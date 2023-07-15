@@ -2,12 +2,12 @@
 //@+node:felix.20211212162008.1: * @file src/core/leoExternalFiles.ts
 //@+<< imports >>
 //@+node:felix.20220102165214.1: ** << imports >>
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 import * as path from 'path';
 import * as md5 from 'md5';
 import * as os from 'os';
 import * as g from './leoGlobals';
-import { LeoFrame } from "./leoFrame";
+import { LeoFrame } from './leoFrame';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
 //@-<< imports >>
@@ -17,7 +17,6 @@ import { Commands } from './leoCommands';
  * A class holding all data about an external file.
  */
 export class ExternalFile {
-
     public c: Commands;
     public ext: string;
     public p: Position | false;
@@ -27,13 +26,19 @@ export class ExternalFile {
     /**
      * Ctor for ExternalFile class.
      */
-    constructor(c: Commands, ext: string, p: Position, p_path: string, time: number) {
+    constructor(
+        c: Commands,
+        ext: string,
+        p: Position,
+        p_path: string,
+        time: number
+    ) {
         this.c = c;
         this.ext = ext;
         this.p = p && p.__bool__() && p.copy();
         // The nearest @<file> node.
         this.path = p_path;
-        this.time = time;  // Used to inhibit endless dialog loop.
+        this.time = time; // Used to inhibit endless dialog loop.
         // See efc.idle_check_open_with_file.
     }
 
@@ -55,7 +60,6 @@ export class ExternalFile {
         return g.os_path_exists(this.path);
     }
     //@-others
-
 }
 //@+node:felix.20211226234316.1: ** class ExternalFilesController
 /**
@@ -75,7 +79,6 @@ export class ExternalFile {
  *  - ef is always an ExternalFiles instance.
  */
 export class ExternalFilesController {
-
     public checksum_d: { [key: string]: string }; // Keys are full paths, values are file checksums.
     public enabled_d: Map<Commands, boolean>;
     public files: ExternalFile[];
@@ -83,7 +86,7 @@ export class ExternalFilesController {
     public unchecked_commanders: Commands[];
     public unchecked_files: ExternalFile[];
     public _time_d: { [key: string]: number };
-    public yesno_all_answer: string | undefined;  // answer, 'yes-all', or 'no-all'
+    public yesno_all_answer: string | undefined; // answer, 'yes-all', or 'no-all'
     public on_idle_count = 0;
 
     //@+others
@@ -92,7 +95,7 @@ export class ExternalFilesController {
      * Ctor for ExternalFiles class.
      */
     constructor() {
-        this.checksum_d = {};  // Keys are full paths, values are file checksums.
+        this.checksum_d = {}; // Keys are full paths, values are file checksums.
         // For efc.on_idle.
         // Keys are commanders.
         // Values are cached @bool check-for-changed-external-file settings.
@@ -121,7 +124,10 @@ export class ExternalFilesController {
      * Return True if the file given by fn has not been changed
      * since Leo read it or if the user agrees to overwrite it.
      */
-    public async check_overwrite(c: Commands, p_path: string): Promise<boolean> {
+    public async check_overwrite(
+        c: Commands,
+        p_path: string
+    ): Promise<boolean> {
         if (c.sqlite_connection && c.mFileName === p_path) {
             // sqlite database file is never actually overwritten by Leo
             // so no need to check its timestamp. It is modified through
@@ -130,7 +136,7 @@ export class ExternalFilesController {
         }
         if (await this.has_changed(p_path)) {
             const val = await this.ask(c, p_path);
-            return ['yes', 'yes-all'].includes(val);  // #1888
+            return ['yes', 'yes-all'].includes(val); // #1888
         }
         return true;
     }
@@ -140,12 +146,12 @@ export class ExternalFilesController {
      * Called by g.app.destroyWindow.
      */
     public async destroy_frame(frame: LeoFrame): Promise<void> {
-        let files = this.files.filter(ef => ef.c.frame === frame);
-        let paths = files.map(ef => ef.path);
+        let files = this.files.filter((ef) => ef.c.frame === frame);
+        let paths = files.map((ef) => ef.path);
         for (const ef of files) {
             await this.destroy_temp_file(ef);
         }
-        this.files = this.files.filter(z => !paths.includes(z.path));
+        this.files = this.files.filter((z) => !paths.includes(z.path));
     }
     //@+node:felix.20230503004807.6: *4* efc.find_path_for_node (called from vim.py)
     /**
@@ -164,7 +170,6 @@ export class ExternalFilesController {
     }
     //@+node:felix.20230503004807.7: *4* efc.on_idle & helpers
 
-
     /**
      * Check for changed open-with files and all external files in commanders
      * for which @bool check_for_changed_external_file is True.
@@ -173,7 +178,8 @@ export class ExternalFilesController {
         //
         // #1240: Note: The "asking" dialog prevents idle time.
         //
-        if (!g.app || g.app.killed || g.app.restarting) {  // #1240.
+        if (!g.app || g.app.killed || g.app.restarting) {
+            // #1240.
             return;
         }
         this.on_idle_count += 1;
@@ -189,7 +195,7 @@ export class ExternalFilesController {
         if (this.unchecked_files && this.unchecked_files.length) {
             // Check all external files.
             while (this.unchecked_files.length) {
-                const ef = this.unchecked_files.pop()!;  // #1959: ensure progress.
+                const ef = this.unchecked_files.pop()!; // #1959: ensure progress.
                 await this.idle_check_open_with_file(c, ef);
             }
         } else if (this.unchecked_commanders.length) {
@@ -200,7 +206,9 @@ export class ExternalFilesController {
         } else {
             // Add all commanders for which
             // @bool check_for_changed_external_file is True.
-            this.unchecked_commanders = g.app.commanders().filter(z => this.is_enabled(z));
+            this.unchecked_commanders = g.app
+                .commanders()
+                .filter((z) => this.is_enabled(z));
 
             // this.unchecked_files = this.files.filter(z=>z.exists());
             this.unchecked_files = [];
@@ -278,7 +286,10 @@ export class ExternalFilesController {
     /**
      * Update the open-with node given by ef.
      */
-    public async idle_check_open_with_file(c: Commands | undefined, ef: ExternalFile): Promise<void> {
+    public async idle_check_open_with_file(
+        c: Commands | undefined,
+        ef: ExternalFile
+    ): Promise<void> {
         console.assert(ef instanceof ExternalFile, ef.toString());
         if (!ef.path) {
             return;
@@ -329,12 +340,10 @@ export class ExternalFilesController {
             c.setChanged();
         }
 
-        // TODO : NEEDED ------------------------------------------------------------- ??? 
+        // TODO : NEEDED ------------------------------------------------------------- ???
         // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
         // g.app.gui.fullRefresh(true);
-        //               ------------------------------------------------------------- ??? 
-
-
+        //               ------------------------------------------------------------- ???
     }
     //@+node:felix.20230503004807.12: *4* efc.open_with & helpers
     /**
@@ -398,11 +407,10 @@ export class ExternalFilesController {
             // if node is part of @<file> tree, get ext from file name
             for (const p2 of p.self_and_parents(false)) {
                 if (p2.isAnyAtFileNode()) {
-                    const fn = p2.h.split(" ", 1)[1];
+                    const fn = p2.h.split(' ', 1)[1];
                     ext = g.os_path_splitext(fn)[1];
                     break;
                 }
-
             }
         }
         if (!ext) {
@@ -418,13 +426,16 @@ export class ExternalFilesController {
         }
 
         return ext;
-
     }
     //@+node:felix.20230503004807.14: *5* efc.compute_temp_file_path & helpers
     /**
      * Return the path to the temp file for p and ext.
      */
-    public async compute_temp_file_path(c: Commands, p: Position, ext: string): Promise<string> {
+    public async compute_temp_file_path(
+        c: Commands,
+        p: Position,
+        ext: string
+    ): Promise<string> {
         let w_path;
         if (c.config.getBool('open-with-clean-filenames')) {
             w_path = await this.clean_file_name(c, ext, p);
@@ -440,15 +451,20 @@ export class ExternalFilesController {
     /**
      * Compute the file name when subdirectories mirror the node's hierarchy in Leo.
      */
-    public async clean_file_name(c: Commands, ext: string, p: Position): Promise<string> {
-
-        const use_extensions = c.config.getBool('open-with-uses-derived-file-extensions');
+    public async clean_file_name(
+        c: Commands,
+        ext: string,
+        p: Position
+    ): Promise<string> {
+        const use_extensions = c.config.getBool(
+            'open-with-uses-derived-file-extensions'
+        );
         const ancestors = [];
         let found = false;
         for (const p2 of p.self_and_parents(false)) {
             let h = p2.anyAtFileNodeName();
             if (!h) {
-                h = p2.h;  // Not an @file node: use the entire header
+                h = p2.h; // Not an @file node: use the entire header
             } else if (use_extensions && !found) {
                 // Found the nearest ancestor @<file> node.
                 found = true;
@@ -459,7 +475,6 @@ export class ExternalFilesController {
                 if (ext2) {
                     ext = ext2;
                 }
-
             }
             ancestors.push(g.sanitize_filename(h));
         }
@@ -468,21 +483,19 @@ export class ExternalFilesController {
         // The base directory is <tempdir>/Leo<id(v)>.
         // ancestors.push("Leo" + str(id(p.v)));
         // TODO : TEST IF OTHER STRING IS OK!
-        ancestors.push("Leo" + p.v.gnx);
+        ancestors.push('Leo' + p.v.gnx);
 
         // Build temporary directories.
         // let td = os.path.abspath(tempfile.gettempdir());
         let td = path.resolve(os.tmpdir());
 
         while (ancestors.length > 1) {
-
             td = g.PYTHON_os_path_join(td, ancestors.pop()!);
             const w_exists = await g.os_path_exists(td);
             if (!w_exists) {
                 const w_uri = g.makeVscodeUri(td);
                 await vscode.workspace.fs.createDirectory(w_uri);
                 // os.mkdir(td);
-
             }
         }
         // Compute the full path.
@@ -494,15 +507,19 @@ export class ExternalFilesController {
     /**
      * Compute a legacy file name for unsupported operating systems.
      */
-    public async legacy_file_name(c: Commands, ext: string, p: Position): Promise<string> {
+    public async legacy_file_name(
+        c: Commands,
+        ext: string,
+        p: Position
+    ): Promise<string> {
         let leoTempDir;
         try {
             // leoTempDir = getpass.getuser() + "_" + "Leo";
             // ! LEOJS -> use g.app.leoID instead
-            leoTempDir = g.app.leoID + "_" + "Leo";
+            leoTempDir = g.app.leoID + '_' + 'Leo';
         } catch (exception) {
-            leoTempDir = "LeoTemp";
-            g.es("Could not retrieve your user name.");
+            leoTempDir = 'LeoTemp';
+            g.es('Could not retrieve your user name.');
             g.es(`Temporary files will be stored in: ${leoTempDir}`);
         }
 
@@ -525,7 +542,11 @@ export class ExternalFilesController {
      * Create the file used by open-with if necessary.
      * Add the corresponding ExternalFile instance to self.files
      */
-    public async create_temp_file(c: Commands, ext: string, p: Position): Promise<string | undefined> {
+    public async create_temp_file(
+        c: Commands,
+        ext: string,
+        p: Position
+    ): Promise<string | undefined> {
         const w_path = await this.compute_temp_file_path(c, p, ext);
         const exists = await g.os_path_exists(w_path);
         // Compute encoding and s.
@@ -539,7 +560,6 @@ export class ExternalFilesController {
         // No need to read the file: recomputing s above suffices.
         if (!exists) {
             try {
-
                 // with open(w_path, 'wb') as f
                 //     f.write(s)
                 //     f.flush()
@@ -547,25 +567,21 @@ export class ExternalFilesController {
                 const w_uri = g.makeVscodeUri(w_path);
                 // s is already Uint8Array buffer
                 await vscode.workspace.fs.writeFile(w_uri, s);
-
-
-            }
-            catch (IOError) {
+            } catch (IOError) {
                 g.error(`exception creating temp file: ${w_path}`);
                 g.es_exception();
                 return undefined;
             }
-
         }
         // Add or update the external file entry.
         const time = await this.get_mtime(w_path);
         // this.files = [z for z in this.files if z.path !== w_path];
-        this.files = this.files.filter(z => z.path !== w_path);
+        this.files = this.files.filter((z) => z.path !== w_path);
         this.files.push(new ExternalFile(c, ext, p, w_path, time));
         return w_path;
     }
     //@+node:felix.20230503004807.18: *5* efc.open_file_in_external_editor
-    // public open_file_in_external_editor(self, c: Commands, d: Dict[str, Any], fn: str, testing: bool = False): string 
+    // public open_file_in_external_editor(self, c: Commands, d: Dict[str, Any], fn: str, testing: bool = False): string
     //     """
     //     Open a file fn in an external editor.
 
@@ -645,11 +661,10 @@ export class ExternalFilesController {
      * Remove any existing *temp* file for p and path, updating this.files.
      */
     public async remove_temp_file(p: Position, p_path: string): Promise<void> {
-
         for (const ef of this.files) {
             if (p_path && p_path === ef.path && ef.p && p.v === ef.p.v) {
                 await this.destroy_temp_file(ef);
-                this.files = this.files.filter(z => z !== ef);
+                this.files = this.files.filter((z) => z !== ef);
                 return;
             }
         }
@@ -663,14 +678,12 @@ export class ExternalFilesController {
      * Called by g.app.finishQuit.
      */
     public async shut_down(): Promise<void> {
-
         // Dont call g.es or g.trace! The log stream no longer exists.
         for (const ef of [...this.files]) {
             await this.destroy_temp_file(ef);
         }
 
         this.files = [];
-
     }
     //@+node:felix.20230503004807.21: *3* efc.utilities
     // pylint: disable=no-value-for-parameter
@@ -680,8 +693,11 @@ export class ExternalFilesController {
      *
      * Return one of ('yes', 'no', 'yes-all', 'no-all')
      */
-    public async ask(c: Commands, p_path: string, p?: Position): Promise<string> {
-
+    public async ask(
+        c: Commands,
+        p_path: string,
+        p?: Position
+    ): Promise<string> {
         if (g.unitTesting) {
             return '';
         }
@@ -691,10 +707,9 @@ export class ExternalFilesController {
         const is_leo = p_path.endsWith('.db') || p_path.endsWith('.leo');
         const is_external_file = !is_leo;
 
-        // check with leoServer's config first. 
+        // check with leoServer's config first.
         if (is_external_file) {
-
-            // * g.app.gui.config.defaultReloadIgnore DEFINED IN PACKAGE.JSON AS: 
+            // * g.app.gui.config.defaultReloadIgnore DEFINED IN PACKAGE.JSON AS:
             // "enum": [
             //     "none",
             //     "yes-all",
@@ -707,14 +722,19 @@ export class ExternalFilesController {
             //   ]
 
             if (g.app.gui.config && g.app.gui.config.defaultReloadIgnore) {
-                const checkConfig = g.app.gui.config.defaultReloadIgnore.toLowerCase();
+                const checkConfig =
+                    g.app.gui.config.defaultReloadIgnore.toLowerCase();
                 if (!checkConfig.includes('none')) {
-                    let w_message = "Changes to external files were detected.";
+                    let w_message = 'Changes to external files were detected.';
                     if (checkConfig.includes('yes')) {
-                        void vscode.window.showInformationMessage(w_message + " Nodes refreshed.");
+                        void vscode.window.showInformationMessage(
+                            w_message + ' Nodes refreshed.'
+                        );
                         return 'yes-all';
                     } else {
-                        void vscode.window.showInformationMessage(w_message + " They were ignored.");
+                        void vscode.window.showInformationMessage(
+                            w_message + ' They were ignored.'
+                        );
                         return 'no-all';
                     }
                 }
@@ -723,7 +743,9 @@ export class ExternalFilesController {
 
         //
         // Create the message.
-        let message1 = `${g.splitLongFileName(p_path)} has changed outside Leo.\n`;
+        let message1 = `${g.splitLongFileName(
+            p_path
+        )} has changed outside Leo.\n`;
         let message2;
         if (is_leo) {
             message2 = 'Restart Leo?';
@@ -733,7 +755,7 @@ export class ExternalFilesController {
             let w_found = false;
             for (const ef of this.files) {
                 if (ef.path === p_path) {
-                    message2 = `Reload ${ef.p ? ef.p.h : "no p"}?`;
+                    message2 = `Reload ${ef.p ? ef.p.h : 'no p'}?`;
                     w_found = true;
                     break;
                 }
@@ -742,7 +764,6 @@ export class ExternalFilesController {
             if (!w_found) {
                 message2 = `Reload ${p_path}?`;
             }
-
         }
         //
         // #1240: Note: This dialog prevents idle time.
@@ -751,7 +772,7 @@ export class ExternalFilesController {
             'Overwrite the version in Leo?',
             message1 + message2,
             is_external_file,
-            is_external_file,
+            is_external_file
         );
         //
         // #1961. Re-init the checksum to suppress concurrent dialogs.
@@ -759,14 +780,12 @@ export class ExternalFilesController {
         //
         // #1888: return one of ('yes', 'no', 'yes-all', 'no-all')
         return result ? result.toLowerCase() : 'no';
-
     }
     //@+node:felix.20230503004807.23: *4* efc.checksum
     /**
      * Return the checksum of the file at the given path.
      */
     public async checksum(p_path: string): Promise<string> {
-
         // import hashlib
         // #1454: Explicitly close the file.
         // with open(path, 'rb') as f
@@ -790,7 +809,6 @@ export class ExternalFilesController {
                 const w_uri = g.makeVscodeUri(ef.path);
                 await vscode.workspace.fs.delete(w_uri, { recursive: true });
                 // os.remove(ef.path)
-
             } catch (exception) {
                 // pass
             }
@@ -917,13 +935,12 @@ export class ExternalFilesController {
                 `${g.splitLongFileName(p_path)} has changed outside Leo.\n`,
                 'Leo can not update this file automatically.\n',
                 `This file was created from ${p.h}.\n`,
-                'Warning: refresh-from-disk will destroy all children.'
-            ].join('\n'),
+                'Warning: refresh-from-disk will destroy all children.',
+            ].join('\n')
         );
     }
 
     //@-others
-
 }
 //@-others
 //@@language typescript

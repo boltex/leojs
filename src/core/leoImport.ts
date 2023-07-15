@@ -2,9 +2,9 @@
 //@+node:felix.20220105221256.1: * @file src/core/leoImport.ts
 //@+<< leoImport imports >>
 //@+node:felix.20230510231730.1: ** << leoImport imports >>
-import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
-import * as utils from "../utils";
+import * as vscode from 'vscode';
+import { Utils as uriUtils } from 'vscode-uri';
+import * as utils from '../utils';
 
 import * as os from 'os';
 import * as csv from 'csvtojson';
@@ -17,10 +17,10 @@ const lxml = false;
 
 // Leo imports...
 import * as g from './leoGlobals';
-import { command } from "../core/decorators";
-import { Commands } from "./leoCommands";
+import { command } from '../core/decorators';
+import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-import { Bead } from "./leoUndo";
+import { Bead } from './leoUndo';
 //@-<< leoImport imports >>
 //@+others
 //@+node:felix.20230519221548.1: ** class FreeMindImporter
@@ -28,7 +28,6 @@ import { Bead } from "./leoUndo";
  * Importer class for FreeMind (.mmap) files.
  */
 export class FreeMindImporter {
-
     public c: Commands;
     public count: number;
 
@@ -47,7 +46,6 @@ export class FreeMindImporter {
      * Recursively add all the child elements as descendants of parent_p.
      */
     public add_children(parent: Position, element: any): void {
-
         const p = parent.insertAsLastChild();
 
         // TODO : FIX THIS !
@@ -69,7 +67,6 @@ export class FreeMindImporter {
      * Create a tree of nodes from a FreeMind file.
      */
     public async create_outline(p_path: string): Promise<Position> {
-
         const c = this.c;
         let [junk, fileName] = g.os_path_split(p_path);
         const undoData = c.undoer.beforeInsertNode(c.p);
@@ -77,23 +74,23 @@ export class FreeMindImporter {
             await this.import_file(p_path);
             c.undoer.afterInsertNode(c.p, 'Import', undoData);
         } catch (exception) {
-            g.es_print('Exception importing FreeMind file', g.shortFileName(p_path));
+            g.es_print(
+                'Exception importing FreeMind file',
+                g.shortFileName(p_path)
+            );
             g.es_exception(exception);
         }
         return c.p;
-
     }
     //@+node:felix.20230519221548.4: *3* freemind.import_file
     /**
      * The main line of the FreeMindImporter class.
      */
     public async import_file(p_path: string): Promise<void> {
-
         const c = this.c;
         const sfn = g.shortFileName(p_path);
         const w_exists = await g.os_path_exists(p_path);
         if (w_exists) {
-
             // TODO : Fix This
             const htmltree = (lxml as any).html.parse(p_path);
             const root = htmltree.getroot();
@@ -121,7 +118,6 @@ export class FreeMindImporter {
      * Import a list of FreeMind (.mmap) files.
      */
     public async import_files(files: string[]): Promise<void> {
-
         const c = this.c;
 
         if (files && files.length) {
@@ -141,23 +137,22 @@ export class FreeMindImporter {
      * Prompt for a list of FreeMind (.mm.html) files and import them.
      */
     public async prompt_for_files(): Promise<void> {
-
         if (!lxml) {
-            g.trace("FreeMind importer requires lxml");
+            g.trace('FreeMind importer requires lxml');
             return;
         }
         const c = this.c;
         const types: [string, string][] = [
-            ["FreeMind files", "*.mm.html"],
-            ["All files", "*"],
+            ['FreeMind files', '*.mm.html'],
+            ['All files', '*'],
         ];
-        const names = await g.app.gui.runOpenFileDialog(
+        const names = (await g.app.gui.runOpenFileDialog(
             c,
-            "Import FreeMind File",
+            'Import FreeMind File',
             types,
-            ".html",
+            '.html',
             true
-        ) as string[];
+        )) as string[];
 
         // c.bringToFront();
 
@@ -167,7 +162,6 @@ export class FreeMindImporter {
         }
     }
     //@-others
-
 }
 //@+node:felix.20230511002352.1: ** class LeoImportCommands
 /**
@@ -177,7 +171,6 @@ export class FreeMindImporter {
  * For more information, see leo/plugins/importers/howto.txt.
  */
 export class LeoImportCommands {
-
     public c: Commands;
     public encoding: BufferEncoding;
     public errors: number;
@@ -196,20 +189,18 @@ export class LeoImportCommands {
      * ctor for LeoImportCommands class.
      */
     constructor(c: Commands) {
-
         this.c = c;
         this.encoding = 'utf-8';
         this.errors = 0;
-        this.fileName = undefined;  // The original file name, say x.cpp
-        this.fileType = undefined;  // ".py", ".c", etc.
-        this.methodName = undefined;  // x, as in < < x methods > > =
-        this.output_newline = g.getOutputNewline(c);  // Value of @bool output_newline
-        this.treeType = "@file";  // None or "@file"
-        this.verbose = true;  // Leo 6.6
-        this.webType = "@noweb";  // "cweb" or "noweb"
-        this.web_st = [];  // noweb symbol table.
+        this.fileName = undefined; // The original file name, say x.cpp
+        this.fileType = undefined; // ".py", ".c", etc.
+        this.methodName = undefined; // x, as in < < x methods > > =
+        this.output_newline = g.getOutputNewline(c); // Value of @bool output_newline
+        this.treeType = '@file'; // None or "@file"
+        this.verbose = true; // Leo 6.6
+        this.webType = '@noweb'; // "cweb" or "noweb"
+        this.web_st = []; // noweb symbol table.
         this.reload_settings();
-
     }
 
     public reload_settings(): void {
@@ -224,52 +215,60 @@ export class LeoImportCommands {
      * # Headlines not containing a section reference are ignored in noweb
      * and generate index index in cweb.
      */
-    public convertCodePartToWeb(s: string, i: number, p: Position, result: string): [number, string] {
-
+    public convertCodePartToWeb(
+        s: string,
+        i: number,
+        p: Position,
+        result: string
+    ): [number, string] {
         const ic = this;
         const nl = ic.output_newline;
         const head_ref = ic.getHeadRef(p);
         const file_name = ic.getFileName(p);
-        if (g.match_word(s, i, "@root")) {
+        if (g.match_word(s, i, '@root')) {
             i = g.skip_line(s, i);
             ic.appendRefToFileName(file_name, result);
-        } else if (g.match_word(s, i, "@c") || g.match_word(s, i, "@code")) {
+        } else if (g.match_word(s, i, '@c') || g.match_word(s, i, '@code')) {
             i = g.skip_line(s, i);
             ic.appendHeadRef(p, file_name, head_ref, result);
-        } else if (g.match_word(p.h, 0, "@file")) {
+        } else if (g.match_word(p.h, 0, '@file')) {
             // Only do this if nothing else matches.
             ic.appendRefToFileName(file_name, result);
-            i = g.skip_line(s, i);  // 4/28/02
+            i = g.skip_line(s, i); // 4/28/02
         } else {
             ic.appendHeadRef(p, file_name, head_ref, result);
         }
         [i, result] = ic.copyPart(s, i, result);
         return [i, result.trim() + nl];
-
     }
     //@+node:felix.20230511002352.5: *5* ic.appendHeadRef
-    public appendHeadRef(p: Position, file_name: string, head_ref: string, result: string): void {
+    public appendHeadRef(
+        p: Position,
+        file_name: string,
+        head_ref: string,
+        result: string
+    ): void {
         const ic = this;
         const nl = ic.output_newline;
-        if (ic.webType === "cweb") {
+        if (ic.webType === 'cweb') {
             if (head_ref) {
-                const escaped_head_ref = head_ref.replace("@", "@@");
-                result += "@<" + escaped_head_ref + "@>=" + nl;
+                const escaped_head_ref = head_ref.replace('@', '@@');
+                result += '@<' + escaped_head_ref + '@>=' + nl;
             } else {
                 // Convert the headline to an index entry.
-                result += "@^" + p.h.trim() + "@>" + nl;
-                result += "@c" + nl;  // @c denotes a new section.
+                result += '@^' + p.h.trim() + '@>' + nl;
+                result += '@c' + nl; // @c denotes a new section.
             }
         } else {
             if (head_ref) {
                 // pass
             } else if (p === ic.c.p) {
-                head_ref = file_name || "*";
+                head_ref = file_name || '*';
             } else {
-                head_ref = "@others";
+                head_ref = '@others';
             }
             // 2019/09/12
-            result += (g.angleBrackets(head_ref) + "=" + nl);
+            result += g.angleBrackets(head_ref) + '=' + nl;
         }
     }
     //@+node:felix.20230511002352.6: *5* ic.appendRefToFileName
@@ -277,20 +276,20 @@ export class LeoImportCommands {
         const ic = this;
         const nl = ic.output_newline;
 
-        if (ic.webType === "cweb") {
+        if (ic.webType === 'cweb') {
             if (!file_name) {
-                result += "@<root@>=" + nl;
+                result += '@<root@>=' + nl;
             } else {
-                result += "@(" + file_name + "@>" + nl;  // @(...@> denotes a file.
+                result += '@(' + file_name + '@>' + nl; // @(...@> denotes a file.
             }
         } else {
             if (!file_name) {
-                file_name = "*";
+                file_name = '*';
             }
             // 2019/09/12.
-            const lt = "<<";
-            const rt = ">>";
-            result += (lt + file_name + rt + "=" + nl);
+            const lt = '<<';
+            const rt = '>>';
+            result += lt + file_name + rt + '=' + nl;
         }
     }
     //@+node:felix.20230511002352.7: *5* ic.getHeadRef
@@ -299,18 +298,16 @@ export class LeoImportCommands {
      * Return everything between those brackets.
      */
     public getHeadRef(p: Position): string {
-
         const h = p.h.trim();
         let i;
-        if (g.match(h, 0, "<<")) {
-            i = h.indexOf(">>", 2);
-        } else if (g.match(h, 0, "<@")) {
-            i = h.indexOf("@>", 2);
+        if (g.match(h, 0, '<<')) {
+            i = h.indexOf('>>', 2);
+        } else if (g.match(h, 0, '<@')) {
+            i = h.indexOf('@>', 2);
         } else {
             return h;
         }
         return h.slice(2, i).trim();
-
     }
     //@+node:felix.20230511002352.8: *5* ic.getFileName
     /**
@@ -319,16 +316,16 @@ export class LeoImportCommands {
     public getFileName(p: Position): string {
         const h = p.h.trim();
         let file_name;
-        if (g.match(h, 0, "@file") || g.match(h, 0, "@root")) {
+        if (g.match(h, 0, '@file') || g.match(h, 0, '@root')) {
             const line = h.substring(5).trim();
             // set j & k so line[j:k] is the file name.
             let j, k;
-            if (g.match(line, 0, "<")) {
-                [j, k] = [1, line.indexOf(">", 1)];
+            if (g.match(line, 0, '<')) {
+                [j, k] = [1, line.indexOf('>', 1)];
             } else if (g.match(line, 0, '"')) {
                 [j, k] = [1, line.indexOf('"', 1)];
             } else {
-                [j, k] = [0, line.indexOf(" ", 0)];
+                [j, k] = [0, line.indexOf(' ', 0)];
             }
             if (k === -1) {
                 k = line.length;
@@ -338,32 +335,38 @@ export class LeoImportCommands {
             file_name = '';
         }
         return file_name;
-
     }
     //@+node:felix.20230511002352.9: *4* ic.convertDocPartToWeb (handle @ %def)
-    public convertDocPartToWeb(s: string, i: number, result: string): [number, string] {
+    public convertDocPartToWeb(
+        s: string,
+        i: number,
+        result: string
+    ): [number, string] {
         const nl = this.output_newline;
-        if (g.match_word(s, i, "@doc")) {
+        if (g.match_word(s, i, '@doc')) {
             i = g.skip_line(s, i);
-        } else if (g.match(s, i, "@ ") || g.match(s, i, "@\t") || g.match(s, i, "@*")) {
+        } else if (
+            g.match(s, i, '@ ') ||
+            g.match(s, i, '@\t') ||
+            g.match(s, i, '@*')
+        ) {
             i += 2;
-        } else if (g.match(s, i, "@\n")) {
+        } else if (g.match(s, i, '@\n')) {
             i += 1;
         }
         i = g.skip_ws_and_nl(s, i);
         let result2;
-        [i, result2] = this.copyPart(s, i, "");
+        [i, result2] = this.copyPart(s, i, '');
         if (result2) {
             // Break lines after periods.
-            result2 = result2.replace(/\.  /g, "." + nl);
-            result2 = result2.replace(/\. /g, "." + nl);
-            result += nl + "@" + nl + result2.trim() + nl + nl;
+            result2 = result2.replace(/\.  /g, '.' + nl);
+            result2 = result2.replace(/\. /g, '.' + nl);
+            result += nl + '@' + nl + result2.trim() + nl + nl;
         } else {
             // All nodes should start with '@', even if the doc part is empty.
-            result += this.webType === "cweb" ? nl + "@ " : nl + "@" + nl;
+            result += this.webType === 'cweb' ? nl + '@ ' : nl + '@' + nl;
         }
         return [i, result];
-
     }
     //@+node:felix.20230511002352.10: *4* ic.convertVnodeToWeb
     /**
@@ -376,27 +379,28 @@ export class LeoImportCommands {
         Output code parts as is.
      */
     public positionToWeb(p: Position): string {
-
         const c = this.c;
-        if ((!p || !p.__bool__()) || !c) {
-            return "";
+        if (!p || !p.__bool__() || !c) {
+            return '';
         }
-        const startInCode = c.config.getBool('at-root-bodies-start-in-doc-mode');
+        const startInCode = c.config.getBool(
+            'at-root-bodies-start-in-doc-mode'
+        );
         const nl = this.output_newline;
-        const docstart = this.webType === "cweb" ? nl + "@ " : nl + "@" + nl;
+        const docstart = this.webType === 'cweb' ? nl + '@ ' : nl + '@' + nl;
         const s = p.b;
-        const lb = this.webType === "cweb" ? "@<" : "<<";
-        let [i, result, docSeen] = [0, "", false];
+        const lb = this.webType === 'cweb' ? '@<' : '<<';
+        let [i, result, docSeen] = [0, '', false];
         while (i < s.length) {
             const progress = i;
             i = g.skip_ws_and_nl(s, i);
-            if (this.isDocStart(s, i) || g.match_word(s, i, "@doc")) {
+            if (this.isDocStart(s, i) || g.match_word(s, i, '@doc')) {
                 [i, result] = this.convertDocPartToWeb(s, i, result);
                 docSeen = true;
             } else if (
-                g.match_word(s, i, "@code") ||
-                g.match_word(s, i, "@root") ||
-                g.match_word(s, i, "@c") ||
+                g.match_word(s, i, '@code') ||
+                g.match_word(s, i, '@root') ||
+                g.match_word(s, i, '@c') ||
                 g.match(s, i, lb)
             ) {
                 if (!docSeen) {
@@ -404,7 +408,7 @@ export class LeoImportCommands {
                     result += docstart;
                 }
                 [i, result] = this.convertCodePartToWeb(s, i, p, result);
-            } else if (this.treeType === "@file" || startInCode) {
+            } else if (this.treeType === '@file' || startInCode) {
                 if (!docSeen) {
                     docSeen = true;
                     result += docstart;
@@ -422,34 +426,33 @@ export class LeoImportCommands {
             result += nl;
         }
         return result;
-
     }
     //@+node:felix.20230511002352.11: *4* ic.copyPart
     // Copies characters to result until the end of the present section is seen.
 
     public copyPart(s: string, i: number, result: string): [number, string] {
-
-        const lb = this.webType === "cweb" ? "@<" : "<<";
-        const rb = this.webType === "cweb" ? "@>" : ">>";
+        const lb = this.webType === 'cweb' ? '@<' : '<<';
+        const rb = this.webType === 'cweb' ? '@>' : '>>';
         const theType = this.webType;
         while (i < s.length) {
             const progress = i;
-            let j = i;  // We should be at the start of a line here.
+            let j = i; // We should be at the start of a line here.
             i = g.skip_nl(s, i);
             i = g.skip_ws(s, i);
             if (this.isDocStart(s, i)) {
                 return [i, result];
             }
-            if (g.match_word(s, i, "@doc") ||
-                g.match_word(s, i, "@c") ||
-                g.match_word(s, i, "@root") ||
-                g.match_word(s, i, "@code")  // 2/25/03
+            if (
+                g.match_word(s, i, '@doc') ||
+                g.match_word(s, i, '@c') ||
+                g.match_word(s, i, '@root') ||
+                g.match_word(s, i, '@code') // 2/25/03
             ) {
                 return [i, result];
             }
             // 2019/09/12
-            const lt = "<<";
-            const rt = ">>=";
+            const lt = '<<';
+            const rt = '>>=';
             if (g.match(s, i, lt) && g.find_on_line(s, i, rt) > -1) {
                 return [i, result];
             }
@@ -457,17 +460,17 @@ export class LeoImportCommands {
             // Converting @others to < < @ others > >
             i = g.skip_line(s, j);
             let line = s.substring(j, i);
-            if (theType === "cweb") {
-                line = line.replace("@", "@@");
+            if (theType === 'cweb') {
+                line = line.replace('@', '@@');
             } else {
                 j = g.skip_ws(line, 0);
-                if (g.match(line, j, "@others")) {
-                    line = line.replace("@others", lb + "@others" + rb);
-                } else if (g.match(line, 0, "@")) {
+                if (g.match(line, j, '@others')) {
+                    line = line.replace('@others', lb + '@others' + rb);
+                } else if (g.match(line, 0, '@')) {
                     // Special case: do not escape @ %defs.
                     const k = g.skip_ws(line, 1);
-                    if (!g.match(line, k, "%defs")) {
-                        line = "@" + line;
+                    if (!g.match(line, k, '%defs')) {
+                        line = '@' + line;
                     }
                 }
             }
@@ -475,7 +478,6 @@ export class LeoImportCommands {
             console.assert(progress < i);
         }
         return [i, result.trimEnd()];
-
     }
     //@+node:felix.20230511002352.12: *4* ic.exportHeadlines
     public async exportHeadlines(fileName: string): Promise<void> {
@@ -488,7 +490,7 @@ export class LeoImportCommands {
         const firstLevel = p.level();
         try {
             const w_uri = g.makeVscodeUri(fileName);
-            let s = "";
+            let s = '';
             // with open(fileName, 'w') as theFile:
             for (const w_p of p.self_and_subtree(false)) {
                 const head = w_p.moreHead(firstLevel, true);
@@ -497,9 +499,8 @@ export class LeoImportCommands {
             }
             const writeData = Buffer.from(s, 'utf8');
             await vscode.workspace.fs.writeFile(w_uri, writeData);
-
         } catch (IOError) {
-            g.warning("can not open", fileName);
+            g.warning('can not open', fileName);
         }
     }
     //@+node:felix.20230511002352.13: *4* ic.flattenOutline
@@ -510,7 +511,6 @@ export class LeoImportCommands {
      * The outline is represented in MORE format.
      */
     public async flattenOutline(fileName: string): Promise<void> {
-
         const c = this.c;
         const nl = this.output_newline;
         const p = c.p;
@@ -522,13 +522,13 @@ export class LeoImportCommands {
 
         try {
             const w_uri = g.makeVscodeUri(fileName);
-            let theFile: string = "";
+            let theFile: string = '';
             // theFile = open(fileName, 'wb')  // Fix crasher: open in 'wb' mode.
             for (const w_p of p.self_and_subtree(false)) {
                 let s = w_p.moreHead(firstLevel) + nl;
                 // s = g.toEncodedString(s, this.encoding, true);
                 theFile += s;
-                s = w_p.moreBody() + nl;  // Inserts escapes.
+                s = w_p.moreBody() + nl; // Inserts escapes.
                 if (s.trim()) {
                     // s = g.toEncodedString(s, this.encoding, true);
                     theFile += s;
@@ -538,14 +538,16 @@ export class LeoImportCommands {
             const writeData = g.toEncodedString(theFile, this.encoding, true);
 
             await vscode.workspace.fs.writeFile(w_uri, writeData);
-
         } catch (IOError) {
-            g.warning("can not open", fileName);
+            g.warning('can not open', fileName);
             return;
         }
     }
     //@+node:felix.20230511002352.14: *4* ic.outlineToWeb
-    public async outlineToWeb(fileName: string, webType: string): Promise<void> {
+    public async outlineToWeb(
+        fileName: string,
+        webType: string
+    ): Promise<void> {
         const c = this.c;
         const nl = this.output_newline;
         const current = c.p;
@@ -557,15 +559,15 @@ export class LeoImportCommands {
         try {
             // theFile = open(fileName, 'w')
             const w_uri = g.makeVscodeUri(fileName);
-            let theFile: string = "";
+            let theFile: string = '';
 
-            this.treeType = "@file";
+            this.treeType = '@file';
 
             // Set self.treeType to @root if p or an ancestor is an @root node.
             for (const p of current.parents()) {
-                let [flag, junk] = g.is_special(p.b, "@root");
+                let [flag, junk] = g.is_special(p.b, '@root');
                 if (flag) {
-                    this.treeType = "@root";
+                    this.treeType = '@root';
                     break;
                 }
             }
@@ -582,15 +584,16 @@ export class LeoImportCommands {
 
             const writeData = g.toEncodedString(theFile);
             await vscode.workspace.fs.writeFile(w_uri, writeData);
-
         } catch (IOError) {
-            g.warning("can not open", fileName);
+            g.warning('can not open', fileName);
             return;
         }
-
     }
     //@+node:felix.20230511002352.15: *4* ic.removeSentinelsCommand
-    public async removeSentinelsCommand(paths: string[], toString = false): Promise<string | undefined> {
+    public async removeSentinelsCommand(
+        paths: string[],
+        toString = false
+    ): Promise<string | undefined> {
         const c = this.c;
         this.setEncoding();
         for (const fileName of paths) {
@@ -612,7 +615,7 @@ export class LeoImportCommands {
             //@+node:felix.20230511002352.16: *5* << set delims from the header line >>
             // Skip any non @+leo lines.
             let i = 0;
-            while (i < s.length && g.find_on_line(s, i, "@+leo") === -1) {
+            while (i < s.length && g.find_on_line(s, i, '@+leo') === -1) {
                 i = g.skip_line(s, i);
             }
             // Get the comment delims from the @+leo sentinel line.
@@ -624,10 +627,11 @@ export class LeoImportCommands {
             let junk1;
             let end_delim;
             let junk2;
-            [valid, junk1, start_delim, end_delim, junk2] = at.parseLeoSentinel(line);
+            [valid, junk1, start_delim, end_delim, junk2] =
+                at.parseLeoSentinel(line);
             if (!valid) {
                 if (!toString) {
-                    g.es("invalid @+leo sentinel in", fileName);
+                    g.es('invalid @+leo sentinel in', fileName);
                 }
                 return undefined;
             }
@@ -642,14 +646,14 @@ export class LeoImportCommands {
             s = this.removeSentinelLines(s, line_delim, start_delim, end_delim);
             let ext = c.config.getString('remove-sentinels-extension');
             if (!ext) {
-                ext = ".txt";
+                ext = '.txt';
             }
             let newFileName;
             if (ext[0] === '.') {
-                newFileName = g.finalize_join(w_path, fileName + ext);  // 1341
+                newFileName = g.finalize_join(w_path, fileName + ext); // 1341
             } else {
                 let [head, ext2] = g.os_path_splitext(fileName);
-                newFileName = g.finalize_join(w_path, head + ext + ext2);  // 1341
+                newFileName = g.finalize_join(w_path, head + ext + ext2); // 1341
             }
             if (toString) {
                 return s;
@@ -664,26 +668,27 @@ export class LeoImportCommands {
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
 
                 if (!g.unitTesting) {
-                    g.es("created:", newFileName);
+                    g.es('created:', newFileName);
                 }
-
             } catch (exception) {
-                g.es("exception creating:", newFileName);
+                g.es('exception creating:', newFileName);
                 g.print_exception(exception);
             }
             //@-<< Write s into newFileName >>
-
         }
         return undefined;
-
     }
     //@+node:felix.20230511002352.18: *4* ic.removeSentinelLines
     /**
      * Properly remove all sentinel lines in s.
      * Note: This does not handle @nonl properly, but that no longer matters.
      */
-    public removeSentinelLines(s: string, line_delim: string | undefined, start_delim: string | undefined, unused_end_delim: string): string {
-
+    public removeSentinelLines(
+        s: string,
+        line_delim: string | undefined,
+        start_delim: string | undefined,
+        unused_end_delim: string
+    ): string {
         const delim = (line_delim || start_delim || '') + '@';
         const verbatim = delim + 'verbatim';
         let verbatimFlag = false;
@@ -701,7 +706,6 @@ export class LeoImportCommands {
             }
         }
         return result.join('');
-
     }
     //@+node:felix.20230511002352.19: *4* ic.weave
     public async weave(filename: string): Promise<void> {
@@ -713,17 +717,16 @@ export class LeoImportCommands {
         this.setEncoding();
 
         try {
-
             // with open(filename, 'w', this.encoding) as f
             const w_uri = g.makeVscodeUri(filename);
 
-            let f = "";
+            let f = '';
 
             for (const w_p of p.self_and_subtree()) {
                 const s = p.b;
                 const s2 = s.trim();
                 if (s2) {
-                    f += "-".repeat(60);
+                    f += '-'.repeat(60);
                     f += nl;
                     //@+<< write the context of p to f >>
                     //@+node:felix.20230511002352.20: *5* << write the context of p to f >> (weave)
@@ -742,7 +745,7 @@ export class LeoImportCommands {
                     }
 
                     context.reverse();
-                    let indent = "";
+                    let indent = '';
 
                     for (const line of context) {
                         f += indent;
@@ -751,7 +754,7 @@ export class LeoImportCommands {
                         f += nl;
                     }
                     //@-<< write the context of p to f >>
-                    f += "-".repeat(60);
+                    f += '-'.repeat(60);
                     f += nl;
                     f += s.trimEnd() + nl;
                 }
@@ -759,9 +762,8 @@ export class LeoImportCommands {
 
             const writeData = g.toEncodedString(f);
             await vscode.workspace.fs.writeFile(w_uri, writeData);
-
         } catch (exception) {
-            g.es("exception opening:", filename);
+            g.es('exception opening:', filename);
             g.print_exception(exception);
         }
     }
@@ -776,21 +778,21 @@ export class LeoImportCommands {
      * parent:     The parent position of the created outline.
      * s:          A string or None. The file's contents.
      */
-    public async createOutline(parent: Position, ext?: string, s?: string): Promise<Position | undefined> {
-
+    public async createOutline(
+        parent: Position,
+        ext?: string,
+        s?: string
+    ): Promise<Position | undefined> {
         const c = this.c;
         const p = parent.copy();
-        this.treeType = '@file';  // Fix #352.
+        this.treeType = '@file'; // Fix #352.
         const fileName = c.fullPath(parent);
         const w_isBinary = await g.is_binary_external_file(fileName);
         if (w_isBinary) {
             return this.import_binary_file(fileName, parent);
         }
         // Init ivars.
-        this.setEncoding(
-            parent,
-            c.config.default_at_auto_file_encoding
-        );
+        this.setEncoding(parent, c.config.default_at_auto_file_encoding);
 
         [ext, s] = await this.init_import(ext, fileName, s);
         if (s == null || !ext) {
@@ -825,22 +827,21 @@ export class LeoImportCommands {
         w.setInsertPoint(0);
         w.seeInsertPoint();
         return p;
-
     }
     //@+node:felix.20230511002352.23: *5* ic.dispatch & helpers
     /**
      * Return the correct scanner function for p, an @auto node.
      */
-    public dispatch(ext: string, p: Position): ((...args: any[]) => any) | undefined {
-
+    public dispatch(
+        ext: string,
+        p: Position
+    ): ((...args: any[]) => any) | undefined {
         // Match the @auto type first, then the file extension.
         const c = this.c;
         return g.app.scanner_for_at_auto(c, p) || g.app.scanner_for_ext(c, ext);
-
     }
     //@+node:felix.20230511002352.24: *5* ic.import_binary_file
     public import_binary_file(fileName: string, parent: Position): Position {
-
         // Fix bug 1185409 importing binary files puts binary content in body editor.
         // Create an @url node.
         const c = this.c;
@@ -854,11 +855,15 @@ export class LeoImportCommands {
         return p;
     }
     //@+node:felix.20230511002352.25: *5* ic.init_import
-    /** 
+    /**
      * Init ivars imports and read the file into s.
      * Return ext, s.
      */
-    public async init_import(ext: string | undefined, fileName: string, s?: string): Promise<[string | undefined, string | undefined]> {
+    public async init_import(
+        ext: string | undefined,
+        fileName: string,
+        s?: string
+    ): Promise<[string | undefined, string | undefined]> {
         let junk;
         [junk, this.fileName] = g.os_path_split(fileName);
         [this.methodName, this.fileType] = g.os_path_splitext(this.fileName);
@@ -878,14 +883,12 @@ export class LeoImportCommands {
             }
         }
         return [ext, s];
-
     }
     //@+node:felix.20230511002352.26: *5* ic.scanUnknownFileType & helper
     /**
      * Scan the text of an unknown file type.
      */
     public scanUnknownFileType(s: string, p: Position, ext: string): boolean {
-
         let body = '';
         if (['.html', '.htm'].includes(ext)) {
             body += '@language html\n';
@@ -908,7 +911,6 @@ export class LeoImportCommands {
      * Return the language corresponding to the extension ext.
      */
     public languageForExtension(ext: string): string {
-
         const unknown = 'unknown_language';
         if (ext.startsWith('.')) {
             ext = ext.substring(1);
@@ -924,7 +926,6 @@ export class LeoImportCommands {
             if ([undefined, 'undefined', 'none', 'None'].includes(language)) {
                 language = unknown;
             }
-
         } else {
             language = unknown;
         }
@@ -953,7 +954,9 @@ export class LeoImportCommands {
             }
         }
         if (!g.unitTesting) {
-            const message = found ? 'finished' : 'no @auto nodes in the selected tree';
+            const message = found
+                ? 'finished'
+                : 'no @auto nodes in the selected tree';
             g.blue(message);
         }
         c.redraw();
@@ -967,9 +970,8 @@ export class LeoImportCommands {
     public async importDerivedFiles(
         parent: Position,
         paths: string[] | undefined,
-        command = 'Import',
+        command = 'Import'
     ): Promise<Position | undefined> {
-
         const at = this.c.atFileCommands;
         const c = this.c;
         const u = this.c.undoer;
@@ -984,7 +986,7 @@ export class LeoImportCommands {
         }
         let p: Position; // p will exist because path is not empty.
         for (let fileName of paths) {
-            fileName = fileName.replace('\\', '/');  // 2011/10/09.
+            fileName = fileName.replace('\\', '/'); // 2011/10/09.
             g.setGlobalOpenDir(fileName);
             const isThin = await at.scanHeaderForThin(fileName);
             let undoData: Bead;
@@ -994,14 +996,14 @@ export class LeoImportCommands {
             p = parent.insertAfter();
             if (isThin) {
                 // Create @file node, not a deprecated @thin node.
-                p.initHeadString("@file " + fileName);
+                p.initHeadString('@file ' + fileName);
                 await at.read(p);
             } else {
-                p.initHeadString("Imported @file " + fileName);
+                p.initHeadString('Imported @file ' + fileName);
                 await at.read(p);
             }
             p.contract();
-            p.setDirty();  // 2011/10/09: tell why the file is dirty!
+            p.setDirty(); // 2011/10/09: tell why the file is dirty!
             if (command) {
                 u.afterInsertNode(p, command, undoData!); // undodata will exist under same 'if'.
             }
@@ -1013,7 +1015,6 @@ export class LeoImportCommands {
         }
         c.redraw(current);
         return p!;
-
     }
     //@+node:felix.20230511002352.30: *4* ic.importFilesCommand
     public async importFilesCommand(
@@ -1021,7 +1022,7 @@ export class LeoImportCommands {
         parent: Position | undefined,
         shortFn = false,
         treeType: string | undefined,
-        verbose = true,  // Legacy value.
+        verbose = true // Legacy value.
     ): Promise<void> {
         // Not a command.  It must *not* have an event arg.
         const c = this.c;
@@ -1046,9 +1047,10 @@ export class LeoImportCommands {
                 p.h = `${treeType} ${fn}`;
                 u.afterInsertNode(p, 'Import', undoData);
                 p = await this.createOutline(p);
-                if (p && p.__bool__()) {  // createOutline may fail.
+                if (p && p.__bool__()) {
+                    // createOutline may fail.
                     if (this.verbose && !g.unitTesting) {
-                        g.blue("imported", shortFn ? g.shortFileName(fn) : fn);
+                        g.blue('imported', shortFn ? g.shortFileName(fn) : fn);
                     }
                     p.contract();
                     p.setDirty();
@@ -1080,7 +1082,10 @@ export class LeoImportCommands {
         await new MindMapImporter(this.c).import_files(files);
     }
     //@+node:felix.20230511002352.33: *4* ic.importWebCommand & helpers
-    public async importWebCommand(files: string[], webType: string): Promise<void> {
+    public async importWebCommand(
+        files: string[],
+        webType: string
+    ): Promise<void> {
         const c = this.c;
         const current = this.c.p;
         if (current == null) {
@@ -1100,7 +1105,10 @@ export class LeoImportCommands {
         c.redraw(current);
     }
     //@+node:felix.20230511002352.34: *5* createOutlineFromWeb
-    public async createOutlineFromWeb(p_path: string, parent: Position): Promise<Position> {
+    public async createOutlineFromWeb(
+        p_path: string,
+        parent: Position
+    ): Promise<Position> {
         const c = this.c;
         const u = c.undoer;
         let [junk, fileName] = g.os_path_split(p_path);
@@ -1108,14 +1116,13 @@ export class LeoImportCommands {
         // Create the top-level headline.
         let p = parent.insertAsLastChild();
         p.initHeadString(fileName);
-        if (this.webType === "cweb") {
-            this.setBodyString(p, "@ignore\n@language cweb");
+        if (this.webType === 'cweb') {
+            this.setBodyString(p, '@ignore\n@language cweb');
         }
         // Scan the file, creating one section for each function definition.
         await this.scanWebFile(p_path, p);
         u.afterInsertNode(p, 'Import', undoData);
         return p;
-
     }
     //@+node:felix.20230511002352.35: *5* findFunctionDef
     public findFunctionDef(s: string, i: number): string | undefined {
@@ -1149,7 +1156,7 @@ export class LeoImportCommands {
 
     public scanBodyForHeadline(s: string): string {
         let name: string | undefined;
-        if (this.webType === "cweb") {
+        if (this.webType === 'cweb') {
             //@+<< scan cweb body for headline >>
             //@+node:felix.20230511002352.37: *6* << scan cweb body for headline >>
             let i = 0;
@@ -1161,10 +1168,10 @@ export class LeoImportCommands {
                     i = g.skip_ws(s, i);
                 }
                 let j;
-                if (g.match(s, i, "@d") || g.match(s, i, "@f")) {
+                if (g.match(s, i, '@d') || g.match(s, i, '@f')) {
                     // Look for a macro name.
                     const directive = s.substring(i, i + 2);
-                    i = g.skip_ws(s, i + 2);  // skip the @d or @f
+                    i = g.skip_ws(s, i + 2); // skip the @d or @f
                     if (i < s.length && g.is_c_id(s[i])) {
                         j = i;
                         i = g.skip_c_id(s, i);
@@ -1172,24 +1179,25 @@ export class LeoImportCommands {
                     }
                     return directive;
                 }
-                if (g.match(s, i, "@c") || g.match(s, i, "@p")) {
+                if (g.match(s, i, '@c') || g.match(s, i, '@p')) {
                     // Look for a function def.
                     name = this.findFunctionDef(s, i + 2);
-                    return name || "outer function";
+                    return name || 'outer function';
                 }
-                if (g.match(s, i, "@<")) {
+                if (g.match(s, i, '@<')) {
                     // Look for a section def.
                     // A small bug: the section def must end on this line.
                     j = i;
-                    const k = g.find_on_line(s, i, "@>");
-                    if (k > -1 && (g.match(s, k + 2, "+=") || g.match(s, k + 2, "="))) {
+                    const k = g.find_on_line(s, i, '@>');
+                    if (
+                        k > -1 &&
+                        (g.match(s, k + 2, '+=') || g.match(s, k + 2, '='))
+                    ) {
                         return s.substring(j, i);
-                        return s.substring(j, k + 2);  // return the section ref.
+                        return s.substring(j, k + 2); // return the section ref.
                     }
-
                 }
                 i = g.skip_line(s, i);
-
             }
             //@-<< scan cweb body for headline >>
         } else {
@@ -1198,12 +1206,12 @@ export class LeoImportCommands {
             let i = 0;
             while (i < s.length) {
                 i = g.skip_ws_and_nl(s, i);
-                if (g.match(s, i, "<<")) {
-                    const k = g.find_on_line(s, i, ">>=");
+                if (g.match(s, i, '<<')) {
+                    const k = g.find_on_line(s, i, '>>=');
                     if (k > -1) {
                         const ref = s.substring(i, k + 2);
                         name = s.substring(i + 2, k).trim();
-                        if (name !== "@others") {
+                        if (name !== '@others') {
                             return ref;
                         }
                     }
@@ -1214,18 +1222,20 @@ export class LeoImportCommands {
                     }
                 }
                 i = g.skip_line(s, i);
-
             }
             //@-<< scan noweb body for headline >>
         }
 
-        return "@";  // default.
+        return '@'; // default.
     }
     //@+node:felix.20230511002352.39: *5* scanWebFile (handles limbo)
-    public async scanWebFile(fileName: string, parent: Position): Promise<void> {
+    public async scanWebFile(
+        fileName: string,
+        parent: Position
+    ): Promise<void> {
         const theType = this.webType;
-        const lb = theType === "cweb" ? "@<" : "<<";
-        const rb = theType === "cweb" ? "@>" : ">>";
+        const lb = theType === 'cweb' ? '@<' : '<<';
+        const rb = theType === 'cweb' ? '@>' : '>>';
         let [s, e] = await g.readFileIntoString(fileName);
         if (s == null) {
             return;
@@ -1238,12 +1248,12 @@ export class LeoImportCommands {
             let progress = i;
             i = g.skip_ws_and_nl(s, i);
             if (this.isDocStart(s, i)) {
-                if (theType === "cweb") {
+                if (theType === 'cweb') {
                     i += 2;
                 } else {
                     i = g.skip_line(s, i);
                 }
-            } else if (theType === "cweb" && g.match(s, i, "@@")) {
+            } else if (theType === 'cweb' && g.match(s, i, '@@')) {
                 i += 2;
             } else if (g.match(s, i, lb)) {
                 i += 2;
@@ -1274,7 +1284,7 @@ export class LeoImportCommands {
 
         let j = g.skip_ws(s, 0);
         if (j < i) {
-            this.createHeadline(parent, "@ " + s.substring(j, i), "Limbo");
+            this.createHeadline(parent, '@ ' + s.substring(j, i), 'Limbo');
         }
         j = i;
         if (g.match(s, i, lb)) {
@@ -1288,7 +1298,11 @@ export class LeoImportCommands {
                 }
                 console.assert(i > progress);
             }
-            this.createHeadline(parent, s.substring(j, i), g.angleBrackets(" @ "));
+            this.createHeadline(
+                parent,
+                s.substring(j, i),
+                g.angleBrackets(' @ ')
+            );
         }
         //@-<< Create nodes for limbo text and the root section >>
         let outer_progress;
@@ -1297,7 +1311,7 @@ export class LeoImportCommands {
             outer_progress = i;
             //@+<< Create a node for the next module >>
             //@+node:felix.20230511002352.42: *6* << Create a node for the next module >>
-            if (theType === "cweb") {
+            if (theType === 'cweb') {
                 console.assert(this.isModuleStart(s, i));
                 start = i;
                 if (this.isDocStart(s, i)) {
@@ -1316,14 +1330,14 @@ export class LeoImportCommands {
 
                 //@+<< Handle cweb @d, @f, @c and @p directives >>
                 //@+node:felix.20230511002352.43: *7* << Handle cweb @d, @f, @c and @p directives >>
-                if (g.match(s, i, "@d") || g.match(s, i, "@f")) {
+                if (g.match(s, i, '@d') || g.match(s, i, '@f')) {
                     i += 2;
                     i = g.skip_line(s, i);
                     // Place all @d and @f directives in the same node.
                     while (i < s.length) {
                         let progress = i;
                         i = g.skip_ws_and_nl(s, i);
-                        if ((g.match(s, i, "@d") || g.match(s, i, "@f"))) {
+                        if (g.match(s, i, '@d') || g.match(s, i, '@f')) {
                             i = g.skip_line(s, i);
                         } else {
                             break;
@@ -1331,7 +1345,6 @@ export class LeoImportCommands {
                         console.assert(i > progress);
                     }
                     i = g.skip_ws_and_nl(s, i);
-
                 }
                 while (i < s.length && !this.isModuleStart(s, i)) {
                     let progress = i;
@@ -1340,7 +1353,7 @@ export class LeoImportCommands {
                     console.assert(i > progress);
                 }
 
-                if (g.match(s, i, "@c") || g.match(s, i, "@p")) {
+                if (g.match(s, i, '@c') || g.match(s, i, '@p')) {
                     i += 2;
                     while (i < s.length) {
                         let progress = i;
@@ -1389,13 +1402,12 @@ export class LeoImportCommands {
         s = s.replace(/\t/g, ' ').replace(/\r/g, '');
         s = s.replace(/\n/g, ' ').replace(/  /g, ' ');
         return s.trim();
-
     }
     //@+node:felix.20230511002352.46: *6* cstDump
     public cstDump(): string {
-        let s = "Web Symbol Table...\n\n";
+        let s = 'Web Symbol Table...\n\n';
         for (const name of [...this.web_st].sort()) {
-            s += name + "\n";
+            s += name + '\n';
         }
         return s;
     }
@@ -1405,19 +1417,18 @@ export class LeoImportCommands {
     public cstEnter(s: string): void {
         // Don't enter names that end in "..."
         s = s.trimEnd();
-        if (s.endsWith("...")) {
+        if (s.endsWith('...')) {
             return;
         }
         // Put the section name in the symbol table, retaining capitalization.
-        const lower = this.cstCanonicalize(s, true);  // do lower
-        const upper = this.cstCanonicalize(s, false);  // don't lower.
+        const lower = this.cstCanonicalize(s, true); // do lower
+        const upper = this.cstCanonicalize(s, false); // don't lower.
         for (const name of this.web_st) {
             if (name.toLowerCase() === lower) {
                 return;
             }
         }
         this.web_st.push(upper);
-
     }
     //@+node:felix.20230511002352.48: *6* cstLookup
     // This method returns a string if the indicated string is a prefix of an entry in the web_st.
@@ -1425,7 +1436,7 @@ export class LeoImportCommands {
     public cstLookup(target: string): string {
         // Do nothing if the ... convention is not used.
         target = target.trim();
-        if (!target.endsWith("...")) {
+        if (!target.endsWith('...')) {
             return target;
         }
         // Canonicalize the target name, and remove the trailing "..."
@@ -1453,7 +1464,6 @@ export class LeoImportCommands {
      * This is essentially an import of p.b.
      */
     public parse_body(p: Position): void {
-
         if (!p || !p.__bool__()) {
             return;
         }
@@ -1464,7 +1474,7 @@ export class LeoImportCommands {
             g.es_print('can not run parse-body: node has children:', p.h);
             return;
         }
-        const language = g.scanForAtLanguage(c, p) || "";
+        const language = g.scanForAtLanguage(c, p) || '';
         this.treeType = '@file';
         const ext = '.' + d[language];
         const parser = g.app.classDispatchDict[ext];
@@ -1477,7 +1487,9 @@ export class LeoImportCommands {
             [ic.methodName, ic.fileType] = [p.h, fileType];
         }
         if (!parser) {
-            g.es_print(`parse-body: no parser for @language ${language || 'None'}`);
+            g.es_print(
+                `parse-body: no parser for @language ${language || 'None'}`
+            );
             return;
         }
         const bunch = c.undoer.beforeChangeTree(p);
@@ -1493,7 +1505,6 @@ export class LeoImportCommands {
             g.es_exception(exception);
             p.b = s;
         }
-
     }
     //@+node:felix.20230511002352.50: *3* ic.Utilities
     //@+node:felix.20230511002352.51: *4* ic.appendStringToBody & setBodyString (leoImport)
@@ -1511,7 +1522,6 @@ export class LeoImportCommands {
      * redraw the screen.
      */
     public setBodyString(p: Position, s: string): void {
-
         const c = this.c;
         const v = p.v;
         if (!c || !p || !p.__bool__()) {
@@ -1539,15 +1549,17 @@ export class LeoImportCommands {
     /**
      * Create a new VNode as the last child of parent position.
      */
-    public createHeadline(parent: Position, body: string, headline: string): Position {
-
+    public createHeadline(
+        parent: Position,
+        body: string,
+        headline: string
+    ): Position {
         const p = parent.insertAsLastChild();
         p.initHeadString(headline);
         if (body) {
             this.setBodyString(p, body);
         }
         return p;
-
     }
     //@+node:felix.20230511002352.53: *4* ic.error
     public error(s: string): void {
@@ -1558,33 +1570,38 @@ export class LeoImportCommands {
     // Exporters may have to test for @doc as well.
 
     public isDocStart(s: string, i: number): boolean {
-        if (!g.match(s, i, "@")) {
+        if (!g.match(s, i, '@')) {
             return false;
         }
         const j = g.skip_ws(s, i + 1);
-        if (g.match(s, j, "%defs")) {
+        if (g.match(s, j, '%defs')) {
             return false;
         }
-        if (this.webType === "cweb" && g.match(s, i, "@*")) {
+        if (this.webType === 'cweb' && g.match(s, i, '@*')) {
             return true;
         }
-        return g.match(s, i, "@ ") || g.match(s, i, "@\t") || g.match(s, i, "@\n");
+        return (
+            g.match(s, i, '@ ') || g.match(s, i, '@\t') || g.match(s, i, '@\n')
+        );
     }
-
 
     public isModuleStart(s: string, i: number): boolean {
         if (this.isDocStart(s, i)) {
             return true;
         }
-        return this.webType === "cweb" && (
-            g.match(s, i, "@c") || g.match(s, i, "@p") ||
-            g.match(s, i, "@d") || g.match(s, i, "@f"));
+        return (
+            this.webType === 'cweb' &&
+            (g.match(s, i, '@c') ||
+                g.match(s, i, '@p') ||
+                g.match(s, i, '@d') ||
+                g.match(s, i, '@f'))
+        );
     }
     //@+node:felix.20230511002352.55: *4* ic.massageWebBody
     public massageWebBody(s: string): string {
         const theType = this.webType;
-        const lb = theType === "cweb" ? "@<" : "<<";
-        const rb = theType === "cweb" ? "@>" : ">>";
+        const lb = theType === 'cweb' ? '@<' : '<<';
+        const rb = theType === 'cweb' ? '@>' : '>>';
         //@+<< Remove most newlines from @space and @* sections >>
         //@+node:felix.20230511002352.56: *5* << Remove most newlines from @space and @* sections >>
         let i = 0;
@@ -1596,7 +1613,7 @@ export class LeoImportCommands {
             i = g.skip_ws_and_nl(s, i);
             if (this.isDocStart(s, i)) {
                 // Scan to end of the doc part.
-                if (g.match(s, i, "@ %def")) {
+                if (g.match(s, i, '@ %def')) {
                     // Don't remove the newline following %def
                     i = g.skip_line(s, i);
                     start = i;
@@ -1612,7 +1629,7 @@ export class LeoImportCommands {
                     if (this.isModuleStart(s, i) || g.match(s, i, lb)) {
                         end = i;
                         break;
-                    } else if (theType === "cweb") {
+                    } else if (theType === 'cweb') {
                         i += 1;
                     } else {
                         i = g.skip_to_end_of_line(s, i);
@@ -1621,25 +1638,22 @@ export class LeoImportCommands {
                 }
                 // Remove newlines from start to end.
                 let doc = s.substring(start, end);
-                doc = doc.replace("\n", " ");
-                doc = doc.replace("\r", "");
+                doc = doc.replace('\n', ' ');
+                doc = doc.replace('\r', '');
                 doc = doc.trim();
                 if (doc) {
-                    if (doc === "@") {
-                        doc = this.webType === "cweb" ? "@ " : "@\n";
+                    if (doc === '@') {
+                        doc = this.webType === 'cweb' ? '@ ' : '@\n';
                     } else {
-                        doc += "\n\n";
+                        doc += '\n\n';
                     }
                     s = s.substring(0, start) + doc + s.substring(end);
                     i = start + doc.length;
                 }
-
             } else {
                 i = g.skip_line(s, i);
             }
             console.assert(i > progress);
-
-
         }
         //@-<< Remove most newlines from @space and @* sections >>
         //@+<< Replace abbreviated names with full names >>
@@ -1681,14 +1695,12 @@ export class LeoImportCommands {
         }
     }
     //@-others
-
 }
 //@+node:felix.20230520010426.1: ** class MindMapImporter
 /**
  * Mind Map Importer class.
  */
 export class MindMapImporter {
-
     public c: Commands;
 
     /**
@@ -1713,7 +1725,6 @@ export class MindMapImporter {
 
         p.h = fn;
         try {
-
             //f = open(p_path)
             const w_uri = g.makeVscodeUri(p_path);
             const readData = await vscode.workspace.fs.readFile(w_uri);
@@ -1722,13 +1733,11 @@ export class MindMapImporter {
             await this.scan(s, p); // ! leojs: Use string from file content instead
             // f.close()
             c.redraw();
-
         } catch (exception) {
             g.es_print('Invalid MindJet file:', fn);
         }
         c.undoer.afterInsertNode(p, 'Import', undoData);
         return p;
-
     }
     //@+node:felix.20230520010426.3: *3* mindmap.import_files
     /**
@@ -1753,19 +1762,18 @@ export class MindMapImporter {
      * Prompt for a list of MindJet (.csv) files and import them.
      */
     public async prompt_for_files(): Promise<void> {
-
         const c = this.c;
         const types: [string, string][] = [
-            ["MindJet files", "*.csv"],
-            ["All files", "*"],
+            ['MindJet files', '*.csv'],
+            ['All files', '*'],
         ];
-        const names = await g.app.gui.runOpenFileDialog(
+        const names = (await g.app.gui.runOpenFileDialog(
             c,
-            "Import MindJet File",
+            'Import MindJet File',
             types,
-            ".csv",
+            '.csv',
             true
-        ) as string[];
+        )) as string[];
         // c.bringToFront();
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -1777,10 +1785,8 @@ export class MindMapImporter {
      * Create an outline from a MindMap (.csv) file.
      */
     public async scan(f: string, target: Position): Promise<void> {
-
         const reader = await csv({
-
-            output: "csv"
+            output: 'csv',
         }).fromString(f);
 
         const max_chars_in_header = 80;
@@ -1815,14 +1821,13 @@ export class MindMapImporter {
             if (p.b.split(/\r?\n/).length === 1) {
                 if (p.b.split(/\r?\n/)[0].length < max_chars_in_header) {
                     p.h = p.b.split(/\r?\n/)[0];
-                    p.b = "";
+                    p.b = '';
                 } else {
-                    p.h = "@node_with_long_text";
+                    p.h = '@node_with_long_text';
                 }
             } else {
-                p.h = "@node_with_long_text";
+                p.h = '@node_with_long_text';
             }
-
         }
     }
     //@+node:felix.20230520010426.6: *4* mindmap.csv_level
@@ -1830,7 +1835,6 @@ export class MindMapImporter {
      * Return the level of the given row, a list of fields.
      */
     public csv_level(row: any[]): number {
-
         let count = 0;
         while (count <= row.length) {
             if (row[count]) {
@@ -1839,14 +1843,12 @@ export class MindMapImporter {
             count = count + 1;
         }
         return -1;
-
     }
     //@+node:felix.20230520010426.7: *4* mindmap.csv_string
     /**
      * Return the string for the given csv row.
      */
     public csv_string(row: string[]): string | undefined {
-
         let count = 0;
         while (count <= row.length) {
             if (row[count]) {
@@ -1856,17 +1858,14 @@ export class MindMapImporter {
         }
 
         return undefined;
-
     }
     //@-others
-
 }
 //@+node:felix.20230520220221.1: ** class MORE_Importer
 /**
  * Class to import MORE files.
  */
 export class MORE_Importer {
-
     public c: Commands;
 
     /**
@@ -1882,19 +1881,16 @@ export class MORE_Importer {
      * Prompt for a list of MORE files and import them.
      */
     public async prompt_for_files(): Promise<void> {
-
         const c = this.c;
-        const types: [string, string][] = [
-            ["All files", "*"],
-        ];
+        const types: [string, string][] = [['All files', '*']];
 
-        const names = await g.app.gui.runOpenFileDialog(
+        const names = (await g.app.gui.runOpenFileDialog(
             c,
-            "Import MORE Files",
+            'Import MORE Files',
             types,
-            "", //  ".txt",
+            '', //  ".txt",
             true
-        ) as string[];
+        )) as string[];
         // c.bringToFront()
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -1906,7 +1902,6 @@ export class MORE_Importer {
      * Import a list of MORE (.csv) files.
      */
     public async import_files(files: string[]): Promise<void> {
-
         const c: Commands = this.c;
         if (files && files.length) {
             let changed = false;
@@ -1928,7 +1923,8 @@ export class MORE_Importer {
         }
     }
     //@+node:felix.20230520220221.4: *3* MORE.import_file
-    public async import_file(fileName: string): Promise<Position | undefined> {// Not a command, so no event arg.
+    public async import_file(fileName: string): Promise<Position | undefined> {
+        // Not a command, so no event arg.
         const c = this.c;
         const u = c.undoer;
         const ic = c.importCommands;
@@ -1941,7 +1937,7 @@ export class MORE_Importer {
         if (s == null) {
             return undefined;
         }
-        s = s.replace(/\r/g, '');  // Fixes bug 626101.
+        s = s.replace(/\r/g, ''); // Fixes bug 626101.
         const lines = g.splitLines(s);
         // Convert the string to an outline and insert it after the current node.
         if (this.check_lines(lines)) {
@@ -1962,13 +1958,15 @@ export class MORE_Importer {
             }
         }
         if (!g.unitTesting) {
-            g.es("not a valid MORE file", fileName);
+            g.es('not a valid MORE file', fileName);
         }
         return undefined;
-
     }
     //@+node:felix.20230520220221.5: *3* MORE.import_lines
-    public import_lines(strings: string[], first_p: Position): Position | undefined {
+    public import_lines(
+        strings: string[],
+        first_p: Position
+    ): Position | undefined {
         const c = this.c;
 
         if (!strings) {
@@ -1993,7 +1991,7 @@ export class MORE_Importer {
                 console.assert(level >= 0);
                 let p: Position;
                 if (!last_p || !last_p.__bool__()) {
-                    theRoot = p = first_p.insertAsLastChild();  // 2016/10/06.
+                    theRoot = p = first_p.insertAsLastChild(); // 2016/10/06.
                 } else if (level === lastLevel) {
                     p = last_p.insertAfter();
                 } else if (level === lastLevel + 1) {
@@ -2017,7 +2015,7 @@ export class MORE_Importer {
                 while (g.match(s, j, '\t') || g.match(s, j, ' ')) {
                     j += 1;
                 }
-                if (g.match(s, j, "+ ") || g.match(s, j, "- ")) {
+                if (g.match(s, j, '+ ') || g.match(s, j, '- ')) {
                     j += 2;
                 }
                 p.initHeadString(s.substring(j));
@@ -2025,7 +2023,7 @@ export class MORE_Importer {
                 //@+<< Count the number of following body lines >>
                 //@+node:felix.20230520220221.8: *4* << Count the number of following body lines >>
                 let bodyLines = 0;
-                index += 1;  // Skip the headline.
+                index += 1; // Skip the headline.
                 while (index < strings.length) {
                     const s = strings[index];
                     let [level, junk] = this.headlineLevel(s);
@@ -2044,12 +2042,12 @@ export class MORE_Importer {
                 //@+<< Add the lines to the body text of p >>
                 //@+node:felix.20230520220221.9: *4* << Add the lines to the body text of p >>
                 if (bodyLines > 0) {
-                    let body = "";
+                    let body = '';
                     let n = index - bodyLines;
                     while (n < index) {
                         body += strings[n].trimEnd();
                         if (n !== index - 1) {
-                            body += "\n";
+                            body += '\n';
                         }
                         n += 1;
                     }
@@ -2068,27 +2066,25 @@ export class MORE_Importer {
         }
         c.redraw();
         return theRoot;
-
     }
     //@+node:felix.20230520220221.10: *3* MORE.headlineLevel
     /**
      * return the headline level of s,or -1 if the string is not a MORE headline.
      */
     public headlineLevel(s: string): [number, boolean] {
-
         let level = 0;
         let i = 0;
-        while (i < s.length && ' \t'.includes(s[i])) {  // 2016/10/06: allow blanks or tabs.
+        while (i < s.length && ' \t'.includes(s[i])) {
+            // 2016/10/06: allow blanks or tabs.
             level += 1;
             i += 1;
         }
-        const plusFlag = g.match(s, i, "+");
+        const plusFlag = g.match(s, i, '+');
 
-        if (g.match(s, i, "+ ") || g.match(s, i, "- ")) {
+        if (g.match(s, i, '+ ') || g.match(s, i, '- ')) {
             return [level, plusFlag];
         }
         return [-1, plusFlag];
-
     }
     //@+node:felix.20230520220221.11: *3* MORE.check & check_lines
     public check(s: string): boolean {
@@ -2098,7 +2094,6 @@ export class MORE_Importer {
     }
 
     public check_lines(strings: string[]): boolean {
-
         if (!strings || !strings.length) {
             return false;
         }
@@ -2111,32 +2106,29 @@ export class MORE_Importer {
         for (const s of strings) {
             let [level, newFlag] = this.headlineLevel(s);
             if (level === -1) {
-                return true;  // A body line.
+                return true; // A body line.
             }
             if (level < level1 || level > lastLevel + 1) {
-                return false;  // improper level.
+                return false; // improper level.
             }
             if (level > lastLevel && !plusFlag) {
-                return false;  // parent of this node has no children.
+                return false; // parent of this node has no children.
             }
             if (level === lastLevel && plusFlag) {
-                return false;  // last node has missing child.
+                return false; // last node has missing child.
             }
             lastLevel = level;
             plusFlag = newFlag;
-
         }
         return true;
     }
     //@-others
-
 }
 //@+node:felix.20230511002459.1: ** class RecursiveImportController
 /**
  * Recursively import all python files in a directory and clean the result.
  */
 export class RecursiveImportController {
-
     public c: Commands;
     public add_path: boolean;
     public file_pattern: RegExp;
@@ -2157,21 +2149,20 @@ export class RecursiveImportController {
     constructor(
         c: Commands,
         kind: string,
-        add_context: boolean | undefined = undefined,  // Override setting only if True/False
-        add_file_context: boolean | undefined = undefined,  // Override setting only if True/False
+        add_context: boolean | undefined = undefined, // Override setting only if True/False
+        add_file_context: boolean | undefined = undefined, // Override setting only if True/False
         add_path: boolean = true,
         recursive: boolean = true,
         safe_at_file: boolean = true,
         theTypes: string[] | undefined = undefined,
         ignore_pattern: RegExp | undefined = undefined,
-        verbose: boolean = true,  // legacy value.
+        verbose: boolean = true // legacy value.
     ) {
-
         this.c = c;
         this.add_path = add_path;
         this.file_pattern = /^(@@|@)(auto|clean|edit|file|nosent)/;
         this.ignore_pattern = ignore_pattern || /\.git|node_modules/;
-        this.kind = kind;  // in ('@auto', '@clean', '@edit', '@file', '@nosent')
+        this.kind = kind; // in ('@auto', '@clean', '@edit', '@file', '@nosent')
         this.recursive = recursive;
         this.root = undefined;
         this.safe_at_file = safe_at_file;
@@ -2195,8 +2186,11 @@ export class RecursiveImportController {
      * In fact, dir_ can be a path to a single file.
      */
     public async run(dir_: string): Promise<void> {
-
-        if (!['@auto', '@clean', '@edit', '@file', '@nosent'].includes(this.kind)) {
+        if (
+            !['@auto', '@clean', '@edit', '@file', '@nosent'].includes(
+                this.kind
+            )
+        ) {
             g.es('bad kind param', this.kind);
         }
         const c = this.c;
@@ -2221,7 +2215,7 @@ export class RecursiveImportController {
             } else {
                 await this.import_dir(dir_, parent);
             }
-            this.post_process(parent, dir_);  // Fix # 1033.
+            this.post_process(parent, dir_); // Fix # 1033.
             c.undoer.afterChangeTree(p1, 'recursive-import', bunch);
         } catch (exception) {
             g.es_print('Exception in recursive import');
@@ -2238,17 +2232,15 @@ export class RecursiveImportController {
         const n = [...parent.self_and_subtree()].length;
         g.es_print(
             `imported ${n} node${g.plural(n)} ` +
-            `in ${this.n_files} file${g.plural(this.n_files)} ` +
-            `in ${utils.getDurationSeconds(t1, t2)} seconds`
+                `in ${this.n_files} file${g.plural(this.n_files)} ` +
+                `in ${utils.getDurationSeconds(t1, t2)} seconds`
         );
-
     }
     //@+node:felix.20230511002459.4: *4* ric.import_dir
     /**
      * Import selected files from dir_, a directory.
      */
     public async import_dir(dir_: string, parent: Position): Promise<void> {
-
         let files;
 
         if (await g.os_path_isfile(dir_)) {
@@ -2286,14 +2278,17 @@ export class RecursiveImportController {
         }
 
         if (files.length || dirs.length) {
-            console.assert(this.root && parent && parent.v !== this.root.v, "import_dir failed!");
+            console.assert(
+                this.root && parent && parent.v !== this.root.v,
+                'import_dir failed!'
+            );
             parent = parent.insertAsLastChild();
             parent.v.h = dir_;
             if (files2.length) {
                 for (const f of files2) {
                     // if (this.ignore_pattern.search(f)===-1){
                     if (f.search(this.ignore_pattern) === -1) {
-                        await this.import_one_file(f, parent = parent);
+                        await this.import_one_file(f, (parent = parent));
                     }
                 }
             }
@@ -2309,17 +2304,26 @@ export class RecursiveImportController {
     /**
      * Import one file to the last top-level node.
      */
-    public async import_one_file(p_path: string, parent: Position): Promise<void> {
-
+    public async import_one_file(
+        p_path: string,
+        parent: Position
+    ): Promise<void> {
         const c = this.c;
         this.n_files += 1;
-        console.assert(this.root && parent && parent.v !== this.root.v, "Error in import_one_file");
+        console.assert(
+            this.root && parent && parent.v !== this.root.v,
+            'Error in import_one_file'
+        );
         let p: Position;
         if (this.kind === '@edit') {
             p = parent.insertAsLastChild();
-            p.v.h = '@edit ' + p_path.replace(/\\/g, '/');  // 2021/02/19: bug fix: add @edit.
-            let [s, e] = await g.readFileIntoString(p_path, undefined, this.kind);
-            p.v.b = s || "";
+            p.v.h = '@edit ' + p_path.replace(/\\/g, '/'); // 2021/02/19: bug fix: add @edit.
+            let [s, e] = await g.readFileIntoString(
+                p_path,
+                undefined,
+                this.kind
+            );
+            p.v.b = s || '';
             return;
         }
         // #1484: Use this for @auto as well.
@@ -2327,15 +2331,14 @@ export class RecursiveImportController {
             [p_path],
             parent,
             true,
-            '@file',  // '@auto','@clean','@nosent' cause problems.
-            this.verbose,  // Leo 6.6.
+            '@file', // '@auto','@clean','@nosent' cause problems.
+            this.verbose // Leo 6.6.
         );
         p = parent.lastChild();
-        p.h = this.kind + p.h.substring(5);  // Honor the requested kind.
+        p.h = this.kind + p.h.substring(5); // Honor the requested kind.
         if (this.safe_at_file) {
             p.v.h = '@' + p.v.h;
         }
-
     }
     //@+node:felix.20230511002459.6: *4* ric.post_process & helpers
     /**
@@ -2343,7 +2346,6 @@ export class RecursiveImportController {
      * by the smallest equivalent @path or @file node.
      */
     public post_process(p: Position, prefix: string): void {
-
         this.fix_back_slashes(p);
         prefix = prefix.replace('\\', '/');
         if (!['@auto', '@edit'].includes(this.kind)) {
@@ -2355,14 +2357,12 @@ export class RecursiveImportController {
         }
         this.clear_dirty_bits(p);
         this.add_class_names(p);
-
     }
     //@+node:felix.20230511002459.7: *5* ric.add_class_names
     /**
      * Add class names to headlines for all descendant nodes.
      */
     public add_class_names(p_p: Position): void {
-
         let after: Position | undefined;
         let class_name: string | undefined;
         const class_paren_pattern = /(.*)\(.*\)\.(.*)/;
@@ -2407,13 +2407,12 @@ export class RecursiveImportController {
             // tag = ' (%s)' % fn
             // if not p.h.endsWith(tag):
             // p.h += tag
-
         }
     }
     //@+node:felix.20230511002459.8: *5* ric.clear_dirty_bits
     public clear_dirty_bits(p_p: Position): void {
         const c = this.c;
-        c.clearChanged();  // Clears *all* dirty bits.
+        c.clearChanged(); // Clears *all* dirty bits.
         for (const p of p_p.self_and_subtree(false)) {
             p.clearDirty();
         }
@@ -2475,7 +2474,7 @@ export class RecursiveImportController {
         if (p_path.startsWith(prefix)) {
             return p_path.substring(prefix.length);
         }
-        return '';  // A signal.
+        return ''; // A signal.
     }
     //@+node:felix.20230511002459.13: *5* ric.remove_empty_nodes
     /**
@@ -2484,14 +2483,15 @@ export class RecursiveImportController {
     public remove_empty_nodes(p: Position): void {
         const c = this.c;
 
-        const aList = [...p.self_and_subtree()].filter(p2 => !p2.b && !p2.hasChildren());
+        const aList = [...p.self_and_subtree()].filter(
+            (p2) => !p2.b && !p2.hasChildren()
+        );
 
         if (aList && aList.length) {
-            c.deletePositionsInList(aList);  // Don't redraw
+            c.deletePositionsInList(aList); // Don't redraw
         }
     }
     //@-others
-
 }
 //@+node:felix.20230511002653.1: ** class TabImporter
 /**
@@ -2499,7 +2499,6 @@ export class RecursiveImportController {
  * leading tabs or blanks (but not both).
  */
 export class TabImporter {
-
     public c: Commands;
     public root: Position | undefined;
     public separate: boolean;
@@ -2521,7 +2520,6 @@ export class TabImporter {
      * Return False and warn if lines contains mixed leading tabs/blanks.
      */
     public check(lines: string[], warn = true): boolean {
-
         let blanks = 0;
         let tabs = 0;
         for (const s of lines) {
@@ -2546,7 +2544,6 @@ export class TabImporter {
      * Dump the stack, containing (level, p) tuples.
      */
     public dump_stack(): void {
-
         g.trace('==========');
         for (let [i, data] of Object.entries(this.stack)) {
             let [level, p] = data;
@@ -2558,7 +2555,6 @@ export class TabImporter {
      * Import a list of tab-delimited files.
      */
     public async import_files(files: string[]): Promise<void> {
-
         const c = this.c;
         const u = this.c.undoer;
         let s: string;
@@ -2598,7 +2594,6 @@ export class TabImporter {
      * Return the length of the leading whitespace of s.
      */
     public lws(s: string): string {
-
         for (let i = 0; i < s.length; i++) {
             let ch = s[i];
             if (ch !== ' ' && ch !== '\t') {
@@ -2613,19 +2608,16 @@ export class TabImporter {
      * Prompt for a list of FreeMind (.mm.html) files and import them.
      */
     public async prompt_for_files(): Promise<void> {
-
         const c = this.c;
-        const types: [string, string][] = [
-            ["All files", "*"]
-        ];
+        const types: [string, string][] = [['All files', '*']];
 
-        const names = await g.app.gui.runOpenFileDialog(
+        const names = (await g.app.gui.runOpenFileDialog(
             c,
-            "Import Tabbed File",
+            'Import Tabbed File',
             types,
-            ".html",
+            '.html',
             true
-        ) as string[];
+        )) as string[];
 
         // c.bringToFront();
         if (names && names.length) {
@@ -2638,11 +2630,10 @@ export class TabImporter {
      * Create the outline corresponding to s1.
      */
     public scan(s1: string, fn?: string, root?: Position): Position {
-
         const c = this.c;
         // Self.root can be None if we are called from a script or unit test.
         if (!this.root || !this.root.__bool__()) {
-            const last = root ? root : c.lastTopLevel();  // For unit testing.
+            const last = root ? root : c.lastTopLevel(); // For unit testing.
             this.root = last.insertAfter();
             if (fn) {
                 this.root.h = fn;
@@ -2660,14 +2651,12 @@ export class TabImporter {
             }
         }
         return this.root;
-
     }
     //@+node:felix.20230511002653.8: *3* tabbed.scan_helper
     /**
      * Update the stack as necessary and return level.
      */
     public scan_helper(s: string): number {
-
         const root = this.root!;
         const separate = this.separate;
         let stack = this.stack;
@@ -2684,20 +2673,19 @@ export class TabImporter {
         const lws = this.lws(s).length;
         const h = s.trim();
         if (lws === level) {
-            if (separate || (!parent || !parent.__bool__())) {
+            if (separate || !parent || !parent.__bool__()) {
                 // Replace the top of the stack with a new entry.
                 if (stack && stack.length) {
                     stack.pop();
                 }
-                grand_parent = (stack && stack.length) ? stack[stack.length - 1][1] : root;
-                parent = grand_parent.insertAsLastChild();  // lws == level
+                grand_parent =
+                    stack && stack.length ? stack[stack.length - 1][1] : root;
+                parent = grand_parent.insertAsLastChild(); // lws == level
                 parent.h = h;
                 stack.push([level, parent]);
             } else if (!parent.h) {
                 parent.h = h;
-            }
-
-            else if (lws > level) {
+            } else if (lws > level) {
                 // Create a new parent.
                 level = lws;
                 parent = parent.insertAsLastChild();
@@ -2709,8 +2697,11 @@ export class TabImporter {
                 while (stack && stack.length) {
                     let [level2, parent2] = stack.pop()!;
                     if (level2 === lws) {
-                        grand_parent = (stack && stack.length) ? stack[stack.length - 1][1] : root;
-                        parent = grand_parent.insertAsLastChild();  // lws < level
+                        grand_parent =
+                            stack && stack.length
+                                ? stack[stack.length - 1][1]
+                                : root;
+                        parent = grand_parent.insertAsLastChild(); // lws < level
                         parent.h = h;
                         level = lws;
                         stack.push([level, parent]);
@@ -2726,21 +2717,22 @@ export class TabImporter {
                 }
             }
         }
-        console.assert(parent && parent.__eq__(stack[stack.length - 1][1]));  // An important invariant.
-        console.assert(level === stack[stack.length - 1][0], JSON.stringify([level, stack[stack.length - 1][0]]));
+        console.assert(parent && parent.__eq__(stack[stack.length - 1][1])); // An important invariant.
+        console.assert(
+            level === stack[stack.length - 1][0],
+            JSON.stringify([level, stack[stack.length - 1][0]])
+        );
         if (!separate && parent) {
             parent.b = parent.b + this.undent(level, s);
         }
 
         return level;
-
     }
     //@+node:felix.20230511002653.9: *3* tabbed.undent
     /**
      * Unindent all lines of p.b by level.
      */
     public undent(level: number, s: string): string {
-
         if (level <= 0) {
             return s;
         }
@@ -2757,17 +2749,14 @@ export class TabImporter {
                 }
             }
             // return ''.join([z[len(lws) :] for z in lines])
-            return lines.map(z => z.substring(lws.length)).join('');
+            return lines.map((z) => z.substring(lws.length)).join('');
         }
         return '';
-
     }
     //@-others
-
 }
 //@+node:felix.20230521004305.1: ** class ToDoImporter
 export class ToDoImporter {
-
     public c: Commands;
     // Patterns...
     // mark_s = r'([x]\ )'
@@ -2775,7 +2764,8 @@ export class ToDoImporter {
     // date_s = r'([0-9]{4}-[0-9]{2}-[0-9]{2}\ )'
     // task_s = r'\s*(.+)'
     // line_s = fr"^{mark_s}?{priority_s}?{date_s}?{date_s}?{task_s}$"
-    line_pat = /^([x]\ )?(\([A-Z]\)\ )?([0-9]{4}-[0-9]{2}-[0-9]{2}\ )?([0-9]{4}-[0-9]{2}-[0-9]{2}\ )?\s*(.+)$/;
+    line_pat =
+        /^([x]\ )?(\([A-Z]\)\ )?([0-9]{4}-[0-9]{2}-[0-9]{2}\ )?([0-9]{4}-[0-9]{2}-[0-9]{2}\ )?\s*(.+)$/;
 
     constructor(c: Commands) {
         this.c = c;
@@ -2787,7 +2777,6 @@ export class ToDoImporter {
      * Return the tasks from the given path.
      */
     public async get_tasks_from_file(p_path: string): Promise<any[]> {
-
         const tag = 'import-todo-text-files';
         const w_exists = await g.os_path_exists(p_path);
         if (!w_exists) {
@@ -2795,7 +2784,6 @@ export class ToDoImporter {
             return [];
         }
         try {
-
             const w_uri = g.makeVscodeUri(p_path);
             const readData = await vscode.workspace.fs.readFile(w_uri);
             const contents = Buffer.from(readData).toString('utf8');
@@ -2818,13 +2806,13 @@ export class ToDoImporter {
      *
      * Return a dict: keys are full paths, values are lists of ToDoTasks"
      */
-    public async import_files(files: string[]): Promise<{ [key: string]: any[] }> {
-
+    public async import_files(
+        files: string[]
+    ): Promise<{ [key: string]: any[] }> {
         const d: { [key: string]: any[] } = {};
         const tag = 'import-todo-text-files';
         for (const w_path of files) {
             try {
-
                 // with open(w_path, 'r') as f:
                 //     contents = f.read()
 
@@ -2833,7 +2821,6 @@ export class ToDoImporter {
                 const contents = Buffer.from(readData).toString('utf8');
                 const tasks = this.parse_file_contents(contents);
                 d[w_path] = tasks;
-
             } catch (exception) {
                 console.log(`unexpected exception in ${tag}`);
                 g.es_exception(exception);
@@ -2841,7 +2828,6 @@ export class ToDoImporter {
         }
 
         return d;
-
     }
     //@+node:felix.20230521004305.4: *3* todo_i.parse_file_contents
     /**
@@ -2849,7 +2835,6 @@ export class ToDoImporter {
      * Return a list of ToDoTask objects.
      */
     public parse_file_contents(s: string): any[] {
-
         let trace = false;
         const tasks: ToDoTask[] = [];
         for (const line of g.splitLines(s)) {
@@ -2887,13 +2872,17 @@ export class ToDoImporter {
             if (completed && !complete_date) {
                 console.log(`no completion date: ${line.toString().trimEnd()}`);
             }
-            tasks.push(new ToDoTask(
-                !!completed, priority, start_date, complete_date, task_s
-            ));
-
+            tasks.push(
+                new ToDoTask(
+                    !!completed,
+                    priority,
+                    start_date,
+                    complete_date,
+                    task_s
+                )
+            );
         }
         return tasks;
-
     }
     //@+node:felix.20230521004305.5: *3* todo_i.prompt_for_files
     /**
@@ -2902,21 +2891,20 @@ export class ToDoImporter {
         Return a python dict. Keys are full paths; values are lists of ToDoTask objects.
      */
     public async prompt_for_files(): Promise<{ [key: string]: any }> {
-
         const c = this.c;
         const types: [string, string][] = [
-            ["Text files", "*.txt"],
-            ["All files", "*"],
+            ['Text files', '*.txt'],
+            ['All files', '*'],
         ];
-        const names = await g.app.gui.runOpenFileDialog(
+        const names = (await g.app.gui.runOpenFileDialog(
             c,
-            "Import todo.txt File",
+            'Import todo.txt File',
             types,
-            ".txt",
+            '.txt',
             true
-        ) as string[];
+        )) as string[];
 
-        // c.bringToFront() ; 
+        // c.bringToFront() ;
 
         if (!names || !names.length) {
             return {};
@@ -2931,17 +2919,14 @@ export class ToDoImporter {
             }
         }
         return d;
-
     }
     //@-others
-
 }
 //@+node:felix.20230521004313.1: ** class ToDoTask
 /**
  * A class representing the components of a task line.
  */
 export class ToDoTask {
-
     public completed: boolean;
     public priority: string;
     public start_date: string;
@@ -2954,19 +2939,19 @@ export class ToDoTask {
     // Patterns...
     public project_pat = /(\+\S+)/;
     public context_pat = /(@\S+)/;
-    public key_val_pat = /((\S+):(\S+))/;  // Might be a false match.
+    public key_val_pat = /((\S+):(\S+))/; // Might be a false match.
 
     constructor(
         completed: boolean,
         priority: string,
         start_date: string,
         complete_date: string,
-        task_s: string,
+        task_s: string
     ) {
         this.completed = completed;
-        this.priority = priority && priority[1] || '';
-        this.start_date = start_date && start_date.trimEnd() || '';
-        this.complete_date = complete_date && complete_date.trimEnd() || '';
+        this.priority = (priority && priority[1]) || '';
+        this.start_date = (start_date && start_date.trimEnd()) || '';
+        this.complete_date = (complete_date && complete_date.trimEnd()) || '';
         this.task_s = task_s.trim();
         // Parse tags into separate dictionaries.
         this.projects = [];
@@ -2991,28 +2976,36 @@ export class ToDoTask {
         ];
         // for (const ivar of ['contexts', 'projects', 'key_vals'])
         //     aList = getattr(self, ivar, None)
-        //     if aList 
+        //     if aList
         //         result.append(f"{' '*13}{ivar}: {aList}")
         if (this.contexts) {
-            result.push(`${' '.repeat(13)}contexts: ${this.contexts.toString()}`);
+            result.push(
+                `${' '.repeat(13)}contexts: ${this.contexts.toString()}`
+            );
         }
         if (this.projects) {
-            result.push(`${' '.repeat(13)}projects: ${this.projects.toString()}`);
+            result.push(
+                `${' '.repeat(13)}projects: ${this.projects.toString()}`
+            );
         }
         if (this.key_vals) {
-            result.push(`${' '.repeat(13)}key_vals: ${this.key_vals.toString()}`);
+            result.push(
+                `${' '.repeat(13)}key_vals: ${this.key_vals.toString()}`
+            );
         }
 
         return result.join('\n');
-
     }
 
-    public __str__(): string { return this.__repr__(); }
-    public toString(): string { return this.__repr__(); }
+    public __str__(): string {
+        return this.__repr__();
+    }
+    public toString(): string {
+        return this.__repr__();
+    }
     //@+node:felix.20230521004313.3: *3* task.parse_task
     public parse_task(): void {
-
-        let trace = (false && !g.unitTesting);
+        let trace = false && !g.unitTesting;
         let s = this.task_s;
         const table: [string, RegExp, string[]][] = [
             ['context', this.context_pat, this.contexts],
@@ -3023,7 +3016,6 @@ export class ToDoTask {
             let m: RegExpExecArray | null;
             const pat_global = new RegExp(pat, 'g');
             while ((m = pat_global.exec(s)) !== null) {
-
                 // Check for false key:val match:
                 if (kind === 'key:val') {
                     let [key, value] = [m[2], m[3]];
@@ -3038,18 +3030,15 @@ export class ToDoTask {
                     if (trace) {
                         g.trace('Duplicate tag:', tag);
                     }
-
                 } else {
                     if (trace) {
                         g.trace(`Add ${kind} tag: ${tag.toString()}`);
                     }
                     aList.push(tag);
-
                 }
                 // Remove the tag from the task.
                 // s = re.sub(pat, "", s);
-                s = s.replace(pat, ""); // No 'g' flag, so one at a time from  while loop
-
+                s = s.replace(pat, ''); // No 'g' flag, so one at a time from  while loop
             }
         }
 
@@ -3058,7 +3047,6 @@ export class ToDoTask {
         }
     }
     //@-others
-
 }
 //@+node:felix.20230521004344.1: ** class ZimImportController
 /**
@@ -3074,7 +3062,6 @@ export class ToDoTask {
  *    @string path_to_zim
  */
 export class ZimImportController {
-
     public c: Commands;
     public pathToZim: string;
     public rstLevel: number;
@@ -3091,14 +3078,16 @@ export class ZimImportController {
         this.pathToZim = c.config.getString('path-to-zim');
         this.rstLevel = c.config.getInt('zim-rst-level') || 0;
         this.rstType = c.config.getString('zim-rst-type') || 'rst';
-        this.zimNodeName = c.config.getString('zim-node-name') || 'Imported Zim Tree';
+        this.zimNodeName =
+            c.config.getString('zim-node-name') || 'Imported Zim Tree';
     }
     //@+node:felix.20230521004344.3: *3* zic.parseZimIndex
     /**
      * Parse Zim wiki index.rst and return a list of tuples (level, name, path) or None.
      */
-    public async parseZimIndex(): Promise<[number, string, string[]][] | undefined> {
-
+    public async parseZimIndex(): Promise<
+        [number, string, string[]][] | undefined
+    > {
         // c = self.c
         const pathToZim = g.os_path_abspath(this.pathToZim);
         const pathToIndex = g.os_path_join(pathToZim, 'index.rst');
@@ -3134,38 +3123,35 @@ export class ZimImportController {
             const unquote = decodeURIComponent; // urllib.parse.unquote;
             // mypy: error: "str" has no attribute "decode"; maybe "encode"?  [attr-defined]
             const w_path = [
-                g.os_path_abspath(g.os_path_join(pathToZim, unquote(result[2]))) // already decoded from buffer above in leojs.
+                g.os_path_abspath(
+                    g.os_path_join(pathToZim, unquote(result[2]))
+                ), // already decoded from buffer above in leojs.
             ];
             results.push([level, name, w_path]);
-
         }
 
         return results;
-
     }
     //@+node:felix.20230521004344.4: *3* zic.rstToLastChild
     /**
      * Import an rst file as a last child of pos node with the specified name
      */
-    public async rstToLastChild(p: Position, p_name: string, rst: string[]): Promise<Position> {
+    public async rstToLastChild(
+        p: Position,
+        p_name: string,
+        rst: string[]
+    ): Promise<Position> {
         const c = this.c;
-        await c.importCommands.importFilesCommand(
-            rst,
-            p,
-            undefined,
-            '@rst',
-        );
+        await c.importCommands.importFilesCommand(rst, p, undefined, '@rst');
         const rstNode = p.getLastChild();
         rstNode.h = p_name;
         return rstNode;
-
     }
     //@+node:felix.20230521004344.5: *3* zic.clean
     /**
      * Clean useless nodes
      */
     public clean(zimNode: Position, rstType: string): void {
-
         const warning = 'Warning: this node is ignored when writing this file';
         for (const p of zimNode.subtree_iter()) {
             // looking for useless bodies
@@ -3174,8 +3160,12 @@ export class ZimImportController {
                 // fmt = "@rst-no-head %s declarations"
                 const table = [
                     // fmt % p.h.replace(/ /g, "_"),
-                    `@rst-no-head ${p.h.replace(/ /g, "_")} declarations`,
-                    `@rst-no-head ${p.h.split(rstType).join('').trim().replace(/ /g, "_")} declarations`,
+                    `@rst-no-head ${p.h.replace(/ /g, '_')} declarations`,
+                    `@rst-no-head ${p.h
+                        .split(rstType)
+                        .join('')
+                        .trim()
+                        .replace(/ /g, '_')} declarations`,
                     // fmt % p.h.split(rstType).join('').trim().replace(/ /g, "_"),
                 ];
                 // Replace content with @rest-no-head first child (without title head) and delete it
@@ -3183,7 +3173,7 @@ export class ZimImportController {
                     p.b = child.b.split('\n').slice(3).join('\n');
                     child.doDelete();
                     // Replace content of empty body parent node with first child with same name
-                } else if (p.h === child.h || (`${rstType} ${child.h}` === p.h)) {
+                } else if (p.h === child.h || `${rstType} ${child.h}` === p.h) {
                     if (!child.hasFirstChild()) {
                         p.b = child.b;
                         child.doDelete();
@@ -3195,21 +3185,24 @@ export class ZimImportController {
                         child.h = 'Introduction';
                     }
                 }
-            } else if (p.hasFirstChild() && p.h.startsWith("@rst-no-head") && !p.b.trim()) {
+            } else if (
+                p.hasFirstChild() &&
+                p.h.startsWith('@rst-no-head') &&
+                !p.b.trim()
+            ) {
                 const child = p.getFirstChild();
-                const p_no_head = p.h.replace("@rst-no-head", "").trim();
+                const p_no_head = p.h.replace('@rst-no-head', '').trim();
                 // Replace empty @rst-no-head by its same named children
                 if (child.h.trim() === p_no_head && !child.hasFirstChild()) {
                     p.h = p_no_head;
                     p.b = child.b;
                     child.doDelete();
                 }
-            } else if (p.h.startsWith("@rst-no-head")) {
+            } else if (p.h.startsWith('@rst-no-head')) {
                 const lines = p.b.split('\n');
                 p.h = lines[1];
                 p.b = lines.slice(3).join('\n');
             }
-
         }
     }
     //@+node:felix.20230521004344.6: *3* zic.run
@@ -3217,7 +3210,6 @@ export class ZimImportController {
      * Create the zim node as the last top-level node.
      */
     public async run(): Promise<void> {
-
         const c = this.c;
         // Make sure a path is given.
         if (!this.pathToZim) {
@@ -3239,7 +3231,11 @@ export class ZimImportController {
                 if (level === this.rstLevel) {
                     name = `${this.rstType} ${name}`;
                 }
-                rstNodes[(level + 1).toString()] = await this.rstToLastChild(rstNodes[level.toString()], name, rst);
+                rstNodes[(level + 1).toString()] = await this.rstToLastChild(
+                    rstNodes[level.toString()],
+                    name,
+                    rst
+                );
             }
             // Clean nodes
             g.es('Start cleaning process. Please wait...');
@@ -3249,10 +3245,8 @@ export class ZimImportController {
             c.selectPosition(zimNode);
             c.redraw();
         }
-
     }
     //@-others
-
 }
 //@+node:felix.20230521004413.2: ** class Node
 /**
@@ -3275,10 +3269,17 @@ class Node {
  * than 5.0.
  */
 export class LegacyExternalFileImporter {
-
     public c: Commands;
     // Sentinels to ignore, without the leading comment delim.
-    public ignore = ['@+at', '@-at', '@+leo', '@-leo', '@nonl', '@nl', '@-others'];
+    public ignore = [
+        '@+at',
+        '@-at',
+        '@+leo',
+        '@-leo',
+        '@nonl',
+        '@nl',
+        '@-others',
+    ];
 
     constructor(c: Commands) {
         this.c = c;
@@ -3290,7 +3291,6 @@ export class LegacyExternalFileImporter {
      * Add a line to the present node.
      */
     public add(line: string, stack: Node[]): void {
-
         if (stack && stack.length) {
             const node = stack[stack.length - 1];
             node.lines.push(line);
@@ -3303,7 +3303,6 @@ export class LegacyExternalFileImporter {
      * Return the opening comment delim for the given file.
      */
     public compute_delim1(p_path: string): string | undefined {
-
         let [junk, ext] = g.os_path_splitext(p_path);
         if (!ext) {
             return undefined;
@@ -3315,14 +3314,12 @@ export class LegacyExternalFileImporter {
         let [delim1, delim2, delim3] = g.set_delims_from_language(language);
         g.trace(language, delim1 || delim2);
         return delim1 || delim2;
-
     }
     //@+node:felix.20230521004413.5: *3* legacy.import_file
     /**
      * Import one legacy external file.
      */
     public async import_file(p_path: string): Promise<void> {
-
         const c = this.c;
         const root_h = g.shortFileName(p_path);
         const delim1 = this.compute_delim1(p_path);
@@ -3347,21 +3344,25 @@ export class LegacyExternalFileImporter {
             return;
         }
         // Compute the local ignore list for this file.
-        const ignore = this.ignore.map(z => delim1 + z); // tuple(delim1 + z for z in this.ignore);
+        const ignore = this.ignore.map((z) => delim1 + z); // tuple(delim1 + z for z in this.ignore);
 
         // Handle each line of the file.
-        const nodes: Node[] = [];  // An list of Nodes, in file order.
-        let stack: Node[] = [];  // A stack of Nodes.
+        const nodes: Node[] = []; // An list of Nodes, in file order.
+        let stack: Node[] = []; // A stack of Nodes.
         for (const line of g.splitLines(s)) {
             s = line.trimStart();
-            const lws = line.substring(0, line.length - line.trimStart().length);
+            const lws = line.substring(
+                0,
+                line.length - line.trimStart().length
+            );
             if (s.startsWith(delim1 + '@@')) {
                 this.add(lws + s.substring(2), stack);
-            } else if (ignore.some(prefix => s.startsWith(prefix))) {
+            } else if (ignore.some((prefix) => s.startsWith(prefix))) {
                 // Ignore these. Use comments instead of @doc bodies.
                 // pass
             } else if (
-                s.startsWith(delim1 + '@+others') || s.startsWith(delim1 + '@' + lws + '@+others')
+                s.startsWith(delim1 + '@+others') ||
+                s.startsWith(delim1 + '@' + lws + '@+others')
             ) {
                 this.add(lws + '@others\n', stack);
             } else if (s.startsWith(delim1 + '@<<')) {
@@ -3416,16 +3417,14 @@ export class LegacyExternalFileImporter {
             }
         }
         c.selectPosition(root);
-        root.expand();  // c.expandAllSubheads()
+        root.expand(); // c.expandAllSubheads()
         c.redraw();
-
     }
     //@+node:felix.20230521004413.6: *3* legacy.import_files
-    /** 
+    /**
      * Import zero or more files.
      */
     public async import_files(paths: string[]): Promise<void> {
-
         for (const w_path of paths) {
             const w_exists = await g.os_path_exists(w_path);
             if (w_exists) {
@@ -3436,24 +3435,23 @@ export class LegacyExternalFileImporter {
         }
     }
     //@+node:felix.20230521004413.7: *3* legacy.prompt_for_files
-    /** 
+    /**
      * Prompt for a list of legacy external .py files and import them.
      */
     public async prompt_for_files(): Promise<void> {
-
         const c = this.c;
         const types: [string, string][] = [
-            ["Legacy external files", "*.py"],
-            ["All files", "*"],
+            ['Legacy external files', '*.py'],
+            ['All files', '*'],
         ];
 
-        const paths = await g.app.gui.runOpenFileDialog(
+        const paths = (await g.app.gui.runOpenFileDialog(
             c,
-            "Import Legacy External Files",
+            'Import Legacy External Files',
             types,
-            ".py",
+            '.py',
             true
-        ) as string[];
+        )) as string[];
 
         // c.bringToFront()
 
@@ -3463,11 +3461,9 @@ export class LegacyExternalFileImporter {
         }
     }
     //@-others
-
 }
 //@+node:felix.20230521235405.1: ** class TopLevelImportCommands
 export class TopLevelImportCommands {
-
     //@+others
     //@+node:felix.20230521235405.2: *3* @g.command(import-free-mind-files)
     @command(
@@ -3503,9 +3499,7 @@ export class TopLevelImportCommands {
         }
     }
     //@+node:felix.20230521235405.5: *3* @g.command(import-MORE-files)
-    @command(
-        'import-MORE-files',
-        'Prompt for MORE files and import them.')
+    @command('import-MORE-files', 'Prompt for MORE files and import them.')
     public async import_MORE_files_command(this: Commands): Promise<void> {
         const c: Commands = this;
         if (c) {
@@ -3513,9 +3507,7 @@ export class TopLevelImportCommands {
         }
     }
     //@+node:felix.20230521235405.6: *3* @g.command(import-tabbed-files)
-    @command(
-        'import-tabbed-files',
-        'Prompt for tabbed files and import them.')
+    @command('import-tabbed-files', 'Prompt for tabbed files and import them.')
     public async import_tabbed_files_command(this: Commands): Promise<void> {
         const c: Commands = this;
         if (c) {
@@ -3525,7 +3517,8 @@ export class TopLevelImportCommands {
     //@+node:felix.20230521235405.7: *3* @g.command(import-todo-text-files)
     @command(
         'import-todo-text-files',
-        'Prompt for free-mind files and import them.')
+        'Prompt for free-mind files and import them.'
+    )
     public async import_todo_text_files(this: Commands): Promise<void> {
         const c: Commands = this;
         if (c) {
@@ -3566,7 +3559,6 @@ export class TopLevelImportCommands {
         }
     }
     //@-others
-
 }
 //@-others
 //@@language typescript

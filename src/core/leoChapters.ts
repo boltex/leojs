@@ -147,9 +147,10 @@ export class ChapterController {
 
         // Replace the docstring for proper details label in minibuffer, etc.
         if (chapterName === 'main') {
-            select_chapter_callback.__doc__ = "Select the main chapter";
+            select_chapter_callback.__doc__ = 'Select the main chapter';
         } else {
-            select_chapter_callback.__doc__ = "Select chapter \"" + chapterName + "\".";
+            select_chapter_callback.__doc__ =
+                'Select chapter "' + chapterName + '".';
         }
 
         for (let shortcut of bindings) {
@@ -274,7 +275,7 @@ export class ChapterController {
         //        - Expanding chapter.p would be confusing and annoying.
         chapter.select();
         c.selectPosition(chapter.p);
-        c.redraw();  // #2718.
+        c.redraw(); // #2718.
     }
     //@+node:felix.20220429005433.13: *3* cc.Utils
     //@+node:felix.20220429005433.14: *4* cc.error/note/warning

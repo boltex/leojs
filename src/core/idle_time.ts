@@ -47,14 +47,13 @@ import * as g from './leoGlobals';
  *          timer2.start()
  */
 export class IdleTime {
-
-    public count: number;  // The number of times handler has been called.
-    public starting_time: number | undefined;  // Time that the timer started.
-    public time: number | undefined;  // Time that the handle is called.
+    public count: number; // The number of times handler has been called.
+    public starting_time: number | undefined; // Time that the timer started.
+    public time: number | undefined; // Time that the handle is called.
     public tag: string; // An arbitrary string/object for use during debugging.
     public delay: number;
     public enabled: boolean; // True: run the timer continuously.
-    public handler: () => any;  // The user-provided idle-time handler.
+    public handler: () => any; // The user-provided idle-time handler.
     public waiting_for_idle: boolean; // True if we have already waited for the minimum delay.
     public timer: NodeJS.Timeout | undefined; // for setTimeout or setInterval instead of QtCore.QTimer();
 
@@ -63,18 +62,18 @@ export class IdleTime {
     /**
      * ctor for IdleTime class.
      */
-    constructor(handler: () => any, delay = 500, tag = "") {
+    constructor(handler: () => any, delay = 500, tag = '') {
         // For use by handlers...
-        this.count = 0;  // The number of times handler has been called.
-        this.starting_time = undefined;  // Time that the timer started.
-        this.time = undefined;  // Time that the handle is called.
-        this.tag = tag;  // An arbitrary string/object for use during debugging.
+        this.count = 0; // The number of times handler has been called.
+        this.starting_time = undefined; // Time that the timer started.
+        this.time = undefined; // Time that the handle is called.
+        this.tag = tag; // An arbitrary string/object for use during debugging.
         // For use by the IdleTime class...
         // The argument to self.timer.start: 0 for idle time, otherwise a delay in msec.
         this.delay = delay;
-        this.enabled = false;  // True: run the timer continuously.
-        this.handler = handler;  // The user-provided idle-time handler.
-        this.waiting_for_idle = false;  // True if we have already waited for the minimum delay.
+        this.enabled = false; // True: run the timer continuously.
+        this.handler = handler; // The user-provided idle-time handler.
+        this.waiting_for_idle = false; // True if we have already waited for the minimum delay.
         // Create the timer, but do not fire it.
         this.timer = undefined; // for setTimeout or setInterval instead of QtCore.QTimer();
         // this.timer.timeout.connect(this.at_idle_time);
@@ -109,8 +108,7 @@ export class IdleTime {
     public at_idle_time(): void {
         if (g.app.killed) {
             this.stop();
-        }
-        else if (this.enabled) {
+        } else if (this.enabled) {
             if (this.waiting_for_idle) {
                 // At idle time: call the handler.
                 this.call_handler();
@@ -123,7 +121,10 @@ export class IdleTime {
                 clearTimeout(this.timer);
                 this.timer = undefined;
             }
-            this.timer = setTimeout(this.at_idle_time.bind(this), this.waiting_for_idle ? 0 : this.delay);
+            this.timer = setTimeout(
+                this.at_idle_time.bind(this),
+                this.waiting_for_idle ? 0 : this.delay
+            );
             // this.timer.start(this.waiting_for_idle ? 0 : this.delay);
         } else if (this.timer) {
             // this.timer.stop();
@@ -182,7 +183,6 @@ export class IdleTime {
         }
     }
     //@-others
-
 }
 //@-others
 //@@language typescript

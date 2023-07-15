@@ -15,8 +15,8 @@
 //@+<< leoRst imports >>
 //@+node:felix.20230427003032.3: ** << leoRst imports >>
 
-import { new_cmd_decorator } from "./decorators";
-import * as utils from "../utils";
+import { new_cmd_decorator } from './decorators';
+import * as utils from '../utils';
 
 // from __future__ import annotations
 // import io
@@ -71,7 +71,6 @@ function cmd(p_name: string, p_doc: string) {
  * A class to convert @rst nodes to rST markup.
  */
 export class RstCommands {
-
     public c: Commands;
 
     // Statistics.
@@ -79,23 +78,23 @@ export class RstCommands {
     public n_docutils: number; // Number of docutils files written.
 
     // Http support for HtmlParserClass.  See http_addNodeMarker.
-    public anchor_map: { [key: string]: Position };  // Keys are anchors. Values are positions
-    public http_map: { [key: string]: Position };  // Keys are named hyperlink targets.  Value are positions.
+    public anchor_map: { [key: string]: Position }; // Keys are anchors. Values are positions
+    public http_map: { [key: string]: Position }; // Keys are named hyperlink targets.  Value are positions.
     public nodeNumber: number; // Unique node number.
 
     // For writing.
-    public at_auto_underlines: string;  // Full set of underlining characters.
-    public at_auto_write: boolean;  // True: in @auto-rst importer.
+    public at_auto_underlines: string; // Full set of underlining characters.
+    public at_auto_write: boolean; // True: in @auto-rst importer.
     public changed_positions: Position[];
-    public changed_vnodes: VNode[];  // As a set
-    public encoding: BufferEncoding;  // From any @encoding directive.
-    public path: string;  // The path from any @path directive.
-    public result_list: string[];  // The intermediate results.
-    public root: Position | undefined;  // The @rst node being processed.
+    public changed_vnodes: VNode[]; // As a set
+    public encoding: BufferEncoding; // From any @encoding directive.
+    public path: string; // The path from any @path directive.
+    public result_list: string[]; // The intermediate results.
+    public root: Position | undefined; // The @rst node being processed.
 
     // Default settings.
     public default_underline_characters: string;
-    public remove_leo_directives: boolean;  // For compatibility with legacy operation.
+    public remove_leo_directives: boolean; // For compatibility with legacy operation.
     public user_filter_b: undefined | ((c: Commands, p: Position) => string);
     public user_filter_h: undefined | ((c: Commands, p: Position) => string);
 
@@ -128,59 +127,57 @@ export class RstCommands {
     public underlines1: string | undefined;
     public underlines2: string | undefined;
 
-
     //@+others
     //@+node:felix.20230427003032.6: *3* rst: Birth
     //@+node:felix.20230427003032.7: *4* rst.__init__
-    /** 
+    /**
      * Ctor for the RstCommand class.
      */
     constructor(c: Commands) {
-
         this.c = c;
 
         // Statistics.
-        this.n_intermediate = 0;  // Number of intermediate files written.
-        this.n_docutils = 0;  // Number of docutils files written.
+        this.n_intermediate = 0; // Number of intermediate files written.
+        this.n_docutils = 0; // Number of docutils files written.
 
         // Http support for HtmlParserClass.  See http_addNodeMarker.
-        this.anchor_map = {};  // Keys are anchors. Values are positions
-        this.http_map = {};  // Keys are named hyperlink targets.  Value are positions.
-        this.nodeNumber = 0;  // Unique node number.
+        this.anchor_map = {}; // Keys are anchors. Values are positions
+        this.http_map = {}; // Keys are named hyperlink targets.  Value are positions.
+        this.nodeNumber = 0; // Unique node number.
 
         // For writing.
-        this.at_auto_underlines = '';  // Full set of underlining characters.
-        this.at_auto_write = false;  // True: in @auto-rst importer.
+        this.at_auto_underlines = ''; // Full set of underlining characters.
+        this.at_auto_write = false; // True: in @auto-rst importer.
         this.changed_positions = [];
         this.changed_vnodes = [];
-        this.encoding = 'utf-8';  // From any @encoding directive.
-        this.path = '';  // The path from any @path directive.
-        this.result_list = [];  // The intermediate results.
-        this.root = undefined;  // The @rst node being processed.
+        this.encoding = 'utf-8'; // From any @encoding directive.
+        this.path = ''; // The path from any @path directive.
+        this.result_list = []; // The intermediate results.
+        this.root = undefined; // The @rst node being processed.
 
         // Default settings.
         this.default_underline_characters = '#=+*^~-:><';
-        this.remove_leo_directives = false;  // For compatibility with legacy operation.
+        this.remove_leo_directives = false; // For compatibility with legacy operation.
         this.user_filter_b = undefined;
         this.user_filter_h = undefined;
 
         // Complete the init.
         this.reloadSettings();
-
     }
     //@+node:felix.20230427003032.8: *4* rst.reloadSettings
     /**
      * RstCommand.reloadSettings
      */
     public reloadSettings(): void {
-
         const c = this.c;
         const getBool = c.config.getBool.bind(c.config);
         const getString = c.config.getString.bind(c.config);
 
         // Action option for rst3 command.
         this.rst3_action = getString('rst3-action') || 'none';
-        if (!['none', 'clone', 'mark'].includes(this.rst3_action.toLowerCase())) {
+        if (
+            !['none', 'clone', 'mark'].includes(this.rst3_action.toLowerCase())
+        ) {
             this.rst3_action = 'none';
         }
         // Reporting options.
@@ -188,25 +185,37 @@ export class RstCommands {
 
         // Http options.
         this.http_server_support = getBool('rst3-http-server-support', false);
-        this.node_begin_marker = getString('rst3-node-begin-marker') || 'http-node-marker-';
+        this.node_begin_marker =
+            getString('rst3-node-begin-marker') || 'http-node-marker-';
 
         // Output options.
         this.default_path = getString('rst3-default-path') || '';
-        this.generate_rst_header_comment = getBool('rst3-generate-rst-header-comment', true);
-        this.remove_leo_directives = getBool('rst3-remove-leo-directives', false);
-        this.underline_characters = (
-            getString('rst3-underline-characters')
-            || this.default_underline_characters);
-        this.write_intermediate_file = getBool('rst3-write-intermediate-file', true);
-        this.write_intermediate_extension = getString('rst3-write-intermediate-extension') || '.txt';
+        this.generate_rst_header_comment = getBool(
+            'rst3-generate-rst-header-comment',
+            true
+        );
+        this.remove_leo_directives = getBool(
+            'rst3-remove-leo-directives',
+            false
+        );
+        this.underline_characters =
+            getString('rst3-underline-characters') ||
+            this.default_underline_characters;
+        this.write_intermediate_file = getBool(
+            'rst3-write-intermediate-file',
+            true
+        );
+        this.write_intermediate_extension =
+            getString('rst3-write-intermediate-extension') || '.txt';
 
         // Docutils options.
         this.call_docutils = getBool('rst3-call-docutils', true);
-        this.publish_argv_for_missing_stylesheets = getString('rst3-publish-argv-for-missing-stylesheets') || '';
+        this.publish_argv_for_missing_stylesheets =
+            getString('rst3-publish-argv-for-missing-stylesheets') || '';
         this.stylesheet_embed = getBool('rst3-stylesheet-embed', false);
-        this.stylesheet_name = getString('rst3-stylesheet-name') || 'default.css';
+        this.stylesheet_name =
+            getString('rst3-stylesheet-name') || 'default.css';
         this.stylesheet_path = getString('rst3-stylesheet-path') || '';
-
     }
     //@+node:felix.20230427003032.9: *3* rst: Entry points
     //@+node:felix.20230427003032.10: *4* rst.rst-convert-legacy-outline
@@ -235,7 +244,15 @@ export class RstCommands {
     public convert_rst_options(p: Position): void {
         const m1 = p.b.match(this.options_pat);
         const m2 = p.b.match(this.default_pat);
-        if (m1 && m2 && m1.length && m2.length && m1.index && m2.index && m2.index > m1.index) {
+        if (
+            m1 &&
+            m2 &&
+            m1.length &&
+            m2.length &&
+            m1.index &&
+            m2.index &&
+            m2.index > m1.index
+        ) {
             const fn = m2[1].trim();
             if (fn) {
                 const old_h = p.h;
@@ -253,7 +270,9 @@ export class RstCommands {
             return;
         }
 
-        const lines = g.splitLines(p.b).map((s) => s.trim() ? `    ${s}` : '\n');
+        const lines = g
+            .splitLines(p.b)
+            .map((s) => (s.trim() ? `    ${s}` : '\n'));
         p.b = '::\n\n' + lines.join('');
 
         const old_h = p.h;
@@ -263,7 +282,6 @@ export class RstCommands {
     //@+node:felix.20230427003032.13: *4* rst.rst3 command & helpers
     @cmd('rst3', 'Write all @rst nodes.')
     public async rst3(): Promise<number> {
-
         const t1 = process.hrtime();
         this.n_intermediate = 0;
         this.n_docutils = 0;
@@ -271,18 +289,23 @@ export class RstCommands {
         const t2 = process.hrtime();
         g.es_print(
             `rst3: wrote...\n` +
-            `${this.n_intermediate.toString().padStart(4)} intermediate file${g.plural(this.n_intermediate)}\n` +
-            `${this.n_docutils.toString().padStart(4)} docutils file${g.plural(this.n_docutils)}\n` +
-            `in ${utils.getDurationSeconds(t1, t2)} sec.`);
+                `${this.n_intermediate
+                    .toString()
+                    .padStart(4)} intermediate file${g.plural(
+                    this.n_intermediate
+                )}\n` +
+                `${this.n_docutils
+                    .toString()
+                    .padStart(4)} docutils file${g.plural(this.n_docutils)}\n` +
+                `in ${utils.getDurationSeconds(t1, t2)} sec.`
+        );
         return this.n_intermediate;
-
     }
     //@+node:felix.20230427003032.14: *5* rst.do_actions & helper
     /**
      * Handle actions specified by @string rst3-action.
      */
     public do_actions(): void {
-
         const c = this.c;
         const action = this.rst3_action;
         const positions = this.changed_positions;
@@ -303,7 +326,6 @@ export class RstCommands {
         } else {
             g.es_print(`Can not happen: bad action: ${action}`);
         }
-
     }
     //@+node:felix.20230427003032.15: *6* rst.clone_action_nodes
     /**
@@ -311,7 +333,6 @@ export class RstCommands {
      * Clone all positions in self.positions as children of the organizer node.
      */
     public clone_action_nodes(): Position {
-
         const c = this.c;
         const positions = this.changed_positions;
         let n = positions.length;
@@ -327,7 +348,6 @@ export class RstCommands {
         }
 
         return organizer;
-
     }
     //@+node:felix.20230427003032.16: *5* rst.processTopTree
     /**
@@ -339,7 +359,7 @@ export class RstCommands {
         };
 
         this.changed_positions = [];
-        this.changed_vnodes = [];  // as a set
+        this.changed_vnodes = []; // as a set
         const roots = g.findRootsWithPredicate(this.c, p, predicate);
         if (roots && roots.length) {
             for (const p of roots) {
@@ -367,7 +387,7 @@ export class RstCommands {
                         await this.write_docutils_files(fn, p, source);
                     }
                 }
-            } else if (g.match_word(p.h, 0, "@slides")) {
+            } else if (g.match_word(p.h, 0, '@slides')) {
                 if (this.in_slides_tree(p)) {
                     g.trace(`ignoring nested @slides node: ${p.h}`);
                 } else {
@@ -381,7 +401,6 @@ export class RstCommands {
      * Convert p's tree to rst sources.
      */
     public write_rst_tree(p: Position, fn: string): string {
-
         const c = this.c;
         this.root = p.copy();
         //
@@ -390,7 +409,7 @@ export class RstCommands {
         this.encoding = d['encoding'] || 'utf-8';
         this.path = d['path'] || '';
         // Write the output to this.result_list.
-        this.result_list = [];  // All output goes here.
+        this.result_list = []; // All output goes here.
         if (this.generate_rst_header_comment) {
             this.result_list.push(`.. rst3: filename: ${fn}`);
         }
@@ -399,25 +418,26 @@ export class RstCommands {
         }
         const source = this.compute_result();
         return source;
-
     }
     //@+node:felix.20230427003032.19: *5* rst.write_slides & helper
     /**
      * Convert p's children to slides.
      */
     public async write_slides(p: Position): Promise<void> {
-
         const c = this.c;
         p = p.copy();
         const h = p.h;
-        const i = g.skip_id(h, 1);  // Skip the '@'
+        const i = g.skip_id(h, 1); // Skip the '@'
         const kind = h.substring(0, i).trim();
         const fn = h.substring(i).trim();
         if (!fn) {
             g.error(`${kind} requires file name`);
             return;
         }
-        let title = p && p.__bool__() && p.firstChild() ? p.firstChild().h : '<no slide>';
+        let title =
+            p && p.__bool__() && p.firstChild()
+                ? p.firstChild().h
+                : '<no slide>';
         title = title.trim();
         title = title.charAt(0).toUpperCase() + title.slice(1);
 
@@ -446,23 +466,21 @@ export class RstCommands {
      * Write the title, underlined with the '#' character.
      */
     public writeSlideTitle(title: string, n: number, n_tot: number): void {
-
         if (n !== 1) {
             title = `${title} (${n} of ${n_tot})`;
         }
         const width = Math.max(
-            4, g.toEncodedString(title, this.encoding, false).length
+            4,
+            g.toEncodedString(title, this.encoding, false).length
         );
 
         this.result_list.push(`${title}\n${'#'.repeat(width)}`);
-
     }
     //@+node:felix.20230427003032.21: *5* rst.writeNode & helper
     /**
      * Append the rst sources to self.result_list.
      */
     public writeNode(p: Position): void {
-
         const c = this.c;
         if (this.is_ignore_node(p) || this.in_ignore_tree(p)) {
             return;
@@ -493,7 +511,6 @@ export class RstCommands {
      *    [<tag n-1 start>, <tag n-1 end>, <other stack elements>]
      */
     public http_addNodeMarker(p: Position): void {
-
         if (this.http_server_support) {
             this.nodeNumber += 1;
             const anchorname = `${this.node_begin_marker}${this.nodeNumber}`;
@@ -502,11 +519,14 @@ export class RstCommands {
         }
     }
     //@+node:felix.20230427003032.23: *4* rst.write_docutils_files & helpers
-    /** 
+    /**
      * Write source to the intermediate file and write the output from docutils..
      */
-    public async write_docutils_files(fn: string, p: Position, source: string): Promise<void> {
-
+    public async write_docutils_files(
+        fn: string,
+        p: Position,
+        source: string
+    ): Promise<void> {
         console.assert(this.root && p.__eq__(this.root));
         let [junk, ext] = g.os_path_splitext(fn);
         ext = ext.toLowerCase();
@@ -526,7 +546,8 @@ export class RstCommands {
             return;
         }
 
-        if (!['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'].includes(ext)) {  // #1884: test now.
+        if (!['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'].includes(ext)) {
+            // #1884: test now.
             return;
         }
 
@@ -548,7 +569,6 @@ export class RstCommands {
                 this.changed_positions.push(this.root!.copy());
                 this.changed_vnodes.push(this.root!.v);
             }
-
         }
     }
     //@+node:felix.20230427003032.24: *5* rst.addTitleToHtml
@@ -556,7 +576,6 @@ export class RstCommands {
      * Replace an empty <title> element by the contents of the first <h1> element.
      */
     public addTitleToHtml(s: string): string {
-
         const i = s.indexOf('<title></title>');
         if (i === -1) {
             return s;
@@ -569,14 +588,12 @@ export class RstCommands {
             s = s.replace('<title></title>', `<title>${m[1]}</title>`);
         }
         return s;
-
     }
     //@+node:felix.20230427003032.25: *5* rst.computeOutputFileName
     /**
      * Return the full path to the output file.
      */
     public computeOutputFileName(fn: string): string {
-
         const c = this.c;
         const openDirectory = c.frame.openDirectory;
         let path;
@@ -600,7 +617,6 @@ export class RstCommands {
      * Return True if the directory existed or was made.
      */
     public async createDirectoryForFile(fn: string): Promise<boolean> {
-
         const c = this.c;
         let [theDir, junk] = g.os_path_split(fn);
         theDir = g.finalize(theDir);
@@ -608,16 +624,19 @@ export class RstCommands {
         if (w_exist) {
             return true;
         }
-        if (c && c.config && c.config.getBool('create-nonexistent-directories', false)) {
+        if (
+            c &&
+            c.config &&
+            c.config.getBool('create-nonexistent-directories', false)
+        ) {
             theDir = c.expand_path_expression(theDir);
             const ok = await g.makeAllNonExistentDirectories(theDir);
             if (!ok) {
                 g.error('did not create:', theDir);
             }
             return !!ok;
-
         }
-        return false;  // Does not exist and wasn't made.
+        return false; // Does not exist and wasn't made.
     }
     //@+node:felix.20230427003032.27: *5* rst.writeIntermediateFile
     /**
@@ -627,8 +646,10 @@ export class RstCommands {
      * a: it does not exist or
      * b: the write would actually change the file.
      */
-    public async writeIntermediateFile(fn: string, s: string): Promise<boolean> {
-
+    public async writeIntermediateFile(
+        fn: string,
+        s: string
+    ): Promise<boolean> {
         let ext = this.write_intermediate_extension;
         if (!ext.startsWith('.')) {
             ext = '.' + ext;
@@ -644,14 +665,15 @@ export class RstCommands {
             }
         }
         return changed;
-
     }
     //@+node:felix.20230427003032.28: *5* rst.writeToDocutils & helper
     /**
      * Send s to docutils using the writer implied by ext and return the result.
      */
-    public async writeToDocutils(s: string, ext: string): Promise<string | undefined> {
-
+    public async writeToDocutils(
+        s: string,
+        ext: string
+    ): Promise<string | undefined> {
         if (!docutils) {
             g.error('writeToDocutils: docutils not present');
             return undefined;
@@ -659,7 +681,9 @@ export class RstCommands {
 
         // const join = g.finalize_join; // leojs : use g.finalize_join directly!
         const openDirectory = this.c.frame.openDirectory;
-        const overrides: { [key: string]: any } = { 'output_encoding': this.encoding };
+        const overrides: { [key: string]: any } = {
+            output_encoding: this.encoding,
+        };
         let ext2: string;
         let writer;
         let writer_name: string;
@@ -668,7 +692,7 @@ export class RstCommands {
         // Compute the args list if the stylesheet path does not exist.
         const styleSheetArgsDict = this.handleMissingStyleSheetArgs();
         if (ext === '.pdf') {
-            // TODO !    
+            // TODO !
             console.log('TODO : IMPLEMENT PDF SUPPORT FOR leoRst.ts');
             const module: any = undefined;
             // module = g.import_module('leo.plugins.leo_pdf')
@@ -676,12 +700,12 @@ export class RstCommands {
                 return undefined;
             }
 
-            writer = module.Writer();  // Get an instance.
-
+            writer = module.Writer(); // Get an instance.
         } else {
             writer = undefined;
             let w_found = false;
-            for ([ext2, writer_name] of [  // noqa: writer_name used below.
+            for ([ext2, writer_name] of [
+                // noqa: writer_name used below.
                 ['.html', 'html'],
                 ['.htm', 'html'],
                 ['.tex', 'latex'],
@@ -702,12 +726,20 @@ export class RstCommands {
         //
         // Make the stylesheet path relative to open directory.
         const rel_stylesheet_path = this.stylesheet_path || '';
-        const stylesheet_path = g.finalize_join(openDirectory, rel_stylesheet_path);
+        const stylesheet_path = g.finalize_join(
+            openDirectory,
+            rel_stylesheet_path
+        );
         console.assert(this.stylesheet_name);
-        const w_path = g.finalize_join(this.stylesheet_path, this.stylesheet_name);
+        const w_path = g.finalize_join(
+            this.stylesheet_path,
+            this.stylesheet_name
+        );
         if (!this.stylesheet_embed) {
-
-            let rel_path = g.finalize_join(rel_stylesheet_path, this.stylesheet_name);
+            let rel_path = g.finalize_join(
+                rel_stylesheet_path,
+                this.stylesheet_name
+            );
             rel_path = rel_path.replace(/\\/g, '/');
             overrides['stylesheet'] = rel_path;
             overrides['stylesheet_path'] = undefined;
@@ -717,9 +749,15 @@ export class RstCommands {
                 overrides['stylesheet'] = w_path;
                 overrides['stylesheet_path'] = undefined;
             }
-        } else if (styleSheetArgsDict && Object.keys(styleSheetArgsDict).length > 0) {
-            g.es_print('using publish_argv_for_missing_stylesheets', styleSheetArgsDict);
-            overrides.update(styleSheetArgsDict);  // MWC add args to settings
+        } else if (
+            styleSheetArgsDict &&
+            Object.keys(styleSheetArgsDict).length > 0
+        ) {
+            g.es_print(
+                'using publish_argv_for_missing_stylesheets',
+                styleSheetArgsDict
+            );
+            overrides.update(styleSheetArgsDict); // MWC add args to settings
         } else if (rel_stylesheet_path === stylesheet_path) {
             g.error(`stylesheet not found: ${w_path}`);
         } else {
@@ -734,7 +772,7 @@ export class RstCommands {
             }
         }
         try {
-            result = "";
+            result = '';
             // TODO !
             console.log('TODO : SUPPORT DOCUTILS IN leoRst.ts');
             // result = docutils.core.publish_string(source=s,
@@ -745,18 +783,15 @@ export class RstCommands {
             //         settings_overrides=overrides)
             // if isinstance(result, bytes) // ! not needed for g.toUnicode
             result = g.toUnicode(result);
-
-        }
-        // catch docutils.ApplicationError as error
-        //     g.error('Docutils error:')
-        //     g.blue(error)
-        catch (exception) {
+        } catch (exception) {
+            // catch docutils.ApplicationError as error
+            //     g.error('Docutils error:')
+            //     g.blue(error)
             g.es_print('Unexpected docutils exception');
             g.es_exception();
         }
 
         return result;
-
     }
     //@+node:felix.20230427003032.29: *6* rst.handleMissingStyleSheetArgs
     /**
@@ -764,12 +799,11 @@ export class RstCommands {
      * returning a dict containing the parsed args.
      */
     public handleMissingStyleSheetArgs(s?: string): { [key: string]: string } {
-
         if (0) {
             // See http://docutils.sourceforge.net/docs/user/config.html#documentclass
             return {
-                'documentclass': 'report',
-                'documentoptions': 'english,12pt,lettersize',
+                documentclass: 'report',
+                documentoptions: 'english,12pt,lettersize',
             };
         }
         if (!s) {
@@ -791,7 +825,8 @@ export class RstCommands {
             const eq = s.indexOf('=');
             let cm = s.indexOf(',');
             let key, val;
-            if (eq === -1 || (-1 < cm && cm < eq)) {  // key[nl] or key,
+            if (eq === -1 || (-1 < cm && cm < eq)) {
+                // key[nl] or key,
                 val = '';
                 cm = s.indexOf(',');
                 if (cm === -1) {
@@ -801,20 +836,23 @@ export class RstCommands {
                     key = s.slice(0, cm).trim();
                     s = s.slice(cm + 1).trim();
                 }
-            } else {  // key = val
+            } else {
+                // key = val
                 key = s.slice(0, eq).trim();
                 s = s.slice(eq + 1).trim();
-                if (s.startsWith('[')) {  // [...]
+                if (s.startsWith('[')) {
+                    // [...]
                     const rb = s.indexOf(']');
                     if (rb === -1) {
-                        break;  // Bad argument.
+                        break; // Bad argument.
                     }
                     val = s.slice(0, rb + 1);
                     s = s.slice(rb + 1).trim();
                     if (s.startsWith(',')) {
                         s = s.slice(1).trim();
                     }
-                } else {  // val[nl] or val,
+                } else {
+                    // val[nl] or val,
                     cm = s.indexOf(',');
                     if (cm === -1) {
                         val = s.trim();
@@ -842,8 +880,11 @@ export class RstCommands {
      *
      * at.writeAtAutoContents will close the output file.
      */
-    public writeAtAutoFile(p: Position, fileName: string, outputFile: string): boolean {
-
+    public writeAtAutoFile(
+        p: Position,
+        fileName: string,
+        outputFile: string
+    ): boolean {
         this.result_list = [];
         this.initAtAutoWrite(p);
         this.root = p.copy();
@@ -853,10 +894,10 @@ export class RstCommands {
             return false;
         }
         try {
-            this.at_auto_write = true;  // Set the flag for underline.
-            p = p.firstChild();  // A hack: ignore the root node.
+            this.at_auto_write = true; // Set the flag for underline.
+            p = p.firstChild(); // A hack: ignore the root node.
             while (p && p.__bool__() && !p.__eq__(after)) {
-                this.writeNode(p);  // side effect: advances p
+                this.writeNode(p); // side effect: advances p
             }
             const s = this.compute_result();
 
@@ -870,14 +911,12 @@ export class RstCommands {
             this.at_auto_write = false;
         }
         return ok;
-
     }
     //@+node:felix.20230427003032.31: *5* rst.initAtAutoWrite
     /**
      * Init underlining for for an @auto write.
      */
     public initAtAutoWrite(p: Position): void {
-
         // User-defined underlining characters make no sense in @auto-rst.
         const d: { [key: string]: any } = p.v.u['rst-import'] || {};
         let underlines2 = d['underlines2'] || '';
@@ -913,7 +952,6 @@ export class RstCommands {
      * rst-options to the write.
      */
     public isSafeWrite(p: Position): boolean {
-
         const lines = g.splitLines(p.b);
         for (const z of lines) {
             if (z.trim() && !z.startsWith('@') && !z.startsWith('.. ')) {
@@ -924,7 +962,6 @@ export class RstCommands {
             }
         }
         return true;
-
     }
     //@+node:felix.20230427003032.33: *4* rst.writeNodeToString
     /**
@@ -943,7 +980,6 @@ export class RstCommands {
      * Don't allow filtering when in the @auto-rst logic.
      */
     public filter_b(c: Commands, p: Position): string {
-
         if (this.user_filter_b && !this.at_auto_write) {
             try {
                 return this.user_filter_b(c, p);
@@ -952,18 +988,22 @@ export class RstCommands {
                 this.user_filter_b = undefined;
                 return p.b;
             }
-
         }
         if (this.remove_leo_directives) {
-
-            return g.splitLines(p.b).filter(
-                z => !(z.startsWith('@language ') || z.startsWith('@others') || z.startsWith('@wrap'))
-            ).join('');
-
+            return g
+                .splitLines(p.b)
+                .filter(
+                    (z) =>
+                        !(
+                            z.startsWith('@language ') ||
+                            z.startsWith('@others') ||
+                            z.startsWith('@wrap')
+                        )
+                )
+                .join('');
         }
 
         return p.b;
-
     }
     //@+node:felix.20230427003032.36: *4* rst.filter_h
     /**
@@ -971,7 +1011,6 @@ export class RstCommands {
      * Don't allow filtering when in the @auto-rst logic.
      */
     public filter_h(c: Commands, p: Position): string {
-
         if (this.user_filter_h && !this.at_auto_write) {
             try {
                 return this.user_filter_h(c, p);
@@ -993,24 +1032,30 @@ export class RstCommands {
     /**
      * Register the user headline filter.
      */
-    public register_headline_filter(f: (c: Commands, p: Position) => string): void {
+    public register_headline_filter(
+        f: (c: Commands, p: Position) => string
+    ): void {
         this.user_filter_h = f;
     }
     //@+node:felix.20230427003032.38: *3* rst: Predicates
     public in_ignore_tree(p: Position): boolean {
-        return [...this.rst_parents(p)].some(p2 => g.match_word(p2.h, 0, '@rst-ignore-tree'));
+        return [...this.rst_parents(p)].some((p2) =>
+            g.match_word(p2.h, 0, '@rst-ignore-tree')
+        );
     }
     public in_rst_tree(p: Position): boolean {
-        return [...this.rst_parents(p)].some(p2 => this.is_rst_node(p2));
+        return [...this.rst_parents(p)].some((p2) => this.is_rst_node(p2));
     }
     public in_slides_tree(p: Position): boolean {
-        return [...this.rst_parents(p)].some(p2 => g.match_word(p.h, 0, "@slides"));
+        return [...this.rst_parents(p)].some((p2) =>
+            g.match_word(p.h, 0, '@slides')
+        );
     }
     public is_ignore_node(p: Position): boolean {
         return g.match_words(p.h, 0, ['@rst-ignore', '@rst-ignore-node']);
     }
     public is_rst_node(p: Position): boolean {
-        return g.match_word(p.h, 0, "@rst") && !g.match(p.h, 0, "@rst-");
+        return g.match_word(p.h, 0, '@rst') && !g.match(p.h, 0, '@rst-');
     }
     public *rst_parents(p: Position): Generator<Position> {
         for (const p2 of p.parents()) {
@@ -1022,20 +1067,23 @@ export class RstCommands {
     }
     //@+node:felix.20230427003032.39: *3* rst: Utils
     //@+node:felix.20230427003032.40: *4* rst.compute_result
-    /** 
+    /**
      * Concatenate all strings in self.result, ensuring exactly one blank line between strings.
      */
     public compute_result(): string {
-        return this.result_list.filter((s) => s.trim())
+        return this.result_list
+            .filter((s) => s.trim())
             .map((s) => `${s.trim()}\n\n`)
             .join('');
     }
     //@+node:felix.20230427003032.41: *4* rst.dumpDict
     public dumpDict(d: { [key: string]: string }, tag: string): void {
         g.pr(tag + '...');
-        Object.keys(d).sort().forEach((key) => {
-            g.pr(`  ${key.padEnd(20)} ${d[key]}`);
-        });
+        Object.keys(d)
+            .sort()
+            .forEach((key) => {
+                g.pr(`  ${key.padEnd(20)} ${d[key]}`);
+            });
     }
     //@+node:felix.20230427003032.42: *4* rst.encode
     // def encode(s: string) -> bytes:
@@ -1061,7 +1109,6 @@ export class RstCommands {
      * This includes the headline, and possibly a leading overlining line.
      */
     public underline(p: Position, s: string): string {
-
         // Never add the root's headline.
         if (!s) {
             return '';
@@ -1077,7 +1124,7 @@ export class RstCommands {
             level = p.level() - this.root!.level();
             // This is tricky. The index n depends on several factors.
             if (this.underlines2) {
-                level -= 1;  // There *is* a double-underlined section.
+                level -= 1; // There *is* a double-underlined section.
                 n = level;
             } else {
                 n = level - 1;
@@ -1101,15 +1148,14 @@ export class RstCommands {
         }
         //
         // The user is responsible for top-level overlining.
-        u = this.underline_characters;  //  '''#=+*^~"'`-:><_'''
+        u = this.underline_characters; //  '''#=+*^~"'`-:><_'''
         level = Math.max(0, p.level() - this.root!.level());
-        level = Math.min(level + 1, u.length - 1);  // Reserve the first character for explicit titles.
+        level = Math.min(level + 1, u.length - 1); // Reserve the first character for explicit titles.
         ch = u[level];
         n = Math.max(4, encoded_s.length);
         return `${s.trim()}\n${ch.repeat(n)}`;
     }
     //@-others
-
 }
 //@-others
 //@@language typescript

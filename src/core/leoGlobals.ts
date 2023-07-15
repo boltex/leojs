@@ -6,7 +6,7 @@
  */
 //@+<< imports >>
 //@+node:felix.20210102181122.1: ** << imports >>
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 // import { Utils as uriUtils } from "vscode-uri";
 
 // import * as Bowser from "bowser";
@@ -16,7 +16,7 @@ import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-import { LeoGui } from "./leoGui";
+import { LeoGui } from './leoGui';
 
 /*
     import binascii
@@ -69,27 +69,45 @@ export const globalDirectiveList: string[] = [
     // Order does not matter.
     'all',
     'beautify',
-    'colorcache', 'code', 'color', 'comment', 'c',
-    'delims', 'doc',
+    'colorcache',
+    'code',
+    'color',
+    'comment',
+    'c',
+    'delims',
+    'doc',
     'encoding',
     // 'end_raw', // #2276.
-    'first', 'header', 'ignore',
-    'killbeautify', 'killcolor',
-    'language', 'last', 'lineending',
+    'first',
+    'header',
+    'ignore',
+    'killbeautify',
+    'killcolor',
+    'language',
+    'last',
+    'lineending',
     'markup',
     'nobeautify',
-    'nocolor-node', 'nocolor', 'noheader', 'nowrap',
-    'nopyflakes',  // Leo 6.1.
-    'nosearch',  // Leo 5.3.
-    'others', 'pagewidth', 'path', 'quiet',
+    'nocolor-node',
+    'nocolor',
+    'noheader',
+    'nowrap',
+    'nopyflakes', // Leo 6.1.
+    'nosearch', // Leo 5.3.
+    'others',
+    'pagewidth',
+    'path',
+    'quiet',
     // 'raw', // #2276.
-    'section-delims',  // Leo 6.6. #2276.
+    'section-delims', // Leo 6.6. #2276.
     'silent',
     'tabwidth',
-    'unit', 'verbose', 'wrap'
+    'unit',
+    'verbose',
+    'wrap',
 ];
 
-export let directives_pat: RegExp;  // Set below.
+export let directives_pat: RegExp; // Set below.
 
 //@-<< define g.globalDirectiveList >>
 //@+<< define global decorator dicts >>
@@ -106,39 +124,39 @@ export let directives_pat: RegExp;  // Set below.
 */
 
 export let global_commands_dict: {
-    [key: string]: (...args: any[]) => any &
-    { __doc__: string } &
-    { __func_name__: string } &
-    { __name__: string } &
-    { __ivars__: string[] }
+    [key: string]: (
+        ...args: any[]
+    ) => any & { __doc__: string } & { __func_name__: string } & {
+        __name__: string;
+    } & { __ivars__: string[] };
 };
 
 export const cmd_instance_dict: { [key: string]: string[] } = {
     // Keys are class names, values are attribute chains.
-    'AbbrevCommandsClass': ['c', 'abbrevCommands'],
-    'AtFile': ['c', 'atFileCommands'],
-    'AutoCompleterClass': ['c', 'k', 'autoCompleter'],
-    'ChapterController': ['c', 'chapterController'],
-    'Commands': ['c'],
-    'ControlCommandsClass': ['c', 'controlCommands'],
-    'DebugCommandsClass': ['c', 'debugCommands'],
-    'EditCommandsClass': ['c', 'editCommands'],
-    'EditFileCommandsClass': ['c', 'editFileCommands'],
-    'FileCommands': ['c', 'fileCommands'],
-    'HelpCommandsClass': ['c', 'helpCommands'],
-    'KeyHandlerClass': ['c', 'k'],
-    'KeyHandlerCommandsClass': ['c', 'keyHandlerCommands'],
-    'KillBufferCommandsClass': ['c', 'killBufferCommands'],
-    'LeoApp': ['g', 'app'],
-    'LeoFind': ['c', 'findCommands'],
-    'LeoImportCommands': ['c', 'importCommands'],
+    AbbrevCommandsClass: ['c', 'abbrevCommands'],
+    AtFile: ['c', 'atFileCommands'],
+    AutoCompleterClass: ['c', 'k', 'autoCompleter'],
+    ChapterController: ['c', 'chapterController'],
+    Commands: ['c'],
+    ControlCommandsClass: ['c', 'controlCommands'],
+    DebugCommandsClass: ['c', 'debugCommands'],
+    EditCommandsClass: ['c', 'editCommands'],
+    EditFileCommandsClass: ['c', 'editFileCommands'],
+    FileCommands: ['c', 'fileCommands'],
+    HelpCommandsClass: ['c', 'helpCommands'],
+    KeyHandlerClass: ['c', 'k'],
+    KeyHandlerCommandsClass: ['c', 'keyHandlerCommands'],
+    KillBufferCommandsClass: ['c', 'killBufferCommands'],
+    LeoApp: ['g', 'app'],
+    LeoFind: ['c', 'findCommands'],
+    LeoImportCommands: ['c', 'importCommands'],
     // 'MacroCommandsClass': ['c', 'macroCommands'],
-    'PrintingController': ['c', 'printingController'],
-    'RectangleCommandsClass': ['c', 'rectangleCommands'],
-    'RstCommands': ['c', 'rstCommands'],
-    'SpellCommandsClass': ['c', 'spellCommands'],
-    'Undoer': ['c', 'undoer'],
-    'VimCommands': ['c', 'vimCommands']
+    PrintingController: ['c', 'printingController'],
+    RectangleCommandsClass: ['c', 'rectangleCommands'],
+    RstCommands: ['c', 'rstCommands'],
+    SpellCommandsClass: ['c', 'spellCommands'],
+    Undoer: ['c', 'undoer'],
+    VimCommands: ['c', 'vimCommands'],
 };
 
 //@-<< define global decorator dicts >>
@@ -152,7 +170,6 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
  * A special case: ivars may be 'g', indicating the leoGlobals module.
  */
 export function ivars2instance(c: Commands, g: any, ivars: string[]): any {
-
     if (!ivars || !ivars.length) {
         g.trace('can not happen: no ivars');
         return undefined;
@@ -189,153 +206,159 @@ export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // It must allow @language python, @nocolor-node, etc.
 
 // #2267: Support for @section-delims.
-export const g_section_delims_pat = new RegExp(/^@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*$/, 'm');
+export const g_section_delims_pat = new RegExp(
+    /^@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*$/,
+    'm'
+);
 
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
-export const color_directives_pat = new RegExp(/^@color|^@killcolor|^@nocolor-node|^@nocolor/, 'mg');
+export const color_directives_pat = new RegExp(
+    /^@color|^@killcolor|^@nocolor-node|^@nocolor/,
+    'mg'
+);
 //@-<< define regex's >>
 //@+<< languages >>
 //@+node:felix.20220112011241.1: ** << languages >>
 const languagesList = [
-    "actionscript",
-    "ada95",
-    "antlr",
-    "apacheconf",
-    "apdl",
-    "applescript",
-    "asp",
-    "aspect-j",
-    "assembly-macro32",
-    "assembly-r2000",
-    "assembly-parrot",
-    "assembly-x86",
-    "awk",
-    "b",
-    "batch",
-    "bbj",
-    "bcel",
-    "beanshell",
-    "bibtex",
-    "c",
-    "chill",
-    "cil",
-    "cobol",
-    "coldfusion",
-    "c++",
-    "c#",
-    "css",
-    "cvs-commit",
-    "d",
-    "doxygen",
-    "dsssl",
-    "embperl",
-    "erlang",
-    "eiffel",
-    "factor",
-    "fortran",
-    "fortran90",
-    "foxpro",
-    "freemarker",
-    "gettext",
-    "groovy",
-    "haskell",
-    "hex",
-    "html",
-    "i4gl",
-    "icon",
-    "idl",
-    "inform",
-    "inno-setup",
-    "ini",
-    "interlis",
-    "io",
-    "java",
-    "javascript",
-    "jcl",
-    "jhtml",
-    "jmk",
-    "jsp",
-    "lilypond",
-    "lisp",
-    "lotos",
-    "lua",
-    "mail",
-    "makefile",
-    "maple",
-    "ml",
-    "modula3",
-    "moin",
-    "mqsc",
-    "netrexx",
-    "nqc",
-    "nsis2",
-    "objective-c",
-    "objectrexx",
-    "occam",
-    "omnimark",
-    "pascal",
-    "patch",
-    "perl",
-    "php",
-    "pike",
-    "pl-sql",
-    "pl1",
-    "pop11",
-    "postscript",
-    "powerdynamo",
-    "povray",
-    "prolog",
-    "progress",
-    "properties",
-    "psp",
-    "ptl",
-    "pvwave",
-    "pyrex",
-    "python",
-    "rebol",
-    "redcode",
-    "relax-ng-compact",
-    "renderman-rib",
-    "rest",
-    "rhtml",
-    "rpm-spec",
-    "rtf",
-    "ruby",
-    "rview",
-    "s+",
-    "s#",
-    "sas",
-    "scheme",
-    "sgml",
-    "shellscript",
-    "shtml",
-    "smalltalk",
-    "sdl/pr",
-    "smi-mib",
-    "sqr",
-    "squidconf",
-    "svn-commit",
-    "swig",
-    "tcl",
-    "tex",
-    "texinfo",
-    "text",
-    "tpl",
-    "transact-sql",
-    "uscript",
-    "vbscript",
-    "velocity",
-    "verilog",
-    "vhdl",
-    "xml",
-    "xsl",
-    "zpt"
+    'actionscript',
+    'ada95',
+    'antlr',
+    'apacheconf',
+    'apdl',
+    'applescript',
+    'asp',
+    'aspect-j',
+    'assembly-macro32',
+    'assembly-r2000',
+    'assembly-parrot',
+    'assembly-x86',
+    'awk',
+    'b',
+    'batch',
+    'bbj',
+    'bcel',
+    'beanshell',
+    'bibtex',
+    'c',
+    'chill',
+    'cil',
+    'cobol',
+    'coldfusion',
+    'c++',
+    'c#',
+    'css',
+    'cvs-commit',
+    'd',
+    'doxygen',
+    'dsssl',
+    'embperl',
+    'erlang',
+    'eiffel',
+    'factor',
+    'fortran',
+    'fortran90',
+    'foxpro',
+    'freemarker',
+    'gettext',
+    'groovy',
+    'haskell',
+    'hex',
+    'html',
+    'i4gl',
+    'icon',
+    'idl',
+    'inform',
+    'inno-setup',
+    'ini',
+    'interlis',
+    'io',
+    'java',
+    'javascript',
+    'jcl',
+    'jhtml',
+    'jmk',
+    'jsp',
+    'lilypond',
+    'lisp',
+    'lotos',
+    'lua',
+    'mail',
+    'makefile',
+    'maple',
+    'ml',
+    'modula3',
+    'moin',
+    'mqsc',
+    'netrexx',
+    'nqc',
+    'nsis2',
+    'objective-c',
+    'objectrexx',
+    'occam',
+    'omnimark',
+    'pascal',
+    'patch',
+    'perl',
+    'php',
+    'pike',
+    'pl-sql',
+    'pl1',
+    'pop11',
+    'postscript',
+    'powerdynamo',
+    'povray',
+    'prolog',
+    'progress',
+    'properties',
+    'psp',
+    'ptl',
+    'pvwave',
+    'pyrex',
+    'python',
+    'rebol',
+    'redcode',
+    'relax-ng-compact',
+    'renderman-rib',
+    'rest',
+    'rhtml',
+    'rpm-spec',
+    'rtf',
+    'ruby',
+    'rview',
+    's+',
+    's#',
+    'sas',
+    'scheme',
+    'sgml',
+    'shellscript',
+    'shtml',
+    'smalltalk',
+    'sdl/pr',
+    'smi-mib',
+    'sqr',
+    'squidconf',
+    'svn-commit',
+    'swig',
+    'tcl',
+    'tex',
+    'texinfo',
+    'text',
+    'tpl',
+    'transact-sql',
+    'uscript',
+    'vbscript',
+    'velocity',
+    'verilog',
+    'vhdl',
+    'xml',
+    'xsl',
+    'zpt',
 ];
 //@-<< languages >>
 
-export const tree_popup_handlers: ((...args: any[]) => any)[] = [];  // Set later.
+export const tree_popup_handlers: ((...args: any[]) => any)[] = []; // Set later.
 export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionary for free use
 
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
@@ -345,7 +368,7 @@ export let app: LeoApp;
 export let inScript: boolean = false; // A synonym for app.inScript
 export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 
-export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
+export let unicode_warnings: { [key: string]: any } = {}; // Keys are callers.
 
 //@+others
 //@+node:felix.20230413003654.1: ** g.codecs
@@ -372,14 +395,13 @@ export const codecs = {
  * The caller is responsible for handling newlines correctly.
  */
 export class FileLikeObject {
-
     public encoding: BufferEncoding;
     public ptr: number;
     private _list: string[];
 
     constructor(encoding: BufferEncoding = 'utf-8', fromString?: string) {
         this.encoding = encoding || 'utf-8';
-        this._list = splitLines(fromString);  // Must preserve newlines!
+        this._list = splitLines(fromString); // Must preserve newlines!
         this.ptr = 0;
     }
 
@@ -433,7 +455,6 @@ export class FileLikeObject {
     }
 
     //@-others
-
 }
 
 //@+node:felix.20221105181936.1: *3* class NullObject (Python Cookbook)
@@ -442,17 +463,15 @@ export class FileLikeObject {
  * From the Python cookbook, recipe 5.23
  */
 export class NullObject {
-
     // def __init__(self, *args, **keys): pass
     constructor(...args: any[]) {
         if (args) {
             // pass
         }
-
     }
 
     public toString(): string {
-        return "NullObject";
+        return 'NullObject';
     }
 
     // def __call__(self, *args, **keys): return self
@@ -470,7 +489,6 @@ export class NullObject {
     // def __getattr__(self, attr): return self
 
     // def __setattr__(self, attr, val): return self
-
 }
 //@+node:felix.20220213000607.1: *3* class g.GeneralSetting
 // Important: The startup code uses this class,
@@ -480,7 +498,6 @@ export class NullObject {
  * A class representing any kind of setting except shortcuts.
  */
 export class GeneralSetting {
-
     public kind: string;
     public encoding: BufferEncoding | undefined = undefined;
     public ivar: string | undefined = undefined;
@@ -490,19 +507,16 @@ export class GeneralSetting {
     public tag: string = 'setting';
     public unl: string | undefined = undefined;
 
-    constructor(
-        p_generalSetting: {
-            kind: string;
-            encoding?: BufferEncoding;
-            ivar?: string;
-            source?: string;
-            val?: any;
-            path?: string;
-            tag?: string;
-            unl?: string;
-        }
-
-    ) {
+    constructor(p_generalSetting: {
+        kind: string;
+        encoding?: BufferEncoding;
+        ivar?: string;
+        source?: string;
+        val?: any;
+        path?: string;
+        tag?: string;
+        unl?: string;
+    }) {
         this.encoding = p_generalSetting.encoding;
         this.ivar = p_generalSetting.ivar;
         this.kind = p_generalSetting.kind;
@@ -519,22 +533,16 @@ export class GeneralSetting {
         // Better for g.printObj.
         let val;
         if (this.val) {
-            val = this.val.toString().split("\n").join(" ");
+            val = this.val.toString().split('\n').join(' ');
         }
         return (
             // `GS: ${shortFileName(this.path)} ` +
             // `${this.kind} = ${val} `
 
-
             `GS: path: ${shortFileName(this.path || '')} ` +
             `source: ${this.source || ''} ` +
             `kind: ${this.kind} val: ${val}`
-
         );
-
-
-
-
     }
     public dump(): string {
         return this.__repr__();
@@ -544,20 +552,17 @@ export class GeneralSetting {
     public toString = (): string => {
         return this.__repr__();
     };
-
 }
 //@+node:felix.20220213000510.1: *3* class g.SettingsDict
 /**
  * A subclass of dict providing settings-related methods.
  */
 export class SettingsDict extends Map<string, any> {
-
     private _name: string;
 
     constructor(name: string) {
         super();
-        this._name = name;  // For __repr__ only.
-
+        this._name = name; // For __repr__ only.
     }
 
     //@+others
@@ -578,7 +583,6 @@ export class SettingsDict extends Map<string, any> {
     // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
     public toString = (): string => {
         return `<SettingsDict name:${this._name} `;
-
     };
 
     //@+node:felix.20220628012349.1: *4* td.copy
@@ -587,16 +591,19 @@ export class SettingsDict extends Map<string, any> {
         // return copy.deepcopy(self)
         const newDict = new SettingsDict(this._name);
         for (const p_key of this.keys()) {
-            newDict.set(p_key, new GeneralSetting({
-                kind: this.get(p_key).kind,
-                encoding: this.get(p_key).encoding,
-                ivar: this.get(p_key).ivar,
-                source: this.get(p_key).source,
-                val: this.get(p_key).val,
-                path: this.get(p_key).path,
-                tag: this.get(p_key).tag,
-                unl: this.get(p_key).unl
-            }));
+            newDict.set(
+                p_key,
+                new GeneralSetting({
+                    kind: this.get(p_key).kind,
+                    encoding: this.get(p_key).encoding,
+                    ivar: this.get(p_key).ivar,
+                    source: this.get(p_key).source,
+                    val: this.get(p_key).val,
+                    path: this.get(p_key).path,
+                    tag: this.get(p_key).tag,
+                    unl: this.get(p_key).unl,
+                })
+            );
         }
         return newDict;
     }
@@ -621,7 +628,6 @@ export class SettingsDict extends Map<string, any> {
      * Update the *list*, self.d [key]
      */
     public add_to_list(key: string, val: any): void {
-
         if (key === undefined) {
             trace('TypeDict: None is not a valid key', callers());
             return;
@@ -639,7 +645,6 @@ export class SettingsDict extends Map<string, any> {
             aList.push(val);
             this.set(key, aList);
         }
-
     }
 
     //@+node:felix.20220213000510.8: *4* td.get_setting & get_string_setting
@@ -657,7 +662,7 @@ export class SettingsDict extends Map<string, any> {
 
     public get_string_setting(key: string): string | undefined {
         const val = this.get_setting(key);
-        if (typeof (val) === 'string') {
+        if (typeof val === 'string') {
             return val;
         } else {
             return undefined;
@@ -674,7 +679,6 @@ export class SettingsDict extends Map<string, any> {
     }
 
     //@-others
-
 }
 
 //@+node:felix.20221221003402.1: *3* g.isTextWrapper & isTextWidget
@@ -756,17 +760,17 @@ export function callers(
 export function _callerName(n: number, verbose: boolean = false): string {
     // TODO : see Error().stack to access names from the call stack
     // return Error.stack.split()[n]; // or something close to that
-    return "<_callerName>";
+    return '<_callerName>';
 }
 
 //@+node:felix.20211104220458.1: *3* g.get_line & get_line__after
 // Very useful for tracing.
 
 export function get_line(s: string, i: number): string {
-    let nl = "";
+    let nl = '';
     if (is_nl(s, i)) {
         i = skip_nl(s, i);
-        nl = "[nl]";
+        nl = '[nl]';
     }
     const j: number = find_line_start(s, i);
     const k: number = skip_to_end_of_line(s, i);
@@ -777,10 +781,10 @@ export function get_line(s: string, i: number): string {
 // * getLine != get_line !!
 
 export function get_line_after(s: string, i: number): string {
-    let nl = "";
+    let nl = '';
     if (is_nl(s, i)) {
         i = skip_nl(s, i);
-        nl = "[nl]";
+        nl = '[nl]';
     }
     const k: number = skip_to_end_of_line(s, i);
     return nl + s.substring(i, k);
@@ -794,14 +798,14 @@ export const getLineAfter = get_line_after;
  * Return a dictionary of ivars:values for non-methods of obj.
  */
 export function getIvarsDict(obj: any): { [key: string]: any } {
-
     const d: { [key: string]: any } = {};
 
     //    [[key, getattr(obj, key)] for key in dir(obj)
     // if not isinstance(getattr(obj, key), types.MethodType)])
     for (const key in obj) {
         // console.log(key); // prints 'a', 'b', and 'c'
-        const w_callable = (typeof obj[key] === 'function') || (obj[key] instanceof Function);
+        const w_callable =
+            typeof obj[key] === 'function' || obj[key] instanceof Function;
         if (!w_callable) {
             d[key] = obj[key];
         }
@@ -818,20 +822,20 @@ export function checkUnchangedIvars(
         exceptions = [];
     }
     let ok = true;
-    for (const key in d) { // USE 'IN' FOR KEY!
+    for (const key in d) {
+        // USE 'IN' FOR KEY!
         if (!exceptions.includes(key)) {
             if (obj[key] !== d[key]) {
                 trace(
                     `changed ivar: ${key} ` +
-                    `old: ${d[key]} ` +
-                    `new: ${obj[key]}`
+                        `old: ${d[key]} ` +
+                        `new: ${obj[key]}`
                 );
                 ok = false;
             }
         }
     }
     return ok;
-
 }
 //@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
 /**
@@ -839,10 +843,10 @@ export function checkUnchangedIvars(
  */
 export function listToString(obj: any): string {
     // return JSON.stringify(obj, undefined, 4);
-    let result: string = "";
+    let result: string = '';
 
     result = obj.toString(); // TODO : TEST THIS!
-    // result = safeJsonStringify(obj, null, 2);// TODO : TEST THIS! 
+    // result = safeJsonStringify(obj, null, 2);// TODO : TEST THIS!
 
     // let cache: any[] = [];
     // result = JSON.stringify(obj, function (key, value) {
@@ -858,7 +862,6 @@ export function listToString(obj: any): string {
     // });
     // (cache as any) = null; // Enable garbage collection
 
-
     return result;
 }
 
@@ -867,8 +870,7 @@ export function listToString(obj: any): string {
  * Pretty print any object to a string.
  */
 export function objToString(obj: any, tag?: string): string {
-
-    let result: string = "";
+    let result: string = '';
     if (tag) {
         result = result + `${tag}...` + '\n';
     }
@@ -887,7 +889,6 @@ export function objToString(obj: any, tag?: string): string {
     //     return value;
     // }, 4);
     // (cache as any) = null; // Enable garbage collection
-
 
     return result;
     // # pylint: disable=undefined-loop-variable
@@ -922,14 +923,18 @@ export function objToString(obj: any, tag?: string): string {
     //     sep = '\n' if '\n' in s else ' '
     //     return f"{prefix}:{sep}{s}"
     // return s
-
 }
 
 //@+node:felix.20211104221444.1: *3* g.printObj        (coreGlobals.py)
 /**
  * Pretty print any Python object using pr.
  */
-export function printObj(obj: any, indent = '', printCaller = false, tag?: string): void {
+export function printObj(
+    obj: any,
+    indent = '',
+    printCaller = false,
+    tag?: string
+): void {
     // TODO : Replace with output to proper pr function
     //     pr(objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
     pr(obj);
@@ -938,10 +943,11 @@ export function printObj(obj: any, indent = '', printCaller = false, tag?: strin
 //@+node:felix.20211104210724.1: ** g.Directives
 //@+node:felix.20220410000509.1: *3* g.comment_delims_from_extension
 /**
-  * Return the comment delims corresponding to the filename's extension.
-  */
-export function comment_delims_from_extension(filename: string): [string, string, string] {
-
+ * Return the comment delims corresponding to the filename's extension.
+ */
+export function comment_delims_from_extension(
+    filename: string
+): [string, string, string] {
     let root;
     let ext;
 
@@ -963,9 +969,9 @@ export function comment_delims_from_extension(filename: string): [string, string
 
     trace(
         `unknown extension: {ext!r},` +
-        `filename: {filename!r},` +
-        `root: {root!r}`);
-
+            `filename: {filename!r},` +
+            `root: {root!r}`
+    );
 
     return ['', '', ''];
 }
@@ -976,7 +982,6 @@ export function comment_delims_from_extension(filename: string): [string, string
  * directive in s.
  */
 export function findAllValidLanguageDirectives(s: string): string[] {
-
     if (!s.trim()) {
         return [];
     }
@@ -995,8 +1000,9 @@ export function findAllValidLanguageDirectives(s: string): string[] {
  * Return the first language for which there is a valid @language
  * directive in s.
  */
-export function findFirstValidAtLanguageDirective(s: string): string | undefined {
-
+export function findFirstValidAtLanguageDirective(
+    s: string
+): string | undefined {
     if (!s.trim()) {
         return undefined;
     }
@@ -1017,8 +1023,10 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
  * Called from the syntax coloring method that colorizes section references.
  * Also called from write at.putRefAt.
  */
-export function findReference(name: string, root: Position): Position | undefined {
-
+export function findReference(
+    name: string,
+    root: Position
+): Position | undefined {
     for (const p of root.subtree(false)) {
         console.assert(!p.__eq__(root));
         if (p.matchHeadline(name) && !p.isAtIgnoreNode()) {
@@ -1026,7 +1034,6 @@ export function findReference(name: string, root: Position): Position | undefine
         }
     }
     return undefined;
-
 }
 //@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
 /**
@@ -1036,13 +1043,11 @@ export function findReference(name: string, root: Position): Position | undefine
  * following the first occurrence of each recognized directive.
  */
 export function get_directives_dict(p: Position): { [key: string]: string } {
-
     let d: { [key: string]: string } = {};
 
     // The headline has higher precedence because it is more visible.
     let m: RegExpExecArray | null;
     for (let s of [p.h, p.b]) {
-
         while ((m = directives_pat.exec(s)) !== null) {
             const word: string = m[1].trim();
 
@@ -1052,7 +1057,7 @@ export function get_directives_dict(p: Position): { [key: string]: string } {
                 continue;
             }
             const j: number = i + word.length;
-            if (j < s.length && !(' \t\n'.includes(s.charAt(j)))) {
+            if (j < s.length && !' \t\n'.includes(s.charAt(j))) {
                 continue;
             }
 
@@ -1073,8 +1078,10 @@ export function get_directives_dict(p: Position): { [key: string]: string } {
  * Returns a list of dicts containing pointers to
  * the start of each directive
  */
-export function get_directives_dict_list(p: Position): { [key: string]: string; }[] {
-    const result: { [key: string]: string; }[] = [];
+export function get_directives_dict_list(
+    p: Position
+): { [key: string]: string }[] {
+    const result: { [key: string]: string }[] = [];
     const p1: Position = p.copy();
     for (let p of p1.self_and_parents(false)) {
         // No copy necessary: g.get_directives_dict does not change p.
@@ -1090,8 +1097,9 @@ export function get_directives_dict_list(p: Position): { [key: string]: string; 
  * 2. Search p's "extended parents" for an @<file> node.
  * 3. Search p's "extended parents" for an unambiguous @language directive.
  */
-export function getLanguageFromAncestorAtFileNode(p: Position): string | undefined {
-
+export function getLanguageFromAncestorAtFileNode(
+    p: Position
+): string | undefined {
     const v0: VNode = p.v;
 
     // The same generator as in v.setAllAncestorAtFileNodesDirty.
@@ -1117,14 +1125,14 @@ export function getLanguageFromAncestorAtFileNode(p: Position): string | undefin
      * Phase one searches only @<file> nodes.
      */
     function find_language(v: VNode, phase: number): string | undefined {
-
         if (phase === 1 && !v.isAnyAtFileNode()) {
             return undefined;
         }
         let w_language: string;
         // #1693: Scan v.b for an *unambiguous* @language directive.
         const languages: string[] = findAllValidLanguageDirectives(v.b);
-        if (languages.length === 1) { // An unambiguous language
+        if (languages.length === 1) {
+            // An unambiguous language
             return languages[0];
         }
         let name: string;
@@ -1134,7 +1142,7 @@ export function getLanguageFromAncestorAtFileNode(p: Position): string | undefin
             // Use the file's extension.
             name = v.anyAtFileNodeName();
             [junk, ext] = os_path_splitext(name);
-            ext = ext.slice(1);  // strip the leading period.
+            ext = ext.slice(1); // strip the leading period.
             w_language = app.extension_dict[ext];
 
             if (isValidLanguage(w_language)) {
@@ -1176,10 +1184,11 @@ export function getLanguageFromAncestorAtFileNode(p: Position): string | undefin
  * This is always a lowercase language name, never None.
  */
 export function getLanguageAtPosition(c: Commands, p: Position): string {
-
-    const aList: { [key: string]: string; }[] = get_directives_dict_list(p);
-    const d: { [key: string]: any } | undefined = scanAtCommentAndAtLanguageDirectives(aList);
-    let language: string = d && d['language'] ||
+    const aList: { [key: string]: string }[] = get_directives_dict_list(p);
+    const d: { [key: string]: any } | undefined =
+        scanAtCommentAndAtLanguageDirectives(aList);
+    let language: string =
+        (d && d['language']) ||
         getLanguageFromAncestorAtFileNode(p) ||
         c.config.getString('target-language') ||
         'python';
@@ -1195,7 +1204,10 @@ export function getLanguageAtPosition(c: Commands, p: Position): string {
  * - Use c.config.output_newline if c given,
  * - Otherwise use g.app.config.output_newline.
  */
-export function getOutputNewline(c: Commands | undefined, name?: string): string {
+export function getOutputNewline(
+    c: Commands | undefined,
+    name?: string
+): string {
     let s: string;
     if (name) {
         s = name;
@@ -1210,18 +1222,21 @@ export function getOutputNewline(c: Commands | undefined, name?: string): string
 
     s = s.toLowerCase();
 
-    if (["nl", "lf"].includes(s)) {
+    if (['nl', 'lf'].includes(s)) {
         s = '\n';
-    } else if (s === "cr") {
+    } else if (s === 'cr') {
         s = '\r';
-    } else if (s === "platform") {
-        s = os.EOL;  // 12/2/03 emakital
-    } else if (s === "crlf") {
-        s = "\r\n";
+    } else if (s === 'platform') {
+        s = os.EOL; // 12/2/03 emakital
+    } else if (s === 'crlf') {
+        s = '\r\n';
     } else {
-        s = '\n';  // Default for erroneous values.
+        s = '\n'; // Default for erroneous values.
     }
-    console.assert((typeof s === 'string' || s as any instanceof String), s.toString());
+    console.assert(
+        typeof s === 'string' || (s as any) instanceof String,
+        s.toString()
+    );
 
     return s;
 }
@@ -1230,9 +1245,8 @@ export function getOutputNewline(c: Commands | undefined, name?: string): string
  * Return True if p or p's ancestors contain an @nosearch directive.
  */
 export function inAtNosearch(p?: Position): boolean {
-
     if (!p || !p.__bool__()) {
-        return false;  // #2288.
+        return false; // #2288.
     }
     for (let p_p of p.self_and_parents()) {
         const nosearch = p_p.b.search(/(^@|\n@)nosearch\b/) !== -1;
@@ -1242,20 +1256,18 @@ export function inAtNosearch(p?: Position): boolean {
         }
     }
     return false;
-
 }
 //@+node:felix.20211104213330.1: *3* g.isDirective
 /**
  * Return True if s starts with a directive.
  */
 export function isDirective(s: string): boolean {
-
     const m: RegExpExecArray | null = g_is_directive_pattern.exec(s);
     if (m) {
         // This pattern excludes @encoding.whatever and @encoding(whatever)
         // It must allow @language python, @nocolor-node, etc.
         const s2: string = s.substring(m.index + m[0].length); // text from end of match #1 (the word after @)
-        if (s2 && ".(".includes(s2.charAt(0))) {
+        if (s2 && '.('.includes(s2.charAt(0))) {
             return false;
         }
         return globalDirectiveList.includes(m[1]);
@@ -1269,19 +1281,21 @@ export function isDirective(s: string): boolean {
  */
 export function isValidLanguage(language: string): boolean {
     return !!(language && app.language_delims_dict[language]);
-
 }
 //@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
 /**
  * Scan aList for @comment and @language directives.
  * @comment should follow @language if both appear in the same node.
  */
-export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: string; }[]): {
-    language: string;
-    comment: string;
-    delims: [string, string, string];
-} | undefined {
-
+export function scanAtCommentAndAtLanguageDirectives(
+    aList: { [key: string]: string }[]
+):
+    | {
+          language: string;
+          comment: string;
+          delims: [string, string, string];
+      }
+    | undefined {
     let lang: string | undefined = undefined;
     for (let d of aList) {
         const comment: string = d['comment'];
@@ -1297,8 +1311,12 @@ export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: str
             [delim1, delim2, delim3] = set_delims_from_string(comment);
         }
         if (comment || language) {
-            const delims: [string, string, string] = [delim1!, delim2!, delim3!];
-            const w_d = { 'language': lang!, 'comment': comment, 'delims': delims };
+            const delims: [string, string, string] = [
+                delim1!,
+                delim2!,
+                delim3!,
+            ];
+            const w_d = { language: lang!, comment: comment, delims: delims };
             return w_d;
         }
     }
@@ -1308,19 +1326,19 @@ export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: str
 /**
  * Scan aList for @encoding directives.
  */
-export function scanAtEncodingDirectives(aList: any[]): BufferEncoding | undefined {
-
+export function scanAtEncodingDirectives(
+    aList: any[]
+): BufferEncoding | undefined {
     for (let d of aList) {
         const encoding = d['encoding'] as BufferEncoding | undefined;
         if (encoding && isValidEncoding(encoding)) {
             return encoding;
         }
         if (encoding && !unitTesting) {
-            error("invalid @encoding:", encoding);
+            error('invalid @encoding:', encoding);
         }
     }
     return undefined;
-
 }
 //@+node:felix.20220412232541.1: *3* g.scanAtHeaderDirectives
 /**
@@ -1328,10 +1346,9 @@ export function scanAtEncodingDirectives(aList: any[]): BufferEncoding | undefin
  * @param aList
  */
 export function scanAtHeaderDirectives(aList: any[]): void {
-
     for (let d of aList) {
-        if ((d['header'] && d['noheader'])) {
-            error("conflicting @header and @noheader directives");
+        if (d['header'] && d['noheader']) {
+            error('conflicting @header and @noheader directives');
         }
     }
 }
@@ -1343,7 +1360,7 @@ export function scanAtHeaderDirectives(aList: any[]): void {
 export function scanAtLineendingDirectives(aList: any[]): string | undefined {
     for (let d of aList) {
         const e = d['lineending'];
-        if (["cr", "crlf", "lf", "nl", "platform"].includes(e)) {
+        if (['cr', 'crlf', 'lf', 'nl', 'platform'].includes(e)) {
             const lineending = getOutputNewline(undefined, e);
             return lineending;
         }
@@ -1358,8 +1375,10 @@ export function scanAtLineendingDirectives(aList: any[]): string | undefined {
  * @param aList
  * @param issue_error_flag
  */
-export function scanAtPagewidthDirectives(aList: any[], issue_error_flag?: boolean): number | undefined {
-
+export function scanAtPagewidthDirectives(
+    aList: any[],
+    issue_error_flag?: boolean
+): number | undefined {
     for (let d of aList) {
         const s = d['pagewidth'];
         if (s && s !== '') {
@@ -1370,22 +1389,23 @@ export function scanAtPagewidthDirectives(aList: any[], issue_error_flag?: boole
                 return val;
             }
             if (issue_error_flag && !unitTesting) {
-                error("ignoring @pagewidth", s);
+                error('ignoring @pagewidth', s);
             }
         }
     }
     return undefined;
-
 }
 //@+node:felix.20211104225158.1: *3* g.scanAtTabwidthDirectives & scanAllTabWidthDirectives
 /**
  * Scan aList for '@tabwidth' directives.
  */
-export function scanAtTabwidthDirectives(aList: any[], issue_error_flag = false): number | undefined {
-
+export function scanAtTabwidthDirectives(
+    aList: any[],
+    issue_error_flag = false
+): number | undefined {
     for (let d of aList) {
         const s: string = d['tabwidth'];
-        if (s || s === "") {
+        if (s || s === '') {
             const w_skip_long = skip_long(s, 0);
             const val: number | undefined = w_skip_long[1];
 
@@ -1393,7 +1413,7 @@ export function scanAtTabwidthDirectives(aList: any[], issue_error_flag = false)
                 return val;
             }
             if (issue_error_flag && !unitTesting) {
-                error("ignoring @tabwidth", s);
+                error('ignoring @tabwidth', s);
             }
         }
     }
@@ -1403,7 +1423,10 @@ export function scanAtTabwidthDirectives(aList: any[], issue_error_flag = false)
 /**
  * Scan p and all ancestors looking for '@tabwidth' directives.
  */
-export function scanAllAtTabWidthDirectives(c: Commands, p?: Position): number | undefined {
+export function scanAllAtTabWidthDirectives(
+    c: Commands,
+    p?: Position
+): number | undefined {
     let ret: number | undefined;
     if (c && p && p.__bool__()) {
         const aList: any[] = get_directives_dict_list(p);
@@ -1420,9 +1443,10 @@ export function scanAllAtTabWidthDirectives(c: Commands, p?: Position): number |
  * @param aList
  * @param issue_error_flag
  */
-export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): boolean | undefined {
-
-
+export function scanAtWrapDirectives(
+    aList: any[],
+    issue_error_flag?: boolean
+): boolean | undefined {
     for (let d of aList) {
         const dWrap = d['wrap'];
         const dNoWrap = d['nowrap'];
@@ -1441,12 +1465,14 @@ export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): 
  * @param aList
  * @param issue_error_flag
  */
-export function scanAllAtWrapDirectives(c: Commands, p: Position): boolean | undefined {
-
+export function scanAllAtWrapDirectives(
+    c: Commands,
+    p: Position
+): boolean | undefined {
     let ret: boolean | undefined;
 
     if (c && p && p.__bool__()) {
-        const w_default = !!(c && c.config.getBool("body-pane-wraps"));
+        const w_default = !!(c && c.config.getBool('body-pane-wraps'));
         const aList = get_directives_dict_list(p);
         const val = scanAtWrapDirectives(aList);
         ret = val === undefined ? w_default : val;
@@ -1460,14 +1486,16 @@ export function scanAllAtWrapDirectives(c: Commands, p: Position): boolean | und
  *
  * Returns the language found, or c.target_language.
  */
-export function scanForAtLanguage(c: Commands, p: Position): string | undefined {
-
+export function scanForAtLanguage(
+    c: Commands,
+    p: Position
+): string | undefined {
     // Unlike the code in x.scanAllDirectives, this code ignores @comment directives.
     if (c && p && p.__bool__()) {
         for (let w_p of p.self_and_parents(false)) {
             const d = get_directives_dict(w_p);
-            if (d["language"]) {
-                const z = d["language"];
+            if (d['language']) {
+                const z = d['language'];
                 let language;
                 let delim1;
                 let delim2;
@@ -1478,14 +1506,14 @@ export function scanForAtLanguage(c: Commands, p: Position): string | undefined 
         }
     }
     return c.target_language;
-
 }
 //@+node:felix.20220110202727.1: *3* g.set_delims_from_language
 /**
  * Return a tuple (single,start,end) of comment delims.
  */
-export function set_delims_from_language(language: string): [string, string, string] {
-
+export function set_delims_from_language(
+    language: string
+): [string, string, string] {
     const val = app.language_delims_dict[language];
     let delim1: string | undefined;
     let delim2: string | undefined;
@@ -1509,10 +1537,11 @@ export function set_delims_from_language(language: string): [string, string, str
  * This code can be called from @language logic, in which case s can
  * point at @comment
  */
-export function set_delims_from_string(s: string): [string, string, string] | [undefined, undefined, undefined] {
-
+export function set_delims_from_string(
+    s: string
+): [string, string, string] | [undefined, undefined, undefined] {
     // Skip an optional @comment
-    const tag: string = "@comment";
+    const tag: string = '@comment';
     let i: number = 0;
     let j: number;
 
@@ -1537,7 +1566,8 @@ export function set_delims_from_string(s: string): [string, string, string] | [u
     }
 
     // 'rr 09/25/02
-    if (count === 2) { // delims[0] is always the single-line delim.
+    if (count === 2) {
+        // delims[0] is always the single-line delim.
         delims[2] = delims[1];
         delims[1] = delims[0];
         delims[0] = '';
@@ -1545,7 +1575,7 @@ export function set_delims_from_string(s: string): [string, string, string] | [u
 
     for (let i of [0, 1, 2]) {
         if (delims[i]) {
-            if (delims[i].startsWith("@0x")) {
+            if (delims[i].startsWith('@0x')) {
                 // Allow delimiter definition as @0x + hexadecimal encoded delimiter
                 // to avoid problems with duplicate delimiters on the @comment line.
                 // If used, whole delimiter must be encoded.
@@ -1556,17 +1586,18 @@ export function set_delims_from_string(s: string): [string, string, string] | [u
                 try {
                     // ! TEST THIS !
                     // delims[i] = binascii.unhexlify(delims[i].splice(3)); // type:ignore
-                    delims[i] = String.fromCharCode(parseInt(delims[i].slice(3), 16));
+                    delims[i] = String.fromCharCode(
+                        parseInt(delims[i].slice(3), 16)
+                    );
                     delims[i] = toUnicode(delims[i]);
-                }
-                catch (e) {
+                } catch (e) {
                     warning(`'${delims[i]}' delimiter is invalid: ${e} `);
                     return [undefined, undefined, undefined];
                 }
             } else {
                 // 7/8/02: The "REM hack": replace underscores by blanks.
                 // 9/25/02: The "perlpod hack": replace double underscores by newlines.
-                delims[i] = delims[i].split("__").join('\n');
+                delims[i] = delims[i].split('__').join('\n');
                 delims[i] = delims[i].split('_').join(' ');
             }
         }
@@ -1582,10 +1613,15 @@ export function set_delims_from_string(s: string): [string, string, string] | [u
  *
  * Returns (language, delim1, delim2, delim3)
  */
-export function set_language(s: string, i: number, issue_errors_flag?: boolean):
-    [string, string, string, string] | [undefined, undefined, undefined, undefined] {
+export function set_language(
+    s: string,
+    i: number,
+    issue_errors_flag?: boolean
+):
+    | [string, string, string, string]
+    | [undefined, undefined, undefined, undefined] {
     let j: number;
-    const tag: string = "@language";
+    const tag: string = '@language';
     console.assert(i !== undefined);
 
     if (match_word(s, i, tag)) {
@@ -1607,7 +1643,7 @@ export function set_language(s: string, i: number, issue_errors_flag?: boolean):
         return [language, delim1, delim2, delim3];
     }
     if (issue_errors_flag) {
-        es("ignoring:", get_line(s, i));
+        es('ignoring:', get_line(s, i));
     }
     return [undefined, undefined, undefined, undefined];
 }
@@ -1616,15 +1652,15 @@ export function set_language(s: string, i: number, issue_errors_flag?: boolean):
  * Strip cruft from a path name.
  */
 export function stripPathCruft(p_path: string): string {
-
     if (!p_path) {
-        return p_path;   // Retain empty paths for warnings.
+        return p_path; // Retain empty paths for warnings.
     }
-    if (p_path.length > 2 && (
-        (p_path[0] === '<' && p_path[p_path.length - 1] === '>') ||
-        (p_path[0] === '"' && p_path[p_path.length - 1] === '"') ||
-        (p_path[0] === "'" && p_path[p_path.length - 1] === "'")
-    )) {
+    if (
+        p_path.length > 2 &&
+        ((p_path[0] === '<' && p_path[p_path.length - 1] === '>') ||
+            (p_path[0] === '"' && p_path[p_path.length - 1] === '"') ||
+            (p_path[0] === "'" && p_path[p_path.length - 1] === "'"))
+    ) {
         p_path = p_path.substring(1, p_path.length - 1).trim();
     }
     // We want a *relative* path, not an absolute path.
@@ -1635,7 +1671,6 @@ export function stripPathCruft(p_path: string): string {
  * Init/update g.directives_pat
  */
 export function update_directives_pat(): void {
-
     // global globalDirectiveList, directives_pat
     // Use a pattern that guarantees word matches.
 
@@ -1645,17 +1680,16 @@ export function update_directives_pat(): void {
     //     fr"\b{z}\b" for z in globalDirectiveList if z != 'others'
     // ]
 
-
     // The metacharacter \b is an anchor like the caret and the dollar sign.
     // It matches at “word boundary” positions. This match is zero-length.
     for (let z of globalDirectiveList) {
         if (z !== 'others') {
-            aList.push("\\b" + z + "\\b");
+            aList.push('\\b' + z + '\\b');
         }
     }
 
     // pat = "^@(%s)" % "|".join(aList)
-    const pat: string = "^@(" + aList.join("|") + ")";
+    const pat: string = '^@(' + aList.join('|') + ')';
 
     // directives_pat = re.compile(pat, re.MULTILINE)
     directives_pat = new RegExp(pat, 'mdg');
@@ -1665,7 +1699,6 @@ update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
 //@+node:felix.20220108221428.1: *3* g.chdir
 export async function chdir(p_path: string): Promise<void> {
-
     let w_isDir = await os_path_isdir(p_path);
     if (w_isDir) {
         p_path = os_path_dirname(p_path);
@@ -1677,7 +1710,6 @@ export async function chdir(p_path: string): Promise<void> {
     if (w_isDir && w_exist) {
         process.chdir(p_path);
     }
-
 }
 //@+node:felix.20230711213447.1: *3* g.mkdir
 export async function mkdir(folderName: string): Promise<void> {
@@ -1687,22 +1719,22 @@ export async function mkdir(folderName: string): Promise<void> {
 //@+node:felix.20230714230415.1: *3* g.rmdir
 export async function rmdir(folderName: string): Promise<void> {
     const w_uri = makeVscodeUri(folderName);
-    await vscode.workspace.fs.delete(w_uri, {recursive: true});
+    await vscode.workspace.fs.delete(w_uri, { recursive: true });
 }
 //@+node:felix.20220511212935.1: *3* g.computeWindowTitle
 export function computeWindowTitle(fileName: string): string {
     let branch;
     let commit;
-    [branch, commit] = gitInfoForFile(fileName);  // #1616
+    [branch, commit] = gitInfoForFile(fileName); // #1616
     if (!fileName) {
-        return branch ? branch + ": untitled" : 'untitled';
+        return branch ? branch + ': untitled' : 'untitled';
     }
     let w_path;
     let fn;
     let title;
     [w_path, fn] = os_path_split(fileName);
     if (w_path) {
-        title = fn + " in " + w_path;
+        title = fn + ' in ' + w_path;
     } else {
         title = fn;
     }
@@ -1711,7 +1743,7 @@ export function computeWindowTitle(fileName: string): string {
         title = title.replace(/\//g, path.sep).replace(/\\/g, path.sep);
     }
     if (branch) {
-        title = branch + ": " + title;
+        title = branch + ': ' + title;
     }
     return title;
 }
@@ -1719,8 +1751,9 @@ export function computeWindowTitle(fileName: string): string {
 /**
  * Read the file into a hidden commander (Similar to g.openWithFileName).
  */
-export async function createHiddenCommander(fn: string): Promise<Commands | undefined> {
-
+export async function createHiddenCommander(
+    fn: string
+): Promise<Commands | undefined> {
     const c = new Commands(fn, app.nullGui);
     // const theFile = app.loadManager.openAnyLeoFile(fn); // LEOJS : UNUSED
     // if (theFile){
@@ -1736,7 +1769,6 @@ export async function createHiddenCommander(fn: string): Promise<Commands | unde
         es_exception(e);
     }
     return undefined;
-
 }
 //@+node:felix.20220108215158.1: *3* g.defaultLeoFileExtension
 export function defaultLeoFileExtension(c?: Commands): string {
@@ -1745,7 +1777,6 @@ export function defaultLeoFileExtension(c?: Commands): string {
 }
 //@+node:felix.20220108220012.1: *3* g.ensure_extension
 export function ensure_extension(name: string, ext: string): string {
-
     let theFile: string;
     let old_ext: string;
 
@@ -1763,7 +1794,11 @@ export function ensure_extension(name: string, ext: string): string {
     return name + ext;
 }
 //@+node:felix.20230430163312.1: *3* g.filecmp_cmp
-export async function filecmp_cmp(path1: string, path2: string, shallow = true): Promise<boolean> {
+export async function filecmp_cmp(
+    path1: string,
+    path2: string,
+    shallow = true
+): Promise<boolean> {
     let w_same = false;
     let w_uri: vscode.Uri;
     w_uri = makeVscodeUri(path1); // first uri, no matter if shallow or not.
@@ -1788,7 +1823,11 @@ export async function filecmp_cmp(path1: string, path2: string, shallow = true):
  *
  * This function is deprecated. Use c.fullPath(p) instead.
  */
-export function fullPath(c: Commands, p: Position, simulate: boolean = false): string {
+export function fullPath(
+    c: Commands,
+    p: Position,
+    simulate: boolean = false
+): string {
     return c.fullPath(p, simulate);
     // Search p and p's parents.
     // for (let p of p_p.self_and_parents(false)) {
@@ -1819,7 +1858,10 @@ export function fullPath(c: Commands, p: Position, simulate: boolean = false): s
  * Read logic:  s is not None.
  * Write logic: s is None.
  */
-export function getEncodingAt(p: Position, b?: Uint8Array): BufferEncoding | undefined {
+export function getEncodingAt(
+    p: Position,
+    b?: Uint8Array
+): BufferEncoding | undefined {
     let e: BufferEncoding | undefined;
     let junk_s;
     // A BOM overrides everything.
@@ -1832,10 +1874,9 @@ export function getEncodingAt(p: Position, b?: Uint8Array): BufferEncoding | und
     const aList = get_directives_dict_list(p);
     e = scanAtEncodingDirectives(aList);
     if (b && Buffer.from(b).toString().trim() && !e) {
-        e = 'utf-8' as BufferEncoding;;
+        e = 'utf-8' as BufferEncoding;
     }
     return e;
-
 }
 //@+node:felix.20230518225302.1: *3* g.is_binary_file/external_file/string
 // export function is_binary_file(f: any): boolean {
@@ -1843,8 +1884,9 @@ export function getEncodingAt(p: Position, b?: Uint8Array): BufferEncoding | und
 //     return f and isinstance(f, io.BufferedIOBase)
 
 // }
-export async function is_binary_external_file(fileName: string): Promise<boolean> {
-
+export async function is_binary_external_file(
+    fileName: string
+): Promise<boolean> {
     try {
         // with open(fileName, 'rb') as f:
         //     s = f.read(1024)  // bytes, in Python 3.
@@ -1861,7 +1903,6 @@ export async function is_binary_external_file(fileName: string): Promise<boolean
     }
 }
 export function is_binary_string(s: string): boolean {
-
     // http://stackoverflow.com/questions/898669
     // aList is a list of all non-binary characters.
     // aList = [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))
@@ -1871,7 +1912,6 @@ export function is_binary_string(s: string): boolean {
     const nonPrintableCharactersRegex = /[^\x09\x0A\x0D\x20-\x7E]/;
 
     return s.includes(nullCharacter) || nonPrintableCharactersRegex.test(s);
-
 }
 //@+node:felix.20221219233638.1: *3* g.is_sentinel
 /**
@@ -1879,8 +1919,10 @@ export function is_binary_string(s: string): boolean {
  *
  * Leo 6.7.2: Support blackened sentinels.
  */
-export function is_sentinel(line: string, delims: [string | undefined, string | undefined, string | undefined]): boolean {
-
+export function is_sentinel(
+    line: string,
+    delims: [string | undefined, string | undefined, string | undefined]
+): boolean {
     let delim1, delim2, delim3, sentinel1, sentinel2;
     [delim1, delim2, delim3] = delims;
     // Defensive code. Make *sure* delim has no trailing space.
@@ -1918,12 +1960,16 @@ export function is_sentinel(line: string, delims: [string | undefined, string | 
  *
  * Return True if the directory exists or was created successfully.
  */
-export async function makeAllNonExistentDirectories(theDir: string): Promise<string | undefined> {
-
+export async function makeAllNonExistentDirectories(
+    theDir: string
+): Promise<string | undefined> {
     // Return True if the directory already exists.
     theDir = os_path_normpath(theDir);
 
-    let [w_exists, w_isDir] = await Promise.all([os_path_exists(theDir), os_path_isdir(theDir)]);
+    let [w_exists, w_isDir] = await Promise.all([
+        os_path_exists(theDir),
+        os_path_isdir(theDir),
+    ]);
 
     if (w_exists && w_isDir) {
         return theDir;
@@ -1945,7 +1991,11 @@ export async function makeAllNonExistentDirectories(theDir: string): Promise<str
  *
  * Return the commander of the newly-opened outline.
  */
-export function openWithFileName(fileName: string, old_c: Commands | undefined, gui?: LeoGui): Promise<Commands | undefined> {
+export function openWithFileName(
+    fileName: string,
+    old_c: Commands | undefined,
+    gui?: LeoGui
+): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
@@ -1962,11 +2012,10 @@ export function openWithFileName(fileName: string, old_c: Commands | undefined, 
  */
 export async function readFileIntoString(
     fileName: string,
-    encoding: BufferEncoding = 'utf-8',  // BOM may override this.
-    kind: string | undefined = undefined,  // @file, @edit, ...
-    verbose: boolean = true,
+    encoding: BufferEncoding = 'utf-8', // BOM may override this.
+    kind: string | undefined = undefined, // @file, @edit, ...
+    verbose: boolean = true
 ): Promise<[string | undefined, BufferEncoding | undefined]> {
-
     if (!fileName) {
         if (verbose) {
             trace('no fileName arg given');
@@ -1982,7 +2031,7 @@ export async function readFileIntoString(
         return [undefined, undefined];
     }
 
-    if (! await os_path_exists(fileName)) {
+    if (!(await os_path_exists(fileName))) {
         if (verbose) {
             error('file not found:', fileName);
         }
@@ -2010,11 +2059,10 @@ export async function readFileIntoString(
         s = toUnicode(readData, e || encoding);
         // const s = Buffer.from(readData).toString('utf-8');
         return [s, e];
-    }
-    catch (iOError) {
+    } catch (iOError) {
         // Translate 'can not open' and kind, but not fileName.
         if (verbose) {
-            error('can not open', '', (kind || ''), fileName);
+            error('can not open', '', kind || '', fileName);
         }
     }
 
@@ -2025,7 +2073,6 @@ export async function readFileIntoString(
     // }
 
     return [undefined, undefined];
-
 }
 
 //@+node:felix.20230423233617.1: *3* g.readFileToUnicodeString
@@ -2035,7 +2082,7 @@ export async function readFileIntoString(
 export async function readFileIntoUnicodeString(
     fn: string,
     encoding?: BufferEncoding,
-    silent?: boolean,
+    silent?: boolean
 ): Promise<string | undefined> {
     try {
         const w_uri = makeVscodeUri(fn);
@@ -2059,7 +2106,10 @@ export async function readFileIntoUnicodeString(
 // same.
 //@@c
 
-export function readlineForceUnixNewline(f: string[], fileName?: string): string {
+export function readlineForceUnixNewline(
+    f: string[],
+    fileName?: string
+): string {
     // Addapted for leojs : receives array of string with their newline endings intact
     let s = f.shift();
     if (s == null) {
@@ -2070,12 +2120,11 @@ export function readlineForceUnixNewline(f: string[], fileName?: string): string
     //   } catch (err) {
     //     console.log(`UnicodeDecodeError: ${fileName}`, f, err);
     //   }
-    if (s.length >= 2 && s.slice(-2) === "\r\n") {
-        s = s.slice(0, -2) + "\n";
+    if (s.length >= 2 && s.slice(-2) === '\r\n') {
+        s = s.slice(0, -2) + '\n';
     }
 
     return s;
-
 }
 //@+node:felix.20230711202208.1: *3* g.os_remove
 export async function os_remove(fileName: string): Promise<void> {
@@ -2098,7 +2147,9 @@ export function sanitize_filename(s: string): string {
     let ch: string;
     for (let i = 0; i < s.length; i++) {
         ch = s[i];
-        if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.includes(ch)) {
+        if (
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.includes(ch)
+        ) {
             result.push(ch);
         } else if (ch === '\t') {
             result.push(' ');
@@ -2134,7 +2185,6 @@ export function setGlobalOpenDir(fileName: string): void {
 export function shortFileName(fileName?: string): string {
     //  return os.path.basename(fileName) if fileName else ''
     return fileName ? path.basename(fileName) : '';
-
 }
 
 export const shortFilename = shortFileName;
@@ -2144,7 +2194,6 @@ export const shortFilename = shortFileName;
  * Return fn, split into lines at slash characters.
  */
 export function splitLongFileName(fn: string, limit: number = 40): string {
-
     const aList = fn.split('\\').join('/').split('/');
 
     let n = 0;
@@ -2155,7 +2204,7 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
     for (let s of aList) {
         n += s.length;
         result.push(s);
-        if ((i + 1) < aList.length) {
+        if (i + 1 < aList.length) {
             result.push('/');
             n += 1;
         }
@@ -2171,8 +2220,11 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
 /**
  * Create a file with the given contents.
  */
-export async function writeFile(contents: Uint8Array | string, encoding: BufferEncoding, fileName: string): Promise<boolean> {
-
+export async function writeFile(
+    contents: Uint8Array | string,
+    encoding: BufferEncoding,
+    fileName: string
+): Promise<boolean> {
     try {
         if (typeof contents === 'string') {
             contents = toEncodedString(contents, encoding);
@@ -2199,7 +2251,11 @@ export async function writeFile(contents: Uint8Array | string, encoding: BufferE
  * context has changed (or the file does not exist).
  * & Return true if the file was written.
  */
-export async function write_file_if_changed(fn: string, s: string, encoding: BufferEncoding = 'utf-8'): Promise<boolean> {
+export async function write_file_if_changed(
+    fn: string,
+    s: string,
+    encoding: BufferEncoding = 'utf-8'
+): Promise<boolean> {
     try {
         const encoded_s = toEncodedString(s, encoding, true);
         if (await os_path_exists(fn)) {
@@ -2216,7 +2272,6 @@ export async function write_file_if_changed(fn: string, s: string, encoding: Buf
         const w_uri = makeVscodeUri(fn);
         await vscode.workspace.fs.writeFile(w_uri, encoded_s);
         return true;
-
     } catch (exception) {
         es_print(`Exception writing ${fn}`);
         es_exception();
@@ -2233,21 +2288,18 @@ export async function write_file_if_changed(fn: string, s: string, encoding: Buf
  * @returns An URI for file access compatible with web extensions filesystems
  */
 export function makeVscodeUri(p_fn: string): vscode.Uri {
-
     if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
         try {
             const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
             return newUri;
-        }
-        catch (e) {
+        } catch (e) {
             console.log(
                 "ERROR: tried to build a vscode.URI from a browser scheme's URI 'with' method"
             );
             throw new Error(
-                "g.makeVscodeUri cannot make an URI with the string: " + p_fn
+                'g.makeVscodeUri cannot make an URI with the string: ' + p_fn
             );
         }
-
     } else {
         // Normal file in desktop app
         return vscode.Uri.file(p_fn);
@@ -2263,7 +2315,6 @@ export function makeVscodeUri(p_fn: string): vscode.Uri {
  * g.find_word ensures that only word-matches are reported.
  */
 export function find_word(s: string, word: string, i: number = 0): number {
-
     let progress: number;
     while (i < s.length) {
         progress = i;
@@ -2284,7 +2335,6 @@ export function find_word(s: string, word: string, i: number = 0): number {
         }
         i += word.length;
         console.assert(progress < i);
-
     }
 
     return -1;
@@ -2298,18 +2348,21 @@ export function find_word(s: string, word: string, i: number = 0): number {
  * pylint, pyflakes and the rst3 commands, returning a list of zero
  * or more found roots.
  */
-export function findRootsWithPredicate(c: Commands, root: Position, predicate?: (p: Position) => boolean): Position[] {
-
+export function findRootsWithPredicate(
+    c: Commands,
+    root: Position,
+    predicate?: (p: Position) => boolean
+): Position[] {
     const seen: VNode[] = [];
     const roots = [];
     if (predicate == null) {
-
         // A useful default predicate for python.
         // pylint: disable=function-redefined
 
         predicate = (p: Position): boolean => {
             const headline = p.h.trim();
-            const is_python = headline.endsWith('py') || headline.endsWith('pyw');
+            const is_python =
+                headline.endsWith('py') || headline.endsWith('pyw');
             return p.isAnyAtFileNode() && is_python;
         };
     }
@@ -2351,14 +2404,12 @@ export function findRootsWithPredicate(c: Commands, root: Position, predicate?: 
         }
     }
     return [];
-
 }
 //@+node:felix.20221025000455.1: *3* g.see_more_lines
 /**
  * Extend index i within string s to include n more lines.
  */
 export function see_more_lines(s: string, ins: number, n = 4): number {
-
     // Show more lines, if they exist.
     if (n > 0) {
         for (let z = 0; z < n; z++) {
@@ -2373,7 +2424,6 @@ export function see_more_lines(s: string, ins: number, n = 4): number {
     }
 
     return Math.max(0, Math.min(ins, s.length));
-
 }
 //@+node:felix.20211104230121.1: *3* g.splitLines
 /**
@@ -2393,11 +2443,11 @@ export function splitLines(s?: string): string[] {
 //@+node:felix.20220410214855.1: *3* Scanners: no error messages
 //@+node:felix.20211104213154.1: *4* g.find_line_start
 /**
-  * Return the index in s of the start of the line containing s[i].
+ * Return the index in s of the start of the line containing s[i].
  */
 export function find_line_start(s: string, p_i: number): number {
     if (p_i < 0) {
-        return 0;  // New in Leo 4.4.5: add this defensive code.
+        return 0; // New in Leo 4.4.5: add this defensive code.
     }
 
     // bug fix: 11/2/02: change i to i+1 in rfind
@@ -2422,7 +2472,6 @@ export function find_on_line(s: string, i: number, pattern: string): number {
         return k;
     }
     return -1;
-
 }
 //@+node:felix.20230519000231.1: *4* g.is_c_id
 export function is_c_id(ch: string): boolean {
@@ -2435,8 +2484,10 @@ export function is_c_id(ch: string): boolean {
 export function is_special(s: string, directive: string): [boolean, number] {
     console.assert(directive && directive.substring(0, 1) === '@');
     // Most directives must start the line.
-    const lws: boolean = ["@others", "@all"].includes(directive);
-    const pattern = lws ? new RegExp("^\\s*(" + directive + "\\b)", 'm') : new RegExp("^(" + directive + "\\b)", 'm');
+    const lws: boolean = ['@others', '@all'].includes(directive);
+    const pattern = lws
+        ? new RegExp('^\\s*(' + directive + '\\b)', 'm')
+        : new RegExp('^(' + directive + '\\b)', 'm');
 
     const m = pattern.exec(s);
 
@@ -2449,7 +2500,7 @@ export function is_special(s: string, directive: string): [boolean, number] {
 
 //@+node:felix.20211104220753.1: *4* g.is_nl
 export function is_nl(s: string, i: number): boolean {
-    return (i < s.length) && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
+    return i < s.length && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
 }
 
 //@+node:felix.20220411230914.1: *4* g.isAlpha
@@ -2465,18 +2516,21 @@ export function isAlNum(str: string): boolean {
 
     for (i = 0, len = str.length; i < len; i++) {
         code = str.charCodeAt(i);
-        if (!(code > 47 && code < 58) && // numeric (0-9)
+        if (
+            !(code > 47 && code < 58) && // numeric (0-9)
             !(code > 64 && code < 91) && // upper alpha (A-Z)
-            !(code > 96 && code < 123)) { // lower alpha (a-z)
+            !(code > 96 && code < 123)
+        ) {
+            // lower alpha (a-z)
             return false;
         }
     }
     return true;
-};
+}
 //@+node:felix.20211104220826.1: *4* g.isDigit
 export function isDigit(s: string): boolean {
-    return (s >= '0' && s <= '9');
-};
+    return s >= '0' && s <= '9';
+}
 //@+node:felix.20220110223811.1: *4* g.is_ws & is_ws_or_nl
 export function is_ws(ch: string): boolean {
     return ch === '\t' || ch === ' ';
@@ -2491,7 +2545,11 @@ export function match(s: string, i: number, pattern: string): boolean {
     // return s and pattern and s.find(pattern, i, i + len(pattern)) == i
     // didn't work with xml expression
     // return !!s && !!pattern && s.substring(i, i + pattern.length + 1).search(pattern) === 0;
-    return !!s && !!pattern && s.substring(i, i + pattern.length + 1).startsWith(pattern);
+    return (
+        !!s &&
+        !!pattern &&
+        s.substring(i, i + pattern.length + 1).startsWith(pattern)
+    );
 }
 
 //@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
@@ -2500,7 +2558,8 @@ export function match_word(s: string, i: number, pattern: string): boolean {
     if (!pattern) {
         return false;
     }
-    if (i > 0 && isWordChar(s.charAt(i - 1))) {   //  Bug fix: 2017/06/01.
+    if (i > 0 && isWordChar(s.charAt(i - 1))) {
+        //  Bug fix: 2017/06/01.
         return false;
     }
     const j = pattern.length;
@@ -2566,7 +2625,10 @@ export function skip_c_id(s: string, i: number): number {
 export function skip_id(s: string, i: number, chars?: string): number {
     chars = chars ? chars.toString() : '';
     const n = s.length;
-    while (i < n && (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) >= 0)) {
+    while (
+        i < n &&
+        (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) >= 0)
+    ) {
         i += 1;
     }
     return i;
@@ -2636,17 +2698,18 @@ export function skip_long(s: string, i: number): [number, number | undefined] {
         return [i, undefined];
     }
     let j: number = i;
-    if ('+-'.includes(s.charAt(i))) {  // Allow sign before the first digit
+    if ('+-'.includes(s.charAt(i))) {
+        // Allow sign before the first digit
         i += 1;
     }
     while (i < n && isDigit(s.charAt(i))) {
         i += 1;
     }
-    try { // There may be no digits.
+    try {
+        // There may be no digits.
         val = Number(s.slice(j, i));
         return [i, val];
-    }
-    catch (err: any) {
+    } catch (err: any) {
         return [i, undefined];
     }
 }
@@ -2656,7 +2719,7 @@ export function skip_long(s: string, i: number): [number, number | undefined] {
  * Skips a single "logical" end-of-line character.
  */
 export function skip_nl(s: string, i: number): number {
-    if (match(s, i, "\r\n")) {
+    if (match(s, i, '\r\n')) {
         return i + 2;
     }
     if (match(s, i, '\n') || match(s, i, '\r')) {
@@ -2683,11 +2746,10 @@ export function skip_python_string(s: string, i: number): number {
  * Scan forward to the end of a string.
  */
 export function skip_string(s: string, i: number): number {
-
     const delim = s[i];
     i += 1;
 
-    console.assert('\'"'.includes(delim), delim.toString() + " " + s);
+    console.assert('\'"'.includes(delim), delim.toString() + ' ' + s);
     let n = s.length;
 
     while (i < n && s[i] !== delim) {
@@ -2708,7 +2770,11 @@ export function skip_string(s: string, i: number): number {
 /**
  * Returns object instead of original python tuple
  */
-export function skip_to_char(s: string, i: number, ch: string): [number, string] {
+export function skip_to_char(
+    s: string,
+    i: number,
+    ch: string
+): [number, string] {
     const j: number = s.indexOf(ch, i);
     if (j === -1) {
         // return {
@@ -2726,7 +2792,7 @@ export function skip_to_char(s: string, i: number, ch: string): [number, string]
 //@+node:felix.20211104220639.1: *4* g.skip_ws, skip_ws_and_nl
 export function skip_ws(s: string, i: number): number {
     const n: number = s.length;
-    while (i < n && ('\t '.indexOf(s.charAt(i)) >= 0)) {
+    while (i < n && '\t '.indexOf(s.charAt(i)) >= 0) {
         i += 1;
     }
     return i;
@@ -2734,7 +2800,7 @@ export function skip_ws(s: string, i: number): number {
 
 export function skip_ws_and_nl(s: string, i: number): number {
     const n: number = s.length;
-    while (i < n && (' \t\n\r'.indexOf(s.charAt(i)))) {
+    while (i < n && ' \t\n\r'.indexOf(s.charAt(i))) {
         i += 1;
     }
     return i;
@@ -2745,7 +2811,6 @@ export function skip_ws_and_nl(s: string, i: number): number {
  * Return the git (branch, commit) info associated for the given file.
  */
 export function gitInfoForFile(filename: string): [string, string] {
-
     console.log('TODO : gitInfoForFile');
 
     return ['', '']; // TODO !
@@ -2757,15 +2822,16 @@ export function gitInfoForFile(filename: string): [string, string] {
 /**
  * Compute the path to .git/HEAD given the path.
  */
-export async function gitHeadPath(path_s: string): Promise<string|undefined> {
+export async function gitHeadPath(path_s: string): Promise<string | undefined> {
     // const w_path = path(path_s);
     // #1780: Look up the directory tree, looking the .git directory.
-    while (await os_path_exists(path_s)){
-        const head = path.join(path_s, '.git', 'HEAD')
-        if( await os_path_exists(head)){
+    while (await os_path_exists(path_s)) {
+        const head = path.join(path_s, '.git', 'HEAD');
+        if (await os_path_exists(head)) {
             return head;
         }
-        if (path_s === path.dirname(path_s)){ // path.parent()
+        if (path_s === path.dirname(path_s)) {
+            // path.parent()
             break;
         }
         path_s = path.dirname(path_s);
@@ -2776,9 +2842,11 @@ export async function gitHeadPath(path_s: string): Promise<string|undefined> {
 /**
  * Execute the given git command in the given directory.
  */
-export function execGitCommand(command: string, directory: string): Promise<string[]> {
-    
-    console.log("TODO : execGitCommand");
+export function execGitCommand(
+    command: string,
+    directory: string
+): Promise<string[]> {
+    console.log('TODO : execGitCommand');
     return Promise.resolve([]);
 
     /*
@@ -2808,7 +2876,6 @@ export function execGitCommand(command: string, directory: string): Promise<stri
 
     return lines;
     */
-    
 }
 //@+node:felix.20211106230549.1: ** g.Hooks & Plugins
 //@+node:felix.20211106230549.2: *3* g.act_on_node
@@ -2852,24 +2919,24 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
     */
     if (!app.enablePlugins) {
         if (['open0', 'start1'].includes(tag)) {
-            console.log("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
+            console.log(
+                'Plugins disabled: use_plugins is 0 in a leoSettings.leo file.'
+            );
             // warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
         }
         return undefined;
     }
     // Get the hook handler function.  Usually this is doPlugins.
-    const c: Commands = keywords ? keywords["c"] : undefined;
+    const c: Commands = keywords ? keywords['c'] : undefined;
     // pylint: disable=consider-using-ternary
     let f = (c && c.hookFunction) || app.hookFunction;
     if (!f) {
-
         if (!!app.pluginsController) {
             app.hookFunction = app.pluginsController?.doPlugins;
             if (app.hookFunction) {
                 f = app.hookFunction;
             }
         }
-
     }
     if (!f) {
         // console.log('TODO: (Plugin system) g.doHook for tag: ', tag);
@@ -2879,10 +2946,9 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
         // Pass the hook to the hook handler.
         // pr('doHook',f.__name__,keywords.get('c'))
         return f(tag, keywords);
-    }
-    catch (exception) {
+    } catch (exception) {
         es_exception();
-        app.hookError = true;  // Suppress this function.
+        app.hookError = true; // Suppress this function.
         app.idle_time_hooks_enabled = false;
         return undefined;
     }
@@ -3042,8 +3108,10 @@ export function idleTimeHookHandler(timer: any): void {
 /**
  * Convert index i into string s into zero-based row/col indices.
  */
-export function convertPythonIndexToRowCol(s: string, i: number): [number, number] {
-
+export function convertPythonIndexToRowCol(
+    s: string,
+    i: number
+): [number, number] {
     if (!s || i <= 0) {
         return [0, 0];
     }
@@ -3052,7 +3120,7 @@ export function convertPythonIndexToRowCol(s: string, i: number): [number, numbe
 
     // works regardless of what s[i] is
     let row = 0;
-    for (let j = 0; (j < s.length && j < i); j++) {
+    for (let j = 0; j < s.length && j < i; j++) {
         if (s[j] === '\n') {
             row++;
         }
@@ -3064,15 +3132,20 @@ export function convertPythonIndexToRowCol(s: string, i: number): [number, numbe
     }
 
     s = s.substring(0, i);
-    const prevNL = s.lastIndexOf('\n') + 1;  // Don't include i
+    const prevNL = s.lastIndexOf('\n') + 1; // Don't include i
 
-    return [row, i - (prevNL)];
+    return [row, i - prevNL];
 }
 //@+node:felix.20220410005950.3: *4* g.convertRowColToPythonIndex
 /**
  * Convert zero-based row/col indices into a python index into string s.
  */
-export function convertRowColToPythonIndex(s: string, row: number, col: number, lines?: string[]): number {
+export function convertRowColToPythonIndex(
+    s: string,
+    row: number,
+    col: number,
+    lines?: string[]
+): number {
     if (row < 0) {
         return 0;
     }
@@ -3086,7 +3159,7 @@ export function convertRowColToPythonIndex(s: string, row: number, col: number, 
     // A big bottleneck
     let prev = 0;
     for (let line of lines.slice(0, row)) {
-        prev += (line.length);
+        prev += line.length;
     }
     return prev + col;
 }
@@ -3095,7 +3168,6 @@ export function convertRowColToPythonIndex(s: string, row: number, col: number, 
  *
  */
 export function getWord(s: string, i: number): [number, number] {
-
     if (i >= s.length) {
         i = s.length - 1;
     }
@@ -3121,7 +3193,6 @@ export function getWord(s: string, i: number): [number, number] {
  * s[j] is a newline unless there is no trailing newline.
  */
 export function getLine(s: string, i: number): [number, number] {
-
     if (i > s.length) {
         i = s.length - 1;
     }
@@ -3153,7 +3224,6 @@ export function getLine(s: string, i: number): [number, number] {
  * index may be a Tk index(x.y) or 'end'.
  */
 export function toPythonIndex(s: string, index?: number | string): number {
-
     if (index === undefined) {
         return 0;
     }
@@ -3218,8 +3288,8 @@ virtual_event_name = angleBrackets
  * Return < < s > >
  */
 export function angleBrackets(s: string): string {
-    const lt = "<<";
-    const rt = ">>";
+    const lt = '<<';
+    const rt = '>>';
     return lt + s + rt;
 }
 export const virtual_event_name = angleBrackets;
@@ -3227,7 +3297,7 @@ export const virtual_event_name = angleBrackets;
 
 export function ensureLeadingNewlines(s: string, n: number): string {
     s = removeLeading(s, '\t\n\r ');
-    return ('\n'.repeat(n)) + s;
+    return '\n'.repeat(n) + s;
 }
 
 export function ensureTrailingNewlines(s: string, n: number): string {
@@ -3333,7 +3403,6 @@ export const checkUnicode_dict: { [key: string]: boolean } = {};
  * user-defined plugins or scripts.
  */
 export function checkUnicode(s: string, encoding?: string): string {
-
     const tag = 'g.checkUnicode';
 
     return s || '';
@@ -3377,15 +3446,15 @@ export function checkUnicode(s: string, encoding?: string): string {
 
     return s;
     */
-
 }
 //@+node:felix.20230420014718.1: *4* g.getPythonEncodingFromString
 /**
  * Return the encoding given by Python's encoding line.
  * s is the entire file.
  */
-export function getPythonEncodingFromString(readData?: Uint8Array | string): BufferEncoding | undefined {
-
+export function getPythonEncodingFromString(
+    readData?: Uint8Array | string
+): BufferEncoding | undefined {
     let encoding = undefined;
     let [tag, tag2] = ['# -*- coding:', '-*-'];
     let [n1, n2] = [tag.length, tag2.length];
@@ -3402,7 +3471,8 @@ export function getPythonEncodingFromString(readData?: Uint8Array | string): Buf
             if (e && isValidEncoding(e)) {
                 encoding = e;
             }
-        } else if (match_word(line1, 0, '@first')) {  // 2011/10/21.
+        } else if (match_word(line1, 0, '@first')) {
+            // 2011/10/21.
             line1 = line1.substring('@first'.length).trim();
             if (line1.startsWith(tag) && line1.endsWith(tag2)) {
                 e = line1.substring(n1, -n2).trim() as BufferEncoding;
@@ -3435,7 +3505,9 @@ export function isWordChar1(ch: string): boolean {
  *
  * s must be the contents of a file (a string) read in binary mode.
  */
-export function stripBOM(s_bytes: Uint8Array): [BufferEncoding | undefined, Uint8Array] {
+export function stripBOM(
+    s_bytes: Uint8Array
+): [BufferEncoding | undefined, Uint8Array] {
     const table: [number, BufferEncoding, Uint8Array][] = [
         // Important: test longer bom's first.
         // [4, 'utf-32', codecs.BOM_UTF32_BE],
@@ -3446,7 +3518,6 @@ export function stripBOM(s_bytes: Uint8Array): [BufferEncoding | undefined, Uint
         // [2, 'utf-16', codecs.BOM_UTF16_LE],
     ];
     if (s_bytes && s_bytes.length) {
-
         for (const [n, e, bom] of table) {
             console.assert(bom.length === n);
             const subarray = s_bytes.subarray(0, bom.length);
@@ -3461,7 +3532,11 @@ export function stripBOM(s_bytes: Uint8Array): [BufferEncoding | undefined, Uint
 /**
  * Convert bytes to unicode if necessary.
  */
-export function toUnicode(s: string | Uint8Array, encoding: BufferEncoding | null = null, reportErrors = false): string {
+export function toUnicode(
+    s: string | Uint8Array,
+    encoding: BufferEncoding | null = null,
+    reportErrors = false
+): string {
     // TODO : SEE g.toEncodedString.
 
     // ORIGINAL
@@ -3476,7 +3551,7 @@ export function toUnicode(s: string | Uint8Array, encoding: BufferEncoding | nul
         //     unicode_warnings[callers] = True
         //     g.error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
         //     g.trace(callers)
-        if (reportErrors && (s !== null && s !== undefined)) {
+        if (reportErrors && s !== null && s !== undefined) {
             error(`${tag}: unexpected argument of type ${typeof s}`);
         }
         return '';
@@ -3486,14 +3561,13 @@ export function toUnicode(s: string | Uint8Array, encoding: BufferEncoding | nul
     }
     try {
         s = Buffer.from(s).toString(encoding);
-    }
-    // except(UnicodeDecodeError, UnicodeError):  # noqa
-    //     # https://wiki.python.org/moin/UnicodeDecodeError
-    //     s = s.decode(encoding, 'replace')
-    //     if reportErrors:
-    //         g.error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
-    //         g.trace(g.callers())
-    catch (exception) {
+    } catch (exception) {
+        // except(UnicodeDecodeError, UnicodeError):  # noqa
+        //     # https://wiki.python.org/moin/UnicodeDecodeError
+        //     s = s.decode(encoding, 'replace')
+        //     if reportErrors:
+        //         g.error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
+        //         g.trace(g.callers())
         es_exception(exception);
         error(`${tag}: unexpected error! encoding: ${encoding}, s:\n${s}`);
         trace(callers());
@@ -3504,19 +3578,21 @@ export function toUnicode(s: string | Uint8Array, encoding: BufferEncoding | nul
 //@+node:felix.20220410213527.1: *3* g.Whitespace
 //@+node:felix.20220410213527.2: *4* g.computeLeadingWhitespace
 
-
 /**
  * Returns optimized whitespace corresponding to width with the indicated tab_width.
  */
-export function computeLeadingWhitespace(width: number, tab_width: number): string {
+export function computeLeadingWhitespace(
+    width: number,
+    tab_width: number
+): string {
     if (width <= 0) {
-        return "";
+        return '';
     }
     if (tab_width > 1) {
         const tabs = Math.floor(width / tab_width);
         const blanks = Math.floor(width % tab_width);
-        return ('\t'.repeat(tabs)) + (' '.repeat(blanks));
-    };
+        return '\t'.repeat(tabs) + ' '.repeat(blanks);
+    }
     // Negative tab width always gets converted to blanks.
     return ' '.repeat(width);
 }
@@ -3642,15 +3718,17 @@ def get_leading_ws(s: str) -> str:
 //@+node:felix.20220410213527.9: *4* g.optimizeLeadingWhitespace
 
 /**
- * 
+ *
  * Optimize leading whitespace in s with the given tab_width.
  */
-export function optimizeLeadingWhitespace(line: string, tab_width: number): string {
+export function optimizeLeadingWhitespace(
+    line: string,
+    tab_width: number
+): string {
     let i, width;
     [i, width] = skip_leading_ws_with_indent(line, 0, tab_width);
     const s = computeLeadingWhitespace(width, tab_width) + line.substring(i);
     return s;
-
 }
 //@+node:felix.20220410213527.10: *4* g.regularizeTrailingNewlines
 
@@ -3669,7 +3747,7 @@ def regularizeTrailingNewlines(s: str, kind: str) -> None:
 //@+node:felix.20220410213527.11: *4* g.removeBlankLines
 export function removeBlankLines(s: string): string {
     let lines = splitLines(s);
-    lines = lines.filter(z => !!z.trim()); // [z for z in lines if z.strip()]
+    lines = lines.filter((z) => !!z.trim()); // [z for z in lines if z.strip()]
     return lines.join('');
 }
 //@+node:felix.20220410213527.12: *4* g.removeLeadingBlankLines
@@ -3705,7 +3783,11 @@ def removeLeadingBlankLines(s: str) -> str:
 /**
  * Remove whitespace up to first_ws wide in s, given tab_width, the width of a tab.
  */
-export function removeLeadingWhitespace(s: string, first_ws: number, tab_width: number): string {
+export function removeLeadingWhitespace(
+    s: string,
+    first_ws: number,
+    tab_width: number
+): string {
     let j = 0;
     let ws = 0;
     first_ws = Math.abs(first_ws);
@@ -3717,7 +3799,7 @@ export function removeLeadingWhitespace(s: string, first_ws: number, tab_width: 
             ws += 1;
         } else if (ch === '\t') {
             j += 1;
-            ws += (Math.abs(tab_width) - (ws % Math.abs(tab_width)));
+            ws += Math.abs(tab_width) - (ws % Math.abs(tab_width));
         } else {
             break;
         }
@@ -3762,8 +3844,11 @@ def skip_leading_ws(s: str, i: int, ws: int, tab_width: int) -> int:
  * - i points after the whitespace
  * - indent is the width of the whitespace, assuming tab_width wide tabs.
  */
-export function skip_leading_ws_with_indent(s: string, i: number, tab_width: number): [number, number] {
-
+export function skip_leading_ws_with_indent(
+    s: string,
+    i: number,
+    tab_width: number
+): [number, number] {
     let count = 0;
     const n = s.length;
     while (i < n) {
@@ -3772,7 +3857,7 @@ export function skip_leading_ws_with_indent(s: string, i: number, tab_width: num
             count += 1;
             i += 1;
         } else if (ch === '\t') {
-            count += (Math.abs(tab_width) - (count % Math.abs(tab_width)));
+            count += Math.abs(tab_width) - (count % Math.abs(tab_width));
             i += 1;
         } else {
             break;
@@ -3825,7 +3910,11 @@ export function isValidEncoding(encoding: string): boolean {
 /**
  * Convert unicode string to an encoded string.
  */
-export function toEncodedString(s: any, encoding: BufferEncoding = 'utf-8', reportErrors = false): Uint8Array {
+export function toEncodedString(
+    s: any,
+    encoding: BufferEncoding = 'utf-8',
+    reportErrors = false
+): Uint8Array {
     return Buffer.from(s, encoding);
     // if ((typeof s) !== "string") {
     //     return s;
@@ -3858,7 +3947,10 @@ export function toEncodedString(s: any, encoding: BufferEncoding = 'utf-8', repo
  * Return a result dict that is a copy of the keys dict
  * with missing items replaced by defaults in d dict.
  */
-export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: any } = {}): { [key: string]: any } {
+export function doKeywordArgs(
+    keys: { [key: string]: any },
+    d: { [key: string]: any } = {}
+): { [key: string]: any } {
     if (d === null) {
         d = {}; // May be unnecessary
     }
@@ -3897,10 +3989,10 @@ export const warning = es_print;
 //@+node:felix.20211104212741.1: *3* g.es
 export function es(...args: any[]): void {
     if (app && app.gui) {
-        let s: string = "";
+        let s: string = '';
         args.forEach((p_entry) => {
             if (s) {
-                s += " ";
+                s += ' ';
             }
             if (typeof p_entry === 'string' || p_entry instanceof String) {
                 // it's a string
@@ -3927,14 +4019,13 @@ export function es_dump(s: string, n: number = 30, title?: string): void {
     let i = 0;
     while (i < s.length) {
         const s2 = s.slice(i, i + n);
-        const aList: string[] = [];//  ''.join([`${ord(ch)} ` for ch in s[i : i + n]]);
+        const aList: string[] = []; //  ''.join([`${ord(ch)} ` for ch in s[i : i + n]]);
         for (var j = 0; j < s2.length; j++) {
             aList.push(`${s2.charAt(j).charCodeAt(0)} `);
         }
         es_print('', aList.join(''));
         i += n;
     }
-
 }
 
 //@+node:felix.20220419221016.1: *3* g.es_error & es_print_error
@@ -3955,7 +4046,7 @@ export function es_exception(p_error?: any, c?: Commands): string {
     const getCircularReplacer = () => {
         const seen = new WeakSet();
         return (key: string, value: any) => {
-            if (typeof value === "object" && value !== null) {
+            if (typeof value === 'object' && value !== null) {
                 if (seen.has(value)) {
                     return;
                 }
@@ -4047,7 +4138,6 @@ export function print_exception(
     //     return fileName, n
     // except Exception:
     //     return "<no file>", 0
-
 }
 //@+node:felix.20211104230337.1: *3* g.trace
 /**
@@ -4058,7 +4148,11 @@ export const trace = console.log;
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
 //@+node:felix.20230529144955.1: *3* g.maketrans
-export function maketrans(from: string, to: string, deletechars?: string): Record<number, string | null> {
+export function maketrans(
+    from: string,
+    to: string,
+    deletechars?: string
+): Record<number, string | null> {
     const translationTable: Record<number, string | null> = {};
     const maxLength = Math.min(from.length, to.length);
 
@@ -4069,7 +4163,7 @@ export function maketrans(from: string, to: string, deletechars?: string): Recor
     if (deletechars) {
         for (let i = 0; i < deletechars.length; i++) {
             const charCode = deletechars.charCodeAt(i);
-            translationTable[charCode] = null;  // Mark for deletion
+            translationTable[charCode] = null; // Mark for deletion
         }
     }
 
@@ -4081,13 +4175,15 @@ export function maketrans(from: string, to: string, deletechars?: string): Recor
  * @param dict With only strings as keys! Dont use if already numeric keys!
  * @returns dict with charCode number as keys.
  */
-export function maketrans_from_dict(dict: Record<string, string | null>): Record<number, string | null> {
+export function maketrans_from_dict(
+    dict: Record<string, string | null>
+): Record<number, string | null> {
     const translationTable: Record<number, string | null> = {};
 
     for (const key in dict) {
         if (dict.hasOwnProperty(key)) {
             let charCode;
-            // ! IF ALREADY A NUMBER KEY : KEEP THIS KEY! 
+            // ! IF ALREADY A NUMBER KEY : KEEP THIS KEY!
             // (see https://www.programiz.com/python-programming/methods/string/maketrans
             //  and look for call with single parameter)
             if (typeof key === 'number') {
@@ -4103,8 +4199,11 @@ export function maketrans_from_dict(dict: Record<string, string | null>): Record
     return translationTable;
 }
 //@+node:felix.20230529144946.1: *3* g.translate
-export function translate(text: string, translationTable: Record<number, string | null>): string {
-    let translatedText = "";
+export function translate(
+    text: string,
+    translationTable: Record<number, string | null>
+): string {
+    let translatedText = '';
     for (let i = 0; i < text.length; i++) {
         const charCode = text.charCodeAt(i);
         const translation = translationTable[charCode];
@@ -4122,7 +4221,10 @@ export function compareArrays(arr1: any[], arr2: any[]): boolean {
     return arr1.every((value, index) => value === arr2[index]);
 }
 //@+node:felix.20230530135543.1: *3* g.comparePositionArray
-export function comparePositionArray(arr1: Position[], arr2: Position[]): boolean {
+export function comparePositionArray(
+    arr1: Position[],
+    arr2: Position[]
+): boolean {
     if (arr1.length !== arr2.length) {
         return false;
     }
@@ -4131,8 +4233,8 @@ export function comparePositionArray(arr1: Position[], arr2: Position[]): boolea
         if (val1 && val1.__bool__() && val2 && val2.__bool__()) {
             return val1.__eq__(val2);
         } else {
-            // some don't exist... are they the same in some way? 
-            // no 'v' to check so default to 'false'. 
+            // some don't exist... are they the same in some way?
+            // no 'v' to check so default to 'false'.
             return false;
         }
     });
@@ -4144,44 +4246,43 @@ export function comparePositionArray(arr1: Position[], arr2: Position[]): boolea
 export function process_time(): number {
     const w_now = process.hrtime();
     const [w_secs, w_nanosecs] = w_now;
-    return (w_secs * 1.0) + Math.floor(w_nanosecs / 1000);
+    return w_secs * 1.0 + Math.floor(w_nanosecs / 1000);
 }
 //@+node:felix.20220611031515.1: *3* g.convertPythonDayjs
 export function convertPythonDayjs(s: string): string {
-
     const table: [string, string][] = [
-        ["%a", "ddd"], // %a    Abbreviated weekday name.	Sun, Mon, ...
-        ["%A", "dddd"], // %A    Full weekday name.	Sunday, Monday, ...
-        ["%w", "d"], // %w    Weekday as a decimal number.	0, 1, ..., 6
-        ["%d", "DD"], // %d    Day of the month as a zero-padded decimal.	01, 02, ..., 31
-        ["%-d", "D"], // %-d  Day of the month as a decimal number.	1, 2, ..., 30
-        ["%b", "MMM"], // %b    Abbreviated month name.	Jan, Feb, ..., Dec
-        ["%B", "MMMM"], // %B    Full month name.	January, February, ...
-        ["%m", "MM"], // %m    Month as a zero-padded decimal number.	01, 02, ..., 12
-        ["%-m", "M"], // %-m  Month as a decimal number.	1, 2, ..., 12
-        ["%y", "YY"], // %y    Year without century as a zero-padded decimal number.	00, 01, ..., 99
-        ["%-y", ""], // %-y  Year without century as a decimal number.	0, 1, ..., 99
-        ["%Y", "YYYY"], // %Y    Year with century as a decimal number.	2013, 2019 etc.
-        ["%H", "HH"], // %H    Hour (24-hour clock) as a zero-padded decimal number.	00, 01, ..., 23
-        ["%-H", "H"], // %-H  Hour (24-hour clock) as a decimal number.	0, 1, ..., 23
-        ["%I", "hh"], // %I    Hour (12-hour clock) as a zero-padded decimal number.	01, 02, ..., 12
-        ["%-I", "h"], // %-I  Hour (12-hour clock) as a decimal number.	1, 2, ... 12
-        ["%p", "A"], // %p    Locale’s AM or PM.	AM, PM
-        ["%M", "mm"], // %M    Minute as a zero-padded decimal number.	00, 01, ..., 59
-        ["%-M", "m"], // %-M  Minute as a decimal number.	0, 1, ..., 59
-        ["%S", "ss"], // %S    Second as a zero-padded decimal number.	00, 01, ..., 59
-        ["%-S", "s"], // %-S  Second as a decimal number.	0, 1, ..., 59
-        ["%f", ""], // %f    Microsecond as a decimal number, zero-padded on the left.	000000 - 999999
-        ["%z", "ZZ"], // %z    UTC offset in the form +HHMM or -HHMM.
-        ["%Z", ""], // %Z    Time zone name.
-        ["%j", ""], // %j    Day of the year as a zero-padded decimal number.	001, 002, ..., 366
-        ["%-j", ""], // %-j  Day of the year as a decimal number.	1, 2, ..., 366
-        ["%U", ""], // %U    Week number of the year (Sunday as the first day of the week). All days in a new year preceding the first Sunday are considered to be in week 0.	00, 01, ..., 53
-        ["%W", ""], // %W    Week number of the year (Monday as the first day of the week). All days in a new year preceding the first Monday are considered to be in week 0.	00, 01, ..., 53
-        ["%c", "LLLL"], // %c    Locale’s appropriate date and time representation.	Mon Sep 30 07:06:05 2013
-        ["%x", "L"], // %x    Locale’s appropriate date representation.	09/30/13
-        ["%X", "LTS"], // %X    Locale’s appropriate time representation.	07:06:05
-        ["%%", "%"], // %%    A literal '%' character.
+        ['%a', 'ddd'], // %a    Abbreviated weekday name.	Sun, Mon, ...
+        ['%A', 'dddd'], // %A    Full weekday name.	Sunday, Monday, ...
+        ['%w', 'd'], // %w    Weekday as a decimal number.	0, 1, ..., 6
+        ['%d', 'DD'], // %d    Day of the month as a zero-padded decimal.	01, 02, ..., 31
+        ['%-d', 'D'], // %-d  Day of the month as a decimal number.	1, 2, ..., 30
+        ['%b', 'MMM'], // %b    Abbreviated month name.	Jan, Feb, ..., Dec
+        ['%B', 'MMMM'], // %B    Full month name.	January, February, ...
+        ['%m', 'MM'], // %m    Month as a zero-padded decimal number.	01, 02, ..., 12
+        ['%-m', 'M'], // %-m  Month as a decimal number.	1, 2, ..., 12
+        ['%y', 'YY'], // %y    Year without century as a zero-padded decimal number.	00, 01, ..., 99
+        ['%-y', ''], // %-y  Year without century as a decimal number.	0, 1, ..., 99
+        ['%Y', 'YYYY'], // %Y    Year with century as a decimal number.	2013, 2019 etc.
+        ['%H', 'HH'], // %H    Hour (24-hour clock) as a zero-padded decimal number.	00, 01, ..., 23
+        ['%-H', 'H'], // %-H  Hour (24-hour clock) as a decimal number.	0, 1, ..., 23
+        ['%I', 'hh'], // %I    Hour (12-hour clock) as a zero-padded decimal number.	01, 02, ..., 12
+        ['%-I', 'h'], // %-I  Hour (12-hour clock) as a decimal number.	1, 2, ... 12
+        ['%p', 'A'], // %p    Locale’s AM or PM.	AM, PM
+        ['%M', 'mm'], // %M    Minute as a zero-padded decimal number.	00, 01, ..., 59
+        ['%-M', 'm'], // %-M  Minute as a decimal number.	0, 1, ..., 59
+        ['%S', 'ss'], // %S    Second as a zero-padded decimal number.	00, 01, ..., 59
+        ['%-S', 's'], // %-S  Second as a decimal number.	0, 1, ..., 59
+        ['%f', ''], // %f    Microsecond as a decimal number, zero-padded on the left.	000000 - 999999
+        ['%z', 'ZZ'], // %z    UTC offset in the form +HHMM or -HHMM.
+        ['%Z', ''], // %Z    Time zone name.
+        ['%j', ''], // %j    Day of the year as a zero-padded decimal number.	001, 002, ..., 366
+        ['%-j', ''], // %-j  Day of the year as a decimal number.	1, 2, ..., 366
+        ['%U', ''], // %U    Week number of the year (Sunday as the first day of the week). All days in a new year preceding the first Sunday are considered to be in week 0.	00, 01, ..., 53
+        ['%W', ''], // %W    Week number of the year (Monday as the first day of the week). All days in a new year preceding the first Monday are considered to be in week 0.	00, 01, ..., 53
+        ['%c', 'LLLL'], // %c    Locale’s appropriate date and time representation.	Mon Sep 30 07:06:05 2013
+        ['%x', 'L'], // %x    Locale’s appropriate date representation.	09/30/13
+        ['%X', 'LTS'], // %X    Locale’s appropriate time representation.	07:06:05
+        ['%%', '%'], // %%    A literal '%' character.
     ];
 
     for (const pair of table) {
@@ -4242,7 +4343,7 @@ export function ltrim(str: string, ch: string): string {
     let i = 0;
     while (ch.includes(str.charAt(i)) && ++i && i < str.length) {
         // pass, the ++i expression is doing the job
-    };
+    }
     return str.substring(i, str.length);
 }
 //@+node:felix.20230212205315.1: *3* g.rtrim
@@ -4250,7 +4351,7 @@ export function rtrim(str: string, ch: string): string {
     let i = str.length;
     while (i-- && ch.includes(str.charAt(i))) {
         // pass, the i-- expression is doing the job
-    };
+    }
     return str.substring(0, i + 1);
 }
 //@+node:felix.20211104222646.1: *3* g.plural (coreGlobals.py)
@@ -4259,14 +4360,14 @@ export function rtrim(str: string, ch: string): string {
  */
 export function plural(obj: any): string {
     let n: number;
-    if (Array.isArray(obj) || ((typeof obj) === "string")) {
+    if (Array.isArray(obj) || typeof obj === 'string') {
         n = obj.length;
-    } else if ((typeof obj) === "object") {
+    } else if (typeof obj === 'object') {
         n = Object.keys(obj).length;
     } else {
         n = obj;
     }
-    return n === 1 ? '' : "s";
+    return n === 1 ? '' : 's';
 }
 
 //@+node:felix.20230501203659.1: *3* g.rjust
@@ -4283,7 +4384,6 @@ export function rjust(s: string, n: number, ch = ' '): string {
  * True if p's parents enable coloring in p.
  */
 export function useSyntaxColoring(p: Position): boolean {
-
     // Special cases for the selected node.
     let d = findColorDirectives(p);
     if (d.includes('killcolor')) {
@@ -4316,7 +4416,6 @@ export function useSyntaxColoring(p: Position): boolean {
  * Return an array with each color directive in p.b, without the leading '@'.
  */
 export function findColorDirectives(p: Position): string[] {
-
     const d = p.b.match(color_directives_pat) || [];
 
     return d.map((s: string) => {
@@ -4335,7 +4434,7 @@ export async function os_listdir(p_path: string): Promise<string[]> {
     try {
         const w_uri = makeVscodeUri(p_path);
         const w_dirInfo = await vscode.workspace.fs.readDirectory(w_uri);
-        result = w_dirInfo.map(p_dirInfo => p_dirInfo[0]);
+        result = w_dirInfo.map((p_dirInfo) => p_dirInfo[0]);
     } catch (e) {
         es(`Error listing directory ${p_path}`);
     }
@@ -4347,14 +4446,16 @@ export function setStatusLabel(s: string): Thenable<unknown> {
 }
 //@+node:felix.20230624200527.1: *3* g.warnNoOpenDirectory
 /**
- * Give warning when trying to refresh or write external files 
+ * Give warning when trying to refresh or write external files
  * and c.openDirectory is undefined.
  * Occurs when new & unsaved leo document, along with no vscode workspace opened
  */
-export function warnNoOpenDirectory(p_items?: string[]): Thenable<string | undefined> {
-
-    const w_message = "Directory for this outline is undefined\n" +
-        "Save it first, or open a VSCode workspace.";
+export function warnNoOpenDirectory(
+    p_items?: string[]
+): Thenable<string | undefined> {
+    const w_message =
+        'Directory for this outline is undefined\n' +
+        'Save it first, or open a VSCode workspace.';
 
     let q_warning: Thenable<string | undefined>;
 
@@ -4363,24 +4464,25 @@ export function warnNoOpenDirectory(p_items?: string[]): Thenable<string | undef
     } else {
         q_warning = vscode.window.showWarningMessage(
             w_message,
-            "Save",
-            "Open Folder"
+            'Save',
+            'Open Folder'
         );
     }
     return q_warning.then((p_result) => {
         // handle choices
-        if (p_result === "Save") {
-            void vscode.commands.executeCommand("leojs.saveLeoFile");
-        } else if (p_result === "Open Folder") {
+        if (p_result === 'Save') {
+            void vscode.commands.executeCommand('leojs.saveLeoFile');
+        } else if (p_result === 'Open Folder') {
             if (isBrowser) {
-                void vscode.commands.executeCommand("remoteHub.openRepository");
+                void vscode.commands.executeCommand('remoteHub.openRepository');
             } else {
-                void vscode.commands.executeCommand("workbench.action.files.openFolder");
+                void vscode.commands.executeCommand(
+                    'workbench.action.files.openFolder'
+                );
             }
         }
         return p_result;
     });
-
 }
 //@+node:felix.20230426001612.1: *3* g.zip
 export function zip<T>(...arrays: T[][]): T[][] {
@@ -4392,7 +4494,7 @@ export function zip<T>(...arrays: T[][]): T[][] {
 // convert to an encoded string as needed, say when opening a file.
 //@+node:felix.20230422214424.1: *3* g.finalize
 /**
- * 
+ *
  * Finalize the path. Do not call os.path.realpath.
  *
  * - Call os.path.expanduser and os.path.expandvars.
@@ -4400,7 +4502,6 @@ export function zip<T>(...arrays: T[][]): T[][] {
  * - On Windows, convert backslashes to forward slashes.
  */
 export function finalize(p_path: string): string {
-
     if (!p_path) {
         return '';
     }
@@ -4420,10 +4521,9 @@ export function finalize(p_path: string): string {
     // Convert backslashes to forward slashes, regradless of platform.
     p_path = os_path_normslashes(p_path);
     return p_path;
-
 }
 
-export const os_path_finalize = finalize;  // Compatibility.
+export const os_path_finalize = finalize; // Compatibility.
 
 //@+node:felix.20230422214428.1: *3* g.finalize_join
 /**
@@ -4436,7 +4536,6 @@ export const os_path_finalize = finalize;  // Compatibility.
  * - On Windows, convert backslashes to forward slashes.
  */
 export function finalize_join(...args: string[]): string {
-
     if (!args || !args.length) {
         return '';
     }
@@ -4469,7 +4568,7 @@ export function finalize_join(...args: string[]): string {
     return w_path;
 }
 
-export const os_path_finalize_join = finalize_join;  // Compatibility.
+export const os_path_finalize_join = finalize_join; // Compatibility.
 //@+node:felix.20211227182611.2: *3* g.glob_glob
 // def glob_glob(pattern):
 //     """Return the regularized glob.glob(pattern)"""
@@ -4483,7 +4582,6 @@ export const os_path_finalize_join = finalize_join;  // Compatibility.
  * Convert a path to an absolute path.
  */
 export function os_path_abspath(p_path: string): string {
-
     if (!p_path) {
         return '';
     }
@@ -4500,7 +4598,6 @@ export function os_path_abspath(p_path: string): string {
         p_path = p_path.split('\\').join('/');
     }
     return p_path;
-
 }
 
 //@+node:felix.20211227182611.4: *3* g.os_path_basename
@@ -4508,7 +4605,7 @@ export function os_path_abspath(p_path: string): string {
  * Return the second half of the pair returned by split(path).
  */
 export function os_path_basename(p_path: string): string {
-    if (!p_path){
+    if (!p_path) {
         return '';
     }
     p_path = path.basename(p_path);
@@ -4520,7 +4617,6 @@ export function os_path_basename(p_path: string): string {
  * Return the first half of the pair returned by split(path).
  */
 export function os_path_dirname(p_path?: string): string {
-
     if (!p_path) {
         return '';
     }
@@ -4538,7 +4634,9 @@ export function os_path_dirname(p_path?: string): string {
 /**
  * Return Truish FileStat if path exists. False otherwise
  */
-export async function os_path_exists(p_path?: string): Promise<boolean | vscode.FileStat> {
+export async function os_path_exists(
+    p_path?: string
+): Promise<boolean | vscode.FileStat> {
     if (!p_path) {
         return false;
     }
@@ -4553,7 +4651,6 @@ export async function os_path_exists(p_path?: string): Promise<boolean | vscode.
     } catch {
         return false;
     }
-
 }
 //@+node:felix.20211227182611.7: *3* g.os_path_expanduser
 /**
@@ -4576,7 +4673,6 @@ export function os_path_expanduser(p_path: string): string {
                 p_path = p_path.replace('~', homeDir);
             }
             p_path = p_path.replace('\\\\', '\\');
-
         }
         p_path = p_path.replace('//', '/');
     }
@@ -4610,20 +4706,25 @@ export function os_path_expandvars(p_path: string): string {
         // Equivalent to python's p_path = os.path.expandvars(p_path)
         // which replaces both $MY_VAR and ${MY_VAR} forms.
 
-        p_path = p_path.replace(/\${([A-Za-z_][A-Za-z0-9_]*)}/g, (match, varName) => {
-            return process.env[varName] || '';
-        });
+        p_path = p_path.replace(
+            /\${([A-Za-z_][A-Za-z0-9_]*)}/g,
+            (match, varName) => {
+                return process.env[varName] || '';
+            }
+        );
 
-        p_path = p_path.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, varName) => {
-            return process.env[varName] || '';
-        });
+        p_path = p_path.replace(
+            /\$([A-Za-z_][A-Za-z0-9_]*)/g,
+            (match, varName) => {
+                return process.env[varName] || '';
+            }
+        );
     }
     return p_path;
-
 }
 //@+node:felix.20211227182611.10: *3* g.os_path_getmtime
 /**
- * Return the modification time of path. 
+ * Return the modification time of path.
  */
 export async function os_path_getmtime(p_path: string): Promise<number> {
     if (!p_path) {
@@ -4646,7 +4747,9 @@ export async function os_path_getsize(p_path: string): Promise<number> {
     if (p_path) {
         const w_uri = makeVscodeUri(p_path);
         try {
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
+            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+                w_uri
+            );
             // OK exists
             return fileStat.size;
         } catch {
@@ -4657,7 +4760,6 @@ export async function os_path_getsize(p_path: string): Promise<number> {
         return 0;
     }
 }
-
 
 //@+node:felix.20211227205142.1: *3* g.os_path_isabs
 /**
@@ -4678,7 +4780,9 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
     if (p_path) {
         try {
             const w_uri = makeVscodeUri(p_path);
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
+            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+                w_uri
+            );
             // OK exists
             return fileStat.type === vscode.FileType.Directory;
         } catch {
@@ -4698,7 +4802,9 @@ export async function os_path_isfile(p_path?: string): Promise<boolean> {
     if (p_path) {
         try {
             const w_uri = makeVscodeUri(p_path);
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
+            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+                w_uri
+            );
             // OK exists
             return fileStat.type === vscode.FileType.File;
         } catch {
@@ -4711,26 +4817,26 @@ export async function os_path_isfile(p_path?: string): Promise<boolean> {
 }
 //@+node:felix.20230608221301.1: *3* g.PYTHON_os_path_join
 /**
- * PYTHON'S OS PATH JOIN ! 
+ * PYTHON'S OS PATH JOIN !
  * os.path.join(path, *paths)
  *
  * Join one or more path segments intelligently. The return value is the concatenation
- * of path and all members of *paths, with exactly one directory separator following 
+ * of path and all members of *paths, with exactly one directory separator following
  * each non-empty part, except the last.
  *
  * That is, the result will only end in a separator
- * if the last part is either empty or ends in a separator. 
+ * if the last part is either empty or ends in a separator.
  *
  * If a segment is an absolute path (which on Windows requires both a drive and a root),
  * then all previous segments are ignored and joining continues from the absolute path segment.
  *
  * On Windows, the drive is not reset when a rooted path segment (e.g., r'\foo') is encountered.
  *
- * If a segment is on a different drive or is an absolute path, all previous segments 
- * are ignored and the drive is reset. 
+ * If a segment is on a different drive or is an absolute path, all previous segments
+ * are ignored and the drive is reset.
  *
- * Note that since there is a current directory for each drive, 
- * os.path.join("c:", "foo") represents a path relative to the current 
+ * Note that since there is a current directory for each drive,
+ * os.path.join("c:", "foo") represents a path relative to the current
  * directory on drive C: (c:foo), not c:\foo.
  */
 export function PYTHON_os_path_join(...args: any[]): string {
@@ -4800,9 +4906,7 @@ export function os_path_normpath(p_path: string): string {
     // }
     p_path = os_path_normslashes(p_path);
     return p_path;
-
 }
-
 
 //@+node:felix.20211227182611.18: *3* g.os_path_normslashes
 /**
@@ -4842,10 +4946,15 @@ export function os_path_realpath(p_path: string): string {
 }
 
 //@+node:felix.20230423204948.1: *3* g.os_path_samefile
-export async function os_path_samefile(fn1: string, fn2: string): Promise<boolean> {
-
+export async function os_path_samefile(
+    fn1: string,
+    fn2: string
+): Promise<boolean> {
     // 1- with string themselves
-    if (os_path_normpath(os_path_normcase(fn1)) === os_path_normpath(os_path_normcase(fn2))) {
+    if (
+        os_path_normpath(os_path_normcase(fn1)) ===
+        os_path_normpath(os_path_normcase(fn2))
+    ) {
         return true;
     }
 
@@ -4857,7 +4966,11 @@ export async function os_path_samefile(fn1: string, fn2: string): Promise<boolea
     //  path
     //  fsPath
     //  toString
-    if (w_uri1.path === w_uri2.path || w_uri1.fsPath === w_uri2.fsPath || w_uri1.toString() === w_uri2.path.toString()) {
+    if (
+        w_uri1.path === w_uri2.path ||
+        w_uri1.fsPath === w_uri2.fsPath ||
+        w_uri1.toString() === w_uri2.path.toString()
+    ) {
         return true;
     }
 
@@ -4878,9 +4991,8 @@ export async function os_path_samefile(fn1: string, fn2: string): Promise<boolea
                 return true;
             }
         }
-    }
-    catch (e) {
-        // A file didnt exist! 
+    } catch (e) {
+        // A file didnt exist!
         return false;
     }
 
@@ -4901,7 +5013,6 @@ export async function os_path_samefile(fn1: string, fn2: string): Promise<boolea
 }
 //@+node:felix.20211227182611.20: *3* g.os_path_split
 export function os_path_split(p_path: string): [string, string] {
-
     /*
      Mimics this behavior from
      https://docs.python.org/3/library/os.path.html#os.path.split
@@ -4941,17 +5052,14 @@ export function os_path_split(p_path: string): [string, string] {
 
         let w_parsed = path.parse(p_path);
         return [w_parsed.dir, w_parsed.base];
-
     } else {
         // no slashes
         return ['', p_path];
     }
-
 }
 //@+node:felix.20211227182611.21: *3* g.os_path_splitext
 
 export function os_path_splitext(p_path: string): [string, string] {
-
     /*
         reproduces os.path.splitext from:
         https://docs.python.org/3/library/os.path.html#os.path.splitext
@@ -4994,9 +5102,9 @@ export function os_path_splitext(p_path: string): [string, string] {
                 if (w_parsed.ext && !w_parsed.dir.endsWith('.')) {
                     return [
                         w_parsed.dir +
-                        (isWindows && p_path.includes("\\") ? "\\" : "/") +
-                        w_parsed.name,
-                        w_parsed.ext
+                            (isWindows && p_path.includes('\\') ? '\\' : '/') +
+                            w_parsed.name,
+                        w_parsed.ext,
                     ];
                 } else {
                     return [p_path, ''];
@@ -5008,7 +5116,6 @@ export function os_path_splitext(p_path: string): [string, string] {
         }
 
         return [head, '.' + tail];
-
     } else {
         // no extension
         return [p_path, ''];
@@ -5108,33 +5215,34 @@ export function os_path_splitext(p_path: string): [string, string] {
 /**
  * Creates a list describing a node and all its descendants
  */
-export function createTopologyList(c: Commands, root?: Position, useHeadlines?: boolean): any[] {
-
+export function createTopologyList(
+    c: Commands,
+    root?: Position,
+    useHeadlines?: boolean
+): any[] {
     if (!root) {
         root = c.rootPosition()!;
     }
     const v = root;
     let aList: any[];
     if (useHeadlines) {
-        aList = [[v.numberOfChildren(), v.headString()]];  // type ignore
+        aList = [[v.numberOfChildren(), v.headString()]]; // type ignore
     } else {
-        aList = [v.numberOfChildren()];  // type ignore
+        aList = [v.numberOfChildren()]; // type ignore
     }
     let child = v.firstChild();
     while (child && child.__bool__()) {
-        aList.push(createTopologyList(c, child, useHeadlines));  // type ignore
+        aList.push(createTopologyList(c, child, useHeadlines)); // type ignore
         child = child.next();
     }
 
     return aList;
-
 }
 //@+node:felix.20220411212559.3: *3* g.getDocString
 /**
  * Return the text of the first docstring found in s.
  */
 export function getDocString(s: string): string {
-
     const tags = ['"""', "'''"];
     let tag1;
     let tag2;
@@ -5162,14 +5270,12 @@ export function getDocString(s: string): string {
         return s.slice(i + 3, j);
     }
     return '';
-
 }
 //@+node:felix.20220411212559.4: *3* g.getDocStringForFunction
 /**
  * Return the docstring for a function that creates a Leo command.
  */
 export function getDocStringForFunction(func: any): string {
-
     const name = (func: any): string => {
         if (func['__name__']) {
             return func['__name__'];
@@ -5212,7 +5318,6 @@ export function getDocStringForFunction(func: any): string {
         s = func.docstring;
     }
     return s;
-
 }
 //@+node:felix.20220411212559.5: *3* g.python_tokenize (not used)
 /**
@@ -5221,7 +5326,6 @@ export function getDocStringForFunction(func: any): string {
  * where kind is in ('comment,'id','nl','other','string','ws').
  */
 export function python_tokenize(s: string): [string, string, number][] {
-
     const result: [string, string, number][] = [];
 
     let i = 0;
@@ -5251,12 +5355,11 @@ export function python_tokenize(s: string): [string, string, number][] {
         console.assert(progress < i && j === progress);
         let val = s.slice(j, i);
         console.assert(val);
-        line_number += (val.split("\n").length - 1); // val.count('\n');  // A comment.
+        line_number += val.split('\n').length - 1; // val.count('\n');  // A comment.
         result.push([kind, val, line_number]);
     }
 
     return result;
-
 }
 
 //@+node:felix.20211104211229.1: ** g.Scripting
@@ -5266,13 +5369,14 @@ export function python_tokenize(s: string): [string, string, number][] {
  * Return the expansion of all of node p's body text if
  * p is not the current node or if there is no text selection.
  */
-export async function getScript(c: Commands, p: Position,
+export async function getScript(
+    c: Commands,
+    p: Position,
     useSelectedText: boolean = true,
     forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true
 ): Promise<string> {
-
-    let script: string = "";
+    let script: string = '';
     let s: string;
     const w = c.frame.body.wrapper;
 
@@ -5292,18 +5396,18 @@ export async function getScript(c: Commands, p: Position,
         s = dedent(s);
         s = extractExecutableString(c, p, s);
         script = await composeScript(
-            c, p, s,
+            c,
+            p,
+            s,
             forceJavascriptSentinels, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
             useSentinels
         );
-    }
-    catch (exception) {
-        es_print("unexpected exception in g.getScript");
+    } catch (exception) {
+        es_print('unexpected exception in g.getScript');
         es_exception();
         script = '';
     }
     return script;
-
 }
 //@+node:felix.20221219205826.2: *4* g.composeScript
 /**
@@ -5316,7 +5420,6 @@ export async function composeScript(
     forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true
 ): Promise<string> {
-
     // This causes too many special cases.
     // if not g.unitTesting and forceEncoding:
     // aList = g.get_directives_dict_list(p)
@@ -5332,7 +5435,7 @@ export async function composeScript(
         // #1297: set inScript flags.
         inScript = true;
         app.inScript = true;
-        app.scriptDict["script1"] = s;
+        app.scriptDict['script1'] = s;
         // Important: converts unicode to utf-8 encoded strings.
         script = await at.stringToString(
             p.copy(),
@@ -5342,15 +5445,13 @@ export async function composeScript(
         );
         // Important, the script is an **encoded string**, not a unicode string.
         script = script.replace(/(?:\r\n)/g, '\n'); // Use brute force.
-        app.scriptDict["script2"] = script;
-    }
-    finally {
+        app.scriptDict['script2'] = script;
+    } finally {
         app.inScript = old_in_script;
         inScript = old_in_script;
     }
 
     return script;
-
 }
 
 //@+node:felix.20221219205826.3: *4* g.extractExecutableString
@@ -5359,11 +5460,14 @@ export async function composeScript(
  *
  * Ignore all lines under control of any other @language directive.
  */
-export function extractExecutableString(c: Commands, p: Position, s: string): string {
-
+export function extractExecutableString(
+    c: Commands,
+    p: Position,
+    s: string
+): string {
     // Rewritten to fix //1071.
     if (unitTesting) {
-        return s;  // Regretable, but necessary.
+        return s; // Regretable, but necessary.
     }
 
     // Return s if no @language in effect. Should never happen.
@@ -5374,7 +5478,7 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
 
     // Return s if @language is unambiguous.
     const pattern = /^@language\s+(\w+)/g;
-    const matches = ((s || '').match(pattern) || []); // list(re.finditer(pattern, s, re.MULTILINE))
+    const matches = (s || '').match(pattern) || []; // list(re.finditer(pattern, s, re.MULTILINE))
     if (matches.length < 2) {
         return s;
     }
@@ -5383,7 +5487,7 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
     let extracting = false;
     let result = [];
     for (let line of splitLines(s)) {
-        const m = pattern.exec(line);// re.match(pattern, line);
+        const m = pattern.exec(line); // re.match(pattern, line);
         if (m) {
             extracting = m[1] === language;
         } else if (extracting) {
@@ -5391,15 +5495,17 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
         }
     }
 
-    return result.join("");
-
+    return result.join('');
 }
 
 //@+node:felix.20220211012808.1: *3* g.find*Node*
 //@+others
 //@+node:felix.20220211012829.1: *4* g.findNodeAnywhere
-export function findNodeAnywhere(c: Commands, headline: string, exact: boolean = true): Position | undefined {
-
+export function findNodeAnywhere(
+    c: Commands,
+    headline: string,
+    exact: boolean = true
+): Position | undefined {
     const h = headline.trim();
 
     for (let p of c.all_unique_positions(false)) {
@@ -5417,14 +5523,17 @@ export function findNodeAnywhere(c: Commands, headline: string, exact: boolean =
     }
 
     return undefined;
-
 }
 //@+node:felix.20230427000458.1: *4* g.findNodeInTree
 /**
  * Search for a node in v's tree matching the given headline.
  */
-export function findNodeInTree(c: Commands, p: Position, headline: string, exact = true): Position | undefined {
-
+export function findNodeInTree(
+    c: Commands,
+    p: Position,
+    headline: string,
+    exact = true
+): Position | undefined {
     const h = headline.trim();
     const p1 = p.copy();
     for (const p of p1.subtree()) {
@@ -5441,7 +5550,6 @@ export function findNodeInTree(c: Commands, p: Position, headline: string, exact
     }
 
     return undefined;
-
 }
 //@-others
 //@+node:felix.20211104211349.1: ** g.Unit Tests

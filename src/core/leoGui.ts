@@ -24,9 +24,8 @@ import { StringTextWrapper } from './leoFrame';
  * Subclasses are expected to override all do-nothing methods of public class.
  */
 export class LeoGui {
-
-    public active: boolean;  //  Used only by qt_gui.
-    public consoleOnly: boolean;  //  True if g.es goes to console.
+    public active: boolean; //  Used only by qt_gui.
+    public consoleOnly: boolean; //  True if g.es goes to console.
     public globalFindTabManager: StringFindTabManager | undefined;
     public globalFindTab: any;
     public idleTimeClass: any; // IdleTime | undefined | g.NullObject;  //  Hard to annotate.
@@ -35,7 +34,7 @@ export class LeoGui {
     public leoIcon: any;
     public mGuiName: string;
     public mainLoop: any;
-    public plainTextWidget: any;  //  For SpellTabHandler class only.
+    public plainTextWidget: any; //  For SpellTabHandler class only.
     public root: Position | undefined;
     public script: string | undefined;
     public scriptFileName: string | undefined;
@@ -48,11 +47,11 @@ export class LeoGui {
     public utils: any;
     //  To keep pylint happy.
     public ScriptingControllerClass: any;
-    // 
+    //
     //  Define special keys that may be overridden is subclasses.
-    public ignoreChars: string[];  //  Keys that should always be ignored.
-    public FKeys: string[];  //  The representation of F-keys.
-    public specialChars: string[];  //  A list of characters/keys to be handle specially.
+    public ignoreChars: string[]; //  Keys that should always be ignored.
+    public FKeys: string[]; //  The representation of F-keys.
+    public specialChars: string[]; //  A list of characters/keys to be handle specially.
 
     //@+others
     //@+node:felix.20221120001229.2: *3* LeoGui.__init__
@@ -60,18 +59,17 @@ export class LeoGui {
      * Ctor for the LeoGui class.
      */
     constructor(guiName = 'nullGui') {
-
-        this.active = false;  //  Used only by qt_gui.
-        this.consoleOnly = true;  //  True if g.es goes to console.
+        this.active = false; //  Used only by qt_gui.
+        this.consoleOnly = true; //  True if g.es goes to console.
         this.globalFindTabManager = undefined;
         this.globalFindTab = undefined;
-        this.idleTimeClass = undefined;  //  Hard to annotate.
+        this.idleTimeClass = undefined; //  Hard to annotate.
         this.isNullGui = false;
         this.lastFrame = undefined;
         this.leoIcon = undefined;
         this.mGuiName = guiName;
         this.mainLoop = undefined;
-        this.plainTextWidget = undefined;  //  For SpellTabHandler class only.
+        this.plainTextWidget = undefined; //  For SpellTabHandler class only.
         this.root = undefined;
         this.script = undefined;
         this.scriptFileName = undefined;
@@ -80,11 +78,11 @@ export class LeoGui {
         this.utils = undefined;
         //  To keep pylint happy.
         this.ScriptingControllerClass = NullScriptingControllerClass;
-        // 
+        //
         //  Define special keys that may be overridden is subclasses.
-        this.ignoreChars = [];  //  Keys that should always be ignored.
-        this.FKeys = [];  //  The representation of F-keys.
-        this.specialChars = [];  //  A list of characters/keys to be handle specially.
+        this.ignoreChars = []; //  Keys that should always be ignored.
+        this.FKeys = []; //  The representation of F-keys.
+        this.specialChars = []; //  A list of characters/keys to be handle specially.
     }
     //@+node:felix.20221120001229.3: *3* LeoGui: Must be defined only in base class
     //@+node:felix.20221120001229.4: *4* LeoGui.create_key_event (LeoGui)
@@ -108,9 +106,8 @@ export class LeoGui {
     public guiName(): string {
         try {
             return this.mGuiName;
-        }
-        catch (e) {
-            return "invalid gui name";
+        } catch (e) {
+            return 'invalid gui name';
         }
     }
     //@+node:felix.20221120001229.6: *4* LeoGui.setScript
@@ -133,7 +130,9 @@ export class LeoGui {
      * Run Leo's interactive search dialog.
      */
     public interactiveSearch(
-        p_backward: boolean, p_regex: boolean, p_word: boolean
+        p_backward: boolean,
+        p_regex: boolean,
+        p_word: boolean
     ): any {
         this.oops();
     }
@@ -200,7 +199,11 @@ export class LeoGui {
     /**
      * Asks for node headline string and inserts node.
      */
-    public editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): any {
+    public editHeadline(
+        p_node?: Position,
+        p_fromOutline?: boolean,
+        p_prompt?: string
+    ): any {
         this.oops();
     }
     /**
@@ -225,7 +228,11 @@ export class LeoGui {
      * Create and run Leo's About Leo dialog.
      */
     public runAboutLeoDialog(
-        c: Commands, version: string, theCopyright: string, url: string, email: string
+        c: Commands,
+        version: string,
+        theCopyright: string,
+        url: string,
+        email: string
     ): any {
         this.oops();
     }
@@ -239,7 +246,12 @@ export class LeoGui {
     /**
      * Create and run an askOK dialog .
      */
-    public runAskOkDialog(c: Commands, title: string, message: string, text = "Ok"): any {
+    public runAskOkDialog(
+        c: Commands,
+        title: string,
+        message: string,
+        text = 'Ok'
+    ): any {
         this.oops();
     }
 
@@ -251,7 +263,7 @@ export class LeoGui {
         title: string,
         message: string,
         cancelButtonText?: string,
-        okButtonText?: string,
+        okButtonText?: string
     ): any {
         this.oops();
     }
@@ -265,8 +277,8 @@ export class LeoGui {
         message: string,
         cancelButtonText: string,
         okButtonText: string,
-        defaultParam = "",
-        wide = false,
+        defaultParam = '',
+        wide = false
     ): any {
         this.oops();
     }
@@ -279,7 +291,7 @@ export class LeoGui {
         title: string,
         message: string,
         yes_all = false,
-        no_all = false,
+        no_all = false
     ): any {
         this.oops();
     }
@@ -291,11 +303,11 @@ export class LeoGui {
         c: Commands,
         title: string,
         message: string,
-        yesMessage = "Yes",
-        noMessage = "No",
-        yesToAllMessage = "",
-        defaultButton = "Yes",
-        cancelMessage = ""
+        yesMessage = 'Yes',
+        noMessage = 'No',
+        yesToAllMessage = '',
+        defaultButton = 'Yes',
+        cancelMessage = ''
     ): any {
         this.oops();
     }
@@ -307,7 +319,7 @@ export class LeoGui {
         title = 'Properties',
         data: string,
         callback: () => void,
-        buttons: string[] = [],
+        buttons: string[] = []
     ): any {
         this.oops();
     }
@@ -321,8 +333,7 @@ export class LeoGui {
         filetypes: [string, string][],
         defaultExtension: string,
         multiple?: boolean,
-        startpath?: string,
-
+        startpath?: string
     ): Thenable<string[] | string> {
         // Return type depends on the evil multiple keyword.
         this.oops();
@@ -336,7 +347,7 @@ export class LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
+        defaultExtension: string
     ): Thenable<string> {
         this.oops();
         return Promise.resolve('no');
@@ -352,8 +363,11 @@ export class LeoGui {
         // pass
     }
     //@+node:felix.20221120212654.1: *4* LeoGui.get1Arg (LeoJs)
-    public get1Arg(p_options?: any, p_token?: any): Thenable<string | undefined> {
-        return Promise.resolve("");
+    public get1Arg(
+        p_options?: any,
+        p_token?: any
+    ): Thenable<string | undefined> {
+        return Promise.resolve('');
     }
     //@+node:felix.20221120205239.1: *4* LeoGui.makeAllBindings (LeoJs)
     public makeAllBindings(): void {
@@ -430,11 +444,11 @@ export class LeoGui {
      */
     public create_labeled_frame(
         parent: string,
-        caption = "",
-        relief = "groove",
+        caption = '',
+        relief = 'groove',
         bd = 2,
         padx = 0,
-        pady = 0,
+        pady = 0
     ): void {
         this.oops();
     }
@@ -472,7 +486,7 @@ export class LeoGui {
         bg = 'LightSteelBlue1',
         define_g = true,
         define_name = '__main__',
-        silent = false,
+        silent = false
     ): void {
         this.oops();
     }
@@ -480,7 +494,7 @@ export class LeoGui {
     //@+node:felix.20221120001229.21: *4* LeoGui.dismiss_spash_screen
     public dismiss_splash_screen(): void {
         // May be overridden in subclasses.
-        // pass 
+        // pass
     }
     //@+node:felix.20221120001229.22: *4* LeoGui.ensure_commander_visible
     /**
@@ -503,7 +517,11 @@ export class LeoGui {
         // It is not usually an error to call methods of this class.
         // However, this message is useful when writing gui plugins.
         if (1) {
-            g.pr("LeoGui oops", g.callers(4), "should be overridden in subclass");
+            g.pr(
+                'LeoGui oops',
+                g.callers(4),
+                'should be overridden in subclass'
+            );
         }
     }
     //@+node:felix.20221120001229.26: *4* LeoGui.put_help
@@ -516,7 +534,7 @@ export class LeoGui {
         if (!w) {
             return '<no widget>';
         }
-        if ((w)['getName']) {
+        if (w['getName']) {
             return w.getName();
         }
         if (w['_name']) {
@@ -525,7 +543,6 @@ export class LeoGui {
         return w.toString();
     }
     //@-others
-
 }
 
 //@+node:felix.20220204224240.1: ** class NullGui
@@ -533,8 +550,7 @@ export class LeoGui {
  * Null gui class.
  */
 export class NullGui extends LeoGui {
-
-    public clipboardContents: string = "";
+    public clipboardContents: string = '';
     public isNullGui: boolean = true;
     public focusWidget: StringTextWrapper | undefined;
     public config: any; // configuration service singleton for a specific external UI (e.g.: leojs)
@@ -543,22 +559,20 @@ export class NullGui extends LeoGui {
      * ctor for the NullGui class.
      */
     constructor(guiName = 'nullGui') {
-
         super(guiName);
         this.clipboardContents = '';
         this.focusWidget = undefined;
         this.script = undefined;
-        this.lastFrame = undefined;  // The outer frame, to set g.app.log in runMainLoop.
+        this.lastFrame = undefined; // The outer frame, to set g.app.log in runMainLoop.
         this.isNullGui = true;
         this.idleTimeClass = g.NullObject;
-
     }
 
-    public makeAllBindings(): void { }
-    public finishStartup(): void { }
+    public makeAllBindings(): void {}
+    public finishStartup(): void {}
 
-    public launchRefresh(): void { }
-    public fullRefresh(p_keepFocus?: boolean): void { }
+    public launchRefresh(): void {}
+    public fullRefresh(p_keepFocus?: boolean): void {}
 
     public replaceClipboardWith(s: string): Thenable<void> {
         this.clipboardContents = s; // also set immediate clipboard string
@@ -574,14 +588,19 @@ export class NullGui extends LeoGui {
     }
 
     public getFullVersion(): string {
-        return "LeoJS NullGui";
+        return 'LeoJS NullGui';
     }
 
     public addLogPaneEntry(...args: any[]): void {
         console.log('NullGui:', ...args);
     }
 
-    public show_find_success(c: Commands, in_headline: boolean, insert: number, p: Position): void {
+    public show_find_success(
+        c: Commands,
+        in_headline: boolean,
+        insert: number,
+        p: Position
+    ): void {
         //
     }
 
@@ -590,7 +609,7 @@ export class NullGui extends LeoGui {
     }
 
     public widget_name(widget: any): string {
-        return "";
+        return '';
     }
     public set_focus(commander: Commands, widget: any): void {
         //
@@ -600,7 +619,9 @@ export class NullGui extends LeoGui {
     }
 
     public interactiveSearch(
-        p_backward: boolean, p_regex: boolean, p_word: boolean
+        p_backward: boolean,
+        p_regex: boolean,
+        p_word: boolean
     ): Promise<unknown> {
         return Promise.resolve();
     }
@@ -629,7 +650,7 @@ export class NullGui extends LeoGui {
         url: string,
         email: string
     ): Thenable<unknown> {
-        return Promise.resolve("");
+        return Promise.resolve('');
     }
 
     public runOpenFileDialog(
@@ -646,9 +667,9 @@ export class NullGui extends LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
+        defaultExtension: string
     ): Thenable<string> {
-        return Promise.resolve("");
+        return Promise.resolve('');
     }
 
     public runAskOkDialog(
@@ -657,7 +678,7 @@ export class NullGui extends LeoGui {
         message: string,
         buttonText?: string
     ): Thenable<unknown> {
-        return Promise.resolve("");
+        return Promise.resolve('');
     }
 
     public runAskYesNoDialog(
@@ -665,40 +686,39 @@ export class NullGui extends LeoGui {
         title: string,
         message: string,
         yes_all?: boolean,
-        no_all?: boolean,
+        no_all?: boolean
     ): Thenable<string> {
-        return Promise.resolve("");
+        return Promise.resolve('');
     }
 
     public runAskYesNoCancelDialog(
         c: Commands,
         title: string,
         message: string,
-        yesMessage = "Yes",
-        noMessage = "No",
-        yesToAllMessage = "",
-        defaultButton = "Yes",
-        cancelMessage = ""
+        yesMessage = 'Yes',
+        noMessage = 'No',
+        yesToAllMessage = '',
+        defaultButton = 'Yes',
+        cancelMessage = ''
     ): Thenable<string> {
-        return Promise.resolve("");
+        return Promise.resolve('');
     }
 
     public showLeoIDMessage(): void {
         // pass
     }
 
-    public setIdSetting(p_id: string): void { };
+    public setIdSetting(p_id: string): void {}
 
     public getIdFromSetting(): string {
-        return "";
+        return '';
     }
 
     public getIdFromDialog(): Thenable<string> {
-        return Promise.resolve("");
+        return Promise.resolve('');
     }
 
-    public ensure_commander_visible(c: Commands): void {
-    }
+    public ensure_commander_visible(c: Commands): void {}
 
     public isTextWidget(w: any): boolean {
         return w instanceof StringTextWrapper;
@@ -714,7 +734,6 @@ export class NullGui extends LeoGui {
  * A default, do-nothing class to be overridden by mod_scripting or other plugins.
  */
 class NullScriptingControllerClass {
-
     public c: Commands;
     public iconBar: any;
 

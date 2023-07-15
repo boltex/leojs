@@ -413,7 +413,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
             }
         }
         if (!found) {
-            g.es_print('no an @clean node found', w_p?.h);
+            g.es_print('no @clean node found', c.p?.h);
             return;
         }
         // pylint: disable=undefined-loop-variable

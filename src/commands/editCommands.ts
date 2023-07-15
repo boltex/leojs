@@ -1,9 +1,9 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220503003653.1: * @file src/commands/editCommands.ts
 import * as g from '../core/leoGlobals';
-import { new_cmd_decorator, command } from "../core/decorators";
-import { Position, VNode } from "../core/leoNodes";
-import { Commands } from "../core/leoCommands";
+import { new_cmd_decorator, command } from '../core/decorators';
+import { Position, VNode } from '../core/leoNodes';
+import { Commands } from '../core/leoCommands';
 import { Bead } from '../core/leoUndo';
 import { StringTextWrapper } from '../core/leoFrame';
 import { BaseEditCommandsClass } from './baseCommands';
@@ -18,13 +18,9 @@ function cmd(p_name: string, p_doc: string) {
 }
 //@+node:felix.20220504203112.1: ** class TopLevelEditCommands
 export class TopLevelEditCommands {
-
     //@+others
     //@+node:felix.20220504203200.2: *3* @g.command('mark-first-parents')
-    @command(
-        'mark-first-parents',
-        'Mark the node and all its parents.'
-    )
+    @command('mark-first-parents', 'Mark the node and all its parents.')
     public mark_first_parents(this: Commands): Position[] {
         const c: Commands = this;
         const changed: Position[] = [];
@@ -49,14 +45,19 @@ export class TopLevelEditCommands {
     @command(
         'merge-node-with-next-node',
         'Merge p.b into p.next().b and delete p, *provided* that p has no children.' +
-        'Undo works, but redo doesn\'t: probably a bug in the u.before/AfterChangeGroup.'
+            "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_next_node(this: Commands): void {
         const c: Commands = this;
         if (!c) {
             return;
         }
-        const [command, p, u, w] = ['merge-node-with-next-node', c.p, c.undoer, c.frame.body.wrapper];
+        const [command, p, u, w] = [
+            'merge-node-with-next-node',
+            c.p,
+            c.undoer,
+            c.frame.body.wrapper,
+        ];
         if (!p || !p.__bool__() || !p.b.trim() || p.hasChildren()) {
             return;
         }
@@ -73,7 +74,7 @@ export class TopLevelEditCommands {
         u.afterChangeBody(next, command, bunch1);
         // Inner undo 2: delete p.
         const bunch2 = u.beforeDeleteNode(p);
-        p.doDelete(next);  // This adjusts next._childIndex.
+        p.doDelete(next); // This adjusts next._childIndex.
         c.selectPosition(next);
         u.afterDeleteNode(next, command, bunch2);
         // End outer undo:
@@ -84,14 +85,19 @@ export class TopLevelEditCommands {
     @command(
         'merge-node-with-prev-node',
         'Merge p.b into p.back().b and delete p, *provided* that p has no children.' +
-        'Undo works, but redo doesn\'t: probably a bug in the u.before/AfterChangeGroup.'
+            "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_prev_node(this: Commands): void {
         const c: Commands = this;
         if (!c) {
             return;
         }
-        const [command, p, u, w] = ['merge-node-with-prev-node', c.p, c.undoer, c.frame.body.wrapper];
+        const [command, p, u, w] = [
+            'merge-node-with-prev-node',
+            c.p,
+            c.undoer,
+            c.frame.body.wrapper,
+        ];
         if (!p || !p.__bool__() || !p.b.trim() || p.hasChildren()) {
             return;
         }
@@ -108,7 +114,7 @@ export class TopLevelEditCommands {
         u.afterChangeBody(prev, command, bunch1);
         // Inner undo 2: delete p, select prev.
         const bunch2 = u.beforeDeleteNode(p);
-        p.doDelete();  // No need to adjust prev._childIndex.
+        p.doDelete(); // No need to adjust prev._childIndex.
         c.selectPosition(prev);
         u.afterDeleteNode(prev, command, bunch2);
         // End outer undo.
@@ -118,10 +124,9 @@ export class TopLevelEditCommands {
     //@+node:felix.20220504203200.3: *3* @g.command('promote-bodies')
     @command(
         'promote-bodies',
-        'Copy the body text of all descendants to the parent\'s body text.'
+        "Copy the body text of all descendants to the parent's body text."
     )
     public promoteBodies(this: Commands): void {
-
         const c: Commands = this;
         if (!c) {
             return;
@@ -136,9 +141,10 @@ export class TopLevelEditCommands {
         for (let child of p.subtree()) {
             const h = child.h.trim();
             if (child.b) {
-
                 // body = '\n'.join([f"  {z}" for z in g.splitLines(child.b)])
-                const body = [...g.splitLines(child.b)].map(z => `  ${z}`).join('\n');
+                const body = [...g.splitLines(child.b)]
+                    .map((z) => `  ${z}`)
+                    .join('\n');
 
                 s = `- ${h}\n${body}`;
             } else {
@@ -154,15 +160,13 @@ export class TopLevelEditCommands {
         p.b = result.join('\n');
 
         c.undoer.afterChangeNodeContents(p, 'promote-bodies', b);
-
     }
     //@+node:felix.20220504203200.4: *3* @g.command('promote-headlines')
     @command(
         'promote-headlines',
-        'Copy the headlines of all descendants to the parent\'s body text.'
+        "Copy the headlines of all descendants to the parent's body text."
     )
     public promoteHeadlines(this: Commands): void {
-
         const c: Commands = this;
         if (!c) {
             return;
@@ -171,7 +175,9 @@ export class TopLevelEditCommands {
 
         const b: Bead = c.undoer.beforeChangeNodeContents(p);
 
-        const result: string = [...p.subtree()].map(p_p => p_p.h.trimEnd()).join('\n');
+        const result: string = [...p.subtree()]
+            .map((p_p) => p_p.h.trimEnd())
+            .join('\n');
         // '\n'.join([p.h.trimEnd() for p in p.subtree()])
 
         if (result) {
@@ -186,14 +192,13 @@ export class TopLevelEditCommands {
         'Display links to all ancestor nodes of the node c.p.'
     )
     public show_clone_ancestors(this: Commands): void {
-
         const c: Commands = this;
         if (!c) {
             return;
         }
         const p = c.p;
 
-        g.es("TODO : show-clone-ancestors when UNL is done");
+        g.es('TODO : show-clone-ancestors when UNL is done');
         /*
         g.es(`Ancestors of ${p.h}...`);
         for (const clone of c.all_positions()){
@@ -212,20 +217,19 @@ export class TopLevelEditCommands {
             }
         }
         */
-
     }
     //@+node:felix.20230708211959.1: *3* @g.command('show-clone-parents')
-    @command('show-clone-parents',
+    @command(
+        'show-clone-parents',
         'Display links to all parent nodes of the node c.p.'
     )
     public show_clones(this: Commands): void {
-
         const c: Commands = this;
         if (!c) {
             return;
         }
 
-        g.es("TODO : show-clone-parents when UNL is done");
+        g.es('TODO : show-clone-parents when UNL is done');
 
         /*
         seen = []
@@ -242,12 +246,8 @@ export class TopLevelEditCommands {
         */
     }
     //@+node:felix.20220504203200.5: *3* @g.command('unmark-first-parents')
-    @command(
-        'unmark-first-parents',
-        'Unmark the node and all its parents.'
-    )
+    @command('unmark-first-parents', 'Unmark the node and all its parents.')
     public unmark_first_parents(this: Commands): Position[] {
-
         const c: Commands = this;
         const changed: Position[] = [];
 
@@ -271,11 +271,9 @@ export class TopLevelEditCommands {
         return changed;
     }
     //@-others
-
 }
 //@+node:felix.20220503222535.1: ** class EditCommandsClass
 export class EditCommandsClass extends BaseEditCommandsClass {
-
     // Match exactly one trailing blank.
     private hn_pattern = new RegExp(/^[0-9]+(\.[0-9]+)* /);
 
@@ -285,10 +283,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         super(c);
     }
     //@+node:felix.20220503223023.1: *3* ec.doNothing
-    @cmd(
-        'do-nothing',
-        'A placeholder command, useful for testing bindings.'
-    )
+    @cmd('do-nothing', 'A placeholder command, useful for testing bindings.')
     public doNothing(): void {
         // pass
     }
@@ -298,13 +293,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Insert a date/time stamp in the headline of the selected node.'
     )
     public insertHeadlineTime(): Thenable<Position> {
-
         const c = this.c;
         const p = c.p;
         const u = this.c.undoer;
 
         if (g.app.batchMode) {
-            c.notValidInBatchMode("Insert Headline Time");
+            c.notValidInBatchMode('Insert Headline Time');
             return Promise.resolve(p);
         }
 
@@ -328,7 +322,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
 
         return c.redrawAndEdit(p, true);
-
     }
     //@+node:felix.20220503225231.1: *3* ec.capitalizeHeadline
     @cmd(
@@ -336,13 +329,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Capitalize all words in the headline of the selected node.'
     )
     public capitalizeHeadline(): void {
-
         const c = this.c;
         const p = this.c.p;
         const u = this.c.undoer;
 
         if (g.app.batchMode) {
-            c.notValidInBatchMode("Capitalize Headline");
+            c.notValidInBatchMode('Capitalize Headline');
             return;
         }
         const h = p.h;
@@ -350,7 +342,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const undoData = u.beforeChangeNodeContents(p);
 
         // const words = [w.capitalize() for w in h.split(" ")];
-        const words = h.split(" ").map(w => w[0].toUpperCase() + w.substring(1));
+        const words = h
+            .split(' ')
+            .map((w) => w[0].toUpperCase() + w.substring(1));
 
         const capitalized = words.join(' ');
         const changed = capitalized !== h;
@@ -361,8 +355,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             u.afterChangeNodeContents(p, undoType, undoData);
             c.redraw();
         }
-
-
     }
     //@+node:felix.20220503225323.1: *3* ec: goto node
     //@+node:felix.20220503225323.2: *4* ec.gotoAnyClone
@@ -371,7 +363,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Select then next cloned node, regardless of whether c.p is a clone.'
     )
     public gotoAnyClone(): void {
-
         const c: Commands = this.c;
 
         const p: Position = c.p.threadNext();
@@ -385,16 +376,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         g.es('no clones found after', c.p.h);
     }
     //@+node:felix.20220503225323.3: *4* ec.gotoCharacter
-    @cmd(
-        'goto-char',
-        'Put the cursor at the n\'th character of the buffer.'
-    )
+    @cmd('goto-char', "Put the cursor at the n'th character of the buffer.")
     public async gotoCharacter(): Promise<unknown> {
-
         let w_n = await g.app.gui.get1Arg({
             title: "Goto n'th character",
             prompt: "Goto n'th character",
-            placeHolder: "Character Number",
+            placeHolder: 'Character Number',
         });
 
         let ok = false;
@@ -408,7 +395,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 w.seeInsertPoint();
                 ok = true;
             }
-
         }
         if (!ok) {
             g.warning('goto-char takes non-negative integer argument');
@@ -420,10 +406,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'goto-global-line',
         'Put the cursor at the line in the *outline* corresponding to the line\n' +
-        'with the given line number *in the external file*.\n' +
-        'For external files containing sentinels, there may be *several* lines\n' +
-        'in the file that correspond to the same line in the outline.' +
-        'An Easter Egg: <Alt-x>number invokes this code.'
+            'with the given line number *in the external file*.\n' +
+            'For external files containing sentinels, there may be *several* lines\n' +
+            'in the file that correspond to the same line in the outline.' +
+            'An Easter Egg: <Alt-x>number invokes this code.'
     )
     public async gotoGlobalLine(p_lineNumber?: number): Promise<unknown> {
         // Bypass if called with number
@@ -433,9 +419,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
         // Otherwise, ask user
         let w_n = await g.app.gui.get1Arg({
-            title: "Goto global line",
-            prompt: "Goto global line",
-            placeHolder: "Line Number",
+            title: 'Goto global line',
+            prompt: 'Goto global line',
+            placeHolder: 'Line Number',
         });
         if (w_n && /^\d+$/.test(w_n)) {
             // Very important: n is one-based.
@@ -443,15 +429,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
     }
     //@+node:felix.20220503225323.5: *4* ec.gotoLine
-    @cmd(
-        'goto-line',
-        'Put the cursor at the n\'th line of the buffer.'
-    )
+    @cmd('goto-line', "Put the cursor at the n'th line of the buffer.")
     public async gotoLine(): Promise<unknown> {
         let w_n = await g.app.gui.get1Arg({
-            title: "Goto line",
-            prompt: "Goto line",
-            placeHolder: "Line Number",
+            title: 'Goto line',
+            prompt: 'Goto line',
+            placeHolder: 'Line Number',
         });
 
         let ok = false;
@@ -464,7 +447,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             const i = g.convertRowColToPythonIndex(s, n - 1, 0);
             w.setInsertPoint(i);
             w.seeInsertPoint();
-
         }
         if (!ok) {
             g.warning('goto-char takes non-negative integer argument');
@@ -477,23 +459,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'hn-add-all',
         'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
-        'Use the *first* clone\'s position for all clones.'
+            '-  @<file> nodes and their descendants.\n' +
+            '- Any node whose headline starts with "@".\n' +
+            "Use the *first* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-all',
         'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
-        'Use the *first* clone\'s position for all clones.'
+            '-  @<file> nodes and their descendants.\n' +
+            '- Any node whose headline starts with "@".\n' +
+            "Use the *first* clone's position for all clones."
     )
     @cmd(
         'add-all-headline-numbers',
         'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
-        'Use the *first* clone\'s position for all clones.'
+            '-  @<file> nodes and their descendants.\n' +
+            '- Any node whose headline starts with "@".\n' +
+            "Use the *first* clone's position for all clones."
     )
     public hn_add_all(): void {
         const c: Commands = this.c;
@@ -544,23 +526,22 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         // Do not strip the original headline!
         p.v.h = `${s} ${p.v.h}`;
         p.v.setDirty();
-
     }
     //@+node:felix.20230402171528.4: *4* hn-add-subtree & helper
     @cmd(
         'hn-add-subtree',
         'Add headline numbers to *all* children of c.p.' +
-        'Use the *last* clone\'s position for all clones.'
+            "Use the *last* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-subtree',
         'Add headline numbers to *all* children of c.p.' +
-        'Use the *last* clone\'s position for all clones.'
+            "Use the *last* clone's position for all clones."
     )
     @cmd(
         'add-subtree-headline-numbers',
         'Add headline numbers to *all* children of c.p.' +
-        'Use the *last* clone\'s position for all clones.'
+            "Use the *last* clone's position for all clones."
     )
     public hn_add_children(): void {
         const c: Commands = this.c;
@@ -582,7 +563,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
      * Add a 1-based outline number (relative to the root) to p.h.
      */
     public hn_add_relative(p: Position, root: Position): void {
-
         const c: Commands = this.c;
         const indices: number[] = [];
         for (const p2 of p.self_and_parents()) {
@@ -592,18 +572,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             indices.unshift(p2.childIndex());
         }
 
-        const s = [...indices.map(z => (1 + z).toString())].join(',');
+        const s = [...indices.map((z) => (1 + z).toString())].join(',');
         // s = '.'.join([str(1 + z) for z in indices]);
 
         // Do not strip the original headline!
         c.setHeadString(p, `${s} ${p.v.h}`);
         p.v.setDirty();
-
     }
     //@+node:felix.20230402171528.6: *4* hn-delete-all
     @cmd('hn-delete-all', 'Delete all headline numbers in the entire outline.')
-    @cmd('headline-number-delete-all', 'Delete all headline numbers in the entire outline.')
-    @cmd('delete-all-headline-numbers', 'Delete all headline numbers in the entire outline.')
+    @cmd(
+        'headline-number-delete-all',
+        'Delete all headline numbers in the entire outline.'
+    )
+    @cmd(
+        'delete-all-headline-numbers',
+        'Delete all headline numbers in the entire outline.'
+    )
     public hn_delete_all(): void {
         const c: Commands = this.c;
         const command = 'delete-all-headline-numbers';
@@ -616,12 +601,17 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         c.setChanged();
         u.afterChangeMultiHeadline(command, data);
         c.redraw();
-
     }
     //@+node:felix.20230402171528.7: *4* hn-delete-subtree
-    @cmd('hn-delete-subtree', 'Delete all headline numbers in c.p\'s subtree.')
-    @cmd('headline-number-delete-subtree', 'Delete all headline numbers in c.p\'s subtree.')
-    @cmd('delete-subtree-headline-numbers', 'Delete all headline numbers in c.p\'s subtree.')
+    @cmd('hn-delete-subtree', "Delete all headline numbers in c.p's subtree.")
+    @cmd(
+        'headline-number-delete-subtree',
+        "Delete all headline numbers in c.p's subtree."
+    )
+    @cmd(
+        'delete-subtree-headline-numbers',
+        "Delete all headline numbers in c.p's subtree."
+    )
     public hn_delete_tree(): void {
         const c: Commands = this.c;
         const command = 'delete-subtree-headline-numbers';
@@ -634,16 +624,13 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         c.setChanged();
         u.afterChangeMultiHeadline(command, data);
         c.redraw();
-
     }
     //@+node:felix.20230402171528.8: *4* hn_delete
-
 
     /**
      * Helper: delete the headline number in p.h.
      */
     public hn_delete(p: Position): void {
-
         const c: Commands = this.c;
         // const m = re.match(this.hn_pattern, p.h);
         const m: RegExpExecArray | null = this.hn_pattern.exec(p.h);
@@ -660,10 +647,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'extend-to-word',
         'Compute the word at the cursor. Select it if select arg is True.'
     )
-    public extendToWord(select = true, w?: StringTextWrapper): [number, number] {
-
+    public extendToWord(
+        select = true,
+        w?: StringTextWrapper
+    ): [number, number] {
         if (!w) {
-            (w = this.editWidget());
+            w = this.editWidget();
         }
         if (!w) {
             return [0, 0];
@@ -710,15 +699,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
 
         return [0, 0];
-
-
     }
     //@+node:felix.20220503225545.1: *3* ec: uA's
     //@+node:felix.20220503225545.2: *4* ec.clearNodeUas & clearAllUas
-    @cmd(
-        'clear-node-uas',
-        'Clear the uA\'s in the selected VNode.'
-    )
+    @cmd('clear-node-uas', "Clear the uA's in the selected VNode.")
     public clearNodeUas(): void {
         const c = this.c;
         const p = c && c.p;
@@ -731,10 +715,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
     }
 
-    @cmd(
-        'clear-all-uas',
-        'Clear all uAs in the entire outline.'
-    )
+    @cmd('clear-all-uas', 'Clear all uAs in the entire outline.')
     public clearAllUas(): void {
         const c = this.c;
         // #1276.
@@ -751,30 +732,20 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             c.setChanged();
             c.redraw();
         }
-
     }
     //@+node:felix.20220503225545.3: *4* ec.showUas & showAllUas
-    @cmd(
-        'show-all-uas',
-        'Print all uA\'s in the outline.'
-    )
+    @cmd('show-all-uas', "Print all uA's in the outline.")
     public showAllUas(): void {
-
         g.es_print('Dump of uAs...');
         for (let v of this.c.all_unique_nodes()) {
             if (v.u && Object.keys(v.u).length) {
                 this.showNodeUas(v);
             }
         }
-
     }
 
-    @cmd(
-        'show-node-uas',
-        'Print the uA\'s in the selected node.'
-    )
+    @cmd('show-node-uas', "Print the uA's in the selected node.")
     public showNodeUas(v?: VNode): void {
-
         const c = this.c;
         let d: { [key: string]: any };
         let h: string;
@@ -795,13 +766,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Prompt for the name and value of a uA, then set the uA in the present node.'
     )
     public async setUa(): Promise<boolean> {
-
-        let w_name = "";
+        let w_name = '';
 
         let w_uaName = await g.app.gui.get1Arg({
-            title: "Set ua",
-            prompt: "Set unknown attribute name",
-            placeHolder: "Attribute Name",
+            title: 'Set ua',
+            prompt: 'Set unknown attribute name',
+            placeHolder: 'Attribute Name',
         });
         // Trim string and re-check if valid string
         if (w_uaName && w_uaName.trim()) {
@@ -809,12 +779,15 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             w_name = w_uaName;
 
             const w_uaVal = await g.app.gui.get1Arg({
-                title: "Set ua to",
-                prompt: "Set unknown attribute value",
-                placeHolder: "Attribute Value",
+                title: 'Set ua to',
+                prompt: 'Set unknown attribute value',
+                placeHolder: 'Attribute Value',
             });
 
-            if (w_name && !(typeof w_uaVal === 'undefined' || w_uaVal === null)) {
+            if (
+                w_name &&
+                !(typeof w_uaVal === 'undefined' || w_uaVal === null)
+            ) {
                 // ok got both name and val
                 const c = this.c;
                 const p = c.p;
@@ -825,13 +798,11 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 this.showNodeUas();
                 return Promise.resolve(true);
             }
-
         }
         return Promise.resolve(false);
     }
 
     //@-others
-
 }
 //@-others
 

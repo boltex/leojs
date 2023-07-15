@@ -6,7 +6,7 @@
 //@+<< imports >>
 //@+node:felix.20210127001502.1: ** << imports >>
 import * as g from './leoGlobals';
-import * as utils from "../utils";
+import * as utils from '../utils';
 import { Commands } from './leoCommands';
 import { Bead } from './leoUndo';
 import { FileCommands } from './leoFileCommands';
@@ -52,8 +52,8 @@ export class NodeIndices {
         if (v2 && v2 !== v) {
             g.error(
                 `getNewIndex: gnx clash ${gnx}\n` +
-                `          v: ${v}\n` +
-                `         v2: ${v2}`
+                    `          v: ${v}\n` +
+                    `         v2: ${v2}`
             );
         }
     }
@@ -63,7 +63,6 @@ export class NodeIndices {
      * Scan the entire leo outline to compute ni.last_index.
      */
     public compute_last_index(c: Commands): void {
-
         const ni = this;
         // Partial, experimental, fix for #658.
         // Do not change self.lastIndex here!
@@ -209,7 +208,6 @@ export class NodeIndices {
      * to its string representation.
      */
     public tupleToString(aTuple: [any, any, any]): string {
-
         let [theId, t, n] = aTuple;
         let s;
         // This logic must match the existing logic so that
@@ -220,7 +218,6 @@ export class NodeIndices {
             s = `${theId}.${t}.${n}`;
         }
         return g.toUnicode(s);
-
     }
     //@+node:felix.20210218214329.12: *3* ni.update
     /**
@@ -242,12 +239,11 @@ export class NodeIndices {
      * Update ni.lastIndex if the gnx affects it.
      */
     public updateLastIndex(gnx: string): undefined {
-
         let [id_, t, n] = this.scanGnx(gnx);
         // pylint: disable=literal-comparison
         // Don't you dare touch this code to keep pylint happy.
-        if (!id_ || (n as any !== 0 && !n)) {
-            return;  // the gnx is not well formed or n in ('',None)
+        if (!id_ || ((n as any) !== 0 && !n)) {
+            return; // the gnx is not well formed or n in ('',None)
         }
         if (id_ === this.userId && t === this.timeString) {
             try {
@@ -258,11 +254,9 @@ export class NodeIndices {
                         g.trace(gnx, '-->', n2);
                     }
                 }
-            }
-            catch (exception) {
+            } catch (exception) {
                 g.trace('can not happen', n);
             }
-
         }
     }
     //@-others
@@ -404,7 +398,7 @@ export class Position {
     }
 
     //@+node:felix.20210126210412.7: *4* p.__str__ and p.__repr__
-    /** 
+    /**
      * For Position string output printout
      */
     public __str__(): string {
@@ -422,17 +416,16 @@ export class Position {
         return `<pos [${p.stack.length}] None>`;
     }
 
-    /** 
+    /**
      * * For Position string output printout
      */
     public toString(): string {
         return this.__str__();
     }
 
-
     //@+node:felix.20230601210333.1: *4* p.valueOf
     /**
-     * For > >= < <= greater/lesser comparisons in javascript. 
+     * For > >= < <= greater/lesser comparisons in javascript.
      * Note: Boolean evaluation still has to call valueOf, or __bool__.
      */
     public valueOf(): number {
@@ -1090,14 +1083,14 @@ export class Position {
      *  - Never generate child indices.
      */
     public get_UNL(): string {
-
-        const parents = [...this.self_and_parents(false)].reverse().map(p => (p.v ? p.h : 'no v node'));
+        const parents = [...this.self_and_parents(false)]
+            .reverse()
+            .map((p) => (p.v ? p.h : 'no v node'));
 
         const base_unl = this.v.context.fileName() + '#' + parents.join('-->');
 
-        const encoded = base_unl.replace(/'/g, "%27");
+        const encoded = base_unl.replace(/'/g, '%27');
         return 'unl://' + encoded;
-
     }
 
     //@+node:felix.20210202235315.12: *4* p.hasBack/Next/Parent/ThreadBack
@@ -1912,7 +1905,7 @@ export class Position {
                     } else if (child_v.fileIndex === parent.v.fileIndex) {
                         g.error(
                             `duplicate gnx: ${child_v.fileIndex} ` +
-                            `v: ${child_v} parent: ${parent.v}`
+                                `v: ${child_v} parent: ${parent.v}`
                         );
                         child_v.fileIndex =
                             g.app.nodeIndices!.getNewIndex(child_v);
@@ -1977,14 +1970,14 @@ export class Position {
     public copyTreeAfter(copyGnxs = false): Position {
         const p: Position = this;
         const p2 = p.insertAfter();
-        p.copyTreeFromSelfTo(p2, copyGnxs = copyGnxs);
+        p.copyTreeFromSelfTo(p2, (copyGnxs = copyGnxs));
         return p2;
     }
 
     public copyTreeFromSelfTo(p2: Position, copyGnxs = false): void {
         const p: Position = this;
-        p2.v._headString = g.toUnicode(p.h, undefined, true);  // 2017/01/24
-        p2.v._bodyString = g.toUnicode(p.b, undefined, true);  // 2017/01/24
+        p2.v._headString = g.toUnicode(p.h, undefined, true); // 2017/01/24
+        p2.v._bodyString = g.toUnicode(p.b, undefined, true); // 2017/01/24
         //
         // #1019794: p.copyTreeFromSelfTo, should deepcopy p.v.u.
         try {
@@ -2042,7 +2035,10 @@ export class Position {
             if (!!newNode && sib.__eq__(newNode)) {
                 // Adjust newNode._childIndex if newNode is a following sibling of p.
                 newNode._childIndex -= 1;
-                console.log('HAD TO LOWER _childIndex!, its now ', newNode._childIndex);
+                console.log(
+                    'HAD TO LOWER _childIndex!, its now ',
+                    newNode._childIndex
+                );
                 break;
             }
         }
@@ -2812,7 +2808,7 @@ export class VNode {
     //@+node:felix.20211209010457.1: *3* v.toString
     public toString(): string {
         return this.__repr__();
-    };
+    }
     //@+node:felix.20210112210731.1: *3* v.Comparisons
     //@+node:felix.20210112210731.2: *4* v.findAtFileName
     /**
@@ -3363,7 +3359,6 @@ export class VNode {
      * Restore the cursor position and scroll so it is visible.
      */
     public restoreCursorAndScroll(): void {
-
         const traceTime: boolean = false && !g.unitTesting;
         const v: VNode = this;
         let ins: number = v.insertSpot;
@@ -3380,7 +3375,10 @@ export class VNode {
         if (traceTime) {
             t1 = process.hrtime();
         }
-        if (body.wrapper.setInsertPoint && body.wrapper.setInsertPoint !== undefined) {
+        if (
+            body.wrapper.setInsertPoint &&
+            body.wrapper.setInsertPoint !== undefined
+        ) {
             w.setInsertPoint(ins);
         }
         if (traceTime) {
@@ -3396,7 +3394,6 @@ export class VNode {
             v.scrollBarSpot = spot;
         }
         // Never call w.see here.
-
     }
 
     //@+node:felix.20210115195450.20: *4* v.saveCursorAndScroll
@@ -3406,7 +3403,6 @@ export class VNode {
      * insertSpot and scrollBarSpot
      */
     public saveCursorAndScroll(): void {
-
         const v: VNode = this;
         const c: any = v.context;
 
@@ -3417,8 +3413,7 @@ export class VNode {
         try {
             v.scrollBarSpot = w.getYScrollPosition();
             v.insertSpot = w.getInsertPoint();
-        }
-        catch (attributeError) {
+        } catch (attributeError) {
             // 2011/03/21: w may not support the high-level interface.
             // pass
         }

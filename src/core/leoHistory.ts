@@ -10,7 +10,6 @@ import { Position } from './leoNodes';
  * * A class encapsulating knowledge of visited nodes.
  */
 export class NodeHistory {
-
     public c: Commands;
     public beadList: [Position, Chapter][]; // a list of (position,chapter) tuples.
     public beadPointer: number;
@@ -95,9 +94,8 @@ export class NodeHistory {
                 if (oldChapter !== chapter) {
                     cc.selectChapterForPosition(p, chapter);
                 }
-                c.selectPosition(p);  // Calls cc.selectChapterForPosition
-            }
-            finally {
+                c.selectPosition(p); // Calls cc.selectChapterForPosition
+            } finally {
                 this.skipBeadUpdate = false;
             }
         }
@@ -155,7 +153,6 @@ export class NodeHistory {
     }
 
     //@-others
-
 }
 //@-others
 //@@language typescript

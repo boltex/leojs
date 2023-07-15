@@ -2,23 +2,23 @@
 //@+node:felix.20210102012334.1: * @file src/core/leoApp.ts
 //@+<< imports >>
 //@+node:felix.20210102211149.1: ** << imports >>
-import * as vscode from "vscode";
-import * as Bowser from "bowser";
-import * as os from "os";
+import * as vscode from 'vscode';
+import * as Bowser from 'bowser';
+import * as os from 'os';
 import * as path from 'path';
 import * as g from './leoGlobals';
-import * as utils from "../utils";
-import { LeoGui, NullGui } from "./leoGui";
+import * as utils from '../utils';
+import { LeoGui, NullGui } from './leoGui';
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
-import { FastRead, FileCommands } from "./leoFileCommands";
-import { GlobalConfigManager, SettingsTreeParser } from "./leoConfig";
-import { Constants } from "../constants";
-import { ExternalFilesController } from "./leoExternalFiles";
-import { LeoFrame } from "./leoFrame";
-import { SettingsDict } from "./leoGlobals";
-import { leojsSettingsXml } from "../leojsSettings";
-import { LeoUI } from "../leoUI";
+import { FastRead, FileCommands } from './leoFileCommands';
+import { GlobalConfigManager, SettingsTreeParser } from './leoConfig';
+import { Constants } from '../constants';
+import { ExternalFilesController } from './leoExternalFiles';
+import { LeoFrame } from './leoFrame';
+import { SettingsDict } from './leoGlobals';
+import { leojsSettingsXml } from '../leojsSettings';
+import { LeoUI } from '../leoUI';
 
 //@-<< imports >>
 //@+others
@@ -31,14 +31,13 @@ import { LeoUI } from "../leoUI";
  *  the callback to be called at idle time forever.
  */
 export class IdleTimeManager {
-
     callback_list: ((...args: any[]) => any)[];
     timer: any;
     on_idle_count = 0;
 
     /**
      * Ctor for IdleTimeManager class.
-    */
+     */
     constructor() {
         this.callback_list = [];
         this.timer = null;
@@ -50,9 +49,7 @@ export class IdleTimeManager {
      * Add a callback to be called at every idle time.
      */
     public add_callback(callback: (...args: any[]) => any): void {
-
         this.callback_list.push(callback);
-
     }
     //@+node:felix.20210102213337.3: *3* itm.on_idle
     /**
@@ -68,7 +65,7 @@ export class IdleTimeManager {
         if (!g.app.pluginsController) {
             g.trace('No g.app.pluginsController', g.callers());
             timer.stop();
-            return;  // For debugger.
+            return; // For debugger.
         }
         this.on_idle_count += 1;
         // Handle the registered callbacks.
@@ -79,7 +76,8 @@ export class IdleTimeManager {
                 g.es_exception(exception);
                 g.es_print(`removing callback: ${callback.toString()}`);
                 const index = this.callback_list.indexOf(callback);
-                if (index > -1) { // only splice array when item is found
+                if (index > -1) {
+                    // only splice array when item is found
                     this.callback_list.splice(index, 1); // 2nd parameter means remove one item only
                 }
                 // this.callback_list.remove(callback);
@@ -104,7 +102,6 @@ export class IdleTimeManager {
         }
     }
     //@-others
-
 }
 
 //@+node:felix.20210102214000.1: ** class LeoApp
@@ -113,7 +110,6 @@ export class IdleTimeManager {
  * instance variables of this class are Leo's global variables.
  */
 export class LeoApp {
-
     //@+others
     //@+node:felix.20220417164713.1: *3* app.Birth & startup
     //@+node:felix.20210102214029.1: *4* app.__init__ (helpers contain language dicts)
@@ -158,7 +154,7 @@ export class LeoApp {
     //@+<< LeoApp: global directories >>
     //@+node:felix.20210103024632.5: *5* << LeoApp: global directories >>
     public extensionsDir: string | undefined; // The leo / extensions directory
-    public globalConfigDir: string | undefined; // leo / config directory 
+    public globalConfigDir: string | undefined; // leo / config directory
     public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir: string | undefined; // The user's home directory.
     public homeLeoDir: string | undefined; // The user's home/.leo directory.
@@ -167,8 +163,8 @@ export class LeoApp {
     public machineDir: string | undefined; // The machine - specific directory.
 
     public vscodeWorkspaceUri: vscode.Uri | undefined;
-    public vscodeUriAuthority: string = "";
-    public vscodeUriPath: string = "";
+    public vscodeUriAuthority: string = '';
+    public vscodeUriPath: string = '';
 
     //@-<< LeoApp: global directories >>
     //@+<< LeoApp: global data >>
@@ -176,7 +172,7 @@ export class LeoApp {
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
-    public vscodeUriScheme: string = ""; // * VSCODE WORKSPACE FILE SCHEME 
+    public vscodeUriScheme: string = ''; // * VSCODE WORKSPACE FILE SCHEME
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.
@@ -295,8 +291,8 @@ export class LeoApp {
     // For communication between find / change scripts.
     public scriptDict: any = {};
     // For use by scripts.Cleared before running each script.
-    public scriptResult = null;   // For use by leoPymacs.
-    public permanentScriptDict = {};   // For use by scrips.Never cleared automatically.
+    public scriptResult = null; // For use by leoPymacs.
+    public permanentScriptDict = {}; // For use by scrips.Never cleared automatically.
 
     public isExternalUnitTest: boolean = false; // True: we are running a unit test externally.
     public runningAllUnitTests: boolean = false; // True: we are running all unit tests(Only for local tests).
@@ -307,19 +303,19 @@ export class LeoApp {
     public suppressImportChecks: boolean = false;
     // Used only in basescanner.py ;
     // True: suppress importCommands.check
-    public unitTestDict = {};   // For communication between unit tests and code.
-    public unitTestGui = null;   // A way to override the gui in external unit tests.
-    public unitTesting = false;   // True if unit testing.
-    public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
+    public unitTestDict = {}; // For communication between unit tests and code.
+    public unitTestGui = null; // A way to override the gui in external unit tests.
+    public unitTesting = false; // True if unit testing.
+    public unitTestMenusDict = {}; // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
 
     //@-<< LeoApp: unit testing ivars >>
 
     public delegate_language_dict: { [key: string]: string } = {};
     public extension_dict: { [key: string]: string } = {};
     public extra_extension_dict: { [key: string]: string } = {};
-    public prolog_prefix_string: string = "";
-    public prolog_postfix_string: string = "";
-    public prolog_namespace_string: string = "";
+    public prolog_prefix_string: string = '';
+    public prolog_postfix_string: string = '';
+    public prolog_namespace_string: string = '';
     public language_delims_dict: { [key: string]: string } = {};
     public language_extension_dict: { [key: string]: string } = {};
 
@@ -343,9 +339,9 @@ export class LeoApp {
         this.delegate_language_dict = {
             // Keys are new language names.
             // Values are existing languages in leo / modes.
-            "less": "css",
-            "hbs": "html",
-            "handlebars": "html",
+            less: 'css',
+            hbs: 'html',
+            handlebars: 'html',
             //"rust": "c",
             // "vue": "c",
         };
@@ -353,156 +349,155 @@ export class LeoApp {
 
     //@+node:felix.20210103024632.17: *5* app.define_extension_dict
     public define_extension_dict(): void {
-
         // Keys are extensions, values are languages
         this.extension_dict = {
             // "ada": "ada",
-            "ada": "ada95", // modes / ada95.py exists.
-            "ahk": "autohotkey",
-            "aj": "aspect_j",
-            "apdl": "apdl",
-            "as": "actionscript", // jason 2003-07 - 03
-            "asp": "asp",
-            "awk": "awk",
-            "b": "b",
-            "bas": "rapidq", // fil 2004-march - 11
-            "bash": "shellscript",
-            "bat": "batch",
-            "bbj": "bbj",
-            "bcel": "bcel",
-            "bib": "bibtex",
-            "c": "c",
-            "c++": "cplusplus",
-            "cbl": "cobol", // Only one extension is valid: .cob
-            "cfg": "config",
-            "cfm": "coldfusion",
-            "clj": "clojure", // 2013 / 09 / 25: Fix bug 879338.
-            "cljs": "clojure",
-            "cljc": "clojure",
-            "ch": "chill", // Other extensions, .c186,.c286
-            "coffee": "coffeescript",
-            "conf": "apacheconf",
-            "cpp": "cplusplus", // 2020 / 08 / 12: was cpp.
-            "css": "css",
-            "d": "d",
-            "dart": "dart",
-            "e": "eiffel",
-            "el": "elisp",
-            "eml": "mail",
-            "erl": "erlang",
-            "ex": "elixir",
-            "f": "fortran",
-            "f90": "fortran90",
-            "factor": "factor",
-            "forth": "forth",
-            "g": "antlr",
-            "groovy": "groovy",
-            "h": "c", // 2012 / 05 / 23.
-            "handlebars": "html", // McNab.
-            "hbs": "html", // McNab.
-            "hs": "haskell",
-            "html": "html",
-            "hx": "haxe",
-            "i": "swig",
-            "i4gl": "i4gl",
-            "icn": "icon",
-            "idl": "idl",
-            "inf": "inform",
-            "info": "texinfo",
-            "ini": "ini",
-            "io": "io",
-            "ipynb": "jupyter",
-            "iss": "inno_setup",
-            "java": "java",
-            "jhtml": "jhtml",
-            "jmk": "jmk",
-            "js": "javascript", // For javascript import test.
-            "jsp": "javaserverpage",
-            "json": "json",
+            ada: 'ada95', // modes / ada95.py exists.
+            ahk: 'autohotkey',
+            aj: 'aspect_j',
+            apdl: 'apdl',
+            as: 'actionscript', // jason 2003-07 - 03
+            asp: 'asp',
+            awk: 'awk',
+            b: 'b',
+            bas: 'rapidq', // fil 2004-march - 11
+            bash: 'shellscript',
+            bat: 'batch',
+            bbj: 'bbj',
+            bcel: 'bcel',
+            bib: 'bibtex',
+            c: 'c',
+            'c++': 'cplusplus',
+            cbl: 'cobol', // Only one extension is valid: .cob
+            cfg: 'config',
+            cfm: 'coldfusion',
+            clj: 'clojure', // 2013 / 09 / 25: Fix bug 879338.
+            cljs: 'clojure',
+            cljc: 'clojure',
+            ch: 'chill', // Other extensions, .c186,.c286
+            coffee: 'coffeescript',
+            conf: 'apacheconf',
+            cpp: 'cplusplus', // 2020 / 08 / 12: was cpp.
+            css: 'css',
+            d: 'd',
+            dart: 'dart',
+            e: 'eiffel',
+            el: 'elisp',
+            eml: 'mail',
+            erl: 'erlang',
+            ex: 'elixir',
+            f: 'fortran',
+            f90: 'fortran90',
+            factor: 'factor',
+            forth: 'forth',
+            g: 'antlr',
+            groovy: 'groovy',
+            h: 'c', // 2012 / 05 / 23.
+            handlebars: 'html', // McNab.
+            hbs: 'html', // McNab.
+            hs: 'haskell',
+            html: 'html',
+            hx: 'haxe',
+            i: 'swig',
+            i4gl: 'i4gl',
+            icn: 'icon',
+            idl: 'idl',
+            inf: 'inform',
+            info: 'texinfo',
+            ini: 'ini',
+            io: 'io',
+            ipynb: 'jupyter',
+            iss: 'inno_setup',
+            java: 'java',
+            jhtml: 'jhtml',
+            jmk: 'jmk',
+            js: 'javascript', // For javascript import test.
+            jsp: 'javaserverpage',
+            json: 'json',
             // "jsp": "jsp",
-            "ksh": "kshell",
-            "kv": "kivy", // PeckJ 2014/05/05
-            "latex": "latex",
-            "less": "css", // McNab
-            "lua": "lua", // ddm 13/02/06
-            "ly": "lilypond",
-            "m": "matlab",
-            "mak": "makefile",
-            "md": "md", // PeckJ 2013/02/07
-            "ml": "ml",
-            "mm": "objective_c", // Only one extension is valid: .m
-            "mod": "modula3",
-            "mpl": "maple",
-            "mqsc": "mqsc",
-            "nqc": "nqc",
-            "nsi": "nsi", // EKR: 2010/10/27
+            ksh: 'kshell',
+            kv: 'kivy', // PeckJ 2014/05/05
+            latex: 'latex',
+            less: 'css', // McNab
+            lua: 'lua', // ddm 13/02/06
+            ly: 'lilypond',
+            m: 'matlab',
+            mak: 'makefile',
+            md: 'md', // PeckJ 2013/02/07
+            ml: 'ml',
+            mm: 'objective_c', // Only one extension is valid: .m
+            mod: 'modula3',
+            mpl: 'maple',
+            mqsc: 'mqsc',
+            nqc: 'nqc',
+            nsi: 'nsi', // EKR: 2010/10/27
             // "nsi": "nsis2",
-            "nw": "noweb",
-            "occ": "occam",
-            "otl": "vimoutline", // TL 8/25/08 Vim's outline plugin
-            "p": "pascal",
+            nw: 'noweb',
+            occ: 'occam',
+            otl: 'vimoutline', // TL 8/25/08 Vim's outline plugin
+            p: 'pascal',
             // "p": "pop11", // Conflicts with pascal.
-            "php": "php",
-            "pike": "pike",
-            "pl": "perl",
-            "pl1": "pl1",
-            "po": "gettext",
-            "pod": "perlpod",
-            "pov": "povray",
-            "prg": "foxpro",
-            "pro": "prolog",
-            "ps": "postscript",
-            "psp": "psp",
-            "ptl": "ptl",
-            "py": "python",
-            "pyx": "cython", // Other extensions, .pyd,.pyi
+            php: 'php',
+            pike: 'pike',
+            pl: 'perl',
+            pl1: 'pl1',
+            po: 'gettext',
+            pod: 'perlpod',
+            pov: 'povray',
+            prg: 'foxpro',
+            pro: 'prolog',
+            ps: 'postscript',
+            psp: 'psp',
+            ptl: 'ptl',
+            py: 'python',
+            pyx: 'cython', // Other extensions, .pyd,.pyi
             // "pyx": "pyrex",
             // "r": "r", # modes / r.py does not exist.
-            "r": "rebol", // jason 2003-07 - 03
-            "rb": "ruby", // thyrsus 2008-11 - 05
-            "rest": "rst",
-            "rex": "objectrexx",
-            "rhtml": "rhtml",
-            "rib": "rib",
-            "rs": "rust", // EKR: 2019/08/11
-            "sas": "sas",
-            "scala": "scala",
-            "scm": "scheme",
-            "scpt": "applescript",
-            "sgml": "sgml",
-            "sh": "shell", // DS 4/1/04.modes / shell.py exists.
-            "shtml": "shtml",
-            "sm": "smalltalk",
-            "splus": "splus",
-            "sql": "plsql", // qt02537 2005-05 - 27
-            "sqr": "sqr",
-            "ss": "ssharp",
-            "ssi": "shtml",
-            "sty": "latex",
-            "tcl": "tcl", // modes / tcl.py exists.
+            r: 'rebol', // jason 2003-07 - 03
+            rb: 'ruby', // thyrsus 2008-11 - 05
+            rest: 'rst',
+            rex: 'objectrexx',
+            rhtml: 'rhtml',
+            rib: 'rib',
+            rs: 'rust', // EKR: 2019/08/11
+            sas: 'sas',
+            scala: 'scala',
+            scm: 'scheme',
+            scpt: 'applescript',
+            sgml: 'sgml',
+            sh: 'shell', // DS 4/1/04.modes / shell.py exists.
+            shtml: 'shtml',
+            sm: 'smalltalk',
+            splus: 'splus',
+            sql: 'plsql', // qt02537 2005-05 - 27
+            sqr: 'sqr',
+            ss: 'ssharp',
+            ssi: 'shtml',
+            sty: 'latex',
+            tcl: 'tcl', // modes / tcl.py exists.
             // "tcl": "tcltk",
-            "tex": "latex",
+            tex: 'latex',
             // "tex": "tex",
-            "tpl": "tpl",
-            "ts": "typescript",
-            "txt": "plain",
+            tpl: 'tpl',
+            ts: 'typescript',
+            txt: 'plain',
             // "txt": "text",
             // "txt": "unknown", # Set when @comment is seen.
-            "uc": "uscript",
-            "v": "verilog",
-            "vbs": "vbscript",
-            "vhd": "vhdl",
-            "vhdl": "vhdl",
-            "vim": "vim",
-            "vtl": "velocity",
-            "w": "cweb",
-            "wiki": "moin",
-            "xml": "xml",
-            "xom": "omnimark",
-            "xsl": "xsl",
-            "yaml": "yaml",
-            "vue": "javascript",
-            "zpt": "zpt"
+            uc: 'uscript',
+            v: 'verilog',
+            vbs: 'vbscript',
+            vhd: 'vhdl',
+            vhdl: 'vhdl',
+            vim: 'vim',
+            vtl: 'velocity',
+            w: 'cweb',
+            wiki: 'moin',
+            xml: 'xml',
+            xom: 'omnimark',
+            xsl: 'xsl',
+            yaml: 'yaml',
+            vue: 'javascript',
+            zpt: 'zpt',
         };
 
         /*
@@ -528,192 +523,192 @@ export class LeoApp {
         */
 
         this.extra_extension_dict = {
-            'pod': 'perl',
-            'unknown_language': 'none',
-            'w': 'none' // cweb
+            pod: 'perl',
+            unknown_language: 'none',
+            w: 'none', // cweb
         };
     }
 
     //@+node:felix.20210103024632.18: *5* app.define_global_constants
     public define_global_constants(): void {
         // this.prolog_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        this.prolog_prefix_string = "<?xml version=\"1.0\" encoding=";
-        this.prolog_postfix_string = "?>";
+        this.prolog_prefix_string = '<?xml version="1.0" encoding=';
+        this.prolog_postfix_string = '?>';
         // this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
-        this.prolog_namespace_string = 'xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1"';
+        this.prolog_namespace_string =
+            'xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1"';
     }
 
     //@+node:felix.20210103024632.19: *5* app.define_language_delims_dict
     public define_language_delims_dict(): void {
-
         this.language_delims_dict = {
             // Internally, lower case is used for all language names.
             // Keys are languages, values are strings that contain 1, 2 or 3 delims separated by spaces.
-            "actionscript": "// /* */", // jason 2003-07 - 03
-            "ada": "--",
-            "ada95": "--",
-            "ahk": ";",
-            "antlr": "// /* */",
-            "apacheconf": "#",
-            "apdl": "!",
-            "applescript": "-- (* *)",
-            "asp": "<!-- -->",
-            "aspect_j": "// /* */",
-            "assembly_macro32": ";",
-            "assembly_mcs51": ";",
-            "assembly_parrot": "#",
-            "assembly_r2000": "#",
-            "assembly_x86": ";",
-            "autohotkey": "; /* */", // TL - AutoHotkey language
-            "awk": "#",
-            "b": "// /* */",
-            "batch": "REM_", // Use the REM hack.
-            "bbj": "/* */",
-            "bcel": "// /* */",
-            "bibtex": "%",
-            "c": "// /* */", // C, C++ or objective C.
-            "chill": "/* */",
-            "clojure": ";", // 2013 / 09 / 25: Fix bug 879338.
-            "cobol": "*",
-            "coldfusion": "<!-- -->",
-            "coffeescript": "#", // 2016 / 02 / 26.
-            "config": "#", // Leo 4.5.1
-            "cplusplus": "// /* */",
-            "cpp": "// /* */", // C++.
-            "csharp": "// /* */", // C#
-            "css": "/* */", // 4 / 1 / 04
-            "cweb": "@q@ @>", // Use the "cweb hack"
-            "cython": "#",
-            "d": "// /* */",
-            "dart": "// /* */", // Leo 5.0.
-            "doxygen": "#",
-            "eiffel": "--",
-            "elisp": ";",
-            "erlang": "%",
-            "elixir": "#",
-            "factor": "!_ ( )", // Use the rem hack.
-            "forth": "\\_ _(_ _)", // Use the "REM hack"
-            "fortran": "C",
-            "fortran90": "!",
-            "foxpro": "&&",
-            "gettext": "# ",
-            "groovy": "// /* */",
-            "handlebars": "<!-- -->", // McNab: delegate to html.
-            "haskell": "--_ {-_ _-}",
-            "haxe": "// /* */",
-            "hbs": "<!-- -->", // McNab: delegate to html.
-            "html": "<!-- -->",
-            "i4gl": "-- { }",
-            "icon": "#",
-            "idl": "// /* */",
-            "inform": "!",
-            "ini": ";",
-            "inno_setup": ";",
-            "interlis": "/* */",
-            "io": "// */",
-            "java": "// /* */",
-            "javascript": "// /* */", // EKR: 2011 / 11 / 12: For javascript import test.
-            "javaserverpage": "<%-- --%>", // EKR: 2011 / 11 / 25(See also, jsp)
-            "jhtml": "<!-- -->",
-            "jmk": "#",
-            "json": "#", // EKR: 2020 / 07 / 27: Json has no delims.This is a dummy entry.
-            "jsp": "<%-- --%>",
-            "jupyter": "<%-- --%>", // Default to markdown ?
-            "kivy": "#", // PeckJ 2014 / 05 / 05
-            "kshell": "#", // Leo 4.5.1.
-            "latex": "%",
-            "less": "/* */", // NcNab: delegate to css.
-            "lilypond": "% %{ %}",
-            "lisp": ";", // EKR: 2010 / 09 / 29
-            "lotos": "(* *)",
-            "lua": "--", // ddm 13 / 02 / 06
-            "mail": ">",
-            "makefile": "#",
-            "maple": "//",
-            "markdown": "<!-- -->", // EKR, 2018 / 03 / 03: html comments.
-            "matlab": "%", // EKR: 2011 / 10 / 21
-            "md": "<!-- -->", // PeckJ: 2013 / 02 / 08
-            "ml": "(* *)",
-            "modula3": "(* *)",
-            "moin": "##",
-            "mqsc": "*",
-            "netrexx": "-- /* */",
-            "noweb": "%", // EKR: 2009 - 01 - 30. Use Latex for doc chunks.
-            "nqc": "// /* */",
-            "nsi": ";", // EKR: 2010 / 10 / 27
-            "nsis2": ";",
-            "objective_c": "// /* */",
-            "objectrexx": "-- /* */",
-            "occam": "--",
-            "omnimark": ";",
-            "pandoc": "<!-- -->",
-            "pascal": "// { }",
-            "perl": "#",
-            "perlpod": "# __=pod__ __=cut__", // 9 / 25 / 02: The perlpod hack.
-            "php": "// /* */", // 6 / 23 / 07: was "//",
-            "pike": "// /* */",
-            "pl1": "/* */",
-            "plain": "#", // We must pick something.
-            "plsql": "-- /* */", // SQL scripts qt02537 2005 - 05 - 27
-            "pop11": ";;; /* */",
-            "postscript": "%",
-            "povray": "// /* */",
-            "powerdynamo": "// <!-- -->",
-            "prolog": "% /* */",
-            "psp": "<!-- -->",
-            "ptl": "#",
-            "pvwave": ";",
-            "pyrex": "#",
-            "python": "#",
-            "r": "#",
-            "rapidq": "'", // fil 2004 - march - 11
-            "rebol": ";", // jason 2003 - 07 - 03
-            "redcode": ";",
-            "rest": ".._",
-            "rhtml": "<%# %>",
-            "rib": "#",
-            "rpmspec": "#",
-            "rst": ".._",
-            "rust": "// /* */",
-            "ruby": "#", // thyrsus 2008 - 11 - 05
-            "rview": "// /* */",
-            "sas": "* /* */",
-            "scala": "// /* */",
-            "scheme": "; #| |#",
-            "sdl_pr": "/* */",
-            "sgml": "<!-- -->",
-            "shell": "#",     // shell scripts
-            "shellscript": "#",
-            "shtml": "<!-- -->",
-            "smalltalk": '" "', // Comments are enclosed in double quotes(!!)
-            "smi_mib": "--",
-            "splus": "#",
-            "sqr": "!",
-            "squidconf": "#",
-            "ssharp": "#",
-            "swig": "// /* */",
-            "tcl": "#",
-            "tcltk": "#",
-            "tex": "%", // Bug fix: 2008 - 1 - 30: Fixed Mark Edginton's bug.
-            "text": "#", // We must pick something.
-            "texinfo": "@c",
-            "tpl": "<!-- -->",
-            "tsql": "-- /* */",
-            "typescript": "// /* */", // For typescript import test.
-            "unknown": "#", // Set when @comment is seen.
-            "unknown_language": '#--unknown-language--', // For unknown extensions in @shadow files.
-            "uscript": "// /* */",
-            "vbscript": "'",
-            "velocity": "## #* *#",
-            "verilog": "// /* */",
-            "vhdl": "--",
-            "vim": "\"",
-            "vimoutline": "#", // TL 8 / 25 / 08 Vim's outline plugin
-            "xml": "<!-- -->",
-            "xsl": "<!-- -->",
-            "xslt": "<!-- -->",
-            "yaml": "#",
-            "zpt": "<!-- -->"
+            actionscript: '// /* */', // jason 2003-07 - 03
+            ada: '--',
+            ada95: '--',
+            ahk: ';',
+            antlr: '// /* */',
+            apacheconf: '#',
+            apdl: '!',
+            applescript: '-- (* *)',
+            asp: '<!-- -->',
+            aspect_j: '// /* */',
+            assembly_macro32: ';',
+            assembly_mcs51: ';',
+            assembly_parrot: '#',
+            assembly_r2000: '#',
+            assembly_x86: ';',
+            autohotkey: '; /* */', // TL - AutoHotkey language
+            awk: '#',
+            b: '// /* */',
+            batch: 'REM_', // Use the REM hack.
+            bbj: '/* */',
+            bcel: '// /* */',
+            bibtex: '%',
+            c: '// /* */', // C, C++ or objective C.
+            chill: '/* */',
+            clojure: ';', // 2013 / 09 / 25: Fix bug 879338.
+            cobol: '*',
+            coldfusion: '<!-- -->',
+            coffeescript: '#', // 2016 / 02 / 26.
+            config: '#', // Leo 4.5.1
+            cplusplus: '// /* */',
+            cpp: '// /* */', // C++.
+            csharp: '// /* */', // C#
+            css: '/* */', // 4 / 1 / 04
+            cweb: '@q@ @>', // Use the "cweb hack"
+            cython: '#',
+            d: '// /* */',
+            dart: '// /* */', // Leo 5.0.
+            doxygen: '#',
+            eiffel: '--',
+            elisp: ';',
+            erlang: '%',
+            elixir: '#',
+            factor: '!_ ( )', // Use the rem hack.
+            forth: '\\_ _(_ _)', // Use the "REM hack"
+            fortran: 'C',
+            fortran90: '!',
+            foxpro: '&&',
+            gettext: '# ',
+            groovy: '// /* */',
+            handlebars: '<!-- -->', // McNab: delegate to html.
+            haskell: '--_ {-_ _-}',
+            haxe: '// /* */',
+            hbs: '<!-- -->', // McNab: delegate to html.
+            html: '<!-- -->',
+            i4gl: '-- { }',
+            icon: '#',
+            idl: '// /* */',
+            inform: '!',
+            ini: ';',
+            inno_setup: ';',
+            interlis: '/* */',
+            io: '// */',
+            java: '// /* */',
+            javascript: '// /* */', // EKR: 2011 / 11 / 12: For javascript import test.
+            javaserverpage: '<%-- --%>', // EKR: 2011 / 11 / 25(See also, jsp)
+            jhtml: '<!-- -->',
+            jmk: '#',
+            json: '#', // EKR: 2020 / 07 / 27: Json has no delims.This is a dummy entry.
+            jsp: '<%-- --%>',
+            jupyter: '<%-- --%>', // Default to markdown ?
+            kivy: '#', // PeckJ 2014 / 05 / 05
+            kshell: '#', // Leo 4.5.1.
+            latex: '%',
+            less: '/* */', // NcNab: delegate to css.
+            lilypond: '% %{ %}',
+            lisp: ';', // EKR: 2010 / 09 / 29
+            lotos: '(* *)',
+            lua: '--', // ddm 13 / 02 / 06
+            mail: '>',
+            makefile: '#',
+            maple: '//',
+            markdown: '<!-- -->', // EKR, 2018 / 03 / 03: html comments.
+            matlab: '%', // EKR: 2011 / 10 / 21
+            md: '<!-- -->', // PeckJ: 2013 / 02 / 08
+            ml: '(* *)',
+            modula3: '(* *)',
+            moin: '##',
+            mqsc: '*',
+            netrexx: '-- /* */',
+            noweb: '%', // EKR: 2009 - 01 - 30. Use Latex for doc chunks.
+            nqc: '// /* */',
+            nsi: ';', // EKR: 2010 / 10 / 27
+            nsis2: ';',
+            objective_c: '// /* */',
+            objectrexx: '-- /* */',
+            occam: '--',
+            omnimark: ';',
+            pandoc: '<!-- -->',
+            pascal: '// { }',
+            perl: '#',
+            perlpod: '# __=pod__ __=cut__', // 9 / 25 / 02: The perlpod hack.
+            php: '// /* */', // 6 / 23 / 07: was "//",
+            pike: '// /* */',
+            pl1: '/* */',
+            plain: '#', // We must pick something.
+            plsql: '-- /* */', // SQL scripts qt02537 2005 - 05 - 27
+            pop11: ';;; /* */',
+            postscript: '%',
+            povray: '// /* */',
+            powerdynamo: '// <!-- -->',
+            prolog: '% /* */',
+            psp: '<!-- -->',
+            ptl: '#',
+            pvwave: ';',
+            pyrex: '#',
+            python: '#',
+            r: '#',
+            rapidq: "'", // fil 2004 - march - 11
+            rebol: ';', // jason 2003 - 07 - 03
+            redcode: ';',
+            rest: '.._',
+            rhtml: '<%# %>',
+            rib: '#',
+            rpmspec: '#',
+            rst: '.._',
+            rust: '// /* */',
+            ruby: '#', // thyrsus 2008 - 11 - 05
+            rview: '// /* */',
+            sas: '* /* */',
+            scala: '// /* */',
+            scheme: '; #| |#',
+            sdl_pr: '/* */',
+            sgml: '<!-- -->',
+            shell: '#', // shell scripts
+            shellscript: '#',
+            shtml: '<!-- -->',
+            smalltalk: '" "', // Comments are enclosed in double quotes(!!)
+            smi_mib: '--',
+            splus: '#',
+            sqr: '!',
+            squidconf: '#',
+            ssharp: '#',
+            swig: '// /* */',
+            tcl: '#',
+            tcltk: '#',
+            tex: '%', // Bug fix: 2008 - 1 - 30: Fixed Mark Edginton's bug.
+            text: '#', // We must pick something.
+            texinfo: '@c',
+            tpl: '<!-- -->',
+            tsql: '-- /* */',
+            typescript: '// /* */', // For typescript import test.
+            unknown: '#', // Set when @comment is seen.
+            unknown_language: '#--unknown-language--', // For unknown extensions in @shadow files.
+            uscript: '// /* */',
+            vbscript: "'",
+            velocity: '## #* *#',
+            verilog: '// /* */',
+            vhdl: '--',
+            vim: '"',
+            vimoutline: '#', // TL 8 / 25 / 08 Vim's outline plugin
+            xml: '<!-- -->',
+            xsl: '<!-- -->',
+            xslt: '<!-- -->',
+            yaml: '#',
+            zpt: '<!-- -->',
 
             // These aren't real languages, or have no delims...
             // "cvs_commit"         : "",
@@ -730,155 +725,153 @@ export class LeoApp {
             // "rtf"                : "",
             // "svn_commit"         : "",
         };
-
     }
 
     //@+node:felix.20210103024632.20: *5* app.define_language_extension_dict
     public define_language_extension_dict(): void {
-
         // Used only by g.app.externalFilesController.get_ext.
 
         // Keys are languages, values are extensions.
         this.language_extension_dict = {
-            "actionscript": "as", // jason 2003-07 - 03
-            "ada": "ada",
-            "ada95": "ada",
-            "ahk": "ahk",
-            "antlr": "g",
-            "apacheconf": "conf",
-            "apdl": "apdl",
-            "applescript": "scpt",
-            "asp": "asp",
-            "aspect_j": "aj",
-            "autohotkey": "ahk", // TL - AutoHotkey language
-            "awk": "awk",
-            "b": "b",
-            "batch": "bat", // Leo 4.5.1.
-            "bbj": "bbj",
-            "bcel": "bcel",
-            "bibtex": "bib",
-            "c": "c",
-            "chill": "ch", // Only one extension is valid: .c186, .c286
-            "clojure": "clj", // 2013 / 09 / 25: Fix bug 879338.
-            "cobol": "cbl", // Only one extension is valid: .cob
-            "coldfusion": "cfm",
-            "coffeescript": "coffee",
-            "config": "cfg",
-            "cplusplus": "c++",
-            "cpp": "cpp",
-            "css": "css", // 4 / 1 / 04
-            "cweb": "w",
-            "cython": "pyx", // Only one extension is valid at present: .pyi, .pyd.
-            "d": "d",
-            "dart": "dart",
-            "eiffel": "e",
-            "elisp": "el",
-            "erlang": "erl",
-            "elixir": "ex",
-            "factor": "factor",
-            "forth": "forth",
-            "fortran": "f",
-            "fortran90": "f90",
-            "foxpro": "prg",
-            "gettext": "po",
-            "groovy": "groovy",
-            "haskell": "hs",
-            "haxe": "hx",
-            "html": "html",
-            "i4gl": "i4gl",
-            "icon": "icn",
-            "idl": "idl",
-            "inform": "inf",
-            "ini": "ini",
-            "inno_setup": "iss",
-            "io": "io",
-            "java": "java",
-            "javascript": "js", // EKR: 2011/11/12: For javascript import test.
-            "javaserverpage": "jsp", // EKR: 2011/11/25
-            "jhtml": "jhtml",
-            "jmk": "jmk",
-            "json": "json",
-            "jsp": "jsp",
-            "jupyter": "ipynb",
-            "kivy": "kv", // PeckJ 2014/05/05
-            "kshell": "ksh", // Leo 4.5.1.
-            "latex": "tex", // 1 / 8 / 04
-            "lilypond": "ly",
-            "lua": "lua", // ddm 13/02/06
-            "mail": "eml",
-            "makefile": "mak",
-            "maple": "mpl",
-            "matlab": "m",
-            "md": "md", // PeckJ: 2013/02/07
-            "ml": "ml",
-            "modula3": "mod",
-            "moin": "wiki",
-            "mqsc": "mqsc",
-            "noweb": "nw",
-            "nqc": "nqc",
-            "nsi": "nsi", // EKR: 2010/10/27
-            "nsis2": "nsi",
-            "objective_c": "mm", // Only one extension is valid: .m
-            "objectrexx": "rex",
-            "occam": "occ",
-            "omnimark": "xom",
-            "pascal": "p",
-            "perl": "pl",
-            "perlpod": "pod",
-            "php": "php",
-            "pike": "pike",
-            "pl1": "pl1",
-            "plain": "txt",
-            "plsql": "sql", // qt02537 2005-05 - 27
+            actionscript: 'as', // jason 2003-07 - 03
+            ada: 'ada',
+            ada95: 'ada',
+            ahk: 'ahk',
+            antlr: 'g',
+            apacheconf: 'conf',
+            apdl: 'apdl',
+            applescript: 'scpt',
+            asp: 'asp',
+            aspect_j: 'aj',
+            autohotkey: 'ahk', // TL - AutoHotkey language
+            awk: 'awk',
+            b: 'b',
+            batch: 'bat', // Leo 4.5.1.
+            bbj: 'bbj',
+            bcel: 'bcel',
+            bibtex: 'bib',
+            c: 'c',
+            chill: 'ch', // Only one extension is valid: .c186, .c286
+            clojure: 'clj', // 2013 / 09 / 25: Fix bug 879338.
+            cobol: 'cbl', // Only one extension is valid: .cob
+            coldfusion: 'cfm',
+            coffeescript: 'coffee',
+            config: 'cfg',
+            cplusplus: 'c++',
+            cpp: 'cpp',
+            css: 'css', // 4 / 1 / 04
+            cweb: 'w',
+            cython: 'pyx', // Only one extension is valid at present: .pyi, .pyd.
+            d: 'd',
+            dart: 'dart',
+            eiffel: 'e',
+            elisp: 'el',
+            erlang: 'erl',
+            elixir: 'ex',
+            factor: 'factor',
+            forth: 'forth',
+            fortran: 'f',
+            fortran90: 'f90',
+            foxpro: 'prg',
+            gettext: 'po',
+            groovy: 'groovy',
+            haskell: 'hs',
+            haxe: 'hx',
+            html: 'html',
+            i4gl: 'i4gl',
+            icon: 'icn',
+            idl: 'idl',
+            inform: 'inf',
+            ini: 'ini',
+            inno_setup: 'iss',
+            io: 'io',
+            java: 'java',
+            javascript: 'js', // EKR: 2011/11/12: For javascript import test.
+            javaserverpage: 'jsp', // EKR: 2011/11/25
+            jhtml: 'jhtml',
+            jmk: 'jmk',
+            json: 'json',
+            jsp: 'jsp',
+            jupyter: 'ipynb',
+            kivy: 'kv', // PeckJ 2014/05/05
+            kshell: 'ksh', // Leo 4.5.1.
+            latex: 'tex', // 1 / 8 / 04
+            lilypond: 'ly',
+            lua: 'lua', // ddm 13/02/06
+            mail: 'eml',
+            makefile: 'mak',
+            maple: 'mpl',
+            matlab: 'm',
+            md: 'md', // PeckJ: 2013/02/07
+            ml: 'ml',
+            modula3: 'mod',
+            moin: 'wiki',
+            mqsc: 'mqsc',
+            noweb: 'nw',
+            nqc: 'nqc',
+            nsi: 'nsi', // EKR: 2010/10/27
+            nsis2: 'nsi',
+            objective_c: 'mm', // Only one extension is valid: .m
+            objectrexx: 'rex',
+            occam: 'occ',
+            omnimark: 'xom',
+            pascal: 'p',
+            perl: 'pl',
+            perlpod: 'pod',
+            php: 'php',
+            pike: 'pike',
+            pl1: 'pl1',
+            plain: 'txt',
+            plsql: 'sql', // qt02537 2005-05 - 27
             // "pop11"       : "p", // Conflicts with pascal.
-            "postscript": "ps",
-            "povray": "pov",
-            "prolog": "pro",
-            "psp": "psp",
-            "ptl": "ptl",
-            "pyrex": "pyx",
-            "python": "py",
-            "r": "r",
-            "rapidq": "bas", // fil 2004-march - 11
-            "rebol": "r", // jason 2003-07 - 03
-            "rhtml": "rhtml",
-            "rib": "rib",
-            "rst": "rest",
-            "ruby": "rb", // thyrsus 2008-11 - 05
-            "rust": "rs", // EKR: 2019/08/11
-            "sas": "sas",
-            "scala": "scala",
-            "scheme": "scm",
-            "sgml": "sgml",
-            "shell": "sh", // DS 4/1/04
-            "shellscript": "bash",
-            "shtml": "ssi", // Only one extension is valid: .shtml
-            "smalltalk": "sm",
-            "splus": "splus",
-            "sqr": "sqr",
-            "ssharp": "ss",
-            "swig": "i",
-            "tcl": "tcl",
-            "tcltk": "tcl",
-            "tex": "tex",
-            "texinfo": "info",
-            "text": "txt",
-            "tpl": "tpl",
-            "tsql": "sql", // A guess.
-            "typescript": "ts",
-            "unknown": "txt", // Set when @comment is seen.
-            "uscript": "uc",
-            "vbscript": "vbs",
-            "velocity": "vtl",
-            "verilog": "v",
-            "vhdl": "vhd", // Only one extension is valid: .vhdl
-            "vim": "vim",
-            "vimoutline": "otl", // TL 8 / 25 / 08 Vim's outline plugin
-            "xml": "xml",
-            "xsl": "xsl",
-            "xslt": "xsl",
-            "yaml": "yaml",
-            "zpt": "zpt"
+            postscript: 'ps',
+            povray: 'pov',
+            prolog: 'pro',
+            psp: 'psp',
+            ptl: 'ptl',
+            pyrex: 'pyx',
+            python: 'py',
+            r: 'r',
+            rapidq: 'bas', // fil 2004-march - 11
+            rebol: 'r', // jason 2003-07 - 03
+            rhtml: 'rhtml',
+            rib: 'rib',
+            rst: 'rest',
+            ruby: 'rb', // thyrsus 2008-11 - 05
+            rust: 'rs', // EKR: 2019/08/11
+            sas: 'sas',
+            scala: 'scala',
+            scheme: 'scm',
+            sgml: 'sgml',
+            shell: 'sh', // DS 4/1/04
+            shellscript: 'bash',
+            shtml: 'ssi', // Only one extension is valid: .shtml
+            smalltalk: 'sm',
+            splus: 'splus',
+            sqr: 'sqr',
+            ssharp: 'ss',
+            swig: 'i',
+            tcl: 'tcl',
+            tcltk: 'tcl',
+            tex: 'tex',
+            texinfo: 'info',
+            text: 'txt',
+            tpl: 'tpl',
+            tsql: 'sql', // A guess.
+            typescript: 'ts',
+            unknown: 'txt', // Set when @comment is seen.
+            uscript: 'uc',
+            vbscript: 'vbs',
+            velocity: 'vtl',
+            verilog: 'v',
+            vhdl: 'vhd', // Only one extension is valid: .vhdl
+            vim: 'vim',
+            vimoutline: 'otl', // TL 8 / 25 / 08 Vim's outline plugin
+            xml: 'xml',
+            xsl: 'xsl',
+            xslt: 'xsl',
+            yaml: 'yaml',
+            zpt: 'zpt',
         };
 
         /*
@@ -896,7 +889,6 @@ export class LeoApp {
                 # squidconf:        .conf
                 # rpmspec:          .rpm
         */
-
     }
 
     //@+node:felix.20210103024632.21: *5* app.init_at_auto_names
@@ -904,7 +896,7 @@ export class LeoApp {
      * Init the app.atAutoNames set.
      */
     public init_at_auto_names(): void {
-        this.atAutoNames = ["@auto-rst", "@auto"];
+        this.atAutoNames = ['@auto-rst', '@auto'];
     }
 
     //@+node:felix.20210103024632.22: *5* app.init_at_file_names
@@ -913,12 +905,16 @@ export class LeoApp {
      */
     public init_at_file_names(): void {
         this.atFileNames = [
-            "@asis",
-            "@edit",
-            "@file-asis", "@file-thin", "@file-nosent", "@file",
-            "@clean", "@nosent",
-            "@shadow",
-            "@thin",
+            '@asis',
+            '@edit',
+            '@file-asis',
+            '@file-thin',
+            '@file-nosent',
+            '@file',
+            '@clean',
+            '@nosent',
+            '@shadow',
+            '@thin',
         ];
     }
 
@@ -926,7 +922,6 @@ export class LeoApp {
 
     //@+node:felix.20220417165216.1: *4* app.computeSignon & printSignon
     public computeSignon(): void {
-
         const app = this;
         if (app.signon && app.signon1) {
             return;
@@ -934,13 +929,15 @@ export class LeoApp {
 
         let guiVersion = 'VSCode version ' + vscode.version;
 
-        const w_LeoJSExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+        const w_LeoJSExtension = vscode.extensions.getExtension(
+            Constants.PUBLISHER + '.' + Constants.NAME
+        )!;
         const w_leojsPackageJson = w_LeoJSExtension.packageJSON;
 
         const leoVer: string = w_leojsPackageJson.version;
 
         // n1, n2, n3, junk1, junk2 = sys.version_info
-        let n1: string = "";
+        let n1: string = '';
         if (process.version) {
             n1 = 'Node.js ' + process.version;
             // @ts-expect-error
@@ -953,15 +950,14 @@ export class LeoApp {
                 if (n1_split.length > 2) {
                     n1_split = n1_split.slice(-2);
                 }
-                n1 = n1_split.join(".");
+                n1 = n1_split.join('.');
             }
-
         }
         if (n1) {
             n1 += ', ';
         }
 
-        let sysVersion: string = "Browser";
+        let sysVersion: string = 'Browser';
 
         if (process.platform) {
             sysVersion = process.platform;
@@ -973,15 +969,15 @@ export class LeoApp {
                 browserResult = Bowser.parse(navigator.userAgent);
                 sysVersion = browserResult.browser.name;
                 if (browserResult.browser.version) {
-                    sysVersion += " " + browserResult.browser.version;
+                    sysVersion += ' ' + browserResult.browser.version;
                 }
 
                 if (browserResult.os) {
                     if (browserResult.os.name) {
-                        sysVersion += " on " + browserResult.os.name;
+                        sysVersion += ' on ' + browserResult.os.name;
                     }
                     if (browserResult.os.version) {
-                        sysVersion += " " + browserResult.os.version;
+                        sysVersion += ' ' + browserResult.os.version;
                     }
                 }
             }
@@ -1056,8 +1052,11 @@ export class LeoApp {
     /**
      * Get g.app.leoID from various sources.
      */
-    public async setLeoID(useDialog: boolean = true, verbose: boolean = true): Promise<string> {
-        this.leoID = "";
+    public async setLeoID(
+        useDialog: boolean = true,
+        verbose: boolean = true
+    ): Promise<string> {
+        this.leoID = '';
 
         // tslint:disable-next-line: strict-comparisons
         console.assert(this === g.app);
@@ -1068,12 +1067,13 @@ export class LeoApp {
         //     this.leoID = "unittestid";
         // }
 
-        let w_userName = ""; // = "TestUserName";
+        let w_userName = ''; // = "TestUserName";
 
         // 1 - set leoID from configuration settings
         if (!this.leoID && vscode && vscode.workspace) {
-            w_userName = vscode.workspace.getConfiguration(
-                Constants.CONFIG_NAME).get(
+            w_userName = vscode.workspace
+                .getConfiguration(Constants.CONFIG_NAME)
+                .get(
                     Constants.CONFIG_NAMES.LEO_ID,
                     Constants.CONFIG_DEFAULTS.LEO_ID
                 );
@@ -1086,7 +1086,10 @@ export class LeoApp {
         if (!this.leoID && os && os.userInfo) {
             w_userName = os.userInfo().username;
             if (w_userName) {
-                this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
+                this.leoID = this.cleanLeoID(
+                    w_userName,
+                    'os.userInfo().username'
+                );
             }
         }
 
@@ -1095,20 +1098,33 @@ export class LeoApp {
             const w_id = await utils.getIdFromDialog();
             this.leoID = this.cleanLeoID(w_id, '');
             if (this.leoID && vscode && vscode.workspace) {
-                const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
+                const w_vscodeConfig = vscode.workspace.getConfiguration(
+                    Constants.CONFIG_NAME
+                );
                 // tslint:disable-next-line: strict-comparisons
-                if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
+                if (
+                    w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
+                        .defaultValue === this.leoID
+                ) {
                     // Set as undefined - same as default
-                    await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
+                    await w_vscodeConfig.update(
+                        Constants.CONFIG_NAMES.LEO_ID,
+                        undefined,
+                        true
+                    );
                 } else {
                     // Set as value which is not default
-                    await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
+                    await w_vscodeConfig.update(
+                        Constants.CONFIG_NAMES.LEO_ID,
+                        this.leoID,
+                        true
+                    );
                 }
             }
         }
         if (!this.leoID) {
             // throw new Error("Could not get Leo ID");
-            this.leoID = "None";
+            this.leoID = 'None';
         }
         return this.leoID;
     }
@@ -1120,23 +1136,27 @@ export class LeoApp {
     public cleanLeoID(id_: string, tag: string): string {
         const old_id: string = id_.toString();
         try {
-            id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
+            id_ = id_
+                .replace(/\./g, '')
+                .replace(/\,/g, '')
+                .replace(/\"/g, '')
+                .replace(/\'/g, '');
             //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
             id_ = id_.split(' ').join('');
-        }
-        catch (exception) {
+        } catch (exception) {
             g.es_exception(exception);
             id_ = '';
         }
         if (id_.length < 3) {
-            id_ = "";
+            id_ = '';
             void vscode.window.showInformationMessage(
                 `Invalid Leo ID: ${tag}`,
                 {
-                    detail: `Invalid Leo ID: ${old_id}\n\n` +
-                        "Your id should contain only letters and numbers\n" +
-                        "and must be at least 3 characters in length.",
-                    modal: true
+                    detail:
+                        `Invalid Leo ID: ${old_id}\n\n` +
+                        'Your id should contain only letters and numbers\n' +
+                        'and must be at least 3 characters in length.',
+                    modal: true,
                 }
             );
         }
@@ -1155,12 +1175,16 @@ export class LeoApp {
      *               during initial load, so UI remains for files
      *               further along the command line.
      */
-    public async closeLeoWindow(frame: LeoFrame, new_c?: Commands, finish_quit = true): Promise<boolean> {
+    public async closeLeoWindow(
+        frame: LeoFrame,
+        new_c?: Commands,
+        finish_quit = true
+    ): Promise<boolean> {
         const c = frame.c;
         if (g.app.debug.includes('shutdown')) {
             g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
         }
-        c.endEditing();  // Commit any open edits.
+        c.endEditing(); // Commit any open edits.
         if (c.promptingForClose) {
             // There is already a dialog open asking what to do.
             return false;
@@ -1180,11 +1204,11 @@ export class LeoApp {
         }
         // g.app.setLog(None)  // no log until we reactive a window.
 
-        g.doHook("close-frame", { c: c });
+        g.doHook('close-frame', { c: c });
         //
         // Save the window state for *all* open files.
         if (g.app.commander_cacher) {
-            g.app.commander_cacher.commit();  // store cache, but don't close it.
+            g.app.commander_cacher.commit(); // store cache, but don't close it.
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
@@ -1195,7 +1219,6 @@ export class LeoApp {
             if (index > -1) {
                 g.app.windowList.splice(index, 1);
             }
-
         } else {
             // #69.
             g.app.forgetOpenFile(c.fileName());
@@ -1208,7 +1231,7 @@ export class LeoApp {
             // * Does not terminate when last is closed: Present 'new' and 'open' buttons instead!
             // g.app.finishQuit();
         }
-        return true;  // The window has been closed.
+        return true; // The window has been closed.
     }
     //@+node:felix.20220511231737.4: *4* app.destroyWindow
     /**
@@ -1218,7 +1241,10 @@ export class LeoApp {
         if (g.app.debug.includes('shutdown')) {
             g.pr(`destroyWindow:  ${frame.c.shortFileName()}`);
         }
-        if (g.app.externalFilesController && g.app.externalFilesController.destroy_frame) {
+        if (
+            g.app.externalFilesController &&
+            g.app.externalFilesController.destroy_frame
+        ) {
             await g.app.externalFilesController.destroy_frame(frame);
         }
         if (g.app.windowList.includes(frame)) {
@@ -1233,7 +1259,7 @@ export class LeoApp {
      * Return list of currently active controllers
      */
     public commanders(): Commands[] {
-        return g.app.windowList.map(f => f.c);
+        return g.app.windowList.map((f) => f.c);
     }
     //@+node:felix.20211226221235.1: *3* app.Detecting already-open files
     //@+node:felix.20211226221235.2: *4* app.checkForOpenFile
@@ -1247,7 +1273,8 @@ export class LeoApp {
             // #302: revert to saved doesn't reset external file change monitoring
             g.app.already_open_files = [];
         }
-        if (d === undefined ||
+        if (
+            d === undefined ||
             g.unitTesting ||
             g.app.batchMode ||
             g.app.reverting ||
@@ -1284,20 +1311,17 @@ export class LeoApp {
         // TODO maybe
         // Temp fix
         g.app.rememberOpenFile(fn);
-
     }
     //@+node:felix.20211226221235.3: *4* app.forgetOpenFile
     /**
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
-
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
 
         if (!d || !fn) {
-
             return; // #69.
         }
 
@@ -1306,7 +1330,6 @@ export class LeoApp {
         fn = path.normalize(fn);
 
         if (aList.includes(fn)) {
-
             // aList.remove(fn)
             const index = aList.indexOf(fn);
             if (index > -1) {
@@ -1317,18 +1340,20 @@ export class LeoApp {
                 g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
             }
             d[tag] = aList;
-
         }
-
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
-
         // Do not call g.trace, etc. here.
         const d = g.app.db;
         const tag = 'open-leo-files';
 
-        if (d === undefined || g.unitTesting || g.app.batchMode || g.app.reverting) {
+        if (
+            d === undefined ||
+            g.unitTesting ||
+            g.app.batchMode ||
+            g.app.reverting
+        ) {
             // pass
         } else if (g.app.preReadFlag) {
             // pass
@@ -1359,10 +1384,13 @@ export class LeoApp {
     /**
      * A factory returning a scanner function for p, an @auto node.
      */
-    public scanner_for_at_auto(c: Commands, p: Position): ((...args: any[]) => any) | undefined {
-
+    public scanner_for_at_auto(
+        c: Commands,
+        p: Position
+    ): ((...args: any[]) => any) | undefined {
         const d = g.app.atAutoDict;
-        for (const key in d) { // USING 'in' for KEYS
+        for (const key in d) {
+            // USING 'in' for KEYS
 
             const func = d[key];
             if (func && g.match_word(p.h, 0, key)) {
@@ -1370,16 +1398,16 @@ export class LeoApp {
             }
         }
         return undefined;
-
     }
     //@+node:felix.20230518231054.3: *4* app.scanner_for_ext
     /**
      * A factory returning a scanner function for the given file extension.
      */
-    public scanner_for_ext(c: Commands, ext: string): ((...args: any[]) => any) | undefined {
-
+    public scanner_for_ext(
+        c: Commands,
+        ext: string
+    ): ((...args: any[]) => any) | undefined {
         return g.app.classDispatchDict[ext];
-
     }
     //@+node:felix.20220417215246.1: *3* app.makeAllBindings
     /**
@@ -1404,7 +1432,7 @@ export class LeoApp {
         fileName: string,
         gui?: LeoGui,
         previousSettings?: PreviousSettings,
-        relativeFileName?: string,
+        relativeFileName?: string
     ): Commands {
         // Create the commander and its subcommanders.
         // This takes about 3/4 sec when called by the leoBridge module.
@@ -1449,7 +1477,6 @@ export class LeoApp {
         c.outerUpdate();
     }
     //@-others
-
 }
 
 //@+node:felix.20210118015431.1: ** class LoadManager
@@ -1457,7 +1484,6 @@ export class LeoApp {
  * A class to manage loading .leo files, including configuration files.
  */
 export class LoadManager {
-
     // Global settings & shortcuts dicts...
     // The are the defaults for computing settings and shortcuts for all loaded files.
 
@@ -1534,7 +1560,6 @@ export class LoadManager {
      * The "footnote": Get the local directory from lm.files[0]
      */
     public async computeMyLeoSettingsPath(): Promise<string | undefined> {
-
         const lm = this;
         const join = g.finalize_join;
         const settings_fn = 'myLeoSettings.leo';
@@ -1545,7 +1570,9 @@ export class LoadManager {
         let localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
         // IF NO FILES IN lm.files THEN USE WORKSPACE ROOT !
         if (!localDir) {
-            localDir = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.path : "";
+            localDir = vscode.workspace.workspaceFolders
+                ? vscode.workspace.workspaceFolders[0].uri.path
+                : '';
         }
 
         const table = [
@@ -1563,7 +1590,6 @@ export class LoadManager {
         let hasBreak = false;
         let path: string | undefined;
         for (let p_path of table) {
-
             const exists = await g.os_path_exists(p_path);
             if (exists) {
                 path = p_path;
@@ -1584,16 +1610,15 @@ export class LoadManager {
      * set the corresponding ivars.
      */
     public async computeStandardDirectories(): Promise<unknown> {
-
         const lm = this;
         const join = g.PYTHON_os_path_join;
-        g.app.loadDir = lm.computeLoadDir(); // UNUSED The leo / core directory. 
-        g.app.globalConfigDir = lm.computeGlobalConfigDir(); // UNUSED leo / config directory 
+        g.app.loadDir = lm.computeLoadDir(); // UNUSED The leo / core directory.
+        g.app.globalConfigDir = lm.computeGlobalConfigDir(); // UNUSED leo / config directory
         g.app.homeDir = await lm.computeHomeDir(); // * The user's home directory.
         g.app.homeLeoDir = await lm.computeHomeLeoDir(); // * The user's home/.leo directory.
-        // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs 
+        // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs
         // These use g.app.loadDir...
-        g.app.extensionsDir = ""; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
+        g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
         // g.app.leoEditorDir = join(g.app.loadDir, '..', '..');
         g.app.testDir = join(g.app.loadDir, '..', 'test');
 
@@ -1603,7 +1628,7 @@ export class LoadManager {
     //@+node:felix.20220610002953.6: *5* LM.computeGlobalConfigDir
 
     public computeGlobalConfigDir(): string {
-        let theDir: string = ""; // ! unused : RETURN EMPTY / FALSY FOR NOW
+        let theDir: string = ''; // ! unused : RETURN EMPTY / FALSY FOR NOW
 
         /* 
         const leo_config_dir = getattr(sys, 'leo_config_directory', None)
@@ -1625,7 +1650,7 @@ export class LoadManager {
      * Returns the user's home directory.
      */
     public async computeHomeDir(): Promise<string> {
-        let home: string = "";
+        let home: string = '';
 
         // Windows searches the HOME, HOMEPATH and HOMEDRIVE
         // environment vars, then gives up.
@@ -1646,7 +1671,7 @@ export class LoadManager {
             const exists = await g.os_path_exists(home);
             const isDir = await g.os_path_isdir(home);
             if (!exists || !isDir) {
-                home = "";
+                home = '';
             }
         }
 
@@ -1655,11 +1680,11 @@ export class LoadManager {
     //@+node:felix.20220610002953.8: *5* LM.computeHomeLeoDir
 
     public async computeHomeLeoDir(): Promise<string> {
-        let homeLeoDir: string = "";
+        let homeLeoDir: string = '';
 
         // * RETURN FALSY STRING IF NO HOME DIR (possibly in browser)
         if (!g.app.homeDir) {
-            return "";
+            return '';
         }
 
         homeLeoDir = g.finalize_join(g.app.homeDir, '.leo');
@@ -1674,11 +1699,9 @@ export class LoadManager {
         try {
             await vscode.workspace.fs.createDirectory(w_uri);
             return homeLeoDir;
-        }
-        catch (exception) {
+        } catch (exception) {
             return '';
         }
-
     }
     //@+node:felix.20220610002953.9: *5* LM.computeLeoDir
     /* 
@@ -1693,8 +1716,7 @@ export class LoadManager {
      * Returns the directory containing leo.py.
      */
     public computeLoadDir(): string {
-
-        let loadDir: string = __dirname || "./";
+        let loadDir: string = __dirname || './';
         let w_uri;
         if (vscode.workspace.workspaceFolders) {
             w_uri = vscode.workspace.workspaceFolders[0].uri;
@@ -1921,15 +1943,20 @@ export class LoadManager {
      * Merge the settings dicts from c's outline into *new copies of*
      * settings_d and bindings_d.
      */
-    public computeLocalSettings(c: Commands, settings_d: g.SettingsDict, bindings_d: g.SettingsDict, localFlag: boolean): [g.SettingsDict, g.SettingsDict] {
-
+    public computeLocalSettings(
+        c: Commands,
+        settings_d: g.SettingsDict,
+        bindings_d: g.SettingsDict,
+        localFlag: boolean
+    ): [g.SettingsDict, g.SettingsDict] {
         const lm = this;
         let shortcuts_d2;
         let settings_d2;
 
         [shortcuts_d2, settings_d2] = lm.createSettingsDicts(c, localFlag);
 
-        if (!bindings_d) {// #1766: unit tests.
+        if (!bindings_d) {
+            // #1766: unit tests.
             [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
         }
         if (settings_d2) {
@@ -1940,7 +1967,7 @@ export class LoadManager {
                     const fn = g.shortFileName(val.path);
                     g.es_print(
                         `--trace-setting: in ${fn}: ` +
-                        `@${val.kind} ${g.app.trace_setting}=${val.val}`
+                            `@${val.kind} ${g.app.trace_setting}=${val.val}`
                     );
                 }
             }
@@ -1948,7 +1975,7 @@ export class LoadManager {
             settings_d.update(settings_d2);
         }
         if (shortcuts_d2) {
-            // TODO support shortcuts needed? 
+            // TODO support shortcuts needed?
             // bindings_d = lm.mergeShortcutsDicts(c, bindings_d, shortcuts_d2, localFlag);
         }
 
@@ -1960,7 +1987,6 @@ export class LoadManager {
      * Create lm.globalSettingsDict & lm.globalBindingsDict.
      */
     public createDefaultSettingsDicts(): [g.SettingsDict, g.SettingsDict] {
-
         const settings_d = new g.SettingsDict('lm.globalSettingsDict');
 
         settings_d.setName('lm.globalSettingsDict');
@@ -1971,7 +1997,10 @@ export class LoadManager {
     }
 
     //@+node:felix.20220602202929.1: *4* LM.createSettingsDicts
-    public createSettingsDicts(c: Commands, localFlag: boolean): [g.SettingsDict | undefined, g.SettingsDict | undefined] {
+    public createSettingsDicts(
+        c: Commands,
+        localFlag: boolean
+    ): [g.SettingsDict | undefined, g.SettingsDict | undefined] {
         if (c) {
             // returns the *raw* shortcutsDict, not a *merged* shortcuts dict.
             const parser = new SettingsTreeParser(c, localFlag);
@@ -1981,7 +2010,6 @@ export class LoadManager {
             return [shortcutsDict, settingsDict];
         }
         return [undefined, undefined];
-
     }
 
     //@+node:felix.20220418170221.1: *4* LM.getPreviousSettings
@@ -1989,27 +2017,25 @@ export class LoadManager {
      * Return the settings in effect for fn. Typically, this involves pre-reading fn.
      */
     public async getPreviousSettings(fn?: string): Promise<PreviousSettings> {
-
         const lm = this;
         const settingsName = `settings dict for ${g.shortFileName(fn)}`;
         const shortcutsName = `shortcuts dict for ${g.shortFileName(fn)}`;
         // A special case: settings in leoSettings.leo do *not* override
         // the global settings, that is, settings in myLeoSettings.leo.
-        const isLeoSettings = fn && g.shortFileName(fn).toLowerCase() === 'leosettings.leo';
+        const isLeoSettings =
+            fn && g.shortFileName(fn).toLowerCase() === 'leosettings.leo';
         const exists = await g.os_path_exists(fn);
 
         let c: Commands | undefined;
         let d1;
         let d2;
 
-
         if (fn && exists && lm.isLeoFile(fn) && !isLeoSettings) {
             // Open the file usinging a null gui.
             try {
                 g.app.preReadFlag = true;
                 c = await lm.openSettingsFile(fn);
-            }
-            finally {
+            } finally {
                 g.app.preReadFlag = false;
             }
             // Merge the settings from c into *copies* of the global dicts.
@@ -2030,7 +2056,8 @@ export class LoadManager {
         //
         // The file does not exist, or is not valid.
         // Get the settings from the globals settings dicts.
-        if (lm.globalSettingsDict && lm.globalBindingsDict) {  // #1766.
+        if (lm.globalSettingsDict && lm.globalBindingsDict) {
+            // #1766.
             d1 = lm.globalSettingsDict.copy(settingsName);
             d2 = lm.globalBindingsDict.copy(shortcutsName);
         } else {
@@ -2038,7 +2065,6 @@ export class LoadManager {
             d2 = undefined;
         }
         return new PreviousSettings(d1, d2);
-
     }
 
     //@+node:felix.20220602203148.1: *4* LM.mergeShortcutsDicts & helpers
@@ -2047,7 +2073,12 @@ export class LoadManager {
      *
      * Both old_d and new_d remain unchanged.
      */
-    public mergeShortcutsDicts(c: Commands, old_d: any, new_d: any, localFlag: boolean): any {
+    public mergeShortcutsDicts(
+        c: Commands,
+        old_d: any,
+        new_d: any,
+        localFlag: boolean
+    ): any {
         /* 
         const lm = this;
         if (!old_d){
@@ -2128,16 +2159,17 @@ export class LoadManager {
      * Duplicates happen only if panes conflict.
      */
     public checkForDuplicateShortcuts(c: Commands, d: any): void {
-
         // Fix bug 951921: check for duplicate shortcuts only in the new file.
         //for (let ks of sorted(list(d.keys())))
         for (let ks of Object.keys(d).sort()) {
             const duplicates = [];
             const panes = ['all'];
-            const aList = d.get(ks);  // A list of bi objects.
+            const aList = d.get(ks); // A list of bi objects.
 
             // aList2 = [z for z in aList if not z.pane.startsWith('mode')];
-            const aList2 = aList.filter((z: { pane: string }) => !z.pane.startsWith('mode'));
+            const aList2 = aList.filter(
+                (z: { pane: string }) => !z.pane.startsWith('mode')
+            );
 
             if (aList.length > 1) {
                 for (let bi of aList2) {
@@ -2150,7 +2182,7 @@ export class LoadManager {
             }
 
             if (duplicates.length) {
-                // bindings = list(set([z.stroke.s for z in duplicates])); 
+                // bindings = list(set([z.stroke.s for z in duplicates]));
                 const bindings: string[] = [];
                 for (let z of duplicates) {
                     if (!bindings.includes(z.stroke.s)) {
@@ -2177,13 +2209,12 @@ export class LoadManager {
      * returning a dict whose keys are strokes.
      */
     public invert(d: any): g.SettingsDict {
-
         const result = new SettingsDict(`inverted ${d.name()}`);
 
         for (let commandName of Object.keys(d)) {
             for (let bi of d.get(commandName, [])) {
-                const stroke = bi.stroke;  // This is canonicalized.
-                bi.commandName = commandName;  // Add info.
+                const stroke = bi.stroke; // This is canonicalized.
+                bi.commandName = commandName; // Add info.
                 console.assert(stroke);
                 result.add_to_list(stroke, bi);
             }
@@ -2198,7 +2229,6 @@ export class LoadManager {
      * returning a dict whose keys are command names.
      */
     public uninvert(d: g.SettingsDict): SettingsDict {
-
         // ! LEOJS : NO KEYSTROKES HANDLING
         // console.assert(d.keyType === g.KeyStroke, d.keyType);
         const result = new SettingsDict(`uninverted ${d.name()}`);
@@ -2211,7 +2241,6 @@ export class LoadManager {
             }
         }
         return result;
-
     }
 
     //@+node:felix.20220418185142.1: *4* LM.openSettingsFile
@@ -2221,7 +2250,6 @@ export class LoadManager {
      * The caller must init the c.config object.
      */
     public async openSettingsFile(fn?: string): Promise<Commands | undefined> {
-
         const lm = this;
 
         if (!fn) {
@@ -2236,7 +2264,7 @@ export class LoadManager {
          */
         if (!(g.unitTesting || g.app.silentMode || g.app.batchMode)) {
             // This occurs early in startup, so use the following.
-            const s = `reading settings in ${(fn)}`;
+            const s = `reading settings in ${fn}`;
             if (g.app.debug.includes('startup')) {
                 console.log(s);
             }
@@ -2260,21 +2288,25 @@ export class LoadManager {
         let ok: VNode | undefined;
         try {
             // ! HACK FOR LEOJS: MAKE COMMANDER FROM FAKE leoSettings.leo STRING !
-            const w_fastRead: FastRead = new FastRead(c, c.fileCommands.gnxDict);
+            const w_fastRead: FastRead = new FastRead(
+                c,
+                c.fileCommands.gnxDict
+            );
             let g_element;
             if (fn === 'leoSettings.leo') {
-                [ok, g_element] = w_fastRead.readWithElementTree(fn, leojsSettingsXml);
+                [ok, g_element] = w_fastRead.readWithElementTree(
+                    fn,
+                    leojsSettingsXml
+                );
                 if (ok) {
                     c.hiddenRootNode = ok;
                 }
             } else {
                 ok = await c.fileCommands.openLeoFile(fn, false, true);
             }
-        }
-        catch (p_err) {
+        } catch (p_err) {
             //
-        }
-        finally {
+        } finally {
             g.app.openingSettingsFile = false;
         }
 
@@ -2284,7 +2316,6 @@ export class LoadManager {
         g.app.gui = oldGui;
 
         return ok ? c : undefined;
-
     }
 
     //@+node:felix.20220417222319.1: *4* LM.readGlobalSettingsFiles
@@ -2294,7 +2325,6 @@ export class LoadManager {
      * New in Leo 6.1: this sets ivars for the ActiveSettingsOutline class.
      */
     public async readGlobalSettingsFiles(): Promise<unknown> {
-
         const trace = g.app.debug.includes('themes');
         const lm = this;
         // Open the standard settings files with a nullGui.
@@ -2308,7 +2338,7 @@ export class LoadManager {
         lm.my_settings_c = await lm.openSettingsFile(lm.my_settings_path);
 
         let commanders = [lm.leo_settings_c, lm.my_settings_c];
-        commanders = commanders.filter(c => !!c);
+        commanders = commanders.filter((c) => !!c);
 
         let settings_d: g.SettingsDict;
         let bindings_d: g.SettingsDict;
@@ -2360,7 +2390,6 @@ export class LoadManager {
         }
 
         return;
-
     }
 
     //@+node:felix.20210120004121.1: *3* LM.load & helpers
@@ -2368,7 +2397,6 @@ export class LoadManager {
      * This is Leo's main startup method.
      */
     public async load(fileName?: string): Promise<unknown> {
-
         const lm: LoadManager = this;
 
         const t1 = process.hrtime();
@@ -2386,13 +2414,13 @@ export class LoadManager {
         // Disable redraw until all files are loaded.
         g.app.disable_redraw = true;
         const t2 = process.hrtime();
-        g.doHook("start1");
+        g.doHook('start1');
 
         if (g.app.killed) {
             return;
         }
 
-        // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ---------------- 
+        // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ----------------
         g.app.idleTimeManager.start();
         // ! ----------------------------------------------------------------------------------------
 
@@ -2402,7 +2430,7 @@ export class LoadManager {
 
         g.app.gui.finishStartup();
 
-        g.es('');  // Clears horizontal scrolling in the log pane.
+        g.es(''); // Clears horizontal scrolling in the log pane.
 
         if (!ok) {
             return;
@@ -2431,24 +2459,25 @@ export class LoadManager {
     public async doPostPluginsInit(): Promise<boolean> {
         // Clear g.app.initing _before_ creating commanders.
         const lm: LoadManager = this;
-        g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
+        g.app.initing = false; // "idle" hooks may now call g.app.forceShutdown.
         // Create the main frame.Show it and all queued messages.
         let c: Commands | undefined;
         let c1: Commands | undefined;
-        let fn: string = "";
+        let fn: string = '';
         if (lm.files.length) {
-            try {  // #1403.
+            try {
+                // #1403.
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
-                    lm.more_cmdline_files = n < (lm.files.length - 1);
+                    lm.more_cmdline_files = n < lm.files.length - 1;
                     c = await lm.loadLocalFile(fn, g.app.gui);
                     // Returns None if the file is open in another instance of Leo.
-                    if (c && !c1) {  // #1416:
+                    if (c && !c1) {
+                        // #1416:
                         c1 = c;
                     }
                 }
-            }
-            catch (exception) {
+            } catch (exception) {
                 g.es_print(`Unexpected exception reading ${fn}`);
                 g.es_exception(exception);
                 c = undefined;
@@ -2480,11 +2509,11 @@ export class LoadManager {
         g.app.disable_redraw = false;
 
         if (!c1) {
-            try { // #1403.
+            try {
+                // #1403.
                 c1 = await lm.openEmptyWorkBook();
                 // Calls LM.loadLocalFile.
-            }
-            catch (exception) {
+            } catch (exception) {
                 g.es_print('Can not create empty workbook');
                 g.es_exception(exception);
             }
@@ -2509,7 +2538,7 @@ export class LoadManager {
         const screenshot_fn: string = lm.options['screenshot_fn'];
         if (screenshot_fn) {
             lm.make_screen_shot(screenshot_fn);
-            return false;  // Force an immediate exit.
+            return false; // Force an immediate exit.
         }
         return true;
     }
@@ -2518,7 +2547,6 @@ export class LoadManager {
     public make_screen_shot(fn: string): void {
         // TODO
         console.log('TODO: make_screen_shot');
-
     }
 
     //@+node:felix.20210120004121.5: *5* LM.openEmptyWorkBook
@@ -2566,7 +2594,7 @@ export class LoadManager {
         g.app.gui.replaceClipboardWith(old_clipboard)  # #933: Restore clipboard
         return c
         */
-        const fn: string = "";
+        const fn: string = '';
         const c = await lm.loadLocalFile(fn, g.app.gui);
         if (!c) {
             return undefined;
@@ -2583,7 +2611,7 @@ export class LoadManager {
         await lm.computeStandardDirectories();
 
         // Scan the command line options as early as possible.
-        const options = {}; // lm.scanOptions(fileName); 
+        const options = {}; // lm.scanOptions(fileName);
         lm.options = options; // ! no command line options !
 
         // const script:string = options['script'];
@@ -2603,7 +2631,8 @@ export class LoadManager {
         // uses lm.files[0] to compute the local directory
         // that might contain myLeoSettings.leo.
         // Read the recent files file.
-        const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
+        const localConfigFile =
+            lm.files && lm.files.length ? lm.files[0] : undefined;
 
         // TODO: ? recent-file management ?
         // g.app.recentFilesManager.readRecentFiles(localConfigFile);
@@ -2611,8 +2640,7 @@ export class LoadManager {
         // Create the gui after reading options and settings.
         lm.createGui();
         // We can't print the signon until we know the gui.
-        return g.app.computeSignon();  // Set app.signon/signon1 for commanders.
-
+        return g.app.computeSignon(); // Set app.signon/signon1 for commanders.
     }
 
     //@+node:felix.20230529220941.1: *5* LM.createAllImporterData & helpers
@@ -2622,16 +2650,15 @@ export class LoadManager {
      * Create global data structures describing importers and writers.
      */
     public createAllImporterData(): void {
-        console.assert(g.app.loadDir);  // This is the only data required.
-        this.createWritersData();  // Was an AtFile method.
-        this.createImporterData();  // Was a LeoImportCommands method.
+        console.assert(g.app.loadDir); // This is the only data required.
+        this.createWritersData(); // Was an AtFile method.
+        this.createImporterData(); // Was a LeoImportCommands method.
     }
     //@+node:felix.20230529220941.2: *6* LM.createImporterData & helper
-    /** 
+    /**
      * Create the data structures describing importer plugins.
      */
     public createImporterData(): void {
-
         console.log('TODO : createImporterData');
 
         // // Allow plugins to be defined in ~/.leo/plugins.
@@ -2655,7 +2682,6 @@ export class LoadManager {
         //                 g.warning(f"can not import leo.plugins.importers.{module_name}")
         //                 g.printObj(filenames)
 
-
         // }
     }
     //@+node:felix.20230529220941.3: *7* LM.parse_importer_dict
@@ -2664,7 +2690,6 @@ export class LoadManager {
      * g.app.atAutoNames using entries in m.importer_dict.
      */
     public parse_importer_dict(sfn: string, m: any): void {
-
         console.log('TODO : parse_importer_dict');
 
         // importer_d = getattr(m, 'importer_dict', None)
@@ -2686,23 +2711,18 @@ export class LoadManager {
         //         for ext in extensions:
         //             d[ext] = scanner_func  #importer_d.get('func')#scanner_class
 
-
-
         // elif sfn not in (
         //     // These are base classes, not real plugins.
         //     'basescanner.py',
         //     'linescanner.py',
         // ):
         //     g.warning(f"leo/plugins/importers/{sfn} has no importer_dict")
-
-
     }
     //@+node:felix.20230529220941.4: *6* LM.createWritersData & helper
     /**
      * Create the data structures describing writer plugins.
      */
     public createWritersData(): void {
-
         console.log('TODO : createWritersData');
 
         // // Do *not* remove this trace.
@@ -2733,7 +2753,6 @@ export class LoadManager {
         //     g.printDict(g.app.writersDispatchDict)
         //     g.trace('LM.atAutoWritersDict')
         //     g.printDict(g.app.atAutoWritersDict)
-
     }
     //@+node:felix.20230529220941.5: *7* LM.parse_writer_dict
     /**
@@ -2741,7 +2760,6 @@ export class LoadManager {
      * using entries in m.writers_dict.
      */
     public parse_writer_dict(sfn: string, m: any): void {
-
         console.log('TODO : createWritersData');
 
         // writer_d = getattr(m, 'writer_dict', None)
@@ -2762,7 +2780,6 @@ export class LoadManager {
         //                 d[s] = scanner_class
         //                 g.app.atAutoNames.add(s)
 
-
         //     if extensions
         //         // Make entries for each extension.
         //         d = g.app.writersDispatchDict
@@ -2773,16 +2790,12 @@ export class LoadManager {
         //             else
         //                 d[ext] = scanner_class
 
-
         // elif sfn not in ('basewriter.py',):
         //     g.warning(f"leo/plugins/writers/{sfn} has no writer_dict")
-
-
     }
 
     //@+node:felix.20220417225955.1: *5* LM.createGui
     public createGui(): void {
-
         const lm: LoadManager = this;
 
         g.app.gui = new LeoUI(undefined, this._context!); // replaces createDefaultGui
@@ -2813,18 +2826,16 @@ export class LoadManager {
 
     //@+node:felix.20210120004121.16: *5* LM.initApp
     public async initApp(verbose?: boolean): Promise<unknown> {
-
         // Can be done early. Uses only g.app.loadDir & g.app.homeDir.
         this.createAllImporterData();
         console.assert(g.app.loadManager);
 
         // Make sure we call the new leoPlugins.init top-level function.
-        // leoPlugins.init(); // TODO: plugins system ? 
-        // ! TEMP EQUIVALENT TO leoPlugins.init(); 
+        // leoPlugins.init(); // TODO: plugins system ?
+        // ! TEMP EQUIVALENT TO leoPlugins.init();
         g.app.pluginsController = {
-            // TODO 
+            // TODO
         }; // new LeoPluginsController();
-
 
         // Force the user to set g.app.leoID.
         await g.app.setLeoID(true, verbose);
@@ -2838,17 +2849,19 @@ export class LoadManager {
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
         // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
 
-        // TODO: plugins system ? 
+        // TODO: plugins system ?
         // Complete the plugins class last.
         // g.app.pluginsController.finishCreate();
 
         return;
-
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public async loadLocalFile(fn: string, gui?: LeoGui, old_c?: Commands): Promise<Commands | undefined> {
-
+    public async loadLocalFile(
+        fn: string,
+        gui?: LeoGui,
+        old_c?: Commands
+    ): Promise<Commands | undefined> {
         /*Completely read a file, creating the corresonding outline.
 
         1. If fn is an existing .leo file (possibly zipped), read it twice:
@@ -2878,13 +2891,15 @@ export class LoadManager {
         if (fn) {
             c = lm.findOpenFile(fn);
             if (c) {
-                return c; // Found it aready opened ! 
+                return c; // Found it aready opened !
             }
         }
         // Step 1: get the previous settings.
         // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
         // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-        const previousSettings: PreviousSettings = await lm.getPreviousSettings(fn);
+        const previousSettings: PreviousSettings = await lm.getPreviousSettings(
+            fn
+        );
 
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
@@ -2895,16 +2910,14 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public async openEmptyLeoFile(gui?: LeoGui, old_c?: Commands): Promise<Commands> {
-
+    public async openEmptyLeoFile(
+        gui?: LeoGui,
+        old_c?: Commands
+    ): Promise<Commands> {
         const lm = this;
         const w_previousSettings = await lm.getPreviousSettings(undefined);
         // Create the commander for the .leo  file.
-        const c: Commands = g.app.newCommander(
-            "",
-            gui,
-            w_previousSettings
-        );
+        const c: Commands = g.app.newCommander('', gui, w_previousSettings);
 
         // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
         c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
@@ -2914,9 +2927,14 @@ export class LoadManager {
 
         g.doHook('open0');
 
-        g.doHook("open1", { old_c: old_c, c: c, new_c: c, fileName: undefined });
+        g.doHook('open1', {
+            old_c: old_c,
+            c: c,
+            new_c: c,
+            fileName: undefined,
+        });
 
-        c.mFileName = "";
+        c.mFileName = '';
         c.wrappedFileName = undefined;
 
         // Late inits. Order matters.
@@ -2924,8 +2942,13 @@ export class LoadManager {
             c.chapterController.finishCreate();
         }
         c.clearChanged();
-        g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: undefined });
-        g.doHook("new", { old_c: old_c, c: c, new_c: c });
+        g.doHook('open2', {
+            old_c: old_c,
+            c: c,
+            new_c: c,
+            fileName: undefined,
+        });
+        g.doHook('new', { old_c: old_c, c: c, new_c: c });
 
         lm.finishOpen(c);
 
@@ -2944,8 +2967,12 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public async openFileByName(fn: string, gui?: LeoGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
-
+    public async openFileByName(
+        fn: string,
+        gui?: LeoGui,
+        old_c?: Commands,
+        previousSettings?: PreviousSettings
+    ): Promise<Commands | undefined> {
         const lm: LoadManager = this;
         // Disable the log.
         // g.app.setLog(None);
@@ -2970,12 +2997,12 @@ export class LoadManager {
         // c.frame.log.enable(true);
 
         // Phase 2: Create the outline.
-        g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
+        g.doHook('open1', { old_c: undefined, c: c, new_c: c, fileName: fn });
 
         const exists = await g.os_path_exists(fn);
 
         if (fn && exists) {
-            const readAtFileNodesFlag = !!(previousSettings);
+            const readAtFileNodesFlag = !!previousSettings;
             // The log is not set properly here.
             const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
 
@@ -2989,8 +3016,7 @@ export class LoadManager {
             await lm.initWrapperLeoFile(c, fn);
         }
 
-
-        g.doHook("open2", { old_c: undefined, c: c, new_c: c, fileName: fn });
+        g.doHook('open2', { old_c: undefined, c: c, new_c: c, fileName: fn });
 
         // Phase 3: Complete the initialization.
         // g.app.writeWaitingLog(c)
@@ -3014,8 +3040,10 @@ export class LoadManager {
         let index = 0;
         for (let frame of g.app.windowList) {
             const c = frame.c;
-            if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
-
+            if (
+                g.os_path_realpath(munge(fn)) ===
+                g.os_path_realpath(munge(c.mFileName))
+            ) {
                 g.app.gui.frameIndex = index;
 
                 c.outerUpdate();
@@ -3029,7 +3057,6 @@ export class LoadManager {
 
     //@+node:felix.20220418013716.1: *6* LM.finishOpen
     public finishOpen(c: Commands): void {
-
         // lm = self
         // const k = c.k;
         // console.assert(k);
@@ -3059,7 +3086,7 @@ export class LoadManager {
             g.app.gui.frameIndex = index;
         }
 
-        c.outerUpdate();  // #181: Honor focus requests.
+        c.outerUpdate(); // #181: Honor focus requests.
     }
     //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
     /**
@@ -3067,8 +3094,10 @@ export class LoadManager {
      *
      * Otherwise, create an @edit or @file node for the external file.
      */
-    public async initWrapperLeoFile(c: Commands, fn: string): Promise<Commands> {
-
+    public async initWrapperLeoFile(
+        c: Commands,
+        fn: string
+    ): Promise<Commands> {
         let p: Position | undefined;
 
         const exists = await g.os_path_exists(fn);
@@ -3077,7 +3106,7 @@ export class LoadManager {
             p = c.rootPosition()!;
             // Create an empty @edit node unless fn is an .leo file.
             // Fix #1070: Use "newHeadline", not fn.
-            p.h = fn.endsWith('.leo') ? "newHeadline" : `@edit ${fn}`;
+            p.h = fn.endsWith('.leo') ? 'newHeadline' : `@edit ${fn}`;
             c.selectPosition(p);
 
             // TODO: importCommands and importDerivedFiles method !
@@ -3095,7 +3124,6 @@ export class LoadManager {
                     return undefined;
 
             */
-
         } else {
             // Create an @<file> node.
             p = c.rootPosition();
@@ -3128,7 +3156,9 @@ export class LoadManager {
             return false;
         }
         // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
-        return fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs');
+        return (
+            fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs')
+        );
     }
     public isZippedFile(fn: string): boolean {
         // ? NEEDED ?
@@ -3144,14 +3174,12 @@ export class LoadManager {
      * @returns number: file descriptor
      */
     public openAnyLeoFile(fn: string): number | undefined {
-
         const lm: LoadManager = this;
 
         if (fn.endsWith('.db')) {
             // TODO !
             // return sqlite3.connect(fn);
             return undefined;
-
         }
         let theFile: number | undefined;
 
@@ -3176,7 +3204,6 @@ export class LoadManager {
      * @returns number: file descriptor
      */
     public openLeoFile(fn: string): number | undefined {
-
         return undefined;
 
         // const lm: LoadManager = this;
@@ -3205,22 +3232,27 @@ export class LoadManager {
      *
      * Note: g.app.log is not inited here.
      */
-    public async readOpenedLeoFile(c: Commands, fn: string, readAtFileNodesFlag: boolean): Promise<VNode | undefined> {
-
+    public async readOpenedLeoFile(
+        c: Commands,
+        fn: string,
+        readAtFileNodesFlag: boolean
+    ): Promise<VNode | undefined> {
         // New in Leo 4.10: The open1 event does not allow an override of the init logic.
         // assert theFile
 
         // Read and close the file.
-        const w_result = await c.fileCommands.openLeoFile(fn, readAtFileNodesFlag);
+        const w_result = await c.fileCommands.openLeoFile(
+            fn,
+            readAtFileNodesFlag
+        );
         if (w_result) {
             if (!c.openDirectory) {
-                const theDir = g.finalize(g.os_path_dirname(fn));  // 1341
+                const theDir = g.finalize(g.os_path_dirname(fn)); // 1341
                 c.openDirectory = theDir;
                 c.frame.openDirectory = theDir;
             }
         }
         return w_result;
-
     }
     //@+node:felix.20220109232545.1: *3* LM.revertCommander
     /**
@@ -3255,8 +3287,12 @@ export class PreviousSettings {
     public settingsDict: g.SettingsDict | undefined;
     public shortcutsDict: g.SettingsDict | undefined;
 
-    constructor(settingsDict: g.SettingsDict | undefined, shortcutsDict: g.SettingsDict | undefined) {
-        if (!shortcutsDict || !settingsDict) {  // #1766: unit tests.
+    constructor(
+        settingsDict: g.SettingsDict | undefined,
+        shortcutsDict: g.SettingsDict | undefined
+    ) {
+        if (!shortcutsDict || !settingsDict) {
+            // #1766: unit tests.
             const lm = g.app.loadManager!;
             [settingsDict, shortcutsDict] = lm.createDefaultSettingsDicts();
         }
@@ -3269,9 +3305,9 @@ export class PreviousSettings {
         return (
             `<PreviousSettings\n` +
             `${this.settingsDict}\n` +
-            `${this.shortcutsDict}\n>`);
+            `${this.shortcutsDict}\n>`
+        );
     };
-
 }
 //@-others
 //@@language typescript
