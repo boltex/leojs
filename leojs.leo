@@ -571,13 +571,19 @@
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
 <v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
 <v t="felix.20230529171913.1"><vh>@file src/test/test_importers.ts</vh></v>
+<v t="felix.20230715185802.1"><vh>unittest commands</vh>
+<v t="felix.20230531185455.1"><vh>@file src/test/leoOutlineCommands.test.ts</vh></v>
+<v t="felix.20230715191134.1"><vh>@file src/test/leoEditCommands.test.ts</vh></v>
+<v t="felix.20230715191137.1"><vh>@file src/test/leoEditFileCommands.test.ts</vh></v>
+<v t="felix.20230715191150.1"><vh>@file src/test/leoCommanderFileCommands.test.ts</vh></v>
+</v>
+<v t="felix.20230715185809.1"><vh>unittest core</vh>
 <v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
 <v t="felix.20220129003133.1"><vh>@file src/test/leoAtFile.test.ts</vh></v>
 <v t="felix.20220129002752.1"><vh>@file src/test/leoCommands.test.ts</vh></v>
 <v t="felix.20220129003431.1"><vh>@file src/test/leoConfig.test.ts</vh></v>
 <v t="felix.20220129003154.1"><vh>@file src/test/leoExternalFiles.test.ts</vh></v>
 <v t="felix.20220129003044.1"><vh>@file src/test/leoFileCommands.test.ts</vh></v>
-<v t="felix.20230531185455.1"><vh>@file src/test/leoOutlineCommands.test.ts</vh></v>
 <v t="felix.20220129003458.1"><vh>@file src/test/leoFind.test.ts</vh></v>
 <v t="felix.20230528193401.1"><vh>@file src/test/leoFrame.test.ts</vh></v>
 <v t="felix.20220129002458.1"><vh>@file src/test/leoGlobals.test.ts</vh></v>
@@ -587,6 +593,7 @@
 <v t="felix.20230528205401.2"><vh>@file src/test/leoRst.test.ts</vh></v>
 <v t="felix.20220129003553.1"><vh>@file src/test/leoShadow.test.ts</vh></v>
 <v t="felix.20220129003013.1"><vh>@file src/test/leoUndo.test.ts</vh></v>
+</v>
 </v>
 </v>
 </vnodes>
@@ -1329,15 +1336,16 @@ export async function activate(p_context: vscode.ExtensionContext) {
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection =&gt; {
-                    if (selection === "More Info") {
-                        vscode.env.openExternal(
-                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
-                        ).then(() =&gt; { }, (e) =&gt; {
-                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                        });
-                    }
-                });
+                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
+                    .then(selection =&gt; {
+                        if (selection === "More Info") {
+                            vscode.env.openExternal(
+                                vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                            ).then(() =&gt; { }, (e) =&gt; {
+                                console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                            });
+                        }
+                    });
                 console.log('NOT started because not writable workspace');
                 void setStartupDoneContext(true);
                 return;
@@ -1345,6 +1353,9 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
+
+                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+
                 await runLeo(p_context);
             } else {
                 // Is local filesystem
@@ -4049,10 +4060,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "6443091",
-  "gitBranch": "editFileCommands",
-  "gitDate": "2023-07-15 00:47:47 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -10865,6 +10873,9 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
+
+                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+
                 void runLeo(p_context);
             } else {
                 // Is local filesystem
@@ -14933,5 +14944,7 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
 @language typescript
 </t>
 <t tx="felix.20230522010520.1"></t>
+<t tx="felix.20230715185802.1"></t>
+<t tx="felix.20230715185809.1"></t>
 </tnodes>
 </leo_file>

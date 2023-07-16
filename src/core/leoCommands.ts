@@ -52,7 +52,7 @@ function applyMixins(derivedCtor: any, constructors: any[]): void {
                 derivedCtor.prototype,
                 name,
                 Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-                    Object.create(null)
+                Object.create(null)
             );
         });
     });
@@ -1528,15 +1528,15 @@ export class Commands {
         if (!ok) {
             g.es_print(
                 `check-outline ERROR! ${c.shortFileName()} ` +
-                    `${count} nodes, ` +
-                    `${gnx_errors} gnx errors, ` +
-                    `${g.app.structure_errors} ` +
-                    `structure errors`
+                `${count} nodes, ` +
+                `${gnx_errors} gnx errors, ` +
+                `${g.app.structure_errors} ` +
+                `structure errors`
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
                 `check-outline OK: ${t2} ms. ` +
-                    `${c.shortFileName()} ${count} nodes`
+                `${c.shortFileName()} ${count} nodes`
             );
         }
         return g.app.structure_errors;
@@ -4179,13 +4179,13 @@ export class Commands {
 
 export interface Commands
     extends CommanderOutlineCommands,
-        CommanderFileCommands,
-        CommanderHelpCommands,
-        CommanderEditCommands,
-        TopLevelCompareCommands,
-        TopLevelImportCommands,
-        TopLevelPersistanceCommands,
-        TopLevelEditCommands {
+    CommanderFileCommands,
+    CommanderHelpCommands,
+    CommanderEditCommands,
+    TopLevelCompareCommands,
+    TopLevelImportCommands,
+    TopLevelPersistanceCommands,
+    TopLevelEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
     canExtractSectionNames: () => boolean;

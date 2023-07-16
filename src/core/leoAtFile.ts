@@ -840,7 +840,7 @@ export class AtFile {
         if (fn !== p.atShadowFileNodeName()) {
             at.error(
                 `can not happen: fn: ${fn} != atShadowNodeName: ` +
-                    `${p.atShadowFileNodeName()}`
+                `${p.atShadowFileNodeName()}`
             );
             return;
         }
@@ -1762,15 +1762,15 @@ export class AtFile {
                 | ((p: Position) => Promise<boolean>)
             )
         ][] = [
-            [p.isAtAsisFileNode, at.asisWrite],
-            [p.isAtAutoNode, at.writeOneAtAutoNode],
-            [p.isAtCleanNode, at.writeOneAtCleanNode],
-            [p.isAtEditNode, at.writeOneAtEditNode],
-            [p.isAtFileNode, at.writeOneAtFileNode],
-            [p.isAtNoSentFileNode, at.writeOneAtNosentNode],
-            [p.isAtShadowFileNode, at.writeOneAtShadowNode],
-            [p.isAtThinFileNode, at.writeOneAtFileNode],
-        ];
+                [p.isAtAsisFileNode, at.asisWrite],
+                [p.isAtAutoNode, at.writeOneAtAutoNode],
+                [p.isAtCleanNode, at.writeOneAtCleanNode],
+                [p.isAtEditNode, at.writeOneAtEditNode],
+                [p.isAtFileNode, at.writeOneAtFileNode],
+                [p.isAtNoSentFileNode, at.writeOneAtNosentNode],
+                [p.isAtShadowFileNode, at.writeOneAtShadowNode],
+                [p.isAtThinFileNode, at.writeOneAtFileNode],
+            ];
         for (let [pred, func] of table) {
             if (pred.bind(p)()) {
                 await func.bind(at)(p); // type:ignore
@@ -2711,7 +2711,7 @@ export class AtFile {
             // Do give this error even if unit testing.
             at.writeError(
                 `undefined section: {g.truncate(name, 60)}\n` +
-                    `  referenced from: {g.truncate(p.h, 60)}`
+                `  referenced from: {g.truncate(p.h, 60)}`
             );
         }
     }
@@ -4748,7 +4748,7 @@ export class FastAtRead {
                     // A useful trace.
                     g.trace(
                         `${g.shortFileName(this.path)}: ` +
-                            `warning: inserting unexpected line: ${line.trimEnd()}`
+                        `warning: inserting unexpected line: ${line.trimEnd()}`
                     );
                     // #2213: *Do* insert the line, with a warning.
                     body.push(line);

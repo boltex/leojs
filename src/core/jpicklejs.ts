@@ -118,7 +118,7 @@ Parser.prototype.load = function (pickle) {
         return pickle.substr(i, index - i);
     };
 
-    for (var i = 0; i < pickle.length; ) {
+    for (var i = 0; i < pickle.length;) {
         var opindex = i,
             opcode = pickle[i++];
         //console.log('opcode ' + opindex + ' ' + opcode);

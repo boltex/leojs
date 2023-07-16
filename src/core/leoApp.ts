@@ -1967,7 +1967,7 @@ export class LoadManager {
                     const fn = g.shortFileName(val.path);
                     g.es_print(
                         `--trace-setting: in ${fn}: ` +
-                            `@${val.kind} ${g.app.trace_setting}=${val.val}`
+                        `@${val.kind} ${g.app.trace_setting}=${val.val}`
                     );
                 }
             }

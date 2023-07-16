@@ -64,15 +64,16 @@ export async function activate(p_context: vscode.ExtensionContext) {
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection => {
-                    if (selection === "More Info") {
-                        vscode.env.openExternal(
-                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
-                        ).then(() => { }, (e) => {
-                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                        });
-                    }
-                });
+                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
+                    .then(selection => {
+                        if (selection === "More Info") {
+                            vscode.env.openExternal(
+                                vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                            ).then(() => { }, (e) => {
+                                console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                            });
+                        }
+                    });
                 console.log('NOT started because not writable workspace');
                 void setStartupDoneContext(true);
                 return;
@@ -80,6 +81,9 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
+
+                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+
                 await runLeo(p_context);
             } else {
                 // Is local filesystem
@@ -138,6 +142,9 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
         if (!g.app.loadManager && g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
+
+                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+
                 void runLeo(p_context);
             } else {
                 // Is local filesystem
