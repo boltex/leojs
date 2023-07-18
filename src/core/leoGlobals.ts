@@ -828,8 +828,8 @@ export function checkUnchangedIvars(
             if (obj[key] !== d[key]) {
                 trace(
                     `changed ivar: ${key} ` +
-                        `old: ${d[key]} ` +
-                        `new: ${obj[key]}`
+                    `old: ${d[key]} ` +
+                    `new: ${obj[key]}`
                 );
                 ok = false;
             }
@@ -876,53 +876,40 @@ export function objToString(obj: any, tag?: string): string {
     }
     result = result + safeJsonStringify(obj, null, 2);
 
-    // let cache: any[] = [];
-    // result = result + JSON.stringify(obj, function (key, value) {
-    //     if (typeof value === 'object' && value !== null) {
-    //         if (cache!.indexOf(value) !== -1) {
-    //             // Circular reference found, discard key
-    //             return;
-    //         }
-    //         // Store value in our collection
-    //         cache!.push(value);
-    //     }
-    //     return value;
-    // }, 4);
-    // (cache as any) = null; // Enable garbage collection
-
     return result;
-    // # pylint: disable=undefined-loop-variable
-    //     # Looks like a a pylint bug.
-    // #
-    // # Compute s.
-    // if isinstance(obj, dict):
-    //     s = dictToString(obj, indent=indent)
-    // elif isinstance(obj, list):
-    //     s = listToString(obj, indent=indent)
-    // elif isinstance(obj, tuple):
-    //     s = tupleToString(obj, indent=indent)
-    // elif isinstance(obj, str):
-    //     # Print multi-line strings as lists.
-    //     s = obj
-    //     lines = splitLines(s)
-    //     if len(lines) > 1:
-    //         s = listToString(lines, indent=indent)
-    //     else:
-    //         s = repr(s)
-    // else:
-    //     s = repr(obj)
-    // #
-    // # Compute the return value.
-    // if printCaller and tag:
-    //     prefix = f"{caller()}: {tag}"
-    // elif printCaller or tag:
-    //     prefix = caller() if printCaller else tag
-    // else:
-    //     prefix = None
-    // if prefix:
-    //     sep = '\n' if '\n' in s else ' '
-    //     return f"{prefix}:{sep}{s}"
-    // return s
+
+    /*
+    if isinstance(obj, dict):
+        result_list = ['{\n']
+        pad = max([len(key) for key in obj])
+        for key in sorted(obj):
+            pad_s = ' ' * max(0, pad - len(key))
+            result_list.append(f"  {pad_s}{key}: {obj.get(key)}\n")
+        result_list.append('}')
+        result = ''.join(result_list)
+    elif isinstance(obj, (list, tuple)):
+        # Return the enumerated lines of the list.
+        result_list = ['[\n' if isinstance(obj, list) else '(\n']
+        for i, z in enumerate(obj):
+            result_list.append(f"  {i:4}: {z!r}\n")
+        result_list.append(']\n' if isinstance(obj, list) else ')\n')
+        result = ''.join(result_list)
+    elif not isinstance(obj, str):
+        result = pprint.pformat(obj, indent=indent, width=width)
+        # Put opening/closing delims on separate lines.
+        if result.count('\n') > 0 and result[0] in '([{' and result[-1] in ')]}':
+            result = f"{result[0]}\n{result[1:-2]}\n{result[-1]}"
+    elif '\n' not in obj:
+        result = repr(obj)
+    else:
+        # Return the enumerated lines of the string.
+        lines = ''.join([
+            f"  {i:4}: {z!r}\n" for i, z in enumerate(g.splitLines(obj))
+        ])
+        result = f"[\n{lines}]\n"
+    return f"{tag.strip()}: {result}" if tag and tag.strip() else result
+    */
+
 }
 
 //@+node:felix.20211104221444.1: *3* g.printObj        (coreGlobals.py)
@@ -969,8 +956,8 @@ export function comment_delims_from_extension(
 
     trace(
         `unknown extension: {ext!r},` +
-            `filename: {filename!r},` +
-            `root: {root!r}`
+        `filename: {filename!r},` +
+        `root: {root!r}`
     );
 
     return ['', '', ''];
@@ -1291,10 +1278,10 @@ export function scanAtCommentAndAtLanguageDirectives(
     aList: { [key: string]: string }[]
 ):
     | {
-          language: string;
-          comment: string;
-          delims: [string, string, string];
-      }
+        language: string;
+        comment: string;
+        delims: [string, string, string];
+    }
     | undefined {
     let lang: string | undefined = undefined;
     for (let d of aList) {
@@ -3334,6 +3321,14 @@ def itemsMatchingPrefixInList(s: str, aList: List[str], matchEmptyPrefix: bool=F
         common_prefix = ''
     return pmatches, common_prefix
  */
+//@+node:felix.20230716225107.1: *4* g.pad
+/**
+ * Return a string of blanks to pad string s to the given width.
+ */
+export function pad(s: string, width: number): string {
+  const paddingCount: number = Math.max(0, width - s.length);
+  return ' '.repeat(paddingCount);
+}
 //@+node:felix.20220410212530.6: *4* g.removeLeading/Trailing
 
 // Warning: g.removeTrailingWs already exists.
@@ -5102,8 +5097,8 @@ export function os_path_splitext(p_path: string): [string, string] {
                 if (w_parsed.ext && !w_parsed.dir.endsWith('.')) {
                     return [
                         w_parsed.dir +
-                            (isWindows && p_path.includes('\\') ? '\\' : '/') +
-                            w_parsed.name,
+                        (isWindows && p_path.includes('\\') ? '\\' : '/') +
+                        w_parsed.name,
                         w_parsed.ext,
                     ];
                 } else {

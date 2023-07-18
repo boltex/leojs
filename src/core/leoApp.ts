@@ -115,6 +115,9 @@ export class LeoApp {
     //@+node:felix.20210102214029.1: *4* app.__init__ (helpers contain language dicts)
     //@+<< LeoApp: command-line arguments >>
     //@+node:felix.20210103024632.2: *5* << LeoApp: command-line arguments >>
+    // TODO : CHECK IF always_write_session_data IS NEEDED ! 
+    public always_write_session_data: boolean = false;  // Default: write session data only if no files on command line.
+
     public batchMode: boolean = false; // True: run in batch mode.
     public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
@@ -1893,7 +1896,7 @@ export class LoadManager {
         fn = g.app.config.getString(setting='default_leo_file') or '~/.leo/workbook.leo'
         fn = g.finalize(fn)
         directory = g.finalize(os.path.dirname(fn))
-        # #1415.
+        
         return fn if os.path.exists(directory) else None
      */
     //@+node:felix.20220610002953.17: *4* LM.reportDirectories
@@ -2415,6 +2418,7 @@ export class LoadManager {
         g.app.disable_redraw = true;
         const t2 = process.hrtime();
         g.doHook('start1');
+        const t3 = process.hrtime();
 
         if (g.app.killed) {
             return;
@@ -2424,7 +2428,7 @@ export class LoadManager {
         g.app.idleTimeManager.start();
         // ! ----------------------------------------------------------------------------------------
 
-        const t3 = process.hrtime();
+        const t4 = process.hrtime();
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
         g.app.makeAllBindings();
 
@@ -2433,6 +2437,11 @@ export class LoadManager {
         g.es(''); // Clears horizontal scrolling in the log pane.
 
         if (!ok) {
+            // --screen-shot causes an immediate exit.
+            if (g.app.debug.includes('shutdown') || g.app.debug.includes('startup')) {
+                g.es_print('Can not create a commander')
+                // g.app.forceShutdown() // ! LEOJS NEEDED ? ?
+            }
             return;
         }
         if (g.app.listen_to_log_flag) {
@@ -2440,12 +2449,13 @@ export class LoadManager {
             // g.app.listenToLog();
         }
         if (g.app.debug.includes('startup')) {
-            const t4 = process.hrtime();
+            const t5 = process.hrtime();
             console.log('');
             g.es_print(`settings:${utils.getDurationMs(t1, t2)} ms`);
             g.es_print(` plugins:${utils.getDurationMs(t2, t3)} ms`);
             g.es_print(`   files:${utils.getDurationMs(t3, t4)} ms`);
-            g.es_print(`   total:${utils.getDurationMs(t1, t4)} ms`);
+            g.es_print(`  frames:${utils.getDurationMs(t4, t5)} ms`);
+            g.es_print(`   total:${utils.getDurationMs(t1, t5)} ms`);
             console.log('');
         }
 
@@ -2463,17 +2473,16 @@ export class LoadManager {
         // Create the main frame.Show it and all queued messages.
         let c: Commands | undefined;
         let c1: Commands | undefined;
+        g.app.loaded_session = !lm.files.length;
         let fn: string = '';
         if (lm.files.length) {
             try {
-                // #1403.
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < lm.files.length - 1;
                     c = await lm.loadLocalFile(fn, g.app.gui);
                     // Returns None if the file is open in another instance of Leo.
                     if (c && !c1) {
-                        // #1416:
                         c1 = c;
                     }
                 }
@@ -2484,37 +2493,34 @@ export class LoadManager {
             }
         }
 
-        // Load (and save later) a session *only* if the command line contains no files.
         /*
-        g.app.loaded_session = !lm.files.length;
-        if (g.app.sessionManager && g.app.loaded_session){
-            try{  // #1403.
-                aList = g.app.sessionManager.load_snapshot();
-                if aList:
-                    g.app.sessionManager.load_session(c1, aList);
-                    // #659.
-                    if g.app.windowList:
-                        c = c1 = g.app.windowList[0].c;
-                    else:
-                        c = c1 = None;
-            }
 
-            catch( Exception){
-                g.es_print('Can not load session');
-                g.es_exception();
-            }
-        }
+        # Load a session if the command line contains no files.
+        if g.app.sessionManager and not lm.files:
+            try:
+                aList = g.app.sessionManager.load_snapshot()
+                if aList:
+                    g.app.sessionManager.load_session(c1, aList)
+                    if g.app.windowList:
+                        c = c1 = g.app.windowList[0].c
+                    else:
+                        c = c1 = None
+            except Exception:
+                g.es_print('Can not load session')
+                g.es_exception()
+
         */
+
         // Enable redraws.
         g.app.disable_redraw = false;
 
         if (!c1) {
+            // Open or create a workbook.
             try {
-                // #1403.
-                c1 = await lm.openEmptyWorkBook();
+                c1 = await lm.openWorkBook();
                 // Calls LM.loadLocalFile.
             } catch (exception) {
-                g.es_print('Can not create empty workbook');
+                g.es_print('Can not create workbook');
                 g.es_exception(exception);
             }
         }
@@ -2532,66 +2538,54 @@ export class LoadManager {
         g.app.initComplete = true;
 
         // c.setLog();
-        // c.redraw();
-        // g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
-        // c.initialFocusHelper();
-        const screenshot_fn: string = lm.options['screenshot_fn'];
-        if (screenshot_fn) {
-            lm.make_screen_shot(screenshot_fn);
-            return false; // Force an immediate exit.
-        }
+        c.redraw();
+        g.doHook("start2", { c: c, p: c.p, fileName: c.fileName() });
+        c.initialFocusHelper();
         return true;
-    }
-
-    //@+node:felix.20210120004121.4: *5* LM.make_screen_shot
-    public make_screen_shot(fn: string): void {
-        // TODO
-        console.log('TODO: make_screen_shot');
     }
 
     //@+node:felix.20210120004121.5: *5* LM.openEmptyWorkBook
     /**
-     * Open an empty frame and paste the contents of CheatSheet.leo into it.
+     * Open or create a new workbook.
+     * 
+     * @string default-leo-file gives the path, defaulting to ~/.leo/workbook.leo.
+     *
+     * Return the new commander.
      */
-    public async openEmptyWorkBook(): Promise<Commands | undefined> {
-        // TODO
+    public async openWorkBook(): Promise<Commands | undefined> {
+
+        // TODO !
+
+        void vscode.window.showInformationMessage('TODO : openWorkBook');
+
         const lm: LoadManager = this;
 
         /*
-        // Create an empty frame.
-        fn = lm.computeWorkbookFileName()
-        if not fn:
-            return None  # #1415
-        c = lm.loadLocalFile(fn, gui=g.app.gui, old_c=None)
-        if not c:
-            return None  # #1201: AttributeError below.
-        if g.app.batchMode and g.os_path_exists(fn):
-            return c
-        # Open the cheatsheet.
-        fn = g.finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
-        if not g.os_path_exists(fn):
-            g.es(f"file not found: {fn}")
+        # Never create a workbook during unit tests or in batch mode.
+        if g.unitTesting or g.app.batchMode:
             return None
-        # Paste the contents of CheetSheet.leo into c.
-        old_clipboard = g.app.gui.getTextFromClipboard()  # #933: Save clipboard.
-        c2 = g.openWithFileName(fn, old_c=c)
-        for p2 in c2.rootPosition().self_and_siblings():
-            c2.setCurrentPosition(p2)  # 1380
-            c2.copyOutline()
-            # #1380 & #1381: Add guard & use vnode methods to prevent redraw.
-            p = c.pasteOutline()
-            if p:
-                c.setCurrentPosition(p)  # 1380
-                p.v.contract()
-                p.v.clearDirty()
-        c2.close(new_c=c)
-        # Delete the dummy first node.
-        root = c.rootPosition()
-        root.doDelete(newNode=root.next())
-        c.target_language = 'rest'
+        fn = self.computeWorkbookFileName()
+        exists = fn and os.path.exists(fn)
+        if not fn:
+            # The usual directory does not exist. Create an empty file.
+            c = self.openEmptyLeoFile(gui=g.app.gui, old_c=None)
+            c.rootPosition().h = 'Workbook'
+        else:
+            # Open the workboook or create an empty file.
+            c = self.loadLocalFile(fn, gui=g.app.gui, old_c=None)
+            if not exists:
+                c.rootPosition().h = 'Workbook'
+        # Create the outline with workbook's name.
+        c.frame.title = title = c.computeWindowTitle(fn)
+        c.frame.setTitle(title)
+        c.openDirectory = c.frame.openDirectory = g.os_path_dirname(fn)
+        if hasattr(c.frame, 'top'):
+            c.frame.top.leo_master.setTabName(c, fn)
+        # Finish: Do *not* save the file!
+        g.chdir(fn)
+        g.app.already_open_files = []
         c.clearChanged()
-        c.redraw(c.rootPosition())  # # 1380: Select the root.
-        g.app.gui.replaceClipboardWith(old_clipboard)  # #933: Restore clipboard
+        # Do not redraw. Do not set c.p.
         return c
         */
         const fn: string = '';

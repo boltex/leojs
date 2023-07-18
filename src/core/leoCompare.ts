@@ -681,7 +681,7 @@ export class BaseLeoCompare {
         this.show('ignoreFirstLine2:' + this.ignoreFirstLine2.toString());
         this.show(
             'ignoreInteriorWhitespace:' +
-                this.ignoreInteriorWhitespace.toString()
+            this.ignoreInteriorWhitespace.toString()
         );
         this.show(
             'ignoreLeadingWhitespace:' + this.ignoreLeadingWhitespace.toString()
@@ -745,22 +745,20 @@ export class CompareLeoOutlines {
         }
         const c = this.c;
         const u = this.c.undoer;
-        const undoType = 'Diff Leo files';
-        u.beforeChangeGroup(c.p, undoType);
 
-        this.root = this.create_root(aList); // creates it's own undo bead
-
+        const undoType = 'diff-files';
+        c.selectPosition(c.lastTopLevel());
+        const undoData = u.beforeInsertNode(c.p);
+        this.root = this.create_root(aList);
         this.visible = visible;
         while (aList.length > 1) {
             const path1 = aList[0];
             aList = aList.slice(1);
             for (const path2 of aList) {
-                const undoData = u.beforeChangeTree(this.root!);
                 await this.diff_two_files(path1, path2); // adds to this.root
-                u.afterChangeTree(this.root!, undoType, undoData);
             }
         }
-        u.afterChangeGroup(c.p, undoType);
+        u.afterInsertNode(this.root, undoType, undoData);
         this.finish();
     }
     //@+node:felix.20230430023337.27: *3* loc.diff_two_files
@@ -799,10 +797,10 @@ export class CompareLeoOutlines {
         c1: Commands,
         c2: Commands
     ): [
-        { [key: string]: VNode },
-        { [key: string]: VNode },
-        { [key: string]: [VNode, VNode] }
-    ] {
+            { [key: string]: VNode },
+            { [key: string]: VNode },
+            { [key: string]: [VNode, VNode] }
+        ] {
         const d1: { [key: string]: VNode } = [...c1.all_unique_nodes()].reduce(
             (acc: { [key: string]: VNode }, v: VNode) => {
                 acc[v.fileIndex] = v;
@@ -931,17 +929,17 @@ export class CompareLeoOutlines {
      */
     public create_root(aList: string[]): Position {
         const c = this.c;
-        const u = this.c.undoer;
 
-        const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
-        c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
+        // const u = this.c.undoer;
+        // const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
+        // c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
+        // const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
 
         const p = c.lastTopLevel().insertAfter();
         p.h = 'diff-leo-files';
         p.b = aList.join('\n') + '\n';
 
-        u.afterInsertNode(p, undoType, undoData);
+        // u.afterInsertNode(p, undoType, undoData);
         return p;
     }
     //@+node:felix.20230430023337.33: *4* loc.finish
@@ -1011,8 +1009,8 @@ export class TopLevelCompareCommands {
     @command(
         'diff-and-open-leo-files',
         'Open a dialog prompting for two or more .leo files.' +
-            "Opens all the files and creates a top-level node in c's outline showing" +
-            'the diffs of those files, two at a time.'
+        "Opens all the files and creates a top-level node in c's outline showing" +
+        'the diffs of those files, two at a time.'
     )
     public diff_and_open_leo_files(this: Commands): Promise<void> {
         return diff_leo_files_helper(this, 'Diff And Open Leo Files', true);
@@ -1021,7 +1019,7 @@ export class TopLevelCompareCommands {
     @command(
         'diff-leo-files',
         'Open a dialog prompting for two or more .leo files.' +
-            'Creates a top-level node showing the diffs of those files, two at a time.'
+        'Creates a top-level node showing the diffs of those files, two at a time.'
     )
     public diff_leo_files(this: Commands): Promise<void> {
         return diff_leo_files_helper(this, 'Diff Leo Files', false);
@@ -1030,12 +1028,12 @@ export class TopLevelCompareCommands {
     @command(
         'diff-marked-nodes',
         'When two or more nodes are marked, this command creates a' +
-            '"diff marked node" as the last top-level node. The body of' +
-            'this node contains "diff n" nodes, one for each pair of compared' +
-            'nodes.' +
-            'Each diff n contains the diffs between the two diffed nodes, that is,' +
-            'difflib.Differ().compare(p1.b, p2.b).' +
-            'The children of the diff n are clones of the two compared nodes.'
+        '"diff marked node" as the last top-level node. The body of' +
+        'this node contains "diff n" nodes, one for each pair of compared' +
+        'nodes.' +
+        'Each diff n contains the diffs between the two diffed nodes, that is,' +
+        'difflib.Differ().compare(p1.b, p2.b).' +
+        'The children of the diff n are clones of the two compared nodes.'
     )
     public diffMarkedNodes(this: Commands): void {
         const c = this; // event and event.get('c')
@@ -1043,10 +1041,44 @@ export class TopLevelCompareCommands {
             return;
         }
         const u = c.undoer;
-        const undoType = 'Diff marked nodes'; // Same undoType is reused for all inner undos
+        const undoType = 'diff-marked-nodes'; // Same undoType is reused for all inner undos
 
         let aList = [...c.all_unique_positions()].filter((z) => z.isMarked());
 
+        if (aList.length < 2) {
+            g.es_print('Please mark at least 2 nodes');
+            return;
+        }
+        c.selectPosition(c.lastTopLevel());
+        const undoData = u.beforeInsertNode(c.p);
+        const root = c.lastTopLevel().insertAfter();
+        root.h = 'diff marked nodes'
+        root.b = aList.map((z) => z.h).join('\n') + '\n';
+        let n = 0;
+
+        while (aList.length > 1) {
+            n += 1;
+            let [p1, p2] = [aList[0], aList[1]];
+            aList = aList.slice(1);
+            const lines = new difflib.Differ().compare(
+                g.splitLines(p1.b.trimEnd() + '\n'),
+                g.splitLines(p2.b.trimEnd() + '\n')
+            );
+            const p = root.insertAsLastChild();
+            p.h = `diff ${n}`;
+            p.b = `1: ${p1.h}\n2: ${p2.h}\n${lines.join('')}`;
+            u.afterInsertNode(p, undoType, undoData);
+            for (const p3 of [p1, p2]) {
+                const clone = p3.clone();
+                clone.moveToLastChildOf(p);
+            }
+        }
+        u.afterInsertNode(root, undoType, undoData);
+        root.expand();
+        c.selectPosition(root);
+        c.redraw();
+
+        /*
         let n = 0;
         if (aList.length >= 2) {
             u.beforeChangeGroup(c.p, undoType); // going to perform many operations
@@ -1091,6 +1123,8 @@ export class TopLevelCompareCommands {
         } else {
             g.es_print('Please mark at least 2 nodes');
         }
+        */
+
     }
     //@-others
 }
@@ -1116,17 +1150,51 @@ export async function diff_leo_files_helper(
         types,
         '.leo',
         true
-    );
-    c.bringToFront();
-    // w_paths = [z for z in w_paths if g.os_path_exists(z)]
-    if (w_paths.length > 1) {
-        await new CompareLeoOutlines(c).diff_list_of_files(
-            w_paths as string[],
-            visible
-        );
-    } else if (w_paths.length === 1) {
-        g.es_print('Please pick two or more .leo files');
+    ) as string[];
+
+    if (!w_paths || !w_paths.length) {
+        return;
     }
+
+    if (w_paths.length === 1) {
+        // Prompt for another file.
+        const paths2 = await g.app.gui.runOpenFileDialog(
+            c,
+            title,
+            types,
+            ".leo",
+            true,
+        ) as string[];
+
+        if (!paths2 || !paths2.length) {
+            return;
+        }
+        w_paths.push(...paths2);
+    }
+
+
+    c.bringToFront();
+
+    // w_paths = [z for z in w_paths if g.os_path_exists(z)]
+    // if (w_paths.length > 1) {
+    //     await new CompareLeoOutlines(c).diff_list_of_files(
+    //         w_paths as string[],
+    //         visible
+    //     );
+    // } else if (w_paths.length === 1) {
+    //     g.es_print('Please pick two or more .leo files');
+    // }
+
+    // console.assert( w_paths.length > 1);
+
+    if (!w_paths || w_paths.length < 2) {
+        g.es_print('Please pick two or more .leo files');
+        return;
+    }
+
+    await new CompareLeoOutlines(c).diff_list_of_files(w_paths as string[], visible);
+
+
 }
 //@-others
 //@@language typescript

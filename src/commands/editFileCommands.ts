@@ -38,7 +38,7 @@ export class ConvertAtRoot {
     public section_pat = /\s*<\<(.*)>\>/;
     public units: Position[] = []; // List of positions containing @unit.
 
-    constructor() {}
+    constructor() { }
 
     //@+others
     //@+node:felix.20230709010603.2: *3* atRoot.check_move
@@ -345,18 +345,15 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     @cmd('clean-at-clean-files', 'Adjust whitespace in all @clean files.')
     public cleanAtCleanFiles(): void {
         const c = this.c;
-        const undoType = 'clean-@clean-files';
+        const undoType = 'clean-at-clean-files';
         c.undoer.beforeChangeGroup(c.p, undoType, true);
         let total = 0;
         for (const p of c.all_unique_positions()) {
-            if (
-                g.match_word(p.h, 0, '@clean') &&
-                (p.h.trimEnd().endsWith('py') || p.h.trimEnd().endsWith('pyw'))
-            ) {
+            if (p.isAtCleanNode()) {
                 let n = 0;
                 for (const p2 of p.subtree()) {
                     const bunch2 = c.undoer.beforeChangeNodeContents(p2);
-                    if (this.cleanAtCleanNode(p2, undoType)) {
+                    if (this.cleanAtCleanNode(p2)) {
                         n += 1;
                         total += 1;
                         c.undoer.afterChangeNodeContents(p2, undoType, bunch2);
@@ -377,7 +374,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     /**
      * Adjust whitespace in p, part of an @clean tree.
      */
-    public cleanAtCleanNode(p: Position, undoType: string): boolean {
+    public cleanAtCleanNode(p: Position): boolean {
         const s = p.b.trim();
         if (!s || p.h.trim().startsWith('<<')) {
             return false;
@@ -395,7 +392,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'clean-at-clean-tree',
         'Adjust whitespace in the nearest @clean tree,' +
-            'searching c.p and its ancestors.'
+        'searching c.p and its ancestors.'
     )
     public cleanAtCleanTree(): void {
         const c = this.c;
@@ -404,10 +401,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         let found = false;
         for (const p of c.p.self_and_parents(false)) {
             w_p = p;
-            if (
-                g.match_word(p.h, 0, '@clean') &&
-                (p.h.trimEnd().endsWith('py') || p.h.trimEnd().endsWith('pyw'))
-            ) {
+            if (p.isAtCleanNode()) {
                 found = true;
                 break;
             }
@@ -418,17 +412,18 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         }
         // pylint: disable=undefined-loop-variable
         // w_p is certainly defined here.
-        const bunch = c.undoer.beforeChangeTree(w_p!);
+        // const bunch = c.undoer.beforeChangeTree(w_p!);
         let n = 0;
-        const undoType = 'clean-@clean-tree';
+        // const undoType = 'clean-@clean-tree';
         for (const p2 of w_p!.subtree()) {
-            if (this.cleanAtCleanNode(p2, undoType)) {
+            if (this.cleanAtCleanNode(p2,)) {
                 n += 1;
             }
         }
         if (n > 0) {
             c.setChanged();
-            c.undoer.afterChangeTree(w_p!, undoType, bunch);
+            //c.undoer.afterChangeTree(w_p!, undoType, bunch);
+            c.undoer.clearAndWarn('clean-at-clean-tree');
         }
         g.es_print(`${n} node${g.plural(n)} cleaned`);
     }
@@ -499,10 +494,10 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         d1: { [key: string]: Position },
         d2: { [key: string]: Position }
     ): [
-        { [key: string]: Position },
-        { [key: string]: Position },
-        { [key: string]: Position }
-    ] {
+            { [key: string]: Position },
+            { [key: string]: Position },
+            { [key: string]: Position }
+        ] {
         const inserted: { [key: string]: Position } = {};
         for (const key in d2) {
             // using 'in' for keys !
@@ -720,7 +715,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.23: *3* efc.insertFile
     @cmd(
         'file-insert',
-        'Prompt for the name of a file and put the selected text into it.'
+        'Prompt for the name of a file.' +
+        'Insert the file\'s contents in the body at the insertion point.'
     )
     public async insertFile(): Promise<void> {
         const w = this.editWidget();
@@ -1039,10 +1035,13 @@ export class GitDiffController {
         fn: string
     ): Promise<void> {
         const c = this.c;
+        const [u, undoType] = [c.undoer, 'diff-two-branches'];
         const directory = await this.get_directory();
         if (!directory) {
             return;
         }
+        c.selectPosition(c.lastTopLevel());
+        const undoData = u.beforeInsertNode(c.p);
         const p = c.lastTopLevel().insertAfter();
         this.root = p;
         p.h = `git-diff-branches ${branch1} ${branch2}`;
@@ -1073,10 +1072,10 @@ export class GitDiffController {
         }
         if (c1 && c2) {
             this.make_diff_outlines(c1, c2, fn);
-            this.file_node.b = `${this.file_node.b.trimEnd()}\n@language ${
-                c2.target_language
-            }\n`;
+            this.file_node.b = `${this.file_node.b.trimEnd()}\n@language ${c2.target_language
+                }\n`;
         }
+        u.afterInsertNode(this.root, undoType, undoData);
         this.finish();
     }
     //@+node:felix.20230709010434.6: *4* gdc.diff_two_revs
@@ -1095,14 +1094,16 @@ export class GitDiffController {
         const files = await this.get_files(rev1, rev2);
         const n = files.length;
         let message = `diffing ${n} file${g.plural(n)}`;
-        if (n > 5) {
-            message += '. This may take awhile...';
+        if (!g.unitTesting) {
+            if (n > 5) {
+                message += '. This may take awhile...';
+            }
+            g.es_print(message);
         }
-        g.es_print(message);
 
-        const undoType = 'Git Diff';
+        // const undoType = 'Git Diff';
         c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        u.beforeChangeGroup(c.p, undoType);
+        // u.beforeChangeGroup(c.p, undoType);
         // Create the root node.
         let undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
         this.root = c.lastTopLevel().insertAfter();
@@ -1112,11 +1113,11 @@ export class GitDiffController {
 
         // Create diffs of all files.
         for (const fn of files) {
-            undoData = u.beforeChangeTree(this.root);
+            // undoData = u.beforeChangeTree(this.root);
             await this.diff_file(fn, rev1, rev2);
-            u.afterChangeTree(this.root, undoType, undoData);
+            // u.afterChangeTree(this.root, undoType, undoData);
         }
-        u.afterChangeGroup(c.p, undoType);
+        // u.afterChangeGroup(c.p, undoType);
 
         this.finish();
     }
@@ -1149,27 +1150,46 @@ export class GitDiffController {
     }
     //@+node:felix.20230709010434.8: *5* gdc.diff_revs
     /**
-     * Diff all files given by rev1 and rev2.
+     *  A helper for Leo's git-diff command
+     *
+     *  Diff all files given by rev1 and rev2.
      */
     public async diff_revs(rev1: string, rev2: string): Promise<boolean> {
+        const c = this.c;
+        const u = c.undoer;
+        const undoType = 'git-diff-revs';
         const files = await this.get_files(rev1, rev2);
-        if (files && files.length) {
-            const [c, u] = [this.c, this.c.undoer];
-            const undoType = 'Git Diff';
-            c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-            u.beforeChangeGroup(c.p, undoType);
-
-            this.root = this.create_root(rev1, rev2); // creates it's own undo bead
-
-            for (const fn of files) {
-                const undoData = u.beforeChangeTree(this.root);
-                await this.diff_file(fn, rev1, rev2);
-                u.afterChangeTree(this.root, undoType, undoData);
-            }
-            u.afterChangeGroup(c.p, undoType);
-            this.finish();
+        if (!files || !files.length) {
+            return false;
         }
-        return !!files.length;
+        c.selectPosition(c.lastTopLevel());
+        const undoData = u.beforeInsertNode(c.p);
+        this.root = this.create_root(rev1, rev2);
+        for (const fn of files) {
+            await this.diff_file(fn, rev1, rev2);
+        }
+        u.afterInsertNode(this.root, undoType, undoData);
+        this.finish();
+        return true;
+
+        // const files = await this.get_files(rev1, rev2);
+        // if (files && files.length) {
+        //     const [c, u] = [this.c, this.c.undoer];
+        //     const undoType = 'Git Diff';
+        //     c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
+        //     u.beforeChangeGroup(c.p, undoType);
+
+        //     this.root = this.create_root(rev1, rev2); // creates it's own undo bead
+
+        //     for (const fn of files) {
+        //         const undoData = u.beforeChangeTree(this.root);
+        //         await this.diff_file(fn, rev1, rev2);
+        //         u.afterChangeTree(this.root, undoType, undoData);
+        //     }
+        //     u.afterChangeGroup(c.p, undoType);
+        //     this.finish();
+        // }
+        // return !!files.length;
     }
     //@+node:felix.20230709010434.9: *3* gdc.Utils
     //@+node:felix.20230709010434.10: *4* gdc.create_compare_node
@@ -1266,10 +1286,12 @@ export class GitDiffController {
      * Create the top-level organizer node describing the git diff.
      */
     public create_root(rev1: string, rev2: string): Position {
-        const [c, u] = [this.c, this.c.undoer];
-        const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
-        c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
+        const c = this.c;
+        // const [c, u] = [this.c, this.c.undoer];
+        // const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
+        // c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
+        // const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
+
         const [r1, r2] = [rev1 || '', rev2 || ''];
         const p = c.lastTopLevel().insertAfter();
         p.h = `git diff ${r1} ${r2}`;
@@ -1280,7 +1302,9 @@ export class GitDiffController {
         } else {
             p.b += `${r1}=${this.get_revno(r1)}`;
         }
-        u.afterInsertNode(p, undoType, undoData);
+
+        // u.afterInsertNode(p, undoType, undoData);
+
         return p;
     }
     //@+node:felix.20230709010434.13: *4* gdc.find_file
@@ -1577,10 +1601,10 @@ export class GitDiffController {
         c1: Commands,
         c2: Commands
     ): [
-        { [key: string]: VNode },
-        { [key: string]: VNode },
-        { [key: string]: [VNode, VNode] }
-    ] {
+            { [key: string]: VNode },
+            { [key: string]: VNode },
+            { [key: string]: [VNode, VNode] }
+        ] {
         // Special case the root: only compare the body text.
         const [root1, root2] = [c1.rootPosition()!.v, c2.rootPosition()!.v];
         root1.h = root2.h;
@@ -1659,7 +1683,4 @@ export class GitDiffController {
 }
 //@-others
 //@@language typescript
-
-// @cmd
-
 //@-leo

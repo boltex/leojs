@@ -34,10 +34,8 @@ suite('Test cases for commanderFileCommands.ts', () => {
     //@+node:felix.20230715220159.1: *3* TestRefreshFromDisk.test_refresh_from_disk
     test('test_refresh_from_disk', () => {
         console.log('TODO : test_refresh_from_disk');
-        
+
     });
-
-
 
     // def test_refresh_from_disk(self):
     //     c = self.c
@@ -47,16 +45,16 @@ suite('Test cases for commanderFileCommands.ts', () => {
     //     def dummy_precheck(fileName: str, root: Any) -> bool:
     //         """A version of at.precheck that always returns True."""
     //         return True
-            
+
     //     at.precheck = dummy_precheck  # Force all writes.
-        
+
     //     # Define data.
     //     raw_contents = '"""Test File"""\n'
     //     altered_raw_contents = '"""Test File (changed)"""\n'
-        
+
     //     # Create a writable directory.
     //     directory = tempfile.gettempdir()
-        
+
     //     # Run the tests.
     //     for kind in ('clean', 'file'):
     //         file_name = f"{directory}{os.sep}test_at_{kind}.py"

@@ -81,9 +81,9 @@ export class CommanderFileCommands {
 
         /*
         trace = 'shutdown' in g.app.debug
-        // 1. Write .leoRecentFiles.txt.
+        # Write .leoRecentFiles.txt.
         g.app.recentFilesManager.writeRecentFilesFile(c)
-        // 2. Abort the restart if the user veto's any close.
+        # Abort the restart if the user veto's any close.
         for c in g.app.commanders():
             if c.changed:
                 veto = False
@@ -95,30 +95,29 @@ export class CommanderFileCommands {
                 if veto:
                     g.es_print('Cancelling restart-leo command')
                     return
-        // 3. Officially begin the restart process. A flag for efc.ask.
-        g.app.restarting = True  // #1240.
-        // 4. Save session data.
-        if g.app.sessionManager:
-            g.app.sessionManager.save_snapshot()
-        // 5. Close all unsaved outlines.
-        g.app.setLog(None)  // Kill the log.
+        # Officially begin the restart process. A flag for efc.ask.
+        g.app.restarting = True
+        # Save session data.
+        g.app.saveSession()
+        # Close all unsaved outlines.
+        g.app.setLog(None)  # Kill the log.
         for c in g.app.commanders():
             frame = c.frame
-            // This is similar to g.app.closeLeoWindow.
+            # This is similar to g.app.closeLeoWindow.
             g.doHook("close-frame", c=c)
-            // Save the window state
-            g.app.commander_cacher.commit()  // store cache, but don't close it.
-            // This may remove frame from the window list.
+            # Save the window state
+            g.app.commander_cacher.commit()  # store cache, but don't close it.
+            # This may remove frame from the window list.
             if frame in g.app.windowList:
                 g.app.destroyWindow(frame)
                 g.app.windowList.remove(frame)
             else:
-                // #69.
+                # #69.
                 g.app.forgetOpenFile(fn=c.fileName())
-        // 6. Complete the shutdown.
+        # Complete the shutdown.
         g.app.finishQuit()
-        // 7. Restart, restoring the original command line.
-        args = ['-c'] + [z for z in lm.old_argv]
+        # Restart, restoring the original command line.
+        args = ['-c'] + lm.old_argv
         if trace:
             g.trace('restarting with args', args)
         sys.stdout.flush()
@@ -299,9 +298,9 @@ export class CommanderFileCommands {
             g.trace();
             g.es(
                 `    1: ${utils.getDurationSeconds(t1, t2)}\n` + // 0.00 sec.
-                    `    2: ${utils.getDurationSeconds(t2, t3)}\n` + // 0.36 sec: c.__init__
-                    `    3: ${utils.getDurationSeconds(t3, t4)}\n` + // 0.17 sec: Everything else.
-                    `total: ${utils.getDurationSeconds(t1, t4)}`
+                `    2: ${utils.getDurationSeconds(t2, t3)}\n` + // 0.36 sec: c.__init__
+                `    3: ${utils.getDurationSeconds(t3, t4)}\n` + // 0.17 sec: Everything else.
+                `total: ${utils.getDurationSeconds(t1, t4)}`
             );
         }
         return c; // For unit tests and scripts.
@@ -432,7 +431,48 @@ export class CommanderFileCommands {
     public async refreshFromDisk(this: Commands): Promise<void> {
         const c: Commands = this;
         let p: Position = this.p;
-        const u: Undoer = this.undoer;
+        // const u: Undoer = this.undoer;
+
+        if (!p.isAnyAtFileNode()) {
+            g.warning(`not an @<file> node: ${p.h}`);
+            return;
+        }
+        const full_path = c.fullPath(p);
+        const w_isDir = await g.os_path_isdir(full_path);
+        if (w_isDir) {
+            g.warning(`not a file: ${full_path}`);
+            return;
+        }
+        const at = c.atFileCommands;
+        c.nodeConflictList = [];
+        c.recreateGnxDict();
+        if (p.isAtAutoNode() || p.isAtAutoRstNode()) {
+            p.v._deleteAllChildren();
+            p = await at.readOneAtAutoNode(p);  // Changes p!
+        } else if (p.isAtFileNode()) {
+            p.v._deleteAllChildren();
+            await at.read(p);
+        } else if (p.isAtCleanNode()) {
+            // Don't delete children!
+            await at.readOneAtCleanNode(p);
+        } else if (p.isAtShadowFileNode()) {
+            p.v._deleteAllChildren();
+            await at.read(p);
+        } else if (p.isAtEditNode()) {
+            await at.readOneAtEditNode(p);  // Always deletes children.
+        } else if (p.isAtAsisFileNode()) {
+            await at.readOneAtAsisNode(p);  // Always deletes children.
+        } else {
+            g.es_print(`Unknown @<file> node: ${p.h}`);
+            return;
+        }
+        c.selectPosition(p);
+        // Create the 'Recovered Nodes' tree.
+        c.fileCommands.handleNodeConflicts();
+        c.redraw();
+        c.undoer.clearAndWarn('refresh-from-disk');
+
+        /*
         // ! LEOJS : warn if no openDirectory before write/read external files.
         if (!c.openDirectory) {
             void g.warnNoOpenDirectory();
@@ -502,6 +542,8 @@ export class CommanderFileCommands {
             c.redraw();
         }
         return;
+        */
+
     }
     //@+node:felix.20220105210716.13: *4* c_file.pwd
     @commander_command('pwd', 'Prints the current working directory')
@@ -679,17 +721,17 @@ export class CommanderFileCommands {
     @commander_command(
         'save-to',
         'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.'
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'file-save-to',
         'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.'
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-to',
         'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.'
+        'Leave the file name of the Leo outline unchanged.'
     )
     public async saveTo(
         this: Commands,
@@ -759,12 +801,12 @@ export class CommanderFileCommands {
     @commander_command(
         'file-save-as-leojs',
         'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.'
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-leojs',
         'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.'
+        'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_leojs(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -788,12 +830,12 @@ export class CommanderFileCommands {
     @commander_command(
         'file-save-as-zipped',
         'Save a copy of the Leo outline as a zipped (.db) file with a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.'
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-zipped',
         'Save a copy of the Leo outline as a zipped (.db) file with a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.'
+        'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_zipped(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -817,14 +859,14 @@ export class CommanderFileCommands {
     @commander_command(
         'file-save-as-xml',
         'Save a copy of the Leo outline as an XML .leo file with a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.\n' +
-            'Useful for converting a .leo.db file to a .leo file.'
+        'Leave the file name of the Leo outline unchanged.\n' +
+        'Useful for converting a .leo.db file to a .leo file.'
     )
     @commander_command(
         'save-file-as-xml',
         'Save a copy of the Leo outline as an XML .leo file with a new file name.\n' +
-            'Leave the file name of the Leo outline unchanged.\n' +
-            'Useful for converting a .leo.db file to a .leo file.'
+        'Leave the file name of the Leo outline unchanged.\n' +
+        'Useful for converting a .leo.db file to a .leo file.'
     )
     public async save_as_xml(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -996,7 +1038,7 @@ export class CommanderFileCommands {
     @commander_command(
         'remove-sentinels',
         'Convert one or more files, replacing the original files\n' +
-            'while removing any sentinels they contain.'
+        'while removing any sentinels they contain.'
     )
     public async removeSentinels(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1054,7 +1096,8 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.31: *4* c_file.readAtAutoNodes
     @commander_command(
         'read-at-auto-nodes',
-        'Read all @auto nodes in the presently selected outline.'
+        'Read all @auto nodes in the presently selected outline.' +
+        'This command is not undoable.'
     )
     public async readAtAutoNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1063,16 +1106,18 @@ export class CommanderFileCommands {
 
         c.endEditing();
         c.init_error_dialogs();
-        const undoData: Bead = u.beforeChangeTree(p);
+        // const undoData: Bead = u.beforeChangeTree(p);
         await c.importCommands.readAtAutoNodes();
-        u.afterChangeTree(p, 'Read @auto Nodes', undoData);
+        // u.afterChangeTree(p, 'Read @auto Nodes', undoData);
         c.redraw();
-        return c.raise_error_dialogs('read');
+        await c.raise_error_dialogs('read');
+        return c.undoer.clearAndWarn('read-at-auto-nodes');
     }
     //@+node:felix.20220105210716.32: *4* c_file.readAtFileNodes
     @commander_command(
         'read-at-file-nodes',
-        'Read all @file nodes in the presently selected outline.'
+        'Read all @file nodes in the presently selected outline.' +
+        'This command is not undoable.'
     )
     public async readAtFileNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1080,19 +1125,21 @@ export class CommanderFileCommands {
         const u: Undoer = this.undoer;
 
         c.endEditing();
-        const undoData: Bead = u.beforeChangeTree(p);
+        // const undoData: Bead = u.beforeChangeTree(p);
 
         await c.atFileCommands.readAllSelected(p);
         // Force an update of the body pane.
         c.setBodyString(p, p.b); // Not a do-nothing!
-        u.afterChangeTree(p, 'Read @file Nodes', undoData);
-        return c.redraw();
+        // u.afterChangeTree(p, 'Read @file Nodes', undoData);
+        c.redraw();
+        return c.undoer.clearAndWarn('read-at-file-nodes');
     }
 
     //@+node:felix.20220105210716.33: *4* c_file.readAtShadowNodes
     @commander_command(
         'read-at-shadow-nodes',
-        'Read all @shadow nodes in the presently selected outline.'
+        'Read all @shadow nodes in the presently selected outline.' +
+        'This command is not undoable.'
     )
     public async readAtShadowNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1101,14 +1148,18 @@ export class CommanderFileCommands {
 
         c.endEditing();
         c.init_error_dialogs();
-        const undoData: Bead = u.beforeChangeTree(p);
+        // const undoData: Bead = u.beforeChangeTree(p);
         await c.atFileCommands.readAtShadowNodes(p);
-        u.afterChangeTree(p, 'Read @shadow Nodes', undoData);
+        // u.afterChangeTree(p, 'Read @shadow Nodes', undoData);
         c.redraw();
-        return c.raise_error_dialogs('read');
+        await c.raise_error_dialogs('read');
+        return c.undoer.clearAndWarn('read-at-shadow-nodes');
     }
     //@+node:felix.20220105210716.34: *4* c_file.readFileIntoNode
-    @commander_command('read-file-into-node', 'Read a file into a single node.')
+    @commander_command(
+        'read-file-into-node',
+        'Read a file into a single node.'
+    )
     public async readFileIntoNode(this: Commands): Promise<unknown> {
         const c: Commands = this;
         const undoType: string = 'Read File Into Node';
@@ -1183,7 +1234,7 @@ export class CommanderFileCommands {
     @commander_command(
         'write-file-from-node',
         'If node starts with @read-file-into-node, use the full path name ' +
-            'in the headline.\nOtherwise, prompt for a file name.'
+        'in the headline.\nOtherwise, prompt for a file name.'
     )
     public async writeFileFromNode(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1229,8 +1280,8 @@ export class CommanderFileCommands {
     @commander_command(
         'write-file-from-subtree',
         'Write the entire tree from the selected node as text to a file.\n' +
-            'If node starts with @read-file-into-node, use the full path name in the headline.\n' +
-            'Otherwise, prompt for a file name.'
+        'If node starts with @read-file-into-node, use the full path name in the headline.\n' +
+        'Otherwise, prompt for a file name.'
     )
     public async writeFileFromSubtree(this: Commands): Promise<void> {
         const c: Commands = this;
@@ -1349,14 +1400,14 @@ export class CommanderFileCommands {
     @commander_command(
         'update-ref-file',
         'Saves only the **public part** of this outline to the reference Leo\n' +
-            'file. The public part consists of all nodes above the **special\n' +
-            'separator node**, a top-level node whose headline is\n' +
-            '`---begin-private-area---`.\n' +
-            '\n' +
-            'Below this special node is **private area** where one can freely make\n' +
-            'changes that should not be copied (published) to the reference Leo file.\n' +
-            '\n' +
-            '**Note**: Use the set-reference-file command to create the separator node.\n'
+        'file. The public part consists of all nodes above the **special\n' +
+        'separator node**, a top-level node whose headline is\n' +
+        '`---begin-private-area---`.\n' +
+        '\n' +
+        'Below this special node is **private area** where one can freely make\n' +
+        'changes that should not be copied (published) to the reference Leo file.\n' +
+        '\n' +
+        '**Note**: Use the set-reference-file command to create the separator node.\n'
     )
     public updateRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1366,14 +1417,14 @@ export class CommanderFileCommands {
     @commander_command(
         'read-ref-file',
         'This command *completely replaces* the **public part** of this outline\n' +
-            'with the contents of the reference Leo file. The public part consists\n' +
-            'of all nodes above the top-level node whose headline is\n' +
-            '`---begin-private-area---`.\n' +
-            '\n' +
-            'Below this special node is **private area** where one can freely make\n' +
-            'changes that should not be copied (published) to the reference Leo file.\n' +
-            '\n' +
-            '**Note**: Use the set-reference-file command to create the separator node.\n'
+        'with the contents of the reference Leo file. The public part consists\n' +
+        'of all nodes above the top-level node whose headline is\n' +
+        '`---begin-private-area---`.\n' +
+        '\n' +
+        'Below this special node is **private area** where one can freely make\n' +
+        'changes that should not be copied (published) to the reference Leo file.\n' +
+        '\n' +
+        '**Note**: Use the set-reference-file command to create the separator node.\n'
     )
     public readRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;

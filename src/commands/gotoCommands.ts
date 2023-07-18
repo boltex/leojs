@@ -43,6 +43,10 @@ export class GoToCommands {
             // even if the actual external file actually contains no sentinels.
             const sentinels = root.isAtFileNode();
             const s = await this.get_external_file_with_sentinels(root);
+            // Special case empty files.
+            if (!s.trim()) {
+                return [p, 0, false];
+            }
             const lines = g.splitLines(s);
 
             let gnx;
@@ -358,7 +362,8 @@ export class GoToCommands {
         const w = c.frame.body.wrapper;
         c.selectPosition(root);
         c.redraw();
-        if (!g.unitTesting) {
+        // Don't warn if there is no line 0.
+        if (!g.unitTesting && Math.abs(n) > 0) {
             if (lines.length < n) {
                 g.warning('only', lines.length, 'lines');
             } else {
@@ -406,9 +411,6 @@ export class GoToCommands {
         let fileName;
         // First look for ancestor @file node.
         for (let w_p of p.self_and_parents(false)) {
-            // fileName = not p2.isAtAllNode() and p2.anyAtFileNodeName()
-            // if fileName:
-            // return p2.copy(), fileName
             if (!w_p.isAtAllNode()) {
                 fileName = w_p.anyAtFileNodeName();
                 if (fileName) {
@@ -416,8 +418,7 @@ export class GoToCommands {
                 }
             }
         }
-        // Search the entire tree for joined nodes.
-        // Bug fix: Leo 4.5.1: *must* search *all* positions.
+        // Search the entire tree for cloned nodes.
         for (let w_p of c.all_positions()) {
             if (w_p.v === p1.v && !w_p.__eq__(p1)) {
                 // Found a joined position.

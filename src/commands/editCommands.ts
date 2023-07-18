@@ -45,7 +45,7 @@ export class TopLevelEditCommands {
     @command(
         'merge-node-with-next-node',
         'Merge p.b into p.next().b and delete p, *provided* that p has no children.' +
-            "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
+        "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_next_node(this: Commands): void {
         const c: Commands = this;
@@ -85,7 +85,7 @@ export class TopLevelEditCommands {
     @command(
         'merge-node-with-prev-node',
         'Merge p.b into p.back().b and delete p, *provided* that p has no children.' +
-            "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
+        "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_prev_node(this: Commands): void {
         const c: Commands = this;
@@ -199,23 +199,21 @@ export class TopLevelEditCommands {
         const p = c.p;
 
         g.es('TODO : show-clone-ancestors when UNL is done');
+
         /*
-        g.es(`Ancestors of ${p.h}...`);
-        for (const clone of c.all_positions()){
-            if (clone.v === p.v){
-                const unl = clone.get_legacy_UNL();
-                const message = unl;
-                // Drop the file part.
+        g.es(f"Ancestors of {p.h}...")
+        for clone in c.all_positions():
+            if clone.v == p.v:
+                unl = message = clone.get_legacy_UNL()
+                # Drop the file part.
                 i = unl.find('#')
                 if i > 0:
                     message = unl[i + 1 :]
-                // Drop the target node from the message.
+                # Drop the target node from the message.
                 parts = message.split('-->')
                 if len(parts) > 1:
                     message = '-->'.join(parts[:-1])
                 c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
-            }
-        }
         */
     }
     //@+node:felix.20230708211959.1: *3* @g.command('show-clone-parents')
@@ -406,10 +404,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'goto-global-line',
         'Put the cursor at the line in the *outline* corresponding to the line\n' +
-            'with the given line number *in the external file*.\n' +
-            'For external files containing sentinels, there may be *several* lines\n' +
-            'in the file that correspond to the same line in the outline.' +
-            'An Easter Egg: <Alt-x>number invokes this code.'
+        'with the given line number *in the external file*.\n' +
+        'For external files containing sentinels, there may be *several* lines\n' +
+        'in the file that correspond to the same line in the outline.' +
+        'An Easter Egg: <Alt-x>number invokes this code.'
     )
     public async gotoGlobalLine(p_lineNumber?: number): Promise<unknown> {
         // Bypass if called with number
@@ -459,23 +457,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'hn-add-all',
         'Add headline numbers to all nodes of the outline *except*\n' +
-            '-  @<file> nodes and their descendants.\n' +
-            '- Any node whose headline starts with "@".\n' +
-            "Use the *first* clone's position for all clones."
+        '-  @<file> nodes and their descendants.\n' +
+        '- Any node whose headline starts with "@".\n' +
+        "Use the *first* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-all',
         'Add headline numbers to all nodes of the outline *except*\n' +
-            '-  @<file> nodes and their descendants.\n' +
-            '- Any node whose headline starts with "@".\n' +
-            "Use the *first* clone's position for all clones."
+        '-  @<file> nodes and their descendants.\n' +
+        '- Any node whose headline starts with "@".\n' +
+        "Use the *first* clone's position for all clones."
     )
     @cmd(
         'add-all-headline-numbers',
         'Add headline numbers to all nodes of the outline *except*\n' +
-            '-  @<file> nodes and their descendants.\n' +
-            '- Any node whose headline starts with "@".\n' +
-            "Use the *first* clone's position for all clones."
+        '-  @<file> nodes and their descendants.\n' +
+        '- Any node whose headline starts with "@".\n' +
+        "Use the *first* clone's position for all clones."
     )
     public hn_add_all(): void {
         const c: Commands = this.c;
@@ -531,17 +529,17 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'hn-add-subtree',
         'Add headline numbers to *all* children of c.p.' +
-            "Use the *last* clone's position for all clones."
+        "Use the *last* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-subtree',
         'Add headline numbers to *all* children of c.p.' +
-            "Use the *last* clone's position for all clones."
+        "Use the *last* clone's position for all clones."
     )
     @cmd(
         'add-subtree-headline-numbers',
         'Add headline numbers to *all* children of c.p.' +
-            "Use the *last* clone's position for all clones."
+        "Use the *last* clone's position for all clones."
     )
     public hn_add_children(): void {
         const c: Commands = this.c;
@@ -639,6 +637,103 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             const n = m[0].length;
             c.setHeadString(p, p.v.h.substring(n));
             p.v.setDirty();
+        }
+    }
+    //@+node:felix.20230716160519.1: *3* ec: info
+    //@+node:felix.20230716160519.2: *4* ec.copyGnx
+    @cmd(
+        'copy-gnx',
+        'Copy c.p.gnx to the clipboard and display a gnx-oriented unl in the log pane.'
+        // 'Copy c.p.gnx to the clipboard and display a gnx-oriented unl in the status area.'
+    )
+    @cmd(
+        'gnx-show',
+        'Copy c.p.gnx to the clipboard and display a gnx-oriented unl in the log pane.'
+        // 'Copy c.p.gnx to the clipboard and display a gnx-oriented unl in the status area.'
+    )
+    @cmd(
+        'show-gnx',
+        'Copy c.p.gnx to the clipboard and display a gnx-oriented unl in the log pane.'
+        // 'Copy c.p.gnx to the clipboard and display a gnx-oriented unl in the status area.'
+    )
+    public async copyGnx(): Promise<void> {
+        
+        const c = this.c;
+        if (!c){
+            return;
+        }
+        const p = c.p;
+        if (!p){
+            return;
+        }
+        const url = p.get_UNL();
+        await g.app.gui.replaceClipboardWith(url);
+
+        g.es(url); // LEOJS NO status_line 
+
+        // const status_line = getattr(c.frame, "statusLine", None)
+        // if status_line
+        //     status_line.put(url)
+
+    }
+    //@+node:felix.20230716160519.3: *4* ec.lineNumber
+    @cmd(
+        'line-number',
+        'Print the line and column number and percentage of insert point.'
+    )
+    public lineNumber(): void {
+        
+        const k = this.c.k;
+        const w = this.editWidget();
+        if (!w){
+            return;
+        }
+        const s = w.getAllText();
+        const i = w.getInsertPoint();
+        let [row, col] = g.convertPythonIndexToRowCol(s, i);
+
+        //percent = int((i * 100) / len(s))
+        const percent: number = Math.floor((i * 100) / s.length);
+
+        g.es_print(
+        `char: ${s[i]} row: ${row} col: ${col} pos: ${i} (${percent}% of ${s.length})`
+        );
+
+    }
+    //@+node:felix.20230716160519.5: *4* ec.viewRecentCommands
+    @cmd(
+        'view-recent-commands',
+        'Print recently-executed commands.'
+    )
+    public viewRecentCommands(): void {
+        
+        const c = this.c;
+        g.es_print('Recently-executed commands...');
+
+        const recentCommandsList = c.recent_commands_list;
+        for (let i = recentCommandsList.length - 1; i >= 0; i--) {
+            const command = recentCommandsList[i];
+            g.es_print(`${i.toString().padStart(2, ' ')} ${command}`);
+        }
+
+    }
+    //@+node:felix.20230716160519.6: *4* ec.whatLine
+    @cmd(
+        'what-line',
+        'Print the line number of the line containing the cursor.'
+    )
+    public whatLine(): void {
+        const k = this.c.k;
+        const w = this.editWidget();
+
+        if (w){
+            const s = w.getAllText();
+            const i = w.getInsertPoint();
+            let [row, col] = g.convertPythonIndexToRowCol(s, i);
+
+            // k.keyboardQuit()
+            // k.setStatusLabel(f"Line {row}")
+            g.es_print(`Line ${row}`);
         }
     }
     //@+node:felix.20221220002620.1: *3* ec: move cursor

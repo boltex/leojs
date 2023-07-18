@@ -52,8 +52,8 @@ export class NodeIndices {
         if (v2 && v2 !== v) {
             g.error(
                 `getNewIndex: gnx clash ${gnx}\n` +
-                    `          v: ${v}\n` +
-                    `         v2: ${v2}`
+                `          v: ${v}\n` +
+                `         v2: ${v2}`
             );
         }
     }
@@ -1066,33 +1066,106 @@ export class Position {
         return this.copy().moveToVisNext(c)!;
     }
 
-    //@+node:felix.20210202235315.11: *4* p.get_UNL
-    /**
-     *  Return a UNL representing a clickable link.
-     *  See the section < define global error regexs > for the regexes.
+    //@+node:felix.20230717211349.1: *4* p.get_UNL and related methods
+    // All unls must contain a file part: f"//{file-name}#"
+    // The file-name may be empty.
+    //@+node:felix.20230717211349.2: *5* p.get_full_gnx_UNL
+    /** 
+     * Return a gnx-oriented UNL with a full path component.
      *
-     *  New in Leo 6.6: Use a single, simplified format for UNL's:
-     *
-     *  - unl: //
-     *  - self.v.context.fileName() #
-     *  - a list of headlines separated by '-->'
-     *
-     *  New in Leo 6.6:
-     *  - Always add unl: // and file name.
-     *  - Never translate '-->' to '--%3E'.
-     *  - Never generate child indices.
+     * Not used in Leo's core or official plugins.
      */
-    public get_UNL(): string {
-        const parents = [...this.self_and_parents(false)]
-            .reverse()
-            .map((p) => (p.v ? p.h : 'no v node'));
+    public get_full_gnx_UNL(): string {
 
-        const base_unl = this.v.context.fileName() + '#' + parents.join('-->');
+        const p = this;
+        const c = p.v.context;
+        const file_part = c.fileName();
+        return 'unl:gnx:' + `//${file_part}#${this.gnx}`;
 
-        const encoded = base_unl.replace(/'/g, '%27');
-        return 'unl://' + encoded;
     }
+    //@+node:felix.20230717211349.3: *5* p.get_full_legacy_UNL
+    /**
+     * Return a legacy unl with the full file-name component.
+     *
+     * Not used in Leo's core or official plugins.
+     */
+    public get_full_legacy_UNL(): string {
 
+        const p = this;
+        const c = p.v.context;
+        const path_part: string = [...this.self_and_parents(false)].map(z => z.h).reverse().join('-->');
+        return 'unl:' + `//${c.fileName()}#${path_part}`;
+
+    }
+    //@+node:felix.20230717211349.4: *5* p.get_legacy_UNL
+    /**
+     * Return a headline-oriented UNL, as in legacy versions of p.get_UNL.
+     *
+     * @bool full-unl-paths determines the size of the file part.
+     *
+     * LeoTree.set_status_line will call this method if legacy unls are in effect.
+     */
+    public get_legacy_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const path_part: string = [...this.self_and_parents()].map(z => z.h).reverse().join('-->');
+
+        const full = c.config.getBool('full-unl-paths', false);
+        const file_part = full ? c.fileName() : g.os_path_basename(c.fileName());
+        return 'unl:' + `//${file_part}#${path_part}`;
+
+    }
+    //@+node:felix.20230717211349.5: *5* p.get_short_gnx_UNL
+    /**
+     * Return a legacy unl without the file-name component.
+     *
+     * Not used in Leo's core or official plugins.
+     */
+    public get_short_gnx_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const file_part = g.os_path_basename(c.fileName());
+        return 'unl:gnx:' + `//${file_part}#${this.gnx}`;
+
+    }
+    //@+node:felix.20230717211349.6: *5* p.get_short_legacy_UNL
+    /**
+     *    Return a legacy unl with a short file-name component.
+
+        Not used in Leo's core or official plugins.
+     */
+    public get_short_legacy_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const file_part = g.os_path_basename(c.fileName());
+        const path_part: string = [...this.self_and_parents(false)].map(z => z.h).reverse().join('-->');
+
+        return 'unl:' + `//${file_part}#${path_part}`;
+
+    }
+    //@+node:felix.20230717211349.7: *5* p.get_UNL
+    /**
+     * Return a gnx-oriented UNL.
+     *
+     * Breaking change to Leo's API: returned a path-oriented UNL previously.
+     *
+     * @bool full-unl-paths determines the size of the file part.
+     *
+     * LeoTree.set_status_line calls this method if gnx-based unls are in effect.
+     */
+
+    public get_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const full = c.config.getBool('full-unl-paths', false);
+        const file_part = full ? c.fileName() : g.os_path_basename(c.fileName());
+        return 'unl:gnx:' + `//${file_part}#${this.gnx}`;
+
+    }
     //@+node:felix.20210202235315.12: *4* p.hasBack/Next/Parent/ThreadBack
     public hasBack(): boolean {
         const p: Position = this;
@@ -1905,7 +1978,7 @@ export class Position {
                     } else if (child_v.fileIndex === parent.v.fileIndex) {
                         g.error(
                             `duplicate gnx: ${child_v.fileIndex} ` +
-                                `v: ${child_v} parent: ${parent.v}`
+                            `v: ${child_v} parent: ${parent.v}`
                         );
                         child_v.fileIndex =
                             g.app.nodeIndices!.getNewIndex(child_v);

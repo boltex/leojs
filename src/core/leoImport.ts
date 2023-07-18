@@ -1464,12 +1464,14 @@ export class LeoImportCommands {
      * This is essentially an import of p.b.
      */
     public parse_body(p: Position): void {
+
+        const c = this.c;
+        const d = g.app.language_extension_dict;
+        const [u, undoType] = [c.undoer, 'parse-body'];
         if (!p || !p.__bool__()) {
             return;
         }
-        const c = this.c;
-        const d = g.app.language_extension_dict;
-        const ic = this;
+
         if (p.hasChildren()) {
             g.es_print('can not run parse-body: node has children:', p.h);
             return;
@@ -1481,10 +1483,10 @@ export class LeoImportCommands {
         // Fix bug 151: parse-body creates "None declarations"
         if (p.isAnyAtFileNode()) {
             const fn = p.anyAtFileNodeName();
-            [ic.methodName, ic.fileType] = g.os_path_splitext(fn);
+            [this.methodName, this.fileType] = g.os_path_splitext(fn);
         } else {
             const fileType = d[language] || 'py';
-            [ic.methodName, ic.fileType] = [p.h, fileType];
+            [this.methodName, this.fileType] = [p.h, fileType];
         }
         if (!parser) {
             g.es_print(
@@ -1492,12 +1494,12 @@ export class LeoImportCommands {
             );
             return;
         }
-        const bunch = c.undoer.beforeChangeTree(p);
         const s = p.b;
         p.b = '';
         try {
+            const bunch = c.undoer.beforeParseBody(p);
             parser(c, p, s);
-            c.undoer.afterChangeTree(p, 'parse-body', bunch);
+            u.afterParseBody(p, undoType, bunch);
             p.expand();
             c.selectPosition(p);
             c.redraw();
@@ -2130,16 +2132,17 @@ export class MORE_Importer {
  */
 export class RecursiveImportController {
     public c: Commands;
-    public add_path: boolean;
     public file_pattern: RegExp;
     public ignore_pattern: RegExp;
     public kind: string;
+    public root_directory: string = "";
     public recursive: boolean;
     public root: Position | undefined;
-    public safe_at_file: boolean;
+    public safe_at_file: boolean = false;
     public theTypes: string[] | undefined;
-    public verbose: boolean;
+    public verbose: boolean = false;
     public n_files: number = 0;
+    public isReady: Thenable<boolean>;
 
     //@+others
     //@+node:felix.20230511002459.2: *3* ric.ctor
@@ -2148,37 +2151,49 @@ export class RecursiveImportController {
      */
     constructor(
         c: Commands,
+        dir_: string,
+        ignore_pattern: RegExp | undefined = undefined,
         kind: string,
-        add_context: boolean | undefined = undefined, // Override setting only if True/False
-        add_file_context: boolean | undefined = undefined, // Override setting only if True/False
-        add_path: boolean = true,
+        // add_context: boolean | undefined = undefined, // Override setting only if True/False
+        // add_file_context: boolean | undefined = undefined, // Override setting only if True/False
+        // add_path: boolean = true,
         recursive: boolean = true,
         safe_at_file: boolean = true,
         theTypes: string[] | undefined = undefined,
-        ignore_pattern: RegExp | undefined = undefined,
         verbose: boolean = true // legacy value.
     ) {
         this.c = c;
-        this.add_path = add_path;
+        // this.add_path = add_path;
         this.file_pattern = /^(@@|@)(auto|clean|edit|file|nosent)/;
         this.ignore_pattern = ignore_pattern || /\.git|node_modules/;
         this.kind = kind; // in ('@auto', '@clean', '@edit', '@file', '@nosent')
         this.recursive = recursive;
         this.root = undefined;
-        this.safe_at_file = safe_at_file;
-        this.theTypes = theTypes;
-        this.verbose = verbose;
+        this.isReady = g.os_path_isdir(dir_).then((w_isDir) => {
+            this.root_directory = w_isDir ? dir_ : g.os_path_dirname(dir_);
+            // Adjust the root directory.
+            console.assert(dir_ && this.root_directory, dir_)
+            this.root_directory = this.root_directory.replace(/\\/g, '/');
+            if (this.root_directory.endsWith('/')) {
+                this.root_directory = this.root_directory.slice(0, -1);
+            }
+            this.safe_at_file = safe_at_file;
+            this.theTypes = theTypes;
+            this.verbose = verbose;
+            return true;
+        });
+
         // #1605:
 
-        const set_bool = (setting: string, val: any): void => {
-            if (![true, false].includes(val)) {
-                return;
-            }
-            c.config.set(undefined, 'bool', setting, val, true);
-        };
+        // const set_bool = (setting: string, val: any): void => {
+        //     if (![true, false].includes(val)) {
+        //         return;
+        //     }
+        //     c.config.set(undefined, 'bool', setting, val, true);
+        // };
 
-        set_bool('add-context-to-headlines', add_context);
-        set_bool('add-file-context-to-headlines', add_file_context);
+        // set_bool('add-context-to-headlines', add_context);
+        // set_bool('add-file-context-to-headlines', add_file_context);
     }
     //@+node:felix.20230511002459.3: *3* ric.run & helpers
     /**
@@ -2192,17 +2207,20 @@ export class RecursiveImportController {
             )
         ) {
             g.es('bad kind param', this.kind);
+            return;
         }
-        const c = this.c;
-        const p1 = c.p;
-        this.root = c.p;
+        const [c, u] = [this.c, this.c.undoer];
         const t1 = process.hrtime();
         g.app.disable_redraw = true;
-        const bunch = c.undoer.beforeChangeTree(p1);
-        // Leo 5.6: Always create a new last top-level node.
+
         const last = c.lastTopLevel();
-        const parent = last.insertAfter();
+        // Always create a new last top-level node.
+        this.root = last.insertAfter();
+        const parent = this.root;
         try {
+            c.selectPosition(last);
+            const undoData = u.beforeInsertNode(last);
+
             parent.v.h = 'imported files';
             // Leo 5.6: Special case for a single file.
             this.n_files = 0;
@@ -2215,8 +2233,8 @@ export class RecursiveImportController {
             } else {
                 await this.import_dir(dir_, parent);
             }
-            this.post_process(parent, dir_); // Fix # 1033.
-            c.undoer.afterChangeTree(p1, 'recursive-import', bunch);
+            this.post_process(parent);
+            u.afterInsertNode(parent, 'recursive-import', undoData);
         } catch (exception) {
             g.es_print('Exception in recursive import');
             g.es_exception(exception);
@@ -2227,14 +2245,15 @@ export class RecursiveImportController {
             }
             c.redraw(parent);
         }
-
-        const t2 = process.hrtime();
-        const n = [...parent.self_and_subtree()].length;
-        g.es_print(
-            `imported ${n} node${g.plural(n)} ` +
+        if (!g.unitTesting) {
+            const t2 = process.hrtime();
+            const n = [...parent.self_and_subtree()].length;
+            g.es_print(
+                `imported ${n} node${g.plural(n)} ` +
                 `in ${this.n_files} file${g.plural(this.n_files)} ` +
                 `in ${utils.getDurationSeconds(t1, t2)} seconds`
-        );
+            );
+        }
     }
     //@+node:felix.20230511002459.4: *4* ric.import_dir
     /**
@@ -2250,6 +2269,7 @@ export class RecursiveImportController {
                 g.es_print('importing directory:', dir_);
             }
             files = await g.os_listdir(dir_);
+            files = files.sort();
         }
 
         const dirs = [];
@@ -2257,8 +2277,7 @@ export class RecursiveImportController {
 
         for (let w_path of files) {
             try {
-                // Fix #408. Catch path exceptions.
-                // The idea here is to keep going on small errors.
+                // Catch path exceptions: keep going on small errors.
                 w_path = g.os_path_join(dir_, w_path);
                 if (await g.os_path_isfile(w_path)) {
                     let [name, ext] = g.os_path_splitext(w_path);
@@ -2278,10 +2297,6 @@ export class RecursiveImportController {
         }
 
         if (files.length || dirs.length) {
-            console.assert(
-                this.root && parent && parent.v !== this.root.v,
-                'import_dir failed!'
-            );
             parent = parent.insertAsLastChild();
             parent.v.h = dir_;
             if (files2.length) {
@@ -2345,16 +2360,15 @@ export class RecursiveImportController {
      * Traverse p's tree, replacing all nodes that start with prefix
      * by the smallest equivalent @path or @file node.
      */
-    public post_process(p: Position, prefix: string): void {
+    public post_process(p: Position): void {
         this.fix_back_slashes(p);
-        prefix = prefix.replace('\\', '/');
+        for (const p2 of p.subtree()) {
+            this.minimize_headline(p2);
+        }
         if (!['@auto', '@edit'].includes(this.kind)) {
             this.remove_empty_nodes(p);
         }
-        const w_firstChild = p.firstChild();
-        if (w_firstChild && w_firstChild.__bool__()) {
-            this.minimize_headlines(p.firstChild(), prefix);
-        }
+
         this.clear_dirty_bits(p);
         this.add_class_names(p);
     }
@@ -2436,11 +2450,64 @@ export class RecursiveImportController {
             }
         }
     }
-    //@+node:felix.20230511002459.11: *5* ric.minimize_headlines & helper
+    //@+node:felix.20230511002459.11: *5* ric.minimize_headline
     /**
-     * Create @path nodes to minimize the paths required in descendant nodes.
+     * Adjust headlines and add @path directives to headlines or body text.
+     * Create an @path directive in  @<file> nodes.
      */
-    public minimize_headlines(p: Position, prefix: string): void {
+    public minimize_headline(p: Position): void {
+        console.assert(g.os_path_isabs(this.root_directory));
+
+        /**
+         * Return path relative to the root directory.
+         */
+        const relative_path = (p_path: string): string => {
+
+            console.assert(p_path.startsWith(this.root_directory), p_path.toString());
+            console.assert(g.os_path_isabs(p_path), p_path.toString());
+            p_path = p_path.includes('/') ? p_path.split('/').slice(-1)[0] : p_path;
+            return p_path;
+        };
+        /**
+         * Compute the relative path to be used in an @path directive.
+         */
+        const compute_at_path_path = (p_path: string): string => {
+
+            console.assert(p_path.startsWith(this.root_directory), p_path.toString());
+            console.assert(g.os_path_isabs(p_path), p_path.toString());
+            p_path = p_path.slice(this.root_directory.length);
+            if (p_path.startsWith('/')) {
+                p_path = p_path.slice(1);
+            }
+            return p_path;
+        };
+
+        const m = this.file_pattern.exec(p.h);
+        if (m && m.length) {
+            // p is an @file node of some kind.
+            const kind = m[0];
+            let w_path = p.h.slice(kind.length).trim().replace(/\\/g, '/');
+            // Shorten p.h.
+            p.h = `${kind} ${relative_path(w_path)}`;
+            // Prepend an @path directive to p.b if it has a directory component.
+            w_path = compute_at_path_path(w_path);
+            if (w_path && w_path.includes('/')) {
+                const directory = w_path.split('/').slice(0, -1).join('/');
+                p.b = `@path ${directory}\n${p.b}`;
+            }
+
+        } else if (p.h.includes('/') && p.h === this.root_directory) {
+            // Show the last component.
+            const directory = p.h.split('/').slice(-1);
+            p.h = `path: ${directory}`;
+        } else if (p.h.startsWith(this.root_directory)) {
+            // The importer has created the start of an @path node.
+            const h = compute_at_path_path(p.h);
+            if (h) {
+                p.h = `path: ${h}`;
+            }
+        }
+        /*
         if (prefix && !prefix.endsWith('/')) {
             prefix = prefix + '/';
         }
@@ -2465,6 +2532,7 @@ export class RecursiveImportController {
                 this.minimize_headlines(w_p, prefix + stripped);
             }
         }
+        */
     }
     //@+node:felix.20230511002459.12: *6* ric.strip_prefix
     /**
@@ -2483,8 +2551,26 @@ export class RecursiveImportController {
     public remove_empty_nodes(p: Position): void {
         const c = this.c;
 
+        /**
+         * Return True if p has any descendant that is not an @path node.
+         */
+        const has_significant_children = (p: Position) => {
+            if (!p.hasChildren()) {
+                return false;
+            }
+            if (!p.h.startsWith('path: ')) {
+                return true;
+            }
+            for (const p2 of p.subtree()) {
+                if (has_significant_children(p2)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         const aList = [...p.self_and_subtree()].filter(
-            (p2) => !p2.b && !p2.hasChildren()
+            (p2) => !p2.b.trim() && !has_significant_children(p2)
         );
 
         if (aList && aList.length) {

@@ -1409,7 +1409,7 @@ export class Commands {
         } else {
             // 2011/02/25:
             c._currentPosition = c.rootPosition();
-            g.trace(`Invalid position: ${p.h}`);
+            g.trace(`Invalid position`, p.toString(), c.toString());
             g.trace(g.callers());
             // Don't kill unit tests for this kind of problem.
         }

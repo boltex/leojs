@@ -560,7 +560,7 @@ export class AtFile {
         } else if (p.isAtAutoNode()) {
             await at.readOneAtAutoNode(p);
         } else if (p.isAtEditNode()) {
-            await at.readOneAtEditNode(fileName, p);
+            await at.readOneAtEditNode(p);
         } else if (p.isAtShadowFileNode()) {
             await at.readOneAtShadowNode(fileName, p);
         } else if (p.isAtAsisFileNode() || p.isAtNoSentFileNode()) {
@@ -669,13 +669,12 @@ export class AtFile {
         return p; // For #451: return p.
     }
     //@+node:felix.20230415162513.14: *5* at.readOneAtEditNode
-    public async readOneAtEditNode(fn: string, p: Position): Promise<void> {
+    public async readOneAtEditNode(p: Position): Promise<void> {
         const at = this;
         const c = this.c;
         const ic = this.c.importCommands;
 
-        // #1521
-        fn = c.fullPath(p);
+        const fn = c.fullPath(p);
         let [junk, ext] = g.os_path_splitext(fn);
         // Fix bug 889175: Remember the full fileName.
         at.rememberReadPath(fn, p);
@@ -710,10 +709,10 @@ export class AtFile {
     /**
      * Read one @asis node. Used only by refresh-from-disk
      */
-    public async readOneAtAsisNode(fn: string, p: Position): Promise<void> {
+    public async readOneAtAsisNode(p: Position): Promise<void> {
         const at = this;
         const c = this.c;
-        fn = c.fullPath(p);
+        const fn = c.fullPath(p);
         let [junk, ext] = g.os_path_splitext(fn);
         // Remember the full fileName.
         at.rememberReadPath(fn, p);
@@ -2974,10 +2973,10 @@ export class AtFile {
         if (at.checkPythonCodeOnWrite) {
             ok = at.checkPythonSyntax(root, contents);
         }
-        if (ok && at.runPyFlakesOnWrite) {
+        if (ok && at.runPyFlakesOnWrite) { // Creates clickable links.
             ok = this.runPyflakes(root);
         }
-        if (ok && at.runFlake8OnWrite) {
+        if (ok && at.runFlake8OnWrite) { // Does *not* create clickable links.
             ok = this.runFlake8(root);
         }
         if (!ok) {
@@ -3967,8 +3966,8 @@ export class AtFile {
             // This suppresses a message from the markdown importer.
             if (!g.unitTesting && at.language) {
                 g.trace(at.language, g.callers());
-                g.es_print('unknown language: using Python comment delimiters');
-                g.es_print('c.target_language:', c.target_language);
+                g.es_print(`unknown language: ${at.language}`);
+                g.es_print('using Python comment delimiters');
             }
             at.startSentinelComment = '#'; // This should never happen!
             at.endSentinelComment = '';
@@ -4294,7 +4293,7 @@ export class FastAtRead {
                 //@+<< handle afterref line>>
                 //@+node:felix.20230413222859.7: *4* << handle afterref line >>
                 if (body && body.length) {
-                    // a List of lines.
+                    // a list of lines.
                     body[body.length - 1] =
                         body[body.length - 1].replace(/\s+$/, '') + line;
                 } else {
@@ -4767,7 +4766,8 @@ export class FastAtRead {
             // Unit tests must use the proper value for root.gnx.
             console.assert(!root_gnx_adjusted);
             console.assert(!stack.length, stack.toString());
-            console.assert(root_gnx === gnx, [root_gnx, gnx].toString());
+            // Allow gnx mismatch.
+            // console.assert(root_gnx === gnx, [root_gnx, gnx].toString());
         } else if (root_gnx_adjusted) {
             // pass  // Don't check!
         } else if (stack && stack.length) {
@@ -4823,12 +4823,11 @@ export class FastAtRead {
     ): boolean {
         this.path = path;
         this.root = root;
-        const sfn = g.shortFileName(path);
         contents = contents.replace(/\r/g, '');
         const lines = g.splitLines(contents);
         const data = this.scan_header(lines);
         if (!data) {
-            g.trace(`Invalid external file: ${sfn}`);
+            g.trace(`Invalid external file: ${path}`);
             return false;
         }
         // Clear all children.

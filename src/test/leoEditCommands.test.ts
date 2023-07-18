@@ -34,7 +34,7 @@ suite('Test cases for editCommands.ts', () => {
     //@+node:felix.20230715235308.1: *3* extend-to-word
     test('test_extend_to_word', () => {
         console.log('TODO : test_extend_to_word');
-        
+
     });
 
     // def test_extend_to_word(self):
@@ -65,7 +65,7 @@ suite('Test cases for editCommands.ts', () => {
     //@+node:felix.20230715234952.1: *3* merge-node-with-next-node
     test('test_merge_node_with_next_node', () => {
         console.log('TODO : test_merge_node_with_next_node');
-        
+
     });
 
     // def test_merge_node_with_next_node(self):
@@ -104,9 +104,9 @@ suite('Test cases for editCommands.ts', () => {
     //@+node:felix.20230715235006.1: *3* merge-node-with-prev-node
     test('test_merge_node_with_prev_node', () => {
         console.log('TODO : test_merge_node_with_prev_node');
-        
-    });
 
+    });
+    /*
     def test_merge_node_with_prev_node(self):
         c, u = self.c, self.c.undoer
         prev_b = textwrap.dedent("""\
@@ -140,6 +140,7 @@ suite('Test cases for editCommands.ts', () => {
         self.assertEqual(c.p.h, 'before')
         self.assertEqual(c.p.b, result_b)
         self.assertFalse(c.p.next())
+    */
     //@-others
 
 });
