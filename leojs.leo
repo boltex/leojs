@@ -846,6 +846,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 **Enjoy!**
 </t>
 <t tx="felix.20201208214322.1">import * as vscode from 'vscode';
+import { APIState, API, GitExtension, PublishEvent } from './git';
 import { Constants } from './constants';
 import * as path from 'path';
 import * as utils from "./utils";
@@ -1309,6 +1310,17 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
+        const extension = vscode.extensions.getExtension&lt;GitExtension&gt;('vscode.git');
+        if (extension) {
+            await extension.activate();
+            try {
+                const gitExtension = extension.exports;
+                (g.gitAPI as API) = gitExtension.getAPI(1);
+            } catch (e) {
+                console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
+            }
+
+        }
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }

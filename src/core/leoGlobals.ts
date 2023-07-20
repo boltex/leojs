@@ -13,6 +13,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
+import { APIState, API, GitExtension, PublishEvent } from '../git';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
@@ -363,6 +364,9 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
+
+// The singleton Git extension exposed API
+export let gitAPI: API;
 
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript
@@ -2800,9 +2804,8 @@ export function skip_ws_and_nl(s: string, i: number): number {
 export function gitInfoForFile(filename: string): [string, string] {
     console.log('TODO : gitInfoForFile');
 
-    return ['', '']; // TODO !
     // g.gitInfo and g.gitHeadPath now do all the work.
-    // return g.gitInfo(filename)
+    return gitInfo(filename);
 }
 //@+node:felix.20230714231140.1: *3* g.gitHeadPath
 
@@ -2863,6 +2866,82 @@ export function execGitCommand(
 
     return lines;
     */
+}
+//@+node:felix.20230720001117.1: *3* g.gitInfo
+/**
+ * Path may be a directory or file.
+
+    Return the branch and commit number or ('', '').
+ */
+export function gitInfo(p_path?: string): [string, string] {
+
+    // Set defaults.
+    let branch = '';
+    let commit = '';
+    const w_gitAPI = gitAPI;
+    try {
+        if (w_gitAPI && w_gitAPI.repositories.length &&
+            w_gitAPI.repositories[0].state.HEAD
+        ) {
+            branch = w_gitAPI.repositories[0].state.HEAD.name || '';
+            commit = w_gitAPI.repositories[0].state.HEAD.commit || '';
+            if (commit && commit.length) {
+                commit = commit.trim().slice(0, 12);
+            }
+        }
+
+    } catch (errorGit) {
+        console.log('ERROR : LEOJS gitInfo :', errorGit);
+    }
+
+    /*
+    if (p_path == null ){
+        // Default to leo/core.
+        p_path = g.os_path_dirname(__file__)
+    }
+    if !g.os_path_isdir(p_path)
+        p_path = g.os_path_dirname(p_path)
+    // Does path/../ref exist?
+    p_path = g.gitHeadPath(p_path)
+    if !p_path
+        return branch, commit
+    try
+        with open(p_path) as f
+            s = f.read()
+            if !s.startsWith('ref')
+                branch = 'None'
+                commit = s[:7]
+                return branch, commit
+        // On a proper branch
+        pointer = s.split()[1]
+        dirs = pointer.split('/')
+        branch = dirs[-1]
+    except IOError:
+        g.trace('can not open:', p_path)
+        return branch, commit
+    // Try to get a better commit number.
+    git_dir = g.finalize_join(p_path, '..')
+    try
+        p_path = g.finalize_join(git_dir, pointer)
+        with open(p_path) as f:
+            s = f.read()
+        commit = s.strip()[0:12]
+        // shorten the hash to a unique shortname
+    catch IOError
+        try:
+            p_path = g.finalize_join(git_dir, 'packed-refs')
+            with open(p_path) as f:  // type:ignore
+                for line in f:
+                    if line.strip().endswith(' ' + pointer):
+                        commit = line.split()[0][0:12]
+                        break
+        except IOError:
+            pass
+
+    */
+
+    return [branch, commit];
+
 }
 //@+node:felix.20211106230549.1: ** g.Hooks & Plugins
 //@+node:felix.20211106230549.2: *3* g.act_on_node
@@ -3326,8 +3405,8 @@ def itemsMatchingPrefixInList(s: str, aList: List[str], matchEmptyPrefix: bool=F
  * Return a string of blanks to pad string s to the given width.
  */
 export function pad(s: string, width: number): string {
-  const paddingCount: number = Math.max(0, width - s.length);
-  return ' '.repeat(paddingCount);
+    const paddingCount: number = Math.max(0, width - s.length);
+    return ' '.repeat(paddingCount);
 }
 //@+node:felix.20220410212530.6: *4* g.removeLeading/Trailing
 
