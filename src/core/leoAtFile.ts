@@ -1523,7 +1523,6 @@ export class AtFile {
      * the @persistence data, thereby annoyingly changing the .leo file.
      */
     public async writeAllHelper(p: Position, root: Position): Promise<void> {
-        console.log('in writeAllHelper');
 
         const at = this;
         at.root = root;

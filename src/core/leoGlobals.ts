@@ -2802,8 +2802,6 @@ export function skip_ws_and_nl(s: string, i: number): number {
  * Return the git (branch, commit) info associated for the given file.
  */
 export function gitInfoForFile(filename: string): [string, string] {
-    console.log('TODO : gitInfoForFile');
-
     // g.gitInfo and g.gitHeadPath now do all the work.
     return gitInfo(filename);
 }
