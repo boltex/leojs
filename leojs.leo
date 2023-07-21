@@ -730,7 +730,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 ### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
-&gt;LeoJS is a typescript implementation of the Leo Editor, integrated as a VSCode extension. It's core is a line-by-line translation of it's original python source code.
+&gt;LeoJS is a typescript implementation of the Leo Editor, as a VSCode extension. A line-by-line translation of the original python source code.
 
 - See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).
@@ -12947,14 +12947,17 @@ public refreshDesc(): void {
 
     if (this.leoStates.fileOpenedReady) {
 
-        const s = this.leoStates.leoOpenedFileName;
-        const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
-        let w_path = "";
-        const n = s ? s.lastIndexOf(w_filename) : -1;
-        if (n &gt;= 0 &amp;&amp; n + w_filename.length &gt;= s.length) {
-            w_path = s.substring(0, n);
-        }
-        titleDesc = w_filename + (w_path ? " in " + w_path : '');
+        // const s = this.leoStates.leoOpenedFileName;
+        // const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+        // let w_path = "";
+        // const n = s ? s.lastIndexOf(w_filename) : -1;
+        // if (n &gt;= 0 &amp;&amp; n + w_filename.length &gt;= s.length) {
+        //     w_path = s.substring(0, n);
+        // }
+        // titleDesc = w_filename + (w_path ? " in " + w_path : '');
+
+        const c = g.app.windowList[this.frameIndex].c;
+        titleDesc = c.frame.title;
 
         if (this._leoTreeView) {
             this._leoTreeView.description = titleDesc;
