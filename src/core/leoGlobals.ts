@@ -13,11 +13,13 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
-import { APIState, API, GitExtension, PublishEvent } from '../git';
+import * as GitAPI from '../git';
+import * as GitBaseAPI from '../git-base';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
+import { RemoteHubApi } from '../remote-hub';
 
 /*
     import binascii
@@ -366,7 +368,9 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 export let app: LeoApp;
 
 // The singleton Git extension exposed API
-export let gitAPI: API;
+export let gitAPI: GitAPI.API;
+export let gitBaseAPI: GitBaseAPI.API;
+export let remoteHubAPI: RemoteHubApi;
 
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript
