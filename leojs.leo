@@ -4182,7 +4182,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "ed3e04a",
+  "gitBranch": "editFileCommands",
+  "gitDate": "2023-07-23 01:20:04 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
