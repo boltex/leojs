@@ -1616,8 +1616,8 @@ export class GlobalConfigManager {
             if (warn) {
                 g.error(
                     `${tag}: ignoring '${setting}' setting.\n` +
-                        `${tag}: '@${gs.kind}' is not '@${requestedType}'.\n` +
-                        `${tag}: there may be conflicting settings!`
+                    `${tag}: '@${gs.kind}' is not '@${requestedType}'.\n` +
+                    `${tag}: there may be conflicting settings!`
                 );
             }
             return [undefined, false];
@@ -2135,8 +2135,8 @@ export class LocalConfigManager {
             if (warn) {
                 g.error(
                     `${tag}: ignoring '${setting}' setting.\n` +
-                        `${tag}: '${gs.kind}' is not '${requestedType}'.\n` +
-                        `${tag}: there may be conflicting settings!`
+                    `${tag}: '${gs.kind}' is not '${requestedType}'.\n` +
+                    `${tag}: there may be conflicting settings!`
                 );
             }
             return [undefined, false];
@@ -2247,7 +2247,7 @@ export class LocalConfigManager {
         if (data && data.length && strip_comments) {
             // data = [z for z in data if not z.strip().startswith('#')]
             data = data.filter((z) => {
-                !z.trim().startsWith('#');
+                return !z.trim().startsWith('#');
             });
         }
         if (data && data.length && strip_data) {
