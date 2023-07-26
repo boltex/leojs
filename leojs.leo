@@ -1289,6 +1289,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     if (p_context.extensionUri) {
         console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
+
     console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
     console.log('STARTUP:             path.sep: ', path.sep);
     console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
@@ -1311,6 +1312,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
+        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
 
         const gitExtension = vscode.extensions.getExtension&lt;GitAPI.GitExtension&gt;('vscode.git');
         if (gitExtension) {
@@ -4143,6 +4145,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "author": {
     "name": "Félix Malboeuf"
   },
+  "sponsor": {
+    "url": "https://boltex.github.io/"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
@@ -4183,9 +4188,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "ed3e04a",
+  "gitCommit": "35c903d",
   "gitBranch": "editFileCommands",
-  "gitDate": "2023-07-23 01:20:04 -0400"
+  "gitDate": "2023-07-23 20:04:25 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{

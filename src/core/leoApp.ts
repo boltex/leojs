@@ -163,6 +163,7 @@ export class LeoApp {
     public homeLeoDir: string | undefined; // The user's home/.leo directory.
     public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
+    public vscodeExtensionDir: string | undefined;
     public machineDir: string | undefined; // The machine - specific directory.
 
     public vscodeWorkspaceUri: vscode.Uri | undefined;

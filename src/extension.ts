@@ -19,6 +19,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     if (p_context.extensionUri) {
         console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
+
     console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
     console.log('STARTUP:             path.sep: ', path.sep);
     console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
@@ -41,6 +42,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
+        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
 
         const gitExtension = vscode.extensions.getExtension<GitAPI.GitExtension>('vscode.git');
         if (gitExtension) {

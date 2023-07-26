@@ -163,6 +163,20 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
 };
 
 //@-<< define global decorator dicts >>
+//@+<< define global error regexes >>
+//@+node:felix.20230724131219.1: ** << define global error regexes >> (leoGlobals.py)
+// Most code need only know about the *existence* of these patterns.
+
+// For all *present* patterns, m.group(1) is the filename and m.group(2) is the line number.
+
+// See link_table above LeoLog.put_html_links.
+
+export const flake8_pat = new RegExp(/(.+?):([0-9]+):[0-9]+:.*$/, 'mg');
+export const mypy_pat = new RegExp(/^(.+?):([0-9]+):\s*(error|note)\s*(.*)\s*$/, 'mg');
+export const pyflakes_pat = new RegExp(/^(.*):([0-9]+):[0-9]+ .*?$/, 'mg');
+export const pylint_pat = new RegExp(/^(.*):\s*([0-9]+)[,:]\s*[0-9]+:.*?\(.*\)\s*$/, 'mg');
+export const python_pat = new RegExp(/^\s*File\s+"(.*?)",\s*line\s*([0-9]+)\s*$/, 'mg');
+//@-<< define global error regexes >>
 //@+<< define g.Decorators >>
 //@+node:felix.20211102223300.1: ** << define g.Decorators >>
 // * Other Decorators used in leojs are in /src/core/decorators.ts
@@ -221,145 +235,30 @@ export const color_directives_pat = new RegExp(
     /^@color|^@killcolor|^@nocolor-node|^@nocolor/,
     'mg'
 );
+
+
+// New in Leo 6.6.4: gnxs must start with 'gnx:'
+// gnx_char = r"""[^.,"'\s]"""  // LeoApp.cleanLeoID() removes these characters.
+// gnx_id = fr"{gnx_char}{{3,}}"  // id's must have at least three characters.
+// gnx_regex = re.compile(fr"\bgnx:{gnx_id}\.[0-9]+\.[0-9]+")
+export const gnx_char = "[^.,\"'\\s]";
+export const gnx_id = `${gnx_char}{3,}`;
+export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`);
+
+
+// Unls end with quotes.
+//unl_regex = re.compile(r"""\bunl:[^`'"]+""")
+export const unl_regex = /\bunl:[^`'"]+/;
+
+
+// Urls end at space or quotes.
+// url_leadins = 'fghmnptw'
+// url_kinds = '(file|ftp|gopher|http|https|mailto|news|nntp|prospero|telnet|wais)'
+// url_regex = re.compile(fr"""\b{url_kinds}://[^\s'"]+""")
+export const url_leadins = 'fghmnptw';
+export const url_kinds = '(file|ftp|gopher|http|https|mailto|news|nntp|prospero|telnet|wais)';
+export const url_regex = new RegExp(`\\b${url_kinds}://[^\\s'"]+`);
 //@-<< define regex's >>
-//@+<< languages >>
-//@+node:felix.20220112011241.1: ** << languages >>
-const languagesList = [
-    'actionscript',
-    'ada95',
-    'antlr',
-    'apacheconf',
-    'apdl',
-    'applescript',
-    'asp',
-    'aspect-j',
-    'assembly-macro32',
-    'assembly-r2000',
-    'assembly-parrot',
-    'assembly-x86',
-    'awk',
-    'b',
-    'batch',
-    'bbj',
-    'bcel',
-    'beanshell',
-    'bibtex',
-    'c',
-    'chill',
-    'cil',
-    'cobol',
-    'coldfusion',
-    'c++',
-    'c#',
-    'css',
-    'cvs-commit',
-    'd',
-    'doxygen',
-    'dsssl',
-    'embperl',
-    'erlang',
-    'eiffel',
-    'factor',
-    'fortran',
-    'fortran90',
-    'foxpro',
-    'freemarker',
-    'gettext',
-    'groovy',
-    'haskell',
-    'hex',
-    'html',
-    'i4gl',
-    'icon',
-    'idl',
-    'inform',
-    'inno-setup',
-    'ini',
-    'interlis',
-    'io',
-    'java',
-    'javascript',
-    'jcl',
-    'jhtml',
-    'jmk',
-    'jsp',
-    'lilypond',
-    'lisp',
-    'lotos',
-    'lua',
-    'mail',
-    'makefile',
-    'maple',
-    'ml',
-    'modula3',
-    'moin',
-    'mqsc',
-    'netrexx',
-    'nqc',
-    'nsis2',
-    'objective-c',
-    'objectrexx',
-    'occam',
-    'omnimark',
-    'pascal',
-    'patch',
-    'perl',
-    'php',
-    'pike',
-    'pl-sql',
-    'pl1',
-    'pop11',
-    'postscript',
-    'powerdynamo',
-    'povray',
-    'prolog',
-    'progress',
-    'properties',
-    'psp',
-    'ptl',
-    'pvwave',
-    'pyrex',
-    'python',
-    'rebol',
-    'redcode',
-    'relax-ng-compact',
-    'renderman-rib',
-    'rest',
-    'rhtml',
-    'rpm-spec',
-    'rtf',
-    'ruby',
-    'rview',
-    's+',
-    's#',
-    'sas',
-    'scheme',
-    'sgml',
-    'shellscript',
-    'shtml',
-    'smalltalk',
-    'sdl/pr',
-    'smi-mib',
-    'sqr',
-    'squidconf',
-    'svn-commit',
-    'swig',
-    'tcl',
-    'tex',
-    'texinfo',
-    'text',
-    'tpl',
-    'transact-sql',
-    'uscript',
-    'vbscript',
-    'velocity',
-    'verilog',
-    'vhdl',
-    'xml',
-    'xsl',
-    'zpt',
-];
-//@-<< languages >>
 
 export const tree_popup_handlers: ((...args: any[]) => any)[] = []; // Set later.
 export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionary for free use
@@ -1988,7 +1887,7 @@ export async function makeAllNonExistentDirectories(
  */
 export function openWithFileName(
     fileName: string,
-    old_c: Commands | undefined,
+    old_c?: Commands,
     gui?: LeoGui
 ): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
@@ -5629,7 +5528,974 @@ export function findNodeInTree(
 }
 //@-others
 //@+node:felix.20211104211349.1: ** g.Unit Tests
-//@+node:felix.20211104211355.1: ** g.Urls
+//@+node:felix.20230724154323.1: ** g.Urls & UNLs
+//@+<< About clickable links >>
+//@+node:felix.20230724154323.2: *3* << About clickable links >>
+/*
+Clickable links have four forms:
+
+1. Error messages produced by flake8, mypy, pyflakes, pylint, python:
+
+   Some of these tools produce clickable links in the log pane when run
+   *within* Leo. Some do not.
+
+   When running these tools *outside of* Leo, copying an error message from
+   the *console* to Leo's log pane will create clickable links in the log
+   pane. Control-clicking these links will select the proper node and line
+   provided the outline contains an `@<file>` node for file mentioned in
+   the error message.
+
+2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):
+
+   Links of the form `unl:gnx:` + `//{outline}#{gnx}` open the given
+   outline and select the first outline node with the given gnx. These UNLs
+   will work as long as the node exists anywhere in the outline.
+
+   For example, the link: `unl:gnx://#ekr.20031218072017.2406` refers to this
+   outline's "Code" node. Try it. The link works in this outline.
+
+   *Note*: `{outline}` is optional. It can be an absolute path name or a relative
+   path name resolved using `@data unl-path-prefixes`.
+
+3. Leo's headline-based UNLs, as shown in the status pane:
+
+   Headline-based UNLs consist of `unl://` + `//{outline}#{headline_list}`
+   where headline_list is list of headlines separated by `-->`.
+
+   This link works: `unl://#Code-->About this file`.
+
+   *Note*: `{outline}` is optional. It can be an absolute path name or a relative
+   path name resolved using `@data unl-path-prefixes`.
+
+4. Web URLs: file, ftp, gopher, http, https, mailto, news, nntp, prospero, telnet, wais.
+
+   For example, Leo's forum: https://leo-editor.github.io/leo-editor/
+*/
+//@-<< About clickable links >>
+//@+node:felix.20230724154323.3: *3* g.computeFileUrl
+/**
+ * Compute finalized url for filename fn.
+ */
+export function computeFileUrl(fn: string, c: Commands, p: Position): string {
+
+    // First, replace special characters (especially %20, by their equivalent).
+    let url = decodeURIComponent(fn);
+    // Finalize the path *before* parsing the url.
+    const i = url.indexOf('~');
+    let w_path = "";
+    if (i > -1) {
+        // Expand '~'.
+        w_path = url.slice(i);
+        w_path = finalize(w_path);
+        url = url.slice(0, i) + w_path;
+    } else {
+        const tag = 'file://';
+        const tag2 = 'file:///';
+        if (isWindows && url.startsWith(tag2)) {
+            w_path = url.slice(tag2.length).trimStart();
+        } else if (url.startsWith(tag)) {
+            w_path = url.slice(tag.length).trimStart();
+        } else {
+            w_path = url;
+        }
+        // Handle ancestor @path directives.
+        if (c && c.openDirectory) {
+            const base = c.getNodePath(p);
+            w_path = finalize_join(c.openDirectory, base, w_path);
+        } else {
+            w_path = finalize(w_path);
+        }
+        url = `${tag}${w_path}`;
+    }
+
+    return url;
+
+}
+//@+node:felix.20230724154323.4: *3* g.es_clickable_link (not used)
+/**
+ * Write a clickable message to the given line number of p.b.
+ *
+ * Negative line numbers indicate global lines.
+ */
+export function es_clickable_link(c: Commands, p: Position, line_number: number, message: string): void {
+
+    // Not used in Leo's core.
+    const unl = p.get_UNL();
+
+    // TODO : HANDLE unl
+
+    es(message.trim() + '\n' + `${unl}::${line_number}`);
+
+    // c.frame.log.put(message.strip() + '\n', nodeLink=f"{unl}::{line_number}")
+
+}
+//@+node:felix.20230724154323.5: *3* g.findAnyUnl
+/** 
+ * Find the Position corresponding to an UNL.
+ *
+ * The UNL may be either a legacy (path-based) or new (gnx-based) unl.
+ */
+export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position | undefined> {
+
+    let unl = unl_s;
+    let file_part;
+    let c2;
+    let tail;
+    if (unl.startsWith('unl:gnx:')) {
+        // Resolve a gnx-based unl.
+        unl = unl.slice(8);
+        file_part = getUNLFilePart(unl);
+        c2 = await openUNLFile(c, file_part);
+        if (!c2) {
+            return undefined;
+        }
+        tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
+        return findGnx(tail, c2);
+    }
+    // Resolve a file-based unl.
+    let found = false;
+    for (const prefix of ['unl:', 'file:']) {
+        if (unl.startsWith(prefix)) {
+            unl = unl.slice(prefix.length);
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        console.log(`Bad unl: ${unl_s}`);
+        return undefined;
+    }
+
+    file_part = getUNLFilePart(unl);
+    c2 = await openUNLFile(c, file_part);
+    if (!c2) {
+        return undefined;
+    }
+
+    tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
+    const unlList = tail.split('-->');
+    return findUnl(unlList, c2);
+
+}
+//@+node:felix.20230724154323.6: *3* g.findGnx (new unls)
+const find_gnx_pat = new RegExp(/^(.*)::([-\d]+)?$/gm);
+
+/**
+ * gnx: the gnx part of a gnx-based unl.
+ *
+ * The gnx part may be the actual gnx or <actual-gnx>::<line-number>
+ *
+ * Return the first position in c with the actual gnx.
+ */
+export async function findGnx(gnx: string, c: Commands): Promise<Position | undefined> {
+
+    //  Get the actual gnx and line number.
+    let n: number = 0;  // The line number.
+
+    const m = gnx.match(find_gnx_pat);
+
+    if (m && m.length) {
+        // Get the actual gnx and line number.
+        gnx = m[1];
+        try {
+            n = Number(m[2]);
+        } catch (e) {
+            // pass
+        }
+    }
+    for (const p of c.all_unique_positions()) {
+        if (p.gnx === gnx) {
+            if (n == null) {
+                return p;
+            }
+            let [p2, offset] = await c.gotoCommands.find_file_line(-n, p);
+            return p2 || p;
+        }
+    }
+    return undefined;
+}
+//@+node:felix.20230724154323.7: *3* g.findUnl & helpers (legacy unls)
+/**
+ * g.findUnl: support for legacy UNLs.
+ * unlList is a list of headlines.
+ *
+ * This method must remain for compatibility with plugins.
+ *
+ * Find and move to the unl given by the unlList in the commander c.
+ * Return the found position, or None.
+ */
+export async function findUnl(unlList1: string[], c: Commands): Promise<Position | undefined> {
+
+    // Define two *optional* unl patterns.
+
+    // old_pat: ':' followed by a list of node indices.
+    //          Deprecated and probably does not work.
+    //          This pattern will remain for compatibility.
+    const old_pat = new RegExp(/^(.*):(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/g);
+
+    // new_pat: '::' followed by a line number.
+    //          Negative line numbers denote global line numbers.
+    const new_pat = new RegExp(/^(.*?)(::)([-\d]+)?$/g);
+
+    //@+others  // Define helper functions
+    //@+node:felix.20230724154323.8: *4* function: convert_unl_list
+    /**
+     * Convert old-style UNLs to new UNLs, retaining line numbers if possible.
+     */
+    function convert_unl_list(aList: string[]): string[] {
+
+        const result = [];
+
+        for (const s of aList) {
+            // Try to get the line number.
+            const table: [RegExpMatchArray | null, number][] = [
+                [s.match(old_pat), 4],
+                [s.match(new_pat), 3],
+            ];
+            for (const [m, line_group] of table) {
+                if (m && m.length) {
+                    try {
+                        const n = Number(m[line_group]);
+                        result.push(`${m[1]}::${n}`);
+                        continue;
+                    } catch (e) {
+                        // pass
+                    }
+                }
+            }
+            // Finally, just add the whole UNL.
+            result.push(s);
+        }
+
+        // Do *not* remove duplicates!
+        return result;
+
+    }
+    //@+node:felix.20230724154323.9: *4* function: full_match
+    /**
+     * Return True if the stripped headlines of p and all p's parents match unlList.
+     */
+    function full_match(p: Position): boolean {
+
+        // Careful: make copies.
+        const aList: string[] = [...unlList];
+        const p1 = p.copy();
+        while (aList && p1 && p1.__bool__()) {
+            const m = aList.slice(-1)[0].match(new_pat);
+            if (m && m[1].trim() !== p1.h.trim()) {
+                return false;
+            }
+            if ((!m || !m.length) && aList.slice(-1)[0].trim() !== p1.h.trim()) {
+                return false;
+            }
+            aList.pop();
+            p1.moveToParent();
+
+        }
+        return !!(!aList || !aList.length);
+
+    }
+    //@-others
+
+    const unlList = convert_unl_list(unlList1);
+    if (!unlList || !unlList.length) {
+        return undefined;
+    }
+    // Find all target headlines.
+    const targets: string[] = [];
+    let m = unlList.slice(-1)[0].match(new_pat);
+    const target = m && m[1] || unlList.slice(-1)[0];
+    targets.push(target.trim());
+    targets.push(...unlList.slice(0, -1));
+
+    // Find all target positions. Prefer later positions.
+    // positions = list(reversed(list(z for z in c.all_positions() if z.h.strip() in targets)))
+    const positions = [...c.all_positions()]
+        .filter((z) => targets.includes(z.h.trim())) // Filter elements based on whether 'z.h' exists in 'targets'
+        .reverse();
+
+    while (unlList && unlList.length) {
+        for (const p of positions) {
+            const p1 = p.copy();
+            if (full_match(p)) {
+                console.assert(p.__eq__(p1));
+                let n = 0;  // The default line number.
+                // Parse the last target.
+                m = unlList[-1].match(new_pat);
+                if (m && m.length) {
+                    const line = m[3];
+                    try {
+                        n = Number(line);
+                    } catch (e) {
+                        trace('bad line number', line);
+                    }
+                }
+                if (n < 0) {
+                    let [p2, offset] = await c.gotoCommands.find_file_line(-n, p);  // Calls c.redraw().
+                    if (!p2 || !p2.__bool__()) {
+                        trace(`${p.h}: global line ${n} not found`);
+                    }
+                }
+                return p;
+            }
+        }
+        // Not found. Pop the first parent from unlList.
+        unlList.shift();
+    }
+    return undefined;
+}
+
+export const findUNL = findUnl;  // Compatibility.
+//@+node:felix.20230724154323.10: *3* g.getUrlFromNode
+/**
+ * Get an url from node p:
+ * 1. Use the headline if it contains a valid url.
+ * 2. Otherwise, look *only* at the first line of the body.
+ */
+export async function getUrlFromNode(p: Position): Promise<string | undefined> {
+
+    if (!p || !p.__bool__()) {
+        return undefined;
+    }
+    const c = p.v.context;
+    console.assert(c);
+    let table = [p.h, p.b ? splitLines(p.b)[0] : ''];
+
+    // table = [g.match_word(s, 0, '@url') ? s.slice(4) : s for s in table];
+    table = table.map((s) =>
+        match_word(s, 0, '@url') ? s.slice(4) : s
+    );
+
+    // table = [s.strip() for s in table if s.strip()];
+    table = table.filter((s) => s.trim() !== "").map((s) => s.trim());
+
+    // First, check for url's with an explicit scheme.
+    for (const s of table) {
+        if (isValidUrl(s)) {
+            return s;
+        }
+    }
+    // Next check for existing file and add a file:// scheme.
+    for (const s of table) {
+        const tag = 'file://';
+        const url = computeFileUrl(s, c, p);
+        if (url.startsWith(tag)) {
+            let fn = url.slice(tag.length).trimStart();
+            fn = fn.split('#', 1)[0];
+            if (await os_path_isfile(fn)) {
+                // Return the *original* url, with a file:// scheme.
+                // g.handleUrl will call computeFileUrl again.
+                return 'file://' + s;
+            }
+        }
+    }
+    // Finally, check for local url's.
+    for (const s of table) {
+        if (s.startsWith("#")) {
+            return s;
+        }
+    }
+    return undefined;
+
+}
+//@+node:felix.20230724154323.11: *3* g.handleUnl
+/**
+ * Select the node given by any kind of unl.
+ * This must *never* open a browser.
+ */
+export async function handleUnl(unl_s: string, c: Commands): Promise<Commands | undefined> {
+
+    if (!unl_s) {
+        return undefined;
+    }
+    const unl = unl_s.trim();
+    if (!unl) {
+        return undefined;
+    }
+    const p = await findAnyUnl(unl, c);
+    if (!p || !p.__bool__()) {
+        console.log(`Not found: ${unl}`);
+        return undefined;
+    }
+    // Do not assume that p is in c.
+    const c2 = p.v.context;
+    if (c2 !== c) {
+        app.selectLeoWindow(c2);  // Switch outlines.
+    }
+    c2.redraw(p);
+    return c2;
+
+}
+//@+node:felix.20230724154323.12: *3* g.handleUrl & helpers
+/**
+ * Open a url or a unl.
+ */
+export async function handleUrl(url: string, c: Commands, p: Position): Promise<any> {
+
+    if (c && (!p || !p.__bool__())) {
+        p = c.p;
+    }
+    // These two special cases should match the hacks in jedit.match_any_url.
+    if (url.endsWith('.')) {
+        url = url.slice(0, -1);
+    }
+    if (!url.includes('(') && url.endsWith(')')) {
+        url = url.slice(0, -1);
+    }
+    // Lower the url.
+    const urll = url.toLowerCase();
+    if (urll.startsWith('@url')) {
+        url = url.slice(4).trimStart();
+    }
+    if ((
+        urll.startsWith('#') ||
+        urll.startsWith('unl://') ||
+        urll.startsWith('unl:gnx:')
+    ) ||
+        urll.startsWith('file://') &&
+        urll.includes('-->')
+    ) {
+        return handleUnl(url, c);
+    }
+    try {
+        await handleUrlHelper(url, c, p);
+        return urll;  // For unit tests.
+    } catch (e) {
+        es_print("g.handleUrl: exception opening", url.toString());
+        es_exception();
+        return undefined;
+    }
+
+}
+//@+node:felix.20230724154323.13: *4* g.handleUrlHelper
+/**
+ * Open a url.  Most browsers should handle:
+ * ftp://ftp.uu.net/public/whatever
+ * http://localhost/MySiteUnderDevelopment/index.html
+ * file:///home/me/todolist.html
+ */
+export async function handleUrlHelper(url: string, c: Commands, p: Position): Promise<void> {
+
+    if (unitTesting) {
+        return;
+    }
+    const tag = 'file://';
+
+    const original_url = url;
+
+    if (url.startsWith(tag) && !url.startsWith(tag + '#')) {
+        // Finalize the path *before* parsing the url.
+        url = computeFileUrl(url, c, p);
+    }
+    let leo_path;
+
+
+    const parsed = makeVscodeUri(url);
+
+    if (parsed.authority) {
+        leo_path = os_path_join(parsed.authority, parsed.path);
+        // "readme.txt" gets parsed into .netloc...
+    } else {
+        leo_path = parsed.path;
+    }
+
+    if (leo_path.endsWith('\\')) {
+        leo_path = leo_path.slice(0, -1);
+    }
+    if (leo_path.endsWith('/')) {
+        leo_path = leo_path.slice(0, -1);
+    }
+    if (parsed.scheme === 'file' && leo_path.endsWith('.leo')) {
+
+        void handleUnl(original_url, c);
+
+    } else if (['', 'file'].includes(parsed.scheme)) {
+
+        const unquote_path = unquoteUrl(leo_path);
+        if (await os_path_exists(leo_path)) {
+
+            console.log("TODO os_startfile for :", unquote_path);
+
+            // os_startfile(unquote_path);
+        } else {
+            es(`File '${leo_path}' does not exist`);
+        }
+
+    } else {
+        // Mozilla throws a weird exception, then opens the file!
+        try {
+            // webbrowser.open(url)
+            void vscode.env.openExternal(vscode.Uri.parse(url));
+        } catch (e) {
+            // pass
+        }
+    }
+}
+//@+node:felix.20230724154323.14: *4* g.traceUrl
+export function traceUrl(c: Commands, path: string, parsed: any, url: string): void {
+    console.log("");
+    trace('url          ', url);
+    trace('c.frame.title', c.frame.title);
+    trace('path         ', path);
+    trace('parsed.fragment', parsed.fragment);
+    trace('parsed.netloc', parsed.netloc);
+    trace('parsed.path  ', parsed.path);
+    trace('parsed.scheme', parsed.scheme.toString());
+}
+//@+node:felix.20230724154323.15: *3* g.isValidUnl
+// unls must contain a (possible empty) file part followed by something else.
+export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#.+/g;
+
+/**
+ * Return true if the given unl is valid.
+ */
+export function isValidUnl(unl_s: string): boolean {
+
+    return !!(unl_s.match(valid_unl_pattern));
+
+}
+//@+node:felix.20230724154323.16: *3* g.isValidUrl
+/**
+ * Return true if url *looks* like a valid url.
+ */
+export function isValidUrl(url: string): boolean {
+
+    const table = [
+        'file', 'ftp', 'gopher', 'hdl', 'http', 'https', 'imap',
+        'mailto', 'mms', 'news', 'nntp', 'prospero', 'rsync', 'rtsp', 'rtspu',
+        'sftp', 'shttp', 'sip', 'sips', 'snews', 'svn', 'svn+ssh', 'telnet', 'wais',
+    ];
+
+    if (!url) {
+        return false;
+    }
+    if (isValidUnl(url)) {
+        return true;
+    }
+    if (url.startsWith('@')) {
+        return false;
+    }
+
+    // const parsed = urlparse.urlparse(url);
+    const parsed = makeVscodeUri(url);
+
+    const scheme = parsed.scheme;
+
+    for (const s of table) {
+        if (scheme.startsWith(s)) {
+            return true;
+        }
+    }
+    return false;
+
+}
+//@+node:felix.20230724154323.17: *3* g.openUrl
+/**
+ * Open the url of node p.
+ * Use the headline if it contains a valid url.
+ * Otherwise, look *only* at the first line of the body.
+ */
+
+export async function openUrl(p: Position): Promise<void> {
+
+    if (p && p.__bool__()) {
+        const url = await getUrlFromNode(p);
+        if (url) {
+            const c = p.v.context;
+            if (!doHook("@url1", { c: c, p: p, url: url })) {
+                void handleUrl(url, c, p);
+            }
+            doHook("@url2", { c: c, p: p, url: url });
+        }
+    }
+}
+//@+node:felix.20230724154323.18: *3* g.openUrlOnClick (open-url-under-cursor)
+/**
+ * Open the URL under the cursor.  Return it for unit testing.
+ * Note: In LEOJS Uses parameter c instead of event
+ */
+export async function openUrlOnClick(c: Commands, url?: string): Promise<string | undefined> {
+
+    // QTextEditWrapper.mouseReleaseEvent calls this outside Leo's command logic.
+    // Make sure to catch all exceptions
+    try {
+        return await openUrlHelper(c, url);
+    } catch (e) {
+        es_exception(e);
+        return undefined;
+    }
+}
+//@+node:felix.20230724154323.19: *4* g.openUrlHelper
+/**
+ * Open the unl, url or gnx under the cursor.  Return it for unit testing.
+ */
+export async function openUrlHelper(c: Commands, url?: string): Promise<string | undefined> {
+
+    // c = getattr(event, 'c', None)
+    if (!c) {
+        return undefined;
+    }
+    // w = getattr(event, 'w', c.frame.body.wrapper)
+    const w = c.frame.body.wrapper;
+    if (!app.gui.isTextWrapper(w)) {
+        internalError('must be a text wrapper', w);
+        return undefined;
+    }
+
+    let p, pos, newpos;
+
+    // if event:
+    //     event.widget = w
+
+    // Part 1: get the url.
+    if (url == null) {
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        let [i, j] = w.getSelectionRange();
+        if (i !== j) {
+            return undefined;  // So find doesn't open the url.
+        }
+        let [row, col] = convertPythonIndexToRowCol(s, ins);
+        [i, j] = getLine(s, ins);
+        const line = s.slice(i, j);
+        // Order is important.
+        //@+<< look for section ref >>
+        //@+node:felix.20230724154323.20: *5* << look for section ref >>
+        // Navigate to section reference if one was clicked.
+        const l_ = line.trim();
+        if (l_.endsWith('>>') && l_.startsWith('<<')) {
+            p = c.p;
+            let px = undefined;
+            for (const p1 of p.subtree()) {
+                if (p1.h.trim() === l_) {
+                    px = p1;
+                    break;
+                }
+            }
+            if (px && px.__bool__()) {
+                c.selectPosition(px);
+                c.redraw();
+            }
+            return undefined;
+        }
+        //@-<< look for section ref >>
+        let url = undefined;
+        let unl = undefined;
+
+        //@+<< look for url >>
+        //@+node:felix.20230724154323.21: *5* << look for url  >>
+        let match;
+        // Find the url on the line.
+        // for const match in url_regex.finditer(line):
+        //     // Don't open if we click after the url.
+        //     if match.start() <= col < match.end():
+        //         url = match.group(0)
+        //         if isValidUrl(url):
+        //             break
+
+        while ((match = url_regex.exec(line)) !== null) {
+            // Don't open if we click after the url.
+            if (match.index <= col && col < url_regex.lastIndex) {
+                const url = match[0];
+                if (isValidUrl(url)) {
+                    break;
+                }
+            }
+        }
+        //@-<< look for url >>
+        if (!url) {
+            //@+<< look for unl >>
+            //@+node:felix.20230724154323.22: *5* << look for unl >>
+            // for match in unl_regex.finditer(line):
+            //     # Don't open if we click after the unl.
+            //     if match.start() <= col < match.end():
+            //         unl = match.group()
+            //         handleUnl(unl, c)
+            //         return None
+
+            while ((match = unl_regex.exec(line)) !== null) {
+                // Don't open if we click after the unl.
+                if (match.index <= col && col < unl_regex.lastIndex) {
+                    const unl = match[0];
+                    void handleUnl(unl, c);
+                    return;
+                }
+            }
+            //@-<< look for unl >>
+            if (!unl) {
+                //@+<< look for gnx >>
+                //@+node:felix.20230724154323.23: *5* << look for gnx >>
+                let target: string = "";
+                // for match in gnx_regex.finditer(line):
+                //     # Don't open if we click after the gnx.
+                //     if match.start() <= col < match.end():
+                //         target = match.group(0)[4:]  # Strip the leading 'gnx:'
+                //         break
+                while ((match = gnx_regex.exec(line)) !== null) {
+                    // Don't open if we click after the gnx.
+                    if (match.index <= col && col < gnx_regex.lastIndex) {
+                        target = match[0].slice(4); // Strip the leading 'gnx:'
+                        break;
+                    }
+                }
+
+                if (target) {
+                    let found_gnx = false;
+                    if (c.p.gnx == target) {
+                        return target;
+                    }
+                    for (const p of c.all_unique_positions()) {
+                        if (p.v.gnx === target) {
+                            found_gnx = true;
+                            c.selectPosition(p);
+                            c.redraw();
+                            break;
+                        }
+                    }
+
+                    return target;
+
+                }
+                //@-<< look for gnx >>
+            }
+        }
+
+    } else if (typeof url !== 'string') {
+        // @ts-expect-error
+        url = url.toString();
+        url = toUnicode(url!);  // #571
+    }
+    if (url && isValidUrl(url)) {
+        // Part 2: handle the url
+        p = c.p;
+        if (!doHook("@url1", { c: c, p: p, url: url })) {
+            await handleUrl(url, c, p);
+        }
+        doHook("@url2", { c: c, p: p });
+        return url;
+    }
+    // Part 3: call find-def.
+    if (!w.hasSelection()) {
+        c.editCommands.extendToWord(true);
+    }
+    const word = w.getSelectedText().trim();
+    if (!word) {
+        return undefined;
+    }
+    [p, pos, newpos] = c.findCommands.find_def();
+    if (p && p.__bool__()) {
+        return undefined;
+    }
+    //@+<< look for filename or import>>
+    //@+node:felix.20230724154323.24: *5* << look for filename or import >>
+    // Part 4: #2546: look for a file name.
+    let s = w.getAllText();
+    let [i, j] = w.getSelectionRange();
+
+    // // m = re.match(r'(\w+)\.(\w){1,4}\b', s[i:]);
+    // const regex = /(\w+)\.(\w{1,4})\b/g;
+
+    // let m;
+    // s.slice(i).replace(regex, (match, group1, group2) => {
+    //   m = { match, group1, group2 };
+    //   return match;
+    // });
+
+    // let [filename, filename_w] =[ '', ''];
+    // if m
+    //     filename = m.group(0);
+    // // Part 5: #3112: look for import statement
+    // else
+    //     FROMre = r'^from [\./\\]*([^\s/\\].+)\s+import';
+    //     IMPORTre = r'^import\s+[\./\\]*([^\s/\\].+)';
+    //     IMPORTSre = FROMre + '|' + IMPORTre;
+
+    //     m = re.match(IMPORTSre, s[i:], re.MULTILINE);
+    //     module = m and (m[2] or m[1]);
+    //     if module
+    //         filename = module + '.py';
+    //         filename_w = module + '.pyw';
+    const selectedText = s.slice(i, j);
+    const restOfString = s.slice(j);
+
+    const fileNameRegex = /(\w+)\.(\w{1,4})\b/;
+    const importRegex = /^import\s+[\./\\]*([^\s/\\].+)/;
+    const fromImportRegex = /^from [\./\\]*([^\s/\\].+)\s+import/;
+
+    let filename = '';
+    let filename_w = '';
+    let moduleName = '';
+
+    // Look for a file name
+    const fileNameMatch = selectedText.match(fileNameRegex);
+    if (fileNameMatch) {
+        filename = fileNameMatch[0];
+    } else {
+        // Look for import statement
+        const importStatementMatch = restOfString.match(importRegex);
+        const fromImportStatementMatch = restOfString.match(fromImportRegex);
+        const importMatch = importStatementMatch || fromImportStatementMatch;
+
+        if (importMatch) {
+            moduleName = importMatch[1];
+            filename = moduleName + '.py';
+            filename_w = moduleName + '.pyw';
+        }
+    }
+
+    if (filename) {
+        // Navigate to the first node whose headline ends with the filename.
+        let effective_filename = '';
+        for (const p of c.all_unique_positions()) {
+            const headline = p.h.trim();
+            if (headline.endsWith(filename)) {
+                effective_filename = filename;
+            } else if (filename_w && headline.endsWith(filename_w)) {
+                effective_filename = filename_w;
+            }
+            if (effective_filename) {
+                // Set the find text.
+                c.findCommands.ftm.set_find_text(effective_filename);
+                // Select.
+                c.redraw(p);
+                break;
+            }
+        }
+    }
+    //@-<< look for filename or import>>
+    return undefined;
+
+}
+//@+node:felix.20230724154323.25: *3* g.unquoteUrl
+/**
+ * Replace escaped characters (especially %20, by their equivalent).
+ */
+export function unquoteUrl(url: string): string {
+
+    // return urllib.parse.unquote(url);
+
+    return decodeURIComponent(url);
+
+}
+//@+node:felix.20230724154323.26: *3* g: file part utils
+//@+node:felix.20230724154323.27: *4* g.getUNLFilePart
+const file_part_pattern = /\/\/(.*?)#.+/;
+
+/**
+ * Return the file part of a unl, that is, everything *between* '//' and '#'.
+ */
+export function getUNLFilePart(s: string): string {
+
+    // Strip the prefix if it exists.
+    for (const prefix of ['unl:gnx:', 'unl:', 'file:']) {
+        if (s.startsWith(prefix)) {
+            s = s.slice(prefix.length);
+            break;
+        }
+    }
+    const m = s.match(file_part_pattern);
+    return m && m.length ? m[1] : '';
+
+}
+//@+node:felix.20230724154323.28: *4* g.openUNLFile
+/**
+ * Open the commander for filename s, the file part of an unl.
+ *
+ * Return undefined if the file can not be found.
+ */
+export async function openUNLFile(c: Commands, s: string): Promise<Commands | undefined> {
+
+    const base = os_path_basename;
+    const norm = os_path_normpath;
+    const c_name = c.fileName();
+    let w_path;
+    let w_exists;
+    /**
+     * Standardize the path for easy comparison.
+     */
+    function standard(p_path: string): string {
+        return norm(p_path).toLowerCase();
+    }
+
+    if (!s.trim()) {
+        return undefined;
+    }
+    if (s.startsWith('//') && s.endsWith('#')) {
+        s = s.slice(2, -1);
+    }
+    if (!s.trim()) {
+        return undefined;
+    }
+    // Always match within the present file.
+    if (os_path_isabs(s) && standard(s) === standard(c_name)) {
+        return c;
+    }
+    if (!os_path_isabs(s) && standard(s) === standard(base(c_name))) {
+        return c;
+    }
+    if (os_path_isabs(s)) {
+        w_path = standard(s);
+    } else {
+        // Values of d should be directories.
+        const d = parsePathData(c);
+        const base_s = base(s);
+        const directory = d[base_s];
+        if (!directory) {
+            return undefined;
+        }
+        w_exists = await os_path_exists(directory);
+        if (!w_exists) {
+            return undefined;
+        }
+        w_path = standard(os_path_join(directory, base_s));
+
+    }
+    if (w_path === standard(c_name)) {
+        return c;
+    }
+    // Search all open commanders.
+    // This is a good shortcut, && it helps unit tests.
+    for (const c2 of app.commanders()) {
+        if (w_path === standard(c2.fileName())) {
+            return c2;
+        }
+    }
+
+    // Open the file if possible.
+    w_exists = await os_path_exists(w_path);
+    if (!w_exists) {
+        return undefined;
+    }
+
+    return openWithFileName(w_path);
+
+}
+//@+node:felix.20230724154323.29: *4* g.parsePathData
+const path_data_pattern = /(.+?):\s*(.+)/;
+/**
+ * Return a dict giving path prefixes for the files given in @data
+ * unl-path-prefixes.
+ */
+export function parsePathData(c: Commands): Record<string, string> {
+
+    const lines = c.config.getData('unl-path-prefixes');
+    const d: Record<string, string> = {};
+    for (const line of lines) {
+        const m = line.match(path_data_pattern);
+        if (m && m.length) {
+            let [key, w_path] = [m[1], m[2]];
+            if (d[key]) {
+                trace(`Ignoring duplicate key: ${line}`);
+            } else {
+                d[key] = os_path_normpath(w_path);
+            }
+        } else {
+            trace(`Ignoring line: ${line}`);
+        }
+    }
+    return d;
+
+}
 //@-others
 
 //@@language typescript
