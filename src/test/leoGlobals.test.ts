@@ -1416,7 +1416,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         for (const p of c.all_positions()) {
             for (const gnx of [`${p.gnx}`, `${p.gnx}::0`]) {
                 const w_found = await g.findGnx(gnx, c);
-                assert.ok(p.__eq__(w_found), gnx);
+                assert.ok(w_found && p.__eq__(w_found), gnx);
             }
 
         }
@@ -1596,11 +1596,11 @@ suite('Tests for leo.core.leoGlobals', () => {
         // Their returned values should not depend on settings, but change the settings to make sure.
         const table2: [string, () => string][] = [
             // Test g.get_full/short_gnx_UNL.
-            [full_gnx, p.get_full_gnx_UNL],
-            [short_gnx, p.get_short_gnx_UNL],
+            [full_gnx, p.get_full_gnx_UNL.bind(p)],
+            [short_gnx, p.get_short_gnx_UNL.bind(p)],
             // Test g.get_full/short_legacy_UNL.
-            [full_legacy, p.get_full_legacy_UNL],
-            [short_legacy, p.get_short_legacy_UNL],
+            [full_legacy, p.get_full_legacy_UNL.bind(p)],
+            [short_legacy, p.get_short_legacy_UNL.bind(p)],
         ];
         for (const kind of ['legacy', 'gnx']) {
             for (const full of [true, false]) {
@@ -1621,8 +1621,8 @@ suite('Tests for leo.core.leoGlobals', () => {
         // Set @data unl-path-prefixes
 
         const s = g.dedent(`\
-            // lines have the form:
-            // x.leo: <absolute path to x.leo>
+            # lines have the form:
+            # x.leo: <absolute path to x.leo>
 
             test.leo:    c:/Repos/leo-editor/leo/test
             LeoDocs.leo: c:/Repos/leo-editor/leo/doc
@@ -1643,12 +1643,14 @@ suite('Tests for leo.core.leoGlobals', () => {
         const valuesArray: string[] = Object.values(d);
         // Sort the array in ascending order
         const sortedArray: string[] = valuesArray.sort();
+        console.log('sortedArray', sortedArray);
+        console.log('expected_paths', expected_paths);
 
         assert.ok(g.compareArrays(sortedArray, expected_paths));
 
     });
     //@+node:felix.20230724012811.10: *4* TestGlobals.test_g_openUNLFile
-    test('test_g_openUNLFile', () => {
+    test('test_g_openUNLFile', async () => {
 
         // Create a new commander
         const c1 = self.c;
@@ -1657,9 +1659,9 @@ suite('Tests for leo.core.leoGlobals', () => {
         const file_name1 = g.os_path_basename(c1.fileName());
         const file_name2 = g.os_path_basename(c2.fileName());
         // Cross-file tests.
-        const c3 = g.openUNLFile(c1, file_name2);
+        const c3 = await g.openUNLFile(c1, file_name2);
         assert.strictEqual(c3, c2);
-        const c4 = g.openUNLFile(c2, file_name1);
+        const c4 = await g.openUNLFile(c2, file_name1);
         assert.strictEqual(c4, c1);
 
     });

@@ -5678,21 +5678,20 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
 
 }
 //@+node:felix.20230724154323.6: *3* g.findGnx (new unls)
-const find_gnx_pat = new RegExp(/^(.*)::([-\d]+)?$/gm);
-
 /**
  * gnx: the gnx part of a gnx-based unl.
- *
- * The gnx part may be the actual gnx or <actual-gnx>::<line-number>
- *
- * Return the first position in c with the actual gnx.
- */
+*
+* The gnx part may be the actual gnx or <actual-gnx>::<line-number>
+*
+* Return the first position in c with the actual gnx.
+*/
 export async function findGnx(gnx: string, c: Commands): Promise<Position | undefined> {
+    const find_gnx_pat = new RegExp(/^(.*)::([-\d]+)?$/g);
 
     //  Get the actual gnx and line number.
     let n: number = 0;  // The line number.
 
-    const m = gnx.match(find_gnx_pat);
+    const m = find_gnx_pat.exec(gnx);  //gnx.exec(find_gnx_pat);
 
     if (m && m.length) {
         // Get the actual gnx and line number.
@@ -5821,7 +5820,7 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
                 console.assert(p.__eq__(p1));
                 let n = 0;  // The default line number.
                 // Parse the last target.
-                m = unlList[-1].match(new_pat);
+                m = unlList.slice(-1)[0].match(new_pat);
                 if (m && m.length) {
                     const line = m[3];
                     try {
