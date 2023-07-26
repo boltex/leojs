@@ -3733,8 +3733,5 @@
     "path-browserify": "^1.0.1",
     "safe-json-stringify": "^1.2.0",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "35c903d",
-  "gitBranch": "editFileCommands",
-  "gitDate": "2023-07-23 20:04:25 -0400"
+  }
 }

@@ -1726,8 +1726,17 @@ export class LoadManager {
             w_uri = vscode.workspace.workspaceFolders[0].uri;
         }
 
+        // ! TRY TO GET EXTENSION FOLDER WITHOUT REQUIRING CONTEXT ! 
+        const extension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+        if (extension) {
+            loadDir = extension.extensionUri.fsPath; // ! OVERRIDE WITH REAL EXTENION PATH !
+        } else {
+            console.log(' -------------- leojs EXTENSION FOLDER NOT FOUND --------------');
+        }
+
         // const loadDir2 = w_uri?.fsPath;
         loadDir = g.finalize(loadDir);
+        // console.log(' -------------- loadDir => ', loadDir);
         return loadDir;
         /* 
         try:

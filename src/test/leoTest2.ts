@@ -148,7 +148,7 @@ export class LeoUnitTest {
 
 
         // fileName = g.os_path_finalize_join(g.app.loadDir, 'LeoPyRef.leo')
-        const fileName = g.os_path_finalize_join(g.app.loadDir!, '..', '..', 'Leojs.leo');
+        const fileName = g.os_path_finalize_join(g.app.loadDir!, 'Leojs.leo');
         // const fileName = g.os_path_finalize_join(g.vsCodeContext.extensionUri.fsPath, 'Leojs.leo');
 
         const c = new Commands(fileName, new NullGui());

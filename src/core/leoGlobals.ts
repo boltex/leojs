@@ -171,11 +171,11 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
 
 // See link_table above LeoLog.put_html_links.
 
-export const flake8_pat = new RegExp(/(.+?):([0-9]+):[0-9]+:.*$/, 'mg');
-export const mypy_pat = new RegExp(/^(.+?):([0-9]+):\s*(error|note)\s*(.*)\s*$/, 'mg');
-export const pyflakes_pat = new RegExp(/^(.*):([0-9]+):[0-9]+ .*?$/, 'mg');
-export const pylint_pat = new RegExp(/^(.*):\s*([0-9]+)[,:]\s*[0-9]+:.*?\(.*\)\s*$/, 'mg');
-export const python_pat = new RegExp(/^\s*File\s+"(.*?)",\s*line\s*([0-9]+)\s*$/, 'mg');
+export const flake8_pat = new RegExp(/(.+?):([0-9]+):[0-9]+:.*$/, 'g');
+export const mypy_pat = new RegExp(/^(.+?):([0-9]+):\s*(error|note)\s*(.*)\s*$/, 'g');
+export const pyflakes_pat = new RegExp(/^(.*):([0-9]+):[0-9]+ .*?$/, 'g');
+export const pylint_pat = new RegExp(/^(.*):\s*([0-9]+)[,:]\s*[0-9]+:.*?\(.*\)\s*$/, 'g');
+export const python_pat = new RegExp(/^\s*File\s+"(.*?)",\s*line\s*([0-9]+)\s*$/, 'g');
 //@-<< define global error regexes >>
 //@+<< define g.Decorators >>
 //@+node:felix.20211102223300.1: ** << define g.Decorators >>

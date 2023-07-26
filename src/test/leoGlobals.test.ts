@@ -55,6 +55,10 @@ suite('Tests for leo.core.leoGlobals', () => {
     // kind: @clean, @edit, @file,
     // path: path to an existing file, relative to LeoPyRef.leo (in leo/core].
     files_data = [
+        ['@file', 'src/core/decorators.ts'],
+        ['@clean', 'src/config.ts'],
+
+        /*
         // The hard case: __init__.py
         ['@file', '../plugins/importers/__init__.py'],
         ['@file', '../plugins/writers/__init__.py'],
@@ -66,6 +70,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         ['@edit', '../../launchLeo.py'],
         ['@file', '../external/log_listener.py'],
         ['@file', '../plugins/cursesGui2.py'],
+        */
     ];
     //@-<< define files data >>
     //@+<< define error_patterns >>
@@ -169,12 +174,13 @@ suite('Tests for leo.core.leoGlobals', () => {
         // ]
         absolute_paths = files_data.map(([, relative_path]) => {
             const dirname = g.os_path_dirname(c.fileName()); // Assuming c is the current file object
-            return g.os_path_finalize_join(dirname, relative_path);
+            const w_result = g.os_path_finalize_join(dirname, relative_path);
+            return w_result;
         });
 
         // The error line for each absolute path. Default all lines to 0.
         error_lines = {};
-        for (const z in absolute_paths) {
+        for (const z of absolute_paths) {
             error_lines[z] = 0;
         }
         // Error messages for every tool and every absolute path.
@@ -199,7 +205,6 @@ suite('Tests for leo.core.leoGlobals', () => {
     async function _test_per_commander_data(): Promise<void> {
 
         const c = self.c;
-
         // All dicts must have the same keys.
         for (const d of [error_messages, error_patterns, error_templates]) {
             assert.ok(g.compareArrays(tools, Object.keys(d).sort()));
@@ -225,11 +230,11 @@ suite('Tests for leo.core.leoGlobals', () => {
         // More tests...
         for (const data of files_data) {// <@file> <filename>
             const [kind, relative_path] = data;
-            const msg = `{kind} {relative_path}`;
+            const msg = `${kind} ${relative_path}`;
             const headline = msg;
             const absolute_path = g.os_path_finalize_join(g.app.loadDir!, relative_path);
             assert.ok(absolute_paths.includes(absolute_path), msg);
-            const w_exists = g.os_path_exists(absolute_path);
+            const w_exists = await g.os_path_exists(absolute_path);
             assert.ok(w_exists, msg);
             _make_tree(c, headline);
             const test_p = g.findNodeAnywhere(c, headline);
