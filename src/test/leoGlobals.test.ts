@@ -1371,18 +1371,14 @@ suite('Tests for leo.core.leoGlobals', () => {
     //@+node:felix.20220129223719.49: *4* TestGlobals.test_g_warnOnReadOnlyFile
     test('test_g_warnOnReadOnlyFile', async () => {
         const c = self.c;
-
         const fc = c.fileCommands;
         const w_path = g.os_path_finalize_join(g.app.loadDir || '', '..', 'test', 'test-read-only.txt');
         const w_exists = await g.os_path_exists(w_path);
-
         if (w_exists && fs.chmod) {
-
             // os.chmod(w_path, stat.S_IREAD);
             const w_uri = g.makeVscodeUri(w_path);
             // await vscode.workspace.fs.writeFile(w_uri, contents);
             await fs.chmod(w_path, fs.constants.S_IRUSR);
-
             await fc.warnOnReadOnlyFiles(w_path);
             assert.ok(fc.read_only);
         } else {
@@ -1392,12 +1388,9 @@ suite('Tests for leo.core.leoGlobals', () => {
     //@+node:felix.20230724012811.1: *3* unl tests
     //@+node:felix.20230724012811.2: *4* TestGlobals.test_g_findGnx
     test('test_g_findGnx', async () => {
-
         const c = self.c;
-
         // Define per-commander data.
         _define_per_commander_data();
-
         // Test all error messages for all paths.
         for (const data of files_data) {  // <@file> <filename>
             const [kind, relative_path] = data;
@@ -1408,7 +1401,6 @@ suite('Tests for leo.core.leoGlobals', () => {
             assert.ok(test_p && test_p.__bool__());
             const result2 = await g.findGnx(test_p.gnx, c);
             assert.ok(result2 && result2.__eq__(test_p), msg);
-
         }
         // Create the test tree.
         _make_tree(c, 'Root');
@@ -1418,7 +1410,6 @@ suite('Tests for leo.core.leoGlobals', () => {
                 const w_found = await g.findGnx(gnx, c);
                 assert.ok(w_found && p.__eq__(w_found), gnx);
             }
-
         }
     });
     //@+node:felix.20230724012811.3: *4* TestGlobals.test_g_findUnl (legacy)
@@ -1430,26 +1421,20 @@ suite('Tests for leo.core.leoGlobals', () => {
         _make_tree(c, 'Root');
         // Test all positions.
         for (const p of c.all_positions()) {
-
             // Plain headlines.
             const headlines = [...p.self_and_parents()].map((z) => z.h).reverse();
-
             let w_foundUnl = await g.findUnl(headlines, c);
             assert.ok(p.__eq__(w_foundUnl), headlines.join(','));
-
             // Headlines with new-style line numbers:
             const aList1: string[] = headlines.map((z: string) => `${z}::0`);
-
             w_foundUnl = await g.findUnl(aList1, c);
             assert.ok(p.__eq__(w_foundUnl), aList1.join(','));
             // Headlines with old-style child offsets.
             if (0) {  // I don't understand the old-style format!
                 const aList2: string[] = headlines.map((z: string) => `${z}:0`);
-
                 w_foundUnl = await g.findUnl(aList2, c);
                 assert.ok(p.__eq__(w_foundUnl), aList2.join(','));
             }
-
         }
     });
     //@+node:felix.20230724012811.4: *4* TestGlobals.test_g_isValidUnl
@@ -1479,19 +1464,19 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
     //@+node:felix.20230724012811.6: *4* TestGlobals.test_g_isValidUrl
     test('test_g_isValidUrl', () => {
-
         const bad_table = ['@whatever'];
         const good_table = [
             'http://leo-editor.github.io/leo-editor/preface.html',
             'https://github.com/leo-editor/leo-editor/issues?q=is%3Aissue+milestone%3A6.6.3+',
         ];
+        console.log("---------------------------------------------1");
         for (const unl of [...valid_unls, ...missing_unls, ...good_table]) {
             assert.ok(g.isValidUrl(unl), unl);
         }
+        console.log("---------------------------------------------2");
         for (const unl of [...invalid_unls, ...bad_table]) {
             assert(!g.isValidUrl(unl), unl);
         }
-
     });
     //@+node:felix.20230724012811.7: *4* TestGlobals.test_g_findAnyUnl
     test('test_g_findAnyUnl', async () => {

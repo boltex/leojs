@@ -254,7 +254,6 @@ export class LeoUnitTest {
      * Dump root's headlines, or all headlines if root is None.
      */
     public dump_headlines(root?: Position, tag?: string): void {
-
         console.log('');
         if (tag) {
             console.log(tag);
@@ -270,7 +269,6 @@ export class LeoUnitTest {
      * Dump root's tree, or the entire tree if root is None.
      */
     public dump_tree(root?: Position, tag?: string): void {
-
         console.log('');
         if (tag) {
             console.log(tag);

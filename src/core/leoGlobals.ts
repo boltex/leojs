@@ -5691,12 +5691,12 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
 * Return the first position in c with the actual gnx.
 */
 export async function findGnx(gnx: string, c: Commands): Promise<Position | undefined> {
-    const find_gnx_pat = new RegExp(/^(.*)::([-\d]+)?$/g);
+    const find_gnx_pat = /^(.*)::([-\d]+)?$/;
 
     //  Get the actual gnx and line number.
     let n: number = 0;  // The line number.
 
-    const m = find_gnx_pat.exec(gnx);  //gnx.exec(find_gnx_pat);
+    const m = gnx.match(find_gnx_pat);  //gnx.exec(find_gnx_pat);
 
     if (m && m.length) {
         // Get the actual gnx and line number.
@@ -5735,11 +5735,11 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
     // old_pat: ':' followed by a list of node indices.
     //          Deprecated and probably does not work.
     //          This pattern will remain for compatibility.
-    const old_pat = new RegExp(/^(.*):(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/g);
+    const old_pat = /^(.*):(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/;
 
     // new_pat: '::' followed by a line number.
     //          Negative line numbers denote global line numbers.
-    const new_pat = new RegExp(/^(.*?)(::)([-\d]+)?$/g);
+    const new_pat = /^(.*?)(::)([-\d]+)?$/;
 
     //@+others  // Define helper functions
     //@+node:felix.20230724154323.8: *4* function: convert_unl_list
@@ -5747,9 +5747,7 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
      * Convert old-style UNLs to new UNLs, retaining line numbers if possible.
      */
     function convert_unl_list(aList: string[]): string[] {
-
         const result = [];
-
         for (const s of aList) {
             // Try to get the line number.
             const table: [RegExpMatchArray | null, number][] = [
@@ -5759,7 +5757,7 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
             for (const [m, line_group] of table) {
                 if (m && m.length) {
                     try {
-                        const n = Number(m[line_group]);
+                        const n = parseInt(m[line_group]);
                         result.push(`${m[1]}::${n}`);
                         continue;
                     } catch (e) {
@@ -5770,21 +5768,18 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
             // Finally, just add the whole UNL.
             result.push(s);
         }
-
         // Do *not* remove duplicates!
         return result;
-
     }
     //@+node:felix.20230724154323.9: *4* function: full_match
     /**
      * Return True if the stripped headlines of p and all p's parents match unlList.
      */
     function full_match(p: Position): boolean {
-
         // Careful: make copies.
         const aList: string[] = [...unlList];
         const p1 = p.copy();
-        while (aList && p1 && p1.__bool__()) {
+        while (aList && aList.length && p1 && p1.__bool__()) {
             const m = aList.slice(-1)[0].match(new_pat);
             if (m && m[1].trim() !== p1.h.trim()) {
                 return false;
@@ -5794,10 +5789,8 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
             }
             aList.pop();
             p1.moveToParent();
-
         }
         return !!(!aList || !aList.length);
-
     }
     //@-others
 
