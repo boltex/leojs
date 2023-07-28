@@ -318,6 +318,14 @@ export class Commands {
         // g.app.config.setIvarsFromSettings(c); // Removed in https://github.com/leo-editor/leo-editor/pull/2681
     }
 
+    //@+node:felix.20230728170724.1: *4* c.valueOf & c.toString
+    public toString(): string {
+        // return f"Commander {id(self)}: {repr(self.mFileName)}"
+        return `Commander ${this.mFileName.toString()}`;
+    }
+    public valueOf(): string {
+        return this.toString();
+    }
     //@+node:felix.20211018215401.1: *4* c.createCommandNames
     /**
      * Create all entries in c.commandsDict.
