@@ -6041,7 +6041,7 @@ export function traceUrl(c: Commands, path: string, parsed: any, url: string): v
 }
 //@+node:felix.20230724154323.15: *3* g.isValidUnl
 // unls must contain a (possible empty) file part followed by something else.
-export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#.+/g;
+export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#.+/;
 
 /**
  * Return true if the given unl is valid.
@@ -6069,12 +6069,13 @@ export function isValidUrl(url: string): boolean {
     if (isValidUnl(url)) {
         return true;
     }
-    if (url.startsWith('@')) {
+    if (url.startsWith('@') || url.startsWith('unl//')) {
         return false;
     }
 
     // const parsed = urlparse.urlparse(url);
-    const parsed = makeVscodeUri(url);
+    // const parsed = makeVscodeUri(url);
+    const parsed = vscode.Uri.parse(url);
 
     const scheme = parsed.scheme;
 
