@@ -1623,15 +1623,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const d = g.parsePathData(c);
         const w_paths = ['c:/Repos/leo-editor/leo/test', 'c:/Repos/leo-editor/leo/doc'];
         const expected_paths: string[] = w_paths.map((z: string) => g.os_path_normpath(z));
-
-        // Convert the values of the object into an array
-        const valuesArray: string[] = Object.values(d);
-        // Sort the array in ascending order
-        const sortedArray: string[] = valuesArray.sort();
-        console.log('sortedArray', sortedArray);
-        console.log('expected_paths', expected_paths);
-
-        assert.ok(g.compareArrays(sortedArray, expected_paths));
+        assert.ok(g.compareArrays(Object.values(d).sort(), expected_paths.sort()));
 
     });
     //@+node:felix.20230724012811.10: *4* TestGlobals.test_g_openUNLFile

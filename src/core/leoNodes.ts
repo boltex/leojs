@@ -1093,7 +1093,11 @@ export class Position {
 
         const p = this;
         const c = p.v.context;
-        const path_part: string = [...this.self_and_parents(false)].map(z => z.h).reverse().join('-->');
+        const w_selfAndParentsHeadline = [];
+        for (const p_p of this.self_and_parents(false)) {
+            w_selfAndParentsHeadline.push(p_p.h);
+        }
+        const path_part: string = w_selfAndParentsHeadline.reverse().join('-->');
         return 'unl:' + `//${c.fileName()}#${path_part}`;
 
     }
@@ -1141,7 +1145,13 @@ export class Position {
         const p = this;
         const c = p.v.context;
         const file_part = g.os_path_basename(c.fileName());
-        const path_part: string = [...this.self_and_parents(false)].map(z => z.h).reverse().join('-->');
+
+        const w_selfAndParentsHeadline = [];
+        for (const p_p of this.self_and_parents(false)) {
+            w_selfAndParentsHeadline.push(p_p.h);
+        }
+
+        const path_part: string = w_selfAndParentsHeadline.reverse().join('-->');
 
         return 'unl:' + `//${file_part}#${path_part}`;
 
