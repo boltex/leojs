@@ -2716,6 +2716,7 @@ export function gitInfoForFile(filename: string): [string, string] {
 export async function gitHeadPath(path_s: string): Promise<string | undefined> {
     // const w_path = path(path_s);
     // #1780: Look up the directory tree, looking the .git directory.
+    // TODO : HANDLE VSCODE INTHE BROWSER!
     while (await os_path_exists(path_s)) {
         const head = path.join(path_s, '.git', 'HEAD');
         if (await os_path_exists(head)) {
@@ -4920,6 +4921,10 @@ export function os_path_realpath(p_path: string): string {
     return p_path;
 }
 
+//@+node:felix.20230727231429.1: *3* g.os_path_relpath
+export function os_path_relpath(start: string, target: string): string {
+    return path.relative(start, target);
+}
 //@+node:felix.20230423204948.1: *3* g.os_path_samefile
 export async function os_path_samefile(
     fn1: string,

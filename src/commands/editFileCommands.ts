@@ -955,7 +955,7 @@ export class GitDiffController {
         // Common code.
         const c = this.c;
         // #1781, #2143
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return;
         }
@@ -1008,7 +1008,7 @@ export class GitDiffController {
      * produced by a pull request between two branches.
      */
     public async diff_pull_request(): Promise<void> {
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return;
         }
@@ -1036,7 +1036,7 @@ export class GitDiffController {
     ): Promise<void> {
         const c = this.c;
         const [u, undoType] = [c.undoer, 'diff-two-branches'];
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return;
         }
@@ -1086,7 +1086,7 @@ export class GitDiffController {
     public async diff_two_revs(rev1 = 'HEAD', rev2 = ''): Promise<void> {
         const [c, u] = [this.c, this.c.undoer];
 
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return;
         }
@@ -1126,7 +1126,7 @@ export class GitDiffController {
      * The main line of the git diff command.
      */
     public async git_diff(rev1 = 'HEAD', rev2 = ''): Promise<void> {
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return;
         }
@@ -1190,6 +1190,382 @@ export class GitDiffController {
         //     this.finish();
         // }
         // return !!files.length;
+    }
+    //@+node:felix.20230727182206.1: *4* gdc.node_history & helpers
+    /**
+     * Produce a Leonine history of the node whose file name and gnx are given.
+     */
+    public async node_history(p_path: string, gnxs: string[], limit?: number): Promise<void> {
+
+        const c = this.c;
+        // The path must be absolute.
+        if (!g.os_path_isabs(p_path)) {
+            g.trace(`Not absolute: ${p_path}`);
+            return;
+        }
+        // Get all the revs.
+        const rev_list = await this._get_revs_for_path(p_path);
+        // Get the files.
+        const contents_list = await this._get_contents_for_revs(p_path, rev_list, limit);
+        // Truncate revs_list so it has the same length as contents_list.
+        const truncated_revs_list = rev_list.slice(0, contents_list.length);
+        // Find changed nodes.
+        const diff_list = this._get_diff_list(contents_list, gnxs, p_path, truncated_revs_list);
+        if (!diff_list || !diff_list.length) {
+            return;
+        }
+        // Create the root node.
+        this.root = c.lastTopLevel().insertAfter();
+        const p = this.root;
+        const limit_s = limit == null ? 'None' : limit.toString();
+        p.h = `node_history: ${g.shortFileName(p_path)}`;
+        p.b = `@ignore\n@nosearch\n\n# gnxs: ${gnxs.join(', ')}\n# limit: ${limit_s}`;
+        // Generate all other nodes.
+        this._generate_nodes(diff_list, truncated_revs_list);
+        this.finish();
+
+    }
+    //@+node:felix.20230727182206.2: *5* gdc._get_action
+    /**
+     * Return a g.Bunch describing the action to be taken at rev i.
+     */
+    private _get_action(
+        i: number,  // The index into contents_list and revs_list
+        path: string,
+        contents_list: string[][],  // Lines for each contents.
+        node_patterns: [string, RegExp][],  // Patterns matching @+node sentinels for each gnx.
+        revs_list: string[]
+    ): Record<string, any> | undefined {
+
+        console.assert(contents_list.length === revs_list.length);
+
+        if (i + 1 >= revs_list.length) {
+            return undefined;// Can't diff past this rev.
+        }
+        // Step 1: Find all nodes matching one of the gnx's in contents[i], contents[i+1]
+        const nodes: [number, string, [number, number]][][] = [
+            [],  // Tuples describing nodes in rev i.
+            [],  // Tuples describing nodes in rev i + 1
+        ];
+        let rev_i;
+        for (const index of [0, 1]) {
+            rev_i = i + index
+            for (const [gnx, pattern] of node_patterns) {
+                const node_info = this._find_node(contents_list[rev_i], pattern, gnx, revs_list[rev_i]);
+                if (node_info) {
+                    nodes[index].push([rev_i, gnx, node_info]);
+                }
+            }
+        }
+
+        let skip_flag: boolean;
+        let range0: [number, number] | undefined;
+        let range1: [number, number] | undefined;
+        let contents0: string[] | undefined;
+        let contents1: string[] | undefined;
+        let body0: string[] | undefined;
+        let body1: string[] | undefined;
+        // Quick test: are both sets of lines the same?
+        if (!nodes[0].length && !nodes[1].length) {
+            skip_flag = true;
+        } else if (nodes[0].length && nodes[1].length) {
+            range0 = nodes[0][0][2];
+            range1 = nodes[1][0][2];
+            contents0 = contents_list[i];
+            contents1 = contents_list[i + 1];
+            body0 = contents0.slice(range0[0], range0[1]);
+            body1 = contents1.slice(range1[0], range1[1]);
+            skip_flag = g.compareArrays(body0, body1);
+        } else {
+            skip_flag = false;
+        }
+        // Return if there is nothing to diff.
+        if (skip_flag) {
+            return undefined;
+        }
+        // Step 2: Create the g.Bunch
+        // kind = 'add' if not nodes[0] else 'delete' if not nodes[1] else 'diff'
+        let kind: string;
+        if (!nodes[0]) {
+            kind = 'add';
+        } else if (!nodes[1]) {
+            kind = 'delete';
+        } else {
+            kind = 'diff';
+        }
+        const [nodes0, nodes1] = [nodes[0], nodes[1]];
+        let gnx0;
+        let gnx1;
+        if (nodes0 && nodes0.length) {
+            gnx0 = nodes0[0][1];
+            range0 = nodes0[0][2];
+            contents0 = contents_list[i];
+            body0 = contents0.slice(range0[0], range0[1]);
+        } else {
+            // all stay undefined;
+            // gnx0 = range0 = contents0 = body0 = None
+        }
+        if (nodes1 && nodes1.length) {
+            gnx1 = nodes1[0][1];
+            range1 = nodes1[0][2];
+            contents1 = contents_list[i + 1];
+            body1 = contents1.slice(range1[0], range1[1]);
+        } else {
+            // all stay undefined;
+            // gnx1 = range1 = contents1 = body1 = None
+        }
+        return {
+            i: i,
+            kind: kind,
+            gnx0: gnx0,
+            gnx1: gnx1,
+            rev0: revs_list[i],
+            rev1: revs_list[i + 1],
+            body0: body0,
+            body1: body1,
+            // Optional debugging info.
+            nodes0: nodes0,
+            contents0: contents0,
+            range0: range0,
+            nodes1: nodes1,
+            contents1: contents1,
+            range1: range1,
+        };
+
+    }
+    //@+node:felix.20230727182206.3: *5* gdc._find_node
+    /**
+     * Return (i1, i2) the range of lines of the node, or None.
+     * i1: The index of the line matching pattern.
+     * i2: The index of the line ending the node.
+     *
+     *
+     * The lines start at the first line matching the pattern.
+     *
+     * The lines end at the first line matching one of the ending patterns.
+     */
+    private _find_node(
+        contents: string[],  // The list of lines.
+        pattern: RegExp,
+        // For debugging only.
+        gnx: string,  // gnx being matched.
+        rev: string,  // Full hash.
+    ): [number, number] | undefined {
+
+        const node_ending_patterns = [
+            /^\s*#@\+node:(.*?):/,  // A start node sentinel.
+            /^\s*#@\-others/,  // A -others sentinel
+            /^\s*#@\-leo/,  // A -leo sentinel.
+        ];
+
+        let w_found = false;
+        let i: number = 0;
+        let line: string = "";
+        for ([i, line] of contents.entries()) {
+            if (pattern.test(line)) {
+                w_found = true;
+                break;
+            }
+        }
+        if (!w_found) {
+            return undefined;
+        }
+
+        let i1 = i;
+        i += 1;
+        while (i < contents.length) {
+            line = contents[i];
+            i += 1;
+            if (node_ending_patterns.some(z => z.test(line))) {
+                return [i1, i - 1];
+            }
+        }
+
+        return undefined;
+
+    }
+    //@+node:felix.20230727182206.4: *5* gdc._generate_nodes
+    /**
+     * Generate all diff nodes from diff_list, a list of g.Bunches returned from _get_action.
+     */
+    private _generate_nodes(diff_list: Record<string, any>[], revs_list: string[]): void {
+
+        // this._trace_diff_list(diff_list)
+        for (const b of diff_list) {
+            // this._trace_kind(b, revs_list)
+            const p = this.root!.insertAsLastChild();
+            const gnx0_s = b.gnx0 || '';
+            const gnx1_s = b.gnx1 || '';
+            const gnxs_s = b.gnx0 === b.gnx1 ? gnx0_s : `${gnx0_s} ${gnx1_s}`;
+            p.h = `${b.i.toString().padStart(4)} ${b.kind}`;  // {gnx0_s} {gnx1_s}"
+            if (b.kind === 'diff') {
+                const diff = difflib.unifiedDiff(b.body0 || [], b.body1 || [],
+                    {
+                        fromfile: b.rev0,
+                        tofile: b.rev1,
+                    }
+                );
+                p.b = `diff ${gnxs_s}\n\n${diff.join('')}`;
+                const child1 = p.insertAsLastChild();
+                child1.h = 'old';
+                child1.b = (b.body0 || []).join('');
+                const child2 = p.insertAsLastChild();
+                child2.h = 'new';
+                child2.b = (b.body1 || []).join('');
+            } else if (b.kind === 'add') {
+                p.b = `add ${gnxs_s}\n\n${(b.body1 || []).join('')}`;
+            } else if (b.kind === 'delete') {
+                p.b = `delete ${gnxs_s}\n\n${(b.body0 || []).join('')}`;
+            } else {
+                g.trace(`Bad b.kind: ${b.kind.toString()}`);
+            }
+        }
+    }
+    //@+node:felix.20230727182206.5: *5* gdc._get_contents_for_revs
+    /**
+     * Return the contents of the file as a list of lines.
+     * path: the full path to the file.
+     * rev_list: the list of full git hashes for each rev.
+     * limit: None (no limit), the number revs to search.
+     */
+    private async _get_contents_for_revs(
+        p_path: string,
+        rev_list: string[],
+        limit?: number
+    ): Promise<string[][]> {
+
+        // Note: the time module excludes sleep time. It's inaccurate here.
+
+        // Run the command itself in the leo-editor, the parent of the .git directory.
+        const git_parent_directory = await this.get_parent_of_git_directory();
+
+        // Compute the path relative to the parent.
+        const relative_path = g.os_path_relpath(p_path, git_parent_directory || "").replace(/\\/g, '/');
+
+        // Get full file contents of rev.
+        const result: string[][] = [];
+        const of_s = limit == null ? '' : ` of ${rev_list.length}`;
+        const n = limit == null ? rev_list.length : Math.min(limit, rev_list.length);
+        g.es_print(`Reading ${n}${of_s} revs!\nThis will take a few minutes.`);
+
+        for (const [i, rev] of rev_list.slice(0, limit).entries()) {
+            const command = `git show ${rev}:${relative_path}`;
+            const aList = await g.execGitCommand(command, git_parent_directory || "");
+            result.push(aList);
+            if (i > 0 && (i % 100) == 0) {
+                g.es_print(`Progress: ${i} revs`);
+            }
+        }
+        g.es_print(`Done! ${n}${of_s} revs`);
+        return result;
+
+    }
+    //@+node:felix.20230727182206.6: *5* gdc._get_diff_list
+    /**
+     * Return a list of Bunches describing the nodes to be diffed.
+     */
+    private _get_diff_list(
+        contents_list: string[][],  // List of lines for each file.
+        gnxs: string[],
+        p_path: string,
+        revs_list: string[],
+    ): Record<string, any>[] {
+
+        console.assert(contents_list.length === revs_list.length);
+
+        // Compile the patterns once.
+        const node_patterns: [string, RegExp][] = gnxs.map(gnx => [
+            gnx,
+            new RegExp(`^\\s*#@\\+node:(${gnx}):`)
+        ]);
+
+        // Create the list of g.Bunches.
+        const node_data_list = [];
+        for (let i = 0; i < contents_list.length; i++) {
+            const bunch = this._get_action(i, p_path, contents_list, node_patterns, revs_list);
+            if (bunch) {
+                node_data_list.push(bunch);
+            }
+        }
+
+        return node_data_list;
+
+    }
+    //@+node:felix.20230727182206.7: *5* gdc._get_revs_for_path
+    /**
+     *  Return the list of full hashes for all commits to the given absolute path.
+     */
+    private async _get_revs_for_path(p_path: string): Promise<string[]> {
+
+        // Run the command itself in leo-editor, the parent of the .git directory.
+        const git_parent_directory = await this.get_parent_of_git_directory();
+
+        // Human readable summary.
+        // %h (%an %cs %s): Abbreviated hash, author, date, commit message
+        const args_s = "--no-patch --pretty='format:%H'";  // Just the long hash.
+        const command = `git log ${args_s} -- ${p_path}`;
+        const aList = await g.execGitCommand(command, git_parent_directory || '');
+        const result = aList.map(z => z.trim());
+        return result;
+
+    }
+    //@+node:felix.20230727182206.8: *5* gdc._trace_diff_list
+    /**
+     * Trace the diff_list.
+     */
+    private _trace_diff_list(diff_list: Record<string, any>[]): void {
+
+        if (1) { // Brief.
+            for (const z of diff_list) {
+                const body_n0 = z.body0 == null ? 'None' : z.body0.length;
+                const body_n1 = z.body1 == null ? 'None' : z.body1.length;
+                console.log(
+                    `${z.i.toString().padStart(4)} ${z.kind.toString().padStart(7)} ${z.rev0.slice(0, 7)} ${z.rev1.slice(0, 7)} `,
+                    // `len(contents0/1: {n0} {n1} range0/1: {z.range0} {z.range1}`)
+                    `len(body0/1): ${body_n0} ${body_n1}`);
+            }
+
+        } else if (0) {  // Too verbose.
+            g.printObj(diff_list, 'diff_list')
+        } else {  // Verbose.
+            for (const bunch of diff_list) {
+                const result = [];
+                for (const key of ['i', 'kind', 'rev0', 'rev1', 'body0', 'body1', 'range0', 'range1']) {
+                    const val = bunch[key]
+                    if (val == null) {
+                        continue;
+                    }
+                    if (key === 'i') {
+                        const pad_s = ' '.repeat(Math.max(0, 4 - val.toString().length));
+                        result.push(`${key}:${pad_s} ${val}`);
+                    } else if (key === 'kind') {
+                        result.push(`${key}: ${val.toString().padEnd(6)}`);
+                    } else if (key.startsWith('body') || key.startsWith('contents')) {
+                        result.push(`${key}: ${val.length.toString().padEnd(3)}`);
+                    } else if (key.startsWith('rev')) {
+                        result.push(`${key}: ${val.slice(0, 7)}`);
+                    } else {
+                        result.push(`${key}: ${val}`);
+                    }
+                }
+                console.log(result.join(' '));
+            }
+        }
+    }
+    //@+node:felix.20230727182206.9: *5* gdc._trace_kind
+    private _trace_kind(b: Record<string, any>, revs_list: string[]): void {
+        const tag = `${b.i.toString().padStart(4)}: ${b.rev0.slice(0, 7)} ${b.rev1.slice(0, 7)}`;
+
+        if (b.kind === 'add') {
+            console.log(`${tag}:    add len(body1):   ${b.body1.length}`);
+        } else if (b.kind === 'delete') {
+            console.log(`${tag}: delete len(body0):   ${b.body0.length}`);
+        } else if (b.kind === 'diff') {
+            //  pad_s = ' ' * (9 + len(tag))
+            console.log(`${tag}:   diff len(body0/2): ${b.body0.length} ${b.nodes1.length}`);
+        } else {
+            g.trace('Unknown kind', b.kind.toString());
+        }
     }
     //@+node:felix.20230709010434.9: *3* gdc.Utils
     //@+node:felix.20230709010434.10: *4* gdc.create_compare_node
@@ -1371,7 +1747,7 @@ export class GitDiffController {
      * #2143.
      * Resolve filename to the nearest directory containing a .git directory.
      */
-    public async get_directory(): Promise<string | undefined> {
+    public async get_parent_of_git_directory(): Promise<string | undefined> {
         const c = this.c;
         const filename = c.fileName();
         if (!filename) {
@@ -1410,7 +1786,7 @@ export class GitDiffController {
         fn: string
     ): Promise<string> {
         // #2143
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return '';
         }
@@ -1425,7 +1801,7 @@ export class GitDiffController {
      */
     public async get_file_from_rev(rev: string, fn: string): Promise<string> {
         // #2143
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return '';
         }
@@ -1458,7 +1834,7 @@ export class GitDiffController {
      */
     public async get_files(rev1: string, rev2: string): Promise<string[]> {
         // #2143
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return [];
         }
@@ -1489,7 +1865,7 @@ export class GitDiffController {
         // Return only the abbreviated hash for the revspec.
         const format_s = abbreviated ? 'h' : 'H';
         const command = `git show --format=%${format_s} --no-patch ${revspec}`;
-        const directory = await this.get_directory();
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return '';
         }
