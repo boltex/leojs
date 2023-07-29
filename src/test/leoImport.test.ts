@@ -124,7 +124,7 @@ suite('Test cases for leoImport.ts', () => {
     });
 
     //@+node:felix.20230728212935.1: *3* TestLeoImport.test_ric_minimize_headlines
-    test('test_ric_minimize_headlines', () => {
+    test('test_ric_minimize_headlines', async () => {
 
         const c = self.c;
         const root = self.c.rootPosition()!;
@@ -165,7 +165,7 @@ suite('Test cases for leoImport.ts', () => {
 
         for (const [h, expected] of table) {
             root.h = h;
-            x.minimize_headline(root);
+            await x.minimize_headline(root);
             console.log('----------------------------- 1111111 ');
             assert.strictEqual(root.h, expected, h);
         }
@@ -177,7 +177,7 @@ suite('Test cases for leoImport.ts', () => {
                 root.h = h;
                 console.log('----------------------------- 222222222 ');
 
-                x.minimize_headline(root);
+                await x.minimize_headline(root);
 
                 assert.ok(false, h); // FAILS if this passes.
             } catch (e) {

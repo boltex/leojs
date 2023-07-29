@@ -2201,6 +2201,7 @@ export class RecursiveImportController {
      * In fact, dir_ can be a path to a single file.
      */
     public async run(dir_: string): Promise<void> {
+        await this.isReady;
         if (
             !['@auto', '@clean', '@edit', '@file', '@nosent'].includes(
                 this.kind
@@ -2233,7 +2234,7 @@ export class RecursiveImportController {
             } else {
                 await this.import_dir(dir_, parent);
             }
-            this.post_process(parent);
+            await this.post_process(parent);
             u.afterInsertNode(parent, 'recursive-import', undoData);
         } catch (exception) {
             g.es_print('Exception in recursive import');
@@ -2260,6 +2261,8 @@ export class RecursiveImportController {
      * Import selected files from dir_, a directory.
      */
     public async import_dir(dir_: string, parent: Position): Promise<void> {
+        await this.isReady;
+
         let files;
 
         if (await g.os_path_isfile(dir_)) {
@@ -2323,6 +2326,8 @@ export class RecursiveImportController {
         p_path: string,
         parent: Position
     ): Promise<void> {
+        await this.isReady;
+
         const c = this.c;
         this.n_files += 1;
         console.assert(
@@ -2360,10 +2365,12 @@ export class RecursiveImportController {
      * Traverse p's tree, replacing all nodes that start with prefix
      * by the smallest equivalent @path or @file node.
      */
-    public post_process(p: Position): void {
+    public async post_process(p: Position): Promise<void> {
+        await this.isReady;
+
         this.fix_back_slashes(p);
         for (const p2 of p.subtree()) {
-            this.minimize_headline(p2);
+            await this.minimize_headline(p2);
         }
         if (!['@auto', '@edit'].includes(this.kind)) {
             this.remove_empty_nodes(p);
@@ -2455,7 +2462,9 @@ export class RecursiveImportController {
      * Adjust headlines and add @path directives to headlines or body text.
      * Create an @path directive in @<file> nodes.
      */
-    public minimize_headline(p: Position): void {
+    public async minimize_headline(p: Position): Promise<void> {
+        await this.isReady;
+
         console.assert(g.os_path_isabs(this.root_directory), "Starting minimize_headline, os_path_isabs failed with " + this.root_directory);
 
         /**
@@ -2515,32 +2524,7 @@ export class RecursiveImportController {
                 p.h = `path: ${h}`;
             }
         }
-        /*
-        if (prefix && !prefix.endsWith('/')) {
-            prefix = prefix + '/';
-        }
-        const m = p.h.match(this.file_pattern);
-        if (m && m.length) {
-            // It's an @file node of some kind. Strip off the prefix.
-            const kind = m[0];
-            const w_path = p.h.substring(kind.length).trim();
-            const stripped = this.strip_prefix(w_path, prefix);
-            p.h = `${kind} ${stripped || w_path}`;
-            // Put the *full* @path directive in the body.
-            if (this.add_path && prefix) {
-                const tail = g.os_path_dirname(stripped).replace(/\/+$/, '');
-                p.b = `@path ${prefix}${tail}\n${p.b}`;
-            }
-        } else {
-            // p.h is a path.
-            const w_path = p.h;
-            const stripped = this.strip_prefix(w_path, prefix);
-            p.h = `@path ${stripped || w_path}`;
-            for (const w_p of p.children()) {
-                this.minimize_headlines(w_p, prefix + stripped);
-            }
-        }
-        */
+
     }
     //@+node:felix.20230511002459.12: *6* ric.strip_prefix
     /**
