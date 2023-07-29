@@ -1470,11 +1470,9 @@ suite('Tests for leo.core.leoGlobals', () => {
             'http://leo-editor.github.io/leo-editor/preface.html',
             'https://github.com/leo-editor/leo-editor/issues?q=is%3Aissue+milestone%3A6.6.3+',
         ];
-        console.log("---------------------------------------------1");
         for (const unl of [...valid_unls, ...missing_unls, ...good_table]) {
             assert.ok(g.isValidUrl(unl), unl);
         }
-        console.log("---------------------------------------------2");
         for (const unl of [...invalid_unls, ...bad_table]) {
             assert(!g.isValidUrl(unl), unl);
         }

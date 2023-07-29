@@ -2172,7 +2172,7 @@ export class RecursiveImportController {
         this.isReady = g.os_path_isdir(dir_).then((w_isDir) => {
             this.root_directory = w_isDir ? dir_ : g.os_path_dirname(dir_);
             // Adjust the root directory.
-            console.assert(dir_ && this.root_directory, dir_)
+            console.assert(dir_ && this.root_directory, dir_);
             this.root_directory = this.root_directory.replace(/\\/g, '/');
             if (this.root_directory.endsWith('/')) {
                 this.root_directory = this.root_directory.slice(0, -1);
@@ -2453,18 +2453,21 @@ export class RecursiveImportController {
     //@+node:felix.20230511002459.11: *5* ric.minimize_headline
     /**
      * Adjust headlines and add @path directives to headlines or body text.
-     * Create an @path directive in  @<file> nodes.
+     * Create an @path directive in @<file> nodes.
      */
     public minimize_headline(p: Position): void {
-        console.assert(g.os_path_isabs(this.root_directory));
+        console.assert(g.os_path_isabs(this.root_directory), "Starting minimize_headline, os_path_isabs failed with " + this.root_directory);
 
         /**
          * Return path relative to the root directory.
          */
         const relative_path = (p_path: string): string => {
-
-            console.assert(p_path.startsWith(this.root_directory), p_path.toString());
-            console.assert(g.os_path_isabs(p_path), p_path.toString());
+            console.assert(p_path.startsWith(this.root_directory),
+                "in relative_path, " + p_path.toString() + " does not starts with " + this.root_directory
+            );
+            console.assert(g.os_path_isabs(p_path),
+                "in relative_path, not os_path_isabs: " + p_path.toString()
+            );
             p_path = p_path.includes('/') ? p_path.split('/').slice(-1)[0] : p_path;
             return p_path;
         };
@@ -2473,8 +2476,13 @@ export class RecursiveImportController {
          */
         const compute_at_path_path = (p_path: string): string => {
 
-            console.assert(p_path.startsWith(this.root_directory), p_path.toString());
-            console.assert(g.os_path_isabs(p_path), p_path.toString());
+            console.assert(p_path.startsWith(this.root_directory),
+                "in  compute_at_path_path, " + p_path.toString() + " does not starts with " + this.root_directory
+
+            );
+            console.assert(g.os_path_isabs(p_path),
+                "in compute_at_path_path, not os_path_isabs: " + p_path.toString()
+            );
             p_path = p_path.slice(this.root_directory.length);
             if (p_path.startsWith('/')) {
                 p_path = p_path.slice(1);
@@ -2482,7 +2490,7 @@ export class RecursiveImportController {
             return p_path;
         };
 
-        const m = this.file_pattern.exec(p.h);
+        const m = p.h.match(this.file_pattern);
         if (m && m.length) {
             // p is an @file node of some kind.
             const kind = m[0];
