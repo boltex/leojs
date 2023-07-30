@@ -1249,7 +1249,7 @@ export class GitDiffController {
         ];
         let rev_i;
         for (const index of [0, 1]) {
-            rev_i = i + index
+            rev_i = i + index;
             for (const [gnx, pattern] of node_patterns) {
                 const node_info = this._find_node(contents_list[rev_i], pattern, gnx, revs_list[rev_i]);
                 if (node_info) {
@@ -1526,12 +1526,12 @@ export class GitDiffController {
             }
 
         } else if (0) {  // Too verbose.
-            g.printObj(diff_list, 'diff_list')
+            g.printObj(diff_list, 'diff_list');
         } else {  // Verbose.
             for (const bunch of diff_list) {
                 const result = [];
                 for (const key of ['i', 'kind', 'rev0', 'rev1', 'body0', 'body1', 'range0', 'range1']) {
-                    const val = bunch[key]
+                    const val = bunch[key];
                     if (val == null) {
                         continue;
                     }
