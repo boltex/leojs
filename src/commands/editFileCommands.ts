@@ -432,10 +432,6 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     @cmd('compare-two-leo-files', 'Compare two files.')
     public async compareAnyTwoFiles(): Promise<unknown> {
         const c = this.c;
-        console.log('BEFORE c.fileCommands.gnxDict: ',
-            Object.keys(c.fileCommands.gnxDict).join(', ')
-        );
-
         let c1 = this.c;
         let c2: Commands | undefined = this.c;
         const w = c.frame.body.wrapper;
@@ -487,10 +483,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
             c2.frame.destroySelf();
             g.app.gui.set_focus(c, w);
         }
-        console.log('AFTER c.fileCommands.gnxDict: ',
-            Object.keys(c.fileCommands.gnxDict).join(', ')
-        );
-
+        // The inserted, deleted and changed dicts may come from c2, a differenct Commander.
+        c.recreateGnxDict();  // So update c.fileCommands.gnxDict.
 
     }
     //@+node:felix.20230709010427.9: *4* efc.computeChangeDicts

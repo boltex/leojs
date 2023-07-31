@@ -2980,6 +2980,10 @@ export class Commands {
     public recreateGnxDict(): void {
         const c: Commands = this;
         const d: { [key: string]: VNode } = {};
+        // Start with the hidden-root-vnode
+        const vHiddenRoot = c.hiddenRootNode;
+        d[vHiddenRoot.gnx] = vHiddenRoot;
+        // And fill up the with rest of the commander's VNodes.
         for (let v of c.all_unique_nodes()) {
             const gnxString: string = v.fileIndex;
             if (typeof gnxString === 'string') {
