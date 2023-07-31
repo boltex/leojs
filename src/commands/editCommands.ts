@@ -342,7 +342,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         // const words = [w.capitalize() for w in h.split(" ")];
         const words = h
             .split(' ')
-            .map((w) => w[0].toUpperCase() + w.substring(1));
+            .map(w => g.capitalize(w));
 
         const capitalized = words.join(' ');
         const changed = capitalized !== h;
@@ -657,13 +657,13 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         // 'Copy c.p.gnx to the clipboard and display a gnx-oriented unl in the status area.'
     )
     public async copyGnx(): Promise<void> {
-        
+
         const c = this.c;
-        if (!c){
+        if (!c) {
             return;
         }
         const p = c.p;
-        if (!p){
+        if (!p) {
             return;
         }
         const url = p.get_UNL();
@@ -682,10 +682,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Print the line and column number and percentage of insert point.'
     )
     public lineNumber(): void {
-        
+
         const k = this.c.k;
         const w = this.editWidget();
-        if (!w){
+        if (!w) {
             return;
         }
         const s = w.getAllText();
@@ -696,7 +696,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const percent: number = Math.floor((i * 100) / s.length);
 
         g.es_print(
-        `char: ${s[i]} row: ${row} col: ${col} pos: ${i} (${percent}% of ${s.length})`
+            `char: ${s[i]} row: ${row} col: ${col} pos: ${i} (${percent}% of ${s.length})`
         );
 
     }
@@ -706,7 +706,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Print recently-executed commands.'
     )
     public viewRecentCommands(): void {
-        
+
         const c = this.c;
         g.es_print('Recently-executed commands...');
 
@@ -726,7 +726,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const k = this.c.k;
         const w = this.editWidget();
 
-        if (w){
+        if (w) {
             const s = w.getAllText();
             const i = w.getInsertPoint();
             let [row, col] = g.convertPythonIndexToRowCol(s, i);

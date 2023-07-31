@@ -673,7 +673,7 @@ export class CommanderFileCommands {
         if (!c.mFileName) {
             c.frame.title = '';
         }
-        if (!fileName && c.k && c.k.givenArgs) {
+        if (!fileName && c.k && c.k.givenArgs && c.k.givenArgs.length) {
             fileName = c.k.givenArgs.join('');
         }
         if (!fileName) {
@@ -745,7 +745,7 @@ export class CommanderFileCommands {
         }
         c.init_error_dialogs();
         // Add fileName keyword arg for leoBridge scripts.
-        if (!fileName && c.k && c.k.givenArgs) {
+        if (!fileName && c.k && c.k.givenArgs && c.k.givenArgs.length) {
             fileName = c.k.givenArgs.join('');
         }
         if (!fileName) {

@@ -963,7 +963,9 @@ export class ParserBaseClass {
                     }
                     // New in Leo 5.7: Add local assignments to None to c.k.killedBindings.
                     else if (c.config.isLocalSettingsFile()) {
-                        c.k.killedBindings.append(commandName);
+                        if (c.k.killedBindings) {
+                            c.k.killedBindings.append(commandName);
+                        }
                     }
                 }
             }

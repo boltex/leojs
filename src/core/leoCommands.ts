@@ -2549,7 +2549,9 @@ export class Commands {
      */
     public setComplexCommand(commandName: string): void {
         const c: Commands = this;
-        c.k.mb_history.unshift(commandName);
+        if (c.k.mb_history) {
+            c.k.mb_history.unshift(commandName);
+        }
     }
     //@+node:felix.20211106224948.12: *4* c.writeScriptFile (changed: does not expand expressions)
     public writeScriptFile(script: string): string | undefined {

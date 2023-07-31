@@ -175,8 +175,12 @@ export class ChapterController {
     public selectChapter1(): void {
         const cc = this;
         const k = this.c.k;
-        k.clearState();
-        k.resetLabel();
+        if (k.clearState) {
+            k.clearState();
+        }
+        if (k.resetLabel) {
+            k.resetLabel();
+        }
         if (k.arg) {
             cc.selectChapterByName(k.arg);
         }

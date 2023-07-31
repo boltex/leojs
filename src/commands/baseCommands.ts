@@ -77,7 +77,7 @@ export class BaseEditCommandsClass {
             if (
                 bunch &&
                 bunch.undoType &&
-                bunch.undoType.capitalize() === 'Typing'
+                g.capitalize(bunch.undoType) === 'Typing'
             ) {
                 // TODO : ? needed ?
                 console.log('TODO : LEOJS : "TYPING" SHOULD NOT OCCUR ! ');
@@ -88,12 +88,14 @@ export class BaseEditCommandsClass {
             }
         }
         this.undoData = undefined;
-        k.clearState();
+        if (k.clearState) {
+            k.clearState();
+        }
         // Warning: basic editing commands **must not** set the label.
         if (setLabel) {
-            if (label) {
-                k.setLabelGrey(label); // pragma: no cover
-            } else {
+            if (label && k.setLabelGrey) {
+                k.setLabelGrey(label);
+            } else if (k.resetLabel) {
                 k.resetLabel();
             }
         }
@@ -180,7 +182,9 @@ export class BaseEditCommandsClass {
      * Clear the state and the minibuffer label.
      */
     public keyboardQuit(): void {
-        this.c.k.keyboardQuit();
+        if (this.c.k.keyboardQuit) {
+            this.c.k.keyboardQuit();
+        }
     }
     //@-others
 }

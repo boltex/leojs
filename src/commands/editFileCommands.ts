@@ -632,11 +632,13 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.18: *3* efc.deleteFile
     @cmd('file-delete', 'Prompt for the name of a file and delete it.')
     public async deleteFile(): Promise<void> {
+        const w_value = this.c.openDirectory + path.sep;
         const fileName = await g.app.gui.get1Arg({
             title: 'Delete File',
             prompt: 'Choose file to delete',
             placeHolder: 'File Path',
-            value: this.c.openDirectory + path.sep,
+            value: w_value,
+            valueSelection: [w_value.length, w_value.length]
         });
         if (!fileName) {
             return;
@@ -718,8 +720,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.23: *3* efc.insertFile
     @cmd(
         'file-insert',
-        'Prompt for the name of a file.' +
-        'Insert the file\'s contents in the body at the insertion point.'
+        'Prompt for the name of a file. Insert the file\'s contents in the body at the insertion point.'
     )
     public async insertFile(): Promise<void> {
         const w = this.editWidget();
@@ -742,11 +743,13 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.24: *3* efc.makeDirectory
     @cmd('directory-make', 'Prompt for the name of a directory and create it.')
     public async makeDirectory(): Promise<void> {
+        const w_value = this.c.openDirectory + path.sep;
         const folderName = await g.app.gui.get1Arg({
             title: 'Make Directory',
             prompt: 'Directory to create',
             placeHolder: 'Folder Path',
-            value: this.c.openDirectory + path.sep,
+            value: w_value,
+            valueSelection: [w_value.length, w_value.length]
         });
         if (!folderName) {
             return;
@@ -764,11 +767,13 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         'file-open-by-name: Prompt for the name of a Leo outline and open it.'
     )
     public async openOutlineByName(): Promise<void> {
+        const w_value = this.c.openDirectory + path.sep;
         const fn = await g.app.gui.get1Arg({
             title: 'Open Leo Outline',
             prompt: 'Choose file to open',
             placeHolder: 'File Path',
-            value: this.c.openDirectory + path.sep,
+            value: w_value,
+            valueSelection: [w_value.length, w_value.length]
         });
         if (!fn) {
             return;
@@ -791,11 +796,13 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         'Prompt for the name of a directory and delete it.'
     )
     public async removeDirectory(): Promise<void> {
+        const w_value = this.c.openDirectory + path.sep;
         const folderName = await g.app.gui.get1Arg({
             title: 'Remove Directory',
             prompt: 'Directory to delete',
             placeHolder: 'Folder Path',
-            value: this.c.openDirectory + path.sep,
+            value: w_value,
+            valueSelection: [w_value.length, w_value.length]
         });
         if (!folderName) {
             return;
