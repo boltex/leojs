@@ -1407,7 +1407,6 @@ export class Commands {
             if (!c.isChanged()) {
                 c.setChanged();
             }
-            // c.redraw_after_icons_changed();
         }
     }
 
@@ -2919,7 +2918,6 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211223223002.9: *4* c.markAtFileNodesDirty
     /**
@@ -2944,7 +2942,6 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211223223002.10: *4* c.openWith
     /**
@@ -3288,17 +3285,18 @@ export class Commands {
     /**
      * Update the icon for the presently selected node
      */
-    public redraw_after_icons_changed(): void {
-        const c: Commands = this;
-        if (c.enableRedrawFlag) {
-            // c.frame.tree.redraw_after_icons_changed();
-            c.redraw();
-            // Do not call treeFocusHelper here.
-            // c.treeFocusHelper()
-        } else {
-            c.requestLaterRedraw = true;
-        }
-    }
+    // ! removed !
+    // public redraw_after_icons_changed(): void {
+    //     const c: Commands = this;
+    //     if (c.enableRedrawFlag) {
+    //         // c.frame.tree.redraw_after_icons_changed();
+    //         c.redraw();
+    //         // Do not call treeFocusHelper here.
+    //         // c.treeFocusHelper()
+    //     } else {
+    //         c.requestLaterRedraw = true;
+    //     }
+    // }
     //@+node:felix.20211122010434.5: *6* c.redraw_after_contract
     public redraw_after_contract(p?: Position): void {
         const c: Commands = this;

@@ -70,9 +70,6 @@ export class CommanderEditCommands {
             g.es('blanks converted to tabs in', count, 'nodes');
             // Must come before c.redraw().
         }
-        if (count > 0) {
-            c.redraw_after_icons_changed();
-        }
     }
 
     //@+node:felix.20230312214917.1: *3* c_ec.convertBlanks

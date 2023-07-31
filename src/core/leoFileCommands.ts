@@ -2078,7 +2078,6 @@ export class FileCommands {
                     c.undoer.clearUndoState();
                 }
             }
-            c.redraw_after_icons_changed();
         }
 
         g.doHook('save2', { c: c, p: p, fileName: fileName });
@@ -2117,7 +2116,6 @@ export class FileCommands {
             } finally {
                 c.ignoreChangedPaths = false; // #1367.
             }
-            c.redraw_after_icons_changed();
         }
         g.doHook('save2', { c: c, p: p, fileName: fileName });
     }
@@ -2157,7 +2155,6 @@ export class FileCommands {
             if (!silent) {
                 this.putSavedMessage(fileName);
             }
-            c.redraw_after_icons_changed();
         }
         g.doHook('save2', { c: c, p: p, fileName: fileName });
     }
