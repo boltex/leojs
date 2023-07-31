@@ -21,12 +21,36 @@ export class GoToCommands {
     }
 
     //@+others
-    //@+node:felix.20221218143456.2: *3* goto.find_file_line
+    //@+node:felix.20221218143456.2: *3* goto.find_file_line & helper
     /**
      * Place the cursor on the n'th line (one-based) of an external file.
      * Return (p, offset, found) for unit testing.
      */
     public async find_file_line(
+        n: number,
+        p?: Position
+    ): Promise<[Position | undefined, number, boolean]> {
+        const c = this.c;
+        let offset: number | undefined;
+        let found: boolean | undefined;
+        // Don't add an item in the history list here!
+        if (c.nodeHistory) {
+            c.nodeHistory.skipBeadUpdate = true;
+            try {
+                [p, offset, found] = await this.find_file_line_helper(n, p);
+            } catch (e) {
+                // pass
+            }
+            finally {
+                c.nodeHistory.skipBeadUpdate = false;
+            }
+            return [p, offset || 0, !!found];
+        }
+        return this.find_file_line_helper(n, p);
+    }
+
+    //@+node:felix.20230730153823.1: *4* goto.find_file_line_helper
+    public async find_file_line_helper(
         n: number,
         p?: Position
     ): Promise<[Position | undefined, number, boolean]> {

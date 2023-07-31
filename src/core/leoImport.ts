@@ -1062,7 +1062,7 @@ export class LeoImportCommands {
             }
         }
 
-        c.validateOutline();
+        c.checkOutline();
         parent.expand();
     }
     //@+node:felix.20230511002352.31: *4* ic.importFreeMind
@@ -1950,7 +1950,7 @@ export class MORE_Importer {
             const p = this.import_lines(lines, root);
             if (p && p.__bool__()) {
                 c.endEditing();
-                c.validateOutline();
+                c.checkOutline();
                 p.setDirty();
                 c.setChanged();
                 u.afterInsertNode(root, 'Import MORE File', undoData);

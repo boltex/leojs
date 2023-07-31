@@ -1636,10 +1636,8 @@ suite('Tests for leo.core.leoGlobals', () => {
         const file_name2 = g.os_path_basename(c2.fileName());
         // Cross-file tests.
         const c3 = await g.openUNLFile(c1, file_name2);
-        console.log("--------1 openUNLFile", file_name2);
         assert.strictEqual(c3, c2);
         const c4 = await g.openUNLFile(c2, file_name1);
-        console.log("--------2 openUNLFile", file_name1);
         assert.strictEqual(c4, c1);
 
     });

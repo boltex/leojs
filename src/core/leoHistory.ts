@@ -1,5 +1,6 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211021231651.1: * @file src/core/leoHistory.ts
+import * as g from './leoGlobals';
 import { Chapter } from './leoChapters';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
@@ -22,6 +23,7 @@ export class NodeHistory {
         this.beadList = []; // a list of (position,chapter) tuples.
         this.beadPointer = -1;
         this.skipBeadUpdate = false;
+        console.assert(g && Object.keys(g).length);
     }
 
     //@+node:felix.20211021231651.4: *3* NodeHistory.dump
@@ -29,6 +31,11 @@ export class NodeHistory {
      * * Dump the beadList
      */
     public dump(): void {
+        const c = this.c;
+        if (g.unitTesting || !this.beadList.length) {
+            return;
+        }
+        console.log(`NodeHisory.beadList: ${c.shortFileName()}:`);
         this.beadList.forEach((data, i) => {
             let p: Position = data[0];
             let p_s: string;
@@ -82,7 +89,8 @@ export class NodeHistory {
     //@+node:felix.20211021231651.7: *3* NodeHistory.select
     /**
      * Update the history list when selecting p.
-     * Called only from self.goToNext/PrevHistory
+     * 
+     * Only self.goNext and self.goPrev call this method.
      */
     public select(p: Position, chapter: Chapter): void {
         const c: Commands = this.c;
@@ -106,7 +114,9 @@ export class NodeHistory {
     //@+node:felix.20211021231651.8: *3* NodeHistory.update
     /**
      * Update the beadList while p is being selected.
-     * Called *only* from c.frame.tree.selectHelper.
+     * 
+     *  change: True:  The caller is c.frame.tree.selectHelper.
+     *          False: The caller is NodeHistory.select.
      */
     public update(p: Position, change: boolean = true): void {
         const c: Commands = this.c;
@@ -144,12 +154,14 @@ export class NodeHistory {
         });
 
         if (change || found === -1) {
-            aList.push([p.copy(), cc.getSelectedChapter()!]);
+            const data: [Position, Chapter] = [p.copy(), cc.getSelectedChapter()!];
+            aList.push(data);
             this.beadPointer = aList.length - 1;
         } else {
             this.beadPointer = found;
         }
         this.beadList = aList;
+        // this.dump();
     }
 
     //@-others

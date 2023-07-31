@@ -402,7 +402,6 @@ export class AtFile {
      * Read an @thin or @file tree.
      */
     public async read(root: Position, fromString?: string): Promise<boolean> {
-        console.log('read!----------------');
         const at = this;
         const c = this.c;
         let file_s;

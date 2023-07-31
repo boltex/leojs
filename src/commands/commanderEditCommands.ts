@@ -79,7 +79,7 @@ export class CommanderEditCommands {
     @commander_command(
         'convert-blanks',
         'Convert *all* blanks to tabs in the selected node. ' +
-            'Return True if the the p.b was changed.'
+        'Return True if the the p.b was changed.'
     )
     public convertBlanks(this: Commands): boolean {
         const c: Commands = this;
@@ -169,7 +169,7 @@ export class CommanderEditCommands {
         p.initHeadString(headline);
         p.setBodyString(body);
         p.setDirty();
-        c.validateOutline();
+        c.checkOutline();
         return p;
     }
     //@+node:felix.20230221160425.1: *3* c_ec.extract & helpers
@@ -417,7 +417,7 @@ export class CommanderEditCommands {
                 found = true;
             }
         }
-        c.validateOutline();
+        c.checkOutline();
         if (found) {
             u.afterChangeGroup(current, undoType);
             c.redraw(p);

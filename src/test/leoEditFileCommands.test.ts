@@ -44,14 +44,19 @@ suite('Test cases for editFileCommands.ts', () => {
     //     # g.findUnl:        unl:gnx://leoPy.leo#ekr.20230626064652.1
     //     # g.parsePathData:  unl:gnx://leoPy.leo#ekr.20230630132341.1
 
+
     //     path = g.os_path_finalize_join(g.app.loadDir, 'leoGlobals.py')
     //     msg = repr(path)
     //     self.assertTrue(os.path.exists(path), msg=msg)
     //     self.assertTrue(os.path.isabs(path), msg=msg)
     //     self.assertTrue(os.path.isfile(path), msg=msg)
-    //     findUnl_gnx = 'ekr.20230626064652.1'
     //     x = GitDiffController(c=self.c)
-    //     x.node_history(path, gnx=findUnl_gnx)
+    //     gnxs = (
+    //         'ekr.20230626064652.1',  # EKR's replacement gnx
+    //         'tbrown.20140311095634.15188',  # Terry's original node.
+    //     )
+    //     x.node_history(path, gnxs, limit=30)
+    //     # self.dump_tree(tag='slow_test_gdc_node_history')
     //@+node:felix.20230715215852.3: *3* TestEditFileCommands.test_diff_two_branches
     test('test_diff_two_branches', () => {
         console.log('TODO : test_diff_two_branches');

@@ -142,7 +142,6 @@ export class LeoApp {
     public log_listener: any = null; // The process created by the 'listen-for-log' command.
     public positions: number = 0; // The number of positions generated.
     public scanErrors: number = 0; // The number of errors seen by g.scanError.
-    public structure_errors: number = 0; // Set by p.safeMoveToThreadNext.
     public statsDict: any = {}; // dict used by g.stat, g.clear_stats, g.print_stats.
     public statsLockout: boolean = false; // A lockout to prevent unbound recursion while gathering stats.
     public validate_outline: boolean = false; // True: enables c.validate_outline. (slow)

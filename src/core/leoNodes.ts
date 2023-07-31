@@ -444,6 +444,76 @@ export class Position {
         }
         return 0; // falsy.
     }
+    //@+node:felix.20230730190515.1: *4* p.archive
+    /**
+     * Return a json-like archival dictionary for p/v.unarchive.
+     */
+    public archive(): {
+        'vnodes': VNode[],
+        'parents': Record<string, string[]>,
+        'children': Record<string, string[]>,
+        'marks': Record<string, string>,
+        'uAs': Record<string, Record<string, any>>,
+    } {
+
+        const p = this;
+        const c = p.v.context;
+
+        // Create an *initial* list of all vnodes in p.self_and_subtree.
+        const all_unique_vnodes: VNode[] = [];
+        for (const p2 of p.self_and_subtree()) {
+            if (!all_unique_vnodes.includes(p2.v)) {
+                all_unique_vnodes.push(p2.v);
+            }
+        }
+
+        function ref(v: VNode): string | undefined {
+            if (v === c.hiddenRootNode) {
+                return undefined;
+            }
+            if (!all_unique_vnodes.includes(v)) {
+                all_unique_vnodes.push(v);
+            }
+            return v.gnx;
+        }
+
+        const parents_dict: Record<string, string[]> = {};
+        for (const p2 of p.self_and_subtree()) {
+            const v = p2.v;
+            const parents_list = v.parents.map((z) => ref(z));
+            parents_dict[v.gnx] = parents_list.filter((z) => z) as string[];
+            // const parents_list = [ref(z) for z in v.parents];
+            // parents_dict[v.gnx] = [z for z in parents_list if z];
+        }
+
+        const children_dict: Record<string, string[]> = {};
+        for (const p2 of p.self_and_subtree()) {
+            const v = p2.v;
+            const childrens_list = v.children.map((z) => ref(z));
+            children_dict[v.gnx] = childrens_list.filter((z) => z) as string[];
+            // const childrens_list = [ref(z.gnx) for z in v.children];
+            // children_dict[v.gnx] = [z for z in childrens_list if z];
+        }
+
+        const marks_dict: Record<string, string> = {};
+        for (const v of all_unique_vnodes) {
+            marks_dict[v.gnx] = Number(v.isMarked()).toString();
+        }
+
+        const uas_dict: Record<string, Record<string, any>> = {};
+        for (const v of all_unique_vnodes) {
+            uas_dict[v.gnx] = v.archive_uas();  // To do.
+        }
+
+        return {
+            'vnodes': all_unique_vnodes,
+            'parents': parents_dict,
+            'children': children_dict,
+            'marks': marks_dict,
+            'uAs': uas_dict,
+        };
+
+    }
     //@+node:felix.20210126210412.8: *4* p.archivedPosition
     /**
      * Return a representation of a position suitable for use in .leo files.
@@ -1185,10 +1255,10 @@ export class Position {
     public hasNext(): boolean | undefined {
         const p: Position = this;
         try {
-            const parent_v: VNode = p._parentVnode()!;
+            const parent_v = p._parentVnode();
             // Returns None if p.v is None.
-            return (
-                p.v && parent_v && p._childIndex + 1 < parent_v.children.length
+            return !!(
+                p.v && parent_v && ((p._childIndex + 1) < (parent_v.children ? parent_v.children.length : 0))
             );
         } catch (exception) {
             g.trace('*** Unexpected exception');
@@ -1956,69 +2026,70 @@ export class Position {
      * Move a position to threadNext position.
      * Issue an error if any vnode is an ancestor of itself.
      */
-    public safeMoveToThreadNext(): Position {
-        const p: Position = this;
-        if (p.v) {
-            const child_v: VNode | false =
-                !!p.v.children.length && p.v.children[0];
-            if (child_v) {
-                let brokeFor: boolean = false;
-                for (let parent of p.self_and_parents(false)) {
-                    if (child_v.fileIndex === parent.v.fileIndex) {
-                        g.error(`vnode: ${child_v} is its own parent`);
-                        // Allocating a new vnode would be difficult.
-                        // Just remove child_v from parent.v.children.
-                        parent.v.children = [];
-                        for (let v2 of parent.v.children) {
-                            if (v2.fileIndex !== child_v.fileIndex) {
-                                parent.v.children.push(v2);
-                            }
-                        }
-                        if (child_v.parents.includes(parent.v)) {
-                            // child_v.parents.remove(parent.v);
-                            const index = child_v.parents.indexOf(parent.v);
-                            if (index > -1) {
-                                child_v.parents.splice(index, 1);
-                            }
-                        }
-                        // Try not to hang.
-                        p.moveToParent();
-                        brokeFor = true;
-                        break;
-                    } else if (child_v.fileIndex === parent.v.fileIndex) {
-                        g.error(
-                            `duplicate gnx: ${child_v.fileIndex} ` +
-                            `v: ${child_v} parent: ${parent.v}`
-                        );
-                        child_v.fileIndex =
-                            g.app.nodeIndices!.getNewIndex(child_v);
-                        console.assert(child_v.gnx !== parent.v.gnx);
-                        // Should be ok to continue.
-                        p.moveToFirstChild();
-                        brokeFor = true;
-                        break;
-                    }
-                }
-                if (!brokeFor) {
-                    //  for else
-                    p.moveToFirstChild();
-                }
-            } else if (p.hasNext()) {
-                p.moveToNext();
-            } else {
-                p.moveToParent();
-                while (p.__bool__()) {
-                    if (p.hasNext()) {
-                        p.moveToNext();
-                        break; // found
-                    }
-                    p.moveToParent();
-                    // not found.
-                }
-            }
-        }
-        return p;
-    }
+    // ! removed !
+    // public safeMoveToThreadNext(): Position {
+    //     const p: Position = this;
+    //     if (p.v) {
+    //         const child_v: VNode | false =
+    //             !!p.v.children.length && p.v.children[0];
+    //         if (child_v) {
+    //             let brokeFor: boolean = false;
+    //             for (let parent of p.self_and_parents(false)) {
+    //                 if (child_v.fileIndex === parent.v.fileIndex) {
+    //                     g.error(`vnode: ${child_v} is its own parent`);
+    //                     // Allocating a new vnode would be difficult.
+    //                     // Just remove child_v from parent.v.children.
+    //                     parent.v.children = [];
+    //                     for (let v2 of parent.v.children) {
+    //                         if (v2.fileIndex !== child_v.fileIndex) {
+    //                             parent.v.children.push(v2);
+    //                         }
+    //                     }
+    //                     if (child_v.parents.includes(parent.v)) {
+    //                         // child_v.parents.remove(parent.v);
+    //                         const index = child_v.parents.indexOf(parent.v);
+    //                         if (index > -1) {
+    //                             child_v.parents.splice(index, 1);
+    //                         }
+    //                     }
+    //                     // Try not to hang.
+    //                     p.moveToParent();
+    //                     brokeFor = true;
+    //                     break;
+    //                 } else if (child_v.fileIndex === parent.v.fileIndex) {
+    //                     g.error(
+    //                         `duplicate gnx: ${child_v.fileIndex} ` +
+    //                         `v: ${child_v} parent: ${parent.v}`
+    //                     );
+    //                     child_v.fileIndex =
+    //                         g.app.nodeIndices!.getNewIndex(child_v);
+    //                     console.assert(child_v.gnx !== parent.v.gnx);
+    //                     // Should be ok to continue.
+    //                     p.moveToFirstChild();
+    //                     brokeFor = true;
+    //                     break;
+    //                 }
+    //             }
+    //             if (!brokeFor) {
+    //                 //  for else
+    //                 p.moveToFirstChild();
+    //             }
+    //         } else if (p.hasNext()) {
+    //             p.moveToNext();
+    //         } else {
+    //             p.moveToParent();
+    //             while (p.__bool__()) {
+    //                 if (p.hasNext()) {
+    //                     p.moveToNext();
+    //                     break; // found
+    //                 }
+    //                 p.moveToParent();
+    //                 // not found.
+    //             }
+    //         }
+    //     }
+    //     return p;
+    // }
 
     //@+node:felix.20210126001920.1: *3* p.Moving, Inserting, Deleting, Cloning, Sorting
     //@+node:felix.20210126001920.2: *4* p.clone
@@ -2293,7 +2364,9 @@ export class Position {
 
     //@+node:felix.20210126001920.16: *4* p.validateOutlineWithParent
     /**
-     * This routine checks the structure of the receiver's tree.
+     * A helper for the legacy version of c.validateOutline.
+     *
+     * No longer used in Leo's core or unit tests.
      */
     public validateOutlineWithParent(pv: Position | undefined): boolean {
         const p: Position = this;
@@ -2866,7 +2939,8 @@ export class VNode {
 
     //@+node:felix.20210130233340.3: *4* v.__repr__ & v.__str__
     public __repr__(): string {
-        return `<VNode ${this.gnx} ${this.headString()}>`;
+        return this.gnx === 'hidden-root-vnode-gnx' ?
+            '<VNode: hidden root>' : `<VNode ${this.gnx} ${this.headString()}>`;
     }
     public valueOf(): string {
         return this.__repr__();
@@ -2879,15 +2953,33 @@ export class VNode {
 
     public dump(label: string = ''): void {
         const v: VNode = this;
-        const s: string = '-'.repeat(10);
-        g.es_print(`${s} ${label} ${v}`);
-        // g.es_print(`gnx: ${v.gnx}`);
-        g.es_print(`parents.length: ${v.parents.length}`);
-        g.es_print(`children.length: ${v.children.length}`);
-        g.es_print(`parents: ${g.listToString(v.parents)}`);
-        g.es_print(`children: ${g.listToString(v.children)}`);
+        // const s: string = '-'.repeat(10);
+        // g.es_print(`${s} ${label} ${v}`);
+        // // g.es_print(`gnx: ${v.gnx}`);
+        // g.es_print(`parents.length: ${v.parents.length}`);
+        // g.es_print(`children.length: ${v.children.length}`);
+        // g.es_print(`parents: ${g.listToString(v.parents)}`);
+        // g.es_print(`children: ${g.listToString(v.children)}`);
+        g.es_print('');
+        g.es_print(`dump of vnode: ${label} ${v.toString()}`);
+        // g.es_print('gnx: %s' % v.gnx)
+        g.es_print(`len(parents): ${v.parents.length} len(children): {v.children.length}`);
+        if (v.parents && v.parents.length) {
+            g.es_print(`parents: ${g.listToString(v.parents)}`);
+        }
+        if (v.children && v.children.length) {
+            g.es_print(`children: ${g.listToString(v.children)}`);
+        }
+
     }
 
+    //@+node:felix.20230730202608.1: *4* v.archive_uas
+    /** 
+     * To do: return a json-like dict of all uas.
+     */
+    public archive_uas(): Record<string, Record<string, any>> {
+        return {};
+    }
     //@+node:felix.20211209010457.1: *3* v.toString
     public toString(): string {
         return this.__repr__();

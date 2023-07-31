@@ -1397,73 +1397,76 @@ export class CommanderFileCommands {
     //     g.app.recentFilesManager.writeEditedRecentFiles(c)
     //@+node:felix.20220105210716.44: *3* Reference outline commands
     //@+node:felix.20220105210716.45: *4* c_file.updateRefLeoFile
-    @commander_command(
-        'update-ref-file',
-        'Saves only the **public part** of this outline to the reference Leo\n' +
-        'file. The public part consists of all nodes above the **special\n' +
-        'separator node**, a top-level node whose headline is\n' +
-        '`---begin-private-area---`.\n' +
-        '\n' +
-        'Below this special node is **private area** where one can freely make\n' +
-        'changes that should not be copied (published) to the reference Leo file.\n' +
-        '\n' +
-        '**Note**: Use the set-reference-file command to create the separator node.\n'
-    )
-    public updateRefLeoFile(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        return c.fileCommands.save_ref();
-    }
+    // ! removed ! 
+    // @commander_command(
+    //     'update-ref-file',
+    //     'Saves only the **public part** of this outline to the reference Leo\n' +
+    //     'file. The public part consists of all nodes above the **special\n' +
+    //     'separator node**, a top-level node whose headline is\n' +
+    //     '`---begin-private-area---`.\n' +
+    //     '\n' +
+    //     'Below this special node is **private area** where one can freely make\n' +
+    //     'changes that should not be copied (published) to the reference Leo file.\n' +
+    //     '\n' +
+    //     '**Note**: Use the set-reference-file command to create the separator node.\n'
+    // )
+    // public updateRefLeoFile(this: Commands): Promise<unknown> {
+    //     const c: Commands = this;
+    //     return c.fileCommands.save_ref();
+    // }
     //@+node:felix.20220105210716.46: *4* c_file.readRefLeoFile
-    @commander_command(
-        'read-ref-file',
-        'This command *completely replaces* the **public part** of this outline\n' +
-        'with the contents of the reference Leo file. The public part consists\n' +
-        'of all nodes above the top-level node whose headline is\n' +
-        '`---begin-private-area---`.\n' +
-        '\n' +
-        'Below this special node is **private area** where one can freely make\n' +
-        'changes that should not be copied (published) to the reference Leo file.\n' +
-        '\n' +
-        '**Note**: Use the set-reference-file command to create the separator node.\n'
-    )
-    public readRefLeoFile(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        return c.fileCommands.updateFromRefFile();
-    }
+    // ! removed ! 
+    // @commander_command(
+    //     'read-ref-file',
+    //     'This command *completely replaces* the **public part** of this outline\n' +
+    //     'with the contents of the reference Leo file. The public part consists\n' +
+    //     'of all nodes above the top-level node whose headline is\n' +
+    //     '`---begin-private-area---`.\n' +
+    //     '\n' +
+    //     'Below this special node is **private area** where one can freely make\n' +
+    //     'changes that should not be copied (published) to the reference Leo file.\n' +
+    //     '\n' +
+    //     '**Note**: Use the set-reference-file command to create the separator node.\n'
+    // )
+    // public readRefLeoFile(this: Commands): Promise<unknown> {
+    //     const c: Commands = this;
+    //     return c.fileCommands.updateFromRefFile();
+    // }
     //@+node:felix.20220105210716.47: *4* c_file.setReferenceFile
-    @commander_command(
-        'set-reference-file',
-        'test'
-        // "Shows a file open dialog allowing you to select a **reference** Leo\n" +
-        // "document to which this outline will be connected.\n" +
-        // "\n" +
-        // "This command creates a **special separator node**, a top-level node\n" +
-        // "whose headline is `---begin-private-area---` and whose body is the path\n" +
-        // "to reference Leo file.\n" +
-        // "\n" +
-        // "The separator node splits the outline into two parts. The **public\n" +
-        // "part** consists of all nodes above the separator node. The **private\n" +
-        // "part** consists of all nodes below the separator node.\n" +
-        // "\n" +
-        // "The update-ref-file and read-ref-file commands operate on the **public\n" +
-        // "part** of the outline. The update-ref-file command saves *only* the\n" +
-        // "public part of the outline to reference Leo file. The read-ref-file\n" +
-        // "command *completely replaces* the public part of the outline with the\n" +
-        // "contents of reference Leo file.\n"
-    )
-    public async setReferenceFile(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        const fileName = (await g.app.gui.runOpenFileDialog(
-            c,
-            'Select reference Leo file',
-            [['Leo files', '*.leo *.leojs *.db']],
-            g.defaultLeoFileExtension(c)
-        )) as string;
-        if (!fileName) {
-            return;
-        }
-        return c.fileCommands.setReferenceFile(fileName);
-    }
+    // ! removed ! 
+    // @commander_command(
+    //     'set-reference-file',
+    //     'test'
+    //     // "Shows a file open dialog allowing you to select a **reference** Leo\n" +
+    //     // "document to which this outline will be connected.\n" +
+    //     // "\n" +
+    //     // "This command creates a **special separator node**, a top-level node\n" +
+    //     // "whose headline is `---begin-private-area---` and whose body is the path\n" +
+    //     // "to reference Leo file.\n" +
+    //     // "\n" +
+    //     // "The separator node splits the outline into two parts. The **public\n" +
+    //     // "part** consists of all nodes above the separator node. The **private\n" +
+    //     // "part** consists of all nodes below the separator node.\n" +
+    //     // "\n" +
+    //     // "The update-ref-file and read-ref-file commands operate on the **public\n" +
+    //     // "part** of the outline. The update-ref-file command saves *only* the\n" +
+    //     // "public part of the outline to reference Leo file. The read-ref-file\n" +
+    //     // "command *completely replaces* the public part of the outline with the\n" +
+    //     // "contents of reference Leo file.\n"
+    // )
+    // public async setReferenceFile(this: Commands): Promise<unknown> {
+    //     const c: Commands = this;
+    //     const fileName = (await g.app.gui.runOpenFileDialog(
+    //         c,
+    //         'Select reference Leo file',
+    //         [['Leo files', '*.leo *.leojs *.db']],
+    //         g.defaultLeoFileExtension(c)
+    //     )) as string;
+    //     if (!fileName) {
+    //         return;
+    //     }
+    //     return c.fileCommands.setReferenceFile(fileName);
+    // }
     //@-others
 }
 //@-others

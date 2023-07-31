@@ -89,7 +89,7 @@ export class ConvertAtRoot {
         }
         //
         // Check the results.
-        const link_errors = c.checkOutline(true);
+        const link_errors = c.checkOutline();
         this.errors += link_errors;
         console.log(
             `${this.errors} error${g.plural(
@@ -432,6 +432,10 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     @cmd('compare-two-leo-files', 'Compare two files.')
     public async compareAnyTwoFiles(): Promise<unknown> {
         const c = this.c;
+        console.log('BEFORE c.fileCommands.gnxDict: ',
+            Object.keys(c.fileCommands.gnxDict).join(', ')
+        );
+
         let c1 = this.c;
         let c2: Commands | undefined = this.c;
         const w = c.frame.body.wrapper;
@@ -483,6 +487,11 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
             c2.frame.destroySelf();
             g.app.gui.set_focus(c, w);
         }
+        console.log('AFTER c.fileCommands.gnxDict: ',
+            Object.keys(c.fileCommands.gnxDict).join(', ')
+        );
+
+
     }
     //@+node:felix.20230709010427.9: *4* efc.computeChangeDicts
     /**
@@ -1800,19 +1809,26 @@ export class GitDiffController {
      * Get the file from the given rev, or the working directory if None.
      */
     public async get_file_from_rev(rev: string, fn: string): Promise<string> {
-        // #2143
         const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return '';
         }
         const w_path = g.finalize_join(directory, fn);
+        // Find all the files in the rev.
         if (rev) {
+            let command = `git ls-tree -r {rev} --name-only`;
+            let lines = await g.execGitCommand(command, directory);
+            if (!lines.some((z) => z.includes(fn))) {
+                // console.log(`${fn} not in ${rev}`);
+                return '';
+            }
             // Get the file using git.
             // Use the file name, not the path.
-            const command = `git show ${rev}:${fn}`;
-            const lines = await g.execGitCommand(command, directory);
+            command = `git show ${rev}:${fn}`;
+            lines = await g.execGitCommand(command, directory);
             return g.toUnicode(lines.join('')).replace(/\r/g, '');
         }
+        // Read the file.
         try {
             // with open(w_path, 'rb') as f:
             //     b = f.read()

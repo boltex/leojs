@@ -5,10 +5,8 @@
  */
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
-import * as path from 'path';
 
 import * as g from '../core/leoGlobals';
-import { Position, VNode } from '../core/leoNodes';
 import { BaseTestImporter } from './test_importers';
 import { MindMapImporter, RecursiveImportController } from '../core/leoImport';
 
@@ -166,7 +164,6 @@ suite('Test cases for leoImport.ts', () => {
         for (const [h, expected] of table) {
             root.h = h;
             await x.minimize_headline(root);
-            console.log('----------------------------- 1111111 ');
             assert.strictEqual(root.h, expected, h);
         }
         // Test that the recursive import only generates @<file> nodes containing absolute paths.
@@ -175,7 +172,6 @@ suite('Test cases for leoImport.ts', () => {
             // with self.assertRaises(AssertionError, msg=h):
             try {
                 root.h = h;
-                console.log('----------------------------- 222222222 ');
 
                 await x.minimize_headline(root);
 

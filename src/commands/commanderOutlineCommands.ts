@@ -192,7 +192,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'paste-node',
         'Paste an outline into the present outline from the clipboard.\n' +
-            'Nodes do *not* retain their original identify.'
+        'Nodes do *not* retain their original identify.'
     )
     public pasteOutline(
         this: Commands,
@@ -220,8 +220,10 @@ export class CommanderOutlineCommands {
             return undefined;
         }
         // Validate.
-        c.validateOutline();
-        c.checkOutline();
+        const errors = c.checkOutline();
+        if (errors > 0) {
+            return undefined;
+        }
         // Handle the "before" data for undo.
         let undoData: any;
         if (undoFlag) {
@@ -253,7 +255,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'async-paste-node',
         'Paste an outline into the present outline from the clipboard.\n' +
-            'Nodes do *not* retain their original identify.'
+        'Nodes do *not* retain their original identify.'
     )
     public asyncPasteOutline(this: Commands): Thenable<unknown> {
         return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
@@ -265,12 +267,11 @@ export class CommanderOutlineCommands {
     @commander_command(
         'paste-retaining-clones',
         'Paste an outline into the present outline from the clipboard.\n' +
-            'Nodes *retain* their original identify.'
+        'Nodes *retain* their original identify.'
     )
     public pasteOutlineRetainingClones(
         this: Commands,
         s: string | undefined = undefined,
-        undoFlag: boolean = true
     ): Position | undefined {
         if (s === undefined) {
             s = g.app.gui.getTextFromClipboard();
@@ -288,12 +289,14 @@ export class CommanderOutlineCommands {
             return undefined;
         }
         // Validate.
-        c.validateOutline();
-        c.checkOutline();
+        const errors = c.checkOutline();
+        if (errors > 0) {
+            return undefined;
+        }
         // Handle the "before" data for undo.
         let vnodeInfoDict: any;
         let undoData: any;
-        if (undoFlag) {
+        if (true) { // undoFlag
             vnodeInfoDict = computeVnodeInfoDict(c);
             undoData = c.undoer.beforeInsertNode(
                 c.p,
@@ -321,7 +324,7 @@ export class CommanderOutlineCommands {
             p.setAllAncestorAtFileNodesDirty();
         }
         // Finish the command.
-        if (undoFlag) {
+        if (true) { // undoFlag
             c.undoer.afterInsertNode(pasted, 'Paste As Clone', undoData);
         }
         c.redraw(pasted);
@@ -332,7 +335,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'async-paste-retaining-clones',
         'Paste an outline into the present outline from the clipboard.\n' +
-            'Nodes *retain* their original identify.'
+        'Nodes *retain* their original identify.'
     )
     public asyncPasteOutlineRetainingClones(this: Commands): Thenable<unknown> {
         return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
@@ -352,7 +355,6 @@ export class CommanderOutlineCommands {
         }
         const c: Commands = this;
         const p: Position = c.p;
-
         if (!s || !c.canPasteOutline(s)) {
             return; // This should never happen.
         }
@@ -540,18 +542,19 @@ export class CommanderOutlineCommands {
         }
         //@-others
 
+        const x = new FastRead(c, {});
         if (!isJson) {
             xroot = et.parse(s);
             xvelements = xroot.find('vnodes')!.getchildren();
             xtelements = xroot.find('tnodes')!.getchildren();
-            [bodies, uas] = new FastRead(c, {}).scanTnodes(xtelements);
+            [bodies, uas] = x.scanTnodes(xtelements);
+            x.updateBodies(bodies, x.gnx2vnode);
             root_gnx = xvelements[0].attrib['t']!; // the gnx of copied node
         } else {
-            xroot = JSON.parse(g.app.gui.getTextFromClipboard());
+            xroot = JSON.parse(s);
             xvelements = xroot['vnodes']; // <v> elements.
             xtelements = xroot['tnodes']; // <t> elements.
-            // bodies, uas = leoFileCommands.FastRead(c, {}).scanTnodes(xtelements)
-            bodies = new FastRead(c, {}).scanJsonTnodes(xtelements);
+            bodies = x.scanJsonTnodes(xtelements);
 
             const addBody = (node: any): void => {
                 if (!bodies[node['gnx']]) {
@@ -669,7 +672,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'contract-all-other-nodes',
         'Contract all nodes except those needed to make the\n' +
-            'presently selected node visible.'
+        'presently selected node visible.'
     )
     public contractAllOtherNodes(this: Commands): void {
         const c: Commands = this;
@@ -786,7 +789,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'expand-all',
         'Expand all headlines.\n' +
-            'Warning: this can take a long time for large outlines.'
+        'Warning: this can take a long time for large outlines.'
     )
     public expandAllHeadlines(this: Commands): void {
         const c: Commands = this;
@@ -868,7 +871,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'expand-next-level',
         'Increase the expansion level of the outline and\n' +
-            'Expand all nodes at that level or lower.'
+        'Expand all nodes at that level or lower.'
     )
     public expandNextLevel(this: Commands): void {
         const c: Commands = this;
@@ -910,9 +913,9 @@ export class CommanderOutlineCommands {
     @commander_command(
         'expand-or-go-right',
         'Simulate the Right Arrow Key in folder of Windows Explorer.\n' +
-            'if c.p has no children, do nothing.\n' +
-            'Otherwise, if c.p is expanded, select the first child.\n' +
-            'Otherwise, expand c.p.'
+        'if c.p has no children, do nothing.\n' +
+        'Otherwise, if c.p is expanded, select the first child.\n' +
+        'Otherwise, expand c.p.'
     )
     public expandNodeOrGoToFirstChild(this: Commands): void {
         const c: Commands = this;
@@ -952,7 +955,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'expand-prev-level',
         'Decrease the expansion level of the outline and\n' +
-            'Expand all nodes at that level or lower.'
+        'Expand all nodes at that level or lower.'
     )
     public expandPrevLevel(this: Commands): void {
         const c: Commands = this;
@@ -967,13 +970,19 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211207224420.1: *3* c_oc.fullCheckOutline
     @commander_command(
         'check-outline',
-        'Performs a full check of the consistency of a .leo file.\n' +
-            "As of Leo 5.1, Leo performs checks of gnx's and outline structure\n" +
-            'before writes and after reads, pastes and undo/redo.'
+        'Do a full check of the consistency of a .leo file.'
     )
-    public fullCheckOutline(this: Commands): number {
+    public fullCheckOutline(this: Commands): void {
         const c: Commands = this;
-        return c.checkOutline(true);
+
+        const t1 = g.process_time();
+
+        const errors = c.checkOutline();
+
+        const t2 = g.process_time();
+
+        g.es_print(`check-outline: ${errors} error${g.plural(errors)} in ${t2 - t1} sec.`);
+
     }
     //@+node:felix.20211021013709.1: *3* c_oc.Goto commands
     //@+node:felix.20211021013709.2: *4* c_oc.findNextClone
@@ -1041,7 +1050,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'goto-first-node',
         'Select the first node of the entire outline,\n' +
-            'Or the first visible node if Leo is hoisted or within a chapter.'
+        'Or the first visible node if Leo is hoisted or within a chapter.'
     )
     public goToFirstNode(this: Commands): void {
         const c: Commands = this;
@@ -1131,7 +1140,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'goto-next-clone',
         'Select the next node that is a clone of the selected node.\n' +
-            'If the selected node is not a clone, do find-next-clone.'
+        'If the selected node is not a clone, do find-next-clone.'
     )
     public goToNextClone(this: Commands): void {
         const c: Commands = this;
@@ -1479,7 +1488,7 @@ export class CommanderOutlineCommands {
         const clone: Position = p.clone();
         clone.setDirty();
         c.setChanged();
-        if (c.validateOutline()) {
+        if (c.checkOutline() === 0) {
             u.afterCloneNode(clone, 'Clone Node', undoData);
             c.redraw(clone); // redraw selects p
             c.treeWantsFocus();
@@ -1493,7 +1502,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'clone-to-at-spot',
         'Create a clone of the selected node and move it to the last @spot node\n' +
-            'of the outline. Create the @spot node if necessary.'
+        'of the outline. Create the @spot node if necessary.'
     )
     public cloneToAtSpot(this: Commands): void {
         const c: Commands = this;
@@ -1531,7 +1540,7 @@ export class CommanderOutlineCommands {
         clone.setDirty();
         c.setChanged();
 
-        if (c.validateOutline()) {
+        if (c.checkOutline() === 0) {
             u.afterCloneNode(clone, 'Clone Node', undoData);
             c.contractAllHeadlines();
             c.redraw(clone);
@@ -1544,7 +1553,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'clone-node-to-last-node',
         'Clone the selected node and move it to the last node.\n' +
-            'Do *not* change the selected node.'
+        'Do *not* change the selected node.'
     )
     public cloneToLastNode(this: Commands): void {
         const c: Commands = this;
@@ -1637,8 +1646,8 @@ export class CommanderOutlineCommands {
     @commander_command(
         'insert-node',
         'If c.p is expanded, insert a new node as the first or last child of c.p,' +
-            'depending on @bool insert-new-nodes-at-end.' +
-            'If c.p is not expanded, insert a new node after c.p.'
+        'depending on @bool insert-new-nodes-at-end.' +
+        'If c.p is not expanded, insert a new node after c.p.'
     )
     public insertHeadline(
         this: Commands,
@@ -1718,8 +1727,8 @@ export class CommanderOutlineCommands {
     @commander_command(
         'async-insert-node',
         'If c.p is expanded, insert a new node as the first or last child of c.p,' +
-            'depending on @bool insert-new-nodes-at-end.' +
-            'If c.p is not expanded, insert a new node after c.p.'
+        'depending on @bool insert-new-nodes-at-end.' +
+        'If c.p is not expanded, insert a new node after c.p.'
     )
     public asyncInsertHeadline(
         this: Commands,
@@ -1944,8 +1953,8 @@ export class CommanderOutlineCommands {
     @commander_command(
         'move-marked-nodes',
         'Move all marked nodes as children of a new node.\n' +
-            'This command is not undoable.\n' +
-            'Consider using clone-marked-nodes, followed by copy/paste instead.'
+        'This command is not undoable.\n' +
+        'Consider using clone-marked-nodes, followed by copy/paste instead.'
     )
     public async moveMarked(this: Commands): Promise<unknown> {
         const c: Commands = this;

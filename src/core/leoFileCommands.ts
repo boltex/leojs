@@ -51,10 +51,6 @@ interface VNodeJSON {
     children: VNodeJSON[];
 }
 //@-<< interfaces >>
-//@+<< constants >>
-//@+node:felix.20211222215249.1: ** << constants >>
-const PRIVAREA: string = '---begin-private-area---';
-//@-<< constants >>
 //@+others
 //@+node:felix.20211212220328.1: ** cmd (decorator)
 /**
@@ -172,22 +168,21 @@ export class FastRead {
      * Unlike readFile above, this does not affect splitter sizes.
      */
     public readFileFromClipboard(s: Uint8Array): VNode | undefined {
-        let v: VNode | undefined;
+        let hidden_v: VNode | undefined;
         let g_element: et.Element | undefined;
-        [v, g_element] = this.readWithElementTree(undefined, s);
+        [hidden_v, g_element] = this.readWithElementTree(undefined, s);
 
-        if (!v) {
-            // #1510.
+        if (!hidden_v) {
             return undefined;
         }
 
-        // #1111: ensure that all outlines have at least one node.
-        if (!v.children.length) {
+        // Ensure that all outlines have at least one node.
+        if (!hidden_v.children.length) {
             const new_vnode: VNode = new VNode(this.c);
             new_vnode.h = 'newHeadline';
-            v.children = [new_vnode];
+            hidden_v.children = [new_vnode];
         }
-        return v;
+        return hidden_v;
     }
     //@+node:felix.20211213223342.4: *3* fast.readWithElementTree & helpers
     public readWithElementTree(
@@ -233,6 +228,7 @@ export class FastRead {
             gnx2ua,
             v_elements
         );
+        this.updateBodies(gnx2body, this.gnx2vnode);
         this.handleBits();
         return [hidden_v, g_element];
     }
@@ -550,6 +546,21 @@ export class FastRead {
         v_element_visitor(v_elements, hidden_v);
         return hidden_v;
     }
+    //@+node:felix.20230730183347.1: *4* fast.updateBodies
+    /**
+     * Update bodies to enforce the "pasted wins" policy.
+     */
+    public updateBodies(gnx2body: Record<string, string>, gnx2vnode: Record<string, VNode>): void {
+        for (const gnx in gnx2body) { // Using 'in' for keys
+            const body = gnx2body[gnx];
+            try {
+                const v = gnx2vnode[gnx];
+                v.b = body;
+            } catch (KeyError) {
+                // pass
+            }
+        }
+    }
     //@+node:felix.20230322233904.1: *3* fast.readFileFromJsonClipboard
     /**
      * Recreate a file from a JSON string s, and return its hidden vnode.
@@ -599,6 +610,7 @@ export class FastRead {
                 gnx2ua,
                 v_elements
             );
+            this.updateBodies(gnx2body, this.gnx2vnode);
             this.handleBits();
         } catch (exception) {
             g.trace(`Error .leojs JSON is not valid: ${p_path}`);
@@ -741,7 +753,7 @@ export class FastRead {
                     const body = g.toUnicode(gnx2body[gnx!] || '');
                     console.assert(
                         typeof body === 'string' ||
-                            (body as any) instanceof String,
+                        (body as any) instanceof String,
                         typeof body
                     );
                     v._bodyString = body;
@@ -1000,7 +1012,7 @@ export class FileCommands {
     @cmd(
         'write-zip-archive',
         'Write a .zip file containing this .leo file and all external files.\n' +
-            "Write to os.environ['LEO_ARCHIVE'] or the directory containing this .leo file."
+        "Write to os.environ['LEO_ARCHIVE'] or the directory containing this .leo file."
     )
     public async writeZipArchive(): Promise<unknown> {
         const c: Commands = this.c;
@@ -1052,7 +1064,7 @@ export class FileCommands {
             // TODO
             await vscode.window.showInformationMessage(
                 'TODO : writeZipArchive for ' +
-                    `${archive_name} containing ${n} file${g.plural(n)}`
+                `${archive_name} containing ${n} file${g.plural(n)}`
             );
 
             // const f = new AdmZip();
@@ -1265,10 +1277,8 @@ export class FileCommands {
             g.trace('no c.p');
             return undefined;
         }
-
         this.initReadIvars();
-        // Save the hidden root's children.
-        const old_children = c.hiddenRootNode.children;
+
         // Save and clear gnxDict.
         const oldGnxDict = this.gnxDict;
         this.gnxDict = {};
@@ -1288,14 +1298,14 @@ export class FileCommands {
 
         const v = hidden_v!.children[0];
         v.parents = [];
-        // Restore the hidden root's children
-        c.hiddenRootNode.children = old_children;
         if (!v) {
             g.es('the clipboard is not valid');
             return undefined;
         }
+
         // Create the position.
         const p: Position = new Position(v);
+
         // Do *not* adjust links when linking v.
         if (current.hasChildren() && current.isExpanded()) {
             p._linkCopiedAsNthChild(current, 0);
@@ -1330,10 +1340,8 @@ export class FileCommands {
             g.trace('no c.p');
             return undefined;
         }
-
         this.initReadIvars();
-        // Save the hidden root's children.
-        const old_children: VNode[] = c.hiddenRootNode.children;
+
         // All pasted nodes should already have unique gnx's.
         const ni = g.app.nodeIndices!;
         for (let v of c.all_unique_nodes()) {
@@ -1365,8 +1373,6 @@ export class FileCommands {
             }
         }
 
-        // Restore the hidden root's children
-        c.hiddenRootNode.children = old_children;
         if (!v) {
             g.es('the clipboard is not valid ');
             return undefined;
@@ -1374,6 +1380,7 @@ export class FileCommands {
 
         // Create the position.
         const p: Position = new Position(v);
+
         // Do *not* adjust links when linking v.
         if (current.hasChildren() && current.isExpanded()) {
             if (!this.checkPaste(current, p)) {
@@ -1387,8 +1394,12 @@ export class FileCommands {
             p._linkCopiedAfter(current);
         }
 
-        // Fix #862: paste-retaining-clones can corrupt the outline.
-        this.linkChildrenToParents(p);
+
+        // Automatically correct any link errors!
+        let errors = c.checkOutline();
+        if (errors > 0) {
+            return undefined;
+        }
         c.selectPosition(p);
         this.initReadIvars();
         return p;
@@ -1397,14 +1408,15 @@ export class FileCommands {
     /**
      * Populate the parent links in all children of p.
      */
-    public linkChildrenToParents(p: Position): void {
-        for (let child of p.children()) {
-            if (!child.v.parents.length) {
-                child.v.parents.push(p.v);
-            }
-            this.linkChildrenToParents(child);
-        }
-    }
+    // ! unused !
+    // public linkChildrenToParents(p: Position): void {
+    //     for (let child of p.children()) {
+    //         if (!child.v.parents.length) {
+    //             child.v.parents.push(p.v);
+    //         }
+    //         this.linkChildrenToParents(child);
+    //     }
+    // }
     //@+node:felix.20211213224232.7: *5* fc.reassignAllIndices
     /**
      * Reassign all indices in p's subtree.
@@ -1619,9 +1631,8 @@ export class FileCommands {
                 ];
                 child.setBodyString(lines.join('\n'));
             } else {
-                const line1: string = `${tag} gnx: ${gnx} root: ${
-                    root_v && root.v
-                }\nDiff...\n`;
+                const line1: string = `${tag} gnx: ${gnx} root: ${root_v && root.v
+                    }\nDiff...\n`;
                 const differ = new difflib.Differ();
                 const d: string[] = differ.compare(
                     g.splitLines(b1),
@@ -1765,185 +1776,6 @@ export class FileCommands {
     //     except sqlite3.OperationalError:
     //         pass
     //     return geom
-    //@+node:felix.20211213224232.18: *5* fc.setReferenceFile
-    public setReferenceFile(fileName: string): void {
-        const c: Commands = this.c;
-
-        let found: boolean = false;
-        for (let v of c.hiddenRootNode.children) {
-            if (v.h === PRIVAREA) {
-                v.b = fileName;
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            const v: VNode = c.rootPosition()!.insertBefore().v;
-            v.h = PRIVAREA;
-            v.b = fileName;
-            c.redraw();
-        }
-
-        g.es('set reference file:', g.shortFileName(fileName));
-    }
-    //@+node:felix.20211213224232.19: *5* fc.updateFromRefFile
-    /**
-     * Updates public part of outline from the specified file.
-     */
-    public async updateFromRefFile(): Promise<unknown> {
-        const c: Commands = this.c;
-        const fc: FileCommands = this;
-
-        //@+others
-        //@+node:felix.20211213224232.20: *6* function: get_ref_filename
-        function get_ref_filename(): string | undefined {
-            // ! This is what the code in original Leo's 'get_ref_filename' function does !
-            for (let v of priv_vnodes()) {
-                return g.splitLines(v.b)[0].trim();
-            }
-            // unused
-            return undefined;
-        }
-        //@+node:felix.20211213224232.21: *6* function: pub_vnodes
-        function* pub_vnodes(): Generator<VNode> {
-            for (let v of c.hiddenRootNode.children) {
-                if (v.h === PRIVAREA) {
-                    break;
-                }
-                yield v;
-            }
-        }
-        //@+node:felix.20211213224232.22: *6* function: priv_vnodes
-        function* priv_vnodes(): Generator<VNode> {
-            let pub: boolean = true;
-            for (let v of c.hiddenRootNode.children) {
-                if (v.h === PRIVAREA) {
-                    pub = false;
-                }
-                if (pub) {
-                    continue;
-                }
-                yield v;
-            }
-        }
-        //@+node:felix.20211213224232.23: *6* function: pub_gnxes
-        function* sub_gnxes(children: Iterable<VNode>): Generator<string> {
-            for (let v of children) {
-                yield v.gnx;
-                for (let gnx of sub_gnxes(v.children)) {
-                    yield gnx;
-                }
-            }
-        }
-
-        function pub_gnxes(): Iterable<string> {
-            return sub_gnxes(pub_vnodes());
-        }
-
-        function priv_gnxes(): Iterable<string> {
-            return sub_gnxes(priv_vnodes());
-        }
-        //@+node:felix.20211213224232.24: *6* function: restore_priv
-        function restore_priv(prdata: DbRow[], topgnxes: string[]): void {
-            const vnodes: VNode[] = [];
-            for (let row of prdata) {
-                const v: VNode = new VNode(c, row.gnx);
-                v._headString = row.h;
-                v._bodyString = row.b;
-                v.children = row.children.map((gnx: string) => {
-                    return fc.gnxDict[gnx] || c.hiddenRootNode;
-                });
-                v.parents = row.parents.map((gnx: string) => {
-                    return fc.gnxDict[gnx] || c.hiddenRootNode;
-                });
-                v.iconVal = row.iconVal;
-                v.statusBits = row.statusBits;
-                v.u = row.u;
-                vnodes.push(v);
-            }
-
-            // ! Note : This python code is already done in the loop above.
-            // def pv(x: VNode) -> VNode:
-            //     return fc.gnxDict.get(x, c.hiddenRootNode)  # type:ignore
-
-            // for v in vnodes:
-            //     v.children = [pv(x) for x in v.children]
-            //     v.parents = [pv(x) for x in v.parents]
-
-            for (let gnx of topgnxes) {
-                const v: VNode = fc.gnxDict[gnx];
-                c.hiddenRootNode.children.push(v);
-                if (pubgnxes.includes(gnx)) {
-                    v.parents.push(c.hiddenRootNode);
-                }
-            }
-        }
-        //@+node:felix.20211213224232.25: *6* function: priv_data
-        function priv_data(gnxes: string[]): DbRow[] {
-            const result: DbRow[] = [];
-            for (let x of gnxes) {
-                const v: VNode = fc.gnxDict[x];
-                const dbrow: DbRow = {
-                    gnx: v.gnx,
-                    h: v.h,
-                    b: v.b,
-                    children: v.children.map((child) => child.gnx),
-                    parents: v.parents.map((child) => child.gnx),
-                    iconVal: v.iconVal,
-                    statusBits: v.statusBits,
-                    u: v.u,
-                };
-                result.push(dbrow);
-            }
-
-            return result;
-        }
-        //@+node:felix.20211213224232.26: *6* function: nosqlite_commander
-        const nosqlite_commander: any = {};
-
-        // TODO !
-        // @contextmanager
-        // def nosqlite_commander(fname):
-        //     oldname = c.mFileName
-        //     conn = getattr(c, 'sqlite_connection', None)
-        //     c.sqlite_connection = None
-        //     c.mFileName = fname
-        //     yield c
-        //     if c.sqlite_connection:
-        //         c.sqlite_connection.close()
-        //     c.mFileName = oldname
-        //     c.sqlite_connection = conn
-        //@-others
-
-        const pubgnxes: string[] = [...pub_gnxes()];
-        const privgnxes: string[] = [...priv_gnxes()];
-
-        // diffnodes = privgnxes - pubgnxes
-        const diffnodes: string[] = [];
-        privgnxes.forEach((gnx) => {
-            if (!pubgnxes.includes(gnx)) {
-                diffnodes.push(gnx);
-            }
-        });
-        const privnodes = priv_data(diffnodes);
-        const toppriv: string[] = [];
-        for (let v of priv_vnodes()) {
-            toppriv.push(v.gnx);
-        }
-        let fname = get_ref_filename();
-        if (!fname) {
-            return;
-        }
-        // with (nosqlite_commander(fname)){
-        // ! Not Needed with vscode.workspace.fs
-        // const theFile: number = fs.openSync(fname, 'rb');
-        fc.initIvars();
-        await fc.getLeoFile(fname, undefined, undefined, false);
-        // }
-        restore_priv(privnodes, toppriv);
-
-        return c.redraw();
-    }
     //@+node:felix.20211213224232.30: *4* fc: Read Utils
     // Methods common to both the sax and non-sax code.
     //@+node:felix.20211213224232.31: *5* fc.archivedPositionToPosition
@@ -2251,145 +2083,6 @@ export class FileCommands {
 
         g.doHook('save2', { c: c, p: p, fileName: fileName });
         return !!ok;
-    }
-    //@+node:felix.20211213224237.4: *5* fc.save_ref & helpers
-    /**
-     * Saves reference outline file
-     */
-    public async save_ref(): Promise<boolean> {
-        const c: Commands = this.c;
-        const p: Position = c.p;
-        const fc: FileCommands = this;
-
-        let fileName: string;
-
-        //@+others
-        //@+node:felix.20211213224237.5: *6* function: put_v_elements
-        /**
-         * Puts all <v> elements in the order in which they appear in the outline.
-         *
-         * This is not the same as fc.put_v_elements!
-         */
-        function put_v_elements(): string | undefined {
-            c.clearAllVisited();
-            fc.put('<vnodes>\n');
-            // Make only one copy for all calls.
-            fc.currentPosition = c.p;
-            fc.rootPosition = c.rootPosition();
-            fc.vnodesDict = {};
-            let ref_fname: string | undefined;
-            for (let p of c.rootPosition()!.self_and_siblings(false)) {
-                if (p.h === PRIVAREA) {
-                    ref_fname = p.b.split('\n', 1)[0].trim();
-                    break;
-                }
-                // An optimization: Write the next top-level node.
-                fc.put_v_element(p, p.isAtIgnoreNode());
-            }
-            fc.put('</vnodes>\n');
-            return ref_fname;
-        }
-        //@+node:felix.20211213224237.6: *6* function: getPublicLeoFile
-        function getPublicLeoFile(): [string, string] {
-            // TODO : outputFile : STRING or BUFFER or ???
-            fc.outputFile = ''; // io.StringIO(); // TODO : new memory empty file.
-
-            fc.putProlog();
-            fc.putHeader();
-            fc.putGlobals();
-            fc.putPrefs();
-            fc.putFindSettings();
-            let fname: string = put_v_elements()!;
-            put_t_elements();
-            fc.putPostlog();
-            //return [fname, fc.outputFile.getvalue()];
-            return [fname, fc.outputFile]; // outputfile as string
-        }
-        //@+node:felix.20211228224127.1: *6* function: put_t_elements
-        /**
-         * Write all <t> elements except those for vnodes appearing in @file, @edit or @auto nodes.
-         */
-        function put_t_elements(): void {
-            function should_suppress(p: Position): boolean {
-                for (let z of p.self_and_parents()) {
-                    if (
-                        z.isAtFileNode() ||
-                        z.isAtEditNode() ||
-                        z.isAtAutoNode()
-                    ) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            fc.put('<tnodes>\n');
-
-            const suppress: { [key: string]: boolean } = {}; // USE v.gnx instead of v as KEY
-            for (let p of c.all_positions(false)) {
-                if (should_suppress(p)) {
-                    suppress[p.v.gnx] = true;
-                }
-            }
-
-            const toBeWritten: { [key: string]: VNode } = {}; // USE v.gnx (fileIndex) as KEY
-            for (let root of c.rootPosition()!.self_and_siblings()) {
-                if (root.h === PRIVAREA) {
-                    break;
-                }
-                for (let p of root.self_and_subtree()) {
-                    //if p.v.gnx not in suppress and p.v not in toBeWritten:
-                    if (!suppress[p.v.gnx] && !toBeWritten[p.v.gnx]) {
-                        toBeWritten[p.v.fileIndex] = p.v;
-                    }
-                }
-            }
-
-            let gnxs: string[] = Object.keys(toBeWritten).sort();
-            for (let gnx of gnxs) {
-                const v: VNode = toBeWritten[gnx];
-                fc.put_t_element(v);
-            }
-
-            fc.put('</tnodes>\n');
-        }
-        //@-others
-
-        c.endEditing();
-
-        let w_found = false;
-        for (let v of c.hiddenRootNode.children) {
-            if (v.h === PRIVAREA) {
-                fileName = g.splitLines(v.b)[0].trim();
-                w_found = true;
-                break;
-            }
-        }
-        if (!w_found) {
-            fileName = c.mFileName;
-        }
-
-        // New in 4.2.  Return ok flag so shutdown logic knows if all went well.
-        let ok = g.doHook('save1', { c: c, p: p, fileName: fileName! });
-
-        let content: string;
-        if (ok === undefined) {
-            [fileName, content] = getPublicLeoFile();
-            fileName = g.finalize_join(c.openDirectory!, fileName);
-
-            const w_uri = g.makeVscodeUri(fileName);
-            const writeData = Buffer.from(content, 'utf8');
-            await vscode.workspace.fs.writeFile(w_uri, writeData);
-
-            // * Equivalent to :
-            //      with open(fileName, 'w', encoding="utf-8", newline='\n') as out:
-            //          out.write(content)
-
-            g.es('updated reference file:', g.shortFileName(fileName));
-        }
-        g.doHook('save2', { c: c, p: p, fileName: fileName! });
-
-        return ok;
     }
     //@+node:felix.20211213224237.7: *5* fc.saveAs
     /**
@@ -2771,7 +2464,7 @@ export class FileCommands {
     }
     //@+node:felix.20211213224237.20: *5* fc.write_Leo_file
     /**
-     *  Write all external files and the.leo file itself.
+     * Write all external files and the .leo file itself.
      */
     public async write_Leo_file(fileName: string): Promise<boolean> {
         const c: Commands = this.c;
@@ -2785,8 +2478,8 @@ export class FileCommands {
         // TODO : recentFilesManager !
         // g.app.recentFilesManager.writeRecentFilesFile(c);
 
-        await fc.writeAllAtFileNodes(); // Ignore any errors.
-        return fc.writeOutline(fileName);
+        await fc.writeAllAtFileNodes();
+        return fc.writeOutline(fileName);  // Calls c.checkOutline.
     }
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
     /**
@@ -3142,7 +2835,8 @@ export class FileCommands {
     public async writeOutline(fileName: string): Promise<boolean> {
         const c: Commands = this.c;
 
-        if (c.checkOutline()) {
+        const errors = c.checkOutline();
+        if (errors) {
             g.error('Structure errors in outline! outline not written');
             return false;
         }
@@ -3729,8 +3423,8 @@ export class FileCommands {
         // Use self.leo_file_encoding encoding.
         this.put(
             `${g.app.prolog_prefix_string}` +
-                `"${this.leo_file_encoding}"` +
-                `${g.app.prolog_postfix_string}\n`
+            `"${this.leo_file_encoding}"` +
+            `${g.app.prolog_postfix_string}\n`
         );
     }
     //@-others

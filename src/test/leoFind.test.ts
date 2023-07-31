@@ -48,6 +48,7 @@ suite('Test cases for leoFind.ts', () => {
     });
 
     beforeEach(() => {
+        // await self.setUpClass();
         self.setUp();
         setUp();
         return Promise.resolve();
@@ -322,11 +323,16 @@ suite('Test cases for leoFind.ts', () => {
         // Test 1.
         let find_text, expected_count;
         let w_case, regex, word;
+        console.log('Test 1.');
+
+
         for (const aTuple of [
             ['settings', [true, false, false]],
             ['def', 7],
             ['bla', 40],
         ]) {
+            console.log('(0) about to test', aTuple[0]);
+
             if (aTuple[0] === 'settings') {
                 [w_case, regex, word] = aTuple[1] as [boolean, boolean, boolean];
             } else {
@@ -337,20 +343,31 @@ suite('Test cases for leoFind.ts', () => {
                 settings.pattern_match = regex as boolean;
                 settings.whole_word = word as boolean;
                 assert.ok(self.c, self.c.rootPosition()!.gnx);
+                console.log('(1) about to test', aTuple[0]);
+
                 const result_dict = x.do_find_all(settings);
                 const count = result_dict['total_matches'];
                 assert.strictEqual(count, expected_count, find_text as string);
             }
         }
+        console.log('Test 2.');
+
         // Test 2.
         init();
         settings.suboutline_only = true;
         x.do_find_all(settings);
+
+        console.log('Test 3.');
+
         // Test 3.
+
         init();
         settings.search_headline = false;
         settings.p!.setVisited();
         x.do_find_all(settings);
+
+        console.log('Test 4.');
+
         // Test 4.
         /*
         init()
@@ -360,6 +377,9 @@ suite('Test cases for leoFind.ts', () => {
         settings.change_text = '*\1*';
         x.do_find_all(settings);
         */
+
+        console.log('Test 5.');
+
         // Test 5: no match.
         init();
         settings.find_text = 'not-found-xyzzy';

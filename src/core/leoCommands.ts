@@ -29,7 +29,7 @@ import {
     EditCommandsClass,
     TopLevelEditCommands,
 } from '../commands/editCommands';
-import { EditFileCommandsClass } from '../commands/editFileCommands';
+import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
 import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
@@ -825,14 +825,15 @@ export class Commands {
      * A generator returning all positions of the outline. This generator does
      * *not* assume that vnodes are never their own ancestors.
      */
-    public *safe_all_positions(copy = true): Generator<Position> {
-        const c: Commands = this;
-        const p: Position | undefined = c.rootPosition(); // Make one copy.
-        while (p && p.__bool__()) {
-            yield copy ? p.copy() : p;
-            p.safeMoveToThreadNext();
-        }
-    }
+    // ! removed !
+    // public *safe_all_positions(copy = true): Generator<Position> {
+    //     const c: Commands = this;
+    //     const p: Position | undefined = c.rootPosition(); // Make one copy.
+    //     while (p && p.__bool__()) {
+    //         yield copy ? p.copy() : p;
+    //         p.safeMoveToThreadNext();
+    //     }
+    // }
 
     //@+node:felix.20210228004000.1: *5* c.all_Root_Children
     /**
@@ -1085,37 +1086,76 @@ export class Commands {
         root?: Position,
         trace?: boolean
     ): boolean {
-        if (!p || !p.__bool__() || !p.v) {
+        if (!p.__bool__() || !p.v) {
             return false;
         }
-        const rstack: StackEntry[] =
-            root && root.__bool__()
-                ? root.stack.concat([[root.v, root._childIndex]])
-                : [];
-        const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
+
+        // const rstack = root.stack + [(root.v, root._childIndex)] if root else []
+        const rstack: StackEntry[] = (root && root.__bool__()) ? [...root.stack, [root.v, root._childIndex]] : [];
+
+        // const pstack = p.stack + [(p.v, p._childIndex)]
+        const pstack: StackEntry[] = [...p.stack, [p.v, p._childIndex]];
+
+
         if (rstack.length > pstack.length) {
             return false;
         }
-        let par: VNode = this.hiddenRootNode!;
+        let par = this.hiddenRootNode!;
 
-        let arrayLength: number = pstack.length;
-        for (let j = 0; j < arrayLength; j++) {
-            const x: StackEntry = pstack[j];
-            if (
-                j < rstack.length &&
-                (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])
-            ) {
+        function sameStackEntry(a: StackEntry, b: StackEntry): boolean {
+            if (a[1] !== b[1]) {
                 return false;
             }
-            let v: VNode;
-            let i: number;
-            [v, i] = x;
-            if (i >= par.children.length || v.gnx !== par.children[i].gnx) {
+            if (a[0] !== b[0]) {
+                return false;
+            }
+            return true;
+        }
+
+        for (let j = 0; j < pstack.length; j++) {
+            const x = pstack[j];
+            if (j < rstack.length && !sameStackEntry(x, rstack[j])) {
+                return false;
+            }
+            const [v, i] = x;
+            if (i >= par.children.length || v !== par.children[i]) {
                 return false;
             }
             par = v;
         }
         return true;
+
+        // if (!p || !p.__bool__() || !p.v) {
+        //     return false;
+        // }
+        // const rstack: StackEntry[] =
+        //     root && root.__bool__()
+        //         ? root.stack.concat([[root.v, root._childIndex]])
+        //         : [];
+        // const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
+        // if (rstack.length > pstack.length) {
+        //     return false;
+        // }
+        // let par: VNode = this.hiddenRootNode!;
+
+        // let arrayLength: number = pstack.length;
+        // for (let j = 0; j < arrayLength; j++) {
+        //     const x: StackEntry = pstack[j];
+        //     if (
+        //         j < rstack.length &&
+        //         (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])
+        //     ) {
+        //         return false;
+        //     }
+        //     let v: VNode;
+        //     let i: number;
+        //     [v, i] = x;
+        //     if (i >= par.children.length || v.gnx !== par.children[i].gnx) {
+        //         return false;
+        //     }
+        //     par = v;
+        // }
+        // return true;
     }
 
     //@+node:felix.20210131011420.15: *6* c.dumpPosition
@@ -1367,7 +1407,7 @@ export class Commands {
             if (!c.isChanged()) {
                 c.setChanged();
             }
-            c.redraw_after_icons_changed();
+            // c.redraw_after_icons_changed();
         }
     }
 
@@ -1415,11 +1455,14 @@ export class Commands {
                 c._currentPosition = p.copy();
             }
         } else {
-            // 2011/02/25:
+            if (g.unitTesting) {
+                // New in Leo 6.7.4: *Do* raise an exception.
+                throw new Error(`Invalid position: ${p.toString()}`);
+            }
+            // Don't kill unit tests for this kind of problem.
             c._currentPosition = c.rootPosition();
             g.trace(`Invalid position`, p.toString(), c.toString());
             g.trace(g.callers());
-            // Don't kill unit tests for this kind of problem.
         }
     }
 
@@ -1482,7 +1525,7 @@ export class Commands {
     /**
      * Check the consistency of all gnx's.
      * Reallocate gnx's for duplicates or empty gnx's.
-     * Return the number of structure_errors found.
+     * Return the number of errors found.
      */
     public checkGnxs(): number {
         const c: Commands = this;
@@ -1493,7 +1536,7 @@ export class Commands {
 
         let count: number = 0;
         let gnx_errors: number = 0;
-        for (let p of c.safe_all_positions(false)) {
+        for (let p of c.all_positions(false)) {
             count += 1;
             const v: VNode = p.v;
             // * removed https://github.com/leo-editor/leo-editor/pull/2363/files
@@ -1530,16 +1573,12 @@ export class Commands {
                 }
             }
         }
-        const ok: boolean = !gnx_errors && !g.app.structure_errors;
+        const ok: boolean = !gnx_errors;
         const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
         const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
         if (!ok) {
             g.es_print(
-                `check-outline ERROR! ${c.shortFileName()} ` +
-                `${count} nodes, ` +
-                `${gnx_errors} gnx errors, ` +
-                `${g.app.structure_errors} ` +
-                `structure errors`
+                `${count} nodes, ${gnx_errors} gnx errors, `
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
@@ -1547,21 +1586,20 @@ export class Commands {
                 `${c.shortFileName()} ${count} nodes`
             );
         }
-        return g.app.structure_errors;
+        return gnx_errors;
     }
     //@+node:felix.20211205223924.1: *4* c.checkLinks & helpers
     /**
      * Check the consistency of all links in the outline.
      */
     public checkLinks(): number {
+        // This is too slow a test to be run outside of unit tests.
         const c: Commands = this;
-        const t1: [number, number] = process.hrtime();
         let count: number = 0;
         let errors: number = 0;
 
-        for (let p of c.safe_all_positions()) {
+        for (let p of c.all_positions()) {
             count += 1;
-            // try:
             if (!c.checkThreadLinks(p)) {
                 errors += 1;
                 break;
@@ -1575,18 +1613,6 @@ export class Commands {
                 break;
             }
         }
-        // except AssertionError:
-        //     errors += 1
-        //     junk, value, junk = sys.exc_info()
-        //     g.error("test failed at position %s\n%s" % (repr(p), value))
-
-        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
-        const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
-
-        g.es_print(
-            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`
-        );
-
         return errors;
     }
     //@+node:felix.20211205223924.2: *5* c.checkParentAndChildren
@@ -1607,9 +1633,6 @@ export class Commands {
                 console.log('<no p.v>');
             } else {
                 console.log('<no p>');
-            }
-            if (g.unitTesting) {
-                console.assert(false, g.callers());
             }
         };
 
@@ -1719,6 +1742,179 @@ export class Commands {
         }
         return true;
     }
+    //@+node:felix.20230730162340.1: *5* c.checkVnodeLinks & helpers
+    /**
+     * Check all vnode links.
+     *
+     * Attempt error recovery if recover_flag is True.
+     * Unit tests may set recover_flag to False for strict tests.
+     *
+     * Return the number of errors.
+     */
+    public checkVnodeLinks(): number {
+
+        const c: Commands = this;
+
+        //@+others  // Define helpers.
+        //@+node:felix.20230730162340.2: *6* find_errors
+        /**
+         * Scan all vnodes for erroneous parent/child pairs.
+         *
+         * Return (error_list, messages, n)
+         */
+        function find_errors(): [[VNode, VNode][], string[], number] {
+
+            const error_list: [VNode, VNode][] = [];
+            const messages: string[] = [];
+            let n = 0;
+            for (const parent_v of c.all_unique_nodes()) { // Avoids recursion.
+                for (const child_v of parent_v.children) {
+
+                    // const children_n = parent_v.children.count(child_v)
+                    const children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                    // const parents_n = child_v.parents.count(parent_v)
+                    const parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+
+                    if (children_n !== parents_n) {
+                        error_list.push([parent_v, child_v]);
+                        messages.push(
+                            'Mismatch between parent.children and child.parents\n' +
+                            `parent: ${parent_v.h} count(parent.children) = ${children_n}\n` +
+                            ` child: ${child_v.h} count(child.parents = ${parents_n}`
+                        );
+                        n += 1;
+                    }
+                }
+            }
+            return [error_list, messages, n];
+
+        }
+        //@+node:felix.20230730162340.3: *6* fix_errors
+        /**
+         * Fix all erroneous nodes by adding/deleting entries from v.parents.
+         */
+        function fix_errors(error_list: [VNode, VNode][]): void {
+
+            for (const [parent_v, child_v] of error_list) {
+
+                // const children_n = parent_v.children.count(child_v)
+                let children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                // const parents_n = child_v.parents.count(parent_v)
+                let parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+
+                if (parents_n === children_n) {
+                    // pass  // Already fixed.
+                } else if (parents_n < children_n) {
+                    while (parents_n < children_n) {
+                        // Safe.
+                        child_v.parents.push(parent_v);
+                        parents_n += 1;
+                    }
+                } else {
+                    while (children_n < parents_n) {
+                        let index;
+                        if (child_v.parents && child_v.parents.length) {
+                            // Safe.
+                            index = child_v.parents.indexOf(parent_v);
+                            if (index !== -1) {
+                                child_v.parents.splice(index, 1);
+                            }
+                            children_n += 1;
+                        } else {
+                            // This could delete the child.
+                            index = parent_v.children.indexOf(child_v);
+                            if (index !== -1) {
+                                parent_v.children.splice(index, 1);
+                            }
+                            parents_n += 1;
+                        }
+                    }
+                }
+
+            }
+        }
+        //@+node:felix.20230730162340.4: *6* undelete_nodes
+        /**
+         * Restore a parent link to any node that would otherwise be deleted.
+         */
+        function undelete_nodes(error_list: [VNode, VNode][]): void {
+            const seen: VNode[] = [];
+            for (const [parent_v, child_v] of error_list) {
+                if ((!child_v.parents || !child_v.parents.length) && !seen.includes(child_v)) {
+                    // Add child_v to *one* parent.
+                    seen.push(child_v);
+                    parent_v.children.push(child_v);
+                    child_v.parents.push(parent_v);
+                }
+            }
+        }
+        //@+node:felix.20230730162340.5: *6* recheck
+        /**
+         * Rescan all vnodes to ensure that no errors remain.
+         *
+         * Return (error_list, messages, no)
+         */
+        function recheck(): [[VNode, VNode][], string[], number] {
+
+            const error_list: [VNode, VNode][] = [];
+            const messages: string[] = [];
+            let n = 0;
+            for (const parent_v of c.all_unique_nodes()) { // Avoids recursion.
+                for (const child_v of parent_v.children) {
+
+                    // const children_n = parent_v.children.count(child_v)
+                    const children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                    // const parents_n = child_v.parents.count(parent_v)
+                    const parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+                    if (children_n !== parents_n) {
+                        error_list.push([parent_v, child_v]);
+                        messages.push(
+                            'Error recovery failed!' +
+                            `parent: ${parent_v.h} count(parent.children) = ${children_n}\n` +
+                            ` child: ${child_v.h} count(child.parents = ${parents_n}`
+                        );
+                        n += 1;
+                    }
+                }
+            }
+            return [error_list, messages, n];
+
+        }
+        //@-others
+
+        // For unit testing.
+        const strict = g.app.debug.includes('test:strict');
+        const verbose: boolean = ['test:verbose', 'gnx', 'shutdown', 'startup', 'verbose'].some(z => g.app.debug.includes(z));
+
+        let [error_list, messages, n] = find_errors();
+        if (n === 0) {
+            return 0;
+        }
+        if (verbose) {
+            console.log('\n');
+            g.trace(`${messages.length} link error${g.plural(messages.length)}:\n`);
+            console.log(messages.join('\n') + '\n');
+        }
+        if (strict) {
+            return n;
+        }
+        const old_n = n;
+        fix_errors(error_list);
+        undelete_nodes(error_list);
+        [error_list, messages, n] = recheck();
+        if (n) {
+            // Report the *failure* to fix links!
+            console.log(messages.join('\n'));
+        } else if (verbose) {
+            g.trace(`Fixed ${old_n} link error${g.plural(old_n)}`);
+        }
+
+        return n;
+
+    }
     //@+node:felix.20211101013238.1: *4* c.checkMoveWithParentWithWarning & c.checkDrag
     //@+node:felix.20211101013241.1: *5* c.checkMoveWithParentWithWarning
     /**
@@ -1767,33 +1963,32 @@ export class Commands {
     //@+node:felix.20211030170430.1: *4* checkOutline
     /**
      * Check for errors in the outline.
-     * Return the count of serious structure errors.
+     * Return the number of errors.
      */
-    public checkOutline(check_links?: boolean): number {
+    public checkOutline(): number {
         // The check-outline command sets check_links = True
         const c: Commands = this;
-        g.app.structure_errors = 0;
-        let structure_errors: number = c.checkGnxs();
-        if (check_links && !structure_errors) {
-            structure_errors += c.checkLinks();
+        let errors = 0;
+        for (const f of [c.checkVnodeLinks, c.checkGnxs]) {
+            errors += f.bind(c)();
         }
-        return structure_errors;
+        return errors;
+        // g.app.structure_errors = 0;
+        // let structure_errors: number = c.checkGnxs();
+        // if (check_links && !structure_errors) {
+        //     structure_errors += c.checkLinks();
+        // }
+        // return structure_errors;
     }
     //@+node:felix.20211031193257.1: *4* validateOutline
     /**
-     * Makes sure all nodes are valid.
+     * A legacy outline checker, retained only for compatibility.
+     *
+     * Not used in Leo's core or unit tests.
      */
     public validateOutline(): boolean {
         const c: Commands = this;
-        if (!g.app.validate_outline) {
-            return true;
-        }
-        const root: Position | undefined = c.rootPosition();
-        const parent: Position | undefined = undefined;
-        if (root && root.__bool__()) {
-            return root.validateOutlineWithParent(parent);
-        }
-        return true;
+        return c.checkOutline() === 0;
     }
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
     //@+node:felix.20230423004652.1: *4* c.fullPath
@@ -2800,6 +2995,42 @@ export class Commands {
             }
         }
         c.fileCommands.gnxDict = d;
+    }
+    //@+node:felix.20230730160811.1: *3* c.Git
+    //@+node:felix.20230730160811.2: *4* c.diff_file
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_file(fn: string, rev1 = 'HEAD', rev2 = ''): Promise<void> {
+        const x = new GitDiffController(this);
+        await x.diff_file(fn, rev1, rev2);
+    }
+    //@+node:felix.20230730160811.3: *4* c.diff_two_revs
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_two_revs(directory?: string, rev1 = '', rev2 = ''): Promise<void> {
+        await new GitDiffController(this).diff_two_revs(rev1, rev2);
+    }
+    //@+node:felix.20230730160811.4: *4* c.diff_two_branches
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_two_branches(branch1: any, branch2: any, fn: string): Promise<void> {
+        await new GitDiffController(this).diff_two_branches(
+            branch1, branch2, fn
+        );
+    }
+    //@+node:felix.20230730160811.5: *4* c.git_diff
+    public async git_diff(rev1 = 'HEAD', rev2 = ''): Promise<void> {
+        await new GitDiffController(this).git_diff(rev1, rev2);
+    }
+    //@+node:felix.20230730160811.6: *4* c.git_node_history
+    public async git_node_history(file_name: string, gnx: string): Promise<void> {
+        await new GitDiffController(this).node_history(file_name, [gnx]);
     }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
@@ -4207,6 +4438,7 @@ export interface Commands
     all_unique_vnodes_iter: () => Generator<VNode, any, unknown>;
     all_positions_iter: () => Generator<Position, any, unknown>;
     allNodes_iter: () => Generator<Position, any, unknown>;
+    safe_all_positions: () => Generator<Position, any, unknown>;
     all_positions_with_unique_vnodes_iter: () => Generator<
         Position,
         any,
@@ -4243,6 +4475,7 @@ Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
 Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
 Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
 Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
+Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
 Commands.prototype.all_positions_with_unique_vnodes_iter =
     Commands.prototype.all_unique_positions;
 Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;

@@ -2733,6 +2733,7 @@ export async function gitHeadPath(path_s: string): Promise<string | undefined> {
 //@+node:felix.20230714231513.1: *3* g.execGitCommand
 /**
  * Execute the given git command in the given directory.
+ * Return a list of lines, with newlines stripped off.
  */
 export function execGitCommand(
     command: string,
@@ -2744,7 +2745,7 @@ export function execGitCommand(
     /*
     const git_dir = g.finalize_join(directory, '.git')
     if not g.os_path_exists(git_dir):
-        g.trace('not found:', git_dir, g.callers())
+        g.trace('.git directory not found:', git_dir, g.callers())
         return []
     if '\n' in command:
         g.trace('removing newline from', command)
@@ -2752,6 +2753,7 @@ export function execGitCommand(
     # #1777: Save/restore os.curdir
     old_dir = os.getcwd()
     if directory:
+        # g.trace(f"os.chdir({directory})")
         os.chdir(directory)
 
     try

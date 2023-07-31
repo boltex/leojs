@@ -50,6 +50,7 @@ import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
 import { ChapterController } from './leoChapters';
 import { StringTextWrapper } from './leoFrame';
+import { FastRead } from './leoFileCommands';
 //@-<< imports >>
 //@+others
 //@+node:felix.20211028004540.1: ** Interfaces
@@ -82,6 +83,8 @@ export class Undoer {
     public beads: Bead[] = []; // List of undo nodes.
     public bead: number = -1; // Index of the present bead: -1:len(beads)
     public undoType: string = "Can't Undo";
+    public last_undoable_command_name = "";  // Name of last undoable command.
+
     public groupCount: number = 0;
     // These must be set here, _not_ in clearUndoState.
     public redoMenuLabel: string = "Can't Redo";
@@ -275,7 +278,7 @@ export class Undoer {
     }
     //@+node:felix.20211026230613.15: *4* u.redoMenuName, undoMenuName
     public redoMenuName(name: string): string {
-        if (name === "Can't Redo") {
+        if (name.startsWith("Can't Undo")) {
             return name;
         }
         return 'Redo ' + name;
@@ -361,10 +364,16 @@ export class Undoer {
         const u: Undoer = this;
         // Set the undo type and undo menu label.
         let bunch: Bead | undefined = u.peekBead(u.bead);
+        let undoType;
         if (bunch) {
             u.setUndoType(bunch.undoType);
         } else {
-            u.setUndoType("Can't Undo");
+            if (u.last_undoable_command_name) {
+                undoType = `Can't Undo ${u.last_undoable_command_name}`;
+            } else {
+                undoType = "Can't Undo";
+            }
+            u.setUndoType(undoType);
         }
         // Set only the redo menu label.
         bunch = u.peekBead(u.bead + 1);
@@ -1169,11 +1178,9 @@ export class Undoer {
      * All non-undoable commands should call this method.
      */
     public clearAndWarn(command_name: string): void {
-        if (!g.unitTesting) {
-            g.es(`not undoable: ${command_name}`);
-            g.es('clearing the undo stack');
-        }
-        this.clearUndoState();
+        const u = this;
+        u.last_undoable_command_name = command_name;
+        u.clearUndoState();
     }
     //@+node:felix.20211026230613.65: *4* u.clearUndoState
     /**
@@ -1184,7 +1191,13 @@ export class Undoer {
         const u: Undoer = this;
         u.clearOptionalIvars(); // Do this first.
         u.setRedoType("Can't Redo");
-        u.setUndoType("Can't Undo");
+        let undoType;
+        if (u.last_undoable_command_name) {
+            undoType = `Can't Undo ${u.last_undoable_command_name}`;
+        } else {
+            undoType = "Can't Undo";
+        }
+        u.setUndoType(undoType)
         u.beads = []; // List of undo nodes.
         u.bead = -1; // Index of the present bead: -1:len(beads)
     }
@@ -1299,6 +1312,58 @@ export class Undoer {
             c.frame.scanForTabWidth(p); // Calls frame.setTabWidth()
             c.recolor();
             w.setFocus();
+        }
+    }
+    //@+node:felix.20230730204242.1: *4* u.restoreFromCopiedTree
+    public restoreFromCopiedTree(v: VNode, s: string): void {
+        //@+<< docstring: restoreFromCopiedTree >>
+        //@+node:felix.20230730204242.2: *5* << docstring: restoreFromCopiedTree >>
+        /*
+        c.restoreFromCopiedTree: restore v from a copied tree.
+
+        This is a low-level method. See u.undo/redoChangeTree for examples.
+
+        The caller is responsible for:
+
+        - Calling c.endEditing.
+        - Setting c.p correctly.
+        - Updating selection range and y-scroll position in c.frame.body.wrapper.
+        - Calling c.redraw.
+        */
+        //@-<< docstring: restoreFromCopiedTree >>
+        const c = this.c;
+        const u = this;
+        const fc = c.fileCommands;
+        if (!(v instanceof VNode)) {
+            // @ts-expect-error
+            g.trace(`Can't happen: not a vnode: ${v.toString()}`);
+            return;
+        }
+        const old_parents = [...v.parents];  // Essential.
+
+        // This encoding must match the encoding used in outline_to_clipboard_string.
+        const encoding = fc.leo_file_encoding;
+
+        // Create a tree of vnodes from s.
+        const x = new FastRead(c, fc.gnxDict);  // Must use fc.gnxDict.
+        fc.initReadIvars();
+        const s_bytes = g.toEncodedString(s, encoding, true);
+        const hidden_v = x.readFileFromClipboard(s_bytes);
+        fc.initReadIvars();
+        if (!hidden_v) {
+            u.clearAndWarn('undo-change-tree');
+            return;
+        }
+        // The big switcharoo: change v in place.
+        const new_v = hidden_v.children[0];
+        new_v.parents = old_parents;  // restore v.parents.
+        console.assert(v.gnx === new_v.gnx);
+        v = new_v;  // Experimental.
+
+        // All pasted nodes should have unique gnx's.
+        const ni = g.app.nodeIndices!;
+        for (const v of c.all_unique_nodes()) {
+            ni.check_gnx(c, v.fileIndex, v);
         }
     }
     //@+node:felix.20211026230613.81: *3* u.redo
