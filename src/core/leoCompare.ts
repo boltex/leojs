@@ -439,7 +439,7 @@ export class BaseLeoCompare {
             if (n2 === 0 && n1 !== 0) {
                 this.show('2.eof***:');
             }
-            if (n1 == 0 || n2 == 0) {
+            if (n1 === 0 || n2 === 0) {
                 break;
             }
             const match = this.compare_lines(s1, s2);
@@ -449,7 +449,7 @@ export class BaseLeoCompare {
 
             //@+<< print matches and/or mismatches >>
             //@+node:felix.20230430023337.13: *4* << print matches and/or mismatches >>
-            if (this.limitCount == 0 || mismatches <= this.limitCount) {
+            if (this.limitCount === 0 || mismatches <= this.limitCount) {
                 if (match && this.printMatches) {
                     if (this.printBothMatches) {
                         z1 = '1.' + lines1.toString();
@@ -1052,7 +1052,7 @@ export class TopLevelCompareCommands {
         c.selectPosition(c.lastTopLevel());
         const undoData = u.beforeInsertNode(c.p);
         const root = c.lastTopLevel().insertAfter();
-        root.h = 'diff marked nodes'
+        root.h = 'diff marked nodes';
         root.b = aList.map((z) => z.h).join('\n') + '\n';
         let n = 0;
 

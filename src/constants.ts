@@ -723,7 +723,7 @@ export class Constants {
         // * Tree Building
         EXECUTE_SCRIPT: "execute-script",
         REFRESH_FROM_DISK: "refresh-from-disk",
-        GIT_DIFF: "TODO_GIT_DIFF", // TODO in editFileCommands.ts !
+        GIT_DIFF: "git-diff",
         // * Outline from body text
         EXTRACT: "extract",
         EXTRACT_NAMES: "extract-names",
@@ -754,7 +754,7 @@ export class Constants {
         // * Mark Operations
         TOGGLE_MARK: "toggle-mark",
         COPY_MARKED: "copy-marked-nodes",
-        DIFF_MARKED_NODES: "diff-marked-nodes", // TODO from leoCompare.py
+        DIFF_MARKED_NODES: "diff-marked-nodes",
         MARK_CHANGED_ITEMS: "mark-changed-items",
         MARK_SUBHEADS: "mark-subheads",
         UNMARK_ALL: "unmark-all",

@@ -1319,6 +1319,8 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
+                console.log("STARTUP:          GIT extension installed as g.gitAPI");
+
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -1331,6 +1333,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
+                console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
             } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
@@ -1343,11 +1346,12 @@ export async function activate(p_context: vscode.ExtensionContext) {
             ?? vscode.extensions.getExtension&lt;RemoteHubApi&gt;('GitHub.remoteHub-insiders');
 
         if (extension == null) {
-            console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT AVAILABLE !");
+            console.log("LEOJS ERROR : GIT_REMOTE EXTENSION NOT AVAILABLE !");
         }
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
+            console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
         }
 
     } else {
@@ -2001,7 +2005,7 @@ public static LEO_COMMANDS = {
     // * Tree Building
     EXECUTE_SCRIPT: "execute-script",
     REFRESH_FROM_DISK: "refresh-from-disk",
-    GIT_DIFF: "TODO_GIT_DIFF", // TODO in editFileCommands.ts !
+    GIT_DIFF: "git-diff",
     // * Outline from body text
     EXTRACT: "extract",
     EXTRACT_NAMES: "extract-names",
@@ -2032,7 +2036,7 @@ public static LEO_COMMANDS = {
     // * Mark Operations
     TOGGLE_MARK: "toggle-mark",
     COPY_MARKED: "copy-marked-nodes",
-    DIFF_MARKED_NODES: "diff-marked-nodes", // TODO from leoCompare.py
+    DIFF_MARKED_NODES: "diff-marked-nodes",
     MARK_CHANGED_ITEMS: "mark-changed-items",
     MARK_SUBHEADS: "mark-subheads",
     UNMARK_ALL: "unmark-all",

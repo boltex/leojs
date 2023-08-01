@@ -12,6 +12,7 @@ import { new_cmd_decorator } from '../core/decorators';
 import { BaseEditCommandsClass } from './baseCommands';
 import { Commands } from '../core/leoCommands';
 import { Position, VNode } from '../core/leoNodes';
+import { Change } from '../git';
 
 //@-<< editFileCommands imports & annotations >>
 
@@ -969,6 +970,7 @@ export class GitDiffController {
         if (!directory) {
             return;
         }
+
         const s1 = await this.get_file_from_rev(rev1, fn);
         const s2 = await this.get_file_from_rev(rev2, fn);
         const lines1 = g.splitLines(s1);
@@ -1022,6 +1024,11 @@ export class GitDiffController {
         if (!directory) {
             return;
         }
+
+        // g.gitAPI
+        // g.gitBaseAPI
+        // g.remoteHubAPI
+
         const aList = await g.execGitCommand('git rev-parse devel', directory);
         if (aList && aList.length) {
             let devel_rev = aList[0];
@@ -1174,7 +1181,7 @@ export class GitDiffController {
         }
         c.selectPosition(c.lastTopLevel());
         const undoData = u.beforeInsertNode(c.p);
-        this.root = this.create_root(rev1, rev2);
+        this.root = await this.create_root(rev1, rev2);
         for (const fn of files) {
             await this.diff_file(fn, rev1, rev2);
         }
@@ -1460,6 +1467,11 @@ export class GitDiffController {
 
         for (const [i, rev] of rev_list.slice(0, limit).entries()) {
             const command = `git show ${rev}:${relative_path}`;
+
+            // g.gitAPI
+            // g.gitBaseAPI
+            // g.remoteHubAPI
+
             const aList = await g.execGitCommand(command, git_parent_directory || "");
             result.push(aList);
             if (i > 0 && (i % 100) == 0) {
@@ -1514,6 +1526,11 @@ export class GitDiffController {
         // %h (%an %cs %s): Abbreviated hash, author, date, commit message
         const args_s = "--no-patch --pretty='format:%H'";  // Just the long hash.
         const command = `git log ${args_s} -- ${p_path}`;
+
+        // g.gitAPI
+        // g.gitBaseAPI
+        // g.remoteHubAPI
+
         const aList = await g.execGitCommand(command, git_parent_directory || '');
         const result = aList.map(z => z.trim());
         return result;
@@ -1671,7 +1688,7 @@ export class GitDiffController {
     /**
      * Create the top-level organizer node describing the git diff.
      */
-    public create_root(rev1: string, rev2: string): Position {
+    public async create_root(rev1: string, rev2: string): Promise<Position> {
         const c = this.c;
         // const [c, u] = [this.c, this.c.undoer];
         // const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
@@ -1682,11 +1699,13 @@ export class GitDiffController {
         const p = c.lastTopLevel().insertAfter();
         p.h = `git diff ${r1} ${r2}`;
         p.b = '@ignore\n@nosearch\n';
+        const revno1 = await this.get_revno(r1);
         if (r1 && r2) {
+            const revno2 = await this.get_revno(r2);
             p.b +=
-                `${r1}=${this.get_revno(r1)}\n` + `${r2}=${this.get_revno(r2)}`;
+                `${r1}=${revno1}\n` + `${r2}=${revno2}`;
         } else {
-            p.b += `${r1}=${this.get_revno(r1)}`;
+            p.b += `${r1}=${revno1}`;
         }
 
         // u.afterInsertNode(p, undoType, undoData);
@@ -1761,7 +1780,7 @@ export class GitDiffController {
         const c = this.c;
         const filename = c.fileName();
         if (!filename) {
-            console.log('git-diff: outline has no name');
+            g.es_print('git-diff: outline has no name');
             return undefined;
         }
         let directory = path.dirname(filename);
@@ -1770,7 +1789,7 @@ export class GitDiffController {
             directory = path.dirname(directory);
         }
         if (!directory) {
-            console.log(
+            g.es_print(
                 `git-diff: outline has no directory. filename: ${filename}`
             );
             return undefined;
@@ -1778,7 +1797,7 @@ export class GitDiffController {
         // Does path/../ref exist?
         const base_directory = await g.gitHeadPath(directory);
         if (!base_directory) {
-            console.log(
+            g.es_print(
                 `git-diff: no .git directory: ${directory} filename: ${filename}`
             );
             return undefined;
@@ -1801,6 +1820,11 @@ export class GitDiffController {
             return '';
         }
         const command = `git show ${branch}:${fn}`;
+
+        // g.gitAPI
+        // g.gitBaseAPI
+        // g.remoteHubAPI
+
         const lines = await g.execGitCommand(command, directory);
         const s = lines.join('');
         return g.toUnicode(s).replace(/\r/g, '');
@@ -1817,8 +1841,19 @@ export class GitDiffController {
         const w_path = g.finalize_join(directory, fn);
         // Find all the files in the rev.
         if (rev) {
-            let command = `git ls-tree -r {rev} --name-only`;
-            let lines = await g.execGitCommand(command, directory);
+            let command = `git ls-tree -r ${rev} --name-only`;
+
+            // g.gitAPI
+            // g.gitBaseAPI
+            // g.remoteHubAPI
+
+            // let w_repo = g.getVSCodeRepository(this.c);
+            // if (!w_repo) {
+            //     w_repo = g.gitAPI.repositories[0];
+            // }
+
+            let lines;
+            lines = await g.execGitCommand(command, directory);
             if (!lines.some((z) => z.includes(fn))) {
                 // console.log(`${fn} not in ${rev}`);
                 return '';
@@ -1826,8 +1861,19 @@ export class GitDiffController {
             // Get the file using git.
             // Use the file name, not the path.
             command = `git show ${rev}:${fn}`;
+
+            // if (w_repo) {
+            //     lines = await w_repo.show(rev, fn);
+            // }
+
+            // g.gitAPI
+            // g.gitBaseAPI
+            // g.remoteHubAPI
+
             lines = await g.execGitCommand(command, directory);
             return g.toUnicode(lines.join('')).replace(/\r/g, '');
+
+            // return lines ? g.toUnicode(lines).replace(/\r/g, '') : '';
         }
         // Read the file.
         try {
@@ -1867,6 +1913,40 @@ export class GitDiffController {
                 (z: string) =>
                     !z.trim().endsWith('.db') && !z.trim().endsWith('.zip')
             );
+
+        // g.gitAPI
+        // g.gitBaseAPI
+        // g.remoteHubAPI
+
+        // let w_repo = g.getVSCodeRepository(this.c);
+
+        // let w_gitDiff: string[] = [];
+        // let w_changes: Change[] = [];
+
+        // if (!w_repo) {
+        //     w_repo = g.gitAPI.repositories[0];
+        // }
+        // if (!w_repo) {
+        // }
+        // if (w_repo) {
+        //     const w_repoPath = w_repo.rootUri.fsPath;
+        //     w_changes = await w_repo.diffBetween(rev1 || '', rev2 || '');
+
+        //     const w_result = w_changes
+        //         .map(z => path.relative(w_repoPath, z.uri.fsPath))
+        //         .map((z: string) => z.trim())
+        //         .filter(
+        //             (z: string) =>
+        //                 !z.trim().endsWith('.db') && !z.trim().endsWith('.zip')
+        //         );
+        //     console.log(
+        //         `get_files result for rev1: ${rev1 || ''} rev2${rev2 || ''} :`,
+        //         w_result
+        //     );
+        //     return w_result;
+        // } else {
+        //     return [];
+        // }
     }
     //@+node:felix.20230709010434.21: *4* gdc.get_revno
     /**
@@ -1886,6 +1966,11 @@ export class GitDiffController {
         if (!directory) {
             return '';
         }
+
+        // g.gitAPI
+        // g.gitBaseAPI
+        // g.remoteHubAPI
+
         const lines = await g.execGitCommand(command, directory);
         return lines.join('').trim();
     }

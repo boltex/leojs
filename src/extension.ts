@@ -49,6 +49,8 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
+                console.log("STARTUP:          GIT extension installed as g.gitAPI");
+
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -61,6 +63,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
+                console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
             } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
@@ -73,11 +76,12 @@ export async function activate(p_context: vscode.ExtensionContext) {
             ?? vscode.extensions.getExtension<RemoteHubApi>('GitHub.remoteHub-insiders');
 
         if (extension == null) {
-            console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT AVAILABLE !");
+            console.log("LEOJS ERROR : GIT_REMOTE EXTENSION NOT AVAILABLE !");
         }
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
+            console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
         }
 
     } else {

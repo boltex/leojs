@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 
 // import * as Bowser from "bowser";
 import * as os from 'os';
+import * as child from 'child_process';
 import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
 import * as GitAPI from '../git';
@@ -666,7 +667,7 @@ export function callers(
 //@+node:felix.20211104212435.1: *3* g._callerName
 export function _callerName(n: number, verbose: boolean = false): string {
     // TODO : see Error().stack to access names from the call stack
-    // return Error.stack.split()[n]; // or something close to that
+    return new Error().stack?.split("\n")[n] || ''; // or something close to that
     return '<_callerName>';
 }
 
@@ -2700,6 +2701,19 @@ export function skip_ws_and_nl(s: string, i: number): number {
     return i;
 }
 //@+node:felix.20220511213218.1: ** g.Git
+//@+node:felix.20230731205419.1: *3* g.getVSCodeRepository
+/**
+ * Calls getRepository form the gitAPI and returns the result.
+ */
+export function getVSCodeRepository(c: Commands): null | GitAPI.Repository {
+    const filename = c.fileName();
+    if (!filename) {
+        console.log('git getRepository: outline has no name');
+        return null;
+    }
+    const w_uri = makeVscodeUri(filename);
+    return gitAPI.getRepository(w_uri);
+}
 //@+node:felix.20220511213305.1: *3* g.gitInfoForFile
 /**
  * Return the git (branch, commit) info associated for the given file.
@@ -2716,7 +2730,7 @@ export function gitInfoForFile(filename: string): [string, string] {
 export async function gitHeadPath(path_s: string): Promise<string | undefined> {
     // const w_path = path(path_s);
     // #1780: Look up the directory tree, looking the .git directory.
-    // TODO : HANDLE VSCODE INTHE BROWSER!
+    // TODO : HANDLE VSCODE IN THE BROWSER!
     while (await os_path_exists(path_s)) {
         const head = path.join(path_s, '.git', 'HEAD');
         if (await os_path_exists(head)) {
@@ -2733,43 +2747,114 @@ export async function gitHeadPath(path_s: string): Promise<string | undefined> {
 //@+node:felix.20230714231513.1: *3* g.execGitCommand
 /**
  * Execute the given git command in the given directory.
+ * 
  * Return a list of lines, with newlines stripped off.
  */
-export function execGitCommand(
+export async function execGitCommand(
     command: string,
     directory: string
 ): Promise<string[]> {
-    console.log('TODO : execGitCommand');
-    return Promise.resolve([]);
 
-    /*
-    const git_dir = g.finalize_join(directory, '.git')
-    if not g.os_path_exists(git_dir):
-        g.trace('.git directory not found:', git_dir, g.callers())
-        return []
-    if '\n' in command:
-        g.trace('removing newline from', command)
-        command = command.replace('\n', '')
-    # #1777: Save/restore os.curdir
-    old_dir = os.getcwd()
-    if directory:
-        # g.trace(f"os.chdir({directory})")
-        os.chdir(directory)
+    console.log('execGitCommand called with command: ', command, ' \nin directory: ', directory);
+    // @ts-expect-error
+    console.log('child,fake? ', !!child.fake);
 
-    try
-        p = subprocess.Popen(
-            shlex.split(command),
-            stdout=subprocess.PIPE,
-            stderr=None,  # Shows error traces.
-            shell=False,
-        )
-        out, err = p.communicate()
-        lines = [g.toUnicode(z) for z in g.splitLines(out or [])]
-    finally
-        os.chdir(old_dir)
+    if (isBrowser) {
+        console.log('LEOJS: GIT COMMAND CALLED FROM BROWSER');
+        void vscode.window.showInformationMessage('LeoJS Git Commands not available in "web" version');
+        return [];
+    }
 
-    return lines;
-    */
+    // return Promise.resolve([]);
+
+    const git_dir = finalize_join(directory, '.git');
+    const w_exists = await os_path_exists(git_dir);
+    if (!w_exists) {
+        trace('.git directory not found:', git_dir, callers());
+        return [];
+    }
+
+    if (command.includes('\n')) {
+        trace('removing newline from', command);
+        command = command.replace(/\n/g, '');
+    }
+
+    const w_args: string[] = [];
+    const w_options: child.SpawnOptions = {
+        // Child to run independently of its parent process.
+        // (Depends on the platform)
+        // detached: false,
+        // If possible hide the terminal window that could appear
+        windowsHide: true,
+        shell: true,
+        cwd: directory
+    };
+
+    return new Promise((resolve, reject) => {
+        const gitProcess = child.spawn(command, w_args, w_options);
+
+        let accumulatedOutput = '';
+
+        if (gitProcess) {
+
+            if (gitProcess.stdout) {
+                gitProcess.stdout.on('data', (data) => {
+                    accumulatedOutput += data.toString();
+                });
+            }
+            if (gitProcess.stderr) {
+                gitProcess.stderr.on('data', (data) => {
+                    // Optionally, you can log and accumulate the error output too
+                    console.error(data.toString());
+                });
+
+            }
+            gitProcess.on('error', (err) => {
+                reject(new Error(`Error executing command: ${err.message}`));
+            });
+
+
+            gitProcess.on('close', (code) => {
+                if (code === 0) {
+                    resolve(splitLines(accumulatedOutput).map((z) => toUnicode(z)));
+                } else {
+                    reject(new Error(`Command exited with code ${code}`));
+                }
+            });
+        } else {
+            reject(new Error(`No git process has started.`));
+        }
+    });
+
+    // // #1777: Save/restore os.curdir
+    // old_dir = os.getcwd()
+    // if directory
+    //     // trace(f"os.chdir({directory})")
+    //     os.chdir(directory)
+    // let lines: string[] = [];
+
+    // try{
+
+    //     p = subprocess.Popen(
+    //         shlex.split(command),
+    //         stdout=subprocess.PIPE,
+    //         stderr=None,  // Shows error traces.
+    //         // stderr=subprocess.PIPE,
+    //         shell=False,
+    //     )
+    //     out, err = p.communicate()
+
+    //     lines = splitLines(out || []).map((z) => toUnicode(z));
+    //     // lines = [toUnicode(z) for z in splitLines(out or [])]
+    // }
+    // catch(e){
+    //     console.log('LEOJS ERROR IN execGitCommand: ', e);
+    // }
+
+    // // finally
+    // //     os.chdir(old_dir)
+
+    // return lines;
 }
 //@+node:felix.20230720001117.1: *3* g.gitInfo
 /**
