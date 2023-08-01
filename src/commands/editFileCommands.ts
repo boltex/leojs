@@ -1124,7 +1124,7 @@ export class GitDiffController {
         // Create the root node.
         let undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
         this.root = c.lastTopLevel().insertAfter();
-        this.root.h = 'git diff revs: {rev1} {rev2}';
+        this.root.h = `git diff revs: ${rev1} ${rev2}`;
         this.root.b = '@ignore\n@nosearch\n';
         u.afterInsertNode(this.root, 'Create diff root node', undoData);
 

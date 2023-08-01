@@ -2810,16 +2810,20 @@ export async function execGitCommand(
 
             }
             gitProcess.on('error', (err) => {
-                reject(new Error(`Error executing command: ${err.message}`));
+                console.error(`Error executing command: ${err.message}`);
+                // reject(new Error(`Error executing command: ${err.message}`));
             });
 
 
             gitProcess.on('close', (code) => {
+                const lines = splitLines(accumulatedOutput).map((z) => toUnicode(z));
                 if (code === 0) {
-                    resolve(splitLines(accumulatedOutput).map((z) => toUnicode(z)));
+                    // ok
                 } else {
-                    reject(new Error(`Command exited with code ${code}`));
+                    console.error(`Command exited with code ${code}`);
+                    // reject(new Error(`Command exited with code ${code}`));
                 }
+                resolve(lines);
             });
         } else {
             reject(new Error(`No git process has started.`));
