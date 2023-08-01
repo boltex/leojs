@@ -1,9 +1,9 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220503003725.1: * @file src/commands/gotoCommands.ts
 import * as g from '../core/leoGlobals';
-import { command } from "../core/decorators";
-import { Position } from "../core/leoNodes";
-import { Commands } from "../core/leoCommands";
+import { command } from '../core/decorators';
+import { Position } from '../core/leoNodes';
+import { Commands } from '../core/leoCommands';
 
 //@+others
 //@+node:felix.20221218143456.1: ** class GoToCommands
@@ -11,7 +11,6 @@ import { Commands } from "../core/leoCommands";
  * A class implementing goto-global-line.
  */
 export class GoToCommands {
-
     public c: Commands;
 
     /**
@@ -22,12 +21,39 @@ export class GoToCommands {
     }
 
     //@+others
-    //@+node:felix.20221218143456.2: *3* goto.find_file_line
+    //@+node:felix.20221218143456.2: *3* goto.find_file_line & helper
     /**
      * Place the cursor on the n'th line (one-based) of an external file.
      * Return (p, offset, found) for unit testing.
      */
-    public async find_file_line(n: number, p?: Position): Promise<[Position | undefined, number, boolean]> {
+    public async find_file_line(
+        n: number,
+        p?: Position
+    ): Promise<[Position | undefined, number, boolean]> {
+        const c = this.c;
+        let offset: number | undefined;
+        let found: boolean | undefined;
+        // Don't add an item in the history list here!
+        if (c.nodeHistory) {
+            c.nodeHistory.skipBeadUpdate = true;
+            try {
+                [p, offset, found] = await this.find_file_line_helper(n, p);
+            } catch (e) {
+                // pass
+            }
+            finally {
+                c.nodeHistory.skipBeadUpdate = false;
+            }
+            return [p, offset || 0, !!found];
+        }
+        return this.find_file_line_helper(n, p);
+    }
+
+    //@+node:felix.20230730153823.1: *4* goto.find_file_line_helper
+    public async find_file_line_helper(
+        n: number,
+        p?: Position
+    ): Promise<[Position | undefined, number, boolean]> {
         const c = this.c;
         if (n < 0) {
             return [undefined, -1, false];
@@ -41,6 +67,10 @@ export class GoToCommands {
             // even if the actual external file actually contains no sentinels.
             const sentinels = root.isAtFileNode();
             const s = await this.get_external_file_with_sentinels(root);
+            // Special case empty files.
+            if (!s.trim()) {
+                return [p, 0, false];
+            }
             const lines = g.splitLines(s);
 
             let gnx;
@@ -65,18 +95,19 @@ export class GoToCommands {
 
             this.fail(lines, n, root);
             return [undefined, -1, false];
-
         }
 
         return this.find_script_line(n, p);
-
     }
 
     //@+node:felix.20221218143456.3: *3* goto.find_node_start
     /**
      * Return the global line number of the first line of p.b
      */
-    public async find_node_start(p: Position, s?: string): Promise<number | undefined> {
+    public async find_node_start(
+        p: Position,
+        s?: string
+    ): Promise<number | undefined> {
         // See #283.
 
         let root;
@@ -98,10 +129,11 @@ export class GoToCommands {
         [delim1, delim2] = this.get_delims(root);
 
         // Match only the node with the correct gnx.
-        const node_pat = new RegExp(`\s*${g.reEscape(delim1)}@\+node:${g.reEscape(p.gnx)}:`);
+        const node_pat = new RegExp(
+            `\s*${g.reEscape(delim1)}@\+node:${g.reEscape(p.gnx)}:`
+        );
 
         for (let [i, w_s] of g.splitLines(s).entries()) {
-
             if (node_pat.test(w_s)) {
                 return i + 1;
             }
@@ -114,8 +146,10 @@ export class GoToCommands {
      * Go to line n (zero based) of the script with the given root.
      * Return p, offset, found for unit testing.
      */
-    public async find_script_line(n: number, root: Position): Promise<[Position | undefined, number, boolean]> {
-
+    public async find_script_line(
+        n: number,
+        root: Position
+    ): Promise<[Position | undefined, number, boolean]> {
         const c = this.c;
 
         if (n < 0) {
@@ -139,7 +173,6 @@ export class GoToCommands {
         }
         this.fail(lines, n, root);
         return [undefined, -1, false];
-
     }
 
     //@+node:felix.20221218143456.5: *3* goto.node_offset_to_file_line
@@ -147,8 +180,11 @@ export class GoToCommands {
      * Given a zero-based target_offset within target_p.b, return the line
      * number of the corresponding line within root's file.
      */
-    public async node_offset_to_file_line(target_offset: number, target_p: Position, root: Position): Promise<number | undefined> {
-
+    public async node_offset_to_file_line(
+        target_offset: number,
+        target_p: Position,
+        root: Position
+    ): Promise<number | undefined> {
         let delim1;
         let delim2;
         [delim1, delim2] = this.get_delims(root);
@@ -164,11 +200,15 @@ export class GoToCommands {
         const stack: [string, string, number][] = [];
 
         for (const s of g.splitLines(file_s)) {
-            n += 1;  // All lines contribute to the file's line count.
+            n += 1; // All lines contribute to the file's line count.
             if (this.is_sentinel(delim1, delim2, s)) {
-                const s2 = s.trim().substring(delim1.length);  // Works for blackened sentinels.
+                const s2 = s.trim().substring(delim1.length); // Works for blackened sentinels.
                 // Common code for the visible sentinels.
-                if (s2.startsWith('@+others') || s2.startsWith('@+<<') || s2.startsWith('@@')) {
+                if (
+                    s2.startsWith('@+others') ||
+                    s2.startsWith('@+<<') ||
+                    s2.startsWith('@@')
+                ) {
                     if (target_offset === node_offset && gnx === target_gnx) {
                         return n;
                     }
@@ -182,7 +222,7 @@ export class GoToCommands {
                     node_offset = 0;
                 } else if (s2.startsWith('@-node')) {
                     gnx = undefined;
-                    node_offset = undefined;;
+                    node_offset = undefined;
                 } else if (s2.startsWith('@+others') || s2.startsWith('@+<<')) {
                     stack.push([gnx, h, node_offset]);
                     [gnx, node_offset] = [undefined, undefined];
@@ -201,7 +241,6 @@ export class GoToCommands {
         }
         g.trace('\nNot found', target_offset, target_gnx);
         return undefined;
-
     }
     //@+node:felix.20221218143456.6: *3* goto.scan_nonsentinel_lines
     /**
@@ -216,7 +255,11 @@ export class GoToCommands {
      * h:      the headline of the #@+node
      * offset: the offset of line n within the node.
      */
-    public scan_nonsentinel_lines(lines: string[], n: number, root: Position): [string | undefined, string | undefined, number] {
+    public scan_nonsentinel_lines(
+        lines: string[],
+        n: number,
+        root: Position
+    ): [string | undefined, string | undefined, number] {
         let delim1;
         let delim2;
 
@@ -227,13 +270,15 @@ export class GoToCommands {
         let h: string | undefined = root.h;
         let offset = 0; //  = 0, root.gnx, root.h, 0
 
-        const stack: [string | undefined, string | undefined, number][] = [[gnx, h, offset]];
+        const stack: [string | undefined, string | undefined, number][] = [
+            [gnx, h, offset],
+        ];
 
         let broke = false;
         for (let s of lines) {
             const is_sentinel = this.is_sentinel(delim1, delim2, s);
             if (is_sentinel) {
-                const s2 = s.trim().substring(delim1.length);  // Works for blackened sentinels.
+                const s2 = s.trim().substring(delim1.length); // Works for blackened sentinels.
                 if (s2.startsWith('@+node')) {
                     // Invisible, but resets the offset.
                     offset = 0;
@@ -269,7 +314,6 @@ export class GoToCommands {
         }
 
         return [gnx, h, offset];
-
     }
     //@+node:felix.20221218143456.7: *3* goto.scan_sentinel_lines
     /**
@@ -281,8 +325,11 @@ export class GoToCommands {
      * h:      the headline of the #@+node
      * offset: the offset of line n within the node.
      */
-    public scan_sentinel_lines(lines: string[], n: number, root: Position): [string | undefined, string | undefined, number] {
-
+    public scan_sentinel_lines(
+        lines: string[],
+        n: number,
+        root: Position
+    ): [string | undefined, string | undefined, number] {
         let delim1;
         let delim2;
 
@@ -292,12 +339,13 @@ export class GoToCommands {
         let h: string | undefined = root.h;
         let offset = 0;
 
-        const stack: [string | undefined, string | undefined, number][] = [[gnx, h, offset]];
+        const stack: [string | undefined, string | undefined, number][] = [
+            [gnx, h, offset],
+        ];
 
         let broke = false;
 
         for (let [i, s] of lines.entries()) {
-
             if (this.is_sentinel(delim1, delim2, s)) {
                 const s2 = s.trim().substring(delim1.length); // Works for blackened sentinels.
                 if (s2.startsWith('@+node')) {
@@ -315,7 +363,8 @@ export class GoToCommands {
             } else {
                 offset += 1;
             }
-            if (i + 1 === n) { // Bug fix 2017/04/01: n is one based.
+            if (i + 1 === n) {
+                // Bug fix 2017/04/01: n is one based.
                 broke = true;
                 break;
             }
@@ -325,7 +374,6 @@ export class GoToCommands {
         }
 
         return [gnx, h, offset];
-
     }
 
     //@+node:felix.20221218143456.8: *3* goto.Utils
@@ -334,33 +382,35 @@ export class GoToCommands {
      * Select the last line of the last node of root's tree.
      */
     public fail(lines: string[], n: number, root: Position): void {
-
         const c = this.c;
         const w = c.frame.body.wrapper;
         c.selectPosition(root);
         c.redraw();
-        if (!g.unitTesting) {
+        // Don't warn if there is no line 0.
+        if (!g.unitTesting && Math.abs(n) > 0) {
             if (lines.length < n) {
                 g.warning('only', lines.length, 'lines');
             } else {
                 g.warning('line', n, 'not found');
             }
         }
-        // c.frame.clearStatusLine(); // LEOJS : UNUSED 
+        // c.frame.clearStatusLine(); // LEOJS : UNUSED
         c.frame.putStatusLine(`goto-global-line not found: ${n}`);
         // Put the cursor on the last line of body text.
         w.setInsertPoint(root.b.length);
         c.bodyWantsFocus();
         w.seeInsertPoint();
-
     }
     //@+node:felix.20221218143456.10: *4* goto.find_gnx
     /**
      * Scan root's tree for a node with the given gnx and vnodeName.
      * return (p,found)
      */
-    public find_gnx(root: Position, gnx?: string, vnodeName?: string): [Position | undefined, boolean] {
-
+    public find_gnx(
+        root: Position,
+        gnx?: string,
+        vnodeName?: string
+    ): [Position | undefined, boolean] {
         if (gnx) {
             gnx = g.toUnicode(gnx);
             for (let p of root.self_and_subtree(false)) {
@@ -380,15 +430,11 @@ export class GoToCommands {
      * return root, fileName.
      */
     public find_root(p: Position): [Position | undefined, string | undefined] {
-
         const c = this.c;
         const p1 = p.copy();
         let fileName;
         // First look for ancestor @file node.
         for (let w_p of p.self_and_parents(false)) {
-            // fileName = not p2.isAtAllNode() and p2.anyAtFileNodeName()
-            // if fileName:
-            // return p2.copy(), fileName
             if (!w_p.isAtAllNode()) {
                 fileName = w_p.anyAtFileNodeName();
                 if (fileName) {
@@ -396,8 +442,7 @@ export class GoToCommands {
                 }
             }
         }
-        // Search the entire tree for joined nodes.
-        // Bug fix: Leo 4.5.1: *must* search *all* positions.
+        // Search the entire tree for cloned nodes.
         for (let w_p of c.all_positions()) {
             if (w_p.v === p1.v && !w_p.__eq__(p1)) {
                 // Found a joined position.
@@ -408,27 +453,23 @@ export class GoToCommands {
                             return [p2.copy(), fileName];
                         }
                     }
-
                 }
             }
         }
         return [undefined, undefined];
-
     }
     //@+node:felix.20221218143456.12: *4* goto.get_delims
     /**
      * Return the delimiters in effect at root.
      */
     public get_delims(root: Position): [string, string | undefined] {
-
         const c = this.c;
         const old_target_language = c.target_language;
         let d;
         try {
             c.target_language = g.getLanguageAtPosition(c, root);
             d = c.scanAllDirectives(root);
-        }
-        finally {
+        } finally {
             c.target_language = old_target_language;
         }
 
@@ -442,7 +483,6 @@ export class GoToCommands {
         }
 
         return [delims2, delims3];
-
     }
     //@+node:felix.20221218143456.13: *4* goto.get_external_file_with_sentinels
     /**
@@ -450,8 +490,9 @@ export class GoToCommands {
      * writing the file *with* sentinels, even if the external file normally
      * would *not* have sentinels.
      */
-    public async get_external_file_with_sentinels(root: Position): Promise<string> {
-
+    public async get_external_file_with_sentinels(
+        root: Position
+    ): Promise<string> {
         const c = this.c;
         let s: string;
         if (root.isAtAutoNode()) {
@@ -460,31 +501,33 @@ export class GoToCommands {
             try {
                 g.app.force_at_auto_sentinels = true;
                 s = await c.atFileCommands.atAutoToString(root);
-            }
-            finally {
+            } finally {
                 g.app.force_at_auto_sentinels = true;
             }
             return s;
         }
 
-        return g.composeScript(  // Fix #429.
+        return g.composeScript(
+            // Fix #429.
             c,
             root,
             root.b,
-            false,  // See #247.
-            true);
-
+            false, // See #247.
+            true
+        );
     }
     //@+node:felix.20221218143456.14: *4* goto.get_script_node_info
     /**
      * Return the gnx and headline of a #@+node.
      */
-    public get_script_node_info(s: string, delim2?: string): [string | undefined, string | undefined] {
-
+    public get_script_node_info(
+        s: string,
+        delim2?: string
+    ): [string | undefined, string | undefined] {
         const i = s.indexOf(':', 0);
         const j = s.indexOf(':', i + 1);
         if (i === -1 || j === -1) {
-            g.error("bad @+node sentinel", s);
+            g.error('bad @+node sentinel', s);
             return [undefined, undefined];
         }
         const gnx = s.substring(i + 1, j);
@@ -494,16 +537,22 @@ export class GoToCommands {
             h = g.rtrim(h, delim2);
         }
         return [gnx, h];
-
     }
     //@+node:felix.20221218143456.15: *4* goto.is_sentinel
-    /** 
+    /**
      * Return True if s is a sentinel line with the given delims.
      */
-    public is_sentinel(delim1: string, delim2: string | undefined, s: string): boolean {
-
+    public is_sentinel(
+        delim1: string,
+        delim2: string | undefined,
+        s: string
+    ): boolean {
         // Leo 6.7.2: Use g.is_sentinel, which handles blackened sentinels properly.
-        let delims: [string | undefined, string | undefined, string | undefined];
+        let delims: [
+            string | undefined,
+            string | undefined,
+            string | undefined
+        ];
         if (delim1 && delim2) {
             delims = [undefined, delim1, delim2];
         } else {
@@ -511,7 +560,6 @@ export class GoToCommands {
         }
 
         return g.is_sentinel(s, delims);
-
     }
     //@+node:felix.20221218143456.16: *4* goto.remove_level_stars
     public remove_level_stars(s: string): string {
@@ -533,14 +581,12 @@ export class GoToCommands {
             i += 1;
         }
         return s.substring(i);
-
     }
     //@+node:felix.20221218143456.17: *4* goto.success
     /**
      * Place the cursor on line n2 of p.b.
      */
     public success(n: number, n2: number, p: Position): void {
-
         const c = this.c;
         const w = c.frame.body.wrapper;
         // Select p and make it visible.
@@ -549,7 +595,7 @@ export class GoToCommands {
         // Put the cursor on line n2 of the body text.
         const s = w.getAllText();
         const ins = g.convertRowColToPythonIndex(s, n2 - 1, 0);
-        // c.frame.clearStatusLine(); // LEOJS : UNUSED 
+        // c.frame.clearStatusLine(); // LEOJS : UNUSED
         c.frame.putStatusLine(`goto-global-line found: ${n2}`);
         w.setInsertPoint(ins);
         c.bodyWantsFocus();
@@ -583,7 +629,6 @@ export class GoToCommands {
     }
 
     //@-others
-
 }
 //@-others
 

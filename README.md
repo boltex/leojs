@@ -4,7 +4,7 @@
 
 ### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
->LeoJS is a typescript implementation of the Leo Editor, integrated as a VSCode extension. It's core is a line-by-line translation of it's original python source code.
+>LeoJS is a typescript implementation of the Leo Editor, as a VSCode extension. A line-by-line translation of the original python source code.
 
 - See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).

@@ -8,6 +8,8 @@
  * Support for LeoJS's new unit tests, contained in src/tests/.
  */
 
+import * as path from 'path';
+import * as os from 'os';
 import * as g from '../core/leoGlobals';
 import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
@@ -143,7 +145,13 @@ export class LeoUnitTest {
 
         // Create a new commander for each test.
         // This is fast, because setUpClass has done all the imports.
-        const c = new Commands("", new NullGui());
+
+
+        // fileName = g.os_path_finalize_join(g.app.loadDir, 'LeoPyRef.leo')
+        const fileName = g.os_path_finalize_join(g.app.loadDir!, 'Leojs.leo');
+        // const fileName = g.os_path_finalize_join(g.vsCodeContext.extensionUri.fsPath, 'Leojs.leo');
+
+        const c = new Commands(fileName, new NullGui());
         this.c = c;
         // Init the 'root' and '@settings' nodes.
         this.root_p = c.rootPosition()!;
@@ -158,6 +166,44 @@ export class LeoUnitTest {
         // unneeded ?
     }
 
+    //@+node:felix.20230724005349.1: *3* LeoUnitTest: setup helpers and related tests
+    //@+node:felix.20230724005349.2: *4* LeoUnitTest._set_setting
+    /**
+     * Call c.config.set with the given args, suppressing stdout.
+     */
+    public _set_setting(c: Commands, kind: string, name: string, val: any): void {
+
+        c.config.set(undefined, kind, name, val);
+
+        // try:
+        //     old_stdout = sys.stdout
+        //     sys.stdout = open(os.devnull, 'w')
+        //     c.config.set(p=None, kind=kind, name=name, val=val)
+        // catch(e){
+
+        // }
+        // finally{
+        //     sys.stdout = old_stdout
+        // }
+
+    }
+
+    //@+node:felix.20230724005349.3: *4* LeoUnitTest.verbose_test_set_setting
+    public verbose_test_set_setting(): void {
+        // Not run by default. To run:
+        // python -m unittest leo.core.leoTest2.LeoUnitTest.verbose_test_set_setting
+        const c = this.c;
+        let val: any;
+        let name = '';
+        for (const w_val in [true, false]) {
+            name = 'test-bool-setting';
+            this._set_setting(c, 'bool', name, val);
+            assert.ok(c.config.getBool(name) === val);
+        }
+        val = 'aString';
+        this._set_setting(c, 'string', name, val);
+        assert.ok(c.config.getString(name) === val);
+    }
     //@+node:felix.20220130224933.5: *3* LeoUnitTest.create_test_outline
     public create_test_outline(): void {
         const p: Position = this.c!.p;
@@ -208,7 +254,6 @@ export class LeoUnitTest {
      * Dump root's headlines, or all headlines if root is None.
      */
     public dump_headlines(root?: Position, tag?: string): void {
-
         console.log('');
         if (tag) {
             console.log(tag);
@@ -224,7 +269,6 @@ export class LeoUnitTest {
      * Dump root's tree, or the entire tree if root is None.
      */
     public dump_tree(root?: Position, tag?: string): void {
-
         console.log('');
         if (tag) {
             console.log(tag);

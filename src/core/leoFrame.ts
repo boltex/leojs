@@ -775,11 +775,13 @@ export class NullTree {
      */
     public set_status_line(p: Position): void {
         const c = this.c;
-        // c.frame.body.assignPositionToEditor(p);  // New in Leo 4.4.1. // NOT USED IN LEOJS
-        // c.frame.updateStatusLine();  // New in Leo 4.4.1. // NOT USED IN LEOJS
+        // c.frame.body.assignPositionToEditor(p); // NOT USED IN LEOJS
+        // c.frame.updateStatusLine();  // NOT USED IN LEOJS
         // c.frame.clearStatusLine(); // NOT USED IN LEOJS
         if (p && p.__bool__() && p.v) {
-            c.frame.putStatusLine(p.get_UNL());
+            const kind = c.config.getString('unl-status-kind') || '';
+            const method = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL : p.get_UNL;
+            c.frame.putStatusLine(method());
         }
     }
 

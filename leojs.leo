@@ -351,7 +351,7 @@
 <v t="felix.20201214151451.8"><vh>_updateLeoObjectIndicator</vh></v>
 </v>
 </v>
-<v t="felix.20201214154816.1"><vh>@clean src/types.d.ts</vh>
+<v t="felix.20201214154816.1"><vh>@clean src/types.ts</vh>
 <v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
 <v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
 <v t="felix.20211007213915.1"><vh>FontSettings</vh></v>
@@ -555,8 +555,8 @@
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
 <v t="felix.20220612234816.1"><vh>@file src/commands/commanderHelpCommands.ts</vh></v>
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
-<v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
+<v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
 </v>
 <v t="felix.20221119204248.1"><vh>Gui base classes</vh>
@@ -571,13 +571,20 @@
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
 <v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
 <v t="felix.20230529171913.1"><vh>@file src/test/test_importers.ts</vh></v>
+<v t="felix.20230715185802.1"><vh>unittest commands</vh>
+<v t="felix.20230531185455.1"><vh>@file src/test/leoOutlineCommands.test.ts</vh></v>
+<v t="felix.20230715191134.1"><vh>@file src/test/leoEditCommands.test.ts</vh></v>
+<v t="felix.20230715191137.1"><vh>@file src/test/leoEditFileCommands.test.ts</vh></v>
+<v t="felix.20230715191150.1"><vh>@file src/test/leoCommanderFileCommands.test.ts</vh></v>
+</v>
+<v t="felix.20230715185809.1"><vh>unittest core</vh>
 <v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
 <v t="felix.20220129003133.1"><vh>@file src/test/leoAtFile.test.ts</vh></v>
 <v t="felix.20220129002752.1"><vh>@file src/test/leoCommands.test.ts</vh></v>
+<v t="felix.20230723005339.1"><vh>@file src/test/leoCompare.test.ts</vh></v>
 <v t="felix.20220129003431.1"><vh>@file src/test/leoConfig.test.ts</vh></v>
 <v t="felix.20220129003154.1"><vh>@file src/test/leoExternalFiles.test.ts</vh></v>
 <v t="felix.20220129003044.1"><vh>@file src/test/leoFileCommands.test.ts</vh></v>
-<v t="felix.20230531185455.1"><vh>@file src/test/leoOutlineCommands.test.ts</vh></v>
 <v t="felix.20220129003458.1"><vh>@file src/test/leoFind.test.ts</vh></v>
 <v t="felix.20230528193401.1"><vh>@file src/test/leoFrame.test.ts</vh></v>
 <v t="felix.20220129002458.1"><vh>@file src/test/leoGlobals.test.ts</vh></v>
@@ -587,6 +594,7 @@
 <v t="felix.20230528205401.2"><vh>@file src/test/leoRst.test.ts</vh></v>
 <v t="felix.20220129003553.1"><vh>@file src/test/leoShadow.test.ts</vh></v>
 <v t="felix.20220129003013.1"><vh>@file src/test/leoUndo.test.ts</vh></v>
+</v>
 </v>
 </v>
 </vnodes>
@@ -723,7 +731,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 ### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
-&gt;LeoJS is a typescript implementation of the Leo Editor, integrated as a VSCode extension. It's core is a line-by-line translation of it's original python source code.
+&gt;LeoJS is a typescript implementation of the Leo Editor, as a VSCode extension. A line-by-line translation of the original python source code.
 
 - See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).
@@ -839,18 +847,21 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 **Enjoy!**
 </t>
 <t tx="felix.20201208214322.1">import * as vscode from 'vscode';
+import * as GitAPI from './git';
+import * as GitBaseAPI from './git-base';
+
 import { Constants } from './constants';
 import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
+import { RemoteHubApi } from './remote-hub';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 @language typescript
 @tabwidth -4
 @others
-
 </t>
 <t tx="felix.20201208214506.1"># Change Log
 
@@ -886,9 +897,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 - Implemented Leo's atFile, atShadow and external files features
 - Implemented javascript scripting, along with c, g and p references.
 </t>
-<t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
-export function deactivate() { }
-
+<t tx="felix.20201208215619.1">
 </t>
 <t tx="felix.20201208223553.1">import * as vscode from 'vscode';
 import { Constants } from "./constants";
@@ -1280,10 +1289,12 @@ export async function activate(p_context: vscode.ExtensionContext) {
     if (p_context.extensionUri) {
         console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
+
     console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
     console.log('STARTUP:             path.sep: ', path.sep);
     console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
     console.log('STARTUP:          env appHost: ', vscode.env.appHost);
+    console.log('STARTUP:          process.cwd(): ', process.cwd());
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
@@ -1301,6 +1312,48 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
+        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
+
+        const gitExtension = vscode.extensions.getExtension&lt;GitAPI.GitExtension&gt;('vscode.git');
+        if (gitExtension) {
+            await gitExtension.activate();
+            try {
+                (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
+                console.log("STARTUP:          GIT extension installed as g.gitAPI");
+
+            } catch (e) {
+                console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
+            }
+        } else {
+            console.log("LEOJS ERROR : GIT EXTENSION NOT AVAILABLE !");
+        }
+
+        const gitBaseExtension = vscode.extensions.getExtension&lt;GitBaseAPI.GitBaseExtension&gt;('vscode.git-base');
+        if (gitBaseExtension) {
+            await gitBaseExtension.activate();
+            try {
+                (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
+                console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+            } catch (e) {
+                console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
+            }
+        } else {
+            console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT AVAILABLE !");
+        }
+
+        const extension = vscode.extensions.getExtension&lt;RemoteHubApi&gt;('ms-vscode.remote-repositories')
+            ?? vscode.extensions.getExtension&lt;RemoteHubApi&gt;('GitHub.remoteHub')
+            ?? vscode.extensions.getExtension&lt;RemoteHubApi&gt;('GitHub.remoteHub-insiders');
+
+        if (extension == null) {
+            console.log("LEOJS ERROR : GIT_REMOTE EXTENSION NOT AVAILABLE !");
+        }
+        if (extension) {
+            const api = extension.isActive ? extension.exports : await extension.activate();
+            (g.remoteHubAPI as RemoteHubApi) = api;
+            console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+        }
+
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
@@ -1328,15 +1381,16 @@ export async function activate(p_context: vscode.ExtensionContext) {
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection =&gt; {
-                    if (selection === "More Info") {
-                        vscode.env.openExternal(
-                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
-                        ).then(() =&gt; { }, (e) =&gt; {
-                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                        });
-                    }
-                });
+                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
+                    .then(selection =&gt; {
+                        if (selection === "More Info") {
+                            vscode.env.openExternal(
+                                vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                            ).then(() =&gt; { }, (e) =&gt; {
+                                console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                            });
+                        }
+                    });
                 console.log('NOT started because not writable workspace');
                 void setStartupDoneContext(true);
                 return;
@@ -1344,6 +1398,9 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
+
+                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+
                 await runLeo(p_context);
             } else {
                 // Is local filesystem
@@ -1369,6 +1426,89 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
 }
 
+function setStartupDoneContext(p_value: boolean): Thenable&lt;unknown&gt; {
+    return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
+}
+
+function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
+    if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
+        console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
+
+        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
+        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
+
+        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
+        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
+
+        // * Set new and unsaved document's c.openDirectory.
+        //  g.app.windowList[this.frameIndex].c;
+        for (const w_frame of g.app.windowList) {
+            if (!w_frame.c.openDirectory) {
+                // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
+                w_frame.c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+                if (w_frame.c.openDirectory) {
+                    w_frame.c.frame.openDirectory = w_frame.c.openDirectory;
+                }
+            }
+        }
+
+        // not started yet? 
+        if (!g.app.loadManager &amp;&amp; g.isBrowser) {
+            // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
+            if (g.app.vscodeUriScheme !== 'file') {
+
+                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+
+                void runLeo(p_context);
+            } else {
+                // Is local filesystem
+                void vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection =&gt; {
+                    if (selection === "More Info") {
+                        vscode.env.openExternal(
+                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project')
+                        ).then(() =&gt; { }, (e) =&gt; {
+                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                        });
+                    }
+                });
+                console.log('NOT started because no remote workspace yet');
+                void setStartupDoneContext(true);
+                return;
+            }
+        }
+    } else {
+        console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
+        void setStartupDoneContext(true);
+    }
+
+}
+
+async function runLeo(p_context: vscode.ExtensionContext) {
+    const w_start = process.hrtime(); // For calculating total startup time duration
+
+    // Initialize and run Leo
+    console.assert(g.app);
+
+    g.app.loadManager = new LoadManager(p_context);
+    await g.app.loadManager.load();
+    console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+
+}
+
+// this method is called when your extension is deactivated
+export function deactivate() { }
+
+/**
+ * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
+ */
+async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
+    const w_foundTabs: vscode.Tab[] = [];
+
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
 </t>
 <t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, false, false)],
 [CMD.INSERT_SELECTION, () =&gt; p_leoUI.insertNode(U, false, false, false)],
@@ -1865,7 +2005,7 @@ public static LEO_COMMANDS = {
     // * Tree Building
     EXECUTE_SCRIPT: "execute-script",
     REFRESH_FROM_DISK: "refresh-from-disk",
-    GIT_DIFF: "TODO_GIT_DIFF", // TODO in editFileCommands.ts !
+    GIT_DIFF: "git-diff",
     // * Outline from body text
     EXTRACT: "extract",
     EXTRACT_NAMES: "extract-names",
@@ -1896,7 +2036,7 @@ public static LEO_COMMANDS = {
     // * Mark Operations
     TOGGLE_MARK: "toggle-mark",
     COPY_MARKED: "copy-marked-nodes",
-    DIFF_MARKED_NODES: "diff-marked-nodes", // TODO from leoCompare.py
+    DIFF_MARKED_NODES: "diff-marked-nodes",
     MARK_CHANGED_ITEMS: "mark-changed-items",
     MARK_SUBHEADS: "mark-subheads",
     UNMARK_ALL: "unmark-all",
@@ -4008,6 +4148,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
+  },
+  "sponsor": {
+    "url": "https://boltex.github.io/"
   },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
@@ -10819,72 +10962,69 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     return item;
 }
 </t>
-<t tx="felix.20220523140004.1">async function runLeo(p_context: vscode.ExtensionContext) {
-    const w_start = process.hrtime(); // For calculating total startup time duration
-
-    // Initialize and run Leo
-    console.assert(g.app);
-
-    g.app.loadManager = new LoadManager(p_context);
-    await g.app.loadManager.load();
-    console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
-
-}
-
-</t>
-<t tx="felix.20220523151725.1">function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
-    if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
-        console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
-
-        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
-        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
-        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
-
-        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
-        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
-
-        // * Set new and unsaved document's c.openDirectory.
-        //  g.app.windowList[this.frameIndex].c;
-        for (const w_frame of g.app.windowList) {
-            if (!w_frame.c.openDirectory) {
-                // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-                w_frame.c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
-                if (w_frame.c.openDirectory) {
-                    w_frame.c.frame.openDirectory = w_frame.c.openDirectory;
-                }
-            }
+<t tx="felix.20220523140004.1">function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Thenable&lt;unknown&gt; {
+    let w_showWelcomeScreen: boolean = false;
+    if (p_previousVersion === undefined) {
+        console.log('leojs first-time install');
+        w_showWelcomeScreen = true;
+    } else {
+        if (p_previousVersion !== p_version) {
+            void vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
         }
+        const [w_major, w_minor] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        const [w_prevMajor, w_prevMinor] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        if (
+            (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor) ||
+            // Don't notify on downgrades
+            (w_major &lt; w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor))
+        ) {
+            w_showWelcomeScreen = false;
+        } else if (w_major !== w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &gt; w_prevMinor)) {
+            // Will show on major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
+            w_showWelcomeScreen = true;
+        }
+    }
+    if (w_showWelcomeScreen) {
+        return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
+    } else {
+        return Promise.resolve();
+    }
+}
+</t>
+<t tx="felix.20220523151725.1">            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
 
-        // not started yet? 
-        if (!g.app.loadManager &amp;&amp; g.isBrowser) {
-            // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
-            if (g.app.vscodeUriScheme !== 'file') {
-                void runLeo(p_context);
-            } else {
-                // Is local filesystem
-                void vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection =&gt; {
-                    if (selection === "More Info") {
-                        vscode.env.openExternal(
-                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project')
-                        ).then(() =&gt; { }, (e) =&gt; {
-                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                        });
-                    }
-                });
-                console.log('NOT started because no remote workspace yet');
-                void setStartupDoneContext(true);
-                return;
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.input) {
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
             }
         }
     } else {
-        console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
-        void setStartupDoneContext(true);
+        q_closedTabs = Promise.resolve(true);
     }
-
+    return q_closedTabs;
 }
 
+/**
+ * * Show welcome screen if needed, based on last version executed
+ * @param p_version Current version, as a string, from packageJSON.version
+ * @param p_previousVersion Previous version, as a string, from context.globalState.get service
+ * @returns A promise that triggers when command to show the welcome screen is finished, or immediately if not needed
+ */
 </t>
 <t tx="felix.20220613164517.1">public runAboutLeoDialog(
     c: Commands | undefined,
@@ -12644,82 +12784,8 @@ private _refreshButtonsPane(): void {
 }
 
 </t>
-<t tx="felix.20221002011858.1">/**
- * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
- */
-async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
-    const w_foundTabs: vscode.Tab[] = [];
-
-    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
-        p_tabGroup.tabs.forEach((p_tab) =&gt; {
-            if (p_tab.input &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
-                !p_tab.isDirty
-            ) {
-                w_foundTabs.push(p_tab);
-            }
-        });
-    });
-
-    let q_closedTabs;
-    if (w_foundTabs.length) {
-        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
-        for (const p_tab of w_foundTabs) {
-            if (p_tab.input) {
-                await vscode.commands.executeCommand(
-                    'vscode.removeFromRecentlyOpened',
-                    (p_tab.input as vscode.TabInputText).uri
-                );
-                // Delete to close all other body tabs.
-                // (w_oldUri will be deleted last below)
-                const w_edit = new vscode.WorkspaceEdit();
-                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
-                await vscode.workspace.applyEdit(w_edit);
-            }
-        }
-    } else {
-        q_closedTabs = Promise.resolve(true);
-    }
-    return q_closedTabs;
-}
-
-</t>
-<t tx="felix.20221002011903.1">/**
- * * Show welcome screen if needed, based on last version executed
- * @param p_version Current version, as a string, from packageJSON.version
- * @param p_previousVersion Previous version, as a string, from context.globalState.get service
- * @returns A promise that triggers when command to show the welcome screen is finished, or immediately if not needed
- */
-function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Thenable&lt;unknown&gt; {
-    let w_showWelcomeScreen: boolean = false;
-    if (p_previousVersion === undefined) {
-        console.log('leojs first-time install');
-        w_showWelcomeScreen = true;
-    } else {
-        if (p_previousVersion !== p_version) {
-            void vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
-        }
-        const [w_major, w_minor] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
-        const [w_prevMajor, w_prevMinor] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
-        if (
-            (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor) ||
-            // Don't notify on downgrades
-            (w_major &lt; w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor))
-        ) {
-            w_showWelcomeScreen = false;
-        } else if (w_major !== w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &gt; w_prevMinor)) {
-            // Will show on major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
-            w_showWelcomeScreen = true;
-        }
-    }
-    if (w_showWelcomeScreen) {
-        return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
-    } else {
-        return Promise.resolve();
-    }
-}
-</t>
+<t tx="felix.20221002011858.1"></t>
+<t tx="felix.20221002011903.1"></t>
 <t tx="felix.20221002124249.1">/**
  * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
  * @returns Promise that resolves when the chosen command is placed on the front-end command stack
@@ -12801,10 +12867,10 @@ set leojsStartupDone(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20221005002719.1">function setStartupDoneContext(p_value: boolean): Thenable&lt;unknown&gt; {
-    return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
-}
-
+<t tx="felix.20221005002719.1">            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
+                !p_tab.isDirty
 </t>
 <t tx="felix.20221009011653.1">export interface CommandOptions {
     node?: Position, // facultative, precise node onto which the command is run (also see p_keepSelection)
@@ -12920,14 +12986,17 @@ public refreshDesc(): void {
 
     if (this.leoStates.fileOpenedReady) {
 
-        const s = this.leoStates.leoOpenedFileName;
-        const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
-        let w_path = "";
-        const n = s ? s.lastIndexOf(w_filename) : -1;
-        if (n &gt;= 0 &amp;&amp; n + w_filename.length &gt;= s.length) {
-            w_path = s.substring(0, n);
-        }
-        titleDesc = w_filename + (w_path ? " in " + w_path : '');
+        // const s = this.leoStates.leoOpenedFileName;
+        // const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+        // let w_path = "";
+        // const n = s ? s.lastIndexOf(w_filename) : -1;
+        // if (n &gt;= 0 &amp;&amp; n + w_filename.length &gt;= s.length) {
+        //     w_path = s.substring(0, n);
+        // }
+        // titleDesc = w_filename + (w_path ? " in " + w_path : '');
+
+        const c = g.app.windowList[this.frameIndex].c;
+        titleDesc = c.frame.title;
 
         if (this._leoTreeView) {
             this._leoTreeView.description = titleDesc;
@@ -14929,5 +14998,7 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
 @language typescript
 </t>
 <t tx="felix.20230522010520.1"></t>
+<t tx="felix.20230715185802.1"></t>
+<t tx="felix.20230715185809.1"></t>
 </tnodes>
 </leo_file>

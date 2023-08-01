@@ -6,12 +6,12 @@
 //@+<< leoCompare imports & annotations >>
 //@+node:felix.20230430023337.2: ** << leoCompare imports & annotations >>
 
-import * as vscode from "vscode";
-import * as difflib from "difflib";
+import * as vscode from 'vscode';
+import * as difflib from 'difflib';
 import * as g from './leoGlobals';
-import { command } from "../core/decorators";
+import { command } from '../core/decorators';
 import { Commands } from './leoCommands';
-import { VNode, Position, } from './leoNodes';
+import { VNode, Position } from './leoNodes';
 
 //@-<< leoCompare imports & annotations >>
 //@+others
@@ -20,7 +20,6 @@ import { VNode, Position, } from './leoNodes';
  * The base class for Leo's compare code.
  */
 export class BaseLeoCompare {
-
     public c: Commands;
     public appendOutput: boolean;
     public ignoreBlankLines: boolean;
@@ -50,21 +49,21 @@ export class BaseLeoCompare {
     constructor(
         commands: Commands,
         options?: {
-            appendOutput?: boolean,
-            ignoreBlankLines?: boolean,
-            ignoreFirstLine1?: boolean,
-            ignoreFirstLine2?: boolean,
-            ignoreInteriorWhitespace?: boolean,
-            ignoreLeadingWhitespace?: boolean,
-            ignoreSentinelLines?: boolean,
-            limitCount?: number,
-            limitToExtension?: string,
-            makeWhitespaceVisible?: boolean,
-            printBothMatches?: boolean,
-            printMatches?: boolean,
-            printMismatches?: boolean,
-            printTrailingMismatches?: boolean,
-            outputFileName?: string,
+            appendOutput?: boolean;
+            ignoreBlankLines?: boolean;
+            ignoreFirstLine1?: boolean;
+            ignoreFirstLine2?: boolean;
+            ignoreInteriorWhitespace?: boolean;
+            ignoreLeadingWhitespace?: boolean;
+            ignoreSentinelLines?: boolean;
+            limitCount?: number;
+            limitToExtension?: string;
+            makeWhitespaceVisible?: boolean;
+            printBothMatches?: boolean;
+            printMatches?: boolean;
+            printMismatches?: boolean;
+            printTrailingMismatches?: boolean;
+            outputFileName?: string;
         }
     ) {
         // It is more convenient for the LeoComparePanel to set these directly.
@@ -77,14 +76,14 @@ export class BaseLeoCompare {
         this.ignoreLeadingWhitespace = true;
         this.ignoreSentinelLines = false;
         this.limitCount = 0;
-        this.limitToExtension = ".py";
+        this.limitToExtension = '.py';
         this.makeWhitespaceVisible = true;
         this.printBothMatches = false;
         this.printMatches = false;
         this.printMismatches = true;
         this.printTrailingMismatches = false;
         // For communication between methods...
-        this.outputFileName = "";
+        this.outputFileName = '';
         if (options) {
             this.appendOutput = !!options.appendOutput;
             this.ignoreFirstLine1 = !!options.ignoreFirstLine1;
@@ -117,15 +116,17 @@ export class BaseLeoCompare {
             }
         }
         //
-        this.fileName1 = "";
-        this.fileName2 = "";
+        this.fileName1 = '';
+        this.fileName2 = '';
         // Open files...
         this.outputFile = undefined; // BinaryIO in leo but intitial string in leojs
-
     }
     //@+node:felix.20230430023337.5: *3* compare_directories (entry)
     // We ignore the filename portion of path1 and path2 if it exists.
-    public async compare_directories(path1: string, path2: string): Promise<void> {
+    public async compare_directories(
+        path1: string,
+        path2: string
+    ): Promise<void> {
         // Ignore everything except the directory name.
         let dir1 = g.os_path_dirname(path1);
         let dir2 = g.os_path_dirname(path2);
@@ -135,25 +136,23 @@ export class BaseLeoCompare {
         let list2: string[];
 
         if (dir1 === dir2) {
-            this.show("Please pick distinct directories.");
+            this.show('Please pick distinct directories.');
             return;
         }
         try {
             const w_uri = g.makeVscodeUri(dir1);
             const w_dirInfo = await vscode.workspace.fs.readDirectory(w_uri);
-            list1 = w_dirInfo.map(p_dirInfo => p_dirInfo[0]);
-
+            list1 = w_dirInfo.map((p_dirInfo) => p_dirInfo[0]);
         } catch (exception) {
-            this.show("invalid directory:" + dir1);
+            this.show('invalid directory:' + dir1);
             return;
         }
         try {
             const w_uri = g.makeVscodeUri(dir2);
             const w_dirInfo = await vscode.workspace.fs.readDirectory(w_uri);
-            list2 = w_dirInfo.map(p_dirInfo => p_dirInfo[0]);
-        }
-        catch (exception) {
-            this.show("invalid directory:" + dir2);
+            list2 = w_dirInfo.map((p_dirInfo) => p_dirInfo[0]);
+        } catch (exception) {
+            this.show('invalid directory:' + dir2);
             return;
         }
         if (this.outputFileName) {
@@ -205,9 +204,8 @@ export class BaseLeoCompare {
                     } else {
                         no.push(f1);
                     }
-
                 } catch (exception) {
-                    this.show("exception in filecmp.cmp");
+                    this.show('exception in filecmp.cmp');
                     g.es_exception();
                     missing1.push(f1);
                 }
@@ -224,10 +222,10 @@ export class BaseLeoCompare {
         }
         // Print the results.
         const table: [string, string[]][] = [
-            ["----- matches --------", yes],
-            ["----- mismatches -----", no],
-            ["----- not found 1 ------", missing1],
-            ["----- not found 2 ------", missing2],
+            ['----- matches --------', yes],
+            ['----- mismatches -----', no],
+            ['----- not found 1 ------', missing1],
+            ['----- not found 2 ------', missing2],
         ];
         for (let [kind, files] of table) {
             this.show(kind);
@@ -245,19 +243,17 @@ export class BaseLeoCompare {
             // this.outputFile.close()
             this.outputFile = undefined;
         }
-
     }
     //@+node:felix.20230430023337.6: *3* compare_files (entry)
     public compare_files(name1: string, name2: string): Promise<void> {
         if (name1 === name2) {
-            this.show("File names are identical.\nPlease pick distinct files.");
+            this.show('File names are identical.\nPlease pick distinct files.');
             return Promise.resolve();
         }
         return this.compare_two_files(name1, name2);
     }
     //@+node:felix.20230430023337.7: *3* compare_list_of_files (entry for scripts)
     public async compare_list_of_files(aList1: string[]): Promise<void> {
-
         const aList = [...new Set(aList1)];
         while (aList.length > 1) {
             const path1 = aList[0];
@@ -271,8 +267,10 @@ export class BaseLeoCompare {
     /**
      * A helper function.
      */
-    public async compare_two_files(name1: string, name2: string): Promise<void> {
-
+    public async compare_two_files(
+        name1: string,
+        name2: string
+    ): Promise<void> {
         let f1;
         let f2;
 
@@ -290,10 +288,8 @@ export class BaseLeoCompare {
                 // Don't compare if there is an error opening the output file.
                 await this.compare_open_files(f1, f2, name1, name2);
             }
-
-        }
-        catch (exception) {
-            this.show("exception comparing files");
+        } catch (exception) {
+            this.show('exception comparing files');
             g.es_exception();
         }
 
@@ -308,12 +304,10 @@ export class BaseLeoCompare {
                 // this.outputFile.close();
                 this.outputFile = undefined;
             }
-        }
-        catch (exception) {
-            this.show("exception closing files");
+        } catch (exception) {
+            this.show('exception closing files');
             g.es_exception(exception);
         }
-
     }
     //@+node:felix.20230430023337.9: *3* compare_lines
     public compare_lines(s1: string, s2: string): boolean {
@@ -334,10 +328,14 @@ export class BaseLeoCompare {
             s2 = ws2 + tail2;
         }
         return s1 === s2;
-
     }
     //@+node:felix.20230430023337.10: *3* compare_open_files
-    public async compare_open_files(f1: string[], f2: string[], name1: string, name2: string): Promise<void> {
+    public async compare_open_files(
+        f1: string[],
+        f2: string[],
+        name1: string,
+        name2: string
+    ): Promise<void> {
         // this.show("compare_open_files")
         let lines1 = 0;
         let lines2 = 0;
@@ -346,9 +344,9 @@ export class BaseLeoCompare {
         let sentinelComment1: string | undefined;
         let sentinelComment2: string | undefined;
         if (await this.openOutputFile()) {
-            this.show("1: " + name1);
-            this.show("2: " + name2);
-            this.show("");
+            this.show('1: ' + name1);
+            this.show('2: ' + name2);
+            this.show('');
         }
         let s1: string | undefined;
         let s2: string | undefined;
@@ -368,10 +366,10 @@ export class BaseLeoCompare {
             sentinelComment1 = this.isLeoHeader(s1);
             sentinelComment2 = this.isLeoHeader(s2);
             if (!sentinelComment1) {
-                this.show("no @+leo line for " + name1);
+                this.show('no @+leo line for ' + name1);
             }
             if (!sentinelComment2) {
-                this.show("no @+leo line for " + name2);
+                this.show('no @+leo line for ' + name2);
             }
         }
         if (this.ignoreFirstLine1) {
@@ -404,21 +402,29 @@ export class BaseLeoCompare {
             //@+node:felix.20230430023337.12: *4* << ignore blank lines and/or sentinels >>
             // Completely empty strings denotes end-of-file.
             if (s1) {
-                if (this.ignoreBlankLines && s1.trim() === "") {
+                if (this.ignoreBlankLines && s1.trim() === '') {
                     s1 = undefined;
                     continue;
                 }
-                if (this.ignoreSentinelLines && sentinelComment1 && this.isSentinel(s1, sentinelComment1)) {
+                if (
+                    this.ignoreSentinelLines &&
+                    sentinelComment1 &&
+                    this.isSentinel(s1, sentinelComment1)
+                ) {
                     s1 = undefined;
                     continue;
                 }
             }
             if (s2) {
-                if (this.ignoreBlankLines && s2.trim() === "") {
+                if (this.ignoreBlankLines && s2.trim() === '') {
                     s2 = undefined;
                     continue;
                 }
-                if (this.ignoreSentinelLines && sentinelComment2 && this.isSentinel(s2, sentinelComment2)) {
+                if (
+                    this.ignoreSentinelLines &&
+                    sentinelComment2 &&
+                    this.isSentinel(s2, sentinelComment2)
+                ) {
                     s2 = undefined;
                     continue;
                 }
@@ -428,12 +434,12 @@ export class BaseLeoCompare {
             n1 = s1.length;
             n2 = s2.length;
             if (n1 === 0 && n2 !== 0) {
-                this.show("1.eof***:");
+                this.show('1.eof***:');
             }
             if (n2 === 0 && n1 !== 0) {
-                this.show("2.eof***:");
+                this.show('2.eof***:');
             }
-            if (n1 == 0 || n2 == 0) {
+            if (n1 === 0 || n2 === 0) {
                 break;
             }
             const match = this.compare_lines(s1, s2);
@@ -443,12 +449,11 @@ export class BaseLeoCompare {
 
             //@+<< print matches and/or mismatches >>
             //@+node:felix.20230430023337.13: *4* << print matches and/or mismatches >>
-            if (this.limitCount == 0 || mismatches <= this.limitCount) {
-
+            if (this.limitCount === 0 || mismatches <= this.limitCount) {
                 if (match && this.printMatches) {
                     if (this.printBothMatches) {
-                        z1 = "1." + lines1.toString();
-                        z2 = "2." + lines2.toString();
+                        z1 = '1.' + lines1.toString();
+                        z2 = '2.' + lines2.toString();
                         this.dump(g.rjust(z1, 6) + ' :', s1);
                         this.dump(g.rjust(z2, 6) + ' :', s2);
                     } else {
@@ -457,53 +462,50 @@ export class BaseLeoCompare {
                 }
 
                 if (!match && this.printMismatches) {
-                    z1 = "1." + lines1.toString();
-                    z2 = "2." + lines2.toString();
+                    z1 = '1.' + lines1.toString();
+                    z2 = '2.' + lines2.toString();
                     this.dump(g.rjust(z1, 6) + '*:', s1);
                     this.dump(g.rjust(z2, 6) + '*:', s2);
                 }
-
             }
             //@-<< print matches and/or mismatches >>
             //@+<< warn if mismatch limit reached >>
             //@+node:felix.20230430023337.14: *4* << warn if mismatch limit reached >>
             if (this.limitCount > 0 && mismatches >= this.limitCount) {
                 if (printTrailing) {
-                    this.show("");
-                    this.show("limit count reached");
-                    this.show("");
+                    this.show('');
+                    this.show('limit count reached');
+                    this.show('');
                     printTrailing = false;
                 }
             }
             //@-<< warn if mismatch limit reached >>
 
             s1 = undefined;
-            s2 = undefined;  // force a read of both lines.
-
+            s2 = undefined; // force a read of both lines.
         }
 
         //@+<< handle reporting after at least one eof is seen >>
         //@+node:felix.20230430023337.15: *4* << handle reporting after at least one eof is seen >>
         if (n1 > 0) {
-            lines1 += this.dumpToEndOfFile("1.", f1, s1, lines1, printTrailing);
+            lines1 += this.dumpToEndOfFile('1.', f1, s1, lines1, printTrailing);
         }
         if (n2 > 0) {
-            lines2 += this.dumpToEndOfFile("2.", f2, s2, lines2, printTrailing);
+            lines2 += this.dumpToEndOfFile('2.', f2, s2, lines2, printTrailing);
         }
-        this.show("");
-        this.show("lines1:" + lines1.toString());
-        this.show("lines2:" + lines2.toString());
-        this.show("mismatches:" + mismatches.toString());
+        this.show('');
+        this.show('lines1:' + lines1.toString());
+        this.show('lines2:' + lines2.toString());
+        this.show('mismatches:' + mismatches.toString());
         //@-<< handle reporting after at least one eof is seen >>
-
     }
     //@+node:felix.20230430023337.16: *3* compare.filecmp
     public async filecmp(f1: string, f2: string): Promise<boolean> {
         const val = await g.filecmp_cmp(f1, f2);
         if (val) {
-            this.show("equal");
+            this.show('equal');
         } else {
-            this.show("*** not equal");
+            this.show('*** not equal');
         }
         return val;
     }
@@ -522,17 +524,17 @@ export class BaseLeoCompare {
             const concatenatedArr = [];
             for (let i = 0; i < arrWithDelimiters.length; i += 2) {
                 if (i + 1 < arrWithDelimiters.length) {
-                    concatenatedArr.push(arrWithDelimiters[i] + arrWithDelimiters[i + 1]);
+                    concatenatedArr.push(
+                        arrWithDelimiters[i] + arrWithDelimiters[i + 1]
+                    );
                 } else {
                     // Add the last entry if it doesn't have a pair
                     concatenatedArr.push(arrWithDelimiters[i]);
                 }
             }
             return concatenatedArr;
-
-        }
-        catch (exception) {
-            this.show("can not open:" + '"' + name + '"');
+        } catch (exception) {
+            this.show('can not open:' + '"' + name + '"');
             return undefined;
         }
     }
@@ -544,13 +546,13 @@ export class BaseLeoCompare {
             let ch = s.slice(i, i + 1);
             if (compare.makeWhitespaceVisible) {
                 if (ch === '\t') {
-                    out += "[";
-                    out += "t";
-                    out += "]";
+                    out += '[';
+                    out += 't';
+                    out += ']';
                 } else if (ch === ' ') {
-                    out += "[";
-                    out += " ";
-                    out += "]";
+                    out += '[';
+                    out += ' ';
+                    out += ']';
                 } else {
                     out += ch;
                 }
@@ -561,7 +563,13 @@ export class BaseLeoCompare {
         this.show(out);
     }
     //@+node:felix.20230430023337.20: *4* compare.dumpToEndOfFile
-    public dumpToEndOfFile(tag: string, f: string[], s: string | undefined, line: number, printTrailing: boolean): number {
+    public dumpToEndOfFile(
+        tag: string,
+        f: string[],
+        s: string | undefined,
+        line: number,
+        printTrailing: boolean
+    ): number {
         let trailingLines = 0;
         while (1) {
             if (!s) {
@@ -573,15 +581,13 @@ export class BaseLeoCompare {
             trailingLines += 1;
             if (this.printTrailingMismatches && printTrailing) {
                 const z = tag + line.toString();
-                const tag2 = g.rjust(z, 6) + "+:";
+                const tag2 = g.rjust(z, 6) + '+:';
                 this.dump(tag2, s);
             }
             s = undefined;
-
         }
-        this.show(tag + trailingLines.toString() + " trailing lines");
+        this.show(tag + trailingLines.toString() + ' trailing lines');
         return trailingLines;
-
     }
     //@+node:felix.20230430023337.21: *4* compare.isLeoHeader & isSentinel
     //@+at These methods are based on AtFile.scanHeader(). They are simpler
@@ -591,7 +597,7 @@ export class BaseLeoCompare {
     //@@c
 
     public isLeoHeader(s: string): string | undefined {
-        const tag = "@+leo";
+        const tag = '@+leo';
         const j = s.indexOf(tag);
         if (j > 0) {
             const i = g.skip_ws(s, 0);
@@ -606,47 +612,45 @@ export class BaseLeoCompare {
         return g.match(s, i, sentinelComment);
     }
     //@+node:felix.20230430023337.22: *4* compare.openOutputFile
-    public async openOutputFile(): Promise<boolean> {// Bug fix: return a bool.
+    public async openOutputFile(): Promise<boolean> {
+        // Bug fix: return a bool.
         if (this.outputFileName == null) {
             return false;
         }
         let [theDir, name] = g.os_path_split(this.outputFileName);
 
         if (!theDir) {
-            this.show("empty output directory");
+            this.show('empty output directory');
             return false;
         }
         if (!name) {
-            this.show("empty output file name");
+            this.show('empty output file name');
             return false;
         }
         const w_exists = await g.os_path_exists(theDir);
         if (!w_exists) {
-            this.show("output directory not found: " + theDir);
+            this.show('output directory not found: ' + theDir);
             return false;
         }
         try {
             if (this.appendOutput) {
-                this.show("appending to " + this.outputFileName);
+                this.show('appending to ' + this.outputFileName);
                 // this.outputFile = open(this.outputFileName, "ab");
                 const w_uri = g.makeVscodeUri(this.outputFileName);
                 const content = await vscode.workspace.fs.readFile(w_uri);
                 this.outputFile = g.toUnicode(content);
-
             } else {
-                this.show("writing to " + this.outputFileName);
+                this.show('writing to ' + this.outputFileName);
 
                 // this.outputFile = open(this.outputFileName, "wb");
 
                 // replace
-                this.outputFile = ""; // START EMPTY
-
+                this.outputFile = ''; // START EMPTY
             }
             return true;
-        }
-        catch (exception) {
+        } catch (exception) {
             this.outputFile = undefined;
-            this.show("exception opening output file");
+            this.show('exception opening output file');
             g.es_exception();
             return false;
         }
@@ -667,37 +671,40 @@ export class BaseLeoCompare {
     }
     //@+node:felix.20230430023337.24: *4* compare.showIvars
     public showIvars(): void {
-        this.show("fileName1:" + this.fileName1.toString());
-        this.show("fileName2:" + this.fileName2.toString());
-        this.show("outputFileName:" + this.outputFileName.toString());
-        this.show("limitToExtension:" + this.limitToExtension.toString());
-        this.show("");
-        this.show("ignoreBlankLines:" + this.ignoreBlankLines.toString());
-        this.show("ignoreFirstLine1:" + this.ignoreFirstLine1.toString());
-        this.show("ignoreFirstLine2:" + this.ignoreFirstLine2.toString());
-        this.show("ignoreInteriorWhitespace:" + this.ignoreInteriorWhitespace.toString());
-        this.show("ignoreLeadingWhitespace:" + this.ignoreLeadingWhitespace.toString());
-        this.show("ignoreSentinelLines:" + this.ignoreSentinelLines.toString());
-        this.show("");
-        this.show("limitCount:" + this.limitCount.toString());
-        this.show("printMatches:" + this.printMatches.toString());
-        this.show("printMismatches:" + this.printMismatches.toString());
-        this.show("printTrailingMismatches:" + this.printTrailingMismatches.toString());
-
+        this.show('fileName1:' + this.fileName1.toString());
+        this.show('fileName2:' + this.fileName2.toString());
+        this.show('outputFileName:' + this.outputFileName.toString());
+        this.show('limitToExtension:' + this.limitToExtension.toString());
+        this.show('');
+        this.show('ignoreBlankLines:' + this.ignoreBlankLines.toString());
+        this.show('ignoreFirstLine1:' + this.ignoreFirstLine1.toString());
+        this.show('ignoreFirstLine2:' + this.ignoreFirstLine2.toString());
+        this.show(
+            'ignoreInteriorWhitespace:' +
+            this.ignoreInteriorWhitespace.toString()
+        );
+        this.show(
+            'ignoreLeadingWhitespace:' + this.ignoreLeadingWhitespace.toString()
+        );
+        this.show('ignoreSentinelLines:' + this.ignoreSentinelLines.toString());
+        this.show('');
+        this.show('limitCount:' + this.limitCount.toString());
+        this.show('printMatches:' + this.printMatches.toString());
+        this.show('printMismatches:' + this.printMismatches.toString());
+        this.show(
+            'printTrailingMismatches:' + this.printTrailingMismatches.toString()
+        );
     }
     //@-others
-
 }
 
 /**
  * A class containing Leo's compare code.
- * 
+ *
  * These are not very useful comparisons.
  */
 export class LeoCompare extends BaseLeoCompare {
-
     // pass
-
 }
 //@+node:felix.20230430023337.25: ** class CompareLeoOutlines
 /**
@@ -705,7 +712,6 @@ export class LeoCompare extends BaseLeoCompare {
  * Similar to GitDiffController, adapted for use by scripts.
  */
 export class CompareLeoOutlines {
-
     public c: Commands;
     public file_node: Position | undefined;
     public root: Position | undefined;
@@ -729,31 +735,31 @@ export class CompareLeoOutlines {
     /**
      * The main entry point for scripts.
      */
-    public async diff_list_of_files(aList: string[], visible = true): Promise<void> {
+    public async diff_list_of_files(
+        aList: string[],
+        visible = true
+    ): Promise<void> {
         if (aList.length < 2) {
             g.trace('Not enough files in', aList.toString());
             return;
         }
         const c = this.c;
         const u = this.c.undoer;
-        const undoType = 'Diff Leo files';
-        u.beforeChangeGroup(c.p, undoType);
 
-        this.root = this.create_root(aList);  // creates it's own undo bead
-
+        const undoType = 'diff-files';
+        c.selectPosition(c.lastTopLevel());
+        const undoData = u.beforeInsertNode(c.p);
+        this.root = this.create_root(aList);
         this.visible = visible;
         while (aList.length > 1) {
             const path1 = aList[0];
             aList = aList.slice(1);
             for (const path2 of aList) {
-                const undoData = u.beforeChangeTree(this.root!);
-                await this.diff_two_files(path1, path2);  // adds to this.root
-                u.afterChangeTree(this.root!, undoType, undoData);
+                await this.diff_two_files(path1, path2); // adds to this.root
             }
         }
-        u.afterChangeGroup(c.p, undoType);
+        u.afterInsertNode(this.root, undoType, undoData);
         this.finish();
-
     }
     //@+node:felix.20230430023337.27: *3* loc.diff_two_files
     /**
@@ -766,7 +772,10 @@ export class CompareLeoOutlines {
         const s2 = await this.get_file(fn2);
         const lines1 = g.splitLines(s1);
         const lines2 = g.splitLines(s2);
-        const diff_list = difflib.unifiedDiff(lines1, lines2, { fromfile: fn1, tofile: fn2 });
+        const diff_list = difflib.unifiedDiff(lines1, lines2, {
+            fromfile: fn1,
+            tofile: fn2,
+        });
         diff_list.splice(0, 0, '@language patch\n');
         this.file_node = this.create_file_node(diff_list, fn1, fn2);
         // These will be left open
@@ -774,7 +783,8 @@ export class CompareLeoOutlines {
         const c2 = await this.open_outline(fn2);
         if (c1 && c2) {
             this.make_diff_outlines(c1, c2);
-            this.file_node.b = `${this.file_node.b.trimEnd()}\n` +
+            this.file_node.b =
+                `${this.file_node.b.trimEnd()}\n` +
                 `@language ${c2.target_language}\n`;
         }
     }
@@ -783,31 +793,46 @@ export class CompareLeoOutlines {
     /**
      * Compute inserted, deleted, changed dictionaries.
      */
-    public compute_dicts(c1: Commands, c2: Commands): [
-        { [key: string]: VNode },
-        { [key: string]: VNode },
-        { [key: string]: [VNode, VNode] }
-    ] {
-        const d1: { [key: string]: VNode } = [...c1.all_unique_nodes()].reduce((acc: { [key: string]: VNode }, v: VNode) => {
-            acc[v.fileIndex] = v;
-            return acc;
-        }, {});
-        const d2: { [key: string]: VNode } = [...c2.all_unique_nodes()].reduce((acc: { [key: string]: VNode }, v: VNode) => {
-            acc[v.fileIndex] = v;
-            return acc;
-        }, {});
-        const added: { [key: string]: VNode } = Object.keys(d2).reduce((acc: { [key: string]: VNode }, key) => {
-            if (!d1[key]) {
-                acc[key] = d2[key];
-            }
-            return acc;
-        }, {});
-        const deleted: { [key: string]: VNode } = Object.keys(d1).reduce((acc: { [key: string]: VNode }, key) => {
-            if (!d2[key]) {
-                acc[key] = d1[key];
-            }
-            return acc;
-        }, {});
+    public compute_dicts(
+        c1: Commands,
+        c2: Commands
+    ): [
+            { [key: string]: VNode },
+            { [key: string]: VNode },
+            { [key: string]: [VNode, VNode] }
+        ] {
+        const d1: { [key: string]: VNode } = [...c1.all_unique_nodes()].reduce(
+            (acc: { [key: string]: VNode }, v: VNode) => {
+                acc[v.fileIndex] = v;
+                return acc;
+            },
+            {}
+        );
+        const d2: { [key: string]: VNode } = [...c2.all_unique_nodes()].reduce(
+            (acc: { [key: string]: VNode }, v: VNode) => {
+                acc[v.fileIndex] = v;
+                return acc;
+            },
+            {}
+        );
+        const added: { [key: string]: VNode } = Object.keys(d2).reduce(
+            (acc: { [key: string]: VNode }, key) => {
+                if (!d1[key]) {
+                    acc[key] = d2[key];
+                }
+                return acc;
+            },
+            {}
+        );
+        const deleted: { [key: string]: VNode } = Object.keys(d1).reduce(
+            (acc: { [key: string]: VNode }, key) => {
+                if (!d2[key]) {
+                    acc[key] = d1[key];
+                }
+                return acc;
+            },
+            {}
+        );
         const changed: { [key: string]: [VNode, VNode] } = {};
         for (const key in d1) {
             if (key in d2) {
@@ -837,7 +862,8 @@ export class CompareLeoOutlines {
         }
         const parent = this.file_node!.insertAsLastChild();
         parent.setHeadString(kind);
-        for (const key in d) {// USE 'in' FOR KEYS !
+        for (const key in d) {
+            // USE 'in' FOR KEYS !
             if (kind.toLowerCase() === 'changed') {
                 let [v1, v2] = d[key] as [VNode, VNode];
                 // Organizer node: contains diff
@@ -849,7 +875,7 @@ export class CompareLeoOutlines {
                     g.splitLines(v2.b),
                     {
                         fromfile: this.path1,
-                        tofile: this.path2
+                        tofile: this.path2,
                     }
                 );
                 // body = list(difflib.unified_diff(
@@ -887,7 +913,11 @@ export class CompareLeoOutlines {
     /**
      * Create an organizer node for the file.
      */
-    public create_file_node(diff_list: string[], fn1: string, fn2: string): Position {
+    public create_file_node(
+        diff_list: string[],
+        fn1: string,
+        fn2: string
+    ): Position {
         const p = this.root!.insertAsLastChild();
         p.h = `${g.shortFileName(fn1).trim()}, ${g.shortFileName(fn2).trim()}`;
         p.b = diff_list.join('');
@@ -899,19 +929,18 @@ export class CompareLeoOutlines {
      */
     public create_root(aList: string[]): Position {
         const c = this.c;
-        const u = this.c.undoer;
 
-        const undoType = 'Create diff root node';  // Same undoType is reused for all inner undos
-        c.selectPosition(c.lastTopLevel());  // pre-select to help undo-insert
-        const undoData = u.beforeInsertNode(c.p);  // c.p is subject of 'insertAfter'
+        // const u = this.c.undoer;
+        // const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
+        // c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
+        // const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
 
         const p = c.lastTopLevel().insertAfter();
         p.h = 'diff-leo-files';
         p.b = aList.join('\n') + '\n';
 
-        u.afterInsertNode(p, undoType, undoData);
+        // u.afterInsertNode(p, undoType, undoData);
         return p;
-
     }
     //@+node:felix.20230430023337.33: *4* loc.finish
     /**
@@ -927,21 +956,18 @@ export class CompareLeoOutlines {
         this.root!.expand();
         c.bodyWantsFocus();
         c.redraw();
-
     }
     //@+node:felix.20230430023337.34: *4* loc.get_file
     /**
      * Return the contents of the file whose path is given.
      */
     public async get_file(p_path: string): Promise<string> {
-
         // with open(p_path, 'rb') as f
         //     s = f.read()
         const w_uri = g.makeVscodeUri(p_path);
         const s = await vscode.workspace.fs.readFile(w_uri);
 
-        return g.toUnicode(s).replace(/\r/g, "");
-
+        return g.toUnicode(s).replace(/\r/g, '');
     }
     //@+node:felix.20230430023337.35: *4* loc.make_diff_outlines
     /**
@@ -952,7 +978,7 @@ export class CompareLeoOutlines {
         const table: [{ [key: string]: VNode | [VNode, VNode] }, string][] = [
             [added, 'Added'],
             [deleted, 'Deleted'],
-            [changed, 'Changed']
+            [changed, 'Changed'],
         ];
 
         for (let [d, kind] of table) {
@@ -975,25 +1001,19 @@ export class CompareLeoOutlines {
         return g.openWithFileName(fn, undefined, gui);
     }
     //@-others
-
 }
 //@+node:felix.20230430023337.37: ** class TopLevelCompareCommands
 export class TopLevelCompareCommands {
-
     //@+others
     //@+node:felix.20230430023337.38: *3* @g.command(diff-and-open-leo-files)
     @command(
         'diff-and-open-leo-files',
         'Open a dialog prompting for two or more .leo files.' +
-        'Opens all the files and creates a top-level node in c\'s outline showing' +
+        "Opens all the files and creates a top-level node in c's outline showing" +
         'the diffs of those files, two at a time.'
     )
     public diff_and_open_leo_files(this: Commands): Promise<void> {
-        return diff_leo_files_helper(
-            this,
-            "Diff And Open Leo Files",
-            true
-        );
+        return diff_leo_files_helper(this, 'Diff And Open Leo Files', true);
     }
     //@+node:felix.20230430023337.39: *3* @g.command(diff-leo-files)
     @command(
@@ -1002,14 +1022,11 @@ export class TopLevelCompareCommands {
         'Creates a top-level node showing the diffs of those files, two at a time.'
     )
     public diff_leo_files(this: Commands): Promise<void> {
-        return diff_leo_files_helper(
-            this,
-            "Diff Leo Files",
-            false
-        );
+        return diff_leo_files_helper(this, 'Diff Leo Files', false);
     }
     //@+node:felix.20230430023337.40: *3* @g.command(diff-marked-nodes)
-    @command('diff-marked-nodes',
+    @command(
+        'diff-marked-nodes',
         'When two or more nodes are marked, this command creates a' +
         '"diff marked node" as the last top-level node. The body of' +
         'this node contains "diff n" nodes, one for each pair of compared' +
@@ -1019,25 +1036,58 @@ export class TopLevelCompareCommands {
         'The children of the diff n are clones of the two compared nodes.'
     )
     public diffMarkedNodes(this: Commands): void {
-
         const c = this; // event and event.get('c')
         if (!c) {
             return;
         }
         const u = c.undoer;
-        const undoType = 'Diff marked nodes';  // Same undoType is reused for all inner undos
+        const undoType = 'diff-marked-nodes'; // Same undoType is reused for all inner undos
 
-        let aList = [...c.all_unique_positions()].filter(z => z.isMarked());
+        let aList = [...c.all_unique_positions()].filter((z) => z.isMarked());
 
+        if (aList.length < 2) {
+            g.es_print('Please mark at least 2 nodes');
+            return;
+        }
+        c.selectPosition(c.lastTopLevel());
+        const undoData = u.beforeInsertNode(c.p);
+        const root = c.lastTopLevel().insertAfter();
+        root.h = 'diff marked nodes';
+        root.b = aList.map((z) => z.h).join('\n') + '\n';
+        let n = 0;
+
+        while (aList.length > 1) {
+            n += 1;
+            let [p1, p2] = [aList[0], aList[1]];
+            aList = aList.slice(1);
+            const lines = new difflib.Differ().compare(
+                g.splitLines(p1.b.trimEnd() + '\n'),
+                g.splitLines(p2.b.trimEnd() + '\n')
+            );
+            const p = root.insertAsLastChild();
+            p.h = `diff ${n}`;
+            p.b = `1: ${p1.h}\n2: ${p2.h}\n${lines.join('')}`;
+            u.afterInsertNode(p, undoType, undoData);
+            for (const p3 of [p1, p2]) {
+                const clone = p3.clone();
+                clone.moveToLastChildOf(p);
+            }
+        }
+        u.afterInsertNode(root, undoType, undoData);
+        root.expand();
+        c.selectPosition(root);
+        c.redraw();
+
+        /*
         let n = 0;
         if (aList.length >= 2) {
-            u.beforeChangeGroup(c.p, undoType);  // going to perform many operations
+            u.beforeChangeGroup(c.p, undoType); // going to perform many operations
 
-            c.selectPosition(c.lastTopLevel());  // pre-select to help undo-insert
-            let undoData = u.beforeInsertNode(c.p);  // c.p is subject of 'insertAfter'
+            c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
+            let undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
             const root = c.lastTopLevel().insertAfter();
             root.h = 'diff marked nodes';
-            root.b = aList.map(z => z.h).join('\n') + '\n';
+            root.b = aList.map((z) => z.h).join('\n') + '\n';
             u.afterInsertNode(root, 'Create diff root node', undoData);
 
             while (aList.length > 1) {
@@ -1050,7 +1100,7 @@ export class TopLevelCompareCommands {
                     g.splitLines(p2.b.trimEnd() + '\n')
                 );
 
-                undoData = u.beforeInsertNode(c.p);  // c.p is subject of 'insertAfter'
+                undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
                 const p = root.insertAsLastChild();
                 // p.h = 'Compare: %s, %s' % (g.truncate(p1.h, 22), g.truncate(p2.h, 22))
                 p.h = `diff ${n}`;
@@ -1073,36 +1123,78 @@ export class TopLevelCompareCommands {
         } else {
             g.es_print('Please mark at least 2 nodes');
         }
+        */
+
     }
     //@-others
-
 }
 //@+node:felix.20230430023337.41: ** diff_leo_files_helper
 /**
  * Prompt for a list of Leo files to open.
  */
-export async function diff_leo_files_helper(c: Commands, title: string, visible: boolean): Promise<void> {
+export async function diff_leo_files_helper(
+    c: Commands,
+    title: string,
+    visible: boolean
+): Promise<void> {
     if (!c) {
         return;
     }
     const types: [string, string][] = [
-        ["Leo files", "*.leo *.leojs *.db"],
-        ["All files", "*"],
+        ['Leo files', '*.leo *.leojs *.db'],
+        ['All files', '*'],
     ];
     const w_paths = await g.app.gui.runOpenFileDialog(
         c,
         title,
         types,
-        ".leo",
-        true,
-    );
-    c.bringToFront();
-    // w_paths = [z for z in w_paths if g.os_path_exists(z)]
-    if (w_paths.length > 1) {
-        await new CompareLeoOutlines(c).diff_list_of_files(w_paths as string[], visible);
-    } else if (w_paths.length === 1) {
-        g.es_print('Please pick two or more .leo files');
+        '.leo',
+        true
+    ) as string[];
+
+    if (!w_paths || !w_paths.length) {
+        return;
     }
+
+    if (w_paths.length === 1) {
+        // Prompt for another file.
+        const paths2 = await g.app.gui.runOpenFileDialog(
+            c,
+            title,
+            types,
+            ".leo",
+            true,
+        ) as string[];
+
+        if (!paths2 || !paths2.length) {
+            return;
+        }
+        w_paths.push(...paths2);
+    }
+
+
+    c.bringToFront();
+
+    // w_paths = [z for z in w_paths if g.os_path_exists(z)]
+    // if (w_paths.length > 1) {
+    //     await new CompareLeoOutlines(c).diff_list_of_files(
+    //         w_paths as string[],
+    //         visible
+    //     );
+    // } else if (w_paths.length === 1) {
+    //     g.es_print('Please pick two or more .leo files');
+    // }
+
+    // console.assert( w_paths.length > 1);
+
+    if (!w_paths || w_paths.length < 2) {
+        g.es_print('Please pick two or more .leo files');
+        return;
+    }
+
+    await new CompareLeoOutlines(c).diff_list_of_files(w_paths as string[], visible);
+
+
 }
 //@-others
 //@@language typescript

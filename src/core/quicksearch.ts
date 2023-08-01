@@ -12,7 +12,6 @@ import { Commands } from './leoCommands';
 //@+others
 //@+node:felix.20221105222427.1: ** class QuickSearchController (leoserver.py)
 export class QuickSearchController {
-
     public c: Commands;
     public lw: string[];
 
@@ -21,11 +20,8 @@ export class QuickSearchController {
 
     // array of tuples (w (p,Position)) use index to refer.
     public its: [
-        { type: string; label: string; },
-        [
-            Position,
-            [number, number] | undefined
-        ] | undefined
+        { type: string; label: string },
+        [Position, [number, number] | undefined] | undefined
     ][];
 
     public fileDirectives: string[];
@@ -40,46 +36,61 @@ export class QuickSearchController {
     //@+node:felix.20221105235156.1: *3* QuickSearchController.__init__
     constructor(c: Commands) {
         this.c = c;
-        this.lw = [];  // empty list
+        this.lw = []; // empty list
 
         // ! OLD ! Keys are id(w),values are either tuples in tuples (w (p,Position)) or tuples (w, f)
         // array of tuples (w (p,Position)) use index to refer.
         this.its = [];
 
         this.fileDirectives = [
-            "@asis", "@auto",
-            "@auto-md", "@auto-org", "@auto-otl", "@auto-rst",
-            "@clean", "@file", "@edit"
+            '@asis',
+            '@auto',
+            '@auto-md',
+            '@auto-org',
+            '@auto-otl',
+            '@auto-rst',
+            '@clean',
+            '@file',
+            '@edit',
         ];
         this._search_patterns = [];
         this.navText = '';
         this.showParents = true;
-        this.isTag = false;  // added concept to combine tag pane functionality
+        this.isTag = false; // added concept to combine tag pane functionality
         this.searchOptions = 0;
-        this.searchOptionsStrings = ["All", "Subtree", "File", "Chapter", "Node"];
+        this.searchOptionsStrings = [
+            'All',
+            'Subtree',
+            'File',
+            'Chapter',
+            'Node',
+        ];
     }
     //@+node:felix.20221107011322.1: *3* translate & helper
     //based on fnmatch.py
     public escape(s: string): string {
-
-        const escapable = /[.\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
-        const meta: { [key: string]: string } = { // table of character substitutions
+        const escapable =
+            /[.\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+        const meta: { [key: string]: string } = {
+            // table of character substitutions
             '\b': '\\b',
             '\t': '\\t',
             '\n': '\\n',
             '\f': '\\f',
             '\r': '\\r',
-            '\.': '\\.',
+            '.': '\\.',
             '"': '\\"',
-            '\\': '\\\\'
+            '\\': '\\\\',
         };
 
         function escapechar(a: string) {
             let c = meta[a];
-            return typeof c === 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+            return typeof c === 'string'
+                ? c
+                : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
         }
         return s.replace(escapable, escapechar);
-    };
+    }
 
     public translate(pat: string): string {
         //Translate a shell PATTERN to a regular expression.
@@ -88,7 +99,7 @@ export class QuickSearchController {
         let i = 0;
         let j = 0;
         let n = pat.length || 0;
-        let res = ''; //  '^'; 
+        let res = ''; //  '^';
         let c: string;
         let stuff: string;
 
@@ -127,7 +138,6 @@ export class QuickSearchController {
             }
         }
         return res + '$';
-
     }
 
     //@+node:felix.20221105222427.6: *3* addBodyMatches
@@ -135,9 +145,9 @@ export class QuickSearchController {
         let lineMatchHits = 0;
 
         for (let p of positions) {
-            const it = { "type": "headline", "label": p[0].h };
+            const it = { type: 'headline', label: p[0].h };
             if (this.addItem(it, [p[0], undefined])) {
-                return lineMatchHits; // Hit 999 limit 
+                return lineMatchHits; // Hit 999 limit
             }
             const ms = this.matchlines(p[0].b, p[1]);
 
@@ -146,41 +156,47 @@ export class QuickSearchController {
                 let pos;
                 [ml, pos] = p_item;
                 lineMatchHits += 1;
-                const it2 = { "type": "body", "label": ml };
+                const it2 = { type: 'body', label: ml };
                 if (this.addItem(it2, [p[0], pos])) {
-                    return lineMatchHits; // Hit 999 limit 
+                    return lineMatchHits; // Hit 999 limit
                 }
             }
         }
 
         return lineMatchHits; // Normal return < 999 hits
-
     }
     //@+node:felix.20221105222427.18: *3* addHeadlineMatches
-    public addHeadlineMatches(position_list: [Position, RegExp | undefined][]): void {
+    public addHeadlineMatches(
+        position_list: [Position, RegExp | undefined][]
+    ): void {
         for (let p of position_list) {
-            const it = { "type": "headline", "label": p[0].h };
+            const it = { type: 'headline', label: p[0].h };
             if (this.addItem(it, [p[0], undefined])) {
                 return; // 999 limit hit
             }
         }
     }
     //@+node:felix.20221105222427.19: *3* addItem
-    public addItem(it: { type: string; label: string; }, val: [Position, [number, number] | undefined] | undefined): boolean {
+    public addItem(
+        it: { type: string; label: string },
+        val: [Position, [number, number] | undefined] | undefined
+    ): boolean {
         this.its.push([it, val]);
         // changed to 999 from 3000 to replace old threadutil behavior
-        return this.its.length > 999;  // Limit to 999 for now
-
+        return this.its.length > 999; // Limit to 999 for now
     }
     //@+node:felix.20221105222427.20: *3* addParentMatches
-    public addParentMatches(parent_list: { [key: string]: [Position, RegExp | undefined][] }): number {
+    public addParentMatches(parent_list: {
+        [key: string]: [Position, RegExp | undefined][];
+    }): number {
         let lineMatchHits = 0;
-        for (let parent_key in parent_list) { // Get key with 'for in'
+        for (let parent_key in parent_list) {
+            // Get key with 'for in'
             const parent_value = parent_list[parent_key];
 
             const v = this.c.fileCommands.gnxDict[parent_key];
             const h = v ? v.h : parent_key;
-            const it = { "type": "parent", "label": h };
+            const it = { type: 'parent', label: h };
 
             if (this.addItem(it, [parent_value[0][0], undefined])) {
                 return lineMatchHits; // Will cap at max number of entries!
@@ -190,35 +206,34 @@ export class QuickSearchController {
                 let p;
                 let m;
                 [p, m] = p_item;
-                const it = { "type": "headline", "label": p.h };
+                const it = { type: 'headline', label: p.h };
                 if (this.addItem(it, [p, undefined])) {
                     return lineMatchHits;
                 }
-                if (m !== undefined) { // p might not have body matches
+                if (m !== undefined) {
+                    // p might not have body matches
                     const ms = this.matchlines(p.b, m);
                     for (let p_ms of ms) {
                         let match_list;
                         let pos;
                         [match_list, pos] = p_ms;
                         lineMatchHits += 1;
-                        const it = { "type": "body", "label": match_list };
+                        const it = { type: 'body', label: match_list };
                         if (this.addItem(it, [p, pos])) {
                             return lineMatchHits;
                         }
                     }
                 }
             }
-
         }
         return lineMatchHits;
-
     }
     //@+node:felix.20221105222427.13: *3* addTag
     /**
      * add Tag label
      */
-    public addTag(text: string): { type: string, label: string } {
-        const it = { "type": "tag", "label": text };
+    public addTag(text: string): { type: string; label: string } {
+        const it = { type: 'tag', label: text };
         this.its.push([it, undefined]);
         return it;
     }
@@ -231,19 +246,20 @@ export class QuickSearchController {
     /**
      * Return list of all tuple (Position, matchiter/None) whose body matches regex one or more times.
      */
-    public find_b(regex: string, positions: Position[], flags = "grm"): [Position, RegExp][] {
-
+    public find_b(
+        regex: string,
+        positions: Position[],
+        flags = 'grm'
+    ): [Position, RegExp][] {
         let pat;
 
         try {
             pat = new RegExp(regex, flags);
-        }
-        catch (e) {
+        } catch (e) {
             return [];
         }
         const aList: [Position, RegExp][] = [];
         for (let p of positions) {
-
             pat.lastIndex = 0;
 
             if (pat.exec(p.b)) {
@@ -251,28 +267,27 @@ export class QuickSearchController {
                 const pc = p.copy();
                 aList.push([pc, new RegExp(regex, flags)]);
             }
-
         }
         return aList;
-
     }
     //@+node:felix.20221105222427.23: *3* find_h
     /**
      * Return the list of all tuple (Position, matchiter/None) whose headline matches the given pattern.
      */
-    public find_h(regex: string, positions: Position[], flags = "gi"): [Position, undefined][] {
-
+    public find_h(
+        regex: string,
+        positions: Position[],
+        flags = 'gi'
+    ): [Position, undefined][] {
         let pat;
 
         try {
             pat = new RegExp(regex, flags);
-        }
-        catch (e) {
+        } catch (e) {
             return [];
         }
         const aList: [Position, undefined][] = [];
         for (let p of positions) {
-
             pat.lastIndex = 0;
 
             if (pat.exec(p.h)) {
@@ -289,7 +304,6 @@ export class QuickSearchController {
      * Return list of all positions that have matching tags
      */
     public find_tag(pat: string): [Position, undefined][] {
-
         // USE update_list(self) from @file ../plugins/nodetags.py
         const c = this.c;
 
@@ -315,31 +329,35 @@ export class QuickSearchController {
         tags.reverse();
         operations.reverse();
 
-        let resultset: string[] = [...tc.get_tagged_gnxes(tags.pop()!)].filter((v, i, a) => a.indexOf(v) === i);
+        let resultset: string[] = [...tc.get_tagged_gnxes(tags.pop()!)].filter(
+            (v, i, a) => a.indexOf(v) === i
+        );
 
         while (operations.length && tags.length) {
             const op = operations.pop()!;
-            const nodes: string[] = [...tc.get_tagged_gnxes(tags.pop()!)].filter((v, i, a) => a.indexOf(v) === i);
+            const nodes: string[] = [
+                ...tc.get_tagged_gnxes(tags.pop()!),
+            ].filter((v, i, a) => a.indexOf(v) === i);
 
             if (op === '&') {
                 // intersection
                 // resultset &= nodes;
-                resultset = resultset.filter(x => nodes.includes(x));
+                resultset = resultset.filter((x) => nodes.includes(x));
             } else if (op === '|') {
                 // Update the set, adding elements from all others
                 // resultset |= nodes;
-                resultset = resultset.concat(nodes).filter((v, i, a) => a.indexOf(v) === i);
-
+                resultset = resultset
+                    .concat(nodes)
+                    .filter((v, i, a) => a.indexOf(v) === i);
             } else if (op === '-') {
                 // difference
                 // resultset -= nodes;
-                resultset = resultset.filter(x => !nodes.includes(x));
-
+                resultset = resultset.filter((x) => !nodes.includes(x));
             } else if (op === '^') {
                 // symetric difference keeping only elements found in either set, but not in both
                 // resultset ^= nodes;
-                const temp_result = resultset.filter(x => !nodes.includes(x)); //  resultset, but removed those in nodes.
-                const temp_Nodes = nodes.filter(x => !resultset.includes(x)); // opposite: nodes without resultset.
+                const temp_result = resultset.filter((x) => !nodes.includes(x)); //  resultset, but removed those in nodes.
+                const temp_Nodes = nodes.filter((x) => !resultset.includes(x)); // opposite: nodes without resultset.
                 resultset = temp_result.concat(temp_Nodes); // both results concatenated
             }
         }
@@ -356,7 +374,6 @@ export class QuickSearchController {
             }
         }
         return aList;
-
     }
 
     //@+node:felix.20221105222427.24: *3* matchlines
@@ -396,9 +413,10 @@ export class QuickSearchController {
                 let p;
                 let pos;
                 [p, pos] = tgt[1];
-                if (p.v) {// p might be "Root"
+                if (p.v) {
+                    // p might be "Root"
                     if (!c.positionExists(p)) {
-                        g.es("Node moved or deleted.\nMaybe re-do search.");
+                        g.es('Node moved or deleted.\nMaybe re-do search.');
                         return;
                     }
                     c.selectPosition(p);
@@ -417,9 +435,8 @@ export class QuickSearchController {
                     }
                 }
             }
-        }
-        catch (e) {
-            throw (new Error("QuickSearchController onSelectItem error" + e));
+        } catch (e) {
+            throw new Error('QuickSearchController onSelectItem error' + e);
         }
     }
 
@@ -429,12 +446,12 @@ export class QuickSearchController {
             return;
         }
         this._search_patterns = [pat, ...this._search_patterns].slice(0, 30);
-
     }
 
     //@+node:felix.20221105222427.10: *3* qsc_background_search
-    public qsc_background_search(pat: string): [[Position, RegExp | undefined][], Position[]] {
-
+    public qsc_background_search(
+        pat: string
+    ): [[Position, RegExp | undefined][], Position[]] {
         let flags: string;
         let hpat: string;
         if (!pat.startsWith('r:')) {
@@ -444,13 +461,13 @@ export class QuickSearchController {
         } else {
             // Flagged as a regexp with "r:"" so just remove it
             hpat = pat.substring(2);
-            flags = "g";
+            flags = 'g';
         }
         let combo = this.searchOptionsStrings[this.searchOptions];
         let hNodes: Position[] | Generator<Position>;
-        if (combo === "All") {
+        if (combo === 'All') {
             hNodes = this.c.all_positions();
-        } else if (combo === "Subtree") {
+        } else if (combo === 'Subtree') {
             hNodes = this.c.p.self_and_subtree();
         } else {
             hNodes = [this.c.p];
@@ -461,7 +478,6 @@ export class QuickSearchController {
         this.addHeadlineMatches(hm);
 
         return [hm, []];
-
     }
 
     //@+node:felix.20221105222427.11: *3* qsc_find_changed
@@ -470,7 +486,6 @@ export class QuickSearchController {
         const changed: [Position, undefined][] = [];
 
         for (let p of c.all_unique_positions()) {
-
             if (p.isDirty()) {
                 changed.push([p.copy(), undefined]);
             }
@@ -478,7 +493,6 @@ export class QuickSearchController {
 
         this.clear();
         this.addHeadlineMatches(changed);
-
     }
 
     //@+node:felix.20221105222427.12: *3* qsc_find_tags & helpers
@@ -487,7 +501,6 @@ export class QuickSearchController {
      * If empty pattern, list tags *strings* instead
      */
     public qsc_find_tags(pat: string): void {
-
         const c = this.c;
 
         if (!pat) {
@@ -506,7 +519,6 @@ export class QuickSearchController {
                         d[tag] = aList;
                     }
                 }
-
             }
             if (Object.keys(d).length) {
                 for (let key of Object.keys(d).sort()) {
@@ -515,18 +527,15 @@ export class QuickSearchController {
                 }
             }
             return;
-
         }
         // else: non empty pattern, so find tag!
         const hm = this.find_tag(pat);
         this.clear(); // needed for external client ui replacement: fills this.its
-        this.addHeadlineMatches(hm);  // added for external client ui replacement: fills this.its
-
+        this.addHeadlineMatches(hm); // added for external client ui replacement: fills this.its
     }
 
     //@+node:felix.20221105222427.15: *3* qsc_get_history
     public qsc_get_history(): void {
-
         const headlines: [Position, undefined][] = [];
 
         for (let po of this.c.nodeHistory.beadList) {
@@ -536,12 +545,10 @@ export class QuickSearchController {
         headlines.reverse();
         this.clear();
         this.addHeadlineMatches(headlines);
-
     }
 
     //@+node:felix.20221105222427.4: *3* qsc_search
     public qsc_search(pat: string): void {
-
         let hitBase = false;
         const c = this.c;
         let flags: string;
@@ -557,11 +564,11 @@ export class QuickSearchController {
             // in python 3.6 there is no (?ms) at the end
             // only \Z
             //bpat = bpat.replace(r'\Z', '')
-            flags = "gi";
+            flags = 'gi';
         } else {
             hpat = pat.substring(2);
             bpat = pat.substring(2);
-            flags = "g";
+            flags = 'g';
         }
 
         const combo = this.searchOptionsStrings[this.searchOptions];
@@ -570,13 +577,13 @@ export class QuickSearchController {
         let node: Position;
         let found: boolean;
         let h: string;
-        if (combo === "All") {
+        if (combo === 'All') {
             hNodes = c.all_positions();
             bNodes = c.all_positions();
-        } else if (combo === "Subtree") {
+        } else if (combo === 'Subtree') {
             hNodes = c.p.self_and_subtree();
             bNodes = c.p.self_and_subtree();
-        } else if (combo === "File") {
+        } else if (combo === 'File') {
             found = false;
             node = c.p;
             while (!found && !hitBase) {
@@ -596,7 +603,7 @@ export class QuickSearchController {
             }
             hNodes = node.self_and_subtree();
             bNodes = node.self_and_subtree();
-        } else if (combo === "Chapter") {
+        } else if (combo === 'Chapter') {
             found = false;
             node = c.p;
             while (!found && !hitBase) {
@@ -604,7 +611,7 @@ export class QuickSearchController {
                 if (h) {
                     h = h.split(/\s+/)[0];
                 }
-                if (h === "@chapter") {
+                if (h === '@chapter') {
                     found = true;
                 } else {
                     if (node.level() === 0) {
@@ -617,36 +624,41 @@ export class QuickSearchController {
             if (hitBase) {
                 // If I hit the base then revert to all positions
                 // this is basically the "main" chapter
-                hitBase = false;  // reset
+                hitBase = false; // reset
                 hNodes = c.all_positions();
                 bNodes = c.all_positions();
             } else {
                 hNodes = node.self_and_subtree();
                 bNodes = node.self_and_subtree();
             }
-
         } else {
             hNodes = [c.p];
             bNodes = [c.p];
         }
 
         if (!hitBase) {
-            let hm = this.find_h(hpat, [...hNodes], flags);  // Returns a list of positions.
-            let bm = this.find_b(bpat, [...bNodes], flags);  // Returns a list of positions.
+            let hm = this.find_h(hpat, [...hNodes], flags); // Returns a list of positions.
+            let bm = this.find_b(bpat, [...bNodes], flags); // Returns a list of positions.
 
-            let bm_keys = bm.map(match => match[0].key()); // [match[0].key() for match in bm];
+            let bm_keys = bm.map((match) => match[0].key()); // [match[0].key() for match in bm];
 
-            let numOfHm = hm.length;  // do this before trim to get accurate count
+            let numOfHm = hm.length; // do this before trim to get accurate count
             let lineMatchHits;
-            hm = hm.filter(match => !bm_keys.includes(match[0].key()));  //  [match for match in hm if match[0].key() not in bm_keys];
+            hm = hm.filter((match) => !bm_keys.includes(match[0].key())); //  [match for match in hm if match[0].key() not in bm_keys];
             if (this.showParents) {
                 // Was: parents = OrderedDefaultDict(list)
-                let parents: { [key: string]: [Position, RegExp | undefined][] } = {};
+                let parents: {
+                    [key: string]: [Position, RegExp | undefined][];
+                } = {};
 
                 for (let nodeList of [hm, bm]) {
                     for (let node of nodeList) {
-                        const key = node[0].level() === 0 ? 'Root' : node[0].parent().gnx;
-                        const aList: [Position, RegExp | undefined][] = parents[key] || [];
+                        const key =
+                            node[0].level() === 0
+                                ? 'Root'
+                                : node[0].parent().gnx;
+                        const aList: [Position, RegExp | undefined][] =
+                            parents[key] || [];
                         aList.push(node);
                         parents[key] = aList;
                     }
@@ -659,13 +671,13 @@ export class QuickSearchController {
 
             const hits = numOfHm + lineMatchHits;
             this.lw.unshift(`${hits} hits`);
-
         } else {
-            if (combo === "File") {
-                this.lw.unshift('External file directive not found during search');
+            if (combo === 'File') {
+                this.lw.unshift(
+                    'External file directive not found during search'
+                );
             }
         }
-
     }
 
     //@+node:felix.20221105222427.16: *3* qsc_show_marked
@@ -676,7 +688,6 @@ export class QuickSearchController {
         const marked: [Position, undefined][] = [];
 
         for (let z of c.all_positions()) {
-
             if (z.isMarked()) {
                 marked.push([z.copy(), undefined]);
             }
@@ -690,27 +701,23 @@ export class QuickSearchController {
      * Return positions by gnx.
      */
     public qsc_sort_by_gnx(): void {
-
         const c = this.c;
 
         const timeline: [Position, undefined][] = [];
-
 
         for (let p of c.all_unique_positions()) {
             timeline.push([p.copy(), undefined]);
         }
 
         timeline.sort((a, b) => {
-            return b[0].gnx === a[0].gnx ? 0 : (b[0].gnx < a[0].gnx ? -1 : 1);
+            return b[0].gnx === a[0].gnx ? 0 : b[0].gnx < a[0].gnx ? -1 : 1;
         });
 
         this.clear();
         this.addHeadlineMatches(timeline);
-
     }
 
     //@-others
-
 }
 //@-others
 //@@language typescript

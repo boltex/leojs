@@ -3,7 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
-import { Utils as uriUtils } from "vscode-uri";
+import { Utils as uriUtils } from 'vscode-uri';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
@@ -21,8 +21,15 @@ import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands, TopLevelImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
-import { PersistenceDataController, TopLevelPersistanceCommands } from './leoPersistence';
-import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
+import {
+    PersistenceDataController,
+    TopLevelPersistanceCommands,
+} from './leoPersistence';
+import {
+    EditCommandsClass,
+    TopLevelEditCommands,
+} from '../commands/editCommands';
+import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
 import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
@@ -219,7 +226,7 @@ export class Commands {
     public controlCommands: any = undefined;
     public convertCommands: any = undefined;
     public debugCommands: any = undefined;
-    public editFileCommands: any = undefined;
+    public editFileCommands: EditFileCommandsClass;
     public evalController: any = undefined;
     public gotoCommands: GoToCommands;
     public rstCommands: RstCommands;
@@ -289,6 +296,7 @@ export class Commands {
         this.persistenceController = new PersistenceDataController(c);
 
         this.editCommands = new EditCommandsClass(c);
+        this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
 
         this.rstCommands = new RstCommands(c);
@@ -298,7 +306,6 @@ export class Commands {
         // From finishCreate
         c.frame.finishCreate();
         c.createCommandNames();
-
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
@@ -311,6 +318,14 @@ export class Commands {
         // g.app.config.setIvarsFromSettings(c); // Removed in https://github.com/leo-editor/leo-editor/pull/2681
     }
 
+    //@+node:felix.20230728170724.1: *4* c.valueOf & c.toString
+    public toString(): string {
+        // return f"Commander {id(self)}: {repr(self.mFileName)}"
+        return `Commander ${this.mFileName.toString()}`;
+    }
+    public valueOf(): string {
+        return this.toString();
+    }
     //@+node:felix.20211018215401.1: *4* c.createCommandNames
     /**
      * Create all entries in c.commandsDict.
@@ -332,7 +347,7 @@ export class Commands {
         if (fileName) {
             title = g.computeWindowTitle(fileName);
         } else {
-            let s = "untitled";
+            let s = 'untitled';
             let n = g.app.numberOfUntitledWindows;
             if (n > 0) {
                 s += n.toString();
@@ -347,14 +362,12 @@ export class Commands {
      * Init all cached commander config settings.
      */
     public initConfigSettings(): void {
-
         const c: Commands = this;
         const getBool = c.config.getBool.bind(c.config);
         const getColor = c.config.getColor.bind(c.config);
         const getData = c.config.getData.bind(c.config);
         const getInt = c.config.getInt.bind(c.config);
         const getString = c.config.getString.bind(c.config);
-
 
         // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
         c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
@@ -366,7 +379,7 @@ export class Commands {
         //     'focus-border-command-state-color') || 'blue';
         // c.focus_border_overwrite_state_color = getColor(
         //     'focus-border-overwrite-state-color') || 'green';
-        c.focus_border_width = getInt('focus-border-width') || 1;  // pixels
+        c.focus_border_width = getInt('focus-border-width') || 1; // pixels
         c.forceExecuteEntireBody = getBool('force-execute-entire-body', false);
         c.make_node_conflicts_node = getBool('make-node-conflicts-node', true);
         c.outlineHasInitialFocus = getBool('outline-pane-has-initial-focus');
@@ -375,7 +388,10 @@ export class Commands {
         c.sparse_move = getBool('sparse-move-outline-left');
         c.sparse_find = getBool('collapse-nodes-during-finds');
         c.sparse_spell = getBool('collapse-nodes-while-spelling');
-        c.sparse_goto_visible = getBool('collapse-on-goto-first-last-visible', false);
+        c.sparse_goto_visible = getBool(
+            'collapse-on-goto-first-last-visible',
+            false
+        );
         c.stayInTreeAfterSelect = getBool('stayInTreeAfterSelect');
         c.smart_tab = getBool('smart-tab');
         c.tab_width = getInt('tab-width') || -4;
@@ -384,25 +400,21 @@ export class Commands {
         c.verbose_check_outline = getBool('verbose-check-outline', false);
         c.vim_mode = getBool('vim-mode', false);
         c.write_script_file = getBool('write-script-file');
-
     }
 
     //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
-    @cmd(
-        'execute-script',
-        'Execute a *Leo* script, written in python.'
-    )
+    @cmd('execute-script', 'Execute a *Leo* script, written in python.')
     public async executeScript(
         args: any = undefined,
         p: Position | undefined = undefined,
-        script: string = "",
+        script: string = '',
         useSelectedText: boolean = true,
         define_g: boolean = true,
         define_name: string = '__main__',
         silent: boolean = false,
         namespace: { [key: string]: any } | undefined = undefined,
         raiseFlag: boolean = false,
-        runPyflakes: boolean = true,
+        runPyflakes: boolean = true
     ): Promise<void> {
         /*
         Execute a *Leo* script, written in python.
@@ -433,7 +445,7 @@ export class Commands {
             }
             script = await g.getScript(c, p || c.p, useSelectedText);
         }
-        const script_p: Position = p || c.p;  // Only for error reporting below.
+        const script_p: Position = p || c.p; // Only for error reporting below.
         // #532: check all scripts with pyflakes.
         // ? needed ?
         // if run_pyflakes and not g.unitTesting:
@@ -450,38 +462,37 @@ export class Commands {
             if (script.trim()) {
                 // sys.path.insert(0, '.')  // New in Leo 5.0 // TODO : needed ?
                 // sys.path.insert(0, c.frame.openDirectory)  // per SegundoBob // TODO : needed ?
-                script += '\n';  // Make sure we end the script properly.
+                script += '\n'; // Make sure we end the script properly.
                 try {
                     if (!namespace || !namespace['script_gnx']) {
                         namespace = namespace || {};
-                        namespace["script_gnx"] = script_p.gnx;
+                        namespace['script_gnx'] = script_p.gnx;
                     }
                     // We *always* execute the script with p = c.p.
-                    c.executeScriptHelper(args, define_g, define_name, namespace, script);
-
-                }
-                catch (e) {
+                    c.executeScriptHelper(
+                        args,
+                        define_g,
+                        define_name,
+                        namespace,
+                        script
+                    );
+                } catch (e) {
                     g.es('interrupted');
                     if (raiseFlag) {
-                        throw (e);
+                        throw e;
                     }
                     // g.handleScriptException(c, script_p);
-
-                }
-                finally {
+                } finally {
                     // del sys.path[0]; // TODO : needed ?
                     // del sys.path[0]; // TODO : needed ?
                 }
-
             } else {
                 // tabName = log and hasattr(log, 'tabName') and log.tabName or 'Log' // TODO : needed ?
-                g.warning("no script selected");
+                g.warning('no script selected');
             }
-        }
-        catch (e) {
+        } catch (e) {
             // pass
-        }
-        finally {
+        } finally {
             // g.app.log = oldLog // TODO : needed ?
             this.unredirectScriptOutput();
         }
@@ -498,12 +509,14 @@ export class Commands {
         const c: Commands = this;
         let p: Position | undefined;
         if (c.p.__bool__()) {
-            p = c.p.copy();  // *Always* use c.p and pass c.p to script.
+            p = c.p.copy(); // *Always* use c.p and pass c.p to script.
             c.setCurrentDirectoryFromContext(p);
         } else {
             p = undefined;
         }
-        const d: { [key: string]: any } = define_g ? { 'c': c, 'g': g, 'input': "", 'p': p } : {};
+        const d: { [key: string]: any } = define_g
+            ? { c: c, g: g, input: '', p: p }
+            : {};
 
         if (define_name) {
             d['__name__'] = define_name;
@@ -522,7 +535,6 @@ export class Commands {
             g.app.inScript = true;
             (g.inScript as boolean) = g.app.inScript; // g.inScript is a synonym for g.app.inScript.
 
-
             // if (c.write_script_file){
             //     scriptFile = self.writeScriptFile(script)
             //     exec(compile(script, scriptFile, 'exec'), d)
@@ -532,43 +544,43 @@ export class Commands {
 
             if (c.write_script_file) {
                 // TODO !
-                console.log('HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ', script);
+                console.log(
+                    'HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ',
+                    script
+                );
                 // scriptFile = self.writeScriptFile(script)
                 // exec(compile(script, scriptFile, 'exec'), d)
             } else {
                 // exec(script, d)
                 const testVar = vscode;
 
-                // TODO : Implement better setup & namespace ! 
+                // TODO : Implement better setup & namespace !
                 new Function(
-                    "vscode",
+                    'vscode',
                     // TODO : 'fetch' equivalent
-                    "c",
-                    "g",
-                    "input",
-                    "p",
-                    "__name__",
-                    "script_args",
-                    "script_gnx",
+                    'c',
+                    'g',
+                    'input',
+                    'p',
+                    '__name__',
+                    'script_args',
+                    'script_gnx',
                     script
                 )(
                     testVar,
                     // TODO : 'fetch' equivalent
-                    d["c"],
-                    d["g"],
-                    d["input"],
-                    d["p"],
-                    d["__name__"],
-                    d["script_args"],
-                    d["script_gnx"],
+                    d['c'],
+                    d['g'],
+                    d['input'],
+                    d['p'],
+                    d['__name__'],
+                    d['script_args'],
+                    d['script_gnx']
                 );
             }
-
-        }
-        catch (e) {
+        } catch (e) {
             // pass
-        }
-        finally {
+        } finally {
             g.app.inScript = false;
             (g.inScript as boolean) = g.app.inScript;
         }
@@ -577,9 +589,12 @@ export class Commands {
     //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
     public redirectScriptOutput(): void {
         const c: Commands = this;
-        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+        if (
+            c.exists &&
+            c.config.getBool('redirect-execute-script-output-to-log-pane')
+        ) {
             // TODO
-            // ? needed ? 
+            // ? needed ?
             // g.redirectStdout()  // Redirect stdout
             // g.redirectStderr()  // Redirect stderr
         }
@@ -606,9 +621,12 @@ export class Commands {
     //@+node:felix.20221010233956.5: *4* c.unredirectScriptOutput
     public unredirectScriptOutput(): void {
         const c: Commands = this;
-        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+        if (
+            c.exists &&
+            c.config.getBool('redirect-execute-script-output-to-log-pane')
+        ) {
             // TODO
-            // ? needed ? 
+            // ? needed ?
             // g.restoreStderr()
             // g.restoreStdout()
         }
@@ -807,14 +825,15 @@ export class Commands {
      * A generator returning all positions of the outline. This generator does
      * *not* assume that vnodes are never their own ancestors.
      */
-    public *safe_all_positions(copy = true): Generator<Position> {
-        const c: Commands = this;
-        const p: Position | undefined = c.rootPosition(); // Make one copy.
-        while (p && p.__bool__()) {
-            yield copy ? p.copy() : p;
-            p.safeMoveToThreadNext();
-        }
-    }
+    // ! removed !
+    // public *safe_all_positions(copy = true): Generator<Position> {
+    //     const c: Commands = this;
+    //     const p: Position | undefined = c.rootPosition(); // Make one copy.
+    //     while (p && p.__bool__()) {
+    //         yield copy ? p.copy() : p;
+    //         p.safeMoveToThreadNext();
+    //     }
+    // }
 
     //@+node:felix.20210228004000.1: *5* c.all_Root_Children
     /**
@@ -907,8 +926,13 @@ export class Commands {
      * - oldSel: tuple containing the old selection range, or None.
      * - oldYview: int containing the old y-scroll value, or None.
      */
-    public getBodyLines(): [string, string[], string, [number, number], number] {
-
+    public getBodyLines(): [
+        string,
+        string[],
+        string,
+        [number, number],
+        number
+    ] {
         const c: Commands = this;
 
         const body = c.frame.body;
@@ -919,12 +943,12 @@ export class Commands {
         let s: string;
         let tail: string;
         [head, s, tail] = body.getSelectionLines();
-        const lines = g.splitLines(s);  // Retain the newlines of each line.
+        const lines = g.splitLines(s); // Retain the newlines of each line.
         // Expand the selection.
         const i = head.length;
         const j = head.length + s.length;
         const oldSel: [number, number] = [i, j];
-        return [head, lines, tail, oldSel, oldYview];  // string,list,string,tuple,int.
+        return [head, lines, tail, oldSel, oldYview]; // string,list,string,tuple,int.
     }
     //@+node:felix.20210131011420.5: *5* c.getTabWidth
     /**
@@ -1062,37 +1086,76 @@ export class Commands {
         root?: Position,
         trace?: boolean
     ): boolean {
-        if (!p || !p.__bool__() || !p.v) {
+        if (!p.__bool__() || !p.v) {
             return false;
         }
-        const rstack: StackEntry[] =
-            root && root.__bool__()
-                ? root.stack.concat([[root.v, root._childIndex]])
-                : [];
-        const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
+
+        // const rstack = root.stack + [(root.v, root._childIndex)] if root else []
+        const rstack: StackEntry[] = (root && root.__bool__()) ? [...root.stack, [root.v, root._childIndex]] : [];
+
+        // const pstack = p.stack + [(p.v, p._childIndex)]
+        const pstack: StackEntry[] = [...p.stack, [p.v, p._childIndex]];
+
+
         if (rstack.length > pstack.length) {
             return false;
         }
-        let par: VNode = this.hiddenRootNode!;
+        let par = this.hiddenRootNode!;
 
-        let arrayLength: number = pstack.length;
-        for (let j = 0; j < arrayLength; j++) {
-            const x: StackEntry = pstack[j];
-            if (
-                j < rstack.length &&
-                (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])
-            ) {
+        function sameStackEntry(a: StackEntry, b: StackEntry): boolean {
+            if (a[1] !== b[1]) {
                 return false;
             }
-            let v: VNode;
-            let i: number;
-            [v, i] = x;
-            if (i >= par.children.length || v.gnx !== par.children[i].gnx) {
+            if (a[0] !== b[0]) {
+                return false;
+            }
+            return true;
+        }
+
+        for (let j = 0; j < pstack.length; j++) {
+            const x = pstack[j];
+            if (j < rstack.length && !sameStackEntry(x, rstack[j])) {
+                return false;
+            }
+            const [v, i] = x;
+            if (i >= par.children.length || v !== par.children[i]) {
                 return false;
             }
             par = v;
         }
         return true;
+
+        // if (!p || !p.__bool__() || !p.v) {
+        //     return false;
+        // }
+        // const rstack: StackEntry[] =
+        //     root && root.__bool__()
+        //         ? root.stack.concat([[root.v, root._childIndex]])
+        //         : [];
+        // const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
+        // if (rstack.length > pstack.length) {
+        //     return false;
+        // }
+        // let par: VNode = this.hiddenRootNode!;
+
+        // let arrayLength: number = pstack.length;
+        // for (let j = 0; j < arrayLength; j++) {
+        //     const x: StackEntry = pstack[j];
+        //     if (
+        //         j < rstack.length &&
+        //         (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])
+        //     ) {
+        //         return false;
+        //     }
+        //     let v: VNode;
+        //     let i: number;
+        //     [v, i] = x;
+        //     if (i >= par.children.length || v.gnx !== par.children[i].gnx) {
+        //         return false;
+        //     }
+        //     par = v;
+        // }
+        // return true;
     }
 
     //@+node:felix.20210131011420.15: *6* c.dumpPosition
@@ -1344,7 +1407,6 @@ export class Commands {
             if (!c.isChanged()) {
                 c.setChanged();
             }
-            c.redraw_after_icons_changed();
         }
     }
 
@@ -1392,11 +1454,14 @@ export class Commands {
                 c._currentPosition = p.copy();
             }
         } else {
-            // 2011/02/25:
-            c._currentPosition = c.rootPosition();
-            g.trace(`Invalid position: ${p.h}`);
-            g.trace(g.callers());
+            if (g.unitTesting) {
+                // New in Leo 6.7.4: *Do* raise an exception.
+                throw new Error(`Invalid position: ${p.toString()}`);
+            }
             // Don't kill unit tests for this kind of problem.
+            c._currentPosition = c.rootPosition();
+            g.trace(`Invalid position`, p.toString(), c.toString());
+            g.trace(g.callers());
         }
     }
 
@@ -1414,7 +1479,6 @@ export class Commands {
         p.setDirty();
         // Change the actual tree widget so
         // A later call to c.endEditing or c.redraw will use s.
-
 
         c.frame.tree.setHeadline(p, s);
     }
@@ -1460,7 +1524,7 @@ export class Commands {
     /**
      * Check the consistency of all gnx's.
      * Reallocate gnx's for duplicates or empty gnx's.
-     * Return the number of structure_errors found.
+     * Return the number of errors found.
      */
     public checkGnxs(): number {
         const c: Commands = this;
@@ -1471,7 +1535,7 @@ export class Commands {
 
         let count: number = 0;
         let gnx_errors: number = 0;
-        for (let p of c.safe_all_positions(false)) {
+        for (let p of c.all_positions(false)) {
             count += 1;
             const v: VNode = p.v;
             // * removed https://github.com/leo-editor/leo-editor/pull/2363/files
@@ -1503,23 +1567,17 @@ export class Commands {
                 g.es_print(`multiple vnodes with gnx: ${gnx}`);
                 for (let v of aList) {
                     gnx_errors += 1;
-                    g.es_print(
-                        `id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`
-                    );
+                    g.es_print(`id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`);
                     v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 }
             }
         }
-        const ok: boolean = !gnx_errors && !g.app.structure_errors;
+        const ok: boolean = !gnx_errors;
         const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
         const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
         if (!ok) {
             g.es_print(
-                `check-outline ERROR! ${c.shortFileName()} ` +
-                `${count} nodes, ` +
-                `${gnx_errors} gnx errors, ` +
-                `${g.app.structure_errors} ` +
-                `structure errors`
+                `${count} nodes, ${gnx_errors} gnx errors, `
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
@@ -1527,21 +1585,20 @@ export class Commands {
                 `${c.shortFileName()} ${count} nodes`
             );
         }
-        return g.app.structure_errors;
+        return gnx_errors;
     }
     //@+node:felix.20211205223924.1: *4* c.checkLinks & helpers
     /**
      * Check the consistency of all links in the outline.
      */
     public checkLinks(): number {
+        // This is too slow a test to be run outside of unit tests.
         const c: Commands = this;
-        const t1: [number, number] = process.hrtime();
         let count: number = 0;
         let errors: number = 0;
 
-        for (let p of c.safe_all_positions()) {
+        for (let p of c.all_positions()) {
             count += 1;
-            // try:
             if (!c.checkThreadLinks(p)) {
                 errors += 1;
                 break;
@@ -1555,18 +1612,6 @@ export class Commands {
                 break;
             }
         }
-        // except AssertionError:
-        //     errors += 1
-        //     junk, value, junk = sys.exc_info()
-        //     g.error("test failed at position %s\n%s" % (repr(p), value))
-
-        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
-        const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
-
-        g.es_print(
-            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`
-        );
-
         return errors;
     }
     //@+node:felix.20211205223924.2: *5* c.checkParentAndChildren
@@ -1587,9 +1632,6 @@ export class Commands {
                 console.log('<no p.v>');
             } else {
                 console.log('<no p>');
-            }
-            if (g.unitTesting) {
-                console.assert(false, g.callers());
             }
         };
 
@@ -1699,6 +1741,179 @@ export class Commands {
         }
         return true;
     }
+    //@+node:felix.20230730162340.1: *5* c.checkVnodeLinks & helpers
+    /**
+     * Check all vnode links.
+     *
+     * Attempt error recovery if recover_flag is True.
+     * Unit tests may set recover_flag to False for strict tests.
+     *
+     * Return the number of errors.
+     */
+    public checkVnodeLinks(): number {
+
+        const c: Commands = this;
+
+        //@+others  // Define helpers.
+        //@+node:felix.20230730162340.2: *6* find_errors
+        /**
+         * Scan all vnodes for erroneous parent/child pairs.
+         *
+         * Return (error_list, messages, n)
+         */
+        function find_errors(): [[VNode, VNode][], string[], number] {
+
+            const error_list: [VNode, VNode][] = [];
+            const messages: string[] = [];
+            let n = 0;
+            for (const parent_v of c.all_unique_nodes()) { // Avoids recursion.
+                for (const child_v of parent_v.children) {
+
+                    // const children_n = parent_v.children.count(child_v)
+                    const children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                    // const parents_n = child_v.parents.count(parent_v)
+                    const parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+
+                    if (children_n !== parents_n) {
+                        error_list.push([parent_v, child_v]);
+                        messages.push(
+                            'Mismatch between parent.children and child.parents\n' +
+                            `parent: ${parent_v.h} count(parent.children) = ${children_n}\n` +
+                            ` child: ${child_v.h} count(child.parents = ${parents_n}`
+                        );
+                        n += 1;
+                    }
+                }
+            }
+            return [error_list, messages, n];
+
+        }
+        //@+node:felix.20230730162340.3: *6* fix_errors
+        /**
+         * Fix all erroneous nodes by adding/deleting entries from v.parents.
+         */
+        function fix_errors(error_list: [VNode, VNode][]): void {
+
+            for (const [parent_v, child_v] of error_list) {
+
+                // const children_n = parent_v.children.count(child_v)
+                let children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                // const parents_n = child_v.parents.count(parent_v)
+                let parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+
+                if (parents_n === children_n) {
+                    // pass  // Already fixed.
+                } else if (parents_n < children_n) {
+                    while (parents_n < children_n) {
+                        // Safe.
+                        child_v.parents.push(parent_v);
+                        parents_n += 1;
+                    }
+                } else {
+                    while (children_n < parents_n) {
+                        let index;
+                        if (child_v.parents && child_v.parents.length) {
+                            // Safe.
+                            index = child_v.parents.indexOf(parent_v);
+                            if (index !== -1) {
+                                child_v.parents.splice(index, 1);
+                            }
+                            children_n += 1;
+                        } else {
+                            // This could delete the child.
+                            index = parent_v.children.indexOf(child_v);
+                            if (index !== -1) {
+                                parent_v.children.splice(index, 1);
+                            }
+                            parents_n += 1;
+                        }
+                    }
+                }
+
+            }
+        }
+        //@+node:felix.20230730162340.4: *6* undelete_nodes
+        /**
+         * Restore a parent link to any node that would otherwise be deleted.
+         */
+        function undelete_nodes(error_list: [VNode, VNode][]): void {
+            const seen: VNode[] = [];
+            for (const [parent_v, child_v] of error_list) {
+                if ((!child_v.parents || !child_v.parents.length) && !seen.includes(child_v)) {
+                    // Add child_v to *one* parent.
+                    seen.push(child_v);
+                    parent_v.children.push(child_v);
+                    child_v.parents.push(parent_v);
+                }
+            }
+        }
+        //@+node:felix.20230730162340.5: *6* recheck
+        /**
+         * Rescan all vnodes to ensure that no errors remain.
+         *
+         * Return (error_list, messages, no)
+         */
+        function recheck(): [[VNode, VNode][], string[], number] {
+
+            const error_list: [VNode, VNode][] = [];
+            const messages: string[] = [];
+            let n = 0;
+            for (const parent_v of c.all_unique_nodes()) { // Avoids recursion.
+                for (const child_v of parent_v.children) {
+
+                    // const children_n = parent_v.children.count(child_v)
+                    const children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                    // const parents_n = child_v.parents.count(parent_v)
+                    const parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+                    if (children_n !== parents_n) {
+                        error_list.push([parent_v, child_v]);
+                        messages.push(
+                            'Error recovery failed!' +
+                            `parent: ${parent_v.h} count(parent.children) = ${children_n}\n` +
+                            ` child: ${child_v.h} count(child.parents = ${parents_n}`
+                        );
+                        n += 1;
+                    }
+                }
+            }
+            return [error_list, messages, n];
+
+        }
+        //@-others
+
+        // For unit testing.
+        const strict = g.app.debug.includes('test:strict');
+        const verbose: boolean = ['test:verbose', 'gnx', 'shutdown', 'startup', 'verbose'].some(z => g.app.debug.includes(z));
+
+        let [error_list, messages, n] = find_errors();
+        if (n === 0) {
+            return 0;
+        }
+        if (verbose) {
+            console.log('\n');
+            g.trace(`${messages.length} link error${g.plural(messages.length)}:\n`);
+            console.log(messages.join('\n') + '\n');
+        }
+        if (strict) {
+            return n;
+        }
+        const old_n = n;
+        fix_errors(error_list);
+        undelete_nodes(error_list);
+        [error_list, messages, n] = recheck();
+        if (n) {
+            // Report the *failure* to fix links!
+            console.log(messages.join('\n'));
+        } else if (verbose) {
+            g.trace(`Fixed ${old_n} link error${g.plural(old_n)}`);
+        }
+
+        return n;
+
+    }
     //@+node:felix.20211101013238.1: *4* c.checkMoveWithParentWithWarning & c.checkDrag
     //@+node:felix.20211101013241.1: *5* c.checkMoveWithParentWithWarning
     /**
@@ -1747,33 +1962,32 @@ export class Commands {
     //@+node:felix.20211030170430.1: *4* checkOutline
     /**
      * Check for errors in the outline.
-     * Return the count of serious structure errors.
+     * Return the number of errors.
      */
-    public checkOutline(check_links?: boolean): number {
+    public checkOutline(): number {
         // The check-outline command sets check_links = True
         const c: Commands = this;
-        g.app.structure_errors = 0;
-        let structure_errors: number = c.checkGnxs();
-        if (check_links && !structure_errors) {
-            structure_errors += c.checkLinks();
+        let errors = 0;
+        for (const f of [c.checkVnodeLinks, c.checkGnxs]) {
+            errors += f.bind(c)();
         }
-        return structure_errors;
+        return errors;
+        // g.app.structure_errors = 0;
+        // let structure_errors: number = c.checkGnxs();
+        // if (check_links && !structure_errors) {
+        //     structure_errors += c.checkLinks();
+        // }
+        // return structure_errors;
     }
     //@+node:felix.20211031193257.1: *4* validateOutline
     /**
-     * Makes sure all nodes are valid.
+     * A legacy outline checker, retained only for compatibility.
+     *
+     * Not used in Leo's core or unit tests.
      */
     public validateOutline(): boolean {
         const c: Commands = this;
-        if (!g.app.validate_outline) {
-            return true;
-        }
-        const root: Position | undefined = c.rootPosition();
-        const parent: Position | undefined = undefined;
-        if (root && root.__bool__()) {
-            return root.validateOutlineWithParent(parent);
-        }
-        return true;
+        return c.checkOutline() === 0;
     }
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
     //@+node:felix.20230423004652.1: *4* c.fullPath
@@ -1782,7 +1996,6 @@ export class Commands {
      * path nor the fileName will be created if it does not exist.
      */
     public fullPath(p_p: Position, simulate: boolean = false): string {
-
         // Search p and p's parents.
         for (let p of p_p.self_and_parents(false)) {
             const aList: any[] = g.get_directives_dict_list(p);
@@ -1799,16 +2012,16 @@ export class Commands {
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
         const c = this;
-        const default_format = "M/D/YYYY H:mm:ss";  // E.g., 1/30/2003 8:31:55
+        const default_format = 'M/D/YYYY H:mm:ss'; // E.g., 1/30/2003 8:31:55
         // Try to get the format string from settings.
         let format: string;
         let gmt: boolean;
         if (body) {
-            format = c.config.getString("body-time-format-string");
-            gmt = c.config.getBool("body-gmt-time");
+            format = c.config.getString('body-time-format-string');
+            gmt = c.config.getBool('body-gmt-time');
         } else {
-            format = c.config.getString("headline-time-format-string");
-            gmt = c.config.getBool("headline-gmt-time");
+            format = c.config.getString('headline-time-format-string');
+            gmt = c.config.getBool('headline-gmt-time');
         }
         if (format) {
             // * CONVERT PYTHON TO DAYJS FORMAT STRING *
@@ -1827,9 +2040,8 @@ export class Commands {
             } else {
                 s = dayjs().format(format); //  time.strftime(format, time.localtime());
             }
-        }
-        catch (exeption) {
-            g.es_exception(exeption);  // Probably a bad format string in leoSettings.leo.
+        } catch (exeption) {
+            g.es_exception(exeption); // Probably a bad format string in leoSettings.leo.
             s = dayjs().format(default_format); //  time.strftime(default_format, time.gmtime());
         }
         return s;
@@ -1858,7 +2070,10 @@ export class Commands {
      * Update the timestamp for fn..
      */
     public async setFileTimeStamp(fn: string): Promise<void> {
-        if (g.app.externalFilesController && g.app.externalFilesController.set_time) {
+        if (
+            g.app.externalFilesController &&
+            g.app.externalFilesController.set_time
+        ) {
             await g.app.externalFilesController.set_time(fn);
         }
     }
@@ -1933,16 +2148,18 @@ export class Commands {
      * Returns a dict containing the results, including defaults.
      */
     public scanAllDirectives(p?: Position): { [key: string]: any } {
-
         const c = this;
         if (!p || !p.__bool__()) {
             p = c.p;
         }
 
         // Defaults...
-        const default_language = g.getLanguageFromAncestorAtFileNode(p) || c.target_language || 'python';
+        const default_language =
+            g.getLanguageFromAncestorAtFileNode(p) ||
+            c.target_language ||
+            'python';
         const default_delims = g.set_delims_from_language(default_language);
-        const wrap = c.config.getBool("body-pane-wraps");
+        const wrap = c.config.getBool('body-pane-wraps');
         const table: [string, any, any][] = [
             ['encoding', undefined, g.scanAtEncodingDirectives],
             ['lang-dict', {}, g.scanAtCommentAndAtLanguageDirectives],
@@ -1967,27 +2184,26 @@ export class Commands {
         // Post process: do *not* set commander ivars.
         const lang_dict = d['lang-dict'];
         d = {
-            "delims": lang_dict['delims'] || default_delims,
-            "comment": lang_dict['comment'],  // Leo 6.4: New.
-            "encoding": d['encoding'],
+            delims: lang_dict['delims'] || default_delims,
+            comment: lang_dict['comment'], // Leo 6.4: New.
+            encoding: d['encoding'],
             // Note: at.scanAllDirectives does not use the defaults for "language".
-            "language": lang_dict['language'] || default_language,
-            "lang-dict": lang_dict,  // Leo 6.4: New.
-            "lineending": d['lineending'],
-            "pagewidth": d['pagewidth'],
-            "path": d['path'],
-            "tabwidth": d['tabwidth'],
-            "wrap": d['wrap'],
+            language: lang_dict['language'] || default_language,
+            'lang-dict': lang_dict, // Leo 6.4: New.
+            lineending: d['lineending'],
+            pagewidth: d['pagewidth'],
+            path: d['path'],
+            tabwidth: d['tabwidth'],
+            wrap: d['wrap'],
         };
         return d;
-
     }
     //@+node:felix.20211228212851.6: *4* c.scanAtPathDirectives
     /**
      * Scan aList for @path directives.
      * Return a reasonable default if no @path directive is found.
      */
-    public scanAtPathDirectives(aList: { [key: string]: string; }[]): string {
+    public scanAtPathDirectives(aList: { [key: string]: string }[]): string {
         const c: Commands = this;
         c.scanAtPathDirectivesCount += 1; // An important statistic.
         let base: string = c.openDirectory!;
@@ -2333,7 +2549,9 @@ export class Commands {
      */
     public setComplexCommand(commandName: string): void {
         const c: Commands = this;
-        c.k.mb_history.unshift(commandName);
+        if (c.k.mb_history) {
+            c.k.mb_history.unshift(commandName);
+        }
     }
     //@+node:felix.20211106224948.12: *4* c.writeScriptFile (changed: does not expand expressions)
     public writeScriptFile(script: string): string | undefined {
@@ -2622,7 +2840,10 @@ export class Commands {
      */
     public checkFileTimeStamp(fn: string): Promise<boolean> {
         const c: Commands = this;
-        if (g.app.externalFilesController && g.app.externalFilesController.check_overwrite) {
+        if (
+            g.app.externalFilesController &&
+            g.app.externalFilesController.check_overwrite
+        ) {
             return g.app.externalFilesController.check_overwrite(c, fn);
         }
         return Promise.resolve(true);
@@ -2699,7 +2920,6 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211223223002.9: *4* c.markAtFileNodesDirty
     /**
@@ -2724,7 +2944,6 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211223223002.10: *4* c.openWith
     /**
@@ -2763,6 +2982,10 @@ export class Commands {
     public recreateGnxDict(): void {
         const c: Commands = this;
         const d: { [key: string]: VNode } = {};
+        // Start with the hidden-root-vnode
+        const vHiddenRoot = c.hiddenRootNode;
+        d[vHiddenRoot.gnx] = vHiddenRoot;
+        // And fill up the with rest of the commander's VNodes.
         for (let v of c.all_unique_nodes()) {
             const gnxString: string = v.fileIndex;
             if (typeof gnxString === 'string') {
@@ -2775,6 +2998,42 @@ export class Commands {
             }
         }
         c.fileCommands.gnxDict = d;
+    }
+    //@+node:felix.20230730160811.1: *3* c.Git
+    //@+node:felix.20230730160811.2: *4* c.diff_file
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_file(fn: string, rev1 = 'HEAD', rev2 = ''): Promise<void> {
+        const x = new GitDiffController(this);
+        await x.diff_file(fn, rev1, rev2);
+    }
+    //@+node:felix.20230730160811.3: *4* c.diff_two_revs
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_two_revs(directory?: string, rev1 = '', rev2 = ''): Promise<void> {
+        await new GitDiffController(this).diff_two_revs(rev1, rev2);
+    }
+    //@+node:felix.20230730160811.4: *4* c.diff_two_branches
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_two_branches(branch1: any, branch2: any, fn: string): Promise<void> {
+        await new GitDiffController(this).diff_two_branches(
+            branch1, branch2, fn
+        );
+    }
+    //@+node:felix.20230730160811.5: *4* c.git_diff
+    public async git_diff(rev1 = 'HEAD', rev2 = ''): Promise<void> {
+        await new GitDiffController(this).git_diff(rev1, rev2);
+    }
+    //@+node:felix.20230730160811.6: *4* c.git_node_history
+    public async git_node_history(file_name: string, gnx: string): Promise<void> {
+        await new GitDiffController(this).node_history(file_name, [gnx]);
     }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
@@ -2796,7 +3055,7 @@ export class Commands {
     }
     //@+node:felix.20220611010339.1: *5* c.notValidInBatchMode
     public notValidInBatchMode(commandName: string): void {
-        g.es('the', commandName, "command is not valid in batch mode");
+        g.es('the', commandName, 'command is not valid in batch mode');
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
     /**
@@ -2810,8 +3069,13 @@ export class Commands {
             return;
         }
         // Issue one or two dialogs or messages.
-        const saved_body = c.rootPosition()!.b;  // Save the root's body. The dialog destroys it!
-        if (c.import_error_nodes.length || c.ignored_at_file_nodes.length || c.orphan_at_file_nodes.length) {
+        // Save the root's body. The dialog destroys it!
+        const saved_body = c.rootPosition()!.b;
+        if (
+            c.import_error_nodes.length ||
+            c.ignored_at_file_nodes.length ||
+            c.orphan_at_file_nodes.length
+        ) {
             g.app.gui.dismiss_splash_screen();
         } else {
             // #1007: Exit now, so we don't have to restore c.rootPosition().b.
@@ -2823,14 +3087,18 @@ export class Commands {
             files = [...new Set(c.import_error_nodes)].sort().join('\n');
             if (!this.warnings_dict[files]) {
                 this.warnings_dict[files] = true;
-                const import_message1 = 'The following were not imported properly.';
+                const import_message1 =
+                    'The following were not imported properly.';
                 const import_message2 = `Inserted @ignore in...\n${files}`;
                 g.es_print(import_message1);
                 g.es_print(import_message2);
                 if (use_dialogs) {
                     const import_dialog_message = `${import_message1}\n${import_message2}`;
-                    await g.app.gui.runAskOkDialog(c,
-                        'Import errors', import_dialog_message);
+                    await g.app.gui.runAskOkDialog(
+                        c,
+                        'Import errors',
+                        import_dialog_message
+                    );
                 }
             }
         }
@@ -2845,8 +3113,11 @@ export class Commands {
                 g.es_print(files);
                 if (use_dialogs) {
                     const ignored_dialog_message = `${ignored_message}\n${files}`;
-                    await g.app.gui.runAskOkDialog(c,
-                        `Not ${g.capitalize(kind)}`, ignored_dialog_message);
+                    await g.app.gui.runAskOkDialog(
+                        c,
+                        `Not ${g.capitalize(kind)}`,
+                        ignored_dialog_message
+                    );
                 }
             }
         }
@@ -2857,7 +3128,7 @@ export class Commands {
                 [...new Set(c.orphan_at_file_nodes)].sort().join('\n'),
                 '',
                 'Warning: changes to these files will be lost\n',
-                'unless you can save the files successfully.'
+                'unless you can save the files successfully.',
             ].join('\n');
             await g.app.gui.runAskOkDialog(c, 'Not Written', message);
             // Mark all the nodes dirty.
@@ -2871,7 +3142,7 @@ export class Commands {
             c.redraw();
         }
         // Restore the root position's body.
-        c.rootPosition()!.v.b = saved_body;  // #1007: just set v.b.
+        c.rootPosition()!.v.b = saved_body; // #1007: just set v.b.
         c.init_error_dialogs();
     }
 
@@ -2882,10 +3153,13 @@ export class Commands {
     public async syntaxErrorDialog(): Promise<void> {
         const c: Commands = this;
         if (
-            g.app.syntax_error_files && g.app.syntax_error_files.length &&
+            g.app.syntax_error_files &&
+            g.app.syntax_error_files.length &&
             c.config.getBool('syntax-error-popup', false)
         ) {
-            const aList: string[] = [...new Set(g.app.syntax_error_files)].sort();
+            const aList: string[] = [
+                ...new Set(g.app.syntax_error_files),
+            ].sort();
             g.app.syntax_error_files = [];
             const list_s: string = aList.join('\n');
             await g.app.gui.runAskOkDialog(
@@ -2958,7 +3232,7 @@ export class Commands {
         if (c.requestedFocusWidget) {
             const w = c.requestedFocusWidget;
             if (g.app.debug.includes('focus') && !g.unitTesting) {
-                let name = "";
+                let name = '';
                 if (w.objectName) {
                     name = w.objectName();
                 } else if (w['_name']) {
@@ -2971,8 +3245,8 @@ export class Commands {
         }
 
         const table: [string, VNode[]][] = [
-            ["childrenModified", g.childrenModifiedSet],
-            ["contentModified", g.contentModifiedSet],
+            ['childrenModified', g.childrenModifiedSet],
+            ['contentModified', g.contentModifiedSet],
         ];
 
         for (let [kind, mods] of table) {
@@ -3017,17 +3291,18 @@ export class Commands {
     /**
      * Update the icon for the presently selected node
      */
-    public redraw_after_icons_changed(): void {
-        const c: Commands = this;
-        if (c.enableRedrawFlag) {
-            // c.frame.tree.redraw_after_icons_changed();
-            c.redraw();
-            // Do not call treeFocusHelper here.
-            // c.treeFocusHelper()
-        } else {
-            c.requestLaterRedraw = true;
-        }
-    }
+    // ! removed !
+    // public redraw_after_icons_changed(): void {
+    //     const c: Commands = this;
+    //     if (c.enableRedrawFlag) {
+    //         // c.frame.tree.redraw_after_icons_changed();
+    //         c.redraw();
+    //         // Do not call treeFocusHelper here.
+    //         // c.treeFocusHelper()
+    //     } else {
+    //         c.requestLaterRedraw = true;
+    //     }
+    // }
     //@+node:felix.20211122010434.5: *6* c.redraw_after_contract
     public redraw_after_contract(p?: Position): void {
         const c: Commands = this;
@@ -3206,7 +3481,7 @@ export class Commands {
         if (w && g.app.gui) {
             if (g.app.debug.includes('focus')) {
                 // g.trace('\n(c)', repr(w))
-                const name = w['name'];  // ?w['objectName'] : MyClass.name
+                const name = w['name']; // ?w['objectName'] : MyClass.name
                 g.trace('(c)', name);
             }
             c.requestedFocusWidget = w;
@@ -3564,7 +3839,7 @@ export class Commands {
     //@+node:felix.20211023195447.21: *6* c.canPasteOutline
     public canPasteOutline(s: string): boolean {
         // check for JSON
-        if (s && s.trimStart().startsWith("{")) {
+        if (s && s.trimStart().startsWith('{')) {
             try {
                 const d = JSON.parse(s);
                 if (!(d['vnodes'] && d['tnodes'])) {
@@ -3709,7 +3984,6 @@ export class Commands {
         const k: any = this.k;
         c.redraw(p); // This *must* be done now.
         if (p && p.__bool__()) {
-
             // This should request focus.
             // c.frame.tree.editLabel(p, selectAll, selection);
             return g.app.gui.editHeadline();
@@ -3793,9 +4067,8 @@ export class Commands {
             // Do not call expandAllAncestors here.
             c.selectPosition(p);
             c.redraw_after_select(p);
-
         }
-        c.treeFocusHelper();  // This is essential.
+        c.treeFocusHelper(); // This is essential.
     }
 
     //@+node:felix.20220210211453.1: *3* c.Scripting utils
@@ -3821,7 +4094,7 @@ export class Commands {
             __name__: string;
         } & { __ivars__: string[] } = c.commandsDict[commandName];
 
-        if (f && ((f as any)['__name__'] !== (func as any)['__name__'])) {
+        if (f && (f as any)['__name__'] !== (func as any)['__name__']) {
             g.trace('redefining', commandName, f, '->', func);
         }
         c.commandsDict[commandName] = func;
@@ -3841,14 +4114,13 @@ export class Commands {
                         The default is 'clone-find-predicate'
      */
     public cloneFindByPredicate(
-        generator: (copy?: boolean) => Generator<Position, any, unknown>,  // The generator used to traverse the tree.
-        predicate: (p: Position) => boolean,  // A function of one argument p, returning True  // if p should be included in the results.
-        failMsg: string = "",  // Failure message. Default is no message.
-        flatten: boolean = false,  // True: Put all matches at the top level.
-        iconPath: string = "",  // Full path to icon to attach to all matches.
-        undoType: string = "",  // The undo name, shown in the Edit:Undo menu.  // The default is 'clone-find-predicate'
+        generator: (copy?: boolean) => Generator<Position, any, unknown>, // The generator used to traverse the tree.
+        predicate: (p: Position) => boolean, // A function of one argument p, returning True  // if p should be included in the results.
+        failMsg: string = '', // Failure message. Default is no message.
+        flatten: boolean = false, // True: Put all matches at the top level.
+        iconPath: string = '', // Full path to icon to attach to all matches.
+        undoType: string = '' // The undo name, shown in the Edit:Undo menu.  // The default is 'clone-find-predicate'
     ): Position | undefined {
-
         const c = this;
         const u = c.undoer;
         undoType = undoType || 'clone-find-predicate';
@@ -3892,16 +4164,13 @@ export class Commands {
             g.es(failMsg);
         }
         return root;
-
     }
     //@+node:felix.20221014000217.2: *5* c.setCloneFindByPredicateIcon
-    /** 
+    /**
      * Attach an icon to p.v.u.
      */
     public setCloneFindByPredicateIcon(iconPath: any, p: Position): void {
-
         // ? needed ?
-
         // if (iconPath && g.os_path_exists(iconPath) && !g.os_path_isdir(iconPath)){
         //     const aList = p.v.u['icons'] || [];
         //     let w_break = false;
@@ -3923,8 +4192,6 @@ export class Commands {
         //         })
         //         p.v.u['icons'] = aList;
         //     }
-
-
         // }else if(iconPath){
         //     g.trace('bad icon path', iconPath);
         // }
@@ -3934,7 +4201,10 @@ export class Commands {
     /**
      * Create a root node for clone-find-predicate.
      */
-    public createCloneFindPredicateRoot(flatten: boolean, undoType: string): Position {
+    public createCloneFindPredicateRoot(
+        flatten: boolean,
+        undoType: string
+    ): Position {
         const c: Commands = this;
 
         const root = c.lastTopLevel().insertAfter();
@@ -4024,14 +4294,16 @@ export class Commands {
         flags = 'ig',
         it?: Generator<Position, any, unknown> | Position[]
     ): Position[] {
-
         const c = this;
 
         if (!flags.includes('g')) {
             flags = flags + 'g';
         }
 
-        function* reFindIter(pattern: RegExp, text: string): IterableIterator<any> {
+        function* reFindIter(
+            pattern: RegExp,
+            text: string
+        ): IterableIterator<any> {
             let match;
             while ((match = pattern.exec(text)) !== null) {
                 yield match;
@@ -4043,10 +4315,15 @@ export class Commands {
         }
         try {
             const pattern = new RegExp(regex, flags);
-            return [...it].filter(p => [...reFindIter(pattern, p.b)].some((m: RegExpExecArray) => m)).map(p => p.copy());
+            return [...it]
+                .filter((p) =>
+                    [...reFindIter(pattern, p.b)].some(
+                        (m: RegExpExecArray) => m
+                    )
+                )
+                .map((p) => p.copy());
 
-            // return [p.copy() for p in it if any(m for m in re.finditer(pattern, p.b))];            
-
+            // return [p.copy() for p in it if any(m for m in re.finditer(pattern, p.b))];
         } catch (exception) {
             g.es_error('Exception in c.find_b');
             g.es_exception(exception);
@@ -4062,9 +4339,7 @@ export class Commands {
         flags = 'i',
         it?: Generator<Position, any, unknown> | Position[]
     ): Position[] {
-
         const c = this;
-
 
         if (!flags.includes('g')) {
             flags = flags + 'g';
@@ -4075,7 +4350,9 @@ export class Commands {
         }
         try {
             const pattern = new RegExp(regex, flags);
-            return [...it].filter(z => pattern.test(z.h)).map(z => z.copy());
+            return [...it]
+                .filter((z) => pattern.test(z.h))
+                .map((z) => z.copy());
             // return [z.copy() for z in it if re.match(pattern, z.h)];
         } catch (exception) {
             g.es_error('Exception in c.find_h');
@@ -4086,7 +4363,6 @@ export class Commands {
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
     public registerReloadSettings(obj: any): void {
-
         const c: Commands = this;
         console.log('TODO: ? NEEDED ? registerReloadSettings');
 
@@ -4103,7 +4379,6 @@ export class Commands {
      * other known classes.
      */
     public reloadConfigurableSettings(): void {
-
         console.log('TODO : ? NEEDED ? reloadConfigurableSettings');
 
         /* 
@@ -4135,7 +4410,6 @@ export class Commands {
                     c.configurables.remove(obj)
 
         */
-
     }
 
     //@-others
@@ -4168,6 +4442,7 @@ export interface Commands
     all_unique_vnodes_iter: () => Generator<VNode, any, unknown>;
     all_positions_iter: () => Generator<Position, any, unknown>;
     allNodes_iter: () => Generator<Position, any, unknown>;
+    safe_all_positions: () => Generator<Position, any, unknown>;
     all_positions_with_unique_vnodes_iter: () => Generator<
         Position,
         any,
@@ -4189,7 +4464,7 @@ applyMixins(Commands, [
     TopLevelCompareCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
-    TopLevelEditCommands
+    TopLevelEditCommands,
 ]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
 Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
@@ -4204,6 +4479,7 @@ Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
 Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
 Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
 Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
+Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
 Commands.prototype.all_positions_with_unique_vnodes_iter =
     Commands.prototype.all_unique_positions;
 Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;

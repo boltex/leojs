@@ -31,7 +31,6 @@ export function commander_command(p_name: string, p_doc: string) {
             g.global_commands_dict = {};
         }
         g.global_commands_dict[p_name] = commander_command_wrapper;
-
     };
 }
 //@+node:felix.20220103234541.1: ** command
@@ -60,7 +59,6 @@ export function command(p_name: string, p_doc: string) {
             g.global_commands_dict = {};
         }
         g.global_commands_dict[p_name] = commander_command_wrapper;
-
     };
 }
 //@+node:felix.20220103234556.1: ** new_cmd_decorator
@@ -71,7 +69,11 @@ export function command(p_name: string, p_doc: string) {
  * Don't even think about removing the @cmd decorators!
  * See https://github.com/leo-editor/leo-editor/issues/325
  */
-export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]) {
+export function new_cmd_decorator(
+    p_name: string,
+    p_doc: string,
+    ivars: string[]
+) {
     return function (
         target: any,
         propertyKey: string,
@@ -94,7 +96,6 @@ export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]
             g.global_commands_dict = {};
         }
         g.global_commands_dict[p_name] = commander_command_wrapper;
-
     };
 }
 //@-others

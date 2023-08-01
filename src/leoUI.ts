@@ -1050,14 +1050,17 @@ export class LeoUI extends NullGui {
 
         if (this.leoStates.fileOpenedReady) {
 
-            const s = this.leoStates.leoOpenedFileName;
-            const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
-            let w_path = "";
-            const n = s ? s.lastIndexOf(w_filename) : -1;
-            if (n >= 0 && n + w_filename.length >= s.length) {
-                w_path = s.substring(0, n);
-            }
-            titleDesc = w_filename + (w_path ? " in " + w_path : '');
+            // const s = this.leoStates.leoOpenedFileName;
+            // const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+            // let w_path = "";
+            // const n = s ? s.lastIndexOf(w_filename) : -1;
+            // if (n >= 0 && n + w_filename.length >= s.length) {
+            //     w_path = s.substring(0, n);
+            // }
+            // titleDesc = w_filename + (w_path ? " in " + w_path : '');
+
+            const c = g.app.windowList[this.frameIndex].c;
+            titleDesc = c.frame.title;
 
             if (this._leoTreeView) {
                 this._leoTreeView.description = titleDesc;

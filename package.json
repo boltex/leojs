@@ -7,6 +7,9 @@
   "author": {
     "name": "Félix Malboeuf"
   },
+  "sponsor": {
+    "url": "https://boltex.github.io/"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
