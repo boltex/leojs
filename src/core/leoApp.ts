@@ -943,9 +943,9 @@ export class LeoApp {
         let n1: string = '';
         if (process.version) {
             n1 = 'Node.js ' + process.version;
-            // @ts-expect-error
+            // // @ts-expect-error
         } else if (location.hostname) {
-            // @ts-expect-error
+            // // @ts-expect-error
             n1 = location.hostname;
             // if dots take 2 last parts
             if (n1.includes('.')) {
@@ -966,9 +966,9 @@ export class LeoApp {
             sysVersion = process.platform;
         } else {
             let browserResult: any;
-            // @ts-expect-error
+            // // @ts-expect-error
             if (navigator.userAgent) {
-                // @ts-expect-error
+                // // @ts-expect-error
                 browserResult = Bowser.parse(navigator.userAgent);
                 sysVersion = browserResult.browser.name;
                 if (browserResult.browser.version) {

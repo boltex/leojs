@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import initSqlJs from '../sqlite/sql-wasm-debug';
+
 import * as GitAPI from './git';
 import * as GitBaseAPI from './git-base';
 
@@ -55,7 +57,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
         } else {
-            console.log("LEOJS ERROR : GIT EXTENSION NOT AVAILABLE !");
+            // console.log("LEOJS ERROR : GIT EXTENSION NOT AVAILABLE !");
         }
 
         const gitBaseExtension = vscode.extensions.getExtension<GitBaseAPI.GitBaseExtension>('vscode.git-base');
@@ -68,7 +70,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
         } else {
-            console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT AVAILABLE !");
+            // console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT AVAILABLE !");
         }
 
         const extension = vscode.extensions.getExtension<RemoteHubApi>('ms-vscode.remote-repositories')
@@ -76,13 +78,51 @@ export async function activate(p_context: vscode.ExtensionContext) {
             ?? vscode.extensions.getExtension<RemoteHubApi>('GitHub.remoteHub-insiders');
 
         if (extension == null) {
-            console.log("LEOJS ERROR : GIT_REMOTE EXTENSION NOT AVAILABLE !");
+            // console.log("LEOJS ERROR : GIT_REMOTE EXTENSION NOT AVAILABLE !");
         }
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
             console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
         }
+
+        // Start SQLITE engine
+        const filebuffer = await vscode.workspace.fs.readFile(
+            vscode.Uri.joinPath(p_context.extensionUri, 'test1.db')
+        );
+        console.log('got test1.db', filebuffer.length);
+
+        const sqliteBits = await vscode.workspace.fs.readFile(
+            vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
+        );
+        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
+
+        console.log('initSqlJs', initSqlJs);
+
+        // console.log('initSqlJs(undefined, sqliteBits)', initSqlJs(undefined, sqliteBits));
+
+        initSqlJs(undefined, sqliteBits).then((SQL) => {
+            console.log("STARTUP:          SQLITE has started");
+
+            // Load the db
+            const db = new SQL.Database(filebuffer);
+            console.log('db', db);
+
+            const q_result1 = db.exec("SELECT `name`, `sql`  FROM `sqlite_master`  WHERE type='table';");
+            // exec returns an  QueryExecResult {
+            //					columns: string[];
+            //					values: SqlValue[][];
+            // 				}
+            console.log('result', q_result1);
+
+
+        }, (e) => {
+            console.log('ERROR starting initSqlJs Reason: ', e);
+
+        }
+
+        );
+
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
@@ -155,11 +195,9 @@ export async function activate(p_context: vscode.ExtensionContext) {
     }
 
 }
-
 function setStartupDoneContext(p_value: boolean): Thenable<unknown> {
     return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
 }
-
 function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
         console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
@@ -215,7 +253,6 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
     }
 
 }
-
 async function runLeo(p_context: vscode.ExtensionContext) {
     const w_start = process.hrtime(); // For calculating total startup time duration
 
@@ -227,10 +264,10 @@ async function runLeo(p_context: vscode.ExtensionContext) {
     console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
 
 }
-
 // this method is called when your extension is deactivated
-export function deactivate() { }
-
+export function deactivate() {
+    // pass
+}
 /**
  * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
  */
@@ -239,10 +276,12 @@ async function closeLeoTextEditors(): Promise<unknown> {
 
     vscode.window.tabGroups.all.forEach((p_tabGroup) => {
         p_tabGroup.tabs.forEach((p_tab) => {
+
             if (p_tab.input &&
                 (p_tab.input as vscode.TabInputText).uri &&
                 (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
                 !p_tab.isDirty
+
             ) {
                 w_foundTabs.push(p_tab);
             }
@@ -270,7 +309,6 @@ async function closeLeoTextEditors(): Promise<unknown> {
     }
     return q_closedTabs;
 }
-
 /**
  * * Show welcome screen if needed, based on last version executed
  * @param p_version Current version, as a string, from packageJSON.version
@@ -305,4 +343,3 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
         return Promise.resolve();
     }
 }
-
