@@ -2448,7 +2448,7 @@ export class LoadManager {
         if (!ok) {
             // --screen-shot causes an immediate exit.
             if (g.app.debug.includes('shutdown') || g.app.debug.includes('startup')) {
-                g.es_print('Can not create a commander')
+                g.es_print('Can not create a commander');
                 // g.app.forceShutdown() // ! LEOJS NEEDED ? ?
             }
             return;

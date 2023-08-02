@@ -1197,7 +1197,7 @@ export class Undoer {
         } else {
             undoType = "Can't Undo";
         }
-        u.setUndoType(undoType)
+        u.setUndoType(undoType);
         u.beads = []; // List of undo nodes.
         u.bead = -1; // Index of the present bead: -1:len(beads)
     }
