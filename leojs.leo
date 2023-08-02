@@ -903,6 +903,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 export function deactivate() {
     // pass
 }
+
 </t>
 <t tx="felix.20201208223553.1">import * as vscode from 'vscode';
 import { Constants } from "./constants";
@@ -1377,25 +1378,21 @@ export async function activate(p_context: vscode.ExtensionContext) {
         initSqlJs(undefined, sqliteBits).then((SQL) =&gt; {
             console.log("STARTUP:          SQLITE has started");
 
-            // Load the db
+            // Load the db.
             const db = new SQL.Database(filebuffer);
             console.log('db', db);
 
+            // Test executing query on db.
             const q_result1 = db.exec("SELECT `name`, `sql`  FROM `sqlite_master`  WHERE type='table';");
             // exec returns an  QueryExecResult {
             //					columns: string[];
             //					values: SqlValue[][];
             // 				}
             console.log('result', q_result1);
-
-
         }, (e) =&gt; {
             console.log('ERROR starting initSqlJs Reason: ', e);
 
-        }
-
-        );
-
+        });
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
@@ -1468,6 +1465,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     }
 
 }
+
 </t>
 <t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, false, false)],
 [CMD.INSERT_SELECTION, () =&gt; p_leoUI.insertNode(U, false, false, false)],
@@ -10932,7 +10930,9 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     await g.app.loadManager.load();
     console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
 
-}</t>
+}
+
+</t>
 <t tx="felix.20220523151725.1">function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
     if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
         console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
@@ -10988,6 +10988,7 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     }
 
 }
+
 </t>
 <t tx="felix.20220613164517.1">public runAboutLeoDialog(
     c: Commands | undefined,
@@ -12788,6 +12789,7 @@ async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
     }
     return q_closedTabs;
 }
+
 </t>
 <t tx="felix.20221002011903.1">/**
  * * Show welcome screen if needed, based on last version executed
@@ -12823,6 +12825,7 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
         return Promise.resolve();
     }
 }
+
 </t>
 <t tx="felix.20221002124249.1">/**
  * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
@@ -12908,6 +12911,7 @@ set leojsStartupDone(p_value: boolean) {
 <t tx="felix.20221005002719.1">function setStartupDoneContext(p_value: boolean): Thenable&lt;unknown&gt; {
     return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
 }
+
 </t>
 <t tx="felix.20221009011653.1">export interface CommandOptions {
     node?: Position, // facultative, precise node onto which the command is run (also see p_keepSelection)
