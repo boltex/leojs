@@ -1,3 +1,6 @@
+// *****************************************************************
+// * ORIGINAL sql-wasm-debug from https://github.com/sql-js/sql.js *
+// *****************************************************************
 
 // We are modularizing this manually because the current modularize setting in Emscripten has some issues:
 // https://github.com/kripken/emscripten/issues/5820
@@ -2566,7 +2569,7 @@ function createWasm() {
     }
   }
 
-  instantiateAsync();
+  void instantiateAsync();
   return {}; // no exports yet; we'll fill them in later
 }
 
