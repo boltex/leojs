@@ -2183,13 +2183,15 @@ export async function write_file_if_changed(
  * @returns An URI for file access compatible with web extensions filesystems
  */
 export function makeVscodeUri(p_fn: string): vscode.Uri {
+
     if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+        p_fn = p_fn.replace(/\\/g, "/");
         try {
             const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
             return newUri;
         } catch (e) {
             console.log(
-                "ERROR: tried to build a vscode.URI from a browser scheme's URI 'with' method"
+                "OOPS! LEOJS Tried to build a vscode.URI from a browser scheme's URI 'with' method. Error: ", e
             );
             throw new Error(
                 'g.makeVscodeUri cannot make an URI with the string: ' + p_fn
