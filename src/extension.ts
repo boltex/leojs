@@ -13,6 +13,7 @@ import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 import { RemoteHubApi } from './remote-hub';
+import { SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 /**
@@ -43,6 +44,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
 
     const w_previousVersion = p_context.globalState.get<string>(Constants.VERSION_STATE_KEY);
+    let SQL: SqlJsStatic;
 
     // * Close remaining Leo Bodies restored by vscode from last session.
     await closeLeoTextEditors();
@@ -107,7 +109,14 @@ export async function activate(p_context: vscode.ExtensionContext) {
         console.log('paco restored test:  ', restored);
 
 
+        const sqliteBits = await vscode.workspace.fs.readFile(
+            vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
+        );
+        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
+        SQL = await initSqlJs(undefined, sqliteBits);
+        console.log("STARTUP:          SQLITE has started");
+        (g.SQL as SqlJsStatic) = SQL;
 
 
     } else {
@@ -131,17 +140,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
         );
         console.log('got db file!!  Length in bytes: ', filebuffer.length);
 
-        const sqliteBits = await vscode.workspace.fs.readFile(
-            vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
-        );
-        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
-        console.log('initSqlJs', initSqlJs);
-
-        // console.log('initSqlJs(undefined, sqliteBits)', initSqlJs(undefined, sqliteBits));
-
-        const SQL = await initSqlJs(undefined, sqliteBits)
-        console.log("STARTUP:          SQLITE has started");
 
         // Load the db.
         const db = new SQL.Database(filebuffer);
@@ -255,20 +254,15 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
         console.log('GOT WORKSPACE: starting file-system ZIP & DB tests');
 
-
         if (0) {
             await dbTests();
         }
 
         if (0) {
-
             await readZipTest();
         } else if (0) {
             await makeZipTest();
-
         }
-
-
 
     }
 

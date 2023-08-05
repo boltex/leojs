@@ -21,6 +21,7 @@ import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
 import { RemoteHubApi } from '../remote-hub';
+import { SqlJsStatic } from 'sql.js';
 
 /*
     import binascii
@@ -266,6 +267,9 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
+
+export let SQL: SqlJsStatic;
+
 
 // The singleton Git extension exposed API
 export let gitAPI: GitAPI.API;

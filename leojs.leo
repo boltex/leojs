@@ -531,7 +531,7 @@
 <v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>
 <v t="felix.20210102012334.1"><vh>@file src/core/leoApp.ts</vh></v>
 <v t="felix.20211211234842.1"><vh>@file src/core/leoAtFile.ts</vh></v>
-<v t="felix.20230802145823.1"><vh>@file src/core/leoCache.txt</vh></v>
+<v t="felix.20230802145823.1"><vh>@file src/core/leoCache.ts</vh></v>
 <v t="felix.20220429005433.1"><vh>@file src/core/leoChapters.ts</vh></v>
 <v t="felix.20210110222544.1"><vh>@file src/core/leoCommands.ts</vh></v>
 <v t="felix.20230430023337.1"><vh>@file src/core/leoCompare.ts</vh></v>
@@ -862,6 +862,7 @@ import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 import { RemoteHubApi } from './remote-hub';
+import { SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 @language typescript
@@ -1318,6 +1319,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
 
     const w_previousVersion = p_context.globalState.get&lt;string&gt;(Constants.VERSION_STATE_KEY);
+    let SQL: SqlJsStatic;
 
     // * Close remaining Leo Bodies restored by vscode from last session.
     await closeLeoTextEditors();
@@ -1382,7 +1384,14 @@ export async function activate(p_context: vscode.ExtensionContext) {
         console.log('paco restored test:  ', restored);
 
 
+        const sqliteBits = await vscode.workspace.fs.readFile(
+            vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
+        );
+        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
+        SQL = await initSqlJs(undefined, sqliteBits);
+        console.log("STARTUP:          SQLITE has started");
+        (g.SQL as SqlJsStatic) = SQL;
 
 
     } else {
@@ -1406,17 +1415,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
         );
         console.log('got db file!!  Length in bytes: ', filebuffer.length);
 
-        const sqliteBits = await vscode.workspace.fs.readFile(
-            vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
-        );
-        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
-        console.log('initSqlJs', initSqlJs);
-
-        // console.log('initSqlJs(undefined, sqliteBits)', initSqlJs(undefined, sqliteBits));
-
-        const SQL = await initSqlJs(undefined, sqliteBits)
-        console.log("STARTUP:          SQLITE has started");
 
         // Load the db.
         const db = new SQL.Database(filebuffer);
@@ -1530,20 +1529,15 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
         console.log('GOT WORKSPACE: starting file-system ZIP &amp; DB tests');
 
-
         if (0) {
             await dbTests();
         }
 
         if (0) {
-
             await readZipTest();
         } else if (0) {
             await makeZipTest();
-
         }
-
-
 
     }
 

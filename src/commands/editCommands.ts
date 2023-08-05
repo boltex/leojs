@@ -669,7 +669,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const url = p.get_UNL();
         await g.app.gui.replaceClipboardWith(url);
 
-        g.es(url); // LEOJS NO status_line 
+        g.es_print('gnx: ' + url);
 
         // const status_line = getattr(c.frame, "statusLine", None)
         // if status_line

@@ -1,22 +1,16 @@
 //@+leo-ver=5-thin
-//@+node:felix.20230802145823.1: * @file src/core/leoCache.txt
+//@+node:felix.20230802145823.1: * @file src/core/leoCache.ts
 /**
  * A module encapsulating Leo's file caching
  */
 //@+<< leoCache imports & annotations >>
 //@+node:felix.20230802145823.2: ** << leoCache imports & annotations >>
-from __future__ import annotations
-import fnmatch
-import os
-import pickle
-import sqlite3
-import stat
-from typing import Any, Generator, Optional, Sequence, TYPE_CHECKING
-import zlib
-from leo.core import leoGlobals as g
-
-if TYPE_CHECKING:  # pragma: no cover
-    from leo.core.leoCommands import Commands as Cmdr
+import * as vscode from 'vscode';
+import * as pako from 'pako';
+import * as path from 'path';
+import * as g from './leoGlobals';
+import { Commands } from './leoCommands';
+var pickle = require('./jpicklejs');
 
 //@-<< leoCache imports & annotations >>
 
@@ -34,174 +28,241 @@ const split = g.os_path_split;
 
 //@+others
 //@+node:felix.20230802145823.3: ** class CommanderCacher
-class CommanderCacher:
-    """A class to manage per-commander caches."""
+/**
+ * A class to manage per-commander caches.
+ */
+class CommanderCacher {
+    
+        public db: any;
+        private _dbPath;
 
-    def __init__(self) -> None:
-        self.db: Any
-        try:
-            path = join(g.app.homeLeoDir, 'db', 'global_data')
-            self.db = SqlitePickleShare(path)
-        except Exception:
-            self.db = {}  # type:ignore
+        constructor() {
+            try{
+                this._dbPath = join(g.app.homeLeoDir, 'db', 'global_data');
+                this.db = new SqlitePickleShare(this._dbPath);
+            }catch (e){
+                this.db = {} ;
+            }
+        }
+
     //@+others
     //@+node:felix.20230802145823.4: *3* cacher.clear
-    def clear(self) -> None:
-        """Clear the cache for all commanders."""
-        # Careful: self.db may be a Python dict.
-        try:
-            self.db.clear()
-        except Exception:
-            g.trace('unexpected exception')
-            g.es_exception()
-            self.db = {}  # type:ignore
+    /**
+     * Clear the cache for all commanders.
+     */
+    public clear(): void {
+        // Careful: self.db may be a Python dict.
+        try{
+            this.db.clear();
+        }catch (e){
+            g.trace('unexpected exception');
+            g.es_exception(e);
+            this.db = {};
+        }
+    }
     //@+node:felix.20230802145823.5: *3* cacher.close
-    def close(self) -> None:
-        # Careful: self.db may be a dict.
-        if hasattr(self.db, 'conn'):
-            # pylint: disable=no-member
-            self.db.conn.commit()
-            self.db.conn.close()
+    public close(): void {
+        // Careful: self.db may be a dict.
+        if (this.db.hasOwnProperty('conn')) {
+            this.db.conn.commit();
+            this.db.conn.close();
+        }
+    }
     //@+node:felix.20230802145823.6: *3* cacher.commit
-    def commit(self) -> None:
-        # Careful: self.db may be a dict.
-        if hasattr(self.db, 'conn'):
-            # pylint: disable=no-member
-            self.db.conn.commit()
+    public commit(): void {
+        // Careful: self.db may be a dict.
+        if (this.db.hasOwnProperty('conn')) {
+            this.db.conn.commit();
+        }
+    }
     //@+node:felix.20230802145823.7: *3* cacher.dump
-    def dump(self) -> None:
-        """Dump the indicated cache if --trace-cache is in effect."""
-        dump_cache(g.app.commander_db, tag='Commander Cache')
+    /**
+     * Dump the indicated cache if --trace-cache is in effect.
+     */
+    public dump() : void {
+        dump_cache(g.app.commander_db, 'Commander Cache');
+    }
     //@+node:felix.20230802145823.8: *3* cacher.get_wrapper
-    def get_wrapper(self, c: Cmdr, fn: str = None) -> "CommanderWrapper":
-        """Return a new wrapper for c."""
-        return CommanderWrapper(c, fn=fn)
+    /**
+     * Return a new wrapper for c.
+     */
+    public get_wrapper(c: Commands, fn?: string): CommanderWrapper {
+        return new CommanderWrapper(c, fn);
+    }
     //@+node:felix.20230802145823.9: *3* cacher.test
-    def test(self) -> bool:
+    public test(): boolean {
 
-        # pylint: disable=no-member
-        if g.app.gui.guiName() == 'nullGui':
-            # Null gui's don't normally set the g.app.gui.db.
-            g.app.setGlobalDb()
-        # Fixes bug 670108.
-        assert g.app.db is not None  # a PickleShareDB instance.
-        # Make sure g.guessExternalEditor works.
-        g.app.db.get("LEO_EDITOR")
-        # self.initFileDB('~/testpickleshare')
-        db = self.db
-        db.clear()
-        assert not list(db.items())
-        db['hello'] = 15
-        db['aku ankka'] = [1, 2, 313]
-        db['paths/nest/ok/keyname'] = [1, (5, 46)]
-        db.uncache()  # frees memory, causes re-reads later
-        # print(db.keys())
-        db.clear()
-        return True
+        if (g.app.gui.guiName() == 'nullGui'){
+            // Null gui's don't normally set the g.app.gui.db.
+            g.app.setGlobalDb();
+        }
+
+        // Fixes bug 670108.
+        console.assert(!(g.app.db == null));  // a PickleShareDB instance.
+        // Make sure g.guessExternalEditor works.
+        g.app.db.get("LEO_EDITOR");
+        // this.initFileDB('~/testpickleshare')
+        const db = this.db;
+        db.clear();
+
+        assert not list(db.items());
+        db['hello'] = 15;
+        db['aku ankka'] = [1, 2, 313];
+        db['paths/nest/ok/keyname'] = [1, (5, 46)];
+        db.uncache();  // frees memory, causes re-reads later
+        // print(db.keys())
+
+        db.clear();
+        return true;
+
+    }
     //@+node:felix.20230802145823.10: *3* cacher.save
-    def save(self, c: Cmdr, fn: str) -> None:
-        """
-        Save the per-commander cache.
+    /**
+     * Save the per-commander cache.
 
         Change the cache prefix if changeName is True.
 
         save and save-as set changeName to True, save-to does not.
-        """
-        self.commit()
-        if fn:
-            # 1484: Change only the key!
-            if isinstance(c.db, CommanderWrapper):
-                c.db.key = fn
-                self.commit()
-            else:
+     */
+    public save(c: Commands, fn: string): void {
+        
+        this.commit()
+        if (fn){
+            // 1484: Change only the key!
+            
+            // if( isinstance(c.db, CommanderWrapper)){
+            if( c.db.constructor.name === "CommanderWrapper"){
+                c.db.key = fn;
+                this.commit();
+            }else{
                 g.trace('can not happen', c.db.__class__.__name__)
+            }
+        }
+    }
     //@-others
+
+}
 //@+node:felix.20230802145823.11: ** class CommanderWrapper
-class CommanderWrapper:
-    """A class to distinguish keys from separate commanders."""
+/** 
+ * A class to distinguish keys from separate commanders.
+ */
+class CommanderWrapper {
+    
+    constructor( c: Commands, fn?: string) {
 
-    def __init__(self, c: Cmdr, fn: str = None) -> None:
-        self.c = c
-        self.db = g.app.db
-        self.key = fn or c.mFileName
-        self.user_keys: set[str] = set()
+        this.c = c
+        this.db = g.app.db
+        this.key = fn || c.mFileName
+        this.user_keys:  Set<string> = new Set();
+    }
 
-    def get(self, key: str, default: Any = None) -> Any:
-        value = self.db.get(f"{self.key}:::{key}")
-        return default if value is None else value
-
-    def keys(self) -> list[str]:
-        return sorted(list(self.user_keys))
-
-    def __contains__(self, key: Any) -> bool:
-        return f"{self.key}:::{key}" in self.db
-
-    def __delitem__(self, key: Any) -> None:
-        if key in self.user_keys:
-            self.user_keys.remove(key)
-        del self.db[f"{self.key}:::{key}"]
-
-    def __getitem__(self, key: str) -> Any:
-        return self.db[f"{self.key}:::{key}"]  # May (properly) raise KeyError
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.user_keys.add(key)
-        self.db[f"{self.key}:::{key}"] = value
+    public get(key: string, default: any = None) : any {
+        const value = this.db.get(`${this.key}:::${key}`);
+        return  value == null  ?default: value;
+    }
+    public keys(): string[] {
+        return Array.from(this.user_keys).sort();
+    }
+    public __contains__(key: any) : boolean{
+        return `${this.key}:::${key}` in this.db
+    }
+    public __delitem__(key: any): void  {
+        if( key in this.user_keys){
+            this.user_keys.remove(key)
+        }
+        del this.db[`${this.key}:::${key}`]
+    }
+    public __getitem__(key: string) : any {
+        return this.db[`${this.key}:::${key}`];  // May (properly) raise KeyError
+    }
+    public __setitem__(key: string, value: any): void {
+        this.user_keys.add(key);
+        this.db[`${this.key}:::${key}`] = value;
+    }
+}
 //@+node:felix.20230802145823.12: ** class GlobalCacher
-class GlobalCacher:
-    """A singleton global cacher, g.app.db"""
+/**
+ * A singleton global cacher, g.app.db
+ */
+class GlobalCacher {
 
-    def __init__(self) -> None:
-        """Ctor for the GlobalCacher class."""
-        trace = 'cache' in g.app.debug
-        self.db: Any
-        try:
-            path = join(g.app.homeLeoDir, 'db', 'g_app_db')
-            if trace:
-                print('path for g.app.db:', repr(path))
-            self.db = SqlitePickleShare(path)
-            if trace and self.db is not None:
-                self.dump(tag='Startup')
-        except Exception:
-            if trace:
-                g.es_exception()
-            # Use a plain dict as a dummy.
-            self.db = {}  # type:ignore
+    public db: any;
+
+    /**
+     * Ctor for the GlobalCacher class.
+     */
+    constructor() {
+        
+        const trace = g.app.debug.includes( 'cache');
+        
+        try{
+            const w_path = join(g.app.homeLeoDir, 'db', 'g_app_db');
+            if (trace){
+                g.es_print('path for g.app.db:', w_path.toString());
+            }
+            this.db = new SqlitePickleShare(w_path)
+            if( trace && !(this.db == null)){
+                this.dump('Startup');
+            }
+        }catch (e){
+            if (trace){
+                g.es_exception(e);
+            }
+            // Use a plain dict as a dummy.
+            this.db = {};
+        }
+    }
+
     //@+others
     //@+node:felix.20230802145823.13: *3* g_cacher.clear
-    def clear(self) -> None:
-        """Clear the global cache."""
-        # Careful: self.db may be a Python dict.
-        if 'cache' in g.app.debug:
-            g.trace('clear g.app.db')
-        try:
-            self.db.clear()
-        except TypeError:
-            self.db.clear()
-        except Exception:
-            g.trace('unexpected exception')
-            g.es_exception()
-            self.db = {}  # type:ignore
+    /**
+     * Clear the global cache.
+     */
+    public clear(): void {
+        
+        // Careful: this.db may be a Python dict.
+        if(g.app.debug.includes('cache')){
+            g.trace('clear g.app.db');
+        }
+        try{
+            this.db.clear();
+        }except (e){
+            // this.db.clear();
+            // except Exception
+            g.trace('unexpected exception');
+            g.es_exception(e);
+            this.db = {};
+        }
+
+    }
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
-    def commit_and_close(self) -> None:
-        # Careful: self.db may be a dict.
-        if hasattr(self.db, 'conn'):
-            # pylint: disable=no-member
-            if 'cache' in g.app.debug:
-                self.dump(tag='Shutdown')
-            self.db.conn.commit()
-            self.db.conn.close()
+    public commit_and_close(): void {
+        // Careful: this.db may be a dict.
+        
+        if (this.db.hasOwnProperty('conn')) {
+            
+            if( g.app.debug.includes('cache')){
+                this.dump('Shutdown');
+            }
+            this.db.conn.commit();
+            this.db.conn.close();
+        }
+    }
     //@+node:felix.20230802145823.15: *3* g_cacher.dump
-    def dump(self, tag: str = '') -> None:
-        """Dump the indicated cache if --trace-cache is in effect."""
-        tag0 = 'Global Cache'
-        tag2 = f"{tag0}: {tag}" if tag else tag0
-        dump_cache(self.db, tag2)  # Careful: g.app.db may not be set yet.
+    /**
+     * Dump the indicated cache if --trace-cache is in effect.
+     */
+    public dump(tag = ''): void {
+        const tag0 = 'Global Cache';
+        const tag2 = tag ? `${tag0}: ${tag}` : tag0;
+        dump_cache(this.db, tag2);  // Careful: g.app.db may not be set yet.
+    }
     //@-others
-//@+node:felix.20230802145823.16: ** class PickleShareDB
-_sentinel = object()
 
+}
+//@+node:felix.20230802145823.16: ** class PickleShareDB (unused)
 
+/*
 class PickleShareDB:
     """ The main 'connection' object for PickleShare database """
     //@+others
@@ -469,56 +530,44 @@ class PickleShareDB:
         for it in items:
             self.cache.pop(it, None)
     //@-others
+*/
 //@+node:felix.20230802145823.39: ** class SqlitePickleShare
-_sentinel = object()
+/**
+ * The main 'connection' object for SqlitePickleShare database
+ */
+class SqlitePickleShare {
+    
+    public root: string;
 
-
-class SqlitePickleShare:
-    """ The main 'connection' object for SqlitePickleShare database """
     //@+others
     //@+node:felix.20230802145823.40: *3*  Birth & special methods
-    def init_dbtables(self, conn: Any) -> None:
-        sql = 'create table if not exists cachevalues(key text primary key, data blob);'
-        conn.execute(sql)
+    public init_dbtables(conn: any): void {
+        const sql = 'create table if not exists cachevalues(key text primary key, data blob);';
+        conn.execute(sql);
+    }
     //@+node:felix.20230802145823.41: *4*  __init__ (SqlitePickleShare)
-    def __init__(self, root: str) -> None:
-        """
-        Init the SqlitePickleShare class.
-        root: The directory that contains the data. Created if it doesn't exist.
-        """
-        self.root: str = abspath(expanduser(root))
-        if not isdir(self.root) and not g.unitTesting:
-            self._makedirs(self.root)
+    /**
+     * Init the SqlitePickleShare class.
+     * root: The directory that contains the data. Created if it doesn't exist.
+     */
+    constructor(root: string) {
+
+        this.root = abspath(expanduser(root))
+        
+        if !isdir(this.root) and not g.unitTesting:
+            this._makedirs(this.root)
+
         dbfile = ':memory:' if g.unitTesting else join(root, 'cache.sqlite')
-        self.conn = sqlite3.connect(dbfile, isolation_level=None)
-        self.init_dbtables(self.conn)
-        # Keys are normalized file names.
-        # Values are tuples (obj, orig_mod_time)
-        self.cache: dict[str, Any] = {}
+        this.conn = sqlite3.connect(dbfile, isolation_level=None)
+        this.init_dbtables(this.conn)
 
-        def loadz(data: Any) -> Optional[Any]:
-            if data:
-                # Retain this code for maximum compatibility.
-                try:
-                    val = pickle.loads(zlib.decompress(data))
-                except(ValueError, TypeError):
-                    g.es("Unpickling error - Python 3 data accessed from Python 2?")
-                    return None
-                return val
-            return None
+        // Keys are normalized file names.
+        // Values are tuples (obj, orig_mod_time)
+        this.cache: dict[str, Any] = {}
 
-        def dumpz(val: Any) -> Any:
-            try:
-                # Use Python 2's highest protocol, 2, if possible
-                data = pickle.dumps(val, protocol=2)
-            except Exception:
-                # Use best available if that doesn't work (unlikely)
-                data = pickle.dumps(val, pickle.HIGHEST_PROTOCOL)
-            return sqlite3.Binary(zlib.compress(data))
+        this.reset_protocol_in_values()
 
-        self.loader = loadz
-        self.dumper = dumpz
-        self.reset_protocol_in_values()
+    }
     //@+node:felix.20230802145823.42: *4* __contains__(SqlitePickleShare)
     def __contains__(self, key: str) -> bool:
 
@@ -565,6 +614,27 @@ class SqlitePickleShare:
                 (key, data))
         except sqlite3.OperationalError:
             g.es_exception()
+    //@+node:felix.20230804140347.1: *3* loader
+    private loader(data: any): any {
+        if data:
+            // Retain this code for maximum compatibility.
+            try:
+                val = pickle.loads(zlib.decompress(data))
+            except(ValueError, TypeError):
+                g.es("Unpickling error - Python 3 data accessed from Python 2?")
+                return None
+            return val
+        return None
+    }
+    //@+node:felix.20230804140352.1: *3* dumper
+    private dumper(): any {
+        try:
+            // Use Python 2's highest protocol, 2, if possible
+            data = pickle.dumps(val, protocol=2)
+        except Exception:
+            // Use best available if that doesn't work (unlikely)
+            data = pickle.dumps(val, pickle.HIGHEST_PROTOCOL)
+    }
     //@+node:felix.20230802145823.48: *3* _makedirs
     def _makedirs(self, fn: str, mode: int = 0o777) -> None:
 
@@ -626,7 +696,7 @@ class SqlitePickleShare:
         try:
             val = self[key]
             return val
-        except Exception:  # #1444: Was KeyError.
+        except Exception:  // #1444: Was KeyError.
             return default
     //@+node:felix.20230802145823.55: *3* has_key (SqlightPickleShare)
     def has_key(self, key: str) -> bool:
@@ -692,57 +762,78 @@ class SqlitePickleShare:
         """not used in SqlitePickleShare"""
         pass
     //@-others
+
+}
 //@+node:felix.20230802145823.62: ** function: dump_cache
-def dump_cache(db: Any, tag: str) -> None:
-    """Dump the given cache."""
-    print(f'\n===== {tag} =====\n')
-    if db is None:
-        print('db is None!')
-        return
-    # Create a dict, sorted by file prefixes.
-    d: dict[str, Any] = {}
+/**
+ * Dump the given cache. 
+ */
+function dump_cache(db: any, tag: string): void {
+    
+    g.es_print(`\n===== ${tag} =====\n`)
+    if (db == null) {
+        g.es_print('db is None!');
+        return;
+    }
+    // Create a dict, sorted by file prefixes.
+    const d: Record<string, any> = {};
     for key in db.keys():
         key = key[0]
         val = db.get(key)
         data = key.split(':::')
-        if len(data) == 2:
+        if len(data) == 2
             fn, key2 = data
-        else:
+        else
             fn, key2 = 'None', key
+
         aList = d.get(fn, [])
         aList.append((key2, val),)
         d[fn] = aList
-    # Print the dict.
-    files = 0
-    for key in sorted(d.keys()):
-        if key != 'None':
+
+    // Print the dict.
+    files = 0;
+    for key in sorted(d.keys())
+        if key != 'None'
             dump_list('File: ' + key, d.get(key))
             files += 1
-    if d.get('None'):
+
+
+    if d.get('None')
         heading = f"All others ({tag})" if files else None
         dump_list(heading, d.get('None'))
 
-def dump_list(heading: Any, aList: list) -> None:
-    if heading:
-        print(f'\n{heading}...\n')
-    for aTuple in aList:
-        key, val = aTuple
-        if isinstance(val, str):
-            if key.startswith('windowState'):
-                print(key)
-            elif key.endswith(('leo_expanded', 'leo_marked')):
-                if val:
-                    print(f"{key:30}:")
+
+}
+function dump_list(heading: any, aList: [string, any][]): void {
+    if (heading){
+        g.es_print(f'\n{heading}...\n')
+    }
+    for (const aTuple of aList){
+        let [key, val] = aTuple
+        if (isinstance(val, str)){
+            if( key.startswith('windowState')){
+                g.es_print(key)
+            }else if( key.endswith(('leo_expanded', 'leo_marked'))){
+                if (val){
+                    g.es_print(f"{key:30}:")
                     g.printObj(val.split(','))
-                else:
-                    print(f"{key:30}: []")
-            else:
-                print(f"{key:30}: {val}")
-        elif isinstance(val, (int, float)):
-            print(f"{key:30}: {val}")
-        else:
-            print(f"{key:30}:")
+                }else{
+                    g.es_print(f"{key:30}: []")
+                }
+
+            }else{
+                g.es_print(f"{key:30}: {val}")
+            }
+
+        }else if (isinstance(val, (int, float))){
+            g.es_print(f"{key:30}: {val}")
+        }else{
+            g.es_print(f"{key:30}:")
             g.printObj(val)
+        }
+
+    }
+}
 //@-others
 //@@language typescript
 //@@tabwidth -4
