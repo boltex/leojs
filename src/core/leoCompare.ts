@@ -1067,7 +1067,6 @@ export class TopLevelCompareCommands {
             const p = root.insertAsLastChild();
             p.h = `diff ${n}`;
             p.b = `1: ${p1.h}\n2: ${p2.h}\n${lines.join('')}`;
-            u.afterInsertNode(p, undoType, undoData);
             for (const p3 of [p1, p2]) {
                 const clone = p3.clone();
                 clone.moveToLastChildOf(p);

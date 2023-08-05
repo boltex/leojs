@@ -2211,6 +2211,26 @@ export class AtFile {
             return '';
         }
     }
+    //@+node:felix.20230805150109.1: *6* at.atCleanToString
+    /**
+     * Write one @clean node to a string.
+     */
+    public async atCleanToString(root: Position): Promise<string> {
+        const at = this;
+        const c = this.c;
+        let fileName;
+        try {
+            c.endEditing();
+            fileName = await at.initWriteIvars(root);
+            at.sentinels = false;
+            at.outputList = [];
+            at.putFile(root, undefined, false);
+            return at.errors ? '' : at.outputList.join('');
+        } catch (e) {
+            await at.writeException(fileName || '', root);
+            return '';
+        }
+    }
     //@+node:felix.20230415162517.34: *6* at.atEditToString
     /**
      * Write one @edit node.

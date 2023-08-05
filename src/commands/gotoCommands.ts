@@ -23,28 +23,30 @@ export class GoToCommands {
     //@+others
     //@+node:felix.20221218143456.2: *3* goto.find_file_line & helper
     /**
-     * Place the cursor on the n'th line (one-based) of an external file.
+     * Helper for goto-global-line command.
+     *
+     * Place the cursor on the n'th line (1-based) of an external file.
+     *
      * Return (p, offset, found) for unit testing.
      */
     public async find_file_line(
         n: number,
         p?: Position
-    ): Promise<[Position | undefined, number, boolean]> {
+    ): Promise<[Position | undefined, number]> {
         const c = this.c;
         let offset: number | undefined;
-        let found: boolean | undefined;
         // Don't add an item in the history list here!
         if (c.nodeHistory) {
             c.nodeHistory.skipBeadUpdate = true;
             try {
-                [p, offset, found] = await this.find_file_line_helper(n, p);
+                [p, offset] = await this.find_file_line_helper(n, p);
             } catch (e) {
                 // pass
             }
             finally {
                 c.nodeHistory.skipBeadUpdate = false;
             }
-            return [p, offset || 0, !!found];
+            return [p, offset || 0];
         }
         return this.find_file_line_helper(n, p);
     }
@@ -53,10 +55,10 @@ export class GoToCommands {
     public async find_file_line_helper(
         n: number,
         p?: Position
-    ): Promise<[Position | undefined, number, boolean]> {
+    ): Promise<[Position | undefined, number]> {
         const c = this.c;
         if (n < 0) {
-            return [undefined, -1, false];
+            return [undefined, -1];
         }
         p = p || c.p;
         let root;
@@ -69,7 +71,7 @@ export class GoToCommands {
             const s = await this.get_external_file_with_sentinels(root);
             // Special case empty files.
             if (!s.trim()) {
-                return [p, 0, false];
+                return [p, 0];
             }
             const lines = g.splitLines(s);
 
@@ -86,23 +88,26 @@ export class GoToCommands {
                 [gnx, h, offset] = this.scan_nonsentinel_lines(lines, n, root);
             }
 
-            let found;
-            [p, found] = this.find_gnx(root, gnx, h);
-            if (gnx && found) {
-                this.success(n, offset, p!);
-                return [p, offset, true];
+            if (gnx) {
+                const p = this.find_gnx2(gnx!);
+                if (p) {
+                    this.success(n, offset, p!);
+                    return [p, offset];
+                }
             }
 
             this.fail(lines, n, root);
-            return [undefined, -1, false];
+            return [undefined, -1];
         }
 
         return this.find_script_line(n, p);
     }
 
-    //@+node:felix.20221218143456.3: *3* goto.find_node_start
+    //@+node:felix.20221218143456.3: *3* goto.find_node_start & helper
     /**
-     * Return the global line number of the first line of p.b
+     * Helper for show-file-line command.
+     *
+     * Return the 1-based global line number of the *first* line of p.b.
      */
     public async find_node_start(
         p: Position,
@@ -119,28 +124,79 @@ export class GoToCommands {
 
         console.assert(root.isAnyAtFileNode());
 
-        if (!s) {
-            s = await this.get_external_file_with_sentinels(root);
+        // Init.
+        let [delim1, delim2] = this.get_delims(root);
+        const delims = this.get_3_delims(root);
+        const remove_sentinels = !root.isAtFileNode();  // Same as in self.find_file_line_helper.
+
+        // Get the file with sentinels.
+        let contents_s: string;
+        if (s == null) {
+            contents_s = await this.get_external_file_with_sentinels(root);
+        } else {
+            contents_s = s;
         }
+        const contents = g.splitLines(contents_s);
 
-        let delim1;
-        let delim2;
+        // if not g.unitTesting: g.printObj(contents)
 
-        [delim1, delim2] = this.get_delims(root);
-
-        // Match only the node with the correct gnx.
+        // Find the node with the correct gnx.
         const node_pat = new RegExp(
-            `\s*${g.reEscape(delim1)}@\+node:${g.reEscape(p.gnx)}:`
+            `\\s*${g.reEscape(delim1)}@\\+node:${g.reEscape(p.gnx)}:`
         );
-
-        for (let [i, w_s] of g.splitLines(s).entries()) {
+        for (let [i, w_s] of contents.entries()) {
             if (node_pat.test(w_s)) {
+                if (remove_sentinels) {
+                    const n = this.prev_hidden_lines(delims, contents, i);
+                    if (n == null) {
+                        // g.trace(f"i: {i:2} n: None: return {i+1}")
+                        return i + 1;
+                    }
+                    // g.trace(f"i: {i:2} n: {n:2}:")
+                    return Math.max(1, i - n + 1);
+                }
                 return i + 1;
+            }
+        }
+        // #3010: Special case for .vue files.
+        //        Also look for nodes delimited by "//"
+        if (root.h.endsWith('.vue')) {
+            const node_pat2 = new RegExp(
+                `\\s*${g.reEscape('//')}@\\+node:${g.reEscape(p.gnx)}:`
+            );
+            // re.compile(fr"\s{re.escape('//')}@\+node:{re.escape(p.gnx)}:")
+            for (let [i, w_s] of contents.entries()) {
+                if (node_pat2.test(w_s)) {
+                    return i + 1;
+                }
+            }
+        }
+        return undefined;
+
+    }
+
+    //@+node:felix.20230805164451.1: *4* goto.prev_hidden_lines
+    /**
+     * Return the number of hidden sentinels preceding contents[target_i].
+     */
+    public prev_hidden_lines(
+        delims: [string, string, string],  // The comment delims.
+        contents: string[],  // The contents of the file *including* sentinels.
+        target_i: number,  // The line number of the target line.
+    ): number | undefined {
+
+        console.assert(delims.length === 3, g.callers());
+        let n_prev = 0;
+        for (const [i, line] of contents.entries()) {
+            if (i === target_i) {
+                return n_prev;
+            }
+            if (g.is_invisible_sentinel(delims, contents, i)) {
+                n_prev += 1;
             }
         }
         return undefined;
     }
-
     //@+node:felix.20221218143456.4: *3* goto.find_script_line
     /**
      * Go to line n (zero based) of the script with the given root.
@@ -149,11 +205,11 @@ export class GoToCommands {
     public async find_script_line(
         n: number,
         root: Position
-    ): Promise<[Position | undefined, number, boolean]> {
+    ): Promise<[Position | undefined, number]> {
         const c = this.c;
 
         if (n < 0) {
-            return [undefined, -1, false];
+            return [undefined, -1];
         }
         const script = await g.getScript(c, root, false);
         const lines = g.splitLines(script);
@@ -165,14 +221,16 @@ export class GoToCommands {
         [gnx, h, offset] = this.scan_sentinel_lines(lines, n, root);
 
         let p;
-        let found;
-        [p, found] = this.find_gnx(root, gnx, h);
-        if (gnx && found) {
-            this.success(n, offset, p!);
-            return [p, offset, true];
+
+        p = this.find_gnx2(gnx!);
+        if (gnx) {
+            if (p) {
+                this.success(n, offset, p!);
+                return [p, offset];
+            }
         }
         this.fail(lines, n, root);
-        return [undefined, -1, false];
+        return [undefined, -1];
     }
 
     //@+node:felix.20221218143456.5: *3* goto.node_offset_to_file_line
@@ -401,28 +459,53 @@ export class GoToCommands {
         c.bodyWantsFocus();
         w.seeInsertPoint();
     }
-    //@+node:felix.20221218143456.10: *4* goto.find_gnx
-    /**
-     * Scan root's tree for a node with the given gnx and vnodeName.
-     * return (p,found)
+    //@+node:felix.20230805160442.1: *4* goto.find_gnx & find_gnx2
+    /** 
+     * Scan the outline for a node with the given gnx and vnodeName.
+     * return (p, True) if found or (None, False) otherwise.
      */
     public find_gnx(
         root: Position,
-        gnx?: string,
-        vnodeName?: string
+        gnx: string,
     ): [Position | undefined, boolean] {
-        if (gnx) {
-            gnx = g.toUnicode(gnx);
-            for (let p of root.self_and_subtree(false)) {
-                if (p.matchHeadline(vnodeName!)) {
-                    if (p.v.fileIndex === gnx) {
-                        return [p.copy(), true];
-                    }
-                }
-            }
-            return [undefined, false];
+
+        // Not used in Leo's core. Retain this method for compatibility.
+        const p = this.find_gnx2(gnx);
+        return [p, !!(p && p.__bool__())];
+    }
+
+    /**
+     * Scan the outline for a node with the given gnx and vnodeName.
+     *
+     * Return a copy of the position or None.
+     */
+    public find_gnx2(gnx: string): Position | undefined {
+
+        const c = this.c;
+        if (!gnx) {
+            return undefined;  // Should never happen.
         }
-        return [root, false];
+        gnx = g.toUnicode(gnx);
+
+        // Prefer c.p.
+        if (c.p.gnx === gnx) {
+            return c.p.copy();
+        }
+        // Search the entire outline.
+        let positions: Position[];
+        const backwards = c.config.getBool('search-links-backwards', true);
+        if (backwards) {
+            positions = [...c.all_positions()].reverse();
+        } else {
+            positions = [...c.all_positions()];
+        }
+        for (const p of positions) {
+            if (p.v.fileIndex === gnx) {
+                return p.copy();
+            }
+        }
+        return undefined;
+
     }
     //@+node:felix.20221218143456.11: *4* goto.find_root
     /**
@@ -460,7 +543,7 @@ export class GoToCommands {
     }
     //@+node:felix.20221218143456.12: *4* goto.get_delims
     /**
-     * Return the delimiters in effect at root.
+     * Return the two start/end delimiters in effect at root.
      */
     public get_delims(root: Position): [string, string | undefined] {
         const c = this.c;
@@ -484,28 +567,48 @@ export class GoToCommands {
 
         return [delims2, delims3];
     }
+    //@+node:felix.20230805150659.1: *4* goto.get_3_delims
+    /**
+     * Return all three comment delimiters in effect at root.
+     */
+    public get_3_delims(root: Position): [string, string, string] {
+        const c = this.c;
+        const old_target_language = c.target_language;
+        let d;
+
+        try {
+            c.target_language = g.getLanguageAtPosition(c, root);
+            d = c.scanAllDirectives(root);
+        } finally {
+            c.target_language = old_target_language;
+        }
+        return d['delims'];
+    }
     //@+node:felix.20221218143456.13: *4* goto.get_external_file_with_sentinels
     /**
      * root is an @<file> node. If root is an @auto node, return the result of
      * writing the file *with* sentinels, even if the external file normally
      * would *not* have sentinels.
      */
-    public async get_external_file_with_sentinels(
+    public get_external_file_with_sentinels(
         root: Position
     ): Promise<string> {
         const c = this.c;
-        let s: string;
-        if (root.isAtAutoNode()) {
-            // Special case @auto nodes:
-            // Leo does not write sentinels in the root @auto node.
-            try {
-                g.app.force_at_auto_sentinels = true;
-                s = await c.atFileCommands.atAutoToString(root);
-            } finally {
-                g.app.force_at_auto_sentinels = true;
-            }
-            return s;
+        if (root.isAnyAtFileNode()) {
+            return c.atFileCommands.atFileToString(root, true);
         }
+        // let s: string;
+        // if (root.isAtAutoNode()) {
+        //     // Special case @auto nodes:
+        //     // Leo does not write sentinels in the root @auto node.
+        //     try {
+        //         g.app.force_at_auto_sentinels = true;
+        //         s = await c.atFileCommands.atAutoToString(root);
+        //     } finally {
+        //         g.app.force_at_auto_sentinels = true;
+        //     }
+        //     return s;
+        // }
 
         return g.composeScript(
             // Fix #429.
@@ -604,7 +707,9 @@ export class GoToCommands {
     //@+node:felix.20221218143503.1: *3* show-file-line
     @command(
         'show-file-line',
-        'Show the line number of the current body cursor position in an external file'
+        'Print the external file line number that corresponds to the line containing the cursor.' +
+        // Added Note in docstring
+        " The command is buggy. It will report incorrect line numbers for all lines following @others or section references."
     )
     public async show_file_line(this: Commands): Promise<void> {
         const c: Commands = this;
@@ -616,15 +721,16 @@ export class GoToCommands {
         if (!w) {
             return;
         }
-        const n0 = await this.gotoCommands.find_node_start(c.p);
+        // n0 is the 1-based line number of the first line of p.b.
+        const n0 = await this.gotoCommands.find_node_start(c.p); // 1-based.
         if (!n0) {
             return;
         }
+        // This does not work after @others or section references.
         const i = w.getInsertPoint();
         const s = w.getAllText();
-        let row;
-        let col;
-        [row, col] = g.convertPythonIndexToRowCol(s, i);
+        const [row, col] = g.convertPythonIndexToRowCol(s, i); // 0-based
+        // g.trace('n0', n0, 'row', row);
         g.es_print(1 + n0 + row);
     }
 

@@ -4440,8 +4440,8 @@ export class LeoUI extends NullGui {
                         const gc = c.gotoCommands;
                         let junk_p;
                         let junk_offset;
-                        let found;
-                        [junk_p, junk_offset, found] = await gc.find_file_line(w_line);
+
+                        [junk_p, junk_offset] = await gc.find_file_line(w_line);
 
                         this.setupRefresh(
                             Focus.Body,

@@ -1812,46 +1812,6 @@ export function is_binary_string(s: string): boolean {
 
     return s.includes(nullCharacter) || nonPrintableCharactersRegex.test(s);
 }
-//@+node:felix.20221219233638.1: *3* g.is_sentinel
-/**
- * Return True if line starts with a sentinel comment.
- *
- * Leo 6.7.2: Support blackened sentinels.
- */
-export function is_sentinel(
-    line: string,
-    delims: [string | undefined, string | undefined, string | undefined]
-): boolean {
-    let delim1, delim2, delim3, sentinel1, sentinel2;
-    [delim1, delim2, delim3] = delims;
-    // Defensive code. Make *sure* delim has no trailing space.
-    if (delim1) {
-        delim1 = delim1.trimEnd();
-    }
-    line = line.trimStart();
-    if (delim1) {
-        sentinel1 = delim1 + '@';
-        sentinel2 = delim1 + ' @';
-        return line.startsWith(sentinel1) || line.startsWith(sentinel2);
-    }
-    let i, j;
-    if (delim2 && delim3) {
-        sentinel1 = delim2 + '@';
-        sentinel2 = delim2 + ' @';
-        if (line.includes(sentinel1)) {
-            i = line.indexOf(sentinel1);
-            j = line.indexOf(delim3);
-            return 0 === i && i < j;
-        }
-        if (line.includes(sentinel2)) {
-            i = line.indexOf(sentinel2);
-            j = line.indexOf(delim3);
-            return 0 === i && i < j;
-        }
-    }
-    error(`is_sentinel: can not happen. delims: ${delims}`);
-    return false;
-}
 //@+node:felix.20230413202326.1: *3* g.makeAllNonExistentDirectories
 /**
  * A wrapper from os.makedirs.
@@ -2761,17 +2721,11 @@ export async function execGitCommand(
     directory: string
 ): Promise<string[]> {
 
-    console.log('execGitCommand called with command: ', command, ' \nin directory: ', directory);
-    // @ts-expect-error
-    console.log('child,fake? ', !!child.fake);
-
     if (isBrowser) {
         console.log('LEOJS: GIT COMMAND CALLED FROM BROWSER');
         void vscode.window.showInformationMessage('LeoJS Git Commands not available in "web" version');
         return [];
     }
-
-    // return Promise.resolve([]);
 
     const git_dir = finalize_join(directory, '.git');
     const w_exists = await os_path_exists(git_dir);
@@ -5629,6 +5583,89 @@ export function findNodeInTree(
     return undefined;
 }
 //@-others
+//@+node:felix.20230805145003.1: ** g.Sentinels
+//@+node:felix.20230805145003.2: *3* g.is_invisible_sentinel
+/**
+ * delims are the comment delims in effect.
+  *
+  * contents is the contents *with* sentinels of an external file that
+  * normally does *not* have sentinels.
+  *
+  * Return True if contents[i] corresponds to a line visible in the outline
+  * but not the external file.
+ */
+export function is_invisible_sentinel(
+    delims: [string, string, string], contents: string[], i: number
+): boolean {
+
+    const delim1 = delims[0] || delims[1];
+
+    // Get previous line, to test for previous @verbatim sentinel.
+    const line1 = i > 0 ? contents[i - 1] : '';  // previous line.
+    const line2 = contents[i];
+
+    if (!is_sentinel(line2, delims)) {
+        return false;  // Non-sentinels are visible everywhere.
+    }
+    // Strip off the leading sentinel comment. Works for blackened sentinels.
+    const s1 = line1.trim().slice(delim1.length);
+    const s2 = line2.trim().slice(delim1.length);
+
+    if (s1.startsWith('@verbatim')) {
+        return false;  // *This* line is visible in the outline.
+    }
+    if (s2.startsWith('@@')) {
+        // Directives are visible in the outline, but not the external file.
+        return true;
+    }
+    if (s2.startsWith('@+others') || s2.startsWith('@+<<')) {
+        // @others and section references are visibible everywhere.
+        return true;
+    }
+    // Not visible anywhere. For example, @+leo, @-leo, @-others, @+node, @-node.
+    return true;
+
+}
+//@+node:felix.20230805145035.1: *3* g.is_sentinel
+/**
+ * Return True if line starts with a sentinel comment.
+ *
+ * Leo 6.7.2: Support blackened sentinels.
+ */
+export function is_sentinel(
+    line: string,
+    delims: [string | undefined, string | undefined, string | undefined]
+): boolean {
+    let delim1, delim2, delim3, sentinel1, sentinel2;
+    [delim1, delim2, delim3] = delims;
+    // Defensive code. Make *sure* delim has no trailing space.
+    if (delim1) {
+        delim1 = delim1.trimEnd();
+    }
+    line = line.trimStart();
+    if (delim1) {
+        sentinel1 = delim1 + '@';
+        sentinel2 = delim1 + ' @';
+        return line.startsWith(sentinel1) || line.startsWith(sentinel2);
+    }
+    let i, j;
+    if (delim2 && delim3) {
+        sentinel1 = delim2 + '@';
+        sentinel2 = delim2 + ' @';
+        if (line.includes(sentinel1)) {
+            i = line.indexOf(sentinel1);
+            j = line.indexOf(delim3);
+            return 0 === i && i < j;
+        }
+        if (line.includes(sentinel2)) {
+            i = line.indexOf(sentinel2);
+            j = line.indexOf(delim3);
+            return 0 === i && i < j;
+        }
+    }
+    error(`is_sentinel: can not happen. delims: ${delims}`);
+    return false;
+}
 //@+node:felix.20211104211349.1: ** g.Unit Tests
 //@+node:felix.20230724154323.1: ** g.Urls & UNLs
 //@+<< About clickable links >>
@@ -5804,6 +5841,7 @@ export async function findGnx(gnx: string, c: Commands): Promise<Position | unde
             // pass
         }
     }
+    // Search forwards, setting p2.
     for (const p of c.all_unique_positions()) {
         if (p.gnx === gnx) {
             if (n == null) {
