@@ -72,17 +72,24 @@ suite('Test cases for leoCompare.ts', () => {
             p.h = h;
             p.b = b;
         }
-        assert.ok(c.lastTopLevel().__eq__(root));
 
+        assert.strictEqual(0, u.beads.length);  // #3476.
+        assert.ok(c.lastTopLevel().__eq__(root));
+        assert.strictEqual(0, c.checkOutline());
         // Run the command.
         c.diffMarkedNodes();
-        assert.strictEqual(c.lastTopLevel().h, 'diff marked nodes')
-
-        u.undo();
-        assert.ok(c.lastTopLevel().__eq__(root));
-
-        u.redo();
-        assert.strictEqual(c.lastTopLevel().h, 'diff marked nodes');
+        for (let i = 0; i < 3; i++) {
+            // #3476.
+            assert.strictEqual(1, u.beads.length);
+            assert.strictEqual(0, c.checkOutline());
+            assert.strictEqual(c.lastTopLevel().h, 'diff marked nodes');
+            u.undo();
+            assert.strictEqual(0, c.checkOutline());
+            assert.ok(c.lastTopLevel().__eq__(root));
+            u.redo();
+            assert.strictEqual(0, c.checkOutline());
+            assert.strictEqual(c.lastTopLevel().h, 'diff marked nodes');
+        }
 
     });
     //@+node:felix.20230723005339.4: *3* TestCompare.test_diff_list_of_files

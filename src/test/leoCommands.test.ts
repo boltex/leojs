@@ -143,8 +143,7 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.7: *3* TestCommands.test_c_checkOutline
     test('test_c_checkOutline', () => {
         const c = self.c;
-        const errors = c.checkOutline();
-        assert.strictEqual(errors, 0);
+        assert.strictEqual(c.checkOutline(), 0);
     });
 
     //@+node:felix.20220129224954.8: *3* TestCommands.test_c_checkPythonCode

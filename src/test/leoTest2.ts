@@ -280,6 +280,122 @@ export class LeoUnitTest {
             g.printObj(g.splitLines(p.v.b));
         }
     }
+    //@+node:felix.20230805124519.1: *3* TestOutlineCommands.clean_tree
+    /**
+     * Clear everything but the root node.
+     */
+    public clean_tree(): void {
+
+        const p = this.root_p;
+        assert.ok(p.h === 'root');
+        p.deleteAllChildren();
+        while (p.hasNext()) {
+            p.next().doDelete();
+        }
+
+    }
+    //@+node:felix.20230805124525.1: *3* TestOutlineCommands.copy_node
+    /**
+     * Copy c.p to the clipboard.
+     */
+    public async copy_node(is_json = false): Promise<string> {
+
+        const c = this.c;
+        let s;
+        if (is_json) {
+            s = c.fileCommands.outline_to_clipboard_json_string();
+        } else {
+            s = c.fileCommands.outline_to_clipboard_string() || "";
+        }
+        await g.app.gui.replaceClipboardWith(s);
+        return s;
+
+    }
+    //@+node:felix.20230805124530.1: *3* TestOutlineCommands.create_test_paste_outline
+    /**
+     * Create the following tree:
+     *
+     *      aa
+     *          aa:child1
+     *      bb
+     *      cc:child1 (clone)
+     *      cc
+     *        cc:child1 (clone)
+     *        cc:child2
+     *      dd
+     *        dd:child1
+     *          dd:child1:child1
+     *        dd:child2
+     *      ee
+     *
+     *  return cc.
+     */
+    public create_test_paste_outline(): Position {
+
+        const c = this.c;
+        const root = c.rootPosition()!;
+        const aa = root.insertAfter();
+        aa.h = 'aa';
+        const aa_child1 = aa.insertAsLastChild();
+        aa_child1.h = 'aa:child1';
+        const bb = aa.insertAfter();
+        bb.h = 'bb';
+        let cc = bb.insertAfter();
+        cc.h = 'cc';
+        const cc_child1 = cc.insertAsLastChild();
+        cc_child1.h = 'cc:child1';
+        const cc_child2 = cc_child1.insertAfter();
+        cc_child2.h = 'cc:child2';
+        const dd = cc.insertAfter();
+        dd.h = 'dd';
+        const dd_child1 = dd.insertAsLastChild();
+        dd_child1.h = 'dd:child1';
+        const dd_child2 = dd.insertAsLastChild();
+        dd_child2.h = 'dd:child2';
+        const dd_child1_child1 = dd_child1.insertAsLastChild();
+        dd_child1_child1.h = 'dd:child1:child1';
+        const ee = dd.insertAfter();
+        ee.h = 'ee';
+        const clone = cc_child1.clone();
+        clone.moveAfter(bb);
+        assert.ok(clone.v === cc_child1.v);
+        // Careful: position cc has changed.
+        cc = clone.next().copy();
+        // Initial checks.
+        assert.ok(cc.h === 'cc');
+        // Make *sure* clones are as expected.
+        for (const p of c.all_positions()) {
+            if (p.h === 'cc:child1') {
+                assert.ok(p.isCloned(), p.h);
+            } else {
+                assert.ok(!p.isCloned(), p.h);
+            }
+        }
+        return cc;
+
+    }
+    //@+node:felix.20230805124535.1: *3* TestOutlineCommands.create_test_sort_outline
+    /**
+     * Create a test outline suitable for sort commands.
+     */
+    public create_test_sort_outline(): void {
+        const p = this.c.p;
+        assert.ok(p.__eq__(this.root_p));
+        assert.ok(p.h === 'root');
+
+        const table = [
+            'child a',
+            'child z',
+            'child b',
+            'child w',
+        ];
+
+        for (const h of table) {
+            const child = p.insertAsLastChild();
+            child.h = h;
+        }
+
+    }
     //@-others
 
 }

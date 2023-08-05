@@ -572,10 +572,11 @@
 <v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
 <v t="felix.20230529171913.1"><vh>@file src/test/test_importers.ts</vh></v>
 <v t="felix.20230715185802.1"><vh>unittest commands</vh>
-<v t="felix.20230531185455.1"><vh>@file src/test/leoOutlineCommands.test.ts</vh></v>
+<v t="felix.20230715191150.1"><vh>@file src/test/leoCommanderFileCommands.test.ts</vh></v>
+<v t="felix.20230805122326.1"><vh>@file src/test/leoGotoCommands.test.ts</vh></v>
 <v t="felix.20230715191134.1"><vh>@file src/test/leoEditCommands.test.ts</vh></v>
 <v t="felix.20230715191137.1"><vh>@file src/test/leoEditFileCommands.test.ts</vh></v>
-<v t="felix.20230715191150.1"><vh>@file src/test/leoCommanderFileCommands.test.ts</vh></v>
+<v t="felix.20230531185455.1"><vh>@file src/test/leoOutlineCommands.test.ts</vh></v>
 </v>
 <v t="felix.20230715185809.1"><vh>unittest core</vh>
 <v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
@@ -9810,8 +9811,8 @@ public gotoGlobalLine(): Thenable&lt;unknown&gt; {
                     const gc = c.gotoCommands;
                     let junk_p;
                     let junk_offset;
-                    let found;
-                    [junk_p, junk_offset, found] = await gc.find_file_line(w_line);
+
+                    [junk_p, junk_offset] = await gc.find_file_line(w_line);
 
                     this.setupRefresh(
                         Focus.Body,

@@ -1853,7 +1853,7 @@ export class Commands {
         /**
          * Rescan all vnodes to ensure that no errors remain.
          *
-         * Return (error_list, messages, no)
+         * Return (error_list, messages, n).
          */
         function recheck(): [[VNode, VNode][], string[], number] {
 
@@ -1871,7 +1871,7 @@ export class Commands {
                     if (children_n !== parents_n) {
                         error_list.push([parent_v, child_v]);
                         messages.push(
-                            'Error recovery failed!' +
+                            'Error recovery failed!\n' +
                             `parent: ${parent_v.h} count(parent.children) = ${children_n}\n` +
                             ` child: ${child_v.h} count(child.parents = ${parents_n}`
                         );
