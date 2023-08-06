@@ -1051,6 +1051,26 @@ export class LeoApp {
         g.es_print(app.signon);
         g.es_print(app.signon1);
     }
+    //@+node:felix.20230805210538.1: *4* app.setGlobalDb
+    /**
+     * Create global pickleshare db
+     *
+     * Usable by:
+     *
+     *    g.app.db['hello'] = [1,2,5]
+     */
+    public async setGlobalDb(): Promise<void> {
+
+        // Fixes bug 670108.
+
+        g.app.global_cacher = new GlobalCacher();
+        await g.app.global_cacher.init();
+        g.app.db = g.app.global_cacher.db;
+        g.app.commander_cacher = new CommanderCacher();
+        await g.app.commander_cacher.init();
+        g.app.commander_db = g.app.commander_cacher.db;
+
+    }
     //@+node:felix.20220417215228.1: *4* app.setLeoID & helpers
     /**
      * Get g.app.leoID from various sources.
@@ -2622,7 +2642,7 @@ export class LoadManager {
 
         // Init the app.
         await lm.initApp();
-        // g.app.setGlobalDb()
+        await g.app.setGlobalDb();
 
         // lm.reportDirectories(verbose)
 

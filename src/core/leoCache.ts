@@ -14,8 +14,6 @@ var pickle = require('./jpicklejs');
 
 //@-<< leoCache imports & annotations >>
 
-
-
 // Abbreviations used throughout.
 const abspath = g.os_path_abspath;
 const basename = g.os_path_basename;
@@ -34,18 +32,22 @@ const split = g.os_path_split;
 class CommanderCacher {
     
         public db: any;
-        private _dbPath;
 
         constructor() {
             try{
-                this._dbPath = join(g.app.homeLeoDir, 'db', 'global_data');
-                this.db = new SqlitePickleShare(this._dbPath);
+                const w_path = join(g.app.homeLeoDir, 'db', 'global_data');
+                this.db = new SqlitePickleShare(w_path);
             }catch (e){
                 this.db = {} ;
             }
         }
 
     //@+others
+    //@+node:felix.20230806001339.1: *3* cacher.init
+    public init(): Promise<unknown> {
+        //
+        return this.db.init();
+    }
     //@+node:felix.20230802145823.4: *3* cacher.clear
     /**
      * Clear the cache for all commanders.
@@ -100,15 +102,15 @@ class CommanderCacher {
         // Fixes bug 670108.
         console.assert(!(g.app.db == null));  // a PickleShareDB instance.
         // Make sure g.guessExternalEditor works.
-        g.app.db.get("LEO_EDITOR");
+        g.app.db["LEO_EDITOR"];
         // this.initFileDB('~/testpickleshare')
         const db = this.db;
         db.clear();
 
-        assert not list(db.items());
+        console.assert( ![...db.items()].length);
         db['hello'] = 15;
         db['aku ankka'] = [1, 2, 313];
-        db['paths/nest/ok/keyname'] = [1, (5, 46)];
+        db['paths/nest/ok/keyname'] = [1, [5, 46]];
         db.uncache();  // frees memory, causes re-reads later
         // print(db.keys())
 
@@ -148,37 +150,73 @@ class CommanderCacher {
  */
 class CommanderWrapper {
     
+    private c: Commands;
+    private db:any ; // SqlitePickleShare
+    private key: string;
+    private user_keys:  Set<string>;
+
     constructor( c: Commands, fn?: string) {
 
-        this.c = c
-        this.db = g.app.db
-        this.key = fn || c.mFileName
-        this.user_keys:  Set<string> = new Set();
+        this.c = c;
+        this.db = g.app.db;
+        this.key = fn || c.mFileName;
+        this.user_keys = new Set();
+        return new Proxy(this, this);
+
     }
 
-    public get(key: string, default: any = None) : any {
-        const value = this.db.get(`${this.key}:::${key}`);
-        return  value == null  ?default: value;
-    }
     public keys(): string[] {
         return Array.from(this.user_keys).sort();
     }
-    public __contains__(key: any) : boolean{
-        return `${this.key}:::${key}` in this.db
+
+    public has(target: CommanderWrapper, prop: string){
+        return `${this.key}:::${prop}` in this.db;
     }
-    public __delitem__(key: any): void  {
-        if( key in this.user_keys){
-            this.user_keys.remove(key)
+
+    public deleteProperty(target: CommanderWrapper,  prop: string): boolean  {
+        if( this.user_keys.has(prop) ){
+            this.user_keys.delete(prop)
         }
-        del this.db[`${this.key}:::${key}`]
+        delete this.db[`${this.key}:::${prop}`];
+        return true;
+
     }
-    public __getitem__(key: string) : any {
-        return this.db[`${this.key}:::${key}`];  // May (properly) raise KeyError
+
+    public get(target: CommanderWrapper, prop: string) : any {
+        if (prop === "keys") {
+            return this.keys.bind(target);
+        }
+        if (prop === "toString") {
+            return this.toString.bind(target);
+        }
+        if (prop === 'valueOf') {
+            return this.valueOf.bind(target);
+        }
+        if (prop === "Symbol(Symbol.iterator)") {
+            return this[Symbol.iterator].bind(target);
+        }
+        return this.db[`${this.key}:::${prop}`];  // May (properly) raise KeyError
     }
-    public __setitem__(key: string, value: any): void {
-        this.user_keys.add(key);
-        this.db[`${this.key}:::${key}`] = value;
+
+    public set(target: CommanderWrapper, prop: string, value: any): boolean {
+        this.user_keys.add(prop);
+        this.db[`${this.key}:::${prop}`] = value;
+        return true;
     }
+
+    valueOf() {
+        return 'CommanderWrapper: ' + this.key + JSON.stringify(this.user_keys);
+    }
+    toString() {
+        return 'CommanderWrapper: ' + this.key + JSON.stringify(this.user_keys);
+    }
+
+    *[Symbol.iterator]() {
+        for (const key of this.user_keys) {
+            yield [key, this.db[`${this.key}:::${key}`]];
+        }
+    }
+
 }
 //@+node:felix.20230802145823.12: ** class GlobalCacher
 /**
@@ -214,6 +252,11 @@ class GlobalCacher {
     }
 
     //@+others
+    //@+node:felix.20230806001555.1: *3* g_cacher.init
+    public init(): Promise<unknown> {
+        //
+        return this.db.init();
+    }
     //@+node:felix.20230802145823.13: *3* g_cacher.clear
     /**
      * Clear the global cache.
@@ -226,7 +269,7 @@ class GlobalCacher {
         }
         try{
             this.db.clear();
-        }except (e){
+        }catch (e){
             // this.db.clear();
             // except Exception
             g.trace('unexpected exception');
@@ -260,277 +303,6 @@ class GlobalCacher {
     //@-others
 
 }
-//@+node:felix.20230802145823.16: ** class PickleShareDB (unused)
-
-/*
-class PickleShareDB:
-    """ The main 'connection' object for PickleShare database """
-    //@+others
-    //@+node:felix.20230802145823.17: *3*  Birth & special methods
-    //@+node:felix.20230802145823.18: *4*  __init__ (PickleShareDB)
-    def __init__(self, root: str) -> None:
-        """
-        Init the PickleShareDB class.
-        root: The directory that contains the data. Created if it doesn't exist.
-        """
-        self.root: str = abspath(expanduser(root))
-        if not isdir(self.root) and not g.unitTesting:
-            self._makedirs(self.root)
-        # Keys are normalized file names.
-        # Values are tuples (obj, orig_mod_time)
-        self.cache: dict[str, Any] = {}
-
-        def loadz(fileobj: Any) -> None:
-            if fileobj:
-                # Retain this code for maximum compatibility.
-                try:
-                    val = pickle.loads(
-                        zlib.decompress(fileobj.read()))
-                except ValueError:
-                    g.es("Unpickling error - Python 3 data accessed from Python 2?")
-                    return None
-                return val
-            return None
-
-        def dumpz(val: Any, fileobj: Any) -> None:
-            if fileobj:
-                try:
-                    # Use Python 2's highest protocol, 2, if possible
-                    data = pickle.dumps(val, 2)
-                except Exception:
-                    # Use best available if that doesn't work (unlikely)
-                    data = pickle.dumps(val, pickle.HIGHEST_PROTOCOL)
-                compressed = zlib.compress(data)
-                fileobj.write(compressed)
-
-        self.loader = loadz
-        self.dumper = dumpz
-    //@+node:felix.20230802145823.19: *4* __contains__(PickleShareDB)
-    def __contains__(self, key: Any) -> bool:
-
-        return self.has_key(key)  # NOQA
-    //@+node:felix.20230802145823.20: *4* __delitem__
-    def __delitem__(self, key: str) -> None:
-        """ del db["key"] """
-        fn = join(self.root, key)
-        self.cache.pop(fn, None)
-        try:
-            os.remove(fn)
-        except OSError:
-            # notfound and permission denied are ok - we
-            # lost, the other process wins the conflict
-            pass
-    //@+node:felix.20230802145823.21: *4* __getitem__ (PickleShareDB)
-    def __getitem__(self, key: str) -> Any:
-        """ db['key'] reading """
-        fn = join(self.root, key)
-        try:
-            mtime = (os.stat(fn)[stat.ST_MTIME])
-        except OSError:
-            raise KeyError(key)
-        if fn in self.cache and mtime == self.cache[fn][1]:
-            obj = self.cache[fn][0]
-            return obj
-        try:
-            # The cached item has expired, need to read
-            obj = self.loader(self._openFile(fn, 'rb'))
-        except Exception:
-            raise KeyError(key)
-        self.cache[fn] = (obj, mtime)
-        return obj
-    //@+node:felix.20230802145823.22: *4* __iter__
-    def __iter__(self) -> Generator:
-
-        for k in list(self.keys()):
-            yield k
-    //@+node:felix.20230802145823.23: *4* __repr__
-    def __repr__(self) -> str:
-        return f"PickleShareDB('{self.root}')"
-    //@+node:felix.20230802145823.24: *4* __setitem__ (PickleShareDB)
-    def __setitem__(self, key: str, value: Any) -> None:
-        """ db['key'] = 5 """
-        fn = join(self.root, key)
-        parent, junk = split(fn)
-        if parent and not isdir(parent):
-            self._makedirs(parent)
-        self.dumper(value, self._openFile(fn, 'wb'))
-        try:
-            mtime = os.path.getmtime(fn)
-            self.cache[fn] = (value, mtime)
-        except OSError as e:
-            if e.errno != 2:
-                raise
-    //@+node:felix.20230802145823.25: *3* _makedirs
-    def _makedirs(self, fn: str, mode: int = 0o777) -> None:
-
-        os.makedirs(fn, mode)
-    //@+node:felix.20230802145823.26: *3* _openFile (PickleShareDB)
-    def _openFile(self, fn: str, mode: str = 'r') -> Optional[Any]:
-        """ Open this file.  Return a file object.
-
-        Do not print an error message.
-        It is not an error for this to fail.
-        """
-        try:
-            return open(fn, mode)
-        except Exception:
-            return None
-    //@+node:felix.20230802145823.27: *3* _walkfiles & helpers
-    def _walkfiles(self, s: str, pattern: str = None) -> Generator:
-        """ D.walkfiles() -> iterator over files in D, recursively.
-
-        The optional argument, pattern, limits the results to files
-        with names that match the pattern.  For example,
-        mydir.walkfiles('*.tmp') yields only files with the .tmp
-        extension.
-        """
-        for child in self._listdir(s):
-            if isfile(child):
-                if pattern is None or self._fn_match(child, pattern):
-                    yield child
-            elif isdir(child):
-                for f in self._walkfiles(child, pattern):
-                    yield f
-    //@+node:felix.20230802145823.28: *4* _listdir
-    def _listdir(self, s: str, pattern: str = None) -> list[str]:
-        """ D.listdir() -> List of items in this directory.
-
-        Use D.files() or D.dirs() instead if you want a listing
-        of just files or just subdirectories.
-
-        The elements of the list are path objects.
-
-        With the optional 'pattern' argument, this only lists
-        items whose names match the given pattern.
-        """
-        names = os.listdir(s)
-        if pattern is not None:
-            names = fnmatch.filter(names, pattern)
-        return [join(s, child) for child in names]
-    //@+node:felix.20230802145823.29: *4* _fn_match
-    def _fn_match(self, s: str, pattern: str) -> bool:
-        """ Return True if self.name matches the given pattern.
-
-        pattern - A filename pattern with wildcards, for example '*.py'.
-        """
-        return fnmatch.fnmatch(basename(s), pattern)
-    //@+node:felix.20230802145823.30: *3* clear (PickleShareDB)
-    def clear(self) -> None:
-        # Deletes all files in the fcache subdirectory.
-        # It would be more thorough to delete everything
-        # below the root directory, but it's not necessary.
-        for z in self.keys():
-            self.__delitem__(z)
-    //@+node:felix.20230802145823.31: *3* get
-    def get(self, key: str, default: Any = None) -> Any:
-
-        try:
-            val = self[key]
-            return val
-        except KeyError:
-            return default
-    //@+node:felix.20230802145823.32: *3* has_key (PickleShareDB)
-    def has_key(self, key: str) -> bool:
-
-        try:
-            self[key]
-        except KeyError:
-            return False
-        return True
-    //@+node:felix.20230802145823.33: *3* items
-    def items(self) -> list[Any]:
-        return [z for z in self]
-    //@+node:felix.20230802145823.34: *3* keys & helpers (PickleShareDB)
-    # Called by clear, and during unit testing.
-
-    def keys(self, globpat: str = None) -> list[str]:
-        """Return all keys in DB, or all keys matching a glob"""
-        files: list[str]
-        if globpat is None:
-            files = self._walkfiles(self.root)  # type:ignore
-        else:
-            # Do not call g.glob_glob here.
-            files = [z for z in join(self.root, globpat)]
-        result = [self._normalized(s) for s in files if isfile(s)]
-        return result
-    //@+node:felix.20230802145823.35: *4* _normalized
-    def _normalized(self, filename: str) -> str:
-        """ Make a key suitable for user's eyes """
-        # os.path.relpath doesn't work here.
-        return self._relpathto(self.root, filename).replace('\\', '/')
-    //@+node:felix.20230802145823.36: *4* _relpathto
-    # Used only by _normalized.
-
-    def _relpathto(self, src: str, dst: str) -> str:
-        """ Return a relative path from self to dst.
-
-        If there is no relative path from self to dst, for example if
-        they reside on different drives in Windows, then this returns
-        dst.abspath().
-        """
-        origin = abspath(src)
-        dst = abspath(dst)
-        orig_list = self._splitall(normcase(origin))
-        # Don't normcase dst!  We want to preserve the case.
-        dest_list = self._splitall(dst)
-        if orig_list[0] != normcase(dest_list[0]):
-            # Can't get here from there.
-            return dst
-        # Find the location where the two paths start to differ.
-        i = 0
-        for start_seg, dest_seg in zip(orig_list, dest_list):
-            if start_seg != normcase(dest_seg):
-                break
-            i += 1
-        # Now i is the point where the two paths diverge.
-        # Need a certain number of "os.pardir"s to work up
-        # from the origin to the point of divergence.
-        segments = [os.pardir] * (len(orig_list) - i)
-        # Need to add the diverging part of dest_list.
-        segments += dest_list[i:]
-        if segments:
-            return join(*segments)
-        # If they happen to be identical, use os.curdir.
-        return os.curdir
-    //@+node:felix.20230802145823.37: *4* _splitall
-    # Used by relpathto.
-
-    def _splitall(self, s: str) -> list[str]:
-        """ Return a list of the path components in this path.
-
-        The first item in the list will be a path.  Its value will be
-        either os.curdir, os.pardir, empty, or the root directory of
-        this path (for example, '/' or 'C:\\').  The other items in
-        the list will be strings.
-
-        path.path.joinpath(*result) will yield the original path.
-        """
-        parts = []
-        loc = s
-        while loc != os.curdir and loc != os.pardir:
-            prev = loc
-            loc, child = split(prev)
-            if loc == prev:
-                break
-            parts.append(child)
-        parts.append(loc)
-        parts.reverse()
-        return parts
-    //@+node:felix.20230802145823.38: *3* uncache
-    def uncache(self, *items: Any) -> None:
-        """ Removes all, or specified items from cache
-
-        Use this after reading a large amount of large objects
-        to free up memory, when you won't be needing the objects
-        for a while.
-
-        """
-        if not items:
-            self.cache = {}
-        for it in items:
-            self.cache.pop(it, None)
-    //@-others
-*/
 //@+node:felix.20230802145823.39: ** class SqlitePickleShare
 /**
  * The main 'connection' object for SqlitePickleShare database
