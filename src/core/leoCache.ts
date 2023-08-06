@@ -29,7 +29,7 @@ const split = g.os_path_split;
 /**
  * A class to manage per-commander caches.
  */
-class CommanderCacher {
+export class CommanderCacher {
     
         public db: any;
 
@@ -222,7 +222,7 @@ class CommanderWrapper {
 /**
  * A singleton global cacher, g.app.db
  */
-class GlobalCacher {
+export class GlobalCacher {
 
     public db: any;
 

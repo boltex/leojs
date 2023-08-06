@@ -19,6 +19,7 @@ import { LeoFrame } from './leoFrame';
 import { SettingsDict } from './leoGlobals';
 import { leojsSettingsXml } from '../leojsSettings';
 import { LeoUI } from '../leoUI';
+import { CommanderCacher, GlobalCacher } from './leoCache';
 
 //@-<< imports >>
 //@+others
@@ -192,12 +193,12 @@ export class LeoApp {
     //@+node:felix.20210103024632.7: *5* << LeoApp: global controller/manager objects >>
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
-    public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
+    public commander_cacher!: CommanderCacher; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
-    public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
+    public global_cacher!: GlobalCacher; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
