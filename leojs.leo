@@ -863,7 +863,7 @@ import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 import { RemoteHubApi } from './remote-hub';
-import { SqlJsStatic } from 'sql.js';
+import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 @language typescript
@@ -1385,6 +1385,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
         console.log('paco restored test:  ', restored);
 
 
+        console.log('SQL start test:  ');
         const sqliteBits = await vscode.workspace.fs.readFile(
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
@@ -1419,7 +1420,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
 
         // Load the db.
-        const db = new SQL.Database(filebuffer);
+        const db: Database = new SQL.Database(filebuffer);
         console.log('db', db);
 
         // Test executing query on db.

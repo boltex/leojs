@@ -6,10 +6,12 @@
 //@+<< leoCache imports & annotations >>
 //@+node:felix.20230802145823.2: ** << leoCache imports & annotations >>
 import * as vscode from 'vscode';
-import * as pako from 'pako';
 import * as path from 'path';
+import * as pako from 'pako';
+import { Database, SqlJsStatic } from 'sql.js';
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
+
 var pickle = require('./jpicklejs');
 
 //@-<< leoCache imports & annotations >>
@@ -30,17 +32,17 @@ const split = g.os_path_split;
  * A class to manage per-commander caches.
  */
 export class CommanderCacher {
-    
-        public db: any;
 
-        constructor() {
-            try{
-                const w_path = join(g.app.homeLeoDir, 'db', 'global_data');
-                this.db = new SqlitePickleShare(w_path);
-            }catch (e){
-                this.db = {} ;
-            }
+    public db: any;
+
+    constructor() {
+        try {
+            const w_path = join(g.app.homeLeoDir, 'db', 'global_data');
+            this.db = new SqlitePickleShare(w_path);
+        } catch (e) {
+            this.db = {};
         }
+    }
 
     //@+others
     //@+node:felix.20230806001339.1: *3* cacher.init
@@ -54,9 +56,9 @@ export class CommanderCacher {
      */
     public clear(): void {
         // Careful: self.db may be a Python dict.
-        try{
+        try {
             this.db.clear();
-        }catch (e){
+        } catch (e) {
             g.trace('unexpected exception');
             g.es_exception(e);
             this.db = {};
@@ -81,7 +83,7 @@ export class CommanderCacher {
     /**
      * Dump the indicated cache if --trace-cache is in effect.
      */
-    public dump() : void {
+    public dump(): void {
         dump_cache(g.app.commander_db, 'Commander Cache');
     }
     //@+node:felix.20230802145823.8: *3* cacher.get_wrapper
@@ -92,11 +94,11 @@ export class CommanderCacher {
         return new CommanderWrapper(c, fn);
     }
     //@+node:felix.20230802145823.9: *3* cacher.test
-    public test(): boolean {
+    public async test(): Promise<boolean> {
 
-        if (g.app.gui.guiName() == 'nullGui'){
+        if (g.app.gui.guiName() == 'nullGui') {
             // Null gui's don't normally set the g.app.gui.db.
-            g.app.setGlobalDb();
+            await g.app.setGlobalDb();
         }
 
         // Fixes bug 670108.
@@ -107,7 +109,7 @@ export class CommanderCacher {
         const db = this.db;
         db.clear();
 
-        console.assert( ![...db.items()].length);
+        console.assert(![...db.items()].length);
         db['hello'] = 15;
         db['aku ankka'] = [1, 2, 313];
         db['paths/nest/ok/keyname'] = [1, [5, 46]];
@@ -127,17 +129,17 @@ export class CommanderCacher {
         save and save-as set changeName to True, save-to does not.
      */
     public save(c: Commands, fn: string): void {
-        
-        this.commit()
-        if (fn){
+
+        this.commit();
+        if (fn) {
             // 1484: Change only the key!
-            
+
             // if( isinstance(c.db, CommanderWrapper)){
-            if( c.db.constructor.name === "CommanderWrapper"){
+            if (c.db.constructor.name === "CommanderWrapper") {
                 c.db.key = fn;
                 this.commit();
-            }else{
-                g.trace('can not happen', c.db.__class__.__name__)
+            } else {
+                g.trace('can not happen', c.db.__class__.__name__);
             }
         }
     }
@@ -149,13 +151,13 @@ export class CommanderCacher {
  * A class to distinguish keys from separate commanders.
  */
 class CommanderWrapper {
-    
-    private c: Commands;
-    private db:any ; // SqlitePickleShare
-    private key: string;
-    private user_keys:  Set<string>;
 
-    constructor( c: Commands, fn?: string) {
+    private c: Commands;
+    private db: any; // SqlitePickleShare
+    private key: string;
+    private user_keys: Set<string>;
+
+    constructor(c: Commands, fn?: string) {
 
         this.c = c;
         this.db = g.app.db;
@@ -169,12 +171,12 @@ class CommanderWrapper {
         return Array.from(this.user_keys).sort();
     }
 
-    public has(target: CommanderWrapper, prop: string){
+    public has(target: CommanderWrapper, prop: string) {
         return `${this.key}:::${prop}` in this.db;
     }
 
-    public deleteProperty(target: CommanderWrapper,  prop: string): boolean  {
-        if( this.user_keys.has(prop) ){
+    public deleteProperty(target: CommanderWrapper, prop: string): boolean {
+        if (this.user_keys.has(prop)) {
             this.user_keys.delete(prop)
         }
         delete this.db[`${this.key}:::${prop}`];
@@ -182,7 +184,7 @@ class CommanderWrapper {
 
     }
 
-    public get(target: CommanderWrapper, prop: string) : any {
+    public get(target: CommanderWrapper, prop: string): any {
         if (prop === "keys") {
             return this.keys.bind(target);
         }
@@ -230,20 +232,20 @@ export class GlobalCacher {
      * Ctor for the GlobalCacher class.
      */
     constructor() {
-        
-        const trace = g.app.debug.includes( 'cache');
-        
-        try{
+
+        const trace = g.app.debug.includes('cache');
+
+        try {
             const w_path = join(g.app.homeLeoDir, 'db', 'g_app_db');
-            if (trace){
+            if (trace) {
                 g.es_print('path for g.app.db:', w_path.toString());
             }
-            this.db = new SqlitePickleShare(w_path)
-            if( trace && !(this.db == null)){
+            this.db = new SqlitePickleShare(w_path);
+            if (trace && !(this.db == null)) {
                 this.dump('Startup');
             }
-        }catch (e){
-            if (trace){
+        } catch (e) {
+            if (trace) {
                 g.es_exception(e);
             }
             // Use a plain dict as a dummy.
@@ -262,14 +264,14 @@ export class GlobalCacher {
      * Clear the global cache.
      */
     public clear(): void {
-        
+
         // Careful: this.db may be a Python dict.
-        if(g.app.debug.includes('cache')){
+        if (g.app.debug.includes('cache')) {
             g.trace('clear g.app.db');
         }
-        try{
+        try {
             this.db.clear();
-        }catch (e){
+        } catch (e) {
             // this.db.clear();
             // except Exception
             g.trace('unexpected exception');
@@ -281,10 +283,10 @@ export class GlobalCacher {
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
     public commit_and_close(): void {
         // Careful: this.db may be a dict.
-        
+
         if (this.db.hasOwnProperty('conn')) {
-            
-            if( g.app.debug.includes('cache')){
+
+            if (g.app.debug.includes('cache')) {
                 this.dump('Shutdown');
             }
             this.db.conn.commit();
@@ -308,231 +310,338 @@ export class GlobalCacher {
  * The main 'connection' object for SqlitePickleShare database
  */
 class SqlitePickleShare {
-    
+
     public root: string;
+    public conn: Database | undefined;
+    public init: Promise<Database>;
+    public cache: Record<string, any>;
 
     //@+others
     //@+node:felix.20230802145823.40: *3*  Birth & special methods
-    public init_dbtables(conn: any): void {
-        const sql = 'create table if not exists cachevalues(key text primary key, data blob);';
-        conn.execute(sql);
-    }
     //@+node:felix.20230802145823.41: *4*  __init__ (SqlitePickleShare)
     /**
      * Init the SqlitePickleShare class.
+     *
      * root: The directory that contains the data. Created if it doesn't exist.
+     *
+     * Proxy setup for equivalent of Python's dunder method overrides
+     * 
      */
     constructor(root: string) {
 
-        this.root = abspath(expanduser(root))
-        
-        if !isdir(this.root) and not g.unitTesting:
-            this._makedirs(this.root)
-
-        dbfile = ':memory:' if g.unitTesting else join(root, 'cache.sqlite')
-        this.conn = sqlite3.connect(dbfile, isolation_level=None)
-        this.init_dbtables(this.conn)
-
+        this.root = abspath(expanduser(root));
         // Keys are normalized file names.
         // Values are tuples (obj, orig_mod_time)
-        this.cache: dict[str, Any] = {}
+        this.cache = {};
 
-        this.reset_protocol_in_values()
+        // 'init' can be used to know if ready, it return a database once done. 
+        this.init = new Promise((resolve, reject) => {
+
+            void (async () => {
+                try {
+                    const w_isdir = await isdir(this.root);
+                    if (!w_isdir && !g.unitTesting) {
+                        await this._makedirs(this.root);
+                    }
+
+                    const dbfile = join(root, 'cache.sqlite');
+                    if (g.unitTesting) {
+                        // TODO : GET FILE
+                        this.conn = await sqlite3.connect(dbfile);
+                    } else {
+                        this.conn = await sqlite3.connect();
+                    }
+
+                    // LEOJS: replaced function & call.
+                    // USED TO BE : this.init_dbtables(this.conn)
+                    const sql = 'create table if not exists cachevalues(key text primary key, data blob);';
+                    await this.conn.execute(sql);
+
+                    await this.reset_protocol_in_values();
+                    resolve(this.conn);
+                } catch (e) {
+                    reject('LEOJS: SqlitePickleShare failed init');
+                }
+
+            })();
+
+        });
+
+        return new Proxy(this, {
+            get(target, prop) {
+                prop = prop.toString();
+                // ALSO SUPPORT : toString, valueOf, iterator
+                if (prop === "toString") {
+                    return target.__repr__.bind(target);
+                }
+                if (prop === 'valueOf') {
+                    return target.__repr__.bind(target);
+                }
+                if (prop === "Symbol(Symbol.iterator)") {
+                    return target.__iter__.bind(target);
+                }
+                // Methods to allow through
+                if (prop === "get") {
+                    return target.get.bind(target);
+                }
+                if (prop === "clear") {
+                    return target.clear.bind(target);
+                }
+                if (prop === "has_key") {
+                    return target.has_key.bind(target);
+                }
+                // Properties to allow through
+                if (prop === "init") {
+                    return target.init;
+                }
+                if (prop === "conn") {
+                    return target.conn;
+                }
+                // OVERRIDDEN USAGE WITH SQLITE
+                return target.__getitem__(prop);
+            },
+            set(target, prop, value) {
+                target.__setitem__(prop.toString(), value);
+                return true;
+            },
+            deleteProperty(target, prop) {
+                target.__delitem__(prop.toString());
+                return true;
+            },
+            has(target, prop) {
+                return target.__contains__(prop.toString());
+            },
+        });
 
     }
     //@+node:felix.20230802145823.42: *4* __contains__(SqlitePickleShare)
-    def __contains__(self, key: str) -> bool:
+    public __contains__(key: string): boolean {
 
-        return self.has_key(key)  # NOQA
+        return this.has_key(key);  // NOQA
+
+    }
     //@+node:felix.20230802145823.43: *4* __delitem__
-    def __delitem__(self, key: str) -> None:
-        """ del db["key"] """
-        try:
-            self.conn.execute(
-                '''delete from cachevalues
-                where key=?''', (key,))
-        except sqlite3.OperationalError:
-            pass
-    //@+node:felix.20230802145823.44: *4* __getitem__
-    def __getitem__(self, key: str) -> None:
-        """ db['key'] reading """
-        try:
-            obj = None
-            for row in self.conn.execute(
-                '''select data from cachevalues
-                where key=?''', (key,)):
-                obj = self.loader(row[0])
-                break
-            else:
-                raise KeyError(key)
-        except sqlite3.Error:
-            raise KeyError(key)
-        return obj
-    //@+node:felix.20230802145823.45: *4* __iter__
-    def __iter__(self) -> Generator:
+    /**
+     * del db["key"] 
+     */
+    public __delitem__(key: string): void {
 
-        for k in list(self.keys()):
-            yield k
+        try {
+            this.conn.execute(
+                'delete from cachevalues where key=?', [key]
+            );
+        } catch (e) {
+            // pass
+        }
+    }
+    //@+node:felix.20230802145823.44: *4* __getitem__
+    /**
+     *  db['key'] reading 
+     */
+    public __getitem__(key: string): void {
+        let obj = undefined;
+        let w_found = false;
+        try {
+            for (const row of this.conn.execute('select data from cachevalues where key=?', [key])) {
+                obj = this.loader(row[0]);
+                w_found = true;
+                break;
+            }
+            if (!w_found) {
+                throw new Error("No such property exists");
+            }
+        } catch (e) {
+            throw new Error("No such property exists");
+        }
+        return obj;
+    }
+    //@+node:felix.20230802145823.45: *4* __iter__
+    public *__iter__(): Generator<string> {
+
+        for (const k of [...this.keys()]) {
+            yield k;
+        }
+    }
     //@+node:felix.20230802145823.46: *4* __repr__
-    def __repr__(self) -> str:
-        return f"SqlitePickleShare('{self.root}')"
+    public __repr__(): string {
+        return `SqlitePickleShare('${this.root}')`;
+    }
     //@+node:felix.20230802145823.47: *4* __setitem__
-    def __setitem__(self, key: str, value: Any) -> None:
-        """ db['key'] = 5 """
-        try:
-            data = self.dumper(value)
-            self.conn.execute(
-                '''replace into cachevalues(key, data) values(?,?);''',
-                (key, data))
-        except sqlite3.OperationalError:
-            g.es_exception()
+    /**
+     *  db['key'] = 5
+     */
+    public __setitem__(key: string, value: any): void {
+
+        try {
+            const data = this.dumper(value);
+            this.conn.execute(
+                'replace into cachevalues(key, data) values(?,?);',
+                [key, data]
+            );
+        } catch (e) {
+            g.es_exception(e);
+        }
+
+    }
     //@+node:felix.20230804140347.1: *3* loader
     private loader(data: any): any {
-        if data:
+        if (data !== null && data !== undefined) {
             // Retain this code for maximum compatibility.
-            try:
-                val = pickle.loads(zlib.decompress(data))
-            except(ValueError, TypeError):
-                g.es("Unpickling error - Python 3 data accessed from Python 2?")
-                return None
-            return val
-        return None
+            try {
+                const val = pickle.loads(zlib.decompress(data));
+            } catch (e) {
+                g.es("Unpickling error - Python 3 data accessed from Python 2?");
+                return undefined;
+            }
+            return val;
+        }
+
+        return undefined;
+
     }
     //@+node:felix.20230804140352.1: *3* dumper
-    private dumper(): any {
-        try:
+    private dumper(val: any): any {
+        let data;
+        try {
             // Use Python 2's highest protocol, 2, if possible
-            data = pickle.dumps(val, protocol=2)
-        except Exception:
+            data = pickle.dumps(val, 2);
+        } catch (e) {
             // Use best available if that doesn't work (unlikely)
-            data = pickle.dumps(val, pickle.HIGHEST_PROTOCOL)
+            data = pickle.dumps(val, pickle.HIGHEST_PROTOCOL);
+        }
+        return sqlite3.Binary(zlib.compress(data));
     }
     //@+node:felix.20230802145823.48: *3* _makedirs
-    def _makedirs(self, fn: str, mode: int = 0o777) -> None:
+    public _makedirs(fn: string, mode: number = 0o777): void {
 
-        os.makedirs(fn, mode)
-    //@+node:felix.20230802145823.49: *3* _openFile (SqlitePickleShare)
-    def _openFile(self, fn: str, mode: str = 'r') -> Optional[Any]:
-        """ Open this file.  Return a file object.
+        g.os_makedirs(fn, mode);
 
-        Do not print an error message.
-        It is not an error for this to fail.
-        """
-        try:
-            return open(fn, mode)
-        except Exception:
-            return None
-    //@+node:felix.20230802145823.50: *3* _walkfiles & helpers
-    def _walkfiles(self, s: str, pattern: str = None) -> None:
-        """ D.walkfiles() -> iterator over files in D, recursively.
-
-        The optional argument, pattern, limits the results to files
-        with names that match the pattern.  For example,
-        mydir.walkfiles('*.tmp') yields only files with the .tmp
-        extension.
-        """
-    //@+node:felix.20230802145823.51: *4* _listdir
-    def _listdir(self, s: str, pattern: str = None) -> list[str]:
-        """ D.listdir() -> List of items in this directory.
-
-        Use D.files() or D.dirs() instead if you want a listing
-        of just files or just subdirectories.
-
-        The elements of the list are path objects.
-
-        With the optional 'pattern' argument, this only lists
-        items whose names match the given pattern.
-        """
-        names = os.listdir(s)
-        if pattern is not None:
-            names = fnmatch.filter(names, pattern)
-        return [join(s, child) for child in names]
-    //@+node:felix.20230802145823.52: *4* _fn_match
-    def _fn_match(self, s: str, pattern: Any) -> bool:
-        """ Return True if self.name matches the given pattern.
-
-        pattern - A filename pattern with wildcards, for example '*.py'.
-        """
-        return fnmatch.fnmatch(basename(s), pattern)
+    }
     //@+node:felix.20230802145823.53: *3* clear (SqlitePickleShare)
-    def clear(self) -> None:
-        # Deletes all files in the fcache subdirectory.
-        # It would be more thorough to delete everything
-        # below the root directory, but it's not necessary.
-        self.conn.execute('delete from cachevalues;')
+    public clear(): void {
+
+        // TODO : Fix this docstring !
+
+        // Deletes all files in the fcache subdirectory.
+        // It would be more thorough to delete everything
+        // below the root directory, but it's not necessary.
+        this.conn.execute('delete from cachevalues;');
+    }
     //@+node:felix.20230802145823.54: *3* get  (SqlitePickleShare)
-    def get(self, key: str, default: Any = None) -> Any:
+    public get(key: string, p_default?: any): any {
 
-        if not self.has_key(key):  # noqa
-            return default
-        try:
-            val = self[key]
-            return val
-        except Exception:  // #1444: Was KeyError.
-            return default
-    //@+node:felix.20230802145823.55: *3* has_key (SqlightPickleShare)
-    def has_key(self, key: str) -> bool:
-        sql = 'select 1 from cachevalues where key=?;'
-        for _row in self.conn.execute(sql, (key,)):
-            return True
-        return False
+        if (!this.has_key(key)) {
+            return p_default;
+        }
+        try {
+            const val = this.__getitem__(key);
+            return val;
+        } catch (e) {  // #1444: Was KeyError.
+            return p_default;
+        }
+
+    }
+    //@+node:felix.20230802145823.55: *3* has_key (SqlitePickleShare)
+    public has_key(key: string): boolean {
+        const sql = 'select 1 from cachevalues where key=?;';
+        for (const _row of this.conn.execute(sql, [key])) {
+            return true;
+        }
+        return false;
+
+    }
     //@+node:felix.20230802145823.56: *3* items
-    def items(self) -> Generator:
-        sql = 'select key,data from cachevalues;'
-        for key, data in self.conn.execute(sql):
-            yield key, data
+    public *items(): Generator<[string, any]> {
+        const sql = 'select key,data from cachevalues;';
+        for (const [key, data] of this.conn.execute(sql)) {
+            yield [key, data];
+        }
+    }
     //@+node:felix.20230802145823.57: *3* keys
-    # Called by clear, and during unit testing.
+    // Called by clear, and during unit testing.
 
-    def keys(self, globpat: str = None) -> Generator:
-        """Return all keys in DB, or all keys matching a glob"""
-        if globpat is None:
-            sql = 'select key from cachevalues;'
-            args: Sequence[Any] = tuple()
-        else:
-            sql = "select key from cachevalues where key glob ?;"
-            # pylint: disable=trailing-comma-tuple
-            args = globpat,
-        for key in self.conn.execute(sql, args):
-            yield key
+    /**
+     * Return all keys in DB, or all keys matching a glob
+     */
+    public *keys(globpat?: string): Generator<string> {
+
+        let sql: string;
+        let args: any[];
+
+        if (globpat == null) {
+            sql = 'select key from cachevalues;';
+            args = [];
+        } else {
+            sql = "select key from cachevalues where key glob ?;";
+            args = [globpat];
+        }
+
+        for (const key in this.conn.execute(sql, args)) {
+            yield key;
+        }
+    }
     //@+node:felix.20230802145823.58: *3* reset_protocol_in_values
-    def reset_protocol_in_values(self) -> None:
-        PROTOCOLKEY = '__cache_pickle_protocol__'
-        if self.get(PROTOCOLKEY, 3) == 2:
-            return
+    public reset_protocol_in_values(): void {
+
+        const PROTOCOLKEY = '__cache_pickle_protocol__';
+
+        if (this.get(PROTOCOLKEY, 3) === 2) {
+            return;
+        }
+
         //@+others
         //@+node:felix.20230802145823.59: *4* viewrendered special case
-        import json
-        row = self.get('viewrendered_default_layouts') or (None, None)
-        row = json.loads(json.dumps(row[0])), json.loads(json.dumps(row[1]))
-        self['viewrendered_default_layouts'] = row
+
+        const row_a = this.get('viewrendered_default_layouts') || [undefined, undefined];
+        const row_o = [JSON.parse(JSON.stringify(row_a[0])), JSON.parse(JSON.stringify(row_a[1]))];
+
+        this.__setitem__('viewrendered_default_layouts', row_o);
         //@+node:felix.20230802145823.60: *4* do_block
-        def do_block(cur: Any) -> Any:
-            itms = tuple((self.dumper(self.loader(v)), k) for k, v in cur)
-            if itms:
-                self.conn.executemany('update cachevalues set data=? where key=?', itms)
-                self.conn.commit()
-                return itms[-1][1]
-            return None
+        const do_block = (cur: any[]): any => {
+            // itms = tuple((self.dumper(self.loader(v)), k) for k, v in cur)
+            const itms: Array<[any, string]> = cur.map(([k, v]) => [this.dumper(this.loader(v)), k]);
+
+            if (itms && itms.length) {
+                this.conn.executemany('update cachevalues set data=? where key=?', itms);
+                this.conn.commit();
+                return itms[-1][1];
+            }
+
+            return undefined;
+
+        };
+
         //@-others
-        self.conn.isolation_level = 'DEFERRED'
 
-        sql0 = '''select key, data from cachevalues order by key limit 50'''
-        sql1 = '''select key, data from cachevalues where key > ? order by key limit 50'''
+        // Unused in leojs
+        // this.conn.isolation_level = 'DEFERRED';
 
+        const sql0 = 'select key, data from cachevalues order by key limit 50';
+        const sql1 = 'select key, data from cachevalues where key > ? order by key limit 50';
 
-        block = self.conn.execute(sql0)
-        lk = do_block(block)
-        while lk:
-            lk = do_block(self.conn.execute(sql1, (lk,)))
-        self[PROTOCOLKEY] = 2
-        self.conn.commit()
+        const block = this.conn.execute(sql0);
+        let lk = do_block(block);
 
-        self.conn.isolation_level = None
+        while (lk !== undefined) {
+            lk = do_block(this.conn.execute(sql1, [lk]));
+        }
+
+        this.__setitem__(PROTOCOLKEY, 2);
+        this.conn.commit();
+
+        // Unused in leojs
+        // this.conn.isolation_level = None;
+
+    }
     //@+node:felix.20230802145823.61: *3* uncache
-    def uncache(self, *items: Any) -> None:
-        """not used in SqlitePickleShare"""
-        pass
+    /**
+     * not used in SqlitePickleShare
+     */
+    public uncache(items: any): void {
+
+        // pass
+
+    }
     //@-others
 
 }
@@ -541,7 +650,7 @@ class SqlitePickleShare {
  * Dump the given cache. 
  */
 function dump_cache(db: any, tag: string): void {
-    
+
     g.es_print(`\n===== ${tag} =====\n`)
     if (db == null) {
         g.es_print('db is None!');
@@ -549,59 +658,62 @@ function dump_cache(db: any, tag: string): void {
     }
     // Create a dict, sorted by file prefixes.
     const d: Record<string, any> = {};
-    for key in db.keys():
-        key = key[0]
-        val = db.get(key)
-        data = key.split(':::')
-        if len(data) == 2
-            fn, key2 = data
-        else
-            fn, key2 = 'None', key
+    for (const x_key of db.keys()) {
+        const key = x_key[0];
+        const val = db.get(key);
+        const data = key.split(':::');
+        let fn;
+        let key2;
+        if (data.length === 2) {
+            [fn, key2] = data;
+        } else {
+            [fn, key2] = ['None', key];
+        }
+        const aList = d.get(fn, []);
+        aList.push([key2, val]);
+        d[fn] = aList;
 
-        aList = d.get(fn, [])
-        aList.append((key2, val),)
-        d[fn] = aList
-
+    }
     // Print the dict.
-    files = 0;
-    for key in sorted(d.keys())
-        if key != 'None'
-            dump_list('File: ' + key, d.get(key))
-            files += 1
-
-
-    if d.get('None')
-        heading = f"All others ({tag})" if files else None
-        dump_list(heading, d.get('None'))
-
+    let files = 0;
+    for (const key of [...d.keys()].sort()) {
+        if (key !== 'None') {
+            dump_list('File: ' + key, d.get(key));
+            files += 1;
+        }
+    }
+    const d_none = d.get('None');
+    if (d_none && d_none.length) {
+        const heading = files ? `All others (${tag})` : '';
+        dump_list(heading, d_none)
+    }
 
 }
-function dump_list(heading: any, aList: [string, any][]): void {
-    if (heading){
-        g.es_print(f'\n{heading}...\n')
+
+function dump_list(heading: string, aList: [string, any][]): void {
+    if (heading) {
+        g.es_print(`\n${heading}...\n`);
     }
-    for (const aTuple of aList){
+    for (const aTuple of aList) {
         let [key, val] = aTuple
-        if (isinstance(val, str)){
-            if( key.startswith('windowState')){
-                g.es_print(key)
-            }else if( key.endswith(('leo_expanded', 'leo_marked'))){
-                if (val){
-                    g.es_print(f"{key:30}:")
-                    g.printObj(val.split(','))
-                }else{
-                    g.es_print(f"{key:30}: []")
+        if (typeof val === 'string') {
+            if (key.startsWith('windowState')) {
+                g.es_print(key);
+            } else if (key.endsWith('leo_expanded') || key.endsWith('leo_marked')) {
+                if (val) {
+                    g.es_print(`${key.toString().padEnd(30)}:`);
+                    g.printObj(val.split(','));
+                } else {
+                    g.es_print(`${key.toString().padEnd(30)}: []`);
                 }
-
-            }else{
-                g.es_print(f"{key:30}: {val}")
+            } else {
+                g.es_print(`${key.toString().padEnd(30)}: ${val}`);
             }
-
-        }else if (isinstance(val, (int, float))){
-            g.es_print(f"{key:30}: {val}")
-        }else{
-            g.es_print(f"{key:30}:")
-            g.printObj(val)
+        } else if (typeof val === 'number') {
+            g.es_print(`${key.toString().padEnd(30)}: ${val}`);
+        } else {
+            g.es_print(`${key.toString().padEnd(30)}:`);
+            g.printObj(val);
         }
 
     }
