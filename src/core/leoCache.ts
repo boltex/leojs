@@ -33,13 +33,14 @@ const split = g.os_path_split;
  */
 export class CommanderCacher {
 
-    public db: any;
+    public db: SqlitePickleShare;
 
     constructor() {
         try {
             const w_path = join(g.app.homeLeoDir, 'db', 'global_data');
             this.db = new SqlitePickleShare(w_path);
         } catch (e) {
+            // @ts-expect-error
             this.db = {};
         }
     }
@@ -48,7 +49,7 @@ export class CommanderCacher {
     //@+node:felix.20230806001339.1: *3* cacher.init
     public init(): Promise<unknown> {
         //
-        return this.db.init();
+        return this.db.init;
     }
     //@+node:felix.20230802145823.4: *3* cacher.clear
     /**
@@ -61,22 +62,23 @@ export class CommanderCacher {
         } catch (e) {
             g.trace('unexpected exception');
             g.es_exception(e);
+            // @ts-expect-error
             this.db = {};
         }
     }
     //@+node:felix.20230802145823.5: *3* cacher.close
-    public close(): void {
+    public async close(): Promise<void> {
         // Careful: self.db may be a dict.
         if (this.db.hasOwnProperty('conn')) {
-            this.db.conn.commit();
-            this.db.conn.close();
+            await this.db.commit();
+            this.db.conn!.close();
         }
     }
     //@+node:felix.20230802145823.6: *3* cacher.commit
-    public commit(): void {
+    public async commit(): Promise<void> {
         // Careful: self.db may be a dict.
         if (this.db.hasOwnProperty('conn')) {
-            this.db.conn.commit();
+            await this.db.commit();
         }
     }
     //@+node:felix.20230802145823.7: *3* cacher.dump
@@ -110,10 +112,12 @@ export class CommanderCacher {
         db.clear();
 
         console.assert(![...db.items()].length);
+
+        // db in prigrams to be used as 'any'
         db['hello'] = 15;
         db['aku ankka'] = [1, 2, 313];
         db['paths/nest/ok/keyname'] = [1, [5, 46]];
-        db.uncache();  // frees memory, causes re-reads later
+
         // print(db.keys())
 
         db.clear();
@@ -128,16 +132,16 @@ export class CommanderCacher {
 
         save and save-as set changeName to True, save-to does not.
      */
-    public save(c: Commands, fn: string): void {
+    public async save(c: Commands, fn: string): Promise<void> {
 
-        this.commit();
+        await this.commit();
         if (fn) {
             // 1484: Change only the key!
 
             // if( isinstance(c.db, CommanderWrapper)){
             if (c.db.constructor.name === "CommanderWrapper") {
                 c.db.key = fn;
-                this.commit();
+                await this.commit();
             } else {
                 g.trace('can not happen', c.db.__class__.__name__);
             }
@@ -316,6 +320,9 @@ class SqlitePickleShare {
     public init: Promise<Database>;
     public cache: Record<string, any>;
 
+    // Allow index signature to allow any arbitrary property
+    [key: string]: any;
+
     //@+others
     //@+node:felix.20230802145823.40: *3*  Birth & special methods
     //@+node:felix.20230802145823.41: *4*  __init__ (SqlitePickleShare)
@@ -483,6 +490,17 @@ class SqlitePickleShare {
         }
 
     }
+    //@+node:felix.20230807231629.1: *3* commit
+    public async commit(): Promise<void> {
+        if (this.conn) {
+            const db_data = this.conn.export();
+            const db_buffer = Buffer.from(db_data);
+            const db_fileName = path.join(this.root);
+            const db_uri = g.makeVscodeUri(db_fileName);
+            await vscode.workspace.fs.writeFile(db_uri, db_buffer);
+        }
+        return;
+    }
     //@+node:felix.20230804140347.1: *3* loader
     private loader(data: any): any {
         if (data !== null && data !== undefined) {
@@ -581,7 +599,7 @@ class SqlitePickleShare {
         }
     }
     //@+node:felix.20230802145823.58: *3* reset_protocol_in_values
-    public reset_protocol_in_values(): void {
+    public async reset_protocol_in_values(): Promise<void> {
 
         const PROTOCOLKEY = '__cache_pickle_protocol__';
 
@@ -603,7 +621,7 @@ class SqlitePickleShare {
 
             if (itms && itms.length) {
                 this.conn.executemany('update cachevalues set data=? where key=?', itms);
-                this.conn.commit();
+                // await this.commit(); // ! LEOJS : COMMIT AT END OF reset_protocol_in_values
                 return itms[-1][1];
             }
 
@@ -627,7 +645,7 @@ class SqlitePickleShare {
         }
 
         this.__setitem__(PROTOCOLKEY, 2);
-        this.conn.commit();
+        await this.commit();
 
         // Unused in leojs
         // this.conn.isolation_level = None;
