@@ -354,15 +354,20 @@ class SqlitePickleShare {
                     const dbfile = join(root, 'cache.sqlite');
                     if (g.unitTesting) {
                         // TODO : GET FILE
-                        this.conn = await sqlite3.connect(dbfile);
+                        // this.conn = await sqlite3.connect(dbfile);
+                        const filebuffer = await vscode.workspace.fs.readFile(
+                            g.makeVscodeUri(path.join(this.root))
+                            // vscode.Uri.joinPath(p_context.extensionUri, 'test1.db')
+                        );
+                        this.conn = new g.SQL.Database(filebuffer);
                     } else {
-                        this.conn = await sqlite3.connect();
+                        this.conn = new g.SQL.Database();
                     }
 
                     // LEOJS: replaced function & call.
                     // USED TO BE : this.init_dbtables(this.conn)
                     const sql = 'create table if not exists cachevalues(key text primary key, data blob);';
-                    await this.conn.execute(sql);
+                    this.conn.exec(sql);
 
                     await this.reset_protocol_in_values();
                     resolve(this.conn);
@@ -434,9 +439,9 @@ class SqlitePickleShare {
     public __delitem__(key: string): void {
 
         try {
-            this.conn.execute(
-                'delete from cachevalues where key=?', [key]
-            );
+            if (this.conn) {
+                this.conn.exec('delete from cachevalues where key=?', [key]);
+            }
         } catch (e) {
             // pass
         }
@@ -445,20 +450,27 @@ class SqlitePickleShare {
     /**
      *  db['key'] reading 
      */
-    public __getitem__(key: string): void {
+    public __getitem__(key: string): any {
         let obj = undefined;
         let w_found = false;
-        try {
-            for (const row of this.conn.execute('select data from cachevalues where key=?', [key])) {
-                obj = this.loader(row[0]);
-                w_found = true;
-                break;
-            }
-            if (!w_found) {
+        if (this.conn) {
+
+            try {
+                for (const row of this.conn.exec('select data from cachevalues where key=?', [key])) {
+
+                    // TODO : CHECK IF row.values[0] is OK !!
+                    // TODO : maybe use this instead: row.values[0][0]
+                    obj = this.loader(row.values[0][0] as Uint8Array);
+
+                    w_found = true;
+                    break;
+                }
+                if (!w_found) {
+                    throw new Error("No such property exists");
+                }
+            } catch (e) {
                 throw new Error("No such property exists");
             }
-        } catch (e) {
-            throw new Error("No such property exists");
         }
         return obj;
     }
@@ -481,10 +493,12 @@ class SqlitePickleShare {
 
         try {
             const data = this.dumper(value);
-            this.conn.execute(
-                'replace into cachevalues(key, data) values(?,?);',
-                [key, data]
-            );
+            if (this.conn) {
+                this.conn.exec(
+                    'replace into cachevalues(key, data) values(?,?);',
+                    [key, data]
+                );
+            }
         } catch (e) {
             g.es_exception(e);
         }
@@ -502,11 +516,15 @@ class SqlitePickleShare {
         return;
     }
     //@+node:felix.20230804140347.1: *3* loader
-    private loader(data: any): any {
+    /**
+     * REBUILDS an object
+     */
+    private loader(data: Uint8Array): any {
         if (data !== null && data !== undefined) {
+            let val;
             // Retain this code for maximum compatibility.
             try {
-                const val = pickle.loads(zlib.decompress(data));
+                val = pickle.loads(pako.inflate(data));
             } catch (e) {
                 g.es("Unpickling error - Python 3 data accessed from Python 2?");
                 return undefined;
@@ -518,7 +536,10 @@ class SqlitePickleShare {
 
     }
     //@+node:felix.20230804140352.1: *3* dumper
-    private dumper(val: any): any {
+    /**
+     * Takes an object, pickles it, then returns the gzipped Uint8Array 
+     */
+    private dumper(val: any): Uint8Array {
         let data;
         try {
             // Use Python 2's highest protocol, 2, if possible
@@ -527,12 +548,14 @@ class SqlitePickleShare {
             // Use best available if that doesn't work (unlikely)
             data = pickle.dumps(val, pickle.HIGHEST_PROTOCOL);
         }
-        return sqlite3.Binary(zlib.compress(data));
+        // TODO : Test this !
+        // return sqlite3.Binary(zlib.compress(data));
+        return pako.deflate(data);
     }
     //@+node:felix.20230802145823.48: *3* _makedirs
-    public _makedirs(fn: string, mode: number = 0o777): void {
+    public async _makedirs(fn: string, mode: number = 0o777): Promise<void> {
 
-        g.os_makedirs(fn, mode);
+        await g.mkdir(fn);
 
     }
     //@+node:felix.20230802145823.53: *3* clear (SqlitePickleShare)
@@ -543,7 +566,7 @@ class SqlitePickleShare {
         // Deletes all files in the fcache subdirectory.
         // It would be more thorough to delete everything
         // below the root directory, but it's not necessary.
-        this.conn.execute('delete from cachevalues;');
+        this.conn!.exec('delete from cachevalues;');
     }
     //@+node:felix.20230802145823.54: *3* get  (SqlitePickleShare)
     public get(key: string, p_default?: any): any {
@@ -562,7 +585,7 @@ class SqlitePickleShare {
     //@+node:felix.20230802145823.55: *3* has_key (SqlitePickleShare)
     public has_key(key: string): boolean {
         const sql = 'select 1 from cachevalues where key=?;';
-        for (const _row of this.conn.execute(sql, [key])) {
+        for (const _row of this.conn!.exec(sql, [key])) {
             return true;
         }
         return false;
@@ -571,8 +594,8 @@ class SqlitePickleShare {
     //@+node:felix.20230802145823.56: *3* items
     public *items(): Generator<[string, any]> {
         const sql = 'select key,data from cachevalues;';
-        for (const [key, data] of this.conn.execute(sql)) {
-            yield [key, data];
+        for (const res of this.conn!.exec(sql)) {
+            yield [res.values[0][0] as string, res.values[0][1]];
         }
     }
     //@+node:felix.20230802145823.57: *3* keys
@@ -594,8 +617,8 @@ class SqlitePickleShare {
             args = [globpat];
         }
 
-        for (const key in this.conn.execute(sql, args)) {
-            yield key;
+        for (const key of this.conn!.exec(sql, args)) {
+            yield key.values[0][0] as string;
         }
     }
     //@+node:felix.20230802145823.58: *3* reset_protocol_in_values
@@ -620,9 +643,12 @@ class SqlitePickleShare {
             const itms: Array<[any, string]> = cur.map(([k, v]) => [this.dumper(this.loader(v)), k]);
 
             if (itms && itms.length) {
-                this.conn.executemany('update cachevalues set data=? where key=?', itms);
+                for (const itm of itms) {
+
+                    this.conn!.exec('update cachevalues set data=? where key=?', itm);
+                }
                 // await this.commit(); // ! LEOJS : COMMIT AT END OF reset_protocol_in_values
-                return itms[-1][1];
+                return itms[itms.length - 1][1];
             }
 
             return undefined;
@@ -637,11 +663,11 @@ class SqlitePickleShare {
         const sql0 = 'select key, data from cachevalues order by key limit 50';
         const sql1 = 'select key, data from cachevalues where key > ? order by key limit 50';
 
-        const block = this.conn.execute(sql0);
-        let lk = do_block(block);
+        const block = this.conn!.exec(sql0);
+        let lk = do_block(block[0].values);
 
         while (lk !== undefined) {
-            lk = do_block(this.conn.execute(sql1, [lk]));
+            lk = do_block(this.conn!.exec(sql1, [lk]));
         }
 
         this.__setitem__(PROTOCOLKEY, 2);

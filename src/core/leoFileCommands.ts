@@ -2058,7 +2058,7 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.save
             ) {
-                g.app.commander_cacher.save(c, fileName);
+                await g.app.commander_cacher.save(c, fileName);
             }
             ok = await c.checkFileTimeStamp(fileName);
             if (ok) {
@@ -2103,7 +2103,7 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.save
             ) {
-                g.app.commander_cacher.save(c, fileName);
+                await g.app.commander_cacher.save(c, fileName);
             }
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
@@ -2142,7 +2142,7 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.commit
             ) {
-                g.app.commander_cacher.commit(); // Commit, but don't save file name.
+                await g.app.commander_cacher.commit(); // Commit, but don't save file name.
             }
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
@@ -2521,7 +2521,7 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.save
             ) {
-                g.app.commander_cacher.save(c, fileName);
+                await g.app.commander_cacher.save(c, fileName);
             }
 
             await c.setFileTimeStamp(fileName);
