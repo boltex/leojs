@@ -747,6 +747,7 @@ export class Constants {
         GOTO_NEXT_VISIBLE: "goto-next-visible",
         GOTO_PREV_VISIBLE: "goto-prev-visible",
         GOTO_NEXT_MARKED: "goto-next-marked",
+        // GOTO_PREV_MARKED: "goto-prev-marked", // ! Not in Leo's menu nor LeoJS package.json.
         GOTO_NEXT_CLONE: "goto-next-clone",
         CONTRACT_OR_GO_LEFT: "contract-or-go-left",
         EXPAND_AND_GO_RIGHT: "expand-and-go-right",

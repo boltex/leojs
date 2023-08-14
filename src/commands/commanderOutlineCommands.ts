@@ -1260,7 +1260,7 @@ export class CommanderOutlineCommands {
         c.treeSelectHelper(p && p.__bool__() && p.parent()); // Non boolean result intended
     }
     //@+node:felix.20211021013709.16: *4* c_oc.goToPrevMarkedHeadline
-    @commander_command('goto-prev-marked', 'Select the next marked node.')
+    @commander_command('goto-prev-marked', 'Select the previous marked node.')
     public goToPrevMarkedHeadline(this: Commands): void {
         const c: Commands = this;
         let p: Position = this.p;
