@@ -1193,43 +1193,6 @@ export class CommanderFileCommands {
         w.setAllText(s);
         return c.redraw(p);
     }
-    //@+node:felix.20220105210716.35: *4* c_file.readOutlineOnly
-    @commander_command(
-        'read-outline-only',
-        'Open a Leo outline, but do not read any derived files.'
-    )
-    public async readOutlineOnly(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        c.endEditing();
-        const fileName = (await g.app.gui.runOpenFileDialog(
-            c,
-            'Read Outline Only',
-            [
-                ['Leo files', '*.leo *.leojs *.db'],
-                ['All files', '*'],
-            ],
-            '.leo'
-        )) as string;
-        if (!fileName) {
-            return;
-        }
-        try {
-            // pylint: disable=assignment-from-no-return
-            // Can't use 'with" because readOutlineOnly closes the file.
-
-            // ! Replaced with vscode.workspace.fs !
-            // const theFile: number = openSync(fileName[0], 'r');
-            await g.chdir(fileName);
-            const c: Commands = g.app.newCommander(fileName);
-            // ? needed ?
-            //frame = c.frame;
-            //frame.deiconify();
-            //frame.lift();
-            return c.fileCommands.readOutlineOnly(fileName); // closes file.
-        } catch (exception) {
-            g.es('can not open:', fileName);
-        }
-    }
     //@+node:felix.20220105210716.36: *4* c_file.writeFileFromNode
     @commander_command(
         'write-file-from-node',

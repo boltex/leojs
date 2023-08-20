@@ -1232,7 +1232,7 @@ export class LeoApp {
         //
         // Save the window state for *all* open files.
         if (g.app.commander_cacher) {
-            g.app.commander_cacher.commit(); // store cache, but don't close it.
+            await g.app.commander_cacher.commit(); // store cache, but don't close it.
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {

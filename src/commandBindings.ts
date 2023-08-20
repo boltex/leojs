@@ -84,6 +84,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.GIT_DIFF, () => p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
+        [CMD.TAB_CYCLE_NEXT, () => p_leoUI.tabCycle()],
+
         [CMD.IMPORT_ANY_FILE, () => p_leoUI.importAnyFile()], // No URL passed from the command definition.
         [CMD.READ_FILE_INTO_NODE, () => p_leoUI.readFileIntoNode()],
 

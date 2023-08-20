@@ -17,3 +17,6 @@ prepare.js
 cleanup.js
 resources/animated-screenshot.gif
 resources/run-extension.png
+test*.db
+scripts.txt
+dummy*.js

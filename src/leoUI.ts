@@ -2965,7 +2965,7 @@ export class LeoUI extends NullGui {
 
         // First, check for undo-history list being requested
         if (w_picked && w_picked.label === Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL) {
-            return this.minibufferHistory();
+            return this._showMinibufferHistory();
         }
         if (w_picked) {
             return this._doMinibufferCommand(w_picked);
@@ -2976,7 +2976,7 @@ export class LeoUI extends NullGui {
      * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
      * @returns Promise that resolves when the chosen command is placed on the front-end command stack
      */
-    public async minibufferHistory(): Promise<unknown> {
+    private async _showMinibufferHistory(): Promise<unknown> {
 
         // Wait for _isBusyTriggerSave resolve because the full body save may change available commands
         await this.triggerBodySave(true);
@@ -4654,6 +4654,30 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * * Cycle opened documents
+     */
+    public async tabCycle(): Promise<unknown> {
+        await this.triggerBodySave(true);
+
+        let w_chosenIndex;
+        const w_files = g.app.windowList;
+
+        if (w_files && w_files.length && w_files.length > 1) {
+            if (this.frameIndex === w_files.length - 1) {
+                w_chosenIndex = 0;
+            } else {
+                w_chosenIndex = this.frameIndex + 1;
+            }
+        } else {
+            // "Only one, or no opened documents"
+            return undefined;
+        }
+
+        this.finalFocus = Focus.Outline;
+        return this.selectOpenedLeoDocument(w_chosenIndex);
+    }
+
+    /**
     * * Creates a new Leo file
     * @returns the promise started after it's done creating the frame and commander
     */
@@ -4741,6 +4765,8 @@ export class LeoUI extends NullGui {
             }
             if (fileName && g.app.loadManager) {
                 await g.app.loadManager.loadLocalFile(fileName, this);
+                this.showBodyIfClosed = true;
+                this.showOutlineIfClosed = true;
                 this.setupRefresh(this.finalFocus, {
                     tree: true,
                     body: true,
@@ -4757,6 +4783,8 @@ export class LeoUI extends NullGui {
             await this.triggerBodySave(true);
             const c = g.app.windowList[this.frameIndex].c;
             await c.open_outline(p_uri);
+            this.showBodyIfClosed = true;
+            this.showOutlineIfClosed = true;
             this.setupRefresh(this.finalFocus, {
                 tree: true,
                 body: true,

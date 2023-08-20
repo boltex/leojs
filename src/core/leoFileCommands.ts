@@ -1655,24 +1655,6 @@ export class FileCommands {
         }
         return root;
     }
-    //@+node:felix.20211213224232.14: *5* fc.readOutlineOnly
-    public async readOutlineOnly(fileName: string): Promise<VNode> {
-        const c: Commands = this.c;
-        // Set c.openDirectory
-        const theDir: string = g.os_path_dirname(fileName);
-        if (theDir) {
-            c.openDirectory = theDir;
-            c.frame.openDirectory = theDir;
-        }
-        let v: VNode;
-        let ratio: number;
-        [v, ratio] = await this.getLeoFile(fileName, false);
-        c.redraw();
-        // c.frame.deiconify()
-        // junk, junk, secondary_ratio = this.frame.initialRatios()
-        // c.frame.resizePanesToRatio(ratio, secondary_ratio);
-        return v;
-    }
     //@+node:felix.20211213224232.15: *5* fc.retrieveVnodesFromDb & helpers
     /**
      * Recreates tree from the data contained in table vnodes.

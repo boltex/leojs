@@ -483,6 +483,7 @@ export class Constants {
         MINIBUFFER: Constants.NAME + ".minibuffer",
         SET_LEO_ID: Constants.NAME + ".setLeoID",
         GIT_DIFF: Constants.NAME + ".gitDiff",
+        TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
         WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
         WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",
         WRITE_DIRTY_AT_FILE_NODES: Constants.NAME + ".writeDirtyAtFileNodes",
