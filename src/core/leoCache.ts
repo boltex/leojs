@@ -98,7 +98,7 @@ export class CommanderCacher {
     //@+node:felix.20230802145823.9: *3* cacher.test
     public async test(): Promise<boolean> {
 
-        if (g.app.gui.guiName() == 'nullGui') {
+        if (g.app.gui.guiName() === 'nullGui') {
             // Null gui's don't normally set the g.app.gui.db.
             await g.app.setGlobalDb();
         }

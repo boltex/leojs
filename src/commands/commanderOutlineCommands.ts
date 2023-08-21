@@ -647,8 +647,8 @@ export class CommanderOutlineCommands {
     public dumpOutline(this: Commands): void {
         const c: Commands = this;
         const seen: { [key: string]: boolean } = {};
-        console.log('');
-        console.log('='.repeat(40));
+        g.es_print('');
+        g.es_print('='.repeat(40));
         const v = c.hiddenRootNode;
         v.dump();
         seen[v.gnx] = true;

@@ -6640,7 +6640,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
-"safe-json-stringify": "^1.2.0",
 "stream": "^0.0.2"
 </t>
 <t tx="felix.20201214205159.9">{

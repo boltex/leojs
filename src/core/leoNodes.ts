@@ -2963,7 +2963,7 @@ export class VNode {
         g.es_print('');
         g.es_print(`dump of vnode: ${label} ${v.toString()}`);
         // g.es_print('gnx: %s' % v.gnx)
-        g.es_print(`len(parents): ${v.parents.length} len(children): {v.children.length}`);
+        g.es_print(`len(parents): ${v.parents.length} len(children): ${v.children.length}`);
         if (v.parents && v.parents.length) {
             g.es_print(`parents: ${g.listToString(v.parents)}`);
         }

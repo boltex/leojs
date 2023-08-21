@@ -8,7 +8,6 @@ import * as utils from '../utils';
 
 import * as os from 'os';
 import * as csv from 'csvtojson';
-import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
 
 const docutils = false;

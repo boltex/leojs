@@ -2643,7 +2643,12 @@ export class LoadManager {
 
         // Init the app.
         await lm.initApp();
-        await g.app.setGlobalDb();
+
+        console.log('**************************************************');
+        console.log('***    Uncomment line below to enable sqlite   ***');
+        console.log('***         // await g.app.setGlobalDb();      ***');
+        console.log('**************************************************');
+        // await g.app.setGlobalDb();
 
         // lm.reportDirectories(verbose)
 

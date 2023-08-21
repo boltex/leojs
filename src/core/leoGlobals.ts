@@ -12,7 +12,6 @@ import * as vscode from 'vscode';
 // import * as Bowser from "bowser";
 import * as os from 'os';
 import * as child from 'child_process';
-import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
 import * as GitAPI from '../git';
 import * as GitBaseAPI from '../git-base';
@@ -749,63 +748,72 @@ export function checkUnchangedIvars(
     }
     return ok;
 }
-//@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
-/**
- * Pretty print any array / python list to string
- */
-export function listToString(obj: any): string {
-    // return JSON.stringify(obj, undefined, 4);
-    let result: string = '';
-
-    result = obj.toString(); // TODO : TEST THIS!
-    // result = safeJsonStringify(obj, null, 2);// TODO : TEST THIS!
-
-    // let cache: any[] = [];
-    // result = JSON.stringify(obj, function (key, value) {
-    //     if (typeof value === 'object' && value !== null) {
-    //         if (cache!.indexOf(value) !== -1) {
-    //             // Circular reference found, discard key
-    //             return;
-    //         }
-    //         // Store value in our collection
-    //         cache!.push(value);
-    //     }
-    //     return value;
-    // });
-    // (cache as any) = null; // Enable garbage collection
-
-    return result;
-}
-
 //@+node:felix.20211104221420.1: *3* g.objToSTring     (coreGlobals.py)
 /**
  * Pretty print any object to a string.
  */
 export function objToString(obj: any, tag?: string): string {
-    let result: string = '';
-    if (tag) {
-        result = result + `${tag}...` + '\n';
-    }
-    result = result + safeJsonStringify(obj, null, 2);
 
-    return result;
+    if (typeof obj === 'object' && obj !== null) {
+        if (Array.isArray(obj)) {
+            if (obj.length > 0) {
+                const resultArray = obj.map((item, index) => `  ${index.toString().padStart(4)}: ${item.toString()}\n`);
+                const openingBracket = Array.isArray(obj) ? '[' : '(';
+                const closingBracket = Array.isArray(obj) ? ']\n' : ')\n';
+                const result = `${openingBracket}\n${resultArray.join('')}${closingBracket}`;
+                return tag ? `${tag}: ${result}` : result;
+            } else {
+                return Array.isArray(obj) ? '[]' : '()';
+            }
+        } else {
+            const keys = Object.keys(obj);
+            if (keys.length > 0) {
+                const maxKeyLength = Math.max(...keys.map(key => key.length));
+                const resultArray = keys.sort().map(key => {
+                    const pad = ' '.repeat(Math.max(0, maxKeyLength - key.length));
+                    return `  ${pad}${key}: ${obj[key].toString()}\n`;
+                });
+                const result = `{\n${resultArray.join('')}}`;
+                return tag ? `${tag}: ${result}` : result;
+            } else {
+                return '{}';
+            }
+        }
+    } else if (typeof obj === 'string') {
+        if (!obj.includes('\n')) {
+            return JSON.stringify(obj);
+        } else {
+            const lines = obj.split('\n');
+            const resultArray = lines.map((line, index) => `  ${index.toString().padStart(4)}: ${JSON.stringify(line)}\n`);
+            const result = `[\n${resultArray.join('')}]\n`;
+            return tag ? `${tag}: ${result}` : result;
+        }
+    } else {
+        return JSON.stringify(obj);
+    }
 
     /*
     if isinstance(obj, dict):
-        result_list = ['{\n']
-        pad = max([len(key) for key in obj])
-        for key in sorted(obj):
-            pad_s = ' ' * max(0, pad - len(key))
-            result_list.append(f"  {pad_s}{key}: {obj.get(key)}\n")
-        result_list.append('}')
-        result = ''.join(result_list)
+        if obj:
+            result_list = ['{\n']
+            pad = max([len(key) for key in obj])
+            for key in sorted(obj):
+                pad_s = ' ' * max(0, pad - len(key))
+                result_list.append(f"  {pad_s}{key}: {obj.get(key)}\n")
+            result_list.append('}')
+            result = ''.join(result_list)
+        else:
+            result = '{}'
     elif isinstance(obj, (list, tuple)):
-        # Return the enumerated lines of the list.
-        result_list = ['[\n' if isinstance(obj, list) else '(\n']
-        for i, z in enumerate(obj):
-            result_list.append(f"  {i:4}: {z!r}\n")
-        result_list.append(']\n' if isinstance(obj, list) else ')\n')
-        result = ''.join(result_list)
+        if obj:
+            # Return the enumerated lines of the list.
+            result_list = ['[\n' if isinstance(obj, list) else '(\n']
+            for i, z in enumerate(obj):
+                result_list.append(f"  {i:4}: {z!r}\n")
+            result_list.append(']\n' if isinstance(obj, list) else ')\n')
+            result = ''.join(result_list)
+        else:
+            result = '[]' if isinstance(obj, list) else '()'
     elif not isinstance(obj, str):
         result = pprint.pformat(obj, indent=indent, width=width)
         # Put opening/closing delims on separate lines.
@@ -823,6 +831,8 @@ export function objToString(obj: any, tag?: string): string {
     */
 
 }
+
+export const listToString = objToString;
 
 //@+node:felix.20211104221444.1: *3* g.printObj        (coreGlobals.py)
 /**
