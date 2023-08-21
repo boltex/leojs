@@ -52,7 +52,7 @@ export class LeoUI extends NullGui {
     public verbose: boolean = true;
     public trace: boolean = false; //true;
 
-    private _minibufferHistory: string[] = [];
+    private _minibufferHistory: vscode.QuickPickItem[] = [];
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
 
@@ -2983,9 +2983,7 @@ export class LeoUI extends NullGui {
         if (!this._minibufferHistory.length) {
             return;
         }
-        const w_commandList: vscode.QuickPickItem[] = this._minibufferHistory.map(
-            p_command => { return { label: p_command }; }
-        );
+        const w_commandList: vscode.QuickPickItem[] = this._minibufferHistory;
         // Add Nav tab special commands
         const w_options: vscode.QuickPickOptions = {
             placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
@@ -3011,7 +3009,7 @@ export class LeoUI extends NullGui {
                 }
             );
 
-            this._addToMinibufferHistory(p_picked.label);
+            this._addToMinibufferHistory(p_picked);
             const c = g.app.windowList[this.frameIndex].c;
 
             let w_command = p_picked.label; // May be overriden with async commands
@@ -3041,8 +3039,8 @@ export class LeoUI extends NullGui {
     /**
      * Add to the minibuffer history (without duplicating entries)
      */
-    private _addToMinibufferHistory(p_commandName: string): void {
-        const w_found = this._minibufferHistory.indexOf(p_commandName);
+    private _addToMinibufferHistory(p_commandName: vscode.QuickPickItem): void {
+        const w_found = this._minibufferHistory.map(p_item => p_item.label).indexOf(p_commandName.label);
         // If found, will be removed (and placed on top)
         if (w_found >= 0) {
             this._minibufferHistory.splice(w_found, 1);
