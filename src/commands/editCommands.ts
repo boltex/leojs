@@ -355,7 +355,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
     }
     //@+node:felix.20220503225323.1: *3* ec: goto node
-    //@+node:felix.20220503225323.2: *4* ec.gotoAnyClone
+    //@+node:felix.20220503225323.2: *4* goto-any-clone
     @cmd(
         'goto-any-clone',
         'Select then next cloned node, regardless of whether c.p is a clone.'
@@ -373,7 +373,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
         g.es('no clones found after', c.p.h);
     }
-    //@+node:felix.20220503225323.3: *4* ec.gotoCharacter
+    //@+node:felix.20220503225323.3: *4* goto-char
     @cmd('goto-char', "Put the cursor at the n'th character of the buffer.")
     public async gotoCharacter(): Promise<unknown> {
         let w_n = await g.app.gui.get1Arg({
@@ -400,7 +400,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         return undefined;
     }
 
-    //@+node:felix.20220503225323.4: *4* ec.gotoGlobalLine
+    //@+node:felix.20220503225323.4: *4* goto-global-line
     @cmd(
         'goto-global-line',
         'Put the cursor at the line in the *outline* corresponding to the line\n' +
@@ -426,7 +426,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return c.gotoCommands.find_file_line(Number(w_n));
         }
     }
-    //@+node:felix.20220503225323.5: *4* ec.gotoLine
+    //@+node:felix.20220503225323.5: *4* goto-line
     @cmd('goto-line', "Put the cursor at the n'th line of the buffer.")
     public async gotoLine(): Promise<unknown> {
         let w_n = await g.app.gui.get1Arg({

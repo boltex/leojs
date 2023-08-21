@@ -2954,12 +2954,6 @@ export class VNode {
     public dump(label: string = ''): void {
         const v: VNode = this;
         // const s: string = '-'.repeat(10);
-        // g.es_print(`${s} ${label} ${v}`);
-        // // g.es_print(`gnx: ${v.gnx}`);
-        // g.es_print(`parents.length: ${v.parents.length}`);
-        // g.es_print(`children.length: ${v.children.length}`);
-        // g.es_print(`parents: ${g.listToString(v.parents)}`);
-        // g.es_print(`children: ${g.listToString(v.children)}`);
         g.es_print('');
         g.es_print(`dump of vnode: ${label} ${v.toString()}`);
         // g.es_print('gnx: %s' % v.gnx)
