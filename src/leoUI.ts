@@ -2823,12 +2823,6 @@ export class LeoUI extends NullGui {
 
         this.lastCommandTimer = undefined;
 
-        // console.log('FINISHED COMMAND');
-        // const test = vscode.commands.executeCommand('getContextKeyInfo');
-        // test.then((p_result) => {
-        //     console.log('then result', p_result);
-        // });
-
         if (value && value.then) {
             void (value as Thenable<unknown>).then((p_result) => {
                 void this.launchRefresh();
@@ -3039,14 +3033,14 @@ export class LeoUI extends NullGui {
     /**
      * Add to the minibuffer history (without duplicating entries)
      */
-    private _addToMinibufferHistory(p_commandName: vscode.QuickPickItem): void {
-        const w_found = this._minibufferHistory.map(p_item => p_item.label).indexOf(p_commandName.label);
+    private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
+        const w_found = this._minibufferHistory.map(p_item => p_item.label).indexOf(p_command.label);
         // If found, will be removed (and placed on top)
         if (w_found >= 0) {
             this._minibufferHistory.splice(w_found, 1);
         }
         // Add to top of minibuffer history
-        this._minibufferHistory.unshift(p_commandName);
+        this._minibufferHistory.unshift(p_command);
     }
 
     /**

@@ -3956,12 +3956,6 @@ public async command(
 
     this.lastCommandTimer = undefined;
 
-    // console.log('FINISHED COMMAND');
-    // const test = vscode.commands.executeCommand('getContextKeyInfo');
-    // test.then((p_result) =&gt; {
-    //     console.log('then result', p_result);
-    // });
-
     if (value &amp;&amp; value.then) {
         void (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
             void this.launchRefresh();
@@ -15095,14 +15089,14 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 <t tx="felix.20230222212520.1">/**
  * Add to the minibuffer history (without duplicating entries)
  */
-private _addToMinibufferHistory(p_commandName: vscode.QuickPickItem): void {
-    const w_found = this._minibufferHistory.map(p_item =&gt; p_item.label).indexOf(p_commandName.label);
+private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
+    const w_found = this._minibufferHistory.map(p_item =&gt; p_item.label).indexOf(p_command.label);
     // If found, will be removed (and placed on top)
     if (w_found &gt;= 0) {
         this._minibufferHistory.splice(w_found, 1);
     }
     // Add to top of minibuffer history
-    this._minibufferHistory.unshift(p_commandName);
+    this._minibufferHistory.unshift(p_command);
 }
 
 </t>
