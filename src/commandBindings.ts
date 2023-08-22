@@ -86,16 +86,16 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.TAB_CYCLE_NEXT, () => p_leoUI.tabCycle()],
 
-        [CMD.IMPORT_ANY_FILE, () => p_leoUI.importAnyFile()], // No URL passed from the command definition.
-        [CMD.READ_FILE_INTO_NODE, () => p_leoUI.readFileIntoNode()],
+        [CMD.IMPORT_ANY_FILE, () => p_leoUI.command(LEOCMD.IMPORT_ANY_FILE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.READ_FILE_INTO_NODE, () => p_leoUI.command(LEOCMD.READ_FILE_INTO_NODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-        [CMD.EXPORT_HEADLINES, () => p_leoUI.exportHeadlines()],
-        [CMD.FLATTEN_OUTLINE, () => p_leoUI.flattenOutline()],
-        [CMD.OUTLINE_TO_CWEB, () => p_leoUI.outlineToCweb()],
-        [CMD.OUTLINE_TO_NOWEB, () => p_leoUI.outlineToNoweb()],
-        [CMD.REMOVE_SENTINELS, () => p_leoUI.removeSentinels()],
-        [CMD.WEAVE, () => p_leoUI.weave()],
-        [CMD.WRITE_FILE_FROM_NODE, () => p_leoUI.writeFileFromNode()],
+        [CMD.EXPORT_HEADLINES, () => p_leoUI.command(LEOCMD.EXPORT_HEADLINES, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.FLATTEN_OUTLINE, () => p_leoUI.command(LEOCMD.FLATTEN_OUTLINE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.OUTLINE_TO_CWEB, () => p_leoUI.command(LEOCMD.OUTLINE_TO_CWEB, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.OUTLINE_TO_NOWEB, () => p_leoUI.command(LEOCMD.OUTLINE_TO_NOWEB, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.REMOVE_SENTINELS, () => p_leoUI.command(LEOCMD.REMOVE_SENTINELS, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.WEAVE, () => p_leoUI.command(LEOCMD.WEAVE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.WRITE_FILE_FROM_NODE, () => p_leoUI.command(LEOCMD.WRITE_FILE_FROM_NODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
         [CMD.HEADLINE, (p_node: Position) => p_leoUI.editHeadline(p_node, true)],
         [CMD.HEADLINE_SELECTION, () => p_leoUI.editHeadline(U, false)],

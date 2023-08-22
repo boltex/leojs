@@ -403,9 +403,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20220503225323.4: *4* goto-global-line
     @cmd(
         'goto-global-line',
-        'Put the cursor at the line in the *outline* corresponding to the line\n' +
-        'with the given line number *in the external file*.\n' +
-        'For external files containing sentinels, there may be *several* lines\n' +
+        'Put the cursor at the line in the *outline* corresponding to the line ' +
+        'with the given line number in the external file. ' +
+        'For external files containing sentinels, there may be *several* lines ' +
         'in the file that correspond to the same line in the outline.' +
         'An Easter Egg: <Alt-x>number invokes this code.'
     )
@@ -456,23 +456,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230402171528.2: *4* hn-add-all & helper
     @cmd(
         'hn-add-all',
-        'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
+        'Add headline numbers to all nodes of the outline except' +
+        ' @<file> nodes and their descendants' +
+        'and any node whose headline starts with "@".' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-all',
-        'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
+        'Add headline numbers to all nodes of the outline except' +
+        ' @<file> nodes and their descendants' +
+        'and any node whose headline starts with "@".' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'add-all-headline-numbers',
-        'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
+        'Add headline numbers to all nodes of the outline except' +
+        ' @<file> nodes and their descendants' +
+        'and any node whose headline starts with "@".' +
         "Use the *first* clone's position for all clones."
     )
     public hn_add_all(): void {

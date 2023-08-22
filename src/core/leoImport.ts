@@ -3605,18 +3605,11 @@ export class TopLevelImportCommands {
     //@+node:felix.20230521235405.8: *3* @g.command(import-zim-folder)
     @command(
         'import-zim-folder',
-        `
-        Import a zim folder, http://zim-wiki.org/, as the last top-level node of the outline.
+        "Import a zim folder, http://zim-wiki.org/, as the last top-level node of the outline. " +
+        "First use Zim to export your project to rst files. " +
+        "This command requires the following Leo settings: " +
+        "@int rst_level = 0, @string rst_type, @string zim_node_name, @string path_to_zim."
 
-        First use Zim to export your project to rst files.
-
-        This command requires the following Leo settings::
-
-            @int rst_level = 0
-            @string rst_type
-            @string zim_node_name
-            @string path_to_zim
-        `
     )
     public async import_zim_command(this: Commands): Promise<void> {
         const c: Commands = this;

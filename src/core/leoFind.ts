@@ -475,16 +475,16 @@ export class LeoFind {
     //@+node:felix.20221013234514.4: *4* find.clone-find_marked & helper
     @cmd(
         'clone-find-all-marked',
-        'clone-find-all-marked, aka cfam.\n\n' +
-        'Create an organizer node whose descendants contain clones of all marked\n' +
-        'nodes. The list is *not* flattened: clones appear only once in the\n' +
+        'clone-find-all-marked, aka cfam. ' +
+        'Create an organizer node whose descendants contain clones of all marked ' +
+        'nodes. The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     @cmd(
         'cfam',
-        'clone-find-all-marked, aka cfam.\n\n' +
-        'Create an organizer node whose descendants contain clones of all marked\n' +
-        'nodes. The list is *not* flattened: clones appear only once in the\n' +
+        'clone-find-all-marked, aka cfam. ' +
+        'Create an organizer node whose descendants contain clones of all marked ' +
+        'nodes. The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     public cloneFindAllMarked(): void {
@@ -492,18 +492,18 @@ export class LeoFind {
     }
     @cmd(
         'clone-find-all-flattened-marked',
-        'clone-find-all-flattened-marked, aka cffm.\n\n' +
-        'Create an organizer node whose direct children are clones of all marked\n' +
-        'nodes. The list is flattened: every cloned node appears as a direct\n' +
-        'child of the organizer node, even if the clone also is a descendant of\n' +
+        'clone-find-all-flattened-marked, aka cffm. ' +
+        'Create an organizer node whose direct children are clones of all marked ' +
+        'nodes. The list is flattened: every cloned node appears as a direct ' +
+        'child of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     @cmd(
         'cffm',
-        'clone-find-all-flattened-marked, aka cffm.\n\n' +
-        'Create an organizer node whose direct children are clones of all marked\n' +
-        'nodes. The list is flattened: every cloned node appears as a direct\n' +
-        'child of the organizer node, even if the clone also is a descendant of\n' +
+        'clone-find-all-flattened-marked, aka cffm. ' +
+        'Create an organizer node whose direct children are clones of all marked ' +
+        'nodes. The list is flattened: every cloned node appears as a direct ' +
+        'child of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     public cloneFindAllFlattenedMarked(): void {
@@ -566,7 +566,7 @@ export class LeoFind {
     //@+node:felix.20221013234514.6: *4* find.clone-find-parents
     @cmd(
         'clone-find-parents',
-        'Create an organizer node whose direct children are clones of all\n' +
+        'Create an organizer node whose direct children are clones of all ' +
         'parents of the selected node, which must be a clone.'
     )
     public cloneFindParents(): boolean {
@@ -1648,26 +1648,26 @@ export class LeoFind {
     //@+node:felix.20221016013001.13: *4* find.clone-find-all & helper
     @cmd(
         'clone-find-all',
-        'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     @cmd(
         'find-clone-all',
-        'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     @cmd(
         'cfa',
-        'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     public interactive_clone_find_all(): Thenable<unknown> {
@@ -1732,29 +1732,29 @@ export class LeoFind {
     //@+node:felix.20221016013001.15: *4* find.clone-find-all-flattened & helper
     @cmd(
         'clone-find-all-flattened',
-        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     @cmd(
         'find-clone-all-flattened',
-        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     @cmd(
         'cff',
-        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     public interactive_cff(): Thenable<unknown> {
@@ -1816,30 +1816,30 @@ export class LeoFind {
     //@+node:felix.20221016013001.17: *4* find.clone-find-tag & helper
     @cmd(
         'clone-find-tag',
-        'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n'
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
     )
     @cmd(
         'find-clone-tag',
-        'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n'
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
     )
     @cmd(
         'cft',
-        'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n'
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
     )
     public interactive_clone_find_tag(): void {
         g.app.gui.cloneFindTag(); // TODO : Only have gui for dialog, move implementation here.
@@ -2367,11 +2367,11 @@ export class LeoFind {
     //@+node:felix.20221016013001.29: *4* find.start-search (Ctrl-F) & common states
     @cmd(
         'start-search',
-        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+        'The default binding of Ctrl-F. Also contains default state-machine entries for find/change commands.'
     )
     @cmd(
         'search-forward',
-        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+        'The default binding of Ctrl-F. Also contains default state-machine entries for find/change commands.'
     )
     public start_search(): void {
         g.app.gui.startSearch(); // All done in GUI.

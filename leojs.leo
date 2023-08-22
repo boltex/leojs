@@ -231,17 +231,6 @@
 <v t="felix.20201214211837.1"><vh>switchLeoFile</vh></v>
 <v t="felix.20201214211839.1"><vh>selectOpenedLeoDocument</vh></v>
 </v>
-<v t="felix.20221114222048.1"><vh>Export/Import Commands</vh>
-<v t="felix.20221114222048.2"><vh>importFile</vh></v>
-<v t="felix.20221114222048.3"><vh>exportHeadlines</vh></v>
-<v t="felix.20221114222048.4"><vh>flattenOutline</vh></v>
-<v t="felix.20221114222048.5"><vh>outlineToCweb</vh></v>
-<v t="felix.20221114222048.6"><vh>outlineToNoweb</vh></v>
-<v t="felix.20221114222048.7"><vh>removeSentinels</vh></v>
-<v t="felix.20221114222048.8"><vh>weave</vh></v>
-<v t="felix.20221114222048.9"><vh>writeFileFromNode</vh></v>
-<v t="felix.20221114222048.10"><vh>readFileIntoNode</vh></v>
-</v>
 <v t="felix.20201214194144.7"><vh>At Buttons</vh>
 <v t="felix.20201214211742.1"><vh>clickAtButton</vh></v>
 <v t="felix.20220517212706.1"><vh>_handleRClicks</vh></v>
@@ -2059,6 +2048,18 @@ public static LEO_COMMANDS = {
     // * More Commands
     // GOTO_GLOBAL_LINE: "!goto_global_line",
     SET_UA: 'set-ua',
+
+    // * Import Export
+    IMPORT_ANY_FILE: "import-file",
+    READ_FILE_INTO_NODE: "read-file-into-node",
+
+    EXPORT_HEADLINES: "export-headlines",
+    FLATTEN_OUTLINE: "flatten-outline",
+    OUTLINE_TO_CWEB: "outline-to-cweb",
+    OUTLINE_TO_NOWEB: "outline-to-noweb",
+    REMOVE_SENTINELS: "remove-sentinels",
+    WEAVE: "weave",
+    WRITE_FILE_FROM_NODE: "write-file-from-node",
 
     // * Search operations
     START_SEARCH: "start-search",
@@ -6946,24 +6947,6 @@ public async switchLeoFile(): Promise&lt;unknown&gt; {
  */
 public async selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Promise&lt;unknown&gt; {
 
-    // this.setupRefresh(
-    //     p_fromOutline ? Focus.Outline : Focus.Body,
-    //     {
-    //         tree: true,
-    //         body: true,
-    //         buttons: true,
-    //         states: true,
-    //         documents: true
-    //     }
-    // );
-
-    // this.frameIndex = p_index;
-
-    // this.launchRefresh();
-
-    // // if selected and opened
-    // return Promise.resolve(true);
-
     await this.triggerBodySave(true);
     this.frameIndex = p_index;
     // Like we just opened or made a new file
@@ -9074,8 +9057,8 @@ public setLeoIDCommand(): Thenable&lt;unknown&gt; {
 };
 </t>
 <t tx="felix.20220201225503.1">public ensure_commander_visible(c: Commands): void {
-    // TODO !
-    // console.log("TODO ensure_commander_visible");
+    this.showBodyIfClosed = true;
+    this.showOutlineIfClosed = true;
 }
 
 </t>
@@ -13211,14 +13194,13 @@ public refreshDesc(): void {
  * Handle a successful find match.
  */
 public show_find_success(c: Commands, in_headline: boolean, insert: number, p: Position): void {
-
-    // * from leoserver
+    // TODO : see focus_to_body !
+    // TODO : USE ONLY 'WRAPPER' OR 'WIDGET' like in show_find_success!
     if (in_headline) {
         // edit_widget(p)
         // c.frame.edit_widget(p);
         // console.log('try to set');
         try {
-
             g.app.gui.set_focus(c, c.frame.tree.edit_widget(p));
         }
         catch (e) {
@@ -14020,515 +14002,16 @@ private _refreshGotoPane(): void {
   "title": "Write File From Node..."
 },
 </t>
-<t tx="felix.20221114220040.1">[CMD.IMPORT_ANY_FILE, () =&gt; p_leoUI.importAnyFile()], // No URL passed from the command definition.
-[CMD.READ_FILE_INTO_NODE, () =&gt; p_leoUI.readFileIntoNode()],
+<t tx="felix.20221114220040.1">[CMD.IMPORT_ANY_FILE, () =&gt; p_leoUI.command(LEOCMD.IMPORT_ANY_FILE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.READ_FILE_INTO_NODE, () =&gt; p_leoUI.command(LEOCMD.READ_FILE_INTO_NODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-[CMD.EXPORT_HEADLINES, () =&gt; p_leoUI.exportHeadlines()],
-[CMD.FLATTEN_OUTLINE, () =&gt; p_leoUI.flattenOutline()],
-[CMD.OUTLINE_TO_CWEB, () =&gt; p_leoUI.outlineToCweb()],
-[CMD.OUTLINE_TO_NOWEB, () =&gt; p_leoUI.outlineToNoweb()],
-[CMD.REMOVE_SENTINELS, () =&gt; p_leoUI.removeSentinels()],
-[CMD.WEAVE, () =&gt; p_leoUI.weave()],
-[CMD.WRITE_FILE_FROM_NODE, () =&gt; p_leoUI.writeFileFromNode()],
-
-</t>
-<t tx="felix.20221114222048.1"></t>
-<t tx="felix.20221114222048.10">/**
- * * Read file from node
- */
-public readFileIntoNode(p_leoFileUri?: vscode.Uri): Thenable&lt;unknown&gt; {
-
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         let q_importFile: Promise&lt;LeoBridgePackage | undefined&gt;; // Promise for opening a file
-    //         if (p_leoFileUri &amp;&amp; p_leoFileUri.fsPath.trim()) {
-    //             const w_fixedFilePath: string = p_leoFileUri.fsPath.replace(/\\/g, '/');
-    //             q_importFile = this.sendAction(
-    //                 Constants.LEOBRIDGE.READ_FILE_INTO_NODE,
-    //                 { name: w_fixedFilePath }
-    //             );
-    //         } else {
-    //             q_importFile = this._leoFilesBrowser.getImportFileUrls(
-    //                 {
-    //                     'All files': ['*'],
-    //                     'Python files': ['py'],
-    //                     'Leo files': ['leo'],
-    //                 },
-    //                 true,
-    //                 "Read File Into Node"
-    //             ).then(
-    //                 (p_chosenLeoFiles) =&gt; {
-    //                     if (p_chosenLeoFiles.length) {
-    //                         return this.sendAction(
-    //                             Constants.LEOBRIDGE.READ_FILE_INTO_NODE,
-    //                             { name: p_chosenLeoFiles[0] }
-    //                         );
-    //                     } else {
-    //                         return Promise.resolve(undefined);
-    //                     }
-    //                 },
-    //                 (p_errorGetFile) =&gt; {
-    //                     return Promise.reject(p_errorGetFile);
-    //                 }
-    //             );
-    //         }
-    //         return q_importFile;
-    //     })
-    //     .then(
-    //         (p_importFileResult: LeoBridgePackage | undefined) =&gt; {
-    //             if (p_importFileResult) {
-    //                 this.setupRefresh(
-    //                     Focus.NoChange,
-    //                     {
-    //                         tree: true,
-    //                         body: true,
-    //                         documents: true,
-    //                         // buttons: false,
-    //                         states: true,
-    //                     }
-    //                 );
-    //                 return this.launchRefresh();
-    //             } else {
-    //                 return Promise.resolve(undefined);
-    //             }
-    //         },
-    //         (p_errorImport) =&gt; {
-    //             console.log('Rejection for Read a file into a single node file');
-    //             return Promise.reject(p_errorImport);
-    //         }
-    //     );
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.2">/**
- * * Import any File(s)
- * No URL passed from the command definition.
- * @param p_leoFileUri is offered for internal use only
- */
-public importAnyFile(p_leoFileUri?: vscode.Uri): Thenable&lt;unknown&gt; {
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         let q_importFile: Promise&lt;LeoBridgePackage | undefined&gt;; // Promise for opening a file
-    //         if (p_leoFileUri &amp;&amp; p_leoFileUri.fsPath.trim()) {
-    //             const w_fixedFilePath: string = p_leoFileUri.fsPath.replace(/\\/g, '/');
-    //             // Array of a single filename
-    //             q_importFile = this.sendAction(
-    //                 Constants.LEOBRIDGE.IMPORT_ANY_FILE,
-    //                 { filenames: [w_fixedFilePath] }
-    //             );
-    //         } else {
-    //             q_importFile = this._leoFilesBrowser.getImportFileUrls().then(
-    //                 (p_chosenLeoFiles) =&gt; {
-    //                     if (p_chosenLeoFiles.length) {
-    //                         // Can be multiple files, so array of string is sent
-    //                         return this.sendAction(
-    //                             Constants.LEOBRIDGE.IMPORT_ANY_FILE,
-    //                             { filenames: p_chosenLeoFiles }
-    //                         );
-    //                     } else {
-    //                         return Promise.resolve(undefined);
-    //                     }
-    //                 },
-    //                 (p_errorGetFile) =&gt; {
-    //                     return Promise.reject(p_errorGetFile);
-    //                 }
-    //             );
-    //         }
-    //         return q_importFile;
-    //     })
-    //     .then(
-    //         (p_importFileResult: LeoBridgePackage | undefined) =&gt; {
-    //             if (p_importFileResult) {
-    //                 this.setupRefresh(
-    //                     Focus.NoChange,
-    //                     {
-    //                         tree: true,
-    //                         body: true,
-    //                         documents: true,
-    //                         // buttons: false,
-    //                         states: true,
-    //                     }
-    //                 );
-    //                 return this.launchRefresh();
-    //             } else {
-    //                 return Promise.resolve(undefined);
-    //             }
-    //         },
-    //         (p_errorImport) =&gt; {
-    //             console.log('Rejection for import file');
-    //             return Promise.reject(p_errorImport);
-    //         }
-    //     );
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.3">/**
- * * Export Outline
- * Export all headlines to an external file.
- */
-public exportHeadlines(p_exportFileUri?: vscode.Uri): Thenable&lt;unknown&gt; {
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         if (this.leoStates.fileOpenedReady &amp;&amp; this.lastSelectedNode) {
-    //             return this._leoFilesBrowser.getExportFileUrl(
-    //                 "Export Headlines",
-    //                 {
-    //                     'Text files': ['txt'],
-    //                     'All files': ['*'],
-    //                 },
-    //             );
-    //         } else {
-    //             vscode.window.showInformationMessage(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //             return Promise.reject(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //         }
-    //     })
-    //     .then((p_chosenLeoFile) =&gt; {
-    //         if (p_chosenLeoFile.trim()) {
-
-    //             const q_commandResult = this.nodeCommand({
-    //                 action: Constants.LEOBRIDGE.EXPORT_HEADLINES,
-    //                 node: undefined,
-    //                 refreshType: { tree: true, states: true, documents: true },
-    //                 finalFocus: Focus.NoChange, // use last
-    //                 name: p_chosenLeoFile,
-    //             });
-    //             if (q_commandResult) {
-    //                 return q_commandResult;
-    //             } else {
-    //                 return Promise.reject('Export Headlines not added on command stack');
-    //             }
-    //         } else {
-    //             // Canceled
-    //             return Promise.resolve(undefined);
-    //         }
-    //     });
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.4">/**
- * * Flatten Selected Outline
- * Export the selected outline to an external file.
- * The outline is represented in MORE format.
- */
-public flattenOutline(): Thenable&lt;unknown&gt; {
-
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         if (this.leoStates.fileOpenedReady &amp;&amp; this.lastSelectedNode) {
-    //             return this._leoFilesBrowser.getExportFileUrl(
-    //                 "Flatten Selected Outline",
-    //                 {
-    //                     'Text files': ['txt'],
-    //                     'All files': ['*'],
-    //                 },
-    //             );
-    //         } else {
-    //             vscode.window.showInformationMessage(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //             return Promise.reject(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //         }
-    //     })
-    //     .then((p_chosenLeoFile) =&gt; {
-    //         if (p_chosenLeoFile.trim()) {
-
-    //             const q_commandResult = this.nodeCommand({
-    //                 action: Constants.LEOBRIDGE.FLATTEN_OUTLINE,
-    //                 node: undefined,
-    //                 refreshType: { tree: true, states: true, documents: true },
-    //                 finalFocus: Focus.NoChange, // use last
-    //                 name: p_chosenLeoFile,
-    //             });
-    //             if (q_commandResult) {
-    //                 return q_commandResult;
-    //             } else {
-    //                 return Promise.reject('Flatten Selected Outline not added on command stack');
-    //             }
-    //         } else {
-    //             // Canceled
-    //             return Promise.resolve(undefined);
-    //         }
-    //     });
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.5">/**
- * * Outline To CWEB
- */
-public outlineToCweb(): Thenable&lt;unknown&gt; {
-
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         if (this.leoStates.fileOpenedReady &amp;&amp; this.lastSelectedNode) {
-    //             return this._leoFilesBrowser.getExportFileUrl(
-    //                 "Outline To CWEB",
-    //                 {
-    //                     'CWEB files': ['w'],
-    //                     'Text files': ['txt'],
-    //                     'All files': ['*'],
-    //                 },
-    //             );
-    //         } else {
-    //             vscode.window.showInformationMessage(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //             return Promise.reject(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //         }
-    //     })
-    //     .then((p_chosenLeoFile) =&gt; {
-    //         if (p_chosenLeoFile.trim()) {
-
-    //             const q_commandResult = this.nodeCommand({
-    //                 action: Constants.LEOBRIDGE.OUTLINE_TO_CWEB,
-    //                 node: undefined,
-    //                 refreshType: { tree: true, states: true, documents: true },
-    //                 finalFocus: Focus.NoChange, // use last
-    //                 name: p_chosenLeoFile,
-    //             });
-    //             if (q_commandResult) {
-    //                 return q_commandResult;
-    //             } else {
-    //                 return Promise.reject('Outline To CWEB not added on command stack');
-    //             }
-    //         } else {
-    //             // Canceled
-    //             return Promise.resolve(undefined);
-    //         }
-    //     });
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.6">/**
- * * Outline To Noweb
- */
-public outlineToNoweb(): Thenable&lt;unknown&gt; {
-
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         if (this.leoStates.fileOpenedReady &amp;&amp; this.lastSelectedNode) {
-    //             return this._leoFilesBrowser.getExportFileUrl(
-    //                 "Outline To Noweb",
-    //                 {
-    //                     'Noweb files': ['nw'],
-    //                     'Text files': ['txt'],
-    //                     'All files': ['*'],
-    //                 },
-    //             );
-    //         } else {
-    //             vscode.window.showInformationMessage(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //             return Promise.reject(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //         }
-    //     })
-    //     .then((p_chosenLeoFile) =&gt; {
-    //         if (p_chosenLeoFile.trim()) {
-
-    //             const q_commandResult = this.nodeCommand({
-    //                 action: Constants.LEOBRIDGE.OUTLINE_TO_NOWEB,
-    //                 node: undefined,
-    //                 refreshType: { tree: true, states: true, documents: true },
-    //                 finalFocus: Focus.NoChange, // use last
-    //                 name: p_chosenLeoFile,
-    //             });
-    //             if (q_commandResult) {
-    //                 return q_commandResult;
-    //             } else {
-    //                 return Promise.reject('Outline To Noweb not added on command stack');
-    //             }
-    //         } else {
-    //             // Canceled
-    //             return Promise.resolve(undefined);
-    //         }
-    //     });
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.7">/**
- * * Remove Sentinels
- */
-public removeSentinels(p_leoFileUri?: vscode.Uri): Thenable&lt;unknown&gt; {
-    // Convert one or more files, replacing the original files while removing any sentinels they contain.
-
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         let q_importFiles: Promise&lt;LeoBridgePackage | undefined&gt;; // Promise for opening a file
-    //         if (p_leoFileUri &amp;&amp; p_leoFileUri.fsPath.trim()) {
-    //             const w_fixedFilePath: string = p_leoFileUri.fsPath.replace(/\\/g, '/');
-    //             q_importFiles = this.sendAction(
-    //                 Constants.LEOBRIDGE.REMOVE_SENTINELS,
-    //                 { names: [w_fixedFilePath] }
-    //             );
-    //         } else {
-    //             q_importFiles = this._leoFilesBrowser.getImportFileUrls(
-    //                 {
-    //                     'Python files': ['py'],
-    //                     'All files': ['*'],
-    //                     'C/C++ files': ['c', 'cpp', 'h', 'hpp'],
-    //                     'Java files': ['java'],
-    //                     'Lua files': ['lua'],
-    //                     'Pascal files': ['pas'],
-    //                 },
-    //                 false,
-    //                 "Remove Sentinels"
-    //             ).then(
-    //                 (p_chosenLeoFiles) =&gt; {
-    //                     if (p_chosenLeoFiles.length) {
-    //                         return this.sendAction(
-    //                             Constants.LEOBRIDGE.REMOVE_SENTINELS,
-    //                             { names: p_chosenLeoFiles }
-    //                         );
-    //                     } else {
-    //                         return Promise.resolve(undefined);
-    //                     }
-    //                 },
-    //                 (p_errorGetFile) =&gt; {
-    //                     return Promise.reject(p_errorGetFile);
-    //                 }
-    //             );
-    //         }
-    //         return q_importFiles;
-    //     })
-    //     .then(
-    //         (p_importFileResult: LeoBridgePackage | undefined) =&gt; {
-    //             if (p_importFileResult) {
-    //                 this.setupRefresh(
-    //                     Focus.NoChange,
-    //                     {
-    //                         tree: true,
-    //                         body: true,
-    //                         documents: true,
-    //                         // buttons: false,
-    //                         states: true,
-    //                     }
-    //                 );
-    //                 return this.launchRefresh();
-    //             } else {
-    //                 return Promise.resolve(undefined);
-    //             }
-    //         },
-    //         (p_errorImport) =&gt; {
-    //             console.log('Rejection for Read a file into a single node file');
-    //             return Promise.reject(p_errorImport);
-    //         }
-    //     );
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.8">/**
- * * Weave
- * Simulate a literate-programming weave operation by writing the outline to a text file.
- */
-public weave(): Thenable&lt;unknown&gt; {
-
-    // return this._isBusyTriggerSave(true, true)
-    //     .then((p_saveResult) =&gt; {
-    //         if (this.leoStates.fileOpenedReady &amp;&amp; this.lastSelectedNode) {
-    //             return this._leoFilesBrowser.getExportFileUrl(
-    //                 "Weave",
-    //                 {
-    //                     'Text files': ['txt'],
-    //                     'All files': ['*'],
-    //                 },
-    //             );
-    //         } else {
-    //             vscode.window.showInformationMessage(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //             return Promise.reject(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //         }
-    //     })
-    //     .then((p_chosenLeoFile) =&gt; {
-    //         if (p_chosenLeoFile.trim()) {
-
-    //             const q_commandResult = this.nodeCommand({
-    //                 action: Constants.LEOBRIDGE.WEAVE,
-    //                 node: undefined,
-    //                 refreshType: { tree: true, states: true, documents: true },
-    //                 finalFocus: Focus.NoChange, // use last
-    //                 name: p_chosenLeoFile,
-    //             });
-    //             if (q_commandResult) {
-    //                 return q_commandResult;
-    //             } else {
-    //                 return Promise.reject('Weave not added on command stack');
-    //             }
-    //         } else {
-    //             // Canceled
-    //             return Promise.resolve(undefined);
-    //         }
-    //     });
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221114222048.9">/**
- * * Write file from node
- */
-public writeFileFromNode(): Thenable&lt;unknown&gt; {
-
-    // * If node starts with @read-file-into-node, use the full path name in the headline.
-    // * Otherwise, prompt for a file name.
-
-    // if (!this.leoStates.fileOpenedReady || !this.lastSelectedNode) {
-    //     vscode.window.showInformationMessage(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //     return Promise.reject(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    // }
-
-    // const h = this.lastSelectedNode.headline.trimEnd();
-    // const tag = '@read-file-into-node';
-
-    // let fileName = '';
-    // if (h.startsWith(tag)) {
-    //     fileName = h.substring(tag.length).trim();
-    // }
-
-    // let q_fileName: Thenable&lt;string&gt;;
-    // if (fileName) {
-    //     q_fileName = Promise.resolve(fileName);
-    // } else {
-    //     q_fileName = this._isBusyTriggerSave(true, true)
-    //         .then((p_saveResult) =&gt; {
-    //             if (this.leoStates.fileOpenedReady &amp;&amp; this.lastSelectedNode) {
-    //                 return this._leoFilesBrowser.getExportFileUrl(
-    //                     "Write file from node",
-    //                     {
-    //                         'All files': ['*'],
-    //                         'Python files': ['py'],
-    //                         'Leo files': ['leo'],
-    //                     },
-    //                 );
-    //             } else {
-    //                 vscode.window.showInformationMessage(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //                 return Promise.reject(Constants.USER_MESSAGES.FILE_NOT_OPENED);
-    //             }
-    //         });
-    // }
-
-    // return q_fileName.then((p_chosenLeoFile) =&gt; {
-    //     if (p_chosenLeoFile.trim()) {
-
-    //         const q_commandResult = this.nodeCommand({
-    //             action: Constants.LEOBRIDGE.WRITE_FILE_FROM_NODE,
-    //             node: undefined,
-    //             refreshType: { tree: true, states: true, documents: true },
-    //             finalFocus: Focus.NoChange, // use last
-    //             name: p_chosenLeoFile,
-    //         });
-    //         this.leoStates.leoOpenedFileName = p_chosenLeoFile.trim();
-    //         this._leoStatusBar.update(true, 0, true);
-    //         this._addRecentAndLastFile(p_chosenLeoFile.trim());
-    //         if (q_commandResult) {
-    //             return q_commandResult;
-    //         } else {
-    //             return Promise.reject('Write File From Node not added on command stack');
-    //         }
-    //     } else {
-    //         // Canceled
-    //         return Promise.resolve(undefined);
-    //     }
-    // });
-    return Promise.resolve();
-}
+[CMD.EXPORT_HEADLINES, () =&gt; p_leoUI.command(LEOCMD.EXPORT_HEADLINES, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.FLATTEN_OUTLINE, () =&gt; p_leoUI.command(LEOCMD.FLATTEN_OUTLINE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.OUTLINE_TO_CWEB, () =&gt; p_leoUI.command(LEOCMD.OUTLINE_TO_CWEB, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.OUTLINE_TO_NOWEB, () =&gt; p_leoUI.command(LEOCMD.OUTLINE_TO_NOWEB, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.REMOVE_SENTINELS, () =&gt; p_leoUI.command(LEOCMD.REMOVE_SENTINELS, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.WEAVE, () =&gt; p_leoUI.command(LEOCMD.WEAVE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.WRITE_FILE_FROM_NODE, () =&gt; p_leoUI.command(LEOCMD.WRITE_FILE_FROM_NODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
 </t>
 <t tx="felix.20221115214948.1">{
@@ -14831,6 +14314,8 @@ public navTextClear(): void {
  * Put focus in body widget.
  */
 public focus_to_body(c: Commands, p: Position): void {
+    // TODO : see show_find_success !
+    // TODO : USE ONLY 'WRAPPER' OR 'WIDGET' like in show_find_success!
     this.set_focus(c, c.frame.body.wrapper);
 }
 </t>

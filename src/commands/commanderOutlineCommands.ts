@@ -191,7 +191,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211208235043.4: *4* c_oc.pasteOutline
     @commander_command(
         'paste-node',
-        'Paste an outline into the present outline from the clipboard.\n' +
+        'Paste an outline into the present outline from the clipboard. ' +
         'Nodes do *not* retain their original identify.'
     )
     public pasteOutline(
@@ -254,7 +254,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20220103211308.1: *4* c_oc.asyncPasteOutline
     @commander_command(
         'async-paste-node',
-        'Paste an outline into the present outline from the clipboard.\n' +
+        'Paste an outline into the present outline from the clipboard. ' +
         'Nodes do *not* retain their original identify.'
     )
     public asyncPasteOutline(this: Commands): Thenable<unknown> {
@@ -266,7 +266,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211208235043.5: *4* c_oc.pasteOutlineRetainingClones
     @commander_command(
         'paste-retaining-clones',
-        'Paste an outline into the present outline from the clipboard.\n' +
+        'Paste an outline into the present outline from the clipboard. ' +
         'Nodes *retain* their original identify.'
     )
     public pasteOutlineRetainingClones(
@@ -334,7 +334,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20220103213833.1: *4* c_oc.asyncPasteOutlineRetainingClones
     @commander_command(
         'async-paste-retaining-clones',
-        'Paste an outline into the present outline from the clipboard.\n' +
+        'Paste an outline into the present outline from the clipboard. ' +
         'Nodes *retain* their original identify.'
     )
     public asyncPasteOutlineRetainingClones(this: Commands): Thenable<unknown> {
@@ -671,7 +671,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211020002058.3: *4* c_oc.contractAllOtherNodes & helper
     @commander_command(
         'contract-all-other-nodes',
-        'Contract all nodes except those needed to make the\n' +
+        'Contract all nodes except those needed to make the ' +
         'presently selected node visible.'
     )
     public contractAllOtherNodes(this: Commands): void {
@@ -788,7 +788,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211020002058.9: *4* c_oc.expandAllHeadlines
     @commander_command(
         'expand-all',
-        'Expand all headlines.\n' +
+        'Expand all headlines. ' +
         'Warning: this can take a long time for large outlines.'
     )
     public expandAllHeadlines(this: Commands): void {
@@ -870,7 +870,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211020002058.12: *4* c_oc.expandNextLevel
     @commander_command(
         'expand-next-level',
-        'Increase the expansion level of the outline and\n' +
+        'Increase the expansion level of the outline and ' +
         'Expand all nodes at that level or lower.'
     )
     public expandNextLevel(this: Commands): void {
@@ -912,9 +912,9 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211020002058.15: *4* c_oc.expandNodeOrGoToFirstChild
     @commander_command(
         'expand-or-go-right',
-        'Simulate the Right Arrow Key in folder of Windows Explorer.\n' +
-        'if c.p has no children, do nothing.\n' +
-        'Otherwise, if c.p is expanded, select the first child.\n' +
+        'Simulate the Right Arrow Key in folder of Windows Explorer. ' +
+        'if c.p has no children, do nothing. ' +
+        'Otherwise, if c.p is expanded, select the first child. ' +
         'Otherwise, expand c.p.'
     )
     public expandNodeOrGoToFirstChild(this: Commands): void {
@@ -954,7 +954,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211020002058.17: *4* c_oc.expandPrevLevel
     @commander_command(
         'expand-prev-level',
-        'Decrease the expansion level of the outline and\n' +
+        'Decrease the expansion level of the outline and ' +
         'Expand all nodes at that level or lower.'
     )
     public expandPrevLevel(this: Commands): void {
@@ -1049,7 +1049,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211021013709.5: *4* c_oc.goToFirstNode
     @commander_command(
         'goto-first-node',
-        'Select the first node of the entire outline,\n' +
+        'Select the first node of the entire outline, ' +
         'Or the first visible node if Leo is hoisted or within a chapter.'
     )
     public goToFirstNode(this: Commands): void {
@@ -1139,7 +1139,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211021013709.11: *4* c_oc.goToNextClone
     @commander_command(
         'goto-next-clone',
-        'Select the next node that is a clone of the selected node.\n' +
+        'Select the next node that is a clone of the selected node. ' +
         'If the selected node is not a clone, do find-next-clone.'
     )
     public goToNextClone(this: Commands): void {
@@ -1501,7 +1501,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211031143555.3: *4* c_oc.cloneToAtSpot
     @commander_command(
         'clone-to-at-spot',
-        'Create a clone of the selected node and move it to the last @spot node\n' +
+        'Create a clone of the selected node and move it to the last @spot node ' +
         'of the outline. Create the @spot node if necessary.'
     )
     public cloneToAtSpot(this: Commands): void {
@@ -1552,7 +1552,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211031143555.4: *4* c_oc.cloneToLastNode
     @commander_command(
         'clone-node-to-last-node',
-        'Clone the selected node and move it to the last node.\n' +
+        'Clone the selected node and move it to the last node. ' +
         'Do *not* change the selected node.'
     )
     public cloneToLastNode(this: Commands): void {
@@ -1952,8 +1952,8 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211025223803.5: *4* c_oc.moveMarked
     @commander_command(
         'move-marked-nodes',
-        'Move all marked nodes as children of a new node.\n' +
-        'This command is not undoable.\n' +
+        'Move all marked nodes as children of a new node. ' +
+        'This command is not undoable. ' +
         'Consider using clone-marked-nodes, followed by copy/paste instead.'
     )
     public async moveMarked(this: Commands): Promise<unknown> {

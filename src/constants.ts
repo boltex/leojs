@@ -684,6 +684,18 @@ export class Constants {
         // GOTO_GLOBAL_LINE: "!goto_global_line",
         SET_UA: 'set-ua',
 
+        // * Import Export
+        IMPORT_ANY_FILE: "import-file",
+        READ_FILE_INTO_NODE: "read-file-into-node",
+
+        EXPORT_HEADLINES: "export-headlines",
+        FLATTEN_OUTLINE: "flatten-outline",
+        OUTLINE_TO_CWEB: "outline-to-cweb",
+        OUTLINE_TO_NOWEB: "outline-to-noweb",
+        REMOVE_SENTINELS: "remove-sentinels",
+        WEAVE: "weave",
+        WRITE_FILE_FROM_NODE: "write-file-from-node",
+
         // * Search operations
         START_SEARCH: "start-search",
         FIND_ALL: "find-all",

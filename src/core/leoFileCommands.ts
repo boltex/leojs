@@ -1011,7 +1011,7 @@ export class FileCommands {
      */
     @cmd(
         'write-zip-archive',
-        'Write a .zip file containing this .leo file and all external files.\n' +
+        'Write a .zip file containing this .leo file and all external files. ' +
         "Write to os.environ['LEO_ARCHIVE'] or the directory containing this .leo file."
     )
     public async writeZipArchive(): Promise<unknown> {
