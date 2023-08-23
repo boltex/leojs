@@ -1841,36 +1841,26 @@ export class LeoFind {
         'direct child of the organizer node, even if the clone also is a ' +
         'descendant of another cloned node.'
     )
-    public interactive_clone_find_tag(): void {
-        g.app.gui.cloneFindTag(); // TODO : Only have gui for dialog, move implementation here.
+    public async interactive_clone_find_tag(): Promise<[number, Position] | undefined> {
+        const w_findText = this.ftm.find_findbox.text();
+        const w_startValue = w_findText === "<find pattern here>" ? '' : w_findText;
+
+        let w_inputResult = await g.app.gui.get1Arg(
+            {
+                value: w_startValue,
+                title: "Find Tag",
+                placeHolder: "<tag>",
+                prompt: "Enter a tag name",
+            }
+        );
+        if (w_inputResult && w_inputResult.trim()) {
+            w_inputResult = w_inputResult.trim();
+            this.find_text = w_inputResult;
+            this.c.treeWantsFocus();
+            return this.do_clone_find_tag(w_inputResult);
+        }
     }
-    // def interactive_clone_find_tag(self, event: Event=None) -> None:  # pragma: no cover (interactive)
-    //     """
-    //     clone-find-tag (aka find-clone-tag and cft).
 
-    //     Create an organizer node whose descendants contain clones of all
-    //     nodes matching the given tag, except @nosearch trees.
-
-    //     The list is *always* flattened: every cloned node appears as a
-    //     direct child of the organizer node, even if the clone also is a
-    //     descendant of another cloned node.
-    //     """
-    //     w = self.c.frame.body.wrapper
-    //     if w:
-    //         self.start_state_machine(event,
-    //             prefix='Clone Find Tag: ',
-    //             handler=self.interactive_clone_find_tag1)
-
-    // def interactive_clone_find_tag1(self, event: Event) -> None:  # pragma: no cover (interactive)
-    //     c, k = self.c, self.k
-    //     # Settings...
-    //     self.find_text = tag = k.arg
-    //     # Gui...
-    //     k.clearState()
-    //     k.resetLabel()
-    //     k.showStateAndMode()
-    //     self.do_clone_find_tag(tag)
-    //     c.treeWantsFocus()
     //@+node:felix.20221016013001.18: *5* find.do_clone_find_tag & helper
     /**
      * Do the clone-all-find commands from settings.

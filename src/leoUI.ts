@@ -4411,48 +4411,6 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Goto Global Line
-     */
-    public gotoGlobalLine(): Thenable<unknown> {
-
-        return this.triggerBodySave(true)
-            .then(() => {
-                return vscode.window.showInputBox({
-                    title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
-                    placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_GOTO_GLOBAL_LINE,
-                    prompt: Constants.USER_MESSAGES.PROMPT_GOTO_GLOBAL_LINE,
-                });
-            })
-            .then(async (p_inputResult?: string) => {
-                if (p_inputResult) {
-                    const w_line = parseInt(p_inputResult);
-                    if (!isNaN(w_line)) {
-
-                        const c = g.app.windowList[this.frameIndex].c;
-                        const gc = c.gotoCommands;
-                        let junk_p;
-                        let junk_offset;
-
-                        [junk_p, junk_offset] = await gc.find_file_line(w_line);
-
-                        this.setupRefresh(
-                            Focus.Body,
-                            {
-                                tree: true,
-                                body: true,
-                                // documents: false,
-                                // buttons: false,
-                                states: true,
-                            }
-                        );
-                        return this.launchRefresh();
-
-                    }
-                }
-            });
-    }
-
-    /**
      * * Tag Children
      */
     public tagChildren(): Thenable<unknown> {
@@ -4582,48 +4540,6 @@ export class LeoUI extends NullGui {
             void vscode.window.showInformationMessage("No tags on node: " + w_p.h);
         }
         return Promise.resolve();
-    }
-
-    /**
-     * * Clone Find Tag
-     */
-    public cloneFindTag(): Thenable<unknown> {
-        return this.triggerBodySave(true)
-            .then(() => {
-                const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
-                return vscode.window.showInputBox({
-                    value: w_startValue,
-                    title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
-                    placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_CLONE_FIND_TAG,
-                    prompt: Constants.USER_MESSAGES.PROMPT_CLONE_FIND_TAG,
-                });
-            })
-            .then((p_inputResult?: string) => {
-                if (p_inputResult && p_inputResult.trim()) {
-
-                    p_inputResult = p_inputResult.trim();
-                    const c = g.app.windowList[this.frameIndex].c;
-                    const fc = c.findCommands;
-                    // Settings...
-                    fc.find_text = p_inputResult;
-                    let n;
-                    let p;
-                    [n, p] = fc.do_clone_find_tag(p_inputResult);
-
-                    this.setupRefresh(
-                        Focus.NoChange,
-                        {
-                            tree: true,
-                            body: true,
-                            // documents: false,
-                            // buttons: false,
-                            states: true,
-                        }
-                    );
-                    return this.launchRefresh();
-                }
-            });
-
     }
 
     /**
@@ -5296,7 +5212,10 @@ export class LeoUI extends NullGui {
     /**
      * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt
      */
-    public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.CancellationToken | undefined): Thenable<string | undefined> {
+    public get1Arg(
+        p_options?: vscode.InputBoxOptions | undefined,
+        p_token?: vscode.CancellationToken | undefined
+    ): Thenable<string | undefined> {
         return vscode.window.showInputBox(p_options, p_token);
     }
 

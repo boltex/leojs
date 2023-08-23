@@ -418,8 +418,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         // Otherwise, ask user
         let w_n = await g.app.gui.get1Arg({
             title: 'Goto global line',
-            prompt: 'Goto global line',
-            placeHolder: 'Line Number',
+            prompt: 'Line Number',
+            placeHolder: '#',
         });
         if (w_n && /^\d+$/.test(w_n)) {
             // Very important: n is one-based.
@@ -431,8 +431,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public async gotoLine(): Promise<unknown> {
         let w_n = await g.app.gui.get1Arg({
             title: 'Goto line',
-            prompt: 'Goto line',
-            placeHolder: 'Line Number',
+            prompt: 'Line number',
+            placeHolder: '#',
         });
 
         let ok = false;

@@ -212,11 +212,9 @@
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
 <v t="felix.20220505215924.14"><vh>saveSearchSettings</vh></v>
-<v t="felix.20220505215924.15"><vh>gotoGlobalLine</vh></v>
 <v t="felix.20220505215924.16"><vh>tagChildren</vh></v>
 <v t="felix.20220505215924.17"><vh>tag_node</vh></v>
 <v t="felix.20220505215924.18"><vh>remove_tag</vh></v>
-<v t="felix.20220505215924.20"><vh>cloneFindTag</vh></v>
 </v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
 <v t="felix.20220930215434.1"><vh>setDocumentSelection</vh></v>
@@ -1628,7 +1626,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 [CMD.UNMARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
 [CMD.UNMARK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
 [CMD.UNMARK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
-[CMD.UNMARK_ALL, () =&gt; p_leoUI.command(LEOCMD.UNMARK_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.UNMARK_ALL, () =&gt; p_leoUI.command(LEOCMD.UNMARK_ALL, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
 </t>
 <t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; p_leoUI.command(LEOCMD.EXTRACT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
@@ -1675,12 +1673,12 @@ export async function activate(p_context: vscode.ExtensionContext) {
 [CMD.MOVE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.MOVE_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 </t>
-<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_TAG, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_TAG, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
-[CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
-[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-[CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
+[CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 [CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 [CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
@@ -1800,8 +1798,8 @@ export async function activate(p_context: vscode.ExtensionContext) {
 [CMD.HOIST_SELECTION, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
 [CMD.HOIST_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
-[CMD.CHAPTER_NEXT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_NEXT, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
-[CMD.CHAPTER_BACK, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_BACK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+[CMD.CHAPTER_NEXT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_NEXT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.CHAPTER_BACK, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_BACK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 [CMD.CHAPTER_MAIN, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_MAIN, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
@@ -2046,7 +2044,7 @@ public static LEO_COMMANDS = {
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
     REVERT: 'revert',
     // * More Commands
-    // GOTO_GLOBAL_LINE: "!goto_global_line",
+    GOTO_GLOBAL_LINE: "!goto_global_line", // USE LEOJS INSTEAD OF UI
     SET_UA: 'set-ua',
 
     // * Import Export
@@ -2326,9 +2324,10 @@ public static USER_MESSAGES = {
     PROMPT_INSERT_NODE: "Insert Node",
     PROMPT_INSERT_CHILD: "Insert Child",
     DEFAULT_HEADLINE: "New Headline",
-    TITLE_GOTO_GLOBAL_LINE: "Goto global line",
-    PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
-    PROMPT_GOTO_GLOBAL_LINE: "Line number",
+
+    TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
+    PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED
+    PROMPT_GOTO_GLOBAL_LINE: "Line number", // TODO : REMOVE IF NOT USED
 
     REPLACE_TITLE: "Replace with",
     REPLACE_PROMPT: "Type text to replace with and press enter.",
@@ -2355,9 +2354,10 @@ public static USER_MESSAGES = {
     TITLE_TAG_NODE: "Tag Node",
     PLACEHOLDER_TAG: "&lt;tag&gt;",
     PROMPT_TAG: "Enter a tag name",
-    TITLE_FIND_TAG: "Find Tag",
-    PLACEHOLDER_CLONE_FIND_TAG: "&lt;tag&gt;",
-    PROMPT_CLONE_FIND_TAG: "Enter a tag name",
+
+    TITLE_FIND_TAG: "Find Tag", // TODO remove if used directly in leoFind.ts
+    PLACEHOLDER_CLONE_FIND_TAG: "&lt;tag&gt;", // TODO remove if used directly in leoFind.ts
+    PROMPT_CLONE_FIND_TAG: "Enter a tag name",// TODO remove if used directly in leoFind.ts
 
     CLOSE_ERROR: "Cannot close: No files opened.",
     YES: "Yes",
@@ -4282,7 +4282,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "961f806",
+  "gitBranch": "sqliteDbSupport",
+  "gitDate": "2023-08-22 00:59:59 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -9880,49 +9883,6 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
 }
 
 </t>
-<t tx="felix.20220505215924.15">/**
- * * Goto Global Line
- */
-public gotoGlobalLine(): Thenable&lt;unknown&gt; {
-
-    return this.triggerBodySave(true)
-        .then(() =&gt; {
-            return vscode.window.showInputBox({
-                title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
-                placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_GOTO_GLOBAL_LINE,
-                prompt: Constants.USER_MESSAGES.PROMPT_GOTO_GLOBAL_LINE,
-            });
-        })
-        .then(async (p_inputResult?: string) =&gt; {
-            if (p_inputResult) {
-                const w_line = parseInt(p_inputResult);
-                if (!isNaN(w_line)) {
-
-                    const c = g.app.windowList[this.frameIndex].c;
-                    const gc = c.gotoCommands;
-                    let junk_p;
-                    let junk_offset;
-
-                    [junk_p, junk_offset] = await gc.find_file_line(w_line);
-
-                    this.setupRefresh(
-                        Focus.Body,
-                        {
-                            tree: true,
-                            body: true,
-                            // documents: false,
-                            // buttons: false,
-                            states: true,
-                        }
-                    );
-                    return this.launchRefresh();
-
-                }
-            }
-        });
-}
-
-</t>
 <t tx="felix.20220505215924.16">/**
  * * Tag Children
  */
@@ -10075,49 +10035,6 @@ public async navEnter(): Promise&lt;unknown&gt; {
 
     this._leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
-
-}
-
-</t>
-<t tx="felix.20220505215924.20">/**
- * * Clone Find Tag
- */
-public cloneFindTag(): Thenable&lt;unknown&gt; {
-    return this.triggerBodySave(true)
-        .then(() =&gt; {
-            const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
-            return vscode.window.showInputBox({
-                value: w_startValue,
-                title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
-                placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_CLONE_FIND_TAG,
-                prompt: Constants.USER_MESSAGES.PROMPT_CLONE_FIND_TAG,
-            });
-        })
-        .then((p_inputResult?: string) =&gt; {
-            if (p_inputResult &amp;&amp; p_inputResult.trim()) {
-
-                p_inputResult = p_inputResult.trim();
-                const c = g.app.windowList[this.frameIndex].c;
-                const fc = c.findCommands;
-                // Settings...
-                fc.find_text = p_inputResult;
-                let n;
-                let p;
-                [n, p] = fc.do_clone_find_tag(p_inputResult);
-
-                this.setupRefresh(
-                    Focus.NoChange,
-                    {
-                        tree: true,
-                        body: true,
-                        // documents: false,
-                        // buttons: false,
-                        states: true,
-                    }
-                );
-                return this.launchRefresh();
-            }
-        });
 
 }
 
@@ -14002,8 +13919,8 @@ private _refreshGotoPane(): void {
   "title": "Write File From Node..."
 },
 </t>
-<t tx="felix.20221114220040.1">[CMD.IMPORT_ANY_FILE, () =&gt; p_leoUI.command(LEOCMD.IMPORT_ANY_FILE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-[CMD.READ_FILE_INTO_NODE, () =&gt; p_leoUI.command(LEOCMD.READ_FILE_INTO_NODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+<t tx="felix.20221114220040.1">[CMD.IMPORT_ANY_FILE, () =&gt; p_leoUI.command(LEOCMD.IMPORT_ANY_FILE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
+[CMD.READ_FILE_INTO_NODE, () =&gt; p_leoUI.command(LEOCMD.READ_FILE_INTO_NODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 [CMD.EXPORT_HEADLINES, () =&gt; p_leoUI.command(LEOCMD.EXPORT_HEADLINES, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.FLATTEN_OUTLINE, () =&gt; p_leoUI.command(LEOCMD.FLATTEN_OUTLINE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
@@ -14162,7 +14079,10 @@ private _refreshGotoPane(): void {
 <t tx="felix.20221115230034.1">/**
  * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt
  */
-public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.CancellationToken | undefined): Thenable&lt;string | undefined&gt; {
+public get1Arg(
+    p_options?: vscode.InputBoxOptions | undefined,
+    p_token?: vscode.CancellationToken | undefined
+): Thenable&lt;string | undefined&gt; {
     return vscode.window.showInputBox(p_options, p_token);
 }
 
@@ -14562,12 +14482,12 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.REPLACE_THEN_FIND, () =&gt; p_leoUI.replace(false, true)],
 [CMD.REPLACE_THEN_FIND_FO, () =&gt; p_leoUI.replace(true, true)],
 
-[CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
+[CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.command(LEOCMD.GOTO_GLOBAL_LINE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
-[CMD.TAG_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.TAG_CHILDREN, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TAG_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.TAG_CHILDREN, { refreshType: REFRESH_TREE, finalFocus: Focus.NoChange })],
 
-[CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.TAG_NODE, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
-[CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_TAG, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
+[CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.TAG_NODE, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
+[CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_TAG, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
 [CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_ALL_TAGS, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
 
 </t>

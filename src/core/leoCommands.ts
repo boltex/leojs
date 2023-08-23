@@ -173,7 +173,7 @@ export class Commands {
     // Flags for c.outerUpdate...
     public enableRedrawFlag = true;
     public requestCloseWindow = false;
-    public requestedFocusWidget: any;
+    public requestedFocusWidget: any; // TODO : Fix by typing properly when using only widget or wrapper!
     public requestLaterRedraw = false;
 
     //@+node:felix.20210223220814.6: *4* c.initFileIvars

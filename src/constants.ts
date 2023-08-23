@@ -150,9 +150,10 @@ export class Constants {
         PROMPT_INSERT_NODE: "Insert Node",
         PROMPT_INSERT_CHILD: "Insert Child",
         DEFAULT_HEADLINE: "New Headline",
-        TITLE_GOTO_GLOBAL_LINE: "Goto global line",
-        PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
-        PROMPT_GOTO_GLOBAL_LINE: "Line number",
+
+        TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
+        PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED
+        PROMPT_GOTO_GLOBAL_LINE: "Line number", // TODO : REMOVE IF NOT USED
 
         REPLACE_TITLE: "Replace with",
         REPLACE_PROMPT: "Type text to replace with and press enter.",
@@ -179,9 +180,10 @@ export class Constants {
         TITLE_TAG_NODE: "Tag Node",
         PLACEHOLDER_TAG: "<tag>",
         PROMPT_TAG: "Enter a tag name",
-        TITLE_FIND_TAG: "Find Tag",
-        PLACEHOLDER_CLONE_FIND_TAG: "<tag>",
-        PROMPT_CLONE_FIND_TAG: "Enter a tag name",
+
+        TITLE_FIND_TAG: "Find Tag", // TODO remove if used directly in leoFind.ts
+        PLACEHOLDER_CLONE_FIND_TAG: "<tag>", // TODO remove if used directly in leoFind.ts
+        PROMPT_CLONE_FIND_TAG: "Enter a tag name",// TODO remove if used directly in leoFind.ts
 
         CLOSE_ERROR: "Cannot close: No files opened.",
         YES: "Yes",
@@ -681,7 +683,7 @@ export class Constants {
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
         REVERT: 'revert',
         // * More Commands
-        // GOTO_GLOBAL_LINE: "!goto_global_line",
+        GOTO_GLOBAL_LINE: "!goto_global_line", // USE LEOJS INSTEAD OF UI
         SET_UA: 'set-ua',
 
         // * Import Export
