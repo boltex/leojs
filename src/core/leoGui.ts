@@ -364,8 +364,9 @@ export class LeoGui {
     }
     //@+node:felix.20221120212654.1: *4* LeoGui.get1Arg (LeoJs)
     public get1Arg(
-        p_options?: any,
-        p_token?: any
+        options?: any,
+        token?: any,
+        tabList?: string[]
     ): Thenable<string | undefined> {
         return Promise.resolve('');
     }
@@ -568,11 +569,11 @@ export class NullGui extends LeoGui {
         this.idleTimeClass = g.NullObject;
     }
 
-    public makeAllBindings(): void {}
-    public finishStartup(): void {}
+    public makeAllBindings(): void { }
+    public finishStartup(): void { }
 
-    public launchRefresh(): void {}
-    public fullRefresh(p_keepFocus?: boolean): void {}
+    public launchRefresh(): void { }
+    public fullRefresh(p_keepFocus?: boolean): void { }
 
     public replaceClipboardWith(s: string): Thenable<void> {
         this.clipboardContents = s; // also set immediate clipboard string
@@ -708,7 +709,7 @@ export class NullGui extends LeoGui {
         // pass
     }
 
-    public setIdSetting(p_id: string): void {}
+    public setIdSetting(p_id: string): void { }
 
     public getIdFromSetting(): string {
         return '';
@@ -718,7 +719,7 @@ export class NullGui extends LeoGui {
         return Promise.resolve('');
     }
 
-    public ensure_commander_visible(c: Commands): void {}
+    public ensure_commander_visible(c: Commands): void { }
 
     public isTextWidget(w: any): boolean {
         return w instanceof StringTextWrapper;

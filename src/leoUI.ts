@@ -5210,13 +5210,28 @@ export class LeoUI extends NullGui {
         this.set_focus(c, c.frame.tree.treeWidget);
     }
     /**
-     * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt
+     * * VSCode Wrapper for showInputBox, or, for showQuickPick if tabList is given.
      */
     public get1Arg(
-        p_options?: vscode.InputBoxOptions | undefined,
-        p_token?: vscode.CancellationToken | undefined
+        options?: vscode.InputBoxOptions | vscode.QuickPickOptions,
+        token?: vscode.CancellationToken,
+        tabList?: string[]
     ): Thenable<string | undefined> {
-        return vscode.window.showInputBox(p_options, p_token);
+        if (tabList) {
+            const itemList: vscode.QuickPickItem[] = tabList.map(
+                (entry) => { return { label: entry }; }
+            );
+            return vscode.window.showQuickPick(itemList, options).then(
+                (p_picked) => {
+                    if (p_picked && p_picked.label) {
+                        return p_picked.label;
+                    }
+                    return undefined;
+                }
+            );
+        } else {
+            return vscode.window.showInputBox(options, token);
+        }
     }
 
     public runAboutLeoDialog(

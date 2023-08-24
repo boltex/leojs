@@ -3748,8 +3748,5 @@
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "961f806",
-  "gitBranch": "sqliteDbSupport",
-  "gitDate": "2023-08-22 00:59:59 -0400"
+  }
 }

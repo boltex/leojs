@@ -4282,10 +4282,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "961f806",
-  "gitBranch": "sqliteDbSupport",
-  "gitDate": "2023-08-22 00:59:59 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -14077,13 +14074,28 @@ private _refreshGotoPane(): void {
 },
 </t>
 <t tx="felix.20221115230034.1">/**
- * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt
+ * * VSCode Wrapper for showInputBox, or, for showQuickPick if tabList is given.
  */
 public get1Arg(
-    p_options?: vscode.InputBoxOptions | undefined,
-    p_token?: vscode.CancellationToken | undefined
+    options?: vscode.InputBoxOptions | vscode.QuickPickOptions,
+    token?: vscode.CancellationToken,
+    tabList?: string[]
 ): Thenable&lt;string | undefined&gt; {
-    return vscode.window.showInputBox(p_options, p_token);
+    if (tabList) {
+        const itemList: vscode.QuickPickItem[] = tabList.map(
+            (entry) =&gt; { return { label: entry }; }
+        );
+        return vscode.window.showQuickPick(itemList, options).then(
+            (p_picked) =&gt; {
+                if (p_picked &amp;&amp; p_picked.label) {
+                    return p_picked.label;
+                }
+                return undefined;
+            }
+        );
+    } else {
+        return vscode.window.showInputBox(options, token);
+    }
 }
 
 </t>

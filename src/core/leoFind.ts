@@ -1932,7 +1932,7 @@ export class LeoFind {
         'search string.'
     )
     public interactive_find_all(): Thenable<unknown> {
-        return g.app.gui.findAll(); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.findAll(false); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2364,7 +2364,8 @@ export class LeoFind {
         'The default binding of Ctrl-F. Also contains default state-machine entries for find/change commands.'
     )
     public start_search(): void {
-        g.app.gui.startSearch(); // All done in GUI.
+        // GUI action that opens the find panel & focuses the 'find' text box.
+        g.app.gui.startSearch();
     }
     // def start_search(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """
