@@ -175,8 +175,6 @@
 <v t="felix.20201214202759.1"><vh>editHeadline</vh></v>
 <v t="felix.20201214202800.1"><vh>insertNode</vh></v>
 <v t="felix.20211204181418.1"><vh>_insertAndSetHeadline</vh></v>
-<v t="felix.20221108224707.1"><vh>chapterMain</vh></v>
-<v t="felix.20221108224716.1"><vh>chapterSelect</vh></v>
 </v>
 <v t="felix.20211024012536.1"><vh>Clipboard</vh>
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
@@ -13240,59 +13238,6 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
     "dark": "resources/dark/chapter-select.svg"
   }
 },
-</t>
-<t tx="felix.20221108224707.1">/**
- * * Selects chapter 'main'
- */
-public async chapterMain(): Promise&lt;unknown&gt; {
-
-    await this.triggerBodySave(true);
-
-    this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
-    const c = g.app.windowList[this.frameIndex].c;
-    const cc = c.chapterController;
-    cc.selectChapterByName('main');
-
-    void this.launchRefresh();
-
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20221108224716.1">/**
- * * Opens chapter list for the user to choose a new chapter, or cancel.
- */
-public async chapterSelect(): Promise&lt;unknown&gt; {
-
-    void this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-
-    const c = g.app.windowList[this.frameIndex].c;
-    const cc = c.chapterController;
-
-    const w_chaptersList: vscode.QuickPickItem[] = cc.setAllChapterNames().map(
-        (p_chapter) =&gt; { return { label: p_chapter }; }
-    );
-    // {
-    //     label: p_chapter
-    // }
-
-    // Add Nav tab special commands
-    const w_options: vscode.QuickPickOptions = {
-        placeHolder: Constants.USER_MESSAGES.SELECT_CHAPTER_PROMPT
-    };
-
-    const p_picked = await vscode.window.showQuickPick(w_chaptersList, w_options);
-
-    if (p_picked &amp;&amp; p_picked.label) {
-        this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
-
-        cc.selectChapterByName(p_picked.label);
-        void this.launchRefresh();
-    }
-
-    return Promise.resolve(); // Canceled
-}
-
 </t>
 <t tx="felix.20221112230919.1">"editor/title": [
   {

@@ -162,29 +162,22 @@ export class ChapterController {
         'chapter-select',
         'Prompt for a chapter name and select the given chapter.'
     )
-    public selectChapter(): void {
-        return g.app.gui.chapterSelect(); // TODO : Only have gui for dialog, move implementation here.
-        // const cc = this;
-        // const k = this.c.k;
-        // const names = cc.setAllChapterNames();
-        // g.es('Chapters:\n' + names.join('\n'));
-        // k.setLabelBlue('Select chapter: ');
-        // k.get1Arg(this.selectChapter1, names);
+    public selectChapter(): Thenable<void> {
+        const cc = this;
+        const names = cc.setAllChapterNames();
+        const options = { placeHolder: "Select chapter" };
+        return g.app.gui.get1Arg(options, undefined, names).then(
+            (arg) => {
+                if (arg) {
+                    cc.selectChapterByName(arg);
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(); // Reject to prevent refresh.
+                }
+            }
+        );
     }
 
-    public selectChapter1(): void {
-        const cc = this;
-        const k = this.c.k;
-        if (k.clearState) {
-            k.clearState();
-        }
-        if (k.resetLabel) {
-            k.resetLabel();
-        }
-        if (k.arg) {
-            cc.selectChapterByName(k.arg);
-        }
-    }
     //@+node:felix.20220429005433.10: *3* cc.selectNext/Back
     @cmd('chapter-back', 'Select the previous chapter.')
     public backChapter(): void {

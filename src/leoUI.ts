@@ -3190,57 +3190,6 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Selects chapter 'main'
-     */
-    public async chapterMain(): Promise<unknown> {
-
-        await this.triggerBodySave(true);
-
-        this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
-        const c = g.app.windowList[this.frameIndex].c;
-        const cc = c.chapterController;
-        cc.selectChapterByName('main');
-
-        void this.launchRefresh();
-
-        return Promise.resolve();
-    }
-
-    /**
-     * * Opens chapter list for the user to choose a new chapter, or cancel.
-     */
-    public async chapterSelect(): Promise<unknown> {
-
-        void this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-
-        const c = g.app.windowList[this.frameIndex].c;
-        const cc = c.chapterController;
-
-        const w_chaptersList: vscode.QuickPickItem[] = cc.setAllChapterNames().map(
-            (p_chapter) => { return { label: p_chapter }; }
-        );
-        // {
-        //     label: p_chapter
-        // }
-
-        // Add Nav tab special commands
-        const w_options: vscode.QuickPickOptions = {
-            placeHolder: Constants.USER_MESSAGES.SELECT_CHAPTER_PROMPT
-        };
-
-        const p_picked = await vscode.window.showQuickPick(w_chaptersList, w_options);
-
-        if (p_picked && p_picked.label) {
-            this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
-
-            cc.selectChapterByName(p_picked.label);
-            void this.launchRefresh();
-        }
-
-        return Promise.resolve(); // Canceled
-    }
-
-    /**
      * Replaces the system's clipboard with the given string
      * @param p_string actual string content to go onto the clipboard
      * @returns a promise that resolves when the string is put on the clipboard
