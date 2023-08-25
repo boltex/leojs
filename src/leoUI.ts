@@ -4034,7 +4034,8 @@ export class LeoUI extends NullGui {
                     const c = g.app.windowList[this.frameIndex].c;
                     const fc = c.findCommands;
 
-                    fc.ftm.get_settings();
+                    fc.ftm.get_settings(); // TODO REMOVE?? 
+
                     const w_changeSettings: ISettings = {
                         // this._lastSettingsUsed
                         // State...

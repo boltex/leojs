@@ -426,6 +426,10 @@ export class LeoGui {
         return '';
     }
     //@+node:felix.20221120001229.16: *5* LeoGui.Dialog utils
+    public loadSearchSettings(): void {
+        this.oops();
+    }
+
     /**
      * Attach the Leo icon to a window.
      */

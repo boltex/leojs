@@ -9548,7 +9548,8 @@ public findAll(p_replace?: boolean): Thenable&lt;unknown&gt; {
                 const c = g.app.windowList[this.frameIndex].c;
                 const fc = c.findCommands;
 
-                fc.ftm.get_settings();
+                fc.ftm.get_settings(); // TODO REMOVE?? 
+
                 const w_changeSettings: ISettings = {
                     // this._lastSettingsUsed
                     // State...
@@ -14423,8 +14424,8 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.WORD_SEARCH, () =&gt; p_leoUI.command(LEOCMD.WORD_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.command(LEOCMD.WORD_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-[CMD.FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-[CMD.REPLACE_ALL, () =&gt; p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.FIND_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
+[CMD.REPLACE_ALL, () =&gt; p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 [CMD.FIND_NEXT, () =&gt; p_leoUI.find(false, false)],
 [CMD.FIND_NEXT_FO, () =&gt; p_leoUI.find(true, false)],

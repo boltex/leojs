@@ -256,8 +256,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.WORD_SEARCH, () => p_leoUI.command(LEOCMD.WORD_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
         [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.command(LEOCMD.WORD_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-        [CMD.FIND_ALL, () => p_leoUI.command(LEOCMD.FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-        [CMD.REPLACE_ALL, () => p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.FIND_ALL, () => p_leoUI.command(LEOCMD.FIND_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
+        [CMD.REPLACE_ALL, () => p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
         [CMD.FIND_NEXT, () => p_leoUI.find(false, false)],
         [CMD.FIND_NEXT_FO, () => p_leoUI.find(true, false)],

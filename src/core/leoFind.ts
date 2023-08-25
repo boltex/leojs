@@ -1340,7 +1340,55 @@ export class LeoFind {
         'Replace all instances of the search string with the replacement string.'
     )
     public interactive_change_all(): Thenable<unknown> {
-        return g.app.gui.findAll(true); // TODO : Only have gui for dialog, move implementation here.
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+        let w_replaceString: string = this.ftm.find_replacebox.text(); // this._lastSettingsUsed!.replaceText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return true; // Cancelled with escape or empty string.
+                }
+                w_searchString = p_findString;
+                return g.app.gui.get1Arg({
+                    title: "Replace with",
+                    prompt: "Type text to replace with and press enter.",
+                    placeHolder: "Replace pattern here",
+                    value: w_replaceString
+                }).then((p_replaceString) => {
+                    if (p_replaceString === undefined) {
+                        return true;
+                    }
+                    w_replaceString = p_replaceString;
+                    return false;
+                });
+            })
+            .then((p_cancelled: boolean) => {
+                if (!p_cancelled) {
+
+                    this.ftm.set_find_text(w_searchString);
+                    this.ftm.set_change_text(w_replaceString);
+
+                    const w_changeSettings = this.ftm.get_settings();
+
+                    const w_result = this.do_change_all(w_changeSettings);
+
+                    this.c.widgetWantsFocusNow(this.c.frame.body.wrapper);
+
+                    g.app.gui.loadSearchSettings();
+
+                    return;
+
+                }
+            });
+
+
+
+
     }
     // def interactive_change_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """Replace all instances of the search string with the replacement string."""
