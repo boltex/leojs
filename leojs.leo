@@ -3504,6 +3504,7 @@ export class LeoUI extends NullGui {
 
     // * Interactive Find Input
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
+    // TODO : UNUSED !
     private _interactiveSearchIsReplace: boolean = false; // Starts false for 'search'. True is replace
     private _interactiveSearchOptions: {
         search: string,

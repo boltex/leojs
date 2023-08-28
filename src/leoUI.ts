@@ -122,7 +122,6 @@ export class LeoUI extends NullGui {
     private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
     private _findNeedsFocus: boolean = false;
-    private _navNeedsFocus: boolean = false;
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
@@ -130,7 +129,6 @@ export class LeoUI extends NullGui {
 
     // * Interactive Find Input
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
-    private _interactiveSearchIsReplace: boolean = false; // Starts false for 'search'. True is replace
     private _interactiveSearchOptions: {
         search: string,
         replace: string,
@@ -3581,6 +3579,7 @@ export class LeoUI extends NullGui {
      */
     public checkForceFindFocus(p_fromInit: boolean): void {
         if (this._findNeedsFocus) {
+            this._findNeedsFocus = false; // Set false before timeout.
             setTimeout(() => {
                 let w_panel: vscode.WebviewView | undefined;
                 if (this._findPanelWebviewView && this._findPanelWebviewView.visible) {
@@ -3589,7 +3588,7 @@ export class LeoUI extends NullGui {
                     w_panel = this._findPanelWebviewExplorerView;
                 }
                 if (w_panel) {
-                    this._findNeedsFocus = false;
+                    this._findNeedsFocus = false; // Set false ALSO AFTER !
                     void w_panel.webview.postMessage({ type: 'selectFind' });
                 }
             }, 60);
@@ -3886,8 +3885,6 @@ export class LeoUI extends NullGui {
                 input.prompt = w_searchPrompt;
                 input.placeholder = w_searchPlaceholder;
 
-                // * RESET interactive search !
-                this._interactiveSearchIsReplace = false;
                 this._interactiveSearchOptions = {
                     search: "",
                     replace: "",
@@ -3904,13 +3901,7 @@ export class LeoUI extends NullGui {
                             return resolve(true); // Cancelled with escape or empty string.
                         }
                         const value = input.value; // maybe this was replace.
-                        if (!this._interactiveSearchIsReplace) {
-                            // accept on search
-                            this._interactiveSearchOptions.search = value;
-                        } else {
-                            // accept on replace
-                            this._interactiveSearchOptions.replace = value;
-                        }
+                        this._interactiveSearchOptions.search = value;
 
                         const find_pattern = this._interactiveSearchOptions.search;
                         const change_pattern = this._interactiveSearchOptions.replace;
@@ -3918,10 +3909,6 @@ export class LeoUI extends NullGui {
                         ftm.set_find_text(find_pattern);
                         fc.update_find_list(find_pattern);
 
-                        if (this._interactiveSearchIsReplace) {
-                            ftm.set_change_text(change_pattern);
-                            fc.update_change_list(change_pattern);
-                        }
                         this.loadSearchSettings(); // * Set vscode's find panel from the Leo find settings
                         fc.init_vim_search(find_pattern);
                         fc.init_in_headline();  // Required.
@@ -4459,7 +4446,6 @@ export class LeoUI extends NullGui {
                     return vscode.window.showQuickPick(w_p.u.__node_tags, {
                         title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
                         placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-                        canPickMany: false
                     });
                 })
                 .then((p_inputResult?: string) => {

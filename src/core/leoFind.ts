@@ -1386,9 +1386,6 @@ export class LeoFind {
                 }
             });
 
-
-
-
     }
     // def interactive_change_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """Replace all instances of the search string with the replacement string."""
@@ -1718,8 +1715,33 @@ export class LeoFind {
         'The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
-    public interactive_clone_find_all(): Thenable<unknown> {
-        return g.app.gui.cloneFind(false, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_clone_find_all(): unknown {
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                this.ftm.set_find_text(p_findString);
+                const w_findSettings = this.ftm.get_settings();
+                const count = this.do_clone_find_all(w_findSettings);
+                if (count) {
+                    this.c.treeWantsFocus();
+                }
+
+                g.app.gui.loadSearchSettings();
+
+                return count;
+
+            });
+
     }
 
     // def interactive_clone_find_all(self,
@@ -1806,7 +1828,34 @@ export class LeoFind {
         'another cloned node.'
     )
     public interactive_cff(): Thenable<unknown> {
-        return g.app.gui.cloneFind(false, true); // TODO : Only have gui for dialog, move implementation here.
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                this.ftm.set_find_text(p_findString);
+                const w_findSettings = this.ftm.get_settings();
+                const count = this.do_clone_find_all_flattened(w_findSettings);
+                if (count) {
+                    this.c.treeWantsFocus();
+                }
+
+                g.app.gui.loadSearchSettings();
+
+                return count;
+
+            });
+
+
+
     }
     // def interactive_cff(self, event: Event=None, preloaded: bool=False) -> None:  # pragma: no cover (interactive)
     //     """
@@ -1980,7 +2029,35 @@ export class LeoFind {
         'search string.'
     )
     public interactive_find_all(): Thenable<unknown> {
-        return g.app.gui.findAll(false); // TODO : Only have gui for dialog, move implementation here.
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+
+                this.ftm.set_find_text(w_searchString);
+
+                const w_changeSettings = this.ftm.get_settings();
+
+                const w_result = this.do_find_all(w_changeSettings);
+
+                this.c.widgetWantsFocusNow(this.c.frame.body.wrapper);
+
+                g.app.gui.loadSearchSettings();
+
+                return;
+            });
+
+
+
     }
     // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2345,7 +2422,7 @@ export class LeoFind {
     @cmd('re-search', 'Same as start-find, with regex.')
     @cmd('re-search-forward', 'Same as start-find, with regex.')
     public interactive_re_search_forward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(false, true, false); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(false, true, false); // TODO : Move implementation here if possible.
     }
     // def interactive_re_search_forward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, with regex."""
@@ -2366,7 +2443,7 @@ export class LeoFind {
         'Same as start-find, but with regex and in reverse.'
     )
     public interactive_re_search_backward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(true, true, false); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(true, true, false); // TODO : Move implementation here if possible.
     }
     // def interactive_re_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but with regex and in reverse."""
@@ -2387,7 +2464,7 @@ export class LeoFind {
     //@+node:felix.20221016013001.28: *4* find.search_backward
     @cmd('search-backward', 'Same as start-find, but in reverse.')
     public interactive_search_backward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(true, false, false); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(true, false, false); // TODO : Move implementation here if possible.
     }
     // def interactive_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but in reverse."""
@@ -2505,14 +2582,66 @@ export class LeoFind {
     //     self.do_find_next(settings)
     //@+node:felix.20230120221726.1: *4* find.tag-node
     @cmd('tag-node', 'Prompt for a tag for this node')
-    public interactive_tag_node(): void {
-        g.app.gui.tagNode(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_tag_node(): Thenable<unknown> {
+
+        return g.app.gui.get1Arg({
+            title: "Tag Node",
+            placeHolder: "<tag>",
+            prompt: "Enter a tag name",
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                p_findString = p_findString.trim();
+                // check for special chars first
+                if (p_findString.split(/(&|\||-|\^)/).length > 1) {
+                    void g.setStatusLabel('Cannot add tags containing any of these characters: &|^-');
+                    return;
+                }
+
+                const c = this.c;
+                const tc = c.theTagController;
+                tc.add_tag(c.p, p_findString);
+            });
+
     }
     //@+node:felix.20230308231502.1: *4* find.remove-tag
     @cmd('remove-tag', 'Prompt for a tag to remove on selected node')
-    public remove_tag(): void {
-        g.app.gui.removeTag(); // TODO : Only have gui for dialog, move implementation here.
+    public remove_tag(): Thenable<unknown> {
+        const c = this.c;
+        const w_p = c.p;
+
+        if (w_p && w_p.u && w_p.u.__node_tags && w_p.u.__node_tags.length) {
+
+            return g.app.gui.get1Arg(
+                {
+                    title: "Remove Tag",
+                    placeHolder: "<tag>",
+                    prompt: "Enter a tag name",
+                },
+                undefined,
+                w_p.u.__node_tags
+            )
+                .then((p_findString) => {
+                    if (!p_findString) {
+                        return; // Cancelled with escape or empty string.
+                    }
+                    p_findString = p_findString.trim();
+
+                    const v = w_p.v;
+                    const tc = c.theTagController;
+                    if (v.u && v.u['__node_tags']) {
+                        tc.remove_tag(w_p, p_findString);
+                    }
+                });
+
+        }
+
+        return Promise.reject();
+
     }
+
     //@+node:felix.20230308231503.1: *4* find.remove-all-tags
     @cmd('remove-all-tags', 'Remove all tags on selected node')
     public remove_all_tags(): void {
@@ -2586,7 +2715,7 @@ export class LeoFind {
         'Same as start-search, with whole_word setting.'
     )
     public word_search_forward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(false, false, true); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(false, false, true); // TODO : Move implementation here if possible.
     }
     // @cmd('word-search')
     // @cmd('word-search-forward')
@@ -2609,7 +2738,7 @@ export class LeoFind {
         'Same as start-search-backward, with whole_word setting.'
     )
     public word_search_backward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(true, false, true); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(true, false, true); // TODO : Move implementation here if possible.
     }
     // def word_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     # Set flags for show_find_options.
