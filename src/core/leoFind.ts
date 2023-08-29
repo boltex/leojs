@@ -2635,11 +2635,8 @@ export class LeoFind {
                         tc.remove_tag(w_p, p_findString);
                     }
                 });
-
         }
-
-        return Promise.reject();
-
+        return Promise.resolve();
     }
 
     //@+node:felix.20230308231503.1: *4* find.remove-all-tags
@@ -2663,9 +2660,26 @@ export class LeoFind {
     }
     //@+node:felix.20221016013001.33: *4* find.tag-children & helper
     @cmd('tag-children', 'Prompt for a tag and add it to all children of c.p.')
-    public interactive_tag_children(): void {
-        g.app.gui.tagChildren(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_tag_children(): Thenable<unknown> {
+        return g.app.gui.get1Arg({
+            title: "Tag Children",
+            placeHolder: "<tag>",
+            prompt: "Enter a tag name",
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                p_findString = p_findString.trim();
+                // check for special chars first
+                if (p_findString.split(/(&|\||-|\^)/).length > 1) {
+                    void g.setStatusLabel('Cannot add tags containing any of these characters: &|^-');
+                    return;
+                }
+                this.do_tag_children(this.c.p, p_findString);
+            });
     }
+
     //     """tag-children: prompt for a tag and add it to all children of c.p."""
     //     w = self.c.frame.body.wrapper
     //     if not w:

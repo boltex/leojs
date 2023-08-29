@@ -170,9 +170,6 @@ export class ChapterController {
             (arg) => {
                 if (arg) {
                     cc.selectChapterByName(arg);
-                    return Promise.resolve();
-                } else {
-                    return Promise.reject(); // Reject to prevent refresh.
                 }
             }
         );

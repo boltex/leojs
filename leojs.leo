@@ -205,7 +205,6 @@
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
-<v t="felix.20220505215924.10"><vh>findAll &amp; replaceAll</vh></v>
 <v t="felix.20220505215924.11"><vh>cloneFind</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
@@ -3496,7 +3495,6 @@ export class LeoUI extends NullGui {
     private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
     private _findNeedsFocus: boolean = false;
-    private _navNeedsFocus: boolean = false;
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
@@ -3504,8 +3502,6 @@ export class LeoUI extends NullGui {
 
     // * Interactive Find Input
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
-    // TODO : UNUSED !
-    private _interactiveSearchIsReplace: boolean = false; // Starts false for 'search'. True is replace
     private _interactiveSearchOptions: {
         search: string,
         replace: string,
@@ -9506,7 +9502,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 }
 </t>
 <t tx="felix.20220505215924.1"></t>
-<t tx="felix.20220505215924.10">/**
+<t tx="felix.20220505215924.11">/**
  * * Find / Replace All
  * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
  */
@@ -9607,8 +9603,7 @@ public findAll(p_replace?: boolean): Thenable&lt;unknown&gt; {
         });
 }
 
-</t>
-<t tx="felix.20220505215924.11">/**
+/**
  * * Clone Find All / Marked / Flattened
  * @param p_marked flag for finding marked nodes
  * @param p_flat flag to get flattened results
@@ -9981,7 +9976,6 @@ public removeTag(p_p?: Position): Thenable&lt;unknown&gt; {
                 return vscode.window.showQuickPick(w_p.u.__node_tags, {
                     title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
                     placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-                    canPickMany: false
                 });
             })
             .then((p_inputResult?: string) =&gt; {
@@ -12771,6 +12765,7 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
  */
 public checkForceFindFocus(p_fromInit: boolean): void {
     if (this._findNeedsFocus) {
+        this._findNeedsFocus = false; // Set false before timeout.
         setTimeout(() =&gt; {
             let w_panel: vscode.WebviewView | undefined;
             if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
@@ -12779,7 +12774,7 @@ public checkForceFindFocus(p_fromInit: boolean): void {
                 w_panel = this._findPanelWebviewExplorerView;
             }
             if (w_panel) {
-                this._findNeedsFocus = false;
+                this._findNeedsFocus = false; // Set false ALSO AFTER !
                 void w_panel.webview.postMessage({ type: 'selectFind' });
             }
         }, 60);
@@ -14291,8 +14286,6 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
             input.prompt = w_searchPrompt;
             input.placeholder = w_searchPlaceholder;
 
-            // * RESET interactive search !
-            this._interactiveSearchIsReplace = false;
             this._interactiveSearchOptions = {
                 search: "",
                 replace: "",
@@ -14309,13 +14302,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
                         return resolve(true); // Cancelled with escape or empty string.
                     }
                     const value = input.value; // maybe this was replace.
-                    if (!this._interactiveSearchIsReplace) {
-                        // accept on search
-                        this._interactiveSearchOptions.search = value;
-                    } else {
-                        // accept on replace
-                        this._interactiveSearchOptions.replace = value;
-                    }
+                    this._interactiveSearchOptions.search = value;
 
                     const find_pattern = this._interactiveSearchOptions.search;
                     const change_pattern = this._interactiveSearchOptions.replace;
@@ -14323,10 +14310,6 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
                     ftm.set_find_text(find_pattern);
                     fc.update_find_list(find_pattern);
 
-                    if (this._interactiveSearchIsReplace) {
-                        ftm.set_change_text(change_pattern);
-                        fc.update_change_list(change_pattern);
-                    }
                     this.loadSearchSettings(); // * Set vscode's find panel from the Leo find settings
                     fc.init_vim_search(find_pattern);
                     fc.init_in_headline();  // Required.
