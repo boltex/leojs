@@ -181,7 +181,7 @@ class CommanderWrapper {
 
     public deleteProperty(target: CommanderWrapper, prop: string): boolean {
         if (this.user_keys.has(prop)) {
-            this.user_keys.delete(prop)
+            this.user_keys.delete(prop);
         }
         delete this.db[`${this.key}:::${prop}`];
         return true;
@@ -695,7 +695,7 @@ class SqlitePickleShare {
  */
 function dump_cache(db: any, tag: string): void {
 
-    g.es_print(`\n===== ${tag} =====\n`)
+    g.es_print(`\n===== ${tag} =====\n`);
     if (db == null) {
         g.es_print('db is None!');
         return;
@@ -729,7 +729,7 @@ function dump_cache(db: any, tag: string): void {
     const d_none = d.get('None');
     if (d_none && d_none.length) {
         const heading = files ? `All others (${tag})` : '';
-        dump_list(heading, d_none)
+        dump_list(heading, d_none);
     }
 
 }
@@ -739,7 +739,7 @@ function dump_list(heading: string, aList: [string, any][]): void {
         g.es_print(`\n${heading}...\n`);
     }
     for (const aTuple of aList) {
-        let [key, val] = aTuple
+        let [key, val] = aTuple;
         if (typeof val === 'string') {
             if (key.startsWith('windowState')) {
                 g.es_print(key);

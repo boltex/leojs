@@ -205,13 +205,10 @@
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
-<v t="felix.20220505215924.11"><vh>cloneFind</vh></v>
+<v t="felix.20220505215924.11"><vh>Find / Replace All</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
 <v t="felix.20220505215924.14"><vh>saveSearchSettings</vh></v>
-<v t="felix.20220505215924.16"><vh>tagChildren</vh></v>
-<v t="felix.20220505215924.17"><vh>tag_node</vh></v>
-<v t="felix.20220505215924.18"><vh>remove_tag</vh></v>
 </v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
 <v t="felix.20220930215434.1"><vh>setDocumentSelection</vh></v>
@@ -2160,7 +2157,7 @@ public static LEO_COMMANDS = {
 
     CLONE_FIND_FLATTENED_MARKED: "cffm",
     CLONE_FIND_TAG: "cft",
-    CLONE_FIND_ALL: "cfa", // cloneFind used instead
+    CLONE_FIND_ALL: "cfa",
     CLONE_FIND_MARKED: "cfam",
     CLONE_FIND_PARENTS: "clone-find-parents",
 };
@@ -9603,84 +9600,6 @@ public findAll(p_replace?: boolean): Thenable&lt;unknown&gt; {
         });
 }
 
-/**
- * * Clone Find All / Marked / Flattened
- * @param p_marked flag for finding marked nodes
- * @param p_flat flag to get flattened results
- * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
- */
-public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
-
-    let w_searchString: string = this._lastSettingsUsed!.findText;
-
-    if (p_marked) {
-        // When marked, no input from user is required, do the command and exit.
-        const w_action = p_flat
-            ? Constants.LEO_COMMANDS.CLONE_FIND_FLATTENED_MARKED
-            : Constants.LEO_COMMANDS.CLONE_FIND_MARKED;
-        return this.command(w_action, {
-            finalFocus: Focus.NoChange,
-            refreshType: {
-                tree: true,
-                states: true,
-                documents: true,
-            }
-        });
-    }
-
-    const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
-
-    return this.triggerBodySave(true)
-        .then(() =&gt; {
-            return this._inputFindPattern(false, w_startValue)
-                .then((p_findString) =&gt; {
-                    if (!p_findString) {
-                        return true; // Cancelled with escape or empty string.
-                    }
-                    w_searchString = p_findString;
-                    return false;
-                });
-        })
-        .then((p_cancelled: boolean) =&gt; {
-            if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
-                this._lastSettingsUsed.findText = w_searchString;
-                void this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-
-                const c = g.app.windowList[this.frameIndex].c;
-                const fc = c.findCommands;
-
-                const settings = fc.ftm.get_settings();
-
-                if (p_flat) {
-                    fc.do_clone_find_all_flattened(settings);
-                } else {
-                    fc.do_clone_find_all(settings);
-                }
-                const w_focus = this._get_focus();
-                let w_focusOnOutline = false;
-
-                if (w_focus.includes('tree') || w_focus.includes('head')) {
-                    // tree
-                    w_focusOnOutline = true;
-                }
-                this.loadSearchSettings();
-
-                this.setupRefresh(
-                    w_focusOnOutline ? Focus.Outline : Focus.Body,
-                    {
-                        tree: true,
-                        body: true,
-                        // documents: false,
-                        // buttons: false,
-                        states: true
-                    }
-                );
-                void this.launchRefresh();
-
-            }
-        });
-}
-
 </t>
 <t tx="felix.20220505215924.12">/**
  * * Set search setting in the search webview
@@ -9871,140 +9790,6 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
         }
     }
 
-    return Promise.resolve();
-}
-
-</t>
-<t tx="felix.20220505215924.16">/**
- * * Tag Children
- */
-public tagChildren(): Thenable&lt;unknown&gt; {
-
-    return this.triggerBodySave(true)
-        .then(() =&gt; {
-            return vscode.window.showInputBox({
-                title: Constants.USER_MESSAGES.TITLE_TAG_CHILDREN,
-                placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-                prompt: Constants.USER_MESSAGES.PROMPT_TAG,
-            });
-        })
-        .then((p_inputResult?: string) =&gt; {
-
-            if (p_inputResult &amp;&amp; p_inputResult.trim()) {
-                p_inputResult = p_inputResult.trim();
-                // check for special chars first
-                if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
-                    void vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
-                    return;
-                }
-
-                const c = g.app.windowList[this.frameIndex].c;
-                const fc = c.findCommands;
-                fc.do_tag_children(c.p, p_inputResult);
-
-                this.setupRefresh(
-                    Focus.NoChange,
-                    {
-                        tree: true,
-                        // body: false,
-                        // documents: false,
-                        // buttons: false,
-                        states: true,
-                    }
-                );
-                return this.launchRefresh();
-            }
-        });
-}
-
-</t>
-<t tx="felix.20220505215924.17">/**
- * * Tag Node
- */
-public tagNode(p_p?: Position): Thenable&lt;unknown&gt; {
-
-    return this.triggerBodySave(true)
-        .then(() =&gt; {
-            return vscode.window.showInputBox({
-                title: Constants.USER_MESSAGES.TITLE_TAG_NODE,
-                placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-                prompt: Constants.USER_MESSAGES.PROMPT_TAG,
-            });
-        })
-        .then((p_inputResult?: string) =&gt; {
-
-            if (p_inputResult &amp;&amp; p_inputResult.trim()) {
-                p_inputResult = p_inputResult.trim();
-                // check for special chars first
-                if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
-                    void vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
-                    return;
-                }
-
-                const c = g.app.windowList[this.frameIndex].c;
-                const tc = c.theTagController;
-                tc.add_tag(p_p ? p_p : c.p, p_inputResult);
-
-                this.setupRefresh(
-                    Focus.NoChange,
-                    {
-                        tree: true,
-                        // body: false,
-                        // documents: false,
-                        // buttons: false,
-                        states: true,
-                    }
-                );
-                return this.launchRefresh();
-
-            }
-        });
-
-}
-
-</t>
-<t tx="felix.20220505215924.18">/**
- * * Remove single Tag on selected node
- */
-public removeTag(p_p?: Position): Thenable&lt;unknown&gt; {
-
-    const w_p = p_p ? p_p : this.lastSelectedNode;
-
-    if (w_p &amp;&amp; w_p.u &amp;&amp; w_p.u.__node_tags &amp;&amp; w_p.u.__node_tags.length) {
-        return this.triggerBodySave(true)
-            .then(() =&gt; {
-                return vscode.window.showQuickPick(w_p.u.__node_tags, {
-                    title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
-                    placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-                });
-            })
-            .then((p_inputResult?: string) =&gt; {
-                if (p_inputResult &amp;&amp; p_inputResult.trim()) {
-                    p_inputResult = p_inputResult.trim();
-                    const c = g.app.windowList[this.frameIndex].c;
-                    const v = w_p.v;
-                    const tc = c.theTagController;
-
-                    if (v.u &amp;&amp; v.u['__node_tags']) {
-                        tc.remove_tag(w_p, p_inputResult);
-                    }
-
-                    this.setupRefresh(
-                        Focus.NoChange,
-                        {
-                            tree: true,
-                            // body: false,
-                            // documents: false,
-                            // buttons: false,
-                            states: true,
-                        }
-                    );
-                    return this.launchRefresh();
-                }
-            });
-    } else if (w_p) {
-        void vscode.window.showInformationMessage("No tags on node: " + w_p.h);
-    }
     return Promise.resolve();
 }
 

@@ -137,42 +137,6 @@ export class LeoGui {
         this.oops();
     }
     /**
-     * Run Leo's remove tag dialog.
-     */
-    public removeTag(): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's tag dialog.
-     */
-    public tagNode(): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's tag children dialog.
-     */
-    public tagChildren(): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's findAll/replaceAll dialog.
-     */
-    public findAll(p_replace?: boolean): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's clone-find methods.
-     */
-    public cloneFind(p_marked: boolean, p_flat: boolean): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's clone-find-tag method.
-     */
-    public cloneFindTag(): any {
-        this.oops();
-    }
-    /**
      * Run Leo's find method.
      */
     public find(p_fromOutline: boolean, p_reverse: boolean): any {
@@ -215,12 +179,6 @@ export class LeoGui {
         p_interrupt: boolean,
         p_asChild: boolean
     ): any {
-        this.oops();
-    }
-    /**
-     * Asks for chapter name and selects it.
-     */
-    public chapterSelect(): any {
         this.oops();
     }
     /**
@@ -630,24 +588,7 @@ export class NullGui extends LeoGui {
     ): Promise<unknown> {
         return Promise.resolve();
     }
-    public removeTag(): any {
-        return;
-    }
-    public tagNode(): any {
-        return;
-    }
-    public tagChildren(): any {
-        return;
-    }
-    public findAll(p_replace?: boolean): Thenable<unknown> {
-        return Promise.resolve();
-    }
-    public cloneFind(p_marked: boolean, p_flat: boolean): Thenable<unknown> {
-        return Promise.resolve();
-    }
-    public cloneFindtag(): void {
-        // pass
-    }
+
     public runAboutLeoDialog(
         c: Commands,
         version: string,

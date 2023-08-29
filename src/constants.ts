@@ -802,7 +802,7 @@ export class Constants {
 
         CLONE_FIND_FLATTENED_MARKED: "cffm",
         CLONE_FIND_TAG: "cft",
-        CLONE_FIND_ALL: "cfa", // cloneFind used instead
+        CLONE_FIND_ALL: "cfa",
         CLONE_FIND_MARKED: "cfam",
         CLONE_FIND_PARENTS: "clone-find-parents",
     };
