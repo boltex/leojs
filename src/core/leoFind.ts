@@ -2043,7 +2043,7 @@ export class LeoFind {
                     return; // Cancelled with escape or empty string.
                 }
 
-                this.ftm.set_find_text(w_searchString);
+                this.ftm.set_find_text(p_findString);
 
                 const w_changeSettings = this.ftm.get_settings();
 
