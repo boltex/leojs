@@ -14426,8 +14426,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 
 [CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.command(LEOCMD.GOTO_GLOBAL_LINE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
-[CMD.TAG_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.TAG_CHILDREN, { refreshType: REFRESH_TREE, finalFocus: Focus.NoChange })],
-
+[CMD.TAG_CHILDREN, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.TAG_CHILDREN, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
 [CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.TAG_NODE, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
 [CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_TAG, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
 [CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_ALL_TAGS, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
