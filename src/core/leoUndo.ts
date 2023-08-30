@@ -722,16 +722,16 @@ export class Undoer {
         if (u.redoing || u.undoing) {
             return;
         }
+        // createCommonBunch sets:
+        //   oldDirty = p.isDirty()
+        //   oldMarked = p.isMarked()
+        //   oldSel = w and w.getSelectionRange() or None
+        //   p = p.copy()
         const bunch: Bead = u.createCommonBunch(p);
-        // Sets
-        // oldDirty = p.isDirty(),
-        // oldMarked = p.isMarked(),
-        // oldSel = w and w.getSelectionRange() or None,
-        // p = p.copy(),
-        // Set types & helpers
+        // Set types.
         bunch.kind = 'clone-marked-nodes';
         bunch.undoType = 'clone-marked-nodes';
-        // Set helpers
+        // Set helpers.
         bunch.undoHelper = u.undoCloneMarkedNodes;
         bunch.redoHelper = u.redoCloneMarkedNodes;
         bunch.newP = p.next();
@@ -744,12 +744,12 @@ export class Undoer {
         if (u.redoing || u.undoing) {
             return;
         }
+        // createCommonBunch sets:
+        //   oldDirty = p.isDirty()
+        //   oldMarked = p.isMarked()
+        //   oldSel = w and w.getSelectionRange() or None
+        //   p = p.copy()
         const bunch: Bead = u.createCommonBunch(p);
-        // Sets
-        // oldDirty = p.isDirty(),
-        // oldMarked = p.isMarked(),
-        // oldSel = w and w.getSelectionRange() or None,
-        // p = p.copy(),
         // Set types & helpers
         bunch.kind = 'copy-marked-nodes';
         bunch.undoType = 'copy-marked-nodes';
@@ -1568,10 +1568,11 @@ export class Undoer {
      */
     public redoGroup(): void {
         const u: Undoer = this;
-        // Remember these values.
         const c: Commands = u.c;
+        // Remember these values.
         const newSel: number[] = u.newSel;
         const p: Position = u.p!.copy();
+        const newP = u.newP.copy();  //  May not exist now, but must exist later.
         u.groupCount += 1;
         const bunch: Bead = u.beads[u.bead + 1];
         let count: number = 0;
@@ -1596,8 +1597,13 @@ export class Undoer {
         if (!g.unitTesting && u.verboseUndoGroup) {
             g.es('redo', count, 'instances');
         }
-        p.setDirty();
-        c.selectPosition(p);
+        // Helpers set dirty bits.
+        // Set c.p, independently of helpers.
+        if (g.unitTesting) {
+            console.assert(c.positionExists(newP), newP.toString());
+        }
+        c.selectPosition(newP);
+        // Set the selection, independently of helpers.
         if (newSel && newSel.length) {
             let i, j;
             [i, j] = newSel;
@@ -2036,10 +2042,15 @@ export class Undoer {
      */
     public undoGroup(): void {
         const u: Undoer = this;
-        // Remember these values.
         const c: Commands = u.c;
-        const oldSel: any = u.oldSel;
+        // Remember these values.
+        const oldSel: number[] = u.oldSel;
         const p: Position = u.p!.copy();
+        const newP = u.newP.copy()  // Must exist now, but may not exist later.
+        if (g.unitTesting) {
+            console.assert(c.positionExists(newP), newP.toString());
+        }
+
         u.groupCount += 1;
         const bunch: Bead = u.beads[u.bead];
         let count: number = 0;
@@ -2067,8 +2078,13 @@ export class Undoer {
         if (!g.unitTesting && u.verboseUndoGroup) {
             g.es('undo', count, 'instances');
         }
-        p.setDirty();
+        // Helpers set dirty bits.
+        // Set c.p, independently of helpers.
+        if (g.unitTesting) {
+            console.assert(c.positionExists(p), p.toString());
+        }
         c.selectPosition(p);
+        // Restore the selection, independently of helpers.
         if (oldSel && oldSel.length) {
             let i, j;
             [i, j] = oldSel;
