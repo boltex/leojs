@@ -112,7 +112,6 @@ suite('Test cases for gotoCommands.ts', () => {
 
             let offset = await x.find_node_start(p);
 
-
             assert.ok(!(offset == null), p.h);
 
             offset = offset - 1;

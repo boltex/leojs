@@ -3253,10 +3253,10 @@ export function getLine(s: string, i: number): [number, number] {
  * index may be a Tk index(x.y) or 'end'.
  */
 export function toPythonIndex(s: string, index?: number | string): number {
-    if (index === undefined) {
+    if (index == null) {
         return 0;
     }
-    if (!isNaN(index as any)) {
+    if (typeof index === 'number' && Number.isInteger(index)) {
         return index as number;
     }
     if (index === '1.0') {
