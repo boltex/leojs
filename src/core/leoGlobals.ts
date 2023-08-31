@@ -2733,7 +2733,7 @@ export async function execGitCommand(
 
     if (isBrowser) {
         console.log('LEOJS: GIT COMMAND CALLED FROM BROWSER');
-        void vscode.window.showInformationMessage('LeoJS Git Commands not available in "web" version');
+        void vscode.window.showInformationMessage('LeoJS Git Commands are not yet available in "web" version');
         return [];
     }
 

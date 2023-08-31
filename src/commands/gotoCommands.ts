@@ -719,7 +719,7 @@ export class GoToCommands {
         const s = w.getAllText();
         const [row, col] = g.convertPythonIndexToRowCol(s, i); // 0-based
         // g.trace('n0', n0, 'row', row);
-        g.es_print('line' + (n0 + row));
+        g.es_print('line', n0 + row);
     }
 
     //@-others
