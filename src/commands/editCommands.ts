@@ -27,10 +27,16 @@ export class TopLevelEditCommands {
         if (!c) {
             return changed;
         }
+        const command = 'mark-first-parents';
+        const u = c.undoer;
+        u.beforeChangeGroup(c.p, command);
+        const undoType = 'Mark';
         for (let parent of c.p.self_and_parents()) {
             if (!parent.isMarked()) {
+                const bunch = u.beforeMark(parent, undoType);
                 parent.setMarked();
                 parent.setDirty();
+                u.afterMark(parent, undoType, bunch);
                 changed.push(parent.copy());
             }
         }
@@ -39,6 +45,7 @@ export class TopLevelEditCommands {
             c.setChanged();
             c.redraw();
         }
+        u.afterChangeGroup(c.p, command);
         return changed;
     }
     //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
@@ -248,24 +255,28 @@ export class TopLevelEditCommands {
     public unmark_first_parents(this: Commands): Position[] {
         const c: Commands = this;
         const changed: Position[] = [];
-
         if (!c) {
             return changed;
         }
-
+        const command = 'unmark-first-parents';
+        const u = c.undoer;
+        u.beforeChangeGroup(c.p, command);
+        const undoType = 'Unmark';
         for (let parent of c.p.self_and_parents()) {
             if (parent.isMarked()) {
+                const bunch = u.beforeMark(parent, undoType);
                 parent.clearMarked();
                 parent.setDirty();
+                u.afterMark(parent, undoType, bunch);
                 changed.push(parent.copy());
             }
         }
-
         if (changed.length) {
             // g.es("unmarked: " + ', '.join([z.h for z in changed]))
             c.setChanged();
             c.redraw();
         }
+        u.afterChangeGroup(c.p, command);
         return changed;
     }
     //@-others
@@ -569,10 +580,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             }
             indices.unshift(p2.childIndex());
         }
-
-        const s = [...indices.map((z) => (1 + z).toString())].join(',');
-        // s = '.'.join([str(1 + z) for z in indices]);
-
+        const s = [...indices.map((z) => (1 + z).toString())].join('.');
         // Do not strip the original headline!
         c.setHeadString(p, `${s} ${p.v.h}`);
         p.v.setDirty();
