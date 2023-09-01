@@ -19,33 +19,33 @@ function cmd(p_name: string, p_doc: string) {
 //@+node:felix.20220504203112.1: ** class TopLevelEditCommands
 export class TopLevelEditCommands {
     //@+others
-    //@+node:felix.20220504203200.2: *3* @g.command('mark-first-parents')
-    @command('mark-first-parents', 'Mark the node and all its parents.')
-    public mark_first_parents(this: Commands): Position[] {
-        const c: Commands = this;
+    //@+node:felix.20220504203200.2: *3* @g.command('mark-node-and-parents')
+    @command('mark-node-and-parents', 'Mark the node and all its parents.')
+    public mark_node_and_parents(this: Commands): Position[] {
         const changed: Position[] = [];
+        const c: Commands = this;
+        const tag = 'mark-node-and-parents';
         if (!c) {
             return changed;
         }
-        const command = 'mark-first-parents';
         const u = c.undoer;
-        u.beforeChangeGroup(c.p, command);
-        const undoType = 'Mark';
         for (let parent of c.p.self_and_parents()) {
             if (!parent.isMarked()) {
-                const bunch = u.beforeMark(parent, undoType);
+                if(!changed.length){
+                    u.beforeChangeGroup(c.p, tag);
+                }
+                const bunch = u.beforeMark(parent, 'mark');
                 parent.setMarked();
                 parent.setDirty();
-                u.afterMark(parent, undoType, bunch);
+                u.afterMark(parent, 'mark', bunch);
                 changed.push(parent.copy());
             }
         }
         if (changed.length) {
-            // g.es("marked: " + ', '.join([z.h for z in changed]))
+            u.afterChangeGroup(c.p, tag);
             c.setChanged();
             c.redraw();
         }
-        u.afterChangeGroup(c.p, command);
         return changed;
     }
     //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
@@ -250,33 +250,34 @@ export class TopLevelEditCommands {
                 c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
         */
     }
-    //@+node:felix.20220504203200.5: *3* @g.command('unmark-first-parents')
-    @command('unmark-first-parents', 'Unmark the node and all its parents.')
-    public unmark_first_parents(this: Commands): Position[] {
+    //@+node:felix.20220504203200.5: *3* @g.command('unmark-node-and-parents')
+    @command('unmark-node-and-parents', 'Unmark the node and all its parents.')
+    public unmark_node_and_parents(this: Commands): Position[] {
         const c: Commands = this;
         const changed: Position[] = [];
+        const tag = 'unmark-node-and-parents';
         if (!c) {
             return changed;
         }
-        const command = 'unmark-first-parents';
         const u = c.undoer;
-        u.beforeChangeGroup(c.p, command);
         const undoType = 'Unmark';
         for (let parent of c.p.self_and_parents()) {
             if (parent.isMarked()) {
-                const bunch = u.beforeMark(parent, undoType);
+                if(!changed.length){
+                    u.beforeChangeGroup(c.p, tag);
+                }
+                const bunch = u.beforeMark(parent, 'unmark');
                 parent.clearMarked();
                 parent.setDirty();
-                u.afterMark(parent, undoType, bunch);
+                u.afterMark(parent, 'unmark', bunch);
                 changed.push(parent.copy());
             }
         }
         if (changed.length) {
-            // g.es("unmarked: " + ', '.join([z.h for z in changed]))
             c.setChanged();
             c.redraw();
         }
-        u.afterChangeGroup(c.p, command);
+        u.afterChangeGroup(c.p, tag);
         return changed;
     }
     //@-others
