@@ -446,7 +446,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             placeHolder: '#',
         });
 
-        let ok = false;
         this.w = this.editWidget();
         const w = this.w;
 
@@ -456,9 +455,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             const i = g.convertRowColToPythonIndex(s, n - 1, 0);
             w.setInsertPoint(i);
             w.seeInsertPoint();
-        }
-        if (!ok) {
-            g.warning('goto-char takes non-negative integer argument');
         }
         return undefined;
     }
@@ -675,7 +671,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
         const url = p.get_UNL();
-        await g.app.gui.replaceClipboardWith(url);
+        await g.app.gui.replaceClipboardWith(c.p.gnx);
 
         g.es_print('gnx: ' + url);
 
@@ -741,7 +737,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
 
             // k.keyboardQuit()
             // k.setStatusLabel(f"Line {row}")
-            g.es_print(`Line ${row}`);
+            g.es_print(`Line ${row + 1}`);
         }
     }
     //@+node:felix.20221220002620.1: *3* ec: move cursor
