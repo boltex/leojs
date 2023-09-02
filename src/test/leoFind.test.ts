@@ -1128,15 +1128,27 @@ suite('Test cases for leoFind.ts', () => {
         const c = self.c;
         const x = new LeoFind(c);
         const table = [
-            ['\\\\', '\\'],
+            // Only replace \n, \\n, \t and \\t.
+            ['\\', '\\'],
+            ['\\\\', '\\\\'],
+            ['a\bc', 'a\bc'],
+            ['a\\bc', 'a\\bc'],
+            ['a\\\\bc', 'a\\\\bc'],
+            ['a \ b', 'a \ b'],
+            ['a \\ b', 'a \\ b'],
+            ['a \\\ b', 'a \\\ b'],
+            ['a \\\\ b', 'a \\\\ b'],
+            ['a \\\\\\ b', 'a \\\\\\ b'],
             ['\\n', '\n'],
             ['\\t', '\t'],
-            ['a\\bc', 'a\\bc'],
-            ['a\\\\bc', 'a\\bc'],
-            ['a\\tc', 'a\tc'],  // Replace \t by a tab.
-            ['a\\nc', 'a\nc'],  // Replace \n by a newline.
+            ['a\tc', 'a\tc'],  // Replace \t by a tab.
+            ['a\nc', 'a\nc'],  // Replace \n by a newline.
         ];
+        let indexTest = 0;
         for (const [s, expected] of table) {
+            indexTest += 1;
+            console.log('index', indexTest, 's', s);
+
             const got = x.replace_back_slashes(s);
             assert.strictEqual(expected, got, s);
         }

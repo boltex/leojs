@@ -889,7 +889,7 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.23: *4* c_file.exportHeadlines
     @commander_command(
         'export-headlines',
-        'Export all headlines to an external file.'
+        'Export headlines for c.p and its subtree to an external file.'
     )
     public async exportHeadlines(this: Commands): Promise<unknown> {
         const c: Commands = this;

@@ -48,6 +48,71 @@ export class TopLevelEditCommands {
         }
         return changed;
     }
+    //@+node:felix.20230902164359.1: *3* @g.command('promote-section-definition')
+    @command(
+        'promote-section-definition',
+        'c.p must be a section definition node and an ancestor must contain a reference. ' +
+        'Replace a section reference in an ancestor by c.p.b and delete c.p.'
+    )
+    public promote_section_definition(this: Commands): void {
+
+        const c: Commands = this;
+        const tag = 'promote-section-definition';
+        if (!c) {
+            return;
+        }
+
+        c.endEditing();
+        const u = c.undoer;
+        const h = c.p.h.trim();
+        const ref_s = h;
+        if (!(h.endsWith('>>') && h.startsWith('<<'))) {
+            g.es_print('Not a section definition:', c.p.h);
+            return;
+        }
+        let found = false;
+        let w_parent: Position;
+        for (const i_parent of c.p.parents()) {
+            if (i_parent.b.includes(ref_s)) {
+                w_parent = i_parent;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            g.es_print('Reference not found:', ref_s);
+            return;
+        }
+
+        // Start the undo group.
+        const ref_p: Position = w_parent!;
+        u.beforeChangeGroup(c.p, tag);
+
+        // Change ref_p.b.
+        const bunch1 = u.beforeChangeBody(ref_p);
+        const new_ref_lines = [];
+        for (const line of g.splitLines(ref_p.b)) {
+            if (line.trim() === ref_s) {
+                new_ref_lines.push(...g.splitLines(c.p.b));
+            } else {
+                new_ref_lines.push(line);
+            }
+        }
+        ref_p.b = new_ref_lines.join('');
+        u.afterChangeBody(ref_p, 'change-body', bunch1);
+
+        // Delete and select ref_p.
+        const bunch2 = u.beforeDeleteNode(c.p);
+        c.p.doDelete(ref_p);
+        u.afterDeleteNode(ref_p, 'delete-node', bunch2);
+        c.selectPosition(ref_p);
+
+        // Finish the group.
+        u.afterChangeGroup(c.p, tag);
+        c.setChanged();
+        c.redraw(ref_p);
+
+    }
     //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
     @command(
         'merge-node-with-next-node',

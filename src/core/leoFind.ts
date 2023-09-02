@@ -3588,9 +3588,15 @@ export class LeoFind {
     }
     //@+node:felix.20221023141723.1: *4* find.replace_back_slashes
     /**
-     * Carefully replace backslashes in a search pattern.
+     * Replace backslash-n with a newline and backslash-t with a tab.
      */
     public replace_back_slashes(s: string): string {
+
+        return s.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+
+        // * Old Code 
+
+        /*
         // This is NOT the same as:
         //
         //   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
@@ -3614,6 +3620,7 @@ export class LeoFind {
             i += 1;
         }
         return s;
+        */
     }
     //@+node:felix.20221022201759.1: *3* LeoFind.Initing & finalizing
     //@+node:felix.20221022201759.2: *4* find.init_in_headline & helper
