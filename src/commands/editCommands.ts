@@ -22,8 +22,8 @@ export class TopLevelEditCommands {
     //@+node:felix.20220504203200.2: *3* @g.command('mark-node-and-parents')
     @command('mark-node-and-parents', 'Mark the node and all its parents.')
     public mark_node_and_parents(this: Commands): Position[] {
-        const changed: Position[] = [];
         const c: Commands = this;
+        const changed: Position[] = [];
         const tag = 'mark-node-and-parents';
         if (!c) {
             return changed;
@@ -260,7 +260,6 @@ export class TopLevelEditCommands {
             return changed;
         }
         const u = c.undoer;
-        const undoType = 'Unmark';
         for (let parent of c.p.self_and_parents()) {
             if (parent.isMarked()) {
                 if(!changed.length){
@@ -274,10 +273,10 @@ export class TopLevelEditCommands {
             }
         }
         if (changed.length) {
+            u.afterChangeGroup(c.p, tag);
             c.setChanged();
             c.redraw();
         }
-        u.afterChangeGroup(c.p, tag);
         return changed;
     }
     //@-others
