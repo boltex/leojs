@@ -3547,14 +3547,16 @@ export class Commands {
         c.request_focus(body && body.wrapper);
     }
     public logWantsFocus(): void {
-        const c = this;
-        const log = c.frame.log;
-        c.request_focus(log && log.logCtrl);
+        g.app.gui.showLogPane(true);
+        // const c = this;
+        // const log = c.frame.log;
+        // c.request_focus(log && log.logCtrl);
     }
-    public minibufferWantsFocus(): void {
-        const c = this;
-        c.request_focus(c.miniBufferWidget);
-    }
+    // * No use in LeoJS
+    // public minibufferWantsFocus(): void {
+    //     const c = this;
+    //     c.request_focus(c.miniBufferWidget);
+    // }
     public treeWantsFocus(): void {
         const c = this;
         const tree = c.frame.tree;
@@ -3584,15 +3586,17 @@ export class Commands {
     }
 
     public logWantsFocusNow(): void {
-        const c = this;
-        const log = this.frame.log;
-        c.widgetWantsFocusNow(log && log.logCtrl);
+        // const c = this;
+        // const log = this.frame.log;
+        // c.widgetWantsFocusNow(log && log.logCtrl);
+        g.app.gui.showLogPane(true);
     }
 
-    public minibufferWantsFocusNow(): void {
-        const c = this;
-        c.widgetWantsFocusNow(c.miniBufferWidget);
-    }
+    // * No use in LeoJS
+    // public minibufferWantsFocusNow(): void {
+    //     const c = this;
+    //     c.widgetWantsFocusNow(c.miniBufferWidget);
+    // }
 
     public treeWantsFocusNow(): void {
         const c = this;

@@ -148,11 +148,11 @@ export class CommanderEditCommands {
         //     k.showStateAndMode(w=wrapper)
         // return e, wrapper  # Neither of these is used by any caller.
     }
-    //@+node:felix.20230221160425.3: *3* def createLastChildNode
+    //@+node:felix.20230221160425.3: *3* createFirstChildNode extract helper
     /**
      * A helper function for the three extract commands.
      */
-    private createLastChildNode(
+    private createFirstChildNode(
         c: Commands,
         parent: Position,
         headline: string,
@@ -162,14 +162,14 @@ export class CommanderEditCommands {
         if (!body) {
             body = '';
         }
-        const p = parent.insertAsLastChild();
+        const p = parent.insertAsNthChild(0);
         p.initHeadString(headline);
         p.setBodyString(body);
         p.setDirty();
         c.checkOutline();
         return p;
     }
-    //@+node:felix.20230221160425.1: *3* c_ec.extract & helpers
+    //@+node:felix.20230221160425.1: *3* c_ec.extract
     @commander_command(
         'extract',
         'Create child node from the selected body text.'
@@ -201,7 +201,7 @@ export class CommanderEditCommands {
         //@-<< docstring for extract command >>
 
         //@+others
-        //@+node:felix.20230221160425.4: *4* def extractDef
+        //@+node:felix.20230221160425.4: *4* function extractDef
         const extractDef_patterns = [
             /\((?:def|defn|defui|deftype|defrecord|defonce)\s+(\S+)/, // clojure definition
             /^\s*(?:def|class)\s+(\w+)/, // python definitions
@@ -241,7 +241,7 @@ export class CommanderEditCommands {
             }
             return '';
         };
-        //@+node:felix.20230221160425.5: *4* def extractDef_find
+        //@+node:felix.20230221160425.5: *4* function extractDef_find
         const extractDef_find = (
             c: Commands,
             lines: string[]
@@ -254,7 +254,7 @@ export class CommanderEditCommands {
             }
             return undefined;
         };
-        //@+node:felix.20230221160425.6: *4* def extractRef
+        //@+node:felix.20230221160425.6: *4* function extractRef
         /**
          * Return s if it starts with a section name.
          */
@@ -314,7 +314,7 @@ export class CommanderEditCommands {
         // Start the outer undo group.
         u.beforeChangeGroup(c.p, undoType);
         const undoData = u.beforeInsertNode(c.p);
-        const p = this.createLastChildNode(c, c.p, h, b.join(''));
+        const p = this.createFirstChildNode(c, c.p, h, b.join(''));
         u.afterInsertNode(p, undoType, undoData);
         //
         // Start inner undo.
@@ -353,7 +353,7 @@ export class CommanderEditCommands {
     // ? Needed ?
     // g.command_alias('extractSection', extract)
     // g.command_alias('extractPythonMethod', extract)
-    //@+node:felix.20230221160431.1: *3* c_ec.extractSectionNames & helper
+    //@+node:felix.20230221160431.1: *3* c_ec.extractSectionNames
     @commander_command(
         'extract-names',
         'Create child nodes for every section reference in the selected text.'
@@ -363,7 +363,7 @@ export class CommanderEditCommands {
         // - The body of each child node is empty.
 
         //@+others
-        //@+node:felix.20230221160431.2: *4* def findSectionName
+        //@+node:felix.20230221160431.2: *4* function findSectionName
         const findSectionName = (s: string): string | undefined => {
             let head1 = s.indexOf('<<');
             let head2 = -1;
@@ -409,7 +409,7 @@ export class CommanderEditCommands {
                     u.beforeChangeGroup(current, undoType); // first one!
                 }
                 const undoData = u.beforeInsertNode(current);
-                p = this.createLastChildNode(c, current, name, undefined);
+                p = this.createFirstChildNode(c, current, name, undefined);
                 u.afterInsertNode(p, undoType, undoData);
                 found = true;
             }

@@ -11199,9 +11199,9 @@ public addLogPaneEntry(p_message: string): void {
 <t tx="felix.20220920001018.3">/**
  * * Reveals the log pane if not already visible
  */
-public showLogPane(): Thenable&lt;unknown&gt; {
+public showLogPane(p_focus?: boolean): Thenable&lt;unknown&gt; {
     if (this._leoLogPane) {
-        this._leoLogPane.show(true); // Just show, so use flag to preserve focus
+        this._leoLogPane.show(!p_focus); // use flag to preserve focus
         return Promise.resolve(true);
     } else {
         return Promise.resolve(undefined); // if cancelled

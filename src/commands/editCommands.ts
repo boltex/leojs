@@ -365,6 +365,21 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             c.redraw();
         }
     }
+    //@+node:felix.20230902141521.1: *3* ec.focusTo...
+    @cmd('focus-to-body', 'Put the keyboard focus in Leo\'s body pane.')
+    public focusToBody(): void {
+        this.c.bodyWantsFocus();
+    }
+
+    @cmd('focus-to-log', 'Put the keyboard focus in Leo\'s log pane.')
+    public focusToLog(): void {
+        this.c.logWantsFocus();
+    }
+
+    @cmd('focus-to-tree', 'Put the keyboard focus in Leo\'s outline pane.')
+    public focusToTree(): void {
+        this.c.treeWantsFocus();
+    }
     //@+node:felix.20220503225323.1: *3* ec: goto node
     //@+node:felix.20220503225323.2: *4* goto-any-clone
     @cmd(

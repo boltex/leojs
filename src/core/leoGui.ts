@@ -314,6 +314,10 @@ export class LeoGui {
     public addLogPaneEntry(s: string): void {
         // Adds a message string to LeoJS log pane. See LeoUi.ts
     }
+    //@+node:felix.20230902142624.1: *4* LeoGui.focusLogPane (LeoJs)
+    public showLogPane(p_focus ?:boolean): void {
+        // Shows and optionally puts focus on the log pane
+    }
     //@+node:felix.20221120210000.1: *4* LeoGui.finishStartup (LeoJs)
     public finishStartup(): void {
         // * LeoJS GUI needs this method to finish it's startup

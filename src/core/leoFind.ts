@@ -3773,7 +3773,7 @@ export class LeoFind {
     public add_change_string_to_label(): void {
         const c = this.c;
         let s: string = this.ftm.get_change_text();
-        c.minibufferWantsFocus();
+        // c.minibufferWantsFocus(); // No use in LeoJS
         while (s.endsWith('\n') || s.endsWith('\r')) {
             s = s.substring(0, s.length - 1);
         }
@@ -3785,7 +3785,7 @@ export class LeoFind {
         const k = this.c.k;
         const ftm = c.findCommands.ftm;
         let s = ftm.get_find_text();
-        c.minibufferWantsFocus();
+        // c.minibufferWantsFocus(); // No use in LeoJS
         while (s.endsWith('\n') || s.endsWith('\r')) {
             s = s.substring(0, s.length - 1);
         }

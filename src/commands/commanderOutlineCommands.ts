@@ -2445,6 +2445,72 @@ export class CommanderOutlineCommands {
         c.redraw(p); // redraw selects p
         // c.updateSyntaxColorer(p);  // Moving can change syntax coloring.
     }
+    //@+node:felix.20230902141341.1: *4* c_oc.moveOutlineToFirstChild
+    @commander_command('move-outline-to-first-child',
+        'Move the selected node so that it is the first child of its parent. ' +
+        'Do nothing if a hoist is in effect.'
+    )
+    public moveOutlineToFirstChild(this: Commands): void {
+
+        const c = this;
+        const p = this.p;
+        const u = this.undoer;
+
+        if (!p || !p.__bool__()) {
+            return;
+        }
+        if (c.hoistStack && c.hoistStack.length) {
+            return;
+        }
+        if (!p.hasBack()) {
+            return;
+        }
+        const parent = p.parent();
+        if (!parent || !parent.__bool__()) {
+            return;
+        }
+        c.endEditing();
+        const undoData = u.beforeMoveNode(p);
+        p.moveToNthChildOf(p.parent(), 0);
+        p.setDirty();
+        c.setChanged();
+        u.afterMoveNode(p, 'Move To First Child', undoData);
+        c.redraw(p);
+
+    }
+    //@+node:felix.20230902141347.1: *4* c_oc.moveOutlineToLastChild
+    @commander_command('move-outline-to-last-child',
+        'Move the selected node so that it is the last child of its parent. ' +
+        'Do nothing if a hoist is in effect.'
+    )
+    public moveOutlineToLastChild(this: Commands): void {
+
+        const c = this;
+        const p = this.p;
+        const u = this.undoer;
+
+        if (!p || !p.__bool__()) {
+            return;
+        }
+        if (c.hoistStack && c.hoistStack.length) {
+            return;
+        }
+        if (!p.hasNext()) {
+            return;
+        }
+        const parent = p.parent();
+        if (!parent || !parent.__bool__()) {
+            return;
+        }
+        c.endEditing();
+        const undoData = u.beforeMoveNode(p);
+        p.moveToNthChildOf(parent, parent.v.children.length - 1);
+        p.setDirty();
+        c.setChanged();
+        u.afterMoveNode(p, 'Move To Last Child', undoData);
+        c.redraw(p);
+
+    }
     //@+node:felix.20211031235049.9: *4* c_oc.promote
     @commander_command(
         'promote',

@@ -507,9 +507,9 @@ export class LeoUI extends NullGui {
     /**
      * * Reveals the log pane if not already visible
      */
-    public showLogPane(): Thenable<unknown> {
+    public showLogPane(p_focus?: boolean): Thenable<unknown> {
         if (this._leoLogPane) {
-            this._leoLogPane.show(true); // Just show, so use flag to preserve focus
+            this._leoLogPane.show(!p_focus); // use flag to preserve focus
             return Promise.resolve(true);
         } else {
             return Promise.resolve(undefined); // if cancelled
