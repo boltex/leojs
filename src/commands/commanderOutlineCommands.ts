@@ -2041,9 +2041,13 @@ export class CommanderOutlineCommands {
         const u: Undoer = c.undoer;
         const undoType: string = 'Mark Changed';
         c.endEditing();
-        u.beforeChangeGroup(current, undoType);
+        let changed = false;
         for (let p of c.all_unique_positions()) {
             if (p.isDirty() && !p.isMarked()) {
+                if (!changed) {
+                    u.beforeChangeGroup(current, undoType);
+                }
+                changed = true;
                 const bunch = u.beforeMark(p, undoType);
                 // c.setMarked calls a hook.
                 c.setMarked(p);
@@ -2052,7 +2056,9 @@ export class CommanderOutlineCommands {
                 u.afterMark(p, undoType, bunch);
             }
         }
-        u.afterChangeGroup(current, undoType);
+        if (changed) {
+            u.afterChangeGroup(current, undoType);
+        }
         if (!g.unitTesting) {
             g.blue('done');
         }
@@ -2095,9 +2101,13 @@ export class CommanderOutlineCommands {
             return;
         }
         c.endEditing();
-        u.beforeChangeGroup(current, undoType);
+        let changed = false;
         for (let p of current.children()) {
             if (!p.isMarked()) {
+                if (!changed) {
+                    u.beforeChangeGroup(current, undoType);
+                }
+                changed = true;
                 const bunch = u.beforeMark(p, undoType);
                 c.setMarked(p); // Calls a hook.
                 p.setDirty();
@@ -2105,7 +2115,9 @@ export class CommanderOutlineCommands {
                 u.afterMark(p, undoType, bunch);
             }
         }
-        u.afterChangeGroup(current, undoType);
+        if (changed) {
+            u.afterChangeGroup(current, undoType);
+        }
     }
     //@+node:felix.20211025223803.11: *4* c_oc.unmarkAll
     @commander_command('unmark-all', 'Unmark all nodes in the entire outline.')
@@ -2118,11 +2130,13 @@ export class CommanderOutlineCommands {
             return;
         }
         c.endEditing();
-        u.beforeChangeGroup(current, undoType);
         let changed = false;
         let w_p: Position | undefined; //  To keep pylint happy.
         for (let p of c.all_unique_positions()) {
             if (p.isMarked()) {
+                if (!changed) {
+                    u.beforeChangeGroup(current, undoType);
+                }
                 const bunch = u.beforeMark(p, undoType);
                 // c.clearMarked(p) // Very slow: calls a hook.
                 p.v.clearMarked();
@@ -2135,8 +2149,8 @@ export class CommanderOutlineCommands {
         if (changed) {
             // g.doHook("clear-all-marks", c, w_p); // w_p was p
             c.setChanged();
+            u.afterChangeGroup(current, undoType);
         }
-        u.afterChangeGroup(current, undoType);
     }
     //@+node:felix.20211031235049.1: *3* c_oc.Move commands
     //@+node:felix.20211031235049.2: *4* c_oc.demote

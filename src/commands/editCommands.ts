@@ -31,7 +31,7 @@ export class TopLevelEditCommands {
         const u = c.undoer;
         for (let parent of c.p.self_and_parents()) {
             if (!parent.isMarked()) {
-                if(!changed.length){
+                if (!changed.length) {
                     u.beforeChangeGroup(c.p, tag);
                 }
                 const bunch = u.beforeMark(parent, 'mark');
@@ -262,7 +262,7 @@ export class TopLevelEditCommands {
         const u = c.undoer;
         for (let parent of c.p.self_and_parents()) {
             if (parent.isMarked()) {
-                if(!changed.length){
+                if (!changed.length) {
                     u.beforeChangeGroup(c.p, tag);
                 }
                 const bunch = u.beforeMark(parent, 'unmark');
