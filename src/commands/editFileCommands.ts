@@ -1964,6 +1964,7 @@ export class GitDiffController {
         const command = `git show --format=%${format_s} --no-patch ${revspec}`;
         const directory = await this.get_parent_of_git_directory();
         if (!directory) {
+            g.es_print("LEOJS ERROR : get_parent_of_git_directory FAILED for rev", revspec);
             return '';
         }
 
@@ -1994,7 +1995,7 @@ export class GitDiffController {
         const hidden_root = hidden_c.rootPosition()!;
         // copy root to hidden root, including gnxs.
         root.copyTreeFromSelfTo(hidden_root, true);
-        hidden_root.h = fn + ':' + rev ? rev : fn;
+        hidden_root.h = rev ? fn + ':' + rev : fn;
         // Set at.encoding first.
         // Must be called before at.scanAllDirectives.
         at.initReadIvars(hidden_root, fn);
