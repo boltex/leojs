@@ -2154,7 +2154,7 @@ export class GitDiffController {
         hidden_c.frame.createFirstTreeNode();
         const root = hidden_c.rootPosition()!;
         root.h = fn + ':' + rev ? rev : fn;
-        await hidden_c.fileCommands.getLeoFile(p_path, false, false, false);
+        await hidden_c.fileCommands.getLeoFile(s, p_path, false, false, false);
         return hidden_c;
     }
 

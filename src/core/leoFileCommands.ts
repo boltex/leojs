@@ -109,11 +109,16 @@ export class FastRead {
     /**
      * Read the file, change splitter ratios, and return its hidden vnode.
      */
-    public async readFile(p_path: string): Promise<VNode | undefined> {
-        const w_uri = g.makeVscodeUri(p_path);
-        const readData = await vscode.workspace.fs.readFile(w_uri);
-        const s = Buffer.from(readData).toString('utf8');
+    public async readFile(theFile: string | undefined, p_path: string): Promise<VNode | undefined> {
 
+        let s;
+        if (theFile == null) {
+            const w_uri = g.makeVscodeUri(p_path);
+            const readData = await vscode.workspace.fs.readFile(w_uri);
+            s = Buffer.from(readData).toString('utf8');
+        } else {
+            s = theFile;
+        }
         //const s: string = fs.readFileSync(theFile).toString();
 
         let v: VNode | undefined;
@@ -139,10 +144,15 @@ export class FastRead {
     /**
      * Read the leojs JSON file, change splitter ratios, and return its hidden vnode.
      */
-    public async readJsonFile(p_path: string): Promise<VNode | undefined> {
-        const w_uri = g.makeVscodeUri(p_path);
-        const readData = await vscode.workspace.fs.readFile(w_uri);
-        const s = Buffer.from(readData).toString('utf8');
+    public async readJsonFile(theFile: string | undefined, p_path: string): Promise<VNode | undefined> {
+        let s;
+        if (theFile == null) {
+            const w_uri = g.makeVscodeUri(p_path);
+            const readData = await vscode.workspace.fs.readFile(w_uri);
+            s = Buffer.from(readData).toString('utf8');
+        } else {
+            s = theFile;
+        }
 
         let v, g_dict;
         [v, g_dict] = this.readWithJsonTree(p_path, s);
@@ -1438,6 +1448,7 @@ export class FileCommands {
      * The caller should follow this with a call to c.redraw().
      */
     public async getLeoFile(
+        theFile: undefined | string,
         fileName: string,
         readAtFileNodesFlag: boolean = true,
         silent: boolean = false,
@@ -1472,13 +1483,13 @@ export class FileCommands {
                 }
             } else if (fileName.endsWith('.leojs')) {
                 const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
-                v = await w_fastRead.readJsonFile(fileName);
+                v = await w_fastRead.readJsonFile(theFile, fileName);
                 if (v) {
                     c.hiddenRootNode = v;
                 }
             } else {
                 const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
-                v = await w_fastRead.readFile(fileName);
+                v = await w_fastRead.readFile(theFile, fileName);
                 if (v) {
                     c.hiddenRootNode = v;
                 }
@@ -1552,6 +1563,7 @@ export class FileCommands {
         let v: VNode;
         let ratio: number;
         [v, ratio] = await this.getLeoFile(
+            undefined,
             fileName,
             readAtFileNodesFlag,
             silent

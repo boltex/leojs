@@ -3299,7 +3299,7 @@ export class LoadManager {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
-            await c.fileCommands.getLeoFile(fn, undefined, undefined, false);
+            await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
         } catch {
             // Does not exist !
         }
