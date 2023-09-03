@@ -577,7 +577,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
             parent.setHeadString(kind);
             for (const key in d) {
                 const p = d[key];
-                if (!kind.endsWith('.leo') && p.isAnyAtFileNode()) {
+                if (!(kind.endsWith('.leo') || kind.endsWith('.leojs')) && p.isAnyAtFileNode()) {
                     // Don't make clones of @<file> nodes for wrapped files.
                     // pass
                 } else if (p.v.context === c) {
@@ -994,7 +994,7 @@ export class GitDiffController {
         const w_path = g.finalize_join(directory, fn); // #1781: bug fix.
         let c1: Commands | undefined;
         let c2: Commands | undefined;
-        if (fn.endsWith('.leo')) {
+        if (fn.endsWith('.leo') || fn.endsWith('.leojs')) {
             c1 = await this.make_leo_outline(fn, w_path, s1, rev1);
             c2 = await this.make_leo_outline(fn, w_path, s2, rev2);
         } else {
