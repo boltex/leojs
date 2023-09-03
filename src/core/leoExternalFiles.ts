@@ -278,8 +278,8 @@ export class ExternalFilesController {
         const val = await this.ask(c, w_path);
         if (['yes', 'yes-all'].includes(val)) {
             // Do a complete restart of Leo.
-            g.es_print('restarting Leo...');
-            c.restartLeo();
+            await g.app.loadManager!.revertCommander(c);
+            g.es_print(`reloaded ${path}`);
         }
     }
     //@+node:felix.20230503004807.10: *5* efc.idle_check_open_with_file & helper
@@ -743,12 +743,10 @@ export class ExternalFilesController {
 
         //
         // Create the message.
-        let message1 = `${g.splitLongFileName(
-            p_path
-        )} has changed outside Leo.\n`;
+        let message1 = `${p_path}\nhas changed outside Leo.\n\n`;
         let message2;
         if (is_leo) {
-            message2 = 'Restart Leo?';
+            message2 = 'Reload this outline?';
         } else if (p && p.__bool__()) {
             message2 = `Reload ${p.h}?`;
         } else {
@@ -769,7 +767,7 @@ export class ExternalFilesController {
         // #1240: Note: This dialog prevents idle time.
         const result = await g.app.gui.runAskYesNoDialog(
             c,
-            'Overwrite the version in Leo?',
+            message2!,
             message1 + message2,
             is_external_file,
             is_external_file
