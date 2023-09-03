@@ -658,6 +658,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     )
     public async diff(): Promise<void> {
         const c = this.c;
+        const u = this.c.undoer;
         const fn = await this.getReadableTextFile();
         if (!fn) {
             return;
@@ -676,9 +677,13 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         }
         const [lines1, lines2] = [g.splitLines(s1), g.splitLines(s2)];
         const aList = difflib.ndiff(lines1, lines2);
+        // add as last top level like other 'diff' result nodes
+        c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
+        const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
         const p = c.p.insertAfter();
         p.h = 'diff';
         p.b = aList.join('');
+        u.afterInsertNode(p, 'file-diff-files', undoData);
         c.redraw();
     }
     //@+node:felix.20230709010427.20: *3* efc.getReadableTextFile
