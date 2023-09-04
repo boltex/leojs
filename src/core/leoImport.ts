@@ -722,7 +722,7 @@ export class LeoImportCommands {
             let f = '';
 
             for (const w_p of p.self_and_subtree()) {
-                const s = p.b;
+                const s = w_p.b;
                 const s2 = s.trim();
                 if (s2) {
                     f += '-'.repeat(60);
