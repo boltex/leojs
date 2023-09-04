@@ -2371,7 +2371,7 @@ export function is_special(s: string, directive: string): [boolean, number] {
 
 //@+node:felix.20211104220753.1: *4* g.is_nl
 export function is_nl(s: string, i: number): boolean {
-    return i < s.length && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
+    return i < s.length && (s[i] === '\n' || s[i] === '\r');
 }
 
 //@+node:felix.20220411230914.1: *4* g.isAlpha
@@ -2671,8 +2671,8 @@ export function skip_ws(s: string, i: number): number {
 
 export function skip_ws_and_nl(s: string, i: number): number {
     const n: number = s.length;
-    while (i < n && ' \t\n\r'.indexOf(s.charAt(i))) {
-        i += 1;
+    while (i < n && (is_ws(s[i]) || is_nl(s, i))) {
+        i++;
     }
     return i;
 }
