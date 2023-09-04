@@ -744,7 +744,7 @@ export class ExternalFilesController {
         //
         // Create the message.
         let message1 = `${p_path}\nhas changed outside Leo.\n\n`;
-        let message2;
+        let message2 = "";
         if (is_leo) {
             message2 = 'Reload this outline?';
         } else if (p && p.__bool__()) {

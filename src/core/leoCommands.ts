@@ -463,6 +463,10 @@ export class Commands {
                 // sys.path.insert(0, '.')  // New in Leo 5.0 // TODO : needed ?
                 // sys.path.insert(0, c.frame.openDirectory)  // per SegundoBob // TODO : needed ?
                 script += '\n'; // Make sure we end the script properly.
+
+                // Wrap script as an IIAFE to allow 'await' right out the box.
+                script = "(async () => {\n" + script + "\n})();";
+
                 try {
                     if (!namespace || !namespace['script_gnx']) {
                         namespace = namespace || {};
@@ -552,12 +556,7 @@ export class Commands {
                 // exec(compile(script, scriptFile, 'exec'), d)
             } else {
                 // exec(script, d)
-                const testVar = vscode;
-
-                // TODO : Implement better setup & namespace !
                 new Function(
-                    'vscode',
-                    // TODO : 'fetch' equivalent
                     'c',
                     'g',
                     'input',
@@ -567,8 +566,6 @@ export class Commands {
                     'script_gnx',
                     script
                 )(
-                    testVar,
-                    // TODO : 'fetch' equivalent
                     d['c'],
                     d['g'],
                     d['input'],

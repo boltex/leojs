@@ -125,6 +125,7 @@ export class LeoApp {
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui!: NullGui; // The gui class.
+    public vscode: typeof vscode = vscode;
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
