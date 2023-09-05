@@ -10592,6 +10592,9 @@ set leoCanGoNext(p_value: boolean) {
 */
 public async newLeoFile(): Promise&lt;unknown&gt; {
 
+    this.showBodyIfClosed = true;
+    this.showOutlineIfClosed = true;
+
     this.setupRefresh(Focus.NoChange, {
         tree: true,
         body: true,

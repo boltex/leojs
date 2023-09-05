@@ -4318,6 +4318,9 @@ export class LeoUI extends NullGui {
     */
     public async newLeoFile(): Promise<unknown> {
 
+        this.showBodyIfClosed = true;
+        this.showOutlineIfClosed = true;
+
         this.setupRefresh(Focus.NoChange, {
             tree: true,
             body: true,
