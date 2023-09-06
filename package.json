@@ -3555,7 +3555,7 @@
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
-        "command": "leojs.gotoLastSibling",
+        "command": "leojs.gotoLastVisible",
         "key": "alt+end",
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
