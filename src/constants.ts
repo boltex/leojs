@@ -206,7 +206,7 @@ export class Constants {
         MINIBUFFER_COMMAND_START: "@command-",
         MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
         MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
-        MINIBUFFER_HISTORY_DESC: "$(history) Choose from last run commands...",
+        MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
         ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
         FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
@@ -332,6 +332,11 @@ export class Constants {
         LEO_ID: ""
     };
 
+    public static MINIBUFFER_QUICK_PICK: vscode.QuickPickItem = {
+        label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
+        description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC,
+        iconPath: new vscode.ThemeIcon("history")
+    };
     /**
      * Choices offered when about to lose current changes to a Leo Document
      */

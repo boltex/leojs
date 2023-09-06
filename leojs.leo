@@ -38,6 +38,7 @@
 <v t="felix.20201214151326.6"><vh>at-buttons strings</vh></v>
 <v t="felix.20211007214102.1"><vh>configuration keys</vh></v>
 <v t="felix.20211007214110.1"><vh>config defaults</vh></v>
+<v t="felix.20230905212324.1"><vh>history quickItem</vh></v>
 <v t="felix.20201214151326.7"><vh>ask/save buttons</vh></v>
 <v t="felix.20201214151326.8"><vh>context flags</vh></v>
 <v t="felix.20201214151326.9"><vh>vscode commands</vh></v>
@@ -2374,7 +2375,7 @@ public static USER_MESSAGES = {
     MINIBUFFER_COMMAND_START: "@command-",
     MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
     MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
-    MINIBUFFER_HISTORY_DESC: "$(history) Choose from last run commands...",
+    MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
     ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
     FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
@@ -4005,10 +4006,7 @@ public async minibuffer(): Promise&lt;unknown&gt; {
     const w_choices: vscode.QuickPickItem[] = [];
 
     if (this._minibufferHistory.length) {
-        w_choices.push({
-            label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
-            description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC
-        });
+        w_choices.push(Constants.MINIBUFFER_QUICK_PICK);
     }
 
     // Finish minibuffer list
@@ -14348,6 +14346,12 @@ public async tabCycle(): Promise&lt;unknown&gt; {
     return this.selectOpenedLeoDocument(w_chosenIndex);
 }
 
+</t>
+<t tx="felix.20230905212324.1">public static MINIBUFFER_QUICK_PICK: vscode.QuickPickItem = {
+    label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
+    description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC,
+    iconPath: new vscode.ThemeIcon("history")
+};
 </t>
 </tnodes>
 </leo_file>

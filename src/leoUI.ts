@@ -2876,10 +2876,7 @@ export class LeoUI extends NullGui {
         const w_choices: vscode.QuickPickItem[] = [];
 
         if (this._minibufferHistory.length) {
-            w_choices.push({
-                label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
-                description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC
-            });
+            w_choices.push(Constants.MINIBUFFER_QUICK_PICK);
         }
 
         // Finish minibuffer list
