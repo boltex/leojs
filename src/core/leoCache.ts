@@ -143,7 +143,7 @@ export class CommanderCacher {
                 c.db.key = fn;
                 await this.commit();
             } else {
-                g.trace('can not happen', c.db.__class__.__name__);
+                g.trace('can not happen', c.db.constructor.name);
             }
         }
     }
@@ -157,8 +157,8 @@ export class CommanderCacher {
 class CommanderWrapper {
 
     private c: Commands;
-    private db: any; // SqlitePickleShare
-    private key: string;
+    private db: SqlitePickleShare;
+    public key: string;
     private user_keys: Set<string>;
 
     constructor(c: Commands, fn?: string) {
@@ -230,7 +230,7 @@ class CommanderWrapper {
  */
 export class GlobalCacher {
 
-    public db: any;
+    public db: SqlitePickleShare;
 
     /**
      * Ctor for the GlobalCacher class.
@@ -253,6 +253,7 @@ export class GlobalCacher {
                 g.es_exception(e);
             }
             // Use a plain dict as a dummy.
+            // @ts-expect-error
             this.db = {};
         }
     }
@@ -261,7 +262,7 @@ export class GlobalCacher {
     //@+node:felix.20230806001555.1: *3* g_cacher.init
     public init(): Promise<unknown> {
         //
-        return this.db.init();
+        return this.db.init;
     }
     //@+node:felix.20230802145823.13: *3* g_cacher.clear
     /**
@@ -280,20 +281,21 @@ export class GlobalCacher {
             // except Exception
             g.trace('unexpected exception');
             g.es_exception(e);
+            // @ts-expect-error
             this.db = {};
         }
 
     }
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
-    public commit_and_close(): void {
+    public async commit_and_close(): Promise<void> {
         // Careful: this.db may be a dict.
 
-        if (this.db.hasOwnProperty('conn')) {
+        if (this.db.conn && this.db.hasOwnProperty('conn')) {
 
             if (g.app.debug.includes('cache')) {
                 this.dump('Shutdown');
             }
-            this.db.conn.commit();
+            await this.db.commit();
             this.db.conn.close();
         }
     }
@@ -693,7 +695,7 @@ class SqlitePickleShare {
 /**
  * Dump the given cache. 
  */
-function dump_cache(db: any, tag: string): void {
+function dump_cache(db: SqlitePickleShare, tag: string): void {
 
     g.es_print(`\n===== ${tag} =====\n`);
     if (db == null) {
@@ -704,7 +706,7 @@ function dump_cache(db: any, tag: string): void {
     const d: Record<string, any> = {};
     for (const x_key of db.keys()) {
         const key = x_key[0];
-        const val = db.get(key);
+        const val = db.get(key); // TODO : MAYBE USE  db[key] 
         const data = key.split(':::');
         let fn;
         let key2;

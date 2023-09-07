@@ -220,7 +220,7 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: any = {}; // May be set to a PickleShare instance later.
+    public db: Record<string, any>; // IS A DATABASE 
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
     public controlCommands: any = undefined;
@@ -271,6 +271,10 @@ export class Commands {
         this.hiddenRootNode.h = '<hidden root vnode>';
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
+
+        // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! masde from g.app.db !!
+        console.log('g.app.db', g.app.db); // undefined as of now so 
+        this.db = {};
 
         // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);
