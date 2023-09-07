@@ -4,11 +4,11 @@
 
 ### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
->LeoJS is a typescript implementation of the Leo Editor, as a VSCode extension. A line-by-line translation of the original python source code.
+> LeoJS is a typescript VSCode extension implementation of the Leo Editor: A line-by-line translation of the original python source.
 
-- See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
-or on [github](https://github.com/leo-editor/leo-editor).
-- See VSCode at [code.visualstudio.com](https://code.visualstudio.com/).
+-   See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
+    or on [github](https://github.com/leo-editor/leo-editor).
+-   See VSCode at [code.visualstudio.com](https://code.visualstudio.com/).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
 
@@ -23,6 +23,7 @@ Make sure you have Node.js and Git installed, then clone the sources and run `np
 You can then run the **Run Extension** target, as shown above, in the **Debug View**.
 
 ## Web extension version
+
 Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
 
 **In the meantime**, see 'Running Development version as a web extension' below to try out leojs in a browser.
@@ -44,13 +45,13 @@ $ mkcert -install
 $ mkcert localhost
 ```
 
-Then, from your extension's path, start an HTTP server by running 
+Then, from your extension's path, start an HTTP server by running
 
 ```
 $ npx serve --cors -l 5000 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/certs/localhost-key.pem
 ```
 
-Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000` 
+Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000`
 
 ## Keybindings
 
@@ -77,34 +78,33 @@ Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.
 
 _Move Outline commands need the 'Alt' key modifier only when focus is on body pane._
 
-| Common Operations  |     |          |     |           |    |            |                     |
-| :----------------- | :-- | :------- | :-- | :-------- |:-- | :--------- | :------------------ |
-| `Ctrl + T`         |     |          |     |           |    |            | Toggle Outline/Body |
-| `Tab`              | or  | `Enter`  | or  | `Alt + D` |or  | `Ctrl + G` | Focus on Body       |
-| `Alt + T`          |     |          |     |           |    |            | Focus on Outline    |
-| `Alt + -`          |     |          |     |           |    |            | Contract All        |
-| `Alt + A`          |     |          |     |           |    |            | Sort Siblings       |
-| `Ctrl + F`         |     |          |     |           |    |            | Start Search        |
-| `F3`               |     |          |     |           |    |            | Find Next           |
-| `F2`               |     |          |     |           |    |            | Find Previous       |
-| `Ctrl + =`         |     |          |     |           |    |            | Replace             |
-| `Ctrl + -`         |     |          |     |           |    |            | Replace then Find   |
-| `Alt + X`          |     |          |     |           |    |            | Minibuffer Palette  |
-| `Ctrl + Shift + D` |     |          |     |           |    |            | Extract             |
-| `Ctrl + Shift + N` |     |          |     |           |    |            | Extract Names       |
-| `Ctrl + B`         |     |          |     |           |    |            | Execute Script      | 
+| Common Operations  |     |         |     |           |     |            |                     |
+| :----------------- | :-- | :------ | :-- | :-------- | :-- | :--------- | :------------------ |
+| `Ctrl + T`         |     |         |     |           |     |            | Toggle Outline/Body |
+| `Tab`              | or  | `Enter` | or  | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
+| `Alt + T`          |     |         |     |           |     |            | Focus on Outline    |
+| `Alt + -`          |     |         |     |           |     |            | Contract All        |
+| `Alt + A`          |     |         |     |           |     |            | Sort Siblings       |
+| `Ctrl + F`         |     |         |     |           |     |            | Start Search        |
+| `F3`               |     |         |     |           |     |            | Find Next           |
+| `F2`               |     |         |     |           |     |            | Find Previous       |
+| `Ctrl + =`         |     |         |     |           |     |            | Replace             |
+| `Ctrl + -`         |     |         |     |           |     |            | Replace then Find   |
+| `Alt + X`          |     |         |     |           |     |            | Minibuffer Palette  |
+| `Ctrl + Shift + D` |     |         |     |           |     |            | Extract             |
+| `Ctrl + Shift + N` |     |         |     |           |     |            | Extract Names       |
+| `Ctrl + B`         |     |         |     |           |     |            | Execute Script      |
 
-| Tree Navigation    |           |                 |                          |
-| :----------------- | :-------- | :-------------- | :----------------------- |
-| `Ctrl+Shift+L`     |           |                 | Show the LeoJS View      |
-| `Ctrl+P`           |           |                 | Go Anywhere              |
-| `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
-| `Alt + End`        |           | `End` \*        | Go To Last Visible Node  |
-| `PgUp / pgDn`      |           |                 | Tree page up/down        |
-| `Alt + N`          |           |                 | Go To Next Clone         |
-| `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
-
-<!-- | `Alt + G`    |           |                   | Go To Global Line      | --> 
+| Tree Navigation    |     |                 |                          |
+| :----------------- | :-- | :-------------- | :----------------------- |
+| `Ctrl+Shift+L`     |     |                 | Show the LeoJS View      |
+| `Ctrl+P`           |     |                 | Go Anywhere              |
+| `Alt + Home`       | or  | `Home` \*       | Go To First Visible Node |
+| `Alt + End`        |     | `End` \*        | Go To Last Visible Node  |
+| `PgUp / pgDn`      |     |                 | Tree page up/down        |
+| `Alt + N`          |     |                 | Go To Next Clone         |
+| `Alt + Arrow Keys` | or  | `Arrow Keys` \* | Browse Tree              |
+| `Alt + G`          |     |                 | Go To Global Line        |
 
 \* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
 
