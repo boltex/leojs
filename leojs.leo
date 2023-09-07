@@ -808,12 +808,11 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
-| `Ctrl+Shift+L`     |           |                 | Show the LeoJS View   |
+| `Ctrl+Shift+L`     |           |                 | Show the LeoJS View      |
 | `Ctrl+P`           |           |                 | Go Anywhere              |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
-|                    |           | `End` \*        | Go To Last Visible Node  |
+| `Alt + End`        |           | `End` \*        | Go To Last Visible Node  |
 | `PgUp / pgDn`      |           |                 | Tree page up/down        |
-| `Alt + End`        |           |                 | Go To Last Sibling       |
 | `Alt + N`          |           |                 | Go To Next Clone         |
 | `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
 
@@ -4272,7 +4271,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "a65d347",
+  "gitBranch": "sqliteDbSupport",
+  "gitDate": "2023-09-05 19:55:28 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6428,7 +6430,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
-  "command": "leojs.gotoLastSibling",
+  "command": "leojs.gotoLastVisible",
   "key": "alt+end",
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
