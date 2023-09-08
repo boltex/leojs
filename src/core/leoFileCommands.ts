@@ -3,6 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20210220195150.1: ** << imports >>
 import * as vscode from 'vscode';
+import * as path from 'path';
 import * as g from './leoGlobals';
 import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';
@@ -1547,7 +1548,6 @@ export class FileCommands {
         silent: boolean = false
     ): Promise<VNode | undefined> {
         const c: Commands = this.c;
-        const frame = this.c.frame;
 
         // Set c.openDirectory
         const theDir: string = g.os_path_dirname(fileName);
@@ -1673,7 +1673,7 @@ export class FileCommands {
      *
      * This method follows behavior of readSaxFile.
      */
-    public retrieveVnodesFromDb(conn: any): Promise<VNode | undefined> {
+    public async retrieveVnodesFromDb(fileName: string): Promise<VNode | undefined> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
 
@@ -1687,57 +1687,78 @@ export class FileCommands {
 
         const vnodes: VNode[] = [];
 
-        return Promise.resolve(undefined);
-        // TODO !
-        /*
-        try:
-            for row in conn.execute(sql):
-                (gnx, h, b, children, parents, iconVal, statusBits, ua) = row
-                try:
-                    ua = pickle.loads(g.toEncodedString(ua))
-                except ValueError:
-                    ua = None
-                v = leoNodes.VNode(context=c, gnx=gnx)
-                v._headString = h
-                v._bodyString = b
-                v.children = children.split()
-                v.parents = parents.split()
-                v.iconVal = iconVal
-                v.statusBits = statusBits
-                v.u = ua
-                vnodes.append(v)
-        except sqlite3.Error as er:
-            if er.args[0].find('no such table') < 0:
+        // return Promise.resolve(undefined);
+        const w_uri = g.makeVscodeUri(fileName);
+        const filebuffer = await vscode.workspace.fs.readFile(w_uri);
+        const conn = new g.SQL.Database(filebuffer);
+        try {
+            const resultElements = conn.exec(sql)[0];
+            for (const row of resultElements.values) {
+                let [gnx, h, b, children, parents, iconVal, statusBits, ua] = row;
+                try {
+                    ua = pickle.loads(g.toEncodedString(ua));
+                } catch (ValueError) {
+                    // @ts-expect-error 
+                    ua = undefined;
+                }
+                const v = new VNode(c, gnx as string);
+                v._headString = h as string;
+                v._bodyString = b as string;
+                // @ts-expect-error FORCED CONVERSION BELOW
+                v.children = (children as string).split(/\s+/);
+                // @ts-expect-error FORCED CONVERSION BELOW
+                v.parents = (parents as string).split(/\s+/);
+                v.iconVal = iconVal as number;
+                v.statusBits = statusBits as number;
+                v.u = ua as { [key: string]: any; };
+                vnodes.push(v);
+            }
+        } catch (er: any) {
+            if (er.toString().indexOf('no such table') < 0) {
                 // there was an error raised but it is not the one we expect
-                g.internalError(er)
+                g.internalError(er);
+            }
             // there is no vnodes table
-            return None
+            return undefined;
+        }
 
-        rootChildren = [x for x in vnodes if 'hidden-root-vnode-gnx' in x.parents]
-        if not rootChildren:
-            g.trace('there should be at least one top level node!')
-            return None
+        // * as string, will be converted below.
+        const rootChildren = vnodes.filter(x => (x.parents as unknown as string[]).includes('hidden-root-vnode-gnx'));
 
-        def findNode(x: VNode) -> VNode:
-            return fc.gnxDict.get(x, c.hiddenRootNode)  // type:ignore
+        // const rootChildren = [x for x in vnodes if 'hidden-root-vnode-gnx' in x.parents]
+
+        if (!rootChildren.length) {
+            g.trace('there should be at least one top level node!');
+            return undefined;
+        }
+
+
+        const findNode = (x: string) => {
+            return fc.gnxDict[x] || c.hiddenRootNode;  // type:ignore
+        };
+
         // let us replace every gnx with the corresponding vnode
-        for v in vnodes:
-            v.children = [findNode(x) for x in v.children]
-            v.parents = [findNode(x) for x in v.parents]
-        c.hiddenRootNode.children = rootChildren
-        (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
-        c.frame.setTopGeometry(w, h, x, y)
-        c.frame.resizePanesToRatio(r1, r2)
-        p = fc.decodePosition(encp)
-        c.setCurrentPosition(p)
-        return rootChildren[0]
-        */
+        for (const v of vnodes) {
+            v.children = v.children.map(x => findNode(x as unknown as string));
+            v.parents = v.parents.map(x => findNode(x as unknown as string));
+        }
+        c.hiddenRootNode.children = rootChildren;
+
+        console.log('TODO: getWindowGeometryFromDb to get current_position when opening db file');
+
+        // let [w, h, x, y, r1, r2, encp] = fc.getWindowGeometryFromDb(conn);
+        // c.frame.setTopGeometry(w, h, x, y);
+        // c.frame.resizePanesToRatio(r1, r2);
+        // const p = fc.decodePosition(encp);
+        // c.setCurrentPosition(p);
+        return rootChildren[0];
+
     }
     //@+node:felix.20211213224232.16: *6* fc.initNewDb
     /**
      * Initializes tables and returns None
      */
-    public initNewDb(conn: any): Promise<VNode> {
+    public initNewDb(filename: string): Promise<VNode> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
         const v: VNode = new VNode(c);
@@ -1746,12 +1767,12 @@ export class FileCommands {
         // (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
         //c.frame.setTopGeometry(w, h, x, y)
         //c.frame.resizePanesToRatio(r1, r2)
-        c.sqlite_connection = conn;
+        // c.sqlite_connection = conn;
         fc.exportToSqlite(c.mFileName);
         return Promise.resolve(v);
     }
     //@+node:felix.20211213224232.17: *6* fc.getWindowGeometryFromDb
-    // ! unneeded
+    // ! unneeded ?
     // def getWindowGeometryFromDb(self, conn):
     //     geom = (600, 400, 50, 50, 0.5, 0.5, '')
     //     keys = ('width', 'height', 'left', 'top',

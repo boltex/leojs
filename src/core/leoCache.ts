@@ -356,6 +356,8 @@ class SqlitePickleShare {
                     const dbfile = join(root, 'cache.sqlite');
                     if (g.unitTesting) {
                         // TODO : GET FILE
+                        console.log('TODO : GET FILE for SqlitePickleShare unitTesting');
+
                         // this.conn = await sqlite3.connect(dbfile);
                         const filebuffer = await vscode.workspace.fs.readFile(
                             g.makeVscodeUri(path.join(this.root))

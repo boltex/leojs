@@ -4,6 +4,7 @@
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
 import { Utils as uriUtils } from 'vscode-uri';
+import { Database, SqlJsStatic } from 'sql.js';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
@@ -144,7 +145,7 @@ export class Commands {
     public command_name: string = '';
     public recent_commands_list: string[] = [];
 
-    public sqlite_connection: any | undefined = undefined;
+    public sqlite_connection: Database | undefined = undefined;
 
     //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.
@@ -272,7 +273,7 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-        // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! masde from g.app.db !!
+        // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
         console.log('g.app.db', g.app.db); // undefined as of now so 
         this.db = {};
 
