@@ -1758,7 +1758,7 @@ export class FileCommands {
     /**
      * Initializes tables and returns None
      */
-    public initNewDb(): Promise<VNode> {
+    public async initNewDb(): Promise<VNode> {
 
         const conn = new g.SQL.Database();
 
@@ -1770,7 +1770,7 @@ export class FileCommands {
         // c.frame.setTopGeometry(w, h, x, y)
         // c.frame.resizePanesToRatio(r1, r2)
         c.sqlite_connection = conn;
-        fc.exportToSqlite(c.mFileName);
+        await fc.exportToSqlite(c.mFileName);
         return Promise.resolve(v);
     }
     //@+node:felix.20211213224232.17: *6* fc.getWindowGeometryFromDb
@@ -2180,30 +2180,29 @@ export class FileCommands {
     /**
      * Dump all vnodes to sqlite database. Returns True on success.
      */
-    public exportToSqlite(fileName: string): boolean {
+    public async exportToSqlite(fileName: string): Promise<boolean> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
 
         if (c.sqlite_connection === undefined) {
 
-            // TODO !
-
-            // c.sqlite_connection = new sqlite3.Database(fileName);
+            c.sqlite_connection = new g.SQL.Database();
 
         }
 
         const conn = c.sqlite_connection;
 
-        // TODO : json stringify instead of pickle?
 
-        // const dump_u(v) -> bytes:
-        //     try:
-        //         s = pickle.dumps(v.u, protocol=1)
-        //     except pickle.PicklingError:
-        //         s = b''  # 2021/06/25: fixed via mypy complaint.
-        //         g.trace('unpickleable value', repr(v.u))
-        //     return s
-
+        const dump_u = (v: VNode) => {
+            let s = '';
+            try {
+                s = pickle.dumps(v.u, 1);
+            } catch (e) {
+                s = '';  // 2021/06/25: fixed via mypy complaint.
+                g.trace('unpickleable value', v.u.toString());
+            }
+            return s;
+        };
         // dbrow = lambda v: (
         //         v.gnx,
         //         v.h,
@@ -2224,7 +2223,10 @@ export class FileCommands {
                 v.parents.map((x) => x.gnx).join(' '),
                 v.iconVal,
                 v.statusBits,
-                v.u ? JSON.stringify(v.u) : '',
+                v.u ? dump_u(v) : '',
+
+                // TODO : maybe JSON stringify instead of pickle? TRY TO DO AS PER LEO !
+                // v.u ? JSON.stringify(v.u) : '',
             ];
         }
 
@@ -2244,7 +2246,12 @@ export class FileCommands {
             fc.exportGeomToSqlite(conn);
             fc.exportHashesToSqlite(conn);
 
-            // conn.commit(); // TODO : support db sqlite files!
+            // conn.commit(); // ! support db sqlite files by 'writing' as commit !
+            const db_data = conn.export();
+            const db_buffer = Buffer.from(db_data);
+
+            const db_uri = g.makeVscodeUri(fileName);
+            await vscode.workspace.fs.writeFile(db_uri, db_buffer);
 
             ok = true;
         } catch (e) {

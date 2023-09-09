@@ -1147,8 +1147,6 @@ suite('Test cases for leoFind.ts', () => {
         let indexTest = 0;
         for (const [s, expected] of table) {
             indexTest += 1;
-            console.log('index', indexTest, 's', s);
-
             const got = x.replace_back_slashes(s);
             assert.strictEqual(expected, got, s);
         }
