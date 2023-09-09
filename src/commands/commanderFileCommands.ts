@@ -76,8 +76,8 @@ export class CommanderFileCommands {
         const lm: LoadManager = g.app.loadManager!;
 
         // TODO
-        void vscode.window.showInformationMessage('TODO : restartLeo');
-        console.log('TODO : restartLeo');
+        void vscode.window.showInformationMessage('TODO : restartLeo (or deprecate/remove?)');
+        console.log('TODO : restartLeo (or deprecate/remove?)');
 
         /*
         trace = 'shutdown' in g.app.debug

@@ -707,7 +707,7 @@ export class ExternalFilesController {
         if (!g.app.commanders().includes(c)) {
             return '';
         }
-        const is_leo = p_path.endsWith('.db') || p_path.endsWith('.leo');
+        const is_leo = p_path.endsWith('.db') || p_path.endsWith('.leo') || p_path.endsWith('.leojs');
         const is_external_file = !is_leo;
 
         // check with leoServer's config first.

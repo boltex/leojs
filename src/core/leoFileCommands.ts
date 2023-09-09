@@ -1480,7 +1480,7 @@ export class FileCommands {
             if (fileName.endsWith('.db')) {
                 v = await fc.retrieveVnodesFromDb(fileName);
                 if (!v) {
-                    v = await fc.initNewDb(fileName);
+                    v = await fc.initNewDb();
                 }
             } else if (fileName.endsWith('.leojs')) {
                 const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
@@ -1758,16 +1758,18 @@ export class FileCommands {
     /**
      * Initializes tables and returns None
      */
-    public initNewDb(filename: string): Promise<VNode> {
+    public initNewDb(): Promise<VNode> {
+
+        const conn = new g.SQL.Database();
+
         const c: Commands = this.c;
         const fc: FileCommands = this;
         const v: VNode = new VNode(c);
-
         c.hiddenRootNode.children = [v];
         // (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
-        //c.frame.setTopGeometry(w, h, x, y)
-        //c.frame.resizePanesToRatio(r1, r2)
-        // c.sqlite_connection = conn;
+        // c.frame.setTopGeometry(w, h, x, y)
+        // c.frame.resizePanesToRatio(r1, r2)
+        c.sqlite_connection = conn;
         fc.exportToSqlite(c.mFileName);
         return Promise.resolve(v);
     }
@@ -2183,12 +2185,17 @@ export class FileCommands {
         const fc: FileCommands = this;
 
         if (c.sqlite_connection === undefined) {
+
             // TODO !
+
             // c.sqlite_connection = new sqlite3.Database(fileName);
+
         }
+
         const conn = c.sqlite_connection;
 
         // TODO : json stringify instead of pickle?
+
         // const dump_u(v) -> bytes:
         //     try:
         //         s = pickle.dumps(v.u, protocol=1)
@@ -2207,6 +2214,7 @@ export class FileCommands {
         //         v.statusBits,
         //         dump_u(v)
         //     )
+
         function dbrow(v: VNode): sqlDbRow {
             return [
                 v.gnx,
@@ -2235,7 +2243,9 @@ export class FileCommands {
 
             fc.exportGeomToSqlite(conn);
             fc.exportHashesToSqlite(conn);
+
             // conn.commit(); // TODO : support db sqlite files!
+
             ok = true;
         } catch (e) {
             g.internalError(e);

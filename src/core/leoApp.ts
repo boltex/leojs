@@ -1307,6 +1307,8 @@ export class LeoApp {
         ) {
             return;
         }
+        console.log('TODO : checkForOpenFile');
+
         // #1519: check os.path.exists.
         /*
         const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
@@ -1342,6 +1344,8 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
+        console.log('TODO : TEST forgetOpenFile');
+
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
@@ -1369,6 +1373,8 @@ export class LeoApp {
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
+        console.log('TODO : TEST rememberOpenFile');
+
         // Do not call g.trace, etc. here.
         const d = g.app.db;
         const tag = 'open-leo-files';
@@ -3185,15 +3191,41 @@ export class LoadManager {
         if (!fn) {
             return false;
         }
+        console.log('TODO: isZippedFile');
         // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
         return (
             fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs')
         );
     }
     public isZippedFile(fn: string): boolean {
-        // ? NEEDED ?
+
         // TODO : zip support ?
+
+        console.log('TODO: isZippedFile');
+
         return false;
+        /*
+        try {
+            const buffer = Buffer.alloc(4);
+            const fd = fs.openSync(filePath, 'r');
+            
+            // Read the first 4 bytes of the file
+            fs.readSync(fd, buffer, 0, 4, 0);
+            fs.closeSync(fd);
+    
+            // Check if the first 4 bytes match the ZIP file signature
+            const zipSignature = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+            for (let i = 0; i < 4; i++) {
+                if (buffer[i] !== zipSignature[i]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            return false;
+        }
+        */
         // return fn && zipfile.is_zipfile(fn);
     }
     //@+node:felix.20220109233001.1: *6* LM.openAnyLeoFile
@@ -3203,30 +3235,30 @@ export class LoadManager {
      * @param fn
      * @returns number: file descriptor
      */
-    public openAnyLeoFile(fn: string): number | undefined {
-        const lm: LoadManager = this;
+    // public openAnyLeoFile(fn: string): number | undefined {
+    //     const lm: LoadManager = this;
 
-        if (fn.endsWith('.db')) {
-            // TODO !
-            // return sqlite3.connect(fn);
-            return undefined;
-        }
-        let theFile: number | undefined;
+    //     if (fn.endsWith('.db')) {
+    //         // TODO !
+    //         // return sqlite3.connect(fn);
+    //         return undefined;
+    //     }
+    //     let theFile: number | undefined;
 
-        // ! now use vscode.workspace.fs async functions
-        /*
-        if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
-            // ? NEEDED ZIP SUPPORT ?
-            // if (lm.isZippedFile(fn)){
-            //     theFile = lm.openZipFile(fn);
-            // }else{
-            //     theFile = lm.openLeoFile(fn);
-            // }
-            theFile = lm.openLeoFile(fn);
-        }
-        */
-        return theFile;
-    }
+    //     // ! now use vscode.workspace.fs async functions
+    //     /*
+    //     if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
+    //         // ? NEEDED ZIP SUPPORT ?
+    //         // if (lm.isZippedFile(fn)){
+    //         //     theFile = lm.openZipFile(fn);
+    //         // }else{
+    //         //     theFile = lm.openLeoFile(fn);
+    //         // }
+    //         theFile = lm.openLeoFile(fn);
+    //     }
+    //     */
+    //     return theFile;
+    // }
     //@+node:felix.20220109233518.1: *6* LM.openLeoFile
     /**
      * @deprecated Now using async vscode.workspace.fs functions
