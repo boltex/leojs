@@ -1704,10 +1704,19 @@ export class FileCommands {
                 const v = new VNode(c, gnx as string);
                 v._headString = h as string;
                 v._bodyString = b as string;
-                // @ts-expect-error FORCED CONVERSION BELOW
-                v.children = (children as string).split(/\s+/);
-                // @ts-expect-error FORCED CONVERSION BELOW
-                v.parents = (parents as string).split(/\s+/);
+                if (!children) {
+                    v.children = [];
+                } else {
+                    // @ts-expect-error FORCED CONVERSION BELOW
+                    v.children = (children as string).split(/\s+/);
+                }
+                if (!parents) {
+                    v.parents = [];
+                } else {
+                    // @ts-expect-error FORCED CONVERSION BELOW
+                    v.parents = (parents as string).split(/\s+/);
+                }
+
                 v.iconVal = iconVal as number;
                 v.statusBits = statusBits as number;
                 v.u = ua as { [key: string]: any; };
@@ -1732,9 +1741,8 @@ export class FileCommands {
             return undefined;
         }
 
-
         const findNode = (x: string) => {
-            return fc.gnxDict[x] || c.hiddenRootNode;  // type:ignore
+            return fc.gnxDict[x] || c.hiddenRootNode;
         };
 
         // let us replace every gnx with the corresponding vnode

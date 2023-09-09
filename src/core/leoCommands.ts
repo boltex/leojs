@@ -1540,11 +1540,6 @@ export class Commands {
         for (let p of c.all_positions(false)) {
             count += 1;
             const v: VNode = p.v;
-            // * removed https://github.com/leo-editor/leo-editor/pull/2363/files
-            // if (v["tnodeList"] !== undefined) {
-            //     delete v.tnodeList;
-            //     v._p_changed = true;
-            // }
             let gnx: string = v.fileIndex;
             if (gnx) {
                 // gnx must be a string.
@@ -1557,7 +1552,6 @@ export class Commands {
             } else {
                 gnx_errors += 1;
                 v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
-                // g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`, 'red');
                 g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`);
             }
         }
