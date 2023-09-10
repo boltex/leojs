@@ -3167,19 +3167,14 @@ export class VNode {
     public matchHeadline(pattern: string): boolean {
         const v: VNode = this;
         let h: string = g.toUnicode(v.headString());
-        h = h.toLowerCase().split(' ').join('').split('\t').join('');
+        h = h.toLowerCase().replace(/ /g, '').replace(/\t/g, '');
         // equivalent to h = h.lstrip('.')
         // 2013/04/05. Allow leading period before section names.
         while (h.charAt(0) === '.') {
             h = h.substring(1);
         }
         pattern = g.toUnicode(pattern);
-        pattern = pattern
-            .toLowerCase()
-            .split(' ')
-            .join('')
-            .split('\t')
-            .join('');
+        pattern = pattern.toLowerCase().replace(/ /g, '').replace(/\t/g, '');
         return h.startsWith(pattern);
     }
 
@@ -3614,7 +3609,7 @@ export class VNode {
         // API allows headlines to contain newlines.
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
-        v._headString = s.split('\n').join('');
+        v._headString = s.replace(/\n/g, '');
         // self.contentModified()  # #1413.
     }
 

@@ -200,7 +200,7 @@ export class TagController {
     public get_tagged_nodes(tag: string): Position[] {
         const nodelist: Position[] = [];
         // replace * with .* for regex compatibility
-        tag = tag.split('*').join('.*');
+        tag = tag.replace(/\*/g, '.*');
         let regex;
         try {
             regex = new RegExp(tag);
@@ -220,7 +220,7 @@ export class TagController {
     //@+node:felix.20221019002843.9: *4* tag_c.get_tagged_gnxes
     public *get_tagged_gnxes(tag: string): Generator<string> {
         const c = this.c;
-        tag = tag.split('*').join('.*');
+        tag = tag.replace(/\*/g, '.*');
         let regex;
         try {
             regex = new RegExp(tag);
