@@ -1690,7 +1690,14 @@ export class FileCommands {
         // return Promise.resolve(undefined);
         const w_uri = g.makeVscodeUri(fileName);
         const filebuffer = await vscode.workspace.fs.readFile(w_uri);
+
+        // HACK for leojs to treat db as regular file.
+        if (c.sqlite_connection) {
+            c.sqlite_connection.close();
+        }
         const conn = new g.SQL.Database(filebuffer);
+        c.sqlite_connection = conn; // ! TEST THIS !
+
         try {
             const resultElements = conn.exec(sql)[0];
             for (const row of resultElements.values) {
@@ -2230,7 +2237,9 @@ export class FileCommands {
                 v.children.map((x) => x.gnx).join(' '),
                 v.parents.map((x) => x.gnx).join(' '),
                 v.iconVal,
-                v.statusBits,
+                // #3550: Clear the dirty bit.
+                v.statusBits & ~StatusFlags.dirtyBit,
+                // v.statusBits,
                 v.u ? dump_u(v) : '',
 
                 // TODO : maybe JSON stringify instead of pickle? TRY TO DO AS PER LEO !
@@ -2342,6 +2351,9 @@ export class FileCommands {
     }
 
     //@+node:felix.20211213224237.14: *6* fc.exportVnodesToSqlite
+    /**
+     * Called only from fc.exportToSqlite.
+     */
     public exportVnodesToSqlite(conn: any, rows: sqlDbRow[]): void {
         for (let row of rows) {
             conn.run(

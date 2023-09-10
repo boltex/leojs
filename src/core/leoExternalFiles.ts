@@ -282,7 +282,7 @@ export class ExternalFilesController {
         if (['yes', 'yes-all'].includes(val)) {
             // Do a complete restart of Leo.
             await g.app.loadManager!.revertCommander(c);
-            g.es_print(`reloaded ${path}`);
+            g.es_print(`reloaded ${w_path}`);
         }
     }
     //@+node:felix.20230503004807.10: *5* efc.idle_check_open_with_file & helper
