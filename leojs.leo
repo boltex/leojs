@@ -549,7 +549,7 @@
 <v t="felix.20221119204422.1"><vh>@file src/core/leoGui.ts</vh></v>
 </v>
 <v t="felix.20230505220205.1"><vh>Importer plugins</vh>
-<v t="felix.20230522010520.1"><vh>TODO</vh></v>
+<v t="felix.20230522010520.1"><vh>@file src/importers/base_importer.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
@@ -14318,7 +14318,6 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
 // Each plugin must define a top-level importer_dict dictionary describing the plugin.
 @language typescript
 </t>
-<t tx="felix.20230522010520.1"></t>
 <t tx="felix.20230715185802.1"></t>
 <t tx="felix.20230715185809.1"></t>
 <t tx="felix.20230820145332.1">/**

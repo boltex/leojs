@@ -216,12 +216,13 @@ export class LeoApp {
     //@+<< LeoApp: global reader/writer data >>
     //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
-    public atAutoWritersDict: { [key: string]: any } = {};
-    public writersDispatchDict: { [key: string]: any } = {};
+    public atAutoWritersDict: Record<string, (...args: any[]) => any> = {};
+    public writersDispatchDict: Record<string, (...args: any[]) => any> = {};
+
     // From leoImport.py
-    public atAutoDict: { [key: string]: any } = {};
-    // Keys are @auto names, values are scanner classes.
-    public classDispatchDict: { [key: string]: any } = {};
+    // Keys are @auto names, values are scanner functions..
+    public atAutoDict: Record<string, (...args: any[]) => any> = {};
+    public classDispatchDict: Record<string, (...args: any[]) => any> = {};
 
     // True if an @auto writer should write sentinels,
     // even if the external file doesn't actually contain sentinels.
@@ -233,7 +234,7 @@ export class LeoApp {
     //@-<< LeoApp: global reader/writer data >>
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>
-    public already_open_files: any[] = []; // A list of file names that * might * be open in another copy of Leo.
+    public already_open_files: string[] = []; // A list of file names that * might * be open in another copy of Leo.
     public inBridge: boolean = false; // True: running from leoBridge module.
     public inScript: boolean = false; // True: executing a script.
     public initing: boolean = true; // True: we are initializing the app.
@@ -2695,7 +2696,37 @@ export class LoadManager {
      * Create the data structures describing importer plugins.
      */
     public createImporterData(): void {
+
         console.log('TODO : createImporterData');
+
+        const table = [
+            "c",
+            "coffeescript",
+            "csharp",
+            "ctext",
+            "cython",
+            "dart",
+            "elisp",
+            "html",
+            "ini",
+            "java",
+            "javascript",
+            "leo_rst",
+            "lua",
+            "markdown",
+            "org",
+            "otl",
+            "pascal",
+            "perl",
+            "php",
+            "python",
+            "rust",
+            "tcl",
+            "treepad",
+            "typescript",
+            "xml",
+
+        ];
 
         // // Allow plugins to be defined in ~/.leo/plugins.
         // for (const pattern of [
@@ -2719,6 +2750,7 @@ export class LoadManager {
         //                 g.printObj(filenames)
 
         // }
+
     }
     //@+node:felix.20230529220941.3: *7* LM.parse_importer_dict
     /**
@@ -2726,6 +2758,7 @@ export class LoadManager {
      * g.app.atAutoNames using entries in m.importer_dict.
      */
     public parse_importer_dict(sfn: string, m: any): void {
+
         console.log('TODO : parse_importer_dict');
 
         // importer_d = getattr(m, 'importer_dict', None)
@@ -2753,12 +2786,14 @@ export class LoadManager {
         //     'linescanner.py',
         // ):
         //     g.warning(f"leo/plugins/importers/{sfn} has no importer_dict")
+
     }
     //@+node:felix.20230529220941.4: *6* LM.createWritersData & helper
     /**
      * Create the data structures describing writer plugins.
      */
     public createWritersData(): void {
+
         console.log('TODO : createWritersData');
 
         // // Do *not* remove this trace.
@@ -2796,6 +2831,7 @@ export class LoadManager {
      * using entries in m.writers_dict.
      */
     public parse_writer_dict(sfn: string, m: any): void {
+
         console.log('TODO : createWritersData');
 
         // writer_d = getattr(m, 'writer_dict', None)
@@ -3212,7 +3248,7 @@ export class LoadManager {
             // Read the first 4 bytes of the file
             fs.readSync(fd, buffer, 0, 4, 0);
             fs.closeSync(fd);
-    
+
             // Check if the first 4 bytes match the ZIP file signature
             const zipSignature = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
             for (let i = 0; i < 4; i++) {
