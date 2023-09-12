@@ -3,7 +3,6 @@
 /**
  * The @auto importer for the C language and other related languages.
  */
-
 import { Commands } from '../core/leoCommands';
 import * as g from '../core/leoGlobals';
 import { Position } from '../core/leoNodes';

@@ -552,6 +552,8 @@
 <v t="felix.20230522010520.1"><vh>@file src/importers/base_importer.ts</vh></v>
 <v t="felix.20230911193725.1"><vh>@file src/importers/c.ts</vh></v>
 <v t="felix.20230911210454.1"><vh>@file src/importers/python.ts</vh></v>
+<v t="felix.20230911233839.1"><vh>@file src/importers/javascript.ts</vh></v>
+<v t="felix.20230911234728.1"><vh>@file src/importers/typescript.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
