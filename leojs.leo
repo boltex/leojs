@@ -550,6 +550,8 @@
 </v>
 <v t="felix.20230505220205.1"><vh>Importer plugins</vh>
 <v t="felix.20230522010520.1"><vh>@file src/importers/base_importer.ts</vh></v>
+<v t="felix.20230911193725.1"><vh>@file src/importers/c.ts</vh></v>
+<v t="felix.20230911210454.1"><vh>@file src/importers/python.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>

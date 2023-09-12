@@ -8,7 +8,7 @@ import { Commands } from '../core/leoCommands';
 import * as g from '../core/leoGlobals';
 import { Position } from '../core/leoNodes';
 
-type Block = [string, string, number, number, number];
+export type Block = [string, string, number, number, number];
 
 //@+others
 //@+node:felix.20230910195228.1: ** class Importer
@@ -99,16 +99,16 @@ export class Importer {
         let message: string = "";
         // Make sure whitespace matches @tabwidth directive.
         if (w < 0) {
-            ok = tabs == 0;
+            ok = tabs === 0;
             message = `tabs found with @tabwidth ${w} in ${fn}`;
 
         } else if (w > 0) {
-            ok = blanks == 0;
+            ok = blanks === 0;
             message = `blanks found with @tabwidth ${w} in ${fn}`;
         }
 
         if (ok) {
-            ok = (blanks == 0 || tabs == 0);
+            ok = (blanks === 0 || tabs === 0);
             message = `intermixed blanks and tabs in: ${fn}`;
         }
 
@@ -145,7 +145,7 @@ export class Importer {
     public create_preamble(blocks: Block[], parent: Position, result_list: string[]): void {
 
         console.assert(this.allow_preamble);
-        console.assert(parent.__eq__(this.root))
+        console.assert(parent.__eq__(this.root));
 
         const lines = this.lines;
         const common_lws = this.compute_common_lws(blocks);
@@ -317,7 +317,7 @@ export class Importer {
             this.guide_lines = this.make_guide_lines(lines);
             const n1: number = this.lines.length;
             const n2: number = this.guide_lines.length;
-            console.assert(n1 == n2);
+            console.assert(n1 === n2);
             // Start the recursion.
             const block: Block = ['outer', 'parent', 0, 0, lines.length];
             this.gen_block(block, parent);
