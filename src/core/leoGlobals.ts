@@ -3743,15 +3743,14 @@ def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> Li
     return result
  */
 //@+node:felix.20220410213527.8: *4* g.get_leading_ws
-/*
-def get_leading_ws(s: str) -> str:
-    """Returns the leading whitespace of 's'."""
-    i = 0
-    n = len(s)
-    while i < n and s[i] in (' ', '\t'):
-        i += 1
-    return s[0:i]
- */
+export function get_leading_ws(s: string): string {
+    let i = 0;
+    const n = s.length;
+    while (i < n && (s[i] === ' ' || s[i] === '\t')) {
+        i++;
+    }
+    return s.substring(0, i);
+}
 //@+node:felix.20220410213527.9: *4* g.optimizeLeadingWhitespace
 
 /**

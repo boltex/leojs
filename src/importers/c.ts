@@ -10,7 +10,7 @@ import { Block, Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230911193725.2: ** class C_Importer(Importer)
-class C_Importer extends Importer {
+export class C_Importer extends Importer {
 
   public language = 'c';
   public string_list = ['"'];  // Not single quotes.

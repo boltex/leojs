@@ -14,7 +14,7 @@ import { Block, Importer } from './base_importer';
 /**
  * Leo's Python importer
  */
-class Python_Importer extends Importer {
+export class Python_Importer extends Importer {
 
 
   public language = 'python';
