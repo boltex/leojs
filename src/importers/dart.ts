@@ -11,16 +11,16 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230912221938.2: ** class Dart_Importer(Importer)
 /**
- * The importer for the dart lanuage.
+ * The importer for the dart language.
  */
 class Dart_Importer extends Importer {
-    
 
-     public language  = 'dart';
 
-      public block_patterns: [string, RegExp][] = [
-        ['function',/^\s*([\w\s]+)\s*\(.*?\)\s*\{/],
-      ];
+  public language = 'dart';
+
+  public block_patterns: [string, RegExp][] = [
+    ['function', /^\s*([\w\s]+)\s*\(.*?\)\s*\{/],
+  ];
 
 }
 //@-others
@@ -29,12 +29,12 @@ class Dart_Importer extends Importer {
  * The importer callback for dart.
  */
 export const do_import = (c: Commands, parent: Position, s: string) => {
-    new Dart_Importer(c).import_from_string(parent, s);
+  new Dart_Importer(c).import_from_string(parent, s);
 };
 
 export const importer_dict = {
-    'extensions': ['.dart'],
-    'func': do_import,
+  'extensions': ['.dart'],
+  'func': do_import,
 };
 
 //@@language typescript

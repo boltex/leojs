@@ -43,8 +43,6 @@ export class Importer {
     // May be overridden in subclasses.
     public allow_preamble = false;
     public block_patterns: [string, RegExp][] = [];
-    public level_up_ch = '{';
-    public level_down_ch = '}';
     public string_list: string[] = ['"', "'"];
 
     public c: Commands;

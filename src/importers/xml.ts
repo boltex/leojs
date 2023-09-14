@@ -12,7 +12,7 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230912233339.2: ** class Xml_Importer(Importer)
 /** 
- * The importer for the xml lanuage.
+ * The importer for the xml language.
  */
 export class Xml_Importer extends Importer {
 

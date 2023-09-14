@@ -12,8 +12,6 @@ import { Block, Importer } from './base_importer';
 //@+node:felix.20230912223458.2: ** class Elisp_Importer(Importer)
 class Elisp_Importer extends Importer {
   public language = 'lisp';
-  public level_up_ch = '(';
-  public level_down_ch = ')';
 
   public block_patterns: [string, RegExp][] = [
     // ( defun name
@@ -39,10 +37,10 @@ class Elisp_Importer extends Importer {
       const line = this.guide_lines[i];
       i += 1;
       for (const ch of line) {
-        if (ch === this.level_up_ch) {
+        if (ch === '(') {
           level += 1;
         }
-        if (ch === this.level_down_ch) {
+        if (ch === ')') {
           level -= 1;
           if (level === 0) {
             return i;
