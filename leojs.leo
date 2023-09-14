@@ -575,6 +575,9 @@
 <v t="felix.20230911234728.1"><vh>@file src/importers/typescript.ts</vh></v>
 <v t="felix.20230912233339.1"><vh>@file src/importers/xml.ts</vh></v>
 </v>
+<v t="felix.20230914004301.1"><vh>Writer plugins</vh>
+<v t="felix.20230914004349.1"><vh>@file src/writers/basewriter.ts</vh></v>
+</v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
 <v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
@@ -14374,6 +14377,12 @@ public async tabCycle(): Promise&lt;unknown&gt; {
     description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC,
     iconPath: new vscode.ThemeIcon("history")
 };
+</t>
+<t tx="felix.20230914004301.1">// Leo loads these plugins automatically.  Do not add them to @enabled-plugins nodes.
+
+// These plugins contain the write code for all kinds of special @auto nodes.
+// Each plugin must define a top-level writer_dict dictionary describing the plugin.
+@language typescript
 </t>
 </tnodes>
 </leo_file>
