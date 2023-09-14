@@ -561,6 +561,10 @@
 <v t="felix.20230913212159.1"><vh>@file src/importers/java.ts</vh></v>
 <v t="felix.20230911233839.1"><vh>@file src/importers/javascript.ts</vh></v>
 <v t="felix.20230913212609.1"><vh>@file src/importers/leo_rst.ts</vh></v>
+<v t="felix.20230913224120.1"><vh>@file src/importers/lua.ts</vh></v>
+<v t="felix.20230913225656.1"><vh>@file src/importers/markdown.ts</vh></v>
+<v t="felix.20230913231752.1"><vh>@file src/importers/org.ts</vh></v>
+<v t="felix.20230913231807.1"><vh>@file src/importers/otl.ts</vh></v>
 <v t="felix.20230911210454.1"><vh>@file src/importers/python.ts</vh></v>
 <v t="felix.20230911234728.1"><vh>@file src/importers/typescript.ts</vh></v>
 <v t="felix.20230912233339.1"><vh>@file src/importers/xml.ts</vh></v>
