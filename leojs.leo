@@ -565,7 +565,13 @@
 <v t="felix.20230913225656.1"><vh>@file src/importers/markdown.ts</vh></v>
 <v t="felix.20230913231752.1"><vh>@file src/importers/org.ts</vh></v>
 <v t="felix.20230913231807.1"><vh>@file src/importers/otl.ts</vh></v>
+<v t="felix.20230913235814.1"><vh>@file src/importers/pascal.ts</vh></v>
+<v t="felix.20230913235829.1"><vh>@file src/importers/perl.ts</vh></v>
+<v t="felix.20230913235836.1"><vh>@file src/importers/php.ts</vh></v>
 <v t="felix.20230911210454.1"><vh>@file src/importers/python.ts</vh></v>
+<v t="felix.20230914002433.1"><vh>@file src/importers/rust.ts</vh></v>
+<v t="felix.20230914002711.1"><vh>@file src/importers/tcl.ts</vh></v>
+<v t="felix.20230914002938.1"><vh>@file src/importers/treepad.ts</vh></v>
 <v t="felix.20230911234728.1"><vh>@file src/importers/typescript.ts</vh></v>
 <v t="felix.20230912233339.1"><vh>@file src/importers/xml.ts</vh></v>
 </v>
