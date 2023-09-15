@@ -1,7 +1,7 @@
 //@+leo-ver=5-thin
 //@+node:felix.20230914011239.1: * @file src/writers/dart.ts
 /**
- * The @auto write code for Emacs org-mode (.org) files.
+ * The @auto write code for dart.
  */
 
 import * as g from '../core/leoGlobals';

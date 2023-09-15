@@ -18,7 +18,7 @@ export type Block = [string, string, number, number, number];
  * Many importers only define `block_patterns` and `language` class ivars.
  *
  * Analyzing **guide lines** (lines without comments and strings)
- * grealtly simplifies this class and all of Leo's importers.
+ * greatly simplifies this class and all of Leo's importers.
  *
  * Subclasses may override the following methods to recognize blocks:
  *
