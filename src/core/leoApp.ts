@@ -20,6 +20,38 @@ import { SettingsDict } from './leoGlobals';
 import { leojsSettingsXml } from '../leojsSettings';
 import { LeoUI } from '../leoUI';
 import { CommanderCacher, GlobalCacher } from './leoCache';
+// importers
+import * as importer_c from '../importers/c';
+import * as importer_coffeescript from '../importers/coffeescript';
+import * as importer_csharp from '../importers/csharp';
+import * as importer_cython from '../importers/cython';
+import * as importer_dart from '../importers/dart';
+import * as importer_elisp from '../importers/elisp';
+import * as importer_html from '../importers/html';
+import * as importer_ini from '../importers/ini';
+import * as importer_java from '../importers/java';
+import * as importer_javascript from '../importers/javascript';
+import * as importer_leo_rst from '../importers/leo_rst';
+import * as importer_lua from '../importers/lua';
+import * as importer_markdown from '../importers/markdown';
+import * as importer_org from '../importers/org';
+import * as importer_otl from '../importers/otl';
+import * as importer_pascal from '../importers/pascal';
+import * as importer_perl from '../importers/perl';
+import * as importer_php from '../importers/php';
+import * as importer_python from '../importers/python';
+import * as importer_rust from '../importers/rust';
+import * as importer_tcl from '../importers/tcl';
+import * as importer_treepad from '../importers/treepad';
+import * as importer_typescript from '../importers/typescript';
+import * as importer_xml from '../importers/xml';
+// writers
+import * as writer_dart from '../writers/dart';
+import * as writer_leo_rst from '../writers/leo_rst';
+import * as writer_markdown from '../writers/markdown';
+import * as writer_org from '../writers/org';
+import * as writer_otl from '../writers/otl';
+import * as writer_treepad from '../writers/treepad';
 
 //@-<< imports >>
 //@+others
@@ -2703,7 +2735,6 @@ export class LoadManager {
             "c",
             "coffeescript",
             "csharp",
-            "ctext",
             "cython",
             "dart",
             "elisp",
@@ -2795,6 +2826,16 @@ export class LoadManager {
     public createWritersData(): void {
 
         console.log('TODO : createWritersData');
+
+        const table = [
+            'dart',
+            'leo_rst',
+            'markdown',
+            'org',
+            'otl',
+            'treepad'
+        ];
+
 
         // // Do *not* remove this trace.
         // const trace = false && 'createWritersData' not in g.app.debug_dict
