@@ -3425,23 +3425,25 @@ export class LeoFind {
         pattern: string
     ): boolean {
         pattern = this.replace_back_slashes(pattern);
-        if (!s || !pattern || !g.match(s, i, pattern)) {
-            return false;
-        }
+        return !!(s && pattern && g.match_word(s, i, pattern));
 
-        let pat1;
-        let pat2;
-        [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
-        const n = pattern.length;
-        const ch1 = 0 <= i - 1 && i - 1 < s.length ? s[i - 1] : '.';
-        const ch2 = 0 <= i + n && i + n < s.length ? s[i + n] : '.';
-        const isWordPat1 = g.isWordChar(pat1);
-        const isWordPat2 = g.isWordChar(pat2);
-        const isWordCh1 = g.isWordChar(ch1);
-        const isWordCh2 = g.isWordChar(ch2);
-        const inWord = (isWordPat1 && isWordCh1) || (isWordPat2 && isWordCh2);
+        // if (!s || !pattern || !g.match(s, i, pattern)) {
+        //     return false;
+        // }
 
-        return !inWord;
+        // let pat1;
+        // let pat2;
+        // [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
+        // const n = pattern.length;
+        // const ch1 = 0 <= i - 1 && i - 1 < s.length ? s[i - 1] : '.';
+        // const ch2 = 0 <= i + n && i + n < s.length ? s[i + n] : '.';
+        // const isWordPat1 = g.isWordChar(pat1);
+        // const isWordPat2 = g.isWordChar(pat2);
+        // const isWordCh1 = g.isWordChar(ch1);
+        // const isWordCh2 = g.isWordChar(ch2);
+        // const inWord = (isWordPat1 && isWordCh1) || (isWordPat2 && isWordCh2);
+
+        // return !inWord;
     }
     //@+node:felix.20221023141654.4: *5* find._inner_search_plain
     /**

@@ -1,6 +1,5 @@
 //@+leo-ver=5-thin
 //@+node:felix.20230914004349.1: * @file src/writers/basewriter.ts
-
 import { AtFile } from "../core/leoAtFile";
 import { Commands } from "../core/leoCommands";
 import { Position } from "../core/leoNodes";

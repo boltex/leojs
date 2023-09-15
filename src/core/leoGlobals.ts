@@ -2425,18 +2425,30 @@ export function match(s: string, i: number, pattern: string): boolean {
 
 //@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
 export function match_word(s: string, i: number, pattern: string): boolean {
+
     // Using a regex is surprisingly tricky.
-    if (!pattern) {
+    if (pattern == null) {
         return false;
     }
-    if (i > 0 && isWordChar(s.charAt(i - 1))) {
-        //  Bug fix: 2017/06/01.
-        return false;
-    }
+
+    // if (i > 0 && isWordChar(s.charAt(i - 1))) {
+    //     //  Bug fix: 2017/06/01.
+    //     return false;
+    // }
+
     const j = pattern.length;
     if (j === 0) {
         return false;
     }
+
+    // Special case: \t or \n delimit words!
+    if (i > 2 && s[i - 2] === '\\' && ['t', 'n'].includes(s[i - 1])) {
+        return true;
+    }
+    if (i > 0 && isWordChar(s[i - 1])) {
+        return false;
+    }
+
     let found = s.indexOf(pattern, i);
 
     if (found < i || found >= i + j) {

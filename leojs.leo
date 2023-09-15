@@ -578,6 +578,11 @@
 <v t="felix.20230914004301.1"><vh>Writer plugins</vh>
 <v t="felix.20230914004349.1"><vh>@file src/writers/basewriter.ts</vh></v>
 <v t="felix.20230914011239.1"><vh>@file src/writers/dart.ts</vh></v>
+<v t="felix.20230914214929.1"><vh>@file src/writers/leo_rst.ts</vh></v>
+<v t="felix.20230914214935.1"><vh>@file src/writers/markdown.ts</vh></v>
+<v t="felix.20230914214940.1"><vh>@file src/writers/org.ts</vh></v>
+<v t="felix.20230914214945.1"><vh>@file src/writers/otl.ts</vh></v>
+<v t="felix.20230914214949.1"><vh>@file src/writers/treepad.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
