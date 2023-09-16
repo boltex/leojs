@@ -2792,6 +2792,7 @@ export class LoadManager {
     public parse_importer_dict(sfn: string, m: any): void {
 
         const importer_d = m['importer_dict'];
+
         if (importer_d) {
             const at_auto = importer_d['@auto'] || [];
             const scanner_func = importer_d['func'];
@@ -2807,8 +2808,8 @@ export class LoadManager {
                         g.app.atAutoNames.push(s);
                     }
                 }
-
             }
+
             if (extensions && extensions.length) {
                 // Make entries for each extension.
                 const d = g.app.classDispatchDict;
@@ -2816,7 +2817,9 @@ export class LoadManager {
                     d[ext] = scanner_func;  // importer_d.get('func')#scanner_class
                 }
             }
+
         }
+
         // elif sfn not in (
         //     // These are base classes, not real plugins.
         //     'basescanner.py',
@@ -2872,6 +2875,7 @@ export class LoadManager {
         //     g.printDict(g.app.writersDispatchDict)
         //     g.trace('LM.atAutoWritersDict')
         //     g.printDict(g.app.atAutoWritersDict)
+
     }
     //@+node:felix.20230529220941.5: *7* LM.parse_writer_dict
     /**
@@ -2881,20 +2885,19 @@ export class LoadManager {
     public parse_writer_dict(sfn: string, m: any): void {
 
         const writer_d = m['writer_dict']; // getattr(m, 'writer_dict', None)
+
         if (writer_d) {
             const at_auto = writer_d['@auto'] || [];
             const scanner_class = writer_d['class'];
             const extensions: string[] = writer_d['extensions'] || [];
+
             if (at_auto) {
                 // Make entries for each @auto type.
                 const d = g.app.atAutoWritersDict;
                 for (const s of at_auto) {
                     const aClass = d[s];
-                    if (aClass && aClass != scanner_class) {
-                        g.trace(
-                            `${sfn}: duplicate ${s} class`
-
-                        );
+                    if (aClass && aClass !== scanner_class) {
+                        g.trace(`${sfn}: duplicate ${s} class`);
                     } else {
                         d[s] = scanner_class;
                         if (!g.app.atAutoNames.includes(s)) {
@@ -2904,25 +2907,30 @@ export class LoadManager {
                     }
                 }
             }
+
             if (extensions && extensions.length) {
                 // Make entries for each extension.
                 const d = g.app.writersDispatchDict;
                 for (const ext of extensions) {
                     const aClass = d[ext];
-                    if (aClass && aClass != scanner_class) {
+                    if (aClass && aClass !== scanner_class) {
                         g.trace(`${sfn}: duplicate ${ext} class`);
                     } else {
                         d[ext] = scanner_class;
                     }
                 }
             }
+
         }
+
         // elif sfn not in ('basewriter.py',):
         //     g.warning(f"leo/plugins/writers/{sfn} has no writer_dict")
+
     }
 
     //@+node:felix.20220417225955.1: *5* LM.createGui
     public createGui(): void {
+
         const lm: LoadManager = this;
 
         g.app.gui = new LeoUI(undefined, this._context!); // replaces createDefaultGui
@@ -2949,6 +2957,7 @@ export class LoadManager {
             lm.createSpecialGui(gui_option, pymacs, script, windowFlag)
 
         */
+
     }
 
     //@+node:felix.20210120004121.16: *5* LM.initApp
