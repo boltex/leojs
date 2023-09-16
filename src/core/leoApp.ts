@@ -2729,35 +2729,36 @@ export class LoadManager {
      */
     public createImporterData(): void {
 
-        console.log('TODO : createImporterData');
-
-        const table = [
-            "c",
-            "coffeescript",
-            "csharp",
-            "cython",
-            "dart",
-            "elisp",
-            "html",
-            "ini",
-            "java",
-            "javascript",
-            "leo_rst",
-            "lua",
-            "markdown",
-            "org",
-            "otl",
-            "pascal",
-            "perl",
-            "php",
-            "python",
-            "rust",
-            "tcl",
-            "treepad",
-            "typescript",
-            "xml",
-
+        const table: [string, any][] = [
+            ["c", [importer_c]],
+            ["coffeescript", [importer_coffeescript]],
+            ["csharp", [importer_csharp]],
+            ["cython", [importer_cython]],
+            ["dart", [importer_dart]],
+            ["elisp", [importer_elisp]],
+            ["html", [importer_html]],
+            ["ini", [importer_ini]],
+            ["java", [importer_java]],
+            ["javascript", [importer_javascript]],
+            ["leo_rst", [importer_leo_rst]],
+            ["lua", [importer_lua]],
+            ["markdown", [importer_markdown]],
+            ["org", [importer_org]],
+            ["otl", [importer_otl]],
+            ["pascal", [importer_pascal]],
+            ["perl", [importer_perl]],
+            ["php", [importer_php]],
+            ["python", [importer_python]],
+            ["rust", [importer_rust]],
+            ["tcl", [importer_tcl]],
+            ["treepad", [importer_treepad]],
+            ["typescript", [importer_typescript]],
+            ["xml", [importer_xml]],
         ];
+
+        for (const language of table) {
+            this.parse_importer_dict(language[0], language[1]);
+        }
 
         // // Allow plugins to be defined in ~/.leo/plugins.
         // for (const pattern of [
@@ -2790,27 +2791,32 @@ export class LoadManager {
      */
     public parse_importer_dict(sfn: string, m: any): void {
 
-        console.log('TODO : parse_importer_dict');
+        const importer_d = m['importer_dict'];
+        if (importer_d) {
+            const at_auto = importer_d['@auto'] || [];
+            const scanner_func = importer_d['func'];
+            // scanner_name = scanner_class.__name__
+            const extensions = importer_d['extensions'] || [];
+            if (at_auto) {
+                // Make entries for each @auto type.
+                const d = g.app.atAutoDict;
+                for (const s of at_auto) {
+                    d[s] = scanner_func;
+                    g.app.atAutoDict[s] = scanner_func;
+                    if (!g.app.atAutoNames.includes(s)) {
+                        g.app.atAutoNames.push(s);
+                    }
+                }
 
-        // importer_d = getattr(m, 'importer_dict', None)
-        // if importer_d
-        //     at_auto = importer_d.get('@auto', [])
-        //     scanner_func = importer_d.get('func', None)
-        //     // scanner_name = scanner_class.__name__
-        //     extensions = importer_d.get('extensions', [])
-        //     if at_auto
-        //         // Make entries for each @auto type.
-        //         d = g.app.atAutoDict
-        //         for s in at_auto:
-        //             d[s] = scanner_func
-        //             g.app.atAutoDict[s] = scanner_func
-        //             g.app.atAutoNames.add(s)
-        //     if extensions
-        //         // Make entries for each extension.
-        //         d = g.app.classDispatchDict
-        //         for ext in extensions:
-        //             d[ext] = scanner_func  #importer_d.get('func')#scanner_class
-
+            }
+            if (extensions && extensions.length) {
+                // Make entries for each extension.
+                const d = g.app.classDispatchDict;
+                for (const ext of extensions) {
+                    d[ext] = scanner_func;  // importer_d.get('func')#scanner_class
+                }
+            }
+        }
         // elif sfn not in (
         //     // These are base classes, not real plugins.
         //     'basescanner.py',
@@ -2825,17 +2831,18 @@ export class LoadManager {
      */
     public createWritersData(): void {
 
-        console.log('TODO : createWritersData');
-
-        const table = [
-            'dart',
-            'leo_rst',
-            'markdown',
-            'org',
-            'otl',
-            'treepad'
+        const table: [string, any][] = [
+            ['dart', writer_dart],
+            ['leo_rst', writer_leo_rst],
+            ['markdown', writer_markdown],
+            ['org', writer_org],
+            ['otl', writer_otl],
+            ['treepad', writer_treepad],
         ];
 
+        for (const language of table) {
+            this.parse_writer_dict(language[0], language[1]);
+        }
 
         // // Do *not* remove this trace.
         // const trace = false && 'createWritersData' not in g.app.debug_dict
@@ -2873,36 +2880,43 @@ export class LoadManager {
      */
     public parse_writer_dict(sfn: string, m: any): void {
 
-        console.log('TODO : createWritersData');
+        const writer_d = m['writer_dict']; // getattr(m, 'writer_dict', None)
+        if (writer_d) {
+            const at_auto = writer_d['@auto'] || [];
+            const scanner_class = writer_d['class'];
+            const extensions: string[] = writer_d['extensions'] || [];
+            if (at_auto) {
+                // Make entries for each @auto type.
+                const d = g.app.atAutoWritersDict;
+                for (const s of at_auto) {
+                    const aClass = d[s];
+                    if (aClass && aClass != scanner_class) {
+                        g.trace(
+                            `${sfn}: duplicate ${s} class`
 
-        // writer_d = getattr(m, 'writer_dict', None)
-        // if writer_d
-        //     at_auto = writer_d.get('@auto', [])
-        //     scanner_class = writer_d.get('class', None)
-        //     extensions = writer_d.get('extensions', [])
-        //     if at_auto
-        //         // Make entries for each @auto type.
-        //         d = g.app.atAutoWritersDict
-        //         for s in at_auto
-        //             aClass = d.get(s)
-        //             if aClass and aClass != scanner_class
-        //                 g.trace(
-        //                     f"{sfn}: duplicate {s} class {aClass.__name__} "
-        //                     f"in {m.__file__}:")
-        //             else
-        //                 d[s] = scanner_class
-        //                 g.app.atAutoNames.add(s)
+                        );
+                    } else {
+                        d[s] = scanner_class;
+                        if (!g.app.atAutoNames.includes(s)) {
 
-        //     if extensions
-        //         // Make entries for each extension.
-        //         d = g.app.writersDispatchDict
-        //         for ext in extensions
-        //             aClass = d.get(ext)
-        //             if aClass and aClass != scanner_class
-        //                 g.trace(f"{sfn}: duplicate {ext} class", aClass, scanner_class)
-        //             else
-        //                 d[ext] = scanner_class
-
+                            g.app.atAutoNames.push(s);
+                        }
+                    }
+                }
+            }
+            if (extensions && extensions.length) {
+                // Make entries for each extension.
+                const d = g.app.writersDispatchDict;
+                for (const ext of extensions) {
+                    const aClass = d[ext];
+                    if (aClass && aClass != scanner_class) {
+                        g.trace(`${sfn}: duplicate ${ext} class`);
+                    } else {
+                        d[ext] = scanner_class;
+                    }
+                }
+            }
+        }
         // elif sfn not in ('basewriter.py',):
         //     g.warning(f"leo/plugins/writers/{sfn} has no writer_dict")
     }
