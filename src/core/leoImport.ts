@@ -802,7 +802,7 @@ export class LeoImportCommands {
         // Call the scanning function.
         if (g.unitTesting) {
             // console.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
-            console.assert(func || ['.txt', '.w', '.xxx'].includes(ext), p.h);
+            console.assert(func || ['.txt', '.w', '.xxx'].includes(ext), `${func?.toString()}, ${ext}, ${p.h}`);
         }
         if (func && !c.config.getBool('suppress-import-parsing', false)) {
             s = g.toUnicode(s, this.encoding);
