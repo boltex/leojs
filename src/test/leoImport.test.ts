@@ -158,7 +158,7 @@ suite('Test cases for leoImport.ts', () => {
                 c,
                 dir_,
                 undefined,
-                '@clean',
+                kind,
                 true,
                 true,
                 ['.py'],
