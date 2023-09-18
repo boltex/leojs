@@ -49,14 +49,16 @@ export class Python_Importer extends Importer {
    * Change 'def' to 'function:' for all non-methods.
    */
   public adjust_headlines(parent: Position): void {
-    const class_pat = /\s*class\s+(\w+)/;
+    const class_pat = /^\s*class\s+(\w+)/; // added caret to match at start of string.
 
     for (const p of parent.subtree()) {
       if (p.h.startsWith('def ')) {
         // Look up the tree for the nearest class.
         let found = false;
         for (const z of p.parents()) {
-          const m = class_pat.exec(z.h);
+          // const m = class_pat.exec(z.h);
+          const m = z.h.match(class_pat);
+
           if (m) {
             p.h = `${m[1]}.${p.h.slice(4).trim()}`;
             found = true;

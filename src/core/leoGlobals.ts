@@ -4262,11 +4262,20 @@ export function translate(
     return translatedText;
 }
 //@+node:felix.20230530001033.1: *3* g.compareArrays
-export function compareArrays(arr1: any[], arr2: any[]): boolean {
+export function compareArrays(arr1: any[], arr2: any[], trace = false): boolean {
     if (arr1.length !== arr2.length) {
+        if (trace) {
+            console.log('compare arrays failed: not equal elements', arr1.length, arr2.length);
+        }
         return false;
     }
-    return arr1.every((value, index) => value === arr2[index]);
+    return arr1.every((value, index) => {
+        const result = value === arr2[index];
+        if (trace && !result) {
+            console.log('compare arrays failed:', value, arr2[index]);
+        }
+        return result;
+    });
 }
 //@+node:felix.20230530135543.1: *3* g.comparePositionArray
 export function comparePositionArray(
