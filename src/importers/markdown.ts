@@ -24,6 +24,10 @@ class Markdown_Importer extends Importer {
     public md_hash_pattern: RegExp = /^(#+)\s*(.+)\s*\n/;
     public md_pattern_table: RegExp[] = [/^(=+)\n/, /^(-+)\n/];
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
 
     //@+others
     //@+node:felix.20230913225656.3: *3* md_i.gen_block

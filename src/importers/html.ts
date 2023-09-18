@@ -20,7 +20,9 @@ class Html_Importer extends Xml_Importer {
      */
     constructor(c: Commands) {
         super(c, 'import_html_tags');
+        this.__init__();
     }
+    
 }
 //@-others
 

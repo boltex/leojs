@@ -1494,9 +1494,9 @@ export class LeoImportCommands {
             return;
         }
         const s = p.b;
-        p.b = '';
         try {
             const bunch = c.undoer.beforeParseBody(p);
+            p.b = '';
             parser(c, p, s);
             u.afterParseBody(p, undoType, bunch);
             p.expand();

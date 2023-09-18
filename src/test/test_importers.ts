@@ -55,7 +55,7 @@ export class BaseTestImporter extends LeoUnitTest {
                 if (i > 0) { //  Don't test top-level headline.
                     assert.strictEqual(e_h, a_h, msg);
                 }
-                assert.strictEqual(g.compareArrays(g.splitLines(e_str), g.splitLines(a_str)), msg);
+                assert.ok(g.compareArrays(g.splitLines(e_str), g.splitLines(a_str)), msg);
             }
         } catch (error) {
             // Dump actual results, including bodies.

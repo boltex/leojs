@@ -18,6 +18,11 @@ import { Block, Importer } from './base_importer';
 class Treepad_Importer extends Importer {
 
     public language: string = 'plain'; // A reasonable default.
+    
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
 
     //@+others
     //@+node:felix.20230914002938.3: *3* treepad_i.gen_block

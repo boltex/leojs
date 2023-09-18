@@ -13,6 +13,7 @@ import { Block, Importer } from './base_importer';
 export class C_Importer extends Importer {
 
   public language = 'c';
+  
   public string_list = ['"'];  // Not single quotes.
 
   public block_patterns: [string, RegExp][] = [
@@ -22,8 +23,6 @@ export class C_Importer extends Importer {
     ['struct', /.*?\bstruct\s+(\w+)?\s*(:.*?)?\{/],
   ];
 
-  //@+others
-  //@+node:felix.20230911193725.3: *3* c_i.find_blocks
   // List of compound statements
   public compound_statements_s: string[] = ['case', 'catch', 'class', 'do', 'else', 'for', 'if', 'switch', 'try', 'while'];
 
@@ -33,6 +32,13 @@ export class C_Importer extends Importer {
   // Pattern that *might* be continued on the next line.
   public multi_line_func_pat = /.*?\b(\w+)\s*\(.*?\)\s*(const)?/;
 
+  constructor(c: Commands) {
+    super(c);
+    this.__init__();
+  }
+
+  //@+others
+  //@+node:felix.20230911193725.3: *3* c_i.find_blocks
   /**
    * C_Importer.find_blocks: override Importer.find_blocks.
    *

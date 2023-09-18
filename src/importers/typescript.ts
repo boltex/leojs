@@ -14,7 +14,6 @@ class TS_Importer extends Importer {
 
     public language: string = 'typescript';
 
-
     //@+<< define non-function patterns >>
     //@+node:felix.20230911234728.3: *3* << define non-function patterns >>
     public non_function_patterns: RegExp[] = [
@@ -43,6 +42,11 @@ class TS_Importer extends Importer {
     ];
     //@-<< define function patterns >>
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+    
 }
 //@-others
 

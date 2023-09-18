@@ -17,6 +17,11 @@ class Org_Importer extends Importer {
     public language: string = 'org';
     public section_pat: RegExp = /(\*+)\s(.*)/;
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
     //@+others
     //@+node:felix.20230913231752.3: *3* org_i.gen_block
     /**

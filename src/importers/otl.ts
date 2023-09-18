@@ -21,6 +21,11 @@ class Otl_Importer extends Importer {
     public otl_body_pattern: RegExp = /^: (.*)$/;
     public otl_node_pattern: RegExp = /^[ ]*(\t*)(.*)$/;
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
     //@+others
     //@+node:felix.20230913231807.3: *3* otl_i.check_blanks_and_tabs
     /**

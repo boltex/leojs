@@ -24,6 +24,11 @@ class Lua_Importer extends Importer {
         ['function', /.*?([\w\.]+)\s*\(function\b\s*\(/],
     ];
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
     //@+others
     //@+node:felix.20230913224120.3: *3* lua_i.find_end_of_block
     /**

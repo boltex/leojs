@@ -274,7 +274,9 @@ export class Commands {
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
         // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
-        console.log('g.app.db', g.app.db); // undefined as of now so 
+        // TODO FIX THIS !
+        // console.log('g.app.db', g.app.db); // undefined as of now so 
+
         this.db = {};
 
         // Create the gui frame.
@@ -1460,7 +1462,6 @@ export class Commands {
                 // New in Leo 6.7.4: *Do* raise an exception.
                 throw new Error(`Invalid position: ${p.toString()}`);
             }
-            // Don't kill unit tests for this kind of problem.
             c._currentPosition = c.rootPosition();
             g.trace(`Invalid position`, p.toString(), c.toString());
             g.trace(g.callers());

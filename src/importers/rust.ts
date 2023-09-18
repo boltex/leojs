@@ -21,6 +21,12 @@ class Rust_Importer extends Importer {
         ['fn', /\s*fn\s+(\w+)\s*\(/],
         ['fn', /\s*pub\s+fn\s+(\w+)\s*\(/],
     ];
+
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+    
 }
 //@-others
 

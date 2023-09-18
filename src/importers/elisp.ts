@@ -11,12 +11,17 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230912223458.2: ** class Elisp_Importer(Importer)
 class Elisp_Importer extends Importer {
-  public language = 'lisp';
+    public language = 'lisp';
 
-  public block_patterns: [string, RegExp][] = [
-    // ( defun name
-    ['defun', /\s*\(\s*\bdefun\s+([\w_-]+)/],
-  ];
+    public block_patterns: [string, RegExp][] = [
+        // ( defun name
+        ['defun', /\s*\(\s*\bdefun\s+([\w_-]+)/],
+    ];
+
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
 
   //@+others
   //@+node:felix.20230912223458.3: *3* elisp_i.find_end_of_block
@@ -59,12 +64,12 @@ class Elisp_Importer extends Importer {
  * The importer callback for elisp.
  */
 export const do_import = (c: Commands, parent: Position, s: string) => {
-  new Elisp_Importer(c).import_from_string(parent, s);
+    new Elisp_Importer(c).import_from_string(parent, s);
 };
 
 export const importer_dict = {
-  'extensions': ['.el', '.clj', '.cljs', '.cljc',],
-  'func': do_import,  // Also clojure, clojurescript
+    'extensions': ['.el', '.clj', '.cljs', '.cljc',],
+    'func': do_import,  // Also clojure, clojurescript
 };
 
 //@@language typescript

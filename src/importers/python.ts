@@ -33,8 +33,13 @@ export class Python_Importer extends Importer {
     ['def', this.def_pat],
   ];
 
-  private string_pat1: RegExp = /([fFrR]*)("""|")/;
-  private string_pat2: RegExp = /([fFrR]*)('''|')/;
+  private string_pat1: RegExp = /^([fFrR]*)("""|")/;
+  private string_pat2: RegExp = /^([fFrR]*)('''|')/;
+
+  constructor(c: Commands) {
+    super(c);
+    this.__init__();
+  }
 
   //@+others
   //@+node:felix.20230911210454.3: *3* python_i.adjust_headlines
@@ -104,14 +109,18 @@ export class Python_Importer extends Importer {
       if (!line.includes(delim)) {
         return [delim, line.length];
       }
-      const delim_pat = new RegExp(delim);
+      const delim_pat = new RegExp("^" + delim); // make sure it's at start of string.
       while (i < line.length) {
         const ch = line[i];
         if (ch === '\\') {
           i += 2;
           continue;
         }
-        if (delim_pat.test(line.substr(i))) {
+
+        // const m1 = line.slice(i).match(this.string_pat1);
+        const test1 = line.slice(i).match(delim_pat);
+
+        if (test1) {
           return ['', i + delim.length];
         }
         i += 1;
@@ -136,10 +145,13 @@ export class Python_Importer extends Importer {
         if (ch === '#' || ch === '\n') {
           break;
         }
-        const m = (
-          this.string_pat1.exec(line.substr(i)) ||
-          this.string_pat2.exec(line.substr(i))
-        );
+
+        const m1 = line.slice(i).match(this.string_pat1);
+        const m2 = line.slice(i).match(this.string_pat2);
+        const m = m1 || m2;
+
+        // const m = this.string_pat1.exec(line.substr(i)) || this.string_pat2.exec(line.substr(i));
+
         if (m) {
           // Start skipping the string.
           const prefix = m[1];
@@ -297,7 +309,7 @@ export class Python_Importer extends Importer {
     console.assert(kinds.some(kind => prev_line.includes(kind)), `Assertion failed: (${i}, ${JSON.stringify(prev_line)})`);
 
     // Handle multi-line def's. Scan to the line containing a close parenthesis.
-    if (prev_line.trimStart().startsWith('def ') && !prev_line.includes(')')) {
+    if (prev_line.trim().startsWith('def ') && !prev_line.includes(')')) {
       while (i < i2) {
         i += 1;
         if (this.guide_lines[i - 1].includes(')')) {

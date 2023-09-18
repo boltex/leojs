@@ -11,32 +11,37 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230912223510.2: ** class Ini_Importer(Importer)
 class Ini_Importer extends Importer {
-  public language = 'ini';
+    public language = 'ini';
 
-  public section_pat = /^\s*\[.*\]/;
-  public block_patterns: [string, RegExp][] = [['section', this.section_pat]];
+    public section_pat = /^\s*\[.*\]/;
+    public block_patterns: [string, RegExp][] = [['section', this.section_pat]];
 
-  //@+others
-  //@+node:felix.20230912223510.3: *3* ini_i.find_end_of_block
-  /**
-   * Ini_Importer.find_end_of_block.
-   *  
-   * i is the index of the line *following* the start of the block.
-   * 
-   * Return the index of the start of the next section.
-   */
-  find_end_of_block(i: number, i2: number): number {
-
-    while (i < i2) {
-      const line = this.guide_lines[i];
-      if (this.section_pat.test(line)) {
-        return i;
-      }
-      i += 1;
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
     }
-    return i2;
-  }
-  //@-others
+
+    //@+others
+    //@+node:felix.20230912223510.3: *3* ini_i.find_end_of_block
+    /**
+     * Ini_Importer.find_end_of_block.
+     *  
+     * i is the index of the line *following* the start of the block.
+     * 
+     * Return the index of the start of the next section.
+     */
+    find_end_of_block(i: number, i2: number): number {
+
+        while (i < i2) {
+            const line = this.guide_lines[i];
+            if (this.section_pat.test(line)) {
+                return i;
+            }
+            i += 1;
+        }
+        return i2;
+    }
+    //@-others
 
 }
 //@-others

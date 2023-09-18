@@ -23,6 +23,11 @@ class Pascal_Importer extends Importer {
 
     public patterns: RegExp[] = this.block_patterns.map(([, pattern]) => pattern);
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
     //@+others
     //@+node:felix.20230913235814.3: *3* pascal_i.find_end_of_block
     /**

@@ -21,6 +21,11 @@ class Coffeescript_Importer extends Python_Importer {
     ['def', /^\s*(.+?)=.*?->/],
   ];
 
+  constructor(c: Commands) {
+    super(c);
+    this.__init__();
+  }
+
 }
 //@-others
 

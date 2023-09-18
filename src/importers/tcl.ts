@@ -19,6 +19,12 @@ class Tcl_Importer extends Importer {
     public block_patterns: [string, RegExp][] = [
         ['proc', /\s*\bproc\s+(\w+)/],
     ];
+
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
 }
 //@-others
 

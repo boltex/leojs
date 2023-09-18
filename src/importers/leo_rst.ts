@@ -29,6 +29,11 @@ class Rst_Importer extends Importer {
     public rst_seen: Record<string, number> = {};
     public rst_level = 0;  // A trick.
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
     //@+others
     //@+node:felix.20230913212609.3: *3* rst_i.gen_block & helpers
     /**
@@ -78,8 +83,6 @@ class Rst_Importer extends Importer {
         }
     }
     //@+node:felix.20230913212609.4: *4* rst_i.ch_level
-
-
     /**
      * Return the underlining level associated with ch.
      */

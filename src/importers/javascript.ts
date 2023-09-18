@@ -34,6 +34,12 @@ class JS_Importer extends Importer {
     // ['const', /\s*\bconst\s*(\w+)\s*=.*?=>/],
     // ['let', /\s*\blet\s*(\w+)\s*=.*?=>/],
   ];
+
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
 }
 //@-others
 

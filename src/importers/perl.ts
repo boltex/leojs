@@ -22,6 +22,11 @@ class Perl_Importer extends Importer {
 
     public regex_pat: RegExp = /(.*?=\s*(m|s|tr|)\/)/;
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
     //@+others
     //@+node:felix.20230913235829.3: *3* perl_i.make_guide_lines
     /**

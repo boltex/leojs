@@ -15,14 +15,18 @@ import { Block, Importer } from './base_importer';
  */
 class Java_Importer extends Importer {
 
-  public language = 'java';
+    public language = 'java';
 
-  public block_patterns: [string, RegExp][] = [
-    ['class', /.*?\bclass\s+(\w+)/],
-    ['func', /.*?\b(\w+)\s*\(.*?\)\s*{/],
-    ['interface', /\w*\binterface\w*{/],
-  ];
+    public block_patterns: [string, RegExp][] = [
+        ['class', /.*?\bclass\s+(\w+)/],
+        ['func', /.*?\b(\w+)\s*\(.*?\)\s*{/],
+        ['interface', /\w*\binterface\w*{/],
+    ];
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
 }
 //@-others
 

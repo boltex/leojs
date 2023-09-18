@@ -47,10 +47,10 @@ export class Importer {
 
     public c: Commands;
     public root: Position | undefined;
-    public single_comment: string;
-    public block1: string;
-    public block2: string;
-    public tab_width: number;
+    public single_comment!: string;
+    public block1!: string;
+    public block2!: string;
+    public tab_width: number = 0;
     public lines: string[] = [];
     public guide_lines: string[] = [];
 
@@ -60,13 +60,15 @@ export class Importer {
      * Importer.__init__
      */
     constructor(c: Commands) {
-        // console.assert(this.language, g.callers());  // Do not remove.
-        console.assert(this.language, new Error().stack || '');  // Do not remove.
+
         this.c = c;  // May be None.
         this.root = undefined;
+
+    }
+    public __init__(): void {
+        console.assert(this.language, new Error().stack || '');  // Do not remove.
         const delims = g.set_delims_from_language(this.language);
         [this.single_comment, this.block1, this.block2] = delims;
-        this.tab_width = 0;  // Must be set later.
     }
     //@+node:felix.20230910195228.3: *3* i: Generic methods: may be overridden
     //@+node:felix.20230910195228.4: *4* i.check_blanks_and_tabs
@@ -269,7 +271,7 @@ export class Importer {
             // Start with the head: lines[start : start_body].
             result_list = lines.slice(start, start_body);
             // Special case: create a preamble node as the first child of the parent.
-            if (this.allow_preamble && parent === this.root && start === 0) {
+            if (this.allow_preamble && parent.__eq__(this.root) && start === 0) {
                 this.create_preamble(blocks, parent, result_list);
             }
             // Add indented @others.
@@ -476,7 +478,7 @@ export class Importer {
         const lws_list: number[] = [];
 
         for (const block of blocks) {
-            const [, , start, end] = block;
+            let [kind, name, start, start_body, end] = block;
             const lines: string[] = this.lines.slice(start, end);
 
             for (const line of lines) {
@@ -616,7 +618,7 @@ export class Importer {
             return;
         }
 
-        console.assert(lws.trim() === lws, JSON.stringify(lws));
+        console.assert(lws.trim() === '', JSON.stringify(lws));
 
         const n: number = lws.length;
         const lines: string[] = g.splitLines(p.b);

@@ -33,7 +33,12 @@ class Cython_Importer extends Python_Importer {
     ['cpdef', this.cpdef_pat],
     ['def', this.def_pat],
   ];
-
+    
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+    
 }
 //@-others
 

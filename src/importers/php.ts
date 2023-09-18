@@ -18,6 +18,11 @@ class Php_Importer extends Importer {
 
     public language = 'php';
 
+    constructor(c: Commands) {
+        super(c);
+        this.__init__();
+    }
+
 }
 //@-others
 

@@ -32,6 +32,7 @@ export class Xml_Importer extends Importer {
    */
   constructor(c: Commands, tags_setting: string = 'import_xml_tags') {
     super(c);
+    this.__init__();
     this.add_tags(tags_setting);
   }
 
