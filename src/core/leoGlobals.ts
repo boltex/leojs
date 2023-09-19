@@ -4266,6 +4266,8 @@ export function compareArrays(arr1: any[], arr2: any[], trace = false): boolean 
     if (arr1.length !== arr2.length) {
         if (trace) {
             console.log('compare arrays failed: not equal elements', arr1.length, arr2.length);
+            console.log('arr1', arr1);
+            console.log('arr2', arr2);
         }
         return false;
     }
