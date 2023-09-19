@@ -1127,21 +1127,21 @@ suite('TestPython', () => {
         // See #3517
 
         // A simplified version of code in mypy/build.py.
-        const s =
-            `
-            def load_plugins_from_config(
-                options: Options, errors: Errors, stdout: TextIO
-            ) -> tuple[list[Plugin], dict[str, str]]:
-        """Load all configured plugins."""
+        const s = `
+                def load_plugins_from_config(
+                    options: Options, errors: Errors, stdout: TextIO
+                ) -> tuple[list[Plugin], dict[str, str]]:
+                    """Load all configured plugins."""
+    
+                    snapshot: dict[str, str] = {}
+    
+                    def plugin_error(message: str) -> NoReturn:
+                        errors.report(line, 0, message)
+                        errors.raise_error(use_stdout=False)
+    
+                    custom_plugins: list[Plugin] = []
+            `;
 
-        snapshot: dict[str, str] = {}
-
-                def plugin_error(message: str) -> NoReturn:
-        errors.report(line, 0, message)
-        errors.raise_error(use_stdout = False)
-
-        custom_plugins: list[Plugin] = []
-        `;
 
         const expected_results: [number, string, string][] = [
             [0, '',  // Ignore the first headline.
