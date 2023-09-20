@@ -79,14 +79,13 @@ export class Python_Importer extends Importer {
    * Add a blank line before @others, and remove the leading blank line in the first child.
    */
   public adjust_at_others(parent: Position): void {
-    const otherString = ' '.repeat(4) + '@others\n';
     for (const p of parent.subtree()) {
       if (p.h.startsWith('class') && p.hasChildren()) {
         const child = p.firstChild();
         const lines = g.splitLines(p.b);
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
-          if (line === otherString && child.b.startsWith('\n')) {
+          if (line.trim().startsWith('@others') && child.b.startsWith('\n')) {
             p.b = lines.slice(0, i).join('') + '\n' + lines.slice(i).join('');
             child.b = child.b.slice(1);
             break;

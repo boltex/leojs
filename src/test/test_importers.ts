@@ -77,8 +77,8 @@ export class BaseTestImporter extends LeoUnitTest {
         result_s = result_s.trimEnd();  // Ignore trailing whitespace.
 
         // Ignore leading whitespace and all blank lines.
-        const s_lines = g.splitLines(s).map(z => z.trimLeft()).filter(z => z.trim() !== '');
-        const result_lines = result_s.split('\n').map(z => z.trimLeft()).filter(z => z.trim() !== '');
+        const s_lines = g.splitLines(s).map(z => z.trimStart()).filter(z => z.trim() !== '');
+        const result_lines = g.splitLines(result_s).map(z => z.trimStart()).filter(z => z.trim() !== '');
 
         if (s_lines.join('\n') !== result_lines.join('\n')) {
             g.trace('FAIL', g.caller(2));
@@ -86,7 +86,7 @@ export class BaseTestImporter extends LeoUnitTest {
             g.printObj(result_lines.map((z, i) => `${i.toString().padStart(4, ' ')} ${z}`), `results: ${p.h}`);
         }
 
-        assert.ok(g.compareArrays(s_lines, result_lines));
+        assert.ok(g.compareArrays(s_lines, result_lines, true));
     }
     //@+node:felix.20230529172038.4: *3* BaseTestImporter.compute_unit_test_kind
     /**
@@ -120,7 +120,11 @@ export class BaseTestImporter extends LeoUnitTest {
     }
     //@+node:felix.20230916201206.1: *3* BaseTestImporter.new_round_trip_test
     public async new_round_trip_test(s: string, expected_s?: string): Promise<void> {
+
+        console.log('before new_round_trip_test', expected_s);
         const p = await this.run_test(s);
+        console.log('after new_round_trip_test', expected_s);
+
         await this.check_round_trip(p, expected_s || s);
     }
     //@+node:felix.20230916201215.1: *3* BaseTestImporter.new_run_test
@@ -189,7 +193,6 @@ export class BaseTestImporter extends LeoUnitTest {
 suite('TestC', () => {
 
     let self: BaseTestImporter;
-    // ext = '.c'
 
     before(() => {
         self = new BaseTestImporter();
@@ -471,7 +474,7 @@ suite('TestC', () => {
         ];
         const result = importer.delete_comments_and_strings(lines);
         assert.strictEqual(result.length, expected_lines.length);
-        assert.ok(g.compareArrays(result, expected_lines));
+        assert.ok(g.compareArrays(result, expected_lines, true));
 
     });
     //@+node:felix.20230916220459.10: *3* TestC.test_find_blocks
@@ -530,7 +533,7 @@ suite('TestC', () => {
             result_lines.push(...lines.slice(start, end));
         }
 
-        assert.ok(g.compareArrays(lines, result_lines));
+        assert.ok(g.compareArrays(lines, result_lines, true));
 
     });
     //@+node:felix.20230916220459.11: *3* TestC.test_codon_file
@@ -581,7 +584,7 @@ suite('TestC', () => {
                 result_lines.push(...lines.slice(start, end));
             }
 
-            assert.ok(g.compareArrays(lines, result_lines));
+            assert.ok(g.compareArrays(lines, result_lines, true));
 
         }
     });
@@ -628,11 +631,131 @@ suite('TestC', () => {
 
 
 
+//@+node:felix.20230919195555.1: ** suite TestJavascript
+suite('TestJavascript', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.js';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230919195555.2: *3* TestJavascript.test_plain_function
+    test('test_plain_function', async () => {
+        const s = `
+            // Restarting
+            function restart() {
+                invokeParamifier(params,"onstart");
+                if(story.isEmpty()) {
+                    var tiddlers = store.filterTiddlers(store.getTiddlerText("DefaultTiddlers"));
+                    for(var t=0; t<tiddlers.length; t++) {
+                        story.displayTiddler("bottom",tiddlers[t].title);
+                    }
+                }
+                window.scrollTo(0,0);
+            }
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language javascript\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'function restart',
+                '// Restarting\n' +
+                'function restart() {\n' +
+                '    invokeParamifier(params,"onstart");\n' +
+                '    if(story.isEmpty()) {\n' +
+                '        var tiddlers = store.filterTiddlers(store.getTiddlerText("DefaultTiddlers"));\n' +
+                '        for(var t=0; t<tiddlers.length; t++) {\n' +
+                '            story.displayTiddler("bottom",tiddlers[t].title);\n' +
+                '        }\n' +
+                '    }\n' +
+                '    window.scrollTo(0,0);\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230919195555.3: *3* TestJavascript.test var_equal_function
+
+    test('var_equal_function', () => {
+
+        return; // NOT USED IN LEO (does not start with 'test')
+        /*
+        const s = `
+            var c3 = (function () {
+                "use strict";
+
+                // Globals
+                var c3 = { version: "0.0.1"   };
+
+                c3.someFunction = function () {
+                    console.log("Just a demo...");
+                };
+
+                return c3;
+            }());
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language javascript\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'function restart',
+                s
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+        */
+    });
+    //@+node:felix.20230919195555.4: *3* TestJavascript.test_comments
+    test('test_comments', async () => {
+        const s = `
+            /* Test of multi-line comments.
+             * line 2.
+             */
+        `;
+        await self.new_round_trip_test(s);
+    });
+    //@+node:felix.20230919195555.5: *3* TestJavascript.test_regex
+    test('test_regex', async () => {
+        const s = `
+            String.prototype.toJSONString = function() {
+                if(/["\\\\\\x00-\\x1f]/.test(this))
+                    return '"' + this.replace(/([\\x00-\\x1f\\"])/g,replaceFn) + '"';
+
+                return '"' + this + '"';
+            };
+            `;
+        await self.new_round_trip_test(s);
+    });
+    //@-others
+
+});
+
+
+
 //@+node:felix.20230917230509.1: ** suite TestPython
 suite('TestPython', () => {
 
     let self: BaseTestImporter;
-    // ext = '.py'
 
     before(() => {
         self = new BaseTestImporter();
@@ -652,7 +775,6 @@ suite('TestPython', () => {
 
     //@+others
     //@+node:felix.20230917230509.2: *3* TestPython.test_delete_comments_and_strings
-
     test('test_delete_comments_and_strings', () => {
 
         const importer = new Python_Importer(self.c);
@@ -691,7 +813,7 @@ suite('TestPython', () => {
         ];
         const result = importer.delete_comments_and_strings(lines);
         assert.strictEqual(result.length, expected_lines.length);
-        assert.ok(g.compareArrays(result, expected_lines));
+        assert.ok(g.compareArrays(result, expected_lines, true));
     });
     //@+node:felix.20230917230509.3: *3* TestPython.test_general_test_1
     test('test_general_test_1', async () => {
@@ -1132,13 +1254,13 @@ suite('TestPython', () => {
                     options: Options, errors: Errors, stdout: TextIO
                 ) -> tuple[list[Plugin], dict[str, str]]:
                     """Load all configured plugins."""
-    
+
                     snapshot: dict[str, str] = {}
-    
+
                     def plugin_error(message: str) -> NoReturn:
                         errors.report(line, 0, message)
                         errors.raise_error(use_stdout=False)
-    
+
                     custom_plugins: list[Plugin] = []
             `;
 
@@ -1169,8 +1291,82 @@ suite('TestPython', () => {
     //@-others
 
 });
+//@+node:felix.20230919203905.1: ** suite TestTypescript
+suite('TestTypescript', () => {
 
+    let self: BaseTestImporter;
 
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.ts';
+        return self.setUpClass();
+    });
 
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230919203905.2: *3* TestTypescript.test_class
+    test('test_class', async () => {
+        const s = `
+            class Greeter {
+                greeting: string;
+                constructor (message: string) {
+                    this.greeting = message;
+                }
+                greet() {
+                    return "Hello, " + this.greeting;
+                }
+            }
+
+            var greeter = new Greeter("world");
+
+            var button = document.createElement('button')
+            button.innerText = "Say Hello"
+            button.onclick = function() {
+                alert(greeter.greet())
+            }
+
+            document.body.appendChild(button)
+
+        `;
+        await self.new_round_trip_test(s);
+    });
+    //@+node:felix.20230919203905.3: *3* TestTypescript.test_module
+    test('test_module', async () => {
+        const s = `
+            module Sayings {
+                export class Greeter {
+                    greeting: string;
+                    constructor (message: string) {
+                        this.greeting = message;
+                    }
+                    greet() {
+                        return "Hello, " + this.greeting;
+                    }
+                }
+            }
+            var greeter = new Sayings.Greeter("world");
+
+            var button = document.createElement('button')
+            button.innerText = "Say Hello"
+            button.onclick = function() {
+                alert(greeter.greet())
+            }
+
+            document.body.appendChild(button)
+        `;
+        await self.new_round_trip_test(s);
+    });
+    //@-others
+
+});
 //@-others
 //@-leo
