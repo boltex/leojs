@@ -15,7 +15,7 @@ import { Block, Importer } from './base_importer';
 /**
  * The importer for the lua language.
  */
-class Lua_Importer extends Importer {
+export class Lua_Importer extends Importer {
     public language = 'lua';
     public end_pat = new RegExp('.*?\\bend\\b');
 

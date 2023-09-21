@@ -13,7 +13,7 @@ import { Block, Importer } from './base_importer';
 /**
  * The importer for the org lanuage.
  */
-class Org_Importer extends Importer {
+export class Org_Importer extends Importer {
     public language: string = 'org';
     public section_pat: RegExp = /(\*+)\s(.*)/;
 

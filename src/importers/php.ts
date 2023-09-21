@@ -14,7 +14,7 @@ import { Block, Importer } from './base_importer';
 /**
  * The importer for the php lanuage.
  */
-class Php_Importer extends Importer {
+export class Php_Importer extends Importer {
 
     public language = 'php';
 

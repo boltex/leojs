@@ -19,7 +19,7 @@ export const underlines = '*=-^~"\'+!$%&(),./:;<>?@[\\]_`{|}#';
 /**
  * The importer for the rst lanuage.
  */
-class Rst_Importer extends Importer {
+export class Rst_Importer extends Importer {
 
     public language = 'rest';
 

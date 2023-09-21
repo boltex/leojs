@@ -13,7 +13,7 @@ import { Block, Importer } from './base_importer';
 /**
  * The importer for the tcl lanuage.
  */
-class Tcl_Importer extends Importer {
+export class Tcl_Importer extends Importer {
     public language: string = 'tcl';
 
     public block_patterns: [string, RegExp][] = [

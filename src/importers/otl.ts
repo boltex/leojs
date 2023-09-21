@@ -13,7 +13,7 @@ import { Block, Importer } from './base_importer';
 /**
  * The importer for the otl language.
  */
-class Otl_Importer extends Importer {
+export class Otl_Importer extends Importer {
 
     public language = 'otl';
 

@@ -15,10 +15,10 @@ import { Block, Importer } from './base_importer';
  *
  * See: http://download.nust.na/pub2/FreeStuff/Software/Home%20office%20helpers/TreePad%20Lite/fileformat.txt
  */
-class Treepad_Importer extends Importer {
+export class Treepad_Importer extends Importer {
 
     public language: string = 'plain'; // A reasonable default.
-    
+
     constructor(c: Commands) {
         super(c);
         this.__init__();

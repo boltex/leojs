@@ -10,6 +10,7 @@ import { LeoUnitTest } from './leoTest2';
 import { Position } from '../core/leoNodes';
 import { C_Importer } from '../importers/c';
 import { Python_Importer } from '../importers/python';
+import { Coffeescript_Importer } from '../importers/coffeescript';
 
 //@+others
 //@+node:felix.20230529172038.1: ** class BaseTestImporter(LeoUnitTest)
@@ -628,9 +629,326 @@ suite('TestC', () => {
     //@-others
 
 });
+//@+node:felix.20230919214345.1: ** suite TestCoffeescript
+suite('TestCoffeescript', () => {
 
+    let self: BaseTestImporter;
 
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.coffee';
+        return self.setUpClass();
+    });
 
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230919214345.2: *3* TestCoffeescript.test_1
+    //@@tabwidth -2 // Required
+    test('test_1', async () => {
+
+        // ! NOTE: RAW STRING do not exist in javascript, except when declaring regex with slashes.
+        const s = `
+        # Js2coffee relies on Narcissus's parser.
+
+        {parser} = @Narcissus or require('./narcissus_packed')
+
+        # Main entry point
+
+        buildCoffee = (str) ->
+          str  = str.replace /\\r/g, ''
+          str += "\\n"
+
+          builder    = new Builder
+          scriptNode = parser.parse str
+        `;
+
+        const expected_results: [number, string, string][] = [
+
+            [0, '',  // Ignore the first headline.
+                '<< TestCoffeescript.test_1: preamble >>\n' +
+                '@others\n' +
+                '@language coffeescript\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<< TestCoffeescript.test_1: preamble >>',
+                "# Js2coffee relies on Narcissus's parser.\n" +
+                '\n' +
+                "{parser} = @Narcissus or require('./narcissus_packed')\n" +
+                '\n' +
+                '# Main entry point\n' +
+                '\n'
+            ],
+            [1, 'def buildCoffee',
+                'buildCoffee = (str) ->\n' +
+                "  str  = str.replace /\\r/g, ''\n" +
+                '  str += "\\n"\n' +
+                '\n' +
+                '  builder    = new Builder\n' +
+                '  scriptNode = parser.parse str\n'
+            ],
+        ];
+
+        await self.new_run_test(s, expected_results, 'TestCoffeescript.test_1');
+
+    });
+    //@+node:felix.20230919214345.3: *3* TestCoffeescript.test_2
+    //@@tabwidth -2 // Required
+    test('test_2', async () => {
+
+        const s = `
+          class Builder
+            constructor: ->
+              @transformer = new Transformer
+            # ` + "`build()`" + `
+
+            build: (args...) ->
+              node = args[0]
+              @transform node
+
+              name = 'other'
+              name = node.typeName()  if node != undefined and node.typeName
+
+              fn  = (@[name] or @other)
+              out = fn.apply(this, args)
+
+              if node.parenthesized then paren(out) else out
+            # `+ "`transform()`" + `
+
+            transform: (args...) ->
+              @transformer.transform.apply(@transformer, args)
+
+            # `+ "`body()`" + `
+
+            body: (node, opts={}) ->
+              str = @build(node, opts)
+              str = blockTrim(str)
+              str = unshift(str)
+              if str.length > 0 then str else ""
+
+          `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language coffeescript\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'class Builder',
+                'class Builder\n' +
+                '  @others\n'
+            ],
+            [2, 'Builder.constructor',
+                'constructor: ->\n' +
+                '  @transformer = new Transformer\n'
+            ],
+            [2, 'Builder.build',
+                '# `build()`\n' +
+                '\n' +
+                'build: (args...) ->\n' +
+                '  node = args[0]\n' +
+                '  @transform node\n' +
+                '\n' +
+                "  name = 'other'\n" +
+                '  name = node.typeName()  if node != undefined and node.typeName\n' +
+                '\n' +
+                '  fn  = (@[name] or @other)\n' +
+                '  out = fn.apply(this, args)\n' +
+                '\n' +
+                '  if node.parenthesized then paren(out) else out\n'
+            ],
+            [2, 'Builder.transform',
+                '# `transform()`\n' +
+                '\n' +
+                'transform: (args...) ->\n' +
+                '  @transformer.transform.apply(@transformer, args)\n'
+            ],
+            [2, 'Builder.body',
+                '# `body()`\n' +
+                '\n' +
+                'body: (node, opts={}) ->\n' +
+                '  str = @build(node, opts)\n' +
+                '  str = blockTrim(str)\n' +
+                '  str = unshift(str)\n' +
+                '  if str.length > 0 then str else ""\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230919214345.4: *3* TestCoffeescript.test_get_leading_indent
+    test('test_get_leading_indent', () => {
+        const c = self.c;
+        const importer = new Coffeescript_Importer(c);
+        assert.strictEqual(importer.single_comment, '#');
+    });
+    //@+node:felix.20230919214345.5: *3* TestCoffeescript.test_scan_line
+    test('test_scan_line', () => {
+        const c = self.c;
+        const x = new Coffeescript_Importer(c);
+        assert.strictEqual(x.single_comment, '#');
+    });
+    //@-others
+
+});
+//@+node:felix.20230919214349.1: ** suite TestCSharp
+suite('TestCSharp', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.c#';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230919214349.2: *3* TestCSharp.test_namespace_indent
+    test('test_namespace_indent', async () => {
+        const s = `
+            namespace {
+                class cTestClass1 {
+                    ;
+                }
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language csharp\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'unnamed namespace',
+                'namespace {\n' +
+                '    @others\n' +
+                '}\n'
+            ],
+            [2, 'class cTestClass1',
+                'class cTestClass1 {\n' +
+                '    ;\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230919214349.3: *3* TestCSharp.test_namespace_no_indent
+    test('test_namespace_no_indent', async () => {
+        const s = `
+            namespace {
+            class cTestClass1 {
+                ;
+            }
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language csharp\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'unnamed namespace',
+                'namespace {\n' +
+                '@others\n' +
+                '}\n'
+            ],
+            [2, 'class cTestClass1',
+                'class cTestClass1 {\n' +
+                '    ;\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230919214352.1: ** suite TestCython
+suite('TestCython', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.pyx';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230919214352.2: *3* TestCython.test_importer
+    test('test_importer', async () => {
+        const s = `
+            from libc.math cimport pow
+
+            cdef double square_and_add (double x):
+                """Compute x^2 + x as double.
+
+                This is a cdef function that can be called from within
+                a Cython program, but not from Python.
+                """
+                return pow(x, 2.0) + x
+
+            cpdef print_result (double x):
+                """This is a cpdef function that can be called from Python."""
+                print("({} ^ 2) + {} = {}".format(x, x, square_and_add(x)))
+        `;
+        const expected_results: [number, string, string][] = [
+
+            [0, '',  // check_outlines ignores the first headline.
+                '<< TestCython.test_importer: preamble >>\n' +
+                '@others\n' +
+                '@language cython\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<< TestCython.test_importer: preamble >>',
+                'from libc.math cimport pow\n' +
+                '\n'
+            ],
+            [1, 'cdef double square_and_add',
+                'cdef double square_and_add (double x):\n' +
+                '    """Compute x^2 + x as double.\n' +
+                '\n' +
+                '    This is a cdef function that can be called from within\n' +
+                '    a Cython program, but not from Python.\n' +
+                '    """\n' +
+                '    return pow(x, 2.0) + x\n'
+            ],
+            [1, 'cpdef print_result',
+                'cpdef print_result (double x):\n' +
+                '    """This is a cpdef function that can be called from Python."""\n' +
+                '    print("({} ^ 2) + {} = {}".format(x, x, square_and_add(x)))\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results, 'TestCython.test_importer');
+    });
+    //@-others
+
+});
 //@+node:felix.20230919195555.1: ** suite TestJavascript
 suite('TestJavascript', () => {
 

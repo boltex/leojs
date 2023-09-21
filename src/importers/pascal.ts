@@ -10,7 +10,7 @@ import { Block, Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230913235814.2: ** class Pascal_Importer(Importer)
-class Pascal_Importer extends Importer {
+export class Pascal_Importer extends Importer {
     public language: string = 'pascal';
 
     public block_patterns: [string, RegExp][] = [

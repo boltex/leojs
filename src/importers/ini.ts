@@ -10,7 +10,7 @@ import { Block, Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230912223510.2: ** class Ini_Importer(Importer)
-class Ini_Importer extends Importer {
+export class Ini_Importer extends Importer {
     public language = 'ini';
 
     public section_pat = /^\s*\[.*\]/;
@@ -50,12 +50,12 @@ class Ini_Importer extends Importer {
  * The importer callback for .ini files.
  */
 export const do_import = (c: Commands, parent: Position, s: string) => {
-  new Ini_Importer(c).import_from_string(parent, s);
+    new Ini_Importer(c).import_from_string(parent, s);
 };
 
 export const importer_dict = {
-  'extensions': ['.ini',],
-  'func': do_import,
+    'extensions': ['.ini',],
+    'func': do_import,
 };
 
 //@@language typescript

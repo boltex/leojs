@@ -13,19 +13,19 @@ import { Block, Importer } from './base_importer';
 /**
  * The importer for the dart language.
  */
-class Dart_Importer extends Importer {
+export class Dart_Importer extends Importer {
 
-    public language = 'dart';
+  public language = 'dart';
 
-    public block_patterns: [string, RegExp][] = [
-        ['function', /^\s*([\w\s]+)\s*\(.*?\)\s*\{/],
-    ];
-    
-    constructor(c: Commands) {
-        super(c);
-        this.__init__();
-    }
-    
+  public block_patterns: [string, RegExp][] = [
+    ['function', /^\s*([\w\s]+)\s*\(.*?\)\s*\{/],
+  ];
+
+  constructor(c: Commands) {
+    super(c);
+    this.__init__();
+  }
+
 }
 //@-others
 

@@ -11,7 +11,7 @@ import { Xml_Importer } from './xml';
 
 //@+others
 //@+node:felix.20230912223504.2: ** class Html_Importer(Xml_Importer)
-class Html_Importer extends Xml_Importer {
+export class Html_Importer extends Xml_Importer {
 
     public language = 'html';
 
@@ -22,7 +22,7 @@ class Html_Importer extends Xml_Importer {
         super(c, 'import_html_tags');
         this.__init__();
     }
-    
+
 }
 //@-others
 

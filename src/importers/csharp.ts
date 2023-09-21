@@ -14,10 +14,10 @@ import { C_Importer } from './c';
 /**
  * The importer for the csharp language.
  */
-class Csharp_Importer extends C_Importer {
+export class Csharp_Importer extends C_Importer {
 
     public language = 'csharp';
-    
+
     constructor(c: Commands) {
         super(c);
         this.__init__();

@@ -9,6 +9,9 @@
 <v t="ekr.20201209145256.1"><vh>Startup</vh>
 <v t="ekr.20201214084854.1"><vh>@file scripts.txt</vh></v>
 </v>
+<v t="felix.20230920221529.1"><vh>Notes</vh>
+<v t="felix.20230920221532.1"><vh>Python to js Tips</vh></v>
+</v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
@@ -14389,6 +14392,33 @@ public async tabCycle(): Promise&lt;unknown&gt; {
 // These plugins contain the write code for all kinds of special @auto nodes.
 // Each plugin must define a top-level writer_dict dictionary describing the plugin.
 @language typescript
+</t>
+<t tx="felix.20230920221529.1"></t>
+<t tx="felix.20230920221532.1">TODO : cleanup this list into proper markdown!
+
+1-
+Raw String (prefixed with an 'r') do not exist in js. Except for regex defined with slashes. 
+
+Those regex defined with slashes are equivalent to raw strings being compiled into a regex in python.
+
+If raw strings are needed for strings OTHER THAN regex, then the have to be escaped. (\\r, \\n, etc.)
+
+This applies for regular strings and multiline strings.
+
+2-
+Multiline strings can be made with back-ticks "`" .
+
+3-
+the regexp 'match' method exists in python, but it only matches at the start of the string. 
+
+So when the 'match' method is used in js, a caret "^" has to be prefixed onto the regex to match at the start of the string.
+
+4-
+a "for in" loop in python loops over the values which is equivalent to a "for of" loop in js. 
+
+Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
+
+
 </t>
 </tnodes>
 </leo_file>

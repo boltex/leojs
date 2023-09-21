@@ -13,7 +13,7 @@ import { Block, Importer } from './base_importer';
 /**
  * A scanner for the perl language.
  */
-class Perl_Importer extends Importer {
+export class Perl_Importer extends Importer {
     public language: string = 'perl';
 
     public block_patterns: [string, RegExp][] = [

@@ -10,7 +10,7 @@ import { Block, Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230914002433.2: ** class Rust_Importer(Importer)
-class Rust_Importer extends Importer {
+export class Rust_Importer extends Importer {
     public language: string = 'rust';
 
     // Single quotes do *not* start strings.
@@ -26,7 +26,7 @@ class Rust_Importer extends Importer {
         super(c);
         this.__init__();
     }
-    
+
 }
 //@-others
 

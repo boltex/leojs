@@ -13,7 +13,7 @@ import { Block, Importer } from './base_importer';
 /**
  * The importer for the markdown lanuage.
  */
-class Markdown_Importer extends Importer {
+export class Markdown_Importer extends Importer {
 
     public language = 'md';
 

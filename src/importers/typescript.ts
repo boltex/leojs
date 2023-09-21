@@ -10,7 +10,7 @@ import { Block, Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230911234728.2: ** class TS_Importer(Importer)
-class TS_Importer extends Importer {
+export class TS_Importer extends Importer {
 
     public language: string = 'typescript';
 
@@ -46,7 +46,7 @@ class TS_Importer extends Importer {
         super(c);
         this.__init__();
     }
-    
+
 }
 //@-others
 

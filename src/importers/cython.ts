@@ -14,7 +14,7 @@ import { Python_Importer } from './python';
 /**
  * A class to store and update scanning state.
  */
-class Cython_Importer extends Python_Importer {
+export class Cython_Importer extends Python_Importer {
 
   public language: string = 'cython';
 
@@ -33,12 +33,12 @@ class Cython_Importer extends Python_Importer {
     ['cpdef', this.cpdef_pat],
     ['def', this.def_pat],
   ];
-    
-    constructor(c: Commands) {
-        super(c);
-        this.__init__();
-    }
-    
+
+  constructor(c: Commands) {
+    super(c);
+    this.__init__();
+  }
+
 }
 //@-others
 

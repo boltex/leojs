@@ -10,7 +10,7 @@ import { Block, Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230911233839.2: ** class JS_Importer(Importer)
-class JS_Importer extends Importer {
+export class JS_Importer extends Importer {
 
   public language: string = 'javascript';
 
@@ -35,10 +35,10 @@ class JS_Importer extends Importer {
     // ['let', /\s*\blet\s*(\w+)\s*=.*?=>/],
   ];
 
-    constructor(c: Commands) {
-        super(c);
-        this.__init__();
-    }
+  constructor(c: Commands) {
+    super(c);
+    this.__init__();
+  }
 
 }
 //@-others

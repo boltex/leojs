@@ -11,7 +11,7 @@ import { Python_Importer } from './python';
 
 //@+others
 //@+node:felix.20230912201234.2: ** class Coffeescript_Importer(Python_Importer)
-class Coffeescript_Importer extends Python_Importer {
+export class Coffeescript_Importer extends Python_Importer {
 
   public language = 'coffeescript';
 
