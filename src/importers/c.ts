@@ -13,7 +13,7 @@ import { Block, Importer } from './base_importer';
 export class C_Importer extends Importer {
 
   public language = 'c';
-  
+
   public string_list = ['"'];  // Not single quotes.
 
   public block_patterns: [string, RegExp][] = [
@@ -26,11 +26,11 @@ export class C_Importer extends Importer {
   // List of compound statements
   public compound_statements_s: string[] = ['case', 'catch', 'class', 'do', 'else', 'for', 'if', 'switch', 'try', 'while'];
 
-  // Create a pattern that matches any compound statement
-  public compound_statements_pat = new RegExp(`\\b(?:${this.compound_statements_s.join('|')})\\b`);
+  // Create a pattern that matches any compound statement WITH CARET TO MATCH START OF STRING
+  public compound_statements_pat = new RegExp(`^\\b(?:${this.compound_statements_s.join('|')})\\b`);
 
-  // Pattern that *might* be continued on the next line.
-  public multi_line_func_pat = /.*?\b(\w+)\s*\(.*?\)\s*(const)?/;
+  // Pattern that *might* be continued on the next line. WITH CARET TO MATCH START OF STRING
+  public multi_line_func_pat = /^.*?\b(\w+)\s*\(.*?\)\s*(const)?/;
 
   constructor(c: Commands) {
     super(c);

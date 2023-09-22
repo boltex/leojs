@@ -25,7 +25,7 @@ export class Xml_Importer extends Importer {
 
   public tag_name_pat = /^<\/?([a-zA-Z]+)/; // added caret to match python's 'match'
   // Match two adjacent elements. Don't match comments.
-  public adjacent_tags_pat = /(.*?)(<[^!].*?>)\s*(<[^!].*?>)/;
+  public adjacent_tags_pat = /(.*?)(<[^!].*?>)\s*(<[^!].*?>)/g;
 
   /**
    * Xml_Importer.__init__
@@ -133,9 +133,9 @@ export class Xml_Importer extends Importer {
     const result_lines: string[] = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const s = line.replace(this.adjacent_tags_pat, (match, group1, group2, group3) => {
-        const m2 = this.tag_name_pat.exec(group2);
-        const m3 = this.tag_name_pat.exec(group3);
+      const s = line.replace(this.adjacent_tags_pat, (match: string, group1: string, group2: string, group3: string) => {
+        const m2 = group2.match(this.tag_name_pat);
+        const m3 = group3.match(this.tag_name_pat);
         const tag_name2 = m2 ? m2[1] : '';
         const tag_name3 = m3 ? m3[1] : '';
         const same_element =
@@ -144,7 +144,7 @@ export class Xml_Importer extends Importer {
           group3.startsWith('</');
         const lws = g.get_leading_ws(group1);
         const sep = same_element ? '' : '\n' + lws;
-        return group1 + group2.trimRight() + sep + group3;
+        return group1 + group2.trimEnd() + sep + group3;
       });
       result_lines.push(...g.splitLines(s));
     }

@@ -121,11 +121,7 @@ export class BaseTestImporter extends LeoUnitTest {
     }
     //@+node:felix.20230916201206.1: *3* BaseTestImporter.new_round_trip_test
     public async new_round_trip_test(s: string, expected_s?: string): Promise<void> {
-
-        console.log('before new_round_trip_test', expected_s);
         const p = await this.run_test(s);
-        console.log('after new_round_trip_test', expected_s);
-
         await this.check_round_trip(p, expected_s || s);
     }
     //@+node:felix.20230916201215.1: *3* BaseTestImporter.new_run_test
@@ -1081,6 +1077,630 @@ suite('TestElisp', () => {
                 '; comment re cde\n' +
                 '(defun cde (a b)\n' +
                 '   (+ 1 2 3))\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230921214523.1: ** suite TestHtml
+suite('TestHtml', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.htm';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        const c = self.c;
+        // Simulate @data import-html-tags, with *only* standard tags.
+        const tags_list = ['html', 'body', 'head', 'div', 'script', 'table'];
+        let [settingsDict, junk] = g.app.loadManager!.createDefaultSettingsDicts();
+        c.config.settingsDict = settingsDict;
+        c.config.set(c.p, 'data', 'import-html-tags', tags_list, true);
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230921214523.2: *3* TestHtml.test_brython
+    test('test_brython', async () => {
+        // https://github.com/leo-editor/leo-editor/issues/479
+        const s = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <script type="text/python3">
+            """Code for the header menu"""
+            from browser import document as doc
+            from browser import html
+            import header
+            </script>
+            <title>Brython</title>
+            <link rel="stylesheet" href="Brython_files/doc_brython.css">
+            </head>
+            <body onload="brython({debug:1, cache:'none'})">
+            <!-- comment -->
+            </body>
+            </html>
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<html>',
+                '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '@others\n' +
+                '</html>\n'
+            ],
+            [2, '<head>',
+                '<head>\n' +
+                '@others\n' +
+                '<title>Brython</title>\n' +
+                '<link rel="stylesheet" href="Brython_files/doc_brython.css">\n' +
+                '</head>\n'
+            ],
+            [3, '<script type="text/python3">',
+                '<script type="text/python3">\n' +
+                '"""Code for the header menu"""\n' +
+                'from browser import document as doc\n' +
+                'from browser import html\n' +
+                'import header\n' +
+                '</script>\n'
+            ],
+            [2, `<body onload="brython({debug:1, cache:'none'})">`,
+                '<body onload="brython({debug:1, cache:\'none\'})">\n' +
+                '<!-- comment -->\n' +
+                '</body>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.3: *3* TestHtml.test_improperly_nested_tags
+    test('test_improperly_nested_tags', async () => {
+        const s = `
+            <body>
+
+            <!-- OOPS: the div and p elements not properly nested.-->
+            <!-- OOPS: this table got generated twice. -->
+
+            <p id="P1">
+            <div id="D666">Paragraph</p> <!-- P1 -->
+            <p id="P2">
+
+            <TABLE id="T666"></TABLE></p> <!-- P2 -->
+            </div>
+            </p> <!-- orphan -->
+
+            </body>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<body>',
+                '<body>\n' +
+                '@others\n' +
+                '</p> <!-- orphan -->\n' +
+                '\n' +
+                '</body>\n'
+            ],
+            [2, '<div id="D666">Paragraph</p> <!-- P1 -->',
+                '<!-- OOPS: the div and p elements not properly nested.-->\n' +
+                '<!-- OOPS: this table got generated twice. -->\n' +
+                '\n' +
+                '<p id="P1">\n' +
+                '<div id="D666">Paragraph</p> <!-- P1 -->\n' +
+                '@others\n' +
+                '</div>\n'
+            ],
+            [3, '<TABLE id="T666"></TABLE></p> <!-- P2 -->',
+                '<p id="P2">\n' +
+                '\n' +
+                '<TABLE id="T666"></TABLE></p> <!-- P2 -->\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.4: *3* TestHtml.test_improperly_terminated_tags
+    test('test_improperly_terminated_tags', async () => {
+        const s = `
+            <html>
+
+            <head>
+                <!-- oops: link elements terminated two different ways -->
+                <link id="L1">
+                <link id="L2">
+                <link id="L3" />
+                <link id='L4' />
+
+                <title>TITLE</title>
+
+            <!-- oops: missing tags. -->
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '    <!-- oops: link elements terminated two different ways -->\n' +
+                '    <link id="L1">\n' +
+                '    <link id="L2">\n' +
+                '    <link id="L3" />\n' +
+                "    <link id='L4' />\n" +
+                '\n' +
+                '    <title>TITLE</title>\n' +
+                '\n' +
+                '<!-- oops: missing tags. -->\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<head>',
+                '<html>\n' +
+                '\n' +
+                '<head>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.5: *3* TestHtml.test_mixed_case_tags
+    test('test_mixed_case_tags', async () => {
+        const s = `
+            <html>
+            <HEAD>
+                <title>Bodystring</title>
+            </head>
+            <body class="bodystring">
+            <div id='bodydisplay'></div>
+            </body>
+            </HTML>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<html>',
+                '<html>\n' +
+                '@others\n' +
+                '</HTML>\n'
+            ],
+            [2, '<HEAD>',  // We don't want to lowercase *all* headlines.
+                '<HEAD>\n' +
+                '    <title>Bodystring</title>\n' +
+                '</head>\n'
+            ],
+            [2, '<body class="bodystring">',
+                '<body class="bodystring">\n' +
+                "<div id='bodydisplay'></div>\n" +
+                '</body>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.6: *3* TestHtml.test_multiple_tags_on_a_line
+    test('test_multiple_tags_on_a_line', async () => {
+
+        //@+<< define s >>
+        //@+node:felix.20230921214523.7: *4* << define s >>
+        // tags that cause nodes: html, head, body, div, table, nodeA, nodeB
+        // NOT: tr, td, tbody, etc.
+        const s = `
+            <html>
+            <body>
+                <table id="0">
+                    <tr valign="top">
+                    <td width="619">
+
+
+                        <table id="3">
+                        <tr>
+                        <td width="368">
+                        <table id="4">
+                            <tbody id="5">
+                            <tr valign="top">
+                            <td width="550">
+                            <table id="6">
+                                <tbody id="6">
+                                <tr>
+                                <td class="blutopgrabot"><a href="href1">Listing Standards</a> |
+                                    <a href="href2">Fees</a> |
+                                    <strong>Non-compliant Issuers</strong> |
+                                    <a href="href3">Form 25 Filings</a></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </td>
+                            </tr><tr>
+                            <td width="100%" colspan="2">
+                            <br />
+                            </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        </td>
+                        </tr>
+                    </table>
+                    <!-- View First part -->
+                    </td>
+                    <td width="242">
+                    <!-- View Second part -->
+                    </td>
+                    </tr></table>
+                <DIV class="webonly">
+                    <script src="/scripts/footer.js"></script>
+                </DIV>
+                </td>
+                </tr>
+                <script language="JavaScript1.1">var SA_ID="nyse;nyse";</script>
+                <script language="JavaScript1.1" src="/scripts/stats/track.js"></script>
+                <noscript><img src="/scripts/stats/track.js" height="1" width="1" alt="" border="0"></noscript>
+            </body>
+            </html>
+        `;
+        //@-<< define s >>
+
+        // xml.preprocess_lines inserts several newlines.
+        // Modify the expected result accordingly.
+
+        const expected_s: string = s.replace(/Form 25 Filings<\/a><\/td>\n/g, 'Form 25 Filings</a>\n</td>\n')
+            .replace(/<\/tr><tr>\n/g, '</tr>\n<tr>\n')
+            .replace(/<\/tr><\/table>\n/g, '</tr>\n</table>\n')
+            .replace(/<td class="blutopgrabot"><a/g, '<td class="blutopgrabot">\n<a')
+            .replace(/<noscript><img/g, '<noscript>\n<img');
+
+
+        await self.new_round_trip_test(s, expected_s);
+    });
+    //@+node:felix.20230921214523.8: *3* TestHtml.test_multple_node_completed_on_a_line
+    test('test_multple_node_completed_on_a_line', async () => {
+        const s = `
+            <!-- tags that start nodes: html,body,head,div,table,nodeA,nodeB -->
+            <html><head>headline</head><body>body</body></html>
+        `;
+
+        // xml.preprocess_lines inserts a newline between </head> and <body>.
+
+
+        const expected_results: [number, string, string][] = [
+            [0, '',
+                '@others\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<html>',
+                '<!-- tags that start nodes: html,body,head,div,table,nodeA,nodeB -->\n' +
+                '<html>\n' +
+                '<head>headline</head>\n' +
+                '<body>body</body>\n' +
+                '</html>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.9: *3* TestHtml.test_multple_node_starts_on_a_line
+    test('test_multple_node_starts_on_a_line', async () => {
+        const s = `
+            <html>
+            <head>headline</head>
+            <body>body</body>
+            </html>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<html>',
+                '<html>\n' +
+                '<head>headline</head>\n' +
+                '<body>body</body>\n' +
+                '</html>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.10: *3* TestHtml.test_slideshow_slide
+    test('test_slideshow_slide', async () => {
+        // s is the contents of slides/basics/slide-002.html
+        //@+<< define s >>
+        //@+node:felix.20230921214523.11: *4* << define s >>
+        const s = `\
+        <!DOCTYPE html>
+
+        <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+            <title>The workbook file &#8212; Leo 6.7.2 documentation</title>
+            <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+            <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+            <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+
+            <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+            <script src="../../_static/doctools.js"></script>
+            <script src="../../_static/sphinx_highlight.js"></script>
+
+            <script src="../../_static/sidebar.js"></script>
+
+            <link rel="index" title="Index" href="../../genindex.html" />
+            <link rel="search" title="Search" href="../../search.html" />
+            <link rel="next" title="Editing headlines" href="slide-003.html" />
+            <link rel="prev" title="Leoâ€™s Basics" href="basics.html" />
+          <!--
+            EKR: Xml_Importer.preprocess_lines should insert put </head> and <body> on separate lines.
+            As with this comment, there is a risk that preprocessing might affect comments...
+          -->
+          </head><body>
+            <div class="related" role="navigation" aria-label="related navigation">
+              <h3>Navigation</h3>
+              <ul>
+                <li class="right" style="margin-right: 10px">
+                  <a href="../../genindex.html" title="General Index"
+                     accesskey="I">index</a></li>
+                <li class="right" >
+                  <a href="slide-003.html" title="Editing headlines"
+                     accesskey="N">next</a> |</li>
+                <li class="right" >
+                  <a href="basics.html" title="Leoâ€™s Basics"
+                     accesskey="P">previous</a> |</li>
+                <li class="nav-item nav-item-0"><a href="../../leo_toc.html">Leo 6.7.2 documentation</a> &#187;</li>
+                  <li class="nav-item nav-item-1"><a href="../../toc-more-links.html" >More Leo Links</a> &#187;</li>
+                  <li class="nav-item nav-item-2"><a href="../../slides.html" >Slides</a> &#187;</li>
+                  <li class="nav-item nav-item-3"><a href="basics.html" accesskey="U">Leoâ€™s Basics</a> &#187;</li>
+                <li class="nav-item nav-item-this"><a href="">The workbook file</a></li>
+              </ul>
+            </div>
+
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body" role="main">
+
+          <section id="the-workbook-file">
+        <h1>The workbook file<a class="headerlink" href="#the-workbook-file" title="Permalink to this heading">Â¶</a></h1>
+        <p>Leo opens the <strong>workbook file</strong> when you start
+        Leo without a filename.</p>
+        <p>The body has focusâ€“it is colored a pale pink, and
+        contains a blinking cursor.</p>
+        <p><strong>Note</strong>: on some monitors the colors will be almost
+        invisible.  You can choose such colors to suit your
+        taste.</p>
+        <img alt="../../_images/slide-002.png" src="../../_images/slide-002.png" />
+        </section>
+
+
+                    <div class="clearer"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+                <div class="sphinxsidebarwrapper">
+                    <p class="logo"><a href="../../leo_toc.html">
+                      <img class="logo" src="../../_static/LeoLogo.svg" alt="Logo"/>
+                    </a></p>
+          <div>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="basics.html"
+                                  title="previous chapter">Leoâ€™s Basics</a></p>
+          </div>
+          <div>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="slide-003.html"
+                                  title="next chapter">Editing headlines</a></p>
+          </div>
+        <div id="searchbox" style="display: none" role="search">
+          <h3 id="searchlabel">Quick search</h3>
+            <div class="searchformwrapper">
+            <form class="search" action="../../search.html" method="get">
+              <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+              <input type="submit" value="Go" />
+            </form>
+            </div>
+        </div>
+        <script>document.getElementById('searchbox').style.display = "block"</script>
+                </div>
+        <div id="sidebarbutton" title="Collapse sidebar">
+        <span>Â«</span>
+        </div>
+
+              </div>
+              <div class="clearer"></div>
+            </div>
+            <div class="related" role="navigation" aria-label="related navigation">
+              <h3>Navigation</h3>
+              <ul>
+                <li class="right" style="margin-right: 10px">
+                  <a href="../../genindex.html" title="General Index"
+                     >index</a></li>
+                <li class="right" >
+                  <a href="slide-003.html" title="Editing headlines"
+                     >next</a> |</li>
+                <li class="right" >
+                  <a href="basics.html" title="Leoâ€™s Basics">previous</a> |</li>
+                <li class="nav-item nav-item-0"><a href="../../leo_toc.html">Leo 6.7.2 documentation</a> &#187;</li>
+                  <li class="nav-item nav-item-1"><a href="../../toc-more-links.html" >More Leo Links</a> &#187;</li>
+                  <li class="nav-item nav-item-2"><a href="../../slides.html" >Slides</a> &#187;</li>
+                  <li class="nav-item nav-item-3"><a href="basics.html" >Leoâ€™s Basics</a> &#187;</li>
+                <li class="nav-item nav-item-this"><a href="">The workbook file</a></li>
+              </ul>
+            </div>
+            <div class="footer" role="contentinfo">
+                &#169; Copyright 1997-2023, Edward K. Ream.
+              Last updated on January 24, 2023.
+              Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.2.
+            </div>
+          </body>
+        </html>
+        const `;
+        //@-<< define s >>
+
+        // xml.preprocess_lines inserts several newlines.
+        // Modify the expected result accordingly.
+        const expected_s: string = s
+            .replace(/<\/head><body>/g, '</head>\n<body>')
+            .replace(/><meta/g, '>\n<meta')
+            .replace(/index<\/a><\/li>/g, 'index</a>\n</li>')
+            // .replace(/\"><a/g, '">\n<a')  # This replacement would affect too many lines.
+            .replace(/m-0\"><a/g, 'm-0">\n<a')
+            .replace(/m-1\"><a/g, 'm-1">\n<a')
+            .replace(/item-2\"><a/g, 'item-2">\n<a')
+            .replace(/m-3\"><a/g, 'm-3">\n<a')
+            .replace(/nav-item-this\"><a/g, 'nav-item-this">\n<a')
+            .replace(/<p class=\"logo\"><a/g, '<p class="logo">\n<a')
+            .replace(/<\/a><\/li>/g, '</a>\n</li>')
+            .replace(/<p><strong>/g, '<p>\n<strong>')
+            .replace(/<\/a><\/p>/g, '</a>\n</p>');
+        // .replace(/<\/head><body>/g, '</head>\n<body>')
+        // .replace(/><meta/g, '>\n<meta')
+        // .replace(/index<\/a><\/li>/g, 'index</a>\n</li>')
+        // .replace(/m-0\"><a/g, 'm-0\">\n<a')
+        // .replace(/m-1\"><a/g, 'm-1\">\n<a')
+        // .replace(/item-2\"><a/g, 'item-2\">\n<a')
+        // .replace(/m-3\"><a/g, 'm-3\">\n<a')
+        // .replace(/nav-item-this\"><a/g, 'nav-item-this\">\n<a')
+        // .replace(/<p class=\"logo\"><a/g, '<p class="logo">\n<a')
+        // .replace(/<\/a><\/p>/g, '</a>\n</p>');
+
+        await self.new_round_trip_test(s, expected_s);
+    });
+    //@+node:felix.20230921214523.12: *3* TestHtml.test_structure
+    test('test_structure', async () => {
+        const s = `
+            <html>
+            <head>
+                <meta charset="utf-8" />
+            </head>
+            <body>
+                <div class="a">
+                    <div class="a-1">
+                        some text
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<html>',
+                '<html>\n' +
+                '@others\n' +
+                '</html>\n'
+            ],
+            [2, '<head>',
+                '<head>\n' +
+                '    <meta charset="utf-8" />\n' +
+                '</head>\n'
+            ],
+            [2, '<body>',
+                '<body>\n' +
+                '    @others\n' +
+                '</body>\n'
+            ],
+            [3, '<div class="a">',
+                '<div class="a">\n' +
+                '    @others\n' +
+                '</div>\n'
+            ],
+            [4, '<div class="a-1">',
+                '<div class="a-1">\n' +
+                '    some text\n' +
+                '</div>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.13: *3* TestHtml.test_underindented_comment
+    test('test_underindented_comment', async () => {
+        const s = `
+            <table cellspacing="0" cellpadding="0" width="600" border="0">
+                <!-- The indentation of this element causes the problem. -->
+                <table>
+            <div align="center">
+            <iframe src="http://www.amex.com/index.jsp"</iframe>
+            </div>
+            </table>
+            </table>
+            <p>Paragraph</p>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '<p>Paragraph</p>\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<table cellspacing="0" cellpadding="0" width="600" border="0">',
+                '<table cellspacing="0" cellpadding="0" width="600" border="0">\n' +
+                '@others\n' +
+                '</table>\n'
+            ],
+            [2, '<table>',
+                '    <!-- The indentation of this element causes the problem. -->\n' +
+                '    <table>\n' +
+                '@others\n' +
+                '</table>\n'
+            ],
+            [3, '<div align="center">',
+                '<div align="center">\n' +
+                '<iframe src="http://www.amex.com/index.jsp"</iframe>\n' +
+                '</div>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921214523.14: *3* TestHtml.test_uppercase_tags
+    test('test_uppercase_tags', async () => {
+        const s = `
+            <HTML>
+            <HEAD>
+                <title>Bodystring</title>
+            </HEAD>
+            <BODY class='bodystring'>
+            <DIV id='bodydisplay'></DIV>
+            </BODY>
+            </HTML>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language html\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<HTML>',
+                '<HTML>\n' +
+                '@others\n' +
+                '</HTML>\n'
+            ],
+            [2, '<HEAD>',
+                '<HEAD>\n' +
+                '    <title>Bodystring</title>\n' +
+                '</HEAD>\n'
+            ],
+            [2, "<BODY class='bodystring'>",
+                "<BODY class='bodystring'>\n" +
+                "<DIV id='bodydisplay'></DIV>\n" +
+                '</BODY>\n'
             ],
         ];
         await self.new_run_test(s, expected_results);
