@@ -918,7 +918,6 @@ suite('TestCython', () => {
                 print("({} ^ 2) + {} = {}".format(x, x, square_and_add(x)))
         `;
         const expected_results: [number, string, string][] = [
-
             [0, '',  // check_outlines ignores the first headline.
                 '<< TestCython.test_importer: preamble >>\n' +
                 '@others\n' +
@@ -945,6 +944,146 @@ suite('TestCython', () => {
             ],
         ];
         await self.new_run_test(s, expected_results, 'TestCython.test_importer');
+    });
+    //@-others
+
+});
+//@+node:felix.20230920230715.1: ** suite TestDart
+suite('TestDart', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.dart';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230920230715.2: *3* TestDart.test_hello_world
+    test('test_hello_world', async () => {
+        const s = `
+        var name = 'Bob';
+
+        hello() {
+          print('Hello, World!');
+        }
+
+        // Define a function.
+        printNumber(num aNumber) {
+          print('The number is $aNumber.'); // Print to console.
+        }
+
+        // This is where the app starts executing.
+        void main() {
+          var number = 42; // Declare and initialize a variable.
+          printNumber(number); // Call a function.
+        }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language dart\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'function hello',
+                "var name = 'Bob';\n" +
+                '\n' +
+                'hello() {\n' +
+                "  print('Hello, World!');\n" +
+                '}\n'
+            ],
+            [1, 'function printNumber',
+                '// Define a function.\n' +
+                'printNumber(num aNumber) {\n' +
+                "  print('The number is $aNumber.'); // Print to console.\n" +
+                '}\n'
+            ],
+            [1, 'function void main',
+                '// This is where the app starts executing.\n' +
+                'void main() {\n' +
+                '  var number = 42; // Declare and initialize a variable.\n' +
+                '  printNumber(number); // Call a function.\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230920230719.1: ** suite TestElisp
+suite('TestElisp', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.el';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230920230719.2: *3* TestElisp.test_1
+    test('test_1', async () => {
+        // Add weird assignments for coverage.
+        const s = `
+            ;;; comment
+            ;;; continue
+            ;;;
+
+            (defun abc (a b)
+               (assn a "abc")
+               (assn b \\x)
+               (+ 1 2 3))
+
+            ; comment re cde
+            (defun cde (a b)
+               (+ 1 2 3))
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '', // Ignore the first headline.
+                '@others\n' +
+                '@language lisp\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'defun abc',
+                ';;; comment\n' +
+                ';;; continue\n' +
+                ';;;\n' +
+                '\n' +
+                '(defun abc (a b)\n' +
+                '   (assn a "abc")\n' +
+                '   (assn b \\x)\n' +
+                '   (+ 1 2 3))\n'
+            ],
+            [1, 'defun cde',
+                '; comment re cde\n' +
+                '(defun cde (a b)\n' +
+                '   (+ 1 2 3))\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
     });
     //@-others
 
@@ -1682,6 +1821,140 @@ suite('TestTypescript', () => {
             document.body.appendChild(button)
         `;
         await self.new_round_trip_test(s);
+    });
+    //@-others
+
+});
+//@+node:felix.20230921010815.1: ** suite TestXML
+suite('TestXML', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.xml';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        const c = self.c;
+        // Simulate @data import-xml-tags, with *only* standard tags.
+        const tags_list = ['html', 'body', 'head', 'div', 'script', 'table'];
+        let [settingsDict, junk] = g.app.loadManager!.createDefaultSettingsDicts();
+        c.config.settingsDict = settingsDict;
+        c.config.set(c.p, 'data', 'import-xml-tags', tags_list, true);
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230921010815.2: *3* TestXml.test_standard_opening_elements
+    test('test_standard_opening_elements', async () => {
+        const s = `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE note SYSTEM "Note.dtd">
+        <html>
+        <head>
+            <title>Bodystring</title>
+        </head>
+        <body class='bodystring'>
+        <div id='bodydisplay'></div>
+        </body>
+        </html>
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore level 0 headlines.
+                '@others\n' +
+                '@language xml\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<html>',
+                '<?xml version="1.0" encoding="UTF-8"?>\n' +
+                '<!DOCTYPE note SYSTEM "Note.dtd">\n' +
+                '<html>\n' +
+                '@others\n' +
+                '</html>\n'
+            ],
+            [2, '<head>',
+                '<head>\n' +
+                '    <title>Bodystring</title>\n' +
+                '</head>\n'
+            ],
+            [2, "<body class='bodystring'>",
+
+                "<body class='bodystring'>\n" +
+                "<div id='bodydisplay'></div>\n" +
+                '</body>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921010815.3: *3* TestXml.test_xml_1
+    test('test_xml_1', async () => {
+        const s = `
+            <html>
+            <head>
+                <title>Bodystring</title>
+            </head>
+            <body class='bodystring'>
+            <div id='bodydisplay'>
+            contents!
+            </div>
+            </body>
+            </html>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore level 0 headlines.
+                '@others\n' +
+                '@language xml\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '<html>',
+                '<html>\n' +
+                '@others\n' +
+                '</html>\n'
+            ],
+            [2, '<head>',
+                '<head>\n' +
+                '    <title>Bodystring</title>\n' +
+                '</head>\n'
+            ],
+            [2, "<body class='bodystring'>",
+                "<body class='bodystring'>\n" +
+                '@others\n' +
+                '</body>\n'
+            ],
+            [3, "<div id='bodydisplay'>",
+                "<div id='bodydisplay'>\n" +
+                'contents!\n' +
+                '</div>\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230921010815.4: *3* TestXml.test_non_ascii_tags
+    test('test_non_ascii_tags', async () => {
+        const s = `
+            <:À.Ç>
+            <Ì>
+            <_.ÌÑ>
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore level 0 headlines.
+                '<:À.Ç>\n' +
+                '<Ì>\n' +
+                '<_.ÌÑ>\n' +
+                '@language xml\n' +
+                '@tabwidth -4\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
     });
     //@-others
 

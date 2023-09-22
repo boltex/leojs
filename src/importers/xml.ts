@@ -23,7 +23,7 @@ export class Xml_Importer extends Importer {
   public end_patterns: RegExp[] | null = null;
   public start_patterns: RegExp[] | null = null;
 
-  public tag_name_pat = /<\/?([a-zA-Z]+)/;
+  public tag_name_pat = /^<\/?([a-zA-Z]+)/; // added caret to match python's 'match'
   // Match two adjacent elements. Don't match comments.
   public adjacent_tags_pat = /(.*?)(<[^!].*?>)\s*(<[^!].*?>)/;
 
@@ -49,9 +49,9 @@ export class Xml_Importer extends Importer {
     tags = tags.map((z) => z.toLowerCase()).concat(tags.map((z) => z.toUpperCase()));
 
     // m.group(1) must be the tag name.
-    this.block_patterns = tags.map((tag) => [tag, new RegExp(`\\s*<(${tag})`)]);
-    this.start_patterns = tags.map((tag) => new RegExp(`\\s*<(${tag})`));
-    this.end_patterns = tags.map((tag) => new RegExp(`\\s*</(${tag})>`));
+    this.block_patterns = tags.map((tag) => [tag, new RegExp(`^\\s*<(${tag})`)]); // caret for start of string
+    this.start_patterns = tags.map((tag) => new RegExp(`^\\s*<(${tag})`)); // caret for start of string
+    this.end_patterns = tags.map((tag) => new RegExp(`^\\s*</(${tag})>`)); // caret for start of string
     return tags;
   }
   //@+node:felix.20230912233339.4: *3* xml_i.compute_headline
@@ -76,7 +76,8 @@ export class Xml_Importer extends Importer {
     let i = i1;
     let line = this.guide_lines[i1 - 1];
     for (const pattern of this.start_patterns!) {
-      const m = pattern.exec(line);
+      // const m = pattern.exec(line);
+      const m = line.match(pattern);
       if (m) {
         tag1 = m[1].toLowerCase();
         tag_stack.push(tag1);
@@ -90,29 +91,38 @@ export class Xml_Importer extends Importer {
     while (i < i2) {
       line = this.guide_lines[i];
       i += 1;
+
       // Push start patterns.
       for (const pattern of this.start_patterns!) {
-        const m = pattern.exec(line);
+        // const m = pattern.exec(line);
+        const m = line.match(pattern);
         if (m) {
           const tag = m[1].toLowerCase();
           tag_stack.push(tag);
           break;
         }
       }
+
       for (const pattern of this.end_patterns!) {
-        const m = pattern.exec(line);
+        // const m = pattern.exec(line);
+        const m = line.match(pattern);
         if (m) {
           const endTag = m[1].toLowerCase();
+          let w_found = false;
           while (tag_stack.length) {
             const tag = tag_stack.pop();
             if (tag === endTag) {
+              w_found = true;
               if (!tag_stack.length) {
                 return i;
               }
               break;
             }
           }
-          return i1; // Don't create a block.
+          if (!w_found) {
+            return i1; // Don't create a block.
+          }
+
         }
       }
     }
@@ -136,7 +146,7 @@ export class Xml_Importer extends Importer {
         const sep = same_element ? '' : '\n' + lws;
         return group1 + group2.trimRight() + sep + group3;
       });
-      result_lines.push(...s.split('\n'));
+      result_lines.push(...g.splitLines(s));
     }
     return result_lines;
   }

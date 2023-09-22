@@ -130,7 +130,6 @@ export class LeoUnitTest {
 
     //@+others
     //@+node:felix.20220130224933.4: *3* LeoUnitTest.setUp, tearDown & setUpClass
-
     constructor() { }
 
     public setUpClass(): Promise<Commands> {
