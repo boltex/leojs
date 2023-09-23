@@ -12,6 +12,8 @@ import { C_Importer } from '../importers/c';
 import { Python_Importer } from '../importers/python';
 import { Coffeescript_Importer } from '../importers/coffeescript';
 import { Markdown_Importer } from '../importers/markdown';
+import { TagController } from '../core/nodeTags';
+import { Otl_Importer } from '../importers/otl';
 
 //@+others
 //@+node:felix.20230529172038.1: ** class BaseTestImporter(LeoUnitTest)
@@ -2500,6 +2502,931 @@ suite('TestMarkdown', () => {
 
 
 
+//@+node:felix.20230922223232.1: ** suite TestOrg
+suite('TestOrg', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.org';
+        self.treeType = '@auto-org';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922223232.2: *3* TestOrg.test_1
+    test('test_1', async () => {
+        const s = `
+            * Section 1
+            Sec 1.
+            * Section 2
+            Sec 2.
+            ** Section 2-1
+            Sec 2.1
+            *** Section 2-1-1
+            Sec 2.1.1
+            * Section 3
+            ** Section 3.1
+            Sec 3.1
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language org\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Section 1',
+                'Sec 1.\n'
+            ],
+            [1, 'Section 2',
+                'Sec 2.\n'
+            ],
+            [2, 'Section 2-1',
+                'Sec 2.1\n'
+            ],
+            [3, 'Section 2-1-1',
+                'Sec 2.1.1\n'
+            ],
+            [1, 'Section 3',
+                ''
+            ],
+            [2, 'Section 3.1',
+                'Sec 3.1\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223232.3: *3* TestOrg.test_1074
+    test('test_1074', async () => {
+        const s = `
+            *  Test
+            First line.
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language org\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, ' Test',
+                'First line.\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223232.4: *3* TestOrg.test_552
+    test('test_552', async () => {
+        const s = `
+            * Events
+              :PROPERTIES:
+              :CATEGORY: events
+              :END:
+            ** 整理个人生活
+            *** 每周惯例
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language org\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Events',
+                '  :PROPERTIES:\n' +
+                '  :CATEGORY: events\n' +
+                '  :END:\n'
+            ],
+            [2, '整理个人生活',
+                ''
+            ],
+            [3, '每周惯例',
+                ''
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223232.5: *3* TestOrg.test_intro
+    test('test_intro', async () => {
+        const s = `
+            Intro line.
+            * Section 1
+            Sec 1.
+            * Section 2
+            Sec 2.
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                'Intro line.\n' +
+                '@language org\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Section 1',
+                'Sec 1.\n'
+            ],
+            [1, 'Section 2',
+                'Sec 2.\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223232.6: *3* TestOrg.test_placeholder
+    test('test_placeholder', async () => {
+        // insert test for org here.
+        const s = `
+            * Section 1
+            Sec 1.
+            * Section 2
+            Sec 2.
+            ** Section 2-1
+            Sec 2.1
+            *** Section 2-1-1
+            Sec 2.1.1
+            * Section 3
+            ****** Section 3-1-1-1-1-1
+            : Sec 3-1-1-1-1-1
+            ** Section 3.1
+            Sec 3.1
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language org\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Section 1',
+                'Sec 1.\n'
+            ],
+            [1, 'Section 2',
+                'Sec 2.\n'
+            ],
+            [2, 'Section 2-1',
+                'Sec 2.1\n'
+            ],
+            [3, 'Section 2-1-1',
+                'Sec 2.1.1\n'
+            ],
+            [1, 'Section 3', ''],
+            [2, 'placeholder level 2', ''],
+            [3, 'placeholder level 3', ''],
+            [4, 'placeholder level 4', ''],
+            [5, 'placeholder level 5', ''],
+            [6, 'Section 3-1-1-1-1-1',
+                ': Sec 3-1-1-1-1-1\n'
+            ],
+            [2, 'Section 3.1',
+                'Sec 3.1\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223232.7: *3* TestOrg.test_tags
+    test('test_tags', async () => {
+        const s = `\
+            * Section 1 :tag1:
+            * Section 2 :tag2:
+            * Section 3 :tag3:tag4:
+        `;
+        const c = self.c;
+        // Create the TagController by hand.
+        // from leo.plugins.nodetags import TagController
+        c.theTagController = new TagController(c);
+        // Run the test.
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language org\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Section 1 :tag1:', ''],
+            [1, 'Section 2 :tag2:', ''],
+            [1, 'Section 3 :tag3:tag4:', ''],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230922223238.1: ** suite TestOtl
+suite('TestOtl', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.otl';
+        self.treeType = '@auto-otl';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922223238.2: *3* TestOtl.test_otl_1
+    test('test_otl_1', async () => {
+        const s = `
+            preamble.
+            Section 1
+            : Sec 1.
+            Section 2
+            : Sec 2.
+            \tSection 2-1
+            : Sec 2-1
+            \t\tSection 2-1-1
+            : Sec 2-1-1
+            Section 3
+            : Sec 3
+            \tSection 3.1
+            : Sec 3.1
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                // 'line in root node\n'
+                '@language otl\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'preamble.', ''],
+            [1, 'Section 1', 'Sec 1.\n'],
+            [1, 'Section 2', 'Sec 2.\n'],
+            [2, 'Section 2-1', 'Sec 2-1\n'],
+            [3, 'Section 2-1-1', 'Sec 2-1-1\n'],
+            [1, 'Section 3', 'Sec 3\n'],
+            [2, 'Section 3.1', 'Sec 3.1\n'],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223238.3: *3* TestOtl.test_otl_placeholder
+    test('test_otl_placeholder', async () => {
+        const s = `
+            Section 1
+            : Sec 1.
+            Section 2
+            : Sec 2.
+            \t\tSection 3
+            : Sec 3.
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language otl\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Section 1', 'Sec 1.\n'],
+            [1, 'Section 2', 'Sec 2.\n'],
+            [2, 'placeholder level 2', ''],
+            [3, 'Section 3', 'Sec 3.\n'],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223238.4: *3* TestOtl.test_vim_outline_mode
+    test('test_vim_outline_mode', () => {
+        const c = self.c;
+        const x = new Otl_Importer(c);
+        const pattern = x.otl_node_pattern;
+        const table = [
+            'body line',
+            '\tline 1',
+            '  \tlevel 2',
+        ];
+        for (const line of table) {
+            const m = line.match(pattern);
+            assert.ok(m, line.toString());
+        }
+    });
+    //@-others
+
+});
+//@+node:felix.20230922223243.1: ** suite TestPascal
+suite('TestPascal', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.pas';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922223243.2: *3* TestPascal.test_delphi_interface
+    test('test_delphi_interface', async () => {
+        //@+<< define s >>
+        //@+node:felix.20230922223243.3: *4* << define s >>
+        const s = g.dedent(
+            `
+            unit Unit1;
+
+            interface
+
+            uses
+            Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls,
+            Forms,
+            Dialogs;
+
+            type
+            TForm1 = class(TForm)
+            procedure FormCreate(Sender: TObject);
+            private
+            { Private declarations }
+            public
+            { Public declarations }
+            end;
+
+            var
+            Form1: TForm1;
+
+            implementation
+
+            {$R *.dfm}
+
+            procedure TForm1.FormCreate(Sender: TObject);
+            var
+            x,y: double;
+            begin
+            x:= 4;
+            Y := x/2;
+            z := 'abc'
+            end;
+
+            end. // interface
+        `).trim() + '\n';
+        //@-<< define s >>
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language pascal\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'unit Unit1',
+                'unit Unit1;\n' +
+                '\n' +
+                'interface\n' +
+                '\n' +
+                'uses\n' +
+                'Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls,\n' +
+                'Forms,\n' +
+                'Dialogs;\n' +
+                '\n' +
+                'type\n' +
+                'TForm1 = class(TForm)\n'
+            ],
+            [1, 'procedure FormCreate',
+                'procedure FormCreate(Sender: TObject);\n' +
+                'private\n' +
+                '{ Private declarations }\n' +
+                'public\n' +
+                '{ Public declarations }\n' +
+                'end;\n' +
+                '\n' +
+                'var\n' +
+                'Form1: TForm1;\n' +
+                '\n' +
+                'implementation\n' +
+                '\n' +
+                '{$R *.dfm}\n'
+            ],
+            [1, 'procedure TForm1.FormCreate',
+                'procedure TForm1.FormCreate(Sender: TObject);\n' +
+                'var\n' +
+                'x,y: double;\n' +
+                'begin\n' +
+                'x:= 4;\n' +
+                'Y := x/2;\n' +
+                "z := 'abc'\n" +
+                'end;\n' +
+                '\n' +
+                'end. // interface\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223243.4: *3* TestPascal.test_indentation
+    test('test_indentation', async () => {
+        // From GSTATOBJ.PAS
+        //@+<< define s >>
+        //@+node:felix.20230922223243.5: *4* << define s >>
+        const s = g.dedent(
+            `
+        unit gstatobj;
+
+        {$F+,R-,S+}
+        {$I numdirect.inc}
+
+        interface
+        uses gf2obj1;
+
+        implementation
+
+        procedure statObj.scale(factor: float);
+        var i: integer;
+        begin
+           for i := 1 to num do
+              with data^[i] do y := factor * y;
+        end;
+
+        procedure statObj.multiplyGraph(var source: pGraphObj);
+        var i, max: integer;
+        begin
+        max := source^.getNum;
+        if max < num then num := max;
+        for i := 1 to max do
+            data^[i].y := data^[i].y * pstatObj(source)^.data^[i].y;
+        end;
+
+        function statObj.divideGraph(var numerator: pGraphObj): boolean;
+        var zerodata: boolean;
+        i, j, max: integer;
+        yy: float;
+        pg: pStatObj;
+        begin
+        if numerator = nil then begin
+            divideGraph := false;
+            exit;
+         end;
+        zerodata:= false;
+        new(pg,init);
+        if pg = nil then begin
+           divideGraph := false;
+           exit;
+         end;
+        max := numerator^.getNum;
+        if max < num then num := max;
+        pg^.importData(@self);
+        j := 0;
+        for i := 1 to max do begin
+            yy := pg^.sendYData(i);
+            if yy <> 0 then begin
+               inc(j);
+               getYData(j, numerator^.sendYData(i)/yy);
+               getXData(j, pg^.sendXData(i));
+             end else zeroData := true;
+         end;
+        setNum(j);
+        dispose(pg, byebye);
+        divideGraph := not zeroData;
+        end;
+
+        procedure statObj.addGraph(var source: pgraphObj);
+        var i, max: integer;
+        begin
+        max := source^.getNum;
+        if max < num then num := max;
+        for i := 1 to max do
+            data^[i].y := data^[i].y + pstatObj(source)^.data^[i].y;
+        end;
+        `).trim() + '\n';
+        //@-<< define s >>
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language pascal\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'unit gstatobj',
+                'unit gstatobj;\n' +
+                '\n' +
+                '{$F+,R-,S+}\n' +
+                '{$I numdirect.inc}\n' +
+                '\n' +
+                'interface\n' +
+                'uses gf2obj1;\n' +
+                '\n' +
+                'implementation\n'
+            ],
+            [1, 'procedure statObj.scale',
+                'procedure statObj.scale(factor: float);\n' +
+                'var i: integer;\n' +
+                'begin\n' +
+                '   for i := 1 to num do\n' +
+                '      with data^[i] do y := factor * y;\n' +
+                'end;\n'
+
+            ],
+            [1, 'procedure statObj.multiplyGraph',
+                'procedure statObj.multiplyGraph(var source: pGraphObj);\n' +
+                'var i, max: integer;\n' +
+                'begin\n' +
+                'max := source^.getNum;\n' +
+                'if max < num then num := max;\n' +
+                'for i := 1 to max do\n' +
+                '    data^[i].y := data^[i].y * pstatObj(source)^.data^[i].y;\n' +
+                'end;\n'
+            ],
+            [1, 'function statObj.divideGraph',
+                'function statObj.divideGraph(var numerator: pGraphObj): boolean;\n' +
+                'var zerodata: boolean;\n' +
+                'i, j, max: integer;\n' +
+                'yy: float;\n' +
+                'pg: pStatObj;\n' +
+                'begin\n' +
+                'if numerator = nil then begin\n' +
+                '    divideGraph := false;\n' +
+                '    exit;\n' +
+                ' end;\n' +
+                'zerodata:= false;\n' +
+                'new(pg,init);\n' +
+                'if pg = nil then begin\n' +
+                '   divideGraph := false;\n' +
+                '   exit;\n' +
+                ' end;\n' +
+                'max := numerator^.getNum;\n' +
+                'if max < num then num := max;\n' +
+                'pg^.importData(@self);\n' +
+                'j := 0;\n' +
+                'for i := 1 to max do begin\n' +
+                '    yy := pg^.sendYData(i);\n' +
+                '    if yy <> 0 then begin\n' +
+                '       inc(j);\n' +
+                '       getYData(j, numerator^.sendYData(i)/yy);\n' +
+                '       getXData(j, pg^.sendXData(i));\n' +
+                '     end else zeroData := true;\n' +
+                ' end;\n' +
+                'setNum(j);\n' +
+                'dispose(pg, byebye);\n' +
+                'divideGraph := not zeroData;\n' +
+                'end;\n'
+            ],
+            [1, 'procedure statObj.addGraph',
+                'procedure statObj.addGraph(var source: pgraphObj);\n' +
+                'var i, max: integer;\n' +
+                'begin\n' +
+                'max := source^.getNum;\n' +
+                'if max < num then num := max;\n' +
+                'for i := 1 to max do\n' +
+                '    data^[i].y := data^[i].y + pstatObj(source)^.data^[i].y;\n' +
+                'end;\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230922223249.1: ** suite TestPerl
+suite('TestPerl', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.pl';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922223249.2: *3* TestPerl.test_1
+    test('test_1', async () => {
+        const s = `
+            #!/usr/bin/perl
+
+            # Function definition
+            sub Hello{
+               print "Hello, World!\n";
+            }
+
+            sub Test{
+               print "Test!\n";
+            }
+            "\uFB01" =~ /fi/i;
+
+            $bar = "foo";
+            if ($bar =~ /foo/){
+               print "Second time is matching\n";
+            }else{
+               print "Second time is not matching\n";
+            }
+
+            # Function call
+            Hello();
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '            "ﬁ" =~ /fi/i;\n' +
+                '\n' +
+                '            $bar = "foo";\n' +
+                '            if ($bar =~ /foo/){\n' +
+                '               print "Second time is matching\n' +
+                '";\n' +
+                '            }else{\n' +
+                '               print "Second time is not matching\n' +
+                '";\n' +
+                '            }\n' +
+                '\n' +
+                '            # Function call\n' +
+                '            Hello();\n' +
+                '@language perl\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'sub Hello',
+                '#!/usr/bin/perl\n' +
+                '\n' +
+                '            # Function definition\n' +
+                '            sub Hello{\n' +
+                '               print "Hello, World!\n' +
+                '";\n' +
+                '            }\n'
+            ],
+            [1, 'sub Test',
+                '            sub Test{\n' +
+                '               print "Test!\n' +
+                '";\n' +
+                '            }\n'
+            ],
+        ]
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223249.3: *3* TestPerl.test_multi_line_string
+    test('test_multi_line_string', async () => {
+        const s = `
+            #!/usr/bin/perl
+
+            # This would print with a line break in the middle
+            print "Hello
+
+            sub World {
+                print "This is not a funtion!"
+            }
+
+            world\n";
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '#!/usr/bin/perl\n' +
+                '\n' +
+                '            # This would print with a line break in the middle\n' +
+                '            print "Hello\n' +
+                '\n' +
+                '            sub World {\n' +
+                '                print "This is not a funtion!"\n' +
+                '            }\n' +
+                '\n' +
+                '            world\n' +
+                '";\n' +
+                '@language perl\n' +
+                '@tabwidth -4\n'
+            ],
+        ]
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223249.4: *3* TestPerl.test_perlpod_comment
+    test('test_perlpod_comment', async () => {
+        const s = `
+            #!/usr/bin/perl
+
+            sub Test{
+               print "Test!\n";
+            }
+
+            =begin comment
+            sub World {
+                print "This is not a funtion!"
+            }
+            =cut
+
+            # Function definition
+            sub Hello{
+               print "Hello, World!\n";
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language perl\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'sub Test',
+                '#!/usr/bin/perl\n' +
+                '\n' +
+                '            sub Test{\n' +
+                '               print "Test!\n' +
+                '";\n' +
+                '            }\n'
+            ],
+            [1, 'sub World',
+                '            =begin comment\n' +
+                '            sub World {\n' +
+                '                print "This is not a funtion!"\n' +
+                '            }\n'
+            ],
+            [1, 'sub Hello',
+                '            =cut\n' +
+                '\n' +
+                '            # Function definition\n' +
+                '            sub Hello{\n' +
+                '               print "Hello, World!\n' +
+                '";\n' +
+                '            }\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922223249.5: *3* TestPerl.test_regex
+    test('test_regex', async () => {
+        const s = `
+            #!/usr/bin/perl
+
+            sub test1 {
+                s = /}/g;
+            }
+
+            sub test2 {
+                s = m//}/;
+            }
+
+            sub test3 {
+                s = s///}/;
+            }
+
+            sub test4 {
+                s = tr///}/;
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language perl\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'sub test1',
+                '#!/usr/bin/perl\n' +
+                '\n' +
+                'sub test1 {\n' +
+                '    s = /}/g;\n' +
+                '}\n'
+            ],
+            [1, 'sub test2',
+                'sub test2 {\n' +
+                '    s = m//}/;\n' +
+                '}\n'
+            ],
+            [1, 'sub test3',
+                'sub test3 {\n' +
+                '    s = s///}/;\n' +
+                '}\n'
+            ],
+            [1, 'sub test4',
+                'sub test4 {\n' +
+                '    s = tr///}/;\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230922223256.1: ** suite TestPhp
+suite('TestPhp', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.php';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922223256.2: *3* TestPhp.test_import_class
+    test('test_import_class', async () => {
+        const s = `
+            <?php
+
+            $type = 'cc';
+            $obj = new $type; // outputs "hi!"
+
+            class cc {
+                function __construct() {
+                    echo 'hi!';
+                }
+            }
+
+            ?>
+        `;
+        await self.run_test(s);
+    });
+    //@+node:felix.20230922223256.3: *3* TestPhp.test_import_conditional_class
+    test('test_import_conditional_class', async () => {
+        const s = `
+            <?php
+
+            if (expr) {
+                class cc {
+                    // version 1
+                }
+            } else {
+                class cc {
+                    // version 2
+                }
+            }
+
+            ?>
+        `;
+        await self.new_round_trip_test(s);
+    });
+    //@+node:felix.20230922223256.4: *3* TestPhp.test_import_classes__functions
+    test('test_import_classes__functions', async () => {
+        const s = `
+            <?php
+            class Enum {
+                protected $self = array();
+                public function __construct( /*...*/ ) {
+                    $args = func_get_args();
+                    for( $i=0, $n=count($args); $i<$n; $i++ )
+                        $this->add($args[$i]);
+                }
+
+                public function __get( /*string*/ $name = null ) {
+                    return $this->self[$name];
+                }
+
+                public function add( /*string*/ $name = null, /*int*/ $enum = null ) {
+                    if( isset($enum) )
+                        $this->self[$name] = $enum;
+                    else
+                        $this->self[$name] = end($this->self) + 1;
+                }
+            }
+
+            class DefinedEnum extends Enum {
+                public function __construct( /*array*/ $itms ) {
+                    foreach( $itms as $name => $enum )
+                        $this->add($name, $enum);
+                }
+            }
+
+            class FlagsEnum extends Enum {
+                public function __construct( /*...*/ ) {
+                    $args = func_get_args();
+                    for( $i=0, $n=count($args), $f=0x1; $i<$n; $i++, $f *= 0x2 )
+                        $this->add($args[$i], $f);
+                }
+            }
+            ?>
+        `;
+        await self.new_round_trip_test(s)
+
+    });
+    //@+node:felix.20230922223256.5: *3* TestPhp.test_here_doc
+    test('test_here_doc', async () => {
+        const s = `
+            <?php
+            class foo {
+                public $bar = <<<EOT
+            a test.
+            bar
+            EOT;
+            }
+            ?>
+        `;
+        await self.new_round_trip_test(s);
+    });
+    //@-others
+
+});
 //@+node:felix.20230917230509.1: ** suite TestPython
 suite('TestPython', () => {
 

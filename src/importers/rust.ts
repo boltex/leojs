@@ -17,7 +17,7 @@ export class Rust_Importer extends Importer {
     public string_list: string[] = ['"'];
 
     public block_patterns: [string, RegExp][] = [
-        ['impl', /\bimpl\b(.*?)\s*{/],  // Use most of the line.
+        ['impl', /^\bimpl\b(.*?)\s*{/],  // Use most of the line. ALSO ADDED CARET TO MATCH AT START OF STRING
         ['fn', /\s*fn\s+(\w+)\s*\(/],
         ['fn', /\s*pub\s+fn\s+(\w+)\s*\(/],
     ];

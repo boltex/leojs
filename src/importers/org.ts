@@ -15,7 +15,7 @@ import { Block, Importer } from './base_importer';
  */
 export class Org_Importer extends Importer {
     public language: string = 'org';
-    public section_pat: RegExp = /(\*+)\s(.*)/;
+    public section_pat: RegExp = /^(\*+)\s(.*)/; // Added caret for start of line
 
     constructor(c: Commands) {
         super(c);
@@ -40,7 +40,7 @@ export class Org_Importer extends Importer {
         const lines_dict: Record<string, string[]> = {};
         lines_dict[parent.v.gnx] = [];
         let i: number = 0;
-
+        let top: Position;
         while (i < lines.length) {
             const line: string = lines[i];
             i += 1;
@@ -50,17 +50,17 @@ export class Org_Importer extends Importer {
                 const level: number = match[1].length;
                 const headline: string = match[2];
                 // Cut back the stack.
-                parents.length = level;
+                parents.splice(level);
                 // Create any needed placeholders.
                 this.create_placeholders(level, lines_dict, parents);
                 // Create the child.
-                const top: Position = parents[parents.length - 1];
+                top = parents[parents.length - 1];
                 const child: Position = top.insertAsLastChild();
                 parents.push(child);
                 child.h = headline;
                 lines_dict[child.v.gnx] = [];
             } else {
-                const top: Position = parents[parents.length - 1];
+                top = parents[parents.length - 1];
                 lines_dict[top.v.gnx].push(line);
             }
         }

@@ -20,7 +20,7 @@ export class Perl_Importer extends Importer {
         ['sub', /^\s*sub\s+(\w+)/],
     ];
 
-    public regex_pat: RegExp = /(.*?=\s*(m|s|tr|)\/)/;
+    public regex_pat: RegExp = /^(.*?=\s*(m|s|tr|)\/)/; // added caret to match only at start
 
     constructor(c: Commands) {
         super(c);
@@ -45,7 +45,7 @@ export class Perl_Importer extends Importer {
     public delete_regexes(lines: string[]): string[] {
         const result: string[] = [];
         for (const line of lines) {
-            const m = this.regex_pat.exec(line);
+            const m = line.match(this.regex_pat);
             if (m) {
                 result.push(line.slice(0, m[0].length));
             } else {

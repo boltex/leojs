@@ -20,7 +20,7 @@ export class Java_Importer extends Importer {
   public block_patterns: [string, RegExp][] = [
     ['class', /.*?\bclass\s+(\w+)/],
     ['func', /.*?\b(\w+)\s*\(.*?\)\s*{/],
-    ['interface', /\w*\binterface\w*{/],
+    ['interface', /^\w*\binterface\w*{/], // Added caret to be used as in python to match at start of string
   ];
 
   constructor(c: Commands) {
