@@ -14414,6 +14414,11 @@ the regexp 'match' method exists in python, but it only matches at the start of 
 So when the 'match' method is used in js, a caret "^" has to be prefixed onto the regex to match at the start of the string.
 
 4-
+If a regex uses the '$' character to match an end-of-line, it needs the 'm' switch if the tested string has '\n' at the end.
+(is considered multiline)
+no need for 'm' switch for a '$' match if the tested string has no newlines at all.
+
+5-
 a "for in" loop in python loops over the values which is equivalent to a "for of" loop in js. 
 
 Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.

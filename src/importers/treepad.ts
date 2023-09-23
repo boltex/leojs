@@ -37,10 +37,10 @@ export class Treepad_Importer extends Importer {
      * i.gen_lines adds the @language and @tabwidth directives.
      */
     public gen_block(block: Block, parent: Position): void {
-        const header_pat = /<Treepad version.*?>\s*$/;
-        const start1_pat = /^\s*dt\=\w+\s*$/;  // type line.
-        const start2_pat = /\s*<node>(\s*5P9i0s8y19Z)?$/;
-        const end_pat = /\s*<end node>\s*5P9i0s8y19Z$/;
+        const header_pat = /^<Treepad version.*?>\s*$/m; // Added caret to match at start of string
+        const start1_pat = /^\s*dt\=\w+\s*$/m;  // type line.
+        const start2_pat = /^\s*<node>(\s*5P9i0s8y19Z)?$/m;
+        const end_pat = /^\s*<end node>\s*5P9i0s8y19Z$/m;
         const lines = this.lines;
         console.assert(parent.__eq__(this.root));
 
@@ -48,7 +48,7 @@ export class Treepad_Importer extends Importer {
         const lines_dict: { [key: string]: string[] } = {};  // Lines for each vnode.
         let i = 0;
 
-        if (header_pat.test(lines[0])) {
+        if (lines[0].match(header_pat)) {
             i += 1;
             lines_dict[parent.v.gnx] = [lines[0], '@others\n'];
         } else {
@@ -61,7 +61,7 @@ export class Treepad_Importer extends Importer {
             const line = lines[i];
             i += 1;
 
-            if (end_pat.test(line)) {
+            if (line.match(end_pat)) {
                 continue;  // No need to change the stack.
             }
 
@@ -72,8 +72,8 @@ export class Treepad_Importer extends Importer {
                 continue;
             }
 
-            const start1_m = start1_pat.test(lines[i - 1]);  // dt line.
-            const start2_m = start2_pat.test(lines[i]);  // type line.
+            const start1_m = lines[i - 1].match(start1_pat);  // dt line.
+            const start2_m = lines[i].match(start2_pat);  // type line.
 
             if (start1_m && start2_m) {
                 const headline = lines[i + 1].trim();
@@ -85,8 +85,7 @@ export class Treepad_Importer extends Importer {
                 try {
                     level = 1 + parseInt(level_s, 10);
                 } catch (e) {
-                    // pragma: no cover (user error)
-                    console.error('Invalid level:', level_s);
+                    level = 1;
                 }
 
                 // Cut back the stack.

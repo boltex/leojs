@@ -3966,6 +3966,667 @@ suite('TestPython', () => {
     //@-others
 
 });
+//@+node:felix.20230923013557.1: ** suite TestRst
+suite('TestRst', () => {
+
+    let self: BaseTestImporter;
+    const docutils = false; // TODO docutils 
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.rst';
+        self.treeType = '@auto-rst';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230923013557.2: *3* TestRst.test_rst_1
+    test('test_rst_1', async () => {
+        try {
+            assert.ok(docutils);
+        } catch (e) {
+            return;
+            // self.skipTest('no docutils')
+        }
+        const s = `
+            .. toc
+
+            ====
+            top
+            ====
+
+            The top section
+
+            section 1
+            ---------
+
+            section 1, line 1
+            --
+            section 1, line 2
+
+            section 2
+            ---------
+
+            section 2, line 1
+
+            section 2.1
+            ~~~~~~~~~~~
+
+            section 2.1, line 1
+
+            section 2.1.1
+            .............
+
+            section 2.2.1 line 1
+
+            section 3
+            ---------
+
+            section 3, line 1
+
+            section 3.1.1
+            .............
+
+            section 3.1.1, line 1
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language rest\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '!Dummy chapter',
+                '.. toc\n' +
+                '\n'
+            ],
+            [1, 'top',
+                '\n' +
+                'The top section\n' +
+                '\n'
+            ],
+            [1, 'section 1',
+                '\n' +
+                'section 1, line 1\n' +
+                '--\n' +
+                'section 1, line 2\n' +
+                '\n'
+            ],
+            [1, 'section 2',
+                '\n' +
+                'section 2, line 1\n' +
+                '\n'
+            ],
+            [2, 'section 2.1',
+                '\n' +
+                'section 2.1, line 1\n' +
+                '\n'
+            ],
+            [3, 'section 2.1.1',
+                '\n' +
+                'section 2.2.1 line 1\n' +
+                '\n'
+            ],
+            [1, 'section 3',
+                '\n' +
+                'section 3, line 1\n' +
+                '\n'
+            ],
+            [2, 'placeholder level 2',
+                ''
+            ],
+            [3, 'section 3.1.1',
+                '\n' +
+                'section 3.1.1, line 1\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230923013557.3: *3* TestRst.test_simple
+    test('test_simple', async () => {
+        try {
+            assert.ok(docutils);
+        } catch (e) {
+            return;
+            // self.skipTest('no docutils')
+        }
+        const s = `
+            .. toc
+
+            .. The section name contains trailing whitespace.
+
+            =======
+            Chapter
+            =======
+
+            The top chapter.
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language rest\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, "!Dummy chapter",
+                '.. toc\n' +
+                '\n' +
+                '.. The section name contains trailing whitespace.\n' +
+                '\n'
+            ],
+            [1, "Chapter",
+                '\n' +
+                'The top chapter.\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230923013557.4: *3* TestRst.test_no_double_underlines
+    test('test_no_double_underlines', async () => {
+        try {
+            assert.ok(docutils);
+        } catch (e) {
+            return;
+            // self.skipTest('no docutils')
+        }
+        const s = `
+            .. toc
+
+            top
+            ====
+
+            The top section
+
+            section 1
+            ---------
+
+            section 1, line 1
+            --
+            section 1, line 2
+
+            section 2
+            ---------
+
+            section 2, line 1
+
+            section 2.1
+            ~~~~~~~~~~~
+
+            section 2.1, line 1
+
+            section 2.1.1
+            .............
+
+            section 2.2.1 line 1
+
+            section 3
+            ---------
+
+            section 3, line 1
+
+            section 3.1.1
+            .............
+
+            section 3.1.1, line 1
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language rest\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '!Dummy chapter',
+                '.. toc\n' +
+                '\n'
+            ],
+            [1, 'top',
+                '\n' +
+                'The top section\n' +
+                '\n'
+            ],
+            [1, 'section 1',
+                '\n' +
+                'section 1, line 1\n' +
+                '--\n' +
+                'section 1, line 2\n' +
+                '\n'
+            ],
+            [1, 'section 2',
+                '\n' +
+                'section 2, line 1\n' +
+                '\n'
+            ],
+            [2, 'section 2.1',
+                '\n' +
+                'section 2.1, line 1\n' +
+                '\n'
+            ],
+            [3, 'section 2.1.1',
+                '\n' +
+                'section 2.2.1 line 1\n' +
+                '\n'
+            ],
+            [1, 'section 3',
+                '\n' +
+                'section 3, line 1\n' +
+                '\n'
+            ],
+            [2, 'placeholder level 2',
+                ''
+            ],
+            [3, 'section 3.1.1',
+                '\n' +
+                'section 3.1.1, line 1\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230923013557.5: *3* TestRst.test_long_underlines
+    test('test_long_underlines', async () => {
+        try {
+            assert.ok(docutils);
+        } catch (e) {
+            return;
+            // self.skipTest('no docutils')
+        }
+        const s = `
+            .. toc
+
+            top
+            -------------
+
+            The top section
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language rest\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '!Dummy chapter',
+                '.. toc\n' +
+                '\n'
+            ],
+            [1, 'top',
+                '\n' +
+                'The top section\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230923013557.6: *3* TestRst.test_test_long_overlines
+    test('test_test_long_overlines', async () => {
+        try {
+            assert.ok(docutils);
+        } catch (e) {
+            return;
+            // self.skipTest('no docutils')
+        }
+        const s = `
+            .. toc
+
+            ======
+            top
+            ======
+
+            The top section
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language rest\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, "!Dummy chapter",
+                '.. toc\n' +
+                '\n'
+            ],
+            [1, "top",
+                '\n' +
+                'The top section\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230923013557.7: *3* TestRst.test_trailing_whitespace
+    test('test_trailing_whitespace', async () => {
+        try {
+            assert.ok(docutils);
+        } catch (e) {
+            return;
+            // self.skipTest('no docutils')
+        }
+        const s = `
+            .. toc
+
+            .. The section name contains trailing whitespace.
+
+            ======
+            top
+            ======
+
+            The top section.
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language rest\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, "!Dummy chapter",
+                '.. toc\n' +
+                '\n' +
+                '.. The section name contains trailing whitespace.\n' +
+                '\n'
+            ],
+            [1, "top",
+                '\n' +
+                'The top section.\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230923013557.8: *3* TestRst.test_leo_rst
+    test('test_leo_rst', async () => {
+        try {
+            assert.ok(docutils);
+        } catch (e) {
+            return;
+            // self.skipTest('no docutils')
+        }
+        // All heading must be followed by an empty line.
+        const s = `\
+            #########
+            Chapter 1
+            #########
+
+            It was a dark and stormy night.
+
+            section 1
+            +++++++++
+
+            Sec 1.
+
+            section 2
+            +++++++++
+
+            Sec 2.
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language rest\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Chapter 1',
+                '\n' +
+                'It was a dark and stormy night.\n' +
+                '\n'
+            ],
+            [2, 'section 1',
+                '\n' +
+                'Sec 1.\n' +
+                '\n'
+            ],
+            [2, 'section 2',
+                '\n' +
+                'Sec 2.\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230923013602.1: ** suite TestRust
+suite('TestRust', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.rs';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230923013602.2: *3* TestRust.test_1
+    test('test_1', async () => {
+        const s = `
+            fn main() {
+                let width1 = 30;
+                let height1 = 50;
+
+                println!(
+                    "The area of the rectangle is {} square pixels.",
+                    area(width1, height1)
+                );
+            }
+
+            fn area(width: u32, height: u32) -> u32 {
+                width * height
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language rust\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'fn main',
+                'fn main() {\n' +
+                '    let width1 = 30;\n' +
+                '    let height1 = 50;\n' +
+                '\n' +
+                '    println!(\n' +
+                '        "The area of the rectangle is {} square pixels.",\n' +
+                '        area(width1, height1)\n' +
+                '    );\n' +
+                '}\n'
+            ],
+            [1, 'fn area',
+                'fn area(width: u32, height: u32) -> u32 {\n' +
+                '    width * height\n' +
+                '}\n'
+            ],
+        ]
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230923013609.1: ** suite TestTcl
+suite('TestTcl', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.tcl';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230923013609.2: *3* TestTcl.test_1
+    test('test_1', async () => {
+        const s = `
+            proc dumpFile { fileName { channel stdout } } {
+
+                 # Open the file, and set up to process it in binary mode.
+                 set f [open $fileName r]
+                 fconfigure $f \\
+                     -translation binary \\
+                     -encoding binary \\
+                     -buffering full -buffersize 16384
+
+                 close $f
+                 return
+             }
+
+             # Main program
+
+             if { [info exists argv0] && [string equal $argv0 [info script]] } {
+                 foreach file $argv {
+                     puts "$file:"
+                     dumpFile $file
+                 }
+             }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '\n' +
+                ' # Main program\n' +
+                '\n' +
+                ' if { [info exists argv0] && [string equal $argv0 [info script]] } {\n' +
+                '     foreach file $argv {\n' +
+                '         puts "$file:"\n' +
+                '         dumpFile $file\n' +
+                '     }\n' +
+                ' }\n' +
+                '@language tcl\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'proc dumpFile',
+                'proc dumpFile { fileName { channel stdout } } {\n' +
+                '\n' +
+                '     # Open the file, and set up to process it in binary mode.\n' +
+                '     set f [open $fileName r]\n' +
+                '     fconfigure $f \\\n' +
+                '         -translation binary \\\n' +
+                '         -encoding binary \\\n' +
+                '         -buffering full -buffersize 16384\n' +
+                '\n' +
+                '     close $f\n' +
+                '     return\n' +
+                ' }\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230923013613.1: ** suite TestTreepad
+suite('TestTreepad', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.hjt';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230923013613.2: *3* TestTreepad.test_treepad_1
+    test('test_treepad_1', async () => {
+        // 5P9i0s8y19Z is a magic number.
+        // The treepad writer always writes '<Treepad version 3.0>',
+        // but any version should work.
+        const s = `
+            <Treepad version 2.7>
+            dt=Text
+            <node> 5P9i0s8y19Z
+            headline 1
+            0
+            node 1, line 1
+            node 1, line 2
+            <end node> 5P9i0s8y19Z
+            dt=Text
+            <node> 5P9i0s8y19Z
+            headline 1.1
+            1
+            node 1.1, line 1
+            <end node> 5P9i0s8y19Z
+            dt=Text
+            <node> 5P9i0s8y19Z
+            headline 1.2
+            1
+            node 1.2, line 1
+            node 1.2, line 2
+            <end node> 5P9i0s8y19Z
+            dt=Text
+            <node> 5P9i0s8y19Z
+            headline 2
+            0
+            node 2, line 1
+            node 2, line 2
+            <end node> 5P9i0s8y19Z
+            dt=Text
+            <node> 5P9i0s8y19Z
+            headline 2.1.1
+            3
+            node 2.1.1, line 1
+            node 2.1.1, line 2
+            <end node> 5P9i0s8y19Z
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '<Treepad version 2.7>\n' +
+                '@others\n' +
+                '@language plain\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'headline 1',
+                'node 1, line 1\n' +
+                'node 1, line 2\n'
+            ],
+            [2, 'headline 1.1',
+                'node 1.1, line 1\n'
+            ],
+            [2, 'headline 1.2',
+                'node 1.2, line 1\n' +
+                'node 1.2, line 2\n'
+            ],
+            [1, 'headline 2',
+                'node 2, line 1\n' +
+                'node 2, line 2\n'
+            ],
+            [2, 'placeholder level 2', ''],
+            [3, 'placeholder level 3', ''],
+            [4, 'headline 2.1.1',
+                'node 2.1.1, line 1\n' +
+                'node 2.1.1, line 2\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
 //@+node:felix.20230919203905.1: ** suite TestTypescript
 suite('TestTypescript', () => {
 
