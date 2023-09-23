@@ -13,7 +13,7 @@ import { BaseWriter } from './basewriter';
 /**
  * The writer class for .otl files.
  */
-class OtlWriter extends BaseWriter {
+export class OtlWriter extends BaseWriter {
 
     //@+others
     //@+node:felix.20230914214945.3: *3* otlw.write

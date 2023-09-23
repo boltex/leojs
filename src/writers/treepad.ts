@@ -12,7 +12,7 @@ import { BaseWriter } from './basewriter';
 /**
  * The writer class for TreePad (.hjt) files.
  */
-class TreePad_Writer extends BaseWriter {
+export class TreePad_Writer extends BaseWriter {
 
     //@+others
     //@+node:felix.20230914214949.3: *3* treepad_w.write

@@ -13,7 +13,7 @@ import { BaseWriter } from './basewriter';
 /**
  * The writer class for markdown files.
  */
-class MarkdownWriter extends BaseWriter {
+export class MarkdownWriter extends BaseWriter {
     public root: Position | null = null;
 
 

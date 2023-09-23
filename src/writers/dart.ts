@@ -13,7 +13,7 @@ import { BaseWriter } from './basewriter';
 /**
  * The writer class for .dart files.
  */
-class DartWriter extends BaseWriter {
+export class DartWriter extends BaseWriter {
 
     //@+others
     //@+node:felix.20230914011239.3: *3* dart.write

@@ -1,7 +1,6 @@
 //@+leo-ver=5-thin
-//@+node:felix.20230529171913.1: * @file src/test/test_importers.ts
+//@+node:felix.20230529171913.1: * @file src/test/test_importers.test.ts
 
-import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
 

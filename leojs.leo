@@ -590,7 +590,8 @@
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
 <v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
-<v t="felix.20230529171913.1"><vh>@file src/test/test_importers.ts</vh></v>
+<v t="felix.20230529171913.1"><vh>@file src/test/test_importers.test.ts</vh></v>
+<v t="felix.20230923150253.1"><vh>@file src/test/test_writers.test.ts</vh></v>
 <v t="felix.20230715185802.1"><vh>unittest commands</vh>
 <v t="felix.20230715191150.1"><vh>@file src/test/leoCommanderFileCommands.test.ts</vh></v>
 <v t="felix.20230805122326.1"><vh>@file src/test/leoGotoCommands.test.ts</vh></v>

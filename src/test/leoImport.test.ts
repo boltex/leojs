@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
 
 import * as g from '../core/leoGlobals';
-import { BaseTestImporter } from './test_importers';
+import { BaseTestImporter } from './test_importers.test';
 import { MindMapImporter, RecursiveImportController } from '../core/leoImport';
 
 //@+others

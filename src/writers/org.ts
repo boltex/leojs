@@ -14,7 +14,7 @@ import { Commands } from "../core/leoCommands";
 /**
  * The writer class for .org files.
  */
-class OrgModeWriter extends BaseWriter {
+export class OrgModeWriter extends BaseWriter {
 
     public tc: any | null = null;
 

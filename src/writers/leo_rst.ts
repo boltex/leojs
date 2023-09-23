@@ -20,7 +20,7 @@ import { underlines } from '../importers/leo_rst';
  *     The writer class for @auto-rst and other reStructuredText nodes.
  * This is *very* different from rst3 command's write code.
  */
-class RstWriter extends BaseWriter {
+export class RstWriter extends BaseWriter {
 
     //@+others
     //@+node:felix.20230914214929.3: *3* rstw.underline_char
