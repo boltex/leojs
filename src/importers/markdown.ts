@@ -40,28 +40,23 @@ export class Markdown_Importer extends Importer {
      */
     public gen_block(block: Block, parent: Position): void {
         console.assert(parent.__eq__(this.root));
-
         const lines: string[] = this.lines;
         this.lines_dict[parent.v.gnx] = [];  // Initialize lines_dict for the parent vnode.
         this.stack = [parent];
         let in_code: boolean = false;
         let skip: number = 0;
-
         for (let i: number = 0; i < lines.length; i++) {
             const line: string = lines[i];
             const top: Position = this.stack[this.stack.length - 1];
-
+            let [level, name]: [number | null, string | null] = this.is_hash(line);
             if (skip > 0) {
                 skip -= 1;
             } else if (!in_code && this.lookahead_underline(i)) {
-                const level: number = lines[i + 1].startsWith('=') ? 1 : 2;
+                level = lines[i + 1].startsWith('=') ? 1 : 2;
                 this.make_markdown_node(level, line);
                 skip = 1;
-            } else if (!in_code) {
-                const [level, name]: [number | null, string | null] = this.is_hash(line);
-                if (level !== null && name !== null) {
-                    this.make_markdown_node(level, name);
-                }
+            } else if (!in_code && name && level != null) {
+                this.make_markdown_node(level, name);
             } else if (i === 0) {
                 this.make_decls_node(line);
             } else if (in_code) {
@@ -123,7 +118,7 @@ export class Markdown_Importer extends Importer {
             const line1: string = lines[i + 1];
             const ch0: boolean = this.is_underline(line0);
             const ch1: boolean = this.is_underline(line1);
-            return !ch0 && !line0.trim().length && ch1 && line1.length >= 4;
+            return !ch0 && !!line0.trim().length && ch1 && line1.length >= 4;
         }
         return false;
     }

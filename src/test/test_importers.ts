@@ -11,6 +11,7 @@ import { Position } from '../core/leoNodes';
 import { C_Importer } from '../importers/c';
 import { Python_Importer } from '../importers/python';
 import { Coffeescript_Importer } from '../importers/coffeescript';
+import { Markdown_Importer } from '../importers/markdown';
 
 //@+others
 //@+node:felix.20230529172038.1: ** class BaseTestImporter(LeoUnitTest)
@@ -50,6 +51,8 @@ export class BaseTestImporter extends LeoUnitTest {
                     [a_level, a_h, a_str] = actual[i];
                     [e_level, e_h, e_str] = expected[i];
                 } catch (error) {
+                    console.log('CANNOT ASSIGN!', actual[i], expected[i]);
+
                     assert.strictEqual(false, true); // So we print the actual results.
                 }
                 const msg: string = `FAIL in node ${i} ${e_h}`;
@@ -61,6 +64,8 @@ export class BaseTestImporter extends LeoUnitTest {
             }
         } catch (error) {
             // Dump actual results, including bodies.
+            console.log('error!', error);
+
             this.dump_tree(p, 'Actual results...');
             throw error;
         }
@@ -1708,6 +1713,257 @@ suite('TestHtml', () => {
     //@-others
 
 });
+//@+node:felix.20230922002133.1: ** suite TestIni
+suite('TestIni', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.ini';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922002133.2: *3* TestIni.test_1
+
+    test('test_1', async () => {
+        // This is just a coverage test for the importer.
+        const s = `
+                ATlanguage ini
+                # Config file for mypy
+
+                # Note: Do not put comments after settings.
+
+                [mypy]
+                python_version = 3.9
+                ignore_missing_imports  = True
+                incremental = True
+                # cache_dir=nul
+                cache_dir = mypy_stubs
+                show_error_codes = True
+                check_untyped_defs = True
+                strict_optional = False
+                disable_error_code=attr-defined
+
+                # For v0.931, per https://github.com/python/mypy/issues/11936
+
+                exclude =
+
+                    # The first line must *not* start with |.
+                    # Thereafter, each line *must* start with |.
+                    # No trailing '|' on last entry!
+
+                    # Directories...
+                    doc/|dist/|editpane/|examples/|extensions/|external/|modes/|obsolete/|scripts/|themes/|unittests/|www/|
+
+
+                # Settings for particular files...
+
+                # Core files that should be fully annotated...
+                [mypy-leo.core.leoGlobals,leo.core.leoNodes,leo.core.leoAst,leo.core.leoBackground]
+                disallow_untyped_defs = True
+                disallow_incomplete_defs = False
+
+                # Importer and writer plugins should be fully annotated...
+                [mypy-leo.plugins.importers.*,leo.plugins.writers.*]
+                disallow_untyped_defs = True
+                disallow_incomplete_defs = True
+
+                # mypy generates lots of useless errors for leoQt.py
+                [mypy-leo.core.leoQt,leo.core.leoQt5,leo.core.leoQt6]
+                follow_imports = skip
+                ignore_missing_imports  = True
+
+                # don't require annotations for leo/modes
+                [mypy-leo.modes]
+                follow_imports = skip
+                ignore_missing_imports  = True
+                disallow_untyped_defs = False
+                disallow_incomplete_defs = False
+
+        `.replace(/AT/g, '@');
+        await self.run_test(s);
+    });
+    //@-others
+
+});
+//@+node:felix.20230922002138.1: ** suite TestJava
+suite('TestJava', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.java';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922002138.2: *3* TestJava.test_from_AdminPermission_java
+    test('test_from_AdminPermission_java', async () => {
+        //  To do: allow '{' on following line.
+        const s = `
+            /**
+             * Indicates the caller's authority to perform lifecycle operations on
+             */
+
+            public final class AdminPermission extends BasicPermission {
+                /**
+                 * Creates a new <tt>AdminPermission</tt> object.
+                 */
+                public AdminPermission() {
+                    super("AdminPermission");
+                }
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language java\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'class AdminPermission',
+                '/**\n' +
+                " * Indicates the caller's authority to perform lifecycle operations on\n" +
+                ' */\n' +
+                '\n' +
+                'public final class AdminPermission extends BasicPermission {\n' +
+                '    @others\n' +
+                '}\n'
+            ],
+            [2, 'func AdminPermission',
+                '/**\n' +
+                ' * Creates a new <tt>AdminPermission</tt> object.\n' +
+                ' */\n' +
+                'public AdminPermission() {\n' +
+                '    super("AdminPermission");\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922002138.3: *3* TestJava.test_from_BundleException_java
+    test('test_from_BundleException_java', async () => {
+        const s = `
+            /*
+             * $Header: /cvs/leo/test/unitTest.leo,v 1.247 2008/02/14 14:59:04 edream Exp $
+             *
+             */
+
+            package org.osgi.framework;
+
+            public class BundleException extends Exception {
+                static final long serialVersionUID = 3571095144220455665L;
+                /**
+                 * Nested exception.
+                 */
+                private Throwable cause;
+
+                public BundleException(String msg, Throwable cause) {
+                    super(msg);
+                    this.cause = cause;
+                }
+            }
+
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '', // Ignore the first headline.
+                '@others\n' +
+                '@language java\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'class BundleException',
+                '/*\n' +
+                ' * $Header: /cvs/leo/test/unitTest.leo,v 1.247 2008/02/14 14:59:04 edream Exp $\n' +
+                ' *\n' +
+                ' */\n' +
+                '\n' +
+                'package org.osgi.framework;\n' +
+                '\n' +
+                'public class BundleException extends Exception {\n' +
+                '    @others\n' +
+                '}\n'
+            ],
+            [2, 'func BundleException',
+                'static final long serialVersionUID = 3571095144220455665L;\n' +
+                '/**\n' +
+                ' * Nested exception.\n' +
+                ' */\n' +
+                'private Throwable cause;\n' +
+                '\n' +
+                'public BundleException(String msg, Throwable cause) {\n' +
+                '    super(msg);\n' +
+                '    this.cause = cause;\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+
+    });
+    //@+node:felix.20230922002138.4: *3* TestJava.test_interface_test1
+    test('test_interface_test1', async () => {
+        const s = `
+            interface Bicycle {
+                void changeCadence(int newValue);
+                void changeGear(int newValue);
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                'interface Bicycle {\n' +
+                '    void changeCadence(int newValue);\n' +
+                '    void changeGear(int newValue);\n' +
+                '}\n' +
+                '@language java\n' +
+                '@tabwidth -4\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922002138.5: *3* TestJava.test_interface_test2
+    test('test_interface_test2', async () => {
+        const s = `
+            interface Bicycle {
+            void changeCadence(int newValue);
+            void changeGear(int newValue);
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                'interface Bicycle {\n' +
+                'void changeCadence(int newValue);\n' +
+                'void changeGear(int newValue);\n' +
+                '}\n' +
+                '@language java\n' +
+                '@tabwidth -4\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
 //@+node:felix.20230919195555.1: ** suite TestJavascript
 suite('TestJavascript', () => {
 
@@ -1822,6 +2078,421 @@ suite('TestJavascript', () => {
             };
             `;
         await self.new_round_trip_test(s);
+    });
+    //@-others
+
+});
+
+
+
+//@+node:felix.20230922003503.1: ** suite TestLua
+suite('TestLua', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.lua';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922003503.2: *3* TestLua.test_1
+    test('test_lua_1', async () => {
+        const s = `
+             function foo (a)
+               print("foo", a)
+               return coroutine.yield(2*a)
+             end
+
+             co = coroutine.create(function (a,b)
+                   print("co-body", a, b)
+                   local r = foo(a+1)
+                   print("co-body", r)
+                   local r, s = coroutine.yield(a+b, a-b)
+                   print("co-body", r, s)
+                   return b, "end"
+             end)
+
+             print("main", coroutine.resume(co, 1, 10))
+             print("main", coroutine.resume(co, "r"))
+             print("main", coroutine.resume(co, "x", "y"))
+             print("main", coroutine.resume(co, "x", "y"))
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '', // Ignore the first headline.
+                '@others\n' +
+                '\n' +
+                'print("main", coroutine.resume(co, 1, 10))\n' +
+                'print("main", coroutine.resume(co, "r"))\n' +
+                'print("main", coroutine.resume(co, "x", "y"))\n' +
+                'print("main", coroutine.resume(co, "x", "y"))\n' +
+                '@language lua\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'function foo',
+                'function foo (a)\n' +
+                '  print("foo", a)\n' +
+                '  return coroutine.yield(2*a)\n' +
+                'end\n'
+            ],
+            [1, 'function coroutine.create',
+                'co = coroutine.create(function (a,b)\n' +
+                '      print("co-body", a, b)\n' +
+                '      local r = foo(a+1)\n' +
+                '      print("co-body", r)\n' +
+                '      local r, s = coroutine.yield(a+b, a-b)\n' +
+                '      print("co-body", r, s)\n' +
+                '      return b, "end"\n' +
+                'end)\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@-others
+
+});
+//@+node:felix.20230922003511.1: ** suite TestMarkdown
+suite('TestMarkdown', () => {
+
+    let self: BaseTestImporter;
+
+    before(() => {
+        self = new BaseTestImporter();
+        self.ext = '.md';
+        self.treeType = '@auto-md';
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230922003511.2: *3* TestMarkdown.test_md_import
+    test('test_md_import', async () => {
+        // Must be in standard form, with a space after '#'.
+        const s = `\
+            # Top
+            The top section
+
+            ## Section 1
+            section 1, line 1
+            section 1, line 2
+
+            ## Section 2
+            section 2, line 1
+
+            ### Section 2.1
+            section 2.1, line 1
+
+            #### Section 2.1.1
+            section 2.2.1 line 1
+            The next section is empty. It must not be deleted.
+
+            ### Section 2.2
+
+            ## Section 3
+            Section 3, line 1
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // check_outlines ignores the first headline.
+                '@language md\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Top', 'The top section\n\n'],
+            [2, 'Section 1',
+                'section 1, line 1\n' +
+                'section 1, line 2\n' +
+                '\n'
+            ],
+            [2, 'Section 2',
+                'section 2, line 1\n' +
+                '\n'
+            ],
+            [3, 'Section 2.1',
+                'section 2.1, line 1\n' +
+                '\n'
+            ],
+            [4, 'Section 2.1.1',
+                'section 2.2.1 line 1\n' +
+                'The next section is empty. It must not be deleted.\n' +
+                '\n'
+            ],
+            [3, 'Section 2.2',
+                '\n'
+            ],
+            [2, 'Section 3',
+                'Section 3, line 1\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922003511.3: *3* TestMarkdown.test_md_import_rst_style
+    test('test_md_import_rst_style', async () => {
+        const s = `\
+            Top
+            ====
+
+            The top section
+
+            Section 1
+            ---------
+
+            section 1, line 1
+            -- Not an underline
+            secttion 1, line 2
+
+            Section 2
+            ---------
+
+            section 2, line 1
+
+            ###Section 2.1
+
+            section 2.1, line 1
+
+            ####Section 2.1.1
+
+            section 2.2.1 line 1
+
+            ###Section 2.2
+            section 2.2, line 1.
+
+            Section 3
+            ---------
+
+            section 3, line 1
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language md\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'Top',
+                '\n' +
+                'The top section\n' +
+                '\n'
+            ],
+            [2, 'Section 1',
+                '\n' +
+                'section 1, line 1\n' +
+                '-- Not an underline\n' +
+                'secttion 1, line 2\n' +
+                '\n'
+            ],
+            [2, 'Section 2',
+                '\n' +
+                'section 2, line 1\n' +
+                '\n'
+            ],
+            [3, 'Section 2.1',
+                '\n' +
+                'section 2.1, line 1\n' +
+                '\n'
+            ],
+            [4, 'Section 2.1.1',
+                '\n' +
+                'section 2.2.1 line 1\n' +
+                '\n'
+            ],
+            [3, 'Section 2.2',
+                'section 2.2, line 1.\n' +
+                '\n'
+            ],
+            [2, 'Section 3',
+                '\n' +
+                'section 3, line 1\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922003511.4: *3* TestMarkdown.test_markdown_importer_basic
+    test('test_markdown_importer_basic', async () => {
+        // Must be in standard form, with a space after '#'.
+        const s = `
+            Decl line.
+            # Header
+
+            After header text
+
+            ## Subheader
+
+            Not an underline
+
+            ----------------
+
+            After subheader text
+
+            # Last header: no text
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language md\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '!Declarations',
+                'Decl line.\n'
+            ],
+            [1, 'Header',
+                '\n' +
+                'After header text\n' +
+                '\n'
+            ],
+            [2, 'Subheader',
+                '\n' +
+                'Not an underline\n' +
+                '\n' +
+                '----------------\n' +
+                '\n' +
+                'After subheader text\n' +
+                '\n'
+            ],
+            [1, 'Last header: no text',
+                ''
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922003511.5: *3* TestMarkdown.test_markdown_importer_implicit_section
+    test('test_markdown_importer_implicit_section', async () => {
+        const s = `
+            Decl line.
+            #Header
+
+            After header text
+
+            ##Subheader
+
+            Not an underline
+
+            ----------------
+
+            This *should* be a section
+            ==========================
+
+            After subheader text
+
+            #Last header: no text
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language md\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '!Declarations',
+                'Decl line.\n'
+            ],
+            [1, 'Header',
+                '\n' +
+                'After header text\n' +
+                '\n'
+            ],
+            [2, 'Subheader',
+                '\n' +
+                'Not an underline\n' +
+                '\n' +
+                '----------------\n' +
+                '\n'
+            ],
+            [1, 'This *should* be a section',
+                '\n' +
+                'After subheader text\n' +
+                '\n'
+            ],
+            [1, 'Last header: no text',
+                ''
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922003511.6: *3* TestMarkdown.test_markdown_github_syntax
+    test('test_markdown_github_syntax', async () => {
+        // Must be in standard form, with a space after '#'.
+        const s = `
+            Decl line.
+            # Header
+
+            \`\`\`python
+            loads.init = {
+                Chloride: 11.5,
+                TotalP: 0.002,
+            }
+            \`\`\`
+            # Last header
+        `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@language md\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, '!Declarations',
+                'Decl line.\n'
+            ],
+            [1, 'Header',
+                '\n' +
+                '```python\n' +
+                'loads.init = {\n' +
+                '    Chloride: 11.5,\n' +
+                '    TotalP: 0.002,\n' +
+                '}\n' +
+                '```\n'
+            ],
+            [1, 'Last header',
+                ''
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20230922003511.7: *3* TestMarkdown.test_is_hash
+    test('test_is_hash', () => {
+        const c = self.c;
+        const x = new Markdown_Importer(c);
+        assert.ok(x.md_pattern_table);
+        const table: [number, string, string][] = [
+            [1, 'name', '# name\n'],
+            [2, 'a test', '## a test\n'],
+            [3, 'a test', '### a test\n'],
+        ];
+
+        for (const data of table) {
+            let [level, w_name, line] = data;
+            let [level2, name2] = x.is_hash(line);
+            assert.strictEqual(level, level2);
+            assert.strictEqual(w_name, name2);
+        }
+        let [level3, w_name] = x.is_hash('Not a hash');
+        assert.ok(level3 == null);
+        assert.ok(w_name == null);
+    });
+    //@+node:felix.20230922003511.8: *3* TestMarkdown.test_is_underline
+    test('test_is_underline', () => {
+        const c = self.c;
+        const x = new Markdown_Importer(c);
+        for (const line of ['----\n', '-----\n', '====\n', '====\n']) {
+            const got = x.is_underline(line);
+            assert.ok(got, line.toString());
+        }
+        for (const line of ['-\n', '--\n', '---\n', '==\n', '===\n', '===\n', '==-==\n', 'abc\n']) {
+            const got = x.is_underline(line);
+            assert.ok(!got, line.toString());
+        }
     });
     //@-others
 
