@@ -4,6 +4,7 @@
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
 import { Utils as uriUtils } from 'vscode-uri';
+import { Database, SqlJsStatic } from 'sql.js';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
@@ -144,7 +145,8 @@ export class Commands {
     public command_name: string = '';
     public recent_commands_list: string[] = [];
 
-    public sqlite_connection: any | undefined = undefined;
+    // * USED AS STRING IN LEOJS - ONLY USED AS A FLAG ANYWAYS IN LEO.
+    public sqlite_connection: string | undefined = undefined;
 
     //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.
@@ -173,7 +175,7 @@ export class Commands {
     // Flags for c.outerUpdate...
     public enableRedrawFlag = true;
     public requestCloseWindow = false;
-    public requestedFocusWidget: any;
+    public requestedFocusWidget: any; // TODO : Fix by typing properly when using only widget or wrapper!
     public requestLaterRedraw = false;
 
     //@+node:felix.20210223220814.6: *4* c.initFileIvars
@@ -220,7 +222,7 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: any = {}; // May be set to a PickleShare instance later.
+    public db: Record<string, any>; // IS A DATABASE 
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
     public controlCommands: any = undefined;
@@ -271,6 +273,12 @@ export class Commands {
         this.hiddenRootNode.h = '<hidden root vnode>';
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
+
+        // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
+        // TODO FIX THIS !
+        // console.log('g.app.db', g.app.db); // undefined as of now so 
+
+        this.db = {};
 
         // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);
@@ -463,6 +471,10 @@ export class Commands {
                 // sys.path.insert(0, '.')  // New in Leo 5.0 // TODO : needed ?
                 // sys.path.insert(0, c.frame.openDirectory)  // per SegundoBob // TODO : needed ?
                 script += '\n'; // Make sure we end the script properly.
+
+                // Wrap script as an IIAFE to allow 'await' right out the box.
+                script = "(async () => {\n" + script + "\n})();";
+
                 try {
                     if (!namespace || !namespace['script_gnx']) {
                         namespace = namespace || {};
@@ -552,12 +564,7 @@ export class Commands {
                 // exec(compile(script, scriptFile, 'exec'), d)
             } else {
                 // exec(script, d)
-                const testVar = vscode;
-
-                // TODO : Implement better setup & namespace !
                 new Function(
-                    'vscode',
-                    // TODO : 'fetch' equivalent
                     'c',
                     'g',
                     'input',
@@ -567,8 +574,6 @@ export class Commands {
                     'script_gnx',
                     script
                 )(
-                    testVar,
-                    // TODO : 'fetch' equivalent
                     d['c'],
                     d['g'],
                     d['input'],
@@ -1458,7 +1463,6 @@ export class Commands {
                 // New in Leo 6.7.4: *Do* raise an exception.
                 throw new Error(`Invalid position: ${p.toString()}`);
             }
-            // Don't kill unit tests for this kind of problem.
             c._currentPosition = c.rootPosition();
             g.trace(`Invalid position`, p.toString(), c.toString());
             g.trace(g.callers());
@@ -1538,11 +1542,6 @@ export class Commands {
         for (let p of c.all_positions(false)) {
             count += 1;
             const v: VNode = p.v;
-            // * removed https://github.com/leo-editor/leo-editor/pull/2363/files
-            // if (v["tnodeList"] !== undefined) {
-            //     delete v.tnodeList;
-            //     v._p_changed = true;
-            // }
             let gnx: string = v.fileIndex;
             if (gnx) {
                 // gnx must be a string.
@@ -1555,7 +1554,6 @@ export class Commands {
             } else {
                 gnx_errors += 1;
                 v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
-                // g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`, 'red');
                 g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`);
             }
         }
@@ -3547,14 +3545,16 @@ export class Commands {
         c.request_focus(body && body.wrapper);
     }
     public logWantsFocus(): void {
-        const c = this;
-        const log = c.frame.log;
-        c.request_focus(log && log.logCtrl);
+        g.app.gui.showLogPane(true);
+        // const c = this;
+        // const log = c.frame.log;
+        // c.request_focus(log && log.logCtrl);
     }
-    public minibufferWantsFocus(): void {
-        const c = this;
-        c.request_focus(c.miniBufferWidget);
-    }
+    // * No use in LeoJS
+    // public minibufferWantsFocus(): void {
+    //     const c = this;
+    //     c.request_focus(c.miniBufferWidget);
+    // }
     public treeWantsFocus(): void {
         const c = this;
         const tree = c.frame.tree;
@@ -3584,15 +3584,17 @@ export class Commands {
     }
 
     public logWantsFocusNow(): void {
-        const c = this;
-        const log = this.frame.log;
-        c.widgetWantsFocusNow(log && log.logCtrl);
+        // const c = this;
+        // const log = this.frame.log;
+        // c.widgetWantsFocusNow(log && log.logCtrl);
+        g.app.gui.showLogPane(true);
     }
 
-    public minibufferWantsFocusNow(): void {
-        const c = this;
-        c.widgetWantsFocusNow(c.miniBufferWidget);
-    }
+    // * No use in LeoJS
+    // public minibufferWantsFocusNow(): void {
+    //     const c = this;
+    //     c.widgetWantsFocusNow(c.miniBufferWidget);
+    // }
 
     public treeWantsFocusNow(): void {
         const c = this;

@@ -504,14 +504,14 @@ suite('Test Undo', () => {
 
         const p = self.c.p;
         let original = p.insertAfter();
-        const original_s = original.b = g.dedent(`
+        const original_s = original.b = g.dedent(`\
             @tabwidth -4
 
             line 1
                 line 2
                   line 3
-            line4\n`
-        );
+            line4
+    `); // Only four spaces before that close tick.
         c.undoer.clearUndoState();
         c.selectPosition(original);
         c.copyOutline();  // Add state to the undo stack!

@@ -137,42 +137,6 @@ export class LeoGui {
         this.oops();
     }
     /**
-     * Run Leo's remove tag dialog.
-     */
-    public removeTag(): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's tag dialog.
-     */
-    public tagNode(): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's tag children dialog.
-     */
-    public tagChildren(): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's findAll/replaceAll dialog.
-     */
-    public findAll(p_replace?: boolean): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's clone-find methods.
-     */
-    public cloneFind(p_marked: boolean, p_flat: boolean): any {
-        this.oops();
-    }
-    /**
-     * Run Leo's clone-find-tag method.
-     */
-    public cloneFindTag(): any {
-        this.oops();
-    }
-    /**
      * Run Leo's find method.
      */
     public find(p_fromOutline: boolean, p_reverse: boolean): any {
@@ -215,12 +179,6 @@ export class LeoGui {
         p_interrupt: boolean,
         p_asChild: boolean
     ): any {
-        this.oops();
-    }
-    /**
-     * Asks for chapter name and selects it.
-     */
-    public chapterSelect(): any {
         this.oops();
     }
     /**
@@ -356,6 +314,10 @@ export class LeoGui {
     public addLogPaneEntry(s: string): void {
         // Adds a message string to LeoJS log pane. See LeoUi.ts
     }
+    //@+node:felix.20230902142624.1: *4* LeoGui.focusLogPane (LeoJs)
+    public showLogPane(p_focus ?:boolean): void {
+        // Shows and optionally puts focus on the log pane
+    }
     //@+node:felix.20221120210000.1: *4* LeoGui.finishStartup (LeoJs)
     public finishStartup(): void {
         // * LeoJS GUI needs this method to finish it's startup
@@ -364,8 +326,9 @@ export class LeoGui {
     }
     //@+node:felix.20221120212654.1: *4* LeoGui.get1Arg (LeoJs)
     public get1Arg(
-        p_options?: any,
-        p_token?: any
+        options?: any,
+        token?: any,
+        tabList?: string[]
     ): Thenable<string | undefined> {
         return Promise.resolve('');
     }
@@ -425,6 +388,10 @@ export class LeoGui {
         return '';
     }
     //@+node:felix.20221120001229.16: *5* LeoGui.Dialog utils
+    public loadSearchSettings(): void {
+        this.oops();
+    }
+
     /**
      * Attach the Leo icon to a window.
      */
@@ -568,11 +535,11 @@ export class NullGui extends LeoGui {
         this.idleTimeClass = g.NullObject;
     }
 
-    public makeAllBindings(): void {}
-    public finishStartup(): void {}
+    public makeAllBindings(): void { }
+    public finishStartup(): void { }
 
-    public launchRefresh(): void {}
-    public fullRefresh(p_keepFocus?: boolean): void {}
+    public launchRefresh(): void { }
+    public fullRefresh(p_keepFocus?: boolean): void { }
 
     public replaceClipboardWith(s: string): Thenable<void> {
         this.clipboardContents = s; // also set immediate clipboard string
@@ -625,24 +592,7 @@ export class NullGui extends LeoGui {
     ): Promise<unknown> {
         return Promise.resolve();
     }
-    public removeTag(): any {
-        return;
-    }
-    public tagNode(): any {
-        return;
-    }
-    public tagChildren(): any {
-        return;
-    }
-    public findAll(p_replace?: boolean): Thenable<unknown> {
-        return Promise.resolve();
-    }
-    public cloneFind(p_marked: boolean, p_flat: boolean): Thenable<unknown> {
-        return Promise.resolve();
-    }
-    public cloneFindtag(): void {
-        // pass
-    }
+
     public runAboutLeoDialog(
         c: Commands,
         version: string,
@@ -708,7 +658,7 @@ export class NullGui extends LeoGui {
         // pass
     }
 
-    public setIdSetting(p_id: string): void {}
+    public setIdSetting(p_id: string): void { }
 
     public getIdFromSetting(): string {
         return '';
@@ -718,7 +668,7 @@ export class NullGui extends LeoGui {
         return Promise.resolve('');
     }
 
-    public ensure_commander_visible(c: Commands): void {}
+    public ensure_commander_visible(c: Commands): void { }
 
     public isTextWidget(w: any): boolean {
         return w instanceof StringTextWrapper;

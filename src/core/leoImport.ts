@@ -8,7 +8,6 @@ import * as utils from '../utils';
 
 import * as os from 'os';
 import * as csv from 'csvtojson';
-import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
 
 const docutils = false;
@@ -723,7 +722,7 @@ export class LeoImportCommands {
             let f = '';
 
             for (const w_p of p.self_and_subtree()) {
-                const s = p.b;
+                const s = w_p.b;
                 const s2 = s.trim();
                 if (s2) {
                     f += '-'.repeat(60);
@@ -803,7 +802,7 @@ export class LeoImportCommands {
         // Call the scanning function.
         if (g.unitTesting) {
             // console.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
-            console.assert(func || ['.txt', '.w', '.xxx'].includes(ext), p.h);
+            console.assert(func || ['.txt', '.w', '.xxx'].includes(ext), `${func?.toString()}, ${ext}, ${p.h}`);
         }
         if (func && !c.config.getBool('suppress-import-parsing', false)) {
             s = g.toUnicode(s, this.encoding);
@@ -1495,9 +1494,9 @@ export class LeoImportCommands {
             return;
         }
         const s = p.b;
-        p.b = '';
         try {
             const bunch = c.undoer.beforeParseBody(p);
+            p.b = '';
             parser(c, p, s);
             u.afterParseBody(p, undoType, bunch);
             p.expand();
@@ -3606,18 +3605,11 @@ export class TopLevelImportCommands {
     //@+node:felix.20230521235405.8: *3* @g.command(import-zim-folder)
     @command(
         'import-zim-folder',
-        `
-        Import a zim folder, http://zim-wiki.org/, as the last top-level node of the outline.
+        "Import a zim folder, http://zim-wiki.org/, as the last top-level node of the outline. " +
+        "First use Zim to export your project to rst files. " +
+        "This command requires the following Leo settings: " +
+        "@int rst_level = 0, @string rst_type, @string zim_node_name, @string path_to_zim."
 
-        First use Zim to export your project to rst files.
-
-        This command requires the following Leo settings::
-
-            @int rst_level = 0
-            @string rst_type
-            @string zim_node_name
-            @string path_to_zim
-        `
     )
     public async import_zim_command(this: Commands): Promise<void> {
         const c: Commands = this;

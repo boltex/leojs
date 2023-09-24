@@ -577,7 +577,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
             parent.setHeadString(kind);
             for (const key in d) {
                 const p = d[key];
-                if (!kind.endsWith('.leo') && p.isAnyAtFileNode()) {
+                if (!(kind.endsWith('.leo') || kind.endsWith('.leojs')) && p.isAnyAtFileNode()) {
                     // Don't make clones of @<file> nodes for wrapped files.
                     // pass
                 } else if (p.v.context === c) {
@@ -658,6 +658,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     )
     public async diff(): Promise<void> {
         const c = this.c;
+        const u = this.c.undoer;
         const fn = await this.getReadableTextFile();
         if (!fn) {
             return;
@@ -676,9 +677,13 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         }
         const [lines1, lines2] = [g.splitLines(s1), g.splitLines(s2)];
         const aList = difflib.ndiff(lines1, lines2);
+        // add as last top level like other 'diff' result nodes
+        c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
+        const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
         const p = c.p.insertAfter();
         p.h = 'diff';
         p.b = aList.join('');
+        u.afterInsertNode(p, 'file-diff-files', undoData);
         c.redraw();
     }
     //@+node:felix.20230709010427.20: *3* efc.getReadableTextFile
@@ -994,7 +999,7 @@ export class GitDiffController {
         const w_path = g.finalize_join(directory, fn); // #1781: bug fix.
         let c1: Commands | undefined;
         let c2: Commands | undefined;
-        if (fn.endsWith('.leo')) {
+        if (fn.endsWith('.leo') || fn.endsWith('.leojs')) {
             c1 = await this.make_leo_outline(fn, w_path, s1, rev1);
             c2 = await this.make_leo_outline(fn, w_path, s2, rev2);
         } else {
@@ -1964,6 +1969,7 @@ export class GitDiffController {
         const command = `git show --format=%${format_s} --no-patch ${revspec}`;
         const directory = await this.get_parent_of_git_directory();
         if (!directory) {
+            g.es_print("LEOJS ERROR : get_parent_of_git_directory FAILED for rev", revspec);
             return '';
         }
 
@@ -1994,7 +2000,7 @@ export class GitDiffController {
         const hidden_root = hidden_c.rootPosition()!;
         // copy root to hidden root, including gnxs.
         root.copyTreeFromSelfTo(hidden_root, true);
-        hidden_root.h = fn + ':' + rev ? rev : fn;
+        hidden_root.h = rev ? fn + ':' + rev : fn;
         // Set at.encoding first.
         // Must be called before at.scanAllDirectives.
         at.initReadIvars(hidden_root, fn);
@@ -2153,7 +2159,7 @@ export class GitDiffController {
         hidden_c.frame.createFirstTreeNode();
         const root = hidden_c.rootPosition()!;
         root.h = fn + ':' + rev ? rev : fn;
-        await hidden_c.fileCommands.getLeoFile(p_path, false, false, false);
+        await hidden_c.fileCommands.getLeoFile(s, p_path, false, false, false);
         return hidden_c;
     }
 

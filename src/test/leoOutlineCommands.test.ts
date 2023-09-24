@@ -120,6 +120,69 @@ suite('TestOutlineCommands', () => {
         assert.ok(g.compareArrays(result_children, original_children));
 
     });
+    //@+node:felix.20230902145755.1: *3* TestOutlineCommands.test_move_outline_to_first_child
+    test('test_move_outline_to_first_child', () => {
+        // Setup.
+        const c = self.c;
+        const u = self.c.undoer;
+        const root = self.root_p;
+        assert.strictEqual(root.h, 'root');
+        self.create_test_outline();
+        const original_children = [...root.v.children];
+        const last_child = root.lastChild();
+        assert.ok(last_child && last_child.__bool__());
+        const last_gnx = last_child.gnx;
+        // Move.
+        c.selectPosition(last_child);
+        c.moveOutlineToFirstChild();
+        // Tests.
+        assert.strictEqual(c.checkOutline(), 0);
+        const first_child = root.firstChild();
+        assert.ok(first_child && first_child.__bool__());
+        const first_gnx = first_child.gnx;
+        assert.strictEqual(first_gnx, last_gnx, first_gnx + ", " + last_gnx);
+        u.undo();
+        assert.strictEqual(c.checkOutline(), 0);
+        assert.ok(g.compareArrays(root.v.children, original_children));
+        u.redo();
+        assert.strictEqual(c.checkOutline(), 0);
+        u.undo();
+        assert.strictEqual(c.checkOutline(), 0);
+        assert.ok(g.compareArrays(root.v.children, original_children));
+    });
+
+    //@+node:felix.20230902145759.1: *3* TestOutlineCommands.test_move_outline_to_last_child
+    test('test_move_outline_to_last_child', () => {
+        // Setup.
+        const c = self.c;
+        const u = self.c.undoer;
+        const root = self.root_p;
+        assert.strictEqual(root.h, 'root');
+        self.create_test_outline();
+        const original_children = [...root.v.children];
+        const first_child = root.firstChild();
+        assert.ok(first_child && first_child.__bool__());
+        const first_gnx = first_child.gnx;
+        // Move.
+        // c.selectPosition(first_child)
+        c.selectPosition(first_child);
+        c.moveOutlineToLastChild();
+        // Tests.
+        assert.strictEqual(c.checkOutline(), 0);
+        const last_child = root.lastChild();
+        assert.ok(last_child && last_child.__bool__());
+        const last_gnx = last_child.gnx;
+        assert.strictEqual(first_gnx, last_gnx, first_gnx + ", " + last_gnx);
+        u.undo();
+        assert.strictEqual(c.checkOutline(), 0);
+        assert.ok(g.compareArrays(root.v.children, original_children));
+        u.redo();
+        assert.strictEqual(c.checkOutline(), 0);
+        u.undo();
+        assert.strictEqual(c.checkOutline(), 0);
+        assert.ok(g.compareArrays(root.v.children, original_children));
+    });
+
     //@-others
 
 });

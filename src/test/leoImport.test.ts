@@ -7,7 +7,7 @@ import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
 
 import * as g from '../core/leoGlobals';
-import { BaseTestImporter } from './test_importers';
+import { BaseTestImporter } from './test_importers.test';
 import { MindMapImporter, RecursiveImportController } from '../core/leoImport';
 
 //@+others
@@ -50,10 +50,11 @@ suite('Test cases for leoImport.ts', () => {
 
         // #2760: These results ignore way too much.
 
+        // Don't call run_test.
         self.check_outline(
             target,
             [
-                [0, '',  // check_outline ignores the top-level headline.
+                [0, '',  // Ignore the top-level headline.
                     ''
                 ],
                 [1, 'a1', ''],
@@ -80,11 +81,6 @@ suite('Test cases for leoImport.ts', () => {
         `).trim() + '\n';
         target.b = body_1;
 
-        if (!Object.keys(g.app.classDispatchDict).length) {
-            console.log("TODO FOR UNIT TEST: test_parse_body --> parse_importer_dict !");
-            return;
-        }
-
         x.parse_body(target);
 
         const expected_results: [number, string, string][] = [
@@ -99,17 +95,14 @@ suite('Test cases for leoImport.ts', () => {
                 'import os\n' +
                 '\n'
             ],
-            [1, 'def macro',
+            [1, 'function: macro',
                 'def macro(func):\n' +
-                '    @others\n'
-            ],
-            [2, 'def new_func',
-                'def new_func(*args, **kwds):\n' +
-                "    raise RuntimeError('blah blah blah')\n"
+                '    def new_func(*args, **kwds):\n' +
+                "        raise RuntimeError('blah blah blah')\n"
             ],
         ];
         // Don't call run_test.
-        self.check_outline(target, expected_results, true);
+        self.check_outline(target, expected_results);
 
         // Test undo
         u.undo();
@@ -117,74 +110,15 @@ suite('Test cases for leoImport.ts', () => {
         assert.ok(!target.hasChildren(), 'undo test');
         // Test redo
         u.redo();
-        self.check_outline(target, expected_results, true);
+        self.check_outline(target, expected_results,);
 
     });
 
-    //@+node:felix.20230728212935.1: *3* TestLeoImport.test_ric_minimize_headlines
-    test('test_ric_minimize_headlines', async () => {
-
-        const c = self.c;
-        const root = self.c.rootPosition()!;
-
-        let dir_;
-        if (g.isWindows) {
-            dir_ = 'C:/Repos/non-existent-directory/mypy';
-        } else {
-            dir_ = '/Repos/non-existent-directory/mypy';
-        }
-
-        // minimize_headlines changes only headlines that start with dir_ or @<file> dir_.
-        const table = [
-            ['root', 'root'],
-            [dir_, 'path: mypy'],
-            [`${dir_}/test`, 'path: mypy/test'],
-            [`${dir_}/xyzzy/test2`, 'path: mypy/xyzzy/test2'],
-            [`@clean ${dir_}/x.py`, '@clean x.py'],
-        ];
-
-        if (!Object.keys(g.app.atAutoDict).length) {
-            console.log("TODO FOR UNIT TEST: test_ric_minimize_headlines --> parse_importer_dict !");
-            // return;
-            console.log("WOULD HAVE RETURNED!");
-
-        }
-
-        const x = new RecursiveImportController(
-            c,
-            dir_,
-            undefined,
-            '@clean',
-            true,
-            false,
-            ['.py'],
-            false,
-        );
-
-        for (const [h, expected] of table) {
-            root.h = h;
-            await x.minimize_headline(root);
-            assert.strictEqual(root.h, expected, h);
-        }
-        // Test that the recursive import only generates @<file> nodes containing absolute paths.
-        for (const h of ['@file bad1.py', '@edit bad2.py']) {
-
-            // with self.assertRaises(AssertionError, msg=h):
-            try {
-                root.h = h;
-
-                await x.minimize_headline(root);
-
-                assert.ok(false, h); // FAILS if this passes.
-            } catch (e) {
-                assert.ok(true, h); // Yay, we expected a throw.
-            }
-
-        }
-
-    });
     //@+node:felix.20230728212943.1: *3* TestLeoImport.slow_test_ric_run
     test('slow_test_ric_run', async () => {
+
+        // ! SKIPPED IN LEO BECAUSE NAME DOES NOT START WITH 'test' !
+        return;
 
         const c = self.c;
         const u = c.undoer;
@@ -212,17 +146,12 @@ suite('Test cases for leoImport.ts', () => {
         // Run the tests.
         const expected_headline = 'imported files';
 
-        if (!Object.keys(g.app.atAutoDict).length) {
-            console.log("TODO FOR UNIT TEST: slow_test_ric_run --> parse_importer_dict !");
-            return;
-        }
-
         for (const kind of ['@clean', '@file']) {
             const x = new RecursiveImportController(
                 c,
                 dir_,
                 undefined,
-                '@clean',
+                kind,
                 true,
                 true,
                 ['.py'],

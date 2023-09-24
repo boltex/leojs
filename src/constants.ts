@@ -150,9 +150,10 @@ export class Constants {
         PROMPT_INSERT_NODE: "Insert Node",
         PROMPT_INSERT_CHILD: "Insert Child",
         DEFAULT_HEADLINE: "New Headline",
-        TITLE_GOTO_GLOBAL_LINE: "Goto global line",
-        PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
-        PROMPT_GOTO_GLOBAL_LINE: "Line number",
+
+        TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
+        PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED
+        PROMPT_GOTO_GLOBAL_LINE: "Line number", // TODO : REMOVE IF NOT USED
 
         REPLACE_TITLE: "Replace with",
         REPLACE_PROMPT: "Type text to replace with and press enter.",
@@ -179,9 +180,10 @@ export class Constants {
         TITLE_TAG_NODE: "Tag Node",
         PLACEHOLDER_TAG: "<tag>",
         PROMPT_TAG: "Enter a tag name",
-        TITLE_FIND_TAG: "Find Tag",
-        PLACEHOLDER_CLONE_FIND_TAG: "<tag>",
-        PROMPT_CLONE_FIND_TAG: "Enter a tag name",
+
+        TITLE_FIND_TAG: "Find Tag", // TODO remove if used directly in leoFind.ts
+        PLACEHOLDER_CLONE_FIND_TAG: "<tag>", // TODO remove if used directly in leoFind.ts
+        PROMPT_CLONE_FIND_TAG: "Enter a tag name",// TODO remove if used directly in leoFind.ts
 
         CLOSE_ERROR: "Cannot close: No files opened.",
         YES: "Yes",
@@ -204,7 +206,7 @@ export class Constants {
         MINIBUFFER_COMMAND_START: "@command-",
         MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
         MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
-        MINIBUFFER_HISTORY_DESC: "$(history) Choose from last run commands...",
+        MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
         ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
         FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
@@ -330,6 +332,11 @@ export class Constants {
         LEO_ID: ""
     };
 
+    public static MINIBUFFER_QUICK_PICK: vscode.QuickPickItem = {
+        label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
+        description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC,
+        iconPath: new vscode.ThemeIcon("history")
+    };
     /**
      * Choices offered when about to lose current changes to a Leo Document
      */
@@ -483,6 +490,7 @@ export class Constants {
         MINIBUFFER: Constants.NAME + ".minibuffer",
         SET_LEO_ID: Constants.NAME + ".setLeoID",
         GIT_DIFF: Constants.NAME + ".gitDiff",
+        TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
         WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
         WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",
         WRITE_DIRTY_AT_FILE_NODES: Constants.NAME + ".writeDirtyAtFileNodes",
@@ -680,8 +688,20 @@ export class Constants {
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
         REVERT: 'revert',
         // * More Commands
-        // GOTO_GLOBAL_LINE: "!goto_global_line",
+        GOTO_GLOBAL_LINE: "!goto_global_line", // USE LEOJS INSTEAD OF UI
         SET_UA: 'set-ua',
+
+        // * Import Export
+        IMPORT_ANY_FILE: "import-file",
+        READ_FILE_INTO_NODE: "read-file-into-node",
+
+        EXPORT_HEADLINES: "export-headlines",
+        FLATTEN_OUTLINE: "flatten-outline",
+        OUTLINE_TO_CWEB: "outline-to-cweb",
+        OUTLINE_TO_NOWEB: "outline-to-noweb",
+        REMOVE_SENTINELS: "remove-sentinels",
+        WEAVE: "weave",
+        WRITE_FILE_FROM_NODE: "write-file-from-node",
 
         // * Search operations
         START_SEARCH: "start-search",
@@ -747,6 +767,7 @@ export class Constants {
         GOTO_NEXT_VISIBLE: "goto-next-visible",
         GOTO_PREV_VISIBLE: "goto-prev-visible",
         GOTO_NEXT_MARKED: "goto-next-marked",
+        // GOTO_PREV_MARKED: "goto-prev-marked", // ! Not in Leo's menu nor LeoJS package.json.
         GOTO_NEXT_CLONE: "goto-next-clone",
         CONTRACT_OR_GO_LEFT: "contract-or-go-left",
         EXPAND_AND_GO_RIGHT: "expand-and-go-right",
@@ -786,7 +807,7 @@ export class Constants {
 
         CLONE_FIND_FLATTENED_MARKED: "cffm",
         CLONE_FIND_TAG: "cft",
-        CLONE_FIND_ALL: "cfa", // cloneFind used instead
+        CLONE_FIND_ALL: "cfa",
         CLONE_FIND_MARKED: "cfam",
         CLONE_FIND_PARENTS: "clone-find-parents",
     };

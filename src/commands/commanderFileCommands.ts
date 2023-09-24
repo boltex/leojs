@@ -25,8 +25,7 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
     const u = c.undoer;
     g.setGlobalOpenDir(fn);
     const undoData = u.beforeInsertNode(c.p);
-    const last = c.lastTopLevel();
-    const p = last.insertAfter();
+    const p = c.p.insertAfter();
     p.h = `@edit ${fn}`;
     let s: string | undefined;
     let e: any;
@@ -77,7 +76,8 @@ export class CommanderFileCommands {
         const lm: LoadManager = g.app.loadManager!;
 
         // TODO
-        console.log('TODO : restartLeo');
+        void vscode.window.showInformationMessage('TODO : restartLeo (or deprecate/remove?)');
+        console.log('TODO : restartLeo (or deprecate/remove?)');
 
         /*
         trace = 'shutdown' in g.app.debug
@@ -362,12 +362,11 @@ export class CommanderFileCommands {
                         fileName
                     );
                     if (w_looksDerived) {
-                        console.log('TODO : IMPORT FILES');
-                        // TODO : IMPORT FILES
-                        // ok = await p_c.importCommands.importDerivedFiles(
-                        //     p_c.p,
-                        //     [fileName],
-                        //     'Open');
+                        ok = await p_c.importCommands.importDerivedFiles(
+                            p_c.p,
+                            [fileName],
+                            'Open'
+                        );
                     } else {
                         // otherwise, create an @edit node.
                         ok = p_c.createNodeFromExternalFile(fileName);
@@ -720,17 +719,17 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.17: *4* c_file.saveTo
     @commander_command(
         'save-to',
-        'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
+        'Save a copy of the Leo outline to a file, prompting for a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'file-save-to',
-        'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
+        'Save a copy of the Leo outline to a file, prompting for a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-to',
-        'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
+        'Save a copy of the Leo outline to a file, prompting for a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     public async saveTo(
@@ -800,12 +799,12 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.19: *4* c_file.save-as-leojs
     @commander_command(
         'file-save-as-leojs',
-        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name.\n' +
+        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-leojs',
-        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name.\n' +
+        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_leojs(this: Commands): Promise<unknown> {
@@ -829,12 +828,12 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.20: *4* c_file.save-as-zipped
     @commander_command(
         'file-save-as-zipped',
-        'Save a copy of the Leo outline as a zipped (.db) file with a new file name.\n' +
+        'Save a copy of the Leo outline as a zipped (.db) file with a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-zipped',
-        'Save a copy of the Leo outline as a zipped (.db) file with a new file name.\n' +
+        'Save a copy of the Leo outline as a zipped (.db) file with a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_zipped(this: Commands): Promise<unknown> {
@@ -858,14 +857,14 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.21: *4* c_file.save-as-xml
     @commander_command(
         'file-save-as-xml',
-        'Save a copy of the Leo outline as an XML .leo file with a new file name.\n' +
-        'Leave the file name of the Leo outline unchanged.\n' +
+        'Save a copy of the Leo outline as an XML .leo file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged. ' +
         'Useful for converting a .leo.db file to a .leo file.'
     )
     @commander_command(
         'save-file-as-xml',
-        'Save a copy of the Leo outline as an XML .leo file with a new file name.\n' +
-        'Leave the file name of the Leo outline unchanged.\n' +
+        'Save a copy of the Leo outline as an XML .leo file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged. ' +
         'Useful for converting a .leo.db file to a .leo file.'
     )
     public async save_as_xml(this: Commands): Promise<unknown> {
@@ -890,7 +889,7 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.23: *4* c_file.exportHeadlines
     @commander_command(
         'export-headlines',
-        'Export all headlines to an external file.'
+        'Export headlines for c.p and its subtree to an external file.'
     )
     public async exportHeadlines(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1037,7 +1036,7 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.28: *4* c_file.removeSentinels
     @commander_command(
         'remove-sentinels',
-        'Convert one or more files, replacing the original files\n' +
+        'Convert one or more files, replacing the original files ' +
         'while removing any sentinels they contain.'
     )
     public async removeSentinels(this: Commands): Promise<unknown> {
@@ -1162,6 +1161,7 @@ export class CommanderFileCommands {
     )
     public async readFileIntoNode(this: Commands): Promise<unknown> {
         const c: Commands = this;
+        const u = c.undoer;
         const undoType: string = 'Read File Into Node';
         c.endEditing();
         const filetypes: [string, string][] = [
@@ -1187,54 +1187,19 @@ export class CommanderFileCommands {
         await g.chdir(fileName);
         s = '@nocolor\n' + s;
         const w = c.frame.body.wrapper;
-        const p: Position = await c.asyncInsertHeadline(undoType, false);
+        const undoData = u.beforeInsertNode(c.p);
+        const p = c.p.insertAfter();
         p.setHeadString('@read-file-into-node ' + fileName);
         p.setBodyString(s);
+        u.afterInsertNode(p, undoType, undoData);
         w.setAllText(s);
         return c.redraw(p);
-    }
-    //@+node:felix.20220105210716.35: *4* c_file.readOutlineOnly
-    @commander_command(
-        'read-outline-only',
-        'Open a Leo outline, but do not read any derived files.'
-    )
-    public async readOutlineOnly(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        c.endEditing();
-        const fileName = (await g.app.gui.runOpenFileDialog(
-            c,
-            'Read Outline Only',
-            [
-                ['Leo files', '*.leo *.leojs *.db'],
-                ['All files', '*'],
-            ],
-            '.leo'
-        )) as string;
-        if (!fileName) {
-            return;
-        }
-        try {
-            // pylint: disable=assignment-from-no-return
-            // Can't use 'with" because readOutlineOnly closes the file.
-
-            // ! Replaced with vscode.workspace.fs !
-            // const theFile: number = openSync(fileName[0], 'r');
-            await g.chdir(fileName);
-            const c: Commands = g.app.newCommander(fileName);
-            // ? needed ?
-            //frame = c.frame;
-            //frame.deiconify();
-            //frame.lift();
-            return c.fileCommands.readOutlineOnly(fileName); // closes file.
-        } catch (exception) {
-            g.es('can not open:', fileName);
-        }
     }
     //@+node:felix.20220105210716.36: *4* c_file.writeFileFromNode
     @commander_command(
         'write-file-from-node',
         'If node starts with @read-file-into-node, use the full path name ' +
-        'in the headline.\nOtherwise, prompt for a file name.'
+        'in the headline. Otherwise, prompt for a file name.'
     )
     public async writeFileFromNode(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1279,8 +1244,8 @@ export class CommanderFileCommands {
     //@+node:felix.20230407210935.1: *4* c_file.writeFileFromSubtree
     @commander_command(
         'write-file-from-subtree',
-        'Write the entire tree from the selected node as text to a file.\n' +
-        'If node starts with @read-file-into-node, use the full path name in the headline.\n' +
+        'Write the entire tree from the selected node as text to a file. ' +
+        'If node starts with @read-file-into-node, use the full path name in the headline. ' +
         'Otherwise, prompt for a file name.'
     )
     public async writeFileFromSubtree(this: Commands): Promise<void> {

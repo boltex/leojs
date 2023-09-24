@@ -1,4 +1,8 @@
 import * as vscode from 'vscode';
+import initSqlJs from '../sqlite/sql-wasm-debug';
+import * as JSZip from 'jszip';
+import * as pako from 'pako';
+
 import * as GitAPI from './git';
 import * as GitBaseAPI from './git-base';
 
@@ -9,12 +13,22 @@ import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 import { RemoteHubApi } from './remote-hub';
+import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 /**
  * Entry point for Leo in Javascript.
  */
 export async function activate(p_context: vscode.ExtensionContext) {
+
+    /*
+        * Original Leo startup *
+
+        g.app = leoApp.LeoApp()
+        g.app.loadManager = leoApp.LoadManager()
+        g.app.loadManager.load(fileName, pymacs)
+
+    */
 
     if (p_context.extensionUri) {
         console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
@@ -30,6 +44,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
 
     const w_previousVersion = p_context.globalState.get<string>(Constants.VERSION_STATE_KEY);
+    let SQL: SqlJsStatic;
 
     // * Close remaining Leo Bodies restored by vscode from last session.
     await closeLeoTextEditors();
@@ -55,7 +70,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
         } else {
-            console.log("LEOJS ERROR : GIT EXTENSION NOT AVAILABLE !");
+            // console.log("LEOJS ERROR : GIT EXTENSION NOT AVAILABLE !");
         }
 
         const gitBaseExtension = vscode.extensions.getExtension<GitBaseAPI.GitBaseExtension>('vscode.git-base');
@@ -68,7 +83,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
         } else {
-            console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT AVAILABLE !");
+            // console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT AVAILABLE !");
         }
 
         const extension = vscode.extensions.getExtension<RemoteHubApi>('ms-vscode.remote-repositories')
@@ -76,13 +91,34 @@ export async function activate(p_context: vscode.ExtensionContext) {
             ?? vscode.extensions.getExtension<RemoteHubApi>('GitHub.remoteHub-insiders');
 
         if (extension == null) {
-            console.log("LEOJS ERROR : GIT_REMOTE EXTENSION NOT AVAILABLE !");
+            // console.log("LEOJS ERROR : GIT_REMOTE EXTENSION NOT AVAILABLE !");
         }
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
             console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
         }
+
+        // Test paco
+        console.log('paco start test:  ');
+        const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
+
+        const compressed = pako.deflate(JSON.stringify(test));
+
+        const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
+        console.log('paco restored test:  ', restored);
+
+
+        console.log('SQL start test:  ');
+        const sqliteBits = await vscode.workspace.fs.readFile(
+            vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
+        );
+        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
+
+        SQL = await initSqlJs(undefined, sqliteBits);
+        console.log("STARTUP:          SQLITE has started");
+        (g.SQL as SqlJsStatic) = SQL;
+
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
@@ -92,11 +128,143 @@ export async function activate(p_context: vscode.ExtensionContext) {
         vscode.workspace.onDidChangeWorkspaceFolders((p_event => setScheme(p_event, p_context)))
     );
 
+    async function dbTests() {
+
+        // Start SQLITE engine
+        // const filebuffer = await vscode.workspace.fs.readFile(
+        //     vscode.Uri.joinPath(p_context.extensionUri, 'test1.db')
+        // );
+
+        const filebuffer = await vscode.workspace.fs.readFile(
+            g.makeVscodeUri(path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, "test2.db"))
+            // vscode.Uri.joinPath(p_context.extensionUri, 'test1.db')
+        );
+        console.log('got db file!!  Length in bytes: ', filebuffer.length);
+
+
+
+        // Load the db.
+        const db: Database = new SQL.Database(filebuffer);
+        console.log('db', db);
+
+        // Test executing query on db.
+        const q_result1 = db.exec("SELECT `name`, `sql`  FROM `sqlite_master`  WHERE type='table';");
+        // exec returns an  QueryExecResult {
+        //					columns: string[];
+        //					values: SqlValue[][];
+        // 				}
+        console.log('result', q_result1);
+
+        const w_date = new Date();
+        const w_dateStringKey = "d_" + w_date.getTime().toString();
+        const w_dateStringVal = w_date.toLocaleDateString() + " " + w_date.toLocaleTimeString();
+
+        const w_insertQuery = `INSERT OR IGNORE INTO extra_infos (name, value) VALUES ('${w_dateStringKey}', '${w_dateStringVal}');`;
+        console.log("w_insertQuery", w_insertQuery);
+
+
+
+        const q_result2 = db.exec(w_insertQuery);
+        console.log('result2', q_result2);
+
+        const db_data = db.export();
+        const db_buffer = Buffer.from(db_data);
+
+        const db_fileName = path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, "my_db_save.db");
+        const db_uri = g.makeVscodeUri(db_fileName);
+        await vscode.workspace.fs.writeFile(db_uri, db_buffer);
+
+        console.log("buffer db to be written byte length :", db_buffer.length);
+        const w_stats = await vscode.workspace.fs.stat(db_uri);
+        console.log('DB written file size check : ', w_stats.size);
+        console.log('Done with DB tests');
+
+    }
+
+    async function readZipTest() {
+        console.log('Starting readZipTest');
+
+        let fileName;
+
+        fileName = path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, "myziptest.zip");
+        const w_uri = g.makeVscodeUri(fileName);
+        let w_stats: vscode.FileStat;
+        // const zip = new JSZip();
+        try {
+            w_stats = await vscode.workspace.fs.stat(w_uri);
+        } catch {
+            return false;
+        }
+        console.log('w_stats.size', w_stats.size);
+
+        await vscode.workspace.fs.readFile(w_uri)
+            .then(JSZip.loadAsync)                            // 3) chain with the zip promise
+            .then(function (zip) {
+                return zip.file("hello.txt")?.async("string"); // 4) chain with the text content promise
+            })
+            .then((read_str) => {
+                console.log('read from zip hello.txt: ', read_str);
+            });
+        console.log('Done with readZipTest');
+
+    }
+
+    async function makeZipTest() {
+        console.log('Starting makeZipTest');
+
+        // Test JSZip
+        const zip = new JSZip();
+
+        // create a file
+        zip.file("hello.txt", "Hello new world");
+
+        // create a file and a folder
+        zip.file("nested/hello.txt", "Hello World\ninside on other line!\n");
+        // // same as
+        // zip.folder("nested")!.file("hello.txt", "Hello World\n");
+
+        let fileName;
+        // if (g.isBrowser) {
+        //     fileName = "/myziptest.zip";
+        // } else {
+        // }
+        fileName = path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, "myziptest2.zip");
+        const w_ZIP_uri = g.makeVscodeUri(fileName);
+
+
+        const zip_data = await zip.generateAsync({ type: "uint8array" });
+        console.log('zip_data byte length: ', zip_data.byteLength);
+
+        const zip_buffer = Buffer.from(zip_data);
+        console.log('zip_buffer length: ', zip_buffer.length);
+
+        await vscode.workspace.fs.writeFile(w_ZIP_uri, zip_buffer);
+        // console.log('done with zip file test!');
+        console.log("zip buffer length", zip_buffer.length);
+        const w_stats = await vscode.workspace.fs.stat(w_ZIP_uri);
+        console.log('ZIP w_stats.size', w_stats.size);
+        console.log('Done with makeZipTest');
+
+    }
+
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
         g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
         g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
         g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
         g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+
+        console.log('GOT WORKSPACE: starting file-system ZIP & DB tests');
+
+        if (0) {
+            await dbTests();
+        }
+
+        if (0) {
+            await readZipTest();
+        } else if (0) {
+            await makeZipTest();
+        }
+
     }
 
     if (!g.isBrowser) {
@@ -229,7 +397,9 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {
+    // pass
+}
 
 /**
  * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
@@ -239,10 +409,12 @@ async function closeLeoTextEditors(): Promise<unknown> {
 
     vscode.window.tabGroups.all.forEach((p_tabGroup) => {
         p_tabGroup.tabs.forEach((p_tab) => {
+
             if (p_tab.input &&
                 (p_tab.input as vscode.TabInputText).uri &&
                 (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
                 !p_tab.isDirty
+
             ) {
                 w_foundTabs.push(p_tab);
             }

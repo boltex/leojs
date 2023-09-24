@@ -1,4 +1,8 @@
-// Mix of MIT licenced node-jpickle by Jeremy Lainé, and pickle-js by Frank Salim
+/**
+ * Mix of MIT licenced librairies:
+ * - node-jpickle by Jeremy Lainé
+ * - pickle-js by Frank Salim
+ */
 
 const emulated: { [key: string]: (args: any) => any } = {
     'datetime.datetime': function (args: any) {
@@ -520,7 +524,7 @@ module.exports.loads = function (data: any) {
     var parser: any = new Parser() as any;
     return parser.load(data);
 };
-// * Use loads from picklejs
+// * Use dumps from pickle-js
 module.exports.dumps = function (data: any, protocol: number) {
     return pickle.dumps(data);
 };

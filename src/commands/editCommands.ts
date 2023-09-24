@@ -19,27 +19,99 @@ function cmd(p_name: string, p_doc: string) {
 //@+node:felix.20220504203112.1: ** class TopLevelEditCommands
 export class TopLevelEditCommands {
     //@+others
-    //@+node:felix.20220504203200.2: *3* @g.command('mark-first-parents')
-    @command('mark-first-parents', 'Mark the node and all its parents.')
-    public mark_first_parents(this: Commands): Position[] {
+    //@+node:felix.20220504203200.2: *3* @g.command('mark-node-and-parents')
+    @command('mark-node-and-parents', 'Mark the node and all its parents.')
+    public mark_node_and_parents(this: Commands): Position[] {
         const c: Commands = this;
         const changed: Position[] = [];
+        const tag = 'mark-node-and-parents';
         if (!c) {
             return changed;
         }
+        const u = c.undoer;
         for (let parent of c.p.self_and_parents()) {
             if (!parent.isMarked()) {
+                if (!changed.length) {
+                    u.beforeChangeGroup(c.p, tag);
+                }
+                const bunch = u.beforeMark(parent, 'mark');
                 parent.setMarked();
                 parent.setDirty();
+                u.afterMark(parent, 'mark', bunch);
                 changed.push(parent.copy());
             }
         }
         if (changed.length) {
-            // g.es("marked: " + ', '.join([z.h for z in changed]))
+            u.afterChangeGroup(c.p, tag);
             c.setChanged();
             c.redraw();
         }
         return changed;
+    }
+    //@+node:felix.20230902164359.1: *3* @g.command('promote-section-definition')
+    @command(
+        'promote-section-definition',
+        'c.p must be a section definition node and an ancestor must contain a reference. ' +
+        'Replace a section reference in an ancestor by c.p.b and delete c.p.'
+    )
+    public promote_section_definition(this: Commands): void {
+
+        const c: Commands = this;
+        const tag = 'promote-section-definition';
+        if (!c) {
+            return;
+        }
+
+        c.endEditing();
+        const u = c.undoer;
+        const h = c.p.h.trim();
+        const ref_s = h;
+        if (!(h.endsWith('>>') && h.startsWith('<<'))) {
+            g.es_print('Not a section definition:', c.p.h);
+            return;
+        }
+        let found = false;
+        let w_parent: Position;
+        for (const i_parent of c.p.parents()) {
+            if (i_parent.b.includes(ref_s)) {
+                w_parent = i_parent;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            g.es_print('Reference not found:', ref_s);
+            return;
+        }
+
+        // Start the undo group.
+        const ref_p: Position = w_parent!;
+        u.beforeChangeGroup(c.p, tag);
+
+        // Change ref_p.b.
+        const bunch1 = u.beforeChangeBody(ref_p);
+        const new_ref_lines = [];
+        for (const line of g.splitLines(ref_p.b)) {
+            if (line.trim() === ref_s) {
+                new_ref_lines.push(...g.splitLines(c.p.b));
+            } else {
+                new_ref_lines.push(line);
+            }
+        }
+        ref_p.b = new_ref_lines.join('');
+        u.afterChangeBody(ref_p, 'change-body', bunch1);
+
+        // Delete and select ref_p.
+        const bunch2 = u.beforeDeleteNode(c.p);
+        c.p.doDelete(ref_p);
+        u.afterDeleteNode(ref_p, 'delete-node', bunch2);
+        c.selectPosition(ref_p);
+
+        // Finish the group.
+        u.afterChangeGroup(c.p, tag);
+        c.setChanged();
+        c.redraw(ref_p);
+
     }
     //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
     @command(
@@ -243,26 +315,30 @@ export class TopLevelEditCommands {
                 c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
         */
     }
-    //@+node:felix.20220504203200.5: *3* @g.command('unmark-first-parents')
-    @command('unmark-first-parents', 'Unmark the node and all its parents.')
-    public unmark_first_parents(this: Commands): Position[] {
+    //@+node:felix.20220504203200.5: *3* @g.command('unmark-node-and-parents')
+    @command('unmark-node-and-parents', 'Unmark the node and all its parents.')
+    public unmark_node_and_parents(this: Commands): Position[] {
         const c: Commands = this;
         const changed: Position[] = [];
-
+        const tag = 'unmark-node-and-parents';
         if (!c) {
             return changed;
         }
-
+        const u = c.undoer;
         for (let parent of c.p.self_and_parents()) {
             if (parent.isMarked()) {
+                if (!changed.length) {
+                    u.beforeChangeGroup(c.p, tag);
+                }
+                const bunch = u.beforeMark(parent, 'unmark');
                 parent.clearMarked();
                 parent.setDirty();
+                u.afterMark(parent, 'unmark', bunch);
                 changed.push(parent.copy());
             }
         }
-
         if (changed.length) {
-            // g.es("unmarked: " + ', '.join([z.h for z in changed]))
+            u.afterChangeGroup(c.p, tag);
             c.setChanged();
             c.redraw();
         }
@@ -354,8 +430,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             c.redraw();
         }
     }
+    //@+node:felix.20230902141521.1: *3* ec.focusTo...
+    @cmd('focus-to-body', 'Put the keyboard focus in Leo\'s body pane.')
+    public focusToBody(): void {
+        this.c.bodyWantsFocus();
+    }
+
+    @cmd('focus-to-log', 'Put the keyboard focus in Leo\'s log pane.')
+    public focusToLog(): void {
+        this.c.logWantsFocus();
+    }
+
+    @cmd('focus-to-tree', 'Put the keyboard focus in Leo\'s outline pane.')
+    public focusToTree(): void {
+        this.c.treeWantsFocus();
+    }
     //@+node:felix.20220503225323.1: *3* ec: goto node
-    //@+node:felix.20220503225323.2: *4* ec.gotoAnyClone
+    //@+node:felix.20220503225323.2: *4* goto-any-clone
     @cmd(
         'goto-any-clone',
         'Select then next cloned node, regardless of whether c.p is a clone.'
@@ -373,7 +464,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
         g.es('no clones found after', c.p.h);
     }
-    //@+node:felix.20220503225323.3: *4* ec.gotoCharacter
+    //@+node:felix.20220503225323.3: *4* goto-char
     @cmd('goto-char', "Put the cursor at the n'th character of the buffer.")
     public async gotoCharacter(): Promise<unknown> {
         let w_n = await g.app.gui.get1Arg({
@@ -400,12 +491,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         return undefined;
     }
 
-    //@+node:felix.20220503225323.4: *4* ec.gotoGlobalLine
+    //@+node:felix.20220503225323.4: *4* goto-global-line
     @cmd(
         'goto-global-line',
-        'Put the cursor at the line in the *outline* corresponding to the line\n' +
-        'with the given line number *in the external file*.\n' +
-        'For external files containing sentinels, there may be *several* lines\n' +
+        'Put the cursor at the line in the *outline* corresponding to the line ' +
+        'with the given line number in the external file. ' +
+        'For external files containing sentinels, there may be *several* lines ' +
         'in the file that correspond to the same line in the outline.' +
         'An Easter Egg: <Alt-x>number invokes this code.'
     )
@@ -418,24 +509,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         // Otherwise, ask user
         let w_n = await g.app.gui.get1Arg({
             title: 'Goto global line',
-            prompt: 'Goto global line',
-            placeHolder: 'Line Number',
+            prompt: 'Line Number',
+            placeHolder: '#',
         });
         if (w_n && /^\d+$/.test(w_n)) {
             // Very important: n is one-based.
             return c.gotoCommands.find_file_line(Number(w_n));
         }
     }
-    //@+node:felix.20220503225323.5: *4* ec.gotoLine
+    //@+node:felix.20220503225323.5: *4* goto-line
     @cmd('goto-line', "Put the cursor at the n'th line of the buffer.")
     public async gotoLine(): Promise<unknown> {
         let w_n = await g.app.gui.get1Arg({
             title: 'Goto line',
-            prompt: 'Goto line',
-            placeHolder: 'Line Number',
+            prompt: 'Line number',
+            placeHolder: '#',
         });
 
-        let ok = false;
         this.w = this.editWidget();
         const w = this.w;
 
@@ -446,9 +536,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             w.setInsertPoint(i);
             w.seeInsertPoint();
         }
-        if (!ok) {
-            g.warning('goto-char takes non-negative integer argument');
-        }
         return undefined;
     }
 
@@ -456,23 +543,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230402171528.2: *4* hn-add-all & helper
     @cmd(
         'hn-add-all',
-        'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
+        'Add headline numbers to all nodes of the outline except' +
+        ' @<file> nodes and their descendants' +
+        'and any node whose headline starts with "@".' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-all',
-        'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
+        'Add headline numbers to all nodes of the outline except' +
+        ' @<file> nodes and their descendants' +
+        'and any node whose headline starts with "@".' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'add-all-headline-numbers',
-        'Add headline numbers to all nodes of the outline *except*\n' +
-        '-  @<file> nodes and their descendants.\n' +
-        '- Any node whose headline starts with "@".\n' +
+        'Add headline numbers to all nodes of the outline except' +
+        ' @<file> nodes and their descendants' +
+        'and any node whose headline starts with "@".' +
         "Use the *first* clone's position for all clones."
     )
     public hn_add_all(): void {
@@ -569,10 +656,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             }
             indices.unshift(p2.childIndex());
         }
-
-        const s = [...indices.map((z) => (1 + z).toString())].join(',');
-        // s = '.'.join([str(1 + z) for z in indices]);
-
+        const s = [...indices.map((z) => (1 + z).toString())].join('.');
         // Do not strip the original headline!
         c.setHeadString(p, `${s} ${p.v.h}`);
         p.v.setDirty();
@@ -667,9 +751,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
         const url = p.get_UNL();
-        await g.app.gui.replaceClipboardWith(url);
+        await g.app.gui.replaceClipboardWith(c.p.gnx);
 
-        g.es(url); // LEOJS NO status_line 
+        g.es_print('gnx: ' + url);
 
         // const status_line = getattr(c.frame, "statusLine", None)
         // if status_line
@@ -733,7 +817,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
 
             // k.keyboardQuit()
             // k.setStatusLabel(f"Line {row}")
-            g.es_print(`Line ${row}`);
+            g.es_print(`Line ${row + 1}`);
         }
     }
     //@+node:felix.20221220002620.1: *3* ec: move cursor

@@ -3,6 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20210220195150.1: ** << imports >>
 import * as vscode from 'vscode';
+import * as path from 'path';
 import * as g from './leoGlobals';
 import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';
@@ -109,11 +110,16 @@ export class FastRead {
     /**
      * Read the file, change splitter ratios, and return its hidden vnode.
      */
-    public async readFile(p_path: string): Promise<VNode | undefined> {
-        const w_uri = g.makeVscodeUri(p_path);
-        const readData = await vscode.workspace.fs.readFile(w_uri);
-        const s = Buffer.from(readData).toString('utf8');
+    public async readFile(theFile: string | undefined, p_path: string): Promise<VNode | undefined> {
 
+        let s;
+        if (theFile == null) {
+            const w_uri = g.makeVscodeUri(p_path);
+            const readData = await vscode.workspace.fs.readFile(w_uri);
+            s = Buffer.from(readData).toString('utf8');
+        } else {
+            s = theFile;
+        }
         //const s: string = fs.readFileSync(theFile).toString();
 
         let v: VNode | undefined;
@@ -139,10 +145,15 @@ export class FastRead {
     /**
      * Read the leojs JSON file, change splitter ratios, and return its hidden vnode.
      */
-    public async readJsonFile(p_path: string): Promise<VNode | undefined> {
-        const w_uri = g.makeVscodeUri(p_path);
-        const readData = await vscode.workspace.fs.readFile(w_uri);
-        const s = Buffer.from(readData).toString('utf8');
+    public async readJsonFile(theFile: string | undefined, p_path: string): Promise<VNode | undefined> {
+        let s;
+        if (theFile == null) {
+            const w_uri = g.makeVscodeUri(p_path);
+            const readData = await vscode.workspace.fs.readFile(w_uri);
+            s = Buffer.from(readData).toString('utf8');
+        } else {
+            s = theFile;
+        }
 
         let v, g_dict;
         [v, g_dict] = this.readWithJsonTree(p_path, s);
@@ -1011,7 +1022,7 @@ export class FileCommands {
      */
     @cmd(
         'write-zip-archive',
-        'Write a .zip file containing this .leo file and all external files.\n' +
+        'Write a .zip file containing this .leo file and all external files. ' +
         "Write to os.environ['LEO_ARCHIVE'] or the directory containing this .leo file."
     )
     public async writeZipArchive(): Promise<unknown> {
@@ -1438,6 +1449,7 @@ export class FileCommands {
      * The caller should follow this with a call to c.redraw().
      */
     public async getLeoFile(
+        theFile: undefined | string,
         fileName: string,
         readAtFileNodesFlag: boolean = true,
         silent: boolean = false,
@@ -1468,17 +1480,17 @@ export class FileCommands {
             if (fileName.endsWith('.db')) {
                 v = await fc.retrieveVnodesFromDb(fileName);
                 if (!v) {
-                    v = await fc.initNewDb(fileName);
+                    v = await fc.initNewDb();
                 }
             } else if (fileName.endsWith('.leojs')) {
                 const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
-                v = await w_fastRead.readJsonFile(fileName);
+                v = await w_fastRead.readJsonFile(theFile, fileName);
                 if (v) {
                     c.hiddenRootNode = v;
                 }
             } else {
                 const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
-                v = await w_fastRead.readFile(fileName);
+                v = await w_fastRead.readFile(theFile, fileName);
                 if (v) {
                     c.hiddenRootNode = v;
                 }
@@ -1536,7 +1548,6 @@ export class FileCommands {
         silent: boolean = false
     ): Promise<VNode | undefined> {
         const c: Commands = this.c;
-        const frame = this.c.frame;
 
         // Set c.openDirectory
         const theDir: string = g.os_path_dirname(fileName);
@@ -1552,6 +1563,7 @@ export class FileCommands {
         let v: VNode;
         let ratio: number;
         [v, ratio] = await this.getLeoFile(
+            undefined,
             fileName,
             readAtFileNodesFlag,
             silent
@@ -1655,31 +1667,13 @@ export class FileCommands {
         }
         return root;
     }
-    //@+node:felix.20211213224232.14: *5* fc.readOutlineOnly
-    public async readOutlineOnly(fileName: string): Promise<VNode> {
-        const c: Commands = this.c;
-        // Set c.openDirectory
-        const theDir: string = g.os_path_dirname(fileName);
-        if (theDir) {
-            c.openDirectory = theDir;
-            c.frame.openDirectory = theDir;
-        }
-        let v: VNode;
-        let ratio: number;
-        [v, ratio] = await this.getLeoFile(fileName, false);
-        c.redraw();
-        // c.frame.deiconify()
-        // junk, junk, secondary_ratio = this.frame.initialRatios()
-        // c.frame.resizePanesToRatio(ratio, secondary_ratio);
-        return v;
-    }
     //@+node:felix.20211213224232.15: *5* fc.retrieveVnodesFromDb & helpers
     /**
      * Recreates tree from the data contained in table vnodes.
      *
      * This method follows behavior of readSaxFile.
      */
-    public retrieveVnodesFromDb(conn: any): Promise<VNode | undefined> {
+    public async retrieveVnodesFromDb(fileName: string): Promise<VNode | undefined> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
 
@@ -1693,71 +1687,104 @@ export class FileCommands {
 
         const vnodes: VNode[] = [];
 
-        return Promise.resolve(undefined);
-        // TODO !
-        /*
-        try:
-            for row in conn.execute(sql):
-                (gnx, h, b, children, parents, iconVal, statusBits, ua) = row
-                try:
-                    ua = pickle.loads(g.toEncodedString(ua))
-                except ValueError:
-                    ua = None
-                v = leoNodes.VNode(context=c, gnx=gnx)
-                v._headString = h
-                v._bodyString = b
-                v.children = children.split()
-                v.parents = parents.split()
-                v.iconVal = iconVal
-                v.statusBits = statusBits
-                v.u = ua
-                vnodes.append(v)
-        except sqlite3.Error as er:
-            if er.args[0].find('no such table') < 0:
+        // return Promise.resolve(undefined);
+        const w_uri = g.makeVscodeUri(fileName);
+        const filebuffer = await vscode.workspace.fs.readFile(w_uri);
+
+        const conn = new g.SQL.Database(filebuffer);
+
+        try {
+            const resultElements = conn.exec(sql)[0];
+            for (const row of resultElements.values) {
+                let [gnx, h, b, children, parents, iconVal, statusBits, ua] = row;
+                try {
+                    ua = pickle.loads(g.toEncodedString(ua));
+                } catch (ValueError) {
+                    // @ts-expect-error 
+                    ua = undefined;
+                }
+                const v = new VNode(c, gnx as string);
+                v._headString = h as string;
+                v._bodyString = b as string;
+                if (!children) {
+                    v.children = [];
+                } else {
+                    // @ts-expect-error FORCED CONVERSION BELOW
+                    v.children = (children as string).split(/\s+/);
+                }
+                if (!parents) {
+                    v.parents = [];
+                } else {
+                    // @ts-expect-error FORCED CONVERSION BELOW
+                    v.parents = (parents as string).split(/\s+/);
+                }
+
+                v.iconVal = iconVal as number;
+                v.statusBits = statusBits as number;
+                v.u = ua as { [key: string]: any; };
+                vnodes.push(v);
+            }
+        } catch (er: any) {
+            if (er.toString().indexOf('no such table') < 0) {
                 // there was an error raised but it is not the one we expect
-                g.internalError(er)
+                g.internalError(er);
+            }
             // there is no vnodes table
-            return None
+            return undefined;
+        }
 
-        rootChildren = [x for x in vnodes if 'hidden-root-vnode-gnx' in x.parents]
-        if not rootChildren:
-            g.trace('there should be at least one top level node!')
-            return None
+        // * as string, will be converted below.
+        const rootChildren = vnodes.filter(x => (x.parents as unknown as string[]).includes('hidden-root-vnode-gnx'));
 
-        def findNode(x: VNode) -> VNode:
-            return fc.gnxDict.get(x, c.hiddenRootNode)  // type:ignore
+        // const rootChildren = [x for x in vnodes if 'hidden-root-vnode-gnx' in x.parents]
+
+        if (!rootChildren.length) {
+            g.trace('there should be at least one top level node!');
+            return undefined;
+        }
+
+        const findNode = (x: string) => {
+            return fc.gnxDict[x] || c.hiddenRootNode;
+        };
+
         // let us replace every gnx with the corresponding vnode
-        for v in vnodes:
-            v.children = [findNode(x) for x in v.children]
-            v.parents = [findNode(x) for x in v.parents]
-        c.hiddenRootNode.children = rootChildren
-        (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
-        c.frame.setTopGeometry(w, h, x, y)
-        c.frame.resizePanesToRatio(r1, r2)
-        p = fc.decodePosition(encp)
-        c.setCurrentPosition(p)
-        return rootChildren[0]
-        */
+        for (const v of vnodes) {
+            v.children = v.children.map(x => findNode(x as unknown as string));
+            v.parents = v.parents.map(x => findNode(x as unknown as string));
+        }
+        c.hiddenRootNode.children = rootChildren;
+
+        console.log('TODO: getWindowGeometryFromDb to get current_position when opening db file');
+
+        // let [w, h, x, y, r1, r2, encp] = fc.getWindowGeometryFromDb(conn);
+        // c.frame.setTopGeometry(w, h, x, y);
+        // c.frame.resizePanesToRatio(r1, r2);
+        // const p = fc.decodePosition(encp);
+        // c.setCurrentPosition(p);
+        return rootChildren[0];
+
     }
     //@+node:felix.20211213224232.16: *6* fc.initNewDb
     /**
      * Initializes tables and returns None
      */
-    public initNewDb(conn: any): Promise<VNode> {
+    public async initNewDb(): Promise<VNode> {
+
+        const conn = new g.SQL.Database();
+
         const c: Commands = this.c;
         const fc: FileCommands = this;
         const v: VNode = new VNode(c);
-
         c.hiddenRootNode.children = [v];
         // (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
-        //c.frame.setTopGeometry(w, h, x, y)
-        //c.frame.resizePanesToRatio(r1, r2)
-        c.sqlite_connection = conn;
-        fc.exportToSqlite(c.mFileName);
+        // c.frame.setTopGeometry(w, h, x, y)
+        // c.frame.resizePanesToRatio(r1, r2)
+        c.sqlite_connection = c.mFileName; // * LEOJS use string as a flag instead of conn.
+        await fc.exportToSqlite(c.mFileName);
         return Promise.resolve(v);
     }
     //@+node:felix.20211213224232.17: *6* fc.getWindowGeometryFromDb
-    // ! unneeded
+    // ! unneeded ?
     // def getWindowGeometryFromDb(self, conn):
     //     geom = (600, 400, 50, 50, 0.5, 0.5, '')
     //     keys = ('width', 'height', 'left', 'top',
@@ -2058,12 +2085,12 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.save
             ) {
-                g.app.commander_cacher.save(c, fileName);
+                await g.app.commander_cacher.save(c, fileName);
             }
             ok = await c.checkFileTimeStamp(fileName);
             if (ok) {
                 if (c.sqlite_connection) {
-                    c.sqlite_connection.close();
+                    // c.sqlite_connection.close();
                     c.sqlite_connection = undefined;
                 }
                 ok = await this.write_Leo_file(fileName);
@@ -2094,7 +2121,7 @@ export class FileCommands {
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
             if (c.sqlite_connection) {
-                c.sqlite_connection.close();
+                // c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
             }
             await this.setDefaultDirectoryForNewFiles(fileName);
@@ -2103,7 +2130,7 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.save
             ) {
-                g.app.commander_cacher.save(c, fileName);
+                await g.app.commander_cacher.save(c, fileName);
             }
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
@@ -2132,8 +2159,8 @@ export class FileCommands {
 
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
-            if (c.sqlite_connection && c.sqlite_connection.close) {
-                c.sqlite_connection.close();
+            if (c.sqlite_connection) {
+                // c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
             }
             await this.setDefaultDirectoryForNewFiles(fileName);
@@ -2142,7 +2169,7 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.commit
             ) {
-                g.app.commander_cacher.commit(); // Commit, but don't save file name.
+                await g.app.commander_cacher.commit(); // Commit, but don't save file name.
             }
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
@@ -2163,25 +2190,25 @@ export class FileCommands {
     /**
      * Dump all vnodes to sqlite database. Returns True on success.
      */
-    public exportToSqlite(fileName: string): boolean {
+    public async exportToSqlite(fileName: string): Promise<boolean> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
 
         if (c.sqlite_connection === undefined) {
-            // TODO !
-            // c.sqlite_connection = new sqlite3.Database(fileName);
+            c.sqlite_connection = fileName; // * LEOJS: use string instead as flag instead of conn.
         }
-        const conn = c.sqlite_connection;
+        const conn = new g.SQL.Database();
 
-        // TODO : json stringify instead of pickle?
-        // const dump_u(v) -> bytes:
-        //     try:
-        //         s = pickle.dumps(v.u, protocol=1)
-        //     except pickle.PicklingError:
-        //         s = b''  # 2021/06/25: fixed via mypy complaint.
-        //         g.trace('unpickleable value', repr(v.u))
-        //     return s
-
+        const dump_u = (v: VNode) => {
+            let s = '';
+            try {
+                s = pickle.dumps(v.u, 1);
+            } catch (e) {
+                s = '';  // 2021/06/25: fixed via mypy complaint.
+                g.trace('unpickleable value', v.u.toString());
+            }
+            return s;
+        };
         // dbrow = lambda v: (
         //         v.gnx,
         //         v.h,
@@ -2192,6 +2219,7 @@ export class FileCommands {
         //         v.statusBits,
         //         dump_u(v)
         //     )
+
         function dbrow(v: VNode): sqlDbRow {
             return [
                 v.gnx,
@@ -2200,8 +2228,13 @@ export class FileCommands {
                 v.children.map((x) => x.gnx).join(' '),
                 v.parents.map((x) => x.gnx).join(' '),
                 v.iconVal,
-                v.statusBits,
-                v.u ? JSON.stringify(v.u) : '',
+                // #3550: Clear the dirty bit.
+                v.statusBits & ~StatusFlags.dirtyBit,
+                // v.statusBits,
+                v.u ? dump_u(v) : '',
+
+                // TODO : maybe JSON stringify instead of pickle? TRY TO DO AS PER LEO !
+                // v.u ? JSON.stringify(v.u) : '',
             ];
         }
 
@@ -2220,7 +2253,14 @@ export class FileCommands {
 
             fc.exportGeomToSqlite(conn);
             fc.exportHashesToSqlite(conn);
-            // conn.commit(); // TODO : support db sqlite files!
+
+            // conn.commit(); // ! support db sqlite files by 'writing' as commit !
+            const db_data = conn.export();
+            const db_buffer = Buffer.from(db_data);
+
+            const db_uri = g.makeVscodeUri(fileName);
+            await vscode.workspace.fs.writeFile(db_uri, db_buffer);
+            c.sqlite_connection = undefined;
             ok = true;
         } catch (e) {
             g.internalError(e);
@@ -2302,6 +2342,9 @@ export class FileCommands {
     }
 
     //@+node:felix.20211213224237.14: *6* fc.exportVnodesToSqlite
+    /**
+     * Called only from fc.exportToSqlite.
+     */
     public exportVnodesToSqlite(conn: any, rows: sqlDbRow[]): void {
         for (let row of rows) {
             conn.run(
@@ -2521,7 +2564,7 @@ export class FileCommands {
                 g.app.commander_cacher &&
                 g.app.commander_cacher.save
             ) {
-                g.app.commander_cacher.save(c, fileName);
+                await g.app.commander_cacher.save(c, fileName);
             }
 
             await c.setFileTimeStamp(fileName);

@@ -2954,16 +2954,10 @@ export class VNode {
     public dump(label: string = ''): void {
         const v: VNode = this;
         // const s: string = '-'.repeat(10);
-        // g.es_print(`${s} ${label} ${v}`);
-        // // g.es_print(`gnx: ${v.gnx}`);
-        // g.es_print(`parents.length: ${v.parents.length}`);
-        // g.es_print(`children.length: ${v.children.length}`);
-        // g.es_print(`parents: ${g.listToString(v.parents)}`);
-        // g.es_print(`children: ${g.listToString(v.children)}`);
         g.es_print('');
         g.es_print(`dump of vnode: ${label} ${v.toString()}`);
         // g.es_print('gnx: %s' % v.gnx)
-        g.es_print(`len(parents): ${v.parents.length} len(children): {v.children.length}`);
+        g.es_print(`len(parents): ${v.parents.length} len(children): ${v.children.length}`);
         if (v.parents && v.parents.length) {
             g.es_print(`parents: ${g.listToString(v.parents)}`);
         }
@@ -3173,19 +3167,14 @@ export class VNode {
     public matchHeadline(pattern: string): boolean {
         const v: VNode = this;
         let h: string = g.toUnicode(v.headString());
-        h = h.toLowerCase().split(' ').join('').split('\t').join('');
+        h = h.toLowerCase().replace(/ /g, '').replace(/\t/g, '');
         // equivalent to h = h.lstrip('.')
         // 2013/04/05. Allow leading period before section names.
         while (h.charAt(0) === '.') {
             h = h.substring(1);
         }
         pattern = g.toUnicode(pattern);
-        pattern = pattern
-            .toLowerCase()
-            .split(' ')
-            .join('')
-            .split('\t')
-            .join('');
+        pattern = pattern.toLowerCase().replace(/ /g, '').replace(/\t/g, '');
         return h.startsWith(pattern);
     }
 
@@ -3620,7 +3609,7 @@ export class VNode {
         // API allows headlines to contain newlines.
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
-        v._headString = s.split('\n').join('');
+        v._headString = s.replace(/\n/g, '');
         // self.contentModified()  # #1413.
     }
 

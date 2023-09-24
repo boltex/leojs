@@ -122,10 +122,14 @@ export class LeoUnitTest {
     public x: any;
     public at!: AtFile;
     public settings!: ISettings;
+    public command_name: string = "";
+    public parent_p!: Position;
+    public tempNode!: Position;
+    public before_p!: Position;
+    public after_p!: Position;
 
     //@+others
     //@+node:felix.20220130224933.4: *3* LeoUnitTest.setUp, tearDown & setUpClass
-
     constructor() { }
 
     public setUpClass(): Promise<Commands> {

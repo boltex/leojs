@@ -475,16 +475,16 @@ export class LeoFind {
     //@+node:felix.20221013234514.4: *4* find.clone-find_marked & helper
     @cmd(
         'clone-find-all-marked',
-        'clone-find-all-marked, aka cfam.\n\n' +
-        'Create an organizer node whose descendants contain clones of all marked\n' +
-        'nodes. The list is *not* flattened: clones appear only once in the\n' +
+        'clone-find-all-marked, aka cfam. ' +
+        'Create an organizer node whose descendants contain clones of all marked ' +
+        'nodes. The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     @cmd(
         'cfam',
-        'clone-find-all-marked, aka cfam.\n\n' +
-        'Create an organizer node whose descendants contain clones of all marked\n' +
-        'nodes. The list is *not* flattened: clones appear only once in the\n' +
+        'clone-find-all-marked, aka cfam. ' +
+        'Create an organizer node whose descendants contain clones of all marked ' +
+        'nodes. The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     public cloneFindAllMarked(): void {
@@ -492,18 +492,18 @@ export class LeoFind {
     }
     @cmd(
         'clone-find-all-flattened-marked',
-        'clone-find-all-flattened-marked, aka cffm.\n\n' +
-        'Create an organizer node whose direct children are clones of all marked\n' +
-        'nodes. The list is flattened: every cloned node appears as a direct\n' +
-        'child of the organizer node, even if the clone also is a descendant of\n' +
+        'clone-find-all-flattened-marked, aka cffm. ' +
+        'Create an organizer node whose direct children are clones of all marked ' +
+        'nodes. The list is flattened: every cloned node appears as a direct ' +
+        'child of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     @cmd(
         'cffm',
-        'clone-find-all-flattened-marked, aka cffm.\n\n' +
-        'Create an organizer node whose direct children are clones of all marked\n' +
-        'nodes. The list is flattened: every cloned node appears as a direct\n' +
-        'child of the organizer node, even if the clone also is a descendant of\n' +
+        'clone-find-all-flattened-marked, aka cffm. ' +
+        'Create an organizer node whose direct children are clones of all marked ' +
+        'nodes. The list is flattened: every cloned node appears as a direct ' +
+        'child of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     public cloneFindAllFlattenedMarked(): void {
@@ -566,7 +566,7 @@ export class LeoFind {
     //@+node:felix.20221013234514.6: *4* find.clone-find-parents
     @cmd(
         'clone-find-parents',
-        'Create an organizer node whose direct children are clones of all\n' +
+        'Create an organizer node whose direct children are clones of all ' +
         'parents of the selected node, which must be a clone.'
     )
     public cloneFindParents(): boolean {
@@ -1340,7 +1340,52 @@ export class LeoFind {
         'Replace all instances of the search string with the replacement string.'
     )
     public interactive_change_all(): Thenable<unknown> {
-        return g.app.gui.findAll(true); // TODO : Only have gui for dialog, move implementation here.
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+        let w_replaceString: string = this.ftm.find_replacebox.text(); // this._lastSettingsUsed!.replaceText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return true; // Cancelled with escape or empty string.
+                }
+                w_searchString = p_findString;
+                return g.app.gui.get1Arg({
+                    title: "Replace with",
+                    prompt: "Type text to replace with and press enter.",
+                    placeHolder: "Replace pattern here",
+                    value: w_replaceString
+                }).then((p_replaceString) => {
+                    if (p_replaceString === undefined) {
+                        return true;
+                    }
+                    w_replaceString = p_replaceString;
+                    return false;
+                });
+            })
+            .then((p_cancelled: boolean) => {
+                if (!p_cancelled) {
+
+                    this.ftm.set_find_text(w_searchString);
+                    this.ftm.set_change_text(w_replaceString);
+
+                    const w_changeSettings = this.ftm.get_settings();
+
+                    const w_result = this.do_change_all(w_changeSettings);
+
+                    this.c.widgetWantsFocusNow(this.c.frame.body.wrapper);
+
+                    g.app.gui.loadSearchSettings();
+
+                    return;
+
+                }
+            });
+
     }
     // def interactive_change_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """Replace all instances of the search string with the replacement string."""
@@ -1648,30 +1693,55 @@ export class LeoFind {
     //@+node:felix.20221016013001.13: *4* find.clone-find-all & helper
     @cmd(
         'clone-find-all',
-        'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     @cmd(
         'find-clone-all',
-        'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     @cmd(
         'cfa',
-        'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
-    public interactive_clone_find_all(): Thenable<unknown> {
-        return g.app.gui.cloneFind(false, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_clone_find_all(): unknown {
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                this.ftm.set_find_text(p_findString);
+                const w_findSettings = this.ftm.get_settings();
+                const count = this.do_clone_find_all(w_findSettings);
+                if (count) {
+                    this.c.treeWantsFocus();
+                }
+
+                g.app.gui.loadSearchSettings();
+
+                return count;
+
+            });
+
     }
 
     // def interactive_clone_find_all(self,
@@ -1732,33 +1802,60 @@ export class LeoFind {
     //@+node:felix.20221016013001.15: *4* find.clone-find-all-flattened & helper
     @cmd(
         'clone-find-all-flattened',
-        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     @cmd(
         'find-clone-all-flattened',
-        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     @cmd(
         'cff',
-        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     public interactive_cff(): Thenable<unknown> {
-        return g.app.gui.cloneFind(false, true); // TODO : Only have gui for dialog, move implementation here.
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                this.ftm.set_find_text(p_findString);
+                const w_findSettings = this.ftm.get_settings();
+                const count = this.do_clone_find_all_flattened(w_findSettings);
+                if (count) {
+                    this.c.treeWantsFocus();
+                }
+
+                g.app.gui.loadSearchSettings();
+
+                return count;
+
+            });
+
+
+
     }
     // def interactive_cff(self, event: Event=None, preloaded: bool=False) -> None:  # pragma: no cover (interactive)
     //     """
@@ -1816,61 +1913,51 @@ export class LeoFind {
     //@+node:felix.20221016013001.17: *4* find.clone-find-tag & helper
     @cmd(
         'clone-find-tag',
-        'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n'
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
     )
     @cmd(
         'find-clone-tag',
-        'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n'
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
     )
     @cmd(
         'cft',
-        'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n'
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
     )
-    public interactive_clone_find_tag(): void {
-        g.app.gui.cloneFindTag(); // TODO : Only have gui for dialog, move implementation here.
+    public async interactive_clone_find_tag(): Promise<[number, Position] | undefined> {
+        const w_findText = this.ftm.find_findbox.text();
+        const w_startValue = w_findText === "<find pattern here>" ? '' : w_findText;
+
+        let w_inputResult = await g.app.gui.get1Arg(
+            {
+                value: w_startValue,
+                title: "Find Tag",
+                placeHolder: "<tag>",
+                prompt: "Enter a tag name",
+            }
+        );
+        if (w_inputResult && w_inputResult.trim()) {
+            w_inputResult = w_inputResult.trim();
+            this.find_text = w_inputResult;
+            this.c.treeWantsFocus();
+            return this.do_clone_find_tag(w_inputResult);
+        }
     }
-    // def interactive_clone_find_tag(self, event: Event=None) -> None:  # pragma: no cover (interactive)
-    //     """
-    //     clone-find-tag (aka find-clone-tag and cft).
 
-    //     Create an organizer node whose descendants contain clones of all
-    //     nodes matching the given tag, except @nosearch trees.
-
-    //     The list is *always* flattened: every cloned node appears as a
-    //     direct child of the organizer node, even if the clone also is a
-    //     descendant of another cloned node.
-    //     """
-    //     w = self.c.frame.body.wrapper
-    //     if w:
-    //         self.start_state_machine(event,
-    //             prefix='Clone Find Tag: ',
-    //             handler=self.interactive_clone_find_tag1)
-
-    // def interactive_clone_find_tag1(self, event: Event) -> None:  # pragma: no cover (interactive)
-    //     c, k = self.c, self.k
-    //     # Settings...
-    //     self.find_text = tag = k.arg
-    //     # Gui...
-    //     k.clearState()
-    //     k.resetLabel()
-    //     k.showStateAndMode()
-    //     self.do_clone_find_tag(tag)
-    //     c.treeWantsFocus()
     //@+node:felix.20221016013001.18: *5* find.do_clone_find_tag & helper
     /**
      * Do the clone-all-find commands from settings.
@@ -1942,7 +2029,35 @@ export class LeoFind {
         'search string.'
     )
     public interactive_find_all(): Thenable<unknown> {
-        return g.app.gui.findAll(); // TODO : Only have gui for dialog, move implementation here.
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+
+                this.ftm.set_find_text(p_findString);
+
+                const w_changeSettings = this.ftm.get_settings();
+
+                const w_result = this.do_find_all(w_changeSettings);
+
+                this.c.widgetWantsFocusNow(this.c.frame.body.wrapper);
+
+                g.app.gui.loadSearchSettings();
+
+                return;
+            });
+
+
+
     }
     // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2307,7 +2422,7 @@ export class LeoFind {
     @cmd('re-search', 'Same as start-find, with regex.')
     @cmd('re-search-forward', 'Same as start-find, with regex.')
     public interactive_re_search_forward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(false, true, false); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(false, true, false); // TODO : Move implementation here if possible.
     }
     // def interactive_re_search_forward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, with regex."""
@@ -2328,7 +2443,7 @@ export class LeoFind {
         'Same as start-find, but with regex and in reverse.'
     )
     public interactive_re_search_backward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(true, true, false); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(true, true, false); // TODO : Move implementation here if possible.
     }
     // def interactive_re_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but with regex and in reverse."""
@@ -2349,7 +2464,7 @@ export class LeoFind {
     //@+node:felix.20221016013001.28: *4* find.search_backward
     @cmd('search-backward', 'Same as start-find, but in reverse.')
     public interactive_search_backward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(true, false, false); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(true, false, false); // TODO : Move implementation here if possible.
     }
     // def interactive_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but in reverse."""
@@ -2367,14 +2482,15 @@ export class LeoFind {
     //@+node:felix.20221016013001.29: *4* find.start-search (Ctrl-F) & common states
     @cmd(
         'start-search',
-        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+        'The default binding of Ctrl-F. Also contains default state-machine entries for find/change commands.'
     )
     @cmd(
         'search-forward',
-        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+        'The default binding of Ctrl-F. Also contains default state-machine entries for find/change commands.'
     )
     public start_search(): void {
-        g.app.gui.startSearch(); // All done in GUI.
+        // GUI action that opens the find panel & focuses the 'find' text box.
+        g.app.gui.startSearch();
     }
     // def start_search(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2466,14 +2582,63 @@ export class LeoFind {
     //     self.do_find_next(settings)
     //@+node:felix.20230120221726.1: *4* find.tag-node
     @cmd('tag-node', 'Prompt for a tag for this node')
-    public interactive_tag_node(): void {
-        g.app.gui.tagNode(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_tag_node(): Thenable<unknown> {
+
+        return g.app.gui.get1Arg({
+            title: "Tag Node",
+            placeHolder: "<tag>",
+            prompt: "Enter a tag name",
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                p_findString = p_findString.trim();
+                // check for special chars first
+                if (p_findString.split(/(&|\||-|\^)/).length > 1) {
+                    void g.setStatusLabel('Cannot add tags containing any of these characters: &|^-');
+                    return;
+                }
+
+                const c = this.c;
+                const tc = c.theTagController;
+                tc.add_tag(c.p, p_findString);
+            });
+
     }
     //@+node:felix.20230308231502.1: *4* find.remove-tag
     @cmd('remove-tag', 'Prompt for a tag to remove on selected node')
-    public remove_tag(): void {
-        g.app.gui.removeTag(); // TODO : Only have gui for dialog, move implementation here.
+    public remove_tag(): Thenable<unknown> {
+        const c = this.c;
+        const w_p = c.p;
+
+        if (w_p && w_p.u && w_p.u.__node_tags && w_p.u.__node_tags.length) {
+
+            return g.app.gui.get1Arg(
+                {
+                    title: "Remove Tag",
+                    placeHolder: "<tag>",
+                    prompt: "Enter a tag name",
+                },
+                undefined,
+                w_p.u.__node_tags
+            )
+                .then((p_findString) => {
+                    if (!p_findString) {
+                        return; // Cancelled with escape or empty string.
+                    }
+                    p_findString = p_findString.trim();
+
+                    const v = w_p.v;
+                    const tc = c.theTagController;
+                    if (v.u && v.u['__node_tags']) {
+                        tc.remove_tag(w_p, p_findString);
+                    }
+                });
+        }
+        return Promise.resolve();
     }
+
     //@+node:felix.20230308231503.1: *4* find.remove-all-tags
     @cmd('remove-all-tags', 'Remove all tags on selected node')
     public remove_all_tags(): void {
@@ -2495,9 +2660,26 @@ export class LeoFind {
     }
     //@+node:felix.20221016013001.33: *4* find.tag-children & helper
     @cmd('tag-children', 'Prompt for a tag and add it to all children of c.p.')
-    public interactive_tag_children(): void {
-        g.app.gui.tagChildren(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_tag_children(): Thenable<unknown> {
+        return g.app.gui.get1Arg({
+            title: "Tag Children",
+            placeHolder: "<tag>",
+            prompt: "Enter a tag name",
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                p_findString = p_findString.trim();
+                // check for special chars first
+                if (p_findString.split(/(&|\||-|\^)/).length > 1) {
+                    void g.setStatusLabel('Cannot add tags containing any of these characters: &|^-');
+                    return;
+                }
+                this.do_tag_children(this.c.p, p_findString);
+            });
     }
+
     //     """tag-children: prompt for a tag and add it to all children of c.p."""
     //     w = self.c.frame.body.wrapper
     //     if not w:
@@ -2547,7 +2729,7 @@ export class LeoFind {
         'Same as start-search, with whole_word setting.'
     )
     public word_search_forward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(false, false, true); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(false, false, true); // TODO : Move implementation here if possible.
     }
     // @cmd('word-search')
     // @cmd('word-search-forward')
@@ -2570,7 +2752,7 @@ export class LeoFind {
         'Same as start-search-backward, with whole_word setting.'
     )
     public word_search_backward(): Promise<unknown> {
-        return g.app.gui.interactiveSearch(true, false, true); // TODO : Only have gui for dialog, move implementation here.
+        return g.app.gui.interactiveSearch(true, false, true); // TODO : Move implementation here if possible.
     }
     // def word_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     # Set flags for show_find_options.
@@ -3243,23 +3425,25 @@ export class LeoFind {
         pattern: string
     ): boolean {
         pattern = this.replace_back_slashes(pattern);
-        if (!s || !pattern || !g.match(s, i, pattern)) {
-            return false;
-        }
+        return !!(s && pattern && g.match_word(s, i, pattern));
 
-        let pat1;
-        let pat2;
-        [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
-        const n = pattern.length;
-        const ch1 = 0 <= i - 1 && i - 1 < s.length ? s[i - 1] : '.';
-        const ch2 = 0 <= i + n && i + n < s.length ? s[i + n] : '.';
-        const isWordPat1 = g.isWordChar(pat1);
-        const isWordPat2 = g.isWordChar(pat2);
-        const isWordCh1 = g.isWordChar(ch1);
-        const isWordCh2 = g.isWordChar(ch2);
-        const inWord = (isWordPat1 && isWordCh1) || (isWordPat2 && isWordCh2);
+        // if (!s || !pattern || !g.match(s, i, pattern)) {
+        //     return false;
+        // }
 
-        return !inWord;
+        // let pat1;
+        // let pat2;
+        // [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
+        // const n = pattern.length;
+        // const ch1 = 0 <= i - 1 && i - 1 < s.length ? s[i - 1] : '.';
+        // const ch2 = 0 <= i + n && i + n < s.length ? s[i + n] : '.';
+        // const isWordPat1 = g.isWordChar(pat1);
+        // const isWordPat2 = g.isWordChar(pat2);
+        // const isWordCh1 = g.isWordChar(ch1);
+        // const isWordCh2 = g.isWordChar(ch2);
+        // const inWord = (isWordPat1 && isWordCh1) || (isWordPat2 && isWordCh2);
+
+        // return !inWord;
     }
     //@+node:felix.20221023141654.4: *5* find._inner_search_plain
     /**
@@ -3406,9 +3590,15 @@ export class LeoFind {
     }
     //@+node:felix.20221023141723.1: *4* find.replace_back_slashes
     /**
-     * Carefully replace backslashes in a search pattern.
+     * Replace backslash-n with a newline and backslash-t with a tab.
      */
     public replace_back_slashes(s: string): string {
+
+        return s.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+
+        // * Old Code 
+
+        /*
         // This is NOT the same as:
         //
         //   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
@@ -3432,6 +3622,7 @@ export class LeoFind {
             i += 1;
         }
         return s;
+        */
     }
     //@+node:felix.20221022201759.1: *3* LeoFind.Initing & finalizing
     //@+node:felix.20221022201759.2: *4* find.init_in_headline & helper
@@ -3591,7 +3782,7 @@ export class LeoFind {
     public add_change_string_to_label(): void {
         const c = this.c;
         let s: string = this.ftm.get_change_text();
-        c.minibufferWantsFocus();
+        // c.minibufferWantsFocus(); // No use in LeoJS
         while (s.endsWith('\n') || s.endsWith('\r')) {
             s = s.substring(0, s.length - 1);
         }
@@ -3603,7 +3794,7 @@ export class LeoFind {
         const k = this.c.k;
         const ftm = c.findCommands.ftm;
         let s = ftm.get_find_text();
-        c.minibufferWantsFocus();
+        // c.minibufferWantsFocus(); // No use in LeoJS
         while (s.endsWith('\n') || s.endsWith('\r')) {
             s = s.substring(0, s.length - 1);
         }

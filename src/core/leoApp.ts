@@ -19,6 +19,39 @@ import { LeoFrame } from './leoFrame';
 import { SettingsDict } from './leoGlobals';
 import { leojsSettingsXml } from '../leojsSettings';
 import { LeoUI } from '../leoUI';
+import { CommanderCacher, GlobalCacher } from './leoCache';
+// importers
+import * as importer_c from '../importers/c';
+import * as importer_coffeescript from '../importers/coffeescript';
+import * as importer_csharp from '../importers/csharp';
+import * as importer_cython from '../importers/cython';
+import * as importer_dart from '../importers/dart';
+import * as importer_elisp from '../importers/elisp';
+import * as importer_html from '../importers/html';
+import * as importer_ini from '../importers/ini';
+import * as importer_java from '../importers/java';
+import * as importer_javascript from '../importers/javascript';
+import * as importer_leo_rst from '../importers/leo_rst';
+import * as importer_lua from '../importers/lua';
+import * as importer_markdown from '../importers/markdown';
+import * as importer_org from '../importers/org';
+import * as importer_otl from '../importers/otl';
+import * as importer_pascal from '../importers/pascal';
+import * as importer_perl from '../importers/perl';
+import * as importer_php from '../importers/php';
+import * as importer_python from '../importers/python';
+import * as importer_rust from '../importers/rust';
+import * as importer_tcl from '../importers/tcl';
+import * as importer_treepad from '../importers/treepad';
+import * as importer_typescript from '../importers/typescript';
+import * as importer_xml from '../importers/xml';
+// writers
+import * as writer_dart from '../writers/dart';
+import * as writer_leo_rst from '../writers/leo_rst';
+import * as writer_markdown from '../writers/markdown';
+import * as writer_org from '../writers/org';
+import * as writer_otl from '../writers/otl';
+import * as writer_treepad from '../writers/treepad';
 
 //@-<< imports >>
 //@+others
@@ -124,6 +157,7 @@ export class LeoApp {
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui!: NullGui; // The gui class.
+    public vscode: typeof vscode = vscode;
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -192,12 +226,12 @@ export class LeoApp {
     //@+node:felix.20210103024632.7: *5* << LeoApp: global controller/manager objects >>
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
-    public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
+    public commander_cacher!: CommanderCacher; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
-    public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
+    public global_cacher!: GlobalCacher; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
@@ -214,12 +248,13 @@ export class LeoApp {
     //@+<< LeoApp: global reader/writer data >>
     //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
-    public atAutoWritersDict: { [key: string]: any } = {};
-    public writersDispatchDict: { [key: string]: any } = {};
+    public atAutoWritersDict: Record<string, (...args: any[]) => any> = {};
+    public writersDispatchDict: Record<string, (...args: any[]) => any> = {};
+
     // From leoImport.py
-    public atAutoDict: { [key: string]: any } = {};
-    // Keys are @auto names, values are scanner classes.
-    public classDispatchDict: { [key: string]: any } = {};
+    // Keys are @auto names, values are scanner functions..
+    public atAutoDict: Record<string, (...args: any[]) => any> = {};
+    public classDispatchDict: Record<string, (...args: any[]) => any> = {};
 
     // True if an @auto writer should write sentinels,
     // even if the external file doesn't actually contain sentinels.
@@ -231,7 +266,7 @@ export class LeoApp {
     //@-<< LeoApp: global reader/writer data >>
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>
-    public already_open_files: any[] = []; // A list of file names that * might * be open in another copy of Leo.
+    public already_open_files: string[] = []; // A list of file names that * might * be open in another copy of Leo.
     public inBridge: boolean = false; // True: running from leoBridge module.
     public inScript: boolean = false; // True: executing a script.
     public initing: boolean = true; // True: we are initializing the app.
@@ -943,9 +978,9 @@ export class LeoApp {
         let n1: string = '';
         if (process.version) {
             n1 = 'Node.js ' + process.version;
-            // @ts-expect-error
+            // // @ts-expect-error
         } else if (location.hostname) {
-            // @ts-expect-error
+            // // @ts-expect-error
             n1 = location.hostname;
             // if dots take 2 last parts
             if (n1.includes('.')) {
@@ -966,9 +1001,9 @@ export class LeoApp {
             sysVersion = process.platform;
         } else {
             let browserResult: any;
-            // @ts-expect-error
+            // // @ts-expect-error
             if (navigator.userAgent) {
-                // @ts-expect-error
+                // // @ts-expect-error
                 browserResult = Bowser.parse(navigator.userAgent);
                 sysVersion = browserResult.browser.name;
                 if (browserResult.browser.version) {
@@ -1050,6 +1085,26 @@ export class LeoApp {
         // * Modified for leojs SINGLE log pane
         g.es_print(app.signon);
         g.es_print(app.signon1);
+    }
+    //@+node:felix.20230805210538.1: *4* app.setGlobalDb
+    /**
+     * Create global pickleshare db
+     *
+     * Usable by:
+     *
+     *    g.app.db['hello'] = [1,2,5]
+     */
+    public async setGlobalDb(): Promise<void> {
+
+        // Fixes bug 670108.
+
+        g.app.global_cacher = new GlobalCacher();
+        await g.app.global_cacher.init();
+        g.app.db = g.app.global_cacher.db;
+        g.app.commander_cacher = new CommanderCacher();
+        await g.app.commander_cacher.init();
+        g.app.commander_db = g.app.commander_cacher.db;
+
     }
     //@+node:felix.20220417215228.1: *4* app.setLeoID & helpers
     /**
@@ -1211,7 +1266,7 @@ export class LeoApp {
         //
         // Save the window state for *all* open files.
         if (g.app.commander_cacher) {
-            g.app.commander_cacher.commit(); // store cache, but don't close it.
+            await g.app.commander_cacher.commit(); // store cache, but don't close it.
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
@@ -1285,6 +1340,8 @@ export class LeoApp {
         ) {
             return;
         }
+        console.log('TODO : checkForOpenFile');
+
         // #1519: check os.path.exists.
         /*
         const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
@@ -1320,6 +1377,8 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
+        console.log('TODO : TEST forgetOpenFile');
+
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
@@ -1347,6 +1406,8 @@ export class LeoApp {
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
+        console.log('TODO : TEST rememberOpenFile');
+
         // Do not call g.trace, etc. here.
         const d = g.app.db;
         const tag = 'open-leo-files';
@@ -2448,7 +2509,7 @@ export class LoadManager {
         if (!ok) {
             // --screen-shot causes an immediate exit.
             if (g.app.debug.includes('shutdown') || g.app.debug.includes('startup')) {
-                g.es_print('Can not create a commander')
+                g.es_print('Can not create a commander');
                 // g.app.forceShutdown() // ! LEOJS NEEDED ? ?
             }
             return;
@@ -2622,7 +2683,12 @@ export class LoadManager {
 
         // Init the app.
         await lm.initApp();
-        // g.app.setGlobalDb()
+
+        console.log('**************************************************');
+        console.log('***    Uncomment line below to enable sqlite   ***');
+        console.log('***         // await g.app.setGlobalDb();      ***');
+        console.log('**************************************************');
+        // await g.app.setGlobalDb();
 
         // lm.reportDirectories(verbose)
 
@@ -2662,7 +2728,37 @@ export class LoadManager {
      * Create the data structures describing importer plugins.
      */
     public createImporterData(): void {
-        console.log('TODO : createImporterData');
+
+        const table: [string, any][] = [
+            ["c", importer_c],
+            ["coffeescript", importer_coffeescript],
+            ["csharp", importer_csharp],
+            ["cython", importer_cython],
+            ["dart", importer_dart],
+            ["elisp", importer_elisp],
+            ["html", importer_html],
+            ["ini", importer_ini],
+            ["java", importer_java],
+            ["javascript", importer_javascript],
+            ["leo_rst", importer_leo_rst],
+            ["lua", importer_lua],
+            ["markdown", importer_markdown],
+            ["org", importer_org],
+            ["otl", importer_otl],
+            ["pascal", importer_pascal],
+            ["perl", importer_perl],
+            ["php", importer_php],
+            ["python", importer_python],
+            ["rust", importer_rust],
+            ["tcl", importer_tcl],
+            ["treepad", importer_treepad],
+            ["typescript", importer_typescript],
+            ["xml", importer_xml],
+        ];
+
+        for (const language of table) {
+            this.parse_importer_dict(language[0], language[1]);
+        }
 
         // // Allow plugins to be defined in ~/.leo/plugins.
         // for (const pattern of [
@@ -2686,6 +2782,7 @@ export class LoadManager {
         //                 g.printObj(filenames)
 
         // }
+
     }
     //@+node:felix.20230529220941.3: *7* LM.parse_importer_dict
     /**
@@ -2693,26 +2790,35 @@ export class LoadManager {
      * g.app.atAutoNames using entries in m.importer_dict.
      */
     public parse_importer_dict(sfn: string, m: any): void {
-        console.log('TODO : parse_importer_dict');
 
-        // importer_d = getattr(m, 'importer_dict', None)
-        // if importer_d
-        //     at_auto = importer_d.get('@auto', [])
-        //     scanner_func = importer_d.get('func', None)
-        //     // scanner_name = scanner_class.__name__
-        //     extensions = importer_d.get('extensions', [])
-        //     if at_auto
-        //         // Make entries for each @auto type.
-        //         d = g.app.atAutoDict
-        //         for s in at_auto:
-        //             d[s] = scanner_func
-        //             g.app.atAutoDict[s] = scanner_func
-        //             g.app.atAutoNames.add(s)
-        //     if extensions
-        //         // Make entries for each extension.
-        //         d = g.app.classDispatchDict
-        //         for ext in extensions:
-        //             d[ext] = scanner_func  #importer_d.get('func')#scanner_class
+        const importer_d = m['importer_dict'];
+
+        if (importer_d) {
+            const at_auto = importer_d['@auto'] || [];
+            const scanner_func = importer_d['func'];
+            // scanner_name = scanner_class.__name__
+            const extensions = importer_d['extensions'] || [];
+            if (at_auto) {
+                // Make entries for each @auto type.
+                const d = g.app.atAutoDict;
+                for (const s of at_auto) {
+                    d[s] = scanner_func;
+                    g.app.atAutoDict[s] = scanner_func;
+                    if (!g.app.atAutoNames.includes(s)) {
+                        g.app.atAutoNames.push(s);
+                    }
+                }
+            }
+
+            if (extensions && extensions.length) {
+                // Make entries for each extension.
+                const d = g.app.classDispatchDict;
+                for (const ext of extensions) {
+                    d[ext] = scanner_func;  // importer_d.get('func')#scanner_class
+                }
+            }
+
+        }
 
         // elif sfn not in (
         //     // These are base classes, not real plugins.
@@ -2720,13 +2826,26 @@ export class LoadManager {
         //     'linescanner.py',
         // ):
         //     g.warning(f"leo/plugins/importers/{sfn} has no importer_dict")
+
     }
     //@+node:felix.20230529220941.4: *6* LM.createWritersData & helper
     /**
      * Create the data structures describing writer plugins.
      */
     public createWritersData(): void {
-        console.log('TODO : createWritersData');
+
+        const table: [string, any][] = [
+            ['dart', writer_dart],
+            ['leo_rst', writer_leo_rst],
+            ['markdown', writer_markdown],
+            ['org', writer_org],
+            ['otl', writer_otl],
+            ['treepad', writer_treepad],
+        ];
+
+        for (const language of table) {
+            this.parse_writer_dict(language[0], language[1]);
+        }
 
         // // Do *not* remove this trace.
         // const trace = false && 'createWritersData' not in g.app.debug_dict
@@ -2756,6 +2875,7 @@ export class LoadManager {
         //     g.printDict(g.app.writersDispatchDict)
         //     g.trace('LM.atAutoWritersDict')
         //     g.printDict(g.app.atAutoWritersDict)
+
     }
     //@+node:felix.20230529220941.5: *7* LM.parse_writer_dict
     /**
@@ -2763,42 +2883,54 @@ export class LoadManager {
      * using entries in m.writers_dict.
      */
     public parse_writer_dict(sfn: string, m: any): void {
-        console.log('TODO : createWritersData');
 
-        // writer_d = getattr(m, 'writer_dict', None)
-        // if writer_d
-        //     at_auto = writer_d.get('@auto', [])
-        //     scanner_class = writer_d.get('class', None)
-        //     extensions = writer_d.get('extensions', [])
-        //     if at_auto
-        //         // Make entries for each @auto type.
-        //         d = g.app.atAutoWritersDict
-        //         for s in at_auto
-        //             aClass = d.get(s)
-        //             if aClass and aClass != scanner_class
-        //                 g.trace(
-        //                     f"{sfn}: duplicate {s} class {aClass.__name__} "
-        //                     f"in {m.__file__}:")
-        //             else
-        //                 d[s] = scanner_class
-        //                 g.app.atAutoNames.add(s)
+        const writer_d = m['writer_dict']; // getattr(m, 'writer_dict', None)
 
-        //     if extensions
-        //         // Make entries for each extension.
-        //         d = g.app.writersDispatchDict
-        //         for ext in extensions
-        //             aClass = d.get(ext)
-        //             if aClass and aClass != scanner_class
-        //                 g.trace(f"{sfn}: duplicate {ext} class", aClass, scanner_class)
-        //             else
-        //                 d[ext] = scanner_class
+        if (writer_d) {
+            const at_auto = writer_d['@auto'] || [];
+            const scanner_class = writer_d['class'];
+            const extensions: string[] = writer_d['extensions'] || [];
+
+            if (at_auto) {
+                // Make entries for each @auto type.
+                const d = g.app.atAutoWritersDict;
+                for (const s of at_auto) {
+                    const aClass = d[s];
+                    if (aClass && aClass !== scanner_class) {
+                        g.trace(`${sfn}: duplicate ${s} class`);
+                    } else {
+                        d[s] = scanner_class;
+                        if (!g.app.atAutoNames.includes(s)) {
+
+                            g.app.atAutoNames.push(s);
+                        }
+                    }
+                }
+            }
+
+            if (extensions && extensions.length) {
+                // Make entries for each extension.
+                const d = g.app.writersDispatchDict;
+                for (const ext of extensions) {
+                    const aClass = d[ext];
+                    if (aClass && aClass !== scanner_class) {
+                        g.trace(`${sfn}: duplicate ${ext} class`);
+                    } else {
+                        d[ext] = scanner_class;
+                    }
+                }
+            }
+
+        }
 
         // elif sfn not in ('basewriter.py',):
         //     g.warning(f"leo/plugins/writers/{sfn} has no writer_dict")
+
     }
 
     //@+node:felix.20220417225955.1: *5* LM.createGui
     public createGui(): void {
+
         const lm: LoadManager = this;
 
         g.app.gui = new LeoUI(undefined, this._context!); // replaces createDefaultGui
@@ -2825,6 +2957,7 @@ export class LoadManager {
             lm.createSpecialGui(gui_option, pymacs, script, windowFlag)
 
         */
+
     }
 
     //@+node:felix.20210120004121.16: *5* LM.initApp
@@ -3158,15 +3291,41 @@ export class LoadManager {
         if (!fn) {
             return false;
         }
+        console.log('TODO: isZippedFile');
         // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
         return (
             fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs')
         );
     }
     public isZippedFile(fn: string): boolean {
-        // ? NEEDED ?
+
         // TODO : zip support ?
+
+        console.log('TODO: isZippedFile');
+
         return false;
+        /*
+        try {
+            const buffer = Buffer.alloc(4);
+            const fd = fs.openSync(filePath, 'r');
+            
+            // Read the first 4 bytes of the file
+            fs.readSync(fd, buffer, 0, 4, 0);
+            fs.closeSync(fd);
+
+            // Check if the first 4 bytes match the ZIP file signature
+            const zipSignature = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+            for (let i = 0; i < 4; i++) {
+                if (buffer[i] !== zipSignature[i]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            return false;
+        }
+        */
         // return fn && zipfile.is_zipfile(fn);
     }
     //@+node:felix.20220109233001.1: *6* LM.openAnyLeoFile
@@ -3176,30 +3335,30 @@ export class LoadManager {
      * @param fn
      * @returns number: file descriptor
      */
-    public openAnyLeoFile(fn: string): number | undefined {
-        const lm: LoadManager = this;
+    // public openAnyLeoFile(fn: string): number | undefined {
+    //     const lm: LoadManager = this;
 
-        if (fn.endsWith('.db')) {
-            // TODO !
-            // return sqlite3.connect(fn);
-            return undefined;
-        }
-        let theFile: number | undefined;
+    //     if (fn.endsWith('.db')) {
+    //         // TODO !
+    //         // return sqlite3.connect(fn);
+    //         return undefined;
+    //     }
+    //     let theFile: number | undefined;
 
-        // ! now use vscode.workspace.fs async functions
-        /*
-        if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
-            // ? NEEDED ZIP SUPPORT ?
-            // if (lm.isZippedFile(fn)){
-            //     theFile = lm.openZipFile(fn);
-            // }else{
-            //     theFile = lm.openLeoFile(fn);
-            // }
-            theFile = lm.openLeoFile(fn);
-        }
-        */
-        return theFile;
-    }
+    //     // ! now use vscode.workspace.fs async functions
+    //     /*
+    //     if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
+    //         // ? NEEDED ZIP SUPPORT ?
+    //         // if (lm.isZippedFile(fn)){
+    //         //     theFile = lm.openZipFile(fn);
+    //         // }else{
+    //         //     theFile = lm.openLeoFile(fn);
+    //         // }
+    //         theFile = lm.openLeoFile(fn);
+    //     }
+    //     */
+    //     return theFile;
+    // }
     //@+node:felix.20220109233518.1: *6* LM.openLeoFile
     /**
      * @deprecated Now using async vscode.workspace.fs functions
@@ -3273,7 +3432,7 @@ export class LoadManager {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
-            await c.fileCommands.getLeoFile(fn, undefined, undefined, false);
+            await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
         } catch {
             // Does not exist !
         }
@@ -3311,6 +3470,528 @@ export class PreviousSettings {
             `${this.shortcutsDict}\n>`
         );
     };
+}
+//@+node:felix.20230923185723.1: ** class RecentFilesManager
+/** 
+ * A class to manipulate leoRecentFiles.txt.
+ */
+export class RecentFilesManager {
+
+    public edit_headline = 'Recent files. Do not change this headline!';
+    public groupedMenus: any[] = [];  // Set in rf.createRecentFilesMenuItems.
+    public recentFiles: any[] = []; // List of g.Bunches describing .leoRecentFiles.txt files.
+    public recentFilesMenuName = 'Recent Files';  // May be changed later.
+    public recentFileMessageWritten = false;  // To suppress all but the first message.
+    public write_recent_files_as_needed = false;  // Will be set later.
+
+    //@+others
+    //@+node:felix.20230923185723.2: *3* rf.appendToRecentFiles
+    public appendToRecentFiles(files: string[]): void {
+        const rf = this;
+        files = files.map((theFile: string) => theFile.trim());
+
+        function munge(name: string): string {
+            return g.os_path_normpath(name || '').toLowerCase();
+        }
+
+        for (const name of files) {
+            // Remove all variants of name.
+            for (const name2 of [...rf.recentFiles]) {
+                if (munge(name) === munge(name2)) {
+                    rf.recentFiles.splice(rf.recentFiles.indexOf(name2), 1);
+                }
+            }
+            rf.recentFiles.push(name);
+        }
+
+    }
+    //@+node:felix.20230923185723.3: *3* rf.cleanRecentFiles
+    /**
+     * Remove items from the recent files list that no longer exist.
+     *
+     * This almost never does anything because Leo's startup logic removes
+     * nonexistent files from the recent files list.
+     */
+    public async cleanRecentFiles(c: Commands): Promise<void> {
+
+        // Filtering recent files to remove nonexistent ones...w
+        const result = await Promise.all(
+            this.recentFiles.map(async (z: string) => {
+                if (await g.os_path_exists(z)) {
+                    return z;
+                }
+                return null;
+            })
+        );
+
+        // Checking if the result differs from the original recent files...
+        if (result.some((path) => path == null)) {
+            for (const w_path of result) {
+                if (w_path !== null) {
+                    this.updateRecentFiles(w_path);
+                }
+            }
+            await this.writeRecentFilesFile(c);
+        }
+
+    }
+    //@+node:felix.20230923185723.4: *3* rf.demangleRecentFiles
+    /**
+     * Rewrite recent files based on c.config.getData('path-demangle')
+     */
+    public async demangleRecentFiles(c: Commands, data: string[]): Promise<void> {
+
+        const changes: [string, string][] = [];
+        let replace: string | null = null;
+
+        for (const line of data) {
+            const text: string = line.trim();
+
+            if (text.startsWith('REPLACE: ')) {
+                const firstSpaceIndex = text.indexOf(' ');
+                const secondPart = firstSpaceIndex !== -1 ? text.slice(firstSpaceIndex + 1) : '';
+                replace = secondPart.trim();
+            }
+
+            if (text.startsWith('WITH:') && replace !== null) {
+                const with_ = text.substr(5).trim();
+                changes.push([replace, with_]);
+                g.es(`${replace} -> ${with_}`);
+            }
+        }
+
+        const orig: string[] = this.recentFiles.filter((z: string) => z.startsWith('/'));
+        this.recentFiles = [];
+
+        for (const i of orig) {
+            let t: string = i;
+
+            for (const change of changes) {
+                t = t.split(change[0]).join(change[1]);
+            }
+
+            this.updateRecentFiles(t);
+        }
+
+        await this.writeRecentFilesFile(c);
+    }
+    //@+node:felix.20230923185723.5: *3* rf.clearRecentFiles
+    /**
+     * Clear the recent files list, then add the present file.
+     */
+    public async clearRecentFiles(c: Commands): Promise<void> {
+
+        let rf: this = this;
+        // let menu: Menu = c.frame.menu;
+        // let u: Undoer = c.undoer;
+        // let bunch: any = u.beforeClearRecentFiles();
+        // let recentFilesMenu: Menu = menu.getMenu(this.recentFilesMenuName);
+
+        /* Clear the recent files menu items... */
+        // menu.deleteRecentFilesMenuItems(recentFilesMenu);
+
+        /* Add the present file to recent files... */
+        rf.recentFiles = [c.fileName()];
+
+        /* Create recent files menu items for all open windows... */
+        // for (const frame of g.app.windowList) {
+        //     rf.createRecentFilesMenuItems(frame.c);
+        // }
+
+        /* Finalize clearing recent files... */
+        // u.afterClearRecentFiles(bunch);
+
+        /* Write the file immediately... */
+        await rf.writeRecentFilesFile(c);
+
+        /* Clearing recent files completed. Terminating protocol... */
+        /* Recent files purged. Commencing data write... */
+    }
+    //@+node:felix.20230923185723.6: *3* rf.createRecentFilesMenuItems
+    public createRecentFilesMenuItems(c: Commands): void {
+        // rf = self
+        // menu = c.frame.menu
+        // recentFilesMenu = menu.getMenu(self.recentFilesMenuName)
+        // if not recentFilesMenu:
+        //     return
+        // # Delete all previous entries.
+        // menu.deleteRecentFilesMenuItems(recentFilesMenu)
+        // # Create the permanent (static) menu entries.
+        // table = rf.getRecentFilesTable()
+        // menu.createMenuEntries(recentFilesMenu, table)
+        // # Create all the other entries (a maximum of 36).
+        // accel_ch = string.digits + string.ascii_uppercase  # Not a unicode problem.
+        // i = 0
+        // n = len(accel_ch)
+        // # see if we're grouping when files occur in more than one place
+        // rf_group = c.config.getBool("recent-files-group")
+        // rf_always = c.config.getBool("recent-files-group-always")
+        // groupedEntries = rf_group or rf_always
+        // if groupedEntries:  # if so, make dict of groups
+        //     dirCount: dict[str, Any] = {}
+        //     for fileName in rf.getRecentFiles()[:n]:
+        //         dirName, baseName = g.os_path_split(fileName)
+        //         if baseName not in dirCount:
+        //             dirCount[baseName] = {'dirs': [], 'entry': None}
+        //         dirCount[baseName]['dirs'].append(dirName)
+        // for name in rf.getRecentFiles()[:n]:
+        //     # pylint: disable=cell-var-from-loop
+        //     if name.strip() == "":
+        //         continue  # happens with empty list/new file
+
+        //     def recentFilesCallback(event: Event = None, c: Cmdr = c, name: str = name) -> None:
+        //         c.openRecentFile(fn=name)
+
+        //     if groupedEntries:
+        //         dirName, baseName = g.os_path_split(name)
+        //         entry = dirCount[baseName]
+        //         if len(entry['dirs']) > 1 or rf_always:  # sub menus
+        //             if entry['entry'] is None:
+        //                 entry['entry'] = menu.createNewMenu(baseName, "Recent Files...")
+        //                 # acts as a flag for the need to create the menu
+        //             c.add_command(menu.getMenu(baseName), label=dirName,
+        //                 command=recentFilesCallback, underline=0)
+        //         else:  # single occurrence, no submenu
+        //             c.add_command(recentFilesMenu, label=baseName,
+        //                 command=recentFilesCallback, underline=0)
+        //     else:  # original behavior
+        //         label = f"{accel_ch[i]} {g.computeWindowTitle(name)}"
+        //         c.add_command(recentFilesMenu, label=label,
+        //             command=recentFilesCallback, underline=0)
+        //     i += 1
+        // if groupedEntries:  # store so we can delete them later
+        //     rf.groupedMenus = [z for z in dirCount
+        //         if dirCount[z]['entry'] is not None]
+    }
+    //@+node:felix.20230923185723.7: *3* rf.editRecentFiles
+    public editRecentFiles(c: Commands): void {
+        let rf: this = this;
+        let p1: any = c.lastTopLevel().insertAfter();
+        p1.h = this.edit_headline;
+        p1.b = rf.recentFiles.join('\n');
+
+        c.redraw();
+
+        c.selectPosition(p1);
+
+        c.redraw();
+
+        c.bodyWantsFocusNow();
+
+        g.es('edit list and run write-edited-recent-files to save recentFiles');
+    }
+    //@+node:felix.20230923185723.8: *3* rf.getRecentFiles
+    async getRecentFiles(): Promise<string[]> {
+        /* Initializing protocol for retrieving recent files... */
+        const validFiles: string[] = [];
+
+        for (const z of this.recentFiles) {
+            if (await g.os_path_exists(z)) {
+                validFiles.push(z);
+            }
+        }
+
+        this.recentFiles = validFiles;
+        return this.recentFiles;
+
+    }
+    //@+node:felix.20230923185723.9: *3* rf.getRecentFilesTable
+    public getRecentFilesTable(): any {
+        return [
+            "*clear-recent-files",
+            "*clean-recent-files",
+            "*demangle-recent-files",
+            "*sort-recent-files",
+            ["-", undefined, undefined],
+        ];
+    }
+    //@+node:felix.20230923185723.10: *3* rf.readRecentFiles & helpers
+    /**
+     * Read all .leoRecentFiles.txt files.
+     */
+    public async readRecentFiles(localConfigFile: string): Promise<void> {
+        // Read all .leoRecentFiles.txt files.
+        // The order of files in this list affects the order of the recent files list.
+        const rf = this;
+        const seen: string[] = [];
+        const localConfigPath: string = g.os_path_dirname(localConfigFile);
+        for (const w_path of [g.app.homeLeoDir, g.app.globalConfigDir, localConfigPath]) {
+            let realPath = w_path;
+            if (w_path) {
+                realPath = g.os_path_realpath(g.finalize(w_path));
+            }
+            if (realPath && !seen.includes(realPath)) {
+                const ok = await rf.readRecentFilesFile(realPath);
+                if (ok) {
+                    seen.push(realPath);
+                }
+            }
+        }
+        if (seen.length === 0 && rf.write_recent_files_as_needed) {
+            await rf.createRecentFiles();
+        }
+    }
+    //@+node:felix.20230923185723.11: *4* rf.createRecentFiles
+    /**
+     * Try to create .leoRecentFiles.txt, in the users home directory,
+     * or in Leo's config directory if that fails.
+     */
+    public async createRecentFiles(): Promise<void> {
+
+        for (const theDir of [g.app.homeLeoDir, g.app.globalConfigDir]) {
+            if (theDir) {
+                const fn = g.os_path_join(theDir, '.leoRecentFiles.txt');
+                try {
+                    const w_uri = g.makeVscodeUri(fn);
+                    const writeData = Buffer.from('', 'utf8');
+                    await vscode.workspace.fs.writeFile(w_uri, writeData);
+                    g.es('created', fn);
+                    return;
+                } catch (err) {
+                    g.error('can not create', fn);
+                    g.es_exception(err);
+                }
+            }
+        }
+    }
+    //@+node:felix.20230923185723.12: *4* rf.readRecentFilesFile
+    public async readRecentFilesFile(path: string): Promise<boolean> {
+        const fileName = g.os_path_join(path, '.leoRecentFiles.txt');
+        const exists = await g.os_path_exists(fileName);
+        if (!exists) {
+            return false;
+        }
+        let lines: string[] | undefined;
+
+        try {
+            const fileContents = await g.readFileIntoUnicodeString(fileName);
+
+            try {
+                lines = fileContents?.split('\n');
+            } catch (err) {
+                lines = undefined;
+            }
+        } catch (err) {
+            g.trace('can not open', fileName);
+            return false;
+        }
+        if (lines && this.sanitize(lines[0]) === 'readonly') {
+            lines = lines.slice(1);
+        }
+        if (lines) {
+            lines = lines.map(line => g.toUnicode(g.os_path_normpath(line)));
+            this.appendToRecentFiles(lines);
+        }
+        return true;
+    }
+    //@+node:felix.20230923185723.13: *3* rf.sanitize
+    /**
+     * Return a sanitized file name.
+     */
+    public sanitize(p_name?: string): string | undefined {
+        if (p_name == null) {
+            return undefined;
+        }
+        p_name = p_name.toLowerCase();
+        for (const ch of ['-', '_', ' ', '\n']) {
+            const regex = new RegExp(ch, 'g');
+            p_name = p_name.replace(regex, '');
+        }
+        return p_name || undefined;
+    }
+    //@+node:felix.20230923185723.14: *3* rf.setRecentFiles
+    /**
+     * Update the recent files list.
+     */
+    public setRecentFiles(files: string[]): void {
+        const rf = this;
+        rf.appendToRecentFiles(files);
+    }
+    //@+node:felix.20230923185723.15: *3* rf.sortRecentFiles
+    /**
+     * Sort the recent files list.
+     */
+    public async sortRecentFiles(c: Commands): Promise<void> {
+
+        const rf = this;
+
+        const key = (path: string): string => {
+            // Sort only the base name. That's what will appear in the menu.
+            const s = g.os_path_basename(path);
+            return g.isWindows ? s.toLowerCase() : s;
+        };
+
+        const aList = rf.recentFiles.sort((a, b) => key(a).localeCompare(key(b)));
+        rf.recentFiles = [];
+        for (const z of aList.reverse()) {
+            rf.updateRecentFiles(z);
+        }
+        await rf.writeRecentFilesFile(c);
+    }
+    //@+node:felix.20230923185723.16: *3* rf.updateRecentFiles
+    /**
+     * Create the RecentFiles menu. May be called with Null fileName.
+     */
+    public updateRecentFiles(fileName?: string): void {
+
+        const rf = this;
+        if (g.unitTesting) {
+            return;
+        }
+
+        const munge = (name: string | null): string => {
+            return g.finalize(name || '').toLowerCase();
+        };
+
+        const munge2 = (name: string | null): string => {
+            return g.finalize_join(g.app.loadDir!, name || '');
+        };
+
+        // Update the recent files list in all windows.
+        if (fileName) {
+            for (const frame of g.app.windowList) {
+                // Remove all versions of the file name.
+                for (const name of rf.recentFiles) {
+                    if (
+                        munge(fileName) === munge(name) ||
+                        munge2(fileName) === munge2(name)
+                    ) {
+                        const index = rf.recentFiles.indexOf(name);
+                        if (index > -1) {
+                            rf.recentFiles.splice(index, 1);
+                        }
+                    }
+                }
+                rf.recentFiles.unshift(fileName);
+                // Recreate the Recent Files menu.
+                rf.createRecentFilesMenuItems(frame.c);
+            }
+        } else {
+            for (const frame of g.app.windowList) {
+                rf.createRecentFilesMenuItems(frame.c);
+            }
+        }
+    }
+    //@+node:felix.20230923185723.17: *3* rf.writeEditedRecentFiles
+    /**
+     * Write content of "edit_headline" node as recentFiles and recreates menus.
+     */
+    async writeEditedRecentFiles(c: Commands): Promise<void> {
+        const rf = this;
+        let p = g.findNodeAnywhere(c, rf.edit_headline);
+
+        if (p && p.__bool__()) {
+            const files: string[] = [];
+            for (const z of p.b.split(/\r?\n/)) {
+                if (z && await g.os_path_exists(z)) {
+                    files.push(z);
+                }
+            }
+            rf.recentFiles = files;
+            await rf.writeRecentFilesFile(c);
+            rf.updateRecentFiles();
+            c.selectPosition(p);
+            c.deleteOutline();
+        } else {
+            g.red('not found:', rf.edit_headline);
+        }
+    }
+    //@+node:felix.20230923185723.18: *3* rf.writeRecentFilesFile & helper
+    /**
+     * Write the appropriate .leoRecentFiles.txt file.
+     */
+    public async writeRecentFilesFile(c: Commands): Promise<void> {
+
+        const tag = '.leoRecentFiles.txt';
+        const rf = this;
+        if (g.unitTesting || g.app.inBridge) {
+            return;
+        }
+
+        const localFileName = c.fileName();
+        let localPath: string | null = null;
+        if (localFileName) {
+            localPath = g.os_path_split(localFileName)[0];
+        }
+        let written = false;
+        const seen: string[] = [];
+
+        for (const w_path of [localPath, g.app.globalConfigDir, g.app.homeLeoDir]) {
+            if (w_path) {
+                const fileName = g.os_path_join(w_path, tag);
+                if (await g.os_path_exists(fileName) && !seen.includes(fileName.toLowerCase())) {
+                    seen.push(fileName.toLowerCase());
+                    const ok = await rf.writeRecentFilesFileHelper(fileName);
+                    if (ok) {
+                        written = true;
+                    }
+                    if (!rf.recentFileMessageWritten && !g.unitTesting && !g.app.silentMode) {
+                        if (ok) {
+                            g.es_print(`wrote recent file: ${fileName}`);
+                        } else {
+                            g.error(`failed to write recent file: ${fileName}`);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (written) {
+            rf.recentFileMessageWritten = true;
+        } else {
+            if (g.app.homeLeoDir) {
+                const fileName = g.finalize_join(g.app.homeLeoDir, tag);
+                if (!(await g.os_path_exists(fileName))) {
+                    g.red(`creating: ${fileName}`);
+                }
+                await rf.writeRecentFilesFileHelper(fileName);
+            }
+        }
+    }
+    //@+node:felix.20230923185723.19: *4* rf.writeRecentFilesFileHelper
+    /**
+     * Don't update the file if it begins with read-only.
+     */
+    async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
+
+        let lines: string[] | undefined = undefined;
+
+        // Part 1: Return False if the first line is "readonly".
+        if (await g.os_path_exists(fileName)) {
+            try {
+
+                const data = await g.readFileIntoUnicodeString(fileName);
+                lines = data?.split('\n');
+
+            } catch (error) {
+                lines = undefined;
+            }
+
+            if (lines && this.sanitize(lines[0]) === 'readonly') {
+                return false;
+            }
+        }
+
+        // Part 2: write the files.
+        try {
+            const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
+
+            await g.writeFile(fileName, 'utf-8', g.toUnicode(s),);
+
+            return true;
+        } catch (error) {
+            if (error) {
+                g.error('error writing', fileName);
+                g.es_exception(error);
+                if (g.unitTesting) {
+                    throw error;
+                }
+            }
+            return false;
+        }
+    }
+    //@-others
+
 }
 //@-others
 //@@language typescript

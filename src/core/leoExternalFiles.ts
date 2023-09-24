@@ -129,6 +129,9 @@ export class ExternalFilesController {
         p_path: string
     ): Promise<boolean> {
         if (c.sqlite_connection && c.mFileName === p_path) {
+            console.log('TODO : VERIFY THAT check_overwrite IS VALID FOR .db FILES');
+
+
             // sqlite database file is never actually overwritten by Leo
             // so no need to check its timestamp. It is modified through
             // sqlite methods.
@@ -278,8 +281,8 @@ export class ExternalFilesController {
         const val = await this.ask(c, w_path);
         if (['yes', 'yes-all'].includes(val)) {
             // Do a complete restart of Leo.
-            g.es_print('restarting Leo...');
-            c.restartLeo();
+            await g.app.loadManager!.revertCommander(c);
+            g.es_print(`reloaded ${w_path}`);
         }
     }
     //@+node:felix.20230503004807.10: *5* efc.idle_check_open_with_file & helper
@@ -704,7 +707,7 @@ export class ExternalFilesController {
         if (!g.app.commanders().includes(c)) {
             return '';
         }
-        const is_leo = p_path.endsWith('.db') || p_path.endsWith('.leo');
+        const is_leo = p_path.endsWith('.db') || p_path.endsWith('.leo') || p_path.endsWith('.leojs');
         const is_external_file = !is_leo;
 
         // check with leoServer's config first.
@@ -743,12 +746,10 @@ export class ExternalFilesController {
 
         //
         // Create the message.
-        let message1 = `${g.splitLongFileName(
-            p_path
-        )} has changed outside Leo.\n`;
-        let message2;
+        let message1 = `${p_path}\nhas changed outside Leo.\n\n`;
+        let message2 = "";
         if (is_leo) {
-            message2 = 'Restart Leo?';
+            message2 = 'Reload this outline?';
         } else if (p && p.__bool__()) {
             message2 = `Reload ${p.h}?`;
         } else {
@@ -769,7 +770,7 @@ export class ExternalFilesController {
         // #1240: Note: This dialog prevents idle time.
         const result = await g.app.gui.runAskYesNoDialog(
             c,
-            'Overwrite the version in Leo?',
+            message2!,
             message1 + message2,
             is_external_file,
             is_external_file

@@ -12,7 +12,6 @@ import * as vscode from 'vscode';
 // import * as Bowser from "bowser";
 import * as os from 'os';
 import * as child from 'child_process';
-import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
 import * as GitAPI from '../git';
 import * as GitBaseAPI from '../git-base';
@@ -21,6 +20,7 @@ import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
 import { RemoteHubApi } from '../remote-hub';
+import { SqlJsStatic } from 'sql.js';
 
 /*
     import binascii
@@ -266,6 +266,9 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
+
+export let SQL: SqlJsStatic;
+
 
 // The singleton Git extension exposed API
 export let gitAPI: GitAPI.API;
@@ -745,63 +748,72 @@ export function checkUnchangedIvars(
     }
     return ok;
 }
-//@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
-/**
- * Pretty print any array / python list to string
- */
-export function listToString(obj: any): string {
-    // return JSON.stringify(obj, undefined, 4);
-    let result: string = '';
-
-    result = obj.toString(); // TODO : TEST THIS!
-    // result = safeJsonStringify(obj, null, 2);// TODO : TEST THIS!
-
-    // let cache: any[] = [];
-    // result = JSON.stringify(obj, function (key, value) {
-    //     if (typeof value === 'object' && value !== null) {
-    //         if (cache!.indexOf(value) !== -1) {
-    //             // Circular reference found, discard key
-    //             return;
-    //         }
-    //         // Store value in our collection
-    //         cache!.push(value);
-    //     }
-    //     return value;
-    // });
-    // (cache as any) = null; // Enable garbage collection
-
-    return result;
-}
-
 //@+node:felix.20211104221420.1: *3* g.objToSTring     (coreGlobals.py)
 /**
  * Pretty print any object to a string.
  */
 export function objToString(obj: any, tag?: string): string {
-    let result: string = '';
-    if (tag) {
-        result = result + `${tag}...` + '\n';
-    }
-    result = result + safeJsonStringify(obj, null, 2);
 
-    return result;
+    if (typeof obj === 'object' && obj !== null) {
+        if (Array.isArray(obj)) {
+            if (obj.length > 0) {
+                const resultArray = obj.map((item, index) => `  ${index.toString().padStart(4)}: ${item.toString()}\n`);
+                const openingBracket = Array.isArray(obj) ? '[' : '(';
+                const closingBracket = Array.isArray(obj) ? ']\n' : ')\n';
+                const result = `${openingBracket}\n${resultArray.join('')}${closingBracket}`;
+                return tag ? `${tag}: ${result}` : result;
+            } else {
+                return Array.isArray(obj) ? '[]' : '()';
+            }
+        } else {
+            const keys = Object.keys(obj);
+            if (keys.length > 0) {
+                const maxKeyLength = Math.max(...keys.map(key => key.length));
+                const resultArray = keys.sort().map(key => {
+                    const pad = ' '.repeat(Math.max(0, maxKeyLength - key.length));
+                    return `  ${pad}${key}: ${obj[key].toString()}\n`;
+                });
+                const result = `{\n${resultArray.join('')}}`;
+                return tag ? `${tag}: ${result}` : result;
+            } else {
+                return '{}';
+            }
+        }
+    } else if (typeof obj === 'string') {
+        if (!obj.includes('\n')) {
+            return JSON.stringify(obj);
+        } else {
+            const lines = obj.split('\n');
+            const resultArray = lines.map((line, index) => `  ${index.toString().padStart(4)}: ${JSON.stringify(line)}\n`);
+            const result = `[\n${resultArray.join('')}]\n`;
+            return tag ? `${tag}: ${result}` : result;
+        }
+    } else {
+        return JSON.stringify(obj);
+    }
 
     /*
     if isinstance(obj, dict):
-        result_list = ['{\n']
-        pad = max([len(key) for key in obj])
-        for key in sorted(obj):
-            pad_s = ' ' * max(0, pad - len(key))
-            result_list.append(f"  {pad_s}{key}: {obj.get(key)}\n")
-        result_list.append('}')
-        result = ''.join(result_list)
+        if obj:
+            result_list = ['{\n']
+            pad = max([len(key) for key in obj])
+            for key in sorted(obj):
+                pad_s = ' ' * max(0, pad - len(key))
+                result_list.append(f"  {pad_s}{key}: {obj.get(key)}\n")
+            result_list.append('}')
+            result = ''.join(result_list)
+        else:
+            result = '{}'
     elif isinstance(obj, (list, tuple)):
-        # Return the enumerated lines of the list.
-        result_list = ['[\n' if isinstance(obj, list) else '(\n']
-        for i, z in enumerate(obj):
-            result_list.append(f"  {i:4}: {z!r}\n")
-        result_list.append(']\n' if isinstance(obj, list) else ')\n')
-        result = ''.join(result_list)
+        if obj:
+            # Return the enumerated lines of the list.
+            result_list = ['[\n' if isinstance(obj, list) else '(\n']
+            for i, z in enumerate(obj):
+                result_list.append(f"  {i:4}: {z!r}\n")
+            result_list.append(']\n' if isinstance(obj, list) else ')\n')
+            result = ''.join(result_list)
+        else:
+            result = '[]' if isinstance(obj, list) else '()'
     elif not isinstance(obj, str):
         result = pprint.pformat(obj, indent=indent, width=width)
         # Put opening/closing delims on separate lines.
@@ -819,6 +831,8 @@ export function objToString(obj: any, tag?: string): string {
     */
 
 }
+
+export const listToString = objToString;
 
 //@+node:felix.20211104221444.1: *3* g.printObj        (coreGlobals.py)
 /**
@@ -2143,13 +2157,15 @@ export async function write_file_if_changed(
  * @returns An URI for file access compatible with web extensions filesystems
  */
 export function makeVscodeUri(p_fn: string): vscode.Uri {
+
     if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+        p_fn = p_fn.replace(/\\/g, "/");
         try {
             const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
             return newUri;
         } catch (e) {
             console.log(
-                "ERROR: tried to build a vscode.URI from a browser scheme's URI 'with' method"
+                "OOPS! LEOJS Tried to build a vscode.URI from a browser scheme's URI 'with' method. Error: ", e
             );
             throw new Error(
                 'g.makeVscodeUri cannot make an URI with the string: ' + p_fn
@@ -2355,7 +2371,7 @@ export function is_special(s: string, directive: string): [boolean, number] {
 
 //@+node:felix.20211104220753.1: *4* g.is_nl
 export function is_nl(s: string, i: number): boolean {
-    return i < s.length && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
+    return i < s.length && (s[i] === '\n' || s[i] === '\r');
 }
 
 //@+node:felix.20220411230914.1: *4* g.isAlpha
@@ -2409,18 +2425,30 @@ export function match(s: string, i: number, pattern: string): boolean {
 
 //@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
 export function match_word(s: string, i: number, pattern: string): boolean {
+
     // Using a regex is surprisingly tricky.
-    if (!pattern) {
+    if (pattern == null) {
         return false;
     }
-    if (i > 0 && isWordChar(s.charAt(i - 1))) {
-        //  Bug fix: 2017/06/01.
-        return false;
-    }
+
+    // if (i > 0 && isWordChar(s.charAt(i - 1))) {
+    //     //  Bug fix: 2017/06/01.
+    //     return false;
+    // }
+
     const j = pattern.length;
     if (j === 0) {
         return false;
     }
+
+    // Special case: \t or \n delimit words!
+    if (i > 2 && s[i - 2] === '\\' && ['t', 'n'].includes(s[i - 1])) {
+        return true;
+    }
+    if (i > 0 && isWordChar(s[i - 1])) {
+        return false;
+    }
+
     let found = s.indexOf(pattern, i);
 
     if (found < i || found >= i + j) {
@@ -2655,8 +2683,8 @@ export function skip_ws(s: string, i: number): number {
 
 export function skip_ws_and_nl(s: string, i: number): number {
     const n: number = s.length;
-    while (i < n && ' \t\n\r'.indexOf(s.charAt(i))) {
-        i += 1;
+    while (i < n && (is_ws(s[i]) || is_nl(s, i))) {
+        i++;
     }
     return i;
 }
@@ -2717,7 +2745,7 @@ export async function execGitCommand(
 
     if (isBrowser) {
         console.log('LEOJS: GIT COMMAND CALLED FROM BROWSER');
-        void vscode.window.showInformationMessage('LeoJS Git Commands not available in "web" version');
+        void vscode.window.showInformationMessage('LeoJS Git Commands are not yet available in "web" version');
         return [];
     }
 
@@ -3237,10 +3265,10 @@ export function getLine(s: string, i: number): [number, number] {
  * index may be a Tk index(x.y) or 'end'.
  */
 export function toPythonIndex(s: string, index?: number | string): number {
-    if (index === undefined) {
+    if (index == null) {
         return 0;
     }
-    if (!isNaN(index as any)) {
+    if (typeof index === 'number' && Number.isInteger(index)) {
         return index as number;
     }
     if (index === '1.0') {
@@ -3727,15 +3755,14 @@ def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> Li
     return result
  */
 //@+node:felix.20220410213527.8: *4* g.get_leading_ws
-/*
-def get_leading_ws(s: str) -> str:
-    """Returns the leading whitespace of 's'."""
-    i = 0
-    n = len(s)
-    while i < n and s[i] in (' ', '\t'):
-        i += 1
-    return s[0:i]
- */
+export function get_leading_ws(s: string): string {
+    let i = 0;
+    const n = s.length;
+    while (i < n && (s[i] === ' ' || s[i] === '\t')) {
+        i++;
+    }
+    return s.substring(0, i);
+}
 //@+node:felix.20220410213527.9: *4* g.optimizeLeadingWhitespace
 
 /**
@@ -4235,11 +4262,22 @@ export function translate(
     return translatedText;
 }
 //@+node:felix.20230530001033.1: *3* g.compareArrays
-export function compareArrays(arr1: any[], arr2: any[]): boolean {
+export function compareArrays(arr1: any[], arr2: any[], trace = false): boolean {
     if (arr1.length !== arr2.length) {
+        if (trace) {
+            console.log('compare arrays failed: not equal elements', arr1.length, arr2.length);
+            console.log('arr1', arr1);
+            console.log('arr2', arr2);
+        }
         return false;
     }
-    return arr1.every((value, index) => value === arr2[index]);
+    return arr1.every((value, index) => {
+        const result = value === arr2[index];
+        if (trace && !result) {
+            console.log('compare arrays failed:', value, arr2[index]);
+        }
+        return result;
+    });
 }
 //@+node:felix.20230530135543.1: *3* g.comparePositionArray
 export function comparePositionArray(

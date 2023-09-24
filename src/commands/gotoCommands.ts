@@ -597,19 +597,6 @@ export class GoToCommands {
         if (root.isAnyAtFileNode()) {
             return c.atFileCommands.atFileToString(root, true);
         }
-        // let s: string;
-        // if (root.isAtAutoNode()) {
-        //     // Special case @auto nodes:
-        //     // Leo does not write sentinels in the root @auto node.
-        //     try {
-        //         g.app.force_at_auto_sentinels = true;
-        //         s = await c.atFileCommands.atAutoToString(root);
-        //     } finally {
-        //         g.app.force_at_auto_sentinels = true;
-        //     }
-        //     return s;
-        // }
-
         return g.composeScript(
             // Fix #429.
             c,
@@ -724,6 +711,7 @@ export class GoToCommands {
         // n0 is the 1-based line number of the first line of p.b.
         const n0 = await this.gotoCommands.find_node_start(c.p); // 1-based.
         if (!n0) {
+            g.es_print('Line not found');
             return;
         }
         // This does not work after @others or section references.
@@ -731,7 +719,7 @@ export class GoToCommands {
         const s = w.getAllText();
         const [row, col] = g.convertPythonIndexToRowCol(s, i); // 0-based
         // g.trace('n0', n0, 'row', row);
-        g.es_print(1 + n0 + row);
+        g.es_print('line', n0 + row);
     }
 
     //@-others
