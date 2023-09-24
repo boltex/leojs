@@ -551,6 +551,9 @@
 <v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
 <v t="felix.20221119204422.1"><vh>@file src/core/leoGui.ts</vh></v>
 </v>
+<v t="felix.20230924005520.1"><vh>Scripting</vh>
+<v t="felix.20230924005539.1"><vh>@file src/scripting/mod_scripting.ts</vh></v>
+</v>
 <v t="felix.20230505220205.1"><vh>Importer plugins</vh>
 <v t="felix.20230522010520.1"><vh>@file src/importers/base_importer.ts</vh></v>
 <v t="felix.20230911193725.1"><vh>@file src/importers/c.ts</vh></v>
@@ -14426,5 +14429,6 @@ Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the
 
 
 </t>
+<t tx="felix.20230924005520.1"></t>
 </tnodes>
 </leo_file>
