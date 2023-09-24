@@ -145,7 +145,8 @@ export class Commands {
     public command_name: string = '';
     public recent_commands_list: string[] = [];
 
-    public sqlite_connection: Database | undefined = undefined;
+    // * USED AS STRING IN LEOJS - ONLY USED AS A FLAG ANYWAYS IN LEO.
+    public sqlite_connection: string | undefined = undefined;
 
     //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.

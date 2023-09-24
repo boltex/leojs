@@ -3471,6 +3471,528 @@ export class PreviousSettings {
         );
     };
 }
+//@+node:felix.20230923185723.1: ** class RecentFilesManager
+/** 
+ * A class to manipulate leoRecentFiles.txt.
+ */
+export class RecentFilesManager {
+
+    public edit_headline = 'Recent files. Do not change this headline!';
+    public groupedMenus: any[] = [];  // Set in rf.createRecentFilesMenuItems.
+    public recentFiles: any[] = []; // List of g.Bunches describing .leoRecentFiles.txt files.
+    public recentFilesMenuName = 'Recent Files';  // May be changed later.
+    public recentFileMessageWritten = false;  // To suppress all but the first message.
+    public write_recent_files_as_needed = false;  // Will be set later.
+
+    //@+others
+    //@+node:felix.20230923185723.2: *3* rf.appendToRecentFiles
+    public appendToRecentFiles(files: string[]): void {
+        const rf = this;
+        files = files.map((theFile: string) => theFile.trim());
+
+        function munge(name: string): string {
+            return g.os_path_normpath(name || '').toLowerCase();
+        }
+
+        for (const name of files) {
+            // Remove all variants of name.
+            for (const name2 of [...rf.recentFiles]) {
+                if (munge(name) === munge(name2)) {
+                    rf.recentFiles.splice(rf.recentFiles.indexOf(name2), 1);
+                }
+            }
+            rf.recentFiles.push(name);
+        }
+
+    }
+    //@+node:felix.20230923185723.3: *3* rf.cleanRecentFiles
+    /**
+     * Remove items from the recent files list that no longer exist.
+     *
+     * This almost never does anything because Leo's startup logic removes
+     * nonexistent files from the recent files list.
+     */
+    public async cleanRecentFiles(c: Commands): Promise<void> {
+
+        // Filtering recent files to remove nonexistent ones...w
+        const result = await Promise.all(
+            this.recentFiles.map(async (z: string) => {
+                if (await g.os_path_exists(z)) {
+                    return z;
+                }
+                return null;
+            })
+        );
+
+        // Checking if the result differs from the original recent files...
+        if (result.some((path) => path == null)) {
+            for (const w_path of result) {
+                if (w_path !== null) {
+                    this.updateRecentFiles(w_path);
+                }
+            }
+            await this.writeRecentFilesFile(c);
+        }
+
+    }
+    //@+node:felix.20230923185723.4: *3* rf.demangleRecentFiles
+    /**
+     * Rewrite recent files based on c.config.getData('path-demangle')
+     */
+    public async demangleRecentFiles(c: Commands, data: string[]): Promise<void> {
+
+        const changes: [string, string][] = [];
+        let replace: string | null = null;
+
+        for (const line of data) {
+            const text: string = line.trim();
+
+            if (text.startsWith('REPLACE: ')) {
+                const firstSpaceIndex = text.indexOf(' ');
+                const secondPart = firstSpaceIndex !== -1 ? text.slice(firstSpaceIndex + 1) : '';
+                replace = secondPart.trim();
+            }
+
+            if (text.startsWith('WITH:') && replace !== null) {
+                const with_ = text.substr(5).trim();
+                changes.push([replace, with_]);
+                g.es(`${replace} -> ${with_}`);
+            }
+        }
+
+        const orig: string[] = this.recentFiles.filter((z: string) => z.startsWith('/'));
+        this.recentFiles = [];
+
+        for (const i of orig) {
+            let t: string = i;
+
+            for (const change of changes) {
+                t = t.split(change[0]).join(change[1]);
+            }
+
+            this.updateRecentFiles(t);
+        }
+
+        await this.writeRecentFilesFile(c);
+    }
+    //@+node:felix.20230923185723.5: *3* rf.clearRecentFiles
+    /**
+     * Clear the recent files list, then add the present file.
+     */
+    public async clearRecentFiles(c: Commands): Promise<void> {
+
+        let rf: this = this;
+        // let menu: Menu = c.frame.menu;
+        // let u: Undoer = c.undoer;
+        // let bunch: any = u.beforeClearRecentFiles();
+        // let recentFilesMenu: Menu = menu.getMenu(this.recentFilesMenuName);
+
+        /* Clear the recent files menu items... */
+        // menu.deleteRecentFilesMenuItems(recentFilesMenu);
+
+        /* Add the present file to recent files... */
+        rf.recentFiles = [c.fileName()];
+
+        /* Create recent files menu items for all open windows... */
+        // for (const frame of g.app.windowList) {
+        //     rf.createRecentFilesMenuItems(frame.c);
+        // }
+
+        /* Finalize clearing recent files... */
+        // u.afterClearRecentFiles(bunch);
+
+        /* Write the file immediately... */
+        await rf.writeRecentFilesFile(c);
+
+        /* Clearing recent files completed. Terminating protocol... */
+        /* Recent files purged. Commencing data write... */
+    }
+    //@+node:felix.20230923185723.6: *3* rf.createRecentFilesMenuItems
+    public createRecentFilesMenuItems(c: Commands): void {
+        // rf = self
+        // menu = c.frame.menu
+        // recentFilesMenu = menu.getMenu(self.recentFilesMenuName)
+        // if not recentFilesMenu:
+        //     return
+        // # Delete all previous entries.
+        // menu.deleteRecentFilesMenuItems(recentFilesMenu)
+        // # Create the permanent (static) menu entries.
+        // table = rf.getRecentFilesTable()
+        // menu.createMenuEntries(recentFilesMenu, table)
+        // # Create all the other entries (a maximum of 36).
+        // accel_ch = string.digits + string.ascii_uppercase  # Not a unicode problem.
+        // i = 0
+        // n = len(accel_ch)
+        // # see if we're grouping when files occur in more than one place
+        // rf_group = c.config.getBool("recent-files-group")
+        // rf_always = c.config.getBool("recent-files-group-always")
+        // groupedEntries = rf_group or rf_always
+        // if groupedEntries:  # if so, make dict of groups
+        //     dirCount: dict[str, Any] = {}
+        //     for fileName in rf.getRecentFiles()[:n]:
+        //         dirName, baseName = g.os_path_split(fileName)
+        //         if baseName not in dirCount:
+        //             dirCount[baseName] = {'dirs': [], 'entry': None}
+        //         dirCount[baseName]['dirs'].append(dirName)
+        // for name in rf.getRecentFiles()[:n]:
+        //     # pylint: disable=cell-var-from-loop
+        //     if name.strip() == "":
+        //         continue  # happens with empty list/new file
+
+        //     def recentFilesCallback(event: Event = None, c: Cmdr = c, name: str = name) -> None:
+        //         c.openRecentFile(fn=name)
+
+        //     if groupedEntries:
+        //         dirName, baseName = g.os_path_split(name)
+        //         entry = dirCount[baseName]
+        //         if len(entry['dirs']) > 1 or rf_always:  # sub menus
+        //             if entry['entry'] is None:
+        //                 entry['entry'] = menu.createNewMenu(baseName, "Recent Files...")
+        //                 # acts as a flag for the need to create the menu
+        //             c.add_command(menu.getMenu(baseName), label=dirName,
+        //                 command=recentFilesCallback, underline=0)
+        //         else:  # single occurrence, no submenu
+        //             c.add_command(recentFilesMenu, label=baseName,
+        //                 command=recentFilesCallback, underline=0)
+        //     else:  # original behavior
+        //         label = f"{accel_ch[i]} {g.computeWindowTitle(name)}"
+        //         c.add_command(recentFilesMenu, label=label,
+        //             command=recentFilesCallback, underline=0)
+        //     i += 1
+        // if groupedEntries:  # store so we can delete them later
+        //     rf.groupedMenus = [z for z in dirCount
+        //         if dirCount[z]['entry'] is not None]
+    }
+    //@+node:felix.20230923185723.7: *3* rf.editRecentFiles
+    public editRecentFiles(c: Commands): void {
+        let rf: this = this;
+        let p1: any = c.lastTopLevel().insertAfter();
+        p1.h = this.edit_headline;
+        p1.b = rf.recentFiles.join('\n');
+
+        c.redraw();
+
+        c.selectPosition(p1);
+
+        c.redraw();
+
+        c.bodyWantsFocusNow();
+
+        g.es('edit list and run write-edited-recent-files to save recentFiles');
+    }
+    //@+node:felix.20230923185723.8: *3* rf.getRecentFiles
+    async getRecentFiles(): Promise<string[]> {
+        /* Initializing protocol for retrieving recent files... */
+        const validFiles: string[] = [];
+
+        for (const z of this.recentFiles) {
+            if (await g.os_path_exists(z)) {
+                validFiles.push(z);
+            }
+        }
+
+        this.recentFiles = validFiles;
+        return this.recentFiles;
+
+    }
+    //@+node:felix.20230923185723.9: *3* rf.getRecentFilesTable
+    public getRecentFilesTable(): any {
+        return [
+            "*clear-recent-files",
+            "*clean-recent-files",
+            "*demangle-recent-files",
+            "*sort-recent-files",
+            ["-", undefined, undefined],
+        ];
+    }
+    //@+node:felix.20230923185723.10: *3* rf.readRecentFiles & helpers
+    /**
+     * Read all .leoRecentFiles.txt files.
+     */
+    public async readRecentFiles(localConfigFile: string): Promise<void> {
+        // Read all .leoRecentFiles.txt files.
+        // The order of files in this list affects the order of the recent files list.
+        const rf = this;
+        const seen: string[] = [];
+        const localConfigPath: string = g.os_path_dirname(localConfigFile);
+        for (const w_path of [g.app.homeLeoDir, g.app.globalConfigDir, localConfigPath]) {
+            let realPath = w_path;
+            if (w_path) {
+                realPath = g.os_path_realpath(g.finalize(w_path));
+            }
+            if (realPath && !seen.includes(realPath)) {
+                const ok = await rf.readRecentFilesFile(realPath);
+                if (ok) {
+                    seen.push(realPath);
+                }
+            }
+        }
+        if (seen.length === 0 && rf.write_recent_files_as_needed) {
+            await rf.createRecentFiles();
+        }
+    }
+    //@+node:felix.20230923185723.11: *4* rf.createRecentFiles
+    /**
+     * Try to create .leoRecentFiles.txt, in the users home directory,
+     * or in Leo's config directory if that fails.
+     */
+    public async createRecentFiles(): Promise<void> {
+
+        for (const theDir of [g.app.homeLeoDir, g.app.globalConfigDir]) {
+            if (theDir) {
+                const fn = g.os_path_join(theDir, '.leoRecentFiles.txt');
+                try {
+                    const w_uri = g.makeVscodeUri(fn);
+                    const writeData = Buffer.from('', 'utf8');
+                    await vscode.workspace.fs.writeFile(w_uri, writeData);
+                    g.es('created', fn);
+                    return;
+                } catch (err) {
+                    g.error('can not create', fn);
+                    g.es_exception(err);
+                }
+            }
+        }
+    }
+    //@+node:felix.20230923185723.12: *4* rf.readRecentFilesFile
+    public async readRecentFilesFile(path: string): Promise<boolean> {
+        const fileName = g.os_path_join(path, '.leoRecentFiles.txt');
+        const exists = await g.os_path_exists(fileName);
+        if (!exists) {
+            return false;
+        }
+        let lines: string[] | undefined;
+
+        try {
+            const fileContents = await g.readFileIntoUnicodeString(fileName);
+
+            try {
+                lines = fileContents?.split('\n');
+            } catch (err) {
+                lines = undefined;
+            }
+        } catch (err) {
+            g.trace('can not open', fileName);
+            return false;
+        }
+        if (lines && this.sanitize(lines[0]) === 'readonly') {
+            lines = lines.slice(1);
+        }
+        if (lines) {
+            lines = lines.map(line => g.toUnicode(g.os_path_normpath(line)));
+            this.appendToRecentFiles(lines);
+        }
+        return true;
+    }
+    //@+node:felix.20230923185723.13: *3* rf.sanitize
+    /**
+     * Return a sanitized file name.
+     */
+    public sanitize(p_name?: string): string | undefined {
+        if (p_name == null) {
+            return undefined;
+        }
+        p_name = p_name.toLowerCase();
+        for (const ch of ['-', '_', ' ', '\n']) {
+            const regex = new RegExp(ch, 'g');
+            p_name = p_name.replace(regex, '');
+        }
+        return p_name || undefined;
+    }
+    //@+node:felix.20230923185723.14: *3* rf.setRecentFiles
+    /**
+     * Update the recent files list.
+     */
+    public setRecentFiles(files: string[]): void {
+        const rf = this;
+        rf.appendToRecentFiles(files);
+    }
+    //@+node:felix.20230923185723.15: *3* rf.sortRecentFiles
+    /**
+     * Sort the recent files list.
+     */
+    public async sortRecentFiles(c: Commands): Promise<void> {
+
+        const rf = this;
+
+        const key = (path: string): string => {
+            // Sort only the base name. That's what will appear in the menu.
+            const s = g.os_path_basename(path);
+            return g.isWindows ? s.toLowerCase() : s;
+        };
+
+        const aList = rf.recentFiles.sort((a, b) => key(a).localeCompare(key(b)));
+        rf.recentFiles = [];
+        for (const z of aList.reverse()) {
+            rf.updateRecentFiles(z);
+        }
+        await rf.writeRecentFilesFile(c);
+    }
+    //@+node:felix.20230923185723.16: *3* rf.updateRecentFiles
+    /**
+     * Create the RecentFiles menu. May be called with Null fileName.
+     */
+    public updateRecentFiles(fileName?: string): void {
+
+        const rf = this;
+        if (g.unitTesting) {
+            return;
+        }
+
+        const munge = (name: string | null): string => {
+            return g.finalize(name || '').toLowerCase();
+        };
+
+        const munge2 = (name: string | null): string => {
+            return g.finalize_join(g.app.loadDir!, name || '');
+        };
+
+        // Update the recent files list in all windows.
+        if (fileName) {
+            for (const frame of g.app.windowList) {
+                // Remove all versions of the file name.
+                for (const name of rf.recentFiles) {
+                    if (
+                        munge(fileName) === munge(name) ||
+                        munge2(fileName) === munge2(name)
+                    ) {
+                        const index = rf.recentFiles.indexOf(name);
+                        if (index > -1) {
+                            rf.recentFiles.splice(index, 1);
+                        }
+                    }
+                }
+                rf.recentFiles.unshift(fileName);
+                // Recreate the Recent Files menu.
+                rf.createRecentFilesMenuItems(frame.c);
+            }
+        } else {
+            for (const frame of g.app.windowList) {
+                rf.createRecentFilesMenuItems(frame.c);
+            }
+        }
+    }
+    //@+node:felix.20230923185723.17: *3* rf.writeEditedRecentFiles
+    /**
+     * Write content of "edit_headline" node as recentFiles and recreates menus.
+     */
+    async writeEditedRecentFiles(c: Commands): Promise<void> {
+        const rf = this;
+        let p = g.findNodeAnywhere(c, rf.edit_headline);
+
+        if (p && p.__bool__()) {
+            const files: string[] = [];
+            for (const z of p.b.split(/\r?\n/)) {
+                if (z && await g.os_path_exists(z)) {
+                    files.push(z);
+                }
+            }
+            rf.recentFiles = files;
+            await rf.writeRecentFilesFile(c);
+            rf.updateRecentFiles();
+            c.selectPosition(p);
+            c.deleteOutline();
+        } else {
+            g.red('not found:', rf.edit_headline);
+        }
+    }
+    //@+node:felix.20230923185723.18: *3* rf.writeRecentFilesFile & helper
+    /**
+     * Write the appropriate .leoRecentFiles.txt file.
+     */
+    public async writeRecentFilesFile(c: Commands): Promise<void> {
+
+        const tag = '.leoRecentFiles.txt';
+        const rf = this;
+        if (g.unitTesting || g.app.inBridge) {
+            return;
+        }
+
+        const localFileName = c.fileName();
+        let localPath: string | null = null;
+        if (localFileName) {
+            localPath = g.os_path_split(localFileName)[0];
+        }
+        let written = false;
+        const seen: string[] = [];
+
+        for (const w_path of [localPath, g.app.globalConfigDir, g.app.homeLeoDir]) {
+            if (w_path) {
+                const fileName = g.os_path_join(w_path, tag);
+                if (await g.os_path_exists(fileName) && !seen.includes(fileName.toLowerCase())) {
+                    seen.push(fileName.toLowerCase());
+                    const ok = await rf.writeRecentFilesFileHelper(fileName);
+                    if (ok) {
+                        written = true;
+                    }
+                    if (!rf.recentFileMessageWritten && !g.unitTesting && !g.app.silentMode) {
+                        if (ok) {
+                            g.es_print(`wrote recent file: ${fileName}`);
+                        } else {
+                            g.error(`failed to write recent file: ${fileName}`);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (written) {
+            rf.recentFileMessageWritten = true;
+        } else {
+            if (g.app.homeLeoDir) {
+                const fileName = g.finalize_join(g.app.homeLeoDir, tag);
+                if (!(await g.os_path_exists(fileName))) {
+                    g.red(`creating: ${fileName}`);
+                }
+                await rf.writeRecentFilesFileHelper(fileName);
+            }
+        }
+    }
+    //@+node:felix.20230923185723.19: *4* rf.writeRecentFilesFileHelper
+    /**
+     * Don't update the file if it begins with read-only.
+     */
+    async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
+
+        let lines: string[] | undefined = undefined;
+
+        // Part 1: Return False if the first line is "readonly".
+        if (await g.os_path_exists(fileName)) {
+            try {
+
+                const data = await g.readFileIntoUnicodeString(fileName);
+                lines = data?.split('\n');
+
+            } catch (error) {
+                lines = undefined;
+            }
+
+            if (lines && this.sanitize(lines[0]) === 'readonly') {
+                return false;
+            }
+        }
+
+        // Part 2: write the files.
+        try {
+            const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
+
+            await g.writeFile(fileName, 'utf-8', g.toUnicode(s),);
+
+            return true;
+        } catch (error) {
+            if (error) {
+                g.error('error writing', fileName);
+                g.es_exception(error);
+                if (g.unitTesting) {
+                    throw error;
+                }
+            }
+            return false;
+        }
+    }
+    //@-others
+
+}
 //@-others
 //@@language typescript
 //@@tabwidth -4

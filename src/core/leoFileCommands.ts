@@ -1691,12 +1691,7 @@ export class FileCommands {
         const w_uri = g.makeVscodeUri(fileName);
         const filebuffer = await vscode.workspace.fs.readFile(w_uri);
 
-        // HACK for leojs to treat db as regular file.
-        if (c.sqlite_connection) {
-            c.sqlite_connection.close();
-        }
         const conn = new g.SQL.Database(filebuffer);
-        c.sqlite_connection = conn; // ! TEST THIS !
 
         try {
             const resultElements = conn.exec(sql)[0];
@@ -1784,7 +1779,7 @@ export class FileCommands {
         // (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
         // c.frame.setTopGeometry(w, h, x, y)
         // c.frame.resizePanesToRatio(r1, r2)
-        c.sqlite_connection = conn;
+        c.sqlite_connection = c.mFileName; // * LEOJS use string as a flag instead of conn.
         await fc.exportToSqlite(c.mFileName);
         return Promise.resolve(v);
     }
@@ -2095,7 +2090,7 @@ export class FileCommands {
             ok = await c.checkFileTimeStamp(fileName);
             if (ok) {
                 if (c.sqlite_connection) {
-                    c.sqlite_connection.close();
+                    // c.sqlite_connection.close();
                     c.sqlite_connection = undefined;
                 }
                 ok = await this.write_Leo_file(fileName);
@@ -2126,7 +2121,7 @@ export class FileCommands {
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
             if (c.sqlite_connection) {
-                c.sqlite_connection.close();
+                // c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
             }
             await this.setDefaultDirectoryForNewFiles(fileName);
@@ -2164,8 +2159,8 @@ export class FileCommands {
 
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
-            if (c.sqlite_connection && c.sqlite_connection.close) {
-                c.sqlite_connection.close();
+            if (c.sqlite_connection) {
+                // c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
             }
             await this.setDefaultDirectoryForNewFiles(fileName);
@@ -2200,13 +2195,9 @@ export class FileCommands {
         const fc: FileCommands = this;
 
         if (c.sqlite_connection === undefined) {
-
-            c.sqlite_connection = new g.SQL.Database();
-
+            c.sqlite_connection = fileName; // * LEOJS: use string instead as flag instead of conn.
         }
-
-        const conn = c.sqlite_connection;
-
+        const conn = new g.SQL.Database();
 
         const dump_u = (v: VNode) => {
             let s = '';
@@ -2269,7 +2260,7 @@ export class FileCommands {
 
             const db_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(db_uri, db_buffer);
-
+            c.sqlite_connection = undefined;
             ok = true;
         } catch (e) {
             g.internalError(e);
