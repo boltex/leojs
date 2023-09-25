@@ -3084,6 +3084,12 @@ export class LoadManager {
             new_c: c,
             fileName: undefined,
         });
+
+        // ! mod_scripting ORIGINALLY INIT ON open2 HOOK IN LEO !
+        c.theScriptingController = new ScriptingControllerClass(c);
+        c.theScriptingController.createAllButtons();
+        c.evalController = new EvalController(c);
+
         g.doHook('new', { old_c: old_c, c: c, new_c: c });
 
         lm.finishOpen(c);
@@ -3153,6 +3159,11 @@ export class LoadManager {
         }
 
         g.doHook('open2', { old_c: undefined, c: c, new_c: c, fileName: fn });
+
+        // ! mod_scripting ORIGINALLY INIT ON open2 HOOK IN LEO !
+        c.theScriptingController = new ScriptingControllerClass(c);
+        c.theScriptingController.createAllButtons();
+        c.evalController = new EvalController(c);
 
         // Phase 3: Complete the initialization.
         // g.app.writeWaitingLog(c)

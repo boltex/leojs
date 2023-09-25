@@ -37,6 +37,7 @@ import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
+import { ScriptingControllerClass, EvalController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 const dayjs = require('dayjs');
@@ -92,6 +93,7 @@ export class Commands {
     public importCommands: LeoImportCommands;
     public persistenceController: PersistenceDataController;
 
+    // 
     public theTagController: TagController;
     public quicksearchController: QuickSearchController;
 
@@ -229,7 +231,8 @@ export class Commands {
     public convertCommands: any = undefined;
     public debugCommands: any = undefined;
     public editFileCommands: EditFileCommandsClass;
-    public evalController: any = undefined;
+    public evalController!: EvalController; // Set in leoApp at 'open2' event.
+    public theScriptingController!: ScriptingControllerClass; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
     public rstCommands: RstCommands;
     public helpCommands: any = undefined;

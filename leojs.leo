@@ -514,7 +514,7 @@
 </v>
 <v t="felix.20210102000100.1"><vh>Core classes</vh>
 <v t="felix.20211018202009.1"><vh>@file src/core/decorators.ts</vh></v>
-<v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>
+<v t="felix.20230509194418.1"><vh>@file src/core/idle_time.ts</vh></v>
 <v t="felix.20210102012334.1"><vh>@file src/core/leoApp.ts</vh></v>
 <v t="felix.20211211234842.1"><vh>@file src/core/leoAtFile.ts</vh></v>
 <v t="felix.20230802145823.1"><vh>@file src/core/leoCache.ts</vh></v>
@@ -532,9 +532,9 @@
 <v t="felix.20230427003032.1"><vh>@file src/core/leoRst.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
+<v t="felix.20230924174338.1"><vh>@file src/core/mod_scripting.ts</vh></v>
 <v t="felix.20221019001448.1"><vh>@file src/core/nodeTags.ts</vh></v>
 <v t="felix.20221105221426.1"><vh>@file src/core/quicksearch.ts</vh></v>
-<v t="felix.20230509194418.1"><vh>@file src/core/idle_time.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
 <v t="felix.20221220233857.1"><vh>@file src/commands/baseCommands.ts</vh></v>
@@ -547,12 +547,10 @@
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
 </v>
 <v t="felix.20221119204248.1"><vh>Gui base classes</vh>
+<v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>
 <v t="felix.20211212000140.1"><vh>@file src/core/leoFind.ts</vh></v>
 <v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
 <v t="felix.20221119204422.1"><vh>@file src/core/leoGui.ts</vh></v>
-</v>
-<v t="felix.20230924005520.1"><vh>Scripting</vh>
-<v t="felix.20230924005539.1"><vh>@file src/scripting/mod_scripting.ts</vh></v>
 </v>
 <v t="felix.20230505220205.1"><vh>Importer plugins</vh>
 <v t="felix.20230522010520.1"><vh>@file src/importers/base_importer.ts</vh></v>
@@ -14429,6 +14427,5 @@ Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the
 
 
 </t>
-<t tx="felix.20230924005520.1"></t>
 </tnodes>
 </leo_file>

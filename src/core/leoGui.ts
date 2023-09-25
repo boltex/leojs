@@ -45,8 +45,8 @@ export class LeoGui {
 
     public splashScreen: any;
     public utils: any;
-    //  To keep pylint happy.
-    public ScriptingControllerClass: any;
+
+    // public ScriptingControllerClass: any; // ? UNEEDED IN LEOJS ?
     //
     //  Define special keys that may be overridden is subclasses.
     public ignoreChars: string[]; //  Keys that should always be ignored.
@@ -76,8 +76,8 @@ export class LeoGui {
 
         this.splashScreen = undefined;
         this.utils = undefined;
-        //  To keep pylint happy.
-        this.ScriptingControllerClass = NullScriptingControllerClass;
+
+        // this.ScriptingControllerClass = NullScriptingControllerClass; // ? UNEEDED IN LEOJS ?
         //
         //  Define special keys that may be overridden is subclasses.
         this.ignoreChars = []; //  Keys that should always be ignored.
@@ -315,7 +315,7 @@ export class LeoGui {
         // Adds a message string to LeoJS log pane. See LeoUi.ts
     }
     //@+node:felix.20230902142624.1: *4* LeoGui.focusLogPane (LeoJs)
-    public showLogPane(p_focus ?:boolean): void {
+    public showLogPane(p_focus?: boolean): void {
         // Shows and optionally puts focus on the log pane
     }
     //@+node:felix.20221120210000.1: *4* LeoGui.finishStartup (LeoJs)
