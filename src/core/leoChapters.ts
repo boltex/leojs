@@ -66,8 +66,7 @@ export class ChapterController {
         if (cc.use_tabs) {
             if (
                 c.frame &&
-                c.frame.iconBar &&
-                c.frame.iconBar.createChaptersIcon
+                c.frame.iconBar
             ) {
                 if (!cc.tt) {
                     console.log(

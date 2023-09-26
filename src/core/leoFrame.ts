@@ -11,7 +11,7 @@ import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
 import { Chapter } from './leoChapters';
 import { StringFindTabManager } from './findTabManager';
-import { build_rclick_tree } from './mod_scripting';
+import { RClick, ScriptingController, build_rclick_tree } from './mod_scripting';
 
 //@-<< imports >>
 //@+others
@@ -21,7 +21,7 @@ export class LeoFrame {
     public title: string;
     public gui: LeoGui;
     public openDirectory: string;
-    public iconBar: any;
+    public iconBar: NullIconBarClass;
     public initComplete = false;
     public isNullFrame = false;
 
@@ -423,11 +423,12 @@ export class NullBody {
 }
 
 //@+node:felix.20230925224847.1: ** class nullButtonWidget
-class nullButtonWidget {
-    c: Commands;
-    command: any;
-    name: string;
-    text: string;
+export class nullButtonWidget {
+    public c: Commands;
+    public command: any;
+    public name: string;
+    public text: string;
+    public rclicks: RClick[] | undefined;
     constructor(c: Commands, command: any, name: string, text: string) {
         this.c = c;
         this.command = command;
@@ -446,7 +447,7 @@ class nullButtonWidget {
 /**
  * A class representing the singleton Icon bar.
  */
-class NullIconBarClass {
+export class NullIconBarClass {
     c: Commands;
     iconFrame: any | null;
     parentFrame: any;
@@ -499,7 +500,7 @@ class NullIconBarClass {
     /**
      * Add a (virtual) button to the (virtual) icon bar.
      */
-    public add(text: string, command: (...args: any[]) => any, kind: string,): any {
+    public add(text: string, command?: (...args: any[]) => any, kind?: string,): nullButtonWidget {
         try {
             g.app.iconWidgetCount += 1;
         } catch (e) {
@@ -524,12 +525,12 @@ class NullIconBarClass {
     }
     //@+node:felix.20230925223152.6: *3* NullIconBarClass.setCommandForButton
     public setCommandForButton(
-        button: any,
-        command: string,
+        button: nullButtonWidget,
+        command: () => any,
         command_p: Position,
-        controller: Commands,
+        controller: ScriptingController,
         gnx: string,
-        script: string
+        script?: string
     ): void {
         button.command = command;
         try {

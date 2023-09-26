@@ -366,7 +366,6 @@
 <v t="felix.20201214154816.15"><vh>AskMessageItem</vh></v>
 <v t="felix.20201214154816.16"><vh>ChooseDocumentItem</vh></v>
 <v t="felix.20220505220706.1"><vh>ChooseRClickItem</vh></v>
-<v t="felix.20220505220722.1"><vh>RClick</vh></v>
 <v t="felix.20201214154816.17"><vh>MinibufferCommand</vh></v>
 </v>
 <v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
@@ -2554,6 +2553,8 @@ public static VSCODE_COMMANDS = {
 import { Icon, LeoButton } from "./types";
 import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
+import { RClick } from "./core/mod_scripting";
 
 @language typescript
 @tabwidth -4
@@ -2564,12 +2565,6 @@ import { LeoStates } from "./leoStates";
  * * '@buttons' shown as a list with this TreeDataProvider implementation
  */
 export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonNode&gt; {
-
-    private fakeAtButtons: LeoButton[] = [
-        { name: 'script-button', index: 'nullButtonWidget' },
-        { name: 'button name 2', index: 'key2' },
-        { name: 'button name 3', index: 'key3' },
-    ];
 
     private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoButtonNode | undefined&gt; = new vscode.EventEmitter&lt;LeoButtonNode | undefined&gt;();
 
@@ -2601,9 +2596,37 @@ public refreshTreeRoot(): void {
     const w_children: LeoButtonNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        this.fakeAtButtons.forEach(p_button =&gt; {
+
+        const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+        const d = c.theScriptingController.buttonsArray;
+
+        const buttons = [];
+
+        let i_but = 0;
+        for (const but of d) {
+            let rclickList: RClick[] = [];
+
+            if (but.rclicks) {
+                rclickList = but.rclicks;
+            }
+
+            const entry: LeoButton = {
+                name: but.name,
+                index: i_but,
+                rclicks: rclickList,
+            };
+
+            buttons.push(entry);
+            i_but += 1;
+        }
+
+
+        buttons.forEach(p_button =&gt; {
             w_children.push(new LeoButtonNode(p_button, this._icons));
         });
+
+
     }
     return Promise.resolve(w_children); // Defaults to an empty list of children
 }
@@ -2622,6 +2645,7 @@ export class LeoButtonNode extends vscode.TreeItem {
 
     // Context string that is checked in package.json with 'when' clauses
     public contextValue: string;
+    public rclicks: RClick[];
 
     // is the special 'add' button used to create button from a given node's script
     private _isAdd: boolean;
@@ -2631,14 +2655,19 @@ export class LeoButtonNode extends vscode.TreeItem {
         private _buttonIcons: Icon[], // pointer to global array of node icons
     ) {
         super(button.name);
+
         // Setup this instance (just differentiate 'script-button' for now)
         this.command = {
             command: Constants.COMMANDS.CLICK_BUTTON,
             title: '',
             arguments: [this]
         };
-        this._isAdd = (this.button.index.startsWith(Constants.BUTTON_STRINGS.NULL_WIDGET) &amp;&amp;
-            this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON);
+
+        this._isAdd = this.button.index === 0;
+        //= (this.button.index.startsWith(Constants.BUTTON_STRINGS.NULL_WIDGET) &amp;&amp;
+        //this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON);
+
+        this.rclicks = button.rclicks ? button.rclicks : [];
         this.contextValue = this._isAdd ? Constants.BUTTON_STRINGS.ADD_BUTTON : Constants.BUTTON_STRINGS.NORMAL_BUTTON;
     }
 
@@ -3153,6 +3182,8 @@ private _updateLeoObjectIndicator(): void {
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutline";
+import { RClick } from "./core/mod_scripting";
+import { nullButtonWidget } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -3293,7 +3324,8 @@ export interface LeoDocument {
  */
 export interface LeoButton {
     name: string;
-    index: string; // STRING KEY
+    index: number;
+    rclicks?: RClick[];
 }
 
 </t>
@@ -10255,15 +10287,6 @@ export interface BodySelectionInfo {
 export interface ChooseRClickItem extends vscode.QuickPickItem {
     index: number;
     rclick?: RClick;
-}
-
-</t>
-<t tx="felix.20220505220722.1">/**
- * * Returned from Leo with buttons data
- */
-export interface RClick {
-    name: string;
-    children: RClick[];
 }
 
 </t>

@@ -235,6 +235,7 @@ import { Commands } from '../core/leoCommands';
 import { LoadManager, PreviousSettings } from '../core/leoApp';
 import { AtFile } from '../core/leoAtFile';
 import { NullGui } from '../core/leoGui';
+import { NullIconBarClass, nullButtonWidget } from './leoFrame';
 
 type Widget = any;
 type Wrapper = any;
@@ -252,8 +253,9 @@ function eval_cmd(p_name: string, p_doc: string) {
 //@+node:felix.20230924174338.6: ** build_rclick_tree
 // Define RClick as an interface
 export interface RClick {
+    // name?: string;
     position: Position;
-    children: any[];
+    children: RClick[];
 }
 
 /**
@@ -426,7 +428,7 @@ export class ScriptingController {
     public c: Commands;  // Replace with the actual type of Cmdr
     public gui: any; // Replace with the actual type of the GUI
     public scanned: boolean;
-    public buttonsDict: Record<any, string>;
+    public buttonsArray: nullButtonWidget[]; // ! LEOJS : ARRAY INSTEAD OF DICT ! 
     public debuggerKind: string;
     public atButtonNodes: boolean;
     public atCommandsNodes: boolean;
@@ -437,7 +439,7 @@ export class ScriptingController {
     public createRunScriptButton: boolean;
     public createScriptButtonButton: boolean;
     public maxButtonSize: number;
-    public iconBar: Widget | undefined;  // Replace with the actual type of Widget
+    public iconBar: NullIconBarClass;  // Replace with the actual type of Widget
     public seen: Set<string>;
 
     //@+others
@@ -448,7 +450,7 @@ export class ScriptingController {
         const getBool = c.config.getBool.bind(c.config);
         this.scanned = false;
         const kind = c.config.getString('debugger-kind') || 'idle';
-        this.buttonsDict = {};
+        this.buttonsArray = [];
         this.debuggerKind = kind.toLowerCase();
 
         // True: adds a button for every @button node.
@@ -580,7 +582,7 @@ export class ScriptingController {
                 if (m) {
                     const w_key: string = m[1];
                     const func = d[w_key];
-                    func(p);
+                    func(p); // no need to bind to something before calling. Already classing from 'this'.
                 }
                 p.moveToThreadNext();
             }
@@ -696,7 +698,8 @@ export class ScriptingController {
         }
 
         this.setButtonColor(b, bg);
-        this.buttonsDict[b] = truncatedText;
+        // this.buttonsArray[b] = truncatedText;
+        this.buttonsArray.push(b);
 
         if (statusLine) {
             this.createBalloon(b, statusLine);
@@ -1175,11 +1178,14 @@ export class ScriptingController {
      */
     deleteButton(button: any, ...kw: any[]): void {
         let w = button;
-        if (button && this.buttonsDict[w]) {
-            delete this.buttonsDict[w];
+
+        const index = this.buttonsArray.indexOf(button);
+        if (index > -1) {
+            this.buttonsArray.splice(index, 1);
             // this.iconBar.deleteButton(w); // * UNUSED IN LEOJS 
             this.c.bodyWantsFocus();
         }
+
     }
     //@+node:felix.20230924174338.49: *4* sc.getArgs
     /**
@@ -1773,7 +1779,7 @@ export class EvalController {
         //             exec(txt, leo_globals, c.vs)
         //         catch (e))
         //             g.es_exception()
-        return ans
+        return ans;
 
     }
     //@+node:felix.20230924174338.71: *5* eval.redirect & unredirect
