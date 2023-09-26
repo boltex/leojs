@@ -1840,18 +1840,26 @@ export class GlobalConfigManager {
         return this.get(setting, 'string');
     }
     //@+node:felix.20220206213914.37: *3* gcm.valueInMyLeoSettings
-    /* def valueInMyLeoSettings(self, settingName):
-        """Return the value of the setting, if any, in myLeoSettings.leo."""
-        lm = g.app.loadManager
-        d = lm.globalSettingsDict
-        gs = d.get(self.munge(settingName))
-            # A GeneralSetting object.
-        if gs:
-            path = gs.path
-            if path.find('myLeoSettings.leo') > -1:
-                return gs.val
-        return None
+    /**
+     * Return the value of the setting, if any, in myLeoSettings.leo.
      */
+    public valueInMyLeoSettings(settingName: string): any {
+        
+        const lm = g.app.loadManager!;
+        const d = lm.globalSettingsDict;
+        const mungedSettingName =  this.munge(settingName);
+        if(mungedSettingName){
+
+            const gs = d.get(mungedSettingName); // A GeneralSetting object.
+            if (gs){
+                const w_path = gs.path;
+                if( w_path.indexOf('myLeoSettings.leo') > -1){
+                    return gs.val;
+                }
+            }
+        }
+        return undefined;
+    }
     //@-others
 }
 

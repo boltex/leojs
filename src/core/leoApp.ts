@@ -52,6 +52,7 @@ import * as writer_markdown from '../writers/markdown';
 import * as writer_org from '../writers/org';
 import * as writer_otl from '../writers/otl';
 import * as writer_treepad from '../writers/treepad';
+import { EvalController, ScriptingController } from './mod_scripting';
 
 //@-<< imports >>
 //@+others
@@ -179,6 +180,8 @@ export class LeoApp {
     public statsDict: any = {}; // dict used by g.stat, g.clear_stats, g.print_stats.
     public statsLockout: boolean = false; // A lockout to prevent unbound recursion while gathering stats.
     public validate_outline: boolean = false; // True: enables c.validate_outline. (slow)
+    public iconWidgetCount: number = 0;
+    public iconImageRefs: any[] = [];
 
     //@-<< LeoApp: Debugging & statistics >>
     //@+<< LeoApp: error messages >>
@@ -3086,8 +3089,8 @@ export class LoadManager {
         });
 
         // ! mod_scripting ORIGINALLY INIT ON open2 HOOK IN LEO !
-        c.theScriptingController = new ScriptingControllerClass(c);
-        c.theScriptingController.createAllButtons();
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
         c.evalController = new EvalController(c);
 
         g.doHook('new', { old_c: old_c, c: c, new_c: c });
@@ -3161,8 +3164,8 @@ export class LoadManager {
         g.doHook('open2', { old_c: undefined, c: c, new_c: c, fileName: fn });
 
         // ! mod_scripting ORIGINALLY INIT ON open2 HOOK IN LEO !
-        c.theScriptingController = new ScriptingControllerClass(c);
-        c.theScriptingController.createAllButtons();
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
         c.evalController = new EvalController(c);
 
         // Phase 3: Complete the initialization.

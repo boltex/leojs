@@ -37,7 +37,7 @@ import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
-import { ScriptingControllerClass, EvalController } from './mod_scripting';
+import { ScriptingController, EvalController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 const dayjs = require('dayjs');
@@ -169,6 +169,7 @@ export class Commands {
     public configInited = false;
     public doubleClickFlag = false;
     public exists = true; // Indicate that this class exists and has not been destroyed.
+    public vs: Record<string, any> = {};
 
     public in_qt_dialog = false; // True: in a qt dialog.
     public loading = false; // True: we are loading a file: disables c.setChanged()
@@ -232,7 +233,7 @@ export class Commands {
     public debugCommands: any = undefined;
     public editFileCommands: EditFileCommandsClass;
     public evalController!: EvalController; // Set in leoApp at 'open2' event.
-    public theScriptingController!: ScriptingControllerClass; // Set in leoApp at 'open2' event.
+    public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
     public rstCommands: RstCommands;
     public helpCommands: any = undefined;
@@ -516,8 +517,8 @@ export class Commands {
     //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
     public executeScriptHelper(
         args: any,
-        define_g: any,
-        define_name: any,
+        define_g: boolean,
+        define_name: string,
         namespace: any,
         script: string
     ): void {
@@ -568,22 +569,24 @@ export class Commands {
             } else {
                 // exec(script, d)
                 new Function(
-                    'c',
-                    'g',
-                    'input',
-                    'p',
-                    '__name__',
-                    'script_args',
-                    'script_gnx',
+                    // 'c',
+                    // 'g',
+                    // 'input',
+                    // 'p',
+                    // '__name__',
+                    // 'script_args',
+                    // 'script_gnx',
+                    ...Object.keys(d),
                     script
                 )(
-                    d['c'],
-                    d['g'],
-                    d['input'],
-                    d['p'],
-                    d['__name__'],
-                    d['script_args'],
-                    d['script_gnx']
+                    ...Object.keys(d).map(k => d[k])
+                    // d['c'],
+                    // d['g'],
+                    // d['input'],
+                    // d['p'],
+                    // d['__name__'],
+                    // d['script_args'],
+                    // d['script_gnx']
                 );
             }
         } catch (e) {

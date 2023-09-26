@@ -235,6 +235,10 @@ import { Commands } from '../core/leoCommands';
 import { LoadManager, PreviousSettings } from '../core/leoApp';
 import { AtFile } from '../core/leoAtFile';
 import { NullGui } from '../core/leoGui';
+
+type Widget = any;
+type Wrapper = any;
+
 //@-<< mod_scripting imports & annotations >>
 
 //@+others
@@ -248,8 +252,8 @@ function eval_cmd(p_name: string, p_doc: string) {
 //@+node:felix.20230924174338.6: ** build_rclick_tree
 // Define RClick as an interface
 export interface RClick {
-  position: Position;
-  children: any[];
+    position: Position;
+    children: any[];
 }
 
 /**
@@ -267,69 +271,69 @@ export interface RClick {
  */
 export function build_rclick_tree(command_p: Position | undefined, rclicks: RClick[] = [], top_level: boolean = false): RClick[] {
 
-  const at_others_pat = new RegExp('^\\s*@others\\b', 'm');
+    const at_others_pat = new RegExp('^\\s*@others\\b', 'm');
 
-  /**
-   * Return True if p.b has a valid @others directive.
-   */
-  function has_at_others(p: Position): boolean {
-    if ('others' in g.globalDirectiveList) {
-      return at_others_pat.test(p.b);
-    }
-    return false;
-  }
-
-  if (rclicks == null) {
-    rclicks = [];
-  }
-
-  if (top_level) {
-    // command_p will be None for leoSettings.leo and myLeoSettings.leo.
-    if (command_p && command_p.__bool__()) {
-      if (!has_at_others(command_p)) {
-        rclicks.push(...command_p.children().map(i => ({
-          position: i.copy(),
-          children: [],
-        } as RClick)));
-      }
-      for (const i of command_p.following_siblings()) {
-        if (i.h.startsWith('@rclick ')) {
-          rclicks.push({ position: i.copy(), children: [] });
-        } else {
-          break;
+    /**
+     * Return True if p.b has a valid @others directive.
+     */
+    function has_at_others(p: Position): boolean {
+        if ('others' in g.globalDirectiveList) {
+            return at_others_pat.test(p.b);
         }
-      }
+        return false;
     }
-    for (const rc of rclicks) {
-      build_rclick_tree(rc.position, rc.children, false);
+
+    if (rclicks == null) {
+        rclicks = [];
     }
-  } else {
-    if (!command_p || !command_p.__bool__()) {
-      return []; // sub menus can't have body text
+
+    if (top_level) {
+        // command_p will be None for leoSettings.leo and myLeoSettings.leo.
+        if (command_p && command_p.__bool__()) {
+            if (!has_at_others(command_p)) {
+                rclicks.push(...[...command_p.children()].map(i => ({
+                    position: i.copy(),
+                    children: [],
+                } as RClick)));
+            }
+            for (const i of command_p.following_siblings()) {
+                if (i.h.startsWith('@rclick ')) {
+                    rclicks.push({ position: i.copy(), children: [] });
+                } else {
+                    break;
+                }
+            }
+        }
+        for (const rc of rclicks) {
+            build_rclick_tree(rc.position, rc.children, false);
+        }
+    } else {
+        if (!command_p || !command_p.__bool__()) {
+            return []; // sub menus can't have body text
+        }
+        if (command_p.b.trim()) {
+            return [];
+        }
+        for (const child of command_p.children()) {
+            const rc: RClick = { position: child.copy(), children: [] };
+            rclicks.push(rc);
+            build_rclick_tree(rc.position, rc.children, false);
+        }
     }
-    if (command_p.b.trim()) {
-      return [];
-    }
-    for (const child of command_p.children()) {
-      const rc: RClick = { position: child.copy(), children: [] };
-      rclicks.push(rc);
-      build_rclick_tree(rc.position, rc.children, false);
-    }
-  }
-  return rclicks;
+    return rclicks;
 }
 //@+node:felix.20230924174338.9: ** class AtButtonCallback
 /**
  * A class whose __call__ method is a callback for @button nodes.
  */
 export class AtButtonCallback {
-    
+
     public b: any;
-    public buttonText: string;
+    public buttonText: string | undefined;
     public c: Commands;
-    public controller: any;
+    public controller: ScriptingController;
     public gnx: string;
-    public script: string;
+    public script: string | undefined;
     public source_c: Commands;
     public __doc__: string;
 
@@ -339,61 +343,63 @@ export class AtButtonCallback {
      * AtButtonCallback.__init__.
      */
     constructor(
-        controller: any,
+        controller: ScriptingController,
         b: any,
         c: Commands,
-        buttonText: string,
+        buttonText: string | undefined,
         docstring: string,
         gnx: string,
-        script: string,
+        script?: string,
     ) {
-       this.b = b;  // A QButton.
-       this.buttonText = buttonText;  // The text of the button.
-       this.c = c;  // A Commander.
-       this.controller = controller;  // A ScriptingController instance.
-       this.gnx = gnx;  // Set if the script is defined in the local .leo file.
-       this.script = script;  // The script defined in myLeoSettings.leo or leoSettings.leo
-       this.source_c = c;  // For GetArgs.command_source.
-       this.__doc__ = docstring;  // The docstring for this callback for g.getDocStringForFunction.
-       this.__call__ = this.__call__.bind(this);
+        this.b = b;  // A QButton.
+        this.buttonText = buttonText;  // The text of the button.
+        this.c = c;  // A Commander.
+        this.controller = controller;  // A ScriptingController instance.
+        this.gnx = gnx;  // Set if the script is defined in the local .leo file.
+        this.script = script;  // The script defined in myLeoSettings.leo or leoSettings.leo
+        this.source_c = c;  // For GetArgs.command_source.
+        this.__doc__ = docstring;  // The docstring for this callback for g.getDocStringForFunction.
+        this.__call__ = this.__call__.bind(this);
     }
     //@+node:felix.20230924174338.11: *3* __call__ (AtButtonCallback)
     /**
      * AtButtonCallbgack.__call__. The callback for @button nodes.
      */
-    public __call__() : void {
-        this.execute_script();
+    public __call__(): Promise<void> {
+        return this.execute_script();
     }
     //@+node:felix.20230924174338.14: *3* AtButtonCallback.execute_script & helper
     /**
      * Execute the script associated with this button.
      */
-    public execute_script(): void {
-        
-        const script = this.find_script();
-        if (script){
-            this.controller.executeScriptFromButton(
+    public async execute_script(): Promise<void> {
+
+        const script = await this.find_script();
+        if (script) {
+            await this.controller.executeScriptFromButton(
                 this.b,
                 this.buttonText,
-                None,
+                undefined,
                 this.gnx,
                 script,
             );
         }
     }
     //@+node:felix.20230924174338.15: *4* AtButtonCallback.find_script
-    export find_script(): string {
+    public async find_script(): Promise<string> {
         let script: string = "";
         // First, search self.c for the gnx.
         for (const p of this.c.all_positions()) {
             if (p.gnx === this.gnx) {
-                script = this.controller.getScript(p);
+                script = await this.controller.getScript(p);
                 return script;
             }
         }
+        let c;
         // See if myLeoSettings.leo is open.
-        for (const c of g.app.commanders()) {
-            if (c.shortFileName().endsWith('myLeoSettings.leo')) {
+        for (const w_c of g.app.commanders()) {
+            if (w_c.shortFileName().endsWith('myLeoSettings.leo')) {
+                c = w_c;
                 break;
             }
         }
@@ -401,12 +407,12 @@ export class AtButtonCallback {
             // Search myLeoSettings.leo file for the gnx.
             for (const p of c.all_positions()) {
                 if (p.gnx === this.gnx) {
-                    script = this.controller.getScript(p);
+                    script = await this.controller.getScript(p);
                     return script;
                 }
             }
         }
-        return this.script;
+        return this.script as string;
     }
     //@-others
 
@@ -416,30 +422,30 @@ export class AtButtonCallback {
  * A class defining scripting commands.
  */
 export class ScriptingController {
-    
-  public c: Commands;  // Replace with the actual type of Cmdr
-  public gui: any; // Replace with the actual type of the GUI
-  public scanned: boolean;
-  public buttonsDict: Record<any, string>;
-  public debuggerKind: string;
-  public atButtonNodes: boolean;
-  public atCommandsNodes: boolean;
-  public atRclickNodes: boolean;
-  public atPluginNodes: boolean;
-  public atScriptNodes: boolean;
-  public createDebugButton: boolean;
-  public createRunScriptButton: boolean;
-  public createScriptButtonButton: boolean;
-  public maxButtonSize: number;
-  public iconBar: Widget | undefined;  // Replace with the actual type of Widget
-  public seen: Set<string>;
+
+    public c: Commands;  // Replace with the actual type of Cmdr
+    public gui: any; // Replace with the actual type of the GUI
+    public scanned: boolean;
+    public buttonsDict: Record<any, string>;
+    public debuggerKind: string;
+    public atButtonNodes: boolean;
+    public atCommandsNodes: boolean;
+    public atRclickNodes: boolean;
+    public atPluginNodes: boolean;
+    public atScriptNodes: boolean;
+    public createDebugButton: boolean;
+    public createRunScriptButton: boolean;
+    public createScriptButtonButton: boolean;
+    public maxButtonSize: number;
+    public iconBar: Widget | undefined;  // Replace with the actual type of Widget
+    public seen: Set<string>;
 
     //@+others
     //@+node:felix.20230924174338.17: *3*  sc.ctor
-      constructor(c: Commands, iconBar?: Widget) {
+    constructor(c: Commands, iconBar?: Widget) {
         this.c = c;
         this.gui = c.frame.gui;
-        const getBool = c.config.getBool;
+        const getBool = c.config.getBool.bind(c.config);
         this.scanned = false;
         const kind = c.config.getString('debugger-kind') || 'idle';
         this.buttonsDict = {};
@@ -457,11 +463,11 @@ export class ScriptingController {
         this.atScriptNodes = getBool('scripting-at-script-nodes');
 
         // Do not allow this setting to be changed in local (non-settings) .leo files.
-        if( this.atScriptNodes && c.config.isLocalSetting('scripting-at-script-nodes', 'bool')){
+        if (this.atScriptNodes && c.config.isLocalSetting('scripting-at-script-nodes', 'bool')) {
             g.issueSecurityWarning('@bool scripting-at-script-nodes');
             // Restore the value in myLeoSettings.leo
-            const val = g.app.config.valueInMyLeoSettings('scripting-at-script-nodes');
-            if (val == null){
+            let val = g.app.config.valueInMyLeoSettings('scripting-at-script-nodes');
+            if (val == null) {
                 val = false;
             }
             g.es('Restoring value to', val);
@@ -478,9 +484,9 @@ export class ScriptingController {
         this.maxButtonSize = c.config.getInt('scripting-max-button-size') || 18;
 
         if (!iconBar) {
-          this.iconBar = c.frame.getIconBarObject();
+            this.iconBar = c.frame.iconBar; // c.frame.getIconBar();
         } else {
-          this.iconBar = iconBar;
+            this.iconBar = iconBar;
         }
 
         this.seen = new Set();
@@ -491,159 +497,160 @@ export class ScriptingController {
      * Called when the user presses the 'script-button' button or executes the script-button command.
      */
     public addScriptButtonCommand(): void {
-      const c = this.c;
-      const p = c.p;
-      const h = p.h;
-      const buttonText = this.getButtonText(h);
-      let shortcut = this.getShortcut(h);
-      let statusLine = `Run Script: ${buttonText}`;
-      if (shortcut) {
-        statusLine += ` @key=${shortcut}`;
-      }
-      this.createLocalAtButtonHelper(p, h, statusLine, 'script-button', true);
-      c.bodyWantsFocus();
+        const c = this.c;
+        const p = c.p;
+        const h = p.h;
+        const buttonText = this.getButtonText(h);
+        let shortcut = this.getShortcut(h);
+        let statusLine = `Run Script: ${buttonText}`;
+        if (shortcut) {
+            statusLine += ` @key=${shortcut}`;
+        }
+        this.createLocalAtButtonHelper(p, h, statusLine, 'script-button', true);
+        c.bodyWantsFocus();
     }
     //@+node:felix.20230924174338.23: *4* sc.runScriptCommand
     /**
      * Called when user presses the 'run-script' button or executes the run-script command.
      */
-    public runScriptCommand(): void {
-      const c = this.c;
-      const p = c.p;
-      const args = this.getArgs(p);
-      g.app.scriptDict = { 'script_gnx': p.gnx };
-      c.executeScript(
-       args,
-       p,
-       '',
-       true,
-      );
-      if (0) {
-        // Do not assume the script will want to remain in this commander.
-        c.bodyWantsFocus();
-      }
+    public async runScriptCommand(): Promise<void> {
+        const c = this.c;
+        const p = c.p;
+        const args = this.getArgs(p);
+        g.app.scriptDict = { 'script_gnx': p.gnx };
+        await c.executeScript(
+            args,
+            p,
+            '',
+            true,
+        );
+        if (0) {
+            // Do not assume the script will want to remain in this commander.
+            c.bodyWantsFocus();
+        }
     }
     //@+node:felix.20230924174338.24: *3* sc.createAllButtons
     /**
      * Scan for @button, @rclick, @command, @plugin and @script nodes.
      */
-    public createAllButtons(): void {
-      const c = this.c;
-      if (this.scanned) {
-        return; // Defensive.
-      }
-      this.scanned = true;
-      
-      // First, create standard buttons.
-      if (this.createRunScriptButton) {
-        this.createRunScriptIconButton();
-      }
-      if (this.createScriptButtonButton) {
-        this.createScriptButtonIconButton();
-      }
-      if (this.createDebugButton) {
-        this.createDebugIconButton();
-      }
-
-      // Next, create common buttons and commands.
-      this.createCommonButtons();
-      this.createCommonCommands();
-      
-      // Handle all other nodes.
-      const d = {
-        'button': this.handleAtButtonNode,
-        'command': this.handleAtCommandNode,
-        'plugin': this.handleAtPluginNode,
-        'rclick': this.handleAtRclickNode,
-        'script': this.handleAtScriptNode,
-      };
-      const pattern = new RegExp('^@(button|command|plugin|rclick|script)\\b');
-      let p = c.rootPosition();
-      while (p && p.__bool__()) {
-        const gnx = p.v.gnx;
-        if (p.isAtIgnoreNode()) {
-          p.moveToNodeAfterTree();
-        } else if (this.seen.has(gnx)) {
-          if (p.h.startsWith('@rlick')) {
-            this.handleAtRclickNode(p);
-          }
-          p.moveToThreadNext();
-        } else {
-          this.seen.add(gnx);
-          const m = pattern.exec(p.h);
-          if (m) {
-            const func = d[m[1]];
-            func(p);
-          }
-          p.moveToThreadNext();
+    public async createAllButtons(): Promise<void> {
+        const c = this.c;
+        if (this.scanned) {
+            return; // Defensive.
         }
-      }
+        this.scanned = true;
+
+        // First, create standard buttons.
+        if (this.createRunScriptButton) {
+            this.createRunScriptIconButton();
+        }
+        if (this.createScriptButtonButton) {
+            this.createScriptButtonIconButton();
+        }
+        if (this.createDebugButton) {
+            this.createDebugIconButton();
+        }
+
+        // Next, create common buttons and commands.
+        await this.createCommonButtons();
+        await this.createCommonCommands();
+
+        // Handle all other nodes.
+        const d: Record<string, (p: Position) => any> = {
+            'button': this.handleAtButtonNode,
+            'command': this.handleAtCommandNode,
+            'plugin': this.handleAtPluginNode,
+            'rclick': this.handleAtRclickNode,
+            'script': this.handleAtScriptNode,
+        };
+        const pattern = new RegExp('^@(button|command|plugin|rclick|script)\\b');
+        let p = c.rootPosition();
+        while (p && p.__bool__()) {
+            const gnx = p.v.gnx;
+            if (p.isAtIgnoreNode()) {
+                p.moveToNodeAfterTree();
+            } else if (this.seen.has(gnx)) {
+                if (p.h.startsWith('@rlick')) {
+                    this.handleAtRclickNode(p);
+                }
+                p.moveToThreadNext();
+            } else {
+                this.seen.add(gnx);
+                const m = pattern.exec(p.h);
+                if (m) {
+                    const w_key: string = m[1];
+                    const func = d[w_key];
+                    func(p);
+                }
+                p.moveToThreadNext();
+            }
+        }
     }
     //@+node:felix.20230924174338.25: *3* sc.createLocalAtButtonHelper
     /**
      * Create a button for a local @button node.
      */
     createLocalAtButtonHelper(
-      p: Position,
-      h: string,
-      statusLine: string,
-      kind: string = 'at-button',
-      verbose: boolean = true
-    ): Wrapper | null {
-      const c = this.c;
-      const buttonText = this.cleanButtonText(h, true);
-      const args = this.getArgs(p);
+        p: Position,
+        h: string,
+        statusLine: string,
+        kind: string = 'at-button',
+        verbose: boolean = true
+    ): Wrapper | undefined {
+        const c = this.c;
+        const buttonText = this.cleanButtonText(h, true);
+        const args = this.getArgs(p);
 
-      // We must define the callback *after* defining b,
-      // so set both command and shortcut to null here.
-      const bg = this.getColor(h);
-      const b = this.createIconButton({
-        args: args,
-        text: h,
-        command: null,
-        statusLine: statusLine,
-        kind: kind,
-        bg: bg,
-      });
+        // We must define the callback *after* defining b,
+        // so set both command and shortcut to null here.
+        const bg = this.getColor(h);
+        const b = this.createIconButton(
+            args,
+            h,
+            undefined,
+            statusLine,
+            kind,
+            bg,
+        );
 
-      if (!b) {
-        return null;
-      }
+        if (!b) {
+            return undefined;
+        }
 
-      // Now that b is defined we can define the callback.
-      // Yes, executeScriptFromButton *does* use b (to delete b if requested by the script).
-      const docstring = g.getDocString(p.b).trim();
-      const cb = new AtButtonCallback(
-        this,
-        b,
-        c,
-        buttonText,
-        docstring,
-        p.v.gnx,
+        // Now that b is defined we can define the callback.
+        // Yes, executeScriptFromButton *does* use b (to delete b if requested by the script).
+        const docstring = g.getDocString(p.b).trim();
+        const cb = new AtButtonCallback(
+            this,
+            b,
+            c,
+            buttonText,
+            docstring,
+            p.v.gnx,
+            undefined
+        ).__call__; // reference to __call__, not called.
 
-      ).__call__; // reference to __call__, not called.
+        this.iconBar.setCommandForButton(
+            b,
+            cb,
+            p && p.copy(),
+            this,
+            p && p.gnx,
+            undefined,
+        );
 
-      this.iconBar.setCommandForButton(
-         b,
-        cb,
-        p && p.copy(),
-         this,
-        p && p.gnx,
-        script: null,
-      );
+        // At last we can define the command and use the shortcut.
+        // registerAllCommands recomputes the shortcut.
+        this.registerAllCommands(
+            this.getArgs(p),
+            cb,
+            h,
+            'button',
+            p.v.context,
+            'local @button'
+        );
 
-      // At last we can define the command and use the shortcut.
-      // registerAllCommands recomputes the shortcut.
-      this.registerAllCommands(
-        this.getArgs(p),
-        cb,
-        h,
-        'button',
-        p.v.context,
-        'local @button'
-      );
-
-      return b;
+        return b;
     }
     //@+node:felix.20230924174338.26: *3* sc.createIconButton (creates all buttons)
     /**
@@ -657,106 +664,106 @@ export class ScriptingController {
      * - Binds a right-click in the button to a callback that deletes the button.
      */
     public createIconButton(
-      args: any,
-      text: string,
-      command: (...args: any[]) => any | undefined,
-      statusLine: string,
-      bg?: string,
-      kind?: string,
+        args: any,
+        text: string,
+        command: ((...args: any[]) => any) | undefined,
+        statusLine: string,
+        bg?: string,
+        kind?: string,
     ): Wrapper | undefined {
-      const c = this.c;
-      
-      // Create the button and add it to the buttons dict.
-      const commandName = this.cleanButtonText(text);
-      
-      // Truncate only the text of the button, not the command name.
-      const truncatedText = this.truncateButtonText(commandName);
-      
-      if (!truncatedText.trim()) {
-        g.error(`${text.trim() || ''} ignored: no cleaned text`);
-        return null;
-      }
-      
-      // Command may be null.
-      const b = this.iconBar.add(
-        truncatedText,
-        command,
-        kind,
-      );
-      
-      if (!b) {
-        return null;
-      }
-      
-      this.setButtonColor(b, bg);
-      this.buttonsDict[b] = truncatedText;
+        const c = this.c;
 
-      if (statusLine) {
-        this.createBalloon(b, statusLine);
-      }
+        // Create the button and add it to the buttons dict.
+        const commandName = this.cleanButtonText(text);
 
-      if (command) {
-        this.registerAllCommands(
-           args,
-           command,
-          text,
-          'button',
-           c,
-          'icon button'
+        // Truncate only the text of the button, not the command name.
+        const truncatedText = this.truncateButtonText(commandName);
+
+        if (!truncatedText.trim()) {
+            g.error(`${text.trim() || ''} ignored: no cleaned text`);
+            return null;
+        }
+
+        // Command may be null.
+        const b = this.iconBar.add(
+            truncatedText,
+            command,
+            kind,
         );
-      }
 
-      const deleteButtonCallback = (b: Widget=b) => {
-        this.deleteButton(b);
-      };
+        if (!b) {
+            return null;
+        }
 
-      // Register the delete-x-button command.
-      const deleteCommandName = `delete-${commandName}-button`;
-      c.k.registerCommand(
-        deleteCommandName,
-        deleteButtonCallback,
-        'button',
-        null,
-      );
-      // Reporting this command is way too annoying.
-      return b;
+        this.setButtonColor(b, bg);
+        this.buttonsDict[b] = truncatedText;
+
+        if (statusLine) {
+            this.createBalloon(b, statusLine);
+        }
+
+        if (command) {
+            this.registerAllCommands(
+                args,
+                command,
+                text,
+                'button',
+                c,
+                'icon button'
+            );
+        }
+
+        const deleteButtonCallback = (p_b: Widget = b) => {
+            this.deleteButton(p_b);
+        };
+
+        // Register the delete-x-button command.
+        const deleteCommandName = `delete-${commandName}-button`;
+        c.k.registerCommand(
+            deleteCommandName,
+            deleteButtonCallback,
+            'button',
+            null,
+        );
+        // Reporting this command is way too annoying.
+        return b;
     }
     //@+node:felix.20230924174338.27: *3* sc.executeScriptFromButton
     /**
      * Execute an @button script in p.b or script.
      */
-    public executeScriptFromButton(
-      b: Wrapper,
-      buttonText: string,
-      p?: Position,
-      script?: string,
-      script_gnx?: string,
-    ): void {
-      const c = this.c;
-      if (c.disableCommandsMessage) {
-        g.blue(c.disableCommandsMessage);
-        return;
-      }
-      if (!p || !p.__bool__() && !script) {
-        g.trace("can not happen: no p and no script");
-        return;
-      }
-      g.app.scriptDict = { "script_gnx": script_gnx };
-      const args = this.getArgs(p);
-      if (!script) {
-        script = this.getScript(p);
-      }
-      c.executeScript(
-        args,
-        p,
-        script,
-      );
-      // Remove the button if the script asks to be removed.
-      if (g.app.scriptDict["removeMe"]) {
-        g.es(`Removing '${buttonText}' button at its request`);
-        this.deleteButton(b);
-      }
-      // Do *not* set focus here: the script may have changed the focus.
+    public async executeScriptFromButton(
+        b: Wrapper,
+        buttonText?: string,
+        p?: Position,
+        script?: string,
+        script_gnx?: string,
+    ): Promise<void> {
+        const c = this.c;
+        if (c.disableCommandsMessage) {
+            g.blue(c.disableCommandsMessage);
+            return;
+        }
+        if (!p || !p.__bool__() && !script) {
+            g.trace("can not happen: no p and no script");
+            return;
+        }
+        g.app.scriptDict = { "script_gnx": script_gnx };
+        const args = this.getArgs(p);
+        if (!script) {
+            script = await this.getScript(p);
+        }
+        await c.executeScript(
+            args,
+            p,
+            script,
+        );
+        // Remove the button if the script asks to be removed.
+        if (g.app.scriptDict["removeMe"]) {
+            g.es(`Removing '${buttonText}' button at its request`);
+            this.deleteButton(b);
+        }
+        // Do *not* set focus here: the script may have changed the focus.
     }
     //@+node:felix.20230924174338.28: *3* sc.open_gnx
     /**
@@ -766,34 +773,34 @@ export class ScriptingController {
      *
      * Called only from a callback in QtIconBarClass.setCommandForButton.
      */
-    public async open_gnx(c: Cmdr, gnx: string): Promise<[Cmdr | undefined, Position | undefined]> {
-      if (!gnx) {
-        g.trace("can not happen: no gnx");
-        return [undefined, undefined];
-      }
-      // First, look in commander c.
-      for (const p2 of c.all_positions()) {
-        if (p2.gnx === gnx) {
-          return [c, p2];
+    public async open_gnx(c: Commands, gnx: string): Promise<[Commands | undefined, Position | undefined]> {
+        if (!gnx) {
+            g.trace("can not happen: no gnx");
+            return [undefined, undefined];
         }
-      }
-      // Fix bug 74: problems with @button if defined in myLeoSettings.leo.
-      for (const f of [c.openMyLeoSettings, c.openLeoSettings]) {
-        const c2 = await f();  // Open the settings file.
-        if (c2) {
-          for (const p2 of c2.all_positions()) {
+        // First, look in commander c.
+        for (const p2 of c.all_positions()) {
             if (p2.gnx === gnx) {
-              return [c2, p2];
+                return [c, p2];
             }
-          }
-          c2.close();
         }
-      }
-      // Fix bug 92: restore the previously selected tab.
-      if (c.frame && "top" in c.frame) {
-        c.frame.top.leo_master.select(c);
-      }
-      return [undefined, undefined];  // 2017/02/02.
+        // Fix bug 74: problems with @button if defined in myLeoSettings.leo.
+        for (const f of [c.openMyLeoSettings, c.openLeoSettings]) {
+            const c2 = await f.bind(c)();  // Open the settings file.
+            if (c2) {
+                for (const p2 of c2.all_positions()) {
+                    if (p2.gnx === gnx) {
+                        return [c2, p2];
+                    }
+                }
+                await c2.close();
+            }
+        }
+        // Fix bug 92: restore the previously selected tab.
+        if (c.frame && (c.frame as any)['top']) {
+            (c.frame as any).leo_master.select(c);
+        }
+        return [undefined, undefined];  // 2017/02/02.
     }
     //@+node:felix.20230924174338.29: *3* sc.Scripts, common
     // Important: common @button and @command nodes do **not** update dynamically!
@@ -801,19 +808,19 @@ export class ScriptingController {
     /**
      * Handle all global @button nodes.
      */
-    public createCommonButtons(): void {
-      const c = this.c;
-      const buttons = c.config.getButtons() || [];
-      for (const z of buttons) {
-        // #2011
-        let [p, script, rclicks] = z;
-        const gnx = p.v.gnx;
-        if (!this.seen.has(gnx)) {
-          this.seen.add(gnx);
-          const newScript = this.getScript(p);
-          this.createCommonButton(p, newScript, rclicks);
+    public async createCommonButtons(): Promise<void> {
+        const c = this.c;
+        const buttons = c.config.getButtons() || [];
+        for (const z of buttons) {
+            // #2011
+            let [p, script, rclicks] = z;
+            const gnx = p.v.gnx;
+            if (!this.seen.has(gnx)) {
+                this.seen.add(gnx);
+                const newScript = await this.getScript(p);
+                this.createCommonButton(p, newScript, rclicks);
+            }
         }
-      }
     }
     //@+node:felix.20230924174338.31: *4* sc.createCommonButton (common @button)
     /**
@@ -827,80 +834,80 @@ export class ScriptingController {
      * See https://github.com/leo-editor/leo-editor/issues/171
      */
     public createCommonButton(p: Position, script: string, rclicks: any[] = []): void {
-      const c = this.c;
-      const gnx = p.gnx;
-      const args = this.getArgs(p);
-      // Fix bug #74: problems with @button if defined in myLeoSettings.leo
-      const docstring = g.getDocString(p.b).trim();
-      let statusLine = docstring || 'Global script button';
-      const shortcut = this.getShortcut(p.h);  // Get the shortcut from the @key field in the headline.
-      if (shortcut) {
-        statusLine = `${statusLine.trim()} = ${shortcut}`;
-      }
-      // We must define the callback *after* defining b,
-      // so set both command and shortcut to None here.
-      const bg = this.getColor(p.h);  // #2024
-      const b = this.createIconButton(
-        args,
-        bg,  // #2024
-         p.h,
-        undefined,
-        statusLine,
-        'at-button',
-      );
-      if (!b) {
-        return;
-      }
-      // Now that b is defined we can define the callback.
-      // Yes, the callback *does* use b (to delete b if requested by the script).
-      const buttonText = this.cleanButtonText(p.h);
-      const cb = new AtButtonCallback(
-        b,
-        buttonText,
-        c,
-        this,
-        docstring,
-        // #367: the gnx is needed for the Goto Script command.
-        //       Use gnx to search myLeoSettings.leo if it is open.
-        gnx,
-        script,
-      );
-      // Now patch the button.
-      this.iconBar.setCommandForButton(
-         b,
-         cb,  // This encapsulates the script.
-         p && p.copy(),  // #567
-         this,
-        gnx,  // For the find-button function.
-        script,
-      );
-      this.handleRclicks(rclicks);
-      // At last we can define the command.
-      this.registerAllCommands(
-        args,
-         cb,
-         p.h,
-         'button',
-         p.v.context,
-         '@button',
-      );
+        const c = this.c;
+        const gnx = p.gnx;
+        const args = this.getArgs(p);
+        // Fix bug #74: problems with @button if defined in myLeoSettings.leo
+        const docstring = g.getDocString(p.b).trim();
+        let statusLine = docstring || 'Global script button';
+        const shortcut = this.getShortcut(p.h);  // Get the shortcut from the @key field in the headline.
+        if (shortcut) {
+            statusLine = `${statusLine.trim()} = ${shortcut}`;
+        }
+        // We must define the callback *after* defining b,
+        // so set both command and shortcut to None here.
+        const bg = this.getColor(p.h);  // #2024
+        const b = this.createIconButton(
+            args,
+            p.h,
+            undefined,
+            statusLine,
+            bg,  // #2024
+            'at-button',
+        );
+        if (!b) {
+            return;
+        }
+        // Now that b is defined we can define the callback.
+        // Yes, the callback *does* use b (to delete b if requested by the script).
+        const buttonText = this.cleanButtonText(p.h);
+        const cb = new AtButtonCallback(
+            this,
+            b,
+            c,
+            buttonText,
+            docstring,
+            // #367: the gnx is needed for the Goto Script command.
+            //       Use gnx to search myLeoSettings.leo if it is open.
+            gnx,
+            script,
+        ).__call__;
+        // Now patch the button.
+        this.iconBar.setCommandForButton(
+            b,
+            cb,  // This encapsulates the script.
+            p && p.copy(),  // #567
+            this,
+            gnx,  // For the find-button function.
+            script,
+        );
+        this.handleRclicks(rclicks);
+        // At last we can define the command.
+        this.registerAllCommands(
+            args,
+            cb,
+            p.h,
+            'button',
+            p.v.context,
+            '@button',
+        );
     }
     //@+node:felix.20230924174338.32: *4* sc.createCommonCommands
     /**
      * Handle all global @command nodes.
      */
-    public createCommonCommands(): void {
-      const c = this.c;
-      const aList = c.config.getCommands() || [];
-      for (const z of aList) {
-        let [p, script] = z;
-        const gnx = p.v.gnx;
-        if (!this.seen.has(gnx)) {
-          this.seen.add(gnx);
-          const updatedScript = this.getScript(p);
-          this.createCommonCommand(p, updatedScript);
+    public async createCommonCommands(): Promise<void> {
+        const c = this.c;
+        const aList = c.config.getCommands() || [];
+        for (const z of aList) {
+            let [p, script] = z;
+            const gnx = p.v.gnx;
+            if (!this.seen.has(gnx)) {
+                this.seen.add(gnx);
+                const updatedScript = await this.getScript(p);
+                this.createCommonCommand(p, updatedScript);
+            }
         }
-      }
     }
     //@+node:felix.20230924174338.33: *4* sc.createCommonCommand (common @command)
     /**
@@ -913,25 +920,25 @@ export class ScriptingController {
      * See https://github.com/leo-editor/leo-editor/issues/171
      */
     createCommonCommand(p: Position, script: string): void {
-      const c = this.c;
-      const args = this.getArgs(p);
-      const commonCommandCallback = new AtButtonCallback(
-        null,
-         null,
-         c,
-         this,
-         g.getDocString(p.b).trim(),
-         p.v.gnx,
-         script,
-      );
-      this.registerAllCommands(
-         args,
-         commonCommandCallback,
-         p.h,
-         'button',
-         p.v.context,
-         'global @command'
-      );
+        const c = this.c;
+        const args = this.getArgs(p);
+        const commonCommandCallback = new AtButtonCallback(
+            this,
+            undefined,
+            c,
+            undefined,
+            g.getDocString(p.b).trim(),
+            p.v.gnx,
+            script,
+        ).__call__;
+        this.registerAllCommands(
+            args,
+            commonCommandCallback,
+            p.h,
+            'button',
+            p.v.context,
+            'global @command'
+        );
     }
     //@+node:felix.20230924174338.34: *3* sc.Scripts, individual
     //@+node:felix.20230924174338.35: *4* sc.handleAtButtonNode @button
@@ -946,135 +953,137 @@ export class ScriptingController {
      * not appear in the status line nor the button name.
      */
     handleAtButtonNode(p: Position): void {
-      let h = p.h;
-      let shortcut = this.getShortcut(h);
-      let docstring = g.getDocString(p.b).trim();
-      let statusLine = docstring ? docstring : "Local script button";
-      if (shortcut) {
-        statusLine = `${statusLine} = ${shortcut}`;
-      }
-      g.app.config.atLocalButtonsList.push(p.copy());
-      // This helper is also called by the script-button callback.
-      this.createLocalAtButtonHelper(p, h, statusLine, false);
+        let h = p.h;
+        let shortcut = this.getShortcut(h);
+        let docstring = g.getDocString(p.b).trim();
+        let statusLine = docstring ? docstring : "Local script button";
+        if (shortcut) {
+            statusLine = `${statusLine} = ${shortcut}`;
+        }
+        g.app.config.atLocalButtonsList.push(p.copy());
+        // This helper is also called by the script-button callback.
+        this.createLocalAtButtonHelper(p, h, statusLine, undefined, false);
     }
     //@+node:felix.20230924174338.36: *4* sc.handleAtCommandNode @command
     /**
      * Handle @command name [@key[=]shortcut].
      */
     public handleAtCommandNode(p: Position): void {
-      let c = this.c;
-      if (!p.h.trim()) {
-        return;
-      }
-      let args = this.getArgs(p);
+        let c = this.c;
+        if (!p.h.trim()) {
+            return;
+        }
+        let args = this.getArgs(p);
 
-      let atCommandCallback = (args: any = args, c: Commands = c, p: Position = p.copy()) => {
-        // Execute the script silently
-        c.executeScript(args, p);
-      };
+        let atCommandCallback = async (p_args: any = args, p_c: Commands = c, p_p: Position = p.copy()) => {
+            // Execute the script silently
+            await p_c.executeScript(p_args, p_p);
+        };
 
-      // Fix bug 1251252
-      // Minibuffer commands created by mod_scripting.py have no docstrings
+        // Fix bug 1251252
+        // Minibuffer commands created by mod_scripting.py have no docstrings
 
-      (atCommandCallback as any).__doc__ = g.getDocString(p.b).trim();
-      this.registerAllCommands(
-        args,
-         atCommandCallback,
-         p.h,
-         'button',  // Fix bug 416.
-        p.v.context,
-        'local @command'
-      );
-      g.app.config.atLocalCommandsList.push(p.copy());
+        (atCommandCallback as any).__doc__ = g.getDocString(p.b).trim();
+        this.registerAllCommands(
+            args,
+            atCommandCallback,
+            p.h,
+            'button',  // Fix bug 416.
+            p.v.context,
+            'local @command'
+        );
+        g.app.config.atLocalCommandsList.push(p.copy());
     }
     //@+node:felix.20230924174338.37: *4* sc.handleAtPluginNode @plugin
     /**
      * Handle @plugin nodes.
      */
     public handleAtPluginNode(p: Position): void {
-      const tag = "@plugin";
-      const h = p.h;
-      if (!g.match(h, 0, tag)) {
-        console.error("Invalid tag: Expected '@plugin' but found something else.");
-        return;
-      }
+        const tag = "@plugin";
+        const h = p.h;
+        if (!g.match(h, 0, tag)) {
+            console.error("Invalid tag: Expected '@plugin' but found something else.");
+            return;
+        }
 
-      // Get the name of the module.
-      const moduleOrFileName = h.slice(tag.length).trim();
-      if (!this.atPluginNodes) {
-        g.warning(`disabled @plugin: ${moduleOrFileName}`);
-      } else if (g.pluginIsLoaded(moduleOrFileName)) {
-        g.warning(`plugin already loaded: ${moduleOrFileName}`);
-      } else {
-        g.loadOnePlugin(moduleOrFileName); // * TODO : LEOJS PLUGIN SYSTEM
-      }
+        // Get the name of the module.
+        const moduleOrFileName = h.slice(tag.length).trim();
+        console.log('TODO : atPluginNodes');
+
+        //   if (!this.atPluginNodes) {
+        //     g.warning(`disabled @plugin: ${moduleOrFileName}`);
+        //   } else if (g.pluginIsLoaded(moduleOrFileName)) {
+        //     g.warning(`plugin already loaded: ${moduleOrFileName}`);
+        //   } else {
+        //     g.loadOnewPlugin(moduleOrFileName); // * TODO : LEOJS PLUGIN SYSTEM
+        //   }
     }
     //@+node:felix.20230924174338.38: *4* sc.handleAtRclickNode @rclick
     /**
      * Handle @rclick name [@key[=]shortcut].
      */
     public handleAtRclickNode(p: Position): void {
-      const c = this.c;
-      if (!p.h.trim()) {
-        return;
-      }
-      const args = this.getArgs(p);
+        const c = this.c;
+        if (!p.h.trim()) {
+            return;
+        }
+        const args = this.getArgs(p);
 
-      const atCommandCallback = (args: any = args, c: Commands = c, p: Position = p.copy()): void => {
-        c.executeScript( args, p,);
-      };
+        const atCommandCallback = async (p_args: any = args, p_c: Commands = c, p_p: Position = p.copy()): Promise<void> => {
+            await p_c.executeScript(p_args, p_p,);
+        };
 
-      if (p.b.trim()) {
-        this.registerAllCommands(
-          args,
-           atCommandCallback,
-           p.h,
-           'all',
-           p.v.context,
-           'local @rclick'
-        );
-      }
-      g.app.config.atLocalCommandsList.push(p.copy());
+        if (p.b.trim()) {
+            this.registerAllCommands(
+                args,
+                atCommandCallback,
+                p.h,
+                'all',
+                p.v.context,
+                'local @rclick'
+            );
+        }
+        g.app.config.atLocalCommandsList.push(p.copy());
     }
     //@+node:felix.20230924174338.39: *4* sc.handleRclicks
     /**
      * Handle rclicks.
      */
     public handleRclicks(rclicks: any[]): void {
-      const handlerc = (rc: any): void => {
-        if (rc.children) {
-          for (const i of rc.children) {
-            handlerc(i);
-          }
-        } else {
-          this.handleAtRclickNode(rc.position);
+        const handlerc = (rc: any): void => {
+            if (rc.children) {
+                for (const i of rc.children) {
+                    handlerc(i);
+                }
+            } else {
+                this.handleAtRclickNode(rc.position);
+            }
+        };
+        for (const rc of rclicks) {
+            handlerc(rc);
         }
-      };
-      for (const rc of rclicks) {
-        handlerc(rc);
-      }
     }
     //@+node:felix.20230924174338.40: *4* sc.handleAtScriptNode @script
     /**
      * Handle @script nodes.
      */
-    public handleAtScriptNode(p: Position): void {
-      const tag = "@script";
-      if (!p.h.startsWith(tag)) {
-        throw new Error("Assertion failed: p.h does not start with '@script'");
-      }
-      const name = p.h.slice(tag.length).trim();
-      const args = this.getArgs(p);
-      if (this.atScriptNodes) {
-        console.log(`executing script ${name}`);
-        this.c.executeScript( args, p, undefined, false);
-      } else {
-        console.warn(`disabled @script: ${name}`);
-      }
-      if (false) {
-        // Do not assume the script will want to remain in this commander.
-        // this.c.bodyWantsFocus(); // Uncomment if needed
-      }
+    public async handleAtScriptNode(p: Position): Promise<void> {
+        const tag = "@script";
+        if (!p.h.startsWith(tag)) {
+            throw new Error("Assertion failed: p.h does not start with '@script'");
+        }
+        const name = p.h.slice(tag.length).trim();
+        const args = this.getArgs(p);
+        if (this.atScriptNodes) {
+            console.log(`executing script ${name}`);
+            await this.c.executeScript(args, p, undefined, false);
+        } else {
+            console.warn(`disabled @script: ${name}`);
+        }
+        if (false) {
+            // Do not assume the script will want to remain in this commander.
+            // this.c.bodyWantsFocus(); // Uncomment if needed
+        }
     }
     //@+node:felix.20230924174338.41: *3* sc.Standard buttons
     //@+node:felix.20230924174338.42: *4* sc.createDebugIconButton 'debug-script'
@@ -1082,39 +1091,41 @@ export class ScriptingController {
      * Create the 'debug-script' button and the debug-script command.
      */
     public createDebugIconButton(): void {
-      this.createIconButton(
-        undefined,
-        'debug-script',
-        this.runDebugScriptCommand,
-        'Debug script in selected node',
-        'debug-script'
-      );
+        console.log('TODO : runDebugScriptCommand');
+
+        //   this.createIconButton(
+        //     undefined,
+        //     'debug-script',
+        //     this.runDebugScriptCommand,
+        //     'Debug script in selected node',
+        //     'debug-script'
+        //   );
     }
     //@+node:felix.20230924174338.43: *4* sc.createRunScriptIconButton 'run-script'
     /**
      * Create the 'run-script' button and the run-script command.
      */
     public createRunScriptIconButton(): void {
-      this.createIconButton(
-        undefined,
-        'run-script',
-        this.runScriptCommand,
-        'Run script in selected node',
-        'run-script'
-      );
+        this.createIconButton(
+            undefined,
+            'run-script',
+            this.runScriptCommand,
+            'Run script in selected node',
+            'run-script'
+        );
     }
     //@+node:felix.20230924174338.44: *4* sc.createScriptButtonIconButton 'script-button'
     /**
      * Create the 'script-button' button and the script-button command.
      */
     public createScriptButtonIconButton(): void {
-      this.createIconButton({
-        undefined,
-         'script-button',
-         this.addScriptButtonCommand,
-         'Make script button from selected node',
-         'script-button-button'
-      });
+        this.createIconButton(
+            undefined,
+            'script-button',
+            this.addScriptButtonCommand,
+            'Make script button from selected node',
+            'script-button-button'
+        );
     }
     //@+node:felix.20230924174338.45: *3* sc.Utils
     //@+node:felix.20230924174338.46: *4* sc.cleanButtonText
@@ -1123,56 +1134,39 @@ export class ScriptingController {
      * that it is a valid name of a minibuffer command.
      */
     public cleanButtonText(s: string, minimal: boolean = false): string {
-      // #1121: Don't lowercase anything.
-      if (minimal) {
-        return s.replace(/ /g, '-').replace(/^-+|-+$/g, '');
-      }
-      for (const tag of ['@key', '@args', '@color']) {
-        let i = s.indexOf(tag);
-        if (i > -1) {
-          let j = s.indexOf('@', i + 1);
-          if (i < j) {
-            s = s.substring(0, i) + s.substring(j);
-          } else {
-            s = s.substring(0, i);
-          }
-          s = s.trim();
+        // #1121: Don't lowercase anything.
+        if (minimal) {
+            return s.replace(/ /g, '-').replace(/^-+|-+$/g, '');
         }
-      }
-      return s.replace(/ /g, '-').replace(/^-+|-+$/g, '');
+        for (const tag of ['@key', '@args', '@color']) {
+            let i = s.indexOf(tag);
+            if (i > -1) {
+                let j = s.indexOf('@', i + 1);
+                if (i < j) {
+                    s = s.substring(0, i) + s.substring(j);
+                } else {
+                    s = s.substring(0, i);
+                }
+                s = s.trim();
+            }
+        }
+        return s.replace(/ /g, '-').replace(/^-+|-+$/g, '');
     }
     //@+node:felix.20230924174338.47: *4* sc.createBalloon (gui-dependent)
-    def createBalloon(self, w: Wrapper, label: Any) -> None:
-        'Create a balloon for a widget.'
-        if g.app.gui.guiName().startswith('qt'):
-            # w is a leoIconBarButton.
-            if hasattr(w, 'button'):
-                w.button.setToolTip(label)
-
-
     /**
      * Create a balloon for a widget.
      * @param w Wrapper instance
      * @param label Balloon label
      */
     createBalloon(w: Wrapper, label: any): void {
-      if (g.app.gui.guiName().startsWith('qt')) {
-        // w is a leoIconBarButton.
-        if ('button' in w) {
-          w.button.setToolTip(label);
+        if (g.app.gui.guiName().startsWith('qt')) {
+            // w is a leoIconBarButton.
+            if ('button' in w) {
+                w.button.setToolTip(label);
+            }
         }
-      }
     }
     //@+node:felix.20230924174338.48: *4* sc.deleteButton
-    def deleteButton(self, button: Any, **kw: Any) -> None:
-        """Delete the given button.
-        This is called from callbacks, it is not a callback."""
-        w = button
-        if button and self.buttonsDict.get(w):
-            del self.buttonsDict[w]
-            self.iconBar.deleteButton(w)
-            self.c.bodyWantsFocus()
-
     /**
      * Delete the given button.
      * This is called from callbacks, it is not a callback.
@@ -1180,183 +1174,183 @@ export class ScriptingController {
      * @param kw Optional keyword arguments
      */
     deleteButton(button: any, ...kw: any[]): void {
-      let w = button;
-      if (button && this.buttonsDict.get(w)) {
-        delete this.buttonsDict[w];
-        this.iconBar.deleteButton(w);
-        this.c.bodyWantsFocus();
-      }
+        let w = button;
+        if (button && this.buttonsDict[w]) {
+            delete this.buttonsDict[w];
+            // this.iconBar.deleteButton(w); // * UNUSED IN LEOJS 
+            this.c.bodyWantsFocus();
+        }
     }
     //@+node:felix.20230924174338.49: *4* sc.getArgs
     /**
      * Return the list of @args field of p.h.
      */
     public getArgs(p: Position): string[] {
-      let args: string[] = [];
-      if (!p) {
+        let args: string[] = [];
+        if (!p) {
+            return args;
+        }
+        let h = p.h;
+        let tag = '@args';
+        let i = h.indexOf(tag);
+        if (i > -1) {
+            let j = g.skip_ws(h, i + tag.length);
+            // Make '=' sign optional.
+            if (g.match(h, j, '=')) {
+                j += 1;
+            }
+            let k = h.indexOf('@', j + 1);
+            if (k === -1) {
+                k = h.length;
+            }
+            let s = h.slice(j, k).trim();
+            args = s.split(',').map(z => z.trim());
+        }
         return args;
-      }
-      let h = p.h;
-      let tag = '@args';
-      let i = h.indexOf(tag);
-      if (i > -1) {
-        let j = g.skip_ws(h, i + tag.length);
-        // Make '=' sign optional.
-        if (g.match(h, j, '=')) {
-          j += 1;
-        }
-        let k = h.indexOf('@', j + 1);
-        if (k === -1) {
-          k = h.length;
-        }
-        let s = h.slice(j, k).trim();
-        args = s.split(',').map(z => z.trim());
-      }
-      return args;
     }
     //@+node:felix.20230924174338.50: *4* sc.getButtonText
     /**
      * Returns the button text found in the given headline string
      */
     public getButtonText(h: string): string {
-      let tag = '@button';
-      if (g.match_word(h, 0, tag)) {
-        h = h.slice(tag.length).trim();
-      }
-      const tags = ['@key', '@args', '@color'];
-      for (let tag of tags) {
-        let i = h.indexOf(tag);
-        if (i > -1) {
-          let j = h.indexOf('@', i + 1);
-          if (i < j) {
-            h = h.slice(0, i) + h.slice(j + 1);
-          } else {
-            h = h.slice(0, i);
-          }
-          h = h.trim();
+        let tag = '@button';
+        if (g.match_word(h, 0, tag)) {
+            h = h.slice(tag.length).trim();
         }
-      }
-      let buttonText = h;
-      return buttonText;
+        const tags = ['@key', '@args', '@color'];
+        for (let tag of tags) {
+            let i = h.indexOf(tag);
+            if (i > -1) {
+                let j = h.indexOf('@', i + 1);
+                if (i < j) {
+                    h = h.slice(0, i) + h.slice(j + 1);
+                } else {
+                    h = h.slice(0, i);
+                }
+                h = h.trim();
+            }
+        }
+        let buttonText = h;
+        return buttonText;
     }
     //@+node:felix.20230924174338.51: *4* sc.getColor
     /**
      * Returns the background color from the given headline string
      */
-    public getColor(h: string): string | undefined  {
-      let color: string;
-      let tag = '@color';
-      let i = h.indexOf(tag);
-      if (i > -1) {
-        let j = g.skip_ws(h, i + tag.length);
-        if (g.match(h, j, '=')) {
-          j += 1;
+    public getColor(h: string): string | undefined {
+        let color: string | undefined;
+        let tag = '@color';
+        let i = h.indexOf(tag);
+        if (i > -1) {
+            let j = g.skip_ws(h, i + tag.length);
+            if (g.match(h, j, '=')) {
+                j += 1;
+            }
+            let k = h.indexOf('@', j + 1);
+            if (k === -1) {
+                k = h.length;
+            }
+            color = h.slice(j, k).trim();
         }
-        let k = h.indexOf('@', j + 1);
-        if (k === -1) {
-          k = h.length;
-        }
-        color = h.slice(j, k).trim();
-      }
-      return color;
+        return color;
     }
     //@+node:felix.20230924174338.52: *4* sc.getShortcut
     /**
      * Return the keyboard shortcut from the given headline string
      */
     public getShortcut(h: string): string | null {
-      let shortcut: string | null = null;
-      let i = h.indexOf('@key');
-      if (i > -1) {
-        let j = g.skip_ws(h, i + '@key'.length);
-        if (g.match(h, j, '=')) {
-          j += 1;
+        let shortcut: string | null = null;
+        let i = h.indexOf('@key');
+        if (i > -1) {
+            let j = g.skip_ws(h, i + '@key'.length);
+            if (g.match(h, j, '=')) {
+                j += 1;
+            }
+            let k = h.indexOf('@', j + 1);
+            if (k === -1) {
+                k = h.length;
+            }
+            shortcut = h.slice(j, k).trim();
         }
-        let k = h.indexOf('@', j + 1);
-        if (k === -1) {
-          k = h.length;
-        }
-        shortcut = h.slice(j, k).trim();
-      }
-      return shortcut;
+        return shortcut;
     }
     //@+node:felix.20230924174338.53: *4* sc.getScript
     /**
      * Return the script composed from p and its descendants.
      */
-    public getScript(p: Position): string {
-      return g.getScript(
-        this.c,
-         p,
-        false,
-        true,
-        true
-      );
+    public getScript(p: Position): Promise<string> {
+        return g.getScript(
+            this.c,
+            p,
+            false,
+            true,
+            true
+        );
     }
     //@+node:felix.20230924174338.54: *4* sc.registerAllCommands
     /**
      * Register @button <name> and @rclick <name> and <name>
      */
     registerAllCommands(
-      args: any,
-      func: (...args: any[]) => void,
-      h: string,
-      pane: string,
-      source_c?: Cmdr,
-      tag?: string
+        args: any,
+        func: (...args: any[]) => any,
+        h: string,
+        pane: string,
+        source_c?: Commands,
+        tag?: string
     ): void {
-      const c = this.c;
-      const k = this.c.k;
-      const trace = false;  // Activate this for debugging purposes.
-      let shortcut = this.getShortcut(h) || '';
-      let commandName = this.cleanButtonText(h);
+        const c = this.c;
+        const k = this.c.k;
+        const trace = false;  // Activate this for debugging purposes.
+        let shortcut = this.getShortcut(h) || '';
+        let commandName = this.cleanButtonText(h);
 
-      // Register the original function.
-      k.registerCommand(
-        true,
-        commandName,
-        func,
-        pane,
-        shortcut
-      );
+        // Register the original function.
+        k.registerCommand(
+            true,
+            commandName,
+            func,
+            pane,
+            shortcut
+        );
 
-      // 2013/11/13 Jake Peck:
-      // include '@rclick-' in list of tags
-      // Loop through each prefix to create the new command
-      for (const prefix of ['@button-', '@command-', '@rclick-']) {
-        if (commandName.startsWith(prefix)) {
-          const commandName2 = commandName.slice(prefix.length).trim();
+        // 2013/11/13 Jake Peck:
+        // include '@rclick-' in list of tags
+        // Loop through each prefix to create the new command
+        for (const prefix of ['@button-', '@command-', '@rclick-']) {
+            if (commandName.startsWith(prefix)) {
+                const commandName2 = commandName.slice(prefix.length).trim();
 
-          // Create a *second* function, to avoid collision in c.commandsDict.
-          const registerAllCommandsCallback = (func: (...args: any[]) => void = func) => {
-            func();
-          };
+                // Create a *second* function, to avoid collision in c.commandsDict.
+                const registerAllCommandsCallback = (p_func: (...args: any[]) => void = func) => {
+                    p_func();
+                };
 
-          // Assign documentation
-          registerAllCommandsCallback.__doc__ = func.__doc__;
+                // Assign documentation
+                registerAllCommandsCallback.__doc__ = (func as any)['__doc__'] || '';
 
-          // Make sure we never redefine an existing commandName.
-          if (commandName2 in c.commandsDict) {
-            // A warning here would be annoying.
-            if (trace) {
-              g.trace(`Already in commandsDict: ${commandName2}`);
+                // Make sure we never redefine an existing commandName.
+                if (commandName2 in c.commandsDict) {
+                    // A warning here would be annoying.
+                    if (trace) {
+                        g.trace(`Already in commandsDict: ${commandName2}`);
+                    }
+                } else {
+                    k.registerCommand(
+                        commandName2,
+                        registerAllCommandsCallback,
+                        pane,
+                        null
+                    );
+                }
             }
-          } else {
-            k.registerCommand(
-              commandName2,
-              registerAllCommandsCallback,
-              pane,
-              null
-            );
-          }
         }
-      }
     }
     //@+node:felix.20230924174338.55: *4* sc.setButtonColor
     /**
      * Set the background color of Qt button b to bg
      */
-    setButtonColor(b: Wrapper, bg: string): void {
+    setButtonColor(b: Wrapper, bg?: string): void {
         // * IGNORED IN LEOJS
         //   if (!bg) {
         //     return;
@@ -1382,22 +1376,22 @@ export class ScriptingController {
      */
     truncateButtonText(s: string): string {
         // 2011/10/16: Remove @button here only.
-      let i = 0;
-      while (g.match(s, i, '@')) {
-        i += 1;
-      }
-      if (g.match_word(s, i, 'button')) {
-        i += 6;
-      }
-      s = s.slice(i);
-      if (this.maxButtonSize > 10) {
-        s = s.slice(0, this.maxButtonSize);
-        if (s.endsWith('-')) {
-          s = s.slice(0, -1);
+        let i = 0;
+        while (g.match(s, i, '@')) {
+            i += 1;
         }
-      }
-      s = s.replace(/^\-+|\-+$/g, '');
-      return s.trim();
+        if (g.match_word(s, i, 'button')) {
+            i += 6;
+        }
+        s = s.slice(i);
+        if (this.maxButtonSize > 10) {
+            s = s.slice(0, this.maxButtonSize);
+            if (s.endsWith('-')) {
+                s = s.slice(0, -1);
+            }
+        }
+        s = s.replace(/^\-+|\-+$/g, '');
+        return s.trim();
     }
     //@-others
 
@@ -1406,317 +1400,474 @@ export class ScriptingController {
 /**
  * A class defining all eval-* commands.
  */
-class EvalController {
- 
+export class EvalController {
+
+    public answers: [string, string][];
+    public c: Commands;
+    public d: { [key: string]: any };
+    public globals_d: { [key: string]: any };
+    public locals_d: { [key: string]: any };
+    public legacy: boolean;
+    public last_result: any;
+    public old_stderr: boolean | null;
+    public old_stdout: boolean | null;
+
     //@+others
     //@+node:felix.20230924174338.58: *3* eval.Birth
-    def __init__(self, c: Cmdr) -> None:
-        """Ctor for EvalController class."""
-        self.answers: list[tuple[str, str]] = []
-        self.c = c
-        self.d: dict[str, Any] = {}
-        self.globals_d: dict[str, Any] = {'c': c, 'g': g, 'p': c.p}
-        self.locals_d: dict[str, Any] = {}
-        self.legacy = c.config.getBool('legacy-eval', default=True)
-        if g.app.ipk:
-            # Use the IPython namespace.
-            self.c.vs = g.app.ipk.namespace
-        elif self.legacy:
-            self.c.vs = self.d
-        else:
-            self.c.vs = self.globals_d
-        # allow the auto-completer to complete in this namespace
-        # Updated by do_exec.
-        self.c.keyHandler.autoCompleter.namespaces.append(self.c.vs)
-        self.last_result = None
-        self.old_stderr: bool = None
-        self.old_stdout: bool = None
+    constructor(c: Commands) {
+        this.answers = [];
+        this.c = c;
+        this.d = {};
+        this.globals_d = { c: c, g: g, p: c.p };
+        this.locals_d = {};
+        this.legacy = c.config.getBool('legacy-eval', true);
+
+        // * NO VALUESPACE PLUGIN FOR NOW IN LEOJS
+        /*
+
+        if (g.app.ipk) {
+          // Use the IPython namespace.
+          this.c.vs = g.app.ipk.namespace;
+        } else if (this.legacy) {
+          this.c.vs = this.d;
+        } else {
+          this.c.vs = this.globals_d;
+        }
+
+        // allow the auto-completer to complete in this namespace
+        // Updated by do_exec.
+        this.c.keyHandler.autoCompleter.namespaces.push(this.c.vs);
+
+        */
+
+        this.last_result = null;
+        this.old_stderr = null;
+        this.old_stdout = null;
+    }
     //@+node:felix.20230924174338.59: *3* eval.Commands
     //@+node:felix.20230924174338.60: *4* eval
-    @eval_cmd("eval")
-    def eval_command(self, event: Event) -> None:
+    @eval_cmd(
+        "eval",
+        "Execute the selected text, if any, or the line containing the cursor."
+    )
+    public eval_command(): void {
         //@+<< eval docstring >>
         //@+node:felix.20230924174338.61: *5* << eval docstring >>
-        """
-        Execute the selected text, if any, or the line containing the cursor.
+        /*
+            Execute the selected text, if any, or the line containing the cursor.
 
-        Select next line of text.
+            Select next line of text.
 
-        Tries hard to capture the result of from the last expression in the
-        selected text::
+            Tries hard to capture the result of from the last expression in the
+            selected text::
 
-            import datetime
-            today = datetime.date.today()
+                import datetime
+                today = datetime.date.today()
 
-        will capture the value of ``today`` even though the last line is a
-        statement, not an expression.
+            will capture the value of ``today`` even though the last line is a
+            statement, not an expression.
 
-        Stores results in ``c.vs['_last']`` for insertion
-        into body by ``eval-last`` or ``eval-last-pretty``.
+            Stores results in ``c.vs['_last']`` for insertion
+            into body by ``eval-last`` or ``eval-last-pretty``.
 
-        Removes common indentation (``textwrap.dedent()``) before executing,
-        allowing execution of indented code.
+            Removes common indentation (``textwrap.dedent()``) before executing,
+            allowing execution of indented code.
 
-        ``g``, ``c``, and ``p`` are available to executing code, assignments
-        are made in the ``c.vs`` namespace and persist for the life of ``c``.
-        """
+            ``g``, ``c``, and ``p`` are available to executing code, assignments
+            are made in the ``c.vs`` namespace and persist for the life of ``c``.
+        */
         //@-<< eval docstring >>
-        c = self.c
-        if c == event.get('c'):
-            s = self.get_selected_lines()
-            if self.legacy and s is None:
-                return
-            # Updates self.last_answer if there is exactly one answer.
-            self.eval_text(s)
+        const c = this.c;
+        //   if (c === event.get('c')) {
+        const s = this.get_selected_lines();
+        if (this.legacy && s === null) {
+            return;
+        }
+        // Updates self.last_answer if there is exactly one answer.
+        this.eval_text(s || '');
+        //   }
+    }
     //@+node:felix.20230924174338.62: *4* eval-block
-    @eval_cmd("eval-block")
-    def eval_block(self, event: Event) -> None:
+    @eval_cmd(
+        "eval-block",
+        "evaluates the current code block, either the code block the cursor's in, or the code block preceding the output block the cursor's in.")
+    eval_block(): void {
         //@+<< eval-block docstring >>
         //@+node:felix.20230924174338.63: *5* << eval-block docstring >>
-        """
-        In the body, "# >>>" marks the end of a code block, and "# <<<" marks
-        the end of an output block.  E.g.::
+        /*
+            In the body, "# >>>" marks the end of a code block, and "# <<<" marks
+            the end of an output block.  E.g.::
 
-        a = 2
-        # >>>
-        4
-        # <<<
-        b = 2.0*a
-        # >>>
-        4.0
-        # <<<
+            a = 2
+            # >>>
+            4
+            # <<<
+            b = 2.0*a
+            # >>>
+            4.0
+            # <<<
 
-        ``eval-block`` evaluates the current code block, either the code block
-        the cursor's in, or the code block preceding the output block the cursor's
-        in.  Subsequent output blocks are marked "# >>> *" to show they may need
-        re-evaluation.
+            ``eval-block`` evaluates the current code block, either the code block
+            the cursor's in, or the code block preceding the output block the cursor's
+            in.  Subsequent output blocks are marked "# >>> *" to show they may need
+            re-evaluation.
 
-        Note: you don't really need to type the "# >>>" and "# <<<" markers
-        because ``eval-block`` will add them as needed.  So just type the
-        first code block and run ``eval-block``.
-
-        """
+            Note: you don't really need to type the "# >>>" and "# <<<" markers
+            because ``eval-block`` will add them as needed.  So just type the
+            first code block and run ``eval-block``.
+        */
         //@-<< eval-block docstring >>
-        c = self.c
-        if c != event.get('c'):
-            return
-        pos = 0
-        lines: list[str] = []
-        current_seen = False
-        current: bool
-        source: str
-        output: str
-        for current, source, output in self.get_blocks():
-            lines.append(source)
-            lines.append("# >>>" + (" *" if current_seen else ""))
-            if current:
-                old_log = c.frame.log.logCtrl.getAllText()
-                self.eval_text(source)
-                new_log = c.frame.log.logCtrl.getAllText()[len(old_log) :]
-                lines.append(new_log.strip())
-                if not self.legacy:
-                    if self.last_result:
-                        lines.append(self.last_result)
-                pos = len('\n'.join(lines)) + 7
-                current_seen = True
-            else:
-                lines.append(output)
-            lines.append("# <<<")
-        c.p.b = '\n'.join(lines) + '\n'
-        c.frame.body.wrapper.setInsertPoint(pos)
-        c.redraw()
-        c.bodyWantsFocusNow()
+        const c = this.c;
+        // if (c !== event.get('c')) {
+        //   return;
+        // }
+        let pos = 0;
+        const lines: string[] = [];
+        let current_seen = false;
+        let current: boolean;
+        let source: string;
+        let output: string;
+
+        for ([current, source, output] of this.get_blocks()) {
+            lines.push(source);
+            lines.push("# >>>" + (current_seen ? " *" : ""));
+            if (current) {
+                const old_log = ''; // NOT USED IN LEOJS // c.frame.log.logCtrl.getAllText();
+                this.eval_text(source);
+                const new_log = ''; // NOT USED IN LEOJS // c.frame.log.logCtrl.getAllText().slice(old_log.length);
+                lines.push(new_log.trim());
+                if (!this.legacy) {
+                    if (this.last_result) {
+                        lines.push(this.last_result);
+                    }
+                }
+                pos = lines.join('\n').length + 7;
+                current_seen = true;
+            } else {
+                lines.push(output);
+            }
+            lines.push("# <<<");
+        }
+        c.p.b = lines.join('\n') + '\n';
+        c.frame.body.wrapper.setInsertPoint(pos);
+        c.redraw();
+        c.bodyWantsFocusNow();
+    }
     //@+node:felix.20230924174338.64: *4* eval-last
-    @eval_cmd("eval-last")
-    def eval_last(self, event: Event, text: str=None) -> None:
-        """
-        Insert the last result from ``eval``.
-
-        Inserted as a string, so ``"1\n2\n3\n4"`` will cover four lines and
-        insert no quotes, for ``repr()`` style insertion use ``last-pretty``.
-        """
-        c = self.c
-        if c != event.get('c'):
-            return
-        if self.legacy:
-            text = str(c.vs.get('_last'))
-        else:
-            if not text and not self.last_result:
-                return
-            if not text:
-                text = str(self.last_result)
-        w = c.frame.body.wrapper
-        i = w.getInsertPoint()
-        w.insert(i, text + '\n')
-        w.setInsertPoint(i + len(text) + 1)
-        c.setChanged()
+    /**
+     * Insert the last result from ``eval``.
+     *
+     * Inserted as a string, so ``"1\n2\n3\n4"`` will cover four lines and
+     * insert no quotes, for ``repr()`` style insertion use ``last-pretty``.
+     */
+    @eval_cmd("eval-last", "Insert the last result from 'eval' as string.")
+    public eval_last(text: string | null = null): void {
+        const c = this.c;
+        // if (c !== event.get('c')) {
+        //   return;
+        // }
+        if (this.legacy && c.vs) {
+            text = String(c.vs['_last']);
+        } else {
+            if (!text && !this.last_result) {
+                return;
+            }
+            if (!text) {
+                text = String(this.last_result);
+            }
+        }
+        const w = c.frame.body.wrapper;
+        const i = w.getInsertPoint();
+        w.insert(i, text + '\n');
+        w.setInsertPoint(i + text.length + 1);
+        c.setChanged();
+    }
     //@+node:felix.20230924174338.65: *4* eval-last-pretty
-    @eval_cmd("eval-last-pretty")
-    def vs_last_pretty(self, event: Event) -> None:
-        """
-        Insert the last result from ``eval``.
-
-        Formatted by ``pprint.pformat()``, so ``"1\n2\n3\n4"`` will appear as
-        '``"1\n2\n3\n4"``', see all ``last``.
-        """
-        c = self.c
-        if c != event.get('c'):
-            return
-        if self.legacy:
-            text = str(c.vs.get('_last'))
-        else:
-            text = self.last_result
-        if text:
-            text = pprint.pformat(text)
-            self.eval_last(event, text=text)
+    /**
+     * Insert the last result from ``eval``.
+     *
+     * Formatted by ``pprint.pformat()``, so ``"1\n2\n3\n4"`` will appear as
+     * '``"1\n2\n3\n4"``', see all ``last``.
+     */
+    @eval_cmd("eval-last-pretty", "Insert the last result from 'eval' as JSON.stringify.")
+    public vs_last_pretty(): void {
+        const c = this.c;
+        // if (c !== event.get('c')) {
+        //   return;
+        // }
+        let text: any;
+        if (this.legacy && c.vs) {
+            text = c.vs['_last'].toString();
+        } else {
+            text = this.last_result;
+        }
+        if (text) {
+            text = JSON.stringify(text, null, 2); // pprint.pformat(text);
+            this.eval_last(text);
+        }
+    }
     //@+node:felix.20230924174338.66: *4* eval-replace
-    @eval_cmd("eval-replace")
-    def eval_replace(self, event: Event) -> None:
-        """
-        Execute the selected text, if any.
-        Undoably replace it with the result.
-        """
-        c = self.c
-        if c != event.get('c'):
-            return
-        w = c.frame.body.wrapper
-        s = w.getSelectedText()
-        if not s.strip():
-            g.es_print('no selected text')
-            return
-        self.eval_text(s)
-        if self.legacy:
-            last = c.vs.get('_last')
-        else:
-            last = self.last_result
-        if not last:
-            return
-        s = pprint.pformat(last)
-        i, j = w.getSelectionRange()
-        new_text = c.p.b[:i] + s + c.p.b[j:]
-        bunch = c.undoer.beforeChangeNodeContents(c.p)
-        w.setAllText(new_text)
-        c.p.b = new_text
-        w.setInsertPoint(i + len(s))
-        c.undoer.afterChangeNodeContents(c.p, 'Insert result', bunch)
-        c.setChanged()
+    /**
+     * Execute the selected text, if any.
+     * Undoably replace it with the result.
+     */
+    @eval_cmd("eval-replace", "Execute the selected text, if any. Undoably replace it with the result.")
+    public eval_replace(): void {
+        const c = this.c;
+        // if (c !== event.get('c')) {
+        //   return;
+        // }
+        const w = c.frame.body.wrapper;
+        const s = w.getSelectedText();
+        if (!s.trim()) {
+            g.es_print('no selected text');
+            return;
+        }
+        this.eval_text(s);
+        let last: any;
+        if (this.legacy && c.vs) {
+            last = c.vs['_last'];
+        } else {
+            last = this.last_result;
+        }
+        if (!last) {
+            return;
+        }
+        const formattedLast = JSON.stringify(last, null, 2); // pprint.pformat(last);
+        const [i, j] = w.getSelectionRange();
+        const new_text = c.p.b.substring(0, i) + formattedLast + c.p.b.substring(j);
+        const bunch = c.undoer.beforeChangeNodeContents(c.p);
+        w.setAllText(new_text);
+        c.p.b = new_text;
+        w.setInsertPoint(i + formattedLast.length);
+        c.undoer.afterChangeNodeContents(c.p, 'Insert result', bunch);
+        c.setChanged();
+    }
     //@+node:felix.20230924174338.67: *3* eval.Helpers
     //@+node:felix.20230924174338.68: *4* eval.eval_text & helpers
-    def eval_text(self, s: str) -> Optional[str]:
-        """Evaluate string s."""
-        s = textwrap.dedent(s)
-        if not s.strip():
-            return None
-        self.redirect()
-        if self.legacy:
-            blocks = re.split('\n(?=[^\\s])', s)
-            ans = self.old_exec(blocks, s)
-            self.show_legacy_answer(ans, blocks)
-            return ans  # needed by mod_http
-        self.new_exec(s)
-        self.show_answers()
-        self.unredirect()
-        return None
+    /**
+     * Evaluate string s.
+     */
+    public eval_text(s: string): string | null {
+        s = g.dedent(s);
+        if (!s.trim()) {
+            return null;
+        }
+        this.redirect();
+        if (this.legacy) {
+            const blocks = s.split(/\n(?=[^\s])/);  // TODO : MAKE SURE THIS IS GOOD IN ORIGINAL LEO ALSO
+            const ans = this.old_exec(blocks, s);
+            this.show_legacy_answer(ans, blocks);
+            return ans;  // needed by mod_http
+        }
+        this.new_exec(s);
+        this.show_answers();
+        this.unredirect();
+        return null;
+    }
     //@+node:felix.20230924174338.69: *5* eval.new_exec
-    def new_exec(self, s: str) -> None:
-        try:
-            self.answers = []
-            self.locals_d = {}
-            exec(s, self.globals_d, self.locals_d)
-            for key in self.locals_d:
-                val = self.locals_d.get(key)
-                self.globals_d[key] = val
-                self.answers.append((key, val))
-            if len(self.answers) == 1:
-                key, val = self.answers[0]
-                self.last_result = val
-            else:
-                self.last_result = None
-        except Exception:
-            g.es_exception()
+    /**
+     * Evaluate string s.
+     */
+    public new_exec(s: string): void {
+        try {
+            this.answers = [];
+            this.locals_d = {};
+            // * Use eval or other JS evaluation methods here.
+            //   exec(s, self.globals_d, self.locals_d)
+
+            this.last_result = new Function(
+                // 'c',
+                // 'g',
+                // 'input',
+                // 'p',
+                // '__name__',
+                // 'script_args',
+                // 'script_gnx',
+                ...Object.keys(this.globals_d),
+                s
+            )(
+                ...Object.keys(this.globals_d).map(k => this.globals_d[k])
+                // d['c'],
+                // d['g'],
+                // d['input'],
+                // d['p'],
+                // d['__name__'],
+                // d['script_args'],
+                // d['script_gnx']
+            );
+
+
+            // * NOT USED IN LEOJS SO FAR
+            // for (let key in this.locals_d) {
+            //   let val = this.locals_d[key];
+            //   this.globals_d[key] = val;
+            //   this.answers.push([key, val]);
+            // }
+            // if (this.answers.length === 1) {
+            //   const [key, val] = this.answers[0];
+            //   this.last_result = val;
+            // } else {
+            //   this.last_result = undefined;
+            // }
+
+        } catch (e) {
+            g.es_exception(e);
+        }
+    }
     //@+node:felix.20230924174338.70: *5* eval.old_exec
-    def old_exec(self, blocks: list[str], txt: str) -> str:
+    public old_exec(blocks: string[], txt: string): string {
 
-        # pylint: disable=eval-used
-        c = self.c
-        leo_globals = {'c': c, 'g': g, 'p': c.p}
-        all_done, ans = False, None
-        try:
-            # Execute all but the last 'block'
-            exec('\n'.join(blocks[:-1]), leo_globals, c.vs)  # Compatible with Python 3.x.
-            all_done = False
-        except SyntaxError:
-            # Splitting the last block caused syntax error
-            try:
-                # Is the whole thing a single expression?
-                ans = eval(txt, leo_globals, c.vs)
-            except SyntaxError:
-                try:
-                    exec(txt, leo_globals, c.vs)
-                except Exception:
-                    g.es_exception()
-            all_done = True  # Either way, the last block will be used.
-        if not all_done:  # last block still needs using
-            try:
-                ans = eval(blocks[-1], leo_globals, c.vs)
-            except SyntaxError:
-                try:
-                    exec(txt, leo_globals, c.vs)
-                except Exception:
-                    g.es_exception()
+        const c = this.c;
+        const leo_globals: Record<string, any> = { 'c': c, 'g': g, 'p': c.p };
+        let all_done = false;
+        let ans: any = undefined;
+
+        console.log('TODO : MAKE A BETTER old_exec');
+        try {
+            ans = new Function(
+                // 'c',
+                // 'g',
+                // 'input',
+                // 'p',
+                // '__name__',
+                // 'script_args',
+                // 'script_gnx',
+                ...Object.keys(leo_globals),
+                txt
+            )(
+                ...Object.keys(leo_globals).map(k => leo_globals[k])
+                // d['c'],
+                // d['g'],
+                // d['input'],
+                // d['p'],
+                // d['__name__'],
+                // d['script_args'],
+                // d['script_gnx']
+            );
+        } catch (e) {
+            g.es_exception(e);
+        }
+
+
+        // try
+        //     // Execute all but the last 'block'
+        //     exec('\n'.join(blocks[:-1]), leo_globals, c.vs)  // Compatible with Python 3.x.
+        //     all_done = false;
+        // catch (e))
+        //     // Splitting the last block caused syntax error
+        //     try:
+        //         // Is the whole thing a single expression?
+        //         ans = eval(txt, leo_globals, c.vs)
+        //     catch (e))
+        //         try:
+        //             exec(txt, leo_globals, c.vs)
+        //         catch (e))
+        //             g.es_exception()
+        //     all_done = true;  // Either way, the last block will be used.
+        // if !all_done  // last block still needs using
+        //     try
+        //         ans = eval(blocks[-1], leo_globals, c.vs)
+        //     catch (e))
+        //         try:
+        //             exec(txt, leo_globals, c.vs)
+        //         catch (e))
+        //             g.es_exception()
         return ans
+
+    }
     //@+node:felix.20230924174338.71: *5* eval.redirect & unredirect
-    def redirect(self) -> None:
-        c = self.c
-        if c.config.getBool('eval-redirect'):
-            self.old_stderr = g.stdErrIsRedirected()
-            self.old_stdout = g.stdOutIsRedirected()
-            if not self.old_stderr:
-                g.redirectStderr()
-            if not self.old_stdout:
-                g.redirectStdout()
+    /**
+     * Redirect standard output and standard error streams.
+     */
+    public redirect(): void {
+        const c = this.c;
 
-    def unredirect(self) -> None:
-        c = self.c
-        if c.config.getBool('eval-redirect'):
-            if not self.old_stderr:
-                g.restoreStderr()
-            if not self.old_stdout:
-                g.restoreStdout()
+        if (c.config.getBool('eval-redirect')) {
+            console.log('TODO : mod_scripting redirect method');
+            // this.old_stderr = g.stdErrIsRedirected();
+            // this.old_stdout = g.stdOutIsRedirected();
+            // if (!this.old_stderr) {
+            //   g.redirectStderr();
+            // }
+            // if (!this.old_stdout) {
+            //   g.redirectStdout();
+            // }
+        }
+    }
+
+    /**
+     * Restore standard output and standard error streams to their original states.
+     */
+    public unredirect(): void {
+        const c = this.c;
+        if (c.config.getBool('eval-redirect')) {
+            console.log('TODO : mod_scripting unredirect method');
+
+            // if (!this.old_stderr) {
+            //   g.restoreStderr();
+            // }
+            // if (!this.old_stdout) {
+            //   g.restoreStdout();
+            // }
+        }
+    }
     //@+node:felix.20230924174338.72: *5* eval.show_answers
-    def show_answers(self) -> None:
-        """ Show all new values computed by do_exec."""
-        if len(self.answers) > 1:
-            g.es('')
-        for answer in self.answers:
-            key, val = answer
-            g.es(f"{key} = {val}")
+    /**
+     * Show all new values computed by do_exec.
+     */
+    public show_answers(): void {
+        if (this.answers.length > 1) {
+            g.es('');
+        }
+        for (const answer of this.answers) {
+            const [key, val] = answer;
+            g.es(`${key} = ${val}`);
+        }
+    }
     //@+node:felix.20230924174338.73: *5* eval.show_legacy_answer
-    def show_legacy_answer(self, ans: str, blocks: list[str]) -> str:
-
-        cvs = self.c.vs
-        if ans is None:  # see if last block was a simple "var =" assignment
-            key = blocks[-1].split('=', 1)[0].strip()
-            if key in cvs:
-                ans = cvs[key]
-        if ans is None:  # see if whole text was a simple /multi-line/ "var =" assignment
-            key = blocks[0].split('=', 1)[0].strip()
-            if key in cvs:
-                ans = cvs[key]
-        cvs['_last'] = ans
-        if ans is not None:
-            # annoying to echo 'None' to the log during line by line execution
-            txt = str(ans)
-            lines = txt.split('\n')
-            if len(lines) > 10:
-                txt = '\n'.join(lines[:5] + ['<snip>'] + lines[-5:])
-            if len(txt) > 500:
-                txt = txt[:500] + ' <truncated>'
-            g.es(txt)
-        return ans
+    /**
+     * show_legacy_answer - Shows the legacy answer.
+     */
+    public show_legacy_answer(ans: string | null, blocks: string[]): string | null {
+        const cvs = this.c.vs;
+        if (ans === null) {  // See if last block was a simple "var =" assignment.
+            const key = blocks[blocks.length - 1].split('=', 1)[0].trim();
+            if (key in cvs) {
+                ans = cvs[key];
+            }
+        }
+        if (ans === null) {  // See if whole text was a simple /multi-line/ "var =" assignment.
+            const key = blocks[0].split('=', 1)[0].trim();
+            if (key in cvs) {
+                ans = cvs[key];
+            }
+        }
+        cvs['_last'] = ans;
+        if (ans !== null) {
+            // Annoying to echo 'None' to the log during line by line execution.
+            let txt = String(ans);
+            const lines = txt.split('\n');
+            if (lines.length > 10) {
+                txt = lines.slice(0, 5).concat('<snip>').concat(lines.slice(-5)).join('\n');
+            }
+            if (txt.length > 500) {
+                txt = txt.substring(0, 500) + ' <truncated>';
+            }
+            g.es(txt);
+        }
+        return ans;
+    }
     //@+node:felix.20230924174338.74: *4* eval.exec_then_eval (not used yet)
-    def exec_then_eval(self, code: str, ns: dict) -> str:
-        # From Milan Melena.
+    /**
+     * exec_then_eval - Executes code and then evaluates the last expression, if any.
+     * From Milan Melena.
+     */
+    public exec_then_eval(code: string, ns: Record<string, any>): string {
+
+        // * TODO  exec_then_eval
+        /*
+        console.log(" TODO  exec_then_eval");
         import ast
         block = ast.parse(code, mode='exec')
         if block.body and isinstance(block.body[-1], ast.Expr):
@@ -1726,77 +1877,109 @@ class EvalController {
             return eval(compile(last, '<string>', mode='eval'), ns)
         exec(compile(block, '<string>', mode='exec'), ns)
         return ""
+        */
+
+        return "";
+    }
     //@+node:felix.20230924174338.75: *4* eval.get_blocks
-    def get_blocks(self) -> Generator:
-        """get_blocks - iterate code blocks
+    /**
+     * get_blocks - iterate code blocks
+     * 
+     * @return A generator yielding tuples of the form (current: boolean, source: string, output: string)
+     */
+    public *get_blocks(): Generator<[boolean, string, string]> {
+        const c = this.c;
+        let pos = c.frame.body.wrapper.getInsertPoint();
+        let chrs = 0;
+        let lines = c.p.b.split('\n');
+        let block: Record<string, string[]> = { 'source': [], 'output': [] };
+        let reading: 'source' | 'output' = 'source';
+        let seeking_current = true;
 
-        :return: (current, source, output)
-        :rtype: (bool, str, str)
-        """
-        c = self.c
-        pos = c.frame.body.wrapper.getInsertPoint()
-        chrs = 0
-        lines = c.p.b.split('\n')
-        block: dict[str, list] = {'source': [], 'output': []}
-        reading = 'source'
-        seeking_current = True
-        # if the last non-blank line isn't the end of a possibly empty
-        # output block, make it one
-        if [i for i in lines if i.strip()][-1] != "# <<<":
-            lines.append("# <<<")
-        while lines:
-            line = lines.pop(0)
-            chrs += len(line) + 1
-            if line.startswith("# >>>"):
-                reading = 'output'
-                continue
-            if line.startswith("# <<<"):
-                current = seeking_current and (chrs >= pos + 1)
-                if current:
-                    seeking_current = False
-                yield current, '\n'.join(block['source']), '\n'.join(block['output'])
-                block = {'source': [], 'output': []}
-                reading = 'source'
-                continue
-            block[reading].append(line)
+        // If the last non-blank line isn't the end of a possibly empty output block, make it one
+        if (lines.filter(i => i.trim()).pop() !== "# <<<") {
+            lines.push("# <<<");
+        }
+
+        while (lines.length > 0) {
+            let line = lines.shift()!;
+            chrs += line.length + 1;
+
+            if (line.startsWith("# >>>")) {
+                reading = 'output';
+                continue;
+            }
+
+            if (line.startsWith("# <<<")) {
+                const current = seeking_current && (chrs >= pos + 1);
+                if (current) {
+                    seeking_current = false;
+                }
+                yield [current, block['source'].join('\n'), block['output'].join('\n')];
+                block = { 'source': [], 'output': [] };
+                reading = 'source';
+                continue;
+            }
+
+            block[reading].push(line);
+        }
+    }
     //@+node:felix.20230924174338.76: *4* eval.get_selected_lines
-    def get_selected_lines(self) -> str:
+    /**
+     * Get selected lines from the text.
+     */
+    public get_selected_lines(): string | null {
+        const c = this.c;
+        const p = c.p;
+        const w = c.frame.body.wrapper;
+        const body = w.getAllText();
+        let i = w.getInsertPoint();
+        let s: string;
 
-        c, p = self.c, self.c.p
-        w = c.frame.body.wrapper
-        body = w.getAllText()
-        i = w.getInsertPoint()
-        if w.hasSelection():
-            if self.legacy:
-                i1, i2 = w.getSelectionRange()
-            else:
-                j, k = w.getSelectionRange()
-                i1, junk = g.getLine(body, j)
-                junk, i2 = g.getLine(body, k)
-            s = body[i1:i2]
-        else:
-            if self.legacy:
-                k = w.getInsertPoint()
-                junk, i2 = g.getLine(body, k)
-                w.setSelectionRange(k, i2)
-                return None
-            i1, i2 = g.getLine(body, i)
-            s = body[i1:i2].strip()
-        # Select next line for next eval.
-        if self.legacy:
-            i = j = i2
-            j += 1
-            while j < len(body) and body[j] != '\n':
-                j += 1
-            w.setSelectionRange(i, j)
-        else:
-            if not body.endswith('\n'):
-                if i >= len(p.b):
-                    i2 += 1
-                p.b = p.b + '\n'
-            ins = min(len(p.b), i2)
-            w.setSelectionRange(i1, ins, insert=ins, s=p.b)
-        return s
+        let i1: number, i2: number;
+        if (w.hasSelection()) {
+            if (this.legacy) {
+                [i1, i2] = w.getSelectionRange();
+            } else {
+                let j: number, k: number;
+                [j, k] = w.getSelectionRange();
+                [i1] = g.getLine(body, j);
+                [, i2] = g.getLine(body, k);
+            }
+            s = body.slice(i1, i2);
+        } else {
+            if (this.legacy) {
+                let k = w.getInsertPoint();
+                [, i2] = g.getLine(body, k);
+                w.setSelectionRange(k, i2);
+                return null;
+            } else {
+                [i1, i2] = g.getLine(body, i);
+                s = body.slice(i1, i2).trim();
+            }
+        }
+
+        // Select next line for next eval.
+        if (this.legacy) {
+            let j = i2;
+            while (j < body.length && body[j] !== '\n') {
+                j += 1;
+            }
+            w.setSelectionRange(i2, j);
+        } else {
+            if (!body.endsWith('\n')) {
+                if (i >= p.b.length) {
+                    i2 += 1;
+                }
+                p.b = p.b + '\n';
+            }
+            const ins = Math.min(p.b.length, i2);
+            // w.setSelectionRange(i, ins, ins, p.b); // no last string parameter in leojs
+            w.setSelectionRange(i, ins, ins);
+        }
+
+        return s;
+    }
     //@-others
 
 }
