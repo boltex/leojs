@@ -3350,7 +3350,8 @@ import {
     LeoGotoNavKey,
     LeoGuiFindTabManagerSettings,
     ChooseDocumentItem,
-    LeoDocument
+    LeoDocument,
+    ChooseRClickItem
 } from "./types";
 
 import { Config } from "./config";
@@ -3373,6 +3374,7 @@ import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
+import { RClick } from "./core/mod_scripting";
 
 @language typescript
 @tabwidth -4
@@ -3598,6 +3600,7 @@ export class LeoUI extends NullGui {
     private _leoButtonsProvider!: LeoButtonsProvider;
     private _leoButtons!: vscode.TreeView&lt;LeoButtonNode&gt;;
     private _leoButtonsExplorer!: vscode.TreeView&lt;LeoButtonNode&gt;;
+    private _rclickSelected: number[] = [];
     private _lastLeoButtons: vscode.TreeView&lt;LeoButtonNode&gt; | undefined;
 
     // * Undos pane
@@ -6744,24 +6747,103 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
  * @param p_node the node of the at-buttons panel that was clicked
  * @returns Promises that resolves when done
  */
-public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
-    this.setupRefresh(Focus.NoChange, {
-        tree: true,
-        body: true,
-        documents: true,
-        buttons: true,
-        states: true
-    });
+    await this.triggerBodySave(true);
 
-    void vscode.window.showInformationMessage('TODO: Implement clickAtButton ' + p_node.label);
+    const c = g.app.windowList[g.app.gui.frameIndex].c;
 
-    void this.launchRefresh();
+    const d = c.theScriptingController.buttonsArray;
 
-    // if edited and accepted
-    return Promise.resolve(true);
+    const button = d[p_node.button.index];
 
-    // return Promise.resolve(undefined); // if cancelled
+    let result: any;
+
+    if (p_node.rclicks.length) {
+        // Has rclicks so show menu to choose
+        this._rclickSelected = [];
+        let w_rclick: number[] | undefined;
+        const p_picked = await this._handleRClicks(p_node.rclicks, p_node.button.name);
+
+        if (
+            p_picked
+        ) {
+
+            // Check if only one in this._rclickSelected and is zero: normal press
+            if (this._rclickSelected.length === 1 &amp;&amp; this._rclickSelected[0] === 0) {
+                // Normal button
+                // this.sendAction(
+                //     Constants.LEOBRIDGE.CLICK_BUTTON,
+                //     { index: p_node.button.index }
+                // );
+            } else {
+                // If not decrement first one, and send this._rclickSelected as array of choices
+                this._rclickSelected[0] = this._rclickSelected[0] - 1;
+                w_rclick = this._rclickSelected;
+                // this.sendAction(
+                //     Constants.LEOBRIDGE.CLICK_BUTTON,
+                //     { index: p_node.button.index, rclick: this._rclickSelected }
+                // );
+            }
+            // Press button ! 
+            try {
+                let w_rclickChosen: RClick | undefined;
+                if (w_rclick &amp;&amp; button.rclicks) {
+                    let toChooseFrom: RClick[] = button.rclicks;
+                    for (const i_rc of w_rclick) {
+                        w_rclickChosen = toChooseFrom[i_rc];
+                        toChooseFrom = w_rclickChosen.children;
+                    }
+                    if (w_rclickChosen) {
+                        result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
+                    }
+                } else {
+                    result = button.command();
+                }
+            } catch (e: any) {
+                void vscode.window.showErrorMessage("LeoUI clickAtButton Error: " + e.toString());
+            }
+
+        }
+        // Escaped
+        return Promise.resolve();
+
+
+    } else {
+        // Normal button
+        // this.sendAction(
+        //     Constants.LEOBRIDGE.CLICK_BUTTON,
+        //     { index: p_node.button.index }
+        // );
+        result = button.command();
+    }
+
+    if (result.then) {
+        return result.then(() =&gt; {
+            this.setupRefresh(Focus.NoChange, {
+                tree: true,
+                body: true,
+                documents: true,
+                buttons: true,
+                states: true
+            });
+
+            void this.launchRefresh();
+        });
+
+    } else {
+
+        this.setupRefresh(Focus.NoChange, {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true
+        });
+
+        return this.launchRefresh();
+    }
+
 }
 
 </t>
@@ -10710,9 +10792,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
 <t tx="felix.20220517212706.1">/**
  * * Show input window to select
  */
-private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any&gt; {
-    // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable&lt;ChooseRClickItem&gt; {
-    /*
+private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promise&lt;ChooseRClickItem&gt; {
     const w_choices: ChooseRClickItem[] = [];
     let w_index = 0;
     if (topLevelName) {
@@ -10721,29 +10801,27 @@ private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any
         );
     }
     w_choices.push(
-        ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.name, index: w_index++, rclick: p_rclick }; })
+        ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
     );
 
     const w_options: vscode.QuickPickOptions = {
         placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
     };
-    return vscode.window.showQuickPick(w_choices, w_options).then((p_picked) =&gt; {
-        if (p_picked) {
-            this._rclickSelected.push(p_picked.index);
-            if (topLevelName &amp;&amp; p_picked.index === 0) {
-                return Promise.resolve(p_picked);
-            }
-            if (p_picked.rclick &amp;&amp; p_picked.rclick.children &amp;&amp; p_picked.rclick.children.length) {
-                return this._handleRClicks(p_picked.rclick.children);
-            } else {
-                return Promise.resolve(p_picked);
-            }
+
+    const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
+
+    if (w_picked) {
+        this._rclickSelected.push(w_picked.index);
+        if (topLevelName &amp;&amp; w_picked.index === 0) {
+            return Promise.resolve(w_picked);
         }
-        // Escaped
-        return Promise.reject();
-    });
-    */
-    return Promise.resolve();
+        if (w_picked.rclick &amp;&amp; w_picked.rclick.children &amp;&amp; w_picked.rclick.children.length) {
+            return this._handleRClicks(w_picked.rclick.children);
+        } else {
+            return Promise.resolve(w_picked);
+        }
+    }
+    return Promise.reject();
 }
 
 </t>
