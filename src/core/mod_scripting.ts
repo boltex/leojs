@@ -378,13 +378,17 @@ export class AtButtonCallback {
 
         const script = await this.find_script();
         if (script) {
+            console.log('HAS SCRIPT!');
+
             await this.controller.executeScriptFromButton(
                 this.b,
                 this.buttonText,
                 undefined,
-                this.gnx,
                 script,
+                this.gnx,
             );
+            console.log('HAS did execute script!');
+
         }
     }
     //@+node:felix.20230924174338.15: *4* AtButtonCallback.find_script
@@ -503,6 +507,14 @@ export class ScriptingController {
         const p = c.p;
         const h = p.h;
         const buttonText = this.getButtonText(h);
+
+
+        console.log(" ----------------------------");
+        console.log(" INSIDE addScriptButtonCommand !!!");
+        console.log("this", this);
+        console.log(" ----------------------------");
+
+
         let shortcut = this.getShortcut(h);
         let statusLine = `Run Script: ${buttonText}`;
         if (shortcut) {
@@ -582,7 +594,7 @@ export class ScriptingController {
                 if (m) {
                     const w_key: string = m[1];
                     const func = d[w_key];
-                    func(p); // no need to bind to something before calling. Already classing from 'this'.
+                    await Promise.resolve(func.bind(this)(p));
                 }
                 p.moveToThreadNext();
             }
@@ -592,7 +604,7 @@ export class ScriptingController {
     /**
      * Create a button for a local @button node.
      */
-    createLocalAtButtonHelper(
+    public createLocalAtButtonHelper(
         p: Position,
         h: string,
         statusLine: string,
@@ -722,12 +734,14 @@ export class ScriptingController {
 
         // Register the delete-x-button command.
         const deleteCommandName = `delete-${commandName}-button`;
-        c.k.registerCommand(
+
+        c.registerCommand(
             deleteCommandName,
             deleteButtonCallback,
-            'button',
-            null,
+            undefined,
+            'button'
         );
+
         // Reporting this command is way too annoying.
         return b;
     }
@@ -747,7 +761,7 @@ export class ScriptingController {
             g.blue(c.disableCommandsMessage);
             return;
         }
-        if (!p || !p.__bool__() && !script) {
+        if ((!p || !p.__bool__()) && !script) {
             g.trace("can not happen: no p and no script");
             return;
         }
@@ -843,6 +857,16 @@ export class ScriptingController {
         // Fix bug #74: problems with @button if defined in myLeoSettings.leo
         const docstring = g.getDocString(p.b).trim();
         let statusLine = docstring || 'Global script button';
+
+
+
+        console.log(" ----------------------------");
+        console.log(" INSIDE createCommonButton !!!");
+        console.log("this", this);
+        console.log(" ----------------------------");
+
+
+
         const shortcut = this.getShortcut(p.h);  // Get the shortcut from the @key field in the headline.
         if (shortcut) {
             statusLine = `${statusLine.trim()} = ${shortcut}`;
@@ -922,7 +946,7 @@ export class ScriptingController {
      *
      * See https://github.com/leo-editor/leo-editor/issues/171
      */
-    createCommonCommand(p: Position, script: string): void {
+    public createCommonCommand(p: Position, script: string): void {
         const c = this.c;
         const args = this.getArgs(p);
         const commonCommandCallback = new AtButtonCallback(
@@ -955,8 +979,17 @@ export class ScriptingController {
      * An optional @color=colorname defines a color for the button's background.  It does
      * not appear in the status line nor the button name.
      */
-    handleAtButtonNode(p: Position): void {
+    public handleAtButtonNode(p: Position): void {
         let h = p.h;
+
+
+
+        console.log(" ----------------------------");
+        console.log(" INSIDE handleAtButtonNode !!!");
+        console.log("this", this);
+        console.log(" ----------------------------");
+
+
         let shortcut = this.getShortcut(h);
         let docstring = g.getDocString(p.b).trim();
         let statusLine = docstring ? docstring : "Local script button";
@@ -1161,7 +1194,7 @@ export class ScriptingController {
      * @param w Wrapper instance
      * @param label Balloon label
      */
-    createBalloon(w: Wrapper, label: any): void {
+    public createBalloon(w: Wrapper, label: any): void {
         if (g.app.gui.guiName().startsWith('qt')) {
             // w is a leoIconBarButton.
             if ('button' in w) {
@@ -1176,7 +1209,7 @@ export class ScriptingController {
      * @param button The button to delete
      * @param kw Optional keyword arguments
      */
-    deleteButton(button: any, ...kw: any[]): void {
+    public deleteButton(button: any, ...kw: any[]): void {
         let w = button;
 
         const index = this.buttonsArray.indexOf(button);
@@ -1191,7 +1224,7 @@ export class ScriptingController {
     /**
      * Return the list of @args field of p.h.
      */
-    public getArgs(p: Position): string[] {
+    public getArgs(p?: Position): string[] {
         let args: string[] = [];
         if (!p) {
             return args;
@@ -1284,7 +1317,7 @@ export class ScriptingController {
     /**
      * Return the script composed from p and its descendants.
      */
-    public getScript(p: Position): Promise<string> {
+    public getScript(p?: Position): Promise<string> {
         return g.getScript(
             this.c,
             p,
@@ -1297,7 +1330,7 @@ export class ScriptingController {
     /**
      * Register @button <name> and @rclick <name> and <name>
      */
-    registerAllCommands(
+    public registerAllCommands(
         args: any,
         func: (...args: any[]) => any,
         h: string,
@@ -1306,16 +1339,23 @@ export class ScriptingController {
         tag?: string
     ): void {
         const c = this.c;
-        const k = this.c.k;
         const trace = false;  // Activate this for debugging purposes.
+
+
+        console.log(" ----------------------------");
+        console.log(" INSIDE registerAllCommands !!!");
+        console.log("this", this);
+        console.log(" ----------------------------");
+
+
         let shortcut = this.getShortcut(h) || '';
         let commandName = this.cleanButtonText(h);
 
         // Register the original function.
-        k.registerCommand(
-            true,
+        c.registerCommand(
             commandName,
             func,
+            true,
             pane,
             shortcut
         );
@@ -1342,11 +1382,11 @@ export class ScriptingController {
                         g.trace(`Already in commandsDict: ${commandName2}`);
                     }
                 } else {
-                    k.registerCommand(
+                    c.registerCommand(
                         commandName2,
-                        registerAllCommandsCallback,
+                        registerAllCommandsCallback.bind(this), // * BINDING TO THS SCRIPTING CONTROLLER *
+                        undefined,
                         pane,
-                        null
                     );
                 }
             }
@@ -1356,7 +1396,7 @@ export class ScriptingController {
     /**
      * Set the background color of Qt button b to bg
      */
-    setButtonColor(b: Wrapper, bg?: string): void {
+    public setButtonColor(b: Wrapper, bg?: string): void {
         // * IGNORED IN LEOJS
         //   if (!bg) {
         //     return;
@@ -1380,7 +1420,7 @@ export class ScriptingController {
     /**
      * Truncate the button text
      */
-    truncateButtonText(s: string): string {
+    public truncateButtonText(s: string): string {
         // 2011/10/16: Remove @button here only.
         let i = 0;
         while (g.match(s, i, '@')) {

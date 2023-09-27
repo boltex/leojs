@@ -4390,7 +4390,7 @@ export function dedent(text: string): string {
     return text;
 }
 //@+node:felix.20230925180832.1: *3* g.issueSecurityWarning
-export function issueSecurityWarning(setting: string) : void {
+export function issueSecurityWarning(setting: string): void {
     es('Security warning! Ignoring...')
     es(setting)
     es('This setting can be set only in')
@@ -5441,7 +5441,7 @@ export function python_tokenize(s: string): [string, string, number][] {
  */
 export async function getScript(
     c: Commands,
-    p: Position,
+    p: Position | undefined,
     useSelectedText: boolean = true,
     forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true

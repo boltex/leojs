@@ -6,6 +6,7 @@ import { Commands } from './leoCommands';
 import { FileCommands } from './leoFileCommands';
 import * as g from './leoGlobals';
 import { Position, VNode } from './leoNodes';
+import { build_rclick_tree } from './mod_scripting';
 
 //@-<< imports >>
 //@+<< class ParserBaseClass >>
@@ -198,53 +199,46 @@ export class ParserBaseClass {
     /**
      * Create buttons for each @button node in an @buttons tree.
      */
-    public doButtons(p: Position, kind: string, name: string, val: any): void {
+    public async doButtons(p: Position, kind: string, name: string, val: any): Promise<void> {
         const c: Commands = this.c;
         const tag = '@button';
         const aList: any[] = [];
         const seen: VNode[] = [];
-
         const after = p.nodeAfterTree();
 
-        console.log('TODO: doButtons in parserBaseClass');
-
-        /* 
-        while (p && p.__bool__() && !p.__eq__(after)){
-            if(seen.includes(p.v)){
+        // TODO : REMOVE false TO ENABLE @button !
+        while (false && p && p.__bool__() && !p.__eq__(after)) {
+            if (seen.includes(p.v)) {
                 p.moveToNodeAfterTree();
-            }else if (p.isAtIgnoreNode()){
-                seen.append(p.v);
-                p.moveToNodeAfterTree();
-            }else{
+            } else if (p.isAtIgnoreNode()) {
                 seen.push(p.v);
-                if( g.match_word(p.h, 0, tag)){
+                p.moveToNodeAfterTree();
+            } else {
+                seen.push(p.v);
+                if (g.match_word(p.h, 0, tag)) {
                     // We can not assume that p will be valid when it is used.
-                    script = g.getScript(
+                    const script = await g.getScript(
                         c,
                         p,
-                        useSelectedText:false,
-                        forcePythonSentinels:true,
-                        useSentinels:true
+                        false,
+                        true,
+                        true
                     );
                     // #2011: put rclicks in aList. Do not inject into command_p.
-                    command_p = p.copy();
-                    const rclicks = build_rclick_tree(command_p, top_level=true);
-                    aList.append((command_p, script, rclicks));
+                    const command_p = p.copy();
+                    const rclicks = build_rclick_tree(command_p, undefined, true);
+                    aList.push([command_p, script, rclicks]);
                 }
                 p.moveToThreadNext();
-
             }
         }
-        */
 
         // This setting is handled differently from most other settings,
         // because the last setting must be retrieved before any commander exists.
         if (aList.length) {
             // Bug fix: 2011/11/24: Extend the list, don't replace it.
             g.app.config.atCommonButtonsList.push(...aList);
-            g.app.config.buttonsFileName = c
-                ? c.shortFileName()
-                : '<no settings file>';
+            g.app.config.buttonsFileName = c ? c.shortFileName() : '<no settings file>';
         }
     }
     //@+node:felix.20220529184714.10: *4* pbc.doColor
@@ -802,6 +796,13 @@ export class ParserBaseClass {
         const modeName = this.computeModeName(name);
         const d = new g.SettingsDict(`modeDict for ${modeName}`);
 
+
+        console.log(" ----------------------------");
+        console.log(" INSIDE DOMODE !!! --------------");
+        console.log(" ----------------------------");
+
+
+
         const s = p.b;
         const lines = g.splitLines(s);
         for (let line in lines) {
@@ -1333,7 +1334,7 @@ export class ParserBaseClass {
     /**
      * Traverse the entire settings tree.
      */
-    public traverse(): [g.SettingsDict, g.SettingsDict] {
+    public async traverse(): Promise<[g.SettingsDict, g.SettingsDict]> {
         const c = this.c;
 
         this.settingsDict = new g.SettingsDict( // type:ignore
@@ -1355,7 +1356,7 @@ export class ParserBaseClass {
 
         const after: Position = p.nodeAfterTree();
         while (p && p.__bool__() && !p.__eq__(after)) {
-            const result = this.visitNode(p);
+            const result = await this.visitNode(p);
             if (result === 'skip') {
                 // g.warning('skipping settings in',p.h)
                 p.moveToNodeAfterTree();
@@ -1376,7 +1377,8 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.52: *3* pbc.visitNode (must be overwritten in subclasses)
-    public visitNode(p: Position): string | undefined {
+    public async visitNode(p: Position): Promise<string | undefined> {
+        await Promise.resolve();
         this.oops();
         return '';
     }
@@ -1844,16 +1846,16 @@ export class GlobalConfigManager {
      * Return the value of the setting, if any, in myLeoSettings.leo.
      */
     public valueInMyLeoSettings(settingName: string): any {
-        
+
         const lm = g.app.loadManager!;
         const d = lm.globalSettingsDict;
-        const mungedSettingName =  this.munge(settingName);
-        if(mungedSettingName){
+        const mungedSettingName = this.munge(settingName);
+        if (mungedSettingName) {
 
             const gs = d.get(mungedSettingName); // A GeneralSetting object.
-            if (gs){
+            if (gs) {
                 const w_path = gs.path;
-                if( w_path.indexOf('myLeoSettings.leo') > -1){
+                if (w_path.indexOf('myLeoSettings.leo') > -1) {
                     return gs.val;
                 }
             }
@@ -2736,7 +2738,7 @@ export class SettingsTreeParser extends ParserBaseClass {
     /**
      * Init any settings found in node p.
      */
-    public visitNode(p: Position): string | undefined {
+    public async visitNode(p: Position): Promise<string | undefined> {
         p = p.copy();
 
         const munge = g.app.config.munge;
@@ -2764,7 +2766,7 @@ export class SettingsTreeParser extends ParserBaseClass {
             const f = this.dispatchDict[kind];
             if (f) {
                 try {
-                    return f.bind(this)(p, kind, name!, val); // type:ignore
+                    const result = await Promise.resolve(f.bind(this)(p, kind, name!, val));
                 } catch (exception) {
                     g.es_exception(exception);
                 }

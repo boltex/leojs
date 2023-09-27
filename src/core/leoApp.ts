@@ -2019,17 +2019,17 @@ export class LoadManager {
      * Merge the settings dicts from c's outline into *new copies of*
      * settings_d and bindings_d.
      */
-    public computeLocalSettings(
+    public async computeLocalSettings(
         c: Commands,
         settings_d: g.SettingsDict,
         bindings_d: g.SettingsDict,
         localFlag: boolean
-    ): [g.SettingsDict, g.SettingsDict] {
+    ): Promise<[g.SettingsDict, g.SettingsDict]> {
         const lm = this;
         let shortcuts_d2;
         let settings_d2;
 
-        [shortcuts_d2, settings_d2] = lm.createSettingsDicts(c, localFlag);
+        [shortcuts_d2, settings_d2] = await lm.createSettingsDicts(c, localFlag);
 
         if (!bindings_d) {
             // #1766: unit tests.
@@ -2073,16 +2073,16 @@ export class LoadManager {
     }
 
     //@+node:felix.20220602202929.1: *4* LM.createSettingsDicts
-    public createSettingsDicts(
+    public async createSettingsDicts(
         c: Commands,
         localFlag: boolean
-    ): [g.SettingsDict | undefined, g.SettingsDict | undefined] {
+    ): Promise<[g.SettingsDict | undefined, g.SettingsDict | undefined]> {
         if (c) {
             // returns the *raw* shortcutsDict, not a *merged* shortcuts dict.
             const parser = new SettingsTreeParser(c, localFlag);
             let shortcutsDict;
             let settingsDict;
-            [shortcutsDict, settingsDict] = parser.traverse();
+            [shortcutsDict, settingsDict] = await parser.traverse();
             return [shortcutsDict, settingsDict];
         }
         return [undefined, undefined];
@@ -2116,7 +2116,7 @@ export class LoadManager {
             }
             // Merge the settings from c into *copies* of the global dicts.
 
-            [d1, d2] = lm.computeLocalSettings(
+            [d1, d2] = await lm.computeLocalSettings(
                 c!,
                 lm.globalSettingsDict,
                 lm.globalBindingsDict,
@@ -2424,7 +2424,7 @@ export class LoadManager {
         for (let c of commanders) {
             // Merge the settings dicts from c's outline into
             // *new copies of* settings_d and bindings_d.
-            [settings_d, bindings_d] = lm.computeLocalSettings(
+            [settings_d, bindings_d] = await lm.computeLocalSettings(
                 c!, // Commands for sure because of filter(c => !!c)
                 settings_d,
                 bindings_d,
