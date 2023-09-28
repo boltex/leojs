@@ -376,11 +376,8 @@ export class AtButtonCallback {
      * Execute the script associated with this button.
      */
     public async execute_script(): Promise<void> {
-
         const script = await this.find_script();
         if (script) {
-            console.log('HAS SCRIPT!');
-
             await this.controller.executeScriptFromButton(
                 this.b,
                 this.buttonText,
@@ -388,11 +385,6 @@ export class AtButtonCallback {
                 script,
                 this.gnx,
             );
-            console.log('HAS did execute script!');
-
-        } else {
-            console.log('CALLED EXECUTE SCRIPT BUT NO SCRIPT! atButtonCallback: ', this);
-
         }
     }
     //@+node:felix.20230924174338.15: *4* AtButtonCallback.find_script
@@ -507,21 +499,10 @@ export class ScriptingController {
      * Called when the user presses the 'script-button' button or executes the script-button command.
      */
     public addScriptButtonCommand(): void {
-        console.log('RUNNING addScriptButtonCommand !! the action of the "create button" button');
-
-        console.log(" ----------------------------");
-        console.log(" INSIDE addScriptButtonCommand !!!");
-        console.log("this", this);
-        console.log(" ----------------------------");
-
         const c = this.c;
         const p = c.p;
         const h = p.h;
         const buttonText = this.getButtonText(h);
-
-
-
-
         let shortcut = this.getShortcut(h);
         let statusLine = `Run Script: ${buttonText}`;
         if (shortcut) {
@@ -535,13 +516,6 @@ export class ScriptingController {
      * Called when user presses the 'run-script' button or executes the run-script command.
      */
     public async runScriptCommand(): Promise<void> {
-        console.log('RUNNING runScriptCommand !! the action of the "create button" button');
-
-        console.log(" ----------------------------");
-        console.log(" INSIDE runScriptCommand !!!");
-        console.log("this", this);
-        console.log(" ----------------------------");
-
         const c = this.c;
         const p = c.p;
         const args = this.getArgs(p);
@@ -867,15 +841,6 @@ export class ScriptingController {
      * See https://github.com/leo-editor/leo-editor/issues/171
      */
     public createCommonButton(p: Position, script: string, rclicks: any[] = []): void {
-
-
-
-        console.log(" ----------------------------");
-        console.log(" INSIDE createCommonButton !!!");
-        console.log("this", this);
-        console.log(" ----------------------------");
-
-
         const c = this.c;
         const gnx = p.gnx;
         const args = this.getArgs(p);
@@ -884,9 +849,6 @@ export class ScriptingController {
         // ! see https://jsdoc.app/about-getting-started.html 
         const docstring = g.getDocString(p.b).trim();
         let statusLine = docstring || 'Global script button';
-
-
-
 
         const shortcut = this.getShortcut(p.h);  // Get the shortcut from the @key field in the headline.
         if (shortcut) {
@@ -1003,14 +965,6 @@ export class ScriptingController {
     public handleAtButtonNode(p: Position): void {
         let h = p.h;
 
-
-
-        console.log(" ----------------------------");
-        console.log(" INSIDE handleAtButtonNode !!!");
-        console.log("this", this);
-        console.log(" ----------------------------");
-
-
         let shortcut = this.getShortcut(h);
         let docstring = g.getDocString(p.b).trim();
         let statusLine = docstring ? docstring : "Local script button";
@@ -1036,6 +990,7 @@ export class ScriptingController {
         //     // Execute the script silently
         //     await p_c.executeScript(p_args, p_p);
         // };
+        // * USE POSITION ONLY INSTEAD GIVEN FROM CALLER doCommand in leoCommands.ts.
         let atCommandCallback = async (p_p: Position = p.copy()) => {
             // Execute the script silently
             await c.executeScript([], p_p);
@@ -1048,10 +1003,6 @@ export class ScriptingController {
         // ! see https://jsdoc.app/about-getting-started.html 
 
         (atCommandCallback as any).__doc__ = g.getDocString(p.b).trim();
-        console.log('calling registerAllCommands with @command: ', atCommandCallback);
-        console.log('which had headline: ', p.h);
-        console.log('which had docstring: ', p.h);
-
 
         this.registerAllCommands(
             args,
@@ -1060,6 +1011,7 @@ export class ScriptingController {
             'button',  // Fix bug 416.
             p.v.context,
             'local @command',
+            // * GIVE POSITION AS AN EXTRA PARAM FOR atCommandCallback ABOVE.
             p.copy()
         );
         g.app.config.atLocalCommandsList.push(p.copy());
@@ -1102,6 +1054,7 @@ export class ScriptingController {
         // const atCommandCallback = async (p_args: any = args, p_c: Commands = c, p_p: Position = p.copy()): Promise<void> => {
         //     await p_c.executeScript(p_args, p_p,);
         // };
+        // * USE POSITION ONLY INSTEAD GIVEN FROM CALLER doCommand in leoCommands.ts.
         const atCommandCallback = async (p_p: Position = p.copy()): Promise<void> => {
             await c.executeScript([], p_p,);
         };
@@ -1114,6 +1067,7 @@ export class ScriptingController {
                 'all',
                 p.v.context,
                 'local @rclick',
+                // * GIVE POSITION AS AN EXTRA PARAM FOR atCommandCallback ABOVE.
                 p.copy()
 
             );
@@ -1379,27 +1333,16 @@ export class ScriptingController {
         p?: Position
     ): void {
 
-
-        console.log(" ----------------------------");
-        console.log(" INSIDE registerAllCommands !!!");
-        console.log("this", this);
-        console.log(" ----------------------------");
-
-
         const c = this.c;
         const trace = false;  // Activate this for debugging purposes.
-
-
 
         let shortcut = this.getShortcut(h) || '';
         let commandName = this.cleanButtonText(h);
 
-        // Add ivars to dive theScriptingController as target for 'bind'
-        // func = Object.assign(            func, { __ivars__: ['c', 'theScriptingController'] }        );
-
         // Register the original function.
         c.registerCommand(
             commandName,
+            // Add ivars to give theScriptingController as target for 'bind'
             Object.assign(func.bind(this), { __ivars__: ['c', 'theScriptingController'], __position__: p }),
             true,
             pane,
@@ -1961,8 +1904,8 @@ export class EvalController {
     public exec_then_eval(code: string, ns: Record<string, any>): string {
 
         // * TODO  exec_then_eval
-        /*
         console.log(" TODO  exec_then_eval");
+        /*
         import ast
         block = ast.parse(code, mode='exec')
         if block.body and isinstance(block.body[-1], ast.Expr):
