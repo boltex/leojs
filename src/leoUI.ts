@@ -4732,22 +4732,29 @@ export class LeoUI extends NullGui {
         void vscode.window.showInformationMessage('TODO: Implement gotoScript ' + p_node.label);
 
         return Promise.resolve(true);
+
         /*
-        return this._isBusyTriggerSave(false)
-            .then((p_saveResult) => {
-                return this.sendAction(
-                    Constants.LEOBRIDGE.GOTO_SCRIPT,
-                    JSON.stringify({ index: p_node.button.index })
-                );
-            })
-            .then((p_gotoScriptResult: LeoBridgePackage) => {
-                return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
-            })
-            .then((p_package) => {
-                // refresh and reveal selection
-                this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
-                return Promise.resolve(true); // TODO launchRefresh should be a returned promise
-            });
+            await this._isBusyTriggerSave(false);
+            this.sendAction(
+                Constants.LEOBRIDGE.GOTO_SCRIPT,
+                { index: p_node.button.index }
+            );
+
+            const w_package = await this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
+
+            // Refresh and reveal selection
+            this.setupRefresh(
+                Focus.Body,
+                {
+                    tree: true,
+                    body: true,
+                    states: true,
+                },
+                w_package.node
+            );
+
+            this.launchRefresh();
+            return w_package;
         */
     }
 
@@ -4761,6 +4768,22 @@ export class LeoUI extends NullGui {
         this.setupRefresh(Focus.NoChange, { buttons: true });
 
         void vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
+
+        /*
+            await this._isBusyTriggerSave(false);
+            const w_package = await this.sendAction(
+                Constants.LEOBRIDGE.REMOVE_BUTTON,
+                { index: p_node.button.index }
+            );
+            this.setupRefresh(
+                Focus.NoChange,
+                {
+                    buttons: true
+                }
+            );
+            this.launchRefresh();
+            return w_package;
+        */
 
         void this.launchRefresh();
 

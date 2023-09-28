@@ -244,8 +244,8 @@ export class Constants {
     public static BUTTON_STRINGS = {
         NULL_WIDGET: "nullButtonWidget",
         SCRIPT_BUTTON: "script-button",
-        ADD_BUTTON: "leoButtonAdd",
-        NORMAL_BUTTON: "leoButtonNode"
+        ADD_BUTTON: "leojsButtonAdd",
+        NORMAL_BUTTON: "leojsButtonNode"
     };
 
     /**
