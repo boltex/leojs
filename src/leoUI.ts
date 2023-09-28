@@ -4690,7 +4690,7 @@ export class LeoUI extends NullGui {
     /**
      * * Show input window to select
      */
-    private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promise<ChooseRClickItem> {
+    private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promise<ChooseRClickItem | undefined> {
         const w_choices: ChooseRClickItem[] = [];
         let w_index = 0;
         if (topLevelName) {
@@ -4719,7 +4719,7 @@ export class LeoUI extends NullGui {
                 return Promise.resolve(w_picked);
             }
         }
-        return Promise.reject();
+        return Promise.resolve(undefined);
     }
 
     /**

@@ -50,7 +50,7 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
                 }
 
                 const entry: LeoButton = {
-                    name: but.name,
+                    name: but.text,
                     index: i_but,
                     rclicks: rclickList,
                 };
@@ -101,17 +101,17 @@ export class LeoButtonNode extends vscode.TreeItem {
             arguments: [this]
         };
 
-        this._isAdd = this.button.index === 0;
-        //= (this.button.index.startsWith(Constants.BUTTON_STRINGS.NULL_WIDGET) &&
-        //this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON);
+        this._isAdd = this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON;
 
         this.rclicks = button.rclicks ? button.rclicks : [];
         this.contextValue = this._isAdd ? Constants.BUTTON_STRINGS.ADD_BUTTON : Constants.BUTTON_STRINGS.NORMAL_BUTTON;
+
     }
 
     // @ts-ignore
     public get iconPath(): Icon {
-        return this._buttonIcons[this._isAdd ? 1 : 0];
+        return this._buttonIcons[this._isAdd ? 2 : this.rclicks.length ? 1 : 0];
+
     }
 
     // @ts-ignore
