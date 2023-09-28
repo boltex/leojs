@@ -362,6 +362,7 @@ export class AtButtonCallback {
         this.source_c = c;  // For GetArgs.command_source.
         this.__doc__ = docstring;  // The docstring for this callback for g.getDocStringForFunction.
         this.__call__ = this.__call__.bind(this);
+        (this.__call__ as any)['gnx'] = gnx;
     }
     //@+node:felix.20230924174338.11: *3* __call__ (AtButtonCallback)
     /**

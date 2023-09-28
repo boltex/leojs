@@ -4727,35 +4727,61 @@ export class LeoUI extends NullGui {
      * @param p_node the node of the at-buttons panel that was right-clicked
      * @returns the launchRefresh promise started after it's done finding the node
      */
-    public gotoScript(p_node: LeoButtonNode): Promise<boolean> {
+    public async gotoScript(p_node: LeoButtonNode): Promise<unknown> {
 
-        void vscode.window.showInformationMessage('TODO: Implement gotoScript ' + p_node.label);
+        await this.triggerBodySave(true);
 
-        return Promise.resolve(true);
+        const tag = 'goto_script';
 
-        /*
-            await this._isBusyTriggerSave(false);
-            this.sendAction(
-                Constants.LEOBRIDGE.GOTO_SCRIPT,
-                { index: p_node.button.index }
-            );
+        const index = p_node.button.index;
 
-            const w_package = await this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
+        const c = g.app.windowList[g.app.gui.frameIndex].c;
 
-            // Refresh and reveal selection
-            this.setupRefresh(
-                Focus.Body,
-                {
-                    tree: true,
-                    body: true,
-                    states: true,
-                },
-                w_package.node
-            );
+        const d = c.theScriptingController.buttonsArray;
 
-            this.launchRefresh();
-            return w_package;
-        */
+        const butWidget = d[index];
+
+        console.log('goto script ! :  button', p_node);
+
+        if (butWidget) {
+
+            try {
+                const gnx: string = butWidget.command.gnx;
+
+                let p: Position | undefined; // Replace YourPType with actual type
+
+                for (const pos of c.all_positions()) {
+                    if (pos.gnx === gnx) {
+                        p = pos;
+                        break;
+                    }
+                }
+
+                if (p) {
+                    c.selectPosition(p);
+                    this.setupRefresh(
+                        Focus.Outline,
+                        {
+                            tree: true,
+                            body: true,
+                            documents: true,
+                            states: true,
+                            buttons: true,
+                        }
+                    );
+                    return this.launchRefresh();
+                } else {
+                    throw new Error(`${tag}: not found ${gnx}`);
+                }
+
+            } catch (e) {
+                g.es_exception(e);
+            }
+
+        }
+
+        return Promise.resolve(false);
+
     }
 
     /**
@@ -4763,34 +4789,34 @@ export class LeoUI extends NullGui {
      * @param p_node the node of the at-buttons panel that was chosen to remove
      * @returns Thenable that resolves when done
      */
-    public removeAtButton(p_node: LeoButtonNode): Thenable<unknown> {
+    public async removeAtButton(p_node: LeoButtonNode): Promise<unknown> {
+
+        await this.triggerBodySave(true);
+
+        const tag: string = 'remove_button';
+
+        const index = p_node.button.index;
+
+        const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+        const d = c.theScriptingController.buttonsArray;
+
+        const butWidget = d[index];
+
+        if (butWidget) {
+            try {
+                d.splice(index, 1);
+            } catch (e) {
+                g.es_exception(e);
+            }
+        } else {
+            console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
+        }
 
         this.setupRefresh(Focus.NoChange, { buttons: true });
 
-        void vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
+        return this.launchRefresh();
 
-        /*
-            await this._isBusyTriggerSave(false);
-            const w_package = await this.sendAction(
-                Constants.LEOBRIDGE.REMOVE_BUTTON,
-                { index: p_node.button.index }
-            );
-            this.setupRefresh(
-                Focus.NoChange,
-                {
-                    buttons: true
-                }
-            );
-            this.launchRefresh();
-            return w_package;
-        */
-
-        void this.launchRefresh();
-
-        // if edited and accepted
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
     }
 
     /**

@@ -206,8 +206,7 @@ export class ParserBaseClass {
         const seen: VNode[] = [];
         const after = p.nodeAfterTree();
 
-        // TODO : REMOVE false TO ENABLE @button !
-        while (false && p && p.__bool__() && !p.__eq__(after)) {
+        while (p && p.__bool__() && !p.__eq__(after)) {
             if (seen.includes(p.v)) {
                 p.moveToNodeAfterTree();
             } else if (p.isAtIgnoreNode()) {

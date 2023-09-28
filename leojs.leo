@@ -2431,8 +2431,8 @@ public static USER_MESSAGES = {
 public static BUTTON_STRINGS = {
     NULL_WIDGET: "nullButtonWidget",
     SCRIPT_BUTTON: "script-button",
-    ADD_BUTTON: "leoButtonAdd",
-    NORMAL_BUTTON: "leoButtonNode"
+    ADD_BUTTON: "leojsButtonAdd",
+    NORMAL_BUTTON: "leojsButtonNode"
 };
 
 </t>
@@ -6829,18 +6829,34 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
  * @param p_node the node of the at-buttons panel that was chosen to remove
  * @returns Thenable that resolves when done
  */
-public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
+
+    await this.triggerBodySave(true);
+
+    const tag: string = 'remove_button';
+
+    const index = p_node.button.index;
+
+    const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+    const d = c.theScriptingController.buttonsArray;
+
+    const butWidget = d[index];
+
+    if (butWidget) {
+        try {
+            d.splice(index, 1);
+        } catch (e) {
+            g.es_exception(e);
+        }
+    } else {
+        console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
+    }
 
     this.setupRefresh(Focus.NoChange, { buttons: true });
 
-    void vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
+    return this.launchRefresh();
 
-    void this.launchRefresh();
-
-    // if edited and accepted
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
 }
 
 </t>
@@ -10807,28 +10823,61 @@ private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promis
  * @param p_node the node of the at-buttons panel that was right-clicked
  * @returns the launchRefresh promise started after it's done finding the node
  */
-public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
+public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
-    void vscode.window.showInformationMessage('TODO: Implement gotoScript ' + p_node.label);
+    await this.triggerBodySave(true);
 
-    return Promise.resolve(true);
-    /*
-    return this._isBusyTriggerSave(false)
-        .then((p_saveResult) =&gt; {
-            return this.sendAction(
-                Constants.LEOBRIDGE.GOTO_SCRIPT,
-                JSON.stringify({ index: p_node.button.index })
-            );
-        })
-        .then((p_gotoScriptResult: LeoBridgePackage) =&gt; {
-            return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
-        })
-        .then((p_package) =&gt; {
-            // refresh and reveal selection
-            this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
-            return Promise.resolve(true); // TODO launchRefresh should be a returned promise
-        });
-    */
+    const tag = 'goto_script';
+
+    const index = p_node.button.index;
+
+    const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+    const d = c.theScriptingController.buttonsArray;
+
+    const butWidget = d[index];
+
+    console.log('goto script ! :  button', p_node);
+
+    if (butWidget) {
+
+        try {
+            const gnx: string = butWidget.command.gnx;
+
+            let p: Position | undefined; // Replace YourPType with actual type
+
+            for (const pos of c.all_positions()) {
+                if (pos.gnx === gnx) {
+                    p = pos;
+                    break;
+                }
+            }
+
+            if (p) {
+                c.selectPosition(p);
+                this.setupRefresh(
+                    Focus.Outline,
+                    {
+                        tree: true,
+                        body: true,
+                        documents: true,
+                        states: true,
+                        buttons: true,
+                    }
+                );
+                return this.launchRefresh();
+            } else {
+                throw new Error(`${tag}: not found ${gnx}`);
+            }
+
+        } catch (e) {
+            g.es_exception(e);
+        }
+
+    }
+
+    return Promise.resolve(false);
+
 }
 
 </t>
