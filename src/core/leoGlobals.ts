@@ -5313,6 +5313,8 @@ export function createTopologyList(
  * Return the text of the first docstring found in s.
  */
 export function getDocString(s: string): string {
+    // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+    // ! see https://jsdoc.app/about-getting-started.html 
     const tags = ['"""', "'''"];
     let tag1;
     let tag2;
@@ -5346,6 +5348,10 @@ export function getDocString(s: string): string {
  * Return the docstring for a function that creates a Leo command.
  */
 export function getDocStringForFunction(func: any): string {
+
+    // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+    // ! see https://jsdoc.app/about-getting-started.html 
+
     const name = (func: any): string => {
         if (func['__name__']) {
             return func['__name__'];

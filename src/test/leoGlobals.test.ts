@@ -753,6 +753,11 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
     //@+node:felix.20220129223719.14: *4* TestGlobals.test_g_getDocString
     test('test_g_getDocString', () => {
+
+        // ! TODO : ADD MORE TESTS FOR JAVASCRIPT DOCSTRINGS: JSDOC STRINGS !!
+        // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+        // ! see https://jsdoc.app/about-getting-started.html 
+
         let s1 = 'no docstring';
         let s2 = g.dedent(`\
     # comment

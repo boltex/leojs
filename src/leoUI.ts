@@ -3022,6 +3022,9 @@ export class LeoUI extends NullGui {
                 void this.launchRefresh();
             }
             return Promise.resolve(w_commandResult);
+
+
+
         } else {
             // Canceled
             return Promise.resolve(undefined);

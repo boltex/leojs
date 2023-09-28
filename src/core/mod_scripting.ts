@@ -647,6 +647,8 @@ export class ScriptingController {
 
         // Now that b is defined we can define the callback.
         // Yes, executeScriptFromButton *does* use b (to delete b if requested by the script).
+        // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+        // ! see https://jsdoc.app/about-getting-started.html 
         const docstring = g.getDocString(p.b).trim();
         const cb = new AtButtonCallback(
             this,
@@ -878,6 +880,8 @@ export class ScriptingController {
         const gnx = p.gnx;
         const args = this.getArgs(p);
         // Fix bug #74: problems with @button if defined in myLeoSettings.leo
+        // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+        // ! see https://jsdoc.app/about-getting-started.html 
         const docstring = g.getDocString(p.b).trim();
         let statusLine = docstring || 'Global script button';
 
@@ -1028,22 +1032,35 @@ export class ScriptingController {
         }
         let args = this.getArgs(p);
 
-        let atCommandCallback = async (p_args: any = args, p_c: Commands = c, p_p: Position = p.copy()) => {
+        // let atCommandCallback = async (p_args: any = args, p_c: Commands = c, p_p: Position = p.copy()) => {
+        //     // Execute the script silently
+        //     await p_c.executeScript(p_args, p_p);
+        // };
+        let atCommandCallback = async (p_p: Position = p.copy()) => {
             // Execute the script silently
-            await p_c.executeScript(p_args, p_p);
+            await c.executeScript([], p_p);
         };
 
         // Fix bug 1251252
         // Minibuffer commands created by mod_scripting.py have no docstrings
 
+        // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+        // ! see https://jsdoc.app/about-getting-started.html 
+
         (atCommandCallback as any).__doc__ = g.getDocString(p.b).trim();
+        console.log('calling registerAllCommands with @command: ', atCommandCallback);
+        console.log('which had headline: ', p.h);
+        console.log('which had docstring: ', p.h);
+
+
         this.registerAllCommands(
             args,
             atCommandCallback,
             p.h,
             'button',  // Fix bug 416.
             p.v.context,
-            'local @command'
+            'local @command',
+            p.copy()
         );
         g.app.config.atLocalCommandsList.push(p.copy());
     }
@@ -1082,8 +1099,11 @@ export class ScriptingController {
         }
         const args = this.getArgs(p);
 
-        const atCommandCallback = async (p_args: any = args, p_c: Commands = c, p_p: Position = p.copy()): Promise<void> => {
-            await p_c.executeScript(p_args, p_p,);
+        // const atCommandCallback = async (p_args: any = args, p_c: Commands = c, p_p: Position = p.copy()): Promise<void> => {
+        //     await p_c.executeScript(p_args, p_p,);
+        // };
+        const atCommandCallback = async (p_p: Position = p.copy()): Promise<void> => {
+            await c.executeScript([], p_p,);
         };
 
         if (p.b.trim()) {
@@ -1093,7 +1113,9 @@ export class ScriptingController {
                 p.h,
                 'all',
                 p.v.context,
-                'local @rclick'
+                'local @rclick',
+                p.copy()
+
             );
         }
         g.app.config.atLocalCommandsList.push(p.copy());
@@ -1353,7 +1375,8 @@ export class ScriptingController {
         h: string,
         pane: string,
         source_c?: Commands,
-        tag?: string
+        tag?: string,
+        p?: Position
     ): void {
 
 
@@ -1371,10 +1394,13 @@ export class ScriptingController {
         let shortcut = this.getShortcut(h) || '';
         let commandName = this.cleanButtonText(h);
 
+        // Add ivars to dive theScriptingController as target for 'bind'
+        // func = Object.assign(            func, { __ivars__: ['c', 'theScriptingController'] }        );
+
         // Register the original function.
         c.registerCommand(
             commandName,
-            func.bind(this),
+            Object.assign(func.bind(this), { __ivars__: ['c', 'theScriptingController'], __position__: p }),
             true,
             pane,
             shortcut
@@ -1404,7 +1430,10 @@ export class ScriptingController {
                 } else {
                     c.registerCommand(
                         commandName2,
-                        registerAllCommandsCallback.bind(this), // * BINDING TO THS SCRIPTING CONTROLLER *
+                        // ! TODO : CHACK IF BOTH BIND AND __ivar__ NECESSARY ! 
+                        // * BINDING TO THS SCRIPTING CONTROLLER and assinginig ivars *
+                        // Object.assign(registerAllCommandsCallback.bind(this), { __ivars__: ['c', 'theScriptingController'], __position__: p }),
+                        Object.assign(func.bind(this), { __ivars__: ['c', 'theScriptingController'], __position__: p }),
                         undefined,
                         pane,
                     );
