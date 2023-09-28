@@ -389,6 +389,9 @@ export class AtButtonCallback {
             );
             console.log('HAS did execute script!');
 
+        } else {
+            console.log('CALLED EXECUTE SCRIPT BUT NO SCRIPT! atButtonCallback: ', this);
+
         }
     }
     //@+node:felix.20230924174338.15: *4* AtButtonCallback.find_script
@@ -458,11 +461,11 @@ export class ScriptingController {
         this.debuggerKind = kind.toLowerCase();
 
         // True: adds a button for every @button node.
-        this.atButtonNodes = getBool('scripting-at-button-nodes');
+        this.atButtonNodes = getBool('scripting-at-button-nodes'); // ! UNUSED IN LEOJS AND ORIGINAL LEO !
         // True: define a minibuffer command for every @command node.
-        this.atCommandsNodes = getBool('scripting-at-commands-nodes');
+        this.atCommandsNodes = getBool('scripting-at-commands-nodes'); // ! UNUSED IN LEOJS AND ORIGINAL LEO !
         // True: define a minibuffer command for every @rclick node.
-        this.atRclickNodes = getBool('scripting-at-rclick-nodes');
+        this.atRclickNodes = getBool('scripting-at-rclick-nodes'); // ! UNUSED IN LEOJS AND ORIGINAL LEO !
         // True: dynamically loads plugins in @plugin nodes when a window is created.
         this.atPluginNodes = getBool('scripting-at-plugin-nodes');
         // # DANGEROUS! True: dynamically executes script in @script nodes when a window is created.
@@ -503,16 +506,19 @@ export class ScriptingController {
      * Called when the user presses the 'script-button' button or executes the script-button command.
      */
     public addScriptButtonCommand(): void {
+        console.log('RUNNING addScriptButtonCommand !! the action of the "create button" button');
+
+        console.log(" ----------------------------");
+        console.log(" INSIDE addScriptButtonCommand !!!");
+        console.log("this", this);
+        console.log(" ----------------------------");
+
         const c = this.c;
         const p = c.p;
         const h = p.h;
         const buttonText = this.getButtonText(h);
 
 
-        console.log(" ----------------------------");
-        console.log(" INSIDE addScriptButtonCommand !!!");
-        console.log("this", this);
-        console.log(" ----------------------------");
 
 
         let shortcut = this.getShortcut(h);
@@ -528,6 +534,13 @@ export class ScriptingController {
      * Called when user presses the 'run-script' button or executes the run-script command.
      */
     public async runScriptCommand(): Promise<void> {
+        console.log('RUNNING runScriptCommand !! the action of the "create button" button');
+
+        console.log(" ----------------------------");
+        console.log(" INSIDE runScriptCommand !!!");
+        console.log("this", this);
+        console.log(" ----------------------------");
+
         const c = this.c;
         const p = c.p;
         const args = this.getArgs(p);
@@ -701,7 +714,7 @@ export class ScriptingController {
         // Command may be null.
         const b = this.iconBar.add(
             truncatedText,
-            command,
+            command?.bind(this),
             kind,
         );
 
@@ -851,12 +864,6 @@ export class ScriptingController {
      * See https://github.com/leo-editor/leo-editor/issues/171
      */
     public createCommonButton(p: Position, script: string, rclicks: any[] = []): void {
-        const c = this.c;
-        const gnx = p.gnx;
-        const args = this.getArgs(p);
-        // Fix bug #74: problems with @button if defined in myLeoSettings.leo
-        const docstring = g.getDocString(p.b).trim();
-        let statusLine = docstring || 'Global script button';
 
 
 
@@ -864,6 +871,15 @@ export class ScriptingController {
         console.log(" INSIDE createCommonButton !!!");
         console.log("this", this);
         console.log(" ----------------------------");
+
+
+        const c = this.c;
+        const gnx = p.gnx;
+        const args = this.getArgs(p);
+        // Fix bug #74: problems with @button if defined in myLeoSettings.leo
+        const docstring = g.getDocString(p.b).trim();
+        let statusLine = docstring || 'Global script button';
+
 
 
 
@@ -1338,8 +1354,6 @@ export class ScriptingController {
         source_c?: Commands,
         tag?: string
     ): void {
-        const c = this.c;
-        const trace = false;  // Activate this for debugging purposes.
 
 
         console.log(" ----------------------------");
@@ -1348,13 +1362,18 @@ export class ScriptingController {
         console.log(" ----------------------------");
 
 
+        const c = this.c;
+        const trace = false;  // Activate this for debugging purposes.
+
+
+
         let shortcut = this.getShortcut(h) || '';
         let commandName = this.cleanButtonText(h);
 
         // Register the original function.
         c.registerCommand(
             commandName,
-            func,
+            func.bind(this),
             true,
             pane,
             shortcut
@@ -1368,7 +1387,7 @@ export class ScriptingController {
                 const commandName2 = commandName.slice(prefix.length).trim();
 
                 // Create a *second* function, to avoid collision in c.commandsDict.
-                const registerAllCommandsCallback = (p_func: (...args: any[]) => void = func) => {
+                const registerAllCommandsCallback = (p_func: (...args: any[]) => void = func.bind(this)) => {
                     p_func();
                 };
 

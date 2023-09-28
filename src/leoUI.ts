@@ -4637,18 +4637,10 @@ export class LeoUI extends NullGui {
                 // Check if only one in this._rclickSelected and is zero: normal press
                 if (this._rclickSelected.length === 1 && this._rclickSelected[0] === 0) {
                     // Normal button
-                    // this.sendAction(
-                    //     Constants.LEOBRIDGE.CLICK_BUTTON,
-                    //     { index: p_node.button.index }
-                    // );
                 } else {
                     // If not decrement first one, and send this._rclickSelected as array of choices
                     this._rclickSelected[0] = this._rclickSelected[0] - 1;
                     w_rclick = this._rclickSelected;
-                    // this.sendAction(
-                    //     Constants.LEOBRIDGE.CLICK_BUTTON,
-                    //     { index: p_node.button.index, rclick: this._rclickSelected }
-                    // );
                 }
                 // Press button ! 
                 try {
@@ -4663,7 +4655,7 @@ export class LeoUI extends NullGui {
                             result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
                         }
                     } else {
-                        result = button.command();
+                        await Promise.resolve(button.command());
                     }
                 } catch (e: any) {
                     void vscode.window.showErrorMessage("LeoUI clickAtButton Error: " + e.toString());
@@ -4680,34 +4672,18 @@ export class LeoUI extends NullGui {
             //     Constants.LEOBRIDGE.CLICK_BUTTON,
             //     { index: p_node.button.index }
             // );
-            result = button.command();
+            await Promise.resolve(button.command());
         }
 
-        if (result.then) {
-            return result.then(() => {
-                this.setupRefresh(Focus.NoChange, {
-                    tree: true,
-                    body: true,
-                    documents: true,
-                    buttons: true,
-                    states: true
-                });
+        this.setupRefresh(Focus.NoChange, {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true
+        });
 
-                void this.launchRefresh();
-            });
-
-        } else {
-
-            this.setupRefresh(Focus.NoChange, {
-                tree: true,
-                body: true,
-                documents: true,
-                buttons: true,
-                states: true
-            });
-
-            return this.launchRefresh();
-        }
+        return this.launchRefresh();
 
     }
 
