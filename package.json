@@ -2197,6 +2197,10 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "leojs.gotoScript",
+          "when": "false"
+        },
+        {
           "command": "leojs.removeButton",
           "when": "false"
         },

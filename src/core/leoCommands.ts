@@ -37,6 +37,7 @@ import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
+import { ScriptingController, EvalController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 const dayjs = require('dayjs');
@@ -92,6 +93,7 @@ export class Commands {
     public importCommands: LeoImportCommands;
     public persistenceController: PersistenceDataController;
 
+    // 
     public theTagController: TagController;
     public quicksearchController: QuickSearchController;
 
@@ -167,6 +169,7 @@ export class Commands {
     public configInited = false;
     public doubleClickFlag = false;
     public exists = true; // Indicate that this class exists and has not been destroyed.
+    public vs: Record<string, any> = {};
 
     public in_qt_dialog = false; // True: in a qt dialog.
     public loading = false; // True: we are loading a file: disables c.setChanged()
@@ -229,7 +232,8 @@ export class Commands {
     public convertCommands: any = undefined;
     public debugCommands: any = undefined;
     public editFileCommands: EditFileCommandsClass;
-    public evalController: any = undefined;
+    public evalController!: EvalController; // Set in leoApp at 'open2' event.
+    public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
     public rstCommands: RstCommands;
     public helpCommands: any = undefined;
@@ -440,6 +444,10 @@ export class Commands {
         */
         const c: Commands = this;
 
+        if (!p || !p.__bool__()) {
+            p = undefined;
+        }
+
         const script1 = script;
         let run_pyflakes: boolean;
         if (runPyflakes) {
@@ -513,8 +521,8 @@ export class Commands {
     //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
     public executeScriptHelper(
         args: any,
-        define_g: any,
-        define_name: any,
+        define_g: boolean,
+        define_name: string,
         namespace: any,
         script: string
     ): void {
@@ -565,22 +573,24 @@ export class Commands {
             } else {
                 // exec(script, d)
                 new Function(
-                    'c',
-                    'g',
-                    'input',
-                    'p',
-                    '__name__',
-                    'script_args',
-                    'script_gnx',
+                    // 'c',
+                    // 'g',
+                    // 'input',
+                    // 'p',
+                    // '__name__',
+                    // 'script_args',
+                    // 'script_gnx',
+                    ...Object.keys(d),
                     script
                 )(
-                    d['c'],
-                    d['g'],
-                    d['input'],
-                    d['p'],
-                    d['__name__'],
-                    d['script_args'],
-                    d['script_gnx']
+                    ...Object.keys(d).map(k => d[k])
+                    // d['c'],
+                    // d['g'],
+                    // d['input'],
+                    // d['p'],
+                    // d['__name__'],
+                    // d['script_args'],
+                    // d['script_gnx']
                 );
             }
         } catch (e) {
@@ -2242,7 +2252,7 @@ export class Commands {
      * command func if g.doHook("command1") returns false. This provides a
      * simple mechanism for overriding commands.
      */
-    public doCommand(command_func: () => any, command_name: string): any {
+    public doCommand(command_func: (...args: any[]) => any, command_name: string, p_positionArg?: Position): any {
         const c: Commands = this;
         let p: Position = c.p;
         let return_value: any;
@@ -2274,7 +2284,7 @@ export class Commands {
             try {
                 c.inCommand = true;
                 try {
-                    return_value = command_func();
+                    return_value = command_func(p_positionArg);
                 } catch (e) {
                     g.es_exception(e);
                     return_value = undefined;
@@ -2337,16 +2347,21 @@ export class Commands {
 
         // * Here the original new_cmd_decorator decorator is implemented 'run-time'
         let ivars: string[] | undefined = (command_func as any)['__ivars__'];
+        let w_position;
+        if ((command_func as any)['__position__']) {
+            w_position = (command_func as any)['__position__'];
+        }
 
         if (ivars && ivars.length) {
             const w_baseObject: any = g.ivars2instance(c, g, ivars);
             command_func = command_func.bind(w_baseObject);
         } else {
+            // NEEDED ??  WE'RE ALREADY IN 'COMMANDS' !
             command_func = command_func.bind(c);
         }
 
         // Invoke the function.
-        const val: any = c.doCommand(command_func, command_name);
+        const val: any = c.doCommand(command_func, command_name, w_position);
         if (c.exists) {
             // c.frame.updateStatusLine();
         }

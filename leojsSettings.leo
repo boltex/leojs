@@ -210,6 +210,19 @@
 <v t="ekr.20041119034357.32"><vh>@int page-width = 80</vh></v>
 <v t="ekr.20041119034357.31"><vh>@int tab-width = -4</vh></v>
 </v>
+<v t="felix.20230927160655.1"><vh>Plugins</vh>
+<v t="felix.20230927161926.1"><vh>scripting plugin</vh>
+<v t="felix.20230927161926.2"><vh>@bool scripting-at-button-nodes = True</vh></v>
+<v t="felix.20230927161926.3"><vh>@bool scripting-at-rclick-nodes = False</vh></v>
+<v t="felix.20230927161926.4"><vh>@bool scripting-at-commands-nodes = True</vh></v>
+<v t="felix.20230927161926.5"><vh>@bool scripting-at-plugin-nodes = False</vh></v>
+<v t="felix.20230927161926.6"><vh>@bool scripting-at-script-nodes = False</vh></v>
+<v t="felix.20230927161926.7"><vh>@bool scripting-create-debug-button = False</vh></v>
+<v t="felix.20230927161926.8"><vh>@bool scripting-create-run-script-button = False</vh></v>
+<v t="felix.20230927161926.9"><vh>@bool scripting-create-script-button-button = True</vh></v>
+<v t="felix.20230927161926.10"><vh>@int scripting-max-button-size = 18</vh></v>
+</v>
+</v>
 <v t="ekr.20110611092035.16481"><vh>Scripting</vh>
 <v t="ekr.20061029091403"><vh>@bool show-full-tracebacks-in-scripts = False</vh></v>
 </v>
@@ -1662,6 +1675,30 @@ w, Wrapper
 <t tx="felix.20220506230435.1">True: (Legacy) The goto-first-visible-node and goto-first-visible-node commands collapse all nodes that are not ancestors of the target node that is selected.
 
 False: (Recommended) The commands act as simple navigation commands, and do not change the outline state.</t>
+<t tx="felix.20230927160655.1"></t>
+<t tx="felix.20230927161926.1"></t>
+<t tx="felix.20230927161926.10">The maximum length of button names.
+</t>
+<t tx="felix.20230927161926.2">True: adds a button for every @button node.
+</t>
+<t tx="felix.20230927161926.3">@killcolor 
+
+True: create minibuffer commands for each @rclick node.
+Default False.</t>
+<t tx="felix.20230927161926.4">True: define a minibuffer command for every @command node.
+</t>
+<t tx="felix.20230927161926.5">True: dynamically loads plugins in @plugins nodes when a window is created.
+</t>
+<t tx="felix.20230927161926.6">True: dynamically executes script in @script nodes when a window is created.  DANGEROUS!
+</t>
+<t tx="felix.20230927161926.7">True: create Debug Script button.
+</t>
+<t tx="felix.20230927161926.8">True: create Run Script button.
+
+Note: The plugin creates the press-run-script-button command regardless of this setting.</t>
+<t tx="felix.20230927161926.9">True: create Script Button button in icon area.
+
+Note: The plugin creates the press-script-button-button regardless of this setting.</t>
 <t tx="jlunz.20151119171553.1"></t>
 <t tx="jlunz.20151120072157.1">True: Wrap body text.
 

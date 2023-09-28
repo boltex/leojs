@@ -19,7 +19,8 @@ import {
     LeoGotoNavKey,
     LeoGuiFindTabManagerSettings,
     ChooseDocumentItem,
-    LeoDocument
+    LeoDocument,
+    ChooseRClickItem
 } from "./types";
 
 import { Config } from "./config";
@@ -42,6 +43,7 @@ import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
+import { RClick } from "./core/mod_scripting";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -158,6 +160,7 @@ export class LeoUI extends NullGui {
     private _leoButtonsProvider!: LeoButtonsProvider;
     private _leoButtons!: vscode.TreeView<LeoButtonNode>;
     private _leoButtonsExplorer!: vscode.TreeView<LeoButtonNode>;
+    private _rclickSelected: number[] = [];
     private _lastLeoButtons: vscode.TreeView<LeoButtonNode> | undefined;
 
     // * Undos pane
@@ -3019,6 +3022,9 @@ export class LeoUI extends NullGui {
                 void this.launchRefresh();
             }
             return Promise.resolve(w_commandResult);
+
+
+
         } else {
             // Canceled
             return Promise.resolve(undefined);
@@ -4609,7 +4615,68 @@ export class LeoUI extends NullGui {
      * @param p_node the node of the at-buttons panel that was clicked
      * @returns Promises that resolves when done
      */
-    public clickAtButton(p_node: LeoButtonNode): Thenable<unknown> {
+    public async clickAtButton(p_node: LeoButtonNode): Promise<unknown> {
+
+        await this.triggerBodySave(true);
+
+        const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+        const d = c.theScriptingController.buttonsArray;
+
+        const button = d[p_node.button.index];
+
+        let result: any;
+
+        if (p_node.rclicks.length) {
+            // Has rclicks so show menu to choose
+            this._rclickSelected = [];
+            let w_rclick: number[] | undefined;
+            const p_picked = await this._handleRClicks(p_node.rclicks, p_node.button.name);
+
+            if (
+                p_picked
+            ) {
+
+                // Check if only one in this._rclickSelected and is zero: normal press
+                if (this._rclickSelected.length === 1 && this._rclickSelected[0] === 0) {
+                    // Normal button
+                } else {
+                    // If not decrement first one, and send this._rclickSelected as array of choices
+                    this._rclickSelected[0] = this._rclickSelected[0] - 1;
+                    w_rclick = this._rclickSelected;
+                }
+                // Press button ! 
+                try {
+                    let w_rclickChosen: RClick | undefined;
+                    if (w_rclick && button.rclicks) {
+                        let toChooseFrom: RClick[] = button.rclicks;
+                        for (const i_rc of w_rclick) {
+                            w_rclickChosen = toChooseFrom[i_rc];
+                            toChooseFrom = w_rclickChosen.children;
+                        }
+                        if (w_rclickChosen) {
+                            result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
+                        }
+                    } else {
+                        await Promise.resolve(button.command());
+                    }
+                } catch (e: any) {
+                    void vscode.window.showErrorMessage("LeoUI clickAtButton Error: " + e.toString());
+                }
+
+            }
+            // Escaped
+            return Promise.resolve();
+
+
+        } else {
+            // Normal button
+            // this.sendAction(
+            //     Constants.LEOBRIDGE.CLICK_BUTTON,
+            //     { index: p_node.button.index }
+            // );
+            await Promise.resolve(button.command());
+        }
 
         this.setupRefresh(Focus.NoChange, {
             tree: true,
@@ -4619,22 +4686,14 @@ export class LeoUI extends NullGui {
             states: true
         });
 
-        void vscode.window.showInformationMessage('TODO: Implement clickAtButton ' + p_node.label);
+        return this.launchRefresh();
 
-        void this.launchRefresh();
-
-        // if edited and accepted
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
     }
 
     /**
      * * Show input window to select
      */
-    private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable<any> {
-        // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable<ChooseRClickItem> {
-        /*
+    private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promise<ChooseRClickItem | undefined> {
         const w_choices: ChooseRClickItem[] = [];
         let w_index = 0;
         if (topLevelName) {
@@ -4643,29 +4702,27 @@ export class LeoUI extends NullGui {
             );
         }
         w_choices.push(
-            ...p_rclicks.map((p_rclick): ChooseRClickItem => { return { label: p_rclick.name, index: w_index++, rclick: p_rclick }; })
+            ...p_rclicks.map((p_rclick): ChooseRClickItem => { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
         );
 
         const w_options: vscode.QuickPickOptions = {
             placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
         };
-        return vscode.window.showQuickPick(w_choices, w_options).then((p_picked) => {
-            if (p_picked) {
-                this._rclickSelected.push(p_picked.index);
-                if (topLevelName && p_picked.index === 0) {
-                    return Promise.resolve(p_picked);
-                }
-                if (p_picked.rclick && p_picked.rclick.children && p_picked.rclick.children.length) {
-                    return this._handleRClicks(p_picked.rclick.children);
-                } else {
-                    return Promise.resolve(p_picked);
-                }
+
+        const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
+
+        if (w_picked) {
+            this._rclickSelected.push(w_picked.index);
+            if (topLevelName && w_picked.index === 0) {
+                return Promise.resolve(w_picked);
             }
-            // Escaped
-            return Promise.reject();
-        });
-        */
-        return Promise.resolve();
+            if (w_picked.rclick && w_picked.rclick.children && w_picked.rclick.children.length) {
+                return this._handleRClicks(w_picked.rclick.children);
+            } else {
+                return Promise.resolve(w_picked);
+            }
+        }
+        return Promise.resolve(undefined);
     }
 
     /**
@@ -4673,28 +4730,61 @@ export class LeoUI extends NullGui {
      * @param p_node the node of the at-buttons panel that was right-clicked
      * @returns the launchRefresh promise started after it's done finding the node
      */
-    public gotoScript(p_node: LeoButtonNode): Promise<boolean> {
+    public async gotoScript(p_node: LeoButtonNode): Promise<unknown> {
 
-        void vscode.window.showInformationMessage('TODO: Implement gotoScript ' + p_node.label);
+        await this.triggerBodySave(true);
 
-        return Promise.resolve(true);
-        /*
-        return this._isBusyTriggerSave(false)
-            .then((p_saveResult) => {
-                return this.sendAction(
-                    Constants.LEOBRIDGE.GOTO_SCRIPT,
-                    JSON.stringify({ index: p_node.button.index })
-                );
-            })
-            .then((p_gotoScriptResult: LeoBridgePackage) => {
-                return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
-            })
-            .then((p_package) => {
-                // refresh and reveal selection
-                this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
-                return Promise.resolve(true); // TODO launchRefresh should be a returned promise
-            });
-        */
+        const tag = 'goto_script';
+
+        const index = p_node.button.index;
+
+        const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+        const d = c.theScriptingController.buttonsArray;
+
+        const butWidget = d[index];
+
+        console.log('goto script ! :  button', p_node);
+
+        if (butWidget) {
+
+            try {
+                const gnx: string = butWidget.command.gnx;
+
+                let p: Position | undefined; // Replace YourPType with actual type
+
+                for (const pos of c.all_positions()) {
+                    if (pos.gnx === gnx) {
+                        p = pos;
+                        break;
+                    }
+                }
+
+                if (p) {
+                    c.selectPosition(p);
+                    this.setupRefresh(
+                        Focus.Outline,
+                        {
+                            tree: true,
+                            body: true,
+                            documents: true,
+                            states: true,
+                            buttons: true,
+                        }
+                    );
+                    return this.launchRefresh();
+                } else {
+                    throw new Error(`${tag}: not found ${gnx}`);
+                }
+
+            } catch (e) {
+                g.es_exception(e);
+            }
+
+        }
+
+        return Promise.resolve(false);
+
     }
 
     /**
@@ -4702,18 +4792,34 @@ export class LeoUI extends NullGui {
      * @param p_node the node of the at-buttons panel that was chosen to remove
      * @returns Thenable that resolves when done
      */
-    public removeAtButton(p_node: LeoButtonNode): Thenable<unknown> {
+    public async removeAtButton(p_node: LeoButtonNode): Promise<unknown> {
+
+        await this.triggerBodySave(true);
+
+        const tag: string = 'remove_button';
+
+        const index = p_node.button.index;
+
+        const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+        const d = c.theScriptingController.buttonsArray;
+
+        const butWidget = d[index];
+
+        if (butWidget) {
+            try {
+                d.splice(index, 1);
+            } catch (e) {
+                g.es_exception(e);
+            }
+        } else {
+            console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
+        }
 
         this.setupRefresh(Focus.NoChange, { buttons: true });
 
-        void vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
+        return this.launchRefresh();
 
-        void this.launchRefresh();
-
-        // if edited and accepted
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
     }
 
     /**

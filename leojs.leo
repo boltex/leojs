@@ -366,7 +366,6 @@
 <v t="felix.20201214154816.15"><vh>AskMessageItem</vh></v>
 <v t="felix.20201214154816.16"><vh>ChooseDocumentItem</vh></v>
 <v t="felix.20220505220706.1"><vh>ChooseRClickItem</vh></v>
-<v t="felix.20220505220722.1"><vh>RClick</vh></v>
 <v t="felix.20201214154816.17"><vh>MinibufferCommand</vh></v>
 </v>
 <v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
@@ -514,7 +513,7 @@
 </v>
 <v t="felix.20210102000100.1"><vh>Core classes</vh>
 <v t="felix.20211018202009.1"><vh>@file src/core/decorators.ts</vh></v>
-<v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>
+<v t="felix.20230509194418.1"><vh>@file src/core/idle_time.ts</vh></v>
 <v t="felix.20210102012334.1"><vh>@file src/core/leoApp.ts</vh></v>
 <v t="felix.20211211234842.1"><vh>@file src/core/leoAtFile.ts</vh></v>
 <v t="felix.20230802145823.1"><vh>@file src/core/leoCache.ts</vh></v>
@@ -532,9 +531,9 @@
 <v t="felix.20230427003032.1"><vh>@file src/core/leoRst.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
+<v t="felix.20230924174338.1"><vh>@file src/core/mod_scripting.ts</vh></v>
 <v t="felix.20221019001448.1"><vh>@file src/core/nodeTags.ts</vh></v>
 <v t="felix.20221105221426.1"><vh>@file src/core/quicksearch.ts</vh></v>
-<v t="felix.20230509194418.1"><vh>@file src/core/idle_time.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
 <v t="felix.20221220233857.1"><vh>@file src/commands/baseCommands.ts</vh></v>
@@ -547,6 +546,7 @@
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
 </v>
 <v t="felix.20221119204248.1"><vh>Gui base classes</vh>
+<v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>
 <v t="felix.20211212000140.1"><vh>@file src/core/leoFind.ts</vh></v>
 <v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
 <v t="felix.20221119204422.1"><vh>@file src/core/leoGui.ts</vh></v>
@@ -2322,17 +2322,14 @@ public static GUI = {
  * Basic user messages strings for messages and dialogs
  */
 public static USER_MESSAGES = {
-    SCRIPT_BUTTON: "Creates a button from selected node's script",
+    SCRIPT_BUTTON: "from selected node",
     SCRIPT_BUTTON_TOOLTIP:
-        "The 'Script Button' button creates a new button.\n" +
-        "Its name will be the headline of the presently selected node\n" +
-        "Hitting this newly created button executes the button's script.\n" +
-        "\n" +
+        "Creates a new button with the presently selected node.\n" +
         "For example, to run a script on any part of an outline:\n" +
         "\n" +
-        "1.  Select the node containing a script. (Ex.: \"g.es(p.h)\")\n" +
-        "2.  Press 'Script Button'. This will create a new button.\n" +
-        "3.  Select a node on which you want to run the script.\n" +
+        "1.  Select the node containing a script. e.g. \"g.es(p.h)\"\n" +
+        "2.  Press 'Script Button' to create a new button.\n" +
+        "3.  Select another node on which to run the script.\n" +
         "4.  Press the *new* button.",
     SAVE_CHANGES: "Save changes to",
     SAVE_DIALOG_LABEL: "Save Leo File",
@@ -2434,8 +2431,8 @@ public static USER_MESSAGES = {
 public static BUTTON_STRINGS = {
     NULL_WIDGET: "nullButtonWidget",
     SCRIPT_BUTTON: "script-button",
-    ADD_BUTTON: "leoButtonAdd",
-    NORMAL_BUTTON: "leoButtonNode"
+    ADD_BUTTON: "leojsButtonAdd",
+    NORMAL_BUTTON: "leojsButtonNode"
 };
 
 </t>
@@ -2553,6 +2550,8 @@ public static VSCODE_COMMANDS = {
 import { Icon, LeoButton } from "./types";
 import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
+import { RClick } from "./core/mod_scripting";
 
 @language typescript
 @tabwidth -4
@@ -2563,12 +2562,6 @@ import { LeoStates } from "./leoStates";
  * * '@buttons' shown as a list with this TreeDataProvider implementation
  */
 export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonNode&gt; {
-
-    private fakeAtButtons: LeoButton[] = [
-        { name: 'script-button', index: 'nullButtonWidget' },
-        { name: 'button name 2', index: 'key2' },
-        { name: 'button name 3', index: 'key3' },
-    ];
 
     private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoButtonNode | undefined&gt; = new vscode.EventEmitter&lt;LeoButtonNode | undefined&gt;();
 
@@ -2600,9 +2593,37 @@ public refreshTreeRoot(): void {
     const w_children: LeoButtonNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        this.fakeAtButtons.forEach(p_button =&gt; {
+
+        const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+        const d = c.theScriptingController.buttonsArray;
+
+        const buttons = [];
+
+        let i_but = 0;
+        for (const but of d) {
+            let rclickList: RClick[] = [];
+
+            if (but.rclicks) {
+                rclickList = but.rclicks;
+            }
+
+            const entry: LeoButton = {
+                name: but.text,
+                index: i_but,
+                rclicks: rclickList,
+            };
+
+            buttons.push(entry);
+            i_but += 1;
+        }
+
+
+        buttons.forEach(p_button =&gt; {
             w_children.push(new LeoButtonNode(p_button, this._icons));
         });
+
+
     }
     return Promise.resolve(w_children); // Defaults to an empty list of children
 }
@@ -2621,6 +2642,7 @@ export class LeoButtonNode extends vscode.TreeItem {
 
     // Context string that is checked in package.json with 'when' clauses
     public contextValue: string;
+    public rclicks: RClick[];
 
     // is the special 'add' button used to create button from a given node's script
     private _isAdd: boolean;
@@ -2630,15 +2652,19 @@ export class LeoButtonNode extends vscode.TreeItem {
         private _buttonIcons: Icon[], // pointer to global array of node icons
     ) {
         super(button.name);
+
         // Setup this instance (just differentiate 'script-button' for now)
         this.command = {
             command: Constants.COMMANDS.CLICK_BUTTON,
             title: '',
             arguments: [this]
         };
-        this._isAdd = (this.button.index.startsWith(Constants.BUTTON_STRINGS.NULL_WIDGET) &amp;&amp;
-            this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON);
+
+        this._isAdd = this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON;
+
+        this.rclicks = button.rclicks ? button.rclicks : [];
         this.contextValue = this._isAdd ? Constants.BUTTON_STRINGS.ADD_BUTTON : Constants.BUTTON_STRINGS.NORMAL_BUTTON;
+
     }
 
     @others
@@ -2647,7 +2673,8 @@ export class LeoButtonNode extends vscode.TreeItem {
 </t>
 <t tx="felix.20201214151425.3">// @ts-ignore
 public get iconPath(): Icon {
-    return this._buttonIcons[this._isAdd ? 1 : 0];
+    return this._buttonIcons[this._isAdd ? 2 : this.rclicks.length ? 1 : 0];
+
 }
 
 </t>
@@ -3152,6 +3179,8 @@ private _updateLeoObjectIndicator(): void {
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutline";
+import { RClick } from "./core/mod_scripting";
+import { nullButtonWidget } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -3292,7 +3321,8 @@ export interface LeoDocument {
  */
 export interface LeoButton {
     name: string;
-    index: string; // STRING KEY
+    index: number;
+    rclicks?: RClick[];
 }
 
 </t>
@@ -3317,7 +3347,8 @@ import {
     LeoGotoNavKey,
     LeoGuiFindTabManagerSettings,
     ChooseDocumentItem,
-    LeoDocument
+    LeoDocument,
+    ChooseRClickItem
 } from "./types";
 
 import { Config } from "./config";
@@ -3340,6 +3371,7 @@ import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
+import { RClick } from "./core/mod_scripting";
 
 @language typescript
 @tabwidth -4
@@ -3565,6 +3597,7 @@ export class LeoUI extends NullGui {
     private _leoButtonsProvider!: LeoButtonsProvider;
     private _leoButtons!: vscode.TreeView&lt;LeoButtonNode&gt;;
     private _leoButtonsExplorer!: vscode.TreeView&lt;LeoButtonNode&gt;;
+    private _rclickSelected: number[] = [];
     private _lastLeoButtons: vscode.TreeView&lt;LeoButtonNode&gt; | undefined;
 
     // * Undos pane
@@ -5373,6 +5406,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 </t>
 <t tx="felix.20201214205159.42">{
+  "command": "leojs.gotoScript",
+  "when": "false"
+},
+{
   "command": "leojs.removeButton",
   "when": "false"
 },
@@ -6711,7 +6748,68 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
  * @param p_node the node of the at-buttons panel that was clicked
  * @returns Promises that resolves when done
  */
-public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
+
+    await this.triggerBodySave(true);
+
+    const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+    const d = c.theScriptingController.buttonsArray;
+
+    const button = d[p_node.button.index];
+
+    let result: any;
+
+    if (p_node.rclicks.length) {
+        // Has rclicks so show menu to choose
+        this._rclickSelected = [];
+        let w_rclick: number[] | undefined;
+        const p_picked = await this._handleRClicks(p_node.rclicks, p_node.button.name);
+
+        if (
+            p_picked
+        ) {
+
+            // Check if only one in this._rclickSelected and is zero: normal press
+            if (this._rclickSelected.length === 1 &amp;&amp; this._rclickSelected[0] === 0) {
+                // Normal button
+            } else {
+                // If not decrement first one, and send this._rclickSelected as array of choices
+                this._rclickSelected[0] = this._rclickSelected[0] - 1;
+                w_rclick = this._rclickSelected;
+            }
+            // Press button ! 
+            try {
+                let w_rclickChosen: RClick | undefined;
+                if (w_rclick &amp;&amp; button.rclicks) {
+                    let toChooseFrom: RClick[] = button.rclicks;
+                    for (const i_rc of w_rclick) {
+                        w_rclickChosen = toChooseFrom[i_rc];
+                        toChooseFrom = w_rclickChosen.children;
+                    }
+                    if (w_rclickChosen) {
+                        result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
+                    }
+                } else {
+                    await Promise.resolve(button.command());
+                }
+            } catch (e: any) {
+                void vscode.window.showErrorMessage("LeoUI clickAtButton Error: " + e.toString());
+            }
+
+        }
+        // Escaped
+        return Promise.resolve();
+
+
+    } else {
+        // Normal button
+        // this.sendAction(
+        //     Constants.LEOBRIDGE.CLICK_BUTTON,
+        //     { index: p_node.button.index }
+        // );
+        await Promise.resolve(button.command());
+    }
 
     this.setupRefresh(Focus.NoChange, {
         tree: true,
@@ -6721,14 +6819,8 @@ public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
         states: true
     });
 
-    void vscode.window.showInformationMessage('TODO: Implement clickAtButton ' + p_node.label);
+    return this.launchRefresh();
 
-    void this.launchRefresh();
-
-    // if edited and accepted
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
 }
 
 </t>
@@ -6737,18 +6829,34 @@ public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
  * @param p_node the node of the at-buttons panel that was chosen to remove
  * @returns Thenable that resolves when done
  */
-public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
+
+    await this.triggerBodySave(true);
+
+    const tag: string = 'remove_button';
+
+    const index = p_node.button.index;
+
+    const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+    const d = c.theScriptingController.buttonsArray;
+
+    const butWidget = d[index];
+
+    if (butWidget) {
+        try {
+            d.splice(index, 1);
+        } catch (e) {
+            g.es_exception(e);
+        }
+    } else {
+        console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
+    }
 
     this.setupRefresh(Focus.NoChange, { buttons: true });
 
-    void vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
+    return this.launchRefresh();
 
-    void this.launchRefresh();
-
-    // if edited and accepted
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
 }
 
 </t>
@@ -10257,15 +10365,6 @@ export interface ChooseRClickItem extends vscode.QuickPickItem {
 }
 
 </t>
-<t tx="felix.20220505220722.1">/**
- * * Returned from Leo with buttons data
- */
-export interface RClick {
-    name: string;
-    children: RClick[];
-}
-
-</t>
 <t tx="felix.20220505221929.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
@@ -10686,9 +10785,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
 <t tx="felix.20220517212706.1">/**
  * * Show input window to select
  */
-private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any&gt; {
-    // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable&lt;ChooseRClickItem&gt; {
-    /*
+private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promise&lt;ChooseRClickItem | undefined&gt; {
     const w_choices: ChooseRClickItem[] = [];
     let w_index = 0;
     if (topLevelName) {
@@ -10697,29 +10794,27 @@ private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any
         );
     }
     w_choices.push(
-        ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.name, index: w_index++, rclick: p_rclick }; })
+        ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
     );
 
     const w_options: vscode.QuickPickOptions = {
         placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
     };
-    return vscode.window.showQuickPick(w_choices, w_options).then((p_picked) =&gt; {
-        if (p_picked) {
-            this._rclickSelected.push(p_picked.index);
-            if (topLevelName &amp;&amp; p_picked.index === 0) {
-                return Promise.resolve(p_picked);
-            }
-            if (p_picked.rclick &amp;&amp; p_picked.rclick.children &amp;&amp; p_picked.rclick.children.length) {
-                return this._handleRClicks(p_picked.rclick.children);
-            } else {
-                return Promise.resolve(p_picked);
-            }
+
+    const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
+
+    if (w_picked) {
+        this._rclickSelected.push(w_picked.index);
+        if (topLevelName &amp;&amp; w_picked.index === 0) {
+            return Promise.resolve(w_picked);
         }
-        // Escaped
-        return Promise.reject();
-    });
-    */
-    return Promise.resolve();
+        if (w_picked.rclick &amp;&amp; w_picked.rclick.children &amp;&amp; w_picked.rclick.children.length) {
+            return this._handleRClicks(w_picked.rclick.children);
+        } else {
+            return Promise.resolve(w_picked);
+        }
+    }
+    return Promise.resolve(undefined);
 }
 
 </t>
@@ -10728,28 +10823,61 @@ private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any
  * @param p_node the node of the at-buttons panel that was right-clicked
  * @returns the launchRefresh promise started after it's done finding the node
  */
-public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
+public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
-    void vscode.window.showInformationMessage('TODO: Implement gotoScript ' + p_node.label);
+    await this.triggerBodySave(true);
 
-    return Promise.resolve(true);
-    /*
-    return this._isBusyTriggerSave(false)
-        .then((p_saveResult) =&gt; {
-            return this.sendAction(
-                Constants.LEOBRIDGE.GOTO_SCRIPT,
-                JSON.stringify({ index: p_node.button.index })
-            );
-        })
-        .then((p_gotoScriptResult: LeoBridgePackage) =&gt; {
-            return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
-        })
-        .then((p_package) =&gt; {
-            // refresh and reveal selection
-            this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
-            return Promise.resolve(true); // TODO launchRefresh should be a returned promise
-        });
-    */
+    const tag = 'goto_script';
+
+    const index = p_node.button.index;
+
+    const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+    const d = c.theScriptingController.buttonsArray;
+
+    const butWidget = d[index];
+
+    console.log('goto script ! :  button', p_node);
+
+    if (butWidget) {
+
+        try {
+            const gnx: string = butWidget.command.gnx;
+
+            let p: Position | undefined; // Replace YourPType with actual type
+
+            for (const pos of c.all_positions()) {
+                if (pos.gnx === gnx) {
+                    p = pos;
+                    break;
+                }
+            }
+
+            if (p) {
+                c.selectPosition(p);
+                this.setupRefresh(
+                    Focus.Outline,
+                    {
+                        tree: true,
+                        body: true,
+                        documents: true,
+                        states: true,
+                        buttons: true,
+                    }
+                );
+                return this.launchRefresh();
+            } else {
+                throw new Error(`${tag}: not found ${gnx}`);
+            }
+
+        } catch (e) {
+            g.es_exception(e);
+        }
+
+    }
+
+    return Promise.resolve(false);
+
 }
 
 </t>
@@ -12751,6 +12879,9 @@ private _doMinibufferCommand(p_picked?: vscode.QuickPickItem): Promise&lt;unknow
             void this.launchRefresh();
         }
         return Promise.resolve(w_commandResult);
+
+
+
     } else {
         // Canceled
         return Promise.resolve(undefined);

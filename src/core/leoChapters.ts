@@ -66,8 +66,7 @@ export class ChapterController {
         if (cc.use_tabs) {
             if (
                 c.frame &&
-                c.frame.iconBar &&
-                c.frame.iconBar.createChaptersIcon
+                c.frame.iconBar
             ) {
                 if (!cc.tt) {
                     console.log(
@@ -154,7 +153,13 @@ export class ChapterController {
         }
 
         for (let shortcut of bindings) {
-            c.registerCommand(commandName, select_chapter_callback, shortcut);
+            c.registerCommand(
+                commandName,
+                select_chapter_callback,
+                undefined,
+                undefined,
+                shortcut
+            );
         }
     }
     //@+node:felix.20220429005433.9: *3* cc.selectChapter

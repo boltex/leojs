@@ -2,17 +2,13 @@ import * as vscode from "vscode";
 import { Icon, LeoButton } from "./types";
 import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
+import { RClick } from "./core/mod_scripting";
 
 /**
  * * '@buttons' shown as a list with this TreeDataProvider implementation
  */
 export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode> {
-
-    private fakeAtButtons: LeoButton[] = [
-        { name: 'script-button', index: 'nullButtonWidget' },
-        { name: 'button name 2', index: 'key2' },
-        { name: 'button name 3', index: 'key3' },
-    ];
 
     private _onDidChangeTreeData: vscode.EventEmitter<LeoButtonNode | undefined> = new vscode.EventEmitter<LeoButtonNode | undefined>();
 
@@ -38,9 +34,37 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
         const w_children: LeoButtonNode[] = [];
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoStates.fileOpenedReady && !element) {
-            this.fakeAtButtons.forEach(p_button => {
+
+            const c = g.app.windowList[g.app.gui.frameIndex].c;
+
+            const d = c.theScriptingController.buttonsArray;
+
+            const buttons = [];
+
+            let i_but = 0;
+            for (const but of d) {
+                let rclickList: RClick[] = [];
+
+                if (but.rclicks) {
+                    rclickList = but.rclicks;
+                }
+
+                const entry: LeoButton = {
+                    name: but.text,
+                    index: i_but,
+                    rclicks: rclickList,
+                };
+
+                buttons.push(entry);
+                i_but += 1;
+            }
+
+
+            buttons.forEach(p_button => {
                 w_children.push(new LeoButtonNode(p_button, this._icons));
             });
+
+
         }
         return Promise.resolve(w_children); // Defaults to an empty list of children
     }
@@ -59,6 +83,7 @@ export class LeoButtonNode extends vscode.TreeItem {
 
     // Context string that is checked in package.json with 'when' clauses
     public contextValue: string;
+    public rclicks: RClick[];
 
     // is the special 'add' button used to create button from a given node's script
     private _isAdd: boolean;
@@ -68,20 +93,25 @@ export class LeoButtonNode extends vscode.TreeItem {
         private _buttonIcons: Icon[], // pointer to global array of node icons
     ) {
         super(button.name);
+
         // Setup this instance (just differentiate 'script-button' for now)
         this.command = {
             command: Constants.COMMANDS.CLICK_BUTTON,
             title: '',
             arguments: [this]
         };
-        this._isAdd = (this.button.index.startsWith(Constants.BUTTON_STRINGS.NULL_WIDGET) &&
-            this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON);
+
+        this._isAdd = this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON;
+
+        this.rclicks = button.rclicks ? button.rclicks : [];
         this.contextValue = this._isAdd ? Constants.BUTTON_STRINGS.ADD_BUTTON : Constants.BUTTON_STRINGS.NORMAL_BUTTON;
+
     }
 
     // @ts-ignore
     public get iconPath(): Icon {
-        return this._buttonIcons[this._isAdd ? 1 : 0];
+        return this._buttonIcons[this._isAdd ? 2 : this.rclicks.length ? 1 : 0];
+
     }
 
     // @ts-ignore

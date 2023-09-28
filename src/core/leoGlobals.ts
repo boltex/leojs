@@ -4389,6 +4389,13 @@ export function dedent(text: string): string {
 
     return text;
 }
+//@+node:felix.20230925180832.1: *3* g.issueSecurityWarning
+export function issueSecurityWarning(setting: string): void {
+    es('Security warning! Ignoring...')
+    es(setting)
+    es('This setting can be set only in')
+    es('leoSettings.leo or myLeoSettings.leo')
+}
 //@+node:felix.20221218195057.1: *3* g.reEscape
 
 /**
@@ -5306,6 +5313,8 @@ export function createTopologyList(
  * Return the text of the first docstring found in s.
  */
 export function getDocString(s: string): string {
+    // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+    // ! see https://jsdoc.app/about-getting-started.html 
     const tags = ['"""', "'''"];
     let tag1;
     let tag2;
@@ -5339,6 +5348,10 @@ export function getDocString(s: string): string {
  * Return the docstring for a function that creates a Leo command.
  */
 export function getDocStringForFunction(func: any): string {
+
+    // ! TODO : CHECK IF LANGUAGE IS TYPESCRIPT AND GET FIRST JSDOC STRING
+    // ! see https://jsdoc.app/about-getting-started.html 
+
     const name = (func: any): string => {
         if (func['__name__']) {
             return func['__name__'];
@@ -5434,7 +5447,7 @@ export function python_tokenize(s: string): [string, string, number][] {
  */
 export async function getScript(
     c: Commands,
-    p: Position,
+    p: Position | undefined,
     useSelectedText: boolean = true,
     forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true

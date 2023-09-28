@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutline";
+import { RClick } from "./core/mod_scripting";
+import { nullButtonWidget } from "./core/leoFrame";
 
 /**
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
@@ -144,7 +146,8 @@ export interface LeoDocument {
  */
 export interface LeoButton {
     name: string;
-    index: string; // STRING KEY
+    index: number;
+    rclicks?: RClick[];
 }
 
 export type TGotoTypes = "tag" | "headline" | "body" | "parent" | "generic";
@@ -318,14 +321,6 @@ export interface ChooseDocumentItem extends vscode.QuickPickItem {
 export interface ChooseRClickItem extends vscode.QuickPickItem {
     index: number;
     rclick?: RClick;
-}
-
-/**
- * * Returned from Leo with buttons data
- */
-export interface RClick {
-    name: string;
-    children: RClick[];
 }
 
 /**

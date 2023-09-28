@@ -11,6 +11,7 @@ import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
 import { Chapter } from './leoChapters';
 import { StringFindTabManager } from './findTabManager';
+import { RClick, ScriptingController, build_rclick_tree } from './mod_scripting';
 
 //@-<< imports >>
 //@+others
@@ -20,7 +21,7 @@ export class LeoFrame {
     public title: string;
     public gui: LeoGui;
     public openDirectory: string;
-    public iconBar: any;
+    public iconBar: NullIconBarClass;
     public initComplete = false;
     public isNullFrame = false;
 
@@ -42,7 +43,7 @@ export class LeoFrame {
         this.saved = false;
         this.startupWindow = false;
         this.openDirectory = '';
-        this.iconBar = {};
+        this.iconBar = new NullIconBarClass(c, undefined);
         this.initComplete = true;
         this.isNullFrame = true;
 
@@ -421,6 +422,127 @@ export class NullBody {
     //@-others
 }
 
+//@+node:felix.20230925224847.1: ** class nullButtonWidget
+export class nullButtonWidget {
+    public c: Commands;
+    public command: any;
+    public name: string;
+    public text: string;
+    public rclicks: RClick[] | undefined;
+    constructor(c: Commands, command: any, name: string, text: string) {
+        this.c = c;
+        this.command = command;
+        this.name = name;
+        this.text = text;
+    }
+    toString(): string {
+        return this.name;
+    }
+    valueOf(): string {
+        return this.name;
+    }
+
+}
+//@+node:felix.20230925223152.1: ** class NullIconBarClass
+/**
+ * A class representing the singleton Icon bar.
+ */
+export class NullIconBarClass {
+    c: Commands;
+    iconFrame: any | null;
+    parentFrame: any;
+    w: any;
+
+    //@+others
+    //@+node:felix.20230925223152.2: *3*  NullIconBarClass.ctor
+    /**
+     * Ctor for NullIconBarClass.
+     */
+    constructor(c: Commands, parentFrame: any) {
+        this.c = c;
+        this.iconFrame = null;
+        this.parentFrame = parentFrame;
+        this.w = new g.NullObject();
+    }
+    //@+node:felix.20230925223152.3: *3*  NullIconBarClass.Do nothing
+    public addRow(height?: string): void {
+        // No operation
+    }
+
+    public addRowIfNeeded(): void {
+        // No operation
+    }
+
+    public addWidget(w: any): void {
+        // No operation
+    }
+
+    public createChaptersIcon(): void {
+        // No operation
+    }
+
+    public deleteButton(w: any): void {
+        // No operation
+    }
+
+    public getNewFrame(): any {
+        return undefined;
+    }
+
+    public hide(): void {
+        // No operation
+    }
+
+    public show(): void {
+        // No operation
+    }
+    //@+node:felix.20230925223152.4: *3* NullIconBarClass.add
+    /**
+     * Add a (virtual) button to the (virtual) icon bar.
+     */
+    public add(text: string, command?: (...args: any[]) => any, kind?: string,): nullButtonWidget {
+        try {
+            g.app.iconWidgetCount += 1;
+        } catch (e) {
+            g.app.iconWidgetCount = 1;
+        }
+        let n = g.app.iconWidgetCount;
+        let w_name = `nullButtonWidget ${n}`;
+        if (!command) {
+            const commandCallback = (p_name: string = w_name) => {
+                g.pr(`command for ${p_name}`);
+            };
+            command = commandCallback;
+        }
+        const b = new nullButtonWidget(this.c, command, w_name, text);
+        return b;
+    }
+
+    //@+node:felix.20230925223152.5: *3* NullIconBarClass.clear
+    public clear(): void {
+        g.app.iconWidgetCount = 0;
+        g.app.iconImageRefs = [];
+    }
+    //@+node:felix.20230925223152.6: *3* NullIconBarClass.setCommandForButton
+    public setCommandForButton(
+        button: nullButtonWidget,
+        command: () => any,
+        command_p: Position,
+        controller: ScriptingController,
+        gnx: string,
+        script?: string
+    ): void {
+        button.command = command;
+        try {
+            const rclicks = build_rclick_tree(command_p, undefined, true);
+            button.rclicks = rclicks;
+        } catch (e) {
+            // No operation
+        }
+    }
+    //@-others
+
+}
 //@+node:felix.20221102232749.1: ** class NullTree (LeoTree)
 /**
  * A do-almost-nothing tree class.
