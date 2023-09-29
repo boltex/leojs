@@ -2356,7 +2356,6 @@ export class Commands {
             const w_baseObject: any = g.ivars2instance(c, g, ivars);
             command_func = command_func.bind(w_baseObject);
         } else {
-            // NEEDED ??  WE'RE ALREADY IN 'COMMANDS' !
             command_func = command_func.bind(c);
         }
 

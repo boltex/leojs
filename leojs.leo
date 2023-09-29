@@ -2404,9 +2404,15 @@ public static USER_MESSAGES = {
     UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
     LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
     MINIBUFFER_BUTTON_START: "@button-",
+    MINIBUFFER_RCLICK_START: "@rclick-",
+    MINIBUFFER_SCRIPT_BUTTON: "script-button",
+    MINIBUFFER_DEL_SCRIPT_BUTTON: "delete-script-",
     MINIBUFFER_DEL_BUTTON_START: "delete-@button-",
     MINIBUFFER_COMMAND_START: "@command-",
-    MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
+    MINIBUFFER_USER_DEFINED: "User defined command.",
+    MINIBUFFER_BUTTON: "$(run) @button",
+    MINIBUFFER_RCLICK: "$(chevron-right) @rclick",
+    MINIBUFFER_COMMAND: "$(zap) @command",
     MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
     MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
@@ -4054,15 +4060,47 @@ public async minibuffer(): Promise&lt;unknown&gt; {
         }
     }
 
-    const w_noDetails = commands.filter(
-        p_command =&gt; !p_command.detail &amp;&amp; !(
-            p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START) ||
-            p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_BUTTON_START) ||
-            p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)
-        )
-    );
+    const w_noDetails: vscode.QuickPickItem[] = [];
+    const stash_button: string[] = [];
+    const stash_rclick: string[] = [];
+    const stash_command: string[] = [];
+
+    for (const w_com of commands) {
+        if (
+            !w_com.detail &amp;&amp; !(
+                w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START) ||
+                w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_RCLICK_START) ||
+                w_com.label === Constants.USER_MESSAGES.MINIBUFFER_SCRIPT_BUTTON ||
+                w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_SCRIPT_BUTTON) ||
+                w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_BUTTON_START) ||
+                w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)
+            )
+        ) {
+            w_noDetails.push(w_com);
+        }
+
+        if (w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START)) {
+            stash_button.push(w_com.label);
+        }
+        if (w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_RCLICK_START)) {
+            stash_rclick.push(w_com.label);
+        }
+        if (w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)) {
+            stash_command.push(w_com.label);
+        }
+    }
+
     for (const p_command of w_noDetails) {
-        p_command.description = Constants.USER_MESSAGES.MINIBUFFER_USER_DEFINED;
+        if (stash_button.includes(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START + p_command.label)) {
+            p_command.description = Constants.USER_MESSAGES.MINIBUFFER_BUTTON;
+        }
+        if (stash_rclick.includes(Constants.USER_MESSAGES.MINIBUFFER_RCLICK_START + p_command.label)) {
+            p_command.description = Constants.USER_MESSAGES.MINIBUFFER_RCLICK;
+        }
+        if (stash_command.includes(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START + p_command.label)) {
+            p_command.description = Constants.USER_MESSAGES.MINIBUFFER_COMMAND;
+        }
+        p_command.description = p_command.description ? p_command.description : Constants.USER_MESSAGES.MINIBUFFER_USER_DEFINED;
     }
 
     const w_withDetails = commands.filter(p_command =&gt; !!p_command.detail);
@@ -12871,16 +12909,15 @@ private _doMinibufferCommand(p_picked?: vscode.QuickPickItem): Promise&lt;unknow
         const w_commandResult = c.executeMinibufferCommand(w_command);
 
         if (w_commandResult &amp;&amp; w_commandResult.then) {
-            // IS A PROMISE
+            // IS A PROMISE so tack-on the launchRefresh to its '.then' chain. 
             void (w_commandResult as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
                 void this.launchRefresh();
             });
         } else {
             void this.launchRefresh();
         }
+        // In both cases, return the result, or if a promise: the promise itself, not the result.
         return Promise.resolve(w_commandResult);
-
-
 
     } else {
         // Canceled

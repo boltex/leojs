@@ -199,9 +199,15 @@ export class Constants {
         UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
         LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
         MINIBUFFER_BUTTON_START: "@button-",
+        MINIBUFFER_RCLICK_START: "@rclick-",
+        MINIBUFFER_SCRIPT_BUTTON: "script-button",
+        MINIBUFFER_DEL_SCRIPT_BUTTON: "delete-script-",
         MINIBUFFER_DEL_BUTTON_START: "delete-@button-",
         MINIBUFFER_COMMAND_START: "@command-",
-        MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
+        MINIBUFFER_USER_DEFINED: "User defined command.",
+        MINIBUFFER_BUTTON: "$(run) @button",
+        MINIBUFFER_RCLICK: "$(chevron-right) @rclick",
+        MINIBUFFER_COMMAND: "$(zap) @command",
         MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
         MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
