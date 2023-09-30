@@ -154,28 +154,26 @@ export class ParserBaseClass {
         return modeName;
     }
     //@+node:felix.20220529184714.5: *3* pbc.createModeCommand
+    /**
+     * Create a mode command.
+     */
     public createModeCommand(
         modeName: string,
         name: string,
         modeDict: any
     ): void {
-        console.log('TODO : createModeCommand');
-
-        /*
-        modeName = 'enter-' + modeName.replace(/\s/g , '-');
+        // The prompt is everything after the '::'
+        modeName = 'enter-' + modeName.replace(' ', '-');
         const i = name.indexOf('::');
-        if (i > -1){
-            // The prompt is everything after the '::'
-            const prompt = name.substring(i + 2).trim();
-            modeDict['*command-prompt*'] = g.BindingInfo(kind=prompt);
-        }    
+        if (i > -1) {
+            const prompt = name.slice(i + 2).trim();
+            modeDict['*command-prompt*'] = { kind: prompt };  // BindingInfo
+        }
         // Save the info for k.finishCreate and k.makeAllBindings.
         const d = g.app.config.modeCommandsDict;
         // New in 4.4.1 b2: silently allow redefinitions of modes.
-        d[modeName] = modeDict;
-        */
+        d.set(modeName, modeDict);
     }
-
     //@+node:felix.20220529184714.6: *3* pbc.error
     public error(s: string): void {
         g.pr(s);
@@ -468,20 +466,17 @@ export class ParserBaseClass {
         name: string,
         val: any
     ): string | undefined {
-        console.log('TODO : doIfHostname');
 
-        /* 
-        const lm = g.app.loadManager;
-        const h = lm.computeMachineName().trim()
-        const s = name.trim()
-        if( s.startsWith('!')){
-            if (h === s.substring(1)){
+        const lm = g.app.loadManager!;
+        const h = lm.computeMachineName().trim();
+        const s = name.trim();
+        if (s.startsWith('!')) {
+            if (h === s.slice(1)) {
                 return 'skip';
             }
-        }else if( h !== s){
+        } else if (h !== s) {
             return 'skip';
         }
-        */
         return undefined;
     }
 
@@ -495,20 +490,13 @@ export class ParserBaseClass {
         name: string,
         val: any
     ): string | undefined {
-        console.log('TODO : doIfPlatform');
-        return undefined;
-
-        /* 
-
-        const platform = sys.platform.lower();
-        for (let s of name.split(',')){
-            if( platform === s.lower()){
+        const platform = process.platform.toLowerCase();
+        for (const s of name.split(',')) {
+            if (platform && platform === s.toLowerCase()) {
                 return undefined;
             }
         }
-        return "skip";
-
-        */
+        return 'skip';
     }
 
     //@+node:felix.20220529184714.22: *4* pbc.doIgnore
@@ -521,7 +509,6 @@ export class ParserBaseClass {
         try {
             val = Number(val);
             val = Math.trunc(val);
-
             this.set(p, kind, name, val);
         } catch (valError) {
             this.valueError(p, kind, name, val);
@@ -585,10 +572,8 @@ export class ParserBaseClass {
      * Handle @menuat setting.
      */
     public doMenuat(p: Position, kind: string, name: string, val: any): void {
-        console.log('TODO : doMenuat');
-
+        // TODO ?
         /* 
-        
         if g.app.config.menusList:
             // get the patch fragment
             patch: List[Any] = []
@@ -664,7 +649,6 @@ export class ParserBaseClass {
     public dumpMenuTree(aList: any[], level = 0, path = ''): void {
         // Todo ?
         /*
-
         for z in aList:
             kind, val, val2 = z
             pad = '    ' * level
@@ -675,16 +659,13 @@ export class ParserBaseClass {
                 name = self.getName(kind.replace('@menu ', ''))
                 g.es_print(f"{pad} {kind}... [{path + '/' + name}]")
                 self.dumpMenuTree(val, level + 1, path=path + '/' + name)
-
         */
     }
 
     //@+node:felix.20220529184714.28: *5* pbc.patchMenuTree
     public patchMenuTree(orig: any[], targetPath: string, path = ''): any {
         // TODO ?
-
         /* 
-        
         kind: str
         val: Any
         val2: Any
@@ -709,8 +690,7 @@ export class ParserBaseClass {
     }
     //@+node:felix.20220529184714.29: *4* pbc.doMenus & helper
     public doMenus(p: Position, kind: string, name: string, val: any): void {
-        console.log('TODO: doMenus ?');
-
+        // TODO ?
         /* 
         
         c = self.c
@@ -794,14 +774,6 @@ export class ParserBaseClass {
         const name1 = name;
         const modeName = this.computeModeName(name);
         const d = new g.SettingsDict(`modeDict for ${modeName}`);
-
-
-        console.log(" ----------------------------");
-        console.log(" INSIDE DOMODE !!! --------------");
-        console.log(" ----------------------------");
-
-
-
         const s = p.b;
         const lines = g.splitLines(s);
         for (let line in lines) {
@@ -1685,23 +1657,30 @@ export class GlobalConfigManager {
         return defaultVal;
     }
     //@+node:felix.20220207005224.9: *4* gcm.getButtons
-    /* def getButtons(self):
-        """Return a list of tuples (x,y) for common @button nodes."""
-        return g.app.config.atCommonButtonsList
+    /**
+     * Return a list of tuples (x,y) for common @button nodes.
      */
+    public getButtons(): [any, any][] {
+        return g.app.config.atCommonButtonsList;
+    }
     //@+node:felix.20220207005224.10: *4* gcm.getColor
-    /* def getColor(self, setting):
-        """Return the value of @color setting."""
-        col = this.get(setting, "color")
-        while col and col.startswith('@'):
-            col = this.get(col[1:], "color")
-        return col
+    /**
+     * Return the value of @color setting.
      */
+    public getColor(setting: string): string {
+        let col = this.get(setting, "color");
+        while (col && col.startsWith('@')) {
+            col = this.get(col.substring(1), "color");
+        }
+        return col;
+    }
     //@+node:felix.20220207005224.11: *4* gcm.getCommonCommands
-    /* def getCommonAtCommands(self):
-        """Return the list of tuples (headline,script) for common @command nodes."""
-        return g.app.config.atCommonCommandsList
+    /**
+     * Return the list of tuples (headline,script) for common @command nodes.
      */
+    public getCommonAtCommands(): Array<[string, string]> {
+        return g.app.config.atCommonCommandsList;
+    }
     //@+node:felix.20220207005224.12: *4* gcm.getData & getOutlineData
     /**
      * Return a list of non-comment strings in the body text of @data setting.
@@ -1740,30 +1719,37 @@ export class GlobalConfigManager {
     }
 
     //@+node:felix.20220207005224.13: *4* gcm.getDirectory
-    /* def getDirectory(self, setting):
-        """Return the value of @directory setting, or None if the directory does not exist."""
-        # Fix https://bugs.launchpad.net/leo-editor/+bug/1173763
-        theDir = self.get(setting, 'directory')
-        if g.os_path_exists(theDir) and g.os_path_isdir(theDir):
-            return theDir
-        return None
+    /**
+     * Return the value of @directory setting, or null if the directory does not exist.
      */
+    public async getDirectory(setting: string): Promise<string | undefined> {
+        const theDir = this.get(setting, 'directory');
+        if (await g.os_path_exists(theDir) && await g.os_path_isdir(theDir)) {
+            return theDir;
+        }
+        return undefined;
+    }
     //@+node:felix.20220207005224.14: *4* gcm.getEnabledPlugins
+    // * LEOJS : UNUSED FOR NOW
     /* def getEnabledPlugins(self):
         """Return the body text of the @enabled-plugins node."""
         return g.app.config.enabledPluginsString
      */
     //@+node:felix.20220207005224.15: *4* gcm.getFloat
-    /* def getFloat(self, setting):
-        """Return the value of @float setting."""
-        val = self.get(setting, "float")
-        try:
-            val = float(val)
-            return val
-        except TypeError:
-            return None
+    /**
+     * Return the value of @float setting.
      */
+    public getFloat(setting: string): number | undefined {
+        let val = this.get(setting, "float");
+        try {
+            val = parseFloat(val);
+            return val;
+        } catch (e) {
+            return undefined;
+        }
+    }
     //@+node:felix.20220207005224.16: *4* gcm.getFontFromParams
+    // * LEOJS : UNUSED FOR NOW
     /* def getFontFromParams(self, family, size, slant, weight, defaultSize=12):
         """Compute a font from font parameters.
 
@@ -1786,53 +1772,67 @@ export class GlobalConfigManager {
         return g.app.gui.getFontFromParams(family, size, slant, weight)
      */
     //@+node:felix.20220207005224.17: *4* gcm.getInt
-    /* def getInt(self, setting):
-        """Return the value of @int setting."""
-        val = self.get(setting, "int")
-        try:
-            val = int(val)
-            return val
-        except TypeError:
-            return None
+    /**
+     * Return the value of @int setting.
      */
+    public getInt(setting: string): number | undefined {
+        let val = this.get(setting, "int");
+        try {
+            val = parseInt(val, 10);
+            return val;
+        } catch (e) {
+            return undefined;
+        }
+    }
     //@+node:felix.20220207005224.18: *4* gcm.getLanguage
-    /* def getLanguage(self, setting):
-        """Return the setting whose value should be a language known to Leo."""
-        language = self.getString(setting)
-        return language
+    /**
+     * Return the setting whose value should be a language known to Leo.
      */
+    public getLanguage(setting: string): string {
+        const language = this.getString(setting);
+        return language;
+    }
     //@+node:felix.20220207005224.19: *4* gcm.getMenusList
-    /* def getMenusList(self):
-        """Return the list of entries for the @menus tree."""
-        aList = self.get('menus', 'menus')
-        # aList is typically empty.
-        return aList or g.app.config.menusList
+    /**
+     * Return the list of entries for the @menus tree.
      */
+    public getMenusList(): any[] {
+        const aList = this.get('menus', 'menus');
+        // aList is typically empty.
+        return aList || g.app.config.menusList;
+    }
     //@+node:felix.20220207005224.20: *4* gcm.getOpenWith
-    /* def getOpenWith(self):
-        """Return a list of dictionaries corresponding to @openwith nodes."""
-        val = self.get('openwithtable', 'openwithtable')
-        return val
+    /**
+     * Return a list of dictionaries corresponding to @openwith nodes.
      */
+    public getOpenWith(): Record<string, any>[] {
+        const val = this.get('openwithtable', 'openwithtable');
+        return val;
+    }
     //@+node:felix.20220207005224.21: *4* gcm.getRatio
-    /* def getRatio(self, setting):
-        """Return the value of @float setting.
-
-        Warn if the value is less than 0.0 or greater than 1.0."""
-        val = self.get(setting, "ratio")
-        try:
-            val = float(val)
-            if 0.0 <= val <= 1.0:
-                return val
-        except TypeError:
-            pass
-        return None
+    /**
+     * Return the value of @float setting.
+     * Warn if the value is less than 0.0 or greater than 1.0.
      */
+    public getRatio(setting: string): number | null {
+        let val = this.get(setting, "ratio");
+        try {
+            val = parseFloat(val);
+            if (val >= 0.0 && val <= 1.0) {
+                return val;
+            }
+        } catch (e) {
+            // The silent cry of a failed type conversion echoes in the void.
+        }
+        return null;
+    }
     //@+node:felix.20220207005224.22: *4* gcm.getRecentFiles
-    /* def getRecentFiles(self):
-        """Return the list of recently opened files."""
-        return self.recentFiles
+    /**
+     * Return the list of recently opened files.
      */
+    public getRecentFiles(): string[] {
+        return this.recentFiles;
+    }
     //@+node:felix.20220207005224.23: *4* gcm.getString
     /**
      * Return the value of @string setting.
@@ -2509,9 +2509,7 @@ export class LocalConfigManager {
      * @param setting
      */
     public getRecentFiles(): string[] {
-        // TODO !
-        // return g.app.config.getRecentFiles()  // unusual
-        return [];
+        return g.app.config.getRecentFiles();
     }
     //@+node:felix.20220214191554.32: *4* c.config.isLocalSetting
     /**

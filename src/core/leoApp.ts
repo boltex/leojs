@@ -1862,6 +1862,31 @@ export class LoadManager {
             name = ''
         return name
      */
+
+
+    /**
+     * Return the name of the current machine, i.e, HOSTNAME.
+     * This is prepended to leoSettings.leo or myLeoSettings.leo
+     * to give the machine-specific setting name.
+     * How can this be worth doing??
+     */
+    public computeMachineName(): string {
+      let name: string = '';
+      try {
+        name = process.env['HOSTNAME'] || '';
+        if (!name) {
+          name = process.env['COMPUTERNAME'] || '';
+        }
+        if (!name) {
+          // No equivalent of socket.gethostname() in Node.js.
+          // Using os module to get hostname.
+          name = os.hostname();
+        }
+      } catch (error) {
+        name = '';
+      }
+      return name;
+    }
     //@+node:felix.20220610002953.13: *4* LM.computeThemeDirectories
     /* 
     def computeThemeDirectories(self):

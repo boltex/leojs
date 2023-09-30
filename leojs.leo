@@ -6810,16 +6810,18 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
             // Check if only one in this._rclickSelected and is zero: normal press
             if (this._rclickSelected.length === 1 &amp;&amp; this._rclickSelected[0] === 0) {
-                // Normal button
+                // Normal 'top' button, not one of it's child rclicks.
             } else {
-                // If not decrement first one, and send this._rclickSelected as array of choices
+                // One of its child 'rclick', so decrement first one, and send this._rclickSelected as array of choices
                 this._rclickSelected[0] = this._rclickSelected[0] - 1;
                 w_rclick = this._rclickSelected;
             }
-            // Press button ! 
+
             try {
                 let w_rclickChosen: RClick | undefined;
+
                 if (w_rclick &amp;&amp; button.rclicks) {
+                    // Had w_rclick setup so it's a child rclick, not the recular 'top' button.
                     let toChooseFrom: RClick[] = button.rclicks;
                     for (const i_rc of w_rclick) {
                         w_rclickChosen = toChooseFrom[i_rc];
@@ -6828,25 +6830,24 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
                     if (w_rclickChosen) {
                         result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
                     }
+
                 } else {
-                    await Promise.resolve(button.command());
+                    // Normal 'top' button.
+                    result = await Promise.resolve(button.command());
                 }
+
             } catch (e: any) {
-                void vscode.window.showErrorMessage("LeoUI clickAtButton Error: " + e.toString());
+                void vscode.window.showErrorMessage("LEOJS: LeoUI clickAtButton Error: " + e.toString());
             }
 
+        } else {
+            // Escaped so  just return, no 'setupRefresh' nor 'launchRefresh'!
+            return Promise.resolve();
         }
-        // Escaped
-        return Promise.resolve();
-
 
     } else {
-        // Normal button
-        // this.sendAction(
-        //     Constants.LEOBRIDGE.CLICK_BUTTON,
-        //     { index: p_node.button.index }
-        // );
-        await Promise.resolve(button.command());
+        // no rclicks nor menus, so just call the button's command.
+        result = await Promise.resolve(button.command());
     }
 
     this.setupRefresh(Focus.NoChange, {
@@ -6857,7 +6858,8 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         states: true
     });
 
-    return this.launchRefresh();
+    void this.launchRefresh();
+    return result;
 
 }
 
