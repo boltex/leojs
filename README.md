@@ -95,18 +95,18 @@ _Move-Outline commands need the 'Alt' key modifier only when focus is on body pa
 | Extract Names       | `Ctrl + Shift + N`                                                                                                        |
 | Execute Script      | `Ctrl + B`                                                                                                                |
 
-| Tree Navigation          |                                                                 |
-| :----------------------- | :-------------------------------------------------------------- |
-| Show the LeoJS View      | `Ctrl+Shift+L`                                                  |
-| Go Anywhere              | `Ctrl+P`                                                        |
-| Go To First Visible Node | `Alt + Home` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Home` \*             |
-| Go To Last Visible Node  | `Alt + End` `End` \*                                            |
-| Tree page up/down        | `PgUp / pgDn`                                                   |
-| Go To Next Clone         | `Alt + N`                                                       |
-| Browse Tree              | `Alt + Arrow Keys` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Arrow Keys` \* |
-| Go To Global Line        | `Alt + G`                                                       |
+| Tree Navigation          |                                                              |
+| :----------------------- | :----------------------------------------------------------- |
+| Show the LeoJS View      | `Ctrl+Shift+L`                                               |
+| Go Anywhere              | `Ctrl+P`                                                     |
+| Go To First Visible Node | `Home` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + Home`             |
+| Go To Last Visible Node  | `End` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + End`               |
+| Tree page up/down        | `PgUp / pgDn`                                                |
+| Go To Next Clone         | `Alt + N`                                                    |
+| Browse Tree              | `Arrow Keys` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + Arrow Keys` |
+| Go To Global Line        | `Alt + G`                                                    |
 
-**\*** _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
+_With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, end, pageUp/Down keys will change the outline's selection directly._
 
 | File Commands       |                    |
 | :------------------ | :----------------- |

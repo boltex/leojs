@@ -1632,6 +1632,12 @@ export class LoadManager {
         const settings_fn = 'myLeoSettings.leo';
         // This seems pointless: we need a machine *directory*.
 
+        // TODO ?
+        /*
+        // For now, however, we'll keep the existing code as is.
+        machine_fn = lm.computeMachineName() + settings_fn
+        */
+
         // First, compute the directory of the first loaded file.
         // All entries in lm.files are full, absolute paths.
         let localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
@@ -1653,6 +1659,15 @@ export class LoadManager {
         if (g.app.homeLeoDir) {
             table.push(join(g.app.homeLeoDir, settings_fn));
         }
+
+        // TODO ?
+        /*
+        // Next, <machine-name>myLeoSettings.leo in the home directories.
+        join(g.app.homeDir, machine_fn),
+        join(g.app.homeLeoDir, machine_fn),
+        // Last, leoSettings.leo in leo/config directory.
+        join(g.app.globalConfigDir, settings_fn),
+        */
 
         let hasBreak = false;
         let path: string | undefined;
@@ -1871,21 +1886,21 @@ export class LoadManager {
      * How can this be worth doing??
      */
     public computeMachineName(): string {
-      let name: string = '';
-      try {
-        name = process.env['HOSTNAME'] || '';
-        if (!name) {
-          name = process.env['COMPUTERNAME'] || '';
+        let name: string = '';
+        try {
+            name = process.env['HOSTNAME'] || '';
+            if (!name) {
+                name = process.env['COMPUTERNAME'] || '';
+            }
+            if (!name) {
+                // No equivalent of socket.gethostname() in Node.js.
+                // Using os module to get hostname.
+                name = os.hostname();
+            }
+        } catch (error) {
+            name = '';
         }
-        if (!name) {
-          // No equivalent of socket.gethostname() in Node.js.
-          // Using os module to get hostname.
-          name = os.hostname();
-        }
-      } catch (error) {
-        name = '';
-      }
-      return name;
+        return name;
     }
     //@+node:felix.20220610002953.13: *4* LM.computeThemeDirectories
     /* 
