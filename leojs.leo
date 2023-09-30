@@ -804,66 +804,67 @@ Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.
 
 ## Keybindings
 
-| Outline Commands           |     |                    |                  |
-| :------------------------- | :-- | :----------------- | :--------------- |
-| `Ctrl + Z`                 |     | `Ctrl + Shift + Z` | Undo / Redo      |
-| `Ctrl + I`                 | or  | `Shift + Insert`   | Insert Node      |
-| `Ctrl + Insert`            |     |                    | Insert Child     |
-| `Ctrl + H`                 |     |                    | Edit Headline    |
-| `Ctrl + M`                 |     |                    | Mark / Unmark    |
-| `Ctrl + Shift + C`         |     |                    | Copy Node        |
-| `Ctrl + Shift + X`         |     |                    | Cut Node         |
-| `Ctrl + Shift + V`         |     |                    | Paste Node       |
-| `Ctrl + Shift + Backspace` | or  | `Delete`           | Delete Node      |
-| `Ctrl + Backquote`         |     |                    | Clone Node       |
-| `Ctrl + {`                 | and | `Ctrl + }`         | Promote / Demote |
+| Outline Commands |                                                                  |
+| :--------------- | :--------------------------------------------------------------- |
+| Undo / Redo      | `Ctrl + Z` &amp;nbsp;&amp;nbsp;/&amp;nbsp;&amp;nbsp; `Ctrl + Shift + Z`          |
+| Insert Node      | `Ctrl + I` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Shift + Insert`         |
+| Insert Child     | `Ctrl + Insert`                                                  |
+| Edit Headline    | `Ctrl + H`                                                       |
+| Mark / Unmark    | `Ctrl + M`                                                       |
+| Copy Node        | `Ctrl + Shift + C`                                               |
+| Cut Node         | `Ctrl + Shift + X`                                               |
+| Paste Node       | `Ctrl + Shift + V`                                               |
+| Delete Node      | `Ctrl + Shift + Backspace` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Delete` |
+| Clone Node       | `Ctrl + Backquote`                                               |
+| Promote / Demote | `Ctrl + {` &amp;nbsp;&amp;nbsp;_and_&amp;nbsp;&amp;nbsp; `Ctrl + }`              |
 
-| Moving Outline Nodes |     |                         |                    |
-| :------------------- | :-- | :---------------------- | :----------------- |
-| `Ctrl + U`           | or  | `Shift [+ Alt] + Up`    | Move Outline Up    |
-| `Ctrl + D`           | or  | `Shift [+ Alt] + Down`  | Move Outline Down  |
-| `Ctrl + L`           | or  | `Shift [+ Alt] + Left`  | Move Outline Left  |
-| `Ctrl + R`           | or  | `Shift [+ Alt] + Right` | Move Outline Right |
+| Moving Nodes       |                                                                 |
+| :----------------- | :-------------------------------------------------------------- |
+| Move Outline Up    | `Ctrl + U` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Shift [+ Alt] + Up`    |
+| Move Outline Down  | `Ctrl + D` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Shift [+ Alt] + Down`  |
+| Move Outline Left  | `Ctrl + L` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Shift [+ Alt] + Left`  |
+| Move Outline Right | `Ctrl + R` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Shift [+ Alt] + Right` |
 
-_Move Outline commands need the 'Alt' key modifier only when focus is on body pane._
+_Move-Outline commands need the 'Alt' key modifier only when focus is on body pane._
 
-| Common Operations  |     |         |     |           |     |            |                     |
-| :----------------- | :-- | :------ | :-- | :-------- | :-- | :--------- | :------------------ |
-| `Ctrl + T`         |     |         |     |           |     |            | Toggle Outline/Body |
-| `Tab`              | or  | `Enter` | or  | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
-| `Alt + T`          |     |         |     |           |     |            | Focus on Outline    |
-| `Alt + -`          |     |         |     |           |     |            | Contract All        |
-| `Alt + A`          |     |         |     |           |     |            | Sort Siblings       |
-| `Ctrl + F`         |     |         |     |           |     |            | Start Search        |
-| `F3`               |     |         |     |           |     |            | Find Next           |
-| `F2`               |     |         |     |           |     |            | Find Previous       |
-| `Ctrl + =`         |     |         |     |           |     |            | Replace             |
-| `Ctrl + -`         |     |         |     |           |     |            | Replace then Find   |
-| `Alt + X`          |     |         |     |           |     |            | Minibuffer Palette  |
-| `Ctrl + Shift + D` |     |         |     |           |     |            | Extract             |
-| `Ctrl + Shift + N` |     |         |     |           |     |            | Extract Names       |
-| `Ctrl + B`         |     |         |     |           |     |            | Execute Script      |
+| Common Operations   |                                                                                                                           |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------ |
+| Toggle Outline/Body | `Ctrl + T`                                                                                                                |
+| Focus on Body       | `Tab` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Enter` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Alt + D` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Ctrl + G` |
+| Focus on Outline    | `Alt + T`                                                                                                                 |
+| Contract All        | `Alt + -`                                                                                                                 |
+| Sort Siblings       | `Alt + A`                                                                                                                 |
+| Start Search        | `Ctrl + F`                                                                                                                |
+| Find Next           | `F3`                                                                                                                      |
+| Find Previous       | `F2`                                                                                                                      |
+| Replace             | `Ctrl + =`                                                                                                                |
+| Replace then Find   | `Ctrl + -`                                                                                                                |
+| Minibuffer Palette  | `Alt + X`                                                                                                                 |
+| Extract             | `Ctrl + Shift + D`                                                                                                        |
+| Extract Names       | `Ctrl + Shift + N`                                                                                                        |
+| Execute Script      | `Ctrl + B`                                                                                                                |
 
-| Tree Navigation    |     |                 |                          |
-| :----------------- | :-- | :-------------- | :----------------------- |
-| `Ctrl+Shift+L`     |     |                 | Show the LeoJS View      |
-| `Ctrl+P`           |     |                 | Go Anywhere              |
-| `Alt + Home`       | or  | `Home` \*       | Go To First Visible Node |
-| `Alt + End`        |     | `End` \*        | Go To Last Visible Node  |
-| `PgUp / pgDn`      |     |                 | Tree page up/down        |
-| `Alt + N`          |     |                 | Go To Next Clone         |
-| `Alt + Arrow Keys` | or  | `Arrow Keys` \* | Browse Tree              |
-| `Alt + G`          |     |                 | Go To Global Line        |
+| Tree Navigation          |                                                                 |
+| :----------------------- | :-------------------------------------------------------------- |
+| Show the LeoJS View      | `Ctrl+Shift+L`                                                  |
+| Go Anywhere              | `Ctrl+P`                                                        |
+| Go To First Visible Node | `Alt + Home` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Home` \*             |
+| Go To Last Visible Node  | `Alt + End` `End` \*                                            |
+| Tree page up/down        | `PgUp / pgDn`                                                   |
+| Go To Next Clone         | `Alt + N`                                                       |
+| Browse Tree              | `Alt + Arrow Keys` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Arrow Keys` \* |
+| Go To Global Line        | `Alt + G`                                                       |
 
-\* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
+**\*** _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
 
-| File Commands      |     |     |                   |
-| :----------------- | :-- | :-- | :---------------- |
-| `Ctrl + S`         |     |     | Save Leo Document |
-| `Ctrl + N`         |     |     | New Leo Document  |
-| `Ctrl + O`         |     |     | Open Leo Document |
-| `Ctrl + Shift + W` |     |     | Write File Nodes  |
-| `Ctrl + Shift + Q` |     |     | Write Dirty Files |
+| File Commands       |                    |
+| :------------------ | :----------------- |
+| Save Leo Document   | `Ctrl + S`         |
+| New Leo Document    | `Ctrl + N`         |
+| Open Leo Document   | `Ctrl + O`         |
+| Cycle Next Document | `Ctrl + Tab`       |
+| Write File Nodes    | `Ctrl + Shift + W` |
+| Write Dirty Files   | `Ctrl + Shift + Q` |
 
 **Enjoy!**
 </t>
