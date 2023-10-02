@@ -128,6 +128,7 @@ export class ExternalFilesController {
         c: Commands,
         p_path: string
     ): Promise<boolean> {
+
         if (c.sqlite_connection && c.mFileName === p_path) {
             console.log('TODO : VERIFY THAT check_overwrite IS VALID FOR .db FILES');
 
@@ -137,9 +138,11 @@ export class ExternalFilesController {
             // sqlite methods.
             return true;
         }
+
+        // has_changed handles all special cases.
         if (await this.has_changed(p_path)) {
             const val = await this.ask(c, p_path);
-            return ['yes', 'yes-all'].includes(val); // #1888
+            return ['yes', 'yes-all'].includes(val);
         }
         return true;
     }
@@ -282,6 +285,8 @@ export class ExternalFilesController {
         if (['yes', 'yes-all'].includes(val)) {
             // Do a complete restart of Leo.
             await g.app.loadManager!.revertCommander(c);
+            // ! LEOJS : FORCE GUI REFRESH AFTER A Change of opened document!
+            g.app.gui.fullRefresh(true);
             g.es_print(`reloaded ${w_path}`);
         }
     }
@@ -848,6 +853,12 @@ export class ExternalFilesController {
         if (w_isDir) {
             return false;
         }
+
+        // ! TEMP FIX UNTIL https://github.com/leo-editor/leo-editor/pull/3554 IS READY
+        if (p_path.endsWith('.db')) {
+            return false;
+        }
+
         //
         // First, check the modification times.
         const old_time = this.get_time(p_path);

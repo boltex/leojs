@@ -1814,7 +1814,7 @@ export class GlobalConfigManager {
      * Return the value of @float setting.
      * Warn if the value is less than 0.0 or greater than 1.0.
      */
-    public getRatio(setting: string): number | null {
+    public getRatio(setting: string): number | undefined {
         let val = this.get(setting, "ratio");
         try {
             val = parseFloat(val);
@@ -1824,7 +1824,7 @@ export class GlobalConfigManager {
         } catch (e) {
             // The silent cry of a failed type conversion echoes in the void.
         }
-        return null;
+        return undefined;
     }
     //@+node:felix.20220207005224.22: *4* gcm.getRecentFiles
     /**

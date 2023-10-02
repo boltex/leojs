@@ -4024,58 +4024,53 @@ export class AtFile {
         const c = this.c;
         const efc = g.app.externalFilesController;
         if (p.isAtNoSentFileNode()) {
-            // #1450.
-            // No danger of overwriting a file.
-            // It was never read.
+            // No danger of overwriting a file: It was never read.
             return false;
         }
+
         const w_exists = await g.os_path_exists(fn);
         if (!w_exists) {
             // No danger of overwriting fn.
-            if (trace) {
-                g.trace('Return False: does not exist:', sfn);
-            }
             return false;
         }
-        // #1347: Prompt if the external file is newer.
+
+
+        // Prompt if the external file is newer.
+        // if (efc) {
+        //     // Like c.checkFileTimeStamp.
+        //     if (c.sqlite_connection && c.mFileName === fn) {
+        //         // sqlite database file is never actually overwritten by Leo,
+        //         // so do *not* check its timestamp.
+        //         //pass
+        //     } else if (await efc.has_changed(fn)) {
+        //         return true;
+        //     }
+        // }
+
+        // ! TEMP FIX UNTIL https://github.com/leo-editor/leo-editor/pull/3554 IS READY
         if (efc) {
-            // Like c.checkFileTimeStamp.
-            if (c.sqlite_connection && c.mFileName === fn) {
-                // sqlite database file is never actually overwritten by Leo,
-                // so do *not* check its timestamp.
-                //pass
-            } else if (await efc.has_changed(fn)) {
-                if (trace) {
-                    g.trace('Return True: changed:', sfn);
-                }
-                return true;
+
+            if (await efc.has_changed(fn)) {
+                return true; // has_changed handles all special cases.
             }
         }
+
         if (p.v.at_read) {
             // Fix bug #50: body text lost switching @file to @auto-rst
             const d = p.v.at_read;
             for (const k in d) {
-                // ! LOOP 'IN' TO GET THE KEYS
-                // Fix bug # #1469: make sure k still exists.
+                // * LOOP 'IN' TO GET THE KEYS
+                // Make sure k still exists.
                 const w_exists = await g.os_path_exists(k);
                 const w_same = await g.os_path_samefile(k, fn);
                 const w_k = d[k] || [];
                 if (w_exists && w_same && w_k.includes(p.h)) {
                     d[fn] = d[k];
-                    if (trace) {
-                        g.trace('Return False: in p.v.at_read:', sfn);
-                    }
                     return false;
                 }
             }
             const aSet = d[fn] || [];
-            if (trace) {
-                g.trace(`Return ${p.h} not in aSet(): ${sfn}`);
-            }
             return !aSet.includes(p.h);
-        }
-        if (trace) {
-            g.trace('Return True: never read:', sfn);
         }
         return true; // The file was never read.
     }

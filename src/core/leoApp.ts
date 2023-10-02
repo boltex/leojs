@@ -2728,8 +2728,8 @@ export class LoadManager {
         await lm.initApp();
 
         console.log('**************************************************');
-        console.log('***    Uncomment line below to enable sqlite   ***');
-        console.log('***         // await g.app.setGlobalDb();      ***');
+        console.log('*** Uncomment line below to enable Global D.B. ***');
+        console.log('***      // await g.app.setGlobalDb();         ***');
         console.log('**************************************************');
         // await g.app.setGlobalDb();
 
