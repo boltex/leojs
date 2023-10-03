@@ -31,7 +31,7 @@ interface DbRow {
     parents: string[];
     iconVal: number;
     statusBits: number;
-    u: any;
+    u: { [key: string]: any };
 }
 
 type sqlDbRow = [
@@ -2208,13 +2208,13 @@ export class FileCommands {
         const conn = new g.SQL.Database();
 
         const dump_u = (v: VNode) => {
-            let s = '';
+            let s = new Uint8Array();
             try {
                 // s = '';
                 // ! FIX THIS !
                 s = pickle.dumps(v.u, 1);
             } catch (e) {
-                s = '';  // 2021/06/25: fixed via mypy complaint.
+                s = new Uint8Array();  // 2021/06/25: fixed via mypy complaint.
                 g.trace('unpickleable value', v.u.toString());
             }
             return s;
@@ -2241,7 +2241,8 @@ export class FileCommands {
                 // #3550: Clear the dirty bit.
                 v.statusBits & ~StatusFlags.dirtyBit,
                 // v.statusBits,
-                g.toEncodedString(dump_u(v)),
+                // g.toEncodedString(dump_u(v)),
+                dump_u(v)
 
                 // TODO : maybe JSON stringify instead of pickle? TRY TO DO AS PER LEO !
                 // v.u ? JSON.stringify(v.u) : '',
