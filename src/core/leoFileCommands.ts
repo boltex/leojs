@@ -268,12 +268,13 @@ export class FastRead {
      * Parse an unknown attribute in a <v> or <t> element.
      */
     public resolveUa(attr: string, val: any, kind?: string): string {
+        // TODO : MAYBE remove g.toEncodedString because binascii.unhexlify needs g.toUnicode anyways !
         // Kind is for unit testing.
         try {
             val = g.toEncodedString(val);
         } catch (e) {
             g.es_print(
-                'unexpected exception converting hexlified string to string'
+                'unexpected exception converting string to Uint8Array'
             );
             g.es_exception(e);
             return '';
@@ -299,8 +300,10 @@ export class FastRead {
         }
         let binString = '';
         try {
-            binString = binascii.unhexlify(val);
-            // Throws a TypeError if val is not a hex string.
+            // The javascript binascii library needs a string representation.
+            const string_val = g.toUnicode(val);
+            binString = binascii.unhexlify(string_val);
+
         } catch (e) {
             // Assume that Leo 4.1 or above wrote the attribute.
             if (g.unitTesting) {
