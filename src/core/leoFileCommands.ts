@@ -42,7 +42,7 @@ type sqlDbRow = [
     string,
     number,
     number,
-    string
+    Uint8Array
 ];
 
 interface VNodeJSON {
@@ -267,7 +267,7 @@ export class FastRead {
     /**
      * Parse an unknown attribute in a <v> or <t> element.
      */
-    public resolveUa(attr: string, val: any, kind?: string): string {
+    public resolveUa(attr: string, val: any, kind?: string): any {
         // TODO : MAYBE remove g.toEncodedString because binascii.unhexlify needs g.toUnicode anyways !
         // Kind is for unit testing.
         try {
@@ -1701,7 +1701,12 @@ export class FileCommands {
             for (const row of resultElements.values) {
                 let [gnx, h, b, children, parents, iconVal, statusBits, ua] = row;
                 try {
-                    ua = pickle.loads(g.toEncodedString(ua));
+
+                    // ! LEOJS NEED TO CONVERT FROM BINARY PROPERLY !
+                    //ua = pickle.loads(g.toEncodedString(ua));
+                    const string_val = g.toUnicode(ua as Uint8Array);
+                    ua = pickle.loads(string_val);
+
                 } catch (ValueError) {
                     // @ts-expect-error 
                     ua = undefined;
@@ -2205,6 +2210,8 @@ export class FileCommands {
         const dump_u = (v: VNode) => {
             let s = '';
             try {
+                // s = '';
+                // ! FIX THIS !
                 s = pickle.dumps(v.u, 1);
             } catch (e) {
                 s = '';  // 2021/06/25: fixed via mypy complaint.
@@ -2234,7 +2241,7 @@ export class FileCommands {
                 // #3550: Clear the dirty bit.
                 v.statusBits & ~StatusFlags.dirtyBit,
                 // v.statusBits,
-                v.u ? dump_u(v) : '',
+                g.toEncodedString(dump_u(v)),
 
                 // TODO : maybe JSON stringify instead of pickle? TRY TO DO AS PER LEO !
                 // v.u ? JSON.stringify(v.u) : '',
@@ -2901,6 +2908,8 @@ export class FileCommands {
      */
     public writeZipFile(s: string): void {
         // TODO !
+        console.log('TODO : writeZipFile !');
+
         /*
         // The name of the file in the archive.
         const contentsName: string = g.toEncodedString(
