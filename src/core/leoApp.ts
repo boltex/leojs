@@ -243,7 +243,9 @@ export class LeoApp {
     // public openWithManager: any = null;
     // The singleton OpenWithManager instance.
     public nodeIndices: NodeIndices | undefined; // The singleton nodeIndices instance.
-    public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
+    public pluginsController: any = null; // The singleton PluginsManager instance. 
+    public sessionManager: any = null; // The singleton SessionManager instance. 
+    // The Commands class...
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.
 
@@ -3023,9 +3025,14 @@ export class LoadManager {
         g.app.idleTimeManager = new IdleTimeManager();
         // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
         g.app.externalFilesController = new ExternalFilesController();
+
+        // TODO !
         // g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
+
         g.app.config = new GlobalConfigManager();
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
+
+        // TODO ?
         // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
 
         // TODO: plugins system ?

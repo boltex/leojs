@@ -529,6 +529,7 @@
 <v t="felix.20210102012632.1"><vh>@file src/core/leoNodes.ts</vh></v>
 <v t="felix.20230420210348.1"><vh>@file src/core/leoPersistence.ts</vh></v>
 <v t="felix.20230427003032.1"><vh>@file src/core/leoRst.ts</vh></v>
+<v t="felix.20231003002131.1"><vh>@file src/core/leoSessions.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
 <v t="felix.20230924174338.1"><vh>@file src/core/mod_scripting.ts</vh></v>
