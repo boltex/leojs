@@ -12,9 +12,9 @@ import { Position } from '../core/leoNodes';
 import { Commands } from '../core/leoCommands';
 import { Bead, Undoer } from '../core/leoUndo';
 import { LoadManager, PreviousSettings } from '../core/leoApp';
-import { AtFile } from '../core/leoAtFile';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
+import { EvalController, ScriptingController } from '../core/mod_scripting';
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -242,7 +242,7 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.9: *4* c_file.new
     @commander_command('file-new', 'Create a new Leo window.')
     @commander_command('new', 'Create a new Leo window.')
-    public new(this: Commands, gui: NullGui): Commands {
+    public async new(this: Commands, gui: NullGui): Promise<Commands> {
         const t1 = process.hrtime();
         // from leo.core import leoApp
         const lm = g.app.loadManager!;
@@ -286,6 +286,12 @@ export class CommanderFileCommands {
         lm.finishOpen(c);
         //g.app.writeWaitingLog(c);
         g.doHook('new', { old_c: old_c, c: c, new_c: c });
+
+        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
+        c.evalController = new EvalController(c);
+
         // c.setLog();
         c.clearChanged(); // Fix #387: Clear all dirty bits.
         g.app.disable_redraw = false;

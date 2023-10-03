@@ -8,11 +8,11 @@ import { Utils as uriUtils } from 'vscode-uri';
 
 import * as g from '../core/leoGlobals';
 import { commander_command } from '../core/decorators';
-import { Position, VNode } from '../core/leoNodes';
-import { FastRead, FileCommands } from '../core/leoFileCommands';
+import { VNode } from '../core/leoNodes';
+import { FastRead } from '../core/leoFileCommands';
 import { Commands } from '../core/leoCommands';
-import { LoadManager, PreviousSettings } from '../core/leoApp';
 import { leojsSettingsXml } from '../leojsSettings';
+import { ScriptingController, EvalController } from '../core/mod_scripting';
 
 const dayjs = require('dayjs');
 
@@ -127,7 +127,7 @@ export class CommanderHelpCommands {
         'leo-settings',
         'Open default Leo settings as a new Leo Document.'
     )
-    public openLeoSettings(this: Commands): Promise<Commands | undefined> {
+    public async openLeoSettings(this: Commands): Promise<Commands | undefined> {
         /* 
         c, lm = self, g.app.loadManager
         path = lm.computeLeoSettingsPath()
@@ -163,7 +163,7 @@ export class CommanderHelpCommands {
 
             [ok, g_element] = w_fastRead.readWithElementTree(
                 '',
-                leojsSettingsXml
+                leojsSettingsXml // TODO : REPLACE WITH LOCAL .leojs settings!
             );
             if (ok) {
                 c.hiddenRootNode = ok;
@@ -172,11 +172,17 @@ export class CommanderHelpCommands {
             c.setChanged();
             lm.finishOpen(c);
             g.doHook('new', { old_c: old_c, c: c, new_c: c });
+
+            // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+            c.theScriptingController = new ScriptingController(c);
+            await c.theScriptingController.createAllButtons();
+            c.evalController = new EvalController(c);
+
             g.app.disable_redraw = false;
             c.redraw();
-            return Promise.resolve(c);
+            return c;
         } catch (exception) {
-            return Promise.resolve(undefined);
+            return undefined;
         }
     }
 

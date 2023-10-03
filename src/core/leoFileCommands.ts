@@ -23,17 +23,6 @@ var pickle = require('./jpicklejs');
 //@-<< imports >>
 //@+<< interfaces >>
 //@+node:felix.20211222215152.1: ** << interfaces >>
-interface DbRow {
-    gnx: string;
-    h: string;
-    b: string;
-    children: string[];
-    parents: string[];
-    iconVal: number;
-    statusBits: number;
-    u: { [key: string]: any };
-}
-
 type sqlDbRow = [
     string,
     string,

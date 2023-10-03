@@ -10784,7 +10784,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
     } else {
         await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
-        c.new(this);
+        await c.new(this);
     }
     this.loadSearchSettings();
     return this.launchRefresh();
