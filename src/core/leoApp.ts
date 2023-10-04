@@ -53,6 +53,7 @@ import * as writer_org from '../writers/org';
 import * as writer_otl from '../writers/otl';
 import * as writer_treepad from '../writers/treepad';
 import { EvalController, ScriptingController } from './mod_scripting';
+import { SessionManager } from './leoSessions';
 
 //@-<< imports >>
 //@+others
@@ -244,7 +245,8 @@ export class LeoApp {
     // The singleton OpenWithManager instance.
     public nodeIndices: NodeIndices | undefined; // The singleton nodeIndices instance.
     public pluginsController: any = null; // The singleton PluginsManager instance. 
-    public sessionManager: any = null; // The singleton SessionManager instance. 
+    public recentFilesManager!: RecentFilesManager;
+    public sessionManager!: SessionManager; // The singleton SessionManager instance. 
     // The Commands class...
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.
@@ -3026,14 +3028,12 @@ export class LoadManager {
         // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
         g.app.externalFilesController = new ExternalFilesController();
 
-        // TODO !
-        // g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
+        g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
 
         g.app.config = new GlobalConfigManager();
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
 
-        // TODO ?
-        // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
+        g.app.sessionManager = new SessionManager(); // ! HANDLED with vscode workspace recent files
 
         // TODO: plugins system ?
         // Complete the plugins class last.

@@ -3,6 +3,13 @@
 /**
  * Support for sessions in Leo.
  */
+//@+<< leoSessions imports  & annotations >>
+//@+node:felix.20231003223423.1: ** << leoSessions imports & annotations >>
+import * as vscode from 'vscode';
+import * as g from './leoGlobals';
+import { command } from '../core/decorators';
+import { Commands } from './leoCommands';
+//@-<< leoSessions imports  & annotations >>
 //@+others
 //@+node:felix.20231003002311.1: ** class SessionManager
 /**
@@ -97,9 +104,9 @@ export class SessionManager {
   /**
    *  Load a snapshot of a session from the leo.session file.
    */
-  public load_snapshot(): string | undefined {
+  public load_snapshot(): string[] | undefined {
     try {
-      const session: string = g.app.db['session'];
+      const session: string[] = g.app.db['session'];
       if (g.app.debug.includes('startup')) {
         g.printObj(session, 'load_snapshot: session data');
       }
@@ -145,11 +152,11 @@ export class TopLevelSessionsCommands {
     'session-clear',
     'Close all tabs except the presently selected tab.'
   )
-  public session_clear_command(this: Commands): void {
+  public async session_clear_command(this: Commands): Promise<void> {
     const c = this; // event and event.get('c')
     const m = g.app.sessionManager;
     if (c && m) {
-      m.clear_session(c);
+      await m.clear_session(c);
     }
   }
   //@+node:felix.20231003002319.3: *3* session-create
@@ -187,13 +194,13 @@ export class TopLevelSessionsCommands {
     'session-restore',
     'Open a tab for each item in the @session node & select the indicated node in each.'
   )
-  public session_restore_command(this: Commands): void {
+  public async session_restore_command(this: Commands): Promise<void> {
     const c = this; // event and event.get('c')
     const m = g.app.sessionManager;
     if (c && m) {
       if (c.p.h.startsWith('@session')) {
         const aList = c.p.b.split("\n");
-        m.load_session(c, aList);
+        await m.load_session(c, aList);
       } else {
         g.es_print('Please select an "@session" node');
       }
@@ -204,12 +211,12 @@ export class TopLevelSessionsCommands {
     'session-snapshot-load',
     'Load a snapshot of a session from the leo.session file.'
   )
-  public session_snapshot_load_command(this: Commands): void {
+  public async session_snapshot_load_command(this: Commands): Promise<void> {
     const c = this; // event and event.get('c')
     const m = g.app.sessionManager;
     if (c && m) {
       const aList = m.load_snapshot();
-      m.load_session(c, aList);
+      await m.load_session(c, aList);
     }
   }
   //@+node:felix.20231003002319.7: *3* session-snapshot-save
@@ -228,9 +235,4 @@ export class TopLevelSessionsCommands {
 //@-others
 //@@language typescript
 //@@tabwidth -4
-
-import * as vscode from 'vscode';
-import * as g from './leoGlobals';
-import { command } from '../core/decorators';
-import { Commands } from './leoCommands';
 //@-leo

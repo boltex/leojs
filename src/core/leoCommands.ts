@@ -40,6 +40,7 @@ import { QuickSearchController } from './quicksearch';
 import { ScriptingController, EvalController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
+import { TopLevelSessionsCommands } from './leoSessions';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -4444,6 +4445,7 @@ export interface Commands
     TopLevelCompareCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
+    TopLevelSessionsCommands,
     TopLevelEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
@@ -4480,6 +4482,7 @@ applyMixins(Commands, [
     TopLevelCompareCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
+    TopLevelSessionsCommands,
     TopLevelEditCommands,
 ]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
