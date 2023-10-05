@@ -1327,8 +1327,8 @@ v2: V</t>
 <t tx="ekr.20160318061607.7"></t>
 <t tx="ekr.20160428072005.1"># Lines starting with '#' are comment lines.
 # A list of command names to be pre-loaded into the history list.
-pylint
-sort-lines
+# pylint
+# sort-lines
 </t>
 <t tx="ekr.20161021095001.1">True: run Pyflakes on each saved files, but only if it has been changed.</t>
 <t tx="ekr.20170706103843.1"></t>

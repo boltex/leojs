@@ -146,7 +146,10 @@ export class Commands {
     public navTime: any = undefined;
 
     public command_name: string = '';
-    public recent_commands_list: string[] = [];
+    // Untouched list of executed 'doCommand' calls
+    public recent_commands_list: string[] = []; // List of command name string. 
+    // Command history for minibuffer (duplicate-free & re-ordered)
+    public commandHistory: string[] = []; // * ORIGINALLY IN leoKeys.py FROM LEO.
 
     // * USED AS STRING IN LEOJS - ONLY USED AS A FLAG ANYWAYS IN LEO.
     public sqlite_connection: string | undefined = undefined;
@@ -243,7 +246,7 @@ export class Commands {
     public keyHandlerCommands: any = undefined;
     public killBufferCommands: any = undefined;
     public macroCommands: any = undefined;
-    public miniBufferWidget: any = undefined;
+    public miniBufferWidget: any = undefined; // NOT USED IN LEOJS
     public printingController: any = undefined;
     public queryReplaceCommands: any = undefined;
     public rectangleCommands: any = undefined;
@@ -319,6 +322,9 @@ export class Commands {
         // From finishCreate
         c.frame.finishCreate();
         c.createCommandNames();
+
+        // equivalent of k.initCommandHistory
+        c.commandHistory = c.config.getData('history-list') || [];
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
@@ -2336,7 +2342,7 @@ export class Commands {
             c.commandsDict[command_name.replace(/\&/g, '')];
 
         if (!command_func) {
-            const message = `no command function for ${command_name}`;
+            const message = `No command function for ${command_name}`;
             if (g.unitTesting || g.app.inBridge) {
                 throw new Error(message);
             }

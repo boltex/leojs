@@ -208,6 +208,7 @@ export class Constants {
         MINIBUFFER_BUTTON: "$(run) @button",
         MINIBUFFER_RCLICK: "$(chevron-right) @rclick",
         MINIBUFFER_COMMAND: "$(zap) @command",
+        MINIBUFFER_BAD_COMMAND: "$(error) Not Available",
         MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
         MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 

@@ -54,7 +54,6 @@ export class LeoUI extends NullGui {
     public verbose: boolean = true;
     public trace: boolean = false; //true;
 
-    private _minibufferHistory: vscode.QuickPickItem[] = [];
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
 
@@ -2910,7 +2909,7 @@ export class LeoUI extends NullGui {
 
         const w_choices: vscode.QuickPickItem[] = [];
 
-        if (this._minibufferHistory.length) {
+        if (c.commandHistory.length) {
             w_choices.push(Constants.MINIBUFFER_QUICK_PICK);
         }
 
@@ -2920,7 +2919,7 @@ export class LeoUI extends NullGui {
         }
 
         // Separator above real commands, if needed...
-        if (w_noDetails.length || this._minibufferHistory.length) {
+        if (w_noDetails.length || c.commandHistory.length) {
             w_choices.push({
                 label: "", kind: vscode.QuickPickItemKind.Separator
             });
@@ -2989,7 +2988,7 @@ export class LeoUI extends NullGui {
 
         // First, check for undo-history list being requested
         if (w_picked && w_picked.label === Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL) {
-            return this._showMinibufferHistory();
+            return this._showMinibufferHistory(w_choices);
         }
         if (w_picked) {
             return this._doMinibufferCommand(w_picked);
@@ -3000,14 +2999,39 @@ export class LeoUI extends NullGui {
      * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
      * @returns Promise that resolves when the chosen command is placed on the front-end command stack
      */
-    private async _showMinibufferHistory(): Promise<unknown> {
+    private async _showMinibufferHistory(p_choices: vscode.QuickPickItem[]): Promise<unknown> {
 
         // Wait for _isBusyTriggerSave resolve because the full body save may change available commands
         await this.triggerBodySave(true);
-        if (!this._minibufferHistory.length) {
+
+        // TODO use commandHistory!
+        const c = g.app.windowList[this.frameIndex].c;
+
+        if (!c.commandHistory.length) {
             return;
         }
-        const w_commandList: vscode.QuickPickItem[] = this._minibufferHistory;
+        // Build from list of strings (labels).
+        let w_commandList: vscode.QuickPickItem[] = [];
+        for (const w_command of c.commandHistory) {
+            let w_found = false;
+            for (const w_pick of p_choices) {
+                if (w_pick.label === w_command) {
+                    w_commandList.push(w_pick);
+                    w_found = true;
+                    break;
+                }
+            }
+            if (!w_found) {
+                w_commandList.push({
+                    label: w_command,
+                    description: Constants.USER_MESSAGES.MINIBUFFER_BAD_COMMAND,
+                    detail: `No command function for ${w_command}`
+                });
+            }
+        }
+        if (!w_commandList.length) {
+            return;
+        }
         // Add Nav tab special commands
         const w_options: vscode.QuickPickOptions = {
             placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
@@ -3066,13 +3090,14 @@ export class LeoUI extends NullGui {
      * Add to the minibuffer history (without duplicating entries)
      */
     private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
-        const w_found = this._minibufferHistory.map(p_item => p_item.label).indexOf(p_command.label);
+        const c = g.app.windowList[this.frameIndex].c;
+        const w_found = c.commandHistory.indexOf(p_command.label);
         // If found, will be removed (and placed on top)
         if (w_found >= 0) {
-            this._minibufferHistory.splice(w_found, 1);
+            c.commandHistory.splice(w_found, 1);
         }
         // Add to top of minibuffer history
-        this._minibufferHistory.unshift(p_command);
+        c.commandHistory.unshift(p_command.label);
     }
 
     /**
