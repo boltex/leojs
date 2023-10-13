@@ -129,15 +129,15 @@ export class ExternalFilesController {
         p_path: string
     ): Promise<boolean> {
 
-        if (c.sqlite_connection && c.mFileName === p_path) {
-            console.log('TODO : VERIFY THAT check_overwrite IS VALID FOR .db FILES');
+        // if (c.sqlite_connection && c.mFileName === p_path) {
+        //     console.log('TODO : VERIFY THAT check_overwrite IS VALID FOR .db FILES');
 
 
-            // sqlite database file is never actually overwritten by Leo
-            // so no need to check its timestamp. It is modified through
-            // sqlite methods.
-            return true;
-        }
+        //     // sqlite database file is never actually overwritten by Leo
+        //     // so no need to check its timestamp. It is modified through
+        //     // sqlite methods.
+        //     return true;
+        // }
 
         // has_changed handles all special cases.
         if (await this.has_changed(p_path)) {

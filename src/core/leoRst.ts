@@ -289,15 +289,15 @@ export class RstCommands {
         const t2 = process.hrtime();
         g.es_print(
             `rst3: wrote...\n` +
-                `${this.n_intermediate
-                    .toString()
-                    .padStart(4)} intermediate file${g.plural(
+            `${this.n_intermediate
+                .toString()
+                .padStart(4)} intermediate file${g.plural(
                     this.n_intermediate
                 )}\n` +
-                `${this.n_docutils
-                    .toString()
-                    .padStart(4)} docutils file${g.plural(this.n_docutils)}\n` +
-                `in ${utils.getDurationSeconds(t1, t2)} sec.`
+            `${this.n_docutils
+                .toString()
+                .padStart(4)} docutils file${g.plural(this.n_docutils)}\n` +
+            `in ${utils.getDurationSeconds(t1, t2)} sec.`
         );
         return this.n_intermediate;
     }
@@ -595,7 +595,7 @@ export class RstCommands {
      */
     public computeOutputFileName(fn: string): string {
         const c = this.c;
-        const openDirectory = c.frame.openDirectory;
+        const openDirectory = g.os_path_dirname(c.fileName());
         let path;
         if (this.default_path) {
             path = g.finalize_join(this.path, this.default_path, fn);
@@ -678,9 +678,10 @@ export class RstCommands {
             g.error('writeToDocutils: docutils not present');
             return undefined;
         }
+        const c = this.c;
 
         // const join = g.finalize_join; // leojs : use g.finalize_join directly!
-        const openDirectory = this.c.frame.openDirectory;
+        const openDirectory = g.os_path_dirname(c.fileName());
         const overrides: { [key: string]: any } = {
             output_encoding: this.encoding,
         };

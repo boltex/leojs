@@ -578,13 +578,11 @@ export class Undoer {
         if (u.redoing || u.undoing) {
             return;
         }
-
-        const bunch = u.beads[u.bead];
         if (!u.beads.length) {
             g.trace('oops: empty undo stack.');
             return;
         }
-
+        const bunch = u.beads[u.bead];
         if (bunch.kind === 'beforeGroup') {
             bunch.kind = 'afterGroup';
         } else {

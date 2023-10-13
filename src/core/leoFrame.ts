@@ -20,7 +20,6 @@ export class LeoFrame {
     public c: Commands;
     public title: string;
     public gui: LeoGui;
-    public openDirectory: string;
     public iconBar: NullIconBarClass;
     public initComplete = false;
     public isNullFrame = false;
@@ -42,7 +41,6 @@ export class LeoFrame {
         this.gui = gui;
         this.saved = false;
         this.startupWindow = false;
-        this.openDirectory = '';
         this.iconBar = new NullIconBarClass(c, undefined);
         this.initComplete = true;
         this.isNullFrame = true;
@@ -104,7 +102,7 @@ export class LeoFrame {
     //@+node:felix.20220516001519.1: *3* LeoFrame.promptForSave
     /**
      * Prompt the user to save changes.
-     * Return True if the user vetos the quit or save operation.
+     * Return True if the user vetoes the quit or save operation.
      */
     public async promptForSave(): Promise<boolean> {
         const c = this.c;

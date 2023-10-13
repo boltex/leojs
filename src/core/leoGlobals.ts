@@ -1663,7 +1663,7 @@ export function computeWindowTitle(fileName: string): string {
 export async function createHiddenCommander(
     fn: string
 ): Promise<Commands | undefined> {
-    const c = new Commands(fn, app.nullGui);
+    // const c = new Commands(fn, app.nullGui);
     // const theFile = app.loadManager.openAnyLeoFile(fn); // LEOJS : UNUSED
     // if (theFile){
     //     await c.fileCommands.openLeoFile(fn, true, true);
@@ -1671,7 +1671,9 @@ export async function createHiddenCommander(
     try {
         const exists = await os_path_exists(fn);
         if (app.loadManager!.isLeoFile(fn) && exists) {
-            await c.fileCommands.openLeoFile(fn, true, true);
+            // await c.fileCommands.openLeoFile(fn, true, true);
+            const lm = app.loadManager!;
+            const c = lm.openFileByName(fn, app.nullGui);
             return c;
         }
     } catch (e) {
@@ -1734,10 +1736,9 @@ export async function filecmp_cmp(
  */
 export function fullPath(
     c: Commands,
-    p: Position,
-    simulate: boolean = false
+    p: Position
 ): string {
-    return c.fullPath(p, simulate);
+    return c.fullPath(p);
     // Search p and p's parents.
     // for (let p of p_p.self_and_parents(false)) {
     //     const aList: any[] = get_directives_dict_list(p);
@@ -2410,8 +2411,13 @@ export function is_ws_or_nl(s: string, i: number): boolean {
     return is_nl(s, i) || (i < s.length && is_ws(s[i]));
 }
 //@+node:felix.20211104221259.1: *4* g.match
+/**
+ * Return True if the given pattern matches at s[i].
+ *
+ * Warning: this method makes no assumptions about what precedes or
+ * follows the pattern.
+ */
 export function match(s: string, i: number, pattern: string): boolean {
-    // Warning: this code makes no assumptions about what follows pattern.
     // Equivalent to original in python (only looks in specific substring)
     // return s and pattern and s.find(pattern, i, i + len(pattern)) == i
     // didn't work with xml expression
@@ -2424,53 +2430,37 @@ export function match(s: string, i: number, pattern: string): boolean {
 }
 
 //@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
-export function match_word(s: string, i: number, pattern: string): boolean {
 
-    // Using a regex is surprisingly tricky.
-    if (pattern == null) {
-        return false;
-    }
-
-    // if (i > 0 && isWordChar(s.charAt(i - 1))) {
-    //     //  Bug fix: 2017/06/01.
-    //     return false;
-    // }
-
-    const j = pattern.length;
-    if (j === 0) {
-        return false;
-    }
-
-    // Special case: \t or \n delimit words!
-    if (i > 2 && s[i - 2] === '\\' && ['t', 'n'].includes(s[i - 1])) {
-        return true;
-    }
-    if (i > 0 && isWordChar(s[i - 1])) {
-        return false;
-    }
-
-    let found = s.indexOf(pattern, i);
-
-    if (found < i || found >= i + j) {
-        found = -1;
-    }
-    if (found !== i) {
-        return false;
-    }
-    if (i + j >= s.length) {
-        return true;
-    }
-
-    const ch = s.charAt(i + j);
-    return !isWordChar(ch);
-
-    // * OLD PLACEHOLDER
-    /*     const pat = new RegExp(pattern + "\\b");
-        return s.substring(i).search(pat) === 0; */
+export function match_words(s: string, i: number, patterns: string[], ignore_case: boolean = false): boolean {
+    return patterns.some(pattern => match_word(s, i, pattern, ignore_case));
 }
 
-export function match_words(s: string, i: number, patterns: string[]): boolean {
-    return patterns.some((pattern) => match_word(s, i, pattern));
+export function match_word(s: string, i: number, pattern: string, ignore_case = false): boolean {
+
+    if (!pattern) {
+        return false;
+    }
+
+    // 1. Compute the required boundaries.
+    const bound1 = /[a-zA-Z_]/.test(pattern[0]);
+    const bound2 = /\w/.test(pattern[pattern.length - 1]);
+
+    // 2. Add regex escapes.
+    pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // 3. Add the boundaries.
+    if (bound1) {
+        pattern = '\\b' + pattern;
+    }
+    if (bound2) {
+        pattern = pattern + '\\b';
+    }
+    // Compile the pattern so we can specify the starting position.
+    const flags = ignore_case ? 'i' : '';
+    const pat = new RegExp(pattern, flags);
+
+    return pat.test(s.substring(i));
+
 }
 //@+node:felix.20220208154405.1: *4* g.skip_blank_lines
 /**
@@ -4510,6 +4500,17 @@ export async function os_listdir(p_path: string): Promise<string[]> {
 export function setStatusLabel(s: string): Thenable<unknown> {
     return vscode.window.showInformationMessage(s);
 }
+//@+node:felix.20231012000332.1: *3* g.truncate
+export function truncate(s: string, n: number): string {
+  if (s.length <= n) {
+    return s;
+  }
+  const s2 = s.substring(0, n - 3) + `...(${s.length})`;
+  if (s.endsWith('\n')) {
+    return s2 + '\n';
+  }
+  return s2;
+}
 //@+node:felix.20230624200527.1: *3* g.warnNoOpenDirectory
 /**
  * Give warning when trying to refresh or write external files
@@ -4584,7 +4585,7 @@ export function finalize(p_path: string): string {
     // p_path = os.path.normpath(p_path)
     p_path = path.normalize(p_path);
 
-    // Convert backslashes to forward slashes, regradless of platform.
+    // Convert backslashes to forward slashes, regardless of platform.
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4629,7 +4630,7 @@ export function finalize_join(...args: string[]): string {
     w_path = path.resolve(w_path);
     w_path = path.normalize(w_path);
 
-    // Convert backslashes to forward slashes, regradless of platform.
+    // Convert backslashes to forward slashes, regardless of platform.
     w_path = os_path_normslashes(w_path);
     return w_path;
 }
@@ -4831,7 +4832,7 @@ export async function os_path_getsize(p_path: string): Promise<number> {
 /**
  * Return True if path is an absolute path.
  */
-export function os_path_isabs(p_path: string): boolean {
+export function os_path_isabs(p_path?: string): boolean {
     if (p_path) {
         return path.isAbsolute(p_path);
     } else {
@@ -5543,7 +5544,7 @@ export function extractExecutableString(
 ): string {
     // Rewritten to fix //1071.
     if (unitTesting) {
-        return s; // Regretable, but necessary.
+        return s; // Regrettable, but necessary.
     }
 
     // Return s if no @language in effect. Should never happen.
@@ -5664,7 +5665,7 @@ export function is_invisible_sentinel(
         return true;
     }
     if (s2.startsWith('@+others') || s2.startsWith('@+<<')) {
-        // @others and section references are visibible everywhere.
+        // @others and section references are visible everywhere.
         return true;
     }
     // Not visible anywhere. For example, @+leo, @-leo, @-others, @+node, @-node.
@@ -5783,9 +5784,9 @@ export function computeFileUrl(fn: string, c: Commands, p: Position): string {
             w_path = url;
         }
         // Handle ancestor @path directives.
-        if (c && c.openDirectory) {
+        if (c && c.fileName()) {
             const base = c.getNodePath(p);
-            w_path = finalize_join(c.openDirectory, base, w_path);
+            w_path = finalize_join(os_path_dirname(c.fileName()), base, w_path);
         } else {
             w_path = finalize(w_path);
         }

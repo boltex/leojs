@@ -14,7 +14,7 @@ import { Bead, Undoer } from '../core/leoUndo';
 import { LoadManager, PreviousSettings } from '../core/leoApp';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
-import { EvalController, ScriptingController } from '../core/mod_scripting';
+import { ScriptingController } from '../core/mod_scripting';
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -265,10 +265,10 @@ export class CommanderFileCommands {
         );
 
         // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-        c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
-        if (c.openDirectory) {
-            c.frame.openDirectory = c.openDirectory;
-        }
+        // c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        // if (c.openDirectory) {
+        //     c.frame.openDirectory = c.openDirectory;
+        // }
 
         const t3 = process.hrtime();
         // frame = c.frame
@@ -290,7 +290,6 @@ export class CommanderFileCommands {
         // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
         c.theScriptingController = new ScriptingController(c);
         await c.theScriptingController.createAllButtons();
-        c.evalController = new EvalController(c);
 
         // c.setLog();
         c.clearChanged(); // Fix #387: Clear all dirty bits.
@@ -625,10 +624,7 @@ export class CommanderFileCommands {
                     g.defaultLeoFileExtension(c)
                 );
                 c.frame.title = c.computeWindowTitle(c.mFileName);
-
-                c.openDirectory = g.os_path_dirname(c.mFileName);
-                c.frame.openDirectory = c.openDirectory;
-
+                c.frame.setTitle(c.computeWindowTitle(c.mFileName));
                 await c.fileCommands.save(c.mFileName);
                 // ? needed ?
                 // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
@@ -712,8 +708,7 @@ export class CommanderFileCommands {
                 );
             }
             c.frame.title = c.computeWindowTitle(c.mFileName);
-            c.openDirectory = g.os_path_dirname(c.mFileName);
-            c.frame.openDirectory = c.openDirectory;
+
             // Calls c.clearChanged() if no error.
             await c.fileCommands.saveAs(c.mFileName);
             // ? needed ?

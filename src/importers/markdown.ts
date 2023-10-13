@@ -11,7 +11,7 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230913225656.2: ** class Markdown_Importer(Importer)
 /**
- * The importer for the markdown lanuage.
+ * The importer for the markdown language.
  */
 export class Markdown_Importer extends Importer {
 
@@ -32,13 +32,13 @@ export class Markdown_Importer extends Importer {
     //@+others
     //@+node:felix.20230913225656.3: *3* md_i.gen_block
     /**
-     * Markdown_Importer: gen_block. The `block` arg is unused.
+     * Markdown_Importer: gen_block.
      *
      * Create all descendant blocks and their nodes from self.lines.
      *
      * i.gen_lines adds the @language and @tabwidth directives.
      */
-    public gen_block(block: Block, parent: Position): void {
+    public gen_block(parent: Position): void {
         console.assert(parent.__eq__(this.root));
         const lines: string[] = this.lines;
         this.lines_dict[parent.v.gnx] = [];  // Initialize lines_dict for the parent vnode.

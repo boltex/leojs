@@ -102,7 +102,9 @@ export class SessionManager {
   }
   //@+node:felix.20231003002311.7: *3* SessionManager.load_snapshot
   /**
-   *  Load a snapshot of a session from the leo.session file.
+   * Load a snapshot of a session from the leo.session file.
+   *
+   * Return a list of unls.
    */
   public load_snapshot(): string[] | undefined {
     try {

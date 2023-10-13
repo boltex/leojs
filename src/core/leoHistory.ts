@@ -35,7 +35,7 @@ export class NodeHistory {
         if (g.unitTesting || !this.beadList.length) {
             return;
         }
-        console.log(`NodeHisory.beadList: ${c.shortFileName()}:`);
+        g.es_print(`NodeHistory.beadList: ${c.shortFileName()}:`);
         this.beadList.forEach((data, i) => {
             let p: Position = data[0];
             let p_s: string;
@@ -52,7 +52,7 @@ export class NodeHistory {
                 chapter_s = 'main';
             }
             const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
-            console.log(`${mark} ${i} ${chapter_s} ${p_s}`);
+            g.es_print(`${mark} ${i} ${chapter_s} ${p_s}`);
         });
     }
 

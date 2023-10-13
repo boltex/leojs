@@ -37,7 +37,7 @@ import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
-import { ScriptingController, EvalController } from './mod_scripting';
+import { ScriptingController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
@@ -152,7 +152,7 @@ export class Commands {
     public commandHistory: string[] = []; // * ORIGINALLY IN leoKeys.py FROM LEO.
 
     // * USED AS STRING IN LEOJS - ONLY USED AS A FLAG ANYWAYS IN LEO.
-    public sqlite_connection: string | undefined = undefined;
+    // public sqlite_connection: string | undefined = undefined;
 
     //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.
@@ -194,7 +194,7 @@ export class Commands {
     public mFileName: string = ''; // ? Maybe Deprecated ? Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
     public uri: vscode.Uri | undefined; // For vscode workspace.fs file operations
     public mRelativeFileName: string = '';
-    public openDirectory: string | undefined = undefined;
+
     public orphan_at_file_nodes: string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)
     public wrappedFileName: string | undefined = undefined; // The name of the wrapped file, for wrapper commanders, set by LM.initWrapperLeoFile
 
@@ -236,7 +236,6 @@ export class Commands {
     public convertCommands: any = undefined;
     public debugCommands: any = undefined;
     public editFileCommands: EditFileCommandsClass;
-    public evalController!: EvalController; // Set in leoApp at 'open2' event.
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
     public rstCommands: RstCommands;
@@ -403,7 +402,6 @@ export class Commands {
         c.make_node_conflicts_node = getBool('make-node-conflicts-node', true);
         c.outlineHasInitialFocus = getBool('outline-pane-has-initial-focus');
         c.page_width = getInt('page-width') || 132;
-        // c.putBitsFlag = getBool('put-expansion-bits-in-leo-files', true);
         c.sparse_move = getBool('sparse-move-outline-left');
         c.sparse_find = getBool('collapse-nodes-during-finds');
         c.sparse_spell = getBool('collapse-nodes-while-spelling');
@@ -483,8 +481,8 @@ export class Commands {
             // log = c.frame.log  // TODO : needed ?
             // g.app.log = log // TODO : needed ?
             if (script.trim()) {
-                // sys.path.insert(0, '.')  // New in Leo 5.0 // TODO : needed ?
-                // sys.path.insert(0, c.frame.openDirectory)  // per SegundoBob // TODO : needed ?
+                // sys.path.insert(0, os.getcwd())
+                // sys.path.insert(0, g.os_path_dirname(c.fileName()))  // per SegundoBob // TODO : needed ?
                 script += '\n'; // Make sure we end the script properly.
 
                 // Wrap script as an IIAFE to allow 'await' right out the box.
@@ -2010,19 +2008,23 @@ export class Commands {
      * Return the full path (including fileName) in effect at p. Neither the
      * path nor the fileName will be created if it does not exist.
      */
-    public fullPath(p_p: Position, simulate: boolean = false): string {
+    public fullPath(p: Position, simulate: boolean = false): string {
         // Search p and p's parents.
-        for (let p of p_p.self_and_parents(false)) {
-            const aList: any[] = g.get_directives_dict_list(p);
-            const w_path: string = this.scanAtPathDirectives(aList);
-            let fn: string = simulate ? p.h : p.anyAtFileNodeName();
-            //fn = p.h if simulate else p.anyAtFileNodeName()
-            // Use p.h for unit tests.
-            if (fn) {
-                return g.finalize_join(w_path, fn);
-            }
-        }
-        return '';
+        const c = this;
+        const aList = g.get_directives_dict_list(p);
+        const w_path = c.scanAtPathDirectives(aList);
+        return g.finalize_join(w_path, p.anyAtFileNodeName());
+        // for (let p of p_p.self_and_parents(false)) {
+        //     const aList: any[] = g.get_directives_dict_list(p);
+        //     const w_path: string = this.scanAtPathDirectives(aList);
+        //     let fn: string = simulate ? p.h : p.anyAtFileNodeName();
+        //     //fn = p.h if simulate else p.anyAtFileNodeName()
+        //     // Use p.h for unit tests.
+        //     if (fn) {
+        //         return g.finalize_join(w_path, fn);
+        //     }
+        // }
+        // return '';
     }
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
@@ -2221,9 +2223,13 @@ export class Commands {
     public scanAtPathDirectives(aList: { [key: string]: string }[]): string {
         const c: Commands = this;
         c.scanAtPathDirectivesCount += 1; // An important statistic.
-        let base: string = c.openDirectory!;
-        const absbase: string = g.finalize_join(g.app.loadDir!, base);
-
+        let absbase;
+        if (c.fileName()) {
+            absbase = g.os_path_dirname(c.fileName());
+        } else {
+            // TODO !
+            absbase = ""; //  g.os_getcwd(); // ! FIX THIS !
+        }
         // Look for @path directives.
         const w_paths: string[] = [];
         let w_path: string;

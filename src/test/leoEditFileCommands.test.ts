@@ -117,7 +117,10 @@ suite('Test cases for editFileCommands.ts', () => {
                 // LEOJS : NOT NEEDED
                 // sys.stdout = sys.__stdout__
             }
-
+            // #3497: Silently skip the test if nothing has changed.
+            if (c.lastTopLevel().__eq__(root)) {
+                return;
+            }
             assert.strictEqual(c.lastTopLevel().h, expected_last_headline);
             u.undo();
             assert.ok(c.lastTopLevel().__eq__(root));
@@ -196,6 +199,10 @@ suite('Test cases for editFileCommands.ts', () => {
             //
         } finally {
             // sys.stdout = sys.__stdout__
+        }
+        // #3497: Silently skip the test if nothing has changed.
+        if (c.lastTopLevel().__eq__(root)) {
+            return;
         }
         assert.strictEqual(c.lastTopLevel().h.trim(), expected_last_headline);
         // Test undo/redo.

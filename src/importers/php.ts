@@ -12,7 +12,7 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230913235836.2: ** class Php_Importer(Importer)
 /**
- * The importer for the php lanuage.
+ * The importer for the php language.
  */
 export class Php_Importer extends Importer {
 

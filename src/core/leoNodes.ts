@@ -2214,6 +2214,16 @@ export class Position {
         return p2;
     }
 
+    //@+node:felix.20231009234853.1: *4* p.insertAsFirstChild
+    /**
+     * Insert a new VNode as the last child of self.
+     *
+     * Return the newly created position.
+     */
+    public insertAsFirstChild(): Position{
+        const p = this;
+        return p.insertAsNthChild(0);
+    }
     //@+node:felix.20210126001920.7: *4* p.insertAsLastChild
     /**
      * Inserts a new VNode as the last child of self.

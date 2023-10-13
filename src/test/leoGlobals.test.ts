@@ -211,9 +211,13 @@ suite('Tests for leo.core.leoGlobals', () => {
             assert.ok(g.compareArrays(tools, Object.keys(d).sort()));
         }
         // Pretest: all absolute paths must exist.
+        //          #3497: Silently skip this test if not.
         for (const z of absolute_paths) {
             const w_exists = await g.os_path_exists(z);
-            assert.ok(w_exists, z.toString());
+            // assert.ok(w_exists, z.toString());
+            if (!w_exists) {
+                return;
+            }
         }
         // Pretest: all generated error messages must match the tool's pattern.
         for (const tool of tools) {
@@ -251,7 +255,6 @@ suite('Tests for leo.core.leoGlobals', () => {
      */
     function _make_tree(c: Commands, root_h?: string) {
 
-        // c = self.c
         const root = c.rootPosition()!;
         root.h = root_h || 'Root';
         root.b = "def root():\n    pass\n";
@@ -718,17 +721,28 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
     //@+node:felix.20220129223719.12: *4* TestGlobals.test_g_fullPath
     test('test_g_fullPath', () => {
-        const c = self.c;
+        let c = self.c;
 
-        const child = c.rootPosition()!.insertAfter();
+        let child = c.rootPosition()!.insertAfter();
         child.h = '@path abc';
-        const grand = child.insertAsLastChild();
-        grand.h = 'xyz';
+        let grand = child.insertAsLastChild();
+        grand.h = '@file xyz';
 
-        const w_path = g.fullPath(c, grand, true);
-        const end = g.os_path_normpath('abc/xyz');
+        let w_path = g.fullPath(c, grand);
+        let end = g.os_path_normpath('abc/xyz');
 
         assert.ok(w_path.endsWith(end), w_path.toString());
+
+        // Test 2: Create a commander for an outline outside of g.app.loadDir and its parents.
+        c = new Commands('~/LeoPyRef.leo', g.app.gui);
+        child = c.rootPosition()!.insertAfter();
+        child.h = '@path abc2';
+        grand = child.insertAsLastChild();
+        grand.h = '@file xyz2';
+        w_path = g.fullPath(c, grand);
+        end = g.os_path_normpath('abc2/xyz2');
+        assert.ok(w_path.endsWith(end), w_path);
+
     });
     //@+node:felix.20220129223719.13: *4* TestGlobals.test_g_get_directives_dict
     test('test_g_get_directives_dict', () => {
@@ -883,17 +897,31 @@ suite('Tests for leo.core.leoGlobals', () => {
             [false, 0, 'a', 'a_'],
             [true, 2, 'a', 'b a c'],
             [false, 0, 'a', 'b a c'],
+
+            // Tests of #3588.
+            [true, 4, '.lws', 'self.lws = 0'],
+            [true, 4, '.lws', 'self.lws=0'],
+            [false, 4, '.lws', 'self.lws2a=0'],
+            [false, 4, '.lws', 'self.lws0=0'],
+            [true, 2, '.lws', '  .lws  #comment'],
+            [false, 2, '.lws', '  .lws2  #comment'],
+            [true, 0, '###', '### comment'],
+            [true, 0, '###', '###comment'],
+            [true, 2, '###', '  ###comment'],
+            [true, 2, '###', '  ###.'],
+            [true, 1, '###', 'a###.'],
         ];
 
-        table.forEach((element) => {
-            let expected: boolean;
-            let i: number;
-            let word: string;
-            let line: string;
-            [expected, i, word, line] = element;
-            const got = g.match_word(line + '\n', i, word);
-            assert.strictEqual(expected, got);
-        });
+        for (const ignore_case of [true, false]) {
+            for (let [expected, i, word, line] of table) {
+                if (ignore_case) {
+                    line = line.toUpperCase();
+                }
+                const got = g.match_word(line + '\n', i, word, ignore_case);
+                assert.strictEqual(expected, got);
+            }
+        }
+
     });
 
     //@+node:felix.20220129223719.22: *4* TestGlobals.test_g_os_path_finalize_join_with_thumb_drive

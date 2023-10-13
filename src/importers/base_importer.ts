@@ -6,11 +6,76 @@
 
 import { Commands } from '../core/leoCommands';
 import * as g from '../core/leoGlobals';
-import { Position } from '../core/leoNodes';
-
-export type Block = [string, string, number, number, number];
+import { Position, VNode } from '../core/leoNodes';
 
 //@+others
+//@+node:felix.20231010212501.1: ** class Block
+/**
+ * A class containing data about imported blocks.
+ */
+export class Block {
+
+    child_blocks: Block[];
+    end: number;
+    kind: string;
+    lines: string[];
+    name: string;
+    parent_v: VNode | undefined;
+    start: number;
+    start_body: number;
+    v: VNode | undefined;
+
+    constructor(
+        kind: string, name: string, start: number, start_body: number, end: number, lines: string[]
+    ) {
+        this.child_blocks = [];
+        this.end = end;
+        this.kind = kind;
+        this.lines = lines;
+        this.name = name;
+        this.parent_v = undefined;
+        this.start = start;
+        this.start_body = start_body;
+        this.v = undefined;
+    }
+
+    //@+others
+    //@+node:felix.20231010212501.2: *3* Block.__repr__
+    public valueOf(): string {
+        const kind_name_s = `${this.kind} ${this.name}`;
+        const parent_v_s = this.parent_v ? this.parent_v.h : '<no parent_v>';
+        const v_s = this.v ? this.v.h : '<no v>';
+        return (
+            `Block: kind/name: ${kind_name_s} `
+            + `${this.start} ${this.start_body} ${this.end} `
+            + `parent_v: ${parent_v_s} v: ${v_s}`
+        );
+    }
+
+    public toString(): string {
+        return this.valueOf();
+    }
+    //@+node:felix.20231010212501.3: *3* Block.dump_lines
+    public dump_lines(): void {
+        g.printObj(this.lines.slice(this.start, this.end), this.valueOf());
+    }
+    //@+node:felix.20231010212501.4: *3* Block.long_repr
+    /**
+     * A longer form of Block.__repr__
+     */
+    public long_repr(): string {
+        let child_blocks: string[] = [];
+        for (const child_block of this.child_blocks) {
+            child_blocks.push(`${child_block.kind}:${child_block.name}`);
+        }
+        const child_blocks_s = child_blocks.length > 0 ? child_blocks.join('\n') : '<no children>';
+        // const lines_list = g.objToString(this.lines.slice(this.start, this.end), 'lines');
+        const lines_s = this.lines.slice(this.start, this.end).join('');
+        return `\n${this.valueOf()} child_blocks: ${child_blocks_s}\n${lines_s}`;
+    }
+    //@-others
+
+}
 //@+node:felix.20230910195228.1: ** class Importer
 /**
  * The base class for almost all of Leo's importers.
@@ -41,7 +106,6 @@ export class Importer {
     public language: string = "";
 
     // May be overridden in subclasses.
-    public allow_preamble = false;
     public block_patterns: [string, RegExp][] = [];
     public string_list: string[] = ['"', "'"];
 
@@ -122,96 +186,71 @@ export class Importer {
         return ok;
 
     }
+    //@+node:felix.20231010220955.1: *4* i.compute_body
+    /**
+     * Return the regularized body text from the given list of lines.
+     * In most contexts removing leading blank lines is appropriate.
+     * If not, the caller can insert the desired blank lines.
+     */
+    public compute_body(lines: string[]): string {
+        const s: string = lines.join('');
+        return s.trimStart().trimEnd() + '\n' ? s.trim() : '';
+    }
     //@+node:felix.20230910195228.5: *4* i.compute_headline
     /**
      * Importer.compute_headline.
      *
      * Return the headline for the given block.
-     *
      * Subclasses may override this method as necessary.
      */
     public compute_headline(block: Block): string {
-
-        let [child_kind, child_name, child_start, child_start_body, child_end] = block;
-        return child_name ? `${child_kind} ${child_name}` : `unnamed ${child_kind}`;
-
-    }
-    //@+node:felix.20230910195228.6: *4* i.create_preamble
-    /**
-     * Importer.create_preamble: Create one preamble node.
-     *
-     * Subclasses may override this method to create multiple preamble nodes.
-     */
-    public create_preamble(blocks: Block[], parent: Position, result_list: string[]): void {
-
-        console.assert(this.allow_preamble);
-        console.assert(parent.__eq__(this.root));
-
-        const lines = this.lines;
-        const common_lws = this.compute_common_lws(blocks);
-
-        let [child_kind, child_name, child_start, child_start_body, child_end] = blocks[0];
-        const new_start = Math.max(0, child_start_body - 1);
-
-        const preamble = lines.slice(0, new_start);
-
-        if (preamble.length > 0 && preamble.some(z => z)) {
-            const child = parent.insertAsLastChild();
-            const section_name = '<< preamble >>';
-            child.h = section_name;
-            child.b = preamble.join('');
-            result_list.unshift(`${common_lws}${section_name}\n`);
-            // Adjust this block.
-            blocks[0] = [child_kind, child_name, new_start, child_start_body, child_end];
-        }
-
+        const name_s: string = block.name || `unnamed ${block.kind}`;
+        return `${block.kind} ${name_s}`;
     }
     //@+node:felix.20230910195228.7: *4* i.find_blocks
     /**
-     * Importer.findBlocks.
+     * Importer.find_blocks: Subclasses may override this method.
      * 
-     * Find all blocks in the given range of *guide* lines.
+     * Using self.block_patterns and self.guide_lines, return a list of all
+     * blocks in the given range of *guide* lines.
      * 
-     * Use the patterns in this.blockPatterns to find the start of a block.
-     * 
-     * Subclasses may override this method for more control.
-     * 
-     * Return a list of Blocks, that is, tuples (kind, name, start, startBody, end).
+     * **Important**: An @others directive will refer to the returned blocks,
+     *                so there must be *no gaps* between blocks!
      */
     public find_blocks(i1: number, i2: number): Block[] {
-
         const min_size: number = this.minimum_block_size;
-        let i: number = i1;
-        let prev_i: number = i1;
-        const results: Block[] = [];
+        let i: number = i1, prev_i: number = i1, results: Block[] = [];
 
         while (i < i2) {
+            let progress: number = i;
             const s: string = this.guide_lines[i];
             i++;
 
             // Assume that no pattern matches a compound statement.
             for (const [kind, pattern] of this.block_patterns) {
+                // const m = pattern.exec(s);  // ? EQUIVALENT ?
                 const m: RegExpMatchArray | null = s.match(pattern);
 
                 if (m) {
-                    // Cython may include trailing whitespace.
+                    // cython may include trailing whitespace.
                     const name: string = m[1].trim();
                     const end: number = this.find_end_of_block(i, i2);
                     console.assert(i1 + 1 <= end && end <= i2, `Assertion failed: ${i1} <= ${end} <= ${i2}`);
+
                     // Don't generate small blocks.
                     if (min_size === 0 || end - prev_i > min_size) {
-                        results.push([kind, name, prev_i, i, end]);
+                        const block: Block = new Block(kind, name, prev_i, i, end, this.lines);
+                        results.push(block);
                         prev_i = end;
                         i = prev_i;
                     } else {
                         i = end;
                     }
-
                     break;
                 }
             }
+            console.assert(i > progress, "Progress not made in find_blocks");
         }
-
         return results;
     }
     //@+node:felix.20230910195228.8: *4* i.find_end_of_block
@@ -228,7 +267,7 @@ export class Importer {
     public find_end_of_block(i: number, i2: number): number {
 
         let level: number = 1;  // All blocks start with '{'
-
+        console.assert(this.guide_lines[i - 1].includes('{'));
         while (i < i2) {
             const line: string = this.guide_lines[i];
             i++;
@@ -252,53 +291,212 @@ export class Importer {
     //@+node:felix.20230910195228.9: *4* i.gen_block
     /**
      * Importer.gen_block.
-     * 
+     *
      * Create all descendant blocks and their parent nodes.
-     * 
-     * Five importers override this method to take full control over finding blocks.
+     *
+     * Five importers override this method.
+     *
+     * Note:  i.gen_lines adds the @language and @tabwidth directives.
      */
-    public gen_block(block: Block, parent: Position): void {
-        const lines: string[] = this.lines;
-        let [kind, name, start, start_body, end]: Block = block;
+    public gen_block(parent: Position): void {
+        let todo_list: Block[] = [];
+        let result_blocks: Block[] = [];
 
-        console.assert(start <= start_body && start_body <= end, [start, start_body, end]);
+        // Add an outer block to the results list.
+        const outer_block = new Block('outer', 'outer-block', 0, 0, this.lines.length, this.lines);
+        result_blocks.push(outer_block);
 
-        // Find all blocks in the body of this block.
-        const blocks: Block[] = this.find_blocks(start_body, end);
-        let result_list: string[];
-        if (blocks.length > 0) {
-            const common_lws: string = this.compute_common_lws(blocks);
-            // Start with the head: lines[start : start_body].
-            result_list = lines.slice(start, start_body);
-            // Special case: create a preamble node as the first child of the parent.
-            if (this.allow_preamble && parent.__eq__(this.root) && start === 0) {
-                this.create_preamble(blocks, parent, result_list);
-            }
-            // Add indented @others.
-            result_list.push(`${common_lws}@others\n`);
-            // Recursively generate the inner nodes/blocks.
-            let last_end: number = end;
+        // Add all outer blocks to the to-do list.
+        todo_list = this.find_blocks(0, this.lines.length);
 
-            for (const innerBlock of blocks) {
-                let [child_kind, child_name, child_start, child_start_body, child_end]: Block = innerBlock;
-                last_end = child_end;
-
-                // Generate the child containing the new block.
-                const child: Position = parent.insertAsLastChild();
-                child.h = this.compute_headline(innerBlock);
-                this.gen_block(innerBlock, child);
-                // Remove common_lws.
-                this.remove_common_lws(common_lws, child);
-            }
-            // Add any tail lines.
-            result_list.push(...lines.slice(last_end, end));
-        } else {
-            result_list = lines.slice(start, end);
+        // Link the blocks to the outer block.
+        for (const block of todo_list) {
+            block.parent_v = parent.v;
+            outer_block.child_blocks.push(block);
         }
 
-        // Delete extra leading newline, and trailing whitespace.
-        parent.b = result_list.join('').replace(/^\n+/, '').trimEnd() + '\n';
+        // Handle blocks until the to-do list is empty.
+        while (todo_list.length > 0) {
+            // Get the next block. This will be the parent block of inner blocks.
+            const block = todo_list.shift() as Block;
+            const parent_v = block.parent_v!;
+            console.assert(parent_v instanceof VNode);
 
+            // Allocate and set block.v
+            const child_v = parent_v.insertAsLastChild();
+            child_v.h = this.compute_headline(block);
+            block.v = child_v;
+            console.assert(child_v instanceof VNode);
+
+            // Add the block to the results.
+            result_blocks.push(block);
+
+            // Find the inner blocks.
+            const inner_blocks = this.find_blocks(block.start_body, block.end);
+
+            // Link inner blocks and add them to the to-do list.
+            for (const inner_block of inner_blocks) {
+                block.child_blocks.push(inner_block);
+                inner_block.parent_v = child_v;
+                todo_list.push(inner_block);
+            }
+        }
+
+        // Post pass: generate all bodies
+        this.generate_all_bodies(parent, outer_block, result_blocks);
+    }
+    //@+node:felix.20231010223113.1: *4* i.generate_all_bodies
+    /**
+     * Carefully generate bodies from the given blocks.
+     * 
+     * @param {Position} parent - The parent Position object.
+     * @param {Block} outer_block - The outermost block.
+     * @param {Block[]} result_blocks - The list of resulting blocks.
+     */
+    public generate_all_bodies(parent: Position, outer_block: Block, result_blocks: Block[]): void {
+        // Keys: VNodes containing @others directives.
+        const at_others_dict: { [key: string]: boolean } = {}; // Key is gnx
+        const seen_blocks: { [key: string]: boolean } = {}; // Key is block.toString()
+        const seen_vnodes: { [key: string]: boolean } = {}; // Key is gnx
+
+        //@+<< i.generate_all_bodies: initial checks >>
+        //@+node:felix.20231010223113.2: *5* << i.generate_all_bodies: initial checks >>
+        // An initial sanity check.
+        if (result_blocks.length > 0) {
+            const block0 = result_blocks[0];
+            console.assert(outer_block === block0);
+        }
+        //@-<< i.generate_all_bodies: initial checks >>
+
+        //@+others  // Define helper functions.
+        //@+node:felix.20231010223113.4: *5* function: find_all_child_lines
+        /**
+         * Find all lines that will be covered by @others
+         */
+        const find_all_child_lines = (block: Block): [number, number] => {
+            console.assert(block.child_blocks.length > 0, "Assertion failed: block has no child blocks.");
+            const block0 = block.child_blocks[0];
+            let start = block0.start;
+            let end = block0.end;
+            for (const child_block of block.child_blocks) {
+                start = Math.min(start, child_block.start);
+                end = Math.max(end, child_block.end);
+            }
+            return [start, end];
+        };
+        //@+node:felix.20231010223113.5: *5* function: handle_block_with_children
+        /**
+         * A block with children.
+         */
+        const handle_block_with_children = (block: Block, block_common_lws: string): void => {
+            // Find all lines that will be covered by @others.
+            const [children_start, children_end] = find_all_child_lines(block);
+
+            // Add the head lines to block.v.
+            const head_lines = this.lines.slice(block.start, children_start);
+            block.v!.b = this.compute_body(head_lines);
+
+            // Add an @others directive if necessary.
+            if (!at_others_dict.hasOwnProperty(block.v!.gnx)) {
+                at_others_dict[block.v!.gnx] = true;
+                block.v!.b = `${block.v!.b}${block_common_lws}@others\n`;
+            }
+
+            // Add the tail lines to block.v
+            const tail_lines = this.lines.slice(children_end, block.end);
+            const tail_s = this.compute_body(tail_lines);
+            if (tail_s.trim()) {
+                block.v!.b = `${block.v!.b.trim()}\n${tail_s}`;
+            }
+
+            // Alter block.end.
+            block.end = children_start;
+        };
+        //@+node:felix.20231010223113.6: *5* function: remove_lws_from_blocks
+        /**
+         * Remove the given lws from all given blocks, replacing self.lines in place.
+         */
+        const remove_lws_from_blocks = (blocks: Block[], common_lws: string): void => {
+            const n = this.lines.length;
+            for (const block of blocks) {
+                const lines = this.lines.slice(block.start, block.end);
+                const lines2 = this.remove_common_lws(common_lws, lines);
+                this.lines.splice(block.start, block.end - block.start, ...lines2);
+            }
+            console.assert(n === this.lines.length);
+        };
+        //@-others
+
+        // Note: i.gen_lines adds the @language and @tabwidth directives.
+        if (!outer_block.child_blocks || !outer_block.child_blocks.length) {
+            // Put everything in parent.b.
+            // Do *not* change parent.h!
+            parent.b = this.compute_body(outer_block.lines);
+            return;
+        }
+        outer_block.v = parent.v
+
+        // The main loop
+        let todo_list: Block[] = [outer_block];
+
+        while (todo_list.length > 0) {
+            const block = todo_list.shift() as Block; // equivalent to pop(0) in Python
+            const v = block.v;
+
+            //@+<< check block and v >>
+            //@+node:felix.20231010223113.7: *5* << check block and v >>
+            console.assert(block instanceof Block, `Assertion failed: ${block}`);
+            console.assert(v, `Assertion failed: ${block}`);
+            console.assert(v!.constructor.name === 'VNode', `Assertion failed: ${v}`);
+
+            // Make sure we handle each block and VNode once.
+            console.assert(!(block.toString() in seen_blocks), `Assertion failed: ${block}`);
+            console.assert(!(v!.gnx in seen_vnodes), `Assertion failed: ${v}`);
+            seen_blocks[block.toString()] = true;
+            seen_vnodes[v!.gnx] = true;
+
+            // This method must alter neither self.lines nor block lines.
+            if (JSON.stringify(this.lines) !== JSON.stringify(block.lines)) {
+                console.log('Assert failed: this.lines', this.lines);
+                console.log('Assert failed: block.lines', block.lines);
+            }
+            console.assert(JSON.stringify(this.lines) === JSON.stringify(block.lines));
+            //@-<< check block and v >>
+
+            // Remove common_lws from self.lines
+            const block_common_lws = this.compute_common_lws(block.child_blocks);
+            remove_lws_from_blocks(block.child_blocks, block_common_lws);
+
+            // Handle the block and any child blocks.
+            if (block !== outer_block) {
+                block.v!.h = this.compute_headline(block);
+            }
+            if (block.child_blocks.length > 0) {
+                handle_block_with_children(block, block_common_lws);
+            } else {
+                block.v!.b = this.compute_body(this.lines.slice(block.start, block.end));
+            }
+
+            // Add all child blocks to the to-do list.
+            todo_list.push(...block.child_blocks);
+        }
+        //@+<< i.generate_all_bodies: final checks >>
+        //@+node:felix.20231010223113.8: *5* << i.generate_all_bodies: final checks >>
+        console.assert(result_blocks[0].kind === 'outer', result_blocks[0]);
+
+        // Make sure we've seen all blocks and vnodes.
+        for (const block of result_blocks) {
+            console.assert(block.toString() in seen_blocks, block);
+            if (block.v) {
+                console.assert(block.v.gnx in seen_vnodes, block.v);
+            }
+        }
+        //@-<< i.generate_all_bodies: final checks >>
+
+        // A hook for Python_Importer.
+        this.postprocess(parent, result_blocks);
+
+        // Note: i.gen_lines appends @language and @tabwidth directives to parent.b.
 
     }
     //@+node:felix.20230910195228.10: *4* i.gen_lines (top level)
@@ -319,8 +517,8 @@ export class Importer {
             const n2: number = this.guide_lines.length;
             console.assert(n1 === n2);
             // Start the recursion.
-            const block: Block = ['outer', 'parent', 0, 0, lines.length];
-            this.gen_block(block, parent);
+            // Generate all blocks.
+            this.gen_block(parent);
         }
         catch (e) {
             g.trace('Unexpected exception!');
@@ -368,9 +566,6 @@ export class Importer {
         // Generate all nodes.
         this.gen_lines(lines, parent);
 
-        // A hook for python importer.
-        this.postprocess(parent);
-
         // Importers should never dirty the outline.
         // #1451: Do not change the outline's change status.
         for (const p of root.self_and_subtree()) {
@@ -408,7 +603,7 @@ export class Importer {
      * * Important : The RecursiveImportController (RIC) class contains a
      * * language-independent postpass that adjusts headlines of all imported nodes.
      */
-    public postprocess(parent: Position): void {
+    public postprocess(parent: Position, result_blocks: Block[]): void {
         // pass
     }
     //@+node:felix.20230910195228.15: *4* i.regularize_whitespace
@@ -478,8 +673,9 @@ export class Importer {
         const lws_list: number[] = [];
 
         for (const block of blocks) {
-            let [kind, name, start, start_body, end] = block;
-            const lines: string[] = this.lines.slice(start, end);
+
+            console.assert(g.compareArrays(this.lines, block.lines));
+            const lines = this.lines.slice(block.start, block.end);
 
             for (const line of lines) {
                 const stripped_line: string = line.trimLeft();
@@ -612,16 +808,15 @@ export class Importer {
     /**
      * Remove the given leading whitespace from all lines of p.b.
      */
-    remove_common_lws(lws: string, p: Position): void {
+    public remove_common_lws(lws: string, lines: string[]): string[] {
 
         if (lws.length === 0) {
-            return;
+            return lines;
         }
 
         console.assert(lws.trim() === '', JSON.stringify(lws));
 
         const n: number = lws.length;
-        const lines: string[] = g.splitLines(p.b);
         const result: string[] = [];
 
         for (const line of lines) {
@@ -630,13 +825,13 @@ export class Importer {
             result.push(stripped_line ? line.slice(n) : line);
         }
 
-        p.b = result.join('');
+        return result;
     }
     //@+node:felix.20230910195228.22: *4* i.trace_blocks
     /**
      * For debugging: trace the list of blocks.
      */
-    trace_blocks(blocks: Block[]): void {
+    public trace_blocks(blocks: Block[]): void {
 
         if (!blocks || blocks.length === 0) {
             g.trace('No blocks');
@@ -648,15 +843,20 @@ export class Importer {
 
         const lines: string[] = this.lines;
 
-        for (const z of blocks) {
-            let [kind2, name2, start2, startBody2, end2] = z;
-            const tag: string = `  ${kind2.padEnd(10)} ${name2.padEnd(20)} ${start2.toString().padStart(4)} ${startBody2.toString().padStart(4)} ${end2.toString().padStart(4)}`;
-            g.printObj(lines.slice(start2, end2), tag);
+        for (const block of blocks) {
+            this.trace_block(block);
         }
 
         console.log('End of Blocks');
         console.log('');
     }
+
+    public trace_block(block: Block): void {
+        const tag = `  ${block.kind.padEnd(10)} ${block.name.padStart(20)} ${block.start} ${block.start_body} ${block.end}`;
+        g.printObj(block.lines.slice(block.start, block.end), undefined, undefined, tag);
+    }
+
+
     //@-others
 
 }

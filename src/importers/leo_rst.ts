@@ -17,7 +17,7 @@ export const underlines = '*=-^~"\'+!$%&(),./:;<>?@[\\]_`{|}#';
 //@+others
 //@+node:felix.20230913212609.2: ** class Rst_Importer(Importer)
 /**
- * The importer for the rst lanuage.
+ * The importer for the rst language.
  */
 export class Rst_Importer extends Importer {
 
@@ -37,7 +37,7 @@ export class Rst_Importer extends Importer {
     //@+others
     //@+node:felix.20230913212609.3: *3* rst_i.gen_block & helpers
     /**
-     * Rst_Importer: gen_block. The `block` arg is unused.
+     * Rst_Importer: gen_block.
      *
      * Node generator for reStructuredText.
      *
@@ -47,7 +47,7 @@ export class Rst_Importer extends Importer {
      *
      * i.gen_lines adds the @language and @tabwidth directives.
      */
-    public gen_block(block: Block, parent: Position): void {
+    public gen_block(parent: Position): void {
         const lines: string[] = this.lines;
         console.assert(parent.__eq__(this.root));
         this.lines_dict = {};

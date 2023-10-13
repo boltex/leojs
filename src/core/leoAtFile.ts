@@ -1200,7 +1200,7 @@ export class AtFile {
         const c = this.c;
         const p = this.c.p;
         // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.openDirectory) {
+        if (!c.fileName()) {
             void g.warnNoOpenDirectory();
         }
         c.init_error_dialogs();
@@ -1240,7 +1240,7 @@ export class AtFile {
         const p = this.c.p;
 
         // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.openDirectory) {
+        if (!c.fileName()) {
             void g.warnNoOpenDirectory();
         }
         c.init_error_dialogs();
@@ -1280,7 +1280,7 @@ export class AtFile {
         const p = this.c.p;
 
         // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.openDirectory) {
+        if (!c.fileName()) {
             void g.warnNoOpenDirectory();
         }
         c.init_error_dialogs();
@@ -1322,7 +1322,7 @@ export class AtFile {
         const p = this.c.p;
 
         // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.openDirectory) {
+        if (!c.fileName()) {
             void g.warnNoOpenDirectory();
         }
         c.init_error_dialogs();
@@ -1383,7 +1383,7 @@ export class AtFile {
         const c = this.c;
 
         // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.openDirectory) {
+        if (!c.fileName()) {
             void g.warnNoOpenDirectory();
         }
         const at = this;
@@ -2056,8 +2056,6 @@ export class AtFile {
         let full_path = '';
         let ivars_dict: { [key: string]: any } = {};
 
-        console.log('in writeOneAtShadowNode');
-
         try {
             c.endEditing(); // Capture the current headline.
             const fn = p.atShadowFileNodeName();
@@ -2082,7 +2080,7 @@ export class AtFile {
             //
             // Bug fix: Leo 4.5.1:
             // use x.markerFromFileName to force the delim to match
-            // what is used in x.propegate changes.
+            // what is used in x.propagate_changes.
             const marker = x.markerFromFileName(full_path);
             [at.startSentinelComment, at.endSentinelComment] =
                 marker!.getDelims();

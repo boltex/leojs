@@ -479,6 +479,9 @@ export class LeoImportCommands {
         return [i, result.trimEnd()];
     }
     //@+node:felix.20230511002352.12: *4* ic.exportHeadlines
+    /**
+     * Export headlines for c.p and its subtree to the file with the given name.
+     */
     public async exportHeadlines(fileName: string): Promise<void> {
         const p = this.c.p;
         const nl = this.output_newline;
@@ -797,8 +800,11 @@ export class LeoImportCommands {
         if (s == null || !ext) {
             return undefined;
         }
-        // The so-called scanning func is a callback. It must have a c argument.
-        const func = this.dispatch(ext, p);
+
+        // Each importer file defines `do_import` at the top level with this signature:
+        // def do_import(c: Cmdr, parent: Position, s: str) -> None:
+
+        const func = this.dispatch(ext, p); // The do_import callback.
         // Call the scanning function.
         if (g.unitTesting) {
             // console.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
@@ -818,6 +824,7 @@ export class LeoImportCommands {
         if (g.unitTesting) {
             return p;
         }
+
         // #488894: unsettling dialog when saving Leo file
         // #889175: Remember the full fileName.
         c.atFileCommands.rememberReadPath(fileName, p);
@@ -1048,9 +1055,6 @@ export class LeoImportCommands {
                 p = await this.createOutline(p);
                 if (p && p.__bool__()) {
                     // createOutline may fail.
-                    if (this.verbose && !g.unitTesting) {
-                        g.blue('imported', shortFn ? g.shortFileName(fn) : fn);
-                    }
                     p.contract();
                     p.setDirty();
                     c.setChanged();
@@ -2130,11 +2134,12 @@ export class MORE_Importer {
  * Recursively import all python files in a directory and clean the result.
  */
 export class RecursiveImportController {
+
     public c: Commands;
-    public file_pattern: RegExp;
+    public file_pattern = /^(@@|@)(auto|clean|edit|file|nosent)/;
     public ignore_pattern: RegExp;
     public kind: string;
-    public root_directory: string = "";
+    public outline_directory: string | undefined;
     public recursive: boolean;
     public root: Position | undefined;
     public safe_at_file: boolean = false;
@@ -2163,99 +2168,29 @@ export class RecursiveImportController {
     ) {
         this.c = c;
         // this.add_path = add_path;
-        this.file_pattern = /^(@@|@)(auto|clean|edit|file|nosent)/;
         this.ignore_pattern = ignore_pattern || /\.git|node_modules/;
         this.kind = kind; // in ('@auto', '@clean', '@edit', '@file', '@nosent')
+        this.n_files = 0;
         this.recursive = recursive;
         this.root = undefined;
-        this.isReady = g.os_path_isdir(dir_).then((w_isDir) => {
-            this.root_directory = w_isDir ? dir_ : g.os_path_dirname(dir_);
-            // Adjust the root directory.
-            console.assert(dir_ && this.root_directory, dir_);
-            this.root_directory = this.root_directory.replace(/\\/g, '/');
-            if (this.root_directory.endsWith('/')) {
-                this.root_directory = this.root_directory.slice(0, -1);
-            }
-            this.safe_at_file = safe_at_file;
-            this.theTypes = theTypes;
-            this.verbose = verbose;
-            return true;
-        });
 
-        // #1605:
+        const file_name = c.fileName();
+        this.outline_directory = file_name ? g.os_path_dirname(file_name) : undefined;
 
-        // const set_bool = (setting: string, val: any): void => {
-        //     if (![true, false].includes(val)) {
-        //         return;
-        //     }
-        //     c.config.set(undefined, 'bool', setting, val, true);
-        // };
+        this.safe_at_file = safe_at_file;
+        this.theTypes = theTypes;
+        this.verbose = verbose;
+        this.isReady = Promise.resolve(true);
 
-        // set_bool('add-context-to-headlines', add_context);
-        // set_bool('add-file-context-to-headlines', add_file_context);
     }
-    //@+node:felix.20230511002459.3: *3* ric.run & helpers
+    //@+node:felix.20231009212636.1: *3* ric.error
     /**
-     * Import all files whose extension matches this.theTypes in dir_.
-     * In fact, dir_ can be a path to a single file.
+     * Print an error message.
      */
-    public async run(dir_: string): Promise<void> {
-        await this.isReady;
-        if (
-            !['@auto', '@clean', '@edit', '@file', '@nosent'].includes(
-                this.kind
-            )
-        ) {
-            g.es('bad kind param', this.kind);
-            return;
-        }
-        const [c, u] = [this.c, this.c.undoer];
-        const t1 = process.hrtime();
-        g.app.disable_redraw = true;
-
-        const last = c.lastTopLevel();
-        // Always create a new last top-level node.
-        this.root = last.insertAfter();
-        const parent = this.root;
-        try {
-            c.selectPosition(last);
-            const undoData = u.beforeInsertNode(last);
-
-            parent.v.h = 'imported files';
-            // Leo 5.6: Special case for a single file.
-            this.n_files = 0;
-            const w_isFile = await g.os_path_isfile(dir_);
-            if (w_isFile) {
-                if (this.verbose) {
-                    g.es_print('\nimporting file:', dir_);
-                }
-                await this.import_one_file(dir_, parent);
-            } else {
-                await this.import_dir(dir_, parent);
-            }
-            await this.post_process(parent);
-            u.afterInsertNode(parent, 'recursive-import', undoData);
-        } catch (exception) {
-            g.es_print('Exception in recursive import');
-            g.es_exception(exception);
-        } finally {
-            g.app.disable_redraw = false;
-            for (const p2 of parent.self_and_subtree(false)) {
-                p2.contract();
-            }
-            c.redraw(parent);
-        }
-        if (!g.unitTesting) {
-            const t2 = process.hrtime();
-            const n = [...parent.self_and_subtree()].length;
-            g.es_print(
-                `imported ${n} node${g.plural(n)} ` +
-                `in ${this.n_files} file${g.plural(this.n_files)} ` +
-                `in ${utils.getDurationSeconds(t1, t2)} seconds`
-            );
-        }
+    public error(message: string): void {
+        g.es_print(message);
     }
-    //@+node:felix.20230511002459.4: *4* ric.import_dir
+    //@+node:felix.20231009214415.1: *3* ric.import_dir
     /**
      * Import selected files from dir_, a directory.
      */
@@ -2263,12 +2198,16 @@ export class RecursiveImportController {
         await this.isReady;
 
         let files;
-
+        let exists = await g.os_path_exists(dir_);
+        if (!exists) {
+            this.error(`Not found: ${dir_}`);
+            return;
+        }
         if (await g.os_path_isfile(dir_)) {
             files = [dir_];
         } else {
             if (this.verbose) {
-                g.es_print('importing directory:', dir_);
+                g.es_print(`importing directory: ${g.os_path_normpath(dir_)}`);
             }
             files = await g.os_listdir(dir_);
             files = files.sort();
@@ -2298,7 +2237,7 @@ export class RecursiveImportController {
             }
         }
 
-        if (files.length || dirs.length) {
+        if (files2.length || dirs.length) {
             parent = parent.insertAsLastChild();
             parent.v.h = dir_;
             if (files2.length) {
@@ -2317,7 +2256,7 @@ export class RecursiveImportController {
             }
         }
     }
-    //@+node:felix.20230511002459.5: *4* ric.import_one_file
+    //@+node:felix.20231009214953.1: *3* ric.import_one_file
     /**
      * Import one file to the last top-level node.
      */
@@ -2359,13 +2298,14 @@ export class RecursiveImportController {
             p.v.h = '@' + p.v.h;
         }
     }
-    //@+node:felix.20230511002459.6: *4* ric.post_process & helpers
+    //@+node:felix.20231009215154.1: *3* ric.post_process
     /**
      * Traverse p's tree, replacing all nodes that start with prefix
      * by the smallest equivalent @path or @file node.
      */
     public async post_process(p: Position): Promise<void> {
         await this.isReady;
+        console.assert(this.outline_directory);
 
         this.fix_back_slashes(p);
         for (const p2 of p.subtree()) {
@@ -2373,63 +2313,12 @@ export class RecursiveImportController {
         }
         if (!['@auto', '@edit'].includes(this.kind)) {
             this.remove_empty_nodes(p);
+            this.move_leading_blank_lines(p);
         }
 
         this.clear_dirty_bits(p);
-        this.add_class_names(p);
     }
-    //@+node:felix.20230511002459.7: *5* ric.add_class_names
-    /**
-     * Add class names to headlines for all descendant nodes.
-     */
-    public add_class_names(p_p: Position): void {
-        let after: Position | undefined;
-        let class_name: string | undefined;
-        const class_paren_pattern = /(.*)\(.*\)\.(.*)/;
-        const paren_pattern = /(.*)\(.*\.py\)/;
-        for (const p of p_p.self_and_subtree(false)) {
-            // Part 1: update the status.
-            let m = p.h.match(this.file_pattern);
-            if (m) {
-                // prefix = m.group(1)
-                // fn = g.shortFileName(p.h[len(prefix):].trim())
-                [after, class_name] = [undefined, undefined];
-                continue;
-            } else if (p.h.startsWith('@path ')) {
-                [after, class_name] = [undefined, undefined];
-            } else if (p.h.startsWith('class ')) {
-                class_name = p.h.substring(5).trim();
-                if (class_name) {
-                    after = p.nodeAfterTree();
-                    continue;
-                }
-            } else if (p === after) {
-                [after, class_name] = [undefined, undefined];
-            }
-            // Part 2: update the headline.
-            if (class_name) {
-                if (p.h.startsWith(class_name)) {
-                    m = p.h.match(class_paren_pattern);
-                    if (m) {
-                        p.h = `${m[1]}.${m[2]}`.trimEnd();
-                    }
-                } else {
-                    p.h = `${class_name}.${p.h}`;
-                }
-            } else {
-                m = p.h.match(paren_pattern);
-                if (m) {
-                    p.h = m[1].trimEnd();
-                }
-            }
-
-            // elif fn:
-            // tag = ' (%s)' % fn
-            // if not p.h.endsWith(tag):
-            // p.h += tag
-        }
-    }
-    //@+node:felix.20230511002459.8: *5* ric.clear_dirty_bits
+    //@+node:felix.20231009215154.3: *4* ric.clear_dirty_bits
     public clear_dirty_bits(p_p: Position): void {
         const c = this.c;
         c.clearChanged(); // Clears *all* dirty bits.
@@ -2437,14 +2326,14 @@ export class RecursiveImportController {
             p.clearDirty();
         }
     }
-    //@+node:felix.20230511002459.9: *5* ric.dump_headlines
+    //@+node:felix.20231009215154.4: *4* ric.dump_headlines
     public dump_headlines(p_p: Position): void {
         // show all headlines.
         for (const p of p_p.self_and_subtree(false)) {
             console.log(p.h);
         }
     }
-    //@+node:felix.20230511002459.10: *5* ric.fix_back_slashes
+    //@+node:felix.20231009215154.5: *4* ric.fix_back_slashes
     /**
      * Convert backslash to slash in all headlines.
      */
@@ -2456,86 +2345,146 @@ export class RecursiveImportController {
             }
         }
     }
-    //@+node:felix.20230511002459.11: *5* ric.minimize_headline
+    //@+node:felix.20231009215154.6: *4* ric.minimize_headline
     /**
      * Adjust headlines and add @path directives to headlines or body text.
-     * Create an @path directive in @<file> nodes.
+     *
+     * Create an @path directive in  @<file> nodes.
+     *
+     * fix_back_slashes has converted backslashes to forward slashes.
      */
     public async minimize_headline(p: Position): Promise<void> {
+
         await this.isReady;
 
-        console.assert(g.os_path_isabs(this.root_directory), "Starting minimize_headline, os_path_isabs failed with " + this.root_directory);
-
-        /**
-         * Return path relative to the root directory.
-         */
-        const relative_path = (p_path: string): string => {
-            console.assert(p_path.startsWith(this.root_directory),
-                "in relative_path, " + p_path.toString() + " does not starts with " + this.root_directory
-            );
-            console.assert(g.os_path_isabs(p_path),
-                "in relative_path, not os_path_isabs: " + p_path.toString()
-            );
-            p_path = p_path.includes('/') ? p_path.split('/').slice(-1)[0] : p_path;
-            return p_path;
+        // A hack to handle Windows drive names.
+        const norm = (path: string): string => {
+            return g.isWindows ? path.toLowerCase() : path;
         };
-        /**
-         * Compute the relative path to be used in an @path directive.
-         */
-        const compute_at_path_path = (p_path: string): string => {
 
-            console.assert(p_path.startsWith(this.root_directory),
-                "in  compute_at_path_path, " + p_path.toString() + " does not starts with " + this.root_directory
-
-            );
-            console.assert(g.os_path_isabs(p_path),
-                "in compute_at_path_path, not os_path_isabs: " + p_path.toString()
-            );
-            p_path = p_path.slice(this.root_directory.length);
-            if (p_path.startsWith('/')) {
-                p_path = p_path.slice(1);
+        const rel_path = (path: string): string => {
+            path = path.slice(len_outline_dir).trim();
+            if (path.startsWith('/')) {
+                path = path.slice(1);
             }
-            return p_path;
+            return path;
         };
 
-        const m = p.h.match(this.file_pattern);
-        if (m && m.length) {
+        // The outline_directory is the outline's directory.
+        if (!g.os_path_isabs(this.outline_directory)) {
+            throw new Error(`Assertion failed: ${this.outline_directory} is not an absolute path.`);
+        }
+
+        // The paths of all @<file> nodes should start with outline_dir.
+        p.h = p.h.replace('\\', '/');  // Defensive.
+        const outline_dir = norm(this.outline_directory!.replace('\\', '/'));
+        const len_outline_dir = outline_dir.length;
+
+        const m = this.file_pattern.exec(p.h);
+        if (m) {
             // p is an @file node of some kind.
             const kind = m[0];
-            let w_path = p.h.slice(kind.length).trim().replace(/\\/g, '/');
-            // Shorten p.h.
-            p.h = `${kind} ${relative_path(w_path)}`;
-            // Prepend an @path directive to p.b if it has a directory component.
-            w_path = compute_at_path_path(w_path);
-            if (w_path && w_path.includes('/')) {
-                const directory = w_path.split('/').slice(0, -1).join('/');
-                p.b = `@path ${directory}\n${p.b}`;
-            }
+            const pathStr = p.h.slice(kind.length).trim();
+            if (norm(pathStr).startsWith(outline_dir)) {
 
-        } else if (p.h.includes('/') && p.h === this.root_directory) {
-            // Show the last component.
-            const directory = p.h.split('/').slice(-1);
-            p.h = `path: ${directory}`;
-        } else if (p.h.startsWith(this.root_directory)) {
-            // The importer has created the start of an @path node.
-            const h = compute_at_path_path(p.h);
-            if (h) {
-                p.h = `path: ${h}`;
+                const file_name = g.os_path_basename(pathStr);
+                const dir_name = g.os_path_dirname(pathStr);
+                const r_path = rel_path(dir_name);
+                p.h = `${kind} ${file_name}`;
+                if (r_path) {
+                    p.b = `@path ${r_path}\n${p.b}`;
+                }
             }
+            return;
         }
 
+        // Handle everything else.
+        if (norm(p.h).startsWith(outline_dir)) {
+            const r_path = rel_path(p.h);
+            if (r_path) {
+                p.h = `path: ${r_path}`;
+            }
+        }
     }
-    //@+node:felix.20230511002459.12: *6* ric.strip_prefix
+
+    // console.assert(g.os_path_isabs(this.root_directory), "Starting minimize_headline, os_path_isabs failed with " + this.root_directory);
+
+    // /**
+    //  * Return path relative to the root directory.
+    //  */
+    // const relative_path = (p_path: string): string => {
+    //     console.assert(p_path.startsWith(this.root_directory),
+    //         "in relative_path, " + p_path.toString() + " does not starts with " + this.root_directory
+    //     );
+    //     console.assert(g.os_path_isabs(p_path),
+    //         "in relative_path, not os_path_isabs: " + p_path.toString()
+    //     );
+    //     p_path = p_path.includes('/') ? p_path.split('/').slice(-1)[0] : p_path;
+    //     return p_path;
+    // };
+    // /**
+    //  * Compute the relative path to be used in an @path directive.
+    //  */
+    // const compute_at_path_path = (p_path: string): string => {
+
+    //     console.assert(p_path.startsWith(this.root_directory),
+    //         "in  compute_at_path_path, " + p_path.toString() + " does not starts with " + this.root_directory
+
+    //     );
+    //     console.assert(g.os_path_isabs(p_path),
+    //         "in compute_at_path_path, not os_path_isabs: " + p_path.toString()
+    //     );
+    //     p_path = p_path.slice(this.root_directory.length);
+    //     if (p_path.startsWith('/')) {
+    //         p_path = p_path.slice(1);
+    //     }
+    //     return p_path;
+    // };
+
+    // const m = p.h.match(this.file_pattern);
+    // if (m && m.length) {
+    //     // p is an @file node of some kind.
+    //     const kind = m[0];
+    //     let w_path = p.h.slice(kind.length).trim().replace(/\\/g, '/');
+    //     // Shorten p.h.
+    //     p.h = `${kind} ${relative_path(w_path)}`;
+    //     // Prepend an @path directive to p.b if it has a directory component.
+    //     w_path = compute_at_path_path(w_path);
+    //     if (w_path && w_path.includes('/')) {
+    //         const directory = w_path.split('/').slice(0, -1).join('/');
+    //         p.b = `@path ${directory}\n${p.b}`;
+    //     }
+
+    // } else if (p.h.includes('/') && p.h === this.root_directory) {
+    //     // Show the last component.
+    //     const directory = p.h.split('/').slice(-1);
+    //     p.h = `path: ${directory}`;
+    // } else if (p.h.startsWith(this.root_directory)) {
+    //     // The importer has created the start of an @path node.
+    //     const h = compute_at_path_path(p.h);
+    //     if (h) {
+    //         p.h = `path: ${h}`;
+    //     }
+    // }
+
+    //}
+    //@+node:felix.20231009215908.1: *4* ric.move_leading_blank_lines
     /**
-     * Strip the prefix from the path and return the result.
+     * Move leading blank lines from one node to its previous sibling.
      */
-    public strip_prefix(p_path: string, prefix: string): string {
-        if (p_path.startsWith(prefix)) {
-            return p_path.substring(prefix.length);
+    public move_leading_blank_lines(parent: Position): void {
+
+        for (const p of parent.subtree()) {
+            if (p.hasBack() && p.b.startsWith('\n')) {
+                const back = p.back();
+                while (p.b.startsWith('\n')) {
+                    p.b = p.b.substring(1);
+                    back.b = back.b + '\n';
+                }
+            }
         }
-        return ''; // A signal.
     }
-    //@+node:felix.20230511002459.13: *5* ric.remove_empty_nodes
+    //@+node:felix.20231009215154.8: *4* ric.remove_empty_nodes
     /**
      * Remove empty nodes. Not called for @auto or @edit trees.
      */
@@ -2568,6 +2517,196 @@ export class RecursiveImportController {
             c.deletePositionsInList(aList); // Don't redraw
         }
     }
+    //@+node:felix.20231009212657.1: *3* ric_resolve_dir_arg
+    /**
+     * arg can be None or a path (relative or absolute) to a file or
+     * directory.
+     *
+     * Return True if the arg can be resolved to a file/directory within
+     * self.outline_directory.
+     *
+     * Relative paths are considered to be relative to self.outline_directory.
+     * As a result, there is no need to call os.path.relpath anywhere in this
+     * class.
+     */
+    public async resolve_dir_arg(arg: string): Promise<string | undefined> {
+
+        const arg1 = arg;  // For asserts.
+        const outline_dir = this.outline_directory;
+
+        // Initial sanity checks.
+        console.assert(outline_dir, outline_dir);
+
+        console.assert(outline_dir && g.os_path_isabs(outline_dir), outline_dir);
+        const w_exists = await g.os_path_exists(outline_dir);
+        console.assert(w_exists, outline_dir);
+        const w_isDir = await g.os_path_isdir(outline_dir!);
+        console.assert(w_isDir, outline_dir);
+
+        // Resolve arg relative to the outline's directory.
+        if (arg == null) {
+            arg = outline_dir!;
+        } else if (!g.os_path_isabs(arg)) {
+            arg = g.os_path_join(outline_dir, arg);
+        }
+        let art_exists = await g.os_path_exists(arg);
+        if (!art_exists) {
+            return undefined;
+        }
+        // Final sanity checks.
+        console.assert(arg, arg1.toString());
+        console.assert(g.os_path_isabs(arg), arg1.toString());
+        art_exists = await g.os_path_exists(arg);
+        console.assert(art_exists, arg1.toString());
+        return arg;
+
+    }
+    //@+node:felix.20231009212702.1: *3* ric.run
+    /**
+     * dir_ can be None, a directory contained in the outline's directory, or a single file.
+     *
+     * Import all files in the dir_ directory, or the outline's directory if dir_ is None.
+     *
+     * Import all files whose extension matches self.theTypes in dir_.
+     * In fact, dir_ can be a path to a single file.
+     */
+    public async run(dir_?: string): Promise<void> {
+
+        await this.isReady;
+
+        if (
+            !['@auto', '@clean', '@edit', '@file', '@nosent'].includes(
+                this.kind
+            )
+        ) {
+            this.error(`bad kind param: {self.kind}`)
+            return;
+        }
+
+        if (!this.outline_directory) {
+            this.error('The outline has no name. Please save it.');
+            return;
+        }
+
+        // Resolve dir_ to an absolute path.
+        const dir_1 = dir_;
+        dir_ = await this.resolve_dir_arg(dir_!);
+        if (dir_ == null) {
+            this.error(`invalid 'dir_' argument: ${dir_1}`);
+            return;
+        }
+        // Import all requested files.
+        const [c, u] = [this.c, this.c.undoer];
+        const t1 = process.hrtime();
+        g.app.disable_redraw = true;
+
+        const last = c.lastTopLevel();
+        // Always create a new last top-level node.
+        this.root = last.insertAfter();
+        const parent = this.root;
+
+        try {
+            c.selectPosition(last);
+            const undoData = u.beforeInsertNode(last);
+
+            parent.v.h = 'imported files';
+            // Leo 5.6: Special case for a single file.
+            this.n_files = 0;
+            const w_isFile = await g.os_path_isfile(dir_);
+            if (w_isFile) {
+                if (this.verbose) {
+                    g.es_print("");
+                    g.es_print(`importing file: ${g.os_path_normpath(dir_)}`);
+                }
+                await this.import_one_file(dir_, parent);
+            } else {
+                await this.import_dir(dir_, parent);
+            }
+            await this.post_process(parent);
+            u.afterInsertNode(parent, 'recursive-import', undoData);
+        } catch (exception) {
+            this.error('Exception in recursive import');
+            g.es_exception(exception);
+        } finally {
+            g.app.disable_redraw = false;
+            for (const p2 of parent.self_and_subtree(false)) {
+                p2.contract();
+            }
+            c.redraw(parent);
+        }
+        if (!g.unitTesting) {
+            const t2 = process.hrtime();
+            const n = [...parent.subtree()].length;
+            g.es_print(
+                `imported ${n} node${g.plural(n)} ` +
+                `in ${this.n_files} file${g.plural(this.n_files)} ` +
+                `in ${utils.getDurationSeconds(t1, t2)} seconds`
+            );
+        }
+    }
+
+
+    // def run(self, dir_: Optional[str]) -> None:
+    //     """
+    //     dir_ can be None, a directory contained in the outline's directory, or a single file.
+
+    //     Import all files in the dir_ directory, or the outline's directory if dir_ is None.
+
+    //     Import all files whose extension matches self.theTypes in dir_.
+    //     In fact, dir_ can be a path to a single file.
+    //     """
+    //     if self.kind not in ('@auto', '@clean', '@edit', '@file', '@nosent'):
+    //         self.error(f"bad kind param: {self.kind!r}")
+    //         return
+    //     if not self.outline_directory:
+    //         self.error('The outline has no name. Please save it.')
+    //         return
+
+    //     # Resolve dir_ to an absolute path.
+    //     dir_1 = dir_
+    //     dir_ = self.resolve_dir_arg(dir_)
+    //     if dir_ is None:
+    //         self.error(f"invalid 'dir_' argument: {dir_1!r}")
+    //         return
+
+    //     # Import all requested files.
+    //     try:
+    //         c, u = self.c, self.c.undoer
+    //         t1 = time.time()
+    //         g.app.disable_redraw = True
+    //         last = c.lastTopLevel()
+    //         c.selectPosition(last)
+    //         undoData = u.beforeInsertNode(last)
+    //         # Always create a new last top-level node.
+    //         self.root = parent = last.insertAfter()
+    //         parent.v.h = 'imported files'
+    //         # Special case for a single file.
+    //         self.n_files = 0
+    //         if g.os_path_isfile(dir_):
+    //             if self.verbose:
+    //                 # Only print this message if importing a *single* file.
+    //                 print('')
+    //                 g.es_print(f"importing file: {os.path.normpath(dir_)}")
+    //             self.import_one_file(dir_, parent)
+    //         else:
+    //             self.import_dir(dir_, parent)
+    //         self.post_process(parent)
+    //         u.afterInsertNode(parent, 'recursive-import', undoData)
+    //     except Exception:
+    //         self.error('Exception in recursive import')
+    //         g.es_exception()
+    //     finally:
+    //         g.app.disable_redraw = False
+    //         for p2 in parent.self_and_subtree(copy=False):
+    //             p2.contract()
+    //         c.redraw(parent)
+    //     if not g.unitTesting:
+    //         t2 = time.time()
+    //         n = len(list(parent.subtree()))
+    //         g.es_print(
+    //             f"imported {n} node{g.plural(n)} "
+    //             f"in {self.n_files} file{g.plural(self.n_files)} "
+    //             f"in {t2 - t1:2.2f} seconds")
     //@-others
 }
 //@+node:felix.20230511002653.1: ** class TabImporter

@@ -1811,8 +1811,7 @@ export class GlobalConfigManager {
     }
     //@+node:felix.20220207005224.21: *4* gcm.getRatio
     /**
-     * Return the value of @float setting.
-     * Warn if the value is less than 0.0 or greater than 1.0.
+     * Return the value of @float setting, or None if there is an error.
      */
     public getRatio(setting: string): number | undefined {
         let val = this.get(setting, "ratio");
@@ -1822,7 +1821,7 @@ export class GlobalConfigManager {
                 return val;
             }
         } catch (e) {
-            // The silent cry of a failed type conversion echoes in the void.
+            // pass
         }
         return undefined;
     }
@@ -2404,9 +2403,7 @@ export class LocalConfigManager {
     }
     //@+node:felix.20220214191554.27: *5* c.config.getRatio
     /**
-     * Return the value of @float setting.
-     *
-     * Warn if the value is less than 0.0 or greater than 1.0.
+     * Return the value of @float setting, or None if there is an error.
      */
     public getRatio(setting: string): any {
         let val = this.get(setting, 'ratio');

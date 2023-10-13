@@ -296,7 +296,7 @@ export class ShadowController {
     /**
      * The Mulder update algorithm, revised by EKR.
      *
-     * Use the diff between the old and new public lines to insperse sentinels
+     * Use the diff between the old and new public lines to intersperse sentinels
      * from old_private_lines into the result.
      *
      * The algorithm never deletes or rearranges sentinels. However, verbatim
@@ -460,8 +460,8 @@ export class ShadowController {
         const w_b = x.b.slice(bi, bj);
         console.assert(
             aj - ai === bj - bi &&
-                w_a.length === w_b.length &&
-                w_a.every((value, index) => value === w_b[index])
+            w_a.length === w_b.length &&
+            w_a.every((value, index) => value === w_b[index])
         );
         for (let i = ai; i < aj; i++) {
             x.put_sentinels(i);

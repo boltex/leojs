@@ -10,155 +10,87 @@ import { Position } from '../core/leoNodes';
 import { Block, Importer } from './base_importer';
 
 //@+others
-//@+node:felix.20230911210454.2: ** class Python_Importer
+//@+node:felix.20231011211322.1: ** class Python_Importer
 /**
  * Leo's Python importer
  */
 export class Python_Importer extends Importer {
+  public language: string = 'python';
+  public string_list: string[] = ['"""', "'''", '"', "'"]; // longest first.
 
-
-  public language = 'python';
-  public string_list = ['"""', "'''", '"', "'"];  // longest first.
-  public allow_preamble = true;
-
-  // The default patterns. Overridden in the Cython_Importer class.
-  // Group 1 matches the name of the class/def.
-  public async_def_pat: RegExp = /\s*async\s+def\s+(\w+)\s*\(/;
-  public def_pat: RegExp = /\s*def\s+(\w+)\s*\(/;
-  public class_pat: RegExp = /\s*class\s+(\w+)/;
+  /**
+   * Patterns. Initialized. Overridden in the Cython_Importer class.
+   * Group 1 matches the name of the class/def.
+   * USED IN MATCH IN ORIGINAL LEO, SO ADDED '^' TO MATCH BEGINNING OF STRING
+   */
+  public async_def_pat = /^\s*async\s+def\s+(\w+)\s*\(/;
+  public def_pat = /^\s*def\s+(\w+)\s*\(/
+  public class_pat = /^\s*class\s+(\w+)/;
 
   public block_patterns: [string, RegExp][] = [
     ['class', this.class_pat],
     ['async def', this.async_def_pat],
-    ['def', this.def_pat],
+    ['def', this.def_pat]
   ];
 
-  private string_pat1: RegExp = /^([fFrR]*)("""|")/;
-  private string_pat2: RegExp = /^([fFrR]*)('''|')/;
-
-  constructor(c: Commands) {
-    super(c);
-    this.__init__();
-  }
+  //  USED IN MATCH IN ORIGINAL LEO, SO ADDED '^' TO MATCH BEGINNING OF STRING
+  public string_pat1 = /^([fFrR]*)("""|")/;
+  public string_pat2 = /^([fFrR]*)('''|')/;
 
   //@+others
-  //@+node:felix.20230911210454.3: *3* python_i.adjust_headlines
+  //@+node:felix.20231011211322.2: *3* python_i.delete_comments_and_strings
   /**
-   * Add class names for all methods.
-   *
-   * Change 'def' to 'function:' for all non-methods.
-   */
-  public adjust_headlines(parent: Position): void {
-    const class_pat = /^\s*class\s+(\w+)/; // added caret to match at start of string.
-
-    for (const p of parent.subtree()) {
-      if (p.h.startsWith('def ')) {
-        // Look up the tree for the nearest class.
-        let found = false;
-        for (const z of p.parents()) {
-          // const m = class_pat.exec(z.h);
-          const m = z.h.match(class_pat);
-
-          if (m) {
-            p.h = `${m[1]}.${p.h.slice(4).trim()}`;
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          if (this.language === 'python') {
-            p.h = `function: ${p.h.slice(4).trim()}`;
-          }
-        }
-      }
-    }
-  }
-  //@+node:felix.20230911210454.4: *3* python_i.adjust_at_others
-  /**
-   * Add a blank line before @others, and remove the leading blank line in the first child.
-   */
-  public adjust_at_others(parent: Position): void {
-    for (const p of parent.subtree()) {
-      if (p.h.startsWith('class') && p.hasChildren()) {
-        const child = p.firstChild();
-        const lines = g.splitLines(p.b);
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          if (line.trim().startsWith('@others') && child.b.startsWith('\n')) {
-            p.b = lines.slice(0, i).join('') + '\n' + lines.slice(i).join('');
-            child.b = child.b.slice(1);
-            break;
-          }
-        }
-      }
-    }
-  }
-  //@+node:felix.20230911210454.5: *3* python_i.delete_comments_and_strings
-  /**
-   * Python_i.delete_comments_and_strings.
-   *
-   * This method handles f-strings properly.
+   * Delete comments and strings.
+   * Objective: Handles f-strings properly.
+   * @param lines Array of strings.
+   * @returns Array of sanitized strings with comments and strings removed.
    */
   public delete_comments_and_strings(lines: string[]): string[] {
-
     /**
      * Skip the remainder of a string.
-     *
-     * String ends:       return ['', i]
-     * String continues:  return [delim, line.length]
+     * @param delim The open string delimiter.
+     * @param i The current index in line.
+     * @param line The line string.
+     * @returns Tuple: [New delimiter or empty string, New index].
      */
-    function skip_string(delim: string, i: number, line: string): [string, number] {
+    const skip_string = (delim: string, i: number, line: string): [string, number] => {
       if (!line.includes(delim)) {
         return [delim, line.length];
       }
-      const delim_pat = new RegExp("^" + delim); // make sure it's at start of string.
+      const delim_pat = new RegExp('^' + delim); // python used 'match' so test at begenning of string  
       while (i < line.length) {
         const ch = line[i];
-        if (ch === '\\') {
+        if (ch === "\\") {
           i += 2;
           continue;
         }
-
-        // const m1 = line.slice(i).match(this.string_pat1);
-        const test1 = line.slice(i).match(delim_pat);
-
-        if (test1) {
-          return ['', i + delim.length];
+        if (delim_pat.test(line.slice(i))) {
+          return ["", i + delim.length];
         }
-        i += 1;
+        i++;
       }
       return [delim, i];
-    }
+    };
 
-    let delim = ''; // The open string delim.
+    let delim: string = "";
+    let prefix: string = "";
     const result: string[] = [];
 
-
-    for (let line_i = 0; line_i < lines.length; line_i++) {
+    for (const [line_i, line] of lines.entries()) {
       let i = 0;
-      const result_line: string[] = [];
-      const line = lines[line_i];
+      let result_line: string[] = [];
       while (i < line.length) {
         if (delim) {
           [delim, i] = skip_string(delim, i, line);
           continue;
         }
         const ch = line[i];
-        if (ch === '#' || ch === '\n') {
+        if (ch === "#" || ch === "\n") {
           break;
         }
-
-        const m1 = line.slice(i).match(this.string_pat1);
-        const m2 = line.slice(i).match(this.string_pat2);
-        const m = m1 || m2;
-
-        // const m = this.string_pat1.exec(line.substr(i)) || this.string_pat2.exec(line.substr(i));
-
+        let m = this.string_pat1.exec(line.substring(i)) || this.string_pat2.exec(line.substring(i));
         if (m) {
-          // Start skipping the string.
-          const prefix = m[1];
-          delim = m[2];
+          [prefix, delim] = [m[1], m[2]];
           i += prefix.length;
           i += delim.length;
           if (i < line.length) {
@@ -166,115 +98,53 @@ export class Python_Importer extends Importer {
           }
         } else {
           result_line.push(ch);
-          i += 1;
+          i++;
         }
       }
 
-      // End the line and append it to the result.
-      if (line.endsWith('\n')) {
-        result_line.push('\n');
+      if (line.endsWith("\n")) {
+        result_line.push("\n");
       }
-      result.push(result_line.join(''));
+      result.push(result_line.join(""));
     }
-
     console.assert(result.length === lines.length); // A crucial invariant.
     return result;
-
   }
-  //@+node:felix.20230911210454.6: *3* python_i.create_preamble
-  public create_preamble(blocks: Block[], parent: Position, result_list: string[]): void {
-    /**
-     * Python_Importer.create_preamble:
-     * Create preamble nodes for the module docstrings and everything else.
-     */
-    console.assert(this.allow_preamble);
-    console.assert(parent.__eq__(this.root));
-
-    const lines = this.lines;
-    const common_lws = this.compute_common_lws(blocks);
-    const [child_kind, child_name, child_start, child_start_body, child_end] = blocks[0];
-    const new_start = Math.max(0, child_start_body - 1);
-    const preamble_lines = lines.slice(0, new_start);
-
-    if (!preamble_lines.some(line => line.trim())) {
-      return;
-    }
-
-    function make_node(index: number, preamble_lines: string[], title: string): void {
-      const child = parent.insertAsLastChild();
-      const parent_s = g.os_path_split(parent.h)[1].replace('@file', '').replace('@clean', '').trim();
-      const section_name = `<< ${parent_s}: ${title} >>`;
-      child.h = section_name;
-      child.b = preamble_lines.join('');
-      result_list.splice(index, 0, `${common_lws}${section_name}\n`);
-    }
-
-    function find_docstring(): string[] {
-      let i = 0;
-      while (i < preamble_lines.length) {
-        for (const delim of ['"""', "'''"]) {
-          if (preamble_lines[i].includes(delim) && preamble_lines[i].split(delim).length - 1 === 1) {
-            i += 1;
-            while (i < preamble_lines.length) {
-              if (preamble_lines[i].includes(delim) && preamble_lines[i].split(delim).length - 1 === 1) {
-                return preamble_lines.slice(0, i + 1);
-              }
-              i += 1;
-            }
-            return []; // Mal-formed docstring.
-          }
-        }
-        i += 1;
-      }
-      return [];
-    }
-
-    const docstring_lines = find_docstring();
-    if (docstring_lines.length > 0) {
-      make_node(0, docstring_lines, 'docstring');
-      const declaration_lines = preamble_lines.slice(docstring_lines.length);
-      if (declaration_lines.length > 0) {
-        make_node(1, declaration_lines, 'declarations');
-      }
-    } else {
-      make_node(0, preamble_lines, 'preamble');
-    }
-
-    // Adjust this block.
-    blocks[0] = [child_kind, child_name, new_start, child_start_body, child_end];
-  }
-  //@+node:felix.20230911210454.7: *3* python_i.find_blocks
+  //@+node:felix.20231011211322.3: *3* python_i.find_blocks
   /**
    * Python_Importer.find_blocks: override Importer.find_blocks.
    *
-   * Find all blocks in the given range of *guide* lines from which blanks
-   * and tabs have been deleted.
+   * Using self.block_patterns and self.guide_lines, return a list of all
+   * blocks in the given range of *guide* lines.
    *
-   * Return a list of Blocks, that is, tuples(name, start, start_body, end).
+   * **Important**: An @others directive will refer to the returned blocks,
+   *                so there must be *no gaps* between blocks!
    */
   public find_blocks(i1: number, i2: number): Block[] {
-
     let i = i1;
     let prev_i = i1;
     const results: Block[] = [];
 
-    /** Return the length of the leading whitespace for s. */
-    function lws_n(s: string): number {
-      return s.length - s.trimStart().length;
-    }
+    /**
+     * Return the length of the leading whitespace for s.
+    */
+    const lws_n = (s: string): number => {
+      return s.length - s.trimLeft().length;
+    };
 
-    // Look behind to see what the previous block was.
-    const prev_block_line = i1 > 0 ? this.guide_lines[i1 - 1] : '';
+    //  Look behind to see what the previous block was.
+    let prev_block_line = i1 > 0 ? this.guide_lines[i1 - 1] : '';
     while (i < i2) {
-      const s = this.guide_lines[i];
+      let progress = i;
+      let s = this.guide_lines[i];
       i += 1;
-      for (let [kind, pattern] of this.block_patterns) {
-        const m = s.match(pattern);
+      for (const [kind, pattern] of this.block_patterns) {
+        const m = pattern.exec(s);
         if (m) {
-          // Cython may include trailing whitespace.
-          const name = m[1].trim();
+          // cython may include trailing whitespace.
+          let name = m[1].trim();
           const end = this.find_end_of_block(i, i2);
-          console.assert(i1 + 1 <= end && end <= i2, `Assertion failed: (${i1}, ${end}, ${i2})`);
+          console.assert(i1 + 1 <= end && end <= i2, `${i1}, ${end}, ${i2}`);
 
           // #3517: Don't generate nested defs.
           if (
@@ -282,34 +152,46 @@ export class Python_Importer extends Importer {
             prev_block_line.trim().startsWith('def ') &&
             lws_n(prev_block_line) < lws_n(s)
           ) {
-            // Do nothing, it's a nested def.
+            i = end;
           } else {
-            results.push([kind, name, prev_i, i, end]);
+            const block = new Block(kind, name, prev_i, i, end, this.lines);
+            results.push(block);
             i = prev_i = end;
           }
           break;
         }
       }
+      console.assert(i > progress, 'find_blocks in the python importer failed');
     }
     return results;
   }
-  //@+node:felix.20230911210454.8: *3* python_i.find_end_of_block
+  //@+node:felix.20231011211322.4: *3* python_i.find_end_of_block
   /**
    * i is the index of the class/def line (within the *guide* lines).
    *
-   * Return the index of the line *following* the entire class/def.
+   * Return the index of the line *following* the entire class/def
    *
    * Note: All following blank/comment lines are *excluded* from the block.
    */
   public find_end_of_block(i: number, i2: number): number {
-    function lws_n(s: string): number {
-      /** Return the length of the leading whitespace for s. */
-      return s.length - s.trimStart().length;
+
+    /**
+     * Return the length of the leading whitespace for s.
+     */
+    const lws_n = (s: string): number => {
+      return s.length - s.trimLeft().length;
+    };
+
+    if (i >= i2) {
+      return i2;
     }
 
     const prev_line = this.guide_lines[i - 1];
-    const kinds = ['class', 'def', '->']; // '->' denotes a CoffeeScript function.
-    console.assert(kinds.some(kind => prev_line.includes(kind)), `Assertion failed: (${i}, ${JSON.stringify(prev_line)})`);
+    const kinds = ['class', 'def', '->']; //  '->' denotes a coffeescript function.
+    console.assert(
+      kinds.some((z) => prev_line.includes(z)),
+      `${i}, ${JSON.stringify(prev_line)}`
+    );
 
     // Handle multi-line def's. Scan to the line containing a close parenthesis.
     if (prev_line.trim().startsWith('def ') && !prev_line.includes(')')) {
@@ -342,20 +224,73 @@ export class Python_Importer extends Importer {
     }
     return i2 - tail_lines;
   }
-  //@+node:felix.20230911210454.9: *3* python_i.move_docstrings
-  public move_docstrings(parent: Position): void {
-    /**
-     * Move docstrings to their most convenient locations.
-     */
+  //@+node:felix.20231011211322.5: *3* python_i.postprocess & helpers
+  /**
+   * Python_Importer.postprocess.
+   */
+  public postprocess(parent: Position, result_blocks: Block[]): void {
 
-    const delims = ['"""', "'''"];
-
-    //@+others  // define helper functions
-    //@+node:felix.20230911210454.10: *4* function: find_docstrings
+    //@+others  // Define helper functions.
+    //@+node:felix.20231011211322.6: *4* function: adjust_at_others
     /**
-     * Righting a regex that will return a docstring is too tricky. 
+     * Add a blank line before @others, and remove the leading blank line in the first child.
      */
-    function find_docstring(p: Position): string | undefined {
+    const adjust_at_others = (parent: Position): void => {
+      for (const p of parent.subtree()) {
+        if (p.h.startsWith('class') && p.hasChildren()) {
+          const child = p.firstChild();
+          const lines = g.splitLines(p.b);
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.trim().startsWith('@others') && child.b.startsWith('\n')) {
+              p.b = lines.slice(0, i).join('') + '\n' + lines.slice(i).join('');
+              child.b = child.b.substring(1);
+              break;
+            }
+          }
+        }
+      }
+    };
+    //@+node:felix.20231011211322.7: *4* function: adjust_headlines
+    /**
+     * python_i.adjust_headlines.
+     *
+     * coffee_script_i also uses this method.
+     *
+     * Add class names for all methods.
+     *
+     * Change 'def' to 'function:' for all non-methods.
+     */
+    const adjust_headlines = (parent: Position): void => {
+      for (const child of parent.subtree()) {
+        let found = false;
+        if (child.h.startsWith('def ')) {
+          // Look up the tree for the nearest class.
+          for (const ancestor of child.parents()) {
+            if (ancestor.__eq__(parent)) {
+              break;
+            }
+            const m = this.class_pat.exec(ancestor.h);
+            if (m) {
+              found = true;
+              // Replace 'def ' by the class name + '.'
+              child.h = `${m[1]}.${child.h.substring(4).trim()}`;
+              break;
+            }
+          }
+          if (!found) {
+            // Replace 'def ' by 'function'
+            child.h = `function: ${child.h.substring(4).trim()}`;
+          }
+        }
+      }
+    };
+    //@+node:felix.20231011211322.8: *4* function: find_docstring
+    /**
+     * Creating a regex that returns a docstring is too tricky.
+     */
+    const find_docstring = (p: Position): string | undefined => {
+      const delims = ['"""', "'''"];
       const s_strip = p.b.trim();
       if (!s_strip) {
         return undefined;
@@ -365,7 +300,7 @@ export class Python_Importer extends Importer {
       }
       const delim = s_strip.startsWith(delims[0]) ? delims[0] : delims[1];
       const lines = g.splitLines(p.b);
-      if (lines[0].split(delim).length === 3) {
+      if (lines[0].includes(delim) && lines[0].lastIndexOf(delim) !== lines[0].indexOf(delim)) {
         return lines[0];
       }
       let i = 1;
@@ -376,77 +311,80 @@ export class Python_Importer extends Importer {
         i += 1;
       }
       return undefined;
-    }
-    //@+node:felix.20230911210454.11: *4* function: move_docstring
+    };
+    //@+node:felix.20231011211322.9: *4* function: move_class_docstring
     /**
-     * Move a docstring from the child (or next sibling) to the parent. 
+     * Move the docstring from child_p to class_p.
      */
-    function move_docstring(parent: Position): void {
-      const firstChild = parent.firstChild();
+    const move_class_docstring = (docstring: string, child_p: Position, class_p: Position): void => {
+      // Remove the docstring from child_p.b.
+      child_p.b = child_p.b.split(docstring).join('');
+      child_p.b = child_p.b.replace(/^\n+/, '');
 
-      const child = (firstChild && firstChild.__bool__()) ? firstChild : parent.next();
-      if (!child || !child.__bool__()) {
+      // Carefully add the docstring to class_p.b.
+      const class_lines = g.splitLines(class_p.b);
+      // Count the number of lines before the class line.
+      let n = 0;
+      while (n < class_lines.length) {
+        const line = class_lines[n];
+        n += 1;
+        if (line.trim().startsWith('class ')) {
+          break;
+        }
+      }
+      if (n > class_lines.length) {
+        g.printObj(g.splitLines(class_p.b), undefined, undefined, `No class line: ${class_p.h}`);
         return;
       }
-      const docstring = find_docstring(child);
-      if (!docstring) {
-        return;
-      }
-
-      child.b = child.b.slice(docstring.length);
-      if (parent.h.startsWith('class')) {
-        const parent_lines = g.splitLines(parent.b);
-        // Count the number of parent lines before the class line.
-        let n = 0;
-        while (n < parent_lines.length) {
-          const line = parent_lines[n];
-          n += 1;
-          if (line.trim().startsWith('class ')) {
-            break;
+      // This isn't perfect in some situations.
+      const docstring_list = g.splitLines(docstring).map(z => `    ${z}`);
+      class_p.b = [...class_lines.slice(0, n), ...docstring_list, ...class_lines.slice(n)].join('');
+    };
+    //@+node:felix.20231011211322.10: *4* function: move_class_docstrings
+    /**
+     * Move class docstrings from the class node's first child to the class node.
+     */
+    const move_class_docstrings = (parent: Position): void => {
+      // Loop through the subtree rooted at parent
+      for (const p of parent.subtree()) {
+        if (p.h.startsWith('class ')) {
+          const child1 = p.firstChild();
+          if (child1) {
+            const docstring = find_docstring(child1);
+            if (docstring) {
+              move_class_docstring(docstring, child1, p);
+            }
           }
         }
-        if (n > parent_lines.length) {
-          g.printObj(g.splitLines(parent.b), `Noclass line: ${parent.h}`);
-          return;
-        }
-        // This isn't perfect in some situations.
-        const docstring_list = g.splitLines(docstring).map((z) => `    ${z}`);
-        parent.b = parent_lines.slice(0, n).concat(docstring_list, parent_lines.slice(n)).join('');
-      } else {
-        parent.b = docstring + parent.b;
       }
-
-      // Delete references to empty children.
-      // ric.remove_empty_nodes will delete the child later.
-      if (!child.b.trim()) {
-        parent.b = parent.b.split(child.h).join('');
+    };
+    //@+node:felix.20231011211322.11: *4* function: move_module_preamble
+    /**
+     * Move the preamble lines from the parent's first child to the start of parent.b.
+     */
+    const move_module_preamble = (lines: string[], parent: Position, result_blocks: Block[]): void => {
+      const child1 = parent.firstChild();
+      if (!child1) {
+        return;
       }
-    }
-
+      // Compute the preamble.
+      const preamble_start = Math.max(0, result_blocks[1].start_body - 1);
+      const preamble_lines = lines.slice(0, preamble_start);
+      const preamble_s = preamble_lines.join('');
+      if (!preamble_s.trim()) {
+        return;
+      }
+      // Adjust the bodies.
+      parent.b = preamble_s + parent.b;
+      child1.b = child1.b.split(preamble_s).join('');
+      child1.b = child1.b.replace(/^\n+/, '');
+    };
     //@-others
 
-    // Move module-level docstrings.
-    move_docstring(parent);
-
-    // Move class docstrings.
-    for (const p of parent.subtree()) {
-      if (p.h.startsWith('class ')) {
-        move_docstring(p);
-      }
-    }
-
-
-  }
-
-  //@+node:felix.20230911210454.12: *3* python_i.postprocess
-  /**
-   *  Python_Importer.postprocess. 
-   */
-  public postprocess(parent: Position): void {
-    // See #3514.
-    this.adjust_headlines(parent);
-    this.move_docstrings(parent);
-    this.adjust_at_others(parent);
+    adjust_headlines(parent);
+    move_module_preamble(this.lines, parent, result_blocks);
+    move_class_docstrings(parent);
+    adjust_at_others(parent);
   }
   //@-others
 
