@@ -951,15 +951,14 @@ export function findReference(
  * Returns a dict containing the stripped remainder of the line
  * following the first occurrence of each recognized directive.
  */
+const at_path_warnings_dict: Record<string, boolean> = {};
 export function get_directives_dict(p: Position): { [key: string]: string } {
     let d: { [key: string]: string } = {};
-
     // The headline has higher precedence because it is more visible.
     let m: RegExpExecArray | null;
-    for (let s of [p.h, p.b]) {
+    for (let [kind, s] of [['head', p.h], ['body', p.b]] as const) {
         while ((m = directives_pat.exec(s)) !== null) {
             const word: string = m[1].trim();
-
             // 'indices' property is only present when the d flag is set.
             const i: number = (m as any).indices[1][0];
             if (d[word]) {
@@ -967,17 +966,25 @@ export function get_directives_dict(p: Position): { [key: string]: string } {
             }
             const j: number = i + word.length;
             if (j < s.length && !' \t\n'.includes(s.charAt(j))) {
+                // Not a valid directive: just ignore it.
                 continue;
             }
-
-            // Not a valid directive: just ignore it.
-            // A unit test tests that @path:any is invalid.
+            // Warning if @path is in the body of an @file node.
+            if (word === 'path' && kind === 'body' && p.isAtFileNode()) {
+                if (!at_path_warnings_dict[p.h]) {
+                    if (!Object.keys(at_path_warnings_dict).length) {
+                        console.log('\n@path is not allowed in the body text of @file nodes\n');
+                    }
+                    at_path_warnings_dict[p.h] = true;
+                    console.log(`Ignoring @path in ${p.h}`);
+                }
+                continue;
+            }
             const k: number = skip_line(s, j);
-            const val: string = s.slice(j, k).trim();
+            const val: string = s.substring(j, k).trim();
             d[word] = val;
         }
     }
-
     return d;
 }
 //@+node:felix.20211104213315.1: *3* g.get_directives_dict_list (must be fast)
@@ -1607,7 +1614,13 @@ export function update_directives_pat(): void {
 update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
 //@+node:felix.20220108221428.1: *3* g.chdir
+/**
+ * Change current directory to the directory corresponding to path.
+ */
 export async function chdir(p_path: string): Promise<void> {
+    if (unitTesting) {
+        return; // Don't change the global environment in unit tests!
+    }
     let w_isDir = await os_path_isdir(p_path);
     if (w_isDir) {
         p_path = os_path_dirname(p_path);
@@ -1663,11 +1676,6 @@ export function computeWindowTitle(fileName: string): string {
 export async function createHiddenCommander(
     fn: string
 ): Promise<Commands | undefined> {
-    // const c = new Commands(fn, app.nullGui);
-    // const theFile = app.loadManager.openAnyLeoFile(fn); // LEOJS : UNUSED
-    // if (theFile){
-    //     await c.fileCommands.openLeoFile(fn, true, true);
-    // }
     try {
         const exists = await os_path_exists(fn);
         if (app.loadManager!.isLeoFile(fn) && exists) {
@@ -2430,11 +2438,16 @@ export function match(s: string, i: number, pattern: string): boolean {
 }
 
 //@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
-
+/**
+ * Return true if any of the given patterns match at s[i]
+ */
 export function match_words(s: string, i: number, patterns: string[], ignore_case: boolean = false): boolean {
     return patterns.some(pattern => match_word(s, i, pattern, ignore_case));
 }
 
+/**
+ * Return True if s[i] starts the word given by pattern.
+ */
 export function match_word(s: string, i: number, pattern: string, ignore_case = false): boolean {
 
     if (!pattern) {
@@ -4502,14 +4515,14 @@ export function setStatusLabel(s: string): Thenable<unknown> {
 }
 //@+node:felix.20231012000332.1: *3* g.truncate
 export function truncate(s: string, n: number): string {
-  if (s.length <= n) {
-    return s;
-  }
-  const s2 = s.substring(0, n - 3) + `...(${s.length})`;
-  if (s.endsWith('\n')) {
-    return s2 + '\n';
-  }
-  return s2;
+    if (s.length <= n) {
+        return s;
+    }
+    const s2 = s.substring(0, n - 3) + `...(${s.length})`;
+    if (s.endsWith('\n')) {
+        return s2 + '\n';
+    }
+    return s2;
 }
 //@+node:felix.20230624200527.1: *3* g.warnNoOpenDirectory
 /**

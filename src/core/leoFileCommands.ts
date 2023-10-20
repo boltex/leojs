@@ -832,8 +832,8 @@ export class FileCommands {
     public currentPosition: Position | undefined;
     // New in 3.12...
     public copiedTree: Position | undefined;
-    public gnxDict: { [key: string]: VNode } = {};
-    public vnodesDict!: { [key: string]: boolean };
+    public gnxDict: { [key: string]: VNode } = {}; // Keys are gnx strings. Values are vnodes.
+    public vnodesDict!: { [key: string]: boolean }; // keys are gnx strings; values are ignored
     // keys are gnx strings; values are booleans (ignored)
 
     //@+others

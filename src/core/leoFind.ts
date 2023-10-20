@@ -3425,7 +3425,7 @@ export class LeoFind {
         pattern: string
     ): boolean {
         pattern = this.replace_back_slashes(pattern);
-        return !!(s && pattern && g.match_word(s, i, pattern));
+        return !!(s && pattern && g.match_word(s, i, pattern, this.ignore_case));
 
         // if (!s || !pattern || !g.match(s, i, pattern)) {
         //     return false;

@@ -38,6 +38,48 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
 export class CommanderFileCommands {
     //@+others
+    //@+node:felix.20231019230149.1: *3*  top-level helper functions
+    //@+node:felix.20231019230149.2: *4* function: do_error_dialogs
+
+    /**
+     * Raise error dialogs.
+     * 
+     * A helper function for c.save, c.saveAs, and c.saveTo.
+     */
+    public async do_error_dialogs(c: Commands): Promise<void> {
+        await c.syntaxErrorDialog();
+        await c.raise_error_dialogs('write');
+    }
+    //@+node:felix.20231019230149.3: *4* function: set_name_and_title
+    /**
+     * Compute the finalized name for c.mFileName. Set related ivars.
+     * 
+     * A helper function for c.save, c.saveAs, and c.saveTo.
+     * 
+     * Return the finalized name.
+     */
+    public set_name_and_title(c: Commands, fileName: string): string {
+
+
+        // Finalize fileName.
+        if (fileName.endsWith('.leo') || fileName.endsWith('.db') || fileName.endsWith('.leojs')) {
+            c.mFileName = fileName;
+        } else {
+            c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+        }
+
+        // Set various ivars.
+        const title = c.computeWindowTitle(c.mFileName);
+        c.frame.title = title;
+        c.frame.setTitle(title);
+        try {
+            // Does not exist during unit testing. May not exist in all guis.
+            // c.frame.top?.leo_master?.setTabName(c, c.mFileName);
+        } catch (error) {
+            // Do nothing.
+        }
+        return c.mFileName;
+    }
     //@+node:felix.20220105210716.2: *3* c_file.reloadSettings
     @commander_command(
         'reload-settings',
@@ -249,7 +291,7 @@ export class CommanderFileCommands {
         const old_c = this;
         // Clean out the update queue so it won't interfere with the new window.
         this.outerUpdate();
-        // Supress redraws until later.
+        // Suppress redraws until later.
         g.app.disable_redraw = true;
         // Send all log messages to the new frame.
         // g.app.setLog(None)
@@ -575,63 +617,59 @@ export class CommanderFileCommands {
             g.es('save commands disabled', 'purple');
             return;
         }
+
+        /**
+         * Common save code.
+         */
+        const do_save = async (c: Commands, fileName: string): Promise<void> => {
+            await c.fileCommands.save(fileName);
+            g.app.recentFilesManager.updateRecentFiles(fileName);
+            await g.chdir(fileName);
+        };
+
+
         c.init_error_dialogs();
-        // 2013/09/28: use the fileName keyword argument if given.
-        // This supports the leoBridge.
-        // Make sure we never pass None to the ctor.
-        if (fileName) {
-            c.frame.title = g.computeWindowTitle(fileName);
-            c.mFileName = fileName;
-        }
-        if (!c.mFileName) {
-            c.frame.title = '';
-            c.mFileName = '';
-        }
-        if (c.mFileName) {
-            // Calls c.clearChanged() if no error.
-            g.app.syntax_error_files = [];
-            await c.fileCommands.save(c.mFileName);
-            await c.syntaxErrorDialog();
-            return c.raise_error_dialogs('write');
-        } else {
-            const root: Position = c.rootPosition()!;
-            if (!root.next().__bool__() && root.isAtEditNode()) {
-                // There is only a single @edit node in the outline.
-                // A hack to allow "quick edit" of non-Leo files.
-                // See https://bugs.launchpad.net/leo-editor/+bug/381527
-                fileName = undefined;
+
+
+        try {
+
+            // Don't prompt if the file name is known.
+            let given_file_name = fileName || c.mFileName;
+            if (given_file_name) {
+                let final_file_name = this.set_name_and_title(c, given_file_name);
+                await do_save(c, final_file_name);
+                return;
+            }
+
+            // The file still has no name.
+            let root = c.rootPosition()!;
+            if (!root.next() && root.isAtEditNode()) {
                 // Write the @edit node if needed.
                 if (root.isDirty()) {
                     await c.atFileCommands.writeOneAtEditNode(root);
                 }
-                c.clearChanged(); // Clears all dirty bits.
-            } else {
-                fileName = c.k?.givenArgs?.join('');
-                if (!fileName) {
-                    fileName = await g.app.gui.runSaveFileDialog(
-                        c,
-                        'Save',
-                        [['Leo files', '*.leo *.leojs *.db']], // Array of arrays (one in this case)
-                        g.defaultLeoFileExtension(c)
-                    );
-                }
+                c.clearChanged();  // Clears all dirty bits.
+                await this.do_error_dialogs(c);
+                return;
             }
-            c.bringToFront();
-            if (fileName) {
-                // Don't change mFileName until the dialog has succeeded.
-                c.mFileName = g.ensure_extension(
-                    fileName,
-                    g.defaultLeoFileExtension(c)
-                );
-                c.frame.title = c.computeWindowTitle(c.mFileName);
-                c.frame.setTitle(c.computeWindowTitle(c.mFileName));
-                await c.fileCommands.save(c.mFileName);
-                // ? needed ?
-                // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
-                await g.chdir(c.mFileName);
-                return c.raise_error_dialogs('write');
+
+            // Prompt for fileName.
+            let new_file_name = await g.app.gui.runSaveFileDialog(
+                c,
+                'Save',
+                [['Leo files', '*.leo *.leojs *.db']], // Array of arrays (one in this case)
+                g.defaultLeoFileExtension(c)
+            );
+
+            if (new_file_name) {
+                let final_file_name = this.set_name_and_title(c, new_file_name);
+                await do_save(c, final_file_name);
             }
+
+        } finally {
+            await this.do_error_dialogs(c);
         }
+
     }
     //@+node:felix.20220105210716.15: *4* c_file.saveAll
     @commander_command('save-all', 'Save all open tabs windows/tabs.')
@@ -664,58 +702,50 @@ export class CommanderFileCommands {
             g.es('save commands disabled', 'purple');
             return;
         }
+
+        const do_save_as = async (c: Commands, fileName: string): Promise<string> => {
+            /** Common save-as code. */
+            // 1. Forget the previous file.
+            if (c.mFileName) {
+                g.app.forgetOpenFile(c.mFileName);
+            }
+            // 2. Finalize fileName and set related ivars.
+            let new_file_name = this.set_name_and_title(c, fileName);
+            // 3. Do the save and related tasks.
+            await c.fileCommands.saveAs(new_file_name);
+            g.app.recentFilesManager.updateRecentFiles(new_file_name);
+            await g.chdir(new_file_name);
+            return new_file_name;
+        };
+
         c.init_error_dialogs();
-        // 2013/09/28: add fileName keyword arg for leoBridge scripts.
-        if (fileName) {
-            c.frame.title = g.computeWindowTitle(fileName);
-            c.mFileName = fileName;
-        }
-        // Make sure we never pass None to the ctor.
-        if (!c.mFileName) {
-            c.frame.title = '';
-        }
-        if (!fileName && c.k && c.k.givenArgs && c.k.givenArgs.length) {
-            fileName = c.k.givenArgs.join('');
-        }
-        if (!fileName) {
-            const w_filename = await g.app.gui.runSaveFileDialog(
+
+
+        try {
+            c.init_error_dialogs();
+
+            // Handle the kwarg first.
+            if (fileName) {
+                await do_save_as(c, fileName);
+                return;
+            }
+
+            // Prompt for fileName.
+            let new_file_name = await g.app.gui.runSaveFileDialog(
                 c,
                 'Save As',
                 [['Leo files', '*.leo *.leojs *.db']], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
             );
-            if (w_filename) {
-                // re-start this 'save' method with given filename
-                return c.saveAs(w_filename); // no need to finish with dialogs.
-            }
-            return Promise.resolve(); // EXIT: canceled 'save-as' file name dialog !
-        } else {
-            // Fix bug 998090: save file as doesn't remove entry from open file list.
-            if (c.mFileName) {
-                g.app.forgetOpenFile(c.mFileName);
-            }
-            // Don't change mFileName until the dialog has succeeded.
-            if (
-                fileName.endsWith('.leo') ||
-                fileName.endsWith('.db') ||
-                fileName.endsWith('.leojs')
-            ) {
-                c.mFileName = fileName;
-            } else {
-                c.mFileName = g.ensure_extension(
-                    fileName,
-                    g.defaultLeoFileExtension(c)
-                );
-            }
-            c.frame.title = c.computeWindowTitle(c.mFileName);
 
-            // Calls c.clearChanged() if no error.
-            await c.fileCommands.saveAs(c.mFileName);
-            // ? needed ?
-            // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
-            await g.chdir(c.mFileName);
-            return c.raise_error_dialogs('write');
+            if (new_file_name) {
+                await do_save_as(c, new_file_name);
+            }
+
+        } finally {
+            await this.do_error_dialogs(c);
         }
+
     }
     //@+node:felix.20220105210716.17: *4* c_file.saveTo
     @commander_command(
@@ -740,34 +770,46 @@ export class CommanderFileCommands {
     ): Promise<unknown> {
         const c: Commands = this;
         if (g.app.disableSave) {
-            g.es('save commands disabled', 'purple');
+            g.es('save commands disabled');
             return;
         }
+
+        const do_save_to = async (c: Commands, fileName: string): Promise<void> => {
+            /** Common save-to code. */
+            // *Never* change c.mFileName or c.frame.title.
+            await c.fileCommands.saveTo(fileName, silent);
+            g.app.recentFilesManager.updateRecentFiles(fileName);
+            // *Never* call g.chdir!
+        };
+
         c.init_error_dialogs();
-        // Add fileName keyword arg for leoBridge scripts.
-        if (!fileName && c.k && c.k.givenArgs && c.k.givenArgs.length) {
-            fileName = c.k.givenArgs.join('');
-        }
-        if (!fileName) {
-            const w_filename = await g.app.gui.runSaveFileDialog(
+
+
+
+        try {
+
+            // Handle the kwarg first.
+            if (fileName) {
+                await do_save_to(c, fileName);
+                return;
+            }
+
+            // Prompt for fileName.
+            let new_file_name = await g.app.gui.runSaveFileDialog(
                 c,
                 'Save To',
                 [['Leo files', '*.leo *.leojs *.db']], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
             );
-            if (w_filename) {
-                // re-start this 'save' method with given filename
-                return c.saveTo(w_filename);
+
+            if (new_file_name) {
+                await do_save_to(c, new_file_name);
             }
-            return Promise.resolve(); // EXIT !
-        } else {
-            // Calls c.clearChanged() if no error.
-            await c.fileCommands.saveTo(fileName, silent);
-            // ? needed ?
-            // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
-            await g.chdir(c.mFileName);
-            return c.raise_error_dialogs('write');
+
+        } finally {
+            await this.do_error_dialogs(c);
         }
+
     }
     //@+node:felix.20220105210716.18: *4* c_file.revert
     @commander_command(
