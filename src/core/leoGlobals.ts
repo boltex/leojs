@@ -2470,9 +2470,12 @@ export function match_word(s: string, i: number, pattern: string, ignore_case = 
     }
     // Compile the pattern so we can specify the starting position.
     const flags = ignore_case ? 'i' : '';
+
+    //  USED IN MATCH IN ORIGINAL LEO, SO ADDED '^' TO MATCH BEGINNING OF STRING
+    pattern = '^' + pattern;
     const pat = new RegExp(pattern, flags);
 
-    return pat.test(s.substring(i));
+    return pat.test(s.substring(i)); // function 'match' is used in python so check at start only
 
 }
 //@+node:felix.20220208154405.1: *4* g.skip_blank_lines
