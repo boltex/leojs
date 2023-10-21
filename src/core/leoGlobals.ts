@@ -2450,32 +2450,79 @@ export function match_words(s: string, i: number, patterns: string[], ignore_cas
  */
 export function match_word(s: string, i: number, pattern: string, ignore_case = false): boolean {
 
-    if (!pattern) {
+    // * NEW METHOD
+
+    // if (!pattern) {
+    //     return false;
+    // }
+
+    // // 1. Compute the required boundaries.
+    // const bound1 = /[a-zA-Z_]/.test(pattern[0]);
+    // const bound2 = /\w/.test(pattern[pattern.length - 1]);
+
+    // // 2. Add regex escapes.
+    // pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // // 3. Add the boundaries.
+    // if (bound1) {
+    //     pattern = '\\b' + pattern;
+    // }
+    // if (bound2) {
+    //     pattern = pattern + '\\b';
+    // }
+    // // Compile the pattern so we can specify the starting position.
+    // const flags = ignore_case ? 'i' : '';
+
+    // //  USED IN MATCH IN ORIGINAL LEO, SO ADDED '^' TO MATCH BEGINNING OF STRING
+    // pattern = '^' + pattern;
+    // const pat = new RegExp(pattern, flags);
+
+    // return pat.test(s.substring(i)); // function 'match' is used in python so check at start only
+
+    // * OLD METHOD
+    // Using a regex is surprisingly tricky.
+    if (pattern == null) {
         return false;
     }
 
-    // 1. Compute the required boundaries.
-    const bound1 = /[a-zA-Z_]/.test(pattern[0]);
-    const bound2 = /\w/.test(pattern[pattern.length - 1]);
+    // if (i > 0 && isWordChar(s.charAt(i - 1))) {
+    //     //  Bug fix: 2017/06/01.
+    //     return false;
+    // }
 
-    // 2. Add regex escapes.
-    pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    // 3. Add the boundaries.
-    if (bound1) {
-        pattern = '\\b' + pattern;
+    const j = pattern.length;
+    if (j === 0) {
+        return false;
     }
-    if (bound2) {
-        pattern = pattern + '\\b';
+
+    // Special case: \t or \n delimit words!
+    if (i > 2 && s[i - 2] === '\\' && ['t', 'n'].includes(s[i - 1])) {
+        return true;
     }
-    // Compile the pattern so we can specify the starting position.
-    const flags = ignore_case ? 'i' : '';
+    if (i > 0 && isWordChar(s[i - 1])) {
+        return false;
+    }
 
-    //  USED IN MATCH IN ORIGINAL LEO, SO ADDED '^' TO MATCH BEGINNING OF STRING
-    pattern = '^' + pattern;
-    const pat = new RegExp(pattern, flags);
+    let found;
+    if (ignore_case) {
+        // To ignore case, convert both the string 's' and the pattern 'pattern' to lowercase (or uppercase) before performing the search.
+        found = s.toLowerCase().indexOf(pattern.toLowerCase(), i);
+    } else {
+        found = s.indexOf(pattern, i);
+    }
 
-    return pat.test(s.substring(i)); // function 'match' is used in python so check at start only
+    if (found < i || found >= i + j) {
+        found = -1;
+    }
+    if (found !== i) {
+        return false;
+    }
+    if (i + j >= s.length) {
+        return true;
+    }
+
+    const ch = s.charAt(i + j);
+    return !isWordChar(ch);
 
 }
 //@+node:felix.20220208154405.1: *4* g.skip_blank_lines
