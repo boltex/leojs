@@ -918,7 +918,7 @@ suite('Tests for leo.core.leoGlobals', () => {
                     line = line.toUpperCase();
                 }
                 const got = g.match_word(line + '\n', i, word, ignore_case);
-                assert.strictEqual(expected, got);
+                assert.strictEqual(got, expected, `line: ${line}\n  i: ${i}\n  word: ${word}\n line[i:] ${line.slice(i)}`);
             }
         }
 

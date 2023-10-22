@@ -2490,6 +2490,10 @@ export function match_word(s: string, i: number, pattern: string, ignore_case = 
     //     return false;
     // }
 
+    // // 1. Compute the required boundaries.
+    const bound1 = isWordChar1(pattern[0]);
+    const bound2 = isWordChar(pattern[pattern.length - 1]);
+
     const j = pattern.length;
     if (j === 0) {
         return false;
@@ -2499,8 +2503,10 @@ export function match_word(s: string, i: number, pattern: string, ignore_case = 
     if (i > 2 && s[i - 2] === '\\' && ['t', 'n'].includes(s[i - 1])) {
         return true;
     }
-    if (i > 0 && isWordChar(s[i - 1])) {
-        return false;
+    if (bound1) {
+        if (i > 0 && isWordChar(s[i - 1])) {
+            return false;
+        }
     }
 
     let found;
@@ -2521,8 +2527,12 @@ export function match_word(s: string, i: number, pattern: string, ignore_case = 
         return true;
     }
 
-    const ch = s.charAt(i + j);
-    return !isWordChar(ch);
+    if (bound2) {
+        const ch = s.charAt(i + j);
+        return !isWordChar(ch);
+    }
+
+    return true;
 
 }
 //@+node:felix.20220208154405.1: *4* g.skip_blank_lines
