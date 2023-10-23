@@ -189,12 +189,13 @@ export class Importer {
     //@+node:felix.20231010220955.1: *4* i.compute_body
     /**
      * Return the regularized body text from the given list of lines.
+     * 
      * In most contexts removing leading blank lines is appropriate.
      * If not, the caller can insert the desired blank lines.
      */
     public compute_body(lines: string[]): string {
         const s: string = lines.join('');
-        return s.trimStart().trimEnd() + '\n' ? s.trim() : '';
+        return s.trim() ? s.replace(/^\n+/, '').trimEnd() + '\n' : '';
     }
     //@+node:felix.20230910195228.5: *4* i.compute_headline
     /**
