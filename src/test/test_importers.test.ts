@@ -1959,8 +1959,6 @@ suite('TestJavascript', () => {
                 '};\n'
             ]
         ];
-
-
         await self.new_run_test(s, expected_results);
 
     });

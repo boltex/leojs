@@ -30,7 +30,6 @@ export class JS_Importer extends Importer {
     // name = ( function ( .*? {
     ['function', /\s*([\w\.]+)\s*=\s*\(*\s*function\s*\(.*?{/],
 
-    // Add other patterns if necessary
     // ['const', /\s*\bconst\s*(\w+)\s*=.*?=>/],
     // ['let', /\s*\blet\s*(\w+)\s*=.*?=>/],
   ];

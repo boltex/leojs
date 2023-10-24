@@ -229,8 +229,10 @@ export class Importer {
 
             // Assume that no pattern matches a compound statement.
             for (const [kind, pattern] of this.block_patterns) {
-                // const m = pattern.exec(s);  // ? EQUIVALENT ?
-                const m: RegExpMatchArray | null = s.match(pattern);
+
+                // * In python, 'match' only matches from start of string so add '^' if not at start of regex.
+                const matchPattern = pattern.source.startsWith('^') ? pattern : new RegExp('^' + pattern.source);
+                const m: RegExpMatchArray | null = s.match(matchPattern);
 
                 if (m) {
                     // cython may include trailing whitespace.
@@ -407,7 +409,7 @@ export class Importer {
             const tail_lines = this.lines.slice(children_end, block.end);
             const tail_s = this.compute_body(tail_lines);
             if (tail_s.trim()) {
-                block.v!.b = `${block.v!.b.trim()}\n${tail_s}`;
+                block.v!.b = block.v!.b.trimEnd() + '\n' + tail_s;
             }
 
             // Alter block.end.
