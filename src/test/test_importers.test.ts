@@ -537,9 +537,10 @@ suite('TestC', () => {
             'i = 2\n'
         ];
         const expected_lines = [
-            'i = 1 \n',
-            's = \n',
-            'if (1)\n',
+            'i = 1\n',
+            's =\n',
+            // 'if (/* a */1)\n',
+            'if (       1)\n',
             '    ;\n',
             '\n',
             '\n',

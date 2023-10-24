@@ -719,13 +719,13 @@ export class Importer {
     }
     //@+node:felix.20230910195228.19: *4* i.delete_comments_and_strings
     /**
-     * Delete all comments and strings from the given lines.
-     * 
-     * The resulting lines form **guide lines**. The input and guide
-     * lines are "parallel": they have the same number of lines.
-     * 
-     * Analyzing the guide lines instead of the input lines is the
-     * simplifying trick behind the new importers.
+     * Return **guide-lines** from the lines, replacing strings and multi-line
+     * comments with spaces, thereby preserving (within the guide-lines) the
+     * position of all significant characters.
+     * Analyzing the guide lines instead of the input lines is the simplifying
+     * trick behind the new importers.
+     * The input and guide lines are "parallel": they have the same number of
+     * lines.
      */
     public delete_comments_and_strings(lines: string[]): string[] {
 
@@ -738,64 +738,116 @@ export class Importer {
         for (const line of lines) {
             const result_line: string[] = [];
             let skip_count: number = 0;
-
-            for (let i: number = 0; i < line.length; i++) {
+            for (let i = 0; i < line.length; i++) {
                 const ch: string = line[i];
-
                 if (ch === '\n') {
-                    break;  // Avoid appending the newline twice.
-                }
-
-                if (skip_count > 0) {
-                    skip_count--;  // Skip the character.
-                    continue;
-                }
-
-                if (target) {
-                    if (line.startsWith(target, i)) {
-                        if (target.length > 1) {
-                            // Skip the remaining characters of the target.
-                            skip_count = target.length - 1;
-                        }
-                        target = '';  // Begin accumulating characters.
-                    }
+                    break; // Terminate. No double newlines allowed.
+                } else if (skip_count > 0) {
+                    result_line.push(' ');
+                    skip_count -= 1;
                 } else if (ch === escape) {
+                    console.assert(skip_count === 0);
+                    result_line.push(' ');
                     skip_count = 1;
-                    continue;
+                } else if (target) {
+                    result_line.push(' ');
+                    if (g.match(line, i, target)) {
+                        skip_count = Math.max(0, (target.length - 1));
+                        target = '';
+                    }
                 } else if (line_comment && line.startsWith(line_comment, i)) {
-                    break;  // Skip the rest of the line.
-                } else if (string_delims.some(z => line.startsWith(z, i))) {
-                    // Allow multi-character string delimiters.
+                    break;
+                } else if (string_delims.some(z => g.match(line, i, z))) {
+                    result_line.push(' ');
                     for (const z of string_delims) {
-                        if (line.startsWith(z, i)) {
+                        if (g.match(line, i, z)) {
                             target = z;
-                            if (z.length > 1) {
-                                skip_count = z.length - 1;
-                            }
+                            skip_count = Math.max(0, (z.length - 1));
                             break;
                         }
                     }
-                } else if (start_comment && line.startsWith(start_comment, i)) {
+                } else if (start_comment && g.match(line, i, start_comment)) {
+                    result_line.push(' ');
                     target = end_comment;
-                    if (start_comment.length > 1) {
-                        // Skip the remaining characters of the starting comment delim.
-                        skip_count = start_comment.length - 1;
-                    }
+                    skip_count = Math.max(0, (start_comment.length - 1));
                 } else {
                     result_line.push(ch);
                 }
             }
-
-            // End the line and append it to the result.
-            if (line.endsWith('\n')) {
-                result_line.push('\n');
-            }
-
-            result.push(result_line.join(''));
+            const end_s: string = line.endsWith('\n') ? '\n' : '';
+            result.push(result_line.join('').trimEnd() + end_s);
         }
-
         console.assert(result.length === lines.length);  // A crucial invariant.
         return result;
+
+
+        // const string_delims: string[] = this.string_list;
+        // let [line_comment, start_comment, end_comment] = g.set_delims_from_language(this.language);
+        // let target: string = '';  // The string ending a multi-line comment or string.
+        // const escape: string = '\\';
+        // const result: string[] = [];
+
+        // for (const line of lines) {
+        //     const result_line: string[] = [];
+        //     let skip_count: number = 0;
+
+        //     for (let i: number = 0; i < line.length; i++) {
+        //         const ch: string = line[i];
+
+        //         if (ch === '\n') {
+        //             break;  // Avoid appending the newline twice.
+        //         }
+
+        //         if (skip_count > 0) {
+        //             skip_count--;  // Skip the character.
+        //             continue;
+        //         }
+
+        //         if (target) {
+        //             if (line.startsWith(target, i)) {
+        //                 if (target.length > 1) {
+        //                     // Skip the remaining characters of the target.
+        //                     skip_count = target.length - 1;
+        //                 }
+        //                 target = '';  // Begin accumulating characters.
+        //             }
+        //         } else if (ch === escape) {
+        //             skip_count = 1;
+        //             continue;
+        //         } else if (line_comment && line.startsWith(line_comment, i)) {
+        //             break;  // Skip the rest of the line.
+        //         } else if (string_delims.some(z => line.startsWith(z, i))) {
+        //             // Allow multi-character string delimiters.
+        //             for (const z of string_delims) {
+        //                 if (line.startsWith(z, i)) {
+        //                     target = z;
+        //                     if (z.length > 1) {
+        //                         skip_count = z.length - 1;
+        //                     }
+        //                     break;
+        //                 }
+        //             }
+        //         } else if (start_comment && line.startsWith(start_comment, i)) {
+        //             target = end_comment;
+        //             if (start_comment.length > 1) {
+        //                 // Skip the remaining characters of the starting comment delim.
+        //                 skip_count = start_comment.length - 1;
+        //             }
+        //         } else {
+        //             result_line.push(ch);
+        //         }
+        //     }
+
+        //     // End the line and append it to the result.
+        //     if (line.endsWith('\n')) {
+        //         result_line.push('\n');
+        //     }
+
+        //     result.push(result_line.join(''));
+        // }
+
+        // console.assert(result.length === lines.length);  // A crucial invariant.
+        // return result;
     }
     //@+node:felix.20230910195228.20: *4* i.get_str_lws
     /**
