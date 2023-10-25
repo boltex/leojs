@@ -541,7 +541,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         changed: { [key: string]: Position }
     ): void {
         const c = this.c; // Always use the visible commander
-        console.assert(c === c1);
+        g.assert(c === c1);
         // Create parent node at the start of the outline.
         const [u, undoType] = [c.undoer, 'Compare Two Files'];
         u.beforeChangeGroup(c.p, undoType);
@@ -1262,7 +1262,7 @@ export class GitDiffController {
         revs_list: string[]
     ): Record<string, any> | undefined {
 
-        console.assert(contents_list.length === revs_list.length);
+        g.assert(contents_list.length === revs_list.length);
 
         if (i + 1 >= revs_list.length) {
             return undefined;// Can't diff past this rev.
@@ -1501,7 +1501,7 @@ export class GitDiffController {
         revs_list: string[],
     ): Record<string, any>[] {
 
-        console.assert(contents_list.length === revs_list.length);
+        g.assert(contents_list.length === revs_list.length);
 
         // Compile the patterns once.
         const node_patterns: [string, RegExp][] = gnxs.map(gnx => [
@@ -1647,7 +1647,7 @@ export class GitDiffController {
                 p2.h = 'Old:' + v1.h;
                 p2.b = v1.b;
                 // Node 3: New node
-                console.assert(v1.fileIndex === v2.fileIndex);
+                g.assert(v1.fileIndex === v2.fileIndex);
                 const p_in_c = this.find_gnx(this.c, v1.fileIndex);
                 let p3;
                 if (p_in_c) {
@@ -2139,8 +2139,8 @@ export class GitDiffController {
             if (d2[key]) {
                 const v1 = d1[key];
                 const v2 = d2[key];
-                console.assert(v1 && v2);
-                console.assert(v1.context !== v2.context);
+                g.assert(v1 && v2);
+                g.assert(v1.context !== v2.context);
                 if (v1.h !== v2.h || v1.b !== v2.b) {
                     changed[key] = [v1, v2];
                 }

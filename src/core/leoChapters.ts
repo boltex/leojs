@@ -289,7 +289,7 @@ export class ChapterController {
                 g.trace('=====', s, g.callers());
             }
             if (killUnitTest) {
-                console.assert(false, s); // noqa
+                g.assert(false, s); // noqa
             }
         } else {
             g.note(`Note: ${s}`);
@@ -490,7 +490,7 @@ export class ChapterController {
         }
 
         // Fix bug 869385: Chapters make the nav_qt.py plugin useless
-        console.assert(!this.selectChapterLockout);
+        g.assert(!this.selectChapterLockout);
         // New in Leo 5.6: don't call c.redraw immediately.
         c.redraw_later();
     }
@@ -632,8 +632,8 @@ export class Chapter {
 
         // Next, recompute p and possibly select a new editor.
         if (w) {
-            console.assert(w === c.frame.body.wrapper);
-            console.assert(w.leo_p);
+            g.assert(w === c.frame.body.wrapper);
+            g.assert(w.leo_p);
             this.p = this.findPositionInChapter(w.leo_p) || root.copy();
             p = this.p;
         } else {

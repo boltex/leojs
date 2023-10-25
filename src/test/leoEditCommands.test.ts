@@ -76,7 +76,7 @@ suite('Test cases for editCommands.ts', () => {
         self.command_name = command_name;
         // Compute the result in tempNode.b
         const command = c.commandsDict[command_name];
-        console.assert(command, `no command: ${command_name}`);
+        g.assert(command, `no command: ${command_name}`);
         // Set the text.
         let parent_b;
         if (dedent) {

@@ -3,6 +3,7 @@
 /**
  * The @auto importer for the TreePad file format.
  */
+import * as g from '../core/leoGlobals';
 import { Commands } from '../core/leoCommands';
 import { Position } from '../core/leoNodes';
 import { Importer } from './base_importer';
@@ -41,7 +42,7 @@ export class Treepad_Importer extends Importer {
         const start2_pat = /^\s*<node>(\s*5P9i0s8y19Z)?$/m;
         const end_pat = /^\s*<end node>\s*5P9i0s8y19Z$/m;
         const lines = this.lines;
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
 
         const parents: Position[] = [parent];
         const lines_dict: { [key: string]: string[] } = {};  // Lines for each vnode.
@@ -107,7 +108,7 @@ export class Treepad_Importer extends Importer {
         }
 
         // Set p.b from the lines_dict.
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         for (const p of parent.self_and_subtree()) {
             p.b = lines_dict[p.v.gnx].join('');
         }

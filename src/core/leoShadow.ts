@@ -458,7 +458,7 @@ export class ShadowController {
         const x = this;
         const w_a = x.a.slice(ai, aj);
         const w_b = x.b.slice(bi, bj);
-        console.assert(
+        g.assert(
             aj - ai === bj - bi &&
             w_a.length === w_b.length &&
             w_a.every((value, index) => value === w_b[index])

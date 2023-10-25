@@ -453,7 +453,7 @@ export class FastRead {
             parent_v: VNode
         ): void => {
             for (let e of parent_e) {
-                console.assert(
+                g.assert(
                     ['v', 'vh'].includes(e.tag.toString()),
                     e.tag.toString()
                 );
@@ -481,7 +481,7 @@ export class FastRead {
                     // The body overrides any previous body text.
                     const body: string = g.toUnicode(gnx2body[gnx!] || '');
                     // assert isinstance(body, str), body.__class__.__name__;
-                    console.assert(typeof body === 'string', typeof body);
+                    g.assert(typeof body === 'string', typeof body);
                     v._bodyString = body;
                 } else {
                     //@+<< Make a new vnode, linked to the parent >>
@@ -492,7 +492,7 @@ export class FastRead {
                     v.parents.push(parent_v);
                     const body = g.toUnicode(gnx2body[gnx!] || '');
                     // assert isinstance(body, str), body.__class__.__name__
-                    console.assert(typeof body === 'string', typeof body);
+                    g.assert(typeof body === 'string', typeof body);
                     v._bodyString = body;
                     v._headString = 'PLACE HOLDER';
                     //@-<< Make a new vnode, linked to the parent >>
@@ -692,7 +692,7 @@ export class FastRead {
             return;
         }
         // ? NOT NEEDED ?
-        // console.assert(frameFactory !== undefined);
+        // g.assert(frameFactory !== undefined);
         // const mf = frameFactory.masterFrame;
         // if (g.app.start_minimized){
         //     mf.showMinimized();
@@ -738,7 +738,7 @@ export class FastRead {
                 }
                 //
                 // Create the vnode.
-                console.assert(parent_v.children.length === i);
+                g.assert(parent_v.children.length === i);
 
                 let v: VNode | undefined;
                 try {
@@ -754,7 +754,7 @@ export class FastRead {
                     v.parents.push(parent_v);
                     // The body overrides any previous body text.
                     const body = g.toUnicode(gnx2body[gnx!] || '');
-                    console.assert(
+                    g.assert(
                         typeof body === 'string' ||
                         (body as any) instanceof String,
                         typeof body
@@ -1296,9 +1296,9 @@ export class FileCommands {
             p._linkCopiedAfter(current);
         }
 
-        // console.assert(!p.isCloned(), g.objToString(p.v.parents));
+        // g.assert(!p.isCloned(), g.objToString(p.v.parents));
         // console.log('result: ', p.v.parents);
-        console.assert(!p.isCloned(), 'parents length ' + p.v.parents.length);
+        g.assert(!p.isCloned(), 'parents length ' + p.v.parents.length);
 
         this.gnxDict = oldGnxDict;
         this.reassignAllIndices(p);

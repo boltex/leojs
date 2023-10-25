@@ -600,13 +600,22 @@ export function isTextWrapper(w: any): boolean {
     return app.gui.isTextWrapper(w);
 }
 //@+node:felix.20211104210703.1: ** g.Debugging, GC, Stats & Timing
+//@+node:felix.20231024203538.1: *3* assert
+/**
+ * Equivalent to Python's assert that both prints a message and halts execution.
+ */
+export function assert(condition: any, message?: string): void {
+    if (!condition) {
+        throw new Error(message || 'Assertion failed');
+    }
+}
 //@+node:felix.20211205233429.1: *3* g._assert
 /**
  * A safer alternative to a bare assert.
  */
 export function _assert(condition: any, show_callers: boolean = true): boolean {
     if (unitTesting) {
-        console.assert(condition);
+        assert(condition);
         return true;
     }
     const ok: boolean = Boolean(condition);
@@ -937,7 +946,7 @@ export function findReference(
     root: Position
 ): Position | undefined {
     for (const p of root.subtree(false)) {
-        console.assert(!p.__eq__(root));
+        assert(!p.__eq__(root));
         if (p.matchHeadline(name) && !p.isAtIgnoreNode()) {
             return p.copy();
         }
@@ -1149,7 +1158,7 @@ export function getOutputNewline(
     } else {
         s = '\n'; // Default for erroneous values.
     }
-    console.assert(
+    assert(
         typeof s === 'string' || (s as any) instanceof String,
         s.toString()
     );
@@ -1538,7 +1547,7 @@ export function set_language(
     | [undefined, undefined, undefined, undefined] {
     let j: number;
     const tag: string = '@language';
-    console.assert(i !== undefined);
+    assert(i !== undefined);
 
     if (match_word(s, i, tag)) {
         i += tag.length;
@@ -2214,7 +2223,7 @@ export function find_word(s: string, word: string, i: number = 0): number {
             return i;
         }
         i += word.length;
-        console.assert(progress < i);
+        assert(progress < i);
     }
 
     return -1;
@@ -2362,7 +2371,7 @@ export function is_c_id(ch: string): boolean {
  * Return non-negative number if the body text contains the @ directive.
  */
 export function is_special(s: string, directive: string): [boolean, number] {
-    console.assert(directive && directive.substring(0, 1) === '@');
+    assert(directive && directive.substring(0, 1) === '@');
     // Most directives must start the line.
     const lws: boolean = ['@others', '@all'].includes(directive);
     const pattern = lws
@@ -2695,7 +2704,7 @@ export function skip_string(s: string, i: number): number {
     const delim = s[i];
     i += 1;
 
-    console.assert('\'"'.includes(delim), delim.toString() + ' ' + s);
+    assert('\'"'.includes(delim), delim.toString() + ' ' + s);
     let n = s.length;
 
     while (i < n && s[i] !== delim) {
@@ -3631,7 +3640,7 @@ export function stripBOM(
     ];
     if (s_bytes && s_bytes.length) {
         for (const [n, e, bom] of table) {
-            console.assert(bom.length === n);
+            assert(bom.length === n);
             const subarray = s_bytes.subarray(0, bom.length);
             if (subarray.every((value, index) => value === bom[index])) {
                 return [e, s_bytes.subarray(bom.length, s_bytes.length)];
@@ -5409,7 +5418,7 @@ export function getDocString(s: string): string {
     }
     const tag = s.slice(i, i + 3);
 
-    console.assert(tags.includes(tag));
+    assert(tags.includes(tag));
 
     const j = s.indexOf(tag, i + 3);
     if (j > -1) {
@@ -5502,9 +5511,9 @@ export function python_tokenize(s: string): [string, string, number][] {
         } else {
             [kind, i] = ['other', i + 1];
         }
-        console.assert(progress < i && j === progress);
+        assert(progress < i && j === progress);
         let val = s.slice(j, i);
-        console.assert(val);
+        assert(val);
         line_number += val.split('\n').length - 1; // val.count('\n');  // A comment.
         result.push([kind, val, line_number]);
     }
@@ -6069,7 +6078,7 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
         for (const p of positions) {
             const p1 = p.copy();
             if (full_match(p)) {
-                console.assert(p.__eq__(p1));
+                assert(p.__eq__(p1));
                 let n = 0;  // The default line number.
                 // Parse the last target.
                 m = unlList.slice(-1)[0].match(new_pat);
@@ -6109,7 +6118,7 @@ export async function getUrlFromNode(p: Position): Promise<string | undefined> {
         return undefined;
     }
     const c = p.v.context;
-    console.assert(c);
+    assert(c);
     let table = [p.h, p.b ? splitLines(p.b)[0] : ''];
 
     // table = [g.match_word(s, 0, '@url') ? s.slice(4) : s for s in table];

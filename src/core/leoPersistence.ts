@@ -124,7 +124,7 @@ export class PersistenceDataController {
         const seen: string[] = [];
         for (const p of root.subtree()) {
             const gnx = p.v.gnx;
-            console.assert(gnx);
+            g.assert(gnx);
             if (!seen.includes(gnx)) {
                 seen.push(gnx);
                 aList.push(p.copy());
@@ -531,8 +531,8 @@ export class PersistenceDataController {
         root: Position,
         target: Position
     ): Position | undefined {
-        console.assert(target && target.__bool__());
-        console.assert(root && root.__bool__());
+        g.assert(target && target.__bool__());
+        g.assert(root && root.__bool__());
         // Pass 1: accept only nodes outside any @file tree.
         let p = this.c.rootPosition();
         while (p && p.__bool__()) {

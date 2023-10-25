@@ -23,7 +23,7 @@ export class NodeHistory {
         this.beadList = []; // a list of (position,chapter) tuples.
         this.beadPointer = -1;
         this.skipBeadUpdate = false;
-        console.assert(g && Object.keys(g).length);
+        g.assert(g && Object.keys(g).length);
     }
 
     //@+node:felix.20211021231651.4: *3* NodeHistory.dump

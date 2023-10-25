@@ -10956,14 +10956,9 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 </t>
 <t tx="felix.20220523140004.1">async function runLeo(p_context: vscode.ExtensionContext) {
     const w_start = process.hrtime(); // For calculating total startup time duration
-
-    // Initialize and run Leo
-    console.assert(g.app);
-
     g.app.loadManager = new LoadManager(p_context);
     await g.app.loadManager.load();
     console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
-
 }
 
 </t>

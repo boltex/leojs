@@ -298,7 +298,7 @@ export class ExternalFilesController {
         c: Commands | undefined,
         ef: ExternalFile
     ): Promise<void> {
-        console.assert(ef instanceof ExternalFile, ef.toString());
+        g.assert(ef instanceof ExternalFile, ef.toString());
         if (!ef.path) {
             return;
         }
@@ -332,7 +332,7 @@ export class ExternalFilesController {
      * Update the body text of ef.p to the contents of ef.path.
      */
     public async update_open_with_node(ef: ExternalFile): Promise<void> {
-        console.assert(ef instanceof ExternalFile, ef.toString());
+        g.assert(ef instanceof ExternalFile, ef.toString());
         const c = ef.c;
         const p = (ef.p as Position).copy();
         g.blue(`updated ${p.h}`);
@@ -884,7 +884,7 @@ export class ExternalFilesController {
             return false;
         }
         // The file has really changed.
-        console.assert(old_time, p_path);
+        g.assert(old_time, p_path);
         return true;
     }
     //@+node:felix.20230503004807.28: *4* efc.is_enabled

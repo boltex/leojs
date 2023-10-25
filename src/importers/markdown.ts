@@ -39,7 +39,7 @@ export class Markdown_Importer extends Importer {
      * i.gen_lines adds the @language and @tabwidth directives.
      */
     public gen_block(parent: Position): void {
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         const lines: string[] = this.lines;
         this.lines_dict[parent.v.gnx] = [];  // Initialize lines_dict for the parent vnode.
         this.stack = [parent];
@@ -73,7 +73,7 @@ export class Markdown_Importer extends Importer {
         }
 
         // Set p.b from the lines_dict.
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         for (const p of parent.self_and_subtree()) {
             p.b = this.lines_dict[p.v.gnx].join('');
         }
@@ -145,15 +145,15 @@ export class Markdown_Importer extends Importer {
         // Insert placeholders as necessary.
         // #877: This could happen in imported files not created by us.
         this.create_placeholders(level, lines_dict, this.stack);
-        console.assert(level === this.stack.length);
+        g.assert(level === this.stack.length);
 
         const parent: Position = this.stack[this.stack.length - 1];
         const child: Position = parent.insertAsLastChild();
         child.h = name;
         lines_dict[child.v.gnx] = [];
         this.stack.push(child);
-        console.assert(this.stack.length);
-        console.assert(0 <= level && level < this.stack.length);
+        g.assert(this.stack.length);
+        g.assert(0 <= level && level < this.stack.length);
 
         return this.stack[level];
     }

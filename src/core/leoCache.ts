@@ -104,14 +104,14 @@ export class CommanderCacher {
         }
 
         // Fixes bug 670108.
-        console.assert(!(g.app.db == null));  // a PickleShareDB instance.
+        g.assert(!(g.app.db == null));  // a PickleShareDB instance.
         // Make sure g.guessExternalEditor works.
         g.app.db["LEO_EDITOR"];
         // this.initFileDB('~/testpickleshare')
         const db = this.db;
         db.clear();
 
-        console.assert(![...db.items()].length);
+        g.assert(![...db.items()].length);
 
         // db in prigrams to be used as 'any'
         db['hello'] = 15;

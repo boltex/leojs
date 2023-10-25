@@ -35,7 +35,7 @@ export class Elisp_Importer extends Importer {
   public find_end_of_block(i: number, i2: number): number {
     // Rescan the previous line to get an accurate count of parents.
 
-    console.assert(i > 0, new Error().stack || '');
+    g.assert(i > 0, new Error().stack || '');
     i -= 1;
     let level = 0;
     while (i < i2) {

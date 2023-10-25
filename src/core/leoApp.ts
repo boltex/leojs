@@ -1123,8 +1123,7 @@ export class LeoApp {
     ): Promise<string> {
         this.leoID = '';
 
-        // tslint:disable-next-line: strict-comparisons
-        console.assert(this === g.app);
+        g.assert(this === g.app);
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
@@ -1166,7 +1165,7 @@ export class LeoApp {
                 const w_vscodeConfig = vscode.workspace.getConfiguration(
                     Constants.CONFIG_NAME
                 );
-                // tslint:disable-next-line: strict-comparisons
+
                 if (
                     w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
                         .defaultValue === this.leoID
@@ -2335,7 +2334,7 @@ export class LoadManager {
             for (let bi of d.get(commandName, [])) {
                 const stroke = bi.stroke; // This is canonicalized.
                 bi.commandName = commandName; // Add info.
-                console.assert(stroke);
+                g.assert(stroke);
                 result.add_to_list(stroke, bi);
             }
         }
@@ -2350,13 +2349,13 @@ export class LoadManager {
      */
     public uninvert(d: g.SettingsDict): SettingsDict {
         // ! LEOJS : NO KEYSTROKES HANDLING
-        // console.assert(d.keyType === g.KeyStroke, d.keyType);
+        // g.assert(d.keyType === g.KeyStroke, d.keyType);
         const result = new SettingsDict(`uninverted ${d.name()}`);
 
         for (let stroke of Object.keys(d)) {
             for (let bi of d.get(stroke, [])) {
                 const commandName = bi.commandName;
-                console.assert(commandName);
+                g.assert(commandName);
                 result.add_to_list(commandName, bi);
             }
         }
@@ -2766,7 +2765,7 @@ export class LoadManager {
      * Create global data structures describing importers and writers.
      */
     public createAllImporterData(): void {
-        console.assert(g.app.loadDir); // This is the only data required.
+        g.assert(g.app.loadDir); // This is the only data required.
         this.createWritersData(); // Was an AtFile method.
         this.createImporterData(); // Was a LeoImportCommands method.
     }
@@ -3011,7 +3010,7 @@ export class LoadManager {
     public async initApp(verbose?: boolean): Promise<unknown> {
         // Can be done early. Uses only g.app.loadDir & g.app.homeDir.
         this.createAllImporterData();
-        console.assert(g.app.loadManager);
+        g.assert(g.app.loadManager);
 
         // Make sure we call the new leoPlugins.init top-level function.
         // leoPlugins.init(); // TODO: plugins system ?
@@ -3298,7 +3297,7 @@ export class LoadManager {
     public finishOpen(c: Commands): void {
         // lm = self
         // const k = c.k;
-        // console.assert(k);
+        // g.assert(k);
 
         // New in Leo 4.6: provide an official way for very late initialization.
         // c.frame.tree.initAfterLoad();

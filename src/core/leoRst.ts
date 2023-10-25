@@ -527,7 +527,7 @@ export class RstCommands {
         p: Position,
         source: string
     ): Promise<void> {
-        console.assert(this.root && p.__eq__(this.root));
+        g.assert(this.root && p.__eq__(this.root));
         let [junk, ext] = g.os_path_splitext(fn);
         ext = ext.toLowerCase();
         fn = this.computeOutputFileName(fn);
@@ -731,7 +731,7 @@ export class RstCommands {
             openDirectory,
             rel_stylesheet_path
         );
-        console.assert(this.stylesheet_name);
+        g.assert(this.stylesheet_name);
         const w_path = g.finalize_join(
             this.stylesheet_path,
             this.stylesheet_name

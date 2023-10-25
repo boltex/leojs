@@ -639,7 +639,7 @@ export class LeoFind {
         }
         // Settings...
         this._save_before_find_def(p); // Save previous settings.
-        console.assert(this.find_def_data);
+        g.assert(this.find_def_data);
         // #3124. Try all possibilities, regardless of case.
         const alt_word = this._switch_style(word);
         //@+<< compute the search table >>
@@ -1607,7 +1607,7 @@ export class LeoFind {
             result.push(s0.substring(prev_i, i));
             result.push(change);
             prev_i = Math.max(prev_i + 1, i + find.length); // 2021/01/08 (!)
-            console.assert(prev_i > progress, prev_i.toString());
+            g.assert(prev_i > progress, prev_i.toString());
         }
 
         // #1166: Complete the result using s0.
@@ -1986,7 +1986,7 @@ export class LeoFind {
         const undoData = u.beforeInsertNode(c.p);
         const found: Position = this._create_clone_tag_nodes(clones);
         u.afterInsertNode(found, 'Clone Find Tag', undoData);
-        console.assert(c.positionExists(found, undefined, true), found.h);
+        g.assert(c.positionExists(found, undefined, true), found.h);
         c.setChanged();
         c.selectPosition(found);
         // c.redraw()
@@ -2001,13 +2001,13 @@ export class LeoFind {
         const c = this.c;
         const p = this.c;
         // Create the found node.;
-        console.assert(
+        g.assert(
             c.positionExists(c.lastTopLevel()),
             c.lastTopLevel().toString()
         );
         const found = c.lastTopLevel().insertAfter();
-        console.assert(found && found.__bool__());
-        console.assert(c.positionExists(found), found.toString());
+        g.assert(found && found.__bool__());
+        g.assert(c.positionExists(found), found.toString());
         found.h = `Found Tag: ${this.find_text}`;
         // Clone nodes as children of the found node.
         for (let p of clones) {
@@ -2266,7 +2266,7 @@ export class LeoFind {
         const c = this.c;
 
         const found = c.lastTopLevel().insertAfter();
-        console.assert(found && found.__bool__());
+        g.assert(found && found.__bool__());
         found.h = `find-all:${this.find_text}`;
         let status = this.compute_result_status(true);
         status = status.trim();
@@ -2838,7 +2838,7 @@ export class LeoFind {
                 p.moveToThreadNext();
             }
 
-            console.assert(!p.__eq__(progress));
+            g.assert(!p.__eq__(progress));
         }
 
         this.ftm.set_radio_button('entire-outline');
@@ -2851,7 +2851,7 @@ export class LeoFind {
             const undoData = u.beforeInsertNode(c.p);
             found = this._cfa_create_nodes(clones, false);
             u.afterInsertNode(found, 'Clone Find All', undoData);
-            console.assert(
+            g.assert(
                 c.positionExists(found, undefined, true),
                 found.toString()
             );
@@ -2874,13 +2874,13 @@ export class LeoFind {
     ): Position {
         const c = this.c;
         // Create the found node.
-        console.assert(
+        g.assert(
             c.positionExists(c.lastTopLevel()),
             c.lastTopLevel().toString()
         );
         const found: Position = c.lastTopLevel().insertAfter();
-        console.assert(found);
-        console.assert(c.positionExists(found), found.toString());
+        g.assert(found);
+        g.assert(c.positionExists(found), found.toString());
         found.h = `Found:${this.find_text}`;
         let status = this.compute_result_status(true);
 

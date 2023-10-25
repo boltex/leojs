@@ -4,8 +4,8 @@
 /**
  * The new, tokenize based, @auto importer for Python.
  */
-import { Commands } from '../core/leoCommands';
 import * as g from '../core/leoGlobals';
+import { Commands } from '../core/leoCommands';
 import { Position } from '../core/leoNodes';
 import { Block, Importer } from './base_importer';
 
@@ -107,7 +107,7 @@ export class Python_Importer extends Importer {
       }
       result.push(result_line.join(""));
     }
-    console.assert(result.length === lines.length); // A crucial invariant.
+    g.assert(result.length === lines.length); // A crucial invariant.
     return result;
   }
   //@+node:felix.20231011211322.3: *3* python_i.find_blocks
@@ -144,7 +144,7 @@ export class Python_Importer extends Importer {
           // cython may include trailing whitespace.
           let name = m[1].trim();
           const end = this.find_end_of_block(i, i2);
-          console.assert(i1 + 1 <= end && end <= i2, `${i1}, ${end}, ${i2}`);
+          g.assert(i1 + 1 <= end && end <= i2, `${i1}, ${end}, ${i2}`);
 
           // #3517: Don't generate nested defs.
           if (
@@ -161,7 +161,7 @@ export class Python_Importer extends Importer {
           break;
         }
       }
-      console.assert(i > progress, 'find_blocks in the python importer failed');
+      g.assert(i > progress, 'find_blocks in the python importer failed');
     }
     return results;
   }
@@ -188,7 +188,7 @@ export class Python_Importer extends Importer {
 
     const prev_line = this.guide_lines[i - 1];
     const kinds = ['class', 'def', '->']; //  '->' denotes a coffeescript function.
-    console.assert(
+    g.assert(
       kinds.some((z) => prev_line.includes(z)),
       `${i}, ${JSON.stringify(prev_line)}`
     );
@@ -349,7 +349,7 @@ export class Python_Importer extends Importer {
       for (const p of parent.subtree()) {
         if (p.h.startsWith('class ')) {
           const child1 = p.firstChild();
-          if (child1) {
+          if (child1 && child1.__bool__()) {
             const docstring = find_docstring(child1);
             if (docstring) {
               move_class_docstring(docstring, child1, p);
@@ -364,7 +364,7 @@ export class Python_Importer extends Importer {
      */
     const move_module_preamble = (lines: string[], parent: Position, result_blocks: Block[]): void => {
       const child1 = parent.firstChild();
-      if (!child1) {
+      if (!child1 || !child1.__bool__()) {
         return;
       }
       // Compute the preamble.

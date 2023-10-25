@@ -54,7 +54,6 @@ export class BaseTestImporter extends LeoUnitTest {
                     [e_level, e_h, e_str] = expected[i];
                 } catch (error) {
                     console.log('CANNOT ASSIGN!', actual[i], expected[i]);
-
                     assert.strictEqual(false, true); // So we print the actual results.
                 }
                 const msg: string = `FAIL in node ${i} ${e_h}`;
@@ -62,7 +61,10 @@ export class BaseTestImporter extends LeoUnitTest {
                 if (i > 0) { //  Don't test top-level headline.
                     assert.strictEqual(e_h, a_h, msg);
                 }
-                assert.ok(g.compareArrays(g.splitLines(e_str), g.splitLines(a_str), true), msg);
+                assert.ok(
+                    g.compareArrays(g.splitLines(e_str), g.splitLines(a_str), true),
+                    msg
+                );
             }
         } catch (error) {
             // Dump actual results, including bodies.
@@ -3727,7 +3729,7 @@ suite('TestPython', () => {
             def f1():
                 pass
 
-        `;
+            `;
         const expected_results: [number, string, string][] = [
             [0, '', // Ignore the first headline.
                 'import sys\n' +

@@ -130,7 +130,7 @@ export class Importer {
 
     }
     public __init__(): void {
-        console.assert(this.language, new Error().stack || '');  // Do not remove.
+        g.assert(this.language, new Error().stack || '');  // Do not remove.
         const delims = g.set_delims_from_language(this.language);
         [this.single_comment, this.block1, this.block2] = delims;
     }
@@ -178,7 +178,7 @@ export class Importer {
 
         if (!ok) {
             if (g.unitTesting) {
-                console.assert(false, message);
+                g.assert(false, message);
             } else {
                 g.es(message);
             }
@@ -238,7 +238,7 @@ export class Importer {
                     // cython may include trailing whitespace.
                     const name: string = m[1].trim();
                     const end: number = this.find_end_of_block(i, i2);
-                    console.assert(i1 + 1 <= end && end <= i2, `Assertion failed: ${i1} <= ${end} <= ${i2}`);
+                    g.assert(i1 + 1 <= end && end <= i2, `Assertion failed: ${i1} <= ${end} <= ${i2}`);
 
                     // Don't generate small blocks.
                     if (min_size === 0 || end - prev_i > min_size) {
@@ -252,7 +252,7 @@ export class Importer {
                     break;
                 }
             }
-            console.assert(i > progress, "Progress not made in find_blocks");
+            g.assert(i > progress, "Progress not made in find_blocks");
         }
         return results;
     }
@@ -270,7 +270,7 @@ export class Importer {
     public find_end_of_block(i: number, i2: number): number {
 
         let level: number = 1;  // All blocks start with '{'
-        console.assert(this.guide_lines[i - 1].includes('{'));
+        g.assert(this.guide_lines[i - 1].includes('{'));
         while (i < i2) {
             const line: string = this.guide_lines[i];
             i++;
@@ -323,13 +323,13 @@ export class Importer {
             // Get the next block. This will be the parent block of inner blocks.
             const block = todo_list.shift() as Block;
             const parent_v = block.parent_v!;
-            console.assert(parent_v instanceof VNode);
+            g.assert(parent_v instanceof VNode);
 
             // Allocate and set block.v
             const child_v = parent_v.insertAsLastChild();
             child_v.h = this.compute_headline(block);
             block.v = child_v;
-            console.assert(child_v instanceof VNode);
+            g.assert(child_v instanceof VNode);
 
             // Add the block to the results.
             result_blocks.push(block);
@@ -359,7 +359,7 @@ export class Importer {
     public generate_all_bodies(parent: Position, outer_block: Block, result_blocks: Block[]): void {
         // Keys: VNodes containing @others directives.
         const at_others_dict: { [key: string]: boolean } = {}; // Key is gnx
-        const seen_blocks: { [key: string]: boolean } = {}; // Key is block.toString()
+        const seen_blocks: Block[] = []; // Key is block.toString()
         const seen_vnodes: { [key: string]: boolean } = {}; // Key is gnx
 
         //@+<< i.generate_all_bodies: initial checks >>
@@ -367,7 +367,7 @@ export class Importer {
         // An initial sanity check.
         if (result_blocks.length > 0) {
             const block0 = result_blocks[0];
-            console.assert(outer_block === block0);
+            g.assert(outer_block === block0);
         }
         //@-<< i.generate_all_bodies: initial checks >>
 
@@ -377,7 +377,7 @@ export class Importer {
          * Find all lines that will be covered by @others
          */
         const find_all_child_lines = (block: Block): [number, number] => {
-            console.assert(block.child_blocks.length > 0, "Assertion failed: block has no child blocks.");
+            g.assert(block.child_blocks.length > 0, "Assertion failed: block has no child blocks.");
             const block0 = block.child_blocks[0];
             let start = block0.start;
             let end = block0.end;
@@ -426,7 +426,7 @@ export class Importer {
                 const lines2 = this.remove_common_lws(common_lws, lines);
                 this.lines.splice(block.start, block.end - block.start, ...lines2);
             }
-            console.assert(n === this.lines.length);
+            g.assert(n === this.lines.length);
         };
         //@-others
 
@@ -448,14 +448,15 @@ export class Importer {
 
             //@+<< check block and v >>
             //@+node:felix.20231010223113.7: *5* << check block and v >>
-            console.assert(block instanceof Block, `Assertion failed: ${block}`);
-            console.assert(v, `Assertion failed: ${block}`);
-            console.assert(v!.constructor.name === 'VNode', `Assertion failed: ${v}`);
+            g.assert(block instanceof Block, `Assertion failed: ${block}`);
+            g.assert(v, `Assertion failed: ${block}`);
+            g.assert(v!.constructor.name === 'VNode', `Assertion failed: ${v}`);
 
             // Make sure we handle each block and VNode once.
-            console.assert(!(block.toString() in seen_blocks), `Assertion failed: ${block}`);
-            console.assert(!(v!.gnx in seen_vnodes), `Assertion failed: ${v}`);
-            seen_blocks[block.toString()] = true;
+            // g.assert(!(block.toString() in seen_blocks), `Assertion failed: ${block}`);
+            g.assert(!seen_blocks.includes(block));
+            g.assert(!(v!.gnx in seen_vnodes), `Assertion failed: ${v}`);
+            seen_blocks.push(block);
             seen_vnodes[v!.gnx] = true;
 
             // This method must alter neither self.lines nor block lines.
@@ -463,7 +464,7 @@ export class Importer {
                 console.log('Assert failed: this.lines', this.lines);
                 console.log('Assert failed: block.lines', block.lines);
             }
-            console.assert(JSON.stringify(this.lines) === JSON.stringify(block.lines));
+            g.assert(JSON.stringify(this.lines) === JSON.stringify(block.lines));
             //@-<< check block and v >>
 
             // Remove common_lws from self.lines
@@ -485,13 +486,17 @@ export class Importer {
         }
         //@+<< i.generate_all_bodies: final checks >>
         //@+node:felix.20231010223113.8: *5* << i.generate_all_bodies: final checks >>
-        console.assert(result_blocks[0].kind === 'outer', result_blocks[0]);
+        g.assert(result_blocks[0].kind === 'outer', result_blocks[0].toString());
 
         // Make sure we've seen all blocks and vnodes.
         for (const block of result_blocks) {
-            console.assert(block.toString() in seen_blocks, block);
+            g.assert(seen_blocks.includes(block), block.toString());
+            if (!(seen_blocks.includes(block))) {
+                console.log('seen_blocks', seen_blocks);
+                console.log('block', block);
+            }
             if (block.v) {
-                console.assert(block.v.gnx in seen_vnodes, block.v);
+                g.assert(block.v.gnx in seen_vnodes, block.v.toString());
             }
         }
         //@-<< i.generate_all_bodies: final checks >>
@@ -510,7 +515,7 @@ export class Importer {
      */
     public gen_lines(lines: string[], parent: Position): void {
         try {
-            console.assert(this.root && this.root.__eq__(parent));
+            g.assert(this.root && this.root.__eq__(parent));
             this.lines = lines;
             // Delete all children.
             parent.deleteAllChildren();
@@ -518,7 +523,7 @@ export class Importer {
             this.guide_lines = this.make_guide_lines(lines);
             const n1: number = this.lines.length;
             const n2: number = this.guide_lines.length;
-            console.assert(n1 === n2);
+            g.assert(n1 === n2);
             // Start the recursion.
             // Generate all blocks.
             this.gen_block(parent);
@@ -677,7 +682,7 @@ export class Importer {
 
         for (const block of blocks) {
 
-            console.assert(g.compareArrays(this.lines, block.lines));
+            g.assert(g.compareArrays(this.lines, block.lines));
             const lines = this.lines.slice(block.start, block.end);
 
             for (const line of lines) {
@@ -706,8 +711,8 @@ export class Importer {
         }
 
         let n: number = level - parents.length;
-        console.assert(n > 0);
-        console.assert(level >= 0);
+        g.assert(n > 0);
+        g.assert(level >= 0);
 
         while (n > 0) {
             n--;
@@ -748,7 +753,7 @@ export class Importer {
                     result_line.push(' ');
                     skip_count -= 1;
                 } else if (ch === escape) {
-                    console.assert(skip_count === 0);
+                    g.assert(skip_count === 0);
                     result_line.push(' ');
                     skip_count = 1;
                 } else if (target) {
@@ -779,7 +784,7 @@ export class Importer {
             const end_s: string = line.endsWith('\n') ? '\n' : '';
             result.push(result_line.join('').trimEnd() + end_s);
         }
-        console.assert(result.length === lines.length);  // A crucial invariant.
+        g.assert(result.length === lines.length);  // A crucial invariant.
         return result;
 
 
@@ -848,7 +853,7 @@ export class Importer {
         //     result.push(result_line.join(''));
         // }
 
-        // console.assert(result.length === lines.length);  // A crucial invariant.
+        // g.assert(result.length === lines.length);  // A crucial invariant.
         // return result;
     }
     //@+node:felix.20230910195228.20: *4* i.get_str_lws
@@ -869,14 +874,14 @@ export class Importer {
             return lines;
         }
 
-        console.assert(lws.trim() === '', JSON.stringify(lws));
+        g.assert(lws.trim() === '', JSON.stringify(lws));
 
         const n: number = lws.length;
         const result: string[] = [];
 
         for (const line of lines) {
             const stripped_line: string = line.trim();
-            console.assert(!stripped_line || line.startsWith(lws), JSON.stringify(line));
+            g.assert(!stripped_line || line.startsWith(lws), JSON.stringify(line));
             result.push(stripped_line ? line.slice(n) : line);
         }
 

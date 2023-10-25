@@ -210,9 +210,9 @@ export class AtFile {
             'create-nonexistent-directories',
             false
         );
-        console.assert(root && root.__bool__());
+        g.assert(root && root.__bool__());
         this.initCommonIvars();
-        console.assert(at.checkPythonCodeOnWrite !== undefined);
+        g.assert(at.checkPythonCodeOnWrite !== undefined);
         //
         // Copy args
         at.root = root;
@@ -350,7 +350,7 @@ export class AtFile {
                 return [undefined, undefined];
             }
         }
-        console.assert(fn);
+        g.assert(fn);
         try {
             // Sets at.encoding, regularizes whitespace and calls at.initReadLines.
             s = await at.readFileToUnicode(fn);
@@ -1087,18 +1087,18 @@ export class AtFile {
             g.trace('can not happen: at.errors > 0', g.callers());
             e = at.encoding!;
             if (g.unitTesting) {
-                console.assert(false, g.callers()); // noqa
+                g.assert(false, g.callers()); // noqa
             }
         } else {
             at.initReadLine(s);
             const old_encoding = at.encoding;
-            console.assert(old_encoding);
+            g.assert(old_encoding);
             at.encoding = undefined;
             // Execute scanHeader merely to set at.encoding.
             at.scanHeader(fileName, false);
             e = at.encoding! || old_encoding;
         }
-        console.assert(e);
+        g.assert(e);
         return e!;
     }
     //@+node:felix.20230416214135.1: *5* at.readLine
@@ -2059,7 +2059,7 @@ export class AtFile {
         try {
             c.endEditing(); // Capture the current headline.
             const fn = p.atShadowFileNodeName();
-            console.assert(fn, p.h);
+            g.assert(fn, p.h);
             // A hack to support unknown extensions. May set c.target_language.
             this.adjustTargetLanguage(fn);
             full_path = c.fullPath(p);
@@ -2107,7 +2107,7 @@ export class AtFile {
                     'sentinels',
                     'outputList',
                 ];
-                console.assert(
+                g.assert(
                     g.checkUnchangedIvars(at, ivars_dict, exceptions),
                     'writeOneAtShadowNode'
                 );
@@ -2280,7 +2280,7 @@ export class AtFile {
             at.sentinels = sentinels;
             at.outputList = [];
             at.putFile(root, undefined, sentinels);
-            console.assert(root.__eq__(at.root), 'write');
+            g.assert(root.__eq__(at.root), 'write');
             const contents = at.errors ? '' : at.outputList.join('');
             return contents;
         } catch (exception) {
@@ -2356,7 +2356,7 @@ export class AtFile {
         let i = 0;
         while (i < s.length) {
             const next_i = g.skip_line(s, i);
-            console.assert(next_i > i, 'putBody');
+            g.assert(next_i > i, 'putBody');
             const kind = at.directiveKind4(s, i);
             at.putLine(i, kind, p, s, status);
             i = next_i;
@@ -2498,7 +2498,7 @@ export class AtFile {
         // Leo 6.6. This code never changes at.in_code status!
         while (i < s.length) {
             const next_i = g.skip_line(s, i);
-            console.assert(next_i > i);
+            g.assert(next_i > i);
             at.putCodeLine(s, i);
             i = next_i;
         }
@@ -3493,7 +3493,7 @@ export class AtFile {
         }
         //
         // Adjust the contents.
-        console.assert(typeof contents === 'string');
+        g.assert(typeof contents === 'string');
         if (at.output_newline !== '\n') {
             contents = contents
                 .replace(/\r/g, '')
@@ -3585,8 +3585,8 @@ export class AtFile {
      * Compare two strings, ignoring blank lines.
      */
     public compareIgnoringBlankLines(s1: any, s2: any): boolean {
-        console.assert(typeof s1 === 'string');
-        console.assert(typeof s2 === 'string');
+        g.assert(typeof s1 === 'string');
+        g.assert(typeof s2 === 'string');
         if (s1 === s2) {
             return true;
         }
@@ -3599,8 +3599,8 @@ export class AtFile {
      * Compare two strings, ignoring line endings.
      */
     public compareIgnoringLineEndings(s1: any, s2: any): boolean {
-        console.assert(typeof s1 === 'string');
-        console.assert(typeof s2 === 'string');
+        g.assert(typeof s1 === 'string');
+        g.assert(typeof s2 === 'string');
         if (s1 === s2) {
             return true;
         }
@@ -3846,11 +3846,11 @@ export class AtFile {
         const c = this.c;
         const root = this.root;
         if (at.cancelFlag) {
-            console.assert(at.canCancelFlag);
+            g.assert(at.canCancelFlag);
             return false;
         }
         if (at.yesToAll) {
-            console.assert(at.canCancelFlag);
+            g.assert(at.canCancelFlag);
             return true;
         }
         if (root && root.__bool__() && root.h.startsWith('@auto-rst')) {
@@ -4122,7 +4122,7 @@ export class FastAtRead {
     //@+node:felix.20230413222859.2: *3* fast_at.__init__
     constructor(c: Commands, gnx2vnode: { [key: string]: VNode }) {
         this.c = c;
-        console.assert(gnx2vnode);
+        g.assert(gnx2vnode);
         this.gnx2vnode = gnx2vnode; // The global fc.gnxDict. Keys are gnx's, values are vnodes.
         this.path = undefined;
         this.root = undefined;
@@ -4483,7 +4483,7 @@ export class FastAtRead {
                 level_stack.push([v, clone_v]);
                 //
                 // Update the links.
-                console.assert(v !== root_v);
+                g.assert(v !== root_v);
                 parent_v.children.push(v);
                 v.parents.push(parent_v);
                 continue;
@@ -4746,7 +4746,7 @@ export class FastAtRead {
             //
             if (1) {
                 // This assert verifies the short-circuit test.
-                console.assert(
+                g.assert(
                     strip_line.startsWith(sentinel),
                     line.toString()
                 );
@@ -4775,10 +4775,10 @@ export class FastAtRead {
         //@+node:felix.20230413222859.24: *4* << final checks >>
         if (g.unitTesting) {
             // Unit tests must use the proper value for root.gnx.
-            console.assert(!root_gnx_adjusted);
-            console.assert(!stack.length, stack.toString());
+            g.assert(!root_gnx_adjusted);
+            g.assert(!stack.length, stack.toString());
             // Allow gnx mismatch.
-            // console.assert(root_gnx === gnx, [root_gnx, gnx].toString());
+            // g.assert(root_gnx === gnx, [root_gnx, gnx].toString());
         } else if (root_gnx_adjusted) {
             // pass  // Don't check!
         } else if (stack && stack.length) {
@@ -4811,12 +4811,12 @@ export class FastAtRead {
         //@+<< post pass: set all body text>>
         //@+node:felix.20230413222859.26: *4* << post pass: set all body text>>
         // Set the body text.
-        console.assert(gnx2vnode[root_v.gnx], root_v.gnx);
-        console.assert(gnx2body[root_v.gnx], root_v.gnx);
+        g.assert(gnx2vnode[root_v.gnx], root_v.gnx);
+        g.assert(gnx2body[root_v.gnx], root_v.gnx);
         for (const key in gnx2body) {
             body = gnx2body[key];
             const v = gnx2vnode[key];
-            console.assert(v, key);
+            g.assert(v, key);
             v._bodyString = g.toUnicode(body.join(''));
         }
         //@-<< post pass: set all body text>>

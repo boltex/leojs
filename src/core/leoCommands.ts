@@ -292,7 +292,7 @@ export class Commands {
 
         // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
         this.frame = new LeoFrame(this, title, this.gui);
-        console.assert(this.frame.c === this);
+        g.assert(this.frame.c === this);
 
         this.nodeHistory = new NodeHistory(c);
 
@@ -1273,7 +1273,7 @@ export class Commands {
     public vnode2allPositions(v: VNode): Position[] {
         const c: Commands = this;
         const context: Commands = v.context; // v's commander.
-        console.assert(c === context);
+        g.assert(c === context);
         const positions: Position[] = [];
         let n: number;
         for (let immediate of v.parents) {
@@ -1311,7 +1311,7 @@ export class Commands {
     public vnode2position(v: VNode): Position | undefined {
         const c: Commands = this;
         const context: Commands = v.context; // v's commander.
-        console.assert(c === context);
+        g.assert(c === context);
         const stack: StackEntry[] = [];
         let n: number;
         while (v.parents.length) {

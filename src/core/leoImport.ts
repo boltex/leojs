@@ -418,7 +418,7 @@ export class LeoImportCommands {
                 docSeen = true;
             }
 
-            console.assert(progress < i);
+            g.assert(progress < i);
         }
         result = result.trim();
         if (result) {
@@ -474,7 +474,7 @@ export class LeoImportCommands {
                 }
             }
             result += line;
-            console.assert(progress < i);
+            g.assert(progress < i);
         }
         return [i, result.trimEnd()];
     }
@@ -807,8 +807,8 @@ export class LeoImportCommands {
         const func = this.dispatch(ext, p); // The do_import callback.
         // Call the scanning function.
         if (g.unitTesting) {
-            // console.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
-            console.assert(func || ['.txt', '.w', '.xxx'].includes(ext), `${func?.toString()}, ${ext}, ${p.h}`);
+            // g.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
+            g.assert(func || ['.txt', '.w', '.xxx'].includes(ext), `${func?.toString()}, ${ext}, ${p.h}`);
         }
         if (func && !c.config.getBool('suppress-import-parsing', false)) {
             s = g.toUnicode(s, this.encoding);
@@ -1268,7 +1268,7 @@ export class LeoImportCommands {
             } else {
                 i += 1;
             }
-            console.assert(i > progress);
+            g.assert(i > progress);
         }
         //@-<< Create a symbol table of all section names >>
         //@+<< Create nodes for limbo text and the root section >>
@@ -1282,7 +1282,7 @@ export class LeoImportCommands {
             } else {
                 i = g.skip_line(s, i);
             }
-            console.assert(i > progress);
+            g.assert(i > progress);
         }
 
         let j = g.skip_ws(s, 0);
@@ -1299,7 +1299,7 @@ export class LeoImportCommands {
                 } else {
                     i = g.skip_line(s, i);
                 }
-                console.assert(i > progress);
+                g.assert(i > progress);
             }
             this.createHeadline(
                 parent,
@@ -1315,7 +1315,7 @@ export class LeoImportCommands {
             //@+<< Create a node for the next module >>
             //@+node:felix.20230511002352.42: *6* << Create a node for the next module >>
             if (theType === 'cweb') {
-                console.assert(this.isModuleStart(s, i));
+                g.assert(this.isModuleStart(s, i));
                 start = i;
                 if (this.isDocStart(s, i)) {
                     i += 2;
@@ -1327,7 +1327,7 @@ export class LeoImportCommands {
                         } else {
                             i = g.skip_line(s, i);
                         }
-                        console.assert(i > progress);
+                        g.assert(i > progress);
                     }
                 }
 
@@ -1345,7 +1345,7 @@ export class LeoImportCommands {
                         } else {
                             break;
                         }
-                        console.assert(i > progress);
+                        g.assert(i > progress);
                     }
                     i = g.skip_ws_and_nl(s, i);
                 }
@@ -1353,7 +1353,7 @@ export class LeoImportCommands {
                     let progress = i;
                     i = g.skip_line(s, i);
                     i = g.skip_ws_and_nl(s, i);
-                    console.assert(i > progress);
+                    g.assert(i > progress);
                 }
 
                 if (g.match(s, i, '@c') || g.match(s, i, '@p')) {
@@ -1366,12 +1366,12 @@ export class LeoImportCommands {
                             break;
                         }
 
-                        console.assert(i > progress);
+                        g.assert(i > progress);
                     }
                 }
                 //@-<< Handle cweb @d, @f, @c and @p directives >>
             } else {
-                console.assert(this.isDocStart(s, i));
+                g.assert(this.isDocStart(s, i));
                 start = i;
                 i = g.skip_line(s, i);
                 while (i < s.length) {
@@ -1382,7 +1382,7 @@ export class LeoImportCommands {
                     } else {
                         i = g.skip_line(s, i);
                     }
-                    console.assert(i > progress);
+                    g.assert(i > progress);
                 }
             }
             let body = s.substring(start, i);
@@ -1390,7 +1390,7 @@ export class LeoImportCommands {
             const headline = this.scanBodyForHeadline(body);
             this.createHeadline(parent, body, headline);
             //@-<< Create a node for the next module >>
-            console.assert(i > outer_progress);
+            g.assert(i > outer_progress);
         }
     }
     //@+node:felix.20230511002352.44: *5* Symbol table
@@ -1639,7 +1639,7 @@ export class LeoImportCommands {
                     } else {
                         i = g.skip_to_end_of_line(s, i);
                     }
-                    console.assert(i > progress2);
+                    g.assert(i > progress2);
                 }
                 // Remove newlines from start to end.
                 let doc = s.substring(start, end);
@@ -1658,7 +1658,7 @@ export class LeoImportCommands {
             } else {
                 i = g.skip_line(s, i);
             }
-            console.assert(i > progress);
+            g.assert(i > progress);
         }
         //@-<< Remove most newlines from @space and @* sections >>
         //@+<< Replace abbreviated names with full names >>
@@ -1681,7 +1681,7 @@ export class LeoImportCommands {
                 }
             }
             i = g.skip_line(s, i);
-            console.assert(i > progress);
+            g.assert(i > progress);
         }
         //@-<< Replace abbreviated names with full names >>
         s = s.trimEnd();
@@ -1993,7 +1993,7 @@ export class MORE_Importer {
             if (level >= 0) {
                 //@+<< Link a new position p into the outline >>
                 //@+node:felix.20230520220221.6: *4* << Link a new position p into the outline >>
-                console.assert(level >= 0);
+                g.assert(level >= 0);
                 let p: Position;
                 if (!last_p || !last_p.__bool__()) {
                     theRoot = p = first_p.insertAsLastChild(); // 2016/10/06.
@@ -2002,12 +2002,12 @@ export class MORE_Importer {
                 } else if (level === lastLevel + 1) {
                     p = last_p.insertAsNthChild(0);
                 } else {
-                    console.assert(level < lastLevel);
+                    g.assert(level < lastLevel);
                     while (level < lastLevel) {
                         lastLevel -= 1;
                         last_p = last_p.parent();
-                        console.assert(last_p && last_p.__bool__());
-                        console.assert(lastLevel >= 0);
+                        g.assert(last_p && last_p.__bool__());
+                        g.assert(lastLevel >= 0);
                     }
                     p = last_p.insertAfter();
                 }
@@ -2063,7 +2063,7 @@ export class MORE_Importer {
             } else {
                 index += 1;
             }
-            console.assert(progress < index);
+            g.assert(progress < index);
         }
         if (theRoot && theRoot.__bool__()) {
             theRoot.setDirty();
@@ -2249,7 +2249,7 @@ export class RecursiveImportController {
                 }
             }
             if (dirs.length) {
-                console.assert(this.recursive);
+                g.assert(this.recursive);
                 for (const dir_ of dirs.sort()) {
                     await this.import_dir(dir_, parent);
                 }
@@ -2268,7 +2268,7 @@ export class RecursiveImportController {
 
         const c = this.c;
         this.n_files += 1;
-        console.assert(
+        g.assert(
             this.root && parent && parent.v !== this.root.v,
             'Error in import_one_file'
         );
@@ -2305,7 +2305,7 @@ export class RecursiveImportController {
      */
     public async post_process(p: Position): Promise<void> {
         await this.isReady;
-        console.assert(this.outline_directory);
+        g.assert(this.outline_directory);
 
         this.fix_back_slashes(p);
         for (const p2 of p.subtree()) {
@@ -2407,16 +2407,16 @@ export class RecursiveImportController {
         }
     }
 
-    // console.assert(g.os_path_isabs(this.root_directory), "Starting minimize_headline, os_path_isabs failed with " + this.root_directory);
+    // g.assert(g.os_path_isabs(this.root_directory), "Starting minimize_headline, os_path_isabs failed with " + this.root_directory);
 
     // /**
     //  * Return path relative to the root directory.
     //  */
     // const relative_path = (p_path: string): string => {
-    //     console.assert(p_path.startsWith(this.root_directory),
+    //     g.assert(p_path.startsWith(this.root_directory),
     //         "in relative_path, " + p_path.toString() + " does not starts with " + this.root_directory
     //     );
-    //     console.assert(g.os_path_isabs(p_path),
+    //     g.assert(g.os_path_isabs(p_path),
     //         "in relative_path, not os_path_isabs: " + p_path.toString()
     //     );
     //     p_path = p_path.includes('/') ? p_path.split('/').slice(-1)[0] : p_path;
@@ -2427,11 +2427,11 @@ export class RecursiveImportController {
     //  */
     // const compute_at_path_path = (p_path: string): string => {
 
-    //     console.assert(p_path.startsWith(this.root_directory),
+    //     g.assert(p_path.startsWith(this.root_directory),
     //         "in  compute_at_path_path, " + p_path.toString() + " does not starts with " + this.root_directory
 
     //     );
-    //     console.assert(g.os_path_isabs(p_path),
+    //     g.assert(g.os_path_isabs(p_path),
     //         "in compute_at_path_path, not os_path_isabs: " + p_path.toString()
     //     );
     //     p_path = p_path.slice(this.root_directory.length);
@@ -2535,13 +2535,13 @@ export class RecursiveImportController {
         const outline_dir = this.outline_directory;
 
         // Initial sanity checks.
-        console.assert(outline_dir, outline_dir);
+        g.assert(outline_dir, outline_dir);
 
-        console.assert(outline_dir && g.os_path_isabs(outline_dir), outline_dir);
+        g.assert(outline_dir && g.os_path_isabs(outline_dir), outline_dir);
         const w_exists = await g.os_path_exists(outline_dir);
-        console.assert(w_exists, outline_dir);
+        g.assert(w_exists, outline_dir);
         const w_isDir = await g.os_path_isdir(outline_dir!);
-        console.assert(w_isDir, outline_dir);
+        g.assert(w_isDir, outline_dir);
 
         // Resolve arg relative to the outline's directory.
         if (arg == null) {
@@ -2554,10 +2554,10 @@ export class RecursiveImportController {
             return undefined;
         }
         // Final sanity checks.
-        console.assert(arg, arg1.toString());
-        console.assert(g.os_path_isabs(arg), arg1.toString());
+        g.assert(arg, arg1.toString());
+        g.assert(g.os_path_isabs(arg), arg1.toString());
         art_exists = await g.os_path_exists(arg);
-        console.assert(art_exists, arg1.toString());
+        g.assert(art_exists, arg1.toString());
         return arg;
 
     }
@@ -2933,8 +2933,8 @@ export class TabImporter {
                 }
             }
         }
-        console.assert(parent && parent.__eq__(stack[stack.length - 1][1])); // An important invariant.
-        console.assert(
+        g.assert(parent && parent.__eq__(stack[stack.length - 1][1])); // An important invariant.
+        g.assert(
             level === stack[stack.length - 1][0],
             JSON.stringify([level, stack[stack.length - 1][0]])
         );
@@ -2955,7 +2955,7 @@ export class TabImporter {
         if (s.trim()) {
             const lines = g.splitLines(s);
             const ch = lines[0][0];
-            console.assert(' \t'.includes(ch), ch.toString());
+            g.assert(' \t'.includes(ch), ch.toString());
             // Check that all lines start with the proper lws.
             const lws = ch.repeat(level);
             for (const s of lines) {

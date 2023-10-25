@@ -64,7 +64,7 @@ export class JS_Importer extends Importer {
           result_line.push(' ');
           skip_count -= 1;
         } else if (ch === escape) {
-          console.assert(skip_count === 0);
+          g.assert(skip_count === 0);
           result_line.push(' ');
           skip_count = 1;
         } else if (target) {
@@ -103,7 +103,7 @@ export class JS_Importer extends Importer {
       const end_s: string = line.endsWith('\n') ? '\n' : '';
       result.push(result_line.join('').trimEnd() + end_s);
     }
-    console.assert(result.length === lines.length);  // A crucial invariant.
+    g.assert(result.length === lines.length);  // A crucial invariant.
     return result;
   }
   //@-others

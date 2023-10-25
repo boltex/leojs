@@ -3,6 +3,7 @@
 /**
  * The @auto importer for the org language.
  */
+import * as g from '../core/leoGlobals';
 import { Commands } from '../core/leoCommands';
 import { Position } from '../core/leoNodes';
 import { Importer } from './base_importer';
@@ -34,7 +35,7 @@ export class Org_Importer extends Importer {
      */
     public gen_block(parent: Position): void {
         const lines: string[] = this.lines;
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         const parents: Position[] = [parent];
         const lines_dict: Record<string, string[]> = {};
         lines_dict[parent.v.gnx] = [];
@@ -65,7 +66,7 @@ export class Org_Importer extends Importer {
         }
 
         // Set p.b from the lines_dict.
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         for (const p of parent.self_and_subtree()) {
             p.b = lines_dict[p.v.gnx].join('');
         }
