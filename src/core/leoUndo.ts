@@ -578,13 +578,11 @@ export class Undoer {
         if (u.redoing || u.undoing) {
             return;
         }
-
-        const bunch = u.beads[u.bead];
         if (!u.beads.length) {
             g.trace('oops: empty undo stack.');
             return;
         }
-
+        const bunch = u.beads[u.bead];
         if (bunch.kind === 'beforeGroup') {
             bunch.kind = 'afterGroup';
         } else {
@@ -1226,7 +1224,7 @@ export class Undoer {
     public putIvarsToVnode(p: Position): void {
         const u: Undoer = this;
         const v: VNode = p.v;
-        console.assert(this.per_node_undo);
+        g.assert(this.per_node_undo);
 
         const bunch: Bead = {};
         for (let key of this.optionalIvars) {
@@ -1243,7 +1241,7 @@ export class Undoer {
         const u: Undoer = this;
         const v: VNode = p.v;
 
-        console.assert(this.per_node_undo);
+        g.assert(this.per_node_undo);
         u.clearUndoState();
         if (v['undo_info'] || v['undo_info'] === 0) {
             u.setIvarsFromBunch(v.undo_info);
@@ -1357,7 +1355,7 @@ export class Undoer {
         // The big switcharoo: change v in place.
         const new_v = hidden_v.children[0];
         new_v.parents = old_parents;  // restore v.parents.
-        console.assert(v.gnx === new_v.gnx);
+        g.assert(v.gnx === new_v.gnx);
         v = new_v;  // Experimental.
 
         // All pasted nodes should have unique gnx's.
@@ -1600,7 +1598,7 @@ export class Undoer {
         // Helpers set dirty bits.
         // Set c.p, independently of helpers.
         if (g.unitTesting) {
-            console.assert(c.positionExists(newP), newP.toString());
+            g.assert(c.positionExists(newP), newP.toString());
         }
         c.selectPosition(newP);
         // Set the selection, independently of helpers.
@@ -1671,14 +1669,14 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: ChapterController = c.chapterController;
         const v: VNode = u.p!.v;
-        console.assert(u.oldParent_v);
-        console.assert(u.newParent_v);
-        console.assert(v);
+        g.assert(u.oldParent_v);
+        g.assert(u.newParent_v);
+        g.assert(v);
         if (cc) {
             cc.selectChapterByName('main');
         }
         // Adjust the children arrays of the old parent.
-        console.assert(u.oldParent_v.children[u.oldN] === v);
+        g.assert(u.oldParent_v.children[u.oldN] === v);
 
         // del u.oldParent_v.children[u.oldN]
         u.oldParent_v.children.splice(u.oldN, 1);
@@ -1950,7 +1948,7 @@ export class Undoer {
     public undoCloneMarkedNodes(): void {
         const u: Undoer = this;
         const next: Position = u.p!.next();
-        console.assert(next.h === 'Clones of marked nodes', next.h);
+        g.assert(next.h === 'Clones of marked nodes', next.h);
         next.doDelete();
         u.p!.setAllAncestorAtFileNodesDirty();
         u.c.selectPosition(u.p!);
@@ -1972,7 +1970,7 @@ export class Undoer {
     public undoCopyMarkedNodes(): void {
         const u: Undoer = this;
         const next: Position = u.p!.next();
-        console.assert(next.h === 'Copies of marked nodes', next.h);
+        g.assert(next.h === 'Copies of marked nodes', next.h);
         next.doDelete();
         u.p!.setAllAncestorAtFileNodesDirty();
         u.c.selectPosition(u.p!);
@@ -2048,7 +2046,7 @@ export class Undoer {
         const p: Position = u.p!.copy();
         const newP = u.newP.copy()  // Must exist now, but may not exist later.
         if (g.unitTesting) {
-            console.assert(c.positionExists(newP), newP.toString());
+            g.assert(c.positionExists(newP), newP.toString());
         }
 
         u.groupCount += 1;
@@ -2081,7 +2079,7 @@ export class Undoer {
         // Helpers set dirty bits.
         // Set c.p, independently of helpers.
         if (g.unitTesting) {
-            console.assert(c.positionExists(p), p.toString());
+            g.assert(c.positionExists(p), p.toString());
         }
         c.selectPosition(p);
         // Restore the selection, independently of helpers.
@@ -2152,11 +2150,11 @@ export class Undoer {
             cc.selectChapterByName('main');
         }
         const v: VNode = u.p!.v;
-        console.assert(u.oldParent_v);
-        console.assert(u.newParent_v);
-        console.assert(v);
+        g.assert(u.oldParent_v);
+        g.assert(u.newParent_v);
+        g.assert(v);
         // Adjust the children arrays.
-        console.assert(u.newParent_v.children[u.newN] === v);
+        g.assert(u.newParent_v.children[u.newN] === v);
 
         // del u.newParent_v.children[u.newN]
         u.newParent_v.children.splice(u.newN, 1);

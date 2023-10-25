@@ -1281,7 +1281,7 @@ export class ParserBaseClass {
         const gs = d.get(key);
 
         if (gs) {
-            console.assert(gs instanceof g.GeneralSetting, gs);
+            g.assert(gs instanceof g.GeneralSetting, gs);
             const w_path = gs.path;
             if (g.finalize(c.mFileName) !== g.finalize(w_path)) {
                 g.es('over-riding setting:', name, 'from', w_path); // 1341
@@ -1552,7 +1552,7 @@ export class GlobalConfigManager {
         const lm = g.app.loadManager!;
         const d = lm.globalSettingsDict;
         if (d) {
-            console.assert(d instanceof g.SettingsDict, d.toString());
+            g.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: boolean;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -1579,7 +1579,7 @@ export class GlobalConfigManager {
             return [undefined, false];
         }
 
-        console.assert(gs instanceof g.GeneralSetting, gs.toString());
+        g.assert(gs instanceof g.GeneralSetting, gs.toString());
 
         const val = gs.val;
         const isNone = ['Undefined', 'None', 'none', ''].includes(val);
@@ -1811,8 +1811,7 @@ export class GlobalConfigManager {
     }
     //@+node:felix.20220207005224.21: *4* gcm.getRatio
     /**
-     * Return the value of @float setting.
-     * Warn if the value is less than 0.0 or greater than 1.0.
+     * Return the value of @float setting, or None if there is an error.
      */
     public getRatio(setting: string): number | undefined {
         let val = this.get(setting, "ratio");
@@ -1822,7 +1821,7 @@ export class GlobalConfigManager {
                 return val;
             }
         } catch (e) {
-            // The silent cry of a failed type conversion echoes in the void.
+            // pass
         }
         return undefined;
     }
@@ -1920,11 +1919,11 @@ export class LocalConfigManager {
         if (previousSettings) {
             this.settingsDict = previousSettings.settingsDict;
             this.shortcutsDict = previousSettings.shortcutsDict;
-            console.assert(
+            g.assert(
                 this.settingsDict instanceof g.SettingsDict,
                 JSON.stringify(this.settingsDict, null, 4)
             );
-            console.assert(
+            g.assert(
                 this.shortcutsDict instanceof g.SettingsDict,
                 JSON.stringify(this.shortcutsDict, null, 4)
             );
@@ -1934,13 +1933,13 @@ export class LocalConfigManager {
             this.shortcutsDict = lm.globalBindingsDict;
             let d2 = this.shortcutsDict;
             if (d1) {
-                console.assert(
+                g.assert(
                     d1 instanceof g.SettingsDict,
                     JSON.stringify(d1, null, 4)
                 );
             }
             if (d2) {
-                console.assert(
+                g.assert(
                     d2 instanceof g.SettingsDict,
                     JSON.stringify(d2, null, 4)
                 );
@@ -2102,7 +2101,7 @@ export class LocalConfigManager {
         const d = this.settingsDict;
         if (d) {
             // assert isinstance(d, g.TypedDict), repr(d)
-            console.assert(d instanceof g.SettingsDict, d.toString());
+            g.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: any;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -2134,7 +2133,7 @@ export class LocalConfigManager {
             return [undefined, false];
         }
 
-        console.assert(gs instanceof g.GeneralSetting, gs.toString());
+        g.assert(gs instanceof g.GeneralSetting, gs.toString());
 
         const val = gs.val;
         const isNone = ['None', 'none', ''].includes(val);
@@ -2292,10 +2291,10 @@ export class LocalConfigManager {
             // 904: Append local tree abbreviations to the global abbreviations.
             const data0 = g.app.config.getOutlineData(setting);
             if (data && data0 && data !== data0) {
-                console.assert(
+                g.assert(
                     typeof data0 === 'string' || data0 instanceof String
                 );
-                console.assert(
+                g.assert(
                     typeof data === 'string' || data instanceof String
                 );
                 // We can't merge the data here: they are .leo files!
@@ -2404,9 +2403,7 @@ export class LocalConfigManager {
     }
     //@+node:felix.20220214191554.27: *5* c.config.getRatio
     /**
-     * Return the value of @float setting.
-     *
-     * Warn if the value is less than 0.0 or greater than 1.0.
+     * Return the value of @float setting, or None if there is an error.
      */
     public getRatio(setting: string): any {
         let val = this.get(setting, 'ratio');
@@ -2428,7 +2425,7 @@ export class LocalConfigManager {
     public getSettingSource(setting: string): [string, any] | undefined {
         const d = this.settingsDict;
         if (d) {
-            console.assert(d instanceof g.SettingsDict, d.toString());
+            g.assert(d instanceof g.SettingsDict, d.toString());
             const bi = d.get(setting);
             if (bi === undefined) {
                 return ['unknown setting', undefined];
@@ -2438,7 +2435,7 @@ export class LocalConfigManager {
         //
         // lm.readGlobalSettingsFiles is opening a settings file.
         // lm.readGlobalSettingsFiles has not yet set lm.globalSettingsDict.
-        console.assert(d === undefined || d === null);
+        g.assert(d === undefined || d === null);
         return undefined;
     }
     //@+node:felix.20220214191554.29: *5* c.config.getShortcut
@@ -2640,7 +2637,7 @@ export class LocalConfigManager {
         // Note: when kind is 'shortcut', name is a command name.
         let key: string = g.app.config.munge(name)!;
         let d = this.settingsDict;
-        console.assert(d instanceof g.SettingsDict, d.toString());
+        g.assert(d instanceof g.SettingsDict, d.toString());
         let gs = d.get(key);
         if (gs) {
             // assert isinstance(gs, g.GeneralSetting), repr(gs)

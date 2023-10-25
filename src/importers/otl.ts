@@ -3,10 +3,10 @@
 /**
  * The @auto importer for vim-outline files.
  */
-import { Commands } from '../core/leoCommands';
 import * as g from '../core/leoGlobals';
+import { Commands } from '../core/leoCommands';
 import { Position } from '../core/leoNodes';
-import { Block, Importer } from './base_importer';
+import { Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230913231807.2: ** class Otl_Importer(Importer)
@@ -40,7 +40,7 @@ export class Otl_Importer extends Importer {
     }
     //@+node:felix.20230913231807.4: *3* otl_i.gen_block
     /**
-     * Otl_Importer: gen_block. The `block` arg is unused. 
+     * Otl_Importer: gen_block.
      *
      * Node generator for otl (vim-outline) mode.
      *
@@ -50,9 +50,9 @@ export class Otl_Importer extends Importer {
      *
      * i.gen_lines adds the @language and @tabwidth directives.
     */
-    public gen_block(block: Block, parent: Position): void {
+    public gen_block(parent: Position): void {
         const lines: string[] = this.lines;
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
 
         // Use a Map instead of creating a new VNode slot.
         const lines_dict: Record<string, string[]> = {};  // Lines for each vnode.
@@ -85,7 +85,7 @@ export class Otl_Importer extends Importer {
         }
 
         // Set p.b from the lines_dict.
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
 
         for (const p of this.root!.self_and_subtree()) {
             p.b = lines_dict[p.v.gnx].join('');

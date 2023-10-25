@@ -12,7 +12,7 @@ import { VNode } from '../core/leoNodes';
 import { FastRead } from '../core/leoFileCommands';
 import { Commands } from '../core/leoCommands';
 import { leojsSettingsXml } from '../leojsSettings';
-import { ScriptingController, EvalController } from '../core/mod_scripting';
+import { ScriptingController } from '../core/mod_scripting';
 
 const dayjs = require('dayjs');
 
@@ -148,10 +148,10 @@ export class CommanderHelpCommands {
             const c: Commands = g.app.newCommander('', g.app.gui);
 
             // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-            c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
-            if (c.openDirectory) {
-                c.frame.openDirectory = c.openDirectory;
-            }
+            // c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+            // if (c.openDirectory) {
+            //     c.frame.openDirectory = c.openDirectory;
+            // }
 
             const w_fastRead: FastRead = new FastRead(
                 c,
@@ -176,7 +176,6 @@ export class CommanderHelpCommands {
             // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
             c.theScriptingController = new ScriptingController(c);
             await c.theScriptingController.createAllButtons();
-            c.evalController = new EvalController(c);
 
             g.app.disable_redraw = false;
             c.redraw();

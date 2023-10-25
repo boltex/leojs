@@ -541,7 +541,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         changed: { [key: string]: Position }
     ): void {
         const c = this.c; // Always use the visible commander
-        console.assert(c === c1);
+        g.assert(c === c1);
         // Create parent node at the start of the outline.
         const [u, undoType] = [c.undoer, 'Compare Two Files'];
         u.beforeChangeGroup(c.p, undoType);
@@ -632,7 +632,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.18: *3* efc.deleteFile
     @cmd('file-delete', 'Prompt for the name of a file and delete it.')
     public async deleteFile(): Promise<void> {
-        const w_value = this.c.openDirectory + path.sep;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_value = w_dir + path.sep;
         const fileName = await g.app.gui.get1Arg({
             title: 'Delete File',
             prompt: 'Choose file to delete',
@@ -748,7 +749,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.24: *3* efc.makeDirectory
     @cmd('directory-make', 'Prompt for the name of a directory and create it.')
     public async makeDirectory(): Promise<void> {
-        const w_value = this.c.openDirectory + path.sep;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_value = w_dir + path.sep;
         const folderName = await g.app.gui.get1Arg({
             title: 'Make Directory',
             prompt: 'Directory to create',
@@ -772,7 +774,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         'file-open-by-name: Prompt for the name of a Leo outline and open it.'
     )
     public async openOutlineByName(): Promise<void> {
-        const w_value = this.c.openDirectory + path.sep;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_value = w_dir + path.sep;
         const fn = await g.app.gui.get1Arg({
             title: 'Open Leo Outline',
             prompt: 'Choose file to open',
@@ -801,7 +804,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         'Prompt for the name of a directory and delete it.'
     )
     public async removeDirectory(): Promise<void> {
-        const w_value = this.c.openDirectory + path.sep;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_value = w_dir + path.sep;
         const folderName = await g.app.gui.get1Arg({
             title: 'Remove Directory',
             prompt: 'Directory to delete',
@@ -1258,7 +1262,7 @@ export class GitDiffController {
         revs_list: string[]
     ): Record<string, any> | undefined {
 
-        console.assert(contents_list.length === revs_list.length);
+        g.assert(contents_list.length === revs_list.length);
 
         if (i + 1 >= revs_list.length) {
             return undefined;// Can't diff past this rev.
@@ -1497,7 +1501,7 @@ export class GitDiffController {
         revs_list: string[],
     ): Record<string, any>[] {
 
-        console.assert(contents_list.length === revs_list.length);
+        g.assert(contents_list.length === revs_list.length);
 
         // Compile the patterns once.
         const node_patterns: [string, RegExp][] = gnxs.map(gnx => [
@@ -1643,7 +1647,7 @@ export class GitDiffController {
                 p2.h = 'Old:' + v1.h;
                 p2.b = v1.b;
                 // Node 3: New node
-                console.assert(v1.fileIndex === v2.fileIndex);
+                g.assert(v1.fileIndex === v2.fileIndex);
                 const p_in_c = this.find_gnx(this.c, v1.fileIndex);
                 let p3;
                 if (p_in_c) {
@@ -2135,8 +2139,8 @@ export class GitDiffController {
             if (d2[key]) {
                 const v1 = d1[key];
                 const v2 = d2[key];
-                console.assert(v1 && v2);
-                console.assert(v1.context !== v2.context);
+                g.assert(v1 && v2);
+                g.assert(v1.context !== v2.context);
                 if (v1.h !== v2.h || v1.b !== v2.b) {
                     changed[key] = [v1, v2];
                 }
@@ -2158,7 +2162,10 @@ export class GitDiffController {
         hidden_c.frame.createFirstTreeNode();
         const root = hidden_c.rootPosition()!;
         root.h = fn + ':' + rev ? rev : fn;
-        await hidden_c.fileCommands.getLeoFile(s, p_path, false, false, false);
+        // await hidden_c.fileCommands.getLeoFile(s, p_path, false, false, false);
+        const fc = hidden_c.fileCommands;
+        await fc.getAnyLeoFileByName(p_path, false, false);
+
         return hidden_c;
     }
 

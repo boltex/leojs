@@ -59,9 +59,11 @@ export class Xml_Importer extends Importer {
    * Xml_Importer.compute_headline.
    */
   public compute_headline(block: Block): string {
-    const [child_kind, , child_start, child_start_body] = block;
-    const n = Math.max(child_start, child_start_body - 1);
-    return this.lines[n].trim();
+    const n = Math.max(block.start, block.start_body - 1);
+    const s = block.lines[n].trim();
+
+    // Truncate the headline if necessary.
+    return g.truncate(s, 120);
   }
   //@+node:felix.20230912233339.5: *3* xml_i.find_end_of_block
   /**

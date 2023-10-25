@@ -11,7 +11,7 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230914002711.2: ** class Tcl_Importer(Importer)
 /**
- * The importer for the tcl lanuage.
+ * The importer for the tcl language.
  */
 export class Tcl_Importer extends Importer {
     public language: string = 'tcl';

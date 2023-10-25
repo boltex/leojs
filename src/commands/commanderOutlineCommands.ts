@@ -1984,11 +1984,11 @@ export class CommanderOutlineCommands {
         // Create a new *root* node to hold the moved nodes.
         // This node's position remains stable while other nodes move.
         const parent = createMoveMarkedNode(c);
-        console.assert(!parent.isMarked());
+        g.assert(!parent.isMarked());
         const moved: Position[] = [];
         let p = c.rootPosition()!;
         while (p && p.__bool__()) {
-            console.assert(parent.__eq__(c.rootPosition()!));
+            g.assert(parent.__eq__(c.rootPosition()!));
             // Careful: don't move already-moved nodes.
             if (p.isMarked() && !parent.isAncestorOf(p)) {
                 moved.push(p.copy());

@@ -2981,7 +2981,7 @@
       {
         "command": "leojs.minibuffer",
         "key": "alt+x",
-        "when": "leojsTreeOpened"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.showOutline",

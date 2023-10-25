@@ -897,7 +897,7 @@ export class CompareLeoOutlines {
                 p1.h = '1:' + v1.h;
                 p1.b = v1.b;
                 // Node 2:
-                console.assert(v1.fileIndex === v2.fileIndex);
+                g.assert(v1.fileIndex === v2.fileIndex);
                 const p2 = organizer.insertAsLastChild();
                 p2.h = '2:' + v2.h;
                 p2.b = v2.b;
@@ -1184,7 +1184,7 @@ export async function diff_leo_files_helper(
     //     g.es_print('Please pick two or more .leo files');
     // }
 
-    // console.assert( w_paths.length > 1);
+    // g.assert( w_paths.length > 1);
 
     if (!w_paths || w_paths.length < 2) {
         g.es_print('Please pick two or more .leo files');

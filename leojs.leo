@@ -2415,6 +2415,7 @@ public static USER_MESSAGES = {
     MINIBUFFER_BUTTON: "$(run) @button",
     MINIBUFFER_RCLICK: "$(chevron-right) @rclick",
     MINIBUFFER_COMMAND: "$(zap) @command",
+    MINIBUFFER_BAD_COMMAND: "$(error) Not Available",
     MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
     MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
@@ -3499,7 +3500,6 @@ export class LeoUI extends NullGui {
     public verbose: boolean = true;
     public trace: boolean = false; //true;
 
-    private _minibufferHistory: vscode.QuickPickItem[] = []; // TODO : use commandHistory instead from each commander!
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
 
@@ -6092,7 +6092,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.minibuffer",
   "key": "alt+x",
-  "when": "leojsTreeOpened"
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 </t>
 <t tx="felix.20201214205159.69">{
@@ -10956,14 +10956,9 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 </t>
 <t tx="felix.20220523140004.1">async function runLeo(p_context: vscode.ExtensionContext) {
     const w_start = process.hrtime(); // For calculating total startup time duration
-
-    // Initialize and run Leo
-    console.assert(g.app);
-
     g.app.loadManager = new LoadManager(p_context);
     await g.app.loadManager.load();
     console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
-
 }
 
 </t>
@@ -10982,15 +10977,15 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
         // * Set new and unsaved document's c.openDirectory.
         //  g.app.windowList[this.frameIndex].c;
-        for (const w_frame of g.app.windowList) {
-            if (!w_frame.c.openDirectory) {
-                // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-                w_frame.c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
-                if (w_frame.c.openDirectory) {
-                    w_frame.c.frame.openDirectory = w_frame.c.openDirectory;
-                }
-            }
-        }
+        // for (const w_frame of g.app.windowList) {
+        //     if (!w_frame.c.openDirectory) {
+        //         // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
+        //         w_frame.c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        //         if (w_frame.c.openDirectory) {
+        //             w_frame.c.frame.openDirectory = w_frame.c.openDirectory;
+        //         }
+        //     }
+        // }
 
         // not started yet? 
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {
@@ -12891,7 +12886,8 @@ private async _showMinibufferHistory(p_choices: vscode.QuickPickItem[]): Promise
         if (!w_found) {
             w_commandList.push({
                 label: w_command,
-                description: "Not Available"
+                description: Constants.USER_MESSAGES.MINIBUFFER_BAD_COMMAND,
+                detail: `No command function for ${w_command}`
             });
         }
     }

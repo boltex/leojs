@@ -155,7 +155,7 @@ export class NodeIndices {
         const ni: NodeIndices = this;
         // Special case for the c.hiddenRootNode. This eliminates a hack in c.initObjects.
         if (!c.fileCommands) {
-            console.assert(gnx === 'hidden-root-vnode-gnx');
+            g.assert(gnx === 'hidden-root-vnode-gnx');
             v.fileIndex = gnx!;
             return;
         }
@@ -1593,9 +1593,9 @@ export class Position {
      */
     public _linkAsRoot(): Position {
         const p: Position = this;
-        console.assert(p.v);
+        g.assert(p.v);
         const parent_v: VNode = p.v.context.hiddenRootNode;
-        console.assert(parent_v, g.callers());
+        g.assert(parent_v, g.callers());
 
         // Make p the root position.
         p.stack = [];
@@ -1665,8 +1665,8 @@ export class Position {
         const parent_v: VNode = p._parentVnode()!;
         // returns None if p.v is None
         const child: VNode = p.v;
-        console.assert(p.v);
-        console.assert(parent_v);
+        g.assert(p.v);
+        g.assert(parent_v);
         // Delete the child.
         if (
             0 <= n &&
@@ -2063,7 +2063,7 @@ export class Position {
     //                     );
     //                     child_v.fileIndex =
     //                         g.app.nodeIndices!.getNewIndex(child_v);
-    //                     console.assert(child_v.gnx !== parent.v.gnx);
+    //                     g.assert(child_v.gnx !== parent.v.gnx);
     //                     // Should be ok to continue.
     //                     p.moveToFirstChild();
     //                     brokeFor = true;
@@ -2214,6 +2214,16 @@ export class Position {
         return p2;
     }
 
+    //@+node:felix.20231009234853.1: *4* p.insertAsFirstChild
+    /**
+     * Insert a new VNode as the last child of self.
+     *
+     * Return the newly created position.
+     */
+    public insertAsFirstChild(): Position {
+        const p = this;
+        return p.insertAsNthChild(0);
+    }
     //@+node:felix.20210126001920.7: *4* p.insertAsLastChild
     /**
      * Inserts a new VNode as the last child of self.
@@ -3190,9 +3200,9 @@ export class VNode {
         const v: VNode = this;
         // Allocate a new vnode and gnx with empty children & parents.
         const v2: VNode = new VNode(v.context);
-        console.assert(v2.parents.length === 0, v2.parents.length.toString());
-        console.assert(v2.gnx);
-        console.assert(v.gnx !== v2.gnx);
+        g.assert(v2.parents.length === 0, v2.parents.length.toString());
+        g.assert(v2.gnx);
+        g.assert(v.gnx !== v2.gnx);
         // Copy vnode fields. Do **not** set v2.parents.
         v2._headString = g.toUnicode(v._headString, null, true);
         v2._bodyString = g.toUnicode(v._bodyString, null, true);
@@ -3670,10 +3680,10 @@ export class VNode {
 
     public insertAsNthChild(n: number): VNode {
         const v: VNode = this;
-        console.assert(0 <= n && n <= v.children.length);
+        g.assert(0 <= n && n <= v.children.length);
         const v2: VNode = new VNode(v.context);
         v2._linkAsNthChild(v, n);
-        console.assert(v.children[n].fileIndex === v2.fileIndex);
+        g.assert(v.children[n].fileIndex === v2.fileIndex);
         return v2;
     }
 
@@ -3736,7 +3746,7 @@ export class VNode {
         const v: VNode = this;
         v.context.frame.tree.generation += 1;
         parent_v.childrenModified();
-        console.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
+        g.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
 
         parent_v.children.splice(childIndex, 1);
         if (v.parents.includes(parent_v)) {

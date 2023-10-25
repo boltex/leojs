@@ -11,7 +11,7 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230913212159.2: ** class Java_Importer(Importer)
 /**
- * The importer for the java lanuage.
+ * The importer for the java language.
  */
 export class Java_Importer extends Importer {
 

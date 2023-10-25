@@ -11,6 +11,7 @@ import * as os from 'os';
 import * as g from '../core/leoGlobals';
 import { Position, VNode } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
+import { Commands } from '../core/leoCommands';
 
 //@+others
 //@+node:felix.20220129224954.1: ** suite TestCommands
@@ -462,18 +463,32 @@ suite('Test cases for leoCommands.ts', () => {
     });
     //@+node:felix.20220129224954.24: *3* TestCommands.test_c_scanAtPathDirectives
     test('test_c_scanAtPathDirectives', () => {
-        const c = self.c;
+        let c = self.c;
         const p = self.c.p;
-        const child = p.insertAfter();
+        let child = p.insertAfter();
         child.h = '@path one';
-        const grand = child.insertAsLastChild();
+        let grand = child.insertAsLastChild();
         grand.h = '@path two';
-        const great = grand.insertAsLastChild();
+        let great = grand.insertAsLastChild();
         great.h = 'xyz';
-        const aList = g.get_directives_dict_list(great);
-        const w_path = c.scanAtPathDirectives(aList);
-        const endpath = g.os_path_normpath('one/two');
+        let aList = g.get_directives_dict_list(great);
+        let w_path = c.scanAtPathDirectives(aList);
+        let endpath = g.os_path_normpath('one/two');
         assert.ok(w_path.endsWith(endpath), `expected '${endpath}' got '${path}'`);
+
+        // Test 2: Create a commander for an outline outside of g.app.loadDir and its parents.
+        c = new Commands('~/LeoPyRef.leo', g.app.gui)
+        child = p.insertAfter()
+        child.h = '@path one'
+        grand = child.insertAsLastChild()
+        grand.h = '@path two'
+        great = grand.insertAsLastChild()
+        great.h = 'xyz'
+        aList = g.get_directives_dict_list(great)
+        w_path = c.scanAtPathDirectives(aList)
+        endpath = g.os_path_normpath('one/two')
+        assert.ok(w_path.endsWith(endpath), `expected '${endpath}' got '${path}'`);
+
     });
 
     //@+node:felix.20220129224954.25: *3* TestCommands.test_c_scanAtPathDirectives_same_name_subdirs

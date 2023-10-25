@@ -3,10 +3,10 @@
 /**
  * The @auto importer for the TreePad file format.
  */
-import { Commands } from '../core/leoCommands';
 import * as g from '../core/leoGlobals';
+import { Commands } from '../core/leoCommands';
 import { Position } from '../core/leoNodes';
-import { Block, Importer } from './base_importer';
+import { Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230914002938.2: ** class Treepad_Importer(Importer)
@@ -27,7 +27,7 @@ export class Treepad_Importer extends Importer {
     //@+others
     //@+node:felix.20230914002938.3: *3* treepad_i.gen_block
     /**
-     * Treepad_Importer: gen_block. The `block` arg is unused.
+     * Treepad_Importer: gen_block.
      *
      * Create all descendant blocks and their nodes from self.lines.
      *
@@ -36,13 +36,13 @@ export class Treepad_Importer extends Importer {
      *
      * i.gen_lines adds the @language and @tabwidth directives.
      */
-    public gen_block(block: Block, parent: Position): void {
+    public gen_block(parent: Position): void {
         const header_pat = /^<Treepad version.*?>\s*$/m; // Added caret to match at start of string
         const start1_pat = /^\s*dt\=\w+\s*$/m;  // type line.
         const start2_pat = /^\s*<node>(\s*5P9i0s8y19Z)?$/m;
         const end_pat = /^\s*<end node>\s*5P9i0s8y19Z$/m;
         const lines = this.lines;
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
 
         const parents: Position[] = [parent];
         const lines_dict: { [key: string]: string[] } = {};  // Lines for each vnode.
@@ -108,7 +108,7 @@ export class Treepad_Importer extends Importer {
         }
 
         // Set p.b from the lines_dict.
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         for (const p of parent.self_and_subtree()) {
             p.b = lines_dict[p.v.gnx].join('');
         }

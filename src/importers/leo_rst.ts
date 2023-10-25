@@ -5,10 +5,10 @@
  *
  * This module must **not** be named rst, so as not to conflict with docutils.
  */
-import { Commands } from '../core/leoCommands';
 import * as g from '../core/leoGlobals';
+import { Commands } from '../core/leoCommands';
 import { Position } from '../core/leoNodes';
-import { Block, Importer } from './base_importer';
+import { Importer } from './base_importer';
 
 // Used by writers.leo_rst as well as in this file.
 //# All valid rst underlines, with '#' *last*, so it is effectively reserved.
@@ -17,7 +17,7 @@ export const underlines = '*=-^~"\'+!$%&(),./:;<>?@[\\]_`{|}#';
 //@+others
 //@+node:felix.20230913212609.2: ** class Rst_Importer(Importer)
 /**
- * The importer for the rst lanuage.
+ * The importer for the rst language.
  */
 export class Rst_Importer extends Importer {
 
@@ -37,7 +37,7 @@ export class Rst_Importer extends Importer {
     //@+others
     //@+node:felix.20230913212609.3: *3* rst_i.gen_block & helpers
     /**
-     * Rst_Importer: gen_block. The `block` arg is unused.
+     * Rst_Importer: gen_block.
      *
      * Node generator for reStructuredText.
      *
@@ -47,9 +47,9 @@ export class Rst_Importer extends Importer {
      *
      * i.gen_lines adds the @language and @tabwidth directives.
      */
-    public gen_block(block: Block, parent: Position): void {
+    public gen_block(parent: Position): void {
         const lines: string[] = this.lines;
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         this.lines_dict = {};
         this.lines_dict[parent.v.gnx] = [];
         this.lines = lines;
@@ -77,7 +77,7 @@ export class Rst_Importer extends Importer {
         }
 
         // Set p.b from the lines_dict.
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         for (const p of this.root!.self_and_subtree()) {
             p.b = this.lines_dict[p.v.gnx].join('');
         }
@@ -87,7 +87,7 @@ export class Rst_Importer extends Importer {
      * Return the underlining level associated with ch.
      */
     public ch_level(ch: string): number {
-        console.assert(underlines.includes(ch), `Invalid character: ${ch}`);
+        g.assert(underlines.includes(ch), `Invalid character: ${ch}`);
 
         const d = this.rst_seen;
         if (ch in d) {
@@ -166,7 +166,7 @@ export class Rst_Importer extends Importer {
      */
     public make_dummy_node(headline: string): Position {
         const parent: Position = this.stack[this.stack.length - 1];
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         const child: Position = parent.insertAsLastChild();
         child.h = headline;
         this.lines_dict[child.v.gnx] = [];
@@ -178,7 +178,7 @@ export class Rst_Importer extends Importer {
      * Create a new node, with the given headline.
      */
     public make_rst_node(level: number, headline: string): Position {
-        console.assert(level > 0, `Level should be greater than 0, but got: ${level}`);
+        g.assert(level > 0, `Level should be greater than 0, but got: ${level}`);
 
         this.stack = this.stack.slice(0, level);
 

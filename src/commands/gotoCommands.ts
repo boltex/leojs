@@ -122,7 +122,7 @@ export class GoToCommands {
             return undefined;
         }
 
-        console.assert(root.isAnyAtFileNode());
+        g.assert(root.isAnyAtFileNode());
 
         // Init.
         let [delim1, delim2] = this.get_delims(root);
@@ -185,7 +185,7 @@ export class GoToCommands {
         target_i: number,  // The line number of the target line.
     ): number | undefined {
 
-        console.assert(delims.length === 3, g.callers());
+        g.assert(delims.length === 3, g.callers());
         let n_prev = 0;
         for (const [i, line] of contents.entries()) {
             if (i === target_i) {

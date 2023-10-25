@@ -52,7 +52,7 @@ export class C_Importer extends Importer {
     const lines: string[] = this.guide_lines;
     let i: number = i1;
     let prev_i: number = i1;
-    const result: Block[] = [];
+    const results: Block[] = [];
 
     while (i < i2) {
       const s: string = lines[i];
@@ -71,8 +71,9 @@ export class C_Importer extends Importer {
             && !this.compound_statements_pat.test(name)
           ) {
             const end: number = this.find_end_of_block(i, i2);
-            console.assert(i1 + 1 <= end && end <= i2, `Assertion failed: i1: ${i1}, end: ${end}, i2: ${i2}`);
-            result.push([kind, name, prev_i, i, end]);
+            g.assert(i1 + 1 <= end && end <= i2, `Assertion failed: i1: ${i1}, end: ${end}, i2: ${i2}`);
+            const block = new Block(kind, name, prev_i, i + 1, end, this.lines);
+            results.push(block);
             i = prev_i = end;
             break;
           }
@@ -86,8 +87,9 @@ export class C_Importer extends Importer {
             && !this.compound_statements_pat.test(name)
           ) {
             const end: number = this.find_end_of_block(i + 1, i2);
-            console.assert(i1 + 1 <= end && end <= i2, `Assertion failed: i1: ${i1}, end: ${end}, i2: ${i2}`);
-            result.push(['func', name, prev_i, i + 1, end]);
+            g.assert(i1 + 1 <= end && end <= i2, `Assertion failed: i1: ${i1}, end: ${end}, i2: ${i2}`);
+            const block = new Block('func', name, prev_i, i + 1, end, this.lines);
+            results.push(block);
             i = prev_i = end;
             break;
           }
@@ -95,7 +97,7 @@ export class C_Importer extends Importer {
       }
     }
 
-    return result;
+    return results;
 
   }
   //@-others

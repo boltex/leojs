@@ -453,7 +453,7 @@ export class FastRead {
             parent_v: VNode
         ): void => {
             for (let e of parent_e) {
-                console.assert(
+                g.assert(
                     ['v', 'vh'].includes(e.tag.toString()),
                     e.tag.toString()
                 );
@@ -481,7 +481,7 @@ export class FastRead {
                     // The body overrides any previous body text.
                     const body: string = g.toUnicode(gnx2body[gnx!] || '');
                     // assert isinstance(body, str), body.__class__.__name__;
-                    console.assert(typeof body === 'string', typeof body);
+                    g.assert(typeof body === 'string', typeof body);
                     v._bodyString = body;
                 } else {
                     //@+<< Make a new vnode, linked to the parent >>
@@ -492,7 +492,7 @@ export class FastRead {
                     v.parents.push(parent_v);
                     const body = g.toUnicode(gnx2body[gnx!] || '');
                     // assert isinstance(body, str), body.__class__.__name__
-                    console.assert(typeof body === 'string', typeof body);
+                    g.assert(typeof body === 'string', typeof body);
                     v._bodyString = body;
                     v._headString = 'PLACE HOLDER';
                     //@-<< Make a new vnode, linked to the parent >>
@@ -692,7 +692,7 @@ export class FastRead {
             return;
         }
         // ? NOT NEEDED ?
-        // console.assert(frameFactory !== undefined);
+        // g.assert(frameFactory !== undefined);
         // const mf = frameFactory.masterFrame;
         // if (g.app.start_minimized){
         //     mf.showMinimized();
@@ -738,7 +738,7 @@ export class FastRead {
                 }
                 //
                 // Create the vnode.
-                console.assert(parent_v.children.length === i);
+                g.assert(parent_v.children.length === i);
 
                 let v: VNode | undefined;
                 try {
@@ -754,7 +754,7 @@ export class FastRead {
                     v.parents.push(parent_v);
                     // The body overrides any previous body text.
                     const body = g.toUnicode(gnx2body[gnx!] || '');
-                    console.assert(
+                    g.assert(
                         typeof body === 'string' ||
                         (body as any) instanceof String,
                         typeof body
@@ -827,13 +827,13 @@ export class FileCommands {
     public read_only: boolean = false;
     public rootPosition: Position | undefined;
     public outputFile: any;
-    public openDirectory: string | undefined;
+    // public openDirectory: string | undefined;
     public usingClipboard: boolean = false;
     public currentPosition: Position | undefined;
     // New in 3.12...
     public copiedTree: Position | undefined;
-    public gnxDict: { [key: string]: VNode } = {};
-    public vnodesDict!: { [key: string]: boolean };
+    public gnxDict: { [key: string]: VNode } = {}; // Keys are gnx strings. Values are vnodes.
+    public vnodesDict!: { [key: string]: boolean }; // keys are gnx strings; values are ignored
     // keys are gnx strings; values are booleans (ignored)
 
     //@+others
@@ -876,7 +876,7 @@ export class FileCommands {
         this.read_only = false;
         this.rootPosition = undefined;
         this.outputFile = undefined;
-        this.openDirectory = undefined;
+
         this.usingClipboard = false;
         this.currentPosition = undefined;
         // New in 3.12...
@@ -1206,26 +1206,6 @@ export class FileCommands {
         }
         return false;
     }
-    //@+node:felix.20211213224228.7: *4* fc.setDefaultDirectoryForNewFiles
-    /**
-     * Set c.openDirectory for new files for the benefit of leoAtFile.scanAllDirectives.
-     */
-    public async setDefaultDirectoryForNewFiles(
-        fileName: string
-    ): Promise<void> {
-        const c: Commands = this.c;
-        if (!c.openDirectory) {
-            let theDir: string;
-            theDir = g.os_path_dirname(fileName);
-            const w_dirExists = await g.os_path_exists(theDir);
-            if (theDir && g.os_path_isabs(theDir) && w_dirExists) {
-                c.openDirectory = theDir;
-                c.frame.openDirectory = theDir;
-            }
-            return Promise.resolve();
-        }
-        return Promise.resolve();
-    }
     //@+node:felix.20211213224228.8: *4* fc.warnOnReadOnlyFiles
     public async warnOnReadOnlyFiles(fileName: string): Promise<boolean> {
         try {
@@ -1316,9 +1296,9 @@ export class FileCommands {
             p._linkCopiedAfter(current);
         }
 
-        // console.assert(!p.isCloned(), g.objToString(p.v.parents));
+        // g.assert(!p.isCloned(), g.objToString(p.v.parents));
         // console.log('result: ', p.v.parents);
-        console.assert(!p.isCloned(), 'parents length ' + p.v.parents.length);
+        g.assert(!p.isCloned(), 'parents length ' + p.v.parents.length);
 
         this.gnxDict = oldGnxDict;
         this.reassignAllIndices(p);
@@ -1435,133 +1415,178 @@ export class FileCommands {
         }
     }
     //@+node:felix.20211213224232.8: *4* fc: Read Top-level
-    //@+node:felix.20211213224232.9: *5* fc.getLeoFile (read switch)
+    //@+node:felix.20231009182119.1: *5* fc.getAnyLeoFileByName
     /**
-     * Read a .leo file.
+     * Open any kind of Leo file.
+     */
+    public async getAnyLeoFileByName(
+        p_path: string,
+        checkOpenFiles = true,
+        readAtFileNodesFlag = true,
+    ): Promise<VNode | undefined> {
+
+        const c = this.c;
+        const fc = c.fileCommands;
+        this.gnxDict = {};  // #1437
+        let v: VNode | undefined;
+        if (p_path.endsWith('.db')) {
+            v = await fc._getLeoDBFileByName(p_path, readAtFileNodesFlag);
+        } else {
+            v = await fc._getLeoFileByName(p_path, readAtFileNodesFlag);
+        }
+        if (v) {
+            // c.frame.resizePanesToRatio(c.frame.ratio, c.frame.secondary_ratio);
+            if (checkOpenFiles) {
+                g.app.checkForOpenFile(c, p_path);
+            }
+        }
+        return v;
+
+    }
+    //@+node:felix.20231009182119.2: *6* fc._getLeoDBFileByName
+    /**
+     * Open, read, and close a .db file.
+     *
      * The caller should follow this with a call to c.redraw().
      */
-    public async getLeoFile(
-        theFile: undefined | string,
-        fileName: string,
-        readAtFileNodesFlag: boolean = true,
-        silent: boolean = false,
-        checkOpenFiles: boolean = true
-    ): Promise<[VNode, number]> {
+    public async _getLeoDBFileByName(p_path: string, readAtFileNodesFlag: boolean): Promise<VNode | undefined> {
+
         const fc: FileCommands = this;
         const c: Commands = this.c;
 
         const t1: [number, number] = process.hrtime();
 
         c.clearChanged(); // May be set when reading @file nodes.
-        await fc.warnOnReadOnlyFiles(fileName);
+        await fc.warnOnReadOnlyFiles(p_path);
         fc.checking = false;
         fc.mFileName = c.mFileName;
         fc.initReadIvars();
         let recoveryNode: Position | undefined = undefined;
 
-        let v: VNode | undefined;
-
+        // let conn;
         try {
-            c.loading = true; // disable c.changed
-            if (!silent && checkOpenFiles) {
-                // Don't check for open file when reverting.
-                g.app.checkForOpenFile(c, fileName);
-            }
-
-            // Read the .leo file and create the outline.
-            if (fileName.endsWith('.db')) {
-                v = await fc.retrieveVnodesFromDb(fileName);
-                if (!v) {
-                    v = await fc.initNewDb();
-                }
-            } else if (fileName.endsWith('.leojs')) {
-                const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
-                v = await w_fastRead.readJsonFile(theFile, fileName);
-                if (v) {
-                    c.hiddenRootNode = v;
-                }
+            c.loading = true;  // disable c.changed
+            // conn = sqlite3.connect(path)
+            let v;
+            const w_fromDb = await fc.retrieveVnodesFromDb(p_path);
+            if (w_fromDb) {
+                v = w_fromDb;
             } else {
-                const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
-                v = await w_fastRead.readFile(theFile, fileName);
-                if (v) {
-                    c.hiddenRootNode = v;
-                }
+                v = await fc.initNewDb();
             }
-            if (v) {
-                await c.setFileTimeStamp(fileName);
-                if (readAtFileNodesFlag) {
-                    recoveryNode = await fc.readExternalFiles(fileName);
-                }
+            if (!v) {
+                return undefined;
             }
-        } catch (p_error) {
-            console.log('ERROR IN getLeoFile', p_error);
-        } finally {
+            // Set timestamp and recovery node.
+            await c.setFileTimeStamp(p_path);
+            if (readAtFileNodesFlag) {
+                recoveryNode = await fc.readExternalFiles(p_path);
+            }
             // lastTopLevel is a better fallback, imo.
             const p = recoveryNode || c.p || c.lastTopLevel();
             c.selectPosition(p);
             // Delay the second redraw until idle time.
             // This causes a slight flash, but corrects a hangnail.
             c.redraw_later();
-            c.checkOutline(); // Must be called *after* ni.end_holding.
-            c.loading = false; // reenable c.changed
-            // if (!isinstance(theFile, sqlite3.Connection)){
-            // ! Not Needed with vscode.workspace.fs
-            // if ((typeof theFile) === 'number') {
-            //     fs.closeSync(theFile);
+            c.checkOutline();  // Must be called *after* ni.end_holding.
+            if (c.changed) {
+                fc.propagateDirtyNodes();
+            }
+            fc.initReadIvars();
 
-            //     // Fix bug https://bugs.launchpad.net/leo-editor/+bug/1208942
-            //     // Leo holding directory/file handles after file close?
-            // }
+            const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
+            const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
+            g.es(`read outline in ${(t2 / 1000).toFixed(2)} seconds`);
+
+            return v;
+        } catch (e) {
+
         }
+        finally {
+            // Never put a return in a finally clause.
+            // if conn
+            //     conn.close();
 
-        if (c.changed) {
-            fc.propagateDirtyNodes();
+            c.loading = false;  // reenable c.changed
         }
-
-        fc.initReadIvars();
-        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
-        const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
-
-        g.es(`read outline in ${(t2 / 1000).toFixed(2)} seconds`);
-
-        // return [v, c.frame.ratio];
-        return [v!, 0.5]; // LEOJS : Fake uneeded Ratio !
     }
-    //@+node:felix.20211213224232.10: *5* fc.openLeoFile
+    //@+node:felix.20231009182119.3: *6* fc._getLeoFileByName
     /**
-     * Open a Leo file.
+     * Open, read, and close a .leo or .leojs file.
      *
-     * readAtFileNodesFlag: False when reading settings files.
-     * silent:              True when creating hidden commanders.
+     * The caller should follow this with a call to c.redraw().
      */
-    public async openLeoFile(
-        fileName: string,
-        readAtFileNodesFlag: boolean = true,
-        silent: boolean = false
-    ): Promise<VNode | undefined> {
+    public async _getLeoFileByName(p_path: string, readAtFileNodesFlag: boolean): Promise<VNode | undefined> {
+
+        const fc: FileCommands = this;
         const c: Commands = this.c;
+        const t1: [number, number] = process.hrtime();
+        c.clearChanged(); // May be set when reading @file nodes.
+        await fc.warnOnReadOnlyFiles(p_path);
+        fc.checking = false;
+        fc.mFileName = c.mFileName;
+        fc.initReadIvars();
+        let recoveryNode: Position | undefined = undefined;
+        let v: VNode | undefined;
 
-        // Set c.openDirectory
-        const theDir: string = g.os_path_dirname(fileName);
+        try {
+            c.loading = true;
 
-        if (theDir) {
-            c.openDirectory = theDir;
-            c.frame.openDirectory = theDir;
+            // Open, read and close the file.
+            try {
+
+                // with open(path, 'rb') as theFile:
+                if (p_path.endsWith('.leojs')) {
+                    const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
+                    v = await w_fastRead.readJsonFile(undefined, p_path);
+                } else {
+                    const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
+                    v = await w_fastRead.readFile(undefined, p_path);
+                }
+
+            } catch (e) {
+                if (!g.unitTesting) {
+                    g.trace(e);
+                    g.error("can not open:", p_path);
+                }
+                return undefined;
+            }
+            if (!v) {
+                return undefined;
+            }
+            // Finish loading.
+            c.hiddenRootNode = v;
+            await c.setFileTimeStamp(p_path);
+            if (readAtFileNodesFlag) {
+                recoveryNode = await fc.readExternalFiles(p_path);
+            }
+            // lastTopLevel is a better fallback, imo.
+            const p = recoveryNode || c.p || c.lastTopLevel();
+            c.selectPosition(p);
+            // Delay the second redraw until idle time.
+            // This causes a slight flash, but corrects a hangnail.
+            c.redraw_later();
+            c.checkOutline();  // Must be called *after* ni.end_holding.
+            if (c.changed) {
+                fc.propagateDirtyNodes();
+            }
+            fc.initReadIvars();
+
+            const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
+            const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
+            g.es(`read outline in ${(t2 / 1000).toFixed(2)} seconds`);
+
+            return v;
+
+        } catch (e) {
+
         }
-        // Get the file.
-        this.gnxDict = {}; // #1437
+        finally {
 
-        // [VNode, number]
-        let v: VNode;
-        let ratio: number;
-        [v, ratio] = await this.getLeoFile(
-            undefined,
-            fileName,
-            readAtFileNodesFlag,
-            silent
-        );
+            // Never put a return in a finally clause.
+            c.loading = false;  // reenable c.changed
+        }
 
-        return v;
     }
     //@+node:felix.20211213224232.12: *5* fc.readExternalFiles & helper
     /**
@@ -1776,7 +1801,6 @@ export class FileCommands {
         // (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
         // c.frame.setTopGeometry(w, h, x, y)
         // c.frame.resizePanesToRatio(r1, r2)
-        c.sqlite_connection = c.mFileName; // * LEOJS use string as a flag instead of conn.
         await fc.exportToSqlite(c.mFileName);
         return Promise.resolve(v);
     }
@@ -2031,11 +2055,6 @@ export class FileCommands {
         const c: Commands = this.c;
         const root: Position = this.c.rootPosition()!;
 
-        if (c.sqlite_connection) {
-            // position is already selected
-            return;
-        }
-
         let current: Position | undefined;
         let str_pos: string | undefined;
 
@@ -2075,7 +2094,6 @@ export class FileCommands {
 
         if (ok === undefined) {
             c.endEditing(); // Set the current headline text.
-            await this.setDefaultDirectoryForNewFiles(fileName);
 
             if (
                 g.app &&
@@ -2086,10 +2104,6 @@ export class FileCommands {
             }
             ok = await c.checkFileTimeStamp(fileName);
             if (ok) {
-                if (c.sqlite_connection) {
-                    // c.sqlite_connection.close();
-                    c.sqlite_connection = undefined;
-                }
                 ok = await this.write_Leo_file(fileName);
             }
             if (ok) {
@@ -2117,11 +2131,7 @@ export class FileCommands {
 
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
-            if (c.sqlite_connection) {
-                // c.sqlite_connection.close();
-                c.sqlite_connection = undefined;
-            }
-            await this.setDefaultDirectoryForNewFiles(fileName);
+
             if (
                 g.app &&
                 g.app.commander_cacher &&
@@ -2130,7 +2140,6 @@ export class FileCommands {
                 await g.app.commander_cacher.save(c, fileName);
             }
             // Disable path-changed messages in writeAllHelper.
-            c.ignoreChangedPaths = true;
             try {
                 const w_ok = await this.write_Leo_file(fileName);
                 if (w_ok) {
@@ -2156,11 +2165,7 @@ export class FileCommands {
 
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
-            if (c.sqlite_connection) {
-                // c.sqlite_connection.close();
-                c.sqlite_connection = undefined;
-            }
-            await this.setDefaultDirectoryForNewFiles(fileName);
+
             if (
                 g.app &&
                 g.app.commander_cacher &&
@@ -2169,7 +2174,6 @@ export class FileCommands {
                 await g.app.commander_cacher.commit(); // Commit, but don't save file name.
             }
             // Disable path-changed messages in writeAllHelper.
-            c.ignoreChangedPaths = true;
             try {
                 await this.write_Leo_file(fileName);
             } finally {
@@ -2191,9 +2195,6 @@ export class FileCommands {
         const c: Commands = this.c;
         const fc: FileCommands = this;
 
-        if (c.sqlite_connection === undefined) {
-            c.sqlite_connection = fileName; // * LEOJS: use string instead as flag instead of conn.
-        }
         const conn = new g.SQL.Database();
 
         const dump_u = (v: VNode) => {
@@ -2260,7 +2261,6 @@ export class FileCommands {
 
             const db_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(db_uri, db_buffer);
-            c.sqlite_connection = undefined;
             ok = true;
         } catch (e) {
             g.internalError(e);
@@ -2966,7 +2966,7 @@ export class FileCommands {
     }
     //@+node:felix.20211213224237.32: *5* fc.putDescendentVnodeUas & helper
     /**
-     * Return the a uA field for descendent VNode attributes,
+     * Return the a uA field for descendant VNode attributes,
      * suitable for reconstituting uA's for anonymous vnodes.
      */
     public putDescendentVnodeUas(p: Position): string {

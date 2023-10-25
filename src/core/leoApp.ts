@@ -52,7 +52,7 @@ import * as writer_markdown from '../writers/markdown';
 import * as writer_org from '../writers/org';
 import * as writer_otl from '../writers/otl';
 import * as writer_treepad from '../writers/treepad';
-import { EvalController, ScriptingController } from './mod_scripting';
+import { ScriptingController } from './mod_scripting';
 import { SessionManager } from './leoSessions';
 
 //@-<< imports >>
@@ -279,7 +279,7 @@ export class LeoApp {
     public initing: boolean = true; // True: we are initializing the app.
     public initComplete: boolean = false; // True: late bindings are not allowed.
     public killed: boolean = false; // True: we are about to destroy the root window.
-    public openingSettingsFile: boolean = false; // True, opening a settings file.
+
     public preReadFlag: boolean = false; // True: we are pre - reading a settings file.
     public quitting: boolean = false; // True: quitting.Locks out some events.
     public restarting: boolean = false; // True: restarting all of Leo.#1240.
@@ -1123,8 +1123,7 @@ export class LeoApp {
     ): Promise<string> {
         this.leoID = '';
 
-        // tslint:disable-next-line: strict-comparisons
-        console.assert(this === g.app);
+        g.assert(this === g.app);
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
@@ -1166,7 +1165,7 @@ export class LeoApp {
                 const w_vscodeConfig = vscode.workspace.getConfiguration(
                     Constants.CONFIG_NAME
                 );
-                // tslint:disable-next-line: strict-comparisons
+
                 if (
                     w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
                         .defaultValue === this.leoID
@@ -2151,7 +2150,7 @@ export class LoadManager {
         let d2;
 
         if (fn && exists && lm.isLeoFile(fn) && !isLeoSettings) {
-            // Open the file usinging a null gui.
+            // Open the file using a null gui.
             try {
                 g.app.preReadFlag = true;
                 c = await lm.openSettingsFile(fn);
@@ -2335,7 +2334,7 @@ export class LoadManager {
             for (let bi of d.get(commandName, [])) {
                 const stroke = bi.stroke; // This is canonicalized.
                 bi.commandName = commandName; // Add info.
-                console.assert(stroke);
+                g.assert(stroke);
                 result.add_to_list(stroke, bi);
             }
         }
@@ -2350,13 +2349,13 @@ export class LoadManager {
      */
     public uninvert(d: g.SettingsDict): SettingsDict {
         // ! LEOJS : NO KEYSTROKES HANDLING
-        // console.assert(d.keyType === g.KeyStroke, d.keyType);
+        // g.assert(d.keyType === g.KeyStroke, d.keyType);
         const result = new SettingsDict(`uninverted ${d.name()}`);
 
         for (let stroke of Object.keys(d)) {
             for (let bi of d.get(stroke, [])) {
                 const commandName = bi.commandName;
-                console.assert(commandName);
+                g.assert(commandName);
                 result.add_to_list(commandName, bi);
             }
         }
@@ -2373,6 +2372,10 @@ export class LoadManager {
         const lm = this;
 
         if (!fn) {
+            return undefined;
+        }
+        const w_exists = await g.os_path_exists(fn);
+        if (!w_exists || !lm.isLeoFile(fn)) {
             return undefined;
         }
         /* 
@@ -2398,12 +2401,11 @@ export class LoadManager {
         const oldGui = g.app.gui;
         g.app.gui = g.app.nullGui;
         const c = g.app.newCommander(fn);
-        const frame = c.frame;
+        const fc = c.fileCommands;
 
+        //const frame = c.frame;
         // frame.log.enable(false);
         // g.app.lockLog();
-
-        g.app.openingSettingsFile = true;
 
         let ok: VNode | undefined;
         try {
@@ -2422,17 +2424,14 @@ export class LoadManager {
                     c.hiddenRootNode = ok;
                 }
             } else {
-                ok = await c.fileCommands.openLeoFile(fn, false, true);
+                // ok = await c.fileCommands.openLeoFile(fn, false, true);
+                ok = await fc.getAnyLeoFileByName(fn, false, false);
             }
+
         } catch (p_err) {
             //
-        } finally {
-            g.app.openingSettingsFile = false;
         }
-
         // g.app.unlockLog();
-        frame.openDirectory = g.os_path_dirname(fn);
-        c.openDirectory = frame.openDirectory;
         g.app.gui = oldGui;
 
         return ok ? c : undefined;
@@ -2484,7 +2483,7 @@ export class LoadManager {
         // ! LEOJS : THEMES NOT NEEDED !
         /* 
         // Add settings from --theme or @string theme-name files.
-        // This must be done *after* reading myLeoSettigns.leo.
+        // This must be done *after* reading myLeoSettings.leo.
         lm.theme_path = lm.computeThemeFilePath()
 
         if lm.theme_path
@@ -2766,7 +2765,7 @@ export class LoadManager {
      * Create global data structures describing importers and writers.
      */
     public createAllImporterData(): void {
-        console.assert(g.app.loadDir); // This is the only data required.
+        g.assert(g.app.loadDir); // This is the only data required.
         this.createWritersData(); // Was an AtFile method.
         this.createImporterData(); // Was a LeoImportCommands method.
     }
@@ -3011,7 +3010,7 @@ export class LoadManager {
     public async initApp(verbose?: boolean): Promise<unknown> {
         // Can be done early. Uses only g.app.loadDir & g.app.homeDir.
         this.createAllImporterData();
-        console.assert(g.app.loadManager);
+        g.assert(g.app.loadManager);
 
         // Make sure we call the new leoPlugins.init top-level function.
         // leoPlugins.init(); // TODO: plugins system ?
@@ -3048,19 +3047,20 @@ export class LoadManager {
         gui?: LeoGui,
         old_c?: Commands
     ): Promise<Commands | undefined> {
-        /*Completely read a file, creating the corresonding outline.
+        /*
+            Completely read a file, creating the corresponding outline.
 
-        1. If fn is an existing .leo file (possibly zipped), read it twice:
-        the first time with a NullGui to discover settings,
-        the second time with the requested gui to create the outline.
+            1. If fn is an existing .leo file (possibly zipped), read it twice:
+            the first time with a NullGui to discover settings,
+            the second time with the requested gui to create the outline.
 
-        2. If fn is an external file:
-        get settings from the leoSettings.leo and myLeoSetting.leo, then
-        create a "wrapper" outline continain an @file node for the external file.
+            2. If fn is an external file:
+            get settings from the leoSettings.leo and myLeoSetting.leo, then
+            create a "wrapper" outline containing an @file node for the external file.
 
-        3. If fn is empty:
-        get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
-        or open an empty outline.
+            3. If fn is empty:
+            get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
+            or open an empty outline.
         */
         const lm: LoadManager = this;
         let c: Commands | undefined;
@@ -3106,10 +3106,10 @@ export class LoadManager {
         const c: Commands = g.app.newCommander('', gui, w_previousSettings);
 
         // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-        c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
-        if (c.openDirectory) {
-            c.frame.openDirectory = c.openDirectory;
-        }
+        // c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        // if (c.openDirectory) {
+        //     c.frame.openDirectory = c.openDirectory;
+        // }
 
         g.doHook('open0');
 
@@ -3138,7 +3138,6 @@ export class LoadManager {
         // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
         c.theScriptingController = new ScriptingController(c);
         await c.theScriptingController.createAllButtons();
-        c.evalController = new EvalController(c);
 
         g.doHook('new', { old_c: old_c, c: c, new_c: c });
 
@@ -3149,15 +3148,12 @@ export class LoadManager {
 
     //@+node:felix.20210120004121.32: *5* LM.openFileByName & helpers
     /**
-     * Read the local file whose full path is fn using the given gui.
-     * fn may be a Leo file (including .leo or zipped file) or an external file.
+     *  Create an outline (Commander) for either:
+     *  - a Leo file (including .leo or zipped file),
+     *  - an external file.
      *
-     * This is not a pre-read: the previousSettings always exist and
-     * the commander created here persists until the user closes the outline.
-     *
-     * Reads the entire outline if fn exists and is a .leo file or zipped file.
-     * Creates an empty outline if fn is a non-existent Leo file.
-     * Creates an wrapper outline if fn is an external file, existing or not.
+     *  Note: The settings don't matter for pre-reads!
+     *  For second read, the settings for the file are *exactly* previousSettings.
      */
     public async openFileByName(
         fn: string,
@@ -3166,62 +3162,107 @@ export class LoadManager {
         previousSettings?: PreviousSettings
     ): Promise<Commands | undefined> {
         const lm: LoadManager = this;
+        if (!fn) {
+            return undefined;  // Should not happen.
+        }
         // Disable the log.
-        // g.app.setLog(None);
-        // g.app.lockLog();
+        // g.app.setLog(None)
+        // g.app.lockLog()
 
         // Create the a commander for the .leo file.
-        // Important.  The settings don't matter for pre-reads!
-        // For second read, the settings for the file are *exactly* previousSettings.
-        const c: Commands = g.app.newCommander(fn, gui, previousSettings);
-        // Open the file, if possible.
+        let c = g.app.newCommander(fn, gui, previousSettings);
+
         g.doHook('open0');
 
-        /*
-        theFile = lm.openAnyLeoFile(fn);
-        if isinstance(theFile, sqlite3.Connection):
-            // this commander is associated with sqlite db
-            c.sqlite_connection = theFile
-        */
+        // Do common completion tasks.
+        const complete_inits = (c: Commands) => {
 
-        // Enable the log.
-        // g.app.unlockLog();
-        // c.frame.log.enable(true);
+            // g.app.unlockLog()
+            // c.frame.log.enable(True)
+            // g.app.writeWaitingLog(c);
+            // c.setLog()
+            // lm.createMenu(c, fn)
+            lm.finishOpen(c);
+        };
 
-        // Phase 2: Create the outline.
-        g.doHook('open1', { old_c: undefined, c: c, new_c: c, fileName: fn });
-
-        const exists = await g.os_path_exists(fn);
-
-        if (fn && exists) {
-            const readAtFileNodesFlag = !!previousSettings;
-            // The log is not set properly here.
-            const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
-
-            if (!ok) {
+        if (!lm.isLeoFile(fn)) {
+            // Handle a wrapper file.
+            c = await lm.initWrapperLeoFile(c, fn); // #2489
+            // Finish.
+            g.doHook("new", { old_c: old_c, c: c, new_c: c });  // #2489.
+            g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
+            complete_inits(c);
+            return c;
+        }
+        // Read the outline, but only if it exists.
+        if (await g.os_path_exists(fn)) {
+            const v = await c.fileCommands.getAnyLeoFileByName(fn, !!previousSettings);
+            if (!v) {
                 return undefined;
             }
-        } else {
-            // Create a wrapper .leo file if:
-            // a) fn is a .leo file that does not exist or
-            // b) fn is an external file, existing or not.
-            await lm.initWrapperLeoFile(c, fn);
         }
-
-        g.doHook('open2', { old_c: undefined, c: c, new_c: c, fileName: fn });
-
-        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
-        c.theScriptingController = new ScriptingController(c);
-        await c.theScriptingController.createAllButtons();
-        c.evalController = new EvalController(c);
-
-        // Phase 3: Complete the initialization.
-        // g.app.writeWaitingLog(c)
-        // c.setLog()
-        // lm.createMenu(c, fn)
-        lm.finishOpen(c); // c.initAfterLoad()
-
+        // Finish.
+        g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
+        g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
+        complete_inits(c);
         return c;
+
+        // // Disable the log.
+        // // g.app.setLog(None);
+        // // g.app.lockLog();
+
+        // // Create the a commander for the .leo file.
+        // // Important.  The settings don't matter for pre-reads!
+        // // For second read, the settings for the file are *exactly* previousSettings.
+        // const c: Commands = g.app.newCommander(fn, gui, previousSettings);
+        // // Open the file, if possible.
+        // g.doHook('open0');
+
+        // /*
+        // theFile = lm.openAnyLeoFile(fn);
+        // if isinstance(theFile, sqlite3.Connection):
+        //     // this commander is associated with sqlite db
+        //     c.sqlite_connection = theFile
+        // */
+
+        // // Enable the log.
+        // // g.app.unlockLog();
+        // // c.frame.log.enable(true);
+
+        // // Phase 2: Create the outline.
+        // g.doHook('open1', { old_c: undefined, c: c, new_c: c, fileName: fn });
+
+        // const exists = await g.os_path_exists(fn);
+
+        // if (fn && exists) {
+        //     const readAtFileNodesFlag = !!previousSettings;
+        //     // The log is not set properly here.
+        //     const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
+
+        //     if (!ok) {
+        //         return undefined;
+        //     }
+        // } else {
+        //     // Create a wrapper .leo file if:
+        //     // a) fn is a .leo file that does not exist or
+        //     // b) fn is an external file, existing or not.
+        //     await lm.initWrapperLeoFile(c, fn);
+        // }
+
+        // g.doHook('open2', { old_c: undefined, c: c, new_c: c, fileName: fn });
+
+        // // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        // c.theScriptingController = new ScriptingController(c);
+        // await c.theScriptingController.createAllButtons();
+        // c.evalController = new EvalController(c);
+
+        // // Phase 3: Complete the initialization.
+        // // g.app.writeWaitingLog(c)
+        // // c.setLog()
+        // // lm.createMenu(c, fn)
+        // lm.finishOpen(c); // c.initAfterLoad()
+
+        // return c;
     }
 
     //@+node:felix.20210124192005.1: *6* LM.findOpenFile
@@ -3256,7 +3297,7 @@ export class LoadManager {
     public finishOpen(c: Commands): void {
         // lm = self
         // const k = c.k;
-        // console.assert(k);
+        // g.assert(k);
 
         // New in Leo 4.6: provide an official way for very late initialization.
         // c.frame.tree.initAfterLoad();
@@ -3389,101 +3430,23 @@ export class LoadManager {
         */
         // return fn && zipfile.is_zipfile(fn);
     }
-    //@+node:felix.20220109233001.1: *6* LM.openAnyLeoFile
-    /**
-     * @deprecated Now using async vscode.workspace.fs functions
-     * Open a .leo, .leojs or .db file.
-     * @param fn
-     * @returns number: file descriptor
-     */
-    // public openAnyLeoFile(fn: string): number | undefined {
-    //     const lm: LoadManager = this;
-
-    //     if (fn.endsWith('.db')) {
-    //         // TODO !
-    //         // return sqlite3.connect(fn);
-    //         return undefined;
-    //     }
-    //     let theFile: number | undefined;
-
-    //     // ! now use vscode.workspace.fs async functions
-    //     /*
-    //     if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
-    //         // ? NEEDED ZIP SUPPORT ?
-    //         // if (lm.isZippedFile(fn)){
-    //         //     theFile = lm.openZipFile(fn);
-    //         // }else{
-    //         //     theFile = lm.openLeoFile(fn);
-    //         // }
-    //         theFile = lm.openLeoFile(fn);
-    //     }
-    //     */
-    //     return theFile;
-    // }
-    //@+node:felix.20220109233518.1: *6* LM.openLeoFile
-    /**
-     * @deprecated Now using async vscode.workspace.fs functions
-     * @param fn
-     * @returns number: file descriptor
-     */
-    public openLeoFile(fn: string): number | undefined {
-        return undefined;
-
-        // const lm: LoadManager = this;
-        /*
-        try {
-            let theFile: number;
-
-            theFile = fs.openSync(fn, 'r');
-
-            return theFile;
-        }
-        catch (iOError) {
-            // Do not use string + here: it will fail for non-ascii strings!
-            if (!g.unitTesting) {
-                g.error("can not open:", fn);
-            }
-            return undefined;
-        }
-        */
-    }
-    //@+node:felix.20220418230225.1: *6* LM.readOpenedLeoFile
-    /**
-     * Call c.fileCommands.openLeoFile to open some kind of Leo file.
-     *
-     * the_file: An open file, which is a StringIO file for zipped files.
-     *
-     * Note: g.app.log is not inited here.
-     */
-    public async readOpenedLeoFile(
-        c: Commands,
-        fn: string,
-        readAtFileNodesFlag: boolean
-    ): Promise<VNode | undefined> {
-        // New in Leo 4.10: The open1 event does not allow an override of the init logic.
-        // assert theFile
-
-        // Read and close the file.
-        const w_result = await c.fileCommands.openLeoFile(
-            fn,
-            readAtFileNodesFlag
-        );
-        if (w_result) {
-            if (!c.openDirectory) {
-                const theDir = g.finalize(g.os_path_dirname(fn)); // 1341
-                c.openDirectory = theDir;
-                c.frame.openDirectory = theDir;
-            }
-        }
-        return w_result;
-    }
     //@+node:felix.20220109232545.1: *3* LM.revertCommander
     /**
      * Revert c to the previously saved contents.
      */
     public async revertCommander(c: Commands): Promise<void> {
         const lm: LoadManager = this;
+        const fc = c.fileCommands;
         const fn: string = c.mFileName;
+        if (!fn) {
+            return;
+        }
+        if (! await g.os_path_exists(fn)) {
+            return;
+        }
+        if (!lm.isLeoFile(fn)) {
+            return;
+        }
         // Re-read the file.
         // const theFile = lm.openAnyLeoFile(fn);
 
@@ -3493,7 +3456,11 @@ export class LoadManager {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
-            await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
+            // await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
+            const v = await fc.getAnyLeoFileByName(fn, true);
+            if (!v) {
+                g.error(`Revert failed: {fn}`);
+            }
         } catch {
             // Does not exist !
         }

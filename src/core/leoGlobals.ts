@@ -600,13 +600,22 @@ export function isTextWrapper(w: any): boolean {
     return app.gui.isTextWrapper(w);
 }
 //@+node:felix.20211104210703.1: ** g.Debugging, GC, Stats & Timing
+//@+node:felix.20231024203538.1: *3* assert
+/**
+ * Equivalent to Python's assert that both prints a message and halts execution.
+ */
+export function assert(condition: any, message?: string): void {
+    if (!condition) {
+        throw new Error(message || 'Assertion failed');
+    }
+}
 //@+node:felix.20211205233429.1: *3* g._assert
 /**
  * A safer alternative to a bare assert.
  */
 export function _assert(condition: any, show_callers: boolean = true): boolean {
     if (unitTesting) {
-        console.assert(condition);
+        assert(condition);
         return true;
     }
     const ok: boolean = Boolean(condition);
@@ -937,7 +946,7 @@ export function findReference(
     root: Position
 ): Position | undefined {
     for (const p of root.subtree(false)) {
-        console.assert(!p.__eq__(root));
+        assert(!p.__eq__(root));
         if (p.matchHeadline(name) && !p.isAtIgnoreNode()) {
             return p.copy();
         }
@@ -951,15 +960,14 @@ export function findReference(
  * Returns a dict containing the stripped remainder of the line
  * following the first occurrence of each recognized directive.
  */
+const at_path_warnings_dict: Record<string, boolean> = {};
 export function get_directives_dict(p: Position): { [key: string]: string } {
     let d: { [key: string]: string } = {};
-
     // The headline has higher precedence because it is more visible.
     let m: RegExpExecArray | null;
-    for (let s of [p.h, p.b]) {
+    for (let [kind, s] of [['head', p.h], ['body', p.b]] as const) {
         while ((m = directives_pat.exec(s)) !== null) {
             const word: string = m[1].trim();
-
             // 'indices' property is only present when the d flag is set.
             const i: number = (m as any).indices[1][0];
             if (d[word]) {
@@ -967,17 +975,25 @@ export function get_directives_dict(p: Position): { [key: string]: string } {
             }
             const j: number = i + word.length;
             if (j < s.length && !' \t\n'.includes(s.charAt(j))) {
+                // Not a valid directive: just ignore it.
                 continue;
             }
-
-            // Not a valid directive: just ignore it.
-            // A unit test tests that @path:any is invalid.
+            // Warning if @path is in the body of an @file node.
+            if (word === 'path' && kind === 'body' && p.isAtFileNode()) {
+                if (!at_path_warnings_dict[p.h]) {
+                    if (!Object.keys(at_path_warnings_dict).length) {
+                        console.log('\n@path is not allowed in the body text of @file nodes\n');
+                    }
+                    at_path_warnings_dict[p.h] = true;
+                    console.log(`Ignoring @path in ${p.h}`);
+                }
+                continue;
+            }
             const k: number = skip_line(s, j);
-            const val: string = s.slice(j, k).trim();
+            const val: string = s.substring(j, k).trim();
             d[word] = val;
         }
     }
-
     return d;
 }
 //@+node:felix.20211104213315.1: *3* g.get_directives_dict_list (must be fast)
@@ -1142,7 +1158,7 @@ export function getOutputNewline(
     } else {
         s = '\n'; // Default for erroneous values.
     }
-    console.assert(
+    assert(
         typeof s === 'string' || (s as any) instanceof String,
         s.toString()
     );
@@ -1531,7 +1547,7 @@ export function set_language(
     | [undefined, undefined, undefined, undefined] {
     let j: number;
     const tag: string = '@language';
-    console.assert(i !== undefined);
+    assert(i !== undefined);
 
     if (match_word(s, i, tag)) {
         i += tag.length;
@@ -1607,7 +1623,13 @@ export function update_directives_pat(): void {
 update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
 //@+node:felix.20220108221428.1: *3* g.chdir
+/**
+ * Change current directory to the directory corresponding to path.
+ */
 export async function chdir(p_path: string): Promise<void> {
+    if (unitTesting) {
+        return; // Don't change the global environment in unit tests!
+    }
     let w_isDir = await os_path_isdir(p_path);
     if (w_isDir) {
         p_path = os_path_dirname(p_path);
@@ -1663,15 +1685,12 @@ export function computeWindowTitle(fileName: string): string {
 export async function createHiddenCommander(
     fn: string
 ): Promise<Commands | undefined> {
-    const c = new Commands(fn, app.nullGui);
-    // const theFile = app.loadManager.openAnyLeoFile(fn); // LEOJS : UNUSED
-    // if (theFile){
-    //     await c.fileCommands.openLeoFile(fn, true, true);
-    // }
     try {
         const exists = await os_path_exists(fn);
         if (app.loadManager!.isLeoFile(fn) && exists) {
-            await c.fileCommands.openLeoFile(fn, true, true);
+            // await c.fileCommands.openLeoFile(fn, true, true);
+            const lm = app.loadManager!;
+            const c = lm.openFileByName(fn, app.nullGui);
             return c;
         }
     } catch (e) {
@@ -1734,10 +1753,9 @@ export async function filecmp_cmp(
  */
 export function fullPath(
     c: Commands,
-    p: Position,
-    simulate: boolean = false
+    p: Position
 ): string {
-    return c.fullPath(p, simulate);
+    return c.fullPath(p);
     // Search p and p's parents.
     // for (let p of p_p.self_and_parents(false)) {
     //     const aList: any[] = get_directives_dict_list(p);
@@ -2205,7 +2223,7 @@ export function find_word(s: string, word: string, i: number = 0): number {
             return i;
         }
         i += word.length;
-        console.assert(progress < i);
+        assert(progress < i);
     }
 
     return -1;
@@ -2353,7 +2371,7 @@ export function is_c_id(ch: string): boolean {
  * Return non-negative number if the body text contains the @ directive.
  */
 export function is_special(s: string, directive: string): [boolean, number] {
-    console.assert(directive && directive.substring(0, 1) === '@');
+    assert(directive && directive.substring(0, 1) === '@');
     // Most directives must start the line.
     const lws: boolean = ['@others', '@all'].includes(directive);
     const pattern = lws
@@ -2410,8 +2428,13 @@ export function is_ws_or_nl(s: string, i: number): boolean {
     return is_nl(s, i) || (i < s.length && is_ws(s[i]));
 }
 //@+node:felix.20211104221259.1: *4* g.match
+/**
+ * Return True if the given pattern matches at s[i].
+ *
+ * Warning: this method makes no assumptions about what precedes or
+ * follows the pattern.
+ */
 export function match(s: string, i: number, pattern: string): boolean {
-    // Warning: this code makes no assumptions about what follows pattern.
     // Equivalent to original in python (only looks in specific substring)
     // return s and pattern and s.find(pattern, i, i + len(pattern)) == i
     // didn't work with xml expression
@@ -2424,8 +2447,48 @@ export function match(s: string, i: number, pattern: string): boolean {
 }
 
 //@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
-export function match_word(s: string, i: number, pattern: string): boolean {
+/**
+ * Return true if any of the given patterns match at s[i]
+ */
+export function match_words(s: string, i: number, patterns: string[], ignore_case: boolean = false): boolean {
+    return patterns.some(pattern => match_word(s, i, pattern, ignore_case));
+}
 
+/**
+ * Return True if s[i] starts the word given by pattern.
+ */
+export function match_word(s: string, i: number, pattern: string, ignore_case = false): boolean {
+
+    // * NEW METHOD
+
+    // if (!pattern) {
+    //     return false;
+    // }
+
+    // // 1. Compute the required boundaries.
+    // const bound1 = /[a-zA-Z_]/.test(pattern[0]);
+    // const bound2 = /\w/.test(pattern[pattern.length - 1]);
+
+    // // 2. Add regex escapes.
+    // pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // // 3. Add the boundaries.
+    // if (bound1) {
+    //     pattern = '\\b' + pattern;
+    // }
+    // if (bound2) {
+    //     pattern = pattern + '\\b';
+    // }
+    // // Compile the pattern so we can specify the starting position.
+    // const flags = ignore_case ? 'i' : '';
+
+    // //  USED IN MATCH IN ORIGINAL LEO, SO ADDED '^' TO MATCH BEGINNING OF STRING
+    // pattern = '^' + pattern;
+    // const pat = new RegExp(pattern, flags);
+
+    // return pat.test(s.substring(i)); // function 'match' is used in python so check at start only
+
+    // * OLD METHOD
     // Using a regex is surprisingly tricky.
     if (pattern == null) {
         return false;
@@ -2436,6 +2499,10 @@ export function match_word(s: string, i: number, pattern: string): boolean {
     //     return false;
     // }
 
+    // // 1. Compute the required boundaries.
+    const bound1 = isWordChar1(pattern[0]);
+    const bound2 = isWordChar(pattern[pattern.length - 1]);
+
     const j = pattern.length;
     if (j === 0) {
         return false;
@@ -2445,11 +2512,19 @@ export function match_word(s: string, i: number, pattern: string): boolean {
     if (i > 2 && s[i - 2] === '\\' && ['t', 'n'].includes(s[i - 1])) {
         return true;
     }
-    if (i > 0 && isWordChar(s[i - 1])) {
-        return false;
+    if (bound1) {
+        if (i > 0 && isWordChar(s[i - 1])) {
+            return false;
+        }
     }
 
-    let found = s.indexOf(pattern, i);
+    let found;
+    if (ignore_case) {
+        // To ignore case, convert both the string 's' and the pattern 'pattern' to lowercase (or uppercase) before performing the search.
+        found = s.toLowerCase().indexOf(pattern.toLowerCase(), i);
+    } else {
+        found = s.indexOf(pattern, i);
+    }
 
     if (found < i || found >= i + j) {
         found = -1;
@@ -2461,16 +2536,13 @@ export function match_word(s: string, i: number, pattern: string): boolean {
         return true;
     }
 
-    const ch = s.charAt(i + j);
-    return !isWordChar(ch);
+    if (bound2) {
+        const ch = s.charAt(i + j);
+        return !isWordChar(ch);
+    }
 
-    // * OLD PLACEHOLDER
-    /*     const pat = new RegExp(pattern + "\\b");
-        return s.substring(i).search(pat) === 0; */
-}
+    return true;
 
-export function match_words(s: string, i: number, patterns: string[]): boolean {
-    return patterns.some((pattern) => match_word(s, i, pattern));
 }
 //@+node:felix.20220208154405.1: *4* g.skip_blank_lines
 /**
@@ -2632,7 +2704,7 @@ export function skip_string(s: string, i: number): number {
     const delim = s[i];
     i += 1;
 
-    console.assert('\'"'.includes(delim), delim.toString() + ' ' + s);
+    assert('\'"'.includes(delim), delim.toString() + ' ' + s);
     let n = s.length;
 
     while (i < n && s[i] !== delim) {
@@ -3568,7 +3640,7 @@ export function stripBOM(
     ];
     if (s_bytes && s_bytes.length) {
         for (const [n, e, bom] of table) {
-            console.assert(bom.length === n);
+            assert(bom.length === n);
             const subarray = s_bytes.subarray(0, bom.length);
             if (subarray.every((value, index) => value === bom[index])) {
                 return [e, s_bytes.subarray(bom.length, s_bytes.length)];
@@ -4510,6 +4582,17 @@ export async function os_listdir(p_path: string): Promise<string[]> {
 export function setStatusLabel(s: string): Thenable<unknown> {
     return vscode.window.showInformationMessage(s);
 }
+//@+node:felix.20231012000332.1: *3* g.truncate
+export function truncate(s: string, n: number): string {
+    if (s.length <= n) {
+        return s;
+    }
+    const s2 = s.substring(0, n - 3) + `...(${s.length})`;
+    if (s.endsWith('\n')) {
+        return s2 + '\n';
+    }
+    return s2;
+}
 //@+node:felix.20230624200527.1: *3* g.warnNoOpenDirectory
 /**
  * Give warning when trying to refresh or write external files
@@ -4584,7 +4667,7 @@ export function finalize(p_path: string): string {
     // p_path = os.path.normpath(p_path)
     p_path = path.normalize(p_path);
 
-    // Convert backslashes to forward slashes, regradless of platform.
+    // Convert backslashes to forward slashes, regardless of platform.
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4629,7 +4712,7 @@ export function finalize_join(...args: string[]): string {
     w_path = path.resolve(w_path);
     w_path = path.normalize(w_path);
 
-    // Convert backslashes to forward slashes, regradless of platform.
+    // Convert backslashes to forward slashes, regardless of platform.
     w_path = os_path_normslashes(w_path);
     return w_path;
 }
@@ -4831,7 +4914,7 @@ export async function os_path_getsize(p_path: string): Promise<number> {
 /**
  * Return True if path is an absolute path.
  */
-export function os_path_isabs(p_path: string): boolean {
+export function os_path_isabs(p_path?: string): boolean {
     if (p_path) {
         return path.isAbsolute(p_path);
     } else {
@@ -5335,7 +5418,7 @@ export function getDocString(s: string): string {
     }
     const tag = s.slice(i, i + 3);
 
-    console.assert(tags.includes(tag));
+    assert(tags.includes(tag));
 
     const j = s.indexOf(tag, i + 3);
     if (j > -1) {
@@ -5428,9 +5511,9 @@ export function python_tokenize(s: string): [string, string, number][] {
         } else {
             [kind, i] = ['other', i + 1];
         }
-        console.assert(progress < i && j === progress);
+        assert(progress < i && j === progress);
         let val = s.slice(j, i);
-        console.assert(val);
+        assert(val);
         line_number += val.split('\n').length - 1; // val.count('\n');  // A comment.
         result.push([kind, val, line_number]);
     }
@@ -5543,7 +5626,7 @@ export function extractExecutableString(
 ): string {
     // Rewritten to fix //1071.
     if (unitTesting) {
-        return s; // Regretable, but necessary.
+        return s; // Regrettable, but necessary.
     }
 
     // Return s if no @language in effect. Should never happen.
@@ -5664,7 +5747,7 @@ export function is_invisible_sentinel(
         return true;
     }
     if (s2.startsWith('@+others') || s2.startsWith('@+<<')) {
-        // @others and section references are visibible everywhere.
+        // @others and section references are visible everywhere.
         return true;
     }
     // Not visible anywhere. For example, @+leo, @-leo, @-others, @+node, @-node.
@@ -5783,9 +5866,9 @@ export function computeFileUrl(fn: string, c: Commands, p: Position): string {
             w_path = url;
         }
         // Handle ancestor @path directives.
-        if (c && c.openDirectory) {
+        if (c && c.fileName()) {
             const base = c.getNodePath(p);
-            w_path = finalize_join(c.openDirectory, base, w_path);
+            w_path = finalize_join(os_path_dirname(c.fileName()), base, w_path);
         } else {
             w_path = finalize(w_path);
         }
@@ -5995,7 +6078,7 @@ export async function findUnl(unlList1: string[], c: Commands): Promise<Position
         for (const p of positions) {
             const p1 = p.copy();
             if (full_match(p)) {
-                console.assert(p.__eq__(p1));
+                assert(p.__eq__(p1));
                 let n = 0;  // The default line number.
                 // Parse the last target.
                 m = unlList.slice(-1)[0].match(new_pat);
@@ -6035,7 +6118,7 @@ export async function getUrlFromNode(p: Position): Promise<string | undefined> {
         return undefined;
     }
     const c = p.v.context;
-    console.assert(c);
+    assert(c);
     let table = [p.h, p.b ? splitLines(p.b)[0] : ''];
 
     // table = [g.match_word(s, 0, '@url') ? s.slice(4) : s for s in table];

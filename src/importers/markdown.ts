@@ -11,7 +11,7 @@ import { Block, Importer } from './base_importer';
 //@+others
 //@+node:felix.20230913225656.2: ** class Markdown_Importer(Importer)
 /**
- * The importer for the markdown lanuage.
+ * The importer for the markdown language.
  */
 export class Markdown_Importer extends Importer {
 
@@ -32,14 +32,14 @@ export class Markdown_Importer extends Importer {
     //@+others
     //@+node:felix.20230913225656.3: *3* md_i.gen_block
     /**
-     * Markdown_Importer: gen_block. The `block` arg is unused.
+     * Markdown_Importer: gen_block.
      *
      * Create all descendant blocks and their nodes from self.lines.
      *
      * i.gen_lines adds the @language and @tabwidth directives.
      */
-    public gen_block(block: Block, parent: Position): void {
-        console.assert(parent.__eq__(this.root));
+    public gen_block(parent: Position): void {
+        g.assert(parent.__eq__(this.root));
         const lines: string[] = this.lines;
         this.lines_dict[parent.v.gnx] = [];  // Initialize lines_dict for the parent vnode.
         this.stack = [parent];
@@ -73,7 +73,7 @@ export class Markdown_Importer extends Importer {
         }
 
         // Set p.b from the lines_dict.
-        console.assert(parent.__eq__(this.root));
+        g.assert(parent.__eq__(this.root));
         for (const p of parent.self_and_subtree()) {
             p.b = this.lines_dict[p.v.gnx].join('');
         }
@@ -145,15 +145,15 @@ export class Markdown_Importer extends Importer {
         // Insert placeholders as necessary.
         // #877: This could happen in imported files not created by us.
         this.create_placeholders(level, lines_dict, this.stack);
-        console.assert(level === this.stack.length);
+        g.assert(level === this.stack.length);
 
         const parent: Position = this.stack[this.stack.length - 1];
         const child: Position = parent.insertAsLastChild();
         child.h = name;
         lines_dict[child.v.gnx] = [];
         this.stack.push(child);
-        console.assert(this.stack.length);
-        console.assert(0 <= level && level < this.stack.length);
+        g.assert(this.stack.length);
+        g.assert(0 <= level && level < this.stack.length);
 
         return this.stack[level];
     }
