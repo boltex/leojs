@@ -3731,34 +3731,28 @@ suite('TestPython', () => {
 
             `;
         const expected_results: [number, string, string][] = [
-            [0, '', // Ignore the first headline.
-                'import sys\n' +
+            [0, '',  // Ignore the first headline.
+                '"""Module-level docstring"""\n' +
+                '\n' +
+                'from __future__ import annotations\n' +
+                '\n' +
                 '@others\n' +
-                "if __name__ == '__main__':\n" +
-                '    main()\n' +
                 '@language python\n' +
                 '@tabwidth -4\n'
+            ],
+            [1, 'class C1',
+                'class C1:\n' +
+                '    """Class docstring"""\n' +
+                '    @others\n'
+            ],
+            [2, 'C1.__init__',
+                'def __init__(self):\n' +
+                '    pass\n'
             ],
             [1, 'function: f1',
                 'def f1():\n' +
                 '    pass\n'
             ],
-            [1, 'class Class1',
-                'class Class1:pass\n'
-            ],
-            [1, 'function: f2',
-                'a = 2\n' +
-                '@dec_for_f2\n' +
-                'def f2(): pass\n'
-            ],
-            [1, 'class A',
-                'class A: pass\n'
-            ],
-            [1, 'function: main',
-                '# About main.\n' +
-                'def main():\n' +
-                '    pass\n'
-            ]
         ];
 
         await self.new_run_test(s, expected_results, 'TestPython.test_post_process');
