@@ -5866,6 +5866,7 @@ export function computeFileUrl(fn: string, c: Commands, p: Position): string {
             w_path = url;
         }
         // Handle ancestor @path directives.
+        // TODO : MAY HAVE TO USE g.app.vscodeWorkspaceUri?.fsPath 
         if (c && c.fileName()) {
             const base = c.getNodePath(p);
             w_path = finalize_join(os_path_dirname(c.fileName()), base, w_path);

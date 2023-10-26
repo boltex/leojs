@@ -84,6 +84,8 @@ export class IdleTimeManager {
      * Add a callback to be called at every idle time.
      */
     public add_callback(callback: (...args: any[]) => any): void {
+        console.log('add_callback CALLED. pushing in callback_list ');
+
         this.callback_list.push(callback);
     }
     //@+node:felix.20210102213337.3: *3* itm.on_idle
@@ -91,6 +93,8 @@ export class IdleTimeManager {
      * IdleTimeManager: Run all idle-time callbacks.
      */
     public on_idle(timer: any): void {
+        console.log(' running on_idle of Idletimemanager in leoApp.ts');
+
         if (!g.app) {
             return;
         }
@@ -129,7 +133,7 @@ export class IdleTimeManager {
     public start(): void {
         this.timer = g.IdleTime(
             this.on_idle.bind(this),
-            1000, // 500, // ! ORIGINAL INTERVAL IS 500 !
+            3000, // 1000, // 500, // ! ORIGINAL INTERVAL IS 500 !
             'IdleTimeManager.on_idle'
         );
         if (this.timer && this.timer.start) {
@@ -2541,6 +2545,7 @@ export class LoadManager {
         }
 
         // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ----------------
+        console.log('load function that starts the idleTimeManager');
         g.app.idleTimeManager.start();
         // ! ----------------------------------------------------------------------------------------
 
