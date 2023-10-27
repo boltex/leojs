@@ -198,11 +198,7 @@ export class ExternalFilesController {
             }
         }
         // Fix #262: Improve performance when @bool check-for-changed-external-files is True.
-        console.log('this.files', this.files);
-        console.log('this.unchecked_files', this.unchecked_files);
-        console.log('this.unchecked_commanders', this.unchecked_commanders);
         if (this.unchecked_files && this.unchecked_files.length) {
-
             // Check all external files.
             while (this.unchecked_files.length) {
                 const ef = this.unchecked_files.pop()!; // #1959: ensure progress.
@@ -235,8 +231,6 @@ export class ExternalFilesController {
      * changes.
      */
     public async idle_check_commander(c: Commands): Promise<void> {
-        console.log('in idle_check_commander');
-
         // #1240: Check the .leo file itself.
         await this.idle_check_leo_file(c);
         //
@@ -247,13 +241,8 @@ export class ExternalFilesController {
             if (!p.isAnyAtFileNode()) {
                 continue;
             }
-
             const w_path = c.fullPath(p);
-
-
             const w_hasChanged = await this.has_changed(w_path);
-            console.log('found @file/@clean node. path: ', w_path);
-            console.log('w_hasChanged: ', w_hasChanged);
             if (!w_hasChanged) {
                 continue;
             }
@@ -853,10 +842,6 @@ export class ExternalFilesController {
      * Return True if the file at path has changed outside of Leo.
      */
     public async has_changed(p_path: string): Promise<boolean> {
-
-        console.log(' ? ? HAS CHANGED: ', p_path);
-
-
         if (!p_path) {
             return false;
         }
