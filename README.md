@@ -117,4 +117,15 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 | Write File Nodes    | `Ctrl + Shift + W` |
 | Write Dirty Files   | `Ctrl + Shift + Q` |
 
+## External Files Directives
+
+| @\<file\> Kind | Sentinels | @others | .leo Data | Write Only |
+| :------------- | :-------: | :-----: | :-------: | :--------: |
+| @asis          |    ❌     |   ❌    |    ✔️     |     ✔️     |
+| @auto          |    ❌     |   ✔️    |    ❌     |     ❌     |
+| @clean         |    ❌     |   ✔️    |    ✔️     |     ❌     |
+| @edit          |    ❌     |   ❌    |    ❌     |     ❌     |
+| @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
+| @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
+
 **Enjoy!**

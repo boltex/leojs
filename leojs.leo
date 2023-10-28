@@ -11,6 +11,7 @@
 </v>
 <v t="felix.20230920221529.1"><vh>Notes</vh>
 <v t="felix.20230920221532.1"><vh>Python to js Tips</vh></v>
+<v t="felix.20231028152922.1"><vh>Directives Tips</vh></v>
 </v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
@@ -866,6 +867,17 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 | Cycle Next Document | `Ctrl + Tab`       |
 | Write File Nodes    | `Ctrl + Shift + W` |
 | Write Dirty Files   | `Ctrl + Shift + Q` |
+
+## External Files Directives
+
+| @\&lt;file\&gt; Kind | Sentinels | @others | .leo Data | Write Only |
+| :------------- | :-------: | :-----: | :-------: | :--------: |
+| @asis          |    ❌     |   ❌    |    ✔️     |     ✔️     |
+| @auto          |    ❌     |   ✔️    |    ❌     |     ❌     |
+| @clean         |    ❌     |   ✔️    |    ✔️     |     ❌     |
+| @edit          |    ❌     |   ❌    |    ❌     |     ❌     |
+| @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
+| @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
 
 **Enjoy!**
 </t>
@@ -14618,6 +14630,18 @@ a "for in" loop in python loops over the values which is equivalent to a "for of
 Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
 
 
+</t>
+<t tx="felix.20231028152922.1">## Augmented table taken from https://leo-editor.github.io/leo-editor/directives.html
+
+
+| @&lt;file&gt; Kind         | Sentinels | @others | .leo Data | Write Only | 
+| :------------------- | :-------: | :-----: | :-------: | :--------: |
+| @asis                | no        | no      | yes       | yes        |
+| @auto or @auto-&lt;lang&gt;| no        | yes     | no        | no         |
+| @clean               | no        | yes     | yes       | no         |
+| @edit                | no        | no      | no        | no         |
+| @file                | Yes       | yes     | no        | no         |
+| @nosent              | no        | yes     | yes       | yes        |
 </t>
 </tnodes>
 </leo_file>
