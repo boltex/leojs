@@ -1,0 +1,15 @@
+{
+  "leoHeader": {
+    "fileFormat": 2
+  },
+  "vnodes": [
+    {
+      "gnx": "felix.20231029001910.1",
+      "vh": "newHeadline",
+      "status": 32
+    }
+  ],
+  "tnodes": {
+    "felix.20231029001910.1": "hello"
+  }
+}

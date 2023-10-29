@@ -59,8 +59,6 @@ export class CommanderFileCommands {
      * Return the finalized name.
      */
     public set_name_and_title(c: Commands, fileName: string): string {
-
-
         // Finalize fileName.
         if (fileName.endsWith('.leo') || fileName.endsWith('.db') || fileName.endsWith('.leojs')) {
             c.mFileName = fileName;

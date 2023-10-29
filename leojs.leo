@@ -11,7 +11,6 @@
 </v>
 <v t="felix.20230920221529.1"><vh>Notes</vh>
 <v t="felix.20230920221532.1"><vh>Python to js Tips</vh></v>
-<v t="felix.20231028152922.1"><vh>Directives Tips</vh></v>
 </v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
@@ -905,7 +904,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 </t>
 <t tx="felix.20201208214506.1"># Change Log
 
-## 0.1.0 Dec 9, 2020 
+## 0.1.0 Dec 9, 2020
 
 - Initial state
 
@@ -936,6 +935,12 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 
 - Implemented Leo's atFile, atShadow and external files features
 - Implemented javascript scripting, along with c, g and p references.
+
+# 0.1.6
+
+- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
+- Implemented importers
+- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export function deactivate() {
@@ -2795,12 +2800,13 @@ export class LeoDocumentNode extends vscode.TreeItem {
         public frame: LeoFrame,
         private _leoUI: LeoUI,
     ) {
-        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : frame.title);
+        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : Constants.UNTITLED_FILE_NAME);
 
         const c: Commands = frame.c;
-        const isNamed: boolean = !!c.fileName();
-        this.label = isNamed ? utils.getFileFromPath(c.fileName()) : frame.title;
-        this.tooltip = isNamed ? c.fileName() : frame.title;
+        const filename = c.fileName();
+        const isNamed: boolean = !!filename;
+        this.label = isNamed ? utils.getFileFromPath(filename) : Constants.UNTITLED_FILE_NAME;
+        this.tooltip = isNamed ? filename : Constants.UNTITLED_FILE_NAME;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
@@ -4346,7 +4352,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -8518,7 +8524,24 @@ public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
         }
     );
 
-    await c.save_as_leojs();
+    // ! THIS WOULD DO A 'SAVE TO' INSTEAD OF 'SAVE AS' !
+    // await c.save_as_leojs();
+
+    // * DO THIS INSTEAD !
+    let fileName = await g.app.gui.runSaveFileDialog(
+        c,
+        'Save As JSON (.leojs)',
+        [['Leo JSON files', '*.leojs']],
+        '.leojs'
+    );
+    if (!fileName) {
+        return;
+    }
+    if (!fileName.endsWith('.leojs')) {
+        fileName = `${fileName}.leojs`;
+    }
+    await c.save(fileName);
+
     void this.launchRefresh();
     return;
 }
@@ -13094,17 +13117,17 @@ public refreshDesc(): void {
 
     if (this.leoStates.fileOpenedReady) {
 
-        // const s = this.leoStates.leoOpenedFileName;
-        // const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
-        // let w_path = "";
-        // const n = s ? s.lastIndexOf(w_filename) : -1;
-        // if (n &gt;= 0 &amp;&amp; n + w_filename.length &gt;= s.length) {
-        //     w_path = s.substring(0, n);
-        // }
-        // titleDesc = w_filename + (w_path ? " in " + w_path : '');
+        const s = this.leoStates.leoOpenedFileName;
+        const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+        let w_path = "";
+        const n = s ? s.lastIndexOf(w_filename) : -1;
+        if (n &gt;= 0 &amp;&amp; n + w_filename.length &gt;= s.length) {
+            w_path = s.substring(0, n);
+        }
+        titleDesc = w_filename + (w_path ? " in " + w_path : '');
 
-        const c = g.app.windowList[this.frameIndex].c;
-        titleDesc = c.frame.title;
+        // const c = g.app.windowList[this.frameIndex].c;
+        // titleDesc = c.frame.title;
 
         if (this._leoTreeView) {
             this._leoTreeView.description = titleDesc;
@@ -13122,6 +13145,54 @@ public refreshDesc(): void {
     if (this._leoTreeExView) {
         this._leoTreeExView.description = titleDesc;
     }
+
+    // * FROM LEO SERVER this is used to make _titleDesc
+    // fileName = c.fileName()
+    // branch, commit = g.gitInfoForFile(fileName)
+
+
+    // * FROM LEOINTEG:
+
+    // if (this.leoStates.fileOpenedReady) {
+
+    //     if (this.config.showBranchInOutlineTitle) {
+    //         this.sendAction(
+    //             Constants.LEOBRIDGE.GET_BRANCH
+    //         ).then(
+    //             (p_result: LeoBridgePackage) =&gt; {
+    //                 let w_branch = "";
+    //                 if (p_result &amp;&amp; p_result.branch) {
+    //                     w_branch = p_result.branch + ": ";
+    //                 }
+
+    //                 if (this._leoTreeView) {
+    //                     this._leoTreeView.description = w_branch + this._titleDesc;
+    //                 }
+    //                 if (this._leoTreeExView) {
+    //                     this._leoTreeExView.description = w_branch + this._titleDesc;
+    //                 }
+    //             }
+    //         );
+    //     } else {
+    //         if (this._leoTreeView) {
+    //             this._leoTreeView.description = this._titleDesc;
+    //         }
+    //         if (this._leoTreeExView) {
+    //             this._leoTreeExView.description = this._titleDesc;
+    //         }
+    //     }
+
+    // } else {
+    //     if (this._leoTreeView) {
+    //         this._leoTreeView.description = "";
+    //     }
+    //     if (this._leoTreeExView) {
+    //         this._leoTreeExView.description = "";
+    //     }
+    // }
+
+
+
 }
 
 </t>
@@ -14630,18 +14701,6 @@ a "for in" loop in python loops over the values which is equivalent to a "for of
 Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
 
 
-</t>
-<t tx="felix.20231028152922.1">## Augmented table taken from https://leo-editor.github.io/leo-editor/directives.html
-
-
-| @&lt;file&gt; Kind         | Sentinels | @others | .leo Data | Write Only | 
-| :------------------- | :-------: | :-----: | :-------: | :--------: |
-| @asis                | no        | no      | yes       | yes        |
-| @auto or @auto-&lt;lang&gt;| no        | yes     | no        | no         |
-| @clean               | no        | yes     | yes       | no         |
-| @edit                | no        | no      | no        | no         |
-| @file                | Yes       | yes     | no        | no         |
-| @nosent              | no        | yes     | yes       | yes        |
 </t>
 </tnodes>
 </leo_file>

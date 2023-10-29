@@ -1050,17 +1050,17 @@ export class LeoUI extends NullGui {
 
         if (this.leoStates.fileOpenedReady) {
 
-            // const s = this.leoStates.leoOpenedFileName;
-            // const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
-            // let w_path = "";
-            // const n = s ? s.lastIndexOf(w_filename) : -1;
-            // if (n >= 0 && n + w_filename.length >= s.length) {
-            //     w_path = s.substring(0, n);
-            // }
-            // titleDesc = w_filename + (w_path ? " in " + w_path : '');
+            const s = this.leoStates.leoOpenedFileName;
+            const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+            let w_path = "";
+            const n = s ? s.lastIndexOf(w_filename) : -1;
+            if (n >= 0 && n + w_filename.length >= s.length) {
+                w_path = s.substring(0, n);
+            }
+            titleDesc = w_filename + (w_path ? " in " + w_path : '');
 
-            const c = g.app.windowList[this.frameIndex].c;
-            titleDesc = c.frame.title;
+            // const c = g.app.windowList[this.frameIndex].c;
+            // titleDesc = c.frame.title;
 
             if (this._leoTreeView) {
                 this._leoTreeView.description = titleDesc;
@@ -1078,6 +1078,54 @@ export class LeoUI extends NullGui {
         if (this._leoTreeExView) {
             this._leoTreeExView.description = titleDesc;
         }
+
+        // * FROM LEO SERVER this is used to make _titleDesc
+        // fileName = c.fileName()
+        // branch, commit = g.gitInfoForFile(fileName)
+
+
+        // * FROM LEOINTEG:
+
+        // if (this.leoStates.fileOpenedReady) {
+
+        //     if (this.config.showBranchInOutlineTitle) {
+        //         this.sendAction(
+        //             Constants.LEOBRIDGE.GET_BRANCH
+        //         ).then(
+        //             (p_result: LeoBridgePackage) => {
+        //                 let w_branch = "";
+        //                 if (p_result && p_result.branch) {
+        //                     w_branch = p_result.branch + ": ";
+        //                 }
+
+        //                 if (this._leoTreeView) {
+        //                     this._leoTreeView.description = w_branch + this._titleDesc;
+        //                 }
+        //                 if (this._leoTreeExView) {
+        //                     this._leoTreeExView.description = w_branch + this._titleDesc;
+        //                 }
+        //             }
+        //         );
+        //     } else {
+        //         if (this._leoTreeView) {
+        //             this._leoTreeView.description = this._titleDesc;
+        //         }
+        //         if (this._leoTreeExView) {
+        //             this._leoTreeExView.description = this._titleDesc;
+        //         }
+        //     }
+
+        // } else {
+        //     if (this._leoTreeView) {
+        //         this._leoTreeView.description = "";
+        //     }
+        //     if (this._leoTreeExView) {
+        //         this._leoTreeExView.description = "";
+        //     }
+        // }
+
+
+
     }
 
     /**
@@ -4552,7 +4600,24 @@ export class LeoUI extends NullGui {
             }
         );
 
-        await c.save_as_leojs();
+        // ! THIS WOULD DO A 'SAVE TO' INSTEAD OF 'SAVE AS' !
+        // await c.save_as_leojs();
+
+        // * DO THIS INSTEAD !
+        let fileName = await g.app.gui.runSaveFileDialog(
+            c,
+            'Save As JSON (.leojs)',
+            [['Leo JSON files', '*.leojs']],
+            '.leojs'
+        );
+        if (!fileName) {
+            return;
+        }
+        if (!fileName.endsWith('.leojs')) {
+            fileName = `${fileName}.leojs`;
+        }
+        await c.save(fileName);
+
         void this.launchRefresh();
         return;
     }
