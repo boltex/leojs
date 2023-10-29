@@ -541,9 +541,9 @@ export class NullGui extends LeoGui {
     public launchRefresh(): void { }
     public fullRefresh(p_keepFocus?: boolean): void { }
 
-    public replaceClipboardWith(s: string): Thenable<void> {
+    public replaceClipboardWith(s: string): Thenable<string> {
         this.clipboardContents = s; // also set immediate clipboard string
-        return Promise.resolve();
+        return Promise.resolve(s);
     }
 
     public asyncGetTextFromClipboard(): Thenable<string> {

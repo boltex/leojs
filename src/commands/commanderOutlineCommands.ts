@@ -189,6 +189,7 @@ export class CommanderOutlineCommands {
         }
     }
     //@+node:felix.20211208235043.4: *4* c_oc.pasteOutline
+    // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
     @commander_command(
         'paste-node',
         'Paste an outline into the present outline from the clipboard. ' +
@@ -252,6 +253,7 @@ export class CommanderOutlineCommands {
         return pasted;
     }
     //@+node:felix.20220103211308.1: *4* c_oc.asyncPasteOutline
+    // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
     @commander_command(
         'async-paste-node',
         'Paste an outline into the present outline from the clipboard. ' +
@@ -264,6 +266,7 @@ export class CommanderOutlineCommands {
         });
     }
     //@+node:felix.20211208235043.5: *4* c_oc.pasteOutlineRetainingClones
+    // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
     @commander_command(
         'paste-retaining-clones',
         'Paste an outline into the present outline from the clipboard. ' +
@@ -332,6 +335,7 @@ export class CommanderOutlineCommands {
         return pasted;
     }
     //@+node:felix.20220103213833.1: *4* c_oc.asyncPasteOutlineRetainingClones
+    // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
     @commander_command(
         'async-paste-retaining-clones',
         'Paste an outline into the present outline from the clipboard. ' +
@@ -345,6 +349,7 @@ export class CommanderOutlineCommands {
     }
 
     //@+node:felix.20211208235043.8: *4* c_oc.pasteAsTemplate
+    // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
     @commander_command(
         'paste-as-template',
         'Paste as template clones only nodes that were already clones'
@@ -631,6 +636,7 @@ export class CommanderOutlineCommands {
         c.redraw(newp);
     }
     //@+node:felix.20220103214054.1: *4* c_oc.asyncPasteAsTemplate
+    // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
     @commander_command(
         'async-paste-as-template',
         'Paste as template clones only nodes that were already clones'

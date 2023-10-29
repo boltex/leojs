@@ -3299,9 +3299,9 @@ export class LeoUI extends NullGui {
      * @param p_string actual string content to go onto the clipboard
      * @returns a promise that resolves when the string is put on the clipboard
      */
-    public replaceClipboardWith(s: string): Thenable<void> {
+    public replaceClipboardWith(s: string): Thenable<string> {
         this.clipboardContents = s; // also set immediate clipboard string
-        return vscode.env.clipboard.writeText(s);
+        return vscode.env.clipboard.writeText(s).then(() => { return s; });
     }
 
     /**

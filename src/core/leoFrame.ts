@@ -1052,10 +1052,10 @@ export class StringTextWrapper {
     }
 
     //@+node:felix.20221102232754.3: *3* stw.Clipboard
-    public clipboard_clear(): Thenable<void> {
+    public clipboard_clear(): Thenable<string> {
         return g.app.gui.replaceClipboardWith('');
     }
-    public async clipboard_append(s: string): Promise<void> {
+    public async clipboard_append(s: string): Promise<string> {
         const s1 = await g.app.gui.getTextFromClipboard();
         return g.app.gui.replaceClipboardWith(s1 + s);
     }
