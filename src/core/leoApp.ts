@@ -3194,6 +3194,10 @@ export class LoadManager {
             // Finish.
             g.doHook("new", { old_c: old_c, c: c, new_c: c });  // #2489.
             g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
+            // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+            c.theScriptingController = new ScriptingController(c);
+            await c.theScriptingController.createAllButtons();
+
             complete_inits(c);
             return c;
         }
@@ -3207,6 +3211,10 @@ export class LoadManager {
         // Finish.
         g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
         g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
+        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
+
         complete_inits(c);
         return c;
 
