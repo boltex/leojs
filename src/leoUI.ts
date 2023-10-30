@@ -211,13 +211,11 @@ export class LeoUI extends NullGui {
     // * Status Bar
     // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
 
-    // * Edit/Insert Headline Input Box options instance, setup so clicking outside cancels the headline change
-    private _headlineInputOptions: vscode.InputBoxOptions = {
-        ignoreFocusOut: false,
-        value: '',
-        valueSelection: undefined,
-        prompt: '',
-    };
+    // * Edit/Insert Headline Input Box System made with 'createInputBox'.
+    private _hib: undefined | vscode.InputBox;
+    private _hibResolve: undefined | ((value: string | PromiseLike<string | undefined> | undefined) => void);
+    private _hibLastValue: undefined | string;
+    private _hibDisposables: vscode.Disposable[] = [];
 
     // * Timing
     private _needLastSelectedRefresh = false; // USED IN showBody
@@ -1129,11 +1127,27 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
+     * * Validate headline edit input box if active, or, Save body to the Leo app if its dirty.
+     *   That is, only if a change has been made to the body 'document' so far
      * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
      * @returns a promise that resolves when the possible saving process is finished
      */
     public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable<unknown> {
+
+        // * Check if headline edit input box is active. Validate it with current value.
+        if (this._hib) {
+            this._hibLastValue = this._hib.value;
+            this._hib.hide();
+            // TODO : CHECK IF DELAYED RESOLVE NEEDED !
+            const w_resolveNextTick = new Promise<void>((p_resolve, p_reject) => {
+                setTimeout(() => {
+                    this._focusInterrupt = true;
+                    p_resolve();
+                }, 0);
+            });
+            return w_resolveNextTick;
+        }
+
         // * Save body to Leo if a change has been made to the body 'document' so far
         let q_savePromise: Thenable<boolean>;
         if (
@@ -3149,6 +3163,49 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Show a headline input box that resolves to undefined only with escape.
+     * Other Leo commands interrupt by accepting the value entered so far.
+     */
+    private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise<string | undefined> {
+
+        const hib = vscode.window.createInputBox();
+        this._hibLastValue = undefined; // Prepare for 'cancel' as default.
+        const q_headlineInputBox = new Promise<string | undefined>((p_resolve, p_reject) => {
+
+            hib.ignoreFocusOut = !!p_options.ignoreFocusOut;
+            hib.value = p_options.value!;
+            hib.valueSelection = p_options.valueSelection;
+            hib.prompt = p_options.prompt;
+            this._hibDisposables.push(hib.onDidAccept(() => {
+                if (this._hib) {
+                    this._hibLastValue = this._hib.value;
+                    this._hib.hide();
+                }
+            }, this));
+            this._hibResolve = p_resolve;
+            // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
+            this._hibDisposables.push(hib.onDidHide(() => {
+                if (this._hibResolve) {
+                    this._hibResolve(this._hibLastValue);
+
+                    for (const disp of this._hibDisposables) {
+                        disp.dispose();
+                    }
+                    this._hibDisposables = [];
+                    this._hibResolve = undefined;
+                    this._hib = undefined;
+                }
+            }, this));
+            this._hibDisposables.push(hib);
+
+            // setup finished, show it! 
+            this._hib = hib;
+            this._hib.show();
+        });
+        return q_headlineInputBox;
+    }
+
+    /**
      * * Asks for a new headline label, and replaces the current label with this new one one the specified, or currently selected node
      * @param p_node Specifies which node to rename, or leave undefined to rename the currently selected node
      * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
@@ -3157,16 +3214,28 @@ export class LeoUI extends NullGui {
      */
     public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Promise<Position> {
         await this.triggerBodySave(true);
+        let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+
+        // ! CHECK IF THIS IS NEEDED !
+        // TODO ?
+        if (this._focusInterrupt) {
+            w_finalFocus = Focus.NoChange; // Going to use last state
+        }
+
         this.setupRefresh(
-            p_fromOutline ? Focus.Outline : Focus.Body,
+            w_finalFocus,
             { tree: true, states: true }
         );
         const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
         const w_p: Position = p_node || c.p;
-        this._headlineInputOptions.prompt = p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
-        this._headlineInputOptions.value = w_p.h; // preset input pop up
-        let p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
+        const w_headlineInputOptions: vscode.InputBoxOptions = {
+            ignoreFocusOut: false,
+            value: w_p.h,  // preset input pop up
+            valueSelection: undefined,
+            prompt: p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE,
+        };
+        let p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
         if (p_newHeadline && p_newHeadline !== "\n") {
             let w_truncated = false;
             if (p_newHeadline.indexOf("\n") >= 0) {
@@ -3210,19 +3279,20 @@ export class LeoUI extends NullGui {
     public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Promise<unknown> {
         await this.triggerBodySave(true);
         let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
-        if (p_interrupt) {
-            this._focusInterrupt = true;
+
+        if (this._focusInterrupt) {
             w_finalFocus = Focus.NoChange; // Going to use last state
         }
-        void this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-        if (p_asChild) {
-            this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_CHILD;
-        } else {
-            this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
-        }
-        this._headlineInputOptions.value = Constants.USER_MESSAGES.DEFAULT_HEADLINE;
 
-        const p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
+        void this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+        const w_headlineInputOptions: vscode.InputBoxOptions = {
+            ignoreFocusOut: false,
+            value: Constants.USER_MESSAGES.DEFAULT_HEADLINE,
+            valueSelection: undefined,
+            prompt: p_asChild ? Constants.USER_MESSAGES.PROMPT_INSERT_CHILD : Constants.USER_MESSAGES.PROMPT_INSERT_NODE
+        };
+
+        const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
         // * if node has child and is expanded: turn p_asChild to true!
 
         this.lastCommandTimer = process.hrtime();
