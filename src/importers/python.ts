@@ -24,7 +24,7 @@ export class Python_Importer extends Importer {
    * USED IN MATCH IN ORIGINAL LEO, SO ADDED '^' TO MATCH BEGINNING OF STRING
    */
   public async_def_pat = /^\s*async\s+def\s+(\w+)\s*\(/;
-  public def_pat = /^\s*def\s+(\w+)\s*\(/
+  public def_pat = /^\s*def\s+(\w+)\s*\(/;
   public class_pat = /^\s*class\s+(\w+)/;
 
   public block_patterns: [string, RegExp][] = [

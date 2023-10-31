@@ -2044,7 +2044,7 @@ export class Undoer {
         // Remember these values.
         const oldSel: number[] = u.oldSel;
         const p: Position = u.p!.copy();
-        const newP = u.newP.copy()  // Must exist now, but may not exist later.
+        const newP = u.newP.copy();  // Must exist now, but may not exist later.
         if (g.unitTesting) {
             g.assert(c.positionExists(newP), newP.toString());
         }

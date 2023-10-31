@@ -3185,12 +3185,15 @@ export class LeoUI extends NullGui {
             this._hibResolve = p_resolve;
             // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
             this._hibDisposables.push(hib.onDidHide(() => {
+                this.leoStates.leoEditHeadline = false;
                 if (this._hibResolve) {
+                    // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
                     this._hibResolve(this._hibLastValue);
-
+                    // Dispose of everything disposable with the edit headline process.
                     for (const disp of this._hibDisposables) {
                         disp.dispose();
                     }
+                    // Empty related global variables.
                     this._hibDisposables = [];
                     this._hibResolve = undefined;
                     this._hib = undefined;
@@ -3198,8 +3201,9 @@ export class LeoUI extends NullGui {
             }, this));
             this._hibDisposables.push(hib);
 
-            // setup finished, show it! 
+            // setup finished, set command context and show it! 
             this._hib = hib;
+            this.leoStates.leoEditHeadline = true;
             this._hib.show();
         });
         return q_headlineInputBox;
@@ -3276,15 +3280,16 @@ export class LeoUI extends NullGui {
      * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
      * @returns Thenable that resolves when done
      */
-    public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Promise<unknown> {
+    public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise<unknown> {
+
         await this.triggerBodySave(true);
+
         let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
 
         if (this._focusInterrupt) {
             w_finalFocus = Focus.NoChange; // Going to use last state
         }
 
-        void this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
         const w_headlineInputOptions: vscode.InputBoxOptions = {
             ignoreFocusOut: false,
             value: Constants.USER_MESSAGES.DEFAULT_HEADLINE,

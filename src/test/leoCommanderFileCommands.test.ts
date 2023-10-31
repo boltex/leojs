@@ -48,7 +48,7 @@ suite('Test cases for commanderFileCommands.ts', () => {
          */
         const dummy_precheck = (fileName: string, root: any): Promise<boolean> => {
             return Promise.resolve(true);
-        }
+        };
 
         at.precheck = dummy_precheck;  // Force all writes.
 

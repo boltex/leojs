@@ -437,7 +437,7 @@ export class Importer {
             parent.b = this.compute_body(outer_block.lines);
             return;
         }
-        outer_block.v = parent.v
+        outer_block.v = parent.v;
 
         // The main loop
         let todo_list: Block[] = [outer_block];

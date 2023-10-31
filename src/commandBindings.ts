@@ -157,19 +157,19 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CHAPTER_MAIN, () => p_leoUI.command(LEOCMD.CHAPTER_MAIN, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
         [CMD.CHAPTER_SELECT, () => p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
-        [CMD.INSERT, (p_node: Position) => p_leoUI.insertNode(p_node, true, false, false)],
-        [CMD.INSERT_SELECTION, () => p_leoUI.insertNode(U, false, false, false)],
-        [CMD.INSERT_SELECTION_FO, () => p_leoUI.insertNode(U, true, false, false)],
+        [CMD.INSERT, (p_node: Position) => p_leoUI.insertNode(p_node, true, false)],
+        [CMD.INSERT_SELECTION, () => p_leoUI.insertNode(U, false, false)],
+        [CMD.INSERT_SELECTION_FO, () => p_leoUI.insertNode(U, true, false)],
         // Special command for when inserting rapidly more than one node without
         // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-        [CMD.INSERT_SELECTION_INTERRUPT, () => p_leoUI.insertNode(U, false, true, false)],
+        // [CMD.INSERT_SELECTION_INTERRUPT, () => p_leoUI.insertNode(U, false, true, false)],
 
-        [CMD.INSERT_CHILD, (p_node: Position) => p_leoUI.insertNode(p_node, true, false, true)],
-        [CMD.INSERT_CHILD_SELECTION, () => p_leoUI.insertNode(U, false, false, true)],
-        [CMD.INSERT_CHILD_SELECTION_FO, () => p_leoUI.insertNode(U, true, false, true)],
+        [CMD.INSERT_CHILD, (p_node: Position) => p_leoUI.insertNode(p_node, true, true)],
+        [CMD.INSERT_CHILD_SELECTION, () => p_leoUI.insertNode(U, false, true)],
+        [CMD.INSERT_CHILD_SELECTION_FO, () => p_leoUI.insertNode(U, true, true)],
         // Special command for when inserting rapidly more than one node without
         // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-        [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () => p_leoUI.insertNode(U, false, true, true)],
+        // [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () => p_leoUI.insertNode(U, false, true, true)],
 
         [CMD.CLONE, (p_node: Position) => p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
         [CMD.CLONE_SELECTION, () => p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],

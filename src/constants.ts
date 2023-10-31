@@ -380,6 +380,7 @@ export class Constants {
         LEO_CAN_DEHOIST: "leojsCanDehoist",
         LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
         LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter",
+        LEO_EDIT_HEADLINE: "leojsEditHeadline",
 
         // 'states' flags about current selection, for visibility and commands availability
         SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
