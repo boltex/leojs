@@ -3680,7 +3680,9 @@ export class LeoUI extends NullGui {
 
     // * Edit/Insert Headline Input Box System made with 'createInputBox'.
     private _hib: undefined | vscode.InputBox;
+    private _hibInstances = 0;
     private _hibResolve: undefined | ((value: string | PromiseLike&lt;string | undefined&gt; | undefined) =&gt; void);
+    private _onDidHideResolve: undefined | ((value: PromiseLike&lt;void&gt; | undefined) =&gt; void);
     private _hibLastValue: undefined | string;
     private _hibDisposables: vscode.Disposable[] = [];
 
@@ -4233,9 +4235,9 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
 
     // ! CHECK IF THIS IS NEEDED !
     // TODO ?
-    if (this._focusInterrupt) {
-        w_finalFocus = Focus.NoChange; // Going to use last state
-    }
+    // if (this._focusInterrupt) {
+    //     w_finalFocus = Focus.NoChange; // Going to use last state
+    // }
 
     this.setupRefresh(
         w_finalFocus,
@@ -4251,6 +4253,8 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
         prompt: p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE,
     };
     let p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
+    console.log('finished awaiting in editHeadline');
+
     if (p_newHeadline &amp;&amp; p_newHeadline !== "\n") {
         let w_truncated = false;
         if (p_newHeadline.indexOf("\n") &gt;= 0) {
@@ -4281,6 +4285,12 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
             this.showOutline(true);
         }
     }
+    if (this._onDidHideResolve) {
+        console.log('RESOLVING!');
+
+        this._onDidHideResolve(undefined);
+        this._onDidHideResolve = undefined;
+    }
     return w_p;
 }
 
@@ -4293,14 +4303,17 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
  * @returns Thenable that resolves when done
  */
 public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise&lt;unknown&gt; {
+    const test = Math.floor(Math.random() * 10) + 1;
+    console.log("starting", test);
 
     await this.triggerBodySave(true);
+    console.log("after triggerBodySave", test);
 
     let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
 
-    if (this._focusInterrupt) {
-        w_finalFocus = Focus.NoChange; // Going to use last state
-    }
+    // if (this._focusInterrupt) {
+    //     w_finalFocus = Focus.NoChange; // Going to use last state
+    // }
 
     const w_headlineInputOptions: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
@@ -4310,6 +4323,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     };
 
     const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
+    console.log('finished awaiting in insertNode in ', test);
     // * if node has child and is expanded: turn p_asChild to true!
 
     this.lastCommandTimer = process.hrtime();
@@ -4355,7 +4369,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
         }
     }
     this.lastCommandTimer = undefined;
-    void this.launchRefresh();
+
+    if (this._onDidHideResolve) {
+        console.log('RESOLVING!', test);
+        this._onDidHideResolve(undefined);
+        this._onDidHideResolve = undefined;
+    } else {
+        void this.launchRefresh();
+    }
+
     return value;
 
 }
@@ -7497,7 +7519,9 @@ public gotSelectedNode(p_node: Position): void {
         let w_showBodyNoFocus: boolean = this.finalFocus.valueOf() !== Focus.Body; // Will preserve focus where it is without forcing into the body pane if true
         if (this._focusInterrupt) {
             this._focusInterrupt = false;
-            w_showBodyNoFocus = true;
+            if (this.finalFocus.valueOf() !== Focus.Body) {
+                w_showBodyNoFocus = true; // TODO MAY BE NECESSARY ?
+            }
         }
         if (!w_last || this._needLastSelectedRefresh) {
             // lastSelectedNode will be set in _tryApplyNodeToBody !
@@ -8749,20 +8773,37 @@ private _refreshUndoPane(): void {
  * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
  * @returns a promise that resolves when the possible saving process is finished
  */
-public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
-
+public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean): Thenable&lt;unknown&gt; {
+    let functionName = "";
+    const err = new Error();
+    if (err.stack) {
+        const stack = err.stack.split('\n');
+        const line = stack[2];
+        const match = line.match(/at (\S+)/);
+        functionName = (match &amp;&amp; match[1]) || "";
+    }
     // * Check if headline edit input box is active. Validate it with current value.
-    if (this._hib) {
+    if (!p_fromFocusChange &amp;&amp; this._hib &amp;&amp; this._hib.enabled &amp;&amp; this._hibInstances) {
+
+
+
+        console.log('++++++++++++ IN triggerBodySave HIB +++++++++++++ HIDING! from :', functionName, 'instances: ', this._hibInstances);
+
+        if (this._hibInstances !== 1) {
+            console.log('ERROR this._hibInstances not 1 when hiding on triggerBodySave INTERRUPT:', this._hibInstances);
+        }
+        this._hib.enabled = false;
+
         this._hibLastValue = this._hib.value;
         this._hib.hide();
         // TODO : CHECK IF DELAYED RESOLVE NEEDED !
-        const w_resolveNextTick = new Promise&lt;void&gt;((p_resolve, p_reject) =&gt; {
-            setTimeout(() =&gt; {
-                this._focusInterrupt = true;
-                p_resolve();
-            }, 0);
+        const w_resolveAfterEditHeadline = new Promise&lt;void&gt;((p_resolve, p_reject) =&gt; {
+            this._onDidHideResolve = p_resolve;
+            this._focusInterrupt = true;
         });
-        return w_resolveNextTick;
+        return w_resolveAfterEditHeadline;
+    } else {
+        console.log('++++++++++++ IN triggerBodySave NORMAL from : ', functionName);
     }
 
     // * Save body to Leo if a change has been made to the body 'document' so far
@@ -12494,7 +12535,7 @@ private _onActiveEditorChanged(
         this._checkPreviewMode(p_editor);
     }
     if (!p_internalCall) {
-        void this.triggerBodySave(true); // Save in case edits were pending
+        void this.triggerBodySave(true, true); // Save in case edits were pending
     }
 
 }
@@ -12510,7 +12551,7 @@ public _changedTextEditorViewColumn(
     if (p_columnChangeEvent &amp;&amp; p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
         this._checkPreviewMode(p_columnChangeEvent.textEditor);
     }
-    void this.triggerBodySave(true);
+    void this.triggerBodySave(true, true);
 }
 
 </t>
@@ -12530,7 +12571,7 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
             }
         });
     }
-    void this.triggerBodySave(true);
+    void this.triggerBodySave(true, true);
 }
 
 </t>
@@ -12540,7 +12581,7 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
  */
 public _changedWindowState(p_windowState: vscode.WindowState): void {
     // no other action
-    void this.triggerBodySave(true);
+    void this.triggerBodySave(true, true);
 }
 
 </t>
@@ -14692,6 +14733,10 @@ Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the
  * Other Leo commands interrupt by accepting the value entered so far.
  */
 private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;string | undefined&gt; {
+    if (this._hibInstances) {
+        console.log('ERROR this._hibInstances is not zero when creating input box!', this._hibInstances);
+    }
+    console.log('-------------------- IN _showHeadlineInputBox --------------------+');
 
     const hib = vscode.window.createInputBox();
     this._hibLastValue = undefined; // Prepare for 'cancel' as default.
@@ -14702,14 +14747,24 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         hib.valueSelection = p_options.valueSelection;
         hib.prompt = p_options.prompt;
         this._hibDisposables.push(hib.onDidAccept(() =&gt; {
+            console.log('-------------------- IN onDidAccept --------------------+');
+
             if (this._hib) {
+                if (this._hibInstances !== 1) {
+                    console.log('ERROR this._hibInstances not 1 when hiding on accept', this._hibInstances);
+                }
+                this._hib.enabled = false;
                 this._hibLastValue = this._hib.value;
+
+
                 this._hib.hide();
             }
         }, this));
         this._hibResolve = p_resolve;
         // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
         this._hibDisposables.push(hib.onDidHide(() =&gt; {
+            console.log('-------------------- IN onDidHide --------------------+ _hibInstances: ', this._hibInstances);
+            this._hibInstances -= 1;
             this.leoStates.leoEditHeadline = false;
             if (this._hibResolve) {
                 // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
@@ -14722,6 +14777,9 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
                 this._hibDisposables = [];
                 this._hibResolve = undefined;
                 this._hib = undefined;
+            } else {
+                console.log('ERROR ON onDidHide NO _hibResolve !');
+
             }
         }, this));
         this._hibDisposables.push(hib);
@@ -14729,6 +14787,7 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         // setup finished, set command context and show it! 
         this._hib = hib;
         this.leoStates.leoEditHeadline = true;
+        this._hibInstances += 1;
         this._hib.show();
     });
     return q_headlineInputBox;
