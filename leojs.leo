@@ -3679,7 +3679,6 @@ export class LeoUI extends NullGui {
 
     // * Edit/Insert Headline Input Box System made with 'createInputBox'.
     private _hib: undefined | vscode.InputBox;
-    private _hibInstances = 0;
     private _hibResolve: undefined | ((value: string | PromiseLike&lt;string | undefined&gt; | undefined) =&gt; void);
     private _onDidHideResolve: undefined | ((value: PromiseLike&lt;void&gt; | undefined) =&gt; void);
     private _hibLastValue: undefined | string;
@@ -8786,30 +8785,20 @@ private _refreshUndoPane(): void {
  * @returns a promise that resolves when the possible saving process is finished
  */
 public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean): Thenable&lt;unknown&gt; {
-    let functionName = "";
-    const err = new Error();
-    if (err.stack) {
-        const stack = err.stack.split('\n');
-        const line = stack[2];
-        const match = line.match(/at (\S+)/);
-        functionName = (match &amp;&amp; match[1]) || "";
-    }
+
     // * Check if headline edit input box is active. Validate it with current value.
     if (!p_fromFocusChange &amp;&amp; this._hib &amp;&amp; this._hib.enabled) {
-        console.log('++++++++++++ IN triggerBodySave HIB -&gt; HIDING! Was called from :', functionName, ' instances: ' + this._hibInstances.toString());
-        if (this._hibInstances !== 1) {
-            console.log('ERROR this._hibInstances not 1 when hiding on triggerBodySave INTERRUPT. instances: ' + this._hibInstances.toString());
-        }
         this._hibInterrupted = true;
         this._hib.enabled = false;
         this._hibLastValue = this._hib.value;
         this._hib.hide();
+        if (this._onDidHideResolve) {
+            console.error('IN triggerBodySave AND _onDidHideResolve PROMISE ALREADY EXISTS!');
+        }
         const w_resolveAfterEditHeadline = new Promise&lt;void&gt;((p_resolve, p_reject) =&gt; {
             this._onDidHideResolve = p_resolve;
         });
         return w_resolveAfterEditHeadline;
-    } else {
-        console.log('++++++++++++ IN triggerBodySave NORMAL from : ', functionName);
     }
 
     // * Save body to Leo if a change has been made to the body 'document' so far
@@ -11462,10 +11451,8 @@ public cleanupBody(): Thenable&lt;any&gt; {
         const w_edit = new vscode.WorkspaceEdit();
         w_edit.deleteFile(this.bodyUri, { ignoreIfNotExists: true });
         q_edit = vscode.workspace.applyEdit(w_edit).then(() =&gt; {
-            // console.log('applyEdit done');
             return true;
         }, () =&gt; {
-            // console.log('applyEdit failed');
             return false;
         });
     } else {
@@ -11473,10 +11460,8 @@ public cleanupBody(): Thenable&lt;any&gt; {
     }
     Promise.all([q_save, q_edit])
         .then(() =&gt; {
-            // console.log('cleaned both');
             return this.closeBody();
         }, () =&gt; {
-            // console.log('cleaned both failed');
             return true;
         });
 
@@ -14637,10 +14622,6 @@ Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the
  * Other Leo commands interrupt by accepting the value entered so far.
  */
 private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;string | undefined&gt; {
-    if (this._hibInstances) {
-        console.log('ERROR this._hibInstances is not zero when creating input box!  _hibInstances was: ' + this._hibInstances.toString());
-    }
-    console.log('-------------------- IN _showHeadlineInputBox _hibInstances was: ' + this._hibInstances.toString());
 
     const hib = vscode.window.createInputBox();
     this._hibLastValue = undefined; // Prepare for 'cancel' as default.
@@ -14651,27 +14632,19 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         hib.valueSelection = p_options.valueSelection;
         hib.prompt = p_options.prompt;
         this._hibDisposables.push(hib.onDidAccept(() =&gt; {
-
-            console.log('-------------------- IN onDidAccept _hibInstances was: ');
-
             if (this._hib) {
-                if (this._hibInstances !== 1) {
-                    console.log('ERROR this._hibInstances not 1 when hiding on accept' + this._hibInstances.toString());
-                }
                 this._hib.enabled = false;
                 this._hibLastValue = this._hib.value;
-
-
                 this._hib.hide();
             }
         }, this));
+        if (this._hibResolve) {
+            console.error('IN _showHeadlineInputBox AND THE _hibResolve PROMISE ALREADY EXISTS!');
+        }
         this._hibResolve = p_resolve;
         // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
         this._hibDisposables.push(hib.onDidHide(() =&gt; {
 
-            console.log('-------------------- IN onDidHide _hibInstances was: ' + this._hibInstances.toString());
-
-            this._hibInstances -= 1;
             this.leoStates.leoEditHeadline = false;
             if (this._hibResolve) {
                 // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
@@ -14686,15 +14659,12 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
                 this._hib = undefined;
             } else {
                 console.log('ERROR ON onDidHide NO _hibResolve !');
-
             }
         }, this));
         this._hibDisposables.push(hib);
-
         // setup finished, set command context and show it! 
         this._hib = hib;
         this.leoStates.leoEditHeadline = true;
-        this._hibInstances += 1;
         this._hib.show();
     });
     return q_headlineInputBox;
