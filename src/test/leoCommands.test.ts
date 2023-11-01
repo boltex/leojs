@@ -477,16 +477,16 @@ suite('Test cases for leoCommands.ts', () => {
         assert.ok(w_path.endsWith(endpath), `expected '${endpath}' got '${path}'`);
 
         // Test 2: Create a commander for an outline outside of g.app.loadDir and its parents.
-        c = new Commands('~/LeoPyRef.leo', g.app.gui)
-        child = p.insertAfter()
-        child.h = '@path one'
-        grand = child.insertAsLastChild()
-        grand.h = '@path two'
-        great = grand.insertAsLastChild()
-        great.h = 'xyz'
-        aList = g.get_directives_dict_list(great)
-        w_path = c.scanAtPathDirectives(aList)
-        endpath = g.os_path_normpath('one/two')
+        c = new Commands('~/LeoPyRef.leo', g.app.gui);
+        child = p.insertAfter();
+        child.h = '@path one';
+        grand = child.insertAsLastChild();
+        grand.h = '@path two';
+        great = grand.insertAsLastChild();
+        great.h = 'xyz';
+        aList = g.get_directives_dict_list(great);
+        w_path = c.scanAtPathDirectives(aList);
+        endpath = g.os_path_normpath('one/two');
         assert.ok(w_path.endsWith(endpath), `expected '${endpath}' got '${path}'`);
 
     });

@@ -4463,10 +4463,10 @@ export function dedent(text: string): string {
 }
 //@+node:felix.20230925180832.1: *3* g.issueSecurityWarning
 export function issueSecurityWarning(setting: string): void {
-    es('Security warning! Ignoring...')
-    es(setting)
-    es('This setting can be set only in')
-    es('leoSettings.leo or myLeoSettings.leo')
+    es('Security warning! Ignoring...');
+    es(setting);
+    es('This setting can be set only in');
+    es('leoSettings.leo or myLeoSettings.leo');
 }
 //@+node:felix.20221218195057.1: *3* g.reEscape
 

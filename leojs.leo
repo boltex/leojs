@@ -176,6 +176,7 @@
 <v t="felix.20221002124249.1"><vh>_showMinibufferHistory</vh></v>
 <v t="felix.20221002124535.1"><vh>_doMinibufferCommand</vh></v>
 <v t="felix.20230222212520.1"><vh>_addToMinibufferHistory</vh></v>
+<v t="felix.20231029213146.1"><vh>_showHeadlineInputBox</vh></v>
 <v t="felix.20201214202759.1"><vh>editHeadline</vh></v>
 <v t="felix.20201214202800.1"><vh>insertNode</vh></v>
 <v t="felix.20211204181418.1"><vh>_insertAndSetHeadline</vh></v>
@@ -209,7 +210,6 @@
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
-<v t="felix.20220505215924.11"><vh>Find / Replace All</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
 <v t="felix.20220505215924.14"><vh>saveSearchSettings</vh></v>
@@ -312,6 +312,7 @@
 <v t="felix.20201214151447.10"><vh>leoCanPromote &amp; helper</vh></v>
 <v t="felix.20201214151447.11"><vh>leoCanDehoist &amp; helper</vh></v>
 <v t="felix.20230403223923.1"><vh>leoTopHoistChapter &amp; helper</vh></v>
+<v t="felix.20231030200350.1"><vh>leoEditHeadline &amp; helper</vh></v>
 </v>
 <v t="felix.20201214151447.12"><vh>Selected Node Flags</vh>
 <v t="felix.20201214151447.13"><vh>leoMarked</vh></v>
@@ -1639,19 +1640,19 @@ export async function activate(p_context: vscode.ExtensionContext) {
 }
 
 </t>
-<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, false, false)],
-[CMD.INSERT_SELECTION, () =&gt; p_leoUI.insertNode(U, false, false, false)],
-[CMD.INSERT_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, false, false)],
+<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, false)],
+[CMD.INSERT_SELECTION, () =&gt; p_leoUI.insertNode(U, false, false)],
+[CMD.INSERT_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, false)],
 // Special command for when inserting rapidly more than one node without
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-[CMD.INSERT_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, false)],
+// [CMD.INSERT_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, false)],
 
-[CMD.INSERT_CHILD, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, false, true)],
-[CMD.INSERT_CHILD_SELECTION, () =&gt; p_leoUI.insertNode(U, false, false, true)],
-[CMD.INSERT_CHILD_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, false, true)],
+[CMD.INSERT_CHILD, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, true)],
+[CMD.INSERT_CHILD_SELECTION, () =&gt; p_leoUI.insertNode(U, false, true)],
+[CMD.INSERT_CHILD_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, true)],
 // Special command for when inserting rapidly more than one node without
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-[CMD.INSERT_CHILD_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, true)],
+// [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, true)],
 
 [CMD.CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 [CMD.CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
@@ -2502,6 +2503,7 @@ public static CONTEXT_FLAGS = {
     LEO_CAN_DEHOIST: "leojsCanDehoist",
     LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
     LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter",
+    LEO_EDIT_HEADLINE: "leojsEditHeadline",
 
     // 'states' flags about current selection, for visibility and commands availability
     SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
@@ -3675,13 +3677,13 @@ export class LeoUI extends NullGui {
     // * Status Bar
     // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
 
-    // * Edit/Insert Headline Input Box options instance, setup so clicking outside cancels the headline change
-    private _headlineInputOptions: vscode.InputBoxOptions = {
-        ignoreFocusOut: false,
-        value: '',
-        valueSelection: undefined,
-        prompt: '',
-    };
+    // * Edit/Insert Headline Input Box System made with 'createInputBox'.
+    private _hib: undefined | vscode.InputBox;
+    private _hibResolve: undefined | ((value: string | PromiseLike&lt;string | undefined&gt; | undefined) =&gt; void);
+    private _onDidHideResolve: undefined | ((value: PromiseLike&lt;void&gt; | undefined) =&gt; void);
+    private _hibLastValue: undefined | string;
+    private _hibInterrupted = false;
+    private _hibDisposables: vscode.Disposable[] = [];
 
     // * Timing
     private _needLastSelectedRefresh = false; // USED IN showBody
@@ -4227,18 +4229,32 @@ public async minibuffer(): Promise&lt;unknown&gt; {
  * @returns Thenable that resolves when done
  */
 public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Promise&lt;Position&gt; {
-    await this.triggerBodySave(true);
-    this.setupRefresh(
-        p_fromOutline ? Focus.Outline : Focus.Body,
-        { tree: true, states: true }
-    );
     const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
     const w_p: Position = p_node || c.p;
-    this._headlineInputOptions.prompt = p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
-    this._headlineInputOptions.value = w_p.h; // preset input pop up
-    let p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
-    if (p_newHeadline &amp;&amp; p_newHeadline !== "\n") {
+
+    if (this._hib &amp;&amp; this._hib.enabled) {
+        return Promise.resolve(w_p); // DO NOT REACT IF ALREADY EDITING A HEADLINE! 
+    }
+
+    await this.triggerBodySave(true);
+
+    let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+
+    this.setupRefresh(
+        w_finalFocus,
+        { tree: true, states: true }
+    );
+
+    const w_headlineInputOptions: vscode.InputBoxOptions = {
+        ignoreFocusOut: false,
+        value: w_p.h,  // preset input pop up
+        valueSelection: undefined,
+        prompt: p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE,
+    };
+    let p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
+
+    if ((p_newHeadline || p_newHeadline === "") &amp;&amp; p_newHeadline !== "\n") {
         let w_truncated = false;
         if (p_newHeadline.indexOf("\n") &gt;= 0) {
             p_newHeadline = p_newHeadline.split("\n")[0];
@@ -4268,6 +4284,10 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
             this.showOutline(true);
         }
     }
+    if (this._onDidHideResolve) {
+        this._onDidHideResolve(undefined);
+        this._onDidHideResolve = undefined;
+    }
     return w_p;
 }
 
@@ -4279,23 +4299,34 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
  * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
  * @returns Thenable that resolves when done
  */
-public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Promise&lt;unknown&gt; {
-    await this.triggerBodySave(true);
-    let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
-    if (p_interrupt) {
-        this._focusInterrupt = true;
-        w_finalFocus = Focus.NoChange; // Going to use last state
-    }
-    void this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-    if (p_asChild) {
-        this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_CHILD;
-    } else {
-        this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
-    }
-    this._headlineInputOptions.value = Constants.USER_MESSAGES.DEFAULT_HEADLINE;
+public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise&lt;unknown&gt; {
 
-    const p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
+    let w_hadHib = false;
+    if (this._hib &amp;&amp; this._hib.enabled) {
+        w_hadHib = true;
+    }
+
+    let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+    if (w_hadHib) {
+        this._focusInterrupt = true; // this will affect next refresh by triggerbodysave, not the refresh of this pass
+    }
+
+    await this.triggerBodySave(true);
+
     // * if node has child and is expanded: turn p_asChild to true!
+    const w_headlineInputOptions: vscode.InputBoxOptions = {
+        ignoreFocusOut: false,
+        value: Constants.USER_MESSAGES.DEFAULT_HEADLINE,
+        valueSelection: undefined,
+        prompt: p_asChild ? Constants.USER_MESSAGES.PROMPT_INSERT_CHILD : Constants.USER_MESSAGES.PROMPT_INSERT_NODE
+    };
+
+    const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
+
+    if (this._hibInterrupted) {
+        w_finalFocus = Focus.NoChange;
+        this._hibInterrupted = false;
+    }
 
     this.lastCommandTimer = process.hrtime();
     if (this.commandTimer === undefined) {
@@ -4340,7 +4371,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
         }
     }
     this.lastCommandTimer = undefined;
+
+    if (this._onDidHideResolve) {
+        this._onDidHideResolve(undefined);
+        this._onDidHideResolve = undefined;
+    } else {
+        // pass
+    }
     void this.launchRefresh();
+
     return value;
 
 }
@@ -5067,26 +5106,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   }
 },
 {
-  "command": "leojs.insertNodeSelectionInterrupt",
-  "category": "Leojs",
-  "title": "Insert Node",
-  "enablement": "leojsTreeOpened",
-  "icon": {
-    "light": "resources/light/plus.svg",
-    "dark": "resources/dark/plus.svg"
-  }
-},
-{
-  "command": "leojs.insertChildNodeSelectionInterrupt",
-  "category": "Leojs",
-  "title": "Insert Child",
-  "enablement": "leojsTreeOpened",
-  "icon": {
-    "light": "resources/light/insert-child.svg",
-    "dark": "resources/dark/insert-child.svg"
-  }
-},
-{
   "command": "leojs.cloneNode",
   "category": "Leojs",
   "title": "Clone Node",
@@ -5700,19 +5719,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "false"
 },
 {
-  "command": "leojs.insertNodeSelectionInterrupt",
-  "when": "false"
-},
-{
   "command": "leojs.insertChildNode",
   "when": "false"
 },
 {
   "command": "leojs.insertChildNodeSelectionFromOutline",
-  "when": "false"
-},
-{
-  "command": "leojs.insertChildNodeSelectionInterrupt",
   "when": "false"
 },
 {
@@ -6105,18 +6116,18 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.executeScript",
   "key": "ctrl+b",
   "mac": "cmd+b",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.minibuffer",
   "key": "alt+x",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 </t>
 <t tx="felix.20201214205159.69">{
   "command": "leojs.showOutline",
   "key": "alt+t",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
 },
 {
   "command": "leojs.showOutline",
@@ -6133,13 +6144,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.showBody",
   "key": "alt+d",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.showBody",
   "key": "ctrl+g",
   "mac": "cmd+g",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.showBody",
@@ -6156,13 +6167,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.tabCycleNext",
   "key": "ctrl+tab",
   "mac": "cmd+tab",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.saveLeoFileFromOutline",
   "key": "ctrl+s",
   "mac": "cmd+s",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.saveLeoFile",
@@ -6174,13 +6185,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.newLeoFile",
   "key": "ctrl+n",
   "mac": "cmd+n",
-  "when": "editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.openLeoFile",
   "key": "ctrl+o",
   "mac": "cmd+o",
-  "when": "editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.writeAtFileNodes",
@@ -6192,7 +6203,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.writeAtFileNodesFromOutline",
   "key": "ctrl+shift+w",
   "mac": "cmd+shift+w",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.writeDirtyAtFileNodes",
@@ -6204,7 +6215,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.writeDirtyAtFileNodesFromOutline",
   "key": "ctrl+shift+q",
   "mac": "cmd+shift+q",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 </t>
 <t tx="felix.20201214205159.71">{
@@ -6215,7 +6226,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.contractAllFromOutline",
   "key": "alt+-",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 </t>
 <t tx="felix.20201214205159.72">{
@@ -6228,7 +6239,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.editSelectedHeadlineFromOutline",
   "key": "ctrl+h",
   "mac": "cmd+h",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 </t>
 <t tx="felix.20201214205159.73">{
@@ -6241,7 +6252,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.markSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leojsTreeOpened &amp;&amp; !leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; !leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.unmarkSelection",
@@ -6253,20 +6264,20 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.unmarkSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leojsTreeOpened &amp;&amp; leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.74">{
   "command": "leojs.extract",
   "key": "ctrl+shift+d",
   "mac": "cmd+shift+d",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.extractNames",
   "key": "ctrl+shift+n",
   "mac": "cmd+shift+n",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
 },
 </t>
 <t tx="felix.20201214205159.75">{
@@ -6285,7 +6296,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "ctrl+d",
   "mac": "cmd+d",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
@@ -6314,7 +6325,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "ctrl+l",
   "mac": "cmd+l",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
@@ -6343,7 +6354,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "ctrl+r",
   "mac": "cmd+r",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
@@ -6372,7 +6383,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "ctrl+u",
   "mac": "cmd+u",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
@@ -6394,7 +6405,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.sortSiblingsSelectionFromOutline",
   "key": "alt+a",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.promoteSelection",
@@ -6410,7 +6421,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "win": "ctrl+oem_4",
   "linux": "ctrl+[",
   "mac": "cmd+[BracketLeft]",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.demoteSelection",
@@ -6426,7 +6437,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "win": "ctrl+oem_6",
   "linux": "ctrl+]",
   "mac": "cmd+[BracketRight]",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.insertNodeSelection",
@@ -6438,13 +6449,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "ctrl+i",
   "mac": "cmd+i",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.insertNodeSelectionInterrupt",
-  "key": "ctrl+i",
-  "mac": "cmd+i",
-  "when": "!terminalFocus &amp;&amp; !panelFocus &amp;&amp; leojsTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.insertNodeSelection",
@@ -6456,19 +6461,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "shift+insert",
   "mac": "shift+insert",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "insert",
   "mac": "insert",
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.insertNodeSelectionInterrupt",
-  "key": "shift+insert",
-  "mac": "shift+insert",
-  "when": "!terminalFocus &amp;&amp; !panelFocus &amp;&amp; leojsTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
 },
 {
   "command": "leojs.insertChildNodeSelection",
@@ -6480,13 +6479,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.insertChildNodeSelectionFromOutline",
   "key": "ctrl+insert",
   "mac": "cmd+insert",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.insertChildNodeSelectionInterrupt",
-  "key": "ctrl+insert",
-  "mac": "cmd+insert",
-  "when": "!terminalFocus &amp;&amp; !panelFocus &amp;&amp; leojsTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.cloneNodeSelection",
@@ -6502,7 +6495,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "win": "ctrl+oem_3",
   "linux": "ctrl+`",
   "mac": "cmd+`",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 </t>
 <t tx="felix.20201214205159.77">{
@@ -6515,13 +6508,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.cutNodeSelectionFromOutline",
   "key": "ctrl+shift+x",
   "mac": "cmd+shift+x",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.copyNodeSelection",
   "key": "ctrl+shift+c",
   "mac": "cmd+shift+c",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.pasteNodeAtSelection",
@@ -6533,7 +6526,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.pasteNodeAtSelectionFromOutline",
   "key": "ctrl+shift+v",
   "mac": "cmd+shift+v",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.deleteSelection",
@@ -6545,7 +6538,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.deleteSelectionFromOutline",
   "key": "ctrl+shift+backspace",
   "mac": "cmd+shift+backspace",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.deleteSelectionFromOutline",
@@ -6606,7 +6599,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
   "key": "alt+n",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNextCloneSelection",
@@ -6616,7 +6609,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoNextVisible",
   "key": "down",
-  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNavNext",
@@ -6626,12 +6619,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.gotoPrevVisible",
   "key": "up",
-  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNavPrev",
@@ -6641,7 +6634,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoPrevVisible",
   "key": "alt+up",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.contractOrGoLeft",
@@ -6651,7 +6644,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.contractOrGoLeft",
   "key": "alt+left",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.expandAndGoRight",
@@ -6661,7 +6654,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.expandAndGoRight",
   "key": "alt+right",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 </t>
 <t tx="felix.20201214205159.79">"cleanup": "node ./cleanup.js",
@@ -8775,11 +8768,28 @@ private _refreshUndoPane(): void {
 </t>
 <t tx="felix.20211204144931.1"></t>
 <t tx="felix.20211204144931.2">/**
- * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
+ * * Validate headline edit input box if active, or, Save body to the Leo app if its dirty.
+ *   That is, only if a change has been made to the body 'document' so far
  * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
  * @returns a promise that resolves when the possible saving process is finished
  */
-public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
+public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean): Thenable&lt;unknown&gt; {
+
+    // * Check if headline edit input box is active. Validate it with current value.
+    if (!p_fromFocusChange &amp;&amp; this._hib &amp;&amp; this._hib.enabled) {
+        this._hibInterrupted = true;
+        this._hib.enabled = false;
+        this._hibLastValue = this._hib.value;
+        this._hib.hide();
+        if (this._onDidHideResolve) {
+            console.error('IN triggerBodySave AND _onDidHideResolve PROMISE ALREADY EXISTS!');
+        }
+        const w_resolveAfterEditHeadline = new Promise&lt;void&gt;((p_resolve, p_reject) =&gt; {
+            this._onDidHideResolve = p_resolve;
+        });
+        return w_resolveAfterEditHeadline;
+    }
+
     // * Save body to Leo if a change has been made to the body 'document' so far
     let q_savePromise: Thenable&lt;boolean&gt;;
     if (
@@ -9021,9 +9031,9 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
  * @param p_string actual string content to go onto the clipboard
  * @returns a promise that resolves when the string is put on the clipboard
  */
-public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
+public replaceClipboardWith(s: string): Thenable&lt;string&gt; {
     this.clipboardContents = s; // also set immediate clipboard string
-    return vscode.env.clipboard.writeText(s);
+    return vscode.env.clipboard.writeText(s).then(() =&gt; { return s; });
 }
 
 </t>
@@ -9718,108 +9728,6 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 }
 </t>
 <t tx="felix.20220505215924.1"></t>
-<t tx="felix.20220505215924.11">/**
- * * Find / Replace All
- * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
- */
-public findAll(p_replace?: boolean): Thenable&lt;unknown&gt; {
-
-    let w_searchString: string = this._lastSettingsUsed!.findText;
-    let w_replaceString: string = this._lastSettingsUsed!.replaceText;
-
-    const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
-    const w_startReplace = this._lastSettingsUsed?.replaceText;
-
-    return this.triggerBodySave(true)
-        .then((p_saveResult) =&gt; {
-            return this._inputFindPattern(false, w_startValue)
-                .then((p_findString) =&gt; {
-                    if (!p_findString) {
-                        return true; // Cancelled with escape or empty string.
-                    }
-                    w_searchString = p_findString;
-                    if (p_replace) {
-                        return this._inputFindPattern(true, w_startReplace).then((p_replaceString) =&gt; {
-                            if (p_replaceString === undefined) {
-                                return true;
-                            }
-                            w_replaceString = p_replaceString;
-                            return false;
-                        });
-                    }
-                    return false;
-                });
-        })
-        .then((p_cancelled: boolean) =&gt; {
-            if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
-                this._lastSettingsUsed.findText = w_searchString;
-                this._lastSettingsUsed.replaceText = w_replaceString;
-
-                // * savesettings not needed, w_changeSettings is used directly
-                void this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-
-                const c = g.app.windowList[this.frameIndex].c;
-                const fc = c.findCommands;
-
-                fc.ftm.get_settings(); // TODO REMOVE?? 
-
-                const w_changeSettings: ISettings = {
-                    // this._lastSettingsUsed
-                    // State...
-                    in_headline: false, // ! TODO !
-                    // p: Position,
-                    // Find/change strings...
-                    find_text: this._lastSettingsUsed.findText,
-                    change_text: this._lastSettingsUsed.replaceText,
-                    // Find options...
-                    file_only: this._lastSettingsUsed.searchOptions === 3,
-                    ignore_case: this._lastSettingsUsed.ignoreCase,
-                    mark_changes: this._lastSettingsUsed.markChanges,
-                    mark_finds: this._lastSettingsUsed.markFinds,
-                    node_only: this._lastSettingsUsed.searchOptions === 2,
-                    pattern_match: this._lastSettingsUsed.regExp,
-                    reverse: false,
-                    search_body: this._lastSettingsUsed.searchBody,
-                    search_headline: this._lastSettingsUsed.searchHeadline,
-                    suboutline_only: this._lastSettingsUsed.searchOptions === 1,
-                    whole_word: this._lastSettingsUsed.wholeWord,
-                    wrapping: false, // unused
-                };
-
-                let w_result;
-                if (p_replace) {
-                    w_result = fc.do_change_all(w_changeSettings);
-                } else {
-                    w_result = fc.do_find_all(w_changeSettings);
-                }
-
-                const w_focus = this._get_focus();
-
-                let w_finalFocus = Focus.Body;
-
-                if (w_focus.includes('tree') || w_focus.includes('head')) {
-                    // tree
-                    w_finalFocus = Focus.Outline;
-                }
-                this.loadSearchSettings();
-                this.setupRefresh(
-                    w_finalFocus,
-                    {
-                        tree: true,
-                        body: true,
-                        // documents: false,
-                        // buttons: false,
-                        states: true
-                    }
-                );
-                void this.launchRefresh();
-                return;
-
-            }
-        });
-}
-
-</t>
 <t tx="felix.20220505215924.12">/**
  * * Set search setting in the search webview
  * @param p_id string id of the setting name
@@ -11532,10 +11440,8 @@ public cleanupBody(): Thenable&lt;any&gt; {
         const w_edit = new vscode.WorkspaceEdit();
         w_edit.deleteFile(this.bodyUri, { ignoreIfNotExists: true });
         q_edit = vscode.workspace.applyEdit(w_edit).then(() =&gt; {
-            // console.log('applyEdit done');
             return true;
         }, () =&gt; {
-            // console.log('applyEdit failed');
             return false;
         });
     } else {
@@ -11543,10 +11449,8 @@ public cleanupBody(): Thenable&lt;any&gt; {
     }
     Promise.all([q_save, q_edit])
         .then(() =&gt; {
-            // console.log('cleaned both');
             return this.closeBody();
         }, () =&gt; {
-            // console.log('cleaned both failed');
             return true;
         });
 
@@ -12509,7 +12413,7 @@ private _onActiveEditorChanged(
         this._checkPreviewMode(p_editor);
     }
     if (!p_internalCall) {
-        void this.triggerBodySave(true); // Save in case edits were pending
+        void this.triggerBodySave(true, true); // Save in case edits were pending
     }
 
 }
@@ -12525,7 +12429,7 @@ public _changedTextEditorViewColumn(
     if (p_columnChangeEvent &amp;&amp; p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
         this._checkPreviewMode(p_columnChangeEvent.textEditor);
     }
-    void this.triggerBodySave(true);
+    void this.triggerBodySave(true, true);
 }
 
 </t>
@@ -12545,7 +12449,7 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
             }
         });
     }
-    void this.triggerBodySave(true);
+    void this.triggerBodySave(true, true);
 }
 
 </t>
@@ -12555,7 +12459,7 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
  */
 public _changedWindowState(p_windowState: vscode.WindowState): void {
     // no other action
-    void this.triggerBodySave(true);
+    void this.triggerBodySave(true, true);
 }
 
 </t>
@@ -13971,18 +13875,18 @@ private _refreshGotoPane(): void {
   "command": "leojs.goAnywhere",
   "key": "ctrl+p",
   "mac": "cmd+p",
-  "when": "config.leojs.goAnywhereShortcut &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || config.leojs.goAnywhereShortcut &amp;&amp; leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "config.leojs.goAnywhereShortcut &amp;&amp; leojsEditHeadline || config.leojs.goAnywhereShortcut &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || config.leojs.goAnywhereShortcut &amp;&amp; leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.startSearch",
   "key": "ctrl+f",
   "mac": "cmd+f",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.findNextFromOutline",
   "key": "f3",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.findNext",
@@ -13992,7 +13896,7 @@ private _refreshGotoPane(): void {
 {
   "command": "leojs.findPreviousFromOutline",
   "key": "f2",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.findPrevious",
@@ -14009,7 +13913,7 @@ private _refreshGotoPane(): void {
   "command": "leojs.replaceFromOutline",
   "key": "ctrl+=",
   "mac": "cmd+=",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.replaceThenFind",
@@ -14021,78 +13925,78 @@ private _refreshGotoPane(): void {
   "command": "leojs.replaceThenFindFromOutline",
   "key": "ctrl+-",
   "mac": "cmd+-",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.gotoGlobalLine",
   "key": "alt+g",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.setFindEverywhereOption",
   "key": "ctrl+alt+e",
   "mac": "cmd+alt+e",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.setFindNodeOnlyOption",
   "key": "ctrl+alt+n",
   "mac": "cmd+alt+n",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.setFindFileOnlyOption",
   "key": "ctrl+alt+l",
   "mac": "cmd+alt+l",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.setFindSuboutlineOnlyOption",
   "key": "ctrl+alt+s",
   "mac": "cmd+alt+s",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.toggleFindIgnoreCaseOption",
   "key": "ctrl+alt+i",
   "mac": "cmd+alt+i",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.toggleFindMarkChangesOption",
   "key": "ctrl+alt+c",
   "mac": "cmd+alt+c",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.toggleFindMarkFindsOption",
   "key": "ctrl+alt+f",
   "mac": "cmd+alt+f",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.toggleFindRegexpOption",
   "key": "ctrl+alt+x",
   "mac": "cmd+alt+x",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.toggleFindWordOption",
   "key": "ctrl+alt+w",
   "mac": "cmd+alt+w",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.toggleFindSearchBodyOption",
   "key": "ctrl+alt+b",
   "mac": "cmd+alt+b",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.toggleFindSearchHeadlineOption",
   "key": "ctrl+alt+h",
   "mac": "cmd+alt+h",
-  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 </t>
 <t tx="felix.20221115220743.1">{
@@ -14700,6 +14604,72 @@ a "for in" loop in python loops over the values which is equivalent to a "for of
 
 Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
 
+
+</t>
+<t tx="felix.20231029213146.1">/**
+ * Show a headline input box that resolves to undefined only with escape.
+ * Other Leo commands interrupt by accepting the value entered so far.
+ */
+private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;string | undefined&gt; {
+
+    const hib = vscode.window.createInputBox();
+    this._hibLastValue = undefined; // Prepare for 'cancel' as default.
+    const q_headlineInputBox = new Promise&lt;string | undefined&gt;((p_resolve, p_reject) =&gt; {
+
+        hib.ignoreFocusOut = !!p_options.ignoreFocusOut;
+        hib.value = p_options.value!;
+        hib.valueSelection = p_options.valueSelection;
+        hib.prompt = p_options.prompt;
+        this._hibDisposables.push(hib.onDidAccept(() =&gt; {
+            if (this._hib) {
+                this._hib.enabled = false;
+                this._hibLastValue = this._hib.value;
+                this._hib.hide();
+            }
+        }, this));
+        if (this._hibResolve) {
+            console.error('IN _showHeadlineInputBox AND THE _hibResolve PROMISE ALREADY EXISTS!');
+        }
+        this._hibResolve = p_resolve;
+        // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
+        this._hibDisposables.push(hib.onDidHide(() =&gt; {
+            if (this._hib) {
+                this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+            }
+            this.leoStates.leoEditHeadline = false;
+            if (this._hibResolve) {
+                // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
+                this._hibResolve(this._hibLastValue);
+                // Dispose of everything disposable with the edit headline process.
+                for (const disp of this._hibDisposables) {
+                    disp.dispose();
+                }
+                // Empty related global variables.
+                this._hibDisposables = [];
+                this._hibResolve = undefined;
+                this._hib = undefined;
+            } else {
+                console.log('ERROR ON onDidHide NO _hibResolve !');
+            }
+        }, this));
+        this._hibDisposables.push(hib);
+        // setup finished, set command context and show it! 
+        this._hib = hib;
+        this.leoStates.leoEditHeadline = true;
+        this._hib.show();
+    });
+    return q_headlineInputBox;
+}
+
+</t>
+<t tx="felix.20231030200350.1">private _leoEditHeadline: boolean = false;
+get leoEditHeadline(): boolean {
+    return this._leoEditHeadline;
+}
+set leoEditHeadline(p_value: boolean) {
+    this._leoEditHeadline = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_EDIT_HEADLINE, p_value);
+}
 
 </t>
 </tnodes>

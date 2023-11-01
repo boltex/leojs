@@ -211,13 +211,13 @@ export class LeoUI extends NullGui {
     // * Status Bar
     // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
 
-    // * Edit/Insert Headline Input Box options instance, setup so clicking outside cancels the headline change
-    private _headlineInputOptions: vscode.InputBoxOptions = {
-        ignoreFocusOut: false,
-        value: '',
-        valueSelection: undefined,
-        prompt: '',
-    };
+    // * Edit/Insert Headline Input Box System made with 'createInputBox'.
+    private _hib: undefined | vscode.InputBox;
+    private _hibResolve: undefined | ((value: string | PromiseLike<string | undefined> | undefined) => void);
+    private _onDidHideResolve: undefined | ((value: PromiseLike<void> | undefined) => void);
+    private _hibLastValue: undefined | string;
+    private _hibInterrupted = false;
+    private _hibDisposables: vscode.Disposable[] = [];
 
     // * Timing
     private _needLastSelectedRefresh = false; // USED IN showBody
@@ -858,7 +858,7 @@ export class LeoUI extends NullGui {
             this._checkPreviewMode(p_editor);
         }
         if (!p_internalCall) {
-            void this.triggerBodySave(true); // Save in case edits were pending
+            void this.triggerBodySave(true, true); // Save in case edits were pending
         }
 
     }
@@ -873,7 +873,7 @@ export class LeoUI extends NullGui {
         if (p_columnChangeEvent && p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
             this._checkPreviewMode(p_columnChangeEvent.textEditor);
         }
-        void this.triggerBodySave(true);
+        void this.triggerBodySave(true, true);
     }
 
     /**
@@ -892,7 +892,7 @@ export class LeoUI extends NullGui {
                 }
             });
         }
-        void this.triggerBodySave(true);
+        void this.triggerBodySave(true, true);
     }
 
     /**
@@ -901,7 +901,7 @@ export class LeoUI extends NullGui {
      */
     public _changedWindowState(p_windowState: vscode.WindowState): void {
         // no other action
-        void this.triggerBodySave(true);
+        void this.triggerBodySave(true, true);
     }
 
     /**
@@ -1129,11 +1129,28 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
+     * * Validate headline edit input box if active, or, Save body to the Leo app if its dirty.
+     *   That is, only if a change has been made to the body 'document' so far
      * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
      * @returns a promise that resolves when the possible saving process is finished
      */
-    public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable<unknown> {
+    public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean): Thenable<unknown> {
+
+        // * Check if headline edit input box is active. Validate it with current value.
+        if (!p_fromFocusChange && this._hib && this._hib.enabled) {
+            this._hibInterrupted = true;
+            this._hib.enabled = false;
+            this._hibLastValue = this._hib.value;
+            this._hib.hide();
+            if (this._onDidHideResolve) {
+                console.error('IN triggerBodySave AND _onDidHideResolve PROMISE ALREADY EXISTS!');
+            }
+            const w_resolveAfterEditHeadline = new Promise<void>((p_resolve, p_reject) => {
+                this._onDidHideResolve = p_resolve;
+            });
+            return w_resolveAfterEditHeadline;
+        }
+
         // * Save body to Leo if a change has been made to the body 'document' so far
         let q_savePromise: Thenable<boolean>;
         if (
@@ -2205,10 +2222,8 @@ export class LeoUI extends NullGui {
             const w_edit = new vscode.WorkspaceEdit();
             w_edit.deleteFile(this.bodyUri, { ignoreIfNotExists: true });
             q_edit = vscode.workspace.applyEdit(w_edit).then(() => {
-                // console.log('applyEdit done');
                 return true;
             }, () => {
-                // console.log('applyEdit failed');
                 return false;
             });
         } else {
@@ -2216,10 +2231,8 @@ export class LeoUI extends NullGui {
         }
         Promise.all([q_save, q_edit])
             .then(() => {
-                // console.log('cleaned both');
                 return this.closeBody();
             }, () => {
-                // console.log('cleaned both failed');
                 return true;
             });
 
@@ -3149,6 +3162,61 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Show a headline input box that resolves to undefined only with escape.
+     * Other Leo commands interrupt by accepting the value entered so far.
+     */
+    private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise<string | undefined> {
+
+        const hib = vscode.window.createInputBox();
+        this._hibLastValue = undefined; // Prepare for 'cancel' as default.
+        const q_headlineInputBox = new Promise<string | undefined>((p_resolve, p_reject) => {
+
+            hib.ignoreFocusOut = !!p_options.ignoreFocusOut;
+            hib.value = p_options.value!;
+            hib.valueSelection = p_options.valueSelection;
+            hib.prompt = p_options.prompt;
+            this._hibDisposables.push(hib.onDidAccept(() => {
+                if (this._hib) {
+                    this._hib.enabled = false;
+                    this._hibLastValue = this._hib.value;
+                    this._hib.hide();
+                }
+            }, this));
+            if (this._hibResolve) {
+                console.error('IN _showHeadlineInputBox AND THE _hibResolve PROMISE ALREADY EXISTS!');
+            }
+            this._hibResolve = p_resolve;
+            // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
+            this._hibDisposables.push(hib.onDidHide(() => {
+                if (this._hib) {
+                    this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+                }
+                this.leoStates.leoEditHeadline = false;
+                if (this._hibResolve) {
+                    // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
+                    this._hibResolve(this._hibLastValue);
+                    // Dispose of everything disposable with the edit headline process.
+                    for (const disp of this._hibDisposables) {
+                        disp.dispose();
+                    }
+                    // Empty related global variables.
+                    this._hibDisposables = [];
+                    this._hibResolve = undefined;
+                    this._hib = undefined;
+                } else {
+                    console.log('ERROR ON onDidHide NO _hibResolve !');
+                }
+            }, this));
+            this._hibDisposables.push(hib);
+            // setup finished, set command context and show it! 
+            this._hib = hib;
+            this.leoStates.leoEditHeadline = true;
+            this._hib.show();
+        });
+        return q_headlineInputBox;
+    }
+
+    /**
      * * Asks for a new headline label, and replaces the current label with this new one one the specified, or currently selected node
      * @param p_node Specifies which node to rename, or leave undefined to rename the currently selected node
      * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
@@ -3156,18 +3224,32 @@ export class LeoUI extends NullGui {
      * @returns Thenable that resolves when done
      */
     public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Promise<Position> {
-        await this.triggerBodySave(true);
-        this.setupRefresh(
-            p_fromOutline ? Focus.Outline : Focus.Body,
-            { tree: true, states: true }
-        );
         const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
         const w_p: Position = p_node || c.p;
-        this._headlineInputOptions.prompt = p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
-        this._headlineInputOptions.value = w_p.h; // preset input pop up
-        let p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
-        if (p_newHeadline && p_newHeadline !== "\n") {
+
+        if (this._hib && this._hib.enabled) {
+            return Promise.resolve(w_p); // DO NOT REACT IF ALREADY EDITING A HEADLINE! 
+        }
+
+        await this.triggerBodySave(true);
+
+        let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+
+        this.setupRefresh(
+            w_finalFocus,
+            { tree: true, states: true }
+        );
+
+        const w_headlineInputOptions: vscode.InputBoxOptions = {
+            ignoreFocusOut: false,
+            value: w_p.h,  // preset input pop up
+            valueSelection: undefined,
+            prompt: p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE,
+        };
+        let p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
+
+        if ((p_newHeadline || p_newHeadline === "") && p_newHeadline !== "\n") {
             let w_truncated = false;
             if (p_newHeadline.indexOf("\n") >= 0) {
                 p_newHeadline = p_newHeadline.split("\n")[0];
@@ -3197,6 +3279,10 @@ export class LeoUI extends NullGui {
                 this.showOutline(true);
             }
         }
+        if (this._onDidHideResolve) {
+            this._onDidHideResolve(undefined);
+            this._onDidHideResolve = undefined;
+        }
         return w_p;
     }
 
@@ -3207,23 +3293,34 @@ export class LeoUI extends NullGui {
      * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
      * @returns Thenable that resolves when done
      */
-    public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Promise<unknown> {
-        await this.triggerBodySave(true);
-        let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
-        if (p_interrupt) {
-            this._focusInterrupt = true;
-            w_finalFocus = Focus.NoChange; // Going to use last state
-        }
-        void this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-        if (p_asChild) {
-            this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_CHILD;
-        } else {
-            this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
-        }
-        this._headlineInputOptions.value = Constants.USER_MESSAGES.DEFAULT_HEADLINE;
+    public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise<unknown> {
 
-        const p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
+        let w_hadHib = false;
+        if (this._hib && this._hib.enabled) {
+            w_hadHib = true;
+        }
+
+        let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+        if (w_hadHib) {
+            this._focusInterrupt = true; // this will affect next refresh by triggerbodysave, not the refresh of this pass
+        }
+
+        await this.triggerBodySave(true);
+
         // * if node has child and is expanded: turn p_asChild to true!
+        const w_headlineInputOptions: vscode.InputBoxOptions = {
+            ignoreFocusOut: false,
+            value: Constants.USER_MESSAGES.DEFAULT_HEADLINE,
+            valueSelection: undefined,
+            prompt: p_asChild ? Constants.USER_MESSAGES.PROMPT_INSERT_CHILD : Constants.USER_MESSAGES.PROMPT_INSERT_NODE
+        };
+
+        const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
+
+        if (this._hibInterrupted) {
+            w_finalFocus = Focus.NoChange;
+            this._hibInterrupted = false;
+        }
 
         this.lastCommandTimer = process.hrtime();
         if (this.commandTimer === undefined) {
@@ -3268,7 +3365,15 @@ export class LeoUI extends NullGui {
             }
         }
         this.lastCommandTimer = undefined;
+
+        if (this._onDidHideResolve) {
+            this._onDidHideResolve(undefined);
+            this._onDidHideResolve = undefined;
+        } else {
+            // pass
+        }
         void this.launchRefresh();
+
         return value;
 
     }
@@ -4083,107 +4188,6 @@ export class LeoUI extends NullGui {
             this._interactiveSearchInputBox?.hide();
         }
 
-    }
-
-    /**
-     * * Find / Replace All
-     * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
-     */
-    public findAll(p_replace?: boolean): Thenable<unknown> {
-
-        let w_searchString: string = this._lastSettingsUsed!.findText;
-        let w_replaceString: string = this._lastSettingsUsed!.replaceText;
-
-        const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
-        const w_startReplace = this._lastSettingsUsed?.replaceText;
-
-        return this.triggerBodySave(true)
-            .then((p_saveResult) => {
-                return this._inputFindPattern(false, w_startValue)
-                    .then((p_findString) => {
-                        if (!p_findString) {
-                            return true; // Cancelled with escape or empty string.
-                        }
-                        w_searchString = p_findString;
-                        if (p_replace) {
-                            return this._inputFindPattern(true, w_startReplace).then((p_replaceString) => {
-                                if (p_replaceString === undefined) {
-                                    return true;
-                                }
-                                w_replaceString = p_replaceString;
-                                return false;
-                            });
-                        }
-                        return false;
-                    });
-            })
-            .then((p_cancelled: boolean) => {
-                if (this._lastSettingsUsed && !p_cancelled) {
-                    this._lastSettingsUsed.findText = w_searchString;
-                    this._lastSettingsUsed.replaceText = w_replaceString;
-
-                    // * savesettings not needed, w_changeSettings is used directly
-                    void this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-
-                    const c = g.app.windowList[this.frameIndex].c;
-                    const fc = c.findCommands;
-
-                    fc.ftm.get_settings(); // TODO REMOVE?? 
-
-                    const w_changeSettings: ISettings = {
-                        // this._lastSettingsUsed
-                        // State...
-                        in_headline: false, // ! TODO !
-                        // p: Position,
-                        // Find/change strings...
-                        find_text: this._lastSettingsUsed.findText,
-                        change_text: this._lastSettingsUsed.replaceText,
-                        // Find options...
-                        file_only: this._lastSettingsUsed.searchOptions === 3,
-                        ignore_case: this._lastSettingsUsed.ignoreCase,
-                        mark_changes: this._lastSettingsUsed.markChanges,
-                        mark_finds: this._lastSettingsUsed.markFinds,
-                        node_only: this._lastSettingsUsed.searchOptions === 2,
-                        pattern_match: this._lastSettingsUsed.regExp,
-                        reverse: false,
-                        search_body: this._lastSettingsUsed.searchBody,
-                        search_headline: this._lastSettingsUsed.searchHeadline,
-                        suboutline_only: this._lastSettingsUsed.searchOptions === 1,
-                        whole_word: this._lastSettingsUsed.wholeWord,
-                        wrapping: false, // unused
-                    };
-
-                    let w_result;
-                    if (p_replace) {
-                        w_result = fc.do_change_all(w_changeSettings);
-                    } else {
-                        w_result = fc.do_find_all(w_changeSettings);
-                    }
-
-                    const w_focus = this._get_focus();
-
-                    let w_finalFocus = Focus.Body;
-
-                    if (w_focus.includes('tree') || w_focus.includes('head')) {
-                        // tree
-                        w_finalFocus = Focus.Outline;
-                    }
-                    this.loadSearchSettings();
-                    this.setupRefresh(
-                        w_finalFocus,
-                        {
-                            tree: true,
-                            body: true,
-                            // documents: false,
-                            // buttons: false,
-                            states: true
-                        }
-                    );
-                    void this.launchRefresh();
-                    return;
-
-                }
-            });
     }
 
     /**

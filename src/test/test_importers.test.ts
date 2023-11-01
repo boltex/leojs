@@ -621,7 +621,7 @@ suite('TestC', () => {
             // self.skipTest(`Not found: ${w_path}`);
         }
 
-        assert.ok(false, "THE CODON FILE ACTUALLY EXISTS IN THE TESTS!")
+        assert.ok(false, "THE CODON FILE ACTUALLY EXISTS IN THE TESTS!");
 
 
         // // with open(path, 'r') as f
@@ -3068,7 +3068,7 @@ suite('TestPerl', () => {
                 '";\n' +
                 '            }\n'
             ],
-        ]
+        ];
         await self.new_run_test(s, expected_results);
     });
     //@+node:felix.20230922223249.3: *3* TestPerl.test_multi_line_string
@@ -3101,7 +3101,7 @@ suite('TestPerl', () => {
                 '@language perl\n' +
                 '@tabwidth -4\n'
             ],
-        ]
+        ];
         await self.new_run_test(s, expected_results);
     });
     //@+node:felix.20230922223249.4: *3* TestPerl.test_perlpod_comment
@@ -3310,7 +3310,7 @@ suite('TestPhp', () => {
             }
             ?>
         `;
-        await self.new_round_trip_test(s)
+        await self.new_round_trip_test(s);
 
     });
     //@+node:felix.20230922223256.5: *3* TestPhp.test_here_doc
@@ -4396,7 +4396,7 @@ suite('TestRust', () => {
                 '    width * height\n' +
                 '}\n'
             ],
-        ]
+        ];
         await self.new_run_test(s, expected_results);
     });
     //@-others
