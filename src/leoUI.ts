@@ -217,6 +217,7 @@ export class LeoUI extends NullGui {
     private _hibResolve: undefined | ((value: string | PromiseLike<string | undefined> | undefined) => void);
     private _onDidHideResolve: undefined | ((value: PromiseLike<void> | undefined) => void);
     private _hibLastValue: undefined | string;
+    private _hibInterrupted = false;
     private _hibDisposables: vscode.Disposable[] = [];
 
     // * Timing
@@ -1144,23 +1145,17 @@ export class LeoUI extends NullGui {
             functionName = (match && match[1]) || "";
         }
         // * Check if headline edit input box is active. Validate it with current value.
-        if (!p_fromFocusChange && this._hib && this._hib.enabled && this._hibInstances) {
-
-
-
-            console.log('++++++++++++ IN triggerBodySave HIB +++++++++++++ HIDING! from :', functionName, 'instances: ', this._hibInstances);
-
+        if (!p_fromFocusChange && this._hib && this._hib.enabled) {
+            console.log('++++++++++++ IN triggerBodySave HIB -> HIDING! Was called from :', functionName, ' instances: ' + this._hibInstances.toString());
             if (this._hibInstances !== 1) {
-                console.log('ERROR this._hibInstances not 1 when hiding on triggerBodySave INTERRUPT:', this._hibInstances);
+                console.log('ERROR this._hibInstances not 1 when hiding on triggerBodySave INTERRUPT. instances: ' + this._hibInstances.toString());
             }
+            this._hibInterrupted = true;
             this._hib.enabled = false;
-
             this._hibLastValue = this._hib.value;
             this._hib.hide();
-            // TODO : CHECK IF DELAYED RESOLVE NEEDED !
             const w_resolveAfterEditHeadline = new Promise<void>((p_resolve, p_reject) => {
                 this._onDidHideResolve = p_resolve;
-                this._focusInterrupt = true;
             });
             return w_resolveAfterEditHeadline;
         } else {
@@ -1814,9 +1809,7 @@ export class LeoUI extends NullGui {
             let w_showBodyNoFocus: boolean = this.finalFocus.valueOf() !== Focus.Body; // Will preserve focus where it is without forcing into the body pane if true
             if (this._focusInterrupt) {
                 this._focusInterrupt = false;
-                if (this.finalFocus.valueOf() !== Focus.Body) {
-                    w_showBodyNoFocus = true; // TODO MAY BE NECESSARY ?
-                }
+                w_showBodyNoFocus = true;
             }
             if (!w_last || this._needLastSelectedRefresh) {
                 // lastSelectedNode will be set in _tryApplyNodeToBody !
@@ -3189,9 +3182,9 @@ export class LeoUI extends NullGui {
      */
     private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise<string | undefined> {
         if (this._hibInstances) {
-            console.log('ERROR this._hibInstances is not zero when creating input box!', this._hibInstances);
+            console.log('ERROR this._hibInstances is not zero when creating input box!  _hibInstances was: ' + this._hibInstances.toString());
         }
-        console.log('-------------------- IN _showHeadlineInputBox --------------------+');
+        console.log('-------------------- IN _showHeadlineInputBox _hibInstances was: ' + this._hibInstances.toString());
 
         const hib = vscode.window.createInputBox();
         this._hibLastValue = undefined; // Prepare for 'cancel' as default.
@@ -3202,11 +3195,12 @@ export class LeoUI extends NullGui {
             hib.valueSelection = p_options.valueSelection;
             hib.prompt = p_options.prompt;
             this._hibDisposables.push(hib.onDidAccept(() => {
-                console.log('-------------------- IN onDidAccept --------------------+');
+
+                console.log('-------------------- IN onDidAccept _hibInstances was: ');
 
                 if (this._hib) {
                     if (this._hibInstances !== 1) {
-                        console.log('ERROR this._hibInstances not 1 when hiding on accept', this._hibInstances);
+                        console.log('ERROR this._hibInstances not 1 when hiding on accept' + this._hibInstances.toString());
                     }
                     this._hib.enabled = false;
                     this._hibLastValue = this._hib.value;
@@ -3218,7 +3212,9 @@ export class LeoUI extends NullGui {
             this._hibResolve = p_resolve;
             // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
             this._hibDisposables.push(hib.onDidHide(() => {
-                console.log('-------------------- IN onDidHide --------------------+ _hibInstances: ', this._hibInstances);
+
+                console.log('-------------------- IN onDidHide _hibInstances was: ' + this._hibInstances.toString());
+
                 this._hibInstances -= 1;
                 this.leoStates.leoEditHeadline = false;
                 if (this._hibResolve) {
@@ -3256,22 +3252,23 @@ export class LeoUI extends NullGui {
      * @returns Thenable that resolves when done
      */
     public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Promise<Position> {
-        await this.triggerBodySave(true);
-        let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+        const c = g.app.windowList[this.frameIndex].c;
+        const u = c.undoer;
+        const w_p: Position = p_node || c.p;
 
-        // ! CHECK IF THIS IS NEEDED !
-        // TODO ?
-        // if (this._focusInterrupt) {
-        //     w_finalFocus = Focus.NoChange; // Going to use last state
-        // }
+        if (this._hib && this._hib.enabled) {
+            return Promise.resolve(w_p); // DO NOT REACT IF ALREADY EDITING A HEADLINE! 
+        }
+
+        await this.triggerBodySave(true);
+
+        let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
 
         this.setupRefresh(
             w_finalFocus,
             { tree: true, states: true }
         );
-        const c = g.app.windowList[this.frameIndex].c;
-        const u = c.undoer;
-        const w_p: Position = p_node || c.p;
+
         const w_headlineInputOptions: vscode.InputBoxOptions = {
             ignoreFocusOut: false,
             value: w_p.h,  // preset input pop up
@@ -3331,14 +3328,18 @@ export class LeoUI extends NullGui {
         const test = Math.floor(Math.random() * 10) + 1;
         console.log("starting", test);
 
-        await this.triggerBodySave(true);
-        console.log("after triggerBodySave", test);
+        let w_hadHib = false;
+        if (this._hib && this._hib.enabled) {
+            w_hadHib = true;
+        }
 
         let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+        if (w_hadHib) {
+            this._focusInterrupt = true; // this will affect next refresh by triggerbodysave, not the refresh of this pass
+        }
 
-        // if (this._focusInterrupt) {
-        //     w_finalFocus = Focus.NoChange; // Going to use last state
-        // }
+        await this.triggerBodySave(true);
+        console.log("after triggerBodySave", test);
 
         const w_headlineInputOptions: vscode.InputBoxOptions = {
             ignoreFocusOut: false,
@@ -3350,6 +3351,14 @@ export class LeoUI extends NullGui {
         const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
         console.log('finished awaiting in insertNode in ', test);
         // * if node has child and is expanded: turn p_asChild to true!
+
+        // IF WE WERE INTERUPTED DO THIS:
+        //  w_finalFocus = Focus.NoChange; // Going to use last state
+        if (this._hibInterrupted) {
+            w_finalFocus = Focus.NoChange;
+            this._hibInterrupted = false;
+        }
+
 
         this.lastCommandTimer = process.hrtime();
         if (this.commandTimer === undefined) {
@@ -3400,8 +3409,9 @@ export class LeoUI extends NullGui {
             this._onDidHideResolve(undefined);
             this._onDidHideResolve = undefined;
         } else {
-            void this.launchRefresh();
+            // pass
         }
+        void this.launchRefresh();
 
         return value;
 
@@ -4217,107 +4227,6 @@ export class LeoUI extends NullGui {
             this._interactiveSearchInputBox?.hide();
         }
 
-    }
-
-    /**
-     * * Find / Replace All
-     * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
-     */
-    public findAll(p_replace?: boolean): Thenable<unknown> {
-
-        let w_searchString: string = this._lastSettingsUsed!.findText;
-        let w_replaceString: string = this._lastSettingsUsed!.replaceText;
-
-        const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
-        const w_startReplace = this._lastSettingsUsed?.replaceText;
-
-        return this.triggerBodySave(true)
-            .then((p_saveResult) => {
-                return this._inputFindPattern(false, w_startValue)
-                    .then((p_findString) => {
-                        if (!p_findString) {
-                            return true; // Cancelled with escape or empty string.
-                        }
-                        w_searchString = p_findString;
-                        if (p_replace) {
-                            return this._inputFindPattern(true, w_startReplace).then((p_replaceString) => {
-                                if (p_replaceString === undefined) {
-                                    return true;
-                                }
-                                w_replaceString = p_replaceString;
-                                return false;
-                            });
-                        }
-                        return false;
-                    });
-            })
-            .then((p_cancelled: boolean) => {
-                if (this._lastSettingsUsed && !p_cancelled) {
-                    this._lastSettingsUsed.findText = w_searchString;
-                    this._lastSettingsUsed.replaceText = w_replaceString;
-
-                    // * savesettings not needed, w_changeSettings is used directly
-                    void this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-
-                    const c = g.app.windowList[this.frameIndex].c;
-                    const fc = c.findCommands;
-
-                    fc.ftm.get_settings(); // TODO REMOVE?? 
-
-                    const w_changeSettings: ISettings = {
-                        // this._lastSettingsUsed
-                        // State...
-                        in_headline: false, // ! TODO !
-                        // p: Position,
-                        // Find/change strings...
-                        find_text: this._lastSettingsUsed.findText,
-                        change_text: this._lastSettingsUsed.replaceText,
-                        // Find options...
-                        file_only: this._lastSettingsUsed.searchOptions === 3,
-                        ignore_case: this._lastSettingsUsed.ignoreCase,
-                        mark_changes: this._lastSettingsUsed.markChanges,
-                        mark_finds: this._lastSettingsUsed.markFinds,
-                        node_only: this._lastSettingsUsed.searchOptions === 2,
-                        pattern_match: this._lastSettingsUsed.regExp,
-                        reverse: false,
-                        search_body: this._lastSettingsUsed.searchBody,
-                        search_headline: this._lastSettingsUsed.searchHeadline,
-                        suboutline_only: this._lastSettingsUsed.searchOptions === 1,
-                        whole_word: this._lastSettingsUsed.wholeWord,
-                        wrapping: false, // unused
-                    };
-
-                    let w_result;
-                    if (p_replace) {
-                        w_result = fc.do_change_all(w_changeSettings);
-                    } else {
-                        w_result = fc.do_find_all(w_changeSettings);
-                    }
-
-                    const w_focus = this._get_focus();
-
-                    let w_finalFocus = Focus.Body;
-
-                    if (w_focus.includes('tree') || w_focus.includes('head')) {
-                        // tree
-                        w_finalFocus = Focus.Outline;
-                    }
-                    this.loadSearchSettings();
-                    this.setupRefresh(
-                        w_finalFocus,
-                        {
-                            tree: true,
-                            body: true,
-                            // documents: false,
-                            // buttons: false,
-                            states: true
-                        }
-                    );
-                    void this.launchRefresh();
-                    return;
-
-                }
-            });
     }
 
     /**

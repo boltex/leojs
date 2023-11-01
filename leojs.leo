@@ -210,7 +210,6 @@
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
-<v t="felix.20220505215924.11"><vh>Find / Replace All</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
 <v t="felix.20220505215924.14"><vh>saveSearchSettings</vh></v>
@@ -3684,6 +3683,7 @@ export class LeoUI extends NullGui {
     private _hibResolve: undefined | ((value: string | PromiseLike&lt;string | undefined&gt; | undefined) =&gt; void);
     private _onDidHideResolve: undefined | ((value: PromiseLike&lt;void&gt; | undefined) =&gt; void);
     private _hibLastValue: undefined | string;
+    private _hibInterrupted = false;
     private _hibDisposables: vscode.Disposable[] = [];
 
     // * Timing
@@ -4230,22 +4230,23 @@ public async minibuffer(): Promise&lt;unknown&gt; {
  * @returns Thenable that resolves when done
  */
 public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Promise&lt;Position&gt; {
-    await this.triggerBodySave(true);
-    let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+    const c = g.app.windowList[this.frameIndex].c;
+    const u = c.undoer;
+    const w_p: Position = p_node || c.p;
 
-    // ! CHECK IF THIS IS NEEDED !
-    // TODO ?
-    // if (this._focusInterrupt) {
-    //     w_finalFocus = Focus.NoChange; // Going to use last state
-    // }
+    if (this._hib &amp;&amp; this._hib.enabled) {
+        return Promise.resolve(w_p); // DO NOT REACT IF ALREADY EDITING A HEADLINE! 
+    }
+
+    await this.triggerBodySave(true);
+
+    let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
 
     this.setupRefresh(
         w_finalFocus,
         { tree: true, states: true }
     );
-    const c = g.app.windowList[this.frameIndex].c;
-    const u = c.undoer;
-    const w_p: Position = p_node || c.p;
+
     const w_headlineInputOptions: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
         value: w_p.h,  // preset input pop up
@@ -4306,14 +4307,18 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     const test = Math.floor(Math.random() * 10) + 1;
     console.log("starting", test);
 
-    await this.triggerBodySave(true);
-    console.log("after triggerBodySave", test);
+    let w_hadHib = false;
+    if (this._hib &amp;&amp; this._hib.enabled) {
+        w_hadHib = true;
+    }
 
     let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
+    if (w_hadHib) {
+        this._focusInterrupt = true; // this will affect next refresh by triggerbodysave, not the refresh of this pass
+    }
 
-    // if (this._focusInterrupt) {
-    //     w_finalFocus = Focus.NoChange; // Going to use last state
-    // }
+    await this.triggerBodySave(true);
+    console.log("after triggerBodySave", test);
 
     const w_headlineInputOptions: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
@@ -4325,6 +4330,14 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
     console.log('finished awaiting in insertNode in ', test);
     // * if node has child and is expanded: turn p_asChild to true!
+
+    // IF WE WERE INTERUPTED DO THIS:
+    //  w_finalFocus = Focus.NoChange; // Going to use last state
+    if (this._hibInterrupted) {
+        w_finalFocus = Focus.NoChange;
+        this._hibInterrupted = false;
+    }
+
 
     this.lastCommandTimer = process.hrtime();
     if (this.commandTimer === undefined) {
@@ -4375,8 +4388,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
         this._onDidHideResolve(undefined);
         this._onDidHideResolve = undefined;
     } else {
-        void this.launchRefresh();
+        // pass
     }
+    void this.launchRefresh();
 
     return value;
 
@@ -6607,7 +6621,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoNextVisible",
   "key": "down",
-  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNavNext",
@@ -6617,12 +6631,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.gotoPrevVisible",
   "key": "up",
-  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNavPrev",
@@ -6632,7 +6646,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoPrevVisible",
   "key": "alt+up",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.contractOrGoLeft",
@@ -6642,7 +6656,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.contractOrGoLeft",
   "key": "alt+left",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.expandAndGoRight",
@@ -6652,7 +6666,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.expandAndGoRight",
   "key": "alt+right",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 </t>
 <t tx="felix.20201214205159.79">"cleanup": "node ./cleanup.js",
@@ -7519,9 +7533,7 @@ public gotSelectedNode(p_node: Position): void {
         let w_showBodyNoFocus: boolean = this.finalFocus.valueOf() !== Focus.Body; // Will preserve focus where it is without forcing into the body pane if true
         if (this._focusInterrupt) {
             this._focusInterrupt = false;
-            if (this.finalFocus.valueOf() !== Focus.Body) {
-                w_showBodyNoFocus = true; // TODO MAY BE NECESSARY ?
-            }
+            w_showBodyNoFocus = true;
         }
         if (!w_last || this._needLastSelectedRefresh) {
             // lastSelectedNode will be set in _tryApplyNodeToBody !
@@ -8783,23 +8795,17 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean
         functionName = (match &amp;&amp; match[1]) || "";
     }
     // * Check if headline edit input box is active. Validate it with current value.
-    if (!p_fromFocusChange &amp;&amp; this._hib &amp;&amp; this._hib.enabled &amp;&amp; this._hibInstances) {
-
-
-
-        console.log('++++++++++++ IN triggerBodySave HIB +++++++++++++ HIDING! from :', functionName, 'instances: ', this._hibInstances);
-
+    if (!p_fromFocusChange &amp;&amp; this._hib &amp;&amp; this._hib.enabled) {
+        console.log('++++++++++++ IN triggerBodySave HIB -&gt; HIDING! Was called from :', functionName, ' instances: ' + this._hibInstances.toString());
         if (this._hibInstances !== 1) {
-            console.log('ERROR this._hibInstances not 1 when hiding on triggerBodySave INTERRUPT:', this._hibInstances);
+            console.log('ERROR this._hibInstances not 1 when hiding on triggerBodySave INTERRUPT. instances: ' + this._hibInstances.toString());
         }
+        this._hibInterrupted = true;
         this._hib.enabled = false;
-
         this._hibLastValue = this._hib.value;
         this._hib.hide();
-        // TODO : CHECK IF DELAYED RESOLVE NEEDED !
         const w_resolveAfterEditHeadline = new Promise&lt;void&gt;((p_resolve, p_reject) =&gt; {
             this._onDidHideResolve = p_resolve;
-            this._focusInterrupt = true;
         });
         return w_resolveAfterEditHeadline;
     } else {
@@ -9744,108 +9750,6 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 }
 </t>
 <t tx="felix.20220505215924.1"></t>
-<t tx="felix.20220505215924.11">/**
- * * Find / Replace All
- * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
- */
-public findAll(p_replace?: boolean): Thenable&lt;unknown&gt; {
-
-    let w_searchString: string = this._lastSettingsUsed!.findText;
-    let w_replaceString: string = this._lastSettingsUsed!.replaceText;
-
-    const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
-    const w_startReplace = this._lastSettingsUsed?.replaceText;
-
-    return this.triggerBodySave(true)
-        .then((p_saveResult) =&gt; {
-            return this._inputFindPattern(false, w_startValue)
-                .then((p_findString) =&gt; {
-                    if (!p_findString) {
-                        return true; // Cancelled with escape or empty string.
-                    }
-                    w_searchString = p_findString;
-                    if (p_replace) {
-                        return this._inputFindPattern(true, w_startReplace).then((p_replaceString) =&gt; {
-                            if (p_replaceString === undefined) {
-                                return true;
-                            }
-                            w_replaceString = p_replaceString;
-                            return false;
-                        });
-                    }
-                    return false;
-                });
-        })
-        .then((p_cancelled: boolean) =&gt; {
-            if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
-                this._lastSettingsUsed.findText = w_searchString;
-                this._lastSettingsUsed.replaceText = w_replaceString;
-
-                // * savesettings not needed, w_changeSettings is used directly
-                void this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-
-                const c = g.app.windowList[this.frameIndex].c;
-                const fc = c.findCommands;
-
-                fc.ftm.get_settings(); // TODO REMOVE?? 
-
-                const w_changeSettings: ISettings = {
-                    // this._lastSettingsUsed
-                    // State...
-                    in_headline: false, // ! TODO !
-                    // p: Position,
-                    // Find/change strings...
-                    find_text: this._lastSettingsUsed.findText,
-                    change_text: this._lastSettingsUsed.replaceText,
-                    // Find options...
-                    file_only: this._lastSettingsUsed.searchOptions === 3,
-                    ignore_case: this._lastSettingsUsed.ignoreCase,
-                    mark_changes: this._lastSettingsUsed.markChanges,
-                    mark_finds: this._lastSettingsUsed.markFinds,
-                    node_only: this._lastSettingsUsed.searchOptions === 2,
-                    pattern_match: this._lastSettingsUsed.regExp,
-                    reverse: false,
-                    search_body: this._lastSettingsUsed.searchBody,
-                    search_headline: this._lastSettingsUsed.searchHeadline,
-                    suboutline_only: this._lastSettingsUsed.searchOptions === 1,
-                    whole_word: this._lastSettingsUsed.wholeWord,
-                    wrapping: false, // unused
-                };
-
-                let w_result;
-                if (p_replace) {
-                    w_result = fc.do_change_all(w_changeSettings);
-                } else {
-                    w_result = fc.do_find_all(w_changeSettings);
-                }
-
-                const w_focus = this._get_focus();
-
-                let w_finalFocus = Focus.Body;
-
-                if (w_focus.includes('tree') || w_focus.includes('head')) {
-                    // tree
-                    w_finalFocus = Focus.Outline;
-                }
-                this.loadSearchSettings();
-                this.setupRefresh(
-                    w_finalFocus,
-                    {
-                        tree: true,
-                        body: true,
-                        // documents: false,
-                        // buttons: false,
-                        states: true
-                    }
-                );
-                void this.launchRefresh();
-                return;
-
-            }
-        });
-}
-
-</t>
 <t tx="felix.20220505215924.12">/**
  * * Set search setting in the search webview
  * @param p_id string id of the setting name
@@ -14734,9 +14638,9 @@ Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the
  */
 private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;string | undefined&gt; {
     if (this._hibInstances) {
-        console.log('ERROR this._hibInstances is not zero when creating input box!', this._hibInstances);
+        console.log('ERROR this._hibInstances is not zero when creating input box!  _hibInstances was: ' + this._hibInstances.toString());
     }
-    console.log('-------------------- IN _showHeadlineInputBox --------------------+');
+    console.log('-------------------- IN _showHeadlineInputBox _hibInstances was: ' + this._hibInstances.toString());
 
     const hib = vscode.window.createInputBox();
     this._hibLastValue = undefined; // Prepare for 'cancel' as default.
@@ -14747,11 +14651,12 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         hib.valueSelection = p_options.valueSelection;
         hib.prompt = p_options.prompt;
         this._hibDisposables.push(hib.onDidAccept(() =&gt; {
-            console.log('-------------------- IN onDidAccept --------------------+');
+
+            console.log('-------------------- IN onDidAccept _hibInstances was: ');
 
             if (this._hib) {
                 if (this._hibInstances !== 1) {
-                    console.log('ERROR this._hibInstances not 1 when hiding on accept', this._hibInstances);
+                    console.log('ERROR this._hibInstances not 1 when hiding on accept' + this._hibInstances.toString());
                 }
                 this._hib.enabled = false;
                 this._hibLastValue = this._hib.value;
@@ -14763,7 +14668,9 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         this._hibResolve = p_resolve;
         // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
         this._hibDisposables.push(hib.onDidHide(() =&gt; {
-            console.log('-------------------- IN onDidHide --------------------+ _hibInstances: ', this._hibInstances);
+
+            console.log('-------------------- IN onDidHide _hibInstances was: ' + this._hibInstances.toString());
+
             this._hibInstances -= 1;
             this.leoStates.leoEditHeadline = false;
             if (this._hibResolve) {
