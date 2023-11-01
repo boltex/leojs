@@ -4253,9 +4253,8 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
         prompt: p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE,
     };
     let p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
-    console.log('finished awaiting in editHeadline');
 
-    if (p_newHeadline &amp;&amp; p_newHeadline !== "\n") {
+    if ((p_newHeadline || p_newHeadline === "") &amp;&amp; p_newHeadline !== "\n") {
         let w_truncated = false;
         if (p_newHeadline.indexOf("\n") &gt;= 0) {
             p_newHeadline = p_newHeadline.split("\n")[0];
@@ -4286,8 +4285,6 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
         }
     }
     if (this._onDidHideResolve) {
-        console.log('RESOLVING!');
-
         this._onDidHideResolve(undefined);
         this._onDidHideResolve = undefined;
     }
@@ -4303,8 +4300,6 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
  * @returns Thenable that resolves when done
  */
 public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise&lt;unknown&gt; {
-    const test = Math.floor(Math.random() * 10) + 1;
-    console.log("starting", test);
 
     let w_hadHib = false;
     if (this._hib &amp;&amp; this._hib.enabled) {
@@ -4317,8 +4312,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     }
 
     await this.triggerBodySave(true);
-    console.log("after triggerBodySave", test);
 
+    // * if node has child and is expanded: turn p_asChild to true!
     const w_headlineInputOptions: vscode.InputBoxOptions = {
         ignoreFocusOut: false,
         value: Constants.USER_MESSAGES.DEFAULT_HEADLINE,
@@ -4327,16 +4322,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     };
 
     const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
-    console.log('finished awaiting in insertNode in ', test);
-    // * if node has child and is expanded: turn p_asChild to true!
 
-    // IF WE WERE INTERUPTED DO THIS:
-    //  w_finalFocus = Focus.NoChange; // Going to use last state
     if (this._hibInterrupted) {
         w_finalFocus = Focus.NoChange;
         this._hibInterrupted = false;
     }
-
 
     this.lastCommandTimer = process.hrtime();
     if (this.commandTimer === undefined) {
@@ -4383,7 +4373,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     this.lastCommandTimer = undefined;
 
     if (this._onDidHideResolve) {
-        console.log('RESOLVING!', test);
         this._onDidHideResolve(undefined);
         this._onDidHideResolve = undefined;
     } else {
@@ -14644,7 +14633,9 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         this._hibResolve = p_resolve;
         // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
         this._hibDisposables.push(hib.onDidHide(() =&gt; {
-
+            if (this._hib) {
+                this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+            }
             this.leoStates.leoEditHeadline = false;
             if (this._hibResolve) {
                 // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.

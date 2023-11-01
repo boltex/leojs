@@ -3188,7 +3188,9 @@ export class LeoUI extends NullGui {
             this._hibResolve = p_resolve;
             // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
             this._hibDisposables.push(hib.onDidHide(() => {
-
+                if (this._hib) {
+                    this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+                }
                 this.leoStates.leoEditHeadline = false;
                 if (this._hibResolve) {
                     // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
@@ -3246,9 +3248,8 @@ export class LeoUI extends NullGui {
             prompt: p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE,
         };
         let p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
-        console.log('finished awaiting in editHeadline');
 
-        if (p_newHeadline && p_newHeadline !== "\n") {
+        if ((p_newHeadline || p_newHeadline === "") && p_newHeadline !== "\n") {
             let w_truncated = false;
             if (p_newHeadline.indexOf("\n") >= 0) {
                 p_newHeadline = p_newHeadline.split("\n")[0];
@@ -3279,8 +3280,6 @@ export class LeoUI extends NullGui {
             }
         }
         if (this._onDidHideResolve) {
-            console.log('RESOLVING!');
-
             this._onDidHideResolve(undefined);
             this._onDidHideResolve = undefined;
         }
@@ -3295,8 +3294,6 @@ export class LeoUI extends NullGui {
      * @returns Thenable that resolves when done
      */
     public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise<unknown> {
-        const test = Math.floor(Math.random() * 10) + 1;
-        console.log("starting", test);
 
         let w_hadHib = false;
         if (this._hib && this._hib.enabled) {
@@ -3309,8 +3306,8 @@ export class LeoUI extends NullGui {
         }
 
         await this.triggerBodySave(true);
-        console.log("after triggerBodySave", test);
 
+        // * if node has child and is expanded: turn p_asChild to true!
         const w_headlineInputOptions: vscode.InputBoxOptions = {
             ignoreFocusOut: false,
             value: Constants.USER_MESSAGES.DEFAULT_HEADLINE,
@@ -3319,16 +3316,11 @@ export class LeoUI extends NullGui {
         };
 
         const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
-        console.log('finished awaiting in insertNode in ', test);
-        // * if node has child and is expanded: turn p_asChild to true!
 
-        // IF WE WERE INTERUPTED DO THIS:
-        //  w_finalFocus = Focus.NoChange; // Going to use last state
         if (this._hibInterrupted) {
             w_finalFocus = Focus.NoChange;
             this._hibInterrupted = false;
         }
-
 
         this.lastCommandTimer = process.hrtime();
         if (this.commandTimer === undefined) {
@@ -3375,7 +3367,6 @@ export class LeoUI extends NullGui {
         this.lastCommandTimer = undefined;
 
         if (this._onDidHideResolve) {
-            console.log('RESOLVING!', test);
             this._onDidHideResolve(undefined);
             this._onDidHideResolve = undefined;
         } else {
