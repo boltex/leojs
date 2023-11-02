@@ -942,6 +942,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 - Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
 - Implemented importers
 - Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
+- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export function deactivate() {
