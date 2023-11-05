@@ -3065,7 +3065,6 @@ export class LeoUI extends NullGui {
         // Wait for _isBusyTriggerSave resolve because the full body save may change available commands
         await this.triggerBodySave(true);
 
-        // TODO use commandHistory!
         const c = g.app.windowList[this.frameIndex].c;
 
         if (!c.commandHistory.length) {
@@ -3566,11 +3565,14 @@ export class LeoUI extends NullGui {
     /**
      * List all marked nodes.
      */
-    public findQuickMarked(): Thenable<unknown> {
+    public findQuickMarked(p_preserveFocus?: boolean): Thenable<unknown> {
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
         scon.qsc_show_marked();
         this._leoGotoProvider.refreshTreeRoot();
+        if (p_preserveFocus && (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
+            return Promise.resolve();
+        }
         return this.showGotoPane(); // Finish by opening and focussing nav pane
     }
 

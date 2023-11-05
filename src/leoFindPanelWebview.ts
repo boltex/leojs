@@ -46,6 +46,10 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         void this._leoUI.navTextClear();
                         break;
                     }
+                    case 'leoNavMarkedList': {
+                        void this._leoUI.findQuickMarked(true);
+                        break;
+                    }
                     case 'gotFocus': {
                         void utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
                         break;
