@@ -4177,7 +4177,12 @@ export function es_exception(p_error?: any, c?: Commands): string {
     };
 
     // p_error = JSON.stringify(p_error, getCircularReplacer());
-    es_print_error('es_exception called with error: ', p_error);
+
+    if (p_error.stack) {
+        es_print_error([p_error.stack]);
+    } else {
+        es_print_error('es_exception called with error: ', p_error);
+    }
     return '<no file>';
 }
 
@@ -5711,6 +5716,55 @@ export function findNodeInTree(
     return undefined;
 }
 //@-others
+//@+node:felix.20231105222444.1: *3* g.handleScriptException
+export function handleScriptException(
+    c: Commands,
+    p: Position,
+    e: any
+    // script?: string,  // No longer used.
+    // script1?: string,  // No longer used.
+): void {
+    warning("exception executing script");
+    es_exception(e);
+
+    // Careful: this test is no longer guaranteed.
+    if (p.v.context != c) {
+        return;
+    }
+
+    // let [fileName, n] = g.getLastTracebackFileAndLineNumber();
+
+    try {
+
+        // c.goToScriptLineNumber(n, p);
+        //@+<< dump the lines near the error >>
+        //@+node:felix.20231105222444.2: *4* << dump the lines near the error >>
+        // if g.os_path_exists(fileName)
+
+        //     with open(fileName) as f
+        //         lines = f.readlines()
+
+        // else
+        //     lines = g.splitLines(script)
+
+
+        // s = '-' * 20
+        // g.es_print('', s)
+        // // Print surrounding lines.
+        // i = max(0, n - 2)
+        // j = min(n + 2, len(lines))
+
+        // while i < j
+        //     ch = '*' if i == n - 1 else ' '
+        //     s = f"{ch} line {i+1:d}: {lines[i]}"
+        //     g.es('', s, newline=False)
+        //     i += 1
+        //@-<< dump the lines near the error >>
+    } catch (e) {
+        es_print('Unexpected exception in g.handleScriptException');
+        es_exception(e);
+    }
+}
 //@+node:felix.20230805145003.1: ** g.Sentinels
 //@+node:felix.20230805145003.2: *3* g.is_invisible_sentinel
 /**

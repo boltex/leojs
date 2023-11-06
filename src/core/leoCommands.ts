@@ -420,7 +420,7 @@ export class Commands {
     }
 
     //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
-    @cmd('execute-script', 'Execute a *Leo* script, written in python.')
+    @cmd('execute-script', 'Execute a *Leo* script, written in javascript.')
     public async executeScript(
         args: any = undefined,
         p: Position | undefined = undefined,
@@ -453,7 +453,6 @@ export class Commands {
             p = undefined;
         }
 
-        const script1 = script;
         let run_pyflakes: boolean;
         if (runPyflakes) {
             run_pyflakes = c.config.getBool('run-pyflakes-on-write', false);
@@ -486,7 +485,10 @@ export class Commands {
                 script += '\n'; // Make sure we end the script properly.
 
                 // Wrap script as an IIAFE to allow 'await' right out the box.
-                script = "(async () => {\n" + script + "\n})();";
+                script = "(async () => {\n try {\n" +
+                    script +
+                    "} catch (e) { g.handleScriptException(c, p, e); }" +
+                    "\n})();";
 
                 try {
                     if (!namespace || !namespace['script_gnx']) {
@@ -506,7 +508,7 @@ export class Commands {
                     if (raiseFlag) {
                         throw e;
                     }
-                    // g.handleScriptException(c, script_p);
+                    g.handleScriptException(c, script_p, e);
                 } finally {
                     // del sys.path[0]; // TODO : needed ?
                     // del sys.path[0]; // TODO : needed ?
