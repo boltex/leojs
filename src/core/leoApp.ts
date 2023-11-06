@@ -2577,7 +2577,7 @@ export class LoadManager {
             g.es_print(`   total:${utils.getDurationMs(t1, t5)} ms`);
             console.log('');
         }
-
+        g.app.gui.fullRefresh();
         return ok;
     }
 

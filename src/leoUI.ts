@@ -1512,6 +1512,26 @@ export class LeoUI extends NullGui {
 
         const w_showBodyNoFocus: boolean = this.finalFocus.valueOf() !== Focus.Body;
 
+        // console.log('showBodyIfClosed', this.showBodyIfClosed);// 
+        // console.log('showOutlineIfClosed', this.showOutlineIfClosed);// 
+        // console.log('explorer visible', this._leoTreeExView.visible);// 
+        // console.log('visible', this._leoTreeView.visible); // 
+        // console.log('this._refreshType.tree', this._refreshType.tree);
+        // console.log('this._refreshType.body', this._refreshType.body); //
+
+        // * Force refresh tree when body update required for 'navigation/insert node' commands
+        if (
+
+            this.showBodyIfClosed &&
+            this.showOutlineIfClosed &&
+            !this.isOutlineVisible() &&
+            this._refreshType.body
+
+        ) {
+            // console.log('HAD TO ADJUST!');
+            this._refreshType.tree = true;
+        }
+
         // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
         if (this._refreshType.tree) {
             this._refreshType.tree = false;

@@ -253,12 +253,10 @@ export async function activate(p_context: vscode.ExtensionContext) {
         g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
         g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
 
-        console.log('GOT WORKSPACE: starting file-system ZIP & DB tests');
-
+        // console.log('GOT WORKSPACE: starting file-system ZIP & DB tests');
         if (0) {
             await dbTests();
         }
-
         if (0) {
             await readZipTest();
         } else if (0) {
