@@ -3319,6 +3319,10 @@ export class LeoUI extends NullGui {
             w_hadHib = true;
         }
 
+        if (!this.isOutlineVisible()) {
+            p_fromOutline = false;
+        }
+
         let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
         if (w_hadHib) {
             this._focusInterrupt = true; // this will affect next refresh by triggerbodysave, not the refresh of this pass
@@ -3333,6 +3337,14 @@ export class LeoUI extends NullGui {
             valueSelection: undefined,
             prompt: p_asChild ? Constants.USER_MESSAGES.PROMPT_INSERT_CHILD : Constants.USER_MESSAGES.PROMPT_INSERT_NODE
         };
+
+        if (w_hadHib && !this.isOutlineVisible()) {
+            await new Promise((p_resolve, p_reject) => {
+                setTimeout(() => {
+                    p_resolve(undefined);
+                }, 60);
+            });
+        }
 
         const p_newHeadline = await this._showHeadlineInputBox(w_headlineInputOptions);
 
@@ -3355,8 +3367,19 @@ export class LeoUI extends NullGui {
         let value: any = undefined;
         const p = p_node ? p_node : c.p;
 
+        const w_refreshType: ReqRefresh = { documents: true, buttons: true, states: true };
+        if (!this.isOutlineVisible()) {
+
+        }
+        if (this.isOutlineVisible()) {
+            w_refreshType.tree = true;
+        } else {
+            w_refreshType.body = true;
+        }
+
         if (p.__eq__(c.p)) {
-            this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
+            w_refreshType.body = true;
+            this.setupRefresh(w_finalFocus, w_refreshType);
             this._insertAndSetHeadline(p_newHeadline, p_asChild); // no need for re-selection
         } else {
             const old_p = c.p;  // c.p is old already selected
@@ -3365,16 +3388,17 @@ export class LeoUI extends NullGui {
             // Only if 'keep' old position was needed (specified with a p_node parameter), and old_p still exists
             if (!!p_node && c.positionExists(old_p)) {
                 // no need to refresh body
-                this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
+                this.setupRefresh(w_finalFocus, w_refreshType);
                 c.selectPosition(old_p);
             } else {
                 old_p._childIndex = old_p._childIndex + 1;
                 if (!!p_node && c.positionExists(old_p)) {
                     // no need to refresh body
-                    this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
+                    this.setupRefresh(w_finalFocus, w_refreshType);
                     c.selectPosition(old_p);
                 } else {
-                    this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
+                    w_refreshType.body = true;
+                    this.setupRefresh(w_finalFocus, w_refreshType);
                 }
             }
         }
