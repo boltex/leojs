@@ -2672,17 +2672,14 @@ export class LocalConfigManager {
      * Find and set the indicated setting, either in the local file or in
      * myLeoSettings.leo.
      */
-    public setUserSetting(setting: string, value: any): void {
+    public async setUserSetting(setting: string, value: any): Promise<void> {
         let c: Commands | undefined = this.c;
 
         let fn: string = g.shortFileName(c.fileName());
         let p: Position | undefined = this.findSettingsPosition(setting);
 
         if (!p || !p.__bool__()) {
-            // c = c.openMyLeoSettings();
-            // TODO !
-            // ! Make command that builds outline of settings!
-            // ! From the leojs vscode config settings
+            c = await c.openMyLeoSettings();
             if (!c) {
                 return;
             }
@@ -2703,7 +2700,7 @@ export class LocalConfigManager {
         let h = setting;
         let i = h.indexOf('=');
         if (i > -1) {
-            h = h.substring(2).trim();
+            h = h.slice(0, i).trim();
         }
         p.h = `${h} = ${value}`;
         console.log(`Updated '${setting}' in ${fn}`); // #2390.

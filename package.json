@@ -32,6 +32,7 @@
     "color": "#f1af88",
     "theme": "light"
   },
+  "preview": true,
   "activationEvents": [
     "onStartupFinished"
   ],
