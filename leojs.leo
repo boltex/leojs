@@ -9,9 +9,6 @@
 <v t="ekr.20201209145256.1"><vh>Startup</vh>
 <v t="ekr.20201214084854.1"><vh>@file scripts.txt</vh></v>
 </v>
-<v t="felix.20230920221529.1"><vh>Notes</vh>
-<v t="felix.20230920221532.1"><vh>Python to js Tips</vh></v>
-</v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
@@ -1163,7 +1160,6 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 </t>
 <t tx="felix.20201208224703.1">@language rest
 @wrap
-
 # How to install and run the development version
 
 Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
@@ -1176,6 +1172,39 @@ Furthermore, if you've never ran a vscode extension in an **Extension Developmen
 
 If you're having problems, try [running this sample extension](https://github.com/Microsoft/vscode-extension-samples/tree/master/helloworld-sample#running-the-sample) first to catch underlying problems or missing dependencies.
 
+## Converting from Python to Typescript
+
+### Raw String
+
+Raw String (prefixed with an 'r') do not exist in js. Except for regex defined with slashes.
+
+Those regex defined with slashes are equivalent to raw strings being compiled into a regex in python.
+
+If raw strings are needed for strings OTHER THAN regex, then the have to be escaped. (\\r, \\n, etc.)
+
+This applies for regular strings and multiline strings.
+
+### Multiline string
+
+Multiline strings can be made with back-ticks "`" .
+
+### Regex 'match' methods
+
+The regexp 'match' method exists in python, but it only matches at the start of the string.
+
+This implies that when the 'match' method is used in js, a caret "^" has to be prefixed onto the regex to match at the start of the string.
+
+### Regex 'end-of-line' and 'm' switch
+
+If a regex uses the '\$' character to match an end-of-line, it needs the 'm' switch if the tested string has '\n' at the end. (is considered multiline)
+
+No need for 'm' switch for a '\$' match if the tested string has no newlines at all.
+
+### For 'in/of' loops
+
+A "for in" loop in python loops over the values which is equivalent to a "for of" loop in js.
+
+Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
 </t>
 <t tx="felix.20201209011931.1">export class LeoOutlineProvider implements vscode.TreeDataProvider&lt;Position&gt; {
     private _onDidChangeTreeData: vscode.EventEmitter&lt;Position | undefined&gt; = new vscode.EventEmitter&lt;Position | undefined&gt;();
@@ -4430,7 +4459,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.81.0"
+    "vscode": "^1.83.0"
   },
   "keywords": [
     "leo",
@@ -4446,6 +4475,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "color": "#f1af88",
     "theme": "light"
   },
+  "preview": true,
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -4463,10 +4493,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "f865954",
-  "gitBranch": "devel",
-  "gitDate": "2023-11-06 00:16:20 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6741,7 +6768,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/pako": "^2.0.0",
 "@types/safe-json-stringify": "^1.1.2",
 "@types/sql.js": "^1.4.4",
-"@types/vscode": "^1.81.0",
+"@types/vscode": "^1.83.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
@@ -14623,38 +14650,6 @@ public async tabCycle(): Promise&lt;unknown&gt; {
 // These plugins contain the write code for all kinds of special @auto nodes.
 // Each plugin must define a top-level writer_dict dictionary describing the plugin.
 @language typescript
-</t>
-<t tx="felix.20230920221529.1"></t>
-<t tx="felix.20230920221532.1">TODO : cleanup this list into proper markdown!
-
-1-
-Raw String (prefixed with an 'r') do not exist in js. Except for regex defined with slashes. 
-
-Those regex defined with slashes are equivalent to raw strings being compiled into a regex in python.
-
-If raw strings are needed for strings OTHER THAN regex, then the have to be escaped. (\\r, \\n, etc.)
-
-This applies for regular strings and multiline strings.
-
-2-
-Multiline strings can be made with back-ticks "`" .
-
-3-
-the regexp 'match' method exists in python, but it only matches at the start of the string. 
-
-So when the 'match' method is used in js, a caret "^" has to be prefixed onto the regex to match at the start of the string.
-
-4-
-If a regex uses the '$' character to match an end-of-line, it needs the 'm' switch if the tested string has '\n' at the end.
-(is considered multiline)
-no need for 'm' switch for a '$' match if the tested string has no newlines at all.
-
-5-
-a "for in" loop in python loops over the values which is equivalent to a "for of" loop in js. 
-
-Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
-
-
 </t>
 <t tx="felix.20231029213146.1">/**
  * Show a headline input box that resolves to undefined only with escape.

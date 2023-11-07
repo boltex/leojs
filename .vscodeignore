@@ -10,9 +10,13 @@ webpack.config.js
 .yarnrc
 **/tsconfig.json
 **/.eslintrc.json
+**/.prettierignore
+**/.prettierrc
 **/*.map
 **/*.ts
 leojs.leo
+leojs.leojs
+dummy-child-process.js
 prepare.js
 cleanup.js
 resources/animated-screenshot.gif
