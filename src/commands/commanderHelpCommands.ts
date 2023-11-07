@@ -11,7 +11,6 @@ import { commander_command } from '../core/decorators';
 import { VNode } from '../core/leoNodes';
 import { FastRead } from '../core/leoFileCommands';
 import { Commands } from '../core/leoCommands';
-import { leojsSettingsXml } from '../leojsSettings';
 import { ScriptingController } from '../core/mod_scripting';
 
 const dayjs = require('dayjs');
@@ -159,11 +158,14 @@ export class CommanderHelpCommands {
             );
 
             let ok: VNode | undefined;
-            let g_element;
 
-            [ok, g_element] = w_fastRead.readWithElementTree(
+            const w_leoSettingsUri = vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
+            let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
+
+            let g_element;
+            [ok, g_element] = w_fastRead.readWithJsonTree(
                 '',
-                leojsSettingsXml // TODO : REPLACE WITH LOCAL .leojs settings!
+                g.toUnicode(readData)
             );
             if (ok) {
                 c.hiddenRootNode = ok;

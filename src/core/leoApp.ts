@@ -17,7 +17,6 @@ import { Constants } from '../constants';
 import { ExternalFilesController } from './leoExternalFiles';
 import { LeoFrame } from './leoFrame';
 import { SettingsDict } from './leoGlobals';
-import { leojsSettingsXml } from '../leojsSettings';
 import { LeoUI } from '../leoUI';
 import { CommanderCacher, GlobalCacher } from './leoCache';
 // importers
@@ -2410,6 +2409,7 @@ export class LoadManager {
         // frame.log.enable(false);
         // g.app.lockLog();
 
+
         let ok: VNode | undefined;
         try {
             // ! HACK FOR LEOJS: MAKE COMMANDER FROM FAKE leoSettings.leo STRING !
@@ -2417,17 +2417,19 @@ export class LoadManager {
                 c,
                 c.fileCommands.gnxDict
             );
+            const w_leoSettingsUri = vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
+            let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
+
             let g_element;
             if (fn === 'leoSettings.leo') {
-                [ok, g_element] = w_fastRead.readWithElementTree(
+                [ok, g_element] = w_fastRead.readWithJsonTree(
                     fn,
-                    leojsSettingsXml
+                    g.toUnicode(readData)
                 );
                 if (ok) {
                     c.hiddenRootNode = ok;
                 }
             } else {
-                // ok = await c.fileCommands.openLeoFile(fn, false, true);
                 ok = await fc.getAnyLeoFileByName(fn, false, false);
             }
 

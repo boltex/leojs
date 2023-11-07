@@ -30,6 +30,8 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     */
 
+    (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
+
     if (p_context.extensionUri) {
         console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }

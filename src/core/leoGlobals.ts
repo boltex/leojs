@@ -64,6 +64,7 @@ import { SqlJsStatic } from 'sql.js';
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
+export let extensionUri: vscode.Uri;  // For accessing files in extension package.
 
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>

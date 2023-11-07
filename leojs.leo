@@ -1346,6 +1346,8 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     */
 
+    (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
+
     if (p_context.extensionUri) {
         console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
@@ -4461,7 +4463,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "f865954",
+  "gitBranch": "devel",
+  "gitDate": "2023-11-06 00:16:20 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
