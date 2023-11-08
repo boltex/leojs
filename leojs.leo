@@ -746,62 +746,66 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 </t>
 <t tx="felix.20201208214250.2"></t>
-<t tx="felix.20201208214319.1"># leojs
+<t tx="felix.20201208214319.1"># ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
-## ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline _in Typescript_ ![Typescript](https://raw.githubusercontent.com/boltex/leojs/master/resources/typescript.png)
+LeoJS is a javascript implementation of the Leo Editor.
 
-### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
+_If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')_
 
-&gt; LeoJS is a typescript VSCode extension implementation of the Leo Editor: A line-by-line translation of the original python source.
+## Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
--   See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
-    or on [github](https://github.com/leo-editor/leo-editor).
--   See VSCode at [code.visualstudio.com](https://code.visualstudio.com/).
+### Break down your code into a structured outline that generates or parses back your source files
+
+&gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.\
+&gt; [📺 Introduction Video](https://www.youtube.com/watch?v=SYwlfdEukD4)
+
+See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
+or on [github](https://github.com/leo-editor/leo-editor).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
 
 # 🚧 This Extension is a WIP 🏗️
 
-## Development Version Installation
+Please report bugs and missing features in the repository's [Issues Page](https://github.com/boltex/leojs/issues).
 
-Make sure you have Node.js and Git installed, then clone the sources and run `npm install` in a terminal to install the remaining development dependencies.
+If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
 
-![run extension](https://raw.githubusercontent.com/boltex/leojs/master/resources/run-extension.png)
+# LeoJS can be run on the web
 
-You can then run the **Run Extension** target, as shown above, in the **Debug View**.
+LeoJS can be run as a web extension for VSCode on the web! It can edit Leo documents directly inside online repositories. _Use the regular desktop version for VSCode to edit local Leo documents and projects._
 
-## Web extension version
+Visit a github repository you want to work on. Press the period '.' key on your keyboard to switch to the vscode.dev web edition of VSCode directly from github.
 
-Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
+Make sure the LeoJS extension is installed and you're good to go!
 
-**In the meantime**, see 'Running Development version as a web extension' below to try out leojs in a browser.
+## Features
 
-## Running Development version as a web extension
+-   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector**, **find panel**, along with a **Log Window** and **Terminal** [output channels](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
+-   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
+-   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
+-   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
+-   **Nav and Tag panel** controls are integrated in the Find panel
+-   **Goto Anywhere panel** to navigate directly from list of nodes, such as the results of Nav or Tag searches
+-   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
 
-&gt; For exact information on this procedure, see [Test your web extension](https://code.visualstudio.com/api/extension-guides/web-extensions#test-your-web-extension-in-vscode.dev).
+## Leo Commands
 
-To try out running as a web extension on vscode.dev, use the following commands:
+![Menus](https://raw.githubusercontent.com/boltex/leojs/master/resources/context-hover-menus.png)
 
-First, you'll need to [install mkcert](https://github.com/FiloSottile/mkcert#installation).
+LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette. (accessible through F1 or Ctrl+Shift+P)
 
-Then, generate the localhost.pem and localhost-key.pem files into a location you won't lose them (for example $HOME/certs):
+### Context-Aware Keybindings
 
-```
-$ mkdir -p $HOME/certs
-$ cd $HOME/certs
-$ mkcert -install
-$ mkcert localhost
-```
+The keybinding architecture is designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence. Shift your focus outside these panes, and Visual Studio Code's native keybindings resume control.
 
-Then, from your extension's path, start an HTTP server by running
+### The Minibuffer
 
-```
-$ npx serve --cors -l 5000 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/certs/localhost-key.pem
-```
-
-Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000`
+For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the complete set of Leo's commands!
 
 ## Keybindings
+
+Listed here are the most useful commands and their keyboard shortcuts.
 
 | Outline Commands |                                                                  |
 | :--------------- | :--------------------------------------------------------------- |
@@ -838,10 +842,10 @@ _Move-Outline commands need the 'Alt' key modifier only when focus is on body pa
 | Find Previous       | `F2`                                                                                                                      |
 | Replace             | `Ctrl + =`                                                                                                                |
 | Replace then Find   | `Ctrl + -`                                                                                                                |
-| Minibuffer Palette  | `Alt + X`                                                                                                                 |
 | Extract             | `Ctrl + Shift + D`                                                                                                        |
 | Extract Names       | `Ctrl + Shift + N`                                                                                                        |
 | Execute Script      | `Ctrl + B`                                                                                                                |
+| Minibuffer Palette  | `Alt + X`                                                                                                                 |
 
 | Tree Navigation          |                                                              |
 | :----------------------- | :----------------------------------------------------------- |
@@ -865,7 +869,11 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 | Write File Nodes    | `Ctrl + Shift + W` |
 | Write Dirty Files   | `Ctrl + Shift + Q` |
 
-## External Files Directives
+---
+
+## Derive External Files
+
+Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty Files** commands to derive external files for any type of **@file** nodes.
 
 | @\&lt;file\&gt; Kind | Sentinels | @others | .leo Data | Write Only |
 | :------------- | :-------: | :-----: | :-------: | :--------: |
@@ -876,7 +884,124 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 | @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
 | @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
 
-**Enjoy!**
+Leo will detect external file changes, and will ask to either **refresh from disk** or **ignore the changes**.
+
+![Derive files](https://raw.githubusercontent.com/boltex/leojs/master/resources/derived-file.gif)
+
+## Automate External Files Synchronization
+
+The **change detection** process can be automated to always refresh, or ignore file changes:
+A **notification** will inform you of the action taken instead.
+
+![Auto sync](https://raw.githubusercontent.com/boltex/leojs/master/resources/auto-sync.gif)
+
+## Extension Settings
+
+### Open the command palette `Ctrl+Shift+P` and start typing `LeoJS settings` to access LeoJS's welcome/settings screen
+
+&gt; _(Changes are auto-saved to the user's profile after 0.5 seconds)_
+
+-   Control the visibility of the outline pane in the explorer view.
+-   Decide how and when to refresh and synchronize content when derived (external) file are modified.
+-   Show additional icons on outline nodes (Move, delete, mark, copy, paste...)
+-   Choose to either focus on the body pane, or keep focus in the outline when a node is selected.
+-   Hide or show the "Open on the side" command in the context menu to open a node beside the active editor
+
+![Settings](https://raw.githubusercontent.com/boltex/leojs/master/resources/welcome-settings.gif)
+
+## Navigating a Leo Document
+
+Arrow keys, home/end, page up/down are used for basic navigation. But in order to **find and goto specific nodes directly**, use the methods described below.
+
+### Goto Anywhere Command
+
+Normally in vscode, the the **`Ctrl+P`** shortcut allows you to switch to any project file, but when the focus is in one of Leo's panels, the **`Ctrl+P`** keybinding allows you to switch to a node directly by typing (part of) it's headline.
+
+![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
+
+### Find Commands
+
+With focus in Leo's outline or body pane, Hit **`Ctrl+F`** to open the _find panel_.
+
+Enter your search pattern directly in the **\&lt;find pattern here\&gt;** field. Press **`Enter`** to find the first match starting from your current position.
+
+Hitting **`F3`** repeatedly will find the subsequent matches. (**`F2`** for previous matches)
+
+![Find results](https://raw.githubusercontent.com/boltex/leojs/master/resources/find-in-headlines.gif)
+
+### Nav and the Goto Panel
+
+Type your search pattern in the **Nav** field instead to see all results show up below in leo's **Goto Pane**. This will show the headlines as you type.
+
+Press **`Enter`** to freeze the results and show results also found in **body text of any node**. This will add a snowflake icon ❄️ to the **Nav** field.
+
+From the **Goto Pane**, you can use the arrow keys, home/end, page up/down to cycle directly to any of those matches.
+
+![Goto pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-goto-pane.gif)
+
+### Using Tags
+
+If you check the **Tag** option, the **Nav** field and **Goto Pane** are then used to find nodes by their tag 🏷 _ua_ (user attribute).
+
+![Node tags](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-tags.gif)
+
+## Undo Panel
+
+&gt; In LeoJS, the undo functionality is a multi-tiered system that segregates structural outline changes from text changes within the body pane. The Undo Panel captures outline alterations as individual 'Undo Beads', independent from VS Code's native text undo states. When focus resides in the body pane, the Undo keybinding triggers VS Code's text-specific undo action. However, once the focus shifts or a new node is selected, all concurrent text changes coalesce into a single 'Undo Bead' within the Undo Panel. These 'Undo Beads' can then be manipulated either through the Undo Panel or by keybindings, provided the focus is explicitly set on the outline pane. This dual-layer undo architecture enables precise control over both code and structural modifications.
+
+Use the undo / redo icons above the outline or above the undo pane itself. You can also right-click on an undo step to directly switch to that specific state!
+
+![Undo pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/undo-pane.gif)
+
+## Issues
+
+Common issues are listed below. See the repository's [Issues Page](https://github.com/boltex/leojs/issues) to submit issues.
+
+### Linux Keybindings
+
+If you're experiencing trouble with the keyboard shortcuts for
+the 'Clone Node' or the 'Promote' and 'Demote' commands,
+set **"keyboard.dispatch": "keyCode"** in your vscode settings and restart vscode.
+See [Troubleshoot Linux Keybindings](https://github.com/microsoft/vscode/wiki/Keybinding-Issues#troubleshoot-linux-keybindings)
+for more information.
+
+### Keybindings Conflicts Resolution
+
+If you have a keybinding conflict for a command that you would like **not** to be resolved by Leo when the focus is on the body pane,
+add **`&amp;&amp; resourceScheme != 'leojs'`** to the keybinding's "_when_" condition. (Use **`Ctrl+K Ctrl+S`** in vscode to open the Keyboards Shortcuts panel)
+
+### Move Outline Keyboard Commands
+
+For some users, the **`Alt+[Arrow Keys]`**, **`Ctrl+D`** and **`Ctrl+T`** keybinding are already assigned.
+
+To help with this conflict, tree-browsing, outline-move keyboard commands, and switch focus command will only trigger
+with the additional condition of having no text selection in the editor.
+
+So select at least one character to use the previously assigned original keyboard commands, while focus is in the body pane.
+
+&gt; Refer to the [issue tracker](https://github.com/boltex/leojs/issues) page to learn more about the known issues, or to contribute with additional information if you encounter some yourself.
+
+---
+
+## Acknowledgments
+
+### _Thanks to_
+
+-   [Edward K. Ream](https://github.com/edreamleo) creator of the [Leo Editor](https://leo-editor.github.io/leo-editor/)
+-   [Eric Amodio](https://github.com/eamodio) for the [welcome screen templates](https://github.com/eamodio/vscode-gitlens/tree/master/src/webviews)
+-   [Vitalije](https://github.com/vitalije) for his contributions and support
+-   [Arjan](https://github.com/ar-jan) for his suggestions and ideas
+-   [Thomas](https://github.com/tbpassin) for his contributions and support
+-   [Viktor](https://github.com/ranvik14) for his contributions and support
+-   [Gaurami](https://github.com/ATikhonov2) for his suggestions, bug reports and support
+-   [Kevin Henderson](https://github.com/kghenderson) for his suggestions and support
+-   [Ville M. Vainio](https://github.com/vivainio) for his Nav tab original concept
+-   [Jacob M. Peck](https://github.com/gatesphere) for his Tags tab original concept
+-   [Matt Wilkie](https://github.com/maphew) for his contributions and support
+
+---
+
+## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
 <t tx="felix.20201208214322.1">import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
@@ -1172,7 +1297,48 @@ Furthermore, if you've never ran a vscode extension in an **Extension Developmen
 
 If you're having problems, try [running this sample extension](https://github.com/Microsoft/vscode-extension-samples/tree/master/helloworld-sample#running-the-sample) first to catch underlying problems or missing dependencies.
 
-## Converting from Python to Typescript
+## Development Version Installation
+
+Make sure you have Node.js and Git installed, then clone the sources and run `npm install` in a terminal to install the remaining development dependencies.
+
+![run extension](https://raw.githubusercontent.com/boltex/leojs/master/resources/run-extension.png)
+
+You can then run the **Run Extension** target, as shown above, in the **Debug View**.
+
+## Web extension version
+
+Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
+
+**In the meantime**, see 'Running Development version as a web extension' below to try out leojs in a browser.
+
+## Running Development version as a web extension
+
+&gt; For exact information on this procedure, see [Test your web extension](https://code.visualstudio.com/api/extension-guides/web-extensions#test-your-web-extension-in-vscode.dev).
+
+To try out running as a web extension on vscode.dev, use the following commands:
+
+First, you'll need to [install mkcert](https://github.com/FiloSottile/mkcert#installation).
+
+Then, generate the localhost.pem and localhost-key.pem files into a location you won't lose them (for example $HOME/certs):
+
+```
+$ mkdir -p $HOME/certs
+$ cd $HOME/certs
+$ mkcert -install
+$ mkcert localhost
+```
+
+Then, from your extension's path, start an HTTP server by running
+
+```
+$ npx serve --cors -l 5000 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/certs/localhost-key.pem
+```
+
+Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000`
+
+# Converting from Python to Typescript
+
+## Useful tricks and common pitfalls
 
 ### Raw String
 
