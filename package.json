@@ -39,6 +39,7 @@
   "qna": false,
   "main": "./dist/extension-node",
   "browser": "./dist/extension-web",
+  "icon": "resources/leoapp256px.png",
   "contributes": {
     "configuration": {
       "title": "LeoJS Leo Editor",

@@ -4648,6 +4648,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "qna": false,
   "main": "./dist/extension-node",
   "browser": "./dist/extension-web",
+  "icon": "resources/leoapp256px.png",
   "contributes": {
     &lt;&lt; contributes &gt;&gt;
   },
