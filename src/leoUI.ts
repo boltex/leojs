@@ -2498,9 +2498,6 @@ export class LeoUI extends NullGui {
             (p_result) => {
                 this.showBodyIfClosed = false; // * BODY IS ACTUALLY SHOWN!
                 return p_result;
-            },
-            (p_reason) => {
-                console.log('showTextDocument rejected: ', p_reason);
             }
         );
 

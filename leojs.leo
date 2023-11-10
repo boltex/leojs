@@ -6,9 +6,6 @@
 <preferences/>
 <find_panel_settings/>
 <vnodes>
-<v t="ekr.20201209145256.1"><vh>Startup</vh>
-<v t="ekr.20201214084854.1"><vh>@file scripts.txt</vh></v>
-</v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
@@ -699,7 +696,6 @@ Leo uses a model/view/controller architecture.
 **Important**: The general organization of these classes have changed hardly at all in Leo's 20+ year history.  The reason is that what each class does is fairly obvious.  How the gets the job done may have changed drastically, but *that's an internal implementation detail of the class itself*.  This is the crucial design principle that allows Leo's code to remain stable.  *Classes do not know or meddle in the internal details of other classes*.  As a result, nobody, including EKR, needs to remember internal details.
 
 </t>
-<t tx="ekr.20201209145256.1"></t>
 <t tx="ekr.20201209145358.1"></t>
 <t tx="felix.20200719025231.24">/**
  * * Handles the change of vscode config: a onDidChangeConfiguration event triggered
@@ -756,8 +752,7 @@ _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.githu
 
 ### Break down your code into a structured outline that generates or parses back your source files
 
-&gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.\
-&gt; [📺 Introduction Video](https://www.youtube.com/watch?v=SYwlfdEukD4)
+&gt; Leo is a fundamentally different way of using and organizing data, programs and scripts. [📺 Introduction Video](https://www.youtube.com/watch?v=SYwlfdEukD4)
 
 See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).

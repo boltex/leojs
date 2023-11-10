@@ -216,6 +216,11 @@ label {
   cursor: pointer
 }
 
+.label-big {
+  font-size: 2.2rem;
+  font-weight: 200;
+}
+
 select {
   background: none;
   color: var(--color-foreground);

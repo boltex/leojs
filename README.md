@@ -8,8 +8,7 @@ _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.githu
 
 ### Break down your code into a structured outline that generates or parses back your source files
 
-> Leo is a fundamentally different way of using and organizing data, programs and scripts.\
-> [📺 Introduction Video](https://www.youtube.com/watch?v=SYwlfdEukD4)
+> Leo is a fundamentally different way of using and organizing data, programs and scripts. [📺 Introduction Video](https://www.youtube.com/watch?v=SYwlfdEukD4)
 
 See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).
@@ -140,13 +139,6 @@ Leo will detect external file changes, and will ask to either **refresh from dis
 
 ![Derive files](https://raw.githubusercontent.com/boltex/leojs/master/resources/derived-file.gif)
 
-## Automate External Files Synchronization
-
-The **change detection** process can be automated to always refresh, or ignore file changes:
-A **notification** will inform you of the action taken instead.
-
-![Auto sync](https://raw.githubusercontent.com/boltex/leojs/master/resources/auto-sync.gif)
-
 ## Extension Settings
 
 ### Open the command palette `Ctrl+Shift+P` and start typing `LeoJS settings` to access LeoJS's welcome/settings screen
@@ -159,7 +151,7 @@ A **notification** will inform you of the action taken instead.
 -   Choose to either focus on the body pane, or keep focus in the outline when a node is selected.
 -   Hide or show the "Open on the side" command in the context menu to open a node beside the active editor
 
-![Settings](https://raw.githubusercontent.com/boltex/leojs/master/resources/welcome-settings.gif)
+![Settings](https://raw.githubusercontent.com/boltex/leojs/master/resources/welcome-settings.png)
 
 ## Navigating a Leo Document
 
