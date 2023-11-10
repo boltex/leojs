@@ -6,10 +6,14 @@
 //@+<< leoFind imports >>
 //@+node:felix.20221012210017.1: ** << leoFind imports >>
 import * as g from './leoGlobals';
-import { new_cmd_decorator } from "../core/decorators";
-import { Commands } from "./leoCommands";
+import { new_cmd_decorator } from './decorators';
+import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-import { StringCheckBox, StringFindTabManager, StringRadioButton } from './findTabManager';
+import {
+    StringCheckBox,
+    StringFindTabManager,
+    StringRadioButton,
+} from './findTabManager';
 import { StringTextWrapper } from './leoFrame';
 //@-<< leoFind imports >>
 //@+<< Theory of operation of find/change >>
@@ -19,7 +23,7 @@ import { StringTextWrapper } from './leoFrame';
 //@+at
 //
 // NOTE: LEOJS DOES NOT RESPECT THE GUI-INDEPENDENCE
-// TODO: CAll those via g.app.gui as LeoUi to respect GUI-independence!)
+// TODO: Call those via g.app.gui as LeoUi to respect GUI-independence!)
 //
 // LeoFind.py contains the gui-independent part of all of Leo's
 // find/change code. Such code is tricky, which is why it should be
@@ -80,7 +84,7 @@ function cmd(p_name: string, p_doc: string) {
 export interface ISettings {
     // State...
     in_headline?: boolean;
-    p?: Position,
+    p?: Position;
     // Find/change strings...
     find_text: string;
     change_text: string;
@@ -113,17 +117,16 @@ type IFindUndoData = {
  * The base class for Leo's Find commands.
  */
 export class LeoFind {
-
     public c: Commands;
-    public expert_mode: boolean = false;  // Set in finishCreate.
+    public expert_mode: boolean = false; // Set in finishCreate.
     // Created by dw.createFindTab.
     public ftm!: StringFindTabManager; // FindTabManager;
     // public k: KeyHandler = c.k // ? needed ?
     public re_obj!: RegExp;
     //
     // The work "widget".
-    public work_s = '';  // p.b or p.c.
-    public work_sel!: [number, number, number];  // pos, newpos, insert.
+    public work_s = ''; // p.b or p.c.
+    public work_sel!: [number, number, number]; // pos, newpos, insert.
     //
     // Options ivars: set by FindTabManager.init.
     // These *must* be initially None, not False.
@@ -150,8 +153,8 @@ export class LeoFind {
     public changeTextList: string[] = [];
     //
     // For find/change...
-    public find_text = "";
-    public change_text = "";
+    public find_text = '';
+    public change_text = '';
     //
     // State machine...
     public escape_handler!: (preloaded?: boolean) => any;
@@ -165,7 +168,7 @@ export class LeoFind {
     public in_headline: boolean = false;
     public match_obj!: RegExpExecArray | undefined;
     public reverse: boolean = false;
-    public root: Position | undefined;  // The start of the search, especially for suboutline-only.
+    public root: Position | undefined; // The start of the search, especially for suboutline-only.
     //
     // User settings.
     public minibuffer_mode!: boolean;
@@ -183,7 +186,6 @@ export class LeoFind {
      * Return a dict representing all default settings.
      */
     public default_settings(): ISettings {
-
         const c = this.c;
         return {
             // State...
@@ -232,7 +234,6 @@ export class LeoFind {
      *     return <appropriate error indication>
      */
     public init_ivars_from_settings(settings: ISettings): void {
-
         //
         // Init required defaults.
         this.reverse = false;
@@ -269,7 +270,7 @@ export class LeoFind {
     public batch_change(
         root: Position,
         replacements: [string, string][],
-        settings?: ISettings,
+        settings?: ISettings
     ): number {
         //@+<< docstring: find.batch_change >>
         //@+node:felix.20230212161706.1: *4* << docstring: find.batch_change >>
@@ -293,7 +294,7 @@ export class LeoFind {
          *     count = c.findCommands.batch_change(root, replacements, settings)
          *     if count:
          *         c.save()
-        */
+         */
         //@-<< docstring: find.batch_change >>
         try {
             // self._init_from_dict(settings or {})
@@ -305,15 +306,17 @@ export class LeoFind {
                 count += this._batch_change_helper(root, find, change);
             }
             return count;
-        }
-        catch (e) {
+        } catch (e) {
             g.es_exception();
             return 0;
         }
     }
     //@+node:felix.20221012233803.3: *4* find._batch_change_helper
-    private _batch_change_helper(p: Position, find_text: string, change_text: string): number {
-
+    private _batch_change_helper(
+        p: Position,
+        find_text: string,
+        change_text: string
+    ): number {
         const c = this.c;
         const p1 = p.copy();
         const u = this.c.undoer;
@@ -375,7 +378,6 @@ export class LeoFind {
             if (count_h || count_b) {
                 u.afterChangeNodeContents(p1, 'Replace All', undoData);
             }
-
         }
         u.afterChangeGroup(p1, undoType);
 
@@ -389,7 +391,6 @@ export class LeoFind {
      * Initialize ivars from settings (a dict or g.Bunch).
      */
     private _init_from_dict(settings: { [key: string]: any }): void {
-
         // The valid ivars and reasonable defaults.
         const valid: { [key: string]: any } = {
             ignore_case: false,
@@ -397,17 +398,19 @@ export class LeoFind {
             pattern_match: false,
             search_body: true,
             search_headline: true,
-            suboutline_only: false,  // Seems safest.  // Was true !!!
-            whole_word: true
+            suboutline_only: false, // Seems safest.  // Was true !!!
+            whole_word: true,
         };
         // Set ivars to reasonable defaults.
-        for (const ivar in valid) { // * USING 'in' TO GET KEYS
+        for (const ivar in valid) {
+            // * USING 'in' TO GET KEYS
             // setattr(self, ivar, valid.get(ivar));
             (this as any)[ivar] = valid[ivar];
         }
         // Override ivars from settings.
         let errors = 0;
-        for (const ivar in settings) { // * USING 'in' TO GET KEYS
+        for (const ivar in settings) {
+            // * USING 'in' TO GET KEYS
             if (ivar in valid) {
                 const val = settings[ivar];
                 if ([true, false].includes(val)) {
@@ -425,7 +428,6 @@ export class LeoFind {
         if (errors) {
             g.printObj(Object.keys(valid).sort(), 'valid keys');
         }
-
     }
     //@+node:felix.20221013234514.1: *3* LeoFind.Commands (immediate execution)
     //@+node:felix.20221020002743.1: *4* show-all-tags
@@ -459,7 +461,6 @@ export class LeoFind {
      *  This is a stand-alone method for unit testing.
      */
     public do_change_then_find(settings: ISettings): boolean {
-
         const p = this.c.p;
         this.init_ivars_from_settings(settings);
         if (!this.check_args('change-then-find')) {
@@ -470,39 +471,39 @@ export class LeoFind {
         } else {
             return false;
         }
-
     }
     //@+node:felix.20221013234514.4: *4* find.clone-find_marked & helper
     @cmd(
         'clone-find-all-marked',
-        'clone-find-all-marked, aka cfam.\n\n' +
-        'Create an organizer node whose descendants contain clones of all marked\n' +
-        'nodes. The list is *not* flattened: clones appear only once in the\n' +
+        'clone-find-all-marked, aka cfam. ' +
+        'Create an organizer node whose descendants contain clones of all marked ' +
+        'nodes. The list is *not* flattened: clones appear only once in the ' +
         'descendants of the organizer node.'
     )
     @cmd(
         'cfam',
-        'clone-find-all-marked, aka cfam.\n\n' +
-        'Create an organizer node whose descendants contain clones of all marked\n' +
-        'nodes. The list is *not* flattened: clones appear only once in the\n' +
-        'descendants of the organizer node.')
+        'clone-find-all-marked, aka cfam. ' +
+        'Create an organizer node whose descendants contain clones of all marked ' +
+        'nodes. The list is *not* flattened: clones appear only once in the ' +
+        'descendants of the organizer node.'
+    )
     public cloneFindAllMarked(): void {
         this.do_find_marked(false);
     }
     @cmd(
         'clone-find-all-flattened-marked',
-        'clone-find-all-flattened-marked, aka cffm.\n\n' +
-        'Create an organizer node whose direct children are clones of all marked\n' +
-        'nodes. The list is flattened: every cloned node appears as a direct\n' +
-        'child of the organizer node, even if the clone also is a descendant of\n' +
+        'clone-find-all-flattened-marked, aka cffm. ' +
+        'Create an organizer node whose direct children are clones of all marked ' +
+        'nodes. The list is flattened: every cloned node appears as a direct ' +
+        'child of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     @cmd(
         'cffm',
-        'clone-find-all-flattened-marked, aka cffm.\n\n' +
-        'Create an organizer node whose direct children are clones of all marked\n' +
-        'nodes. The list is flattened: every cloned node appears as a direct\n' +
-        'child of the organizer node, even if the clone also is a descendant of\n' +
+        'clone-find-all-flattened-marked, aka cffm. ' +
+        'Create an organizer node whose direct children are clones of all marked ' +
+        'nodes. The list is flattened: every cloned node appears as a direct ' +
+        'child of the organizer node, even if the clone also is a descendant of ' +
         'another cloned node.'
     )
     public cloneFindAllFlattenedMarked(): void {
@@ -515,7 +516,6 @@ export class LeoFind {
      * This is a stand-alone method for unit testing.
      */
     public do_find_marked(flatten: boolean): boolean {
-
         const c = this.c;
         const u = this.c.undoer;
         const undoType = 'clone-find-marked';
@@ -543,7 +543,7 @@ export class LeoFind {
             failMsg,
             flatten,
             undefined,
-            undoType,
+            undoType
         );
 
         if (root) {
@@ -559,20 +559,17 @@ export class LeoFind {
             root.b = `# Found ${n} marked node${g.plural(n)}`;
             c.selectPosition(root);
             c.redraw(root);
-
         }
         u.afterChangeGroup(c.p.copy(), undoType);
         return !!root && root.__bool__();
-
     }
     //@+node:felix.20221013234514.6: *4* find.clone-find-parents
     @cmd(
         'clone-find-parents',
-        'Create an organizer node whose direct children are clones of all\n' +
+        'Create an organizer node whose direct children are clones of all ' +
         'parents of the selected node, which must be a clone.'
     )
     public cloneFindParents(): boolean {
-
         const c = this.c;
         const u = this.c.undoer;
         const p = c.p;
@@ -617,15 +614,21 @@ export class LeoFind {
         c.redraw(found);
 
         return true;
-
     }
     //@+node:felix.20230212162733.1: *4* find.find-def, do_find_def & helpers
-    @cmd('find-def', 'Find the class, def or assignment to var of the word under the cursor.')
+    @cmd(
+        'find-def',
+        'Find the class, def or assignment to var of the word under the cursor.'
+    )
     public find_def_command(): Promise<unknown> {
         return g.app.gui.findSymbol(true);
     }
 
-    public find_def(): [Position | undefined, number | undefined, number | undefined] {
+    public find_def(): [
+        Position | undefined,
+        number | undefined,
+        number | undefined
+    ] {
         // re searches are more accurate, but not enough to be worth changing the user's settings.
         const ftm = this.ftm;
         const p = this.c.p;
@@ -635,13 +638,18 @@ export class LeoFind {
             return [undefined, undefined, undefined];
         }
         // Settings...
-        this._save_before_find_def(p);  // Save previous settings.
-        console.assert(this.find_def_data);
+        this._save_before_find_def(p); // Save previous settings.
+        g.assert(this.find_def_data);
         // #3124. Try all possibilities, regardless of case.
         const alt_word = this._switch_style(word);
         //@+<< compute the search table >>
         //@+node:felix.20230212162733.2: *5* << compute the search table >>
-        let table: [string, (settings: ISettings) => [Position | undefined, number | undefined, number | undefined]][];
+        let table: [
+            string,
+            (
+                settings: ISettings
+            ) => [Position | undefined, number | undefined, number | undefined]
+        ][];
         if (alt_word) {
             table = [
                 [`class ${word}`, this.do_find_def],
@@ -659,11 +667,14 @@ export class LeoFind {
             ];
         }
         //@-<< compute the search table >>
-        let find_pattern: string, method: (settings: ISettings) => [Position | undefined, number | undefined, number | undefined];
+        let find_pattern: string,
+            method: (
+                settings: ISettings
+            ) => [Position | undefined, number | undefined, number | undefined];
         for ([find_pattern, method] of table) {
             ftm.set_find_text(find_pattern);
             this.init_vim_search(find_pattern);
-            this.update_change_list(this.change_text);  // Optional. An edge case.
+            this.update_change_list(this.change_text); // Optional. An edge case.
             // Do the command!
             const settings = this._compute_find_def_settings(find_pattern);
             const result = method.bind(this)(settings);
@@ -681,12 +692,13 @@ export class LeoFind {
     /**
      * A standalone helper for unit tests.
      */
-    public do_find_def(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
+    public do_find_def(
+        settings: ISettings
+    ): [Position | undefined, number | undefined, number | undefined] {
         return this._fd_helper(settings);
     }
     //@+node:felix.20230212162733.3: *5* find._compute_find_def_settings
     private _compute_find_def_settings(find_pattern: string): ISettings {
-
         const settings = this.default_settings();
         const table: [ISettingsKey, boolean | string][] = [
             ['change_text', ''],
@@ -709,16 +721,15 @@ export class LeoFind {
             // Set the values.
             // setattr(this, attr, val);
             (settings as any)[attr] = val;
-
         }
         return settings;
-
     }
     //@+node:felix.20230212162733.4: *5* find._compute_find_def_word
     /**
      * Init the find-def command. Return the word to find or None.
      */
-    private _compute_find_def_word(): string | undefined {  // pragma: no cover (cmd)
+    private _compute_find_def_word(): string | undefined {
+        // pragma: no cover (cmd)
 
         const c = this.c;
         const w = c.frame.body.wrapper;
@@ -735,15 +746,43 @@ export class LeoFind {
             return undefined;
         }
 
-        // 'keywords' array used for equivalent of python's keyword.iskeyword(word) 
+        // 'keywords' array used for equivalent of python's keyword.iskeyword(word)
         const keywords = [
-            "False", "await", "else", "import", "pass",
-            "None", "break", "except", "in", "raise",
-            "True", "class", "finally", "is", "return",
-            "and", "continue", "for", "lambda", "try",
-            "as", "def", "from", "nonlocal", "while",
-            "assert", "del", "global", "not", "with",
-            "async", "elif", "if", "or", "yield"
+            'False',
+            'await',
+            'else',
+            'import',
+            'pass',
+            'None',
+            'break',
+            'except',
+            'in',
+            'raise',
+            'True',
+            'class',
+            'finally',
+            'is',
+            'return',
+            'and',
+            'continue',
+            'for',
+            'lambda',
+            'try',
+            'as',
+            'def',
+            'from',
+            'nonlocal',
+            'while',
+            'assert',
+            'del',
+            'global',
+            'not',
+            'with',
+            'async',
+            'elif',
+            'if',
+            'or',
+            'yield',
         ];
         if (keywords.includes(word)) {
             return undefined;
@@ -764,8 +803,9 @@ export class LeoFind {
      *
      * return p, pos, newpos for unit tests.
      */
-    private _fd_helper(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
-
+    private _fd_helper(
+        settings: ISettings
+    ): [Position | undefined, number | undefined, number | undefined] {
         const c = this.c;
         this.find_text = settings.find_text;
         //
@@ -814,15 +854,14 @@ export class LeoFind {
             while (true) {
                 [p, pos, newpos] = this.find_next_match(p);
                 found = pos !== undefined;
-                if (found || !g.inAtNosearch(p)) {// do *not* use c.p.
+                if (found || !g.inAtNosearch(p)) {
+                    // do *not* use c.p.
                     break;
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             //
-        }
-        finally {
+        } finally {
             this.reverse = old_reverse;
         }
         if (found) {
@@ -840,7 +879,6 @@ export class LeoFind {
         w.setSelectionRange(i, j, ins);
         c.bodyWantsFocusNow();
         return [undefined, undefined, undefined];
-
     }
 
     //@+node:felix.20230212162733.6: *5* find._restore_after_find_def
@@ -848,7 +886,7 @@ export class LeoFind {
      * Restore find settings in effect before a find-def command.
      */
     private _restore_after_find_def(): void {
-        const b = this.find_def_data;  // A g.Bunch
+        const b = this.find_def_data; // A g.Bunch
         if (b) {
             this.ignore_case = b.ignore_case;
             this.pattern_match = b.pattern_match;
@@ -869,7 +907,7 @@ export class LeoFind {
             pattern_match: this.pattern_match,
             search_body: this.search_body,
             search_headline: this.search_headline,
-            whole_word: this.whole_word
+            whole_word: this.whole_word,
         };
     }
     //@+node:felix.20230212162733.8: *5* find._switch_style
@@ -878,14 +916,13 @@ export class LeoFind {
      * Return undefined if there would be no change.
      */
     private _switch_style(word: string): string | undefined {
-
         let s = word;
         if (!s) {
             return undefined;
         }
 
         if (g.isUpper(s[0])) {
-            return undefined;  // Don't convert class names.
+            return undefined; // Don't convert class names.
         }
         if (s.indexOf('_') > -1) {
             // Convert to CamelCase
@@ -905,16 +942,13 @@ export class LeoFind {
         let i;
         let ch;
         for (const [i, ch] of g.enumerate(s)) {
-
             if (i > 0 && g.isUpper(ch)) {
                 result.push('_');
             }
             result.push(ch.toLowerCase());
-
         }
-        s = result.join("");
+        s = result.join('');
         return s === word ? undefined : s;
-
     }
     //@+node:felix.20221013234514.14: *4* find.find-next, find-prev & do_find_*
     @cmd('find-next', 'The find-next command.')
@@ -940,7 +974,9 @@ export class LeoFind {
     /**
      * Find the previous instance of this.find_text.
      */
-    public do_find_prev(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
+    public do_find_prev(
+        settings: ISettings
+    ): [Position | undefined, number | undefined, number | undefined] {
         this.request_reverse = true;
         return this.do_find_next(settings);
     }
@@ -949,13 +985,16 @@ export class LeoFind {
      *
      * Return True (for vim-mode) if a match was found.
      */
-    public do_find_next(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
-
+    public do_find_next(
+        settings: ISettings
+    ): [Position | undefined, number | undefined, number | undefined] {
         const c = this.c;
         let p: Position | undefined = this.c.p;
         //
         // The gui widget may not exist for headlines.
-        const gui_w = this.in_headline ? c.edit_widget(p) : c.frame.body.wrapper;
+        const gui_w = this.in_headline
+            ? c.edit_widget(p)
+            : c.frame.body.wrapper;
         //
         // Init the work widget, so we don't get stuck.
         const s = this.in_headline ? p.h : p.b;
@@ -970,7 +1009,8 @@ export class LeoFind {
         for (const ivar of ['reverse', 'pattern_match', 'whole_word']) {
             const request = 'request_' + ivar;
             const val = (this as any)[request]; // getattr(this, request)
-            if (val) {  // Only *set* the ivar!
+            if (val) {
+                // Only *set* the ivar!
                 // setattr(this, ivar, val)  // Set the ivar.
                 (this as any)[ivar] = val;
                 //setattr(this, request, false)  // Clear the request!
@@ -979,19 +1019,19 @@ export class LeoFind {
         }
         //
         // Leo 6.4: set/clear this.root
-        if (this.root && this.root.__bool__()) { // pragma: no cover
+        if (this.root && this.root.__bool__()) {
+            // pragma: no cover
             if (!p.__eq__(this.root) && !this.root.isAncestorOf(p)) {
                 // p is outside of this.root's tree.
                 // Clear suboutline-only.
                 this.root = undefined;
                 this.suboutline_only = false;
-                this.set_find_scope_every_where();  // Update find-tab & status area.
+                this.set_find_scope_every_where(); // Update find-tab & status area.
             }
         } else if (this.suboutline_only) {
             // Start the range and set suboutline-only.
             this.root = c.p;
-            this.set_find_scope_suboutline_only();  // Update find-tab & status area.
-
+            this.set_find_scope_suboutline_only(); // Update find-tab & status area.
         } else if (this.file_only) {
             // Start the range and set file-only.
             this.root = c.p;
@@ -1002,12 +1042,23 @@ export class LeoFind {
             while (!found && !hitBase) {
                 let h = node.h;
                 if (h) {
-                    h = h.split(" ")[0];
+                    h = h.split(' ')[0];
                 }
 
-                if (["@clean", "@file", "@asis", "@thin", "@edit",
-                    "@auto", "@auto-md", "@auto-org",
-                    "@auto-otl", "@auto-rst"].includes(h)) {
+                if (
+                    [
+                        '@clean',
+                        '@file',
+                        '@asis',
+                        '@thin',
+                        '@edit',
+                        '@auto',
+                        '@auto-md',
+                        '@auto-org',
+                        '@auto-otl',
+                        '@auto-rst',
+                    ].includes(h)
+                ) {
                     found = true;
                 } else {
                     if (node.level() === 0) {
@@ -1020,12 +1071,12 @@ export class LeoFind {
             this.root = node;
             this.set_find_scope_file_only(); // Update find-tab & status area.
             p = node;
-
         }
         //
         // Now check the args.
         const tag = this.reverse ? 'find-prev' : 'find-next';
-        if (!this.check_args(tag)) { // Issues error message.
+        if (!this.check_args(tag)) {
+            // Issues error message.
             return [undefined, undefined, undefined];
         }
         const data = this.save();
@@ -1049,7 +1100,6 @@ export class LeoFind {
     }
 
     public find_var(): void {
-
         const ftm = this.ftm;
         const p = this.c.p;
         // Check...
@@ -1061,9 +1111,9 @@ export class LeoFind {
         const find_pattern = word + ' =';
         // this.find_pattern = find_pattern; // ? NEEDED ?
         ftm.set_find_text(find_pattern);
-        this._save_before_find_def(p);  // Save previous settings.
+        this._save_before_find_def(p); // Save previous settings.
         this.init_vim_search(find_pattern);
-        this.update_change_list(this.change_text);  // Optional. An edge case.
+        this.update_change_list(this.change_text); // Optional. An edge case.
         const settings = this._compute_find_def_settings(find_pattern);
         // Do the command!
         const result = this.do_find_var(settings);
@@ -1079,8 +1129,9 @@ export class LeoFind {
     /**
      * A standalone helper for unit tests.
      */
-    public do_find_var(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
-
+    public do_find_var(
+        settings: ISettings
+    ): [Position | undefined, number | undefined, number | undefined] {
         return this._fd_helper(settings);
     }
     //@+node:felix.20221013234514.20: *4* find.replace
@@ -1096,24 +1147,36 @@ export class LeoFind {
     }
 
     //@+node:felix.20221013234514.21: *4* find.set-find-*
-    @cmd('set-find-everywhere', 'Set the \'Entire Outline\' radio button in the Find tab.')
+    @cmd(
+        'set-find-everywhere',
+        "Set the 'Entire Outline' radio button in the Find tab."
+    )
     public set_find_scope_every_where(): void {
-        g.app.gui.setSearchSetting("entireOutline");
+        g.app.gui.setSearchSetting('entireOutline');
         // this.set_find_scope('entire-outline');
     }
-    @cmd('set-find-node-only', 'Set the \'Node Only\' radio button in the Find tab.')
+    @cmd(
+        'set-find-node-only',
+        "Set the 'Node Only' radio button in the Find tab."
+    )
     public set_find_scope_node_only(): void {
-        g.app.gui.setSearchSetting("nodeOnly");
+        g.app.gui.setSearchSetting('nodeOnly');
         // this.set_find_scope('node-only');
     }
-    @cmd('set-find-file-only', 'Set the \'File Only\' radio button in the Find tab.')
+    @cmd(
+        'set-find-file-only',
+        "Set the 'File Only' radio button in the Find tab."
+    )
     public set_find_scope_file_only(): void {
-        g.app.gui.setSearchSetting("fileOnly");
+        g.app.gui.setSearchSetting('fileOnly');
         // this.set_find_scope('file-only');
     }
-    @cmd('set-find-suboutline-only', 'Set the \'Suboutline Only\' radio button in the Find tab.')
+    @cmd(
+        'set-find-suboutline-only',
+        "Set the 'Suboutline Only' radio button in the Find tab."
+    )
     public set_find_scope_suboutline_only(): void {
-        g.app.gui.setSearchSetting("subOutlineOnly");
+        g.app.gui.setSearchSetting('subOutlineOnly');
         // this.set_find_scope('suboutline-only');
     }
 
@@ -1121,7 +1184,6 @@ export class LeoFind {
      * Set the radio buttons to the given scope
      */
     public set_find_scope(where: string): void {
-
         const c = this.c;
         const fc = this.c.findCommands;
         this.ftm.set_radio_button(where);
@@ -1132,7 +1194,6 @@ export class LeoFind {
     //@+node:felix.20221013234514.22: *4* find.show-find-options
     @cmd('show-find-options', 'Show the present find options')
     public show_find_options(): void {
-
         // frame = self.c.frame // ? NEEDED ?
         // frame.clearStatusLine() // ? NEEDED ?
         let part1;
@@ -1142,14 +1203,12 @@ export class LeoFind {
         // frame.putStatusLine(part2);  // ? NEEDED ?
         g.es(part1);
         g.es(part2);
-
     }
     //@+node:felix.20221013234514.23: *5* LeoFind.compute_find_options
     /**
      * Return the status line as two strings.
      */
     public compute_find_options(): [string, string] {
-
         const z: string[] = [];
         let scope: string;
         // Set the scope field.
@@ -1179,7 +1238,7 @@ export class LeoFind {
             ['whole_word', 'word'],
             // ['wrap', 'wrap'],
             ['mark_changes', 'markChg'],
-            ['mark_finds', 'markFnd']
+            ['mark_finds', 'markFnd'],
         ];
         let ivar;
         let s;
@@ -1192,10 +1251,9 @@ export class LeoFind {
         const part2 = z.join(' ');
 
         return [part1, part2];
-
     }
     //@+node:felix.20221013234514.24: *4* find.toggle-find-*
-    @cmd('toggle-find-collapses-nodes', 'Toggle the \'Collapse Nodes\' setting.')
+    @cmd('toggle-find-collapses-nodes', "Toggle the 'Collapse Nodes' setting.")
     public toggle_find_collapses_nodes(): void {
         const c = this.c;
         c.sparse_find = !c.sparse_find;
@@ -1203,39 +1261,60 @@ export class LeoFind {
             g.es('sparse_find', c.sparse_find);
         }
     }
-    @cmd('toggle-find-ignore-case-option', 'Toggle the \'Ignore Case\' checkbox in the Find tab.')
+    @cmd(
+        'toggle-find-ignore-case-option',
+        "Toggle the 'Ignore Case' checkbox in the Find tab."
+    )
     public toggle_ignore_case_option(): void {
-        g.app.gui.setSearchSetting("ignoreCase");
+        g.app.gui.setSearchSetting('ignoreCase');
         // this.toggle_option('ignore_case');
     }
-    @cmd('toggle-find-mark-changes-option', 'Toggle the \'Mark Changes\' checkbox in the Find tab.')
+    @cmd(
+        'toggle-find-mark-changes-option',
+        "Toggle the 'Mark Changes' checkbox in the Find tab."
+    )
     public toggle_mark_changes_option(): void {
-        g.app.gui.setSearchSetting("markChanges");
+        g.app.gui.setSearchSetting('markChanges');
         // this.toggle_option('mark_changes');
     }
-    @cmd('toggle-find-mark-finds-option', 'Toggle the \'Mark Finds\' checkbox in the Find tab.')
+    @cmd(
+        'toggle-find-mark-finds-option',
+        "Toggle the 'Mark Finds' checkbox in the Find tab."
+    )
     public toggle_mark_finds_option(): void {
-        g.app.gui.setSearchSetting("markFinds");
+        g.app.gui.setSearchSetting('markFinds');
         // this.toggle_option('mark_finds');
     }
-    @cmd('toggle-find-regex-option', 'Toggle the \'Regexp\' checkbox in the Find tab.')
+    @cmd(
+        'toggle-find-regex-option',
+        "Toggle the 'Regexp' checkbox in the Find tab."
+    )
     public toggle_regex_option(): void {
-        g.app.gui.setSearchSetting("regExp");
+        g.app.gui.setSearchSetting('regExp');
         // this.toggle_option('pattern_match');
     }
-    @cmd('toggle-find-in-body-option', 'Set the \'Search Body\' checkbox in the Find tab.')
+    @cmd(
+        'toggle-find-in-body-option',
+        "Set the 'Search Body' checkbox in the Find tab."
+    )
     public toggle_search_body_option(): void {
-        g.app.gui.setSearchSetting("searchBody");
+        g.app.gui.setSearchSetting('searchBody');
         // this.toggle_option('search_body');
     }
-    @cmd('toggle-find-in-headline-option', 'Toggle the \'Search Headline\' checkbox in the Find tab.')
+    @cmd(
+        'toggle-find-in-headline-option',
+        "Toggle the 'Search Headline' checkbox in the Find tab."
+    )
     public toggle_search_headline_option(): void {
-        g.app.gui.setSearchSetting("searchHeadline");
+        g.app.gui.setSearchSetting('searchHeadline');
         // this.toggle_option('search_headline');
     }
-    @cmd('toggle-find-word-option', 'Toggle the \'Whole Word\' checkbox in the Find tab.')
+    @cmd(
+        'toggle-find-word-option',
+        "Toggle the 'Whole Word' checkbox in the Find tab."
+    )
     public toggle_whole_word_option(): void {
-        g.app.gui.setSearchSetting("wholeWord");
+        g.app.gui.setSearchSetting('wholeWord');
         // this.toggle_option('whole_word');
     }
     // # @cmd('toggle-find-wrap-around-option')
@@ -1252,10 +1331,61 @@ export class LeoFind {
     }
     //@+node:felix.20221016013001.1: *3* LeoFind.Commands (interactive)
     //@+node:felix.20221018001528.1: *4* find.change-all & helper
-    @cmd('change-all', 'Replace all instances of the search string with the replacement string.')
-    @cmd('replace-all', 'Replace all instances of the search string with the replacement string.')
-    public interactive_change_all(): void {
-        g.app.gui.findAll(true); // TODO : Only have gui for dialog, move implementation here.
+    @cmd(
+        'change-all',
+        'Replace all instances of the search string with the replacement string.'
+    )
+    @cmd(
+        'replace-all',
+        'Replace all instances of the search string with the replacement string.'
+    )
+    public interactive_change_all(): Thenable<unknown> {
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+        let w_replaceString: string = this.ftm.find_replacebox.text(); // this._lastSettingsUsed!.replaceText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return true; // Cancelled with escape or empty string.
+                }
+                w_searchString = p_findString;
+                return g.app.gui.get1Arg({
+                    title: "Replace with",
+                    prompt: "Type text to replace with and press enter.",
+                    placeHolder: "Replace pattern here",
+                    value: w_replaceString
+                }).then((p_replaceString) => {
+                    if (p_replaceString === undefined) {
+                        return true;
+                    }
+                    w_replaceString = p_replaceString;
+                    return false;
+                });
+            })
+            .then((p_cancelled: boolean) => {
+                if (!p_cancelled) {
+
+                    this.ftm.set_find_text(w_searchString);
+                    this.ftm.set_change_text(w_replaceString);
+
+                    const w_changeSettings = this.ftm.get_settings();
+
+                    const w_result = this.do_change_all(w_changeSettings);
+
+                    this.c.widgetWantsFocusNow(this.c.frame.body.wrapper);
+
+                    g.app.gui.loadSearchSettings();
+
+                    return;
+
+                }
+            });
+
     }
     // def interactive_change_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """Replace all instances of the search string with the replacement string."""
@@ -1327,7 +1457,6 @@ export class LeoFind {
      * Do the change-all command. Return the number of changes, or 0 for error.
      */
     private _change_all_helper(settings: ISettings): number {
-
         // Caller has checked settings.
         const c = this.c;
         const current = this.c.p;
@@ -1406,15 +1535,14 @@ export class LeoFind {
         const t2 = g.process_time();
         if (!g.unitTesting) {
             g.es_print(
-                `changed ${count} instances${count} ` +
-                `in ${t2 - t1} sec.`);
+                `changed ${count} instances${count} ` + `in ${t2 - t1} sec.`
+            );
         }
         // c.recolor(); // ? NEEDED ?
         // c.redraw(p); // ? NEEDED ?
         this.restore(saveData);
 
         return count;
-
     }
     //@+node:felix.20221016013001.5: *6* find._change_all_search_and_replace & helpers
     /**
@@ -1422,8 +1550,9 @@ export class LeoFind {
      *
      * Return (found, new text)
      */
-    private _change_all_search_and_replace(s: string): [number | false, string | undefined] {
-
+    private _change_all_search_and_replace(
+        s: string
+    ): [number | false, string | undefined] {
         // This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if (g.isWindows) {
             // Ignore '\r' characters, which may appear in @edit nodes.
@@ -1477,8 +1606,8 @@ export class LeoFind {
             count += 1;
             result.push(s0.substring(prev_i, i));
             result.push(change);
-            prev_i = Math.max(prev_i + 1, i + find.length);  // 2021/01/08 (!)
-            console.assert(prev_i > progress, prev_i.toString());
+            prev_i = Math.max(prev_i + 1, i + find.length); // 2021/01/08 (!)
+            g.assert(prev_i > progress, prev_i.toString());
         }
 
         // #1166: Complete the result using s0.
@@ -1491,19 +1620,17 @@ export class LeoFind {
      * return (count, new_s)
      */
     public _change_all_regex(s: string): [number, string] {
-
         let count = 0;
         let prev_i = 0;
         let result = [];
 
-        let flags = "mgd";
+        let flags = 'mgd';
         if (this.ignore_case) {
-            flags += "i";
+            flags += 'i';
         }
         const re = RegExp(this.find_text, flags);
         // let m of re.finditer(this.find_text, s, flags)
-        for (let m; m = re.exec(s); null) {
-
+        for (let m; (m = re.exec(s)); null) {
             count += 1;
             const i = re.lastIndex - m[0].length; // m.start();
             result.push(s.substring(prev_i, i));
@@ -1519,7 +1646,6 @@ export class LeoFind {
             }
             result.push(change_text);
             prev_i = re.lastIndex; // m.end();  // ? equivalent to lastIndex ?
-
         }
         // Compute the result.
         result.push(s.substring(prev_i));
@@ -1532,7 +1658,6 @@ export class LeoFind {
      * return (count, new_s)
      */
     public _change_all_word(s: string): [number, string] {
-
         let find = this.find_text;
         const change = this.change_text;
         // #1166: s0 and find0 aren't affected by ignore-case.
@@ -1560,30 +1685,63 @@ export class LeoFind {
                 result.push(find0);
             }
             prev_i = i + find.length;
-
         }
         // #1166: Complete the result using s0.
         result.push(s0.substring(prev_i));
         return [count, result.join('')];
     }
     //@+node:felix.20221016013001.13: *4* find.clone-find-all & helper
-    @cmd('clone-find-all', 'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
-        'descendants of the organizer node.')
-    @cmd('find-clone-all', 'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
-        'descendants of the organizer node.')
-    @cmd('cfa', 'clone-find-all (aka find-clone-all and cfa).\n' +
-        'Create an organizer node whose descendants contain clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is *not* flattened: clones appear only once in the' +
-        'descendants of the organizer node.')
-    public interactive_clone_find_all(): void {
-        g.app.gui.cloneFind(false, false); // TODO : Only have gui for dialog, move implementation here.
+    @cmd(
+        'clone-find-all',
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
+        'descendants of the organizer node.'
+    )
+    @cmd(
+        'find-clone-all',
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
+        'descendants of the organizer node.'
+    )
+    @cmd(
+        'cfa',
+        'clone-find-all (aka find-clone-all and cfa). ' +
+        'Create an organizer node whose descendants contain clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is *not* flattened: clones appear only once in the ' +
+        'descendants of the organizer node.'
+    )
+    public interactive_clone_find_all(): unknown {
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                this.ftm.set_find_text(p_findString);
+                const w_findSettings = this.ftm.get_settings();
+                const count = this.do_clone_find_all(w_findSettings);
+                if (count) {
+                    this.c.treeWantsFocus();
+                }
+
+                g.app.gui.loadSearchSettings();
+
+                return count;
+
+            });
+
     }
 
     // def interactive_clone_find_all(self,
@@ -1635,7 +1793,6 @@ export class LeoFind {
      * This is a stand-alone method for unit testing.
      */
     public do_clone_find_all(settings: ISettings): number {
-
         this.init_ivars_from_settings(settings);
         if (!this.check_args('clone-find-all')) {
             return 0;
@@ -1643,27 +1800,62 @@ export class LeoFind {
         return this._cf_helper(settings, false);
     }
     //@+node:felix.20221016013001.15: *4* find.clone-find-all-flattened & helper
-    @cmd('clone-find-all-flattened',
-        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
-        'another cloned node.')
-    @cmd('find-clone-all-flattened', 'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
-        'another cloned node.')
-    @cmd('cff', 'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
-        'Create an organizer node whose direct children are clones of all nodes' +
-        'matching the search string, except @nosearch trees.\n' +
-        'The list is flattened: every cloned node appears as a direct child' +
-        'of the organizer node, even if the clone also is a descendant of' +
-        'another cloned node.')
-    public interactive_cff(): void {
-        g.app.gui.cloneFind(false, true); // TODO : Only have gui for dialog, move implementation here.
+    @cmd(
+        'clone-find-all-flattened',
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
+        'another cloned node.'
+    )
+    @cmd(
+        'find-clone-all-flattened',
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
+        'another cloned node.'
+    )
+    @cmd(
+        'cff',
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff). ' +
+        'Create an organizer node whose direct children are clones of all nodes ' +
+        'matching the search string, except @nosearch trees. ' +
+        'The list is flattened: every cloned node appears as a direct child ' +
+        'of the organizer node, even if the clone also is a descendant of ' +
+        'another cloned node.'
+    )
+    public interactive_cff(): Thenable<unknown> {
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                this.ftm.set_find_text(p_findString);
+                const w_findSettings = this.ftm.get_settings();
+                const count = this.do_clone_find_all_flattened(w_findSettings);
+                if (count) {
+                    this.c.treeWantsFocus();
+                }
+
+                g.app.gui.loadSearchSettings();
+
+                return count;
+
+            });
+
+
+
     }
     // def interactive_cff(self, event: Event=None, preloaded: bool=False) -> None:  # pragma: no cover (interactive)
     //     """
@@ -1712,70 +1904,66 @@ export class LeoFind {
      * This is a stand-alone method for unit testing.
      */
     public do_clone_find_all_flattened(settings: ISettings): number {
-
         this.init_ivars_from_settings(settings);
         if (this.check_args('clone-find-all-flattened')) {
             return this._cf_helper(settings, true);
         }
         return 0;
-
     }
     //@+node:felix.20221016013001.17: *4* find.clone-find-tag & helper
-    @cmd('clone-find-tag', 'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n')
-    @cmd('find-clone-tag', 'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n')
-    @cmd('cft', 'clone-find-tag (aka find-clone-tag and cft).\n' +
-        'Create an organizer node whose descendants contain clones of all' +
-        'nodes matching the given tag, except @nosearch trees.\n' +
-        'The list is *always* flattened: every cloned node appears as a' +
-        'direct child of the organizer node, even if the clone also is a' +
-        'descendant of another cloned node.\n')
-    public interactive_clone_find_tag(): void {
-        g.app.gui.cloneFindTag(); // TODO : Only have gui for dialog, move implementation here.
+    @cmd(
+        'clone-find-tag',
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
+    )
+    @cmd(
+        'find-clone-tag',
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
+    )
+    @cmd(
+        'cft',
+        'clone-find-tag (aka find-clone-tag and cft). ' +
+        'Create an organizer node whose descendants contain clones of all ' +
+        'nodes matching the given tag, except @nosearch trees. ' +
+        'The list is always flattened: every cloned node appears as a ' +
+        'direct child of the organizer node, even if the clone also is a ' +
+        'descendant of another cloned node.'
+    )
+    public async interactive_clone_find_tag(): Promise<[number, Position] | undefined> {
+        const w_findText = this.ftm.find_findbox.text();
+        const w_startValue = w_findText === "<find pattern here>" ? '' : w_findText;
+
+        let w_inputResult = await g.app.gui.get1Arg(
+            {
+                value: w_startValue,
+                title: "Find Tag",
+                placeHolder: "<tag>",
+                prompt: "Enter a tag name",
+            }
+        );
+        if (w_inputResult && w_inputResult.trim()) {
+            w_inputResult = w_inputResult.trim();
+            this.find_text = w_inputResult;
+            this.c.treeWantsFocus();
+            return this.do_clone_find_tag(w_inputResult);
+        }
     }
-    // def interactive_clone_find_tag(self, event: Event=None) -> None:  # pragma: no cover (interactive)
-    //     """
-    //     clone-find-tag (aka find-clone-tag and cft).
 
-    //     Create an organizer node whose descendants contain clones of all
-    //     nodes matching the given tag, except @nosearch trees.
-
-    //     The list is *always* flattened: every cloned node appears as a
-    //     direct child of the organizer node, even if the clone also is a
-    //     descendant of another cloned node.
-    //     """
-    //     w = self.c.frame.body.wrapper
-    //     if w:
-    //         self.start_state_machine(event,
-    //             prefix='Clone Find Tag: ',
-    //             handler=self.interactive_clone_find_tag1)
-
-    // def interactive_clone_find_tag1(self, event: Event) -> None:  # pragma: no cover (interactive)
-    //     c, k = self.c, self.k
-    //     # Settings...
-    //     self.find_text = tag = k.arg
-    //     # Gui...
-    //     k.clearState()
-    //     k.resetLabel()
-    //     k.showStateAndMode()
-    //     self.do_clone_find_tag(tag)
-    //     c.treeWantsFocus()
     //@+node:felix.20221016013001.18: *5* find.do_clone_find_tag & helper
     /**
      * Do the clone-all-find commands from settings.
      * Return (len(clones), found) for unit tests.
      */
     public do_clone_find_tag(tag: string): [number, Position] {
-
         const c = this.c;
         const u = this.c.undoer;
         const tc = c.theTagController;
@@ -1798,7 +1986,7 @@ export class LeoFind {
         const undoData = u.beforeInsertNode(c.p);
         const found: Position = this._create_clone_tag_nodes(clones);
         u.afterInsertNode(found, 'Clone Find Tag', undoData);
-        console.assert(c.positionExists(found, undefined, true), found.h);
+        g.assert(c.positionExists(found, undefined, true), found.h);
         c.setChanged();
         c.selectPosition(found);
         // c.redraw()
@@ -1813,10 +2001,13 @@ export class LeoFind {
         const c = this.c;
         const p = this.c;
         // Create the found node.;
-        console.assert(c.positionExists(c.lastTopLevel()), c.lastTopLevel().toString());
+        g.assert(
+            c.positionExists(c.lastTopLevel()),
+            c.lastTopLevel().toString()
+        );
         const found = c.lastTopLevel().insertAfter();
-        console.assert(found && found.__bool__());
-        console.assert(c.positionExists(found), found.toString());
+        g.assert(found && found.__bool__());
+        g.assert(c.positionExists(found), found.toString());
         found.h = `Found Tag: ${this.find_text}`;
         // Clone nodes as children of the found node.
         for (let p of clones) {
@@ -1832,12 +2023,40 @@ export class LeoFind {
     // * '@cmd' commands @cmd('find-all'), etc,  are overriden in the UI client.
     // * do_find_all is intended to be called directly from the UI client instead.
 
-    @cmd('find-all',
+    @cmd(
+        'find-all',
         'Create a summary node containing descriptions of all matches of the' +
         'search string.'
     )
-    public interactive_find_all(): void {
-        g.app.gui.findAll(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_find_all(): Thenable<unknown> {
+
+        let w_searchString: string = this.ftm.find_findbox.text(); // this._lastSettingsUsed!.findText;
+
+        return g.app.gui.get1Arg({
+            title: "Search for",
+            prompt: "Type text to search for and press enter.",
+            placeHolder: "Find pattern here",
+            value: w_searchString === "<find pattern here>" ? '' : w_searchString
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+
+                this.ftm.set_find_text(p_findString);
+
+                const w_changeSettings = this.ftm.get_settings();
+
+                const w_result = this.do_find_all(w_changeSettings);
+
+                this.c.widgetWantsFocusNow(this.c.frame.body.wrapper);
+
+                g.app.gui.loadSearchSettings();
+
+                return;
+            });
+
+
 
     }
     // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
@@ -1935,7 +2154,6 @@ export class LeoFind {
      * Return the List of Dicts describing each match.
      */
     private _find_all_helper(settings: ISettings): { [key: string]: any } {
-
         const c = this.c;
         const u = this.c.undoer;
         const undoType = 'Find All';
@@ -1960,7 +2178,7 @@ export class LeoFind {
             vnodes = [...c.all_unique_nodes()];
         }
 
-        const matches_dict: { 'body': number[], 'head': number[], 'v': VNode }[] = [];
+        const matches_dict: { body: number[]; head: number[]; v: VNode }[] = [];
         let distinct_body_lines, total_matches, total_nodes;
         [distinct_body_lines, total_matches, total_nodes] = [0, 0, 0];
         let body, head;
@@ -1978,7 +2196,10 @@ export class LeoFind {
                 let line_number_set = new Set();
                 let line_number, _unused;
                 for (const index of body) {
-                    [line_number, _unused] = this.index_to_line_info(index, v.b);
+                    [line_number, _unused] = this.index_to_line_info(
+                        index,
+                        v.b
+                    );
                     line_number_set.add(line_number);
                 }
 
@@ -1990,10 +2211,9 @@ export class LeoFind {
             }
             if (body.length || head.length) {
                 total_nodes += 1;
-                matches_dict.push({ 'body': body, 'head': head, 'v': v });
+                matches_dict.push({ body: body, head: head, v: v });
             }
         }
-
 
         if (!matches_dict.length) {
             // Not even one match found!
@@ -2031,24 +2251,22 @@ export class LeoFind {
         c.redraw();
         // Return a dict containing the actual results and statistics.
         return {
-            'distinct_body_lines': distinct_body_lines,
-            'match_dict': matches_dict,
-            'result_string': result_string,
-            'total_matches': total_matches,
-            'total_nodes': total_nodes,
+            distinct_body_lines: distinct_body_lines,
+            match_dict: matches_dict,
+            result_string: result_string,
+            total_matches: total_matches,
+            total_nodes: total_nodes,
         };
-
     }
     //@+node:felix.20230212180757.4: *7* find.create_find_all_node
-    /** 
+    /**
      * Create a "Found All" node as the last node of the outline.
      */
     private create_find_all_node(result: string): Position {
-
         const c = this.c;
 
         const found = c.lastTopLevel().insertAfter();
-        console.assert(found && found.__bool__());
+        g.assert(found && found.__bool__());
         found.h = `find-all:${this.find_text}`;
         let status = this.compute_result_status(true);
         status = status.trim();
@@ -2068,15 +2286,16 @@ export class LeoFind {
         return [row + 1, line];
     }
     //@+node:felix.20230212180757.6: *7* find.make_result_from_matches
-    private make_result_from_matches(matches: { 'body': number[], 'head': number[], 'v': VNode }[]): string {
-
+    private make_result_from_matches(
+        matches: { body: number[]; head: number[]; v: VNode }[]
+    ): string {
         const results: string[] = ['\n'];
         // Report settings.
         results.push(
             `  ignore-case: ${this.ignore_case}\n`,
             `        regex: ${this.pattern_match}\n`,
             `   whole-word: ${this.whole_word}\n`,
-            `search string: ${this.find_text}\n`,
+            `search string: ${this.find_text}\n`
         );
         let body, head, v;
         for (const d of matches) {
@@ -2111,7 +2330,7 @@ export class LeoFind {
      */
     private put_link(line: string, line_number: number, v: VNode): void {
         const c = this.c;
-        // const log = c.frame.log // UNAVAILABLE IN LEOJS 
+        // const log = c.frame.log // UNAVAILABLE IN LEOJS
         // Find the first position with the given vnode.
         let found;
         for (const p of c.all_unique_positions()) {
@@ -2140,13 +2359,15 @@ export class LeoFind {
         if (g.isWindows) {
             // Ignore '\r' characters, which may appear in @edit nodes.
             // Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
-            s = s.replace(/(\r)/gm, "");
+            s = s.replace(/(\r)/gm, '');
         }
         if (!s.trim()) {
             return [];
         }
         const find_s = this.replace_back_slashes(this.find_text);
-        const f = this.pattern_match ? this.find_all_regex : this.find_all_plain;
+        const f = this.pattern_match
+            ? this.find_all_regex
+            : this.find_all_plain;
         return f.bind(this)(find_s, s);
     }
     //@+node:felix.20230212180757.9: *8* find.find_all_plain
@@ -2167,7 +2388,10 @@ export class LeoFind {
             if (i === -1) {
                 break;
             }
-            if (!this.whole_word || this.whole_word && g.match_word(s, i, find_s)) {
+            if (
+                !this.whole_word ||
+                (this.whole_word && g.match_word(s, i, find_s))
+            ) {
                 result.push(i);
             }
             i += find_s.length;
@@ -2180,15 +2404,15 @@ export class LeoFind {
      * return a list of matching indices.
      */
     public find_all_regex(find_s: string, s: string): number[] {
-        let flags = "mgd";
+        let flags = 'mgd';
         if (this.ignore_case) {
-            flags += "i";
+            flags += 'i';
         }
 
         // return [m.start() for m in re.finditer(find_s, s, flags)]
         const re = RegExp(find_s, flags);
         let result = [];
-        for (let m; m = re.exec(s); null) {
+        for (let m; (m = re.exec(s)); null) {
             const i = re.lastIndex - m[0].length; // m.start();
             result.push(i);
         }
@@ -2197,8 +2421,8 @@ export class LeoFind {
     //@+node:felix.20221016013001.26: *4* find.re-search
     @cmd('re-search', 'Same as start-find, with regex.')
     @cmd('re-search-forward', 'Same as start-find, with regex.')
-    public interactive_re_search_forward(): void {
-        g.app.gui.interactiveSearch(false, true, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_re_search_forward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(false, true, false); // TODO : Move implementation here if possible.
     }
     // def interactive_re_search_forward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, with regex."""
@@ -2214,9 +2438,12 @@ export class LeoFind {
     //         escape_handler=self.start_search_escape1,  # See start-search
     //     )
     //@+node:felix.20221016013001.27: *4* find.re-search-backward
-    @cmd('re-search-backward', 'Same as start-find, but with regex and in reverse.')
-    public interactive_re_search_backward(): void {
-        g.app.gui.interactiveSearch(true, true, false); // TODO : Only have gui for dialog, move implementation here.
+    @cmd(
+        're-search-backward',
+        'Same as start-find, but with regex and in reverse.'
+    )
+    public interactive_re_search_backward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(true, true, false); // TODO : Move implementation here if possible.
     }
     // def interactive_re_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but with regex and in reverse."""
@@ -2236,8 +2463,8 @@ export class LeoFind {
 
     //@+node:felix.20221016013001.28: *4* find.search_backward
     @cmd('search-backward', 'Same as start-find, but in reverse.')
-    public interactive_search_backward(): void {
-        g.app.gui.interactiveSearch(true, false, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_search_backward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(true, false, false); // TODO : Move implementation here if possible.
     }
     // def interactive_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but in reverse."""
@@ -2253,14 +2480,17 @@ export class LeoFind {
     //         escape_handler=self.start_search_escape1,  # See start-search
     //     )
     //@+node:felix.20221016013001.29: *4* find.start-search (Ctrl-F) & common states
-    @cmd('start-search',
-        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+    @cmd(
+        'start-search',
+        'The default binding of Ctrl-F. Also contains default state-machine entries for find/change commands.'
     )
-    @cmd('search-forward',
-        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+    @cmd(
+        'search-forward',
+        'The default binding of Ctrl-F. Also contains default state-machine entries for find/change commands.'
     )
     public start_search(): void {
-        g.app.gui.startSearch(); // All done in GUI.
+        // GUI action that opens the find panel & focuses the 'find' text box.
+        g.app.gui.startSearch();
     }
     // def start_search(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2352,39 +2582,104 @@ export class LeoFind {
     //     self.do_find_next(settings)
     //@+node:felix.20230120221726.1: *4* find.tag-node
     @cmd('tag-node', 'Prompt for a tag for this node')
-    public interactive_tag_node(): void {
-        g.app.gui.tagNode(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_tag_node(): Thenable<unknown> {
+
+        return g.app.gui.get1Arg({
+            title: "Tag Node",
+            placeHolder: "<tag>",
+            prompt: "Enter a tag name",
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                p_findString = p_findString.trim();
+                // check for special chars first
+                if (p_findString.split(/(&|\||-|\^)/).length > 1) {
+                    void g.setStatusLabel('Cannot add tags containing any of these characters: &|^-');
+                    return;
+                }
+
+                const c = this.c;
+                const tc = c.theTagController;
+                tc.add_tag(c.p, p_findString);
+            });
+
     }
     //@+node:felix.20230308231502.1: *4* find.remove-tag
     @cmd('remove-tag', 'Prompt for a tag to remove on selected node')
-    public remove_tag(): void {
-        g.app.gui.removeTag(); // TODO : Only have gui for dialog, move implementation here.
+    public remove_tag(): Thenable<unknown> {
+        const c = this.c;
+        const w_p = c.p;
+
+        if (w_p && w_p.u && w_p.u.__node_tags && w_p.u.__node_tags.length) {
+
+            return g.app.gui.get1Arg(
+                {
+                    title: "Remove Tag",
+                    placeHolder: "<tag>",
+                    prompt: "Enter a tag name",
+                },
+                undefined,
+                w_p.u.__node_tags
+            )
+                .then((p_findString) => {
+                    if (!p_findString) {
+                        return; // Cancelled with escape or empty string.
+                    }
+                    p_findString = p_findString.trim();
+
+                    const v = w_p.v;
+                    const tc = c.theTagController;
+                    if (v.u && v.u['__node_tags']) {
+                        tc.remove_tag(w_p, p_findString);
+                    }
+                });
+        }
+        return Promise.resolve();
     }
+
     //@+node:felix.20230308231503.1: *4* find.remove-all-tags
     @cmd('remove-all-tags', 'Remove all tags on selected node')
     public remove_all_tags(): void {
         const c = this.c;
         const w_p = c.p;
-        if (w_p && w_p.u &&
-            w_p.u.__node_tags && w_p.u.__node_tags.length) {
+        if (w_p && w_p.u && w_p.u.__node_tags && w_p.u.__node_tags.length) {
             const v = w_p.v;
             const tc = c.theTagController;
             if (v.u['__node_tags']) {
                 delete v.u['__node_tags'];
-                tc.initialize_taglist();  // reset tag list: some may have been removed
+                tc.initialize_taglist(); // reset tag list: some may have been removed
                 c.setChanged();
             }
         } else if (w_p) {
-            g.es("No tags on node: " + w_p.h);
+            g.es('No tags on node: ' + w_p.h);
         } else {
             return;
         }
     }
     //@+node:felix.20221016013001.33: *4* find.tag-children & helper
     @cmd('tag-children', 'Prompt for a tag and add it to all children of c.p.')
-    public interactive_tag_children(): void {
-        g.app.gui.tagChildren(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_tag_children(): Thenable<unknown> {
+        return g.app.gui.get1Arg({
+            title: "Tag Children",
+            placeHolder: "<tag>",
+            prompt: "Enter a tag name",
+        })
+            .then((p_findString) => {
+                if (!p_findString) {
+                    return; // Cancelled with escape or empty string.
+                }
+                p_findString = p_findString.trim();
+                // check for special chars first
+                if (p_findString.split(/(&|\||-|\^)/).length > 1) {
+                    void g.setStatusLabel('Cannot add tags containing any of these characters: &|^-');
+                    return;
+                }
+                this.do_tag_children(this.c.p, p_findString);
+            });
     }
+
     //     """tag-children: prompt for a tag and add it to all children of c.p."""
     //     w = self.c.frame.body.wrapper
     //     if not w:
@@ -2408,7 +2703,6 @@ export class LeoFind {
      * Handle the tag-children command.
      */
     public do_tag_children(p: Position, tag: string): void {
-
         const c = this.c;
 
         const tc = c.theTagController;
@@ -2430,9 +2724,12 @@ export class LeoFind {
     }
     //@+node:felix.20221020230510.1: *4* find.word-search
     @cmd('word-search', 'Same as start-search, with whole_word setting.')
-    @cmd('word-search-forward', 'Same as start-search, with whole_word setting.')
-    public word_search_forward(): void {
-        g.app.gui.interactiveSearch(false, false, true); // TODO : Only have gui for dialog, move implementation here.
+    @cmd(
+        'word-search-forward',
+        'Same as start-search, with whole_word setting.'
+    )
+    public word_search_forward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(false, false, true); // TODO : Move implementation here if possible.
     }
     // @cmd('word-search')
     // @cmd('word-search-forward')
@@ -2450,9 +2747,12 @@ export class LeoFind {
     //         escape_handler=self.start_search_escape1,  # See start-search
     //     )
     //@+node:felix.20221016013001.36: *4* find.word-search-backward
-    @cmd('word-search-backward', 'Same as start-search-backward, with whole_word setting.')
-    public word_search_backward(): void {
-        g.app.gui.interactiveSearch(true, false, true); // TODO : Only have gui for dialog, move implementation here.
+    @cmd(
+        'word-search-backward',
+        'Same as start-search-backward, with whole_word setting.'
+    )
+    public word_search_backward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(true, false, true); // TODO : Move implementation here if possible.
     }
     // def word_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     # Set flags for show_find_options.
@@ -2476,7 +2776,6 @@ export class LeoFind {
      * Return the number of found nodes.
      */
     private _cf_helper(settings: ISettings, flatten: boolean): number {
-
         const c = this.c;
         const u = this.c.undoer;
 
@@ -2534,13 +2833,12 @@ export class LeoFind {
                         }
                     }
                     p.moveToNodeAfterTree();
-
                 }
             } else {
                 p.moveToThreadNext();
             }
 
-            console.assert(!p.__eq__(progress));
+            g.assert(!p.__eq__(progress));
         }
 
         this.ftm.set_radio_button('entire-outline');
@@ -2553,29 +2851,36 @@ export class LeoFind {
             const undoData = u.beforeInsertNode(c.p);
             found = this._cfa_create_nodes(clones, false);
             u.afterInsertNode(found, 'Clone Find All', undoData);
-            console.assert(c.positionExists(found, undefined, true), found.toString());
+            g.assert(
+                c.positionExists(found, undefined, true),
+                found.toString()
+            );
             c.setChanged();
             c.selectPosition(found);
             // Put the count in found.h.
             found.h = found.h.replace('Found:', `Found ${count}:`);
         }
         g.es(`found ${count}, matches for ${this.find_text}`);
-        return count;  // Might be useful for the gui update.
-
+        return count; // Might be useful for the gui update.
     }
     //@+node:felix.20221020232631.3: *5* find._cfa_create_nodes
     /**
      * Create a "Found" node as the last node of the outline.
      * Clone all positions in the clones set a children of found.
      */
-    private _cfa_create_nodes(clones: Position[], flattened: boolean): Position {
-
+    private _cfa_create_nodes(
+        clones: Position[],
+        flattened: boolean
+    ): Position {
         const c = this.c;
         // Create the found node.
-        console.assert(c.positionExists(c.lastTopLevel()), c.lastTopLevel().toString());
+        g.assert(
+            c.positionExists(c.lastTopLevel()),
+            c.lastTopLevel().toString()
+        );
         const found: Position = c.lastTopLevel().insertAfter();
-        console.assert(found);
-        console.assert(c.positionExists(found), found.toString());
+        g.assert(found);
+        g.assert(c.positionExists(found), found.toString());
         found.h = `Found:${this.find_text}`;
         let status = this.compute_result_status(true);
 
@@ -2614,7 +2919,6 @@ export class LeoFind {
      * Find the next batch match at p.
      */
     private _cfa_find_next_match(p: Position): boolean {
-
         // Called only from unit tests.
         const table = [];
         if (this.search_headline) {
@@ -2627,20 +2931,23 @@ export class LeoFind {
             this.reverse = false;
             let pos: number;
             let newpos: number;
-            [pos, newpos] = this.inner_search_helper(s, 0, s.length, this.find_text);
+            [pos, newpos] = this.inner_search_helper(
+                s,
+                0,
+                s.length,
+                this.find_text
+            );
             if (pos !== -1) {
                 return true;
             }
         }
         return false;
-
     }
     //@+node:felix.20221020232631.5: *4* find.change_selection
     /**
      * Replace selection with this.change_text.
      */
     public change_selection(p: Position): boolean {
-
         const c = this.c;
         const u = this.c.undoer;
         const wrapper = c.frame.body && c.frame.body.wrapper;
@@ -2662,7 +2969,7 @@ export class LeoFind {
             [start, end] = [end, start];
         }
         if (start === end) {
-            g.es("no text selected");
+            g.es('no text selected');
             return false;
         }
 
@@ -2680,7 +2987,7 @@ export class LeoFind {
 
         // IF [start, end] EQUALS change_text -> skip change and no undo bead
         if (gui_w.getAllText().substring(start, end) === change_text) {
-            g.es("same text as replacement");
+            g.es('same text as replacement');
             return true; // Success but no actual change to body, nor undo created.
         }
 
@@ -2693,7 +3000,7 @@ export class LeoFind {
         }
         gui_w.insert(start, change_text);
         gui_w.setInsertPoint(new_ins);
-        this.work_s = gui_w.getAllText();  // #2220.
+        this.work_s = gui_w.getAllText(); // #2220.
         this.work_sel = [new_ins, new_ins, new_ins];
 
         // Update the selection for the next match.
@@ -2702,7 +3009,6 @@ export class LeoFind {
 
         // No redraws here: they would destroy the headline selection.
         if (this.in_headline) {
-
             // #2220: Let onHeadChanged handle undo, etc.
             c.frame.tree.onHeadChanged(p, 'Change Headline');
 
@@ -2725,17 +3031,15 @@ export class LeoFind {
             u.afterMark(p, undoType, bunch);
         }
         return true;
-
     }
     //@+node:felix.20221020232631.6: *4* find.check_args
     /**
      * Check the user arguments to a command.
      */
     public check_args(tag: string): boolean {
-
         if (!this.search_headline && !this.search_body) {
             if (!g.unitTesting) {
-                g.es_print("not searching headline or body");
+                g.es_print('not searching headline or body');
             }
             return false;
         }
@@ -2747,7 +3051,6 @@ export class LeoFind {
             return false;
         }
         return true;
-
     }
     //@+node:felix.20221023141615.1: *4* find.compile_pattern
     /**
@@ -2755,11 +3058,12 @@ export class LeoFind {
      */
     public compile_pattern(): boolean {
         let flags: string;
-        try { // Precompile the regexp.
+        try {
+            // Precompile the regexp.
 
-            flags = "mg"; // re.MULTILINE and g for global search.
+            flags = 'mg'; // re.MULTILINE and g for global search.
             if (this.ignore_case) {
-                flags = flags + "i"; //|= re.IGNORECASE
+                flags = flags + 'i'; //|= re.IGNORECASE
             }
             // Escape the search text.
             // Ignore the whole_word option.
@@ -2771,8 +3075,7 @@ export class LeoFind {
             // if not s.endswith(b): s = s + b
             this.re_obj = new RegExp(s, flags); // re.compile(s, flags)
             return true;
-        }
-        catch (e) {
+        } catch (e) {
             if (!g.unitTesting) {
                 g.warning('invalid regular expression:', this.find_text);
             }
@@ -2786,8 +3089,9 @@ export class LeoFind {
      *
      * Return (p, pos, newpos).
      */
-    public find_next_match(p: Position | undefined): [Position | undefined, number | undefined, number | undefined] {
-
+    public find_next_match(
+        p: Position | undefined
+    ): [Position | undefined, number | undefined, number | undefined] {
         if (!this.search_headline && !this.search_body) {
             return [undefined, undefined, undefined];
         }
@@ -2833,7 +3137,8 @@ export class LeoFind {
                 // Switch to the next/prev node, if possible.
                 attempts += 1;
                 p = this._fnm_next_after_fail(p);
-                if (p && p.__bool__()) { // Found another node: select the proper pane.
+                if (p && p.__bool__()) {
+                    // Found another node: select the proper pane.
                     this.in_headline = this._fnm_first_search_pane();
                     s = this.in_headline ? p.h : p.b;
                     ins = this.reverse ? s.length : 0;
@@ -2841,17 +3146,14 @@ export class LeoFind {
                     this.work_sel = [ins, ins, ins];
                 }
             }
-
         }
         return [undefined, undefined, undefined];
-
     }
     //@+node:felix.20221020232631.9: *5* find._fnm_next_after_fail & helper
     /**
      * Return the next node after a failed search or undefined.
      */
     private _fnm_next_after_fail(p: Position): Position | undefined {
-
         // Move to the next position.
         p = this.reverse ? p.threadBack() : p.threadNext();
         // Check it.
@@ -2862,7 +3164,6 @@ export class LeoFind {
             return undefined;
         }
         return p;
-
     }
     //@+node:felix.20221020232631.10: *6* find._fail_outside_range
     /**
@@ -2870,7 +3171,6 @@ export class LeoFind {
      * both the headline and body text of the present node have been searched.
      */
     private _fail_outside_range(p: Position): boolean {
-
         const c = this.c;
         if (!p || !p.__bool__()) {
             return true;
@@ -2879,7 +3179,11 @@ export class LeoFind {
             return true;
         }
         if (this.suboutline_only || this.file_only) {
-            if (this.root && !p.__eq__(this.root) && !this.root.isAncestorOf(p)) {
+            if (
+                this.root &&
+                !p.__eq__(this.root) &&
+                !this.root.isAncestorOf(p)
+            ) {
                 return true;
             }
         }
@@ -2891,8 +3195,7 @@ export class LeoFind {
                 return true;
             }
         }
-        return false;  // Within range.
-
+        return false; // Within range.
     }
     //@+node:felix.20221020232631.11: *5* find._fnm_first_search_pane
     /**
@@ -2900,13 +3203,12 @@ export class LeoFind {
      * indicating which pane to search first.
      */
     private _fnm_first_search_pane(): boolean {
-
         if (this.search_headline && this.search_body) {
             // Fix bug 1228458: Inconsistency between Find-forward and Find-backward.
             if (this.reverse) {
-                return false;  // Search the body pane first.
+                return false; // Search the body pane first.
             }
-            return true;  // Search the headline pane first.
+            return true; // Search the headline pane first.
         }
 
         if (this.search_headline || this.search_body) {
@@ -2916,15 +3218,15 @@ export class LeoFind {
 
         g.trace('can not happen: no search enabled');
         return false;
-
     }
     //@+node:felix.20221020232631.12: *5* find._fnm_search
     /**
      * Search this.work_s for this.find_text with present options.
      * Returns (pos, newpos) or (undefined, dundefined).
      */
-    private _fnm_search(p: Position): [number, number] | [undefined, undefined] {
-
+    private _fnm_search(
+        p: Position
+    ): [number, number] | [undefined, undefined] {
         let index = this.work_sel[2];
         let s = this.work_s;
 
@@ -2941,7 +3243,12 @@ export class LeoFind {
 
         let pos;
         let newpos;
-        [pos, newpos] = this.inner_search_helper(s, index, stopindex, this.find_text);
+        [pos, newpos] = this.inner_search_helper(
+            s,
+            index,
+            stopindex,
+            this.find_text
+        );
 
         if (this.in_headline && !this.search_headline) {
             return [undefined, undefined];
@@ -2953,18 +3260,18 @@ export class LeoFind {
             return [undefined, undefined];
         }
 
-        const ins = this.reverse ? Math.min(pos, newpos) : Math.max(pos, newpos);
+        const ins = this.reverse
+            ? Math.min(pos, newpos)
+            : Math.max(pos, newpos);
         this.work_sel = [pos, newpos, ins];
 
         return [pos, newpos];
-
     }
     //@+node:felix.20221020232631.13: *5* find._fnm_should_stay_in_node
     /**
      * Return True if the find should simply switch panes.
      */
     private _fnm_should_stay_in_node(p: Position): boolean {
-
         // Errors here cause the find command to fail badly.
         // Switch only if:
         //   a) searching both panes and,
@@ -2972,20 +3279,22 @@ export class LeoFind {
         // There is * no way * this can ever change.
         // So simple in retrospect, so difficult to see.
         return (
-            this.search_headline && this.search_body &&
-            (
-                (this.reverse && !this.in_headline) ||
-                (!this.reverse && this.in_headline)
-            )
+            this.search_headline &&
+            this.search_body &&
+            ((this.reverse && !this.in_headline) ||
+                (!this.reverse && this.in_headline))
         );
-
     }
     //@+node:felix.20221023141654.1: *4* find.inner_search_helper & helpers
     /**
      * Dispatch the proper search method based on settings.
      */
-    public inner_search_helper(s: string, i: number, j: number, pattern: string): [number, number] {
-
+    public inner_search_helper(
+        s: string,
+        i: number,
+        j: number,
+        pattern: string
+    ): [number, number] {
         const backwards = this.reverse;
         const nocase = this.ignore_case;
         const regexp = this.pattern_match;
@@ -3002,17 +3311,42 @@ export class LeoFind {
         let newpos;
 
         if (regexp) {
-            [pos, newpos] = this._inner_search_regex(s, i, j, pattern, backwards, nocase);
+            [pos, newpos] = this._inner_search_regex(
+                s,
+                i,
+                j,
+                pattern,
+                backwards,
+                nocase
+            );
         } else if (backwards) {
-            [pos, newpos] = this._inner_search_backward(s, i, j, pattern, nocase, word);
+            [pos, newpos] = this._inner_search_backward(
+                s,
+                i,
+                j,
+                pattern,
+                nocase,
+                word
+            );
         } else {
-            [pos, newpos] = this._inner_search_plain(s, i, j, pattern, nocase, word);
+            [pos, newpos] = this._inner_search_plain(
+                s,
+                i,
+                j,
+                pattern,
+                nocase,
+                word
+            );
         }
         return [pos, newpos];
-
     }
     //@+node:felix.20221023184334.1: *5* find._rfind
-    private _rfind(s: string, pattern: string, start: number, end: number): number {
+    private _rfind(
+        s: string,
+        pattern: string,
+        start: number,
+        end: number
+    ): number {
         const w_s = s.substring(start, end); // will start just past i
 
         let result = w_s.lastIndexOf(pattern);
@@ -3042,7 +3376,6 @@ export class LeoFind {
         nocase: boolean,
         word: boolean
     ): [number, number] {
-
         if (nocase) {
             s = s.toLowerCase();
             pattern = pattern.toLowerCase();
@@ -3060,7 +3393,6 @@ export class LeoFind {
         let k: number;
         if (word) {
             while (1) {
-
                 // k = s.rfind(pattern, i, j)
                 k = this._rfind(s, pattern, i, j);
 
@@ -3071,10 +3403,8 @@ export class LeoFind {
                     return [k, k + n];
                 }
                 j = Math.max(0, k - 1);
-
             }
             return [-1, -1];
-
         }
 
         // k = s.rfind(pattern, i, j)
@@ -3084,33 +3414,36 @@ export class LeoFind {
             return [-1, -1];
         }
         return [k, k + n];
-
     }
     //@+node:felix.20221023141654.3: *5* find._inner_search_match_word
     /**
      * Do a whole-word search.
      */
-    private _inner_search_match_word(s: string, i: number, pattern: string): boolean {
-
+    private _inner_search_match_word(
+        s: string,
+        i: number,
+        pattern: string
+    ): boolean {
         pattern = this.replace_back_slashes(pattern);
-        if (!s || !pattern || !g.match(s, i, pattern)) {
-            return false;
-        }
+        return !!(s && pattern && g.match_word(s, i, pattern, this.ignore_case));
 
-        let pat1;
-        let pat2;
-        [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
-        const n = pattern.length;
-        const ch1 = (0 <= (i - 1) && (i - 1) < s.length) ? s[i - 1] : '.';
-        const ch2 = (0 <= (i + n) && (i + n) < s.length) ? s[i + n] : '.';
-        const isWordPat1 = g.isWordChar(pat1);
-        const isWordPat2 = g.isWordChar(pat2);
-        const isWordCh1 = g.isWordChar(ch1);
-        const isWordCh2 = g.isWordChar(ch2);
-        const inWord = isWordPat1 && isWordCh1 || isWordPat2 && isWordCh2;
+        // if (!s || !pattern || !g.match(s, i, pattern)) {
+        //     return false;
+        // }
 
-        return !inWord;
+        // let pat1;
+        // let pat2;
+        // [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
+        // const n = pattern.length;
+        // const ch1 = 0 <= i - 1 && i - 1 < s.length ? s[i - 1] : '.';
+        // const ch2 = 0 <= i + n && i + n < s.length ? s[i + n] : '.';
+        // const isWordPat1 = g.isWordChar(pat1);
+        // const isWordPat2 = g.isWordChar(pat2);
+        // const isWordCh1 = g.isWordChar(ch1);
+        // const isWordCh2 = g.isWordChar(ch2);
+        // const inWord = (isWordPat1 && isWordCh1) || (isWordPat2 && isWordCh2);
 
+        // return !inWord;
     }
     //@+node:felix.20221023141654.4: *5* find._inner_search_plain
     /**
@@ -3124,7 +3457,6 @@ export class LeoFind {
         nocase: boolean,
         word: boolean
     ): [number, number] {
-
         if (nocase) {
             s = s.toLowerCase();
             pattern = pattern.toLowerCase();
@@ -3144,10 +3476,8 @@ export class LeoFind {
                     return [k, k + n];
                 }
                 i = k + n;
-
             }
             return [-1, -1];
-
         }
         k = s.indexOf(pattern, i);
 
@@ -3155,7 +3485,6 @@ export class LeoFind {
             return [-1, -1];
         }
         return [k, k + n];
-
     }
     //@+node:felix.20221023141654.5: *5* find._inner_search_regex
     /**
@@ -3167,10 +3496,9 @@ export class LeoFind {
         j: number,
         pattern: string,
         backwards: boolean,
-        nocase: boolean,
+        nocase: boolean
     ): [number, number] {
-
-        const re_obj = this.re_obj;  // Use the pre-compiled object
+        const re_obj = this.re_obj; // Use the pre-compiled object
         if (!re_obj) {
             if (!g.unitTesting) {
                 g.trace('can not happen: no re_obj');
@@ -3204,7 +3532,6 @@ export class LeoFind {
                 // if busted past j 'end'
                 mo = undefined;
             }
-
         }
 
         if (mo) {
@@ -3214,7 +3541,6 @@ export class LeoFind {
 
         this.match_obj = undefined;
         return [-1, -1];
-
     }
     //@+node:felix.20221023141705.1: *4* find.make_regex_subs
     /**
@@ -3222,8 +3548,10 @@ export class LeoFind {
      *
      * Groups is a tuple of strings, one for every matched group.
      */
-    public make_regex_subs(change_text: string, groups: RegExpExecArray): string {
-
+    public make_regex_subs(
+        change_text: string,
+        groups: RegExpExecArray
+    ): string {
         // ! TODO : TEST THIS METHOD !
         // ! see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_function_as_the_replacement
 
@@ -3232,8 +3560,8 @@ export class LeoFind {
         // g.printObj(list(groups), tag=f"groups in {change_text!r}")
 
         /**
-        * re.sub calls this function once per group.
-        */
+         * re.sub calls this function once per group.
+         */
         const repl = (match: string, p1: string, offset: number): string => {
             // subgroup will be a number matched
 
@@ -3244,15 +3572,13 @@ export class LeoFind {
 
             if (0 <= n && n < groups.length - 1) {
                 // Executed only if the change text contains groups that match.
-                return (
-                    groups[w_group].
-                        replace(/\\b/g, '\\\\b').   // b
-                        replace(/\\f/g, '\\\\f').   // f
-                        replace(/\\n/g, '\\\\n').   // n
-                        replace(/\\r/g, '\\\\r').   // r
-                        replace(/\\t/g, '\\\\t').   // t
-                        replace(/\\w/g, '\\\\v')    // w
-                );
+                return groups[w_group]
+                    .replace(/\\b/g, '\\\\b') // b
+                    .replace(/\\f/g, '\\\\f') // f
+                    .replace(/\\n/g, '\\\\n') // n
+                    .replace(/\\r/g, '\\\\r') // r
+                    .replace(/\\t/g, '\\\\t') // t
+                    .replace(/\\w/g, '\\\\v'); // w
             }
             // No replacement.
             return match; // in python group(0) is the whole match spanning all subgroups
@@ -3261,14 +3587,18 @@ export class LeoFind {
         const result = change_text.replace(/\\([0-9])/g, repl);
 
         return result;
-
     }
     //@+node:felix.20221023141723.1: *4* find.replace_back_slashes
     /**
-     * Carefully replace backslashes in a search pattern.
+     * Replace backslash-n with a newline and backslash-t with a tab.
      */
     public replace_back_slashes(s: string): string {
 
+        return s.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+
+        // * Old Code 
+
+        /*
         // This is NOT the same as:
         //
         //   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
@@ -3292,7 +3622,7 @@ export class LeoFind {
             i += 1;
         }
         return s;
-
+        */
     }
     //@+node:felix.20221022201759.1: *3* LeoFind.Initing & finalizing
     //@+node:felix.20221022201759.2: *4* find.init_in_headline & helper
@@ -3302,7 +3632,6 @@ export class LeoFind {
      * This must not alter the current insertion point or selection range.
      */
     public init_in_headline(): void {
-
         // #1228458: Inconsistency between Find-forward and Find-backward.
         if (this.search_headline && this.search_body) {
             // We have no choice: we *must* search the present widget!
@@ -3318,12 +3647,11 @@ export class LeoFind {
      * Note: the focus may be in the find pane.
      */
     public focus_in_tree(): boolean {
-
         const c = this.c;
         const ftm = this.ftm;
-        const w = ftm && ftm.entry_focus || g.app.gui.get_focus();
+        const w = (ftm && ftm.entry_focus) || g.app.gui.get_focus();
         if (ftm) {
-            ftm.entry_focus = undefined;  // Only use this focus widget once!
+            ftm.entry_focus = undefined; // Only use this focus widget once!
         }
         const w_name = c.widget_name(w);
         let val;
@@ -3335,14 +3663,12 @@ export class LeoFind {
             val = w_name.startsWith('head');
         }
         return val;
-
     }
     //@+node:felix.20221022201759.4: *4* find.restore
     /**
      * Restore Leo's gui and settings from data, a g.Bunch.
      */
     public restore(data: IFindUndoData): void {
-
         const c = this.c;
         const p = data.p;
         // c.frame.bringToFront();  // Needed on the Mac
@@ -3368,7 +3694,6 @@ export class LeoFind {
      * Save everything needed to restore after a search fails.
      */
     public save(): IFindUndoData {
-
         const c = this.c;
         let insert: number | undefined;
         let start: number | undefined;
@@ -3388,7 +3713,7 @@ export class LeoFind {
             in_headline: this.in_headline,
             insert: insert,
             p: c.p.copy(),
-            start: start
+            start: start,
         };
 
         return data;
@@ -3397,12 +3722,18 @@ export class LeoFind {
     /**
      * Display the result of a successful find operation.
      */
-    public show_success(p: Position, pos: number, newpos: number, showState = true): any {
-
+    public show_success(
+        p: Position,
+        pos: number,
+        newpos: number,
+        showState = true
+    ): any {
         const c = this.c;
         // Set state vars.
         // Ensure progress in backwards searches.
-        const insert = this.reverse ? Math.min(pos, newpos) : Math.max(pos, newpos);
+        const insert = this.reverse
+            ? Math.min(pos, newpos)
+            : Math.max(pos, newpos);
         if (c.sparse_find) {
             c.expandOnlyAncestorsOfNode(p);
         }
@@ -3413,9 +3744,9 @@ export class LeoFind {
             c.endEditing();
             c.redraw(p);
             c.frame.tree.editLabel(p); // <-- THIS SHOULD CREATE IT !
-            w = c.edit_widget(p) as StringTextWrapper;  // #2220
+            w = c.edit_widget(p) as StringTextWrapper; // #2220
             if (w) {
-                w.setSelectionRange(pos, newpos, insert);  // #2220
+                w.setSelectionRange(pos, newpos, insert); // #2220
             }
         } else {
             // Tricky code.  Do not change without careful thought.
@@ -3425,24 +3756,23 @@ export class LeoFind {
             c.selectPosition(p);
             c.bodyWantsFocus();
             if (showState && c.k && c.k.showStateAndMode) {
-                c.k.showStateAndMode(w);  // TODO : ? NEEDED ?
+                c.k.showStateAndMode(w); // TODO : ? NEEDED ?
             }
             c.bodyWantsFocusNow();
             w.setSelectionRange(pos, newpos, insert);
             const k = g.see_more_lines(w.getAllText(), insert, 4);
-            w.see(k);  // #78: find-next match not always scrolled into view.
-            c.outerUpdate();  // Set the focus immediately.
+            w.see(k); // #78: find-next match not always scrolled into view.
+            c.outerUpdate(); // Set the focus immediately.
             if (c.vim_mode && c.vimCommands) {
                 c.vimCommands.update_selection_after_search();
             }
         }
 
-
         // // Support for the console gui.
         g.app.gui.show_find_success(c, this.in_headline, insert, p);
 
         // c.frame.bringToFront();
-        return w;  // Support for isearch.
+        return w; // Support for isearch.
     }
     //@+node:felix.20221022201804.1: *3* LeoFind.Utils
     //@+node:felix.20221022201804.2: *4* find.add_change_string_to_label
@@ -3450,10 +3780,9 @@ export class LeoFind {
      * Add an unprotected change string to the minibuffer label.
      */
     public add_change_string_to_label(): void {
-
         const c = this.c;
         let s: string = this.ftm.get_change_text();
-        c.minibufferWantsFocus();
+        // c.minibufferWantsFocus(); // No use in LeoJS
         while (s.endsWith('\n') || s.endsWith('\r')) {
             s = s.substring(0, s.length - 1);
         }
@@ -3461,24 +3790,21 @@ export class LeoFind {
     }
     //@+node:felix.20221022201804.3: *4* find.add_find_string_to_label
     public add_find_string_to_label(protect = true): void {
-
         const c = this.c;
         const k = this.c.k;
         const ftm = c.findCommands.ftm;
         let s = ftm.get_find_text();
-        c.minibufferWantsFocus();
+        // c.minibufferWantsFocus(); // No use in LeoJS
         while (s.endsWith('\n') || s.endsWith('\r')) {
             s = s.substring(0, s.length - 1);
         }
         k.extendLabel(s, true, protect);
-
     }
     //@+node:felix.20221022201804.4: *4* find.compute_result_status
     /**
      * Return the status to be shown in the status line after a find command completes.
      */
     public compute_result_status(find_all_flag = false): string {
-
         // Too similar to another method...
         const status = [];
         const table: [keyof LeoFind, string][] = [
@@ -3497,7 +3823,6 @@ export class LeoFind {
             }
         }
         return status.length ? ` (${status.join(', ')})` : '';
-
     }
     //@+node:felix.20221022201804.5: *4* find.help_for_find_commands
     /**
@@ -3512,12 +3837,9 @@ export class LeoFind {
      * Initialize searches in vim mode.
      */
     public init_vim_search(pattern: string): void {
-
         const c = this.c;
         if (c.vim_mode && c.vimCommands) {
-            c.vimCommands.update_dot_before_search(
-                pattern,
-                undefined);  // A flag.
+            c.vimCommands.update_dot_before_search(pattern, undefined); // A flag.
         }
     }
     //@+node:felix.20221022201804.7: *4* find.preload_find_pattern
@@ -3525,7 +3847,6 @@ export class LeoFind {
      * Preload the find pattern from the selected text of widget w.
      */
     public preload_find_pattern(w: StringTextWrapper): void {
-
         const c = this.c;
         const ftm = this.ftm;
         if (!c.config.getBool('preload-find-pattern', false)) {
@@ -3555,7 +3876,6 @@ export class LeoFind {
      * Show the find status the Find dialog, if present, and the status line.
      */
     public show_status(found: boolean): void {
-
         const c = this.c;
         const status = found ? 'found' : 'not found';
         const options = this.compute_result_status();
@@ -3567,7 +3887,7 @@ export class LeoFind {
         const not_found_fg = c.config.getColor('find-not-found-fg') || 'white';
         const bg = found ? found_bg : not_found_bg;
         const fg = found ? found_fg : not_found_fg;
-        if (c.config.getBool("show-find-result-in-status") !== false) {
+        if (c.config.getBool('show-find-result-in-status') !== false) {
             c.frame.putStatusLine(s, bg, fg);
         }
     }
@@ -3576,15 +3896,12 @@ export class LeoFind {
      * Show find options in the status area.
      */
     public show_find_options_in_status_area(): void {
-
         const c = this.c;
         const s = this.compute_find_options_in_status_area();
         c.frame.putStatusLine(s);
-
     }
     //@+node:felix.20221022201804.10: *5* find.compute_find_options_in_status_area
     public compute_find_options_in_status_area(): string {
-
         // TODO : REDO WITH APPROPRIATE GETTERS FROM VSCODE/LEOJS
         const c = this.c;
         const ftm = c.findCommands.ftm;
@@ -3600,11 +3917,13 @@ export class LeoFind {
         ];
 
         // const result = [option for option, ivar in table if ivar.isChecked()]
-        const result = table.filter((p_entry) => {
-            return p_entry[1].isChecked();
-        }).map((p_entry) => {
-            return p_entry[0];
-        });
+        const result = table
+            .filter((p_entry) => {
+                return p_entry[1].isChecked();
+            })
+            .map((p_entry) => {
+                return p_entry[0];
+            });
 
         const table2: [string, StringRadioButton][] = [
             ['Suboutline', ftm.radio_button_suboutline_only],
@@ -3618,7 +3937,6 @@ export class LeoFind {
             }
         }
         return `Find: ${result.join(' ')}`;
-
     }
     //@+node:felix.20221022201804.11: *4* find.start_state_machine
     // ! USE CLIENT UI DIALOGS INSTEAD OF ORIGINAL LEO'S STATE_MACHINE
@@ -3673,7 +3991,6 @@ export class LeoFind {
         }
     }
     //@-others
-
 }
 //@-others
 //@@language typescript

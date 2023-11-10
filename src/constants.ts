@@ -117,17 +117,14 @@ export class Constants {
      * Basic user messages strings for messages and dialogs
      */
     public static USER_MESSAGES = {
-        SCRIPT_BUTTON: "Creates a button from selected node's script",
+        SCRIPT_BUTTON: "from selected node",
         SCRIPT_BUTTON_TOOLTIP:
-            "The 'Script Button' button creates a new button.\n" +
-            "Its name will be the headline of the presently selected node\n" +
-            "Hitting this newly created button executes the button's script.\n" +
-            "\n" +
+            "Creates a new button with the presently selected node.\n" +
             "For example, to run a script on any part of an outline:\n" +
             "\n" +
-            "1.  Select the node containing a script. (Ex.: \"g.es(p.h)\")\n" +
-            "2.  Press 'Script Button'. This will create a new button.\n" +
-            "3.  Select a node on which you want to run the script.\n" +
+            "1.  Select the node containing a script. e.g. \"g.es(p.h)\"\n" +
+            "2.  Press 'Script Button' to create a new button.\n" +
+            "3.  Select another node on which to run the script.\n" +
             "4.  Press the *new* button.",
         SAVE_CHANGES: "Save changes to",
         SAVE_DIALOG_LABEL: "Save Leo File",
@@ -141,15 +138,19 @@ export class Constants {
         CLEARED_RECENT: "Cleared recent files list",
         CHOOSE_OPENED_FILE: "Select an opened Leojs File",
         FILE_NOT_OPENED: "No files opened.",
+
+        // STATUS BAR UNUSED FOR NOW IN LEOJS // 
         STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
         STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
+
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
         PROMPT_INSERT_CHILD: "Insert Child",
         DEFAULT_HEADLINE: "New Headline",
-        TITLE_GOTO_GLOBAL_LINE: "Goto global line",
-        PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
-        PROMPT_GOTO_GLOBAL_LINE: "Line number",
+
+        TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
+        PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED
+        PROMPT_GOTO_GLOBAL_LINE: "Line number", // TODO : REMOVE IF NOT USED
 
         REPLACE_TITLE: "Replace with",
         REPLACE_PROMPT: "Type text to replace with and press enter.",
@@ -176,9 +177,10 @@ export class Constants {
         TITLE_TAG_NODE: "Tag Node",
         PLACEHOLDER_TAG: "<tag>",
         PROMPT_TAG: "Enter a tag name",
-        TITLE_FIND_TAG: "Find Tag",
-        PLACEHOLDER_CLONE_FIND_TAG: "<tag>",
-        PROMPT_CLONE_FIND_TAG: "Enter a tag name",
+
+        TITLE_FIND_TAG: "Find Tag", // TODO remove if used directly in leoFind.ts
+        PLACEHOLDER_CLONE_FIND_TAG: "<tag>", // TODO remove if used directly in leoFind.ts
+        PROMPT_CLONE_FIND_TAG: "Enter a tag name",// TODO remove if used directly in leoFind.ts
 
         CLOSE_ERROR: "Cannot close: No files opened.",
         YES: "Yes",
@@ -197,11 +199,18 @@ export class Constants {
         UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
         LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
         MINIBUFFER_BUTTON_START: "@button-",
+        MINIBUFFER_RCLICK_START: "@rclick-",
+        MINIBUFFER_SCRIPT_BUTTON: "script-button",
+        MINIBUFFER_DEL_SCRIPT_BUTTON: "delete-script-",
         MINIBUFFER_DEL_BUTTON_START: "delete-@button-",
         MINIBUFFER_COMMAND_START: "@command-",
-        MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
+        MINIBUFFER_USER_DEFINED: "User defined command.",
+        MINIBUFFER_BUTTON: "$(run) @button",
+        MINIBUFFER_RCLICK: "$(chevron-right) @rclick",
+        MINIBUFFER_COMMAND: "$(zap) @command",
+        MINIBUFFER_BAD_COMMAND: "$(error) Not Available",
         MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
-        MINIBUFFER_HISTORY_DESC: "$(history) Choose from last run commands...",
+        MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
         ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
         FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
@@ -242,8 +251,8 @@ export class Constants {
     public static BUTTON_STRINGS = {
         NULL_WIDGET: "nullButtonWidget",
         SCRIPT_BUTTON: "script-button",
-        ADD_BUTTON: "leoButtonAdd",
-        NORMAL_BUTTON: "leoButtonNode"
+        ADD_BUTTON: "leojsButtonAdd",
+        NORMAL_BUTTON: "leojsButtonNode"
     };
 
     /**
@@ -327,6 +336,11 @@ export class Constants {
         LEO_ID: ""
     };
 
+    public static MINIBUFFER_QUICK_PICK: vscode.QuickPickItem = {
+        label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
+        description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC,
+        iconPath: new vscode.ThemeIcon("history")
+    };
     /**
      * Choices offered when about to lose current changes to a Leo Document
      */
@@ -366,6 +380,7 @@ export class Constants {
         LEO_CAN_DEHOIST: "leojsCanDehoist",
         LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
         LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter",
+        LEO_EDIT_HEADLINE: "leojsEditHeadline",
 
         // 'states' flags about current selection, for visibility and commands availability
         SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
@@ -399,9 +414,6 @@ export class Constants {
 
         // Flags for focus context
         FOCUS_FIND: "leojsFindFocus",
-
-        // Flag for interactive Search
-        // INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
         // Context flags that are mapped 'directly' onto leojs config settings
         // * PREFIXED WITH 'leojs' *
@@ -483,6 +495,7 @@ export class Constants {
         MINIBUFFER: Constants.NAME + ".minibuffer",
         SET_LEO_ID: Constants.NAME + ".setLeoID",
         GIT_DIFF: Constants.NAME + ".gitDiff",
+        TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
         WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
         WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",
         WRITE_DIRTY_AT_FILE_NODES: Constants.NAME + ".writeDirtyAtFileNodes",
@@ -622,8 +635,6 @@ export class Constants {
         GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
         GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
 
-        // INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
-
         START_SEARCH: Constants.NAME + ".startSearch",
         SEARCH_BACKWARD: Constants.NAME + ".searchBackward",
         RE_SEARCH: Constants.NAME + ".reSearch",
@@ -682,8 +693,20 @@ export class Constants {
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
         REVERT: 'revert',
         // * More Commands
-        // GOTO_GLOBAL_LINE: "!goto_global_line",
+        GOTO_GLOBAL_LINE: "!goto_global_line", // USE LEOJS INSTEAD OF UI
         SET_UA: 'set-ua',
+
+        // * Import Export
+        IMPORT_ANY_FILE: "import-file",
+        READ_FILE_INTO_NODE: "read-file-into-node",
+
+        EXPORT_HEADLINES: "export-headlines",
+        FLATTEN_OUTLINE: "flatten-outline",
+        OUTLINE_TO_CWEB: "outline-to-cweb",
+        OUTLINE_TO_NOWEB: "outline-to-noweb",
+        REMOVE_SENTINELS: "remove-sentinels",
+        WEAVE: "weave",
+        WRITE_FILE_FROM_NODE: "write-file-from-node",
 
         // * Search operations
         START_SEARCH: "start-search",
@@ -723,10 +746,9 @@ export class Constants {
         UNDO: "undo",
         REDO: "redo",
         // * Tree Building
-        EXECUTE_SCRIPT: "execute-script", // TODO
-        REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
-        REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
-        GIT_DIFF: "TODO_GIT_DIFF", // TODO
+        EXECUTE_SCRIPT: "execute-script",
+        REFRESH_FROM_DISK: "refresh-from-disk",
+        GIT_DIFF: "git-diff",
         // * Outline from body text
         EXTRACT: "extract",
         EXTRACT_NAMES: "extract-names",
@@ -750,6 +772,7 @@ export class Constants {
         GOTO_NEXT_VISIBLE: "goto-next-visible",
         GOTO_PREV_VISIBLE: "goto-prev-visible",
         GOTO_NEXT_MARKED: "goto-next-marked",
+        // GOTO_PREV_MARKED: "goto-prev-marked", // ! Not in Leo's menu nor LeoJS package.json.
         GOTO_NEXT_CLONE: "goto-next-clone",
         CONTRACT_OR_GO_LEFT: "contract-or-go-left",
         EXPAND_AND_GO_RIGHT: "expand-and-go-right",
@@ -757,7 +780,7 @@ export class Constants {
         // * Mark Operations
         TOGGLE_MARK: "toggle-mark",
         COPY_MARKED: "copy-marked-nodes",
-        DIFF_MARKED_NODES: "diff-marked-nodes", // TODO from leoCompare.py
+        DIFF_MARKED_NODES: "diff-marked-nodes",
         MARK_CHANGED_ITEMS: "mark-changed-items",
         MARK_SUBHEADS: "mark-subheads",
         UNMARK_ALL: "unmark-all",
@@ -789,7 +812,7 @@ export class Constants {
 
         CLONE_FIND_FLATTENED_MARKED: "cffm",
         CLONE_FIND_TAG: "cft",
-        CLONE_FIND_ALL: "cfa", // cloneFind used instead
+        CLONE_FIND_ALL: "cfa",
         CLONE_FIND_MARKED: "cfam",
         CLONE_FIND_PARENTS: "clone-find-parents",
     };
@@ -809,9 +832,11 @@ export class Constants {
         'paste-node': 'async-paste-node',
         'paste-retaining-clones': 'async-paste-retaining-clones',
         'paste-as-template': 'async-paste-as-template',
-        // TODO : insertNode, insertChild, ...
-        // TODO : select chapter
-
+        'insert-child': 'async-insert-child',
+        'insert-node': 'async-insert-node',
+        'insert-as-first-child': 'async-insert-as-first-child',
+        'insert-as-last-child': 'async-insert-as-last-child',
+        'insert-node-before': 'async-insert-node-before',
     };
 
 }

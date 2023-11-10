@@ -35,43 +35,47 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
             webviewView.webview.onDidReceiveMessage((data) => {
                 switch (data.type) {
                     case 'leoNavEnter': {
-                        this._leoUI.navEnter();
+                        void this._leoUI.navEnter();
                         break;
                     }
                     case 'leoNavTextChange': {
-                        this._leoUI.navTextChange();
+                        void this._leoUI.navTextChange();
                         break;
                     }
                     case 'leoNavClear': {
-                        this._leoUI.navTextClear();
+                        void this._leoUI.navTextClear();
+                        break;
+                    }
+                    case 'leoNavMarkedList': {
+                        void this._leoUI.findQuickMarked(true);
                         break;
                     }
                     case 'gotFocus': {
-                        utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
+                        void utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
                         break;
                     }
                     case 'lostFocus': {
-                        utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, false);
+                        void utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, false);
                         break;
                     }
                     case 'leoFindNext': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT_FO);
+                        void vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT_FO);
                         break;
                     }
                     case 'leoFindPrevious': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS_FO);
+                        void vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS_FO);
                         break;
                     }
                     case 'searchConfig': {
-                        this._leoUI.saveSearchSettings(data.value);
+                        void this._leoUI.saveSearchSettings(data.value);
                         break;
                     }
                     case 'replace': {
-                        this._leoUI.replace(true, false);
+                        void this._leoUI.replace(true, false);
                         break;
                     }
                     case 'replaceThenFind': {
-                        this._leoUI.replace(true, true);
+                        void this._leoUI.replace(true, true);
                         break;
                     }
                     case 'refreshSearchConfig': {

@@ -2,99 +2,92 @@
 <html lang="en" tabindex="-1">
 
 <head>
-
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'none'; style-src #{webview.cspSource}; img-src #{webview.cspSource} https:; script-src 'nonce-#{nonce}';">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="#{style}" rel="stylesheet">
+    content="default-src 'none'; style-src #{webview.cspSource}; img-src #{webview.cspSource} https:; script-src 'nonce-#{nonce}';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="#{style}" rel="stylesheet" />
   <title>LeoJS</title>
 </head>
 
 <body class="preload">
   <div class="container">
-
     <header>
       <a class="header__link" title="Learn more about Leo Integration" href="https://github.com/boltex/leojs#leojs">
         <div class="header__logo">
           <img class="image__logo" src="#{root}/resources/leoapp128px.png" />
           <div>
-            <h1>Leo<span class="header__logo--highlight">JS</span></h1>
+            <h1>
+              Leo<span class="header__logo--highlight">JS</span>
+            </h1>
             <p class="header__subtitle">Leo for VS Code</p>
           </div>
         </div>
       </a>
       <p class="header__blurb">
-        Use <b>Leo</b>, the <b>Literate Editor with Outlines</b>, to program with <b>directed acyclic graphs</b>,
-        along with <b>section-references</b>, <b>@others</b>, and <b>clones</b>.
+        Use <b>Leo</b>, the <b>Literate Editor with Outlines</b>, to
+        program with <b>directed acyclic graphs</b>, along with
+        <b>section-references</b>, <b>@others</b>, and
+        <b>clones</b>.
       </p>
     </header>
 
     <div class="content__area">
       <section id="welcome" class="section--full mb-0">
         <h2 class="section__title section__title--primary">
-          Welcome to <span class="highlight">LeoJS 0.1.4</span>
+          Welcome to <span class="highlight">LeoJS 0.1.6</span>
         </h2>
         <div class="center mt-1">
-          <a class="button button--flat is-sidebar-hidden "
+          <a class="button button--flat is-sidebar-hidden"
             title="LeoJS is built by the support of generous users like you!" href="https://boltex.github.io/">Sponsor
             LeoJS
             <span class="heart">&#x2764;</span>
           </a>
           <a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features">
-            See What's New in LeoJS 0.1.4
+            See What's New in LeoJS 0.1.6
           </a>
         </div>
         <p class="blurb center ml-0 mr-0">
-          <strong>LeoJS</strong>
-          is an open-source extension created by
-          <a class="bold" title="My github user page" href="https://boltex.github.io/">Félix</a>
-          which implements
-          <a class="bold" title="Learn more about Leo" href="https://leo-editor.github.io/leo-editor/">Leo</a>
-          in typescript.
-
+          <strong>LeoJS</strong>,
+          an open-source extension created by
+          <a class="bold" title="My github user page" href="https://boltex.github.io/">Félix</a>,
+          is a Javascript implementation of
+          <a class="bold" title="Learn more about Leo" href="https://leo-editor.github.io/leo-editor/">Leo</a>.
         </p>
         <h2 class="section__title section__title--break"></h2>
         <p class="section__hint mt-0 center">
-          Automate auto-refresh for <a href="#external-files" title="Setup file-change detection">external files
-            changes</a>,
-          or choose which <a href="#node-commands" title="Fine-tune interface">icons</a>
+          Automate auto-refresh for
+          <a href="#external-files" title="Setup file-change detection">external files changes</a>, or choose which
+          <a href="#node-commands" title="Fine-tune interface">icons</a>
           are shown, and more!
         </p>
       </section>
 
-
       <section id="leo-id" class="section--settings">
         <div class="section__content">
-          <div class="section__header">
-            <h2>
-              Leo ID
-            </h2>
-          </div>
-
           <div class="settings">
             <div class="setting">
-              <div class="setting__input">
-                <label for="leoID">Your ID</label>
-                <input id="leoID" name="leoID" type="text" minLength="3" maxlength="128" placeholder="Leo Id"
+              <div class="setting__input mt-0">
+                <label for="leoID" class="label-big">Leo ID</label>
+                <input id="leoID" name="leoID" type="text" minlength="3" maxlength="128" placeholder="Leo Id"
                   data-setting />
               </div>
               <span class="setting__hint">
-                An id that identifies you uniquely. <strong>Defaults to your current user name.</strong><br>
-                <em>Letters and numbers only, at least 3 characters.</em>
+                An id that identifies you uniquely.
+                <strong>Defaults to your current user
+                  name.</strong><br />
+                <em>Letters and numbers only, at least 3
+                  characters.</em>
               </span>
             </div>
           </div>
         </div>
       </section>
 
-
       <section id="external-files" class="section--settings">
         <div class="section__content">
           <div class="section__header">
-            <h2>
-              External Files Change Detection
-            </h2>
+            <h2>External Files Change Detection</h2>
           </div>
 
           <div class="settings">
@@ -102,26 +95,39 @@
               <div class="setting__input">
                 <label for="checkForChangeExternalFiles">Check changes to external files</label>
                 <select id="checkForChangeExternalFiles" name="checkForChangeExternalFiles" data-setting>
-                  <option value="none">Default from Leo's config</option>
-                  <option value="force-check">Check for changes</option>
-                  <option value="force-ignore">Ignore all changes</option>
+                  <option value="none">
+                    Default from Leo's config
+                  </option>
+                  <option value="force-check">
+                    Check for changes
+                  </option>
+                  <option value="force-ignore">
+                    Ignore all changes
+                  </option>
                 </select>
               </div>
-              <span class="setting__hint">Use Leo's defaults, or force either to check changes or not</span>
+              <span class="setting__hint">Use Leo's defaults, or force either to
+                check changes or not</span>
             </div>
 
             <div class="setting">
               <div class="setting__input">
                 <label for="defaultReloadIgnore">Force reload or ignore changes</label>
                 <select id="defaultReloadIgnore" name="defaultReloadIgnore" data-setting>
-                  <option value="none">Choose each time</option>
-                  <option value="yes-all">Reload All</option>
-                  <option value="no-all">Ignore All</option>
+                  <option value="none">
+                    Choose each time
+                  </option>
+                  <option value="yes-all">
+                    Reload All
+                  </option>
+                  <option value="no-all">
+                    Ignore All
+                  </option>
                 </select>
               </div>
-              <span class="setting__hint">Choose yourself, or set default to reload or ignore changes</span>
+              <span class="setting__hint">Choose yourself, or set default to reload
+                or ignore changes</span>
             </div>
-
           </div>
         </div>
       </section>
@@ -129,21 +135,20 @@
       <section id="interface-behavior" class="section--settings">
         <div class="section__content">
           <div class="section__header">
-            <h2>
-              Interface Behavior
-            </h2>
+            <h2>Interface Behavior</h2>
           </div>
 
           <div class="settings">
-
             <div class="setting">
               <div class="setting__input">
                 <input id="leoTreeBrowse" name="leoTreeBrowse" type="checkbox" data-setting />
                 <label for="leoTreeBrowse">Use Leo Tree Browsing</label>
               </div>
-              <span class="setting__hint">Navigate Leo's outline with Leo's shortcuts and behavior instead of the
-                default vscode
-                method<br>(Arrow keys move selection instead of moving a cursor when focus is on Leo's outline)</span>
+              <span class="setting__hint">Navigate Leo's outline with Leo's shortcuts
+                and behavior instead of the default vscode
+                method<br />(Arrow keys move selection
+                instead of moving a cursor when focus is on
+                Leo's outline)</span>
             </div>
 
             <div class="setting">
@@ -151,17 +156,18 @@
                 <input id="treeKeepFocus" name="treeKeepFocus" type="checkbox" data-setting />
                 <label for="treeKeepFocus">Keep focus on Outline</label>
               </div>
-              <span class="setting__hint">Keep focus in the outline when selecting a node - overridden by "<strong>Leo
-                  Tree
-                  Browsing</strong>"</span>
+              <span class="setting__hint">Keep focus in the outline when selecting a
+                node - overridden by "<strong>Leo Tree Browsing</strong>"</span>
             </div>
 
             <div class="setting">
               <div class="setting__input">
                 <input id="treeKeepFocusWhenAside" name="treeKeepFocusWhenAside" type="checkbox" data-setting />
-                <label for="treeKeepFocusWhenAside">Keep focus when opening on the side</label>
+                <label for="treeKeepFocusWhenAside">Keep focus when opening on the
+                  side</label>
               </div>
-              <span class="setting__hint">Keep focus in the outline when opening a body pane on the side</span>
+              <span class="setting__hint">Keep focus in the outline when opening a
+                body pane on the side</span>
             </div>
 
             <div class="break"></div>
@@ -169,31 +175,39 @@
             <div class="setting">
               <div class="setting__input">
                 <input id="goAnywhereShortcut" name="goAnywhereShortcut" type="checkbox" data-setting />
-                <label for="goAnywhereShortcut">Replace 'Go to File' shortcut with 'Go Anywhere'</label>
+                <label for="goAnywhereShortcut">Replace 'Go to File' shortcut with 'Go
+                  Anywhere'</label>
               </div>
               <span class="setting__hint">
-                Make <strong>[Ctrl+P]</strong> call Leo's <strong>Go Anywhere</strong>
-                instead of VSCode's <strong>Go to File</strong> when focus in the body or outline
+                Make <strong>[Ctrl+P]</strong> call Leo's
+                <strong>Go Anywhere</strong> instead of
+                VSCode's <strong>Go to File</strong> when
+                focus in the body or outline</span>
             </div>
 
             <div class="setting">
               <div class="setting__input">
                 <input id="collapseAllShortcut" name="collapseAllShortcut" type="checkbox" data-setting />
-                <label for="collapseAllShortcut">Enable collapse-all shortcut for explorer</label>
+                <label for="collapseAllShortcut">Enable collapse-all shortcut for
+                  explorer</label>
               </div>
-              <span class="setting__hint">Allows the <strong>[Alt+'-'] keyboard shortcut</strong>
-                to collapse folders in the file explorer</span>
+              <span class="setting__hint">Allows the
+                <strong>[Alt+'-'] keyboard shortcut</strong>
+                to collapse folders in the file
+                explorer</span>
             </div>
 
             <div class="setting">
               <div class="setting__input">
                 <input id="activityViewShortcut" name="activityViewShortcut" type="checkbox" data-setting />
-                <label for="activityViewShortcut">Enable 'Show LeoJS view' shortcut</label>
+                <label for="activityViewShortcut">Enable 'Show LeoJS view'
+                  shortcut</label>
               </div>
-              <span class="setting__hint">Allows the <strong>[Ctrl+Shift+L] keyboard shortcut</strong>
+              <span class="setting__hint">Allows the
+                <strong>[Ctrl+Shift+L] keyboard
+                  shortcut</strong>
                 to reveal the LeoJS Activity View</span>
             </div>
-
           </div>
         </div>
       </section>
@@ -206,7 +220,8 @@
               <label for="treeInExplorer">Show&nbsp;Leo&nbsp;Outline&nbsp;in&nbsp;Explorer</label>
             </div>
             <p class="section__header-hint">
-              Adds an instance of the outline pane in the explorer view
+              Adds an instance of the outline pane in the
+              explorer view
             </p>
           </div>
         </div>
@@ -229,7 +244,8 @@
             </p>
           </div>
         </div>
-        <div class="break"></div> <!-- Make sure to break line after this short title. -->
+        <div class="break"></div>
+        <!-- Make sure to break line after this short title. -->
         <div class="section__preview">
           <img class="image__preview" src="#{root}/resources/showOpenAsideDisabled.png" />
           <img class="image__preview--overlay hidden" src="#{root}/resources/showOpenAsideEnabled.png"
@@ -245,7 +261,8 @@
               <label for="invertNodeContrast">Invert Node Contrast</label>
             </div>
             <p class="section__header-hint">
-              Inverts the dirty/clean border appearance of tree nodes
+              Inverts the dirty/clean border appearance of
+              tree nodes
             </p>
           </div>
         </div>
@@ -259,15 +276,13 @@
       <section id="node-commands" class="section--settings">
         <div class="section__content">
           <div class="section__header">
-            <h2>
-              Node Commands
-            </h2>
+            <h2>Node Commands</h2>
             <p class="section__header-hint">
-              Hovering tree nodes displays an edit icon - Choose more commands to display when hovering
+              Hovering tree nodes displays an edit icon -
+              Choose more commands to display when hovering
             </p>
           </div>
           <div class="section__preview">
-
             <img class="image__preview" src="#{root}/resources/allIconsDisabled.png" />
 
             <div class="image__preview--float-container">
@@ -318,18 +333,18 @@
               <span class="setting__hint">Shows 'Insert' on hover</span>
             </div>
           </div>
-
         </div>
       </section>
       <section id="font-sizes" class="section--settings">
         <div class="section__content">
           <div class="section__header">
-            <h2>
-              Outline and Body Font Sizes
-            </h2>
+            <h2>Outline and Body Font Sizes</h2>
             <p class="section__header-hint">
-              <em>Start by adjusting the Outline pane</em>, by changing the global <em>Zoom Level</em>.<br>
-              Then, resize the the <em>Body Pane font size</em> by changing the <em>Editor Font Size</em>.
+              <em>Start by adjusting the Outline pane</em>, by
+              changing the global <em>Zoom Level</em>.<br />
+              Then, resize the the
+              <em>Body Pane font size</em> by changing the
+              <em>Editor Font Size</em>.
             </p>
           </div>
 
@@ -341,11 +356,11 @@
                   placeholder="Number" data-vscode />
               </div>
               <span class="setting__hint">
-                Adjust the zoom level<br>
-                of the window.<br>
-                (Original size is 0 and each<br>
-                increment above 1 or below -1<br>
-                represents zooming 20%.<br>
+                Adjust the zoom level<br />
+                of the window.<br />
+                (Original size is 0 and each<br />
+                increment above 1 or below -1<br />
+                represents zooming 20%.<br />
                 You can also use decimals.)
               </span>
             </div>
@@ -356,26 +371,25 @@
                   placeholder="Number" data-vscode />
               </div>
               <span class="setting__hint">
-                Controls the Text-Editor<br>
-                pane font size in pixels.<br>
-                Set this after having set the<br>
-                Zoom Level for the outline, as<br>
+                Controls the Text-Editor<br />
+                pane font size in pixels.<br />
+                Set this after having set the<br />
+                Zoom Level for the outline, as<br />
                 it's affected by the Zoom Level.
               </span>
             </div>
           </div>
         </div>
       </section>
-
     </div>
 
     <div class="sidebar">
       <div class="sidebar__group">
         <a class="button button--flat-primary" title="Support LeoJS Development"
-          href="https://boltex.github.io/">Sponsor
-          LeoJS &#x2764;</a>
+          href="https://boltex.github.io/">Sponsor LeoJS &#x2764;</a>
         <p>
-          LeoJS is built by the support of generous users like <b>you</b>!
+          LeoJS is built by the support of generous users like
+          <b>you</b>!
         </p>
       </div>
 
@@ -406,7 +420,6 @@
           <li>
             <a href="#font-sizes" title="Font size settings">Font Sizes</a>
           </li>
-
         </ul>
       </div>
 
@@ -422,7 +435,8 @@
           </li>
           <li>
             <a href="https://groups.google.com/forum/#!forum/leo-editor" title="Leo Editor Forum">Forum</a>
-            <small> &nbsp;&nbsp;&mdash;&nbsp; #Google Group</small>
+            <small>
+              &nbsp;&nbsp;&mdash;&nbsp; #Google Group</small>
           </li>
           <li>
             <a href="https://github.com/leo-editor/leo-editor" title="Leo Editor on GitHub">Source</a>
@@ -431,7 +445,6 @@
         </ul>
       </div>
     </div>
-
   </div>
   <div id="dirty-config-toast">Saving...</div>
   <div id="saved-config-toast">Settings Saved</div>

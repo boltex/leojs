@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.1.0 Dec 9, 2020 
+## 0.1.0 Dec 9, 2020
 
 - Initial state
 
@@ -26,3 +26,15 @@
 - implemented c.registerCommand (instead of c.k.registerCommand)
 - Fixed reading/writing JSON leojs file format
 - Removed status bar indicator (until vscode API can provide focus status)
+
+# 0.1.5 June 24 2023
+
+- Implemented Leo's atFile, atShadow and external files features
+- Implemented javascript scripting, along with c, g and p references.
+
+# 0.1.6
+
+- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
+- Implemented importers
+- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
+- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.

@@ -88,6 +88,21 @@
             }
 
         }
+        if (searchSettings.navText === "m" && !searchSettings.isTag) {
+            // ! Easter Egg: calls 'marked-list', which list all marked nodes !
+            navSearchTimer = setTimeout(() => {
+                if (navTextDirty) {
+                    navTextDirty = false;
+                    if (navSearchTimer) {
+                        clearTimeout(navSearchTimer);
+                    }
+                    sendSearchConfig();
+                }
+                vscode.postMessage({ type: 'leoNavMarkedList' });
+
+            }, 40); // Shorter delay for this command
+            return false;
+        }
 
         // User changed text in nav text input
         if (frozen || searchSettings.navText.length < 3) {
@@ -295,13 +310,15 @@
 
     function focusOnField(p_id) {
         const inputField = document.querySelector('#' + p_id);
-        // @ts-expect-error
-        inputField.select();
-        // TODO : TEST IF NEEDED TO PREVENT FLICKER ON FIRST TRY?
-        setTimeout(() => {
+        if (inputField) {
             // @ts-expect-error
             inputField.select();
-        }, 0);
+            // TODO : TEST IF NEEDED TO PREVENT FLICKER ON FIRST TRY?
+            setTimeout(() => {
+                // @ts-expect-error
+                inputField.select();
+            }, 0);
+        }
     }
 
     function getSettings() {
@@ -457,9 +474,6 @@
             w_inputEl.addEventListener('input', function (p_event) {
                 // @ts-expect-error
                 searchSettings[p_inputId] = this.value;
-
-                console.log('searchSettings of', p_inputId, " is: ", searchSettings);
-
                 processChange();
             });
         }

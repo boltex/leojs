@@ -3,10 +3,11 @@
 //@+<< imports >>
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
-import { Utils as uriUtils } from "vscode-uri";
+import { Utils as uriUtils } from 'vscode-uri';
+import { Database, SqlJsStatic } from 'sql.js';
 import * as path from 'path';
 import * as g from './leoGlobals';
-import { NullGui } from './leoGui';
+import { LeoGui } from './leoGui';
 import { new_cmd_decorator } from './decorators';
 import { FileCommands } from './leoFileCommands';
 import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
@@ -19,17 +20,29 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
-import { LeoImportCommands } from './leoImport';
+import { LeoImportCommands, TopLevelImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
-import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
+import {
+    PersistenceDataController,
+    TopLevelPersistanceCommands,
+} from './leoPersistence';
+import {
+    EditCommandsClass,
+    TopLevelEditCommands,
+} from '../commands/editCommands';
+import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
+import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
-
-import dayjs = require('dayjs');
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
-var utc = require('dayjs/plugin/utc');
+import { ScriptingController } from './mod_scripting';
+import { ShadowController } from './leoShadow';
+import { RstCommands } from './leoRst';
+import { TopLevelSessionsCommands } from './leoSessions';
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
 //@-<< imports >>
@@ -79,15 +92,19 @@ export class Commands {
     public atFileCommands: AtFile;
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
+    public persistenceController: PersistenceDataController;
 
+    // 
     public theTagController: TagController;
     public quicksearchController: QuickSearchController;
 
     public chapterController: ChapterController;
+    public shadowController: ShadowController;
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
-    public gui: NullGui;
+    public gui: LeoGui;
     public replace_errors: string[] = [];
+    public warnings_dict: { [key: string]: boolean } = {};
 
     // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
@@ -129,9 +146,13 @@ export class Commands {
     public navTime: any = undefined;
 
     public command_name: string = '';
-    public recent_commands_list: string[] = [];
+    // Untouched list of executed 'doCommand' calls
+    public recent_commands_list: string[] = []; // List of command name string. 
+    // Command history for minibuffer (duplicate-free & re-ordered)
+    public commandHistory: string[] = []; // * ORIGINALLY IN leoKeys.py FROM LEO.
 
-    public sqlite_connection: any | undefined = undefined;
+    // * USED AS STRING IN LEOJS - ONLY USED AS A FLAG ANYWAYS IN LEO.
+    // public sqlite_connection: string | undefined = undefined;
 
     //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.
@@ -152,6 +173,7 @@ export class Commands {
     public configInited = false;
     public doubleClickFlag = false;
     public exists = true; // Indicate that this class exists and has not been destroyed.
+    public vs: Record<string, any> = {};
 
     public in_qt_dialog = false; // True: in a qt dialog.
     public loading = false; // True: we are loading a file: disables c.setChanged()
@@ -160,7 +182,7 @@ export class Commands {
     // Flags for c.outerUpdate...
     public enableRedrawFlag = true;
     public requestCloseWindow = false;
-    public requestedFocusWidget: any;
+    public requestedFocusWidget: any; // TODO : Fix by typing properly when using only widget or wrapper!
     public requestLaterRedraw = false;
 
     //@+node:felix.20210223220814.6: *4* c.initFileIvars
@@ -172,7 +194,7 @@ export class Commands {
     public mFileName: string = ''; // ? Maybe Deprecated ? Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
     public uri: vscode.Uri | undefined; // For vscode workspace.fs file operations
     public mRelativeFileName: string = '';
-    public openDirectory: string | undefined = undefined;
+
     public orphan_at_file_nodes: string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)
     public wrappedFileName: string | undefined = undefined; // The name of the wrapped file, for wrapper commanders, set by LM.initWrapperLeoFile
 
@@ -207,22 +229,23 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: any = {}; // May be set to a PickleShare instance later.
+    public db: Record<string, any>; // IS A DATABASE 
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
     public controlCommands: any = undefined;
     public convertCommands: any = undefined;
     public debugCommands: any = undefined;
-    public editFileCommands: any = undefined;
-    public evalController: any = undefined;
+    public editFileCommands: EditFileCommandsClass;
+    public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
+    public rstCommands: RstCommands;
     public helpCommands: any = undefined;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
     public keyHandlerCommands: any = undefined;
     public killBufferCommands: any = undefined;
     public macroCommands: any = undefined;
-    public miniBufferWidget: any = undefined;
+    public miniBufferWidget: any = undefined; // NOT USED IN LEOJS
     public printingController: any = undefined;
     public queryReplaceCommands: any = undefined;
     public rectangleCommands: any = undefined;
@@ -235,7 +258,7 @@ export class Commands {
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
         fileName: string,
-        gui?: NullGui,
+        gui?: LeoGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string
     ) {
@@ -255,20 +278,28 @@ export class Commands {
         // From initObjects
         this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
         this.hiddenRootNode.h = '<hidden root vnode>';
+        this.k = {};
+        this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
+
+        // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
+        // TODO FIX THIS !
+        // console.log('g.app.db', g.app.db); // undefined as of now so 
+
+        this.db = {};
 
         // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);
 
         // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
         this.frame = new LeoFrame(this, title, this.gui);
-        console.assert(this.frame.c === this);
+        g.assert(this.frame.c === this);
 
         this.nodeHistory = new NodeHistory(c);
 
         this.initConfigSettings();
 
         this.chapterController = new ChapterController(c);
-        // this.shadowController // TODO: = leoShadow.ShadowController(c);
+        this.shadowController = new ShadowController(c);
 
         this.theTagController = new TagController(c);
         this.quicksearchController = new QuickSearchController(c);
@@ -277,15 +308,22 @@ export class Commands {
         this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
         this.importCommands = new LeoImportCommands(c);
+        this.persistenceController = new PersistenceDataController(c);
 
         this.editCommands = new EditCommandsClass(c);
+        this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
+
+        this.rstCommands = new RstCommands(c);
+
         this.undoer = new Undoer(c);
 
         // From finishCreate
         c.frame.finishCreate();
         c.createCommandNames();
 
+        // equivalent of k.initCommandHistory
+        c.commandHistory = c.config.getData('history-list') || [];
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
@@ -298,6 +336,14 @@ export class Commands {
         // g.app.config.setIvarsFromSettings(c); // Removed in https://github.com/leo-editor/leo-editor/pull/2681
     }
 
+    //@+node:felix.20230728170724.1: *4* c.valueOf & c.toString
+    public toString(): string {
+        // return f"Commander {id(self)}: {repr(self.mFileName)}"
+        return `Commander ${this.mFileName.toString()}`;
+    }
+    public valueOf(): string {
+        return this.toString();
+    }
     //@+node:felix.20211018215401.1: *4* c.createCommandNames
     /**
      * Create all entries in c.commandsDict.
@@ -319,7 +365,7 @@ export class Commands {
         if (fileName) {
             title = g.computeWindowTitle(fileName);
         } else {
-            let s = "untitled";
+            let s = 'untitled';
             let n = g.app.numberOfUntitledWindows;
             if (n > 0) {
                 s += n.toString();
@@ -334,14 +380,12 @@ export class Commands {
      * Init all cached commander config settings.
      */
     public initConfigSettings(): void {
-
         const c: Commands = this;
         const getBool = c.config.getBool.bind(c.config);
         const getColor = c.config.getColor.bind(c.config);
         const getData = c.config.getData.bind(c.config);
         const getInt = c.config.getInt.bind(c.config);
         const getString = c.config.getString.bind(c.config);
-
 
         // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
         c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
@@ -353,16 +397,18 @@ export class Commands {
         //     'focus-border-command-state-color') || 'blue';
         // c.focus_border_overwrite_state_color = getColor(
         //     'focus-border-overwrite-state-color') || 'green';
-        c.focus_border_width = getInt('focus-border-width') || 1;  // pixels
+        c.focus_border_width = getInt('focus-border-width') || 1; // pixels
         c.forceExecuteEntireBody = getBool('force-execute-entire-body', false);
         c.make_node_conflicts_node = getBool('make-node-conflicts-node', true);
         c.outlineHasInitialFocus = getBool('outline-pane-has-initial-focus');
         c.page_width = getInt('page-width') || 132;
-        // c.putBitsFlag = getBool('put-expansion-bits-in-leo-files', true);
         c.sparse_move = getBool('sparse-move-outline-left');
         c.sparse_find = getBool('collapse-nodes-during-finds');
         c.sparse_spell = getBool('collapse-nodes-while-spelling');
-        c.sparse_goto_visible = getBool('collapse-on-goto-first-last-visible', false);
+        c.sparse_goto_visible = getBool(
+            'collapse-on-goto-first-last-visible',
+            false
+        );
         c.stayInTreeAfterSelect = getBool('stayInTreeAfterSelect');
         c.smart_tab = getBool('smart-tab');
         c.tab_width = getInt('tab-width') || -4;
@@ -371,26 +417,22 @@ export class Commands {
         c.verbose_check_outline = getBool('verbose-check-outline', false);
         c.vim_mode = getBool('vim-mode', false);
         c.write_script_file = getBool('write-script-file');
-
     }
 
     //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
-    @cmd(
-        'execute-script',
-        'Execute a *Leo* script, written in python.'
-    )
-    public executeScript(
+    @cmd('execute-script', 'Execute a *Leo* script, written in javascript.')
+    public async executeScript(
         args: any = undefined,
         p: Position | undefined = undefined,
-        script: string = "",
+        script: string = '',
         useSelectedText: boolean = true,
         define_g: boolean = true,
         define_name: string = '__main__',
         silent: boolean = false,
         namespace: { [key: string]: any } | undefined = undefined,
         raiseFlag: boolean = false,
-        runPyflakes: boolean = true,
-    ): void {
+        runPyflakes: boolean = true
+    ): Promise<void> {
         /*
         Execute a *Leo* script, written in python.
         Keyword args:
@@ -407,7 +449,10 @@ export class Commands {
         */
         const c: Commands = this;
 
-        const script1 = script;
+        if (!p || !p.__bool__()) {
+            p = undefined;
+        }
+
         let run_pyflakes: boolean;
         if (runPyflakes) {
             run_pyflakes = c.config.getBool('run-pyflakes-on-write', false);
@@ -418,9 +463,9 @@ export class Commands {
             if (c.forceExecuteEntireBody) {
                 useSelectedText = false;
             }
-            script = g.getScript(c, p || c.p, useSelectedText);
+            script = await g.getScript(c, p || c.p, useSelectedText);
         }
-        const script_p: Position = p || c.p;  // Only for error reporting below.
+        const script_p: Position = p || c.p; // Only for error reporting below.
         // #532: check all scripts with pyflakes.
         // ? needed ?
         // if run_pyflakes and not g.unitTesting:
@@ -435,39 +480,46 @@ export class Commands {
             // log = c.frame.log  // TODO : needed ?
             // g.app.log = log // TODO : needed ?
             if (script.trim()) {
-                // sys.path.insert(0, '.')  // New in Leo 5.0 // TODO : needed ?
-                // sys.path.insert(0, c.frame.openDirectory)  // per SegundoBob // TODO : needed ?
-                script += '\n';  // Make sure we end the script properly.
+                // sys.path.insert(0, os.getcwd())
+                // sys.path.insert(0, g.os_path_dirname(c.fileName()))  // per SegundoBob // TODO : needed ?
+                script += '\n'; // Make sure we end the script properly.
+
+                // Wrap script as an IIAFE to allow 'await' right out the box.
+                script = "(async () => {\n try {\n" +
+                    script +
+                    "} catch (e) { g.handleScriptException(c, p, e); }" +
+                    "\n})();";
+
                 try {
                     if (!namespace || !namespace['script_gnx']) {
                         namespace = namespace || {};
-                        namespace["script_gnx"] = script_p.gnx;
+                        namespace['script_gnx'] = script_p.gnx;
                     }
                     // We *always* execute the script with p = c.p.
-                    c.executeScriptHelper(args, define_g, define_name, namespace, script);
-
-                }
-                catch (e) {
+                    c.executeScriptHelper(
+                        args,
+                        define_g,
+                        define_name,
+                        namespace,
+                        script
+                    );
+                } catch (e) {
                     g.es('interrupted');
-                    // if raiseFlag:
-                    //      raise
-                    // g.handleScriptException(c, script_p, script, script1);
-
-                }
-                finally {
+                    if (raiseFlag) {
+                        throw e;
+                    }
+                    g.handleScriptException(c, script_p, e);
+                } finally {
                     // del sys.path[0]; // TODO : needed ?
                     // del sys.path[0]; // TODO : needed ?
                 }
-
             } else {
                 // tabName = log and hasattr(log, 'tabName') and log.tabName or 'Log' // TODO : needed ?
-                g.warning("no script selected");
+                g.warning('no script selected');
             }
-        }
-        catch (e) {
+        } catch (e) {
             // pass
-        }
-        finally {
+        } finally {
             // g.app.log = oldLog // TODO : needed ?
             this.unredirectScriptOutput();
         }
@@ -476,26 +528,28 @@ export class Commands {
     //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
     public executeScriptHelper(
         args: any,
-        define_g: any,
-        define_name: any,
+        define_g: boolean,
+        define_name: string,
         namespace: any,
-        script: any
+        script: string
     ): void {
         const c: Commands = this;
         let p: Position | undefined;
         if (c.p.__bool__()) {
-            p = c.p.copy();  // *Always* use c.p and pass c.p to script.
+            p = c.p.copy(); // *Always* use c.p and pass c.p to script.
             c.setCurrentDirectoryFromContext(p);
         } else {
             p = undefined;
         }
-        const d: { [key: string]: any } = define_g ? { 'c': c, 'g': g, 'input': "", 'p': p } : {};
+        const d: { [key: string]: any } = define_g
+            ? { c: c, g: g, input: '', p: p }
+            : {};
 
         if (define_name) {
             d['__name__'] = define_name;
         }
         d['script_args'] = args || [];
-        d['script_gnx'] = g.app.scriptDict.get('script_gnx');
+        d['script_gnx'] = g.app.scriptDict['script_gnx'];
         if (namespace) {
             // d.update(namespace)
             Object.assign(d, namespace);
@@ -507,7 +561,6 @@ export class Commands {
             c.inCommand = false;
             g.app.inScript = true;
             (g.inScript as boolean) = g.app.inScript; // g.inScript is a synonym for g.app.inScript.
-            console.log('TODO RUN SCRIPT: ', script);
 
             // if (c.write_script_file){
             //     scriptFile = self.writeScriptFile(script)
@@ -515,11 +568,41 @@ export class Commands {
             // }else{
             //     exec(script, d)
             // }
-        }
-        catch (e) {
+
+            if (c.write_script_file) {
+                // TODO !
+                console.log(
+                    'HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ',
+                    script
+                );
+                // scriptFile = self.writeScriptFile(script)
+                // exec(compile(script, scriptFile, 'exec'), d)
+            } else {
+                // exec(script, d)
+                new Function(
+                    // 'c',
+                    // 'g',
+                    // 'input',
+                    // 'p',
+                    // '__name__',
+                    // 'script_args',
+                    // 'script_gnx',
+                    ...Object.keys(d),
+                    script
+                )(
+                    ...Object.keys(d).map(k => d[k])
+                    // d['c'],
+                    // d['g'],
+                    // d['input'],
+                    // d['p'],
+                    // d['__name__'],
+                    // d['script_args'],
+                    // d['script_gnx']
+                );
+            }
+        } catch (e) {
             // pass
-        }
-        finally {
+        } finally {
             g.app.inScript = false;
             (g.inScript as boolean) = g.app.inScript;
         }
@@ -528,9 +611,12 @@ export class Commands {
     //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
     public redirectScriptOutput(): void {
         const c: Commands = this;
-        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+        if (
+            c.exists &&
+            c.config.getBool('redirect-execute-script-output-to-log-pane')
+        ) {
             // TODO
-            // ? needed ? 
+            // ? needed ?
             // g.redirectStdout()  // Redirect stdout
             // g.redirectStderr()  // Redirect stderr
         }
@@ -557,9 +643,12 @@ export class Commands {
     //@+node:felix.20221010233956.5: *4* c.unredirectScriptOutput
     public unredirectScriptOutput(): void {
         const c: Commands = this;
-        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+        if (
+            c.exists &&
+            c.config.getBool('redirect-execute-script-output-to-log-pane')
+        ) {
             // TODO
-            // ? needed ? 
+            // ? needed ?
             // g.restoreStderr()
             // g.restoreStdout()
         }
@@ -758,14 +847,15 @@ export class Commands {
      * A generator returning all positions of the outline. This generator does
      * *not* assume that vnodes are never their own ancestors.
      */
-    public *safe_all_positions(copy = true): Generator<Position> {
-        const c: Commands = this;
-        const p: Position | undefined = c.rootPosition(); // Make one copy.
-        while (p && p.__bool__()) {
-            yield copy ? p.copy() : p;
-            p.safeMoveToThreadNext();
-        }
-    }
+    // ! removed !
+    // public *safe_all_positions(copy = true): Generator<Position> {
+    //     const c: Commands = this;
+    //     const p: Position | undefined = c.rootPosition(); // Make one copy.
+    //     while (p && p.__bool__()) {
+    //         yield copy ? p.copy() : p;
+    //         p.safeMoveToThreadNext();
+    //     }
+    // }
 
     //@+node:felix.20210228004000.1: *5* c.all_Root_Children
     /**
@@ -858,8 +948,13 @@ export class Commands {
      * - oldSel: tuple containing the old selection range, or None.
      * - oldYview: int containing the old y-scroll value, or None.
      */
-    public getBodyLines(): [string, string[], string, [number, number], number] {
-
+    public getBodyLines(): [
+        string,
+        string[],
+        string,
+        [number, number],
+        number
+    ] {
         const c: Commands = this;
 
         const body = c.frame.body;
@@ -870,18 +965,18 @@ export class Commands {
         let s: string;
         let tail: string;
         [head, s, tail] = body.getSelectionLines();
-        const lines = g.splitLines(s);  // Retain the newlines of each line.
+        const lines = g.splitLines(s); // Retain the newlines of each line.
         // Expand the selection.
         const i = head.length;
         const j = head.length + s.length;
         const oldSel: [number, number] = [i, j];
-        return [head, lines, tail, oldSel, oldYview];  // string,list,string,tuple,int.
+        return [head, lines, tail, oldSel, oldYview]; // string,list,string,tuple,int.
     }
     //@+node:felix.20210131011420.5: *5* c.getTabWidth
     /**
      * Return the tab width in effect at p.
      */
-    public getTabWidth(p: Position): number | undefined {
+    public getTabWidth(p?: Position): number | undefined {
         const c: Commands = this;
         const val: number | undefined = g.scanAllAtTabWidthDirectives(c, p);
         return val;
@@ -1013,37 +1108,76 @@ export class Commands {
         root?: Position,
         trace?: boolean
     ): boolean {
-        if (!p || !p.__bool__() || !p.v) {
+        if (!p.__bool__() || !p.v) {
             return false;
         }
-        const rstack: StackEntry[] =
-            root && root.__bool__()
-                ? root.stack.concat([[root.v, root._childIndex]])
-                : [];
-        const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
+
+        // const rstack = root.stack + [(root.v, root._childIndex)] if root else []
+        const rstack: StackEntry[] = (root && root.__bool__()) ? [...root.stack, [root.v, root._childIndex]] : [];
+
+        // const pstack = p.stack + [(p.v, p._childIndex)]
+        const pstack: StackEntry[] = [...p.stack, [p.v, p._childIndex]];
+
+
         if (rstack.length > pstack.length) {
             return false;
         }
-        let par: VNode = this.hiddenRootNode!;
+        let par = this.hiddenRootNode!;
 
-        let arrayLength: number = pstack.length;
-        for (let j = 0; j < arrayLength; j++) {
-            const x: StackEntry = pstack[j];
-            if (
-                j < rstack.length &&
-                (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])
-            ) {
+        function sameStackEntry(a: StackEntry, b: StackEntry): boolean {
+            if (a[1] !== b[1]) {
                 return false;
             }
-            let v: VNode;
-            let i: number;
-            [v, i] = x;
-            if (i >= par.children.length || v.gnx !== par.children[i].gnx) {
+            if (a[0] !== b[0]) {
+                return false;
+            }
+            return true;
+        }
+
+        for (let j = 0; j < pstack.length; j++) {
+            const x = pstack[j];
+            if (j < rstack.length && !sameStackEntry(x, rstack[j])) {
+                return false;
+            }
+            const [v, i] = x;
+            if (i >= par.children.length || v !== par.children[i]) {
                 return false;
             }
             par = v;
         }
         return true;
+
+        // if (!p || !p.__bool__() || !p.v) {
+        //     return false;
+        // }
+        // const rstack: StackEntry[] =
+        //     root && root.__bool__()
+        //         ? root.stack.concat([[root.v, root._childIndex]])
+        //         : [];
+        // const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
+        // if (rstack.length > pstack.length) {
+        //     return false;
+        // }
+        // let par: VNode = this.hiddenRootNode!;
+
+        // let arrayLength: number = pstack.length;
+        // for (let j = 0; j < arrayLength; j++) {
+        //     const x: StackEntry = pstack[j];
+        //     if (
+        //         j < rstack.length &&
+        //         (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])
+        //     ) {
+        //         return false;
+        //     }
+        //     let v: VNode;
+        //     let i: number;
+        //     [v, i] = x;
+        //     if (i >= par.children.length || v.gnx !== par.children[i].gnx) {
+        //         return false;
+        //     }
+        //     par = v;
+        // }
+        // return true;
     }
 
     //@+node:felix.20210131011420.15: *6* c.dumpPosition
@@ -1141,7 +1275,7 @@ export class Commands {
     public vnode2allPositions(v: VNode): Position[] {
         const c: Commands = this;
         const context: Commands = v.context; // v's commander.
-        console.assert(c === context);
+        g.assert(c === context);
         const positions: Position[] = [];
         let n: number;
         for (let immediate of v.parents) {
@@ -1179,7 +1313,7 @@ export class Commands {
     public vnode2position(v: VNode): Position | undefined {
         const c: Commands = this;
         const context: Commands = v.context; // v's commander.
-        console.assert(c === context);
+        g.assert(c === context);
         const stack: StackEntry[] = [];
         let n: number;
         while (v.parents.length) {
@@ -1295,7 +1429,6 @@ export class Commands {
             if (!c.isChanged()) {
                 c.setChanged();
             }
-            c.redraw_after_icons_changed();
         }
     }
 
@@ -1343,11 +1476,13 @@ export class Commands {
                 c._currentPosition = p.copy();
             }
         } else {
-            // 2011/02/25:
+            if (g.unitTesting) {
+                // New in Leo 6.7.4: *Do* raise an exception.
+                throw new Error(`Invalid position: ${p.toString()}`);
+            }
             c._currentPosition = c.rootPosition();
-            g.trace(`Invalid position: ${p.h}`);
+            g.trace(`Invalid position`, p.toString(), c.toString());
             g.trace(g.callers());
-            // Don't kill unit tests for this kind of problem.
         }
     }
 
@@ -1365,7 +1500,6 @@ export class Commands {
         p.setDirty();
         // Change the actual tree widget so
         // A later call to c.endEditing or c.redraw will use s.
-
 
         c.frame.tree.setHeadline(p, s);
     }
@@ -1411,7 +1545,7 @@ export class Commands {
     /**
      * Check the consistency of all gnx's.
      * Reallocate gnx's for duplicates or empty gnx's.
-     * Return the number of structure_errors found.
+     * Return the number of errors found.
      */
     public checkGnxs(): number {
         const c: Commands = this;
@@ -1422,14 +1556,9 @@ export class Commands {
 
         let count: number = 0;
         let gnx_errors: number = 0;
-        for (let p of c.safe_all_positions(false)) {
+        for (let p of c.all_positions(false)) {
             count += 1;
             const v: VNode = p.v;
-            // * removed https://github.com/leo-editor/leo-editor/pull/2363/files
-            // if (v["tnodeList"] !== undefined) {
-            //     delete v.tnodeList;
-            //     v._p_changed = true;
-            // }
             let gnx: string = v.fileIndex;
             if (gnx) {
                 // gnx must be a string.
@@ -1442,7 +1571,6 @@ export class Commands {
             } else {
                 gnx_errors += 1;
                 v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
-                // g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`, 'red');
                 g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`);
             }
         }
@@ -1454,23 +1582,17 @@ export class Commands {
                 g.es_print(`multiple vnodes with gnx: ${gnx}`);
                 for (let v of aList) {
                     gnx_errors += 1;
-                    g.es_print(
-                        `id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`
-                    );
+                    g.es_print(`id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`);
                     v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 }
             }
         }
-        const ok: boolean = !gnx_errors && !g.app.structure_errors;
+        const ok: boolean = !gnx_errors;
         const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
         const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
         if (!ok) {
             g.es_print(
-                `check-outline ERROR! ${c.shortFileName()} ` +
-                `${count} nodes, ` +
-                `${gnx_errors} gnx errors, ` +
-                `${g.app.structure_errors} ` +
-                `structure errors`
+                `${count} nodes, ${gnx_errors} gnx errors, `
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
@@ -1478,21 +1600,20 @@ export class Commands {
                 `${c.shortFileName()} ${count} nodes`
             );
         }
-        return g.app.structure_errors;
+        return gnx_errors;
     }
     //@+node:felix.20211205223924.1: *4* c.checkLinks & helpers
     /**
      * Check the consistency of all links in the outline.
      */
     public checkLinks(): number {
+        // This is too slow a test to be run outside of unit tests.
         const c: Commands = this;
-        const t1: [number, number] = process.hrtime();
         let count: number = 0;
         let errors: number = 0;
 
-        for (let p of c.safe_all_positions()) {
+        for (let p of c.all_positions()) {
             count += 1;
-            // try:
             if (!c.checkThreadLinks(p)) {
                 errors += 1;
                 break;
@@ -1506,18 +1627,6 @@ export class Commands {
                 break;
             }
         }
-        // except AssertionError:
-        //     errors += 1
-        //     junk, value, junk = sys.exc_info()
-        //     g.error("test failed at position %s\n%s" % (repr(p), value))
-
-        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
-        const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
-
-        g.es_print(
-            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`
-        );
-
         return errors;
     }
     //@+node:felix.20211205223924.2: *5* c.checkParentAndChildren
@@ -1538,9 +1647,6 @@ export class Commands {
                 console.log('<no p.v>');
             } else {
                 console.log('<no p>');
-            }
-            if (g.unitTesting) {
-                console.assert(false, g.callers());
             }
         };
 
@@ -1650,6 +1756,179 @@ export class Commands {
         }
         return true;
     }
+    //@+node:felix.20230730162340.1: *5* c.checkVnodeLinks & helpers
+    /**
+     * Check all vnode links.
+     *
+     * Attempt error recovery if recover_flag is True.
+     * Unit tests may set recover_flag to False for strict tests.
+     *
+     * Return the number of errors.
+     */
+    public checkVnodeLinks(): number {
+
+        const c: Commands = this;
+
+        //@+others  // Define helpers.
+        //@+node:felix.20230730162340.2: *6* find_errors
+        /**
+         * Scan all vnodes for erroneous parent/child pairs.
+         *
+         * Return (error_list, messages, n)
+         */
+        function find_errors(): [[VNode, VNode][], string[], number] {
+
+            const error_list: [VNode, VNode][] = [];
+            const messages: string[] = [];
+            let n = 0;
+            for (const parent_v of c.all_unique_nodes()) { // Avoids recursion.
+                for (const child_v of parent_v.children) {
+
+                    // const children_n = parent_v.children.count(child_v)
+                    const children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                    // const parents_n = child_v.parents.count(parent_v)
+                    const parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+
+                    if (children_n !== parents_n) {
+                        error_list.push([parent_v, child_v]);
+                        messages.push(
+                            'Mismatch between parent.children and child.parents\n' +
+                            `parent: ${parent_v.h} count(parent.children) = ${children_n}\n` +
+                            ` child: ${child_v.h} count(child.parents = ${parents_n}`
+                        );
+                        n += 1;
+                    }
+                }
+            }
+            return [error_list, messages, n];
+
+        }
+        //@+node:felix.20230730162340.3: *6* fix_errors
+        /**
+         * Fix all erroneous nodes by adding/deleting entries from v.parents.
+         */
+        function fix_errors(error_list: [VNode, VNode][]): void {
+
+            for (const [parent_v, child_v] of error_list) {
+
+                // const children_n = parent_v.children.count(child_v)
+                let children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                // const parents_n = child_v.parents.count(parent_v)
+                let parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+
+                if (parents_n === children_n) {
+                    // pass  // Already fixed.
+                } else if (parents_n < children_n) {
+                    while (parents_n < children_n) {
+                        // Safe.
+                        child_v.parents.push(parent_v);
+                        parents_n += 1;
+                    }
+                } else {
+                    while (children_n < parents_n) {
+                        let index;
+                        if (child_v.parents && child_v.parents.length) {
+                            // Safe.
+                            index = child_v.parents.indexOf(parent_v);
+                            if (index !== -1) {
+                                child_v.parents.splice(index, 1);
+                            }
+                            children_n += 1;
+                        } else {
+                            // This could delete the child.
+                            index = parent_v.children.indexOf(child_v);
+                            if (index !== -1) {
+                                parent_v.children.splice(index, 1);
+                            }
+                            parents_n += 1;
+                        }
+                    }
+                }
+
+            }
+        }
+        //@+node:felix.20230730162340.4: *6* undelete_nodes
+        /**
+         * Restore a parent link to any node that would otherwise be deleted.
+         */
+        function undelete_nodes(error_list: [VNode, VNode][]): void {
+            const seen: VNode[] = [];
+            for (const [parent_v, child_v] of error_list) {
+                if ((!child_v.parents || !child_v.parents.length) && !seen.includes(child_v)) {
+                    // Add child_v to *one* parent.
+                    seen.push(child_v);
+                    parent_v.children.push(child_v);
+                    child_v.parents.push(parent_v);
+                }
+            }
+        }
+        //@+node:felix.20230730162340.5: *6* recheck
+        /**
+         * Rescan all vnodes to ensure that no errors remain.
+         *
+         * Return (error_list, messages, n).
+         */
+        function recheck(): [[VNode, VNode][], string[], number] {
+
+            const error_list: [VNode, VNode][] = [];
+            const messages: string[] = [];
+            let n = 0;
+            for (const parent_v of c.all_unique_nodes()) { // Avoids recursion.
+                for (const child_v of parent_v.children) {
+
+                    // const children_n = parent_v.children.count(child_v)
+                    const children_n: number = parent_v.children.filter((item) => item === child_v).length;
+
+                    // const parents_n = child_v.parents.count(parent_v)
+                    const parents_n: number = child_v.parents.filter((item) => item === parent_v).length;
+                    if (children_n !== parents_n) {
+                        error_list.push([parent_v, child_v]);
+                        messages.push(
+                            'Error recovery failed!\n' +
+                            `parent: ${parent_v.h} count(parent.children) = ${children_n}\n` +
+                            ` child: ${child_v.h} count(child.parents = ${parents_n}`
+                        );
+                        n += 1;
+                    }
+                }
+            }
+            return [error_list, messages, n];
+
+        }
+        //@-others
+
+        // For unit testing.
+        const strict = g.app.debug.includes('test:strict');
+        const verbose: boolean = ['test:verbose', 'gnx', 'shutdown', 'startup', 'verbose'].some(z => g.app.debug.includes(z));
+
+        let [error_list, messages, n] = find_errors();
+        if (n === 0) {
+            return 0;
+        }
+        if (verbose) {
+            console.log('\n');
+            g.trace(`${messages.length} link error${g.plural(messages.length)}:\n`);
+            console.log(messages.join('\n') + '\n');
+        }
+        if (strict) {
+            return n;
+        }
+        const old_n = n;
+        fix_errors(error_list);
+        undelete_nodes(error_list);
+        [error_list, messages, n] = recheck();
+        if (n) {
+            // Report the *failure* to fix links!
+            console.log(messages.join('\n'));
+        } else if (verbose) {
+            g.trace(`Fixed ${old_n} link error${g.plural(old_n)}`);
+        }
+
+        return n;
+
+    }
     //@+node:felix.20211101013238.1: *4* c.checkMoveWithParentWithWarning & c.checkDrag
     //@+node:felix.20211101013241.1: *5* c.checkMoveWithParentWithWarning
     /**
@@ -1698,48 +1977,70 @@ export class Commands {
     //@+node:felix.20211030170430.1: *4* checkOutline
     /**
      * Check for errors in the outline.
-     * Return the count of serious structure errors.
+     * Return the number of errors.
      */
-    public checkOutline(check_links?: boolean): number {
+    public checkOutline(): number {
         // The check-outline command sets check_links = True
         const c: Commands = this;
-        g.app.structure_errors = 0;
-        let structure_errors: number = c.checkGnxs();
-        if (check_links && !structure_errors) {
-            structure_errors += c.checkLinks();
+        let errors = 0;
+        for (const f of [c.checkVnodeLinks, c.checkGnxs]) {
+            errors += f.bind(c)();
         }
-        return structure_errors;
+        return errors;
+        // g.app.structure_errors = 0;
+        // let structure_errors: number = c.checkGnxs();
+        // if (check_links && !structure_errors) {
+        //     structure_errors += c.checkLinks();
+        // }
+        // return structure_errors;
     }
     //@+node:felix.20211031193257.1: *4* validateOutline
     /**
-     * Makes sure all nodes are valid.
+     * A legacy outline checker, retained only for compatibility.
+     *
+     * Not used in Leo's core or unit tests.
      */
     public validateOutline(): boolean {
         const c: Commands = this;
-        if (!g.app.validate_outline) {
-            return true;
-        }
-        const root: Position | undefined = c.rootPosition();
-        const parent: Position | undefined = undefined;
-        if (root && root.__bool__()) {
-            return root.validateOutlineWithParent(parent);
-        }
-        return true;
+        return c.checkOutline() === 0;
     }
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
+    //@+node:felix.20230423004652.1: *4* c.fullPath
+    /**
+     * Return the full path (including fileName) in effect at p. Neither the
+     * path nor the fileName will be created if it does not exist.
+     */
+    public fullPath(p: Position, simulate: boolean = false): string {
+        // Search p and p's parents.
+        const c = this;
+        const aList = g.get_directives_dict_list(p);
+        const w_path = c.scanAtPathDirectives(aList);
+        return g.finalize_join(w_path, p.anyAtFileNodeName());
+        // for (let p of p_p.self_and_parents(false)) {
+        //     const aList: any[] = g.get_directives_dict_list(p);
+        //     const w_path: string = this.scanAtPathDirectives(aList);
+        //     let fn: string = simulate ? p.h : p.anyAtFileNodeName();
+        //     //fn = p.h if simulate else p.anyAtFileNodeName()
+        //     // Use p.h for unit tests.
+        //     if (fn) {
+        //         return g.finalize_join(w_path, fn);
+        //     }
+        // }
+        // return '';
+    }
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
         const c = this;
-        const default_format = "M/D/YYYY H:mm:ss";  // E.g., 1/30/2003 8:31:55
+        const default_format = 'M/D/YYYY H:mm:ss'; // E.g., 1/30/2003 8:31:55
         // Try to get the format string from settings.
         let format: string;
         let gmt: boolean;
         if (body) {
-            format = c.config.getString("body-time-format-string");
-            gmt = c.config.getBool("body-gmt-time");
+            format = c.config.getString('body-time-format-string');
+            gmt = c.config.getBool('body-gmt-time');
         } else {
-            format = c.config.getString("headline-time-format-string");
-            gmt = c.config.getBool("headline-gmt-time");
+            format = c.config.getString('headline-time-format-string');
+            gmt = c.config.getBool('headline-gmt-time');
         }
         if (format) {
             // * CONVERT PYTHON TO DAYJS FORMAT STRING *
@@ -1758,24 +2059,42 @@ export class Commands {
             } else {
                 s = dayjs().format(format); //  time.strftime(format, time.localtime());
             }
-        }
-        catch (exeption) {
-            g.es_exception(exeption);  // Probably a bad format string in leoSettings.leo.
+        } catch (exeption) {
+            g.es_exception(exeption); // Probably a bad format string in leoSettings.leo.
             s = dayjs().format(default_format); //  time.strftime(default_format, time.gmtime());
         }
         return s;
     }
 
+    //@+node:felix.20230423004739.1: *4* c.goToLineNumber & goToScriptLineNumber
+    /**
+     * Go to line n (zero-based) of a script.
+     * A convenience method called from g.handleScriptException.
+     */
+    public async goToLineNumber(n: number): Promise<void> {
+        const c = this;
+        await c.gotoCommands.find_file_line(n);
+    }
+
+    /**
+     * Go to line n (zero-based) of a script.
+     * A convenience method called from g.handleScriptException.
+     */
+    public async goToScriptLineNumber(n: number, p: Position): Promise<void> {
+        const c = this;
+        await c.gotoCommands.find_script_line(n, p);
+    }
     //@+node:felix.20211226232349.1: *4* setFileTimeStamp
     /**
      * Update the timestamp for fn..
      */
-    public setFileTimeStamp(fn: string): void {
-        if (g.app.externalFilesController && g.app.externalFilesController.set_time) {
-            g.app.externalFilesController.set_time(fn);
+    public async setFileTimeStamp(fn: string): Promise<void> {
+        if (
+            g.app.externalFilesController &&
+            g.app.externalFilesController.set_time
+        ) {
+            await g.app.externalFilesController.set_time(fn);
         }
-        // TODO !
-        console.log('TODO : setFileTimeStamp AND g.app.externalFilesController.set_time');
     }
     //@+node:felix.20211228212851.1: *3* c.Directive scanning
     // These are all new in Leo 4.5.1.
@@ -1848,16 +2167,18 @@ export class Commands {
      * Returns a dict containing the results, including defaults.
      */
     public scanAllDirectives(p?: Position): { [key: string]: any } {
-
         const c = this;
         if (!p || !p.__bool__()) {
             p = c.p;
         }
 
         // Defaults...
-        const default_language = g.getLanguageFromAncestorAtFileNode(p) || c.target_language || 'python';
+        const default_language =
+            g.getLanguageFromAncestorAtFileNode(p) ||
+            c.target_language ||
+            'python';
         const default_delims = g.set_delims_from_language(default_language);
-        const wrap = c.config.getBool("body-pane-wraps");
+        const wrap = c.config.getBool('body-pane-wraps');
         const table: [string, any, any][] = [
             ['encoding', undefined, g.scanAtEncodingDirectives],
             ['lang-dict', {}, g.scanAtCommentAndAtLanguageDirectives],
@@ -1882,81 +2203,60 @@ export class Commands {
         // Post process: do *not* set commander ivars.
         const lang_dict = d['lang-dict'];
         d = {
-            "delims": lang_dict['delims'] || default_delims,
-            "comment": lang_dict['comment'],  // Leo 6.4: New.
-            "encoding": d['encoding'],
+            delims: lang_dict['delims'] || default_delims,
+            comment: lang_dict['comment'], // Leo 6.4: New.
+            encoding: d['encoding'],
             // Note: at.scanAllDirectives does not use the defaults for "language".
-            "language": lang_dict['language'] || default_language,
-            "lang-dict": lang_dict,  // Leo 6.4: New.
-            "lineending": d['lineending'],
-            "pagewidth": d['pagewidth'],
-            "path": d['path'], // Redundant: || g.getBaseDirectory(c),
-            "tabwidth": d['tabwidth'],
-            "wrap": d['wrap'],
+            language: lang_dict['language'] || default_language,
+            'lang-dict': lang_dict, // Leo 6.4: New.
+            lineending: d['lineending'],
+            pagewidth: d['pagewidth'],
+            path: d['path'],
+            tabwidth: d['tabwidth'],
+            wrap: d['wrap'],
         };
         return d;
-
     }
     //@+node:felix.20211228212851.6: *4* c.scanAtPathDirectives
     /**
      * Scan aList for @path directives.
      * Return a reasonable default if no @path directive is found.
      */
-    public scanAtPathDirectives(aList: any[]): string {
+    public scanAtPathDirectives(aList: { [key: string]: string }[]): string {
         const c: Commands = this;
         c.scanAtPathDirectivesCount += 1; // An important statistic.
-        // Step 1: Compute the starting path.
-        // The correct fallback directory is the absolute path to the base.
-        let base: string;
-        if (c.openDirectory) {
-            // Bug fix: 2008/9/18
-            base = c.openDirectory;
+        let absbase;
+        if (c.fileName()) {
+            absbase = g.os_path_dirname(c.fileName());
         } else {
-            base = c.config.getString('relative-path-base-directory');
-            if (base && base === '!') {
-                base = g.app.loadDir!;
-            } else if (base && base === '.') {
-                base = c.openDirectory!;
-            } else {
-                base = ''; // Settings error.
-            }
+            // TODO !
+            absbase = ""; //  g.os_getcwd(); // ! FIX THIS !
         }
-        base = c.expand_path_expression(base); // #1341.
-        base = g.os_path_expanduser(base); // #1889.
-
-        const absbase: string = g.os_path_finalize_join(
-            undefined,
-            g.app.loadDir!,
-            base
-        ); // #1341.
-        // Step 2: look for @path directives.
+        // Look for @path directives.
         const w_paths: string[] = [];
-
+        let w_path: string;
         for (let d of aList) {
             // Look for @path directives.
-            let w_path: string = d['path'];
+            w_path = d['path'];
             const warning = d['@path_in_body'];
-            if (w_path !== undefined) {
+            if (!(w_path == null)) {
                 // retain empty paths for warnings.
                 // Convert "path" or <path> to path.
                 w_path = g.stripPathCruft(w_path);
                 if (w_path && !warning) {
-                    w_path = c.expand_path_expression(w_path); // #1341.
-                    w_path = g.os_path_expanduser(w_path); // #1889.
                     w_paths.push(w_path);
                     // We will silently ignore empty @path directives.
                 }
             }
         }
+
         // Add absbase and reverse the list.
         w_paths.push(absbase);
         w_paths.reverse();
 
-        // Step 3: Compute the full, effective, absolute path.
-        const w_path: string = g.os_path_finalize_join(undefined, ...w_paths); // #1341.
-
-        return w_path || g.getBaseDirectory(c);
-        // 2010/10/22: A useful default.
+        // Compute the full, effective, absolute path.
+        w_path = g.finalize_join(...w_paths);
+        return w_path;
     }
     //@+node:felix.20211106224948.1: *3* c.Executing commands & scripts
     //@+node:felix.20211106224948.3: *4* c.doCommand
@@ -1967,7 +2267,7 @@ export class Commands {
      * command func if g.doHook("command1") returns false. This provides a
      * simple mechanism for overriding commands.
      */
-    public doCommand(command_func: () => any, command_name: string): any {
+    public doCommand(command_func: (...args: any[]) => any, command_name: string, p_positionArg?: Position): any {
         const c: Commands = this;
         let p: Position = c.p;
         let return_value: any;
@@ -1999,7 +2299,7 @@ export class Commands {
             try {
                 c.inCommand = true;
                 try {
-                    return_value = command_func();
+                    return_value = command_func(p_positionArg);
                 } catch (e) {
                     g.es_exception(e);
                     return_value = undefined;
@@ -2050,9 +2350,9 @@ export class Commands {
             c.commandsDict[command_name.replace(/\&/g, '')];
 
         if (!command_func) {
-            const message = `no command function for ${command_name}`;
+            const message = `No command function for ${command_name}`;
             if (g.unitTesting || g.app.inBridge) {
-                throw message;
+                throw new Error(message);
             }
             // g.es_print(message, 'red');
             g.es_print(message);
@@ -2062,6 +2362,10 @@ export class Commands {
 
         // * Here the original new_cmd_decorator decorator is implemented 'run-time'
         let ivars: string[] | undefined = (command_func as any)['__ivars__'];
+        let w_position;
+        if ((command_func as any)['__position__']) {
+            w_position = (command_func as any)['__position__'];
+        }
 
         if (ivars && ivars.length) {
             const w_baseObject: any = g.ivars2instance(c, g, ivars);
@@ -2071,7 +2375,7 @@ export class Commands {
         }
 
         // Invoke the function.
-        const val: any = c.doCommand(command_func, command_name);
+        const val: any = c.doCommand(command_func, command_name, w_position);
         if (c.exists) {
             // c.frame.updateStatusLine();
         }
@@ -2272,7 +2576,9 @@ export class Commands {
      */
     public setComplexCommand(commandName: string): void {
         const c: Commands = this;
-        c.k.mb_history.unshift(commandName);
+        if (c.k.mb_history) {
+            c.k.mb_history.unshift(commandName);
+        }
     }
     //@+node:felix.20211106224948.12: *4* c.writeScriptFile (changed: does not expand expressions)
     public writeScriptFile(script: string): string | undefined {
@@ -2292,10 +2598,10 @@ export class Commands {
                 // make the first element absolute
                 parts[0] = driveSpec + os.sep + parts[0]
             allParts = [path] + parts
-            path = g.os_path_finalize_join(*allParts)  // #1431
+            path = g.finalize_join(*allParts)
 
         }else{
-            path = g.os_path_finalize_join(g.app.homeLeoDir, 'scriptFile.py');  // #1431
+            path = g.finalize_join(g.app.homeLeoDir, 'scriptFile.py');
         }
         //
         // Write the file.
@@ -2310,63 +2616,77 @@ export class Commands {
                 // c.config.getString('script-file-path'))
             path = undefined
 
-
         return path;
         */
         return undefined;
     }
     //@+node:felix.20220102021736.1: *3* c.expand_path_expression
     /**
-     * Expand all {{anExpression}} in c's context.
+     * Apply Python's *standard* os.path tools to s:
+     *
+     * - os.path.expanduser: https://docs.python.org/3/library/os.path.html#os.path.expanduser
+     * - os.path.expandvars: https://docs.python.org/3/library/os.path.html#os.path.expandvars
+     *
+     * Do *not* call os.path.abspath, os.path.normpath, or g.os_path_normslashes.
      */
     public expand_path_expression(s: string): string {
-        const c: Commands = this;
-
         if (!s) {
             return '';
         }
-        s = g.toUnicode(s);
+        let w_path = g.toUnicode(s);
+        w_path = g.os_path_expanduser(w_path);
+        w_path = g.os_path_expandvars(w_path);
+        return w_path;
 
-        // find and replace repeated path expressions
-        let previ: number = 0;
-        const aList: string[] = [];
+        // ! OLD INSECURE IMPLEMENTATION !
 
-        while (previ < s.length) {
-            const i = s.indexOf('{{', previ);
-            const j = s.indexOf('}}', previ);
-            if (-1 < i && i < j) {
-                // Add anything from previous index up to '{{'
-                if (previ < i) {
-                    aList.push(s.substring(previ, i));
-                }
-                // Get expression and find substitute
-                const exp: string = s.substring(i + 2, j).trim();
-                if (exp) {
-                    try {
-                        const s2 = c.replace_path_expression(exp);
-                        aList.push(s2);
-                    } catch (exception) {
-                        g.es(
-                            `Exception evaluating {{ ${exp} }} in ${s.trim()}`
-                        );
-                        g.es_exception(exception, c);
-                    }
-                }
-                // Prepare to search again after the last '}}'
-                previ = j + 2;
-            } else {
-                // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
-                aList.push(s.substring(previ));
-                break;
-            }
-        }
+        // const c: Commands = this;
 
-        let val: string = aList.join('');
-        if (g.isWindows) {
-            val = val.split('\\').join('/');
-        }
+        // if (!s) {
+        //     return '';
+        // }
+        // s = g.toUnicode(s);
 
-        return val;
+        // // find and replace repeated path expressions
+        // let previ: number = 0;
+        // const aList: string[] = [];
+
+        // while (previ < s.length) {
+        //     const i = s.indexOf('{{', previ);
+        //     const j = s.indexOf('}}', previ);
+        //     if (-1 < i && i < j) {
+        //         // Add anything from previous index up to '{{'
+        //         if (previ < i) {
+        //             aList.push(s.substring(previ, i));
+        //         }
+        //         // Get expression and find substitute
+        //         const exp: string = s.substring(i + 2, j).trim();
+        //         if (exp) {
+        //             try {
+        //                 const s2 = c.replace_path_expression(exp);
+        //                 aList.push(s2);
+        //             } catch (exception) {
+        //                 g.es(
+        //                     `Exception evaluating {{ ${exp} }} in ${s.trim()}`
+        //                 );
+        //                 g.es_exception(exception, c);
+        //             }
+        //         }
+        //         // Prepare to search again after the last '}}'
+        //         previ = j + 2;
+        //     } else {
+        //         // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
+        //         aList.push(s.substring(previ));
+        //         break;
+        //     }
+        // }
+
+        // let val: string = aList.join('');
+        // if (g.isWindows) {
+        //     val = val.split('\\').join('/');
+        // }
+
+        // return val;
     }
     //@+node:felix.20220102021736.2: *4* c.replace_path_expression
     /**
@@ -2451,12 +2771,12 @@ export class Commands {
      * Back up given fileName or c.fileName().
      * If useTimeStamp is True, append a timestamp to the filename.
      */
-    public backup(
+    public async backup(
         fileName: string | undefined = undefined,
         prefix: string | undefined = undefined,
         silent: boolean = false,
         useTimeStamp: boolean = true
-    ): string | undefined {
+    ): Promise<string | undefined> {
         const c: Commands = this;
 
         let fn: string = fileName || c.fileName();
@@ -2481,11 +2801,9 @@ export class Commands {
 
             // time.strftime("%Y%m%d-%H%M%S")
             const stamp: string = new Date().format('YYYYMMDD-hhmmss');
-
             const branch: string = prefix ? prefix + '-' : '';
-
             fn = `${branch}${base}-${stamp}.leo`;
-            w_path = g.os_path_finalize_join(undefined, theDir, fn);
+            w_path = g.finalize_join(theDir, fn);
         } else {
             w_path = fn;
         }
@@ -2493,7 +2811,7 @@ export class Commands {
         if (w_path) {
             // pylint: disable=no-member
             // Defined in commanderFileCommands.py.
-            c.saveTo(w_path, silent);
+            await c.saveTo(w_path, silent);
             // Issues saved message.
             // g.es('in', theDir)
         }
@@ -2513,7 +2831,7 @@ export class Commands {
     //     """
     //     c = self
     //     old_cwd = os.getcwd()
-    //     join = g.os_path_finalize_join
+    //     join = g.finalize_join
     //     if not base_dir:
     //         if env_key:
     //             try:
@@ -2547,13 +2865,15 @@ export class Commands {
      * Return True if the file given by fn has not been changed
      * since Leo read it or if the user agrees to overwrite it.
      */
-    public checkFileTimeStamp(fn: string): boolean {
+    public checkFileTimeStamp(fn: string): Promise<boolean> {
         const c: Commands = this;
-
-        if (g.app.externalFilesController && g.app.externalFilesController.check_overwrite) {
+        if (
+            g.app.externalFilesController &&
+            g.app.externalFilesController.check_overwrite
+        ) {
             return g.app.externalFilesController.check_overwrite(c, fn);
         }
-        return true;
+        return Promise.resolve(true);
     }
     //@+node:felix.20211223223002.6: *4* c.createNodeFromExternalFile
     /**
@@ -2565,15 +2885,12 @@ export class Commands {
         let s: string | undefined;
         let e: string | undefined;
         [s, e] = await g.readFileIntoString(fn);
-
         if (s === undefined) {
             return;
         }
-
         let head: string;
         let ext: string;
         [head, ext] = g.os_path_splitext(fn);
-
         if (ext.startsWith('.')) {
             ext = ext.slice(1);
         }
@@ -2604,7 +2921,6 @@ export class Commands {
      */
     public async looksLikeDerivedFile(fn: string): Promise<boolean> {
         try {
-            //const w_uri = vscode.Uri.file(fn);
             const w_uri = g.makeVscodeUri(fn);
             const readData = await vscode.workspace.fs.readFile(w_uri);
             const s = Buffer.from(readData).toString('utf8');
@@ -2620,10 +2936,8 @@ export class Commands {
      */
     public markAllAtFileNodesDirty(): void {
         const c: Commands = this;
-
         c.endEditing();
         const p: Position = c.rootPosition()!;
-
         while (p && p.__bool__()) {
             if (p.isAtFileNode()) {
                 p.setDirty();
@@ -2633,7 +2947,6 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211223223002.9: *4* c.markAtFileNodesDirty
     /**
@@ -2658,7 +2971,6 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211223223002.10: *4* c.openWith
     /**
@@ -2668,27 +2980,28 @@ export class Commands {
      *
      * See ExternalFilesController.open_with for details about d.
      */
-    public openWith(d?: any): void {
-        const c: Commands = this;
+    // ! LEOJS DOES NOT OFFER TO OPEN IN EXTERNAL EDITOR !
+    // public openWith(d?: any): void {
+    //     const c: Commands = this;
 
-        if (d && g.app.externalFilesController) {
-            // Select an ancestor @<file> node if possible.
-            if (!d['p'] || !d['p'].__bool__()) {
-                d['p'] = undefined;
-                const p: Position = c.p;
-                while (p && p.__bool__()) {
-                    if (p.isAnyAtFileNode()) {
-                        d['p'] = p;
-                        break;
-                    }
-                    p.moveToParent();
-                }
-            }
-            g.app.externalFilesController.open_with(c, d);
-        } else if (!d) {
-            g.trace('can not happen: no d', g.callers());
-        }
-    }
+    //     if (d && g.app.externalFilesController) {
+    //         // Select an ancestor @<file> node if possible.
+    //         if (!d['p'] || !d['p'].__bool__()) {
+    //             d['p'] = undefined;
+    //             const p: Position = c.p;
+    //             while (p && p.__bool__()) {
+    //                 if (p.isAnyAtFileNode()) {
+    //                     d['p'] = p;
+    //                     break;
+    //                 }
+    //                 p.moveToParent();
+    //             }
+    //         }
+    //         g.app.externalFilesController.open_with(c, d);
+    //     } else if (!d) {
+    //         g.trace('can not happen: no d', g.callers());
+    //     }
+    // }
     //@+node:felix.20211223223002.11: *4* c.recreateGnxDict
     /**
      * Recreate the gnx dict prior to refreshing nodes from disk.
@@ -2696,7 +3009,10 @@ export class Commands {
     public recreateGnxDict(): void {
         const c: Commands = this;
         const d: { [key: string]: VNode } = {};
-
+        // Start with the hidden-root-vnode
+        const vHiddenRoot = c.hiddenRootNode;
+        d[vHiddenRoot.gnx] = vHiddenRoot;
+        // And fill up the with rest of the commander's VNodes.
         for (let v of c.all_unique_nodes()) {
             const gnxString: string = v.fileIndex;
             if (typeof gnxString === 'string') {
@@ -2710,12 +3026,47 @@ export class Commands {
         }
         c.fileCommands.gnxDict = d;
     }
+    //@+node:felix.20230730160811.1: *3* c.Git
+    //@+node:felix.20230730160811.2: *4* c.diff_file
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_file(fn: string, rev1 = 'HEAD', rev2 = ''): Promise<void> {
+        const x = new GitDiffController(this);
+        await x.diff_file(fn, rev1, rev2);
+    }
+    //@+node:felix.20230730160811.3: *4* c.diff_two_revs
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_two_revs(directory?: string, rev1 = '', rev2 = ''): Promise<void> {
+        await new GitDiffController(this).diff_two_revs(rev1, rev2);
+    }
+    //@+node:felix.20230730160811.4: *4* c.diff_two_branches
+    /**
+     * Create an outline describing the git diffs for all files changed
+     * between rev1 and rev2.
+     */
+    public async diff_two_branches(branch1: any, branch2: any, fn: string): Promise<void> {
+        await new GitDiffController(this).diff_two_branches(
+            branch1, branch2, fn
+        );
+    }
+    //@+node:felix.20230730160811.5: *4* c.git_diff
+    public async git_diff(rev1 = 'HEAD', rev2 = ''): Promise<void> {
+        await new GitDiffController(this).git_diff(rev1, rev2);
+    }
+    //@+node:felix.20230730160811.6: *4* c.git_node_history
+    public async git_node_history(file_name: string, gnx: string): Promise<void> {
+        await new GitDiffController(this).node_history(file_name, [gnx]);
+    }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
     //@+node:felix.20211120224234.1: *5* c.alert
     public alert(message: string): void {
         const c: Commands = this;
-
         // The unit tests just tests the args.
         if (!g.unitTesting) {
             g.es(message);
@@ -2731,100 +3082,114 @@ export class Commands {
     }
     //@+node:felix.20220611010339.1: *5* c.notValidInBatchMode
     public notValidInBatchMode(commandName: string): void {
-        g.es('the', commandName, "command is not valid in batch mode");
+        g.es('the', commandName, 'command is not valid in batch mode');
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
-    // warnings_dict = {}
-
-    public raise_error_dialogs(kind: string = 'read'): void {
-        console.log('TODO raise_error_dialogs !');
-
-
-        /*
-        """Warn about read/write failures."""
-        c = self
-        use_dialogs = False
-        if g.unitTesting:
-            c.init_error_dialogs()
-            return
-        #
-        # Issue one or two dialogs or messages.
-        saved_body = c.rootPosition().b
-            # Save the root's body. Somehow the dialog destroys it!
-        if c.import_error_nodes or c.ignored_at_file_nodes or c.orphan_at_file_nodes:
-            g.app.gui.dismiss_splash_screen()
-        else:
-            # #1007: Exit now, so we don't have to restore c.rootPosition().b.
-            c.init_error_dialogs()
-            return
-        if c.import_error_nodes:
-            files = '\n'.join(sorted(set(c.import_error_nodes)))  # type:ignore
-            if files not in self.warnings_dict:
-                self.warnings_dict[files] = True
-                import_message1 = 'The following were not imported properly.'
-                import_message2 = f"Inserted @ignore in...\n{files}"
-                g.es_print(import_message1, color='red')
-                g.es_print(import_message2)
-                if use_dialogs:
-                    import_dialog_message = f"{import_message1}\n{import_message2}"
-                    g.app.gui.runAskOkDialog(c,
-                        message=import_dialog_message, title='Import errors')
-        if c.ignored_at_file_nodes:
-            files = '\n'.join(sorted(set(c.ignored_at_file_nodes)))  # type:ignore
-            if files not in self.warnings_dict:
-                self.warnings_dict[files] = True
-                kind_s = 'read' if kind == 'read' else 'written'
-                ignored_message = f"The following were not {kind_s} because they contain @ignore:"
-                kind = 'read' if kind.startswith('read') else 'written'
-                g.es_print(ignored_message, color='red')
-                g.es_print(files)
-                if use_dialogs:
-                    ignored_dialog_message = f"{ignored_message}\n{files}"
-                    g.app.gui.runAskOkDialog(c,
-                        message=ignored_dialog_message, title=f"Not {kind.capitalize()}")
-        #
-        # #1050: always raise a dialog for orphan @<file> nodes.
-        if c.orphan_at_file_nodes:
-            message = '\n'.join([
+    /**
+     * Warn about read/write failures.
+     */
+    public async raise_error_dialogs(kind: string = 'read'): Promise<unknown> {
+        const c: Commands = this;
+        const use_dialogs = false;
+        if (g.unitTesting) {
+            c.init_error_dialogs();
+            return;
+        }
+        // Issue one or two dialogs or messages.
+        // Save the root's body. The dialog destroys it!
+        const saved_body = c.rootPosition()!.b;
+        if (
+            c.import_error_nodes.length ||
+            c.ignored_at_file_nodes.length ||
+            c.orphan_at_file_nodes.length
+        ) {
+            g.app.gui.dismiss_splash_screen();
+        } else {
+            // #1007: Exit now, so we don't have to restore c.rootPosition().b.
+            c.init_error_dialogs();
+            return;
+        }
+        let files: string;
+        if (c.import_error_nodes.length) {
+            files = [...new Set(c.import_error_nodes)].sort().join('\n');
+            if (!this.warnings_dict[files]) {
+                this.warnings_dict[files] = true;
+                const import_message1 =
+                    'The following were not imported properly.';
+                const import_message2 = `Inserted @ignore in...\n${files}`;
+                g.es_print(import_message1);
+                g.es_print(import_message2);
+                if (use_dialogs) {
+                    const import_dialog_message = `${import_message1}\n${import_message2}`;
+                    await g.app.gui.runAskOkDialog(
+                        c,
+                        'Import errors',
+                        import_dialog_message
+                    );
+                }
+            }
+        }
+        if (c.ignored_at_file_nodes.length) {
+            files = [...new Set(c.ignored_at_file_nodes)].sort().join('\n');
+            if (!this.warnings_dict[files]) {
+                this.warnings_dict[files] = true;
+                const kind_s = kind === 'read' ? 'read' : 'written';
+                const ignored_message = `The following were not ${kind_s} because they contain @ignore:`;
+                kind = kind.startsWith('read') ? 'read' : 'written';
+                g.es_print(ignored_message);
+                g.es_print(files);
+                if (use_dialogs) {
+                    const ignored_dialog_message = `${ignored_message}\n${files}`;
+                    await g.app.gui.runAskOkDialog(
+                        c,
+                        `Not ${g.capitalize(kind)}`,
+                        ignored_dialog_message
+                    );
+                }
+            }
+        }
+        // #1050: always raise a dialog for orphan @<file> nodes.
+        if (c.orphan_at_file_nodes.length) {
+            const message = [
                 'The following were not written because of errors:\n',
-                '\n'.join(sorted(set(c.orphan_at_file_nodes))),  # type:ignore
+                [...new Set(c.orphan_at_file_nodes)].sort().join('\n'),
                 '',
-                'Warning: changes to these files will be lost\n'
-                'unless you can save the files successfully.'
-            ])
-            g.app.gui.runAskOkDialog(c, message=message, title='Not Written')
-            # Mark all the nodes dirty.
-            for z in c.all_unique_positions():
-                if z.isOrphan():
-                    z.setDirty()
-                    z.clearOrphan()
-            c.setChanged()
-            c.redraw()
-        # Restore the root position's body.
-        c.rootPosition().v.b = saved_body
-            # #1007: just set v.b.
-        c.init_error_dialogs()
-
-        */
+                'Warning: changes to these files will be lost\n',
+                'unless you can save the files successfully.',
+            ].join('\n');
+            await g.app.gui.runAskOkDialog(c, 'Not Written', message);
+            // Mark all the nodes dirty.
+            for (const z of c.all_unique_positions()) {
+                if (z.isOrphan()) {
+                    z.setDirty();
+                    z.clearOrphan();
+                }
+            }
+            c.setChanged();
+            c.redraw();
+        }
+        // Restore the root position's body.
+        c.rootPosition()!.v.b = saved_body; // #1007: just set v.b.
+        c.init_error_dialogs();
     }
-    //@+node:felix.20220108205755.1: *5* c.syntaxErrorDialog
+
+    //@+node:felix.20230626180727.1: *5* c.syntaxErrorDialog
     /**
      * Warn about syntax errors in files.
      */
-    public syntaxErrorDialog(): void {
+    public async syntaxErrorDialog(): Promise<void> {
         const c: Commands = this;
-
         if (
-            g.app.syntax_error_files && g.app.syntax_error_files.length &&
-            c.config.getBool('syntax-error-popup')
+            g.app.syntax_error_files &&
+            g.app.syntax_error_files.length &&
+            c.config.getBool('syntax-error-popup', false)
         ) {
-            const aList: string[] = [...g.app.syntax_error_files].sort();
-
+            const aList: string[] = [
+                ...new Set(g.app.syntax_error_files),
+            ].sort();
             g.app.syntax_error_files = [];
-
             const list_s: string = aList.join('\n');
-
-            g.app.gui.runAskOkDialog(
+            await g.app.gui.runAskOkDialog(
                 c,
                 'Python Errors',
                 `Python errors in:\n\n${list_s}`,
@@ -2832,6 +3197,7 @@ export class Commands {
             );
         }
     }
+
     //@+node:felix.20211022202201.1: *4* c.Drawing
 
     //@+node:felix.20211120225325.1: *5* c.bringToFront
@@ -2893,7 +3259,7 @@ export class Commands {
         if (c.requestedFocusWidget) {
             const w = c.requestedFocusWidget;
             if (g.app.debug.includes('focus') && !g.unitTesting) {
-                let name = "";
+                let name = '';
                 if (w.objectName) {
                     name = w.objectName();
                 } else if (w['_name']) {
@@ -2906,8 +3272,8 @@ export class Commands {
         }
 
         const table: [string, VNode[]][] = [
-            ["childrenModified", g.childrenModifiedSet],
-            ["contentModified", g.contentModifiedSet],
+            ['childrenModified', g.childrenModifiedSet],
+            ['contentModified', g.contentModifiedSet],
         ];
 
         for (let [kind, mods] of table) {
@@ -2916,7 +3282,6 @@ export class Commands {
                 mods.length = 0;
             }
         }
-
     }
 
     //@+node:felix.20211120224224.1: *5* c.recolor
@@ -2949,26 +3314,22 @@ export class Commands {
             c.selectPosition(p);
         }
     }
-
-    // TODO : Compatibility
-    // force_redraw = redraw
-    // redraw_now = redraw
-
     //@+node:felix.20211120224231.1: *6* c.redraw_after_icons_changed
     /**
      * Update the icon for the presently selected node
      */
-    public redraw_after_icons_changed(): void {
-        const c: Commands = this;
-        if (c.enableRedrawFlag) {
-            // c.frame.tree.redraw_after_icons_changed();
-            c.redraw();
-            // Do not call treeFocusHelper here.
-            // c.treeFocusHelper()
-        } else {
-            c.requestLaterRedraw = true;
-        }
-    }
+    // ! removed !
+    // public redraw_after_icons_changed(): void {
+    //     const c: Commands = this;
+    //     if (c.enableRedrawFlag) {
+    //         // c.frame.tree.redraw_after_icons_changed();
+    //         c.redraw();
+    //         // Do not call treeFocusHelper here.
+    //         // c.treeFocusHelper()
+    //     } else {
+    //         c.requestLaterRedraw = true;
+    //     }
+    // }
     //@+node:felix.20211122010434.5: *6* c.redraw_after_contract
     public redraw_after_contract(p?: Position): void {
         const c: Commands = this;
@@ -2980,7 +3341,7 @@ export class Commands {
             }
             //c.frame.tree.redraw_after_contract(p);
             c.redraw(p);
-            //c.treeFocusHelper();
+            c.treeFocusHelper();
         } else {
             c.requestLaterRedraw = true;
         }
@@ -2996,7 +3357,7 @@ export class Commands {
             }
             //c.frame.tree.redraw_after_expand(p);
             c.redraw(p);
-            //c.treeFocusHelper();
+            c.treeFocusHelper();
         } else {
             c.requestLaterRedraw = true;
         }
@@ -3113,7 +3474,6 @@ export class Commands {
         if (c.expansionLevel !== old_expansion_level) {
             c.redraw();
         }
-
         /*
         // It's always useful to announce the level.
         // c.k.setLabelBlue('level: %s' % (max_level+1))
@@ -3148,10 +3508,9 @@ export class Commands {
         if (w && g.app.gui) {
             if (g.app.debug.includes('focus')) {
                 // g.trace('\n(c)', repr(w))
-                const name = w['name'];  // ?w['objectName'] : MyClass.name
+                const name = w['name']; // ?w['objectName'] : MyClass.name
                 g.trace('(c)', name);
             }
-
             c.requestedFocusWidget = w;
         }
     }
@@ -3177,7 +3536,6 @@ export class Commands {
      * Indicate that the focus is in an invalid location, or is unknown.
      */
     public invalidateFocus(): void {
-
         // c = self
         // c.requestedFocusWidget = None
         // pass
@@ -3216,14 +3574,16 @@ export class Commands {
         c.request_focus(body && body.wrapper);
     }
     public logWantsFocus(): void {
-        const c = this;
-        const log = c.frame.log;
-        c.request_focus(log && log.logCtrl);
+        g.app.gui.showLogPane(true);
+        // const c = this;
+        // const log = c.frame.log;
+        // c.request_focus(log && log.logCtrl);
     }
-    public minibufferWantsFocus(): void {
-        const c = this;
-        c.request_focus(c.miniBufferWidget);
-    }
+    // * No use in LeoJS
+    // public minibufferWantsFocus(): void {
+    //     const c = this;
+    //     c.request_focus(c.miniBufferWidget);
+    // }
     public treeWantsFocus(): void {
         const c = this;
         const tree = c.frame.tree;
@@ -3253,15 +3613,17 @@ export class Commands {
     }
 
     public logWantsFocusNow(): void {
-        const c = this;
-        const log = this.frame.log;
-        c.widgetWantsFocusNow(log && log.logCtrl);
+        // const c = this;
+        // const log = this.frame.log;
+        // c.widgetWantsFocusNow(log && log.logCtrl);
+        g.app.gui.showLogPane(true);
     }
 
-    public minibufferWantsFocusNow(): void {
-        const c = this;
-        c.widgetWantsFocusNow(c.miniBufferWidget);
-    }
+    // * No use in LeoJS
+    // public minibufferWantsFocusNow(): void {
+    //     const c = this;
+    //     c.widgetWantsFocusNow(c.miniBufferWidget);
+    // }
 
     public treeWantsFocusNow(): void {
         const c = this;
@@ -3397,8 +3759,6 @@ export class Commands {
         return (-1 < i1 && i1 < j1) || (-1 < i2 && i2 < j2);
     }
     //@+node:felix.20211023195447.15: *6* c.canFindMatchingBracket
-    //@@nobeautify
-
     public canFindMatchingBracket(): boolean {
         const c: Commands = this;
         const brackets: string = '()[]{}';
@@ -3510,7 +3870,7 @@ export class Commands {
     //@+node:felix.20211023195447.21: *6* c.canPasteOutline
     public canPasteOutline(s: string): boolean {
         // check for JSON
-        if (s && s.trimStart().startsWith("{")) {
+        if (s && s.trimStart().startsWith('{')) {
             try {
                 const d = JSON.parse(s);
                 if (!(d['vnodes'] && d['tnodes'])) {
@@ -3650,34 +4010,33 @@ export class Commands {
         selectAll: boolean = false,
         selection: any = undefined,
         keepMinibuffer: boolean = false
-    ): void {
+    ): Thenable<Position> {
         const c: Commands = this;
         const k: any = this.k;
         c.redraw(p); // This *must* be done now.
         if (p && p.__bool__()) {
-            // TODO : allow headline rename ?
             // This should request focus.
-
-            // * Unused in leojs *
             // c.frame.tree.editLabel(p, selectAll, selection);
+            return g.app.gui.editHeadline();
 
-            if (k && !keepMinibuffer) {
-                // Setting the input state has no effect on focus.
-                if (selectAll) {
-                    k.setInputState('insert');
-                } else {
-                    k.setDefaultInputState();
-                }
-                // This *does* affect focus.
-                k.showStateAndMode();
-            }
+            // if (k && !keepMinibuffer) {
+            //     // Setting the input state has no effect on focus.
+            //     if (selectAll) {
+            //         k.setInputState('insert');
+            //     } else {
+            //         k.setDefaultInputState();
+            //     }
+            //     // This *does* affect focus.
+            //     k.showStateAndMode();
+            // }
         } else {
             g.trace('** no p');
+            return Promise.resolve(p);
         }
         // Update the focus immediately.
-        if (!keepMinibuffer) {
-            c.outerUpdate();
-        }
+        // if (!keepMinibuffer) {
+        //     c.outerUpdate();
+        // }
     }
     //@+node:felix.20211005023456.1: *5* c.selectPosition
     /**
@@ -3738,7 +4097,9 @@ export class Commands {
         if (p && p.__bool__()) {
             // Do not call expandAllAncestors here.
             c.selectPosition(p);
+            c.redraw_after_select(p);
         }
+        c.treeFocusHelper(); // This is essential.
     }
 
     //@+node:felix.20220210211453.1: *3* c.Scripting utils
@@ -3764,7 +4125,7 @@ export class Commands {
             __name__: string;
         } & { __ivars__: string[] } = c.commandsDict[commandName];
 
-        if (f && (f as any)['__name__'] != (func as any)['__name__']) {
+        if (f && (f as any)['__name__'] !== (func as any)['__name__']) {
             g.trace('redefining', commandName, f, '->', func);
         }
         c.commandsDict[commandName] = func;
@@ -3784,14 +4145,13 @@ export class Commands {
                         The default is 'clone-find-predicate'
      */
     public cloneFindByPredicate(
-        generator: (copy?: boolean) => Generator<Position, any, unknown>,  // The generator used to traverse the tree.
-        predicate: (p: Position) => boolean,  // A function of one argument p, returning True  // if p should be included in the results.
-        failMsg: string = "",  // Failure message. Default is no message.
-        flatten: boolean = false,  // True: Put all matches at the top level.
-        iconPath: string = "",  // Full path to icon to attach to all matches.
-        undoType: string = "",  // The undo name, shown in the Edit:Undo menu.  // The default is 'clone-find-predicate'
+        generator: (copy?: boolean) => Generator<Position, any, unknown>, // The generator used to traverse the tree.
+        predicate: (p: Position) => boolean, // A function of one argument p, returning True  // if p should be included in the results.
+        failMsg: string = '', // Failure message. Default is no message.
+        flatten: boolean = false, // True: Put all matches at the top level.
+        iconPath: string = '', // Full path to icon to attach to all matches.
+        undoType: string = '' // The undo name, shown in the Edit:Undo menu.  // The default is 'clone-find-predicate'
     ): Position | undefined {
-
         const c = this;
         const u = c.undoer;
         undoType = undoType || 'clone-find-predicate';
@@ -3814,7 +4174,6 @@ export class Commands {
                         }
                     }
                 }
-
                 clones.push(p.copy());
             }
         }
@@ -3835,18 +4194,14 @@ export class Commands {
         } else if (failMsg) {
             g.es(failMsg);
         }
-
         return root;
-
     }
     //@+node:felix.20221014000217.2: *5* c.setCloneFindByPredicateIcon
-    /** 
+    /**
      * Attach an icon to p.v.u.
      */
     public setCloneFindByPredicateIcon(iconPath: any, p: Position): void {
-
         // ? needed ?
-
         // if (iconPath && g.os_path_exists(iconPath) && !g.os_path_isdir(iconPath)){
         //     const aList = p.v.u['icons'] || [];
         //     let w_break = false;
@@ -3868,8 +4223,6 @@ export class Commands {
         //         })
         //         p.v.u['icons'] = aList;
         //     }
-
-
         // }else if(iconPath){
         //     g.trace('bad icon path', iconPath);
         // }
@@ -3879,7 +4232,10 @@ export class Commands {
     /**
      * Create a root node for clone-find-predicate.
      */
-    public createCloneFindPredicateRoot(flatten: boolean, undoType: string): Position {
+    public createCloneFindPredicateRoot(
+        flatten: boolean,
+        undoType: string
+    ): Position {
         const c: Commands = this;
 
         const root = c.lastTopLevel().insertAfter();
@@ -3959,10 +4315,85 @@ export class Commands {
         }
         return undodata;
     }
+    //@+node:felix.20230525222516.1: *4* c.find_b & find_h
+    //@+node:felix.20230525222516.2: *5* c.find_b
+    /**
+     * Return list of all Positions whose body matches the regex at least once.
+     */
+    public find_b(
+        regex: RegExp,
+        flags = 'ig',
+        it?: Generator<Position, any, unknown> | Position[]
+    ): Position[] {
+        const c = this;
+
+        if (!flags.includes('g')) {
+            flags = flags + 'g';
+        }
+
+        function* reFindIter(
+            pattern: RegExp,
+            text: string
+        ): IterableIterator<any> {
+            let match;
+            while ((match = pattern.exec(text)) !== null) {
+                yield match;
+            }
+        }
+
+        if (it == null) {
+            it = c.all_positions();
+        }
+        try {
+            const pattern = new RegExp(regex, flags);
+            return [...it]
+                .filter((p) =>
+                    [...reFindIter(pattern, p.b)].some(
+                        (m: RegExpExecArray) => m
+                    )
+                )
+                .map((p) => p.copy());
+
+            // return [p.copy() for p in it if any(m for m in re.finditer(pattern, p.b))];
+        } catch (exception) {
+            g.es_error('Exception in c.find_b');
+            g.es_exception(exception);
+            return [];
+        }
+    }
+    //@+node:felix.20230525222516.3: *5* c.find_h
+    /**
+     *  Return list of all Positions whose headline matches the regex.
+     */
+    public find_h(
+        regex: RegExp,
+        flags = 'i',
+        it?: Generator<Position, any, unknown> | Position[]
+    ): Position[] {
+        const c = this;
+
+        if (!flags.includes('g')) {
+            flags = flags + 'g';
+        }
+
+        if (it == null) {
+            it = c.all_positions();
+        }
+        try {
+            const pattern = new RegExp(regex, flags);
+            return [...it]
+                .filter((z) => pattern.test(z.h))
+                .map((z) => z.copy());
+            // return [z.copy() for z in it if re.match(pattern, z.h)];
+        } catch (exception) {
+            g.es_error('Exception in c.find_h');
+            g.es_exception(exception);
+            return [];
+        }
+    }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
     public registerReloadSettings(obj: any): void {
-
         const c: Commands = this;
         console.log('TODO: ? NEEDED ? registerReloadSettings');
 
@@ -3979,7 +4410,6 @@ export class Commands {
      * other known classes.
      */
     public reloadConfigurableSettings(): void {
-
         console.log('TODO : ? NEEDED ? reloadConfigurableSettings');
 
         /* 
@@ -4011,7 +4441,6 @@ export class Commands {
                     c.configurables.remove(obj)
 
         */
-
     }
 
     //@-others
@@ -4027,6 +4456,10 @@ export interface Commands
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCompareCommands,
+    TopLevelImportCommands,
+    TopLevelPersistanceCommands,
+    TopLevelSessionsCommands,
     TopLevelEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
@@ -4041,6 +4474,7 @@ export interface Commands
     all_unique_vnodes_iter: () => Generator<VNode, any, unknown>;
     all_positions_iter: () => Generator<Position, any, unknown>;
     allNodes_iter: () => Generator<Position, any, unknown>;
+    safe_all_positions: () => Generator<Position, any, unknown>;
     all_positions_with_unique_vnodes_iter: () => Generator<
         Position,
         any,
@@ -4059,7 +4493,11 @@ applyMixins(Commands, [
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
-    TopLevelEditCommands
+    TopLevelCompareCommands,
+    TopLevelImportCommands,
+    TopLevelPersistanceCommands,
+    TopLevelSessionsCommands,
+    TopLevelEditCommands,
 ]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
 Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
@@ -4074,6 +4512,7 @@ Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
 Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
 Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
 Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
+Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
 Commands.prototype.all_positions_with_unique_vnodes_iter =
     Commands.prototype.all_unique_positions;
 Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;

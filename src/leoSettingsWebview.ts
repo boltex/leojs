@@ -17,16 +17,16 @@ export class LeoSettingsProvider {
         this._extensionUri = _context.extensionUri;
     }
 
-    public changedConfiguration(p_event?: vscode.ConfigurationChangeEvent): void {
+    public async changedConfiguration(p_event?: vscode.ConfigurationChangeEvent): Promise<void> {
         if (this._panel && !this._waitingForUpdate) {
-            this._panel.webview.postMessage({ command: 'newConfig', config: this._leoUI.config.getConfig() });
-            this._panel.webview.postMessage({ command: 'newFontConfig', config: this._leoUI.config.getFontConfig() });
+            await this._panel.webview.postMessage({ command: 'newConfig', config: this._leoUI.config.getConfig() });
+            await this._panel.webview.postMessage({ command: 'newFontConfig', config: this._leoUI.config.getFontConfig() });
         }
     }
 
-    public openWebview(): void {
+    public openWebview(): Promise<unknown> {
         if (this._panel) {
-            this._panel.reveal();
+            return Promise.resolve(this._panel.reveal());
         } else {
             this._panel = vscode.window.createWebviewPanel(
                 'leojsSettings', // Identifies the type of the webview. Used internally
@@ -40,7 +40,7 @@ export class LeoSettingsProvider {
                 }
             );
 
-            this._getBaseHtml(this._panel.webview).then(p_baseHtml => {
+            return this._getBaseHtml(this._panel.webview).then(p_baseHtml => {
                 if (this._panel) {
 
                     this._context.subscriptions.push(this._panel);
@@ -56,15 +56,7 @@ export class LeoSettingsProvider {
 
                     const w_baseUri = this._panel.webview.asWebviewUri(this._extensionUri);
 
-                    this._panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'resources', 'leoapp128px.png')
-
-                    // this._panel.iconPath = vscode.Uri.file(this._context.asAbsolutePath('resources/leoapp128px.png'));
-
-                    // light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_DOCUMENT),
-
-                    // this._panel.iconPath = this._panel.webview.asWebviewUri(
-                    //     vscode.Uri.joinPath(this._extensionUri, 'resources', 'leoapp128px.png')
-                    // );
+                    this._panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'resources', 'leoapp128px.png');
 
                     const w_nonce = utils.getNonce();
 
@@ -100,11 +92,11 @@ export class LeoSettingsProvider {
                         message => {
                             switch (message.command) {
                                 case 'alert':
-                                    vscode.window.showErrorMessage(message.text);
+                                    void vscode.window.showErrorMessage(message.text);
                                     break;
                                 case 'getNewConfig':
                                     if (this._panel && !this._waitingForUpdate) {
-                                        this._panel.webview.postMessage(
+                                        void this._panel.webview.postMessage(
                                             {
                                                 command: 'newConfig',
                                                 config: this._leoUI.config.getConfig()
@@ -114,8 +106,8 @@ export class LeoSettingsProvider {
                                     break;
                                 case 'config':
                                     this._waitingForUpdate = true;
-                                    this._leoUI.config.setLeojsSettings(message.changes).then(() => {
-                                        this._panel!.webview.postMessage(
+                                    void this._leoUI.config.setLeojsSettings(message.changes).then(() => {
+                                        void this._panel!.webview.postMessage(
                                             {
                                                 command: 'vscodeConfig',
                                                 config: this._leoUI.config.getConfig()
@@ -126,7 +118,7 @@ export class LeoSettingsProvider {
                                     break;
                                 case 'getNewFontConfig':
                                     if (this._panel && !this._waitingForUpdate) {
-                                        this._panel.webview.postMessage(
+                                        void this._panel.webview.postMessage(
                                             {
                                                 command: 'newFontConfig',
                                                 config: this._leoUI.config.getFontConfig()

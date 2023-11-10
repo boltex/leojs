@@ -1,18 +1,20 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211017230407.1: * @file src/commands/commanderFileCommands.ts
-// File commands that used to be defined in leoCommands.py
-import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
-
-import * as g from "../core/leoGlobals";
-import { commander_command } from "../core/decorators";
-import { Position, VNode } from "../core/leoNodes";
-import { FileCommands } from "../core/leoFileCommands";
-import { Commands } from "../core/leoCommands";
-import { Bead, Undoer } from "../core/leoUndo";
-import { LoadManager, PreviousSettings } from "../core/leoApp";
-import { AtFile } from "../core/leoAtFile";
-import { NullGui } from "../core/leoGui";
+/**
+ * File commands that used to be defined in leoCommands.py
+ */
+import * as vscode from 'vscode';
+import { Utils as uriUtils } from 'vscode-uri';
+import * as utils from '../utils';
+import * as g from '../core/leoGlobals';
+import { commander_command } from '../core/decorators';
+import { Position } from '../core/leoNodes';
+import { Commands } from '../core/leoCommands';
+import { Bead, Undoer } from '../core/leoUndo';
+import { LoadManager, PreviousSettings } from '../core/leoApp';
+import { NullGui } from '../core/leoGui';
+import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
+import { ScriptingController } from '../core/mod_scripting';
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -23,8 +25,7 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
     const u = c.undoer;
     g.setGlobalOpenDir(fn);
     const undoData = u.beforeInsertNode(c.p);
-    const last = c.lastTopLevel();
-    const p = last.insertAfter();
+    const p = c.p.insertAfter();
     p.h = `@edit ${fn}`;
     let s: string | undefined;
     let e: any;
@@ -36,8 +37,47 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
 }
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
 export class CommanderFileCommands {
-
     //@+others
+    //@+node:felix.20231019230149.1: *3*  top-level helper functions
+    //@+node:felix.20231019230149.2: *4* function: do_error_dialogs
+
+    /**
+     * Raise error dialogs.
+     * 
+     * A helper function for c.save, c.saveAs, and c.saveTo.
+     */
+    public async do_error_dialogs(c: Commands): Promise<void> {
+        await c.syntaxErrorDialog();
+        await c.raise_error_dialogs('write');
+    }
+    //@+node:felix.20231019230149.3: *4* function: set_name_and_title
+    /**
+     * Compute the finalized name for c.mFileName. Set related ivars.
+     * 
+     * A helper function for c.save, c.saveAs, and c.saveTo.
+     * 
+     * Return the finalized name.
+     */
+    public set_name_and_title(c: Commands, fileName: string): string {
+        // Finalize fileName.
+        if (fileName.endsWith('.leo') || fileName.endsWith('.db') || fileName.endsWith('.leojs')) {
+            c.mFileName = fileName;
+        } else {
+            c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+        }
+
+        // Set various ivars.
+        const title = c.computeWindowTitle(c.mFileName);
+        c.frame.title = title;
+        c.frame.setTitle(title);
+        try {
+            // Does not exist during unit testing. May not exist in all guis.
+            // c.frame.top?.leo_master?.setTabName(c, c.mFileName);
+        } catch (error) {
+            // Do nothing.
+        }
+        return c.mFileName;
+    }
     //@+node:felix.20220105210716.2: *3* c_file.reloadSettings
     @commander_command(
         'reload-settings',
@@ -72,18 +112,18 @@ export class CommanderFileCommands {
         'Restart Leo, reloading all presently open outlines.'
     )
     public restartLeo(this: Commands): void {
-
         const c: Commands = this;
         const lm: LoadManager = g.app.loadManager!;
 
         // TODO
-        console.log('TODO : restartLeo');
+        void vscode.window.showInformationMessage('TODO : restartLeo (or deprecate/remove?)');
+        console.log('TODO : restartLeo (or deprecate/remove?)');
 
         /*
         trace = 'shutdown' in g.app.debug
-        // 1. Write .leoRecentFiles.txt.
+        # Write .leoRecentFiles.txt.
         g.app.recentFilesManager.writeRecentFilesFile(c)
-        // 2. Abort the restart if the user veto's any close.
+        # Abort the restart if the user veto's any close.
         for c in g.app.commanders():
             if c.changed:
                 veto = False
@@ -95,30 +135,29 @@ export class CommanderFileCommands {
                 if veto:
                     g.es_print('Cancelling restart-leo command')
                     return
-        // 3. Officially begin the restart process. A flag for efc.ask.
-        g.app.restarting = True  // #1240.
-        // 4. Save session data.
-        if g.app.sessionManager:
-            g.app.sessionManager.save_snapshot()
-        // 5. Close all unsaved outlines.
-        g.app.setLog(None)  // Kill the log.
+        # Officially begin the restart process. A flag for efc.ask.
+        g.app.restarting = True
+        # Save session data.
+        g.app.saveSession()
+        # Close all unsaved outlines.
+        g.app.setLog(None)  # Kill the log.
         for c in g.app.commanders():
             frame = c.frame
-            // This is similar to g.app.closeLeoWindow.
+            # This is similar to g.app.closeLeoWindow.
             g.doHook("close-frame", c=c)
-            // Save the window state
-            g.app.commander_cacher.commit()  // store cache, but don't close it.
-            // This may remove frame from the window list.
+            # Save the window state
+            g.app.commander_cacher.commit()  # store cache, but don't close it.
+            # This may remove frame from the window list.
             if frame in g.app.windowList:
                 g.app.destroyWindow(frame)
                 g.app.windowList.remove(frame)
             else:
-                // #69.
+                # #69.
                 g.app.forgetOpenFile(fn=c.fileName())
-        // 6. Complete the shutdown.
+        # Complete the shutdown.
         g.app.finishQuit()
-        // 7. Restart, restoring the original command line.
-        args = ['-c'] + [z for z in lm.old_argv]
+        # Restart, restoring the original command line.
+        args = ['-c'] + lm.old_argv
         if trace:
             g.trace('restarting with args', args)
         sys.stdout.flush()
@@ -132,124 +171,104 @@ export class CommanderFileCommands {
         'close-window',
         'Close the Leo window, prompting to save it if it has been changed.'
     )
-    public async close(this: Commands, new_c?: Commands): Promise<unknown> {
-
+    public close(this: Commands, new_c?: Commands): Promise<unknown> {
         return g.app.closeLeoWindow(this.frame, new_c);
-
     }
     //@+node:felix.20220105210716.7: *4* c_file.importAnyFile & helper
-    @commander_command(
-        'import-file',
-        'Import one or more files.'
-    )
+    @commander_command('import-file', 'Import one or more files.')
     public async importAnyFile(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
-
-        const ic: any = c.importCommands;
-
+        const ic: LeoImportCommands = c.importCommands;
         const types: [string, string][] = [
-            ["All files", "*"],
-            ["C/C++ files", "*.c"],
-            ["C/C++ files", "*.cpp"],
-            ["C/C++ files", "*.h"],
-            ["C/C++ files", "*.hpp"],
-            ["FreeMind files", "*.mm.html"],
-            ["Java files", "*.java"],
-            ["JavaScript files", "*.js"],
+            ['All files', '*'],
+            ['C/C++ files', '*.c'],
+            ['C/C++ files', '*.cpp'],
+            ['C/C++ files', '*.h'],
+            ['C/C++ files', '*.hpp'],
+            ['FreeMind files', '*.mm.html'],
+            ['Java files', '*.java'],
+            ['JavaScript files', '*.js'],
             // ["JSON files", "*.json"],
-            ["Mindjet files", "*.csv"],
-            ["MORE files", "*.MORE"],
-            ["Lua files", "*.lua"],
-            ["Pascal files", "*.pas"],
-            ["Python files", "*.py"],
-            ["Text files", "*.txt"]
+            ['Mindjet files', '*.csv'],
+            ['MORE files', '*.MORE'],
+            ['Lua files', '*.lua'],
+            ['Pascal files', '*.pas'],
+            ['Python files', '*.py'],
+            ['Text files', '*.txt'],
         ];
-
-        const names = await g.app.gui.runOpenFileDialog(
+        let names: string[] = (await g.app.gui.runOpenFileDialog(
             c,
-            "Import File",
+            'Import File',
             types,
-            ".py",
-            true);
-
-        return console.log('GOT NAMES FOR FILE IMPORT!', names);
-
-        // TODO
-        /*
-        c.bringToFront()
-
-        if names
-            g.chdir(names[0]);
-        else
+            '.py',
+            true
+        )) as string[]; // Has multiple flag when calling runOpenFileDialog
+        c.bringToFront();
+        if (names && names.length) {
+            await g.chdir(names[0]);
+        } else {
             names = [];
-
-        if not names
-            if g.unitTesting
+        }
+        if (!names.length) {
+            if (g.unitTesting) {
                 // a kludge for unit testing.
                 c.init_error_dialogs();
-                c.raise_error_dialogs('read');
-
-
+                await c.raise_error_dialogs('read');
+            }
             return;
-
+        }
         // New in Leo 4.9: choose the type of import based on the extension.
         c.init_error_dialogs();
-        derived = [z for z in names if c.looksLikeDerivedFile(z)]
-
-        others = [z for z in names if z not in derived]
-
-        if derived
-            ic.importDerivedFiles(c.p, derived);
-
-
+        const derived: string[] = names.filter((z) =>
+            c.looksLikeDerivedFile(z)
+        );
+        const others: string[] = names.filter((z) => !derived.includes(z));
+        if (derived && derived.length) {
+            await ic.importDerivedFiles(c.p, derived);
+        }
         let junk: string;
         let ext: string;
-
-        for let fn of others
+        for (let fn of others) {
             [junk, ext] = g.os_path_splitext(fn);
-            ext = ext.lower();  // #1522
-            if ext.startswith('.')
-                ext = ext[1:];
-
-            if ext == 'csv'
-                ic.importMindMap([fn]);
-            else if ext in ('cw', 'cweb')
-                ic.importWebCommand([fn], "cweb");
-
+            ext = ext.toLowerCase(); // #1522
+            if (ext.startsWith('.')) {
+                ext = ext.slice(1);
+            }
+            if (ext === 'csv') {
+                await ic.importMindMap([fn]);
+            } else if (['cw', 'cweb'].includes(ext)) {
+                await ic.importWebCommand([fn], 'cweb');
+            }
             // Not useful. Use @auto x.json instead.
             // else if ext == 'json':
-                // ic.importJSON([fn])
-            else if fn.endswith('mm.html')
-                ic.importFreeMind([fn]);
-            else if ext in ('nw', 'noweb')
-                ic.importWebCommand([fn], "noweb");
-            else if ext == 'more'
-                leoImport.MORE_Importer(c).import_file(fn);  // #1522.
-            else if ext == 'txt'
+            // ic.importJSON([fn])
+            else if (fn.endsWith('mm.html')) {
+                await ic.importFreeMind([fn]);
+            } else if (['nw', 'noweb'].includes(ext)) {
+                await ic.importWebCommand([fn], 'noweb');
+            } else if (ext === 'more') {
+                await new MORE_Importer(c).import_file(fn); // #1522.
+            } else if (ext === 'txt') {
                 // #1522: Create an @edit node.
-                import_txt_file(c, fn);
-            else
+                await import_txt_file(c, fn);
+            } else {
                 // Make *sure* that parent.b is empty.
-                last = c.lastTopLevel();
-                parent = last.insertAfter();
+                const last = c.lastTopLevel();
+                const parent = last.insertAfter();
                 parent.v.h = 'Imported Files';
-                ic.importFilesCommand(
+                await ic.importFilesCommand(
                     [fn],
                     parent,
-                    '@auto'  // was '@clean'
-                        // Experimental: attempt to use permissive section ref logic.
+                    undefined,
+                    '@auto' // was '@clean'
+                    // Experimental: attempt to use permissive section ref logic.
                 );
-
-            c.redraw()
-        c.raise_error_dialogs('read')
-        */
-
-
+            }
+            c.redraw();
+        }
+        await c.raise_error_dialogs('read');
     }
-
-    // TODO : aliases
-
+    // * LEOJS NOT USED : Not referenced in Leo's codebase either
     /*
     g.command_alias('importAtFile', importAnyFile)
     g.command_alias('importAtRoot', importAnyFile)
@@ -261,40 +280,37 @@ export class CommanderFileCommands {
     g.command_alias('importTabFiles', importAnyFile)
     */
     //@+node:felix.20220105210716.9: *4* c_file.new
-    @commander_command(
-        'file-new',
-        'Create a new Leo window.'
-    )
-    @commander_command(
-        'new',
-        'Create a new Leo window.'
-    )
-    public new(this: Commands, gui: NullGui): Commands {
-
-        // t1 = time.process_time()
+    @commander_command('file-new', 'Create a new Leo window.')
+    @commander_command('new', 'Create a new Leo window.')
+    public async new(this: Commands, gui: NullGui): Promise<Commands> {
+        const t1 = process.hrtime();
         // from leo.core import leoApp
         const lm = g.app.loadManager!;
         const old_c = this;
         // Clean out the update queue so it won't interfere with the new window.
         this.outerUpdate();
-        // Supress redraws until later.
+        // Suppress redraws until later.
         g.app.disable_redraw = true;
         // Send all log messages to the new frame.
         // g.app.setLog(None)
         // g.app.lockLog()
 
         // Retain all previous settings. Very important for theme code.
-        // t2 = time.process_time()
+        const t2 = process.hrtime();
 
         const c = g.app.newCommander(
             '',
             gui,
-            new PreviousSettings(
-                lm.globalSettingsDict,
-                lm.globalBindingsDict,
-            ));
+            new PreviousSettings(lm.globalSettingsDict, lm.globalBindingsDict)
+        );
 
-        // t3 = time.process_time()
+        // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
+        // c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        // if (c.openDirectory) {
+        //     c.frame.openDirectory = c.openDirectory;
+        // }
+
+        const t3 = process.hrtime();
         // frame = c.frame
         // g.app.unlockLog()
         // if not old_c:
@@ -309,59 +325,69 @@ export class CommanderFileCommands {
         // lm.createMenu(c);
         lm.finishOpen(c);
         //g.app.writeWaitingLog(c);
-        g.doHook("new", { old_c: old_c, c: c, new_c: c });
+        g.doHook('new', { old_c: old_c, c: c, new_c: c });
+
+        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
+
         // c.setLog();
-        c.clearChanged();  // Fix #387: Clear all dirty bits.
+        c.clearChanged(); // Fix #387: Clear all dirty bits.
         g.app.disable_redraw = false;
 
         c.redraw();
 
-        // t4 = time.process_time()
-        /* 
-        if 'speed' in g.app.debug:
-            g.trace()
-            print(
-                f"    1: {t2-t1:5.2f}\n"  // 0.00 sec.
-                f"    2: {t3-t2:5.2f}\n"  // 0.36 sec: c.__init__
-                f"    3: {t4-t3:5.2f}\n"  // 0.17 sec: Everything else.
-                f"total: {t4-t1:5.2f}"
-            )
-        */
-        return c;  // For unit tests and scripts.
+        const t4 = process.hrtime();
 
+        if (g.app.debug.includes('speed')) {
+            g.trace();
+            g.es(
+                `    1: ${utils.getDurationSeconds(t1, t2)}\n` + // 0.00 sec.
+                `    2: ${utils.getDurationSeconds(t2, t3)}\n` + // 0.36 sec: c.__init__
+                `    3: ${utils.getDurationSeconds(t3, t4)}\n` + // 0.17 sec: Everything else.
+                `total: ${utils.getDurationSeconds(t1, t4)}`
+            );
+        }
+        return c; // For unit tests and scripts.
     }
     //@+node:felix.20220105210716.10: *4* c_file.open_outline
     @commander_command(
         'open-outline',
         'Open a Leo window containing the contents of a .leo file.'
     )
-    public async open_outline(this: Commands, p_uri?: vscode.Uri): Promise<unknown> {
-
+    public async open_outline(
+        this: Commands,
+        p_uri?: vscode.Uri
+    ): Promise<unknown> {
         const c: Commands = this;
 
         //@+others // Defines open_completer function.
         //@+node:felix.20220105210716.11: *5* function: open_completer
-        async function open_completer(p_c: Commands, closeFlag: boolean, fileName?: string): Promise<unknown> {
-
+        async function open_completer(
+            p_c: Commands,
+            closeFlag: boolean,
+            fileName?: string
+        ): Promise<unknown> {
             p_c.bringToFront();
             p_c.init_error_dialogs();
 
             let ok: any = false;
+
+            // ! THIS METHOD VOLUNTARILY DIFFERENT THAN LEO'S PYTHON CODE
 
             let q_result = Promise.resolve();
             if (fileName) {
                 if (g.app.loadManager!.isLeoFile(fileName)) {
                     const c2 = await g.openWithFileName(fileName, p_c, c.gui);
                     if (c2) {
-
                         // c2.k.makeAllBindings(); // ? needed ?
 
                         // Fix #579: Key bindings don't take for commands defined in plugins.
-                        g.chdir(fileName);
+                        await g.chdir(fileName);
                         g.setGlobalOpenDir(fileName);
                     }
                     if (c2 && closeFlag) {
-                        g.app.destroyWindow(p_c.frame);
+                        await g.app.destroyWindow(p_c.frame);
                         // ! Need to remove here in leojs !
                         let index = g.app.windowList.indexOf(p_c.frame, 0);
                         if (index > -1) {
@@ -377,22 +403,22 @@ export class CommanderFileCommands {
                     }
                 } else {
                     // Create an @file node for files containing Leo sentinels.
-                    const w_looksDerived = await p_c.looksLikeDerivedFile(fileName);
+                    const w_looksDerived = await p_c.looksLikeDerivedFile(
+                        fileName
+                    );
                     if (w_looksDerived) {
-                        console.log('TODO : IMPORT FILES');
-                        // TODO : IMPORT FILES
-                        // ok = p_c.importCommands.importDerivedFiles(
-                        //     p_c.p,
-                        //     [fileName],
-                        //     'Open');
+                        ok = await p_c.importCommands.importDerivedFiles(
+                            p_c.p,
+                            [fileName],
+                            'Open'
+                        );
                     } else {
                         // otherwise, create an @edit node.
                         ok = p_c.createNodeFromExternalFile(fileName);
                     }
-
                 }
             }
-            p_c.raise_error_dialogs('write');
+            await p_c.raise_error_dialogs('write');
             // g.app.runAlreadyOpenDialog(p_c); // ? Needed ?
 
             // openWithFileName sets focus if ok.
@@ -404,43 +430,40 @@ export class CommanderFileCommands {
         }
         //@-others
 
+        // ! THIS METHOD VOLUNTARILY DIFFERENT THAN LEO'S PYTHON CODE
         // Close the window if this command completes successfully?
-        let closeFlag: boolean = (
+        let closeFlag: boolean =
             c.frame.startupWindow &&
             // The window was open on startup
-            !c.changed && !c.frame.saved &&
+            !c.changed &&
+            !c.frame.saved &&
             // The window has never been changed
-            g.app.numberOfUntitledWindows === 1
-            // Only one untitled window has ever been opened
-        );
+            g.app.numberOfUntitledWindows === 1;
+        // Only one untitled window has ever been opened
 
         let table: [string, string][] = [
-            ["Leo files", "*.leo *.leojs *.db"],
-            ["Python files", "*.py"],
-            ["All files", "*"]
+            ['Leo files', '*.leo *.leojs *.db'],
+            ['Python files', '*.py'],
+            ['All files', '*'],
         ];
-
         // maybe from c.k.
         let fileName: string = c.k?.givenArgs?.join('');
         // override with given argument
         if (p_uri && p_uri.fsPath && p_uri.fsPath.trim()) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
         }
-
         if (fileName) {
             return open_completer(c, closeFlag, fileName);
         }
-
         // Equivalent to legacy code.
-        fileName = await g.app.gui.runOpenFileDialog(
+        fileName = (await g.app.gui.runOpenFileDialog(
             c,
-            "Open",
+            'Open',
             table,
             g.defaultLeoFileExtension(c),
             false
-        ) as string;
+        )) as string;
         return open_completer(c, closeFlag, fileName);
-
     }
     //@+node:felix.20220105210716.12: *4* c_file.refreshFromDisk
     // refresh_pattern = re.compile(r'^(@[\w-]+)')
@@ -450,17 +473,57 @@ export class CommanderFileCommands {
         'Refresh an @<file> node from disk.'
     )
     public async refreshFromDisk(this: Commands): Promise<void> {
-
         const c: Commands = this;
         let p: Position = this.p;
-        const u: Undoer = this.undoer;
+        // const u: Undoer = this.undoer;
 
+        if (!p.isAnyAtFileNode()) {
+            g.warning(`not an @<file> node: ${p.h}`);
+            return;
+        }
+        const full_path = c.fullPath(p);
+        const w_isDir = await g.os_path_isdir(full_path);
+        if (w_isDir) {
+            g.warning(`not a file: ${full_path}`);
+            return;
+        }
+        const at = c.atFileCommands;
         c.nodeConflictList = [];
+        c.recreateGnxDict();
+        if (p.isAtAutoNode() || p.isAtAutoRstNode()) {
+            p.v._deleteAllChildren();
+            p = await at.readOneAtAutoNode(p);  // Changes p!
+        } else if (p.isAtFileNode()) {
+            p.v._deleteAllChildren();
+            await at.read(p);
+        } else if (p.isAtCleanNode()) {
+            // Don't delete children!
+            await at.readOneAtCleanNode(p);
+        } else if (p.isAtShadowFileNode()) {
+            p.v._deleteAllChildren();
+            await at.read(p);
+        } else if (p.isAtEditNode()) {
+            await at.readOneAtEditNode(p);  // Always deletes children.
+        } else if (p.isAtAsisFileNode()) {
+            await at.readOneAtAsisNode(p);  // Always deletes children.
+        } else {
+            g.es_print(`Unknown @<file> node: ${p.h}`);
+            return;
+        }
+        c.selectPosition(p);
+        // Create the 'Recovered Nodes' tree.
+        c.fileCommands.handleNodeConflicts();
+        c.redraw();
+        c.undoer.clearAndWarn('refresh-from-disk');
 
+        /*
+        // ! LEOJS : warn if no openDirectory before write/read external files.
+        if (!c.openDirectory) {
+            void g.warnNoOpenDirectory();
+        }
+        c.nodeConflictList = [];
         const fn: string = p.anyAtFileNodeName();
-
         const shouldDelete: boolean = c.sqlite_connection === undefined;
-
         if (!fn) {
             g.warning(`not an @<file> node: ${p.h}`);
             return;
@@ -502,7 +565,7 @@ export class CommanderFileCommands {
             if (shouldDelete) {
                 p.v._deleteAllChildren();
             }
-            at.read(p);
+            await at.read(p);
         } else if (word === '@edit') {
             await at.readOneAtEditNode(fn, p);
             // Always deletes children.
@@ -523,13 +586,13 @@ export class CommanderFileCommands {
             c.redraw();
         }
         return;
+        */
+
     }
     //@+node:felix.20220105210716.13: *4* c_file.pwd
-    @commander_command(
-        'pwd',
-        'Prints the current working directory'
-    )
+    @commander_command('pwd', 'Prints the current working directory')
     public pwd_command(this: Commands): void {
+        // TODO : GET WORKING DIR OF THE WORKSPACE !
         g.es_print('pwd:', process.cwd());
     }
     //@+node:felix.20220105210716.14: *4* c_file.save
@@ -546,82 +609,71 @@ export class CommanderFileCommands {
         'Save a Leo outline to a file, using the existing file name unless fileName is given'
     )
     public async save(this: Commands, fileName?: string): Promise<unknown> {
-
         const c: Commands = this;
 
         if (g.app.disableSave) {
-            g.es("save commands disabled", "purple");
+            g.es('save commands disabled', 'purple');
             return;
         }
+
+        /**
+         * Common save code.
+         */
+        const do_save = async (c: Commands, fileName: string): Promise<void> => {
+            await c.fileCommands.save(fileName);
+            g.app.recentFilesManager.updateRecentFiles(fileName);
+            await g.chdir(fileName);
+        };
+
+
         c.init_error_dialogs();
-        // 2013/09/28: use the fileName keyword argument if given.
-        // This supports the leoBridge.
-        // Make sure we never pass None to the ctor.
-        if (fileName) {
-            c.frame.title = g.computeWindowTitle(fileName);
-            c.mFileName = fileName;
-        }
-        if (!c.mFileName) {
-            // c.frame.title = ""; // TODO : CHECK IF NEEDED !! 
-            c.mFileName = "";
-        }
-        if (c.mFileName) {
-            // Calls c.clearChanged() if no error.
-            g.app.syntax_error_files = [];
-            await c.fileCommands.save(c.mFileName);
-            c.syntaxErrorDialog();
-            return c.raise_error_dialogs('write');
-        } else {
-            const root: Position = c.rootPosition()!;
-            if (!root.next().__bool__() && root.isAtEditNode()) {
-                // There is only a single @edit node in the outline.
-                // A hack to allow "quick edit" of non-Leo files.
-                // See https://bugs.launchpad.net/leo-editor/+bug/381527
-                fileName = undefined;
+
+
+        try {
+
+            // Don't prompt if the file name is known.
+            let given_file_name = fileName || c.mFileName;
+            if (given_file_name) {
+                let final_file_name = this.set_name_and_title(c, given_file_name);
+                await do_save(c, final_file_name);
+                return;
+            }
+
+            // The file still has no name.
+            let root = c.rootPosition()!;
+            if (!root.next() && root.isAtEditNode()) {
                 // Write the @edit node if needed.
                 if (root.isDirty()) {
-                    c.atFileCommands.writeOneAtEditNode(root);
+                    await c.atFileCommands.writeOneAtEditNode(root);
                 }
                 c.clearChanged();  // Clears all dirty bits.
-            } else {
-                fileName = c.k?.givenArgs?.join('');
-                if (!fileName) {
-                    fileName = await g.app.gui.runSaveFileDialog(
-                        c,
-                        "Save",
-                        [["Leo files", "*.leo *.leojs *.db"]], // Array of arrays (one in this case)
-                        g.defaultLeoFileExtension(c)
-                    );
-                }
+                await this.do_error_dialogs(c);
+                return;
             }
-            c.bringToFront();
-            if (fileName) {
-                // Don't change mFileName until the dialog has succeeded.
-                c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
-                c.frame.title = c.computeWindowTitle(c.mFileName);
 
-                c.openDirectory = g.os_path_dirname(c.mFileName);
-                c.frame.openDirectory = c.openDirectory;
+            // Prompt for fileName.
+            let new_file_name = await g.app.gui.runSaveFileDialog(
+                c,
+                'Save',
+                [['Leo files', '*.leo *.leojs *.db']], // Array of arrays (one in this case)
+                g.defaultLeoFileExtension(c)
+            );
 
-                await c.fileCommands.save(c.mFileName);
-                // ? needed ? 
-                // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
-                await g.chdir(c.mFileName);
-                return c.raise_error_dialogs('write');
+            if (new_file_name) {
+                let final_file_name = this.set_name_and_title(c, new_file_name);
+                await do_save(c, final_file_name);
             }
+
+        } finally {
+            await this.do_error_dialogs(c);
         }
+
     }
     //@+node:felix.20220105210716.15: *4* c_file.saveAll
-    @commander_command(
-        'save-all',
-        'Save all open tabs windows/tabs.'
-    )
+    @commander_command('save-all', 'Save all open tabs windows/tabs.')
     public async saveAll(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
-
-        c.save();  // Force a write of the present window.
-
+        await c.save(); // Force a write of the present window.
         for (let c2 of g.app.commanders()) {
             if (c2 !== c && c2.isChanged()) {
                 await c2.save();
@@ -643,112 +695,119 @@ export class CommanderFileCommands {
         'Save a Leo outline to a file, prompting for a new filename unless fileName is given'
     )
     public async saveAs(this: Commands, fileName?: string): Promise<unknown> {
-
         const c: Commands = this;
-
         if (g.app.disableSave) {
-            g.es("save commands disabled", "purple");
+            g.es('save commands disabled', 'purple');
             return;
         }
 
-        c.init_error_dialogs();
-
-        // 2013/09/28: add fileName keyword arg for leoBridge scripts.
-        if (fileName) {
-            c.frame.title = g.computeWindowTitle(fileName);
-            c.mFileName = fileName;
-        }
-        // Make sure we never pass None to the ctor.
-        if (!c.mFileName) {
-            c.frame.title = "";
-        }
-        if (!fileName && c.k && c.k.givenArgs) {
-            fileName = c.k.givenArgs.join('');
-        }
-        if (!fileName) {
-            const w_filename = await g.app.gui.runSaveFileDialog(
-                c,
-                "Save As",
-                [["Leo files", "*.leo *.leojs *.db"]], // Array of arrays (one in this case)
-                g.defaultLeoFileExtension(c)
-            );
-            if (w_filename) {
-                // re-start this 'save' method with given filename
-                return c.saveAs(w_filename); // no need to finish with dialogs.
-            }
-            return Promise.resolve(); // EXIT: canceled 'save-as' file name dialog !
-        } else {
-            // Fix bug 998090: save file as doesn't remove entry from open file list.
+        const do_save_as = async (c: Commands, fileName: string): Promise<string> => {
+            /** Common save-as code. */
+            // 1. Forget the previous file.
             if (c.mFileName) {
                 g.app.forgetOpenFile(c.mFileName);
             }
-            // Don't change mFileName until the dialog has succeeded.
-            if (fileName.endsWith('.leo') ||
-                fileName.endsWith('.db',) ||
-                fileName.endsWith('.leojs')
-            ) {
-                c.mFileName = fileName;
-            } else {
-                c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+            // 2. Finalize fileName and set related ivars.
+            let new_file_name = this.set_name_and_title(c, fileName);
+            // 3. Do the save and related tasks.
+            await c.fileCommands.saveAs(new_file_name);
+            g.app.recentFilesManager.updateRecentFiles(new_file_name);
+            await g.chdir(new_file_name);
+            return new_file_name;
+        };
+
+        c.init_error_dialogs();
+
+
+        try {
+            c.init_error_dialogs();
+
+            // Handle the kwarg first.
+            if (fileName) {
+                await do_save_as(c, fileName);
+                return;
             }
 
-            c.frame.title = c.computeWindowTitle(c.mFileName);
-
-            c.openDirectory = g.os_path_dirname(c.mFileName);
-            c.frame.openDirectory = c.openDirectory;
-
-            // Calls c.clearChanged() if no error.
-            await c.fileCommands.saveAs(c.mFileName);
-            // ? needed ? 
-            // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
-            await g.chdir(c.mFileName);
-            return c.raise_error_dialogs('write');
-        }
-    }
-    //@+node:felix.20220105210716.17: *4* c_file.saveTo
-    @commander_command('save-to',
-        'Save a Leo outline to a file, prompting for a new file name unless fileName is given.\n' +
-        'Leave the file name of the Leo outline unchanged.'
-    )
-    @commander_command('file-save-to',
-        'Save a Leo outline to a file, prompting for a new file name unless fileName is given.\n' +
-        'Leave the file name of the Leo outline unchanged.'
-    )
-    @commander_command('save-file-to',
-        'Save a Leo outline to a file, prompting for a new file name unless fileName is given.\n' +
-        'Leave the file name of the Leo outline unchanged.'
-    )
-    public async saveTo(this: Commands, fileName?: string, silent?: boolean): Promise<unknown> {
-        const c: Commands = this;
-        if (g.app.disableSave) {
-            g.es("save commands disabled", "purple");
-            return;
-        }
-        c.init_error_dialogs();
-        // Add fileName keyword arg for leoBridge scripts.
-        if (!fileName && c.k && c.k.givenArgs) {
-            fileName = c.k.givenArgs.join('');
-        }
-        if (!fileName) {
-            const w_filename = await g.app.gui.runSaveFileDialog(
+            // Prompt for fileName.
+            let new_file_name = await g.app.gui.runSaveFileDialog(
                 c,
-                "Save To",
-                [["Leo files", "*.leo *.leojs *.db"]], // Array of arrays (one in this case)
+                'Save As',
+                [['Leo files', '*.leo *.leojs *.db']], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
             );
-            if (w_filename) {
-                // re-start this 'save' method with given filename
-                return c.saveTo(w_filename);
+
+            if (new_file_name) {
+                await do_save_as(c, new_file_name);
             }
-            return Promise.resolve(); // EXIT !
-        } else {
-            // Calls c.clearChanged() if no error.
-            await c.fileCommands.saveTo(fileName, silent);
-            // ? needed ? 
-            // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
-            await g.chdir(c.mFileName);
-            return c.raise_error_dialogs('write');
+
+        } finally {
+            await this.do_error_dialogs(c);
         }
+
+    }
+    //@+node:felix.20220105210716.17: *4* c_file.saveTo
+    @commander_command(
+        'save-to',
+        'Save a copy of the Leo outline to a file, prompting for a new file name. ' +
+        'Leave the file name of the Leo outline unchanged.'
+    )
+    @commander_command(
+        'file-save-to',
+        'Save a copy of the Leo outline to a file, prompting for a new file name. ' +
+        'Leave the file name of the Leo outline unchanged.'
+    )
+    @commander_command(
+        'save-file-to',
+        'Save a copy of the Leo outline to a file, prompting for a new file name. ' +
+        'Leave the file name of the Leo outline unchanged.'
+    )
+    public async saveTo(
+        this: Commands,
+        fileName?: string,
+        silent?: boolean
+    ): Promise<unknown> {
+        const c: Commands = this;
+        if (g.app.disableSave) {
+            g.es('save commands disabled');
+            return;
+        }
+
+        const do_save_to = async (c: Commands, fileName: string): Promise<void> => {
+            /** Common save-to code. */
+            // *Never* change c.mFileName or c.frame.title.
+            await c.fileCommands.saveTo(fileName, silent);
+            g.app.recentFilesManager.updateRecentFiles(fileName);
+            // *Never* call g.chdir!
+        };
+
+        c.init_error_dialogs();
+
+
+
+        try {
+
+            // Handle the kwarg first.
+            if (fileName) {
+                await do_save_to(c, fileName);
+                return;
+            }
+
+            // Prompt for fileName.
+            let new_file_name = await g.app.gui.runSaveFileDialog(
+                c,
+                'Save To',
+                [['Leo files', '*.leo *.leojs *.db']], // Array of arrays (one in this case)
+                g.defaultLeoFileExtension(c)
+            );
+
+            if (new_file_name) {
+                await do_save_to(c, new_file_name);
+            }
+
+        } finally {
+            await this.do_error_dialogs(c);
+        }
+
     }
     //@+node:felix.20220105210716.18: *4* c_file.revert
     @commander_command(
@@ -756,26 +815,24 @@ export class CommanderFileCommands {
         'Revert the contents of a Leo outline to last saved contents.'
     )
     public async revert(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
         const u = c.undoer;
-
         // Make sure the user wants to Revert.
         const fn: string = c.mFileName;
         if (!fn) {
             g.es('can not revert unnamed file.');
         }
-        if (!g.os_path_exists(fn)) {
+        const w_exists = await g.os_path_exists(fn);
+        if (!w_exists) {
             g.es(`Can not revert unsaved file: ${fn}`);
             return;
         }
-
         const w_reply = await g.app.gui.runAskYesNoDialog(
             c,
             'Revert',
-            `Revert to previous version of ${fn}?`);
-
-        if (w_reply === "yes") {
+            `Revert to previous version of ${fn}?`
+        );
+        if (w_reply === 'yes') {
             u.clearUndoState();
             return g.app.loadManager!.revertCommander(c);
         }
@@ -783,23 +840,22 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.19: *4* c_file.save-as-leojs
     @commander_command(
         'file-save-as-leojs',
-        'Save a Leo outline as a JSON (.leojs) file with a new file name.'
+        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-leojs',
-        'Save a Leo outline as a JSON (.leojs) file with a new file name.'
+        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_leojs(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
-
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Save As JSON (.leojs)",
-            [["Leo files", "*.leojs"]],
+            'Save As JSON (.leojs)',
+            [['Leo JSON files', '*.leojs']],
             '.leojs'
         );
-
         if (!fileName) {
             return;
         }
@@ -809,24 +865,24 @@ export class CommanderFileCommands {
         // Leo 6.4: Using save-to instead of save-as allows two versions of the file.
         await c.saveTo(fileName);
         return c.fileCommands.putSavedMessage(fileName);
-
     }
     //@+node:felix.20220105210716.20: *4* c_file.save-as-zipped
     @commander_command(
         'file-save-as-zipped',
-        'Save a Leo outline as a zipped (.db) file with a new file name.'
+        'Save a copy of the Leo outline as a zipped (.db) file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-zipped',
-        'Save a Leo outline as a zipped (.db) file with a new file name.'
+        'Save a copy of the Leo outline as a zipped (.db) file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_zipped(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Save As Zipped",
-            [["Leo files", "*.db"]],
+            'Save As Zipped',
+            [['Leo files', '*.db']],
             '.db'
         );
         if (!fileName) {
@@ -838,27 +894,26 @@ export class CommanderFileCommands {
         // Leo 6.4: Using save-to instead of save-as allows two versions of the file.
         await c.saveTo(fileName);
         return c.fileCommands.putSavedMessage(fileName);
-
     }
     //@+node:felix.20220105210716.21: *4* c_file.save-as-xml
     @commander_command(
         'file-save-as-xml',
-        'Save a Leo outline as a .leo file with a new file name.\n' +
+        'Save a copy of the Leo outline as an XML .leo file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged. ' +
         'Useful for converting a .leo.db file to a .leo file.'
     )
     @commander_command(
         'save-file-as-xml',
-        'Save a Leo outline as a .leo file with a new file name.\n' +
+        'Save a copy of the Leo outline as an XML .leo file with a new file name. ' +
+        'Leave the file name of the Leo outline unchanged. ' +
         'Useful for converting a .leo.db file to a .leo file.'
     )
     public async save_as_xml(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
-
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Save As XML",
-            [["Leo files", "*.leo"]],
+            'Save As XML',
+            [['Leo files', '*.leo']],
             g.defaultLeoFileExtension(c)
         );
         if (!fileName) {
@@ -875,19 +930,19 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.23: *4* c_file.exportHeadlines
     @commander_command(
         'export-headlines',
-        'Export all headlines to an external file.'
+        'Export headlines for c.p and its subtree to an external file.'
     )
     public async exportHeadlines(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
-
-        const filetypes: [string, string][] = [["Text files", "*.txt"], ["All files", "*"]];
-
+        const filetypes: [string, string][] = [
+            ['Text files', '*.txt'],
+            ['All files', '*'],
+        ];
         const fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Export Headlines",
+            'Export Headlines',
             filetypes,
-            ".txt"
+            '.txt'
         );
         c.bringToFront();
         if (fileName) {
@@ -895,7 +950,6 @@ export class CommanderFileCommands {
             await g.chdir(fileName);
             return c.importCommands.exportHeadlines(fileName);
         }
-
     }
     //@+node:felix.20220105210716.24: *4* c_file.flattenOutline
     @commander_command(
@@ -903,16 +957,16 @@ export class CommanderFileCommands {
         'Export the selected outline to an external file. The outline is represented in MORE format.'
     )
     public async flattenOutline(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
-
-        const filetypes: [string, string][] = [["Text files", "*.txt"], ["All files", "*"]];
-
+        const filetypes: [string, string][] = [
+            ['Text files', '*.txt'],
+            ['All files', '*'],
+        ];
         const fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Flatten Selected Outline",
+            'Flatten Selected Outline',
             filetypes,
-            ".txt"
+            '.txt'
         );
         c.bringToFront();
         if (fileName) {
@@ -927,7 +981,6 @@ export class CommanderFileCommands {
         'Append the body text of all descendants of the selected node to the body text of the selected node.'
     )
     public flattenOutlineToNode(this: Commands): void {
-
         const c: Commands = this;
         const root: Position = this.p;
         const u: Undoer = this.undoer;
@@ -945,7 +998,7 @@ export class CommanderFileCommands {
         if (language) {
             [single, start, end] = g.set_delims_from_language(language);
         } else {
-            [single, start, end] = ['#', "", ""];
+            [single, start, end] = ['#', '', ''];
         }
         const bunch: Bead = u.beforeChangeNodeContents(root);
         const aList: string[] = [];
@@ -964,7 +1017,6 @@ export class CommanderFileCommands {
 
         root.b = root.b.trimEnd() + '\n' + aList.join('').trimEnd() + '\n';
         u.afterChangeNodeContents(root, 'flatten-outline-to-node', bunch);
-
     }
     //@+node:felix.20220105210716.26: *4* c_file.outlineToCWEB
     @commander_command(
@@ -972,26 +1024,25 @@ export class CommanderFileCommands {
         'Export the selected outline to an external file. The outline is represented in CWEB format.'
     )
     public async outlineToCWEB(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
 
         const filetypes: [string, string][] = [
-            ["CWEB files", "*.w"],
-            ["Text files", "*.txt"],
-            ["All files", "*"]
+            ['CWEB files', '*.w'],
+            ['Text files', '*.txt'],
+            ['All files', '*'],
         ];
 
         const fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Outline To CWEB",
+            'Outline To CWEB',
             filetypes,
-            ".w"
+            '.w'
         );
         c.bringToFront();
         if (fileName) {
             g.setGlobalOpenDir(fileName);
             await g.chdir(fileName);
-            return c.importCommands.outlineToWeb(fileName, "cweb");
+            return c.importCommands.outlineToWeb(fileName, 'cweb');
         }
     }
     //@+node:felix.20220105210716.27: *4* c_file.outlineToNoweb
@@ -1000,26 +1051,25 @@ export class CommanderFileCommands {
         'Export the selected outline to an external file. The outline is represented in noweb format.'
     )
     public async outlineToNoweb(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
 
         const filetypes: [string, string][] = [
-            ["Noweb files", "*.nw"],
-            ["Text files", "*.txt"],
-            ["All files", "*"]
+            ['Noweb files', '*.nw'],
+            ['Text files', '*.txt'],
+            ['All files', '*'],
         ];
 
         const fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Outline To Noweb",
+            'Outline To Noweb',
             filetypes,
-            ".nw"
+            '.nw'
         );
         c.bringToFront();
         if (fileName) {
             g.setGlobalOpenDir(fileName);
             await g.chdir(fileName);
-            await c.importCommands.outlineToWeb(fileName, "noweb");
+            await c.importCommands.outlineToWeb(fileName, 'noweb');
             c.outlineToNowebDefaultFileName = fileName;
         }
         return;
@@ -1027,29 +1077,29 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.28: *4* c_file.removeSentinels
     @commander_command(
         'remove-sentinels',
-        'Convert one or more files, replacing the original files\n' +
+        'Convert one or more files, replacing the original files ' +
         'while removing any sentinels they contain.'
     )
     public async removeSentinels(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
 
         const types: [string, string][] = [
-            ["All files", "*"],
-            ["C/C++ files", "*.c"],
-            ["C/C++ files", "*.cpp"],
-            ["C/C++ files", "*.h"],
-            ["C/C++ files", "*.hpp"],
-            ["Java files", "*.java"],
-            ["Lua files", "*.lua"],
-            ["Pascal files", "*.pas"],
-            ["Python files", "*.py"]
+            ['All files', '*'],
+            ['C/C++ files', '*.c'],
+            ['C/C++ files', '*.cpp'],
+            ['C/C++ files', '*.h'],
+            ['C/C++ files', '*.hpp'],
+            ['Java files', '*.java'],
+            ['Lua files', '*.lua'],
+            ['Pascal files', '*.pas'],
+            ['Python files', '*.py'],
         ];
 
-        const names = await g.app.gui.runOpenFileDialog(c,
-            "Remove Sentinels",
+        const names = await g.app.gui.runOpenFileDialog(
+            c,
+            'Remove Sentinels',
             types,
-            ".py",
+            '.py',
             true
         );
         c.bringToFront();
@@ -1057,8 +1107,6 @@ export class CommanderFileCommands {
             await g.chdir(names[0]);
             return c.importCommands.removeSentinelsCommand(names as string[]);
         }
-
-
     }
     //@+node:felix.20220105210716.29: *4* c_file.weave
     @commander_command(
@@ -1066,14 +1114,16 @@ export class CommanderFileCommands {
         'Simulate a literate-programming weave operation by writing the outline to a text file.'
     )
     public async weave(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
 
         const fileName = await g.app.gui.runSaveFileDialog(
             c,
-            "Weave",
-            [["Text files", "*.txt"], ["All files", "*"]],
-            ".txt"
+            'Weave',
+            [
+                ['Text files', '*.txt'],
+                ['All files', '*'],
+            ],
+            '.txt'
         );
         c.bringToFront();
         if (fileName) {
@@ -1086,7 +1136,8 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.31: *4* c_file.readAtAutoNodes
     @commander_command(
         'read-at-auto-nodes',
-        'Read all @auto nodes in the presently selected outline.'
+        'Read all @auto nodes in the presently selected outline.' +
+        'This command is not undoable.'
     )
     public async readAtAutoNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1095,17 +1146,18 @@ export class CommanderFileCommands {
 
         c.endEditing();
         c.init_error_dialogs();
-        const undoData: Bead = u.beforeChangeTree(p);
+        // const undoData: Bead = u.beforeChangeTree(p);
         await c.importCommands.readAtAutoNodes();
-        u.afterChangeTree(p, 'Read @auto Nodes', undoData);
+        // u.afterChangeTree(p, 'Read @auto Nodes', undoData);
         c.redraw();
-        return c.raise_error_dialogs('read');
-
+        await c.raise_error_dialogs('read');
+        return c.undoer.clearAndWarn('read-at-auto-nodes');
     }
     //@+node:felix.20220105210716.32: *4* c_file.readAtFileNodes
     @commander_command(
         'read-at-file-nodes',
-        'Read all @file nodes in the presently selected outline.'
+        'Read all @file nodes in the presently selected outline.' +
+        'This command is not undoable.'
     )
     public async readAtFileNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1113,19 +1165,21 @@ export class CommanderFileCommands {
         const u: Undoer = this.undoer;
 
         c.endEditing();
-        const undoData: Bead = u.beforeChangeTree(p);
+        // const undoData: Bead = u.beforeChangeTree(p);
 
         await c.atFileCommands.readAllSelected(p);
         // Force an update of the body pane.
-        c.setBodyString(p, p.b);  // Not a do-nothing!
-        u.afterChangeTree(p, 'Read @file Nodes', undoData);
-        return c.redraw();
+        c.setBodyString(p, p.b); // Not a do-nothing!
+        // u.afterChangeTree(p, 'Read @file Nodes', undoData);
+        c.redraw();
+        return c.undoer.clearAndWarn('read-at-file-nodes');
     }
 
     //@+node:felix.20220105210716.33: *4* c_file.readAtShadowNodes
     @commander_command(
         'read-at-shadow-nodes',
-        'Read all @shadow nodes in the presently selected outline.'
+        'Read all @shadow nodes in the presently selected outline.' +
+        'This command is not undoable.'
     )
     public async readAtShadowNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
@@ -1134,11 +1188,12 @@ export class CommanderFileCommands {
 
         c.endEditing();
         c.init_error_dialogs();
-        const undoData: Bead = u.beforeChangeTree(p);
+        // const undoData: Bead = u.beforeChangeTree(p);
         await c.atFileCommands.readAtShadowNodes(p);
-        u.afterChangeTree(p, 'Read @shadow Nodes', undoData);
+        // u.afterChangeTree(p, 'Read @shadow Nodes', undoData);
         c.redraw();
-        return c.raise_error_dialogs('read');
+        await c.raise_error_dialogs('read');
+        return c.undoer.clearAndWarn('read-at-shadow-nodes');
     }
     //@+node:felix.20220105210716.34: *4* c_file.readFileIntoNode
     @commander_command(
@@ -1147,21 +1202,20 @@ export class CommanderFileCommands {
     )
     public async readFileIntoNode(this: Commands): Promise<unknown> {
         const c: Commands = this;
+        const u = c.undoer;
         const undoType: string = 'Read File Into Node';
-
         c.endEditing();
         const filetypes: [string, string][] = [
-            ["All files", "*"],
-            ["Python files", "*.py"],
-            ["Leo files", "*.leo *.leojs"]
+            ['All files', '*'],
+            ['Python files', '*.py'],
+            ['Leo files', '*.leo *.leojs'],
         ];
-
-        const fileName = await g.app.gui.runOpenFileDialog(
+        const fileName = (await g.app.gui.runOpenFileDialog(
             c,
-            "Read File Into Node",
+            'Read File Into Node',
             filetypes,
-            ""
-        ) as string;
+            ''
+        )) as string;
         if (!fileName) {
             return;
         }
@@ -1174,98 +1228,56 @@ export class CommanderFileCommands {
         await g.chdir(fileName);
         s = '@nocolor\n' + s;
         const w = c.frame.body.wrapper;
-        const p: Position = c.insertHeadline(undoType)!;
+        const undoData = u.beforeInsertNode(c.p);
+        const p = c.p.insertAfter();
         p.setHeadString('@read-file-into-node ' + fileName);
         p.setBodyString(s);
+        u.afterInsertNode(p, undoType, undoData);
         w.setAllText(s);
         return c.redraw(p);
-    }
-    //@+node:felix.20220105210716.35: *4* c_file.readOutlineOnly
-    @commander_command(
-        'read-outline-only',
-        'Open a Leo outline from a .leo file, but do not read any derived files.'
-    )
-    public async readOutlineOnly(this: Commands): Promise<unknown> {
-
-        const c: Commands = this;
-        c.endEditing();
-        const fileName = await g.app.gui.runOpenFileDialog(
-            c,
-            "Read Outline Only",
-            [["Leo files", "*.leo *.leojs"], ["All files", "*"]],
-            ".leo"
-        ) as string;
-
-        if (!fileName) {
-            return;
-        }
-        try {
-            // pylint: disable=assignment-from-no-return
-            // Can't use 'with" because readOutlineOnly closes the file.
-
-            // ! Replaced with vscode.workspace.fs !
-            // const theFile: number = openSync(fileName[0], 'r');
-            g.chdir(fileName);
-            const c: Commands = g.app.newCommander(fileName);
-            // ? needed ?
-            //frame = c.frame;
-            //frame.deiconify();
-            //frame.lift();
-            return c.fileCommands.readOutlineOnly(fileName); // closes file.
-        }
-        catch (exception) {
-            g.es("can not open:", fileName);
-        }
     }
     //@+node:felix.20220105210716.36: *4* c_file.writeFileFromNode
     @commander_command(
         'write-file-from-node',
         'If node starts with @read-file-into-node, use the full path name ' +
-        'in the headline.\nOtherwise, prompt for a file name.'
+        'in the headline. Otherwise, prompt for a file name.'
     )
     public async writeFileFromNode(this: Commands): Promise<unknown> {
-
         const c: Commands = this;
         let p: Position = this.p;
         c.endEditing();
         let h: string = p.h.trimEnd();
         let s: string = p.b;
-
         const tag: string = '@read-file-into-node';
         let fileName: string | undefined;
-
         if (h.startsWith(tag)) {
             fileName = h.slice(tag.length).trim();
         } else {
             fileName = undefined;
         }
-
         if (!fileName) {
             fileName = await g.app.gui.runSaveFileDialog(
                 c,
                 'Write File From Node',
                 [
-                    ["All files", "*"],
-                    ["Python files", "*.py"],
-                    ["Leo files", "*.leo *.leojs"]
+                    ['All files', '*'],
+                    ['Python files', '*.py'],
+                    ['Leo files', '*.leo *.leojs'],
                 ],
-                ""
+                ''
             );
         }
-
         if (fileName) {
             try {
-                g.chdir(fileName);
+                await g.chdir(fileName);
                 if (s.startsWith('@nocolor\n')) {
                     s = s.slice('@nocolor\n'.length);
                 }
-                // const w_uri = vscode.Uri.file(fileName);
                 const w_uri = g.makeVscodeUri(fileName);
                 const writeData = Buffer.from(s, 'utf8');
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
                 return g.blue('wrote:', fileName);
-            }
-            catch (iOError) {
+            } catch (iOError) {
                 g.error('can not write %s', fileName);
             }
         }
@@ -1273,8 +1285,8 @@ export class CommanderFileCommands {
     //@+node:felix.20230407210935.1: *4* c_file.writeFileFromSubtree
     @commander_command(
         'write-file-from-subtree',
-        'Write the entire tree from the selected node as text to a file.\n' +
-        'If node starts with @read-file-into-node, use the full path name in the headline.\n' +
+        'Write the entire tree from the selected node as text to a file. ' +
+        'If node starts with @read-file-into-node, use the full path name in the headline. ' +
         'Otherwise, prompt for a file name.'
     )
     public async writeFileFromSubtree(this: Commands): Promise<void> {
@@ -1286,23 +1298,29 @@ export class CommanderFileCommands {
         for (const p1 of p.self_and_subtree()) {
             s += p1.b + '\n';
         }
-        let fileName = "";
+        let fileName = '';
         const tag = '@read-file-into-node';
         if (h.startsWith(tag)) {
             fileName = h.substring(tag.length).trim();
         } else {
-            fileName = "";
+            fileName = '';
         }
         if (!fileName) {
-            fileName = await g.app.gui.runSaveFileDialog(c,
+            fileName = await g.app.gui.runSaveFileDialog(
+                c,
                 'Write File From Node',
-                [["All files", "*"], ["Python files", "*.py"], ["Leo files", "*.leo *.leojs"]],
-                "");
+                [
+                    ['All files', '*'],
+                    ['Python files', '*.py'],
+                    ['Leo files', '*.leo *.leojs'],
+                ],
+                ''
+            );
         }
         if (fileName) {
             try {
                 // with open(fileName, 'w') as f:
-                g.chdir(fileName);
+                await g.chdir(fileName);
                 if (s.startsWith('@nocolor\n')) {
                     s = s.substring('@nocolor\n'.length);
                 }
@@ -1312,8 +1330,7 @@ export class CommanderFileCommands {
                 const writeData = Buffer.from(s, 'utf8');
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
                 g.blue('wrote:', fileName);
-            }
-            catch (IOError) {
+            } catch (IOError) {
                 g.error('can not write %s', fileName);
             }
         }
@@ -1386,75 +1403,77 @@ export class CommanderFileCommands {
     //     g.app.recentFilesManager.writeEditedRecentFiles(c)
     //@+node:felix.20220105210716.44: *3* Reference outline commands
     //@+node:felix.20220105210716.45: *4* c_file.updateRefLeoFile
-    @commander_command(
-        'update-ref-file',
-        "Saves only the **public part** of this outline to the reference Leo\n" +
-        "file. The public part consists of all nodes above the **special\n" +
-        "separator node**, a top-level node whose headline is\n" +
-        "`---begin-private-area---`.\n" +
-        "\n" +
-        "Below this special node is **private area** where one can freely make\n" +
-        "changes that should not be copied (published) to the reference Leo file.\n" +
-        "\n" +
-        "**Note**: Use the set-reference-file command to create the separator node.\n"
-    )
-    public async updateRefLeoFile(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        return c.fileCommands.save_ref();
-    }
+    // ! removed ! 
+    // @commander_command(
+    //     'update-ref-file',
+    //     'Saves only the **public part** of this outline to the reference Leo\n' +
+    //     'file. The public part consists of all nodes above the **special\n' +
+    //     'separator node**, a top-level node whose headline is\n' +
+    //     '`---begin-private-area---`.\n' +
+    //     '\n' +
+    //     'Below this special node is **private area** where one can freely make\n' +
+    //     'changes that should not be copied (published) to the reference Leo file.\n' +
+    //     '\n' +
+    //     '**Note**: Use the set-reference-file command to create the separator node.\n'
+    // )
+    // public updateRefLeoFile(this: Commands): Promise<unknown> {
+    //     const c: Commands = this;
+    //     return c.fileCommands.save_ref();
+    // }
     //@+node:felix.20220105210716.46: *4* c_file.readRefLeoFile
-    @commander_command(
-        'read-ref-file',
-        "This command *completely replaces* the **public part** of this outline\n" +
-        "with the contents of the reference Leo file. The public part consists\n" +
-        "of all nodes above the top-level node whose headline is\n" +
-        "`---begin-private-area---`.\n" +
-        "\n" +
-        "Below this special node is **private area** where one can freely make\n" +
-        "changes that should not be copied (published) to the reference Leo file.\n" +
-        "\n" +
-        "**Note**: Use the set-reference-file command to create the separator node.\n"
-    )
-    public async readRefLeoFile(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        return c.fileCommands.updateFromRefFile();
-    }
+    // ! removed ! 
+    // @commander_command(
+    //     'read-ref-file',
+    //     'This command *completely replaces* the **public part** of this outline\n' +
+    //     'with the contents of the reference Leo file. The public part consists\n' +
+    //     'of all nodes above the top-level node whose headline is\n' +
+    //     '`---begin-private-area---`.\n' +
+    //     '\n' +
+    //     'Below this special node is **private area** where one can freely make\n' +
+    //     'changes that should not be copied (published) to the reference Leo file.\n' +
+    //     '\n' +
+    //     '**Note**: Use the set-reference-file command to create the separator node.\n'
+    // )
+    // public readRefLeoFile(this: Commands): Promise<unknown> {
+    //     const c: Commands = this;
+    //     return c.fileCommands.updateFromRefFile();
+    // }
     //@+node:felix.20220105210716.47: *4* c_file.setReferenceFile
-    @commander_command(
-        'set-reference-file',
-        'test'
-        // "Shows a file open dialog allowing you to select a **reference** Leo\n" +
-        // "document to which this outline will be connected.\n" +
-        // "\n" +
-        // "This command creates a **special separator node**, a top-level node\n" +
-        // "whose headline is `---begin-private-area---` and whose body is the path\n" +
-        // "to reference Leo file.\n" +
-        // "\n" +
-        // "The separator node splits the outline into two parts. The **public\n" +
-        // "part** consists of all nodes above the separator node. The **private\n" +
-        // "part** consists of all nodes below the separator node.\n" +
-        // "\n" +
-        // "The update-ref-file and read-ref-file commands operate on the **public\n" +
-        // "part** of the outline. The update-ref-file command saves *only* the\n" +
-        // "public part of the outline to reference Leo file. The read-ref-file\n" +
-        // "command *completely replaces* the public part of the outline with the\n" +
-        // "contents of reference Leo file.\n"
-    )
-    public async setReferenceFile(this: Commands): Promise<unknown> {
-        const c: Commands = this;
-        const fileName = await g.app.gui.runOpenFileDialog(
-            c,
-            "Select reference Leo file",
-            [["Leo files", "*.leo *.leojs *.db"]],
-            g.defaultLeoFileExtension(c)
-        ) as string;
-        if (!fileName) {
-            return;
-        }
-        return c.fileCommands.setReferenceFile(fileName);
-    }
+    // ! removed ! 
+    // @commander_command(
+    //     'set-reference-file',
+    //     'test'
+    //     // "Shows a file open dialog allowing you to select a **reference** Leo\n" +
+    //     // "document to which this outline will be connected.\n" +
+    //     // "\n" +
+    //     // "This command creates a **special separator node**, a top-level node\n" +
+    //     // "whose headline is `---begin-private-area---` and whose body is the path\n" +
+    //     // "to reference Leo file.\n" +
+    //     // "\n" +
+    //     // "The separator node splits the outline into two parts. The **public\n" +
+    //     // "part** consists of all nodes above the separator node. The **private\n" +
+    //     // "part** consists of all nodes below the separator node.\n" +
+    //     // "\n" +
+    //     // "The update-ref-file and read-ref-file commands operate on the **public\n" +
+    //     // "part** of the outline. The update-ref-file command saves *only* the\n" +
+    //     // "public part of the outline to reference Leo file. The read-ref-file\n" +
+    //     // "command *completely replaces* the public part of the outline with the\n" +
+    //     // "contents of reference Leo file.\n"
+    // )
+    // public async setReferenceFile(this: Commands): Promise<unknown> {
+    //     const c: Commands = this;
+    //     const fileName = (await g.app.gui.runOpenFileDialog(
+    //         c,
+    //         'Select reference Leo file',
+    //         [['Leo files', '*.leo *.leojs *.db']],
+    //         g.defaultLeoFileExtension(c)
+    //     )) as string;
+    //     if (!fileName) {
+    //         return;
+    //     }
+    //     return c.fileCommands.setReferenceFile(fileName);
+    // }
     //@-others
-
 }
 //@-others
 //@-leo

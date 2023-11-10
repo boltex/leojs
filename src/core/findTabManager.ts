@@ -3,7 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20221109235755.1: ** << imports >>
 import * as g from './leoGlobals';
-import { Commands } from "./leoCommands";
+import { Commands } from './leoCommands';
 import { ISettings, LeoFind } from './leoFind';
 
 //@-<< imports >>
@@ -32,12 +32,11 @@ export interface LeoFindTabMAnagerSettings {
  * Simulate a QCheckBox.
  */
 export class StringCheckBox {
-
     private label: string;
     private name: string;
     private value: boolean;
 
-    constructor(name: string, label = "") {
+    constructor(name: string, label = '') {
         this.label = label;
         this.name = name;
         this.value = true;
@@ -66,12 +65,11 @@ export class StringCheckBox {
  * Simulate a QRadioButton.
  */
 export class StringRadioButton {
-
     private label: string;
     private name: string;
     private value: boolean;
 
-    constructor(name: string, label = "") {
+    constructor(name: string, label = '') {
         this.label = label;
         this.name = name;
         this.value = true;
@@ -92,7 +90,6 @@ export class StringRadioButton {
  * Simulate a QLineEdit.
  */
 export class StringLineEdit {
-
     private disabled: boolean;
     private name: string;
     private pos: number;
@@ -129,7 +126,6 @@ export class StringLineEdit {
  * A string-based FindTabManager class.
  */
 export class StringFindTabManager {
-
     public c: Commands;
     public entry_focus: any;
     // Find/change text boxes...
@@ -156,7 +152,7 @@ export class StringFindTabManager {
      */
     constructor(c: Commands) {
         this.c = c;
-        this.entry_focus = undefined;  // Accessed directly from code(!)
+        this.entry_focus = undefined; // Accessed directly from code(!)
         // Find/change text boxes...
         this.find_findbox = new StringLineEdit('find_text');
         this.find_replacebox = new StringLineEdit('change_text');
@@ -169,10 +165,14 @@ export class StringFindTabManager {
         this.check_box_search_headline = new StringCheckBox('search_headline');
         this.check_box_whole_word = new StringCheckBox('whole_word');
         // Radio buttons...
-        this.radio_button_entire_outline = new StringRadioButton('entire_outline');
+        this.radio_button_entire_outline = new StringRadioButton(
+            'entire_outline'
+        );
         this.radio_button_file_only = new StringRadioButton('file_only');
         this.radio_button_node_only = new StringRadioButton('node_only');
-        this.radio_button_suboutline_only = new StringRadioButton('suboutline_only');
+        this.radio_button_suboutline_only = new StringRadioButton(
+            'suboutline_only'
+        );
         // Init the default values.
         this.init_widgets();
     }
@@ -180,7 +180,7 @@ export class StringFindTabManager {
     //@+node:felix.20221109235451.3: *3* sftm.clear_focus & init_focus & set_entry_focus
     public clear_focus(): void {
         this.entry_focus = undefined;
-        // this.find_findbox.clearFocus(); // UNUSED IN LEOJS 
+        // this.find_findbox.clearFocus(); // UNUSED IN LEOJS
     }
     public init_focus(): void {
         this.set_entry_focus();
@@ -211,7 +211,6 @@ export class StringFindTabManager {
      * Similar to LeoFind.default_settings, but only for find-tab values.
      */
     public get_settings(): ISettings {
-
         return {
             // Find/change strings...
             find_text: this.find_findbox.text(),
@@ -235,7 +234,6 @@ export class StringFindTabManager {
      * Create callbacks that always keep the LeoFind ivars up to date.
      */
     public init_widgets(): void {
-
         const c = this.c;
         const find = this.c.findCommands;
 
@@ -266,17 +264,22 @@ export class StringFindTabManager {
             const val = c.config.getBool(setting_name, false);
             // setattr(find, setting_name, val)
             (find[setting_name as keyof LeoFind] as any) = val;
-            if (val !== w.isChecked()) {  // Support LeoJS. :) 
+            if (val !== w.isChecked()) {
+                // Support LeoJS. :)
                 w.toggle();
             }
         }
 
         // Radio buttons
         const table3: [string, string | undefined, string][] = [
-            ['file_only', 'file_only', 'radio_button_file_only'],  // #2684.
+            ['file_only', 'file_only', 'radio_button_file_only'], // #2684.
             ['node_only', 'node_only', 'radio_button_node_only'],
             ['entire_outline', undefined, 'radio_button_entire_outline'],
-            ['suboutline_only', 'suboutline_only', 'radio_button_suboutline_only'],
+            [
+                'suboutline_only',
+                'suboutline_only',
+                'radio_button_suboutline_only',
+            ],
         ];
 
         for (let [setting_name, ivar, widget_ivar] of table3) {
@@ -302,7 +305,6 @@ export class StringFindTabManager {
                 w.toggle();
             }
         }
-
     }
 
     //@+node:felix.20230213001211.1: *3* ftm.set_widgets_from_dict
@@ -310,18 +312,17 @@ export class StringFindTabManager {
      * Set all settings from d.
      */
     public set_widgets_from_dict(d: { [key: string]: any }): void {
-
         // Similar to ftm.init_widgets, which has already been called.
         const c = this.c;
         const find = c.findCommands;
         // Set find text.
         const find_text = d['find_text'];
-        this.set_find_text(find_text)
-        find.find_text = find_text
+        this.set_find_text(find_text);
+        find.find_text = find_text;
         // Set change text.
         const change_text = d['change_text'];
-        this.set_change_text(change_text)
-        find.change_text = change_text
+        this.set_change_text(change_text);
+        find.change_text = change_text;
         // Check boxes...
         const table1 = [
             ['ignore_case', 'check_box_ignore_case'],
@@ -337,7 +338,8 @@ export class StringFindTabManager {
             const val = d[setting_name] || false;
             // setattr(find, setting_name, val)
             (find[setting_name as keyof LeoFind] as any) = val;
-            if (val !== w.isChecked()) {  // Support LeoJS. :) 
+            if (val !== w.isChecked()) {
+                // Support LeoJS. :)
                 w.toggle();
             }
         }
@@ -345,8 +347,12 @@ export class StringFindTabManager {
         const table2: [string, string | undefined, string][] = [
             ['node_only', 'node_only', 'radio_button_node_only'],
             ['entire_outline', undefined, 'radio_button_entire_outline'],
-            ['suboutline_only', 'suboutline_only', 'radio_button_suboutline_only'],
-            ['file_only', 'file_only', 'radio_button_file_only'],  // #2684.
+            [
+                'suboutline_only',
+                'suboutline_only',
+                'radio_button_suboutline_only',
+            ],
+            ['file_only', 'file_only', 'radio_button_file_only'], // #2684.
         ];
         for (let [setting_name, ivar, widget_ivar] of table2) {
             const w = this[widget_ivar as keyof StringFindTabManager];
@@ -370,14 +376,12 @@ export class StringFindTabManager {
                 w.toggle();
             }
         }
-
     }
     //@+node:felix.20221109235451.6: *3* sftm.set_body_and_headline_checkbox
     /**
      * Return the search-body and search-headline checkboxes to their defaults.
      */
     public set_body_and_headline_checkbox(): void {
-
         // #1840: headline-only one-shot
         const c = this.c;
         const find = c.findCommands;
@@ -456,21 +460,19 @@ export class StringFindTabManager {
      * Toggle the value of the checkbox whose name is given.
      */
     public toggle_checkbox(checkbox_name: string): void {
-
         const d: { [key: string]: StringCheckBox } = {
-            'ignore_case': this.check_box_ignore_case,
-            'mark_changes': this.check_box_mark_changes,
-            'mark_finds': this.check_box_mark_finds,
-            'pattern_match': this.check_box_regexp,
-            'search_body': this.check_box_search_body,
-            'search_headline': this.check_box_search_headline,
-            'whole_word': this.check_box_whole_word,
+            ignore_case: this.check_box_ignore_case,
+            mark_changes: this.check_box_mark_changes,
+            mark_finds: this.check_box_mark_finds,
+            pattern_match: this.check_box_regexp,
+            search_body: this.check_box_search_body,
+            search_headline: this.check_box_search_headline,
+            whole_word: this.check_box_whole_word,
         };
         const w = d[checkbox_name];
         w.toggle();
     }
     //@-others
-
 }
 
 //@-others

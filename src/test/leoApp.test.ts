@@ -9,23 +9,27 @@ import { afterEach, before, beforeEach } from 'mocha';
 import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
 
+/* eslint-disable require-await */
+
 //@+others
-//@+node:felix.20220129221242.1: ** suite TestApp(LeoUnitTest)
+//@+node:felix.20220129221242.1: ** suite TestApp
 suite('Test cases for leoApp.ts', () => {
 
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
@@ -99,33 +103,7 @@ suite('Test cases for leoApp.ts', () => {
             const lang = ext_d[ext];
             assert.ok(lang_d[lang], lang);
         }
-
     });
-
-    //@+node:felix.20220129221913.5: *3* TestApp.test_lm_openAnyLeoFile
-    /*
-    def test_lm_openAnyLeoFile(self):
-        lm = g.app.loadManager
-        # Create a zip file for testing.
-        s = 'this is a test file'
-        testDir = g.os_path_join(g.app.loadDir, '..', 'test')
-        assert g.os_path_exists(testDir), testDir
-        path = g.os_path_finalize_join(testDir, 'testzip.zip')
-        if os.path.exists(path):
-            os.remove(path)
-        f = zipfile.ZipFile(path, 'x')
-        assert f, path
-        try:
-            f.writestr('leo-zip-file', s)
-            f.close()
-            # Open the file, and get the contents.
-            f = lm.openAnyLeoFile(path)
-            s2 = f.read()
-            f.close()
-        finally:
-            os.remove(path)
-        self.assertEqual(s, s2)
-    */
 
     //@+node:felix.20220129221913.6: *3* TestApp.test_rfm_writeRecentFilesFileHelper
     /*

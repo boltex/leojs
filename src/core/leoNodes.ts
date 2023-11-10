@@ -1,10 +1,12 @@
 //@+leo-ver=5-thin
 //@+node:felix.20210102012632.1: * @file src/core/leoNodes.ts
-// Leo's fundamental data classes.
+/**
+ * Leo's fundamental data classes.
+ */
 //@+<< imports >>
 //@+node:felix.20210127001502.1: ** << imports >>
 import * as g from './leoGlobals';
-import * as utils from "../utils";
+import * as utils from '../utils';
 import { Commands } from './leoCommands';
 import { Bead } from './leoUndo';
 import { FileCommands } from './leoFileCommands';
@@ -56,6 +58,31 @@ export class NodeIndices {
         }
     }
 
+    //@+node:felix.20230531001257.1: *3* ni.compute_last_index
+    /**
+     * Scan the entire leo outline to compute ni.last_index.
+     */
+    public compute_last_index(c: Commands): void {
+        const ni = this;
+        // Partial, experimental, fix for #658.
+        // Do not change self.lastIndex here!
+        // self.lastIndex = 0
+        for (const v of c.all_unique_nodes()) {
+            const gnx = v.fileIndex;
+            if (gnx) {
+                let [id_, t, n] = this.scanGnx(gnx);
+                if (t === ni.timeString && !(n == null)) {
+                    try {
+                        const w_n = Number(n);
+                        this.lastIndex = Math.max(this.lastIndex, w_n);
+                    } catch (exception) {
+                        g.es_exception(exception);
+                        this.lastIndex += 1;
+                    }
+                }
+            }
+        }
+    }
     //@+node:felix.20220101212728.1: *3* ni.computeNewIndex
     /**
      * Return a new gnx.
@@ -128,7 +155,7 @@ export class NodeIndices {
         const ni: NodeIndices = this;
         // Special case for the c.hiddenRootNode. This eliminates a hack in c.initObjects.
         if (!c.fileCommands) {
-            console.assert(gnx === 'hidden-root-vnode-gnx');
+            g.assert(gnx === 'hidden-root-vnode-gnx');
             v.fileIndex = gnx!;
             return;
         }
@@ -175,6 +202,23 @@ export class NodeIndices {
         }
         return [theId, t, n];
     }
+    //@+node:felix.20230531001333.1: *3* ni.tupleToString
+    /**
+     * Convert a gnx tuple returned by scanGnx
+     * to its string representation.
+     */
+    public tupleToString(aTuple: [any, any, any]): string {
+        let [theId, t, n] = aTuple;
+        let s;
+        // This logic must match the existing logic so that
+        // previously written gnx's can be found.
+        if ([undefined, 0, ''].includes(n)) {
+            s = `${theId}.${t}`;
+        } else {
+            s = `${theId}.${t}.${n}`;
+        }
+        return g.toUnicode(s);
+    }
     //@+node:felix.20210218214329.12: *3* ni.update
     /**
      * Update self.timeString and self.lastIndex
@@ -190,6 +234,31 @@ export class NodeIndices {
         return t_s;
     }
 
+    //@+node:felix.20230426235322.1: *3* ni.updateLastIndex
+    /**
+     * Update ni.lastIndex if the gnx affects it.
+     */
+    public updateLastIndex(gnx: string): undefined {
+        let [id_, t, n] = this.scanGnx(gnx);
+        // pylint: disable=literal-comparison
+        // Don't you dare touch this code to keep pylint happy.
+        if (!id_ || ((n as any) !== 0 && !n)) {
+            return; // the gnx is not well formed or n in ('',None)
+        }
+        if (id_ === this.userId && t === this.timeString) {
+            try {
+                const n2 = parseInt(n!);
+                if (n2 > this.lastIndex) {
+                    this.lastIndex = n2;
+                    if (!g.unitTesting) {
+                        g.trace(gnx, '-->', n2);
+                    }
+                }
+            } catch (exception) {
+                g.trace('can not happen', n);
+            }
+        }
+    }
     //@-others
 }
 
@@ -329,6 +398,9 @@ export class Position {
     }
 
     //@+node:felix.20210126210412.7: *4* p.__str__ and p.__repr__
+    /**
+     * For Position string output printout
+     */
     public __str__(): string {
         const p: Position = this;
         if (p.v) {
@@ -344,6 +416,104 @@ export class Position {
         return `<pos [${p.stack.length}] None>`;
     }
 
+    /**
+     * * For Position string output printout
+     */
+    public toString(): string {
+        return this.__str__();
+    }
+
+    //@+node:felix.20230601210333.1: *4* p.valueOf
+    /**
+     * For > >= < <= greater/lesser comparisons in javascript.
+     * Note: Boolean evaluation still has to call valueOf, or __bool__.
+     */
+    public valueOf(): number {
+        if (this.__bool__()) {
+            let order = 1;
+            const c: Commands = this.v.context;
+            const p1: Position | undefined = c.rootPosition();
+            while (p1 && p1.v) {
+                if (this.__eq__(p1)) {
+                    break;
+                }
+                order += 1;
+                p1.moveToThreadNext();
+            }
+            return order; // 1 for rootPosition, the first child of the hiddenRootNode.
+        }
+        return 0; // falsy.
+    }
+    //@+node:felix.20230730190515.1: *4* p.archive
+    /**
+     * Return a json-like archival dictionary for p/v.unarchive.
+     */
+    public archive(): {
+        'vnodes': VNode[],
+        'parents': Record<string, string[]>,
+        'children': Record<string, string[]>,
+        'marks': Record<string, string>,
+        'uAs': Record<string, Record<string, any>>,
+    } {
+
+        const p = this;
+        const c = p.v.context;
+
+        // Create an *initial* list of all vnodes in p.self_and_subtree.
+        const all_unique_vnodes: VNode[] = [];
+        for (const p2 of p.self_and_subtree()) {
+            if (!all_unique_vnodes.includes(p2.v)) {
+                all_unique_vnodes.push(p2.v);
+            }
+        }
+
+        function ref(v: VNode): string | undefined {
+            if (v === c.hiddenRootNode) {
+                return undefined;
+            }
+            if (!all_unique_vnodes.includes(v)) {
+                all_unique_vnodes.push(v);
+            }
+            return v.gnx;
+        }
+
+        const parents_dict: Record<string, string[]> = {};
+        for (const p2 of p.self_and_subtree()) {
+            const v = p2.v;
+            const parents_list = v.parents.map((z) => ref(z));
+            parents_dict[v.gnx] = parents_list.filter((z) => z) as string[];
+            // const parents_list = [ref(z) for z in v.parents];
+            // parents_dict[v.gnx] = [z for z in parents_list if z];
+        }
+
+        const children_dict: Record<string, string[]> = {};
+        for (const p2 of p.self_and_subtree()) {
+            const v = p2.v;
+            const childrens_list = v.children.map((z) => ref(z));
+            children_dict[v.gnx] = childrens_list.filter((z) => z) as string[];
+            // const childrens_list = [ref(z.gnx) for z in v.children];
+            // children_dict[v.gnx] = [z for z in childrens_list if z];
+        }
+
+        const marks_dict: Record<string, string> = {};
+        for (const v of all_unique_vnodes) {
+            marks_dict[v.gnx] = Number(v.isMarked()).toString();
+        }
+
+        const uas_dict: Record<string, Record<string, any>> = {};
+        for (const v of all_unique_vnodes) {
+            uas_dict[v.gnx] = v.archive_uas();  // To do.
+        }
+
+        return {
+            'vnodes': all_unique_vnodes,
+            'parents': parents_dict,
+            'children': children_dict,
+            'marks': marks_dict,
+            'uAs': uas_dict,
+        };
+
+    }
     //@+node:felix.20210126210412.8: *4* p.archivedPosition
     /**
      * Return a representation of a position suitable for use in .leo files.
@@ -357,7 +527,6 @@ export class Position {
             }
         } else {
             for (let z of p.self_and_parents(false)) {
-                aList.push(z._childIndex);
                 if (z.__eq__(root_p)) {
                     aList.push(0);
                     break;
@@ -426,7 +595,7 @@ export class Position {
 
     //@+node:felix.20210204224730.2: *4* p.convertTreeToString
     /**
-     * Convert a positions  suboutline to a string in MORE format.
+     * Convert a positions suboutline to a string in MORE format.
      */
     public convertTreeToString(): string {
         const p1: Position = this;
@@ -967,33 +1136,116 @@ export class Position {
         return this.copy().moveToVisNext(c)!;
     }
 
-    //@+node:felix.20210202235315.11: *4* p.get_UNL
-    /**
-     *  Return a UNL representing a clickable link.
-     *  See the section < define global error regexs > for the regexes.
+    //@+node:felix.20230717211349.1: *4* p.get_UNL and related methods
+    // All unls must contain a file part: f"//{file-name}#"
+    // The file-name may be empty.
+    //@+node:felix.20230717211349.2: *5* p.get_full_gnx_UNL
+    /** 
+     * Return a gnx-oriented UNL with a full path component.
      *
-     *  New in Leo 6.6: Use a single, simplified format for UNL's:
-     *
-     *  - unl: //
-     *  - self.v.context.fileName() #
-     *  - a list of headlines separated by '-->'
-     *
-     *  New in Leo 6.6:
-     *  - Always add unl: // and file name.
-     *  - Never translate '-->' to '--%3E'.
-     *  - Never generate child indices.
+     * Not used in Leo's core or official plugins.
      */
-    public get_UNL(): string {
+    public get_full_gnx_UNL(): string {
 
-        const parents = [...this.self_and_parents(false)].reverse().map(p => (p.v ? p.h : 'no v node'));
-
-        const base_unl = this.v.context.fileName() + '#' + parents.join('-->');
-
-        const encoded = base_unl.replace(/'/g, "%27");
-        return 'unl://' + encoded;
+        const p = this;
+        const c = p.v.context;
+        const file_part = c.fileName();
+        return 'unl:gnx:' + `//${file_part}#${this.gnx}`;
 
     }
+    //@+node:felix.20230717211349.3: *5* p.get_full_legacy_UNL
+    /**
+     * Return a legacy unl with the full file-name component.
+     *
+     * Not used in Leo's core or official plugins.
+     */
+    public get_full_legacy_UNL(): string {
 
+        const p = this;
+        const c = p.v.context;
+        const w_selfAndParentsHeadline = [];
+        for (const p_p of this.self_and_parents(false)) {
+            w_selfAndParentsHeadline.push(p_p.h);
+        }
+        const path_part: string = w_selfAndParentsHeadline.reverse().join('-->');
+        return 'unl:' + `//${c.fileName()}#${path_part}`;
+
+    }
+    //@+node:felix.20230717211349.4: *5* p.get_legacy_UNL
+    /**
+     * Return a headline-oriented UNL, as in legacy versions of p.get_UNL.
+     *
+     * @bool full-unl-paths determines the size of the file part.
+     *
+     * LeoTree.set_status_line will call this method if legacy unls are in effect.
+     */
+    public get_legacy_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const path_part: string = [...this.self_and_parents()].map(z => z.h).reverse().join('-->');
+
+        const full = c.config.getBool('full-unl-paths', false);
+        const file_part = full ? c.fileName() : g.os_path_basename(c.fileName());
+        return 'unl:' + `//${file_part}#${path_part}`;
+
+    }
+    //@+node:felix.20230717211349.5: *5* p.get_short_gnx_UNL
+    /**
+     * Return a legacy unl without the file-name component.
+     *
+     * Not used in Leo's core or official plugins.
+     */
+    public get_short_gnx_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const file_part = g.os_path_basename(c.fileName());
+        return 'unl:gnx:' + `//${file_part}#${this.gnx}`;
+
+    }
+    //@+node:felix.20230717211349.6: *5* p.get_short_legacy_UNL
+    /**
+     *    Return a legacy unl with a short file-name component.
+
+        Not used in Leo's core or official plugins.
+     */
+    public get_short_legacy_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const file_part = g.os_path_basename(c.fileName());
+
+        const w_selfAndParentsHeadline = [];
+        for (const p_p of this.self_and_parents(false)) {
+            w_selfAndParentsHeadline.push(p_p.h);
+        }
+
+        const path_part: string = w_selfAndParentsHeadline.reverse().join('-->');
+
+        return 'unl:' + `//${file_part}#${path_part}`;
+
+    }
+    //@+node:felix.20230717211349.7: *5* p.get_UNL
+    /**
+     * Return a gnx-oriented UNL.
+     *
+     * Breaking change to Leo's API: returned a path-oriented UNL previously.
+     *
+     * @bool full-unl-paths determines the size of the file part.
+     *
+     * LeoTree.set_status_line calls this method if gnx-based unls are in effect.
+     */
+
+    public get_UNL(): string {
+
+        const p = this;
+        const c = p.v.context;
+        const full = c.config.getBool('full-unl-paths', false);
+        const file_part = full ? c.fileName() : g.os_path_basename(c.fileName());
+        return 'unl:gnx:' + `//${file_part}#${this.gnx}`;
+
+    }
     //@+node:felix.20210202235315.12: *4* p.hasBack/Next/Parent/ThreadBack
     public hasBack(): boolean {
         const p: Position = this;
@@ -1003,10 +1255,10 @@ export class Position {
     public hasNext(): boolean | undefined {
         const p: Position = this;
         try {
-            const parent_v: VNode = p._parentVnode()!;
+            const parent_v = p._parentVnode();
             // Returns None if p.v is None.
-            return (
-                p.v && parent_v && p._childIndex + 1 < parent_v.children.length
+            return !!(
+                p.v && parent_v && ((p._childIndex + 1) < (parent_v.children ? parent_v.children.length : 0))
             );
         } catch (exception) {
             g.trace('*** Unexpected exception');
@@ -1341,9 +1593,9 @@ export class Position {
      */
     public _linkAsRoot(): Position {
         const p: Position = this;
-        console.assert(p.v);
+        g.assert(p.v);
         const parent_v: VNode = p.v.context.hiddenRootNode;
-        console.assert(parent_v, g.callers());
+        g.assert(parent_v, g.callers());
 
         // Make p the root position.
         p.stack = [];
@@ -1413,8 +1665,8 @@ export class Position {
         const parent_v: VNode = p._parentVnode()!;
         // returns None if p.v is None
         const child: VNode = p.v;
-        console.assert(p.v);
-        console.assert(parent_v);
+        g.assert(p.v);
+        g.assert(parent_v);
         // Delete the child.
         if (
             0 <= n &&
@@ -1424,10 +1676,6 @@ export class Position {
             // This is the only call to v._cutlink.
             child._cutLink(n, parent_v);
         } else {
-            // console.log('n', n);
-            // console.log('parent_v.children.length', parent_v.children.length);
-            // console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
-            // console.log('child', child.fileIndex);
             this.badUnlink(parent_v, n, child);
         }
     }
@@ -1438,7 +1686,7 @@ export class Position {
      */
     public badUnlink(parent_v: VNode, n: number, child: VNode): void {
         if (0 <= n && n < parent_v.children.length) {
-            g.trace(`**can not happen: children[{n}] != p.v`);
+            g.trace(`**can not happen: children[${n}] != p.v`);
             g.trace(
                 'parent_v.children...\n',
                 g.listToString(parent_v.children)
@@ -1488,10 +1736,6 @@ export class Position {
             p._childIndex -= 1;
             p.v = parent_v.children[n - 1];
         } else {
-            // console.log('Deleting a node??', p.h);
-            // console.log('parent_v', parent_v?.h);
-            // console.log('n', n);
-            // console.log('parent_v.children.length', parent_v?.children.length);
             // * For now, use undefined p.v to signal null/invalid positions
             // @ts-ignore
             p.v = undefined;
@@ -1782,69 +2026,70 @@ export class Position {
      * Move a position to threadNext position.
      * Issue an error if any vnode is an ancestor of itself.
      */
-    public safeMoveToThreadNext(): Position {
-        const p: Position = this;
-        if (p.v) {
-            const child_v: VNode | false =
-                !!p.v.children.length && p.v.children[0];
-            if (child_v) {
-                let brokeFor: boolean = false;
-                for (let parent of p.self_and_parents(false)) {
-                    if (child_v.fileIndex === parent.v.fileIndex) {
-                        g.error(`vnode: ${child_v} is its own parent`);
-                        // Allocating a new vnode would be difficult.
-                        // Just remove child_v from parent.v.children.
-                        parent.v.children = [];
-                        for (let v2 of parent.v.children) {
-                            if (v2.fileIndex !== child_v.fileIndex) {
-                                parent.v.children.push(v2);
-                            }
-                        }
-                        if (child_v.parents.includes(parent.v)) {
-                            // child_v.parents.remove(parent.v);
-                            const index = child_v.parents.indexOf(parent.v);
-                            if (index > -1) {
-                                child_v.parents.splice(index, 1);
-                            }
-                        }
-                        // Try not to hang.
-                        p.moveToParent();
-                        brokeFor = true;
-                        break;
-                    } else if (child_v.fileIndex === parent.v.fileIndex) {
-                        g.error(
-                            `duplicate gnx: ${child_v.fileIndex} ` +
-                            `v: ${child_v} parent: ${parent.v}`
-                        );
-                        child_v.fileIndex =
-                            g.app.nodeIndices!.getNewIndex(child_v);
-                        console.assert(child_v.gnx !== parent.v.gnx);
-                        // Should be ok to continue.
-                        p.moveToFirstChild();
-                        brokeFor = true;
-                        break;
-                    }
-                }
-                if (!brokeFor) {
-                    //  for else
-                    p.moveToFirstChild();
-                }
-            } else if (p.hasNext()) {
-                p.moveToNext();
-            } else {
-                p.moveToParent();
-                while (p.__bool__()) {
-                    if (p.hasNext()) {
-                        p.moveToNext();
-                        break; // found
-                    }
-                    p.moveToParent();
-                    // not found.
-                }
-            }
-        }
-        return p;
-    }
+    // ! removed !
+    // public safeMoveToThreadNext(): Position {
+    //     const p: Position = this;
+    //     if (p.v) {
+    //         const child_v: VNode | false =
+    //             !!p.v.children.length && p.v.children[0];
+    //         if (child_v) {
+    //             let brokeFor: boolean = false;
+    //             for (let parent of p.self_and_parents(false)) {
+    //                 if (child_v.fileIndex === parent.v.fileIndex) {
+    //                     g.error(`vnode: ${child_v} is its own parent`);
+    //                     // Allocating a new vnode would be difficult.
+    //                     // Just remove child_v from parent.v.children.
+    //                     parent.v.children = [];
+    //                     for (let v2 of parent.v.children) {
+    //                         if (v2.fileIndex !== child_v.fileIndex) {
+    //                             parent.v.children.push(v2);
+    //                         }
+    //                     }
+    //                     if (child_v.parents.includes(parent.v)) {
+    //                         // child_v.parents.remove(parent.v);
+    //                         const index = child_v.parents.indexOf(parent.v);
+    //                         if (index > -1) {
+    //                             child_v.parents.splice(index, 1);
+    //                         }
+    //                     }
+    //                     // Try not to hang.
+    //                     p.moveToParent();
+    //                     brokeFor = true;
+    //                     break;
+    //                 } else if (child_v.fileIndex === parent.v.fileIndex) {
+    //                     g.error(
+    //                         `duplicate gnx: ${child_v.fileIndex} ` +
+    //                         `v: ${child_v} parent: ${parent.v}`
+    //                     );
+    //                     child_v.fileIndex =
+    //                         g.app.nodeIndices!.getNewIndex(child_v);
+    //                     g.assert(child_v.gnx !== parent.v.gnx);
+    //                     // Should be ok to continue.
+    //                     p.moveToFirstChild();
+    //                     brokeFor = true;
+    //                     break;
+    //                 }
+    //             }
+    //             if (!brokeFor) {
+    //                 //  for else
+    //                 p.moveToFirstChild();
+    //             }
+    //         } else if (p.hasNext()) {
+    //             p.moveToNext();
+    //         } else {
+    //             p.moveToParent();
+    //             while (p.__bool__()) {
+    //                 if (p.hasNext()) {
+    //                     p.moveToNext();
+    //                     break; // found
+    //                 }
+    //                 p.moveToParent();
+    //                 // not found.
+    //             }
+    //         }
+    //     }
+    //     return p;
+    // }
 
     //@+node:felix.20210126001920.1: *3* p.Moving, Inserting, Deleting, Cloning, Sorting
     //@+node:felix.20210126001920.2: *4* p.clone
@@ -1867,6 +2112,44 @@ export class Position {
         return new Position(this.v, this._childIndex, this.stack);
     }
 
+    //@+node:felix.20230521190938.1: *4* p.copyTreeAfter, copyTreeTo
+    // These used by unit tests, by the group_operations plugin,
+    // and by the files-compare-leo-files command.
+
+    // To do: use v.copyTree instead.
+
+    /**
+     * Copy p and insert it after itself.
+     */
+    public copyTreeAfter(copyGnxs = false): Position {
+        const p: Position = this;
+        const p2 = p.insertAfter();
+        p.copyTreeFromSelfTo(p2, (copyGnxs = copyGnxs));
+        return p2;
+    }
+
+    public copyTreeFromSelfTo(p2: Position, copyGnxs = false): void {
+        const p: Position = this;
+        p2.v._headString = g.toUnicode(p.h, undefined, true); // 2017/01/24
+        p2.v._bodyString = g.toUnicode(p.b, undefined, true); // 2017/01/24
+        //
+        // #1019794: p.copyTreeFromSelfTo, should deepcopy p.v.u.
+        try {
+            p2.v.u = JSON.parse(JSON.stringify(p.v.u));
+        } catch (e) {
+            p2.v.u = {};
+        }
+        // p2.v.u = copy.deepcopy(p.v.u);
+        if (copyGnxs) {
+            p2.v.fileIndex = p.v.fileIndex;
+        }
+        // 2009/10/02: no need to copy arg to iter
+
+        for (const child of p.children()) {
+            const child2 = p2.insertAsLastChild();
+            child.copyTreeFromSelfTo(child2, copyGnxs);
+        }
+    }
     //@+node:felix.20211026001924.1: *4* p.copyWithNewVnodes
     /**
      * Return an **unlinked** copy of p with a new vnode v.
@@ -1906,6 +2189,10 @@ export class Position {
             if (!!newNode && sib.__eq__(newNode)) {
                 // Adjust newNode._childIndex if newNode is a following sibling of p.
                 newNode._childIndex -= 1;
+                console.log(
+                    'HAD TO LOWER _childIndex!, its now ',
+                    newNode._childIndex
+                );
                 break;
             }
         }
@@ -1927,6 +2214,16 @@ export class Position {
         return p2;
     }
 
+    //@+node:felix.20231009234853.1: *4* p.insertAsFirstChild
+    /**
+     * Insert a new VNode as the last child of self.
+     *
+     * Return the newly created position.
+     */
+    public insertAsFirstChild(): Position {
+        const p = this;
+        return p.insertAsNthChild(0);
+    }
     //@+node:felix.20210126001920.7: *4* p.insertAsLastChild
     /**
      * Inserts a new VNode as the last child of self.
@@ -2077,7 +2374,9 @@ export class Position {
 
     //@+node:felix.20210126001920.16: *4* p.validateOutlineWithParent
     /**
-     * This routine checks the structure of the receiver's tree.
+     * A helper for the legacy version of c.validateOutline.
+     *
+     * No longer used in Leo's core or unit tests.
      */
     public validateOutlineWithParent(pv: Position | undefined): boolean {
         const p: Position = this;
@@ -2198,7 +2497,7 @@ export class Position {
     /**
      * position property returning the script formed by p and its descendants
      */
-    public get script(): string {
+    public get script(): Promise<string> {
         const p: Position = this;
         return g.getScript(
             p.v.context,
@@ -2509,7 +2808,7 @@ export interface Position {
     atAsisFileNodeName: () => string;
     isAtNoSentFileNode: () => boolean;
     isAtAsisFileNode: () => boolean;
-    __repr__: () => string;
+    __repr__: () => number;
     simpleLevel: () => number;
 
     initBodyString: (s: string) => void;
@@ -2556,7 +2855,7 @@ Position.prototype.atAsisFileNodeName = Position.prototype.atSilentFileNodeName;
 Position.prototype.isAtNoSentFileNode =
     Position.prototype.isAtNoSentinelsFileNode;
 Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
-Position.prototype.__repr__ = Position.prototype.__str__;
+Position.prototype.__repr__ = Position.prototype.valueOf;
 Position.prototype.simpleLevel = Position.prototype.level;
 
 Position.prototype.initBodyString = Position.prototype.setBodyString;
@@ -2622,8 +2921,9 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
-    public tempTnodeList: undefined | string[]; // TODO : Type better than that!
     public unknownAttributes: undefined | { [key: string]: any };
+    public tempAttributes: undefined | { [key: string]: any };
+    public at_read: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
     //@+others
@@ -2649,7 +2949,11 @@ export class VNode {
 
     //@+node:felix.20210130233340.3: *4* v.__repr__ & v.__str__
     public __repr__(): string {
-        return `<VNode ${this.gnx} ${this.headString()}>`;
+        return this.gnx === 'hidden-root-vnode-gnx' ?
+            '<VNode: hidden root>' : `<VNode ${this.gnx} ${this.headString()}>`;
+    }
+    public valueOf(): string {
+        return this.__repr__();
     }
 
     //@+node:felix.20210130233340.4: *4* v.dump
@@ -2659,20 +2963,31 @@ export class VNode {
 
     public dump(label: string = ''): void {
         const v: VNode = this;
-        const s: string = '-'.repeat(10);
-        console.log(`${s} ${label} ${v}`);
-        // console.log(`gnx: ${v.gnx}`);
-        console.log(`parents.length: ${v.parents.length}`);
-        console.log(`children.length: ${v.children.length}`);
-        console.log(`parents: ${g.listToString(v.parents)}`);
-        console.log(`children: ${g.listToString(v.children)}`);
+        // const s: string = '-'.repeat(10);
+        g.es_print('');
+        g.es_print(`dump of vnode: ${label} ${v.toString()}`);
+        // g.es_print('gnx: %s' % v.gnx)
+        g.es_print(`len(parents): ${v.parents.length} len(children): ${v.children.length}`);
+        if (v.parents && v.parents.length) {
+            g.es_print(`parents: ${g.listToString(v.parents)}`);
+        }
+        if (v.children && v.children.length) {
+            g.es_print(`children: ${g.listToString(v.children)}`);
+        }
+
     }
 
+    //@+node:felix.20230730202608.1: *4* v.archive_uas
+    /** 
+     * To do: return a json-like dict of all uas.
+     */
+    public archive_uas(): Record<string, Record<string, any>> {
+        return {};
+    }
     //@+node:felix.20211209010457.1: *3* v.toString
-    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
-    public toString = (): string => {
-        return `VNode (gnx: ${this.gnx})`;
-    };
+    public toString(): string {
+        return this.__repr__();
+    }
     //@+node:felix.20210112210731.1: *3* v.Comparisons
     //@+node:felix.20210112210731.2: *4* v.findAtFileName
     /**
@@ -2683,20 +2998,15 @@ export class VNode {
         if (!h) {
             h = this.headString();
         }
-
         if (!g.match(h, 0, '@')) {
             return '';
         }
-
         const i: number = g.skip_id(h, 1, '-');
-
         const word: string = h.substring(0, i);
-
         if (names.includes(word) && g.match_word(h, 0, word)) {
             const name = h.substring(i).trim();
             return name;
         }
-
         return '';
     }
 
@@ -2779,7 +3089,7 @@ export class VNode {
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
     public isAtAllNode(): boolean {
-        const flag: boolean = g.is_special(this._bodyString, '@all') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@all');
         return flag;
     }
 
@@ -2846,7 +3156,7 @@ export class VNode {
         if (g.match_word(this._headString, 0, '@ignore')) {
             return true;
         }
-        const flag: boolean = g.is_special(this._bodyString, '@ignore') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@ignore');
         return flag;
     }
 
@@ -2855,7 +3165,7 @@ export class VNode {
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
     public isAtOthersNode(): boolean {
-        const flag: boolean = g.is_special(this._bodyString, '@others') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@others');
         return flag;
     }
 
@@ -2867,19 +3177,14 @@ export class VNode {
     public matchHeadline(pattern: string): boolean {
         const v: VNode = this;
         let h: string = g.toUnicode(v.headString());
-        h = h.toLowerCase().split(' ').join('').split('\t').join('');
+        h = h.toLowerCase().replace(/ /g, '').replace(/\t/g, '');
         // equivalent to h = h.lstrip('.')
         // 2013/04/05. Allow leading period before section names.
         while (h.charAt(0) === '.') {
             h = h.substring(1);
         }
         pattern = g.toUnicode(pattern);
-        pattern = pattern
-            .toLowerCase()
-            .split(' ')
-            .join('')
-            .split('\t')
-            .join('');
+        pattern = pattern.toLowerCase().replace(/ /g, '').replace(/\t/g, '');
         return h.startsWith(pattern);
     }
 
@@ -2895,9 +3200,9 @@ export class VNode {
         const v: VNode = this;
         // Allocate a new vnode and gnx with empty children & parents.
         const v2: VNode = new VNode(v.context);
-        console.assert(v2.parents.length === 0, v2.parents.length.toString());
-        console.assert(v2.gnx);
-        console.assert(v.gnx !== v2.gnx);
+        g.assert(v2.parents.length === 0, v2.parents.length.toString());
+        g.assert(v2.gnx);
+        g.assert(v.gnx !== v2.gnx);
         // Copy vnode fields. Do **not** set v2.parents.
         v2._headString = g.toUnicode(v._headString, null, true);
         v2._bodyString = g.toUnicode(v._bodyString, null, true);
@@ -3228,7 +3533,6 @@ export class VNode {
      * Restore the cursor position and scroll so it is visible.
      */
     public restoreCursorAndScroll(): void {
-
         const traceTime: boolean = false && !g.unitTesting;
         const v: VNode = this;
         let ins: number = v.insertSpot;
@@ -3245,11 +3549,14 @@ export class VNode {
         if (traceTime) {
             t1 = process.hrtime();
         }
-        if (body.wrapper.setInsertPoint && body.wrapper.setInsertPoint !== undefined) {
+        if (
+            body.wrapper.setInsertPoint &&
+            body.wrapper.setInsertPoint !== undefined
+        ) {
             w.setInsertPoint(ins);
         }
         if (traceTime) {
-            const delta_t: number = utils.getDurationMs(t1!, process.hrtime()); //  time.time() - t1;
+            const delta_t: number = utils.getDurationSeconds(t1!); //  time.time() - t1;
             if (delta_t > 0.1) {
                 g.trace(`${delta_t} sec`);
             }
@@ -3261,7 +3568,6 @@ export class VNode {
             v.scrollBarSpot = spot;
         }
         // Never call w.see here.
-
     }
 
     //@+node:felix.20210115195450.20: *4* v.saveCursorAndScroll
@@ -3271,7 +3577,6 @@ export class VNode {
      * insertSpot and scrollBarSpot
      */
     public saveCursorAndScroll(): void {
-
         const v: VNode = this;
         const c: any = v.context;
 
@@ -3282,8 +3587,7 @@ export class VNode {
         try {
             v.scrollBarSpot = w.getYScrollPosition();
             v.insertSpot = w.getInsertPoint();
-        }
-        catch (attributeError) {
+        } catch (attributeError) {
             // 2011/03/21: w may not support the high-level interface.
             // pass
         }
@@ -3315,7 +3619,7 @@ export class VNode {
         // API allows headlines to contain newlines.
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
-        v._headString = s.split('\n').join('');
+        v._headString = s.replace(/\n/g, '');
         // self.contentModified()  # #1413.
     }
 
@@ -3376,10 +3680,10 @@ export class VNode {
 
     public insertAsNthChild(n: number): VNode {
         const v: VNode = this;
-        console.assert(0 <= n && n <= v.children.length);
+        g.assert(0 <= n && n <= v.children.length);
         const v2: VNode = new VNode(v.context);
         v2._linkAsNthChild(v, n);
-        console.assert(v.children[n].fileIndex === v2.fileIndex);
+        g.assert(v.children[n].fileIndex === v2.fileIndex);
         return v2;
     }
 
@@ -3442,7 +3746,7 @@ export class VNode {
         const v: VNode = this;
         v.context.frame.tree.generation += 1;
         parent_v.childrenModified();
-        console.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
+        g.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
 
         parent_v.children.splice(childIndex, 1);
         if (v.parents.includes(parent_v)) {
@@ -3617,12 +3921,10 @@ VNode.prototype.initBodyString = VNode.prototype.setBodyString;
 VNode.prototype.setHeadText = VNode.prototype.setHeadString;
 VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
-VNode.prototype.__str__ = VNode.prototype.__repr__;
+VNode.prototype.__str__ = VNode.prototype.toString;
 
 //@-others
 //@@language typescript
 //@@tabwidth -4
-//@@pagewidth 70
-
 
 //@-leo

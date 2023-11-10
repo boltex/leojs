@@ -1,15 +1,16 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211021231651.1: * @file src/core/leoHistory.ts
+import * as g from './leoGlobals';
 import { Chapter } from './leoChapters';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
+
 //@+others
 //@+node:felix.20211021231651.2: ** class NodeHistory
 /**
  * * A class encapsulating knowledge of visited nodes.
  */
 export class NodeHistory {
-
     public c: Commands;
     public beadList: [Position, Chapter][]; // a list of (position,chapter) tuples.
     public beadPointer: number;
@@ -22,6 +23,7 @@ export class NodeHistory {
         this.beadList = []; // a list of (position,chapter) tuples.
         this.beadPointer = -1;
         this.skipBeadUpdate = false;
+        g.assert(g && Object.keys(g).length);
     }
 
     //@+node:felix.20211021231651.4: *3* NodeHistory.dump
@@ -29,6 +31,11 @@ export class NodeHistory {
      * * Dump the beadList
      */
     public dump(): void {
+        const c = this.c;
+        if (g.unitTesting || !this.beadList.length) {
+            return;
+        }
+        g.es_print(`NodeHistory.beadList: ${c.shortFileName()}:`);
         this.beadList.forEach((data, i) => {
             let p: Position = data[0];
             let p_s: string;
@@ -45,7 +52,7 @@ export class NodeHistory {
                 chapter_s = 'main';
             }
             const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
-            console.log(`${mark} ${i} ${chapter_s} ${p_s}`);
+            g.es_print(`${mark} ${i} ${chapter_s} ${p_s}`);
         });
     }
 
@@ -82,7 +89,8 @@ export class NodeHistory {
     //@+node:felix.20211021231651.7: *3* NodeHistory.select
     /**
      * Update the history list when selecting p.
-     * Called only from self.goToNext/PrevHistory
+     * 
+     * Only self.goNext and self.goPrev call this method.
      */
     public select(p: Position, chapter: Chapter): void {
         const c: Commands = this.c;
@@ -94,9 +102,8 @@ export class NodeHistory {
                 if (oldChapter !== chapter) {
                     cc.selectChapterForPosition(p, chapter);
                 }
-                c.selectPosition(p);  // Calls cc.selectChapterForPosition
-            }
-            finally {
+                c.selectPosition(p); // Calls cc.selectChapterForPosition
+            } finally {
                 this.skipBeadUpdate = false;
             }
         }
@@ -107,7 +114,9 @@ export class NodeHistory {
     //@+node:felix.20211021231651.8: *3* NodeHistory.update
     /**
      * Update the beadList while p is being selected.
-     * Called *only* from c.frame.tree.selectHelper.
+     * 
+     *  change: True:  The caller is c.frame.tree.selectHelper.
+     *          False: The caller is NodeHistory.select.
      */
     public update(p: Position, change: boolean = true): void {
         const c: Commands = this.c;
@@ -145,16 +154,17 @@ export class NodeHistory {
         });
 
         if (change || found === -1) {
-            aList.push([p.copy(), cc.getSelectedChapter()!]);
+            const data: [Position, Chapter] = [p.copy(), cc.getSelectedChapter()!];
+            aList.push(data);
             this.beadPointer = aList.length - 1;
         } else {
             this.beadPointer = found;
         }
         this.beadList = aList;
+        // this.dump();
     }
 
     //@-others
-
 }
 //@-others
 //@@language typescript

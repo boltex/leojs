@@ -1,115 +1,248 @@
-# leojs
+# ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
-## ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline _in Typescript_ ![Typescript](https://raw.githubusercontent.com/boltex/leojs/master/resources/typescript.png)
+LeoJS is a javascript implementation of the Leo Editor.
 
-### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
+_If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')_
 
-LeoJS is [LeoInteg](https://github.com/boltex/leointeg#-leo-editor-integration-with-visual-studio-code)'s younger sibling project : a vsCode extension, currently in early alpha.
+## Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
-Inspired by <https://github.com/leo-editor/leo-editor/issues/1025>.
+### Break down your code into a structured outline that generates or parses back your source files
+
+> Leo is a fundamentally different way of using and organizing data, programs and scripts. [📺 Introduction Video](https://www.youtube.com/watch?v=SYwlfdEukD4)
 
 See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
-or on [github](https://github.com/leo-editor/leo-editor), and vscode at [code.visualstudio.com](https://code.visualstudio.com/).
+or on [github](https://github.com/leo-editor/leo-editor).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
 
-## Development Version Installation
+# 🚧 This Extension is a WIP 🏗️
 
-Make sure you have Node.js and Git installed, then clone the sources and run `npm install` in a terminal to install the remaining development dependencies.
+Please report bugs and missing features in the repository's [Issues Page](https://github.com/boltex/leojs/issues).
 
-![run extension](https://raw.githubusercontent.com/boltex/leojs/master/resources/run-extension.png)
+If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
 
-You can then run the **Run Extension** target, as shown above, in the **Debug View**.
+# LeoJS can be run on the web
 
-## Web extension version
-Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
+LeoJS can be run as a web extension for VSCode on the web! It can edit Leo documents directly inside online repositories. _Use the regular desktop version for VSCode to edit local Leo documents and projects._
 
-**In the meantime**, see 'Running Development version as a web extension' below to try out with development version.
+Visit a github repository you want to work on. Press the period '.' key on your keyboard to switch to the vscode.dev web edition of VSCode directly from github.
 
-## Running Development version as a web extension
+Make sure the LeoJS extension is installed and you're good to go!
 
-To try out running as a web extension on vscode.dev, use the following commands:
+## Features
 
-1. From the development folder, open a terminal and start an HTTP server by running `npx serve --cors -l 5000`
+-   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector**, **find panel**, along with a **Log Window** and **Terminal** [output channels](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
+-   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
+-   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
+-   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
+-   **Nav and Tag panel** controls are integrated in the Find panel
+-   **Goto Anywhere panel** to navigate directly from list of nodes, such as the results of Nav or Tag searches
+-   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
 
-2. Open another terminal and run `npx localtunnel -p 5000`
+## Leo Commands
 
-3. Click on the generated URL and select the _Click-to-Continue_ button. (Copy the URL to your clipboard.)
+![Menus](https://raw.githubusercontent.com/boltex/leojs/master/resources/context-hover-menus.png)
 
-4. Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste the generated URL.
+LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette. (accessible through F1 or Ctrl+Shift+P)
 
-## Features done so far
+### Context-Aware Keybindings
 
--   The commands and menus icons for outline editing
--   Undo and navigation history commands
--   The minibuffer Command-Palette
--   Panels for Outline, Undo history, Leo documents, find and goto panes (no @buttons panes support yet)
--   Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... nor scripting support yet)
+The keybinding architecture is designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence. Shift your focus outside these panes, and Visual Studio Code's native keybindings resume control.
+
+### The Minibuffer
+
+For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the complete set of Leo's commands!
 
 ## Keybindings
 
-| Outline Commands           |     |                    |                  |
-| :------------------------- | :-- | :----------------- | :--------------- |
-| `Ctrl + Z`                 |     | `Ctrl + Shift + Z` | Undo / Redo      |
-| `Ctrl + I`                 | or  | `Shift + Insert`   | Insert Node      |
-| `Ctrl + Insert`            |     |                    | Insert Child     |
-| `Ctrl + H`                 |     |                    | Edit Headline    |
-| `Ctrl + M`                 |     |                    | Mark / Unmark    |
-| `Ctrl + Shift + C`         |     |                    | Copy Node        |
-| `Ctrl + Shift + X`         |     |                    | Cut Node         |
-| `Ctrl + Shift + V`         |     |                    | Paste Node       |
-| `Ctrl + Shift + Backspace` | or  | `Delete`           | Delete Node      |
-| `Ctrl + Backquote`         |     |                    | Clone Node       |
-| `Ctrl + {`                 | and | `Ctrl + }`         | Promote / Demote |
+Listed here are the most useful commands and their keyboard shortcuts.
 
-| Moving Outline Nodes |     |                         |                    |
-| :------------------- | :-- | :---------------------- | :----------------- |
-| `Ctrl + U`           | or  | `Shift [+ Alt] + Up`    | Move Outline Up    |
-| `Ctrl + D`           | or  | `Shift [+ Alt] + Down`  | Move Outline Down  |
-| `Ctrl + L`           | or  | `Shift [+ Alt] + Left`  | Move Outline Left  |
-| `Ctrl + R`           | or  | `Shift [+ Alt] + Right` | Move Outline Right |
+| Outline Commands |                                                                  |
+| :--------------- | :--------------------------------------------------------------- |
+| Undo / Redo      | `Ctrl + Z` &nbsp;&nbsp;/&nbsp;&nbsp; `Ctrl + Shift + Z`          |
+| Insert Node      | `Ctrl + I` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift + Insert`         |
+| Insert Child     | `Ctrl + Insert`                                                  |
+| Edit Headline    | `Ctrl + H`                                                       |
+| Mark / Unmark    | `Ctrl + M`                                                       |
+| Copy Node        | `Ctrl + Shift + C`                                               |
+| Cut Node         | `Ctrl + Shift + X`                                               |
+| Paste Node       | `Ctrl + Shift + V`                                               |
+| Delete Node      | `Ctrl + Shift + Backspace` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Delete` |
+| Clone Node       | `Ctrl + Backquote`                                               |
+| Promote / Demote | `Ctrl + {` &nbsp;&nbsp;_and_&nbsp;&nbsp; `Ctrl + }`              |
 
-_Move Outline commands need the 'Alt' key modifier only when focus is on body pane._
+| Moving Nodes       |                                                                 |
+| :----------------- | :-------------------------------------------------------------- |
+| Move Outline Up    | `Ctrl + U` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift [+ Alt] + Up`    |
+| Move Outline Down  | `Ctrl + D` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift [+ Alt] + Down`  |
+| Move Outline Left  | `Ctrl + L` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift [+ Alt] + Left`  |
+| Move Outline Right | `Ctrl + R` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift [+ Alt] + Right` |
 
-| Common Operations  |     |          |     |           |    |            |                     |
-| :----------------- | :-- | :------- | :-- | :-------- |:-- | :--------- | :------------------ |
-| `Ctrl + T`         |     |          |     |           |    |            | Toggle Outline/Body |
-| `Tab`              | or  | `Enter`  | or  | `Alt + D` |or  | `Ctrl + G` | Focus on Body       |
-| `Alt + T`          |     |          |     |           |    |            | Focus on Outline    |
-| `Alt + -`          |     |          |     |           |    |            | Contract All        |
-| `Alt + A`          |     |          |     |           |    |            | Sort Siblings       |
-| `Ctrl + F`         |     |          |     |           |    |            | Start Search        |
-| `F3`               |     |          |     |           |    |            | Find Next           |
-| `F2`               |     |          |     |           |    |            | Find Previous       |
-| `Ctrl + =`         |     |          |     |           |    |            | Replace             |
-| `Ctrl + -`         |     |          |     |           |    |            | Replace then Find   |
-| `Alt + X`          |     |          |     |           |    |            | Minibuffer Palette  |
+_Move-Outline commands need the 'Alt' key modifier only when focus is on body pane._
 
-<!-- | `Ctrl + Shift + D` |     |          |     |           |    |            | Extract             | -->
-<!-- | `Ctrl + Shift + N` |     |          |     |           |    |            | Extract Names       | -->
-<!-- | `Ctrl + B`         |     |          |     |           |    |            | Execute Script      |  -->
+| Common Operations   |                                                                                                                           |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------ |
+| Toggle Outline/Body | `Ctrl + T`                                                                                                                |
+| Focus on Body       | `Tab` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Enter` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + D` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Ctrl + G` |
+| Focus on Outline    | `Alt + T`                                                                                                                 |
+| Contract All        | `Alt + -`                                                                                                                 |
+| Sort Siblings       | `Alt + A`                                                                                                                 |
+| Start Search        | `Ctrl + F`                                                                                                                |
+| Find Next           | `F3`                                                                                                                      |
+| Find Previous       | `F2`                                                                                                                      |
+| Replace             | `Ctrl + =`                                                                                                                |
+| Replace then Find   | `Ctrl + -`                                                                                                                |
+| Extract             | `Ctrl + Shift + D`                                                                                                        |
+| Extract Names       | `Ctrl + Shift + N`                                                                                                        |
+| Execute Script      | `Ctrl + B`                                                                                                                |
+| Minibuffer Palette  | `Alt + X`                                                                                                                 |
 
-| Tree Navigation    |           |                 |                          |
-| :----------------- | :-------- | :-------------- | :----------------------- |
-| `Ctrl+Shift+L`     |           |                 | Show the LeoJS View   |
-| `Ctrl+P`           |           |                 | Go Anywhere              |
-| `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
-|                    |           | `End` \*        | Go To Last Visible Node  |
-| `PgUp / pgDn`      |           |                 | Tree page up/down        |
-| `Alt + End`        |           |                 | Go To Last Sibling       |
-| `Alt + N`          |           |                 | Go To Next Clone         |
-| `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
+| Tree Navigation          |                                                              |
+| :----------------------- | :----------------------------------------------------------- |
+| Show the LeoJS View      | `Ctrl+Shift+L`                                               |
+| Go Anywhere              | `Ctrl+P`                                                     |
+| Go To First Visible Node | `Home` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + Home`             |
+| Go To Last Visible Node  | `End` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + End`               |
+| Tree page up/down        | `PgUp / pgDn`                                                |
+| Go To Next Clone         | `Alt + N`                                                    |
+| Browse Tree              | `Arrow Keys` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + Arrow Keys` |
+| Go To Global Line        | `Alt + G`                                                    |
 
-<!-- | `Alt + G`    |           |                   | Go To Global Line      | --> 
+_With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, end, pageUp/Down keys will change the outline's selection directly._
 
-\* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
+| File Commands       |                    |
+| :------------------ | :----------------- |
+| Save Leo Document   | `Ctrl + S`         |
+| New Leo Document    | `Ctrl + N`         |
+| Open Leo Document   | `Ctrl + O`         |
+| Cycle Next Document | `Ctrl + Tab`       |
+| Write File Nodes    | `Ctrl + Shift + W` |
+| Write Dirty Files   | `Ctrl + Shift + Q` |
 
-| File Commands      |     |     |                   |
-| :----------------- | :-- | :-- | :---------------- |
-| `Ctrl + S`         |     |     | Save Leo Document |
-| `Ctrl + N`         |     |     | New Leo Document  |
-| `Ctrl + O`         |     |     | Open Leo Document |
-| `Ctrl + Shift + W` |     |     | Write File Nodes  |
-| `Ctrl + Shift + Q` |     |     | Write Dirty Files |
+---
 
-**Enjoy!**
+## Derive External Files
+
+Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty Files** commands to derive external files for any type of **@file** nodes.
+
+| @\<file\> Kind | Sentinels | @others | .leo Data | Write Only |
+| :------------- | :-------: | :-----: | :-------: | :--------: |
+| @asis          |    ❌     |   ❌    |    ✔️     |     ✔️     |
+| @auto          |    ❌     |   ✔️    |    ❌     |     ❌     |
+| @clean         |    ❌     |   ✔️    |    ✔️     |     ❌     |
+| @edit          |    ❌     |   ❌    |    ❌     |     ❌     |
+| @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
+| @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
+
+Leo will detect external file changes, and will ask to either **refresh from disk** or **ignore the changes**.
+
+![Derive files](https://raw.githubusercontent.com/boltex/leojs/master/resources/derived-file.gif)
+
+## Extension Settings
+
+### Open the command palette `Ctrl+Shift+P` and start typing `LeoJS settings` to access LeoJS's welcome/settings screen
+
+> _(Changes are auto-saved to the user's profile after 0.5 seconds)_
+
+-   Control the visibility of the outline pane in the explorer view.
+-   Decide how and when to refresh and synchronize content when derived (external) file are modified.
+-   Show additional icons on outline nodes (Move, delete, mark, copy, paste...)
+-   Choose to either focus on the body pane, or keep focus in the outline when a node is selected.
+-   Hide or show the "Open on the side" command in the context menu to open a node beside the active editor
+
+![Settings](https://raw.githubusercontent.com/boltex/leojs/master/resources/welcome-settings.png)
+
+## Navigating a Leo Document
+
+Arrow keys, home/end, page up/down are used for basic navigation. But in order to **find and goto specific nodes directly**, use the methods described below.
+
+### Goto Anywhere Command
+
+Normally in vscode, the the **`Ctrl+P`** shortcut allows you to switch to any project file, but when the focus is in one of Leo's panels, the **`Ctrl+P`** keybinding allows you to switch to a node directly by typing (part of) it's headline.
+
+![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
+
+### Find Commands
+
+With focus in Leo's outline or body pane, Hit **`Ctrl+F`** to open the _find panel_.
+
+Enter your search pattern directly in the **\<find pattern here\>** field. Press **`Enter`** to find the first match starting from your current position.
+
+Hitting **`F3`** repeatedly will find the subsequent matches. (**`F2`** for previous matches)
+
+![Find results](https://raw.githubusercontent.com/boltex/leojs/master/resources/find-in-headlines.gif)
+
+### Nav and the Goto Panel
+
+Type your search pattern in the **Nav** field instead to see all results show up below in leo's **Goto Pane**. This will show the headlines as you type.
+
+Press **`Enter`** to freeze the results and show results also found in **body text of any node**. This will add a snowflake icon ❄️ to the **Nav** field.
+
+From the **Goto Pane**, you can use the arrow keys, home/end, page up/down to cycle directly to any of those matches.
+
+![Goto pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-goto-pane.gif)
+
+### Using Tags
+
+If you check the **Tag** option, the **Nav** field and **Goto Pane** are then used to find nodes by their tag 🏷 _ua_ (user attribute).
+
+![Node tags](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-tags.gif)
+
+## Undo Panel
+
+> In LeoJS, the undo functionality is a multi-tiered system that segregates structural outline changes from text changes within the body pane. The Undo Panel captures outline alterations as individual 'Undo Beads', independent from VS Code's native text undo states. When focus resides in the body pane, the Undo keybinding triggers VS Code's text-specific undo action. However, once the focus shifts or a new node is selected, all concurrent text changes coalesce into a single 'Undo Bead' within the Undo Panel. These 'Undo Beads' can then be manipulated either through the Undo Panel or by keybindings, provided the focus is explicitly set on the outline pane. This dual-layer undo architecture enables precise control over both code and structural modifications.
+
+Use the undo / redo icons above the outline or above the undo pane itself. You can also right-click on an undo step to directly switch to that specific state!
+
+![Undo pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/undo-pane.gif)
+
+## Issues
+
+Common issues are listed below. See the repository's [Issues Page](https://github.com/boltex/leojs/issues) to submit issues.
+
+### Linux Keybindings
+
+If you're experiencing trouble with the keyboard shortcuts for
+the 'Clone Node' or the 'Promote' and 'Demote' commands,
+set **"keyboard.dispatch": "keyCode"** in your vscode settings and restart vscode.
+See [Troubleshoot Linux Keybindings](https://github.com/microsoft/vscode/wiki/Keybinding-Issues#troubleshoot-linux-keybindings)
+for more information.
+
+### Keybindings Conflicts Resolution
+
+If you have a keybinding conflict for a command that you would like **not** to be resolved by Leo when the focus is on the body pane,
+add **`&& resourceScheme != 'leojs'`** to the keybinding's "_when_" condition. (Use **`Ctrl+K Ctrl+S`** in vscode to open the Keyboards Shortcuts panel)
+
+### Move Outline Keyboard Commands
+
+For some users, the **`Alt+[Arrow Keys]`**, **`Ctrl+D`** and **`Ctrl+T`** keybinding are already assigned.
+
+To help with this conflict, tree-browsing, outline-move keyboard commands, and switch focus command will only trigger
+with the additional condition of having no text selection in the editor.
+
+So select at least one character to use the previously assigned original keyboard commands, while focus is in the body pane.
+
+> Refer to the [issue tracker](https://github.com/boltex/leojs/issues) page to learn more about the known issues, or to contribute with additional information if you encounter some yourself.
+
+---
+
+## Acknowledgments
+
+### _Thanks to_
+
+-   [Edward K. Ream](https://github.com/edreamleo) creator of the [Leo Editor](https://leo-editor.github.io/leo-editor/)
+-   [Eric Amodio](https://github.com/eamodio) for the [welcome screen templates](https://github.com/eamodio/vscode-gitlens/tree/master/src/webviews)
+-   [Vitalije](https://github.com/vitalije) for his contributions and support
+-   [Arjan](https://github.com/ar-jan) for his suggestions and ideas
+-   [Thomas](https://github.com/tbpassin) for his contributions and support
+-   [Viktor](https://github.com/ranvik14) for his contributions and support
+-   [Gaurami](https://github.com/ATikhonov2) for his suggestions, bug reports and support
+-   [Kevin Henderson](https://github.com/kghenderson) for his suggestions and support
+-   [Ville M. Vainio](https://github.com/vivainio) for his Nav tab original concept
+-   [Jacob M. Peck](https://github.com/gatesphere) for his Tags tab original concept
+-   [Matt Wilkie](https://github.com/maphew) for his contributions and support
+
+---
+
+## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)

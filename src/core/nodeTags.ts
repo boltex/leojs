@@ -105,7 +105,6 @@ import { Commands } from './leoCommands';
 //@+others
 //@+node:felix.20221019002843.1: ** class TagController
 export class TagController {
-
     public readonly TAG_LIST_KEY = '__node_tags';
     public c: Commands;
     public taglist: string[];
@@ -113,7 +112,6 @@ export class TagController {
     //@+others
     //@+node:felix.20221019002843.2: *3* tag_c.__init__
     constructor(c: Commands) {
-
         this.c = c;
         this.taglist = [];
         this.initialize_taglist();
@@ -124,7 +122,6 @@ export class TagController {
         //     this.ui = LeoTagWidget(c)
         //     c.frame.log.createTab('Tags', widget=this.ui)
         //     this.ui.update_all()
-
     }
     //@+node:felix.20221019002843.3: *3* tag_c.initialize_taglist
     public initialize_taglist(): void {
@@ -144,9 +141,7 @@ export class TagController {
      * return a list of all tags in the outline
      */
     public get_all_tags(): string[] {
-
         return this.taglist;
-
     }
     //@+node:felix.20221019002843.6: *4* tag_c.show_all_tags
     /**
@@ -181,40 +176,35 @@ export class TagController {
                 g.es(`no tags in ${c.shortFileName()}`);
             }
         }
-
     }
     //@+node:felix.20221019002843.7: *4* tag_c.update_taglist
     /**
      * ensures the outline's taglist is consistent with the state of the nodes in the outline
      */
     public update_taglist(tag: string): void {
-
         if (!this.taglist.includes(tag)) {
             this.taglist.push(tag);
         }
         const nodelist = this.get_tagged_nodes(tag);
         if (!nodelist || !nodelist.length) {
-            this.taglist = this.taglist.filter(e => e !== tag);
+            this.taglist = this.taglist.filter((e) => e !== tag);
         }
         // ? NEEDED ?
         // if hasattr(this, 'ui'):
         //     this.ui.update_all()
-
     }
     //@+node:felix.20221019002843.8: *4* tag_c.get_tagged_nodes
     /**
      * return a list of *positions* of nodes containing the tag, with * as a wildcard
      */
     public get_tagged_nodes(tag: string): Position[] {
-
         const nodelist: Position[] = [];
         // replace * with .* for regex compatibility
-        tag = tag.split('*').join('.*');
+        tag = tag.replace(/\*/g, '.*');
         let regex;
         try {
             regex = new RegExp(tag);
-        }
-        catch (e) {
+        } catch (e) {
             return nodelist;
         }
         for (let p of this.c.all_unique_positions()) {
@@ -226,17 +216,15 @@ export class TagController {
             }
         }
         return nodelist;
-
     }
     //@+node:felix.20221019002843.9: *4* tag_c.get_tagged_gnxes
     public *get_tagged_gnxes(tag: string): Generator<string> {
         const c = this.c;
-        tag = tag.split('*').join('.*');
+        tag = tag.replace(/\*/g, '.*');
         let regex;
         try {
             regex = new RegExp(tag);
-        }
-        catch (e) {
+        } catch (e) {
             return;
         }
         for (let p of c.all_unique_positions()) {
@@ -253,24 +241,21 @@ export class TagController {
      * returns a list of tags applied to position p.
      */
     public get_tags(p: Position): string[] {
-
         if (p && p.__bool__()) {
             const tags = p.v.u[this.TAG_LIST_KEY] || [];
             return tags;
         }
 
         return [];
-
     }
     //@+node:felix.20221019002843.12: *4* tag_c.add_tag
     /**
      *  adds 'tag' to the taglist of v
      */
     public add_tag(p: Position, tag: string): void {
-
         // cast to set() incase JSON storage (leo_cloud plugin) converted to list
 
-        const tags = p.v.u[this.TAG_LIST_KEY] as string[] || [];
+        const tags = (p.v.u[this.TAG_LIST_KEY] as string[]) || [];
         if (!tags.includes(tag)) {
             tags.push(tag);
             p.v.u[this.TAG_LIST_KEY] = tags;
@@ -280,14 +265,14 @@ export class TagController {
     }
     //@+node:felix.20221019002843.13: *4* tag_c.remove_tag
     /**
-     * removes 'tag' from the taglist of position p. 
+     * removes 'tag' from the taglist of position p.
      */
     public remove_tag(p: Position, tag: string): void {
         const v = p.v;
         //  In case JSON storage (leo_cloud plugin) converted to list.
-        let tags = v.u[this.TAG_LIST_KEY] as string[] || [];
+        let tags = (v.u[this.TAG_LIST_KEY] as string[]) || [];
         if (tags.includes(tag)) {
-            tags = tags.filter(e => e !== tag);
+            tags = tags.filter((e) => e !== tag);
             this.c.setChanged();
         }
         if (tags.length) {
@@ -298,12 +283,10 @@ export class TagController {
                 delete v.u[this.TAG_LIST_KEY];
                 this.c.setChanged();
             }
-
         }
         this.update_taglist(tag);
     }
     //@-others
-
 }
 //@-others
 //@@language typescript

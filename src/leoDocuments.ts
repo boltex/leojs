@@ -57,12 +57,13 @@ export class LeoDocumentNode extends vscode.TreeItem {
         public frame: LeoFrame,
         private _leoUI: LeoUI,
     ) {
-        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : frame.title);
+        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : Constants.UNTITLED_FILE_NAME);
 
         const c: Commands = frame.c;
-        const isNamed: boolean = !!c.fileName();
-        this.label = isNamed ? utils.getFileFromPath(c.fileName()) : frame.title;
-        this.tooltip = isNamed ? c.fileName() : frame.title;
+        const filename = c.fileName();
+        const isNamed: boolean = !!filename;
+        this.label = isNamed ? utils.getFileFromPath(filename) : Constants.UNTITLED_FILE_NAME;
+        this.tooltip = isNamed ? filename : Constants.UNTITLED_FILE_NAME;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',

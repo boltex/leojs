@@ -1,15 +1,16 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220414231314.1: * @file src/commands/commanderEditCommands.ts
-// * Outline commands that used to be defined in leoCommands.py
-import * as g from "../core/leoGlobals";
-import { commander_command } from "../core/decorators";
-import { Commands } from "../core/leoCommands";
-import { Position } from "../core/leoNodes";
+/**
+ * Outline commands that used to be defined in leoCommands.py
+ */
+import * as g from '../core/leoGlobals';
+import { commander_command } from '../core/decorators';
+import { Commands } from '../core/leoCommands';
+import { Position } from '../core/leoNodes';
 
 //@+others
 //@+node:felix.20220414231634.1: ** Class CommanderEditCommands
 export class CommanderEditCommands {
-
     //@+others
     //@+node:felix.20220414235045.1: *3* c_ec.convertAllBlanks
     @commander_command(
@@ -27,7 +28,7 @@ export class CommanderEditCommands {
             return;
         }
         const d = c.scanAllDirectives(c.p);
-        const tabWidth = d["tabwidth"];
+        const tabWidth = d['tabwidth'];
         let count = 0;
         u.beforeChangeGroup(current, undoType);
 
@@ -48,9 +49,9 @@ export class CommanderEditCommands {
                     let i;
                     let w;
                     [i, w] = g.skip_leading_ws_with_indent(line, 0, tabWidth);
-                    let s;
-
-                    s = g.computeLeadingWhitespace(w, Math.abs(tabWidth)) + line.slice(i);  // use positive width.
+                    let s =
+                        g.computeLeadingWhitespace(w, Math.abs(tabWidth)) +
+                        line.slice(i); // use positive width.
                     if (s !== line) {
                         changed = true;
                     }
@@ -66,14 +67,9 @@ export class CommanderEditCommands {
         }
         u.afterChangeGroup(current, undoType);
         if (!g.unitTesting) {
-            g.es("blanks converted to tabs in", count, "nodes");
+            g.es('blanks converted to tabs in', count, 'nodes');
             // Must come before c.redraw().
         }
-        if (count > 0) {
-            c.redraw_after_icons_changed();
-        }
-
-
     }
 
     //@+node:felix.20230312214917.1: *3* c_ec.convertBlanks
@@ -98,7 +94,7 @@ export class CommanderEditCommands {
         //
         // Use the relative @tabwidth, not the global one.
         const d = c.scanAllDirectives(p);
-        const tabWidth = d["tabwidth"];
+        const tabWidth = d['tabwidth'];
         if (!tabWidth) {
             return false;
         }
@@ -108,7 +104,8 @@ export class CommanderEditCommands {
         const result: string[] = [];
 
         for (let line of lines) {
-            const s = g.optimizeLeadingWhitespace(line, Math.abs(tabWidth));  // Use positive width.
+            // Use positive width.
+            const s = g.optimizeLeadingWhitespace(line, Math.abs(tabWidth));
             if (s !== line) {
                 changed = true;
             }
@@ -120,7 +117,7 @@ export class CommanderEditCommands {
         //
         // Set p.b and w's text first.
         const middle = result.join('');
-        p.b = head + middle + tail;  // Sets dirty and changed bits.
+        p.b = head + middle + tail; // Sets dirty and changed bits.
         w.setAllText(head + middle + tail);
         //
         // Select all text and set scroll position.
@@ -131,31 +128,58 @@ export class CommanderEditCommands {
         u.afterChangeBody(p, 'Indent Region', bunch);
         return true;
     }
-    //@+node:felix.20230221160425.3: *3* def createLastChildNode
+    //@+node:felix.20230702194637.1: *3* c_ec.editHeadline (edit-headline)
+    @commander_command(
+        'edit-headline',
+        'Begin editing the headline of the selected node.'
+    )
+    public editHeadline(): Thenable<unknown> {
+        return g.app.gui.editHeadline();
+
+        // c = self
+        // k, tree = c.k, c.frame.tree
+        // if g.app.batchMode:
+        //     c.notValidInBatchMode("Edit Headline")
+        //     return None, None
+        // e, wrapper = tree.editLabel(c.p)
+        // if k:
+        //     # k.setDefaultInputState()
+        //     k.setEditingState()
+        //     k.showStateAndMode(w=wrapper)
+        // return e, wrapper  # Neither of these is used by any caller.
+    }
+    //@+node:felix.20230221160425.3: *3* createFirstChildNode extract helper
     /**
      * A helper function for the three extract commands.
      */
-    private createLastChildNode(c: Commands, parent: Position, headline: string, body?: string): Position {
-
+    private createFirstChildNode(
+        c: Commands,
+        parent: Position,
+        headline: string,
+        body?: string
+    ): Position {
         // #1955: don't strip trailing lines.
         if (!body) {
-            body = "";
+            body = '';
         }
-        const p = parent.insertAsLastChild();
+        const p = parent.insertAsNthChild(0);
         p.initHeadString(headline);
         p.setBodyString(body);
         p.setDirty();
-        c.validateOutline();
+        c.checkOutline();
         return p;
-    };
-    //@+node:felix.20230221160425.1: *3* c_ec.extract & helpers
-    @commander_command('extract', 'Create child node from the selected body text.')
+    }
+    //@+node:felix.20230221160425.1: *3* c_ec.extract
+    @commander_command(
+        'extract',
+        'Create child node from the selected body text.'
+    )
     public extract(this: Commands): void {
         //@+<< docstring for extract command >>
         //@+node:felix.20230221160425.2: *4* << docstring for extract command >>
         /**
          * Create child node from the selected body text.
-         * 
+         *
          * 1. If the selection starts with a section reference, the section
          *    name becomes the child's headline. All following lines become
          *    the child's body text. The section reference line remains in
@@ -177,7 +201,7 @@ export class CommanderEditCommands {
         //@-<< docstring for extract command >>
 
         //@+others
-        //@+node:felix.20230221160425.4: *4* def extractDef
+        //@+node:felix.20230221160425.4: *4* function extractDef
         const extractDef_patterns = [
             /\((?:def|defn|defui|deftype|defrecord|defonce)\s+(\S+)/, // clojure definition
             /^\s*(?:def|class)\s+(\w+)/, // python definitions
@@ -217,8 +241,11 @@ export class CommanderEditCommands {
             }
             return '';
         };
-        //@+node:felix.20230221160425.5: *4* def extractDef_find
-        const extractDef_find = (c: Commands, lines: string[]): string | undefined => {
+        //@+node:felix.20230221160425.5: *4* function extractDef_find
+        const extractDef_find = (
+            c: Commands,
+            lines: string[]
+        ): string | undefined => {
             for (const line of lines) {
                 const def_h = extractDef(c, line.trim());
                 if (def_h) {
@@ -227,12 +254,11 @@ export class CommanderEditCommands {
             }
             return undefined;
         };
-        //@+node:felix.20230221160425.6: *4* def extractRef
+        //@+node:felix.20230221160425.6: *4* function extractRef
         /**
          * Return s if it starts with a section name.
          */
         const extractRef = (c: Commands, s: string): string => {
-
             let i = s.indexOf('<<');
             let j = s.indexOf('>>');
             if (-1 < i && i < j) {
@@ -257,7 +283,7 @@ export class CommanderEditCommands {
         let head, tail, oldSel, oldYview;
         [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
         if (!lines || !lines.length) {
-            return;  // Nothing selected.
+            return; // Nothing selected.
         }
         //
         // Remove leading whitespace.
@@ -278,7 +304,7 @@ export class CommanderEditCommands {
         const ref_h = extractRef(c, h).trim();
         const def_h = extractDef_find(c, lines);
         if (ref_h) {
-            [h, b, middle] = [ref_h, lines.slice(1), ' '.repeat(ws) + lines[0]];  // By vitalije.
+            [h, b, middle] = [ref_h, lines.slice(1), ' '.repeat(ws) + lines[0]]; // By vitalije.
         } else if (def_h) {
             [h, b, middle] = [def_h, lines, ''];
         } else {
@@ -288,7 +314,7 @@ export class CommanderEditCommands {
         // Start the outer undo group.
         u.beforeChangeGroup(c.p, undoType);
         const undoData = u.beforeInsertNode(c.p);
-        const p = this.createLastChildNode(c, c.p, h, b.join(""));
+        const p = this.createFirstChildNode(c, c.p, h, b.join(''));
         u.afterInsertNode(p, undoType, undoData);
         //
         // Start inner undo.
@@ -297,10 +323,10 @@ export class CommanderEditCommands {
             [i, j] = oldSel;
             w.setSelectionRange(i, j, j);
         }
-        const bunch = u.beforeChangeBody(c.p);  // Not p.
+        const bunch = u.beforeChangeBody(c.p); // Not p.
         //
         // Update the text and selection
-        c.p.v.b = head + middle + tail;  // Don't redraw.
+        c.p.v.b = head + middle + tail; // Don't redraw.
         w.setAllText(head + middle + tail);
         i = head.length;
         j = Math.max(i, head.length + middle.length - 1);
@@ -319,7 +345,7 @@ export class CommanderEditCommands {
         // Add the changes to the outer undo group.
         u.afterChangeGroup(c.p, undoType);
         p.parent().expand();
-        c.redraw(p.parent());  // A bit more convenient than p.
+        c.redraw(p.parent()); // A bit more convenient than p.
         c.bodyWantsFocus();
     }
 
@@ -327,7 +353,7 @@ export class CommanderEditCommands {
     // ? Needed ?
     // g.command_alias('extractSection', extract)
     // g.command_alias('extractPythonMethod', extract)
-    //@+node:felix.20230221160431.1: *3* c_ec.extractSectionNames & helper
+    //@+node:felix.20230221160431.1: *3* c_ec.extractSectionNames
     @commander_command(
         'extract-names',
         'Create child nodes for every section reference in the selected text.'
@@ -337,17 +363,16 @@ export class CommanderEditCommands {
         // - The body of each child node is empty.
 
         //@+others
-        //@+node:felix.20230221160431.2: *4* def findSectionName
+        //@+node:felix.20230221160431.2: *4* function findSectionName
         const findSectionName = (s: string): string | undefined => {
-
-            let head1 = s.indexOf("<<");
+            let head1 = s.indexOf('<<');
             let head2 = -1;
             if (head1 > -1) {
-                head2 = s.indexOf(">>", head1);
+                head2 = s.indexOf('>>', head1);
             } else {
-                head1 = s.indexOf("@<");
+                head1 = s.indexOf('@<');
                 if (head1 > -1) {
-                    head2 = s.indexOf("@>", head1);
+                    head2 = s.indexOf('@>', head1);
                 }
             }
 
@@ -381,20 +406,20 @@ export class CommanderEditCommands {
             const name = findSectionName(s);
             if (name) {
                 if (!found) {
-                    u.beforeChangeGroup(current, undoType);  // first one!
+                    u.beforeChangeGroup(current, undoType); // first one!
                 }
                 const undoData = u.beforeInsertNode(current);
-                p = this.createLastChildNode(c, current, name, undefined);
+                p = this.createFirstChildNode(c, current, name, undefined);
                 u.afterInsertNode(p, undoType, undoData);
                 found = true;
             }
         }
-        c.validateOutline();
+        c.checkOutline();
         if (found) {
             u.afterChangeGroup(current, undoType);
             c.redraw(p);
         } else {
-            g.warning("selected text should contain section names");
+            g.warning('selected text should contain section names');
         }
         // Restore the selection.
         let i, j;
@@ -404,7 +429,6 @@ export class CommanderEditCommands {
             w.setSelectionRange(i, j);
             w.setFocus();
         }
-
     }
     //@+node:felix.20220503232001.1: *3* c_ec.goToNext/PrevHistory
     @commander_command(
@@ -430,7 +454,6 @@ export class CommanderEditCommands {
         'Insert a time/date stamp at the cursor.'
     )
     public insertBodyTime(this: Commands): void {
-
         const c: Commands = this;
         const p = this.p;
         const u = this.undoer;
@@ -448,7 +471,6 @@ export class CommanderEditCommands {
         w.insert(i, s);
         p.v.b = w.getAllText();
         u.afterChangeBody(p, undoType, bunch);
-
     }
     //@+node:felix.20230221160455.1: *3* c_ec.line_to_headline
     @commander_command(
@@ -497,7 +519,6 @@ export class CommanderEditCommands {
         c.bodyWantsFocus();
     }
     //@-others
-
 }
 //@-others
 //@-leo

@@ -1,24 +1,58 @@
 //@+leo-ver=5-thin
 //@+node:felix.20210102012334.1: * @file src/core/leoApp.ts
 //@+<< imports >>
-//@+node:felix.20210102211149.1: ** << imports >> (leoApp)
-import * as vscode from "vscode";
-import * as Bowser from "bowser";
-import * as os from "os";
+//@+node:felix.20210102211149.1: ** << imports >>
+import * as vscode from 'vscode';
+import * as Bowser from 'bowser';
+import * as os from 'os';
 import * as path from 'path';
 import * as g from './leoGlobals';
-import * as utils from "../utils";
-import { NullGui } from "./leoGui";
+import * as utils from '../utils';
+import { LeoGui, NullGui } from './leoGui';
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
-import { FastRead, FileCommands } from "./leoFileCommands";
-import { GlobalConfigManager, SettingsTreeParser } from "./leoConfig";
-import { Constants } from "../constants";
-import { ExternalFilesController } from "./leoExternalFiles";
-import { LeoFrame } from "./leoFrame";
-import { SettingsDict } from "./leoGlobals";
-import { leojsSettingsXml } from "../leojsSettings";
-import { LeoUI } from "../leoUI";
+import { FastRead, FileCommands } from './leoFileCommands';
+import { GlobalConfigManager, SettingsTreeParser } from './leoConfig';
+import { Constants } from '../constants';
+import { ExternalFilesController } from './leoExternalFiles';
+import { LeoFrame } from './leoFrame';
+import { SettingsDict } from './leoGlobals';
+import { LeoUI } from '../leoUI';
+import { CommanderCacher, GlobalCacher } from './leoCache';
+// importers
+import * as importer_c from '../importers/c';
+import * as importer_coffeescript from '../importers/coffeescript';
+import * as importer_csharp from '../importers/csharp';
+import * as importer_cython from '../importers/cython';
+import * as importer_dart from '../importers/dart';
+import * as importer_elisp from '../importers/elisp';
+import * as importer_html from '../importers/html';
+import * as importer_ini from '../importers/ini';
+import * as importer_java from '../importers/java';
+import * as importer_javascript from '../importers/javascript';
+import * as importer_leo_rst from '../importers/leo_rst';
+import * as importer_lua from '../importers/lua';
+import * as importer_markdown from '../importers/markdown';
+import * as importer_org from '../importers/org';
+import * as importer_otl from '../importers/otl';
+import * as importer_pascal from '../importers/pascal';
+import * as importer_perl from '../importers/perl';
+import * as importer_php from '../importers/php';
+import * as importer_python from '../importers/python';
+import * as importer_rust from '../importers/rust';
+import * as importer_tcl from '../importers/tcl';
+import * as importer_treepad from '../importers/treepad';
+import * as importer_typescript from '../importers/typescript';
+import * as importer_xml from '../importers/xml';
+// writers
+import * as writer_dart from '../writers/dart';
+import * as writer_leo_rst from '../writers/leo_rst';
+import * as writer_markdown from '../writers/markdown';
+import * as writer_org from '../writers/org';
+import * as writer_otl from '../writers/otl';
+import * as writer_treepad from '../writers/treepad';
+import { ScriptingController } from './mod_scripting';
+import { SessionManager } from './leoSessions';
 
 //@-<< imports >>
 //@+others
@@ -31,13 +65,13 @@ import { LeoUI } from "../leoUI";
  *  the callback to be called at idle time forever.
  */
 export class IdleTimeManager {
-
     callback_list: ((...args: any[]) => any)[];
     timer: any;
+    on_idle_count = 0;
 
     /**
      * Ctor for IdleTimeManager class.
-    */
+     */
     constructor() {
         this.callback_list = [];
         this.timer = null;
@@ -45,52 +79,63 @@ export class IdleTimeManager {
 
     //@+others
     //@+node:felix.20210102213337.2: *3* itm.add_callback
-    /*
-    def add_callback(self, callback):
-        """Add a callback to be called at every idle time."""
-        self.callback_list.append(callback)
-    */
-
+    /**
+     * Add a callback to be called at every idle time.
+     */
+    public add_callback(callback: (...args: any[]) => any): void {
+        this.callback_list.push(callback);
+    }
     //@+node:felix.20210102213337.3: *3* itm.on_idle
-    /*
-    on_idle_count = 0
-
-    def on_idle(self, timer):
-        """IdleTimeManager: Run all idle-time callbacks."""
-        if not g.app: return
-        if g.app.killed: return
-        if not g.app.pluginsController:
-            g.trace('No g.app.pluginsController', g.callers())
-            timer.stop()
-            return  # For debugger.
-        self.on_idle_count += 1
-        # Handle the registered callbacks.
-        for callback in self.callback_list:
-            try:
-                callback()
-            except Exception:
-                g.es_exception()
-                g.es_print(f"removing callback: {callback}")
-                self.callback_list.remove(callback)
-        # Handle idle-time hooks.
-        g.app.pluginsController.on_idle()
-
-    */
-
+    /**
+     * IdleTimeManager: Run all idle-time callbacks.
+     */
+    public on_idle(timer: any): void {
+        if (!g.app) {
+            return;
+        }
+        if (g.app.killed) {
+            return;
+        }
+        if (!g.app.pluginsController) {
+            g.trace('No g.app.pluginsController', g.callers());
+            timer.stop();
+            return; // For debugger.
+        }
+        this.on_idle_count += 1;
+        // Handle the registered callbacks.
+        for (const callback of this.callback_list) {
+            try {
+                callback();
+            } catch (exception) {
+                g.es_exception(exception);
+                g.es_print(`removing callback: ${callback.toString()}`);
+                const index = this.callback_list.indexOf(callback);
+                if (index > -1) {
+                    // only splice array when item is found
+                    this.callback_list.splice(index, 1); // 2nd parameter means remove one item only
+                }
+                // this.callback_list.remove(callback);
+            }
+        }
+        // Handle idle-time hooks.
+        // ? TODO : pluginsController ?
+        // g.app.pluginsController.on_idle();
+    }
     //@+node:felix.20210102213337.4: *3* itm.start
-    /*
-    def start(self):
-        """Start the idle-time timer."""
-        self.timer = g.IdleTime(
-            self.on_idle,
-            delay=500,
-            tag='IdleTimeManager.on_idle')
-        if self.timer:
-            self.timer.start()
-    */
-
+    /**
+     * Start the idle-time timer.
+     */
+    public start(): void {
+        this.timer = g.IdleTime(
+            this.on_idle.bind(this),
+            1000, // 500, // ! ORIGINAL INTERVAL IS 500 !
+            'IdleTimeManager.on_idle'
+        );
+        if (this.timer && this.timer.start) {
+            this.timer.start(); // this.timer is a idleTimeClass, which can be a dummy object in unit-tests
+        }
+    }
     //@-others
-
 }
 
 //@+node:felix.20210102214000.1: ** class LeoApp
@@ -99,24 +144,28 @@ export class IdleTimeManager {
  * instance variables of this class are Leo's global variables.
  */
 export class LeoApp {
-
     //@+others
     //@+node:felix.20220417164713.1: *3* app.Birth & startup
     //@+node:felix.20210102214029.1: *4* app.__init__ (helpers contain language dicts)
     //@+<< LeoApp: command-line arguments >>
     //@+node:felix.20210103024632.2: *5* << LeoApp: command-line arguments >>
+    // TODO : CHECK IF always_write_session_data IS NEEDED ! 
+    public always_write_session_data: boolean = false;  // Default: write session data only if no files on command line.
+
     public batchMode: boolean = false; // True: run in batch mode.
     public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui!: NullGui; // The gui class.
+    public vscode: typeof vscode = vscode;
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
     public silentMode: boolean = false; // True: no sign-on.
     public trace_binding: string | undefined; // The name of a binding to trace, or None.
     public trace_setting: string | undefined; // The name of a setting to trace, or None.
+    public write_black_sentinels = false; // True: write a space befor '@' in sentinel lines.
 
     //@-<< LeoApp: command-line arguments >>
     //@+<< LeoApp: Debugging & statistics >>
@@ -128,10 +177,11 @@ export class LeoApp {
     public log_listener: any = null; // The process created by the 'listen-for-log' command.
     public positions: number = 0; // The number of positions generated.
     public scanErrors: number = 0; // The number of errors seen by g.scanError.
-    public structure_errors: number = 0; // Set by p.safeMoveToThreadNext.
     public statsDict: any = {}; // dict used by g.stat, g.clear_stats, g.print_stats.
     public statsLockout: boolean = false; // A lockout to prevent unbound recursion while gathering stats.
     public validate_outline: boolean = false; // True: enables c.validate_outline. (slow)
+    public iconWidgetCount: number = 0;
+    public iconImageRefs: any[] = [];
 
     //@-<< LeoApp: Debugging & statistics >>
     //@+<< LeoApp: error messages >>
@@ -143,16 +193,18 @@ export class LeoApp {
     //@+<< LeoApp: global directories >>
     //@+node:felix.20210103024632.5: *5* << LeoApp: global directories >>
     public extensionsDir: string | undefined; // The leo / extensions directory
-    public globalConfigDir: string | undefined; // leo / config directory 
+    public globalConfigDir: string | undefined; // leo / config directory
     public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir: string | undefined; // The user's home directory.
     public homeLeoDir: string | undefined; // The user's home/.leo directory.
+    public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
+    public vscodeExtensionDir: string | undefined;
     public machineDir: string | undefined; // The machine - specific directory.
 
     public vscodeWorkspaceUri: vscode.Uri | undefined;
-    public vscodeUriAuthority: string = "";
-    public vscodeUriPath: string = "";
+    public vscodeUriAuthority: string = '';
+    public vscodeUriPath: string = '';
 
     //@-<< LeoApp: global directories >>
     //@+<< LeoApp: global data >>
@@ -160,7 +212,7 @@ export class LeoApp {
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
-    public vscodeUriScheme: string = ""; // * VSCODE WORKSPACE FILE SCHEME 
+    public vscodeUriScheme: string = ''; // * VSCODE WORKSPACE FILE SCHEME
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.
@@ -177,13 +229,13 @@ export class LeoApp {
     //@+node:felix.20210103024632.7: *5* << LeoApp: global controller/manager objects >>
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
-    public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
+    public commander_cacher!: CommanderCacher; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
-    public externalFilesController: any = null; // The singleton ExternalFilesController instance.
-    public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
-    public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
+    public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
+    public global_cacher!: GlobalCacher; // The singleton leoCacher.GlobalCacher instance.
+    public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
@@ -191,7 +243,10 @@ export class LeoApp {
     // public openWithManager: any = null;
     // The singleton OpenWithManager instance.
     public nodeIndices: NodeIndices | undefined; // The singleton nodeIndices instance.
-    public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
+    public pluginsController: any = null; // The singleton PluginsManager instance. 
+    public recentFilesManager!: RecentFilesManager;
+    public sessionManager!: SessionManager; // The singleton SessionManager instance. 
+    // The Commands class...
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.
 
@@ -199,12 +254,13 @@ export class LeoApp {
     //@+<< LeoApp: global reader/writer data >>
     //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
-    public atAutoWritersDict: { [key: string]: any } = {};
-    public writersDispatchDict: { [key: string]: any } = {};
+    public atAutoWritersDict: Record<string, (...args: any[]) => any> = {};
+    public writersDispatchDict: Record<string, (...args: any[]) => any> = {};
+
     // From leoImport.py
-    public atAutoDict: { [key: string]: any } = {};
-    // Keys are @auto names, values are scanner classes.
-    public classDispatchDict: { [key: string]: any } = {};
+    // Keys are @auto names, values are scanner functions..
+    public atAutoDict: Record<string, (...args: any[]) => any> = {};
+    public classDispatchDict: Record<string, (...args: any[]) => any> = {};
 
     // True if an @auto writer should write sentinels,
     // even if the external file doesn't actually contain sentinels.
@@ -216,13 +272,13 @@ export class LeoApp {
     //@-<< LeoApp: global reader/writer data >>
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>
-    public already_open_files: any[] = []; // A list of file names that * might * be open in another copy of Leo.
+    public already_open_files: string[] = []; // A list of file names that * might * be open in another copy of Leo.
     public inBridge: boolean = false; // True: running from leoBridge module.
     public inScript: boolean = false; // True: executing a script.
     public initing: boolean = true; // True: we are initializing the app.
     public initComplete: boolean = false; // True: late bindings are not allowed.
     public killed: boolean = false; // True: we are about to destroy the root window.
-    public openingSettingsFile: boolean = false; // True, opening a settings file.
+
     public preReadFlag: boolean = false; // True: we are pre - reading a settings file.
     public quitting: boolean = false; // True: quitting.Locks out some events.
     public restarting: boolean = false; // True: restarting all of Leo.#1240.
@@ -279,8 +335,8 @@ export class LeoApp {
     // For communication between find / change scripts.
     public scriptDict: any = {};
     // For use by scripts.Cleared before running each script.
-    public scriptResult = null;   // For use by leoPymacs.
-    public permanentScriptDict = {};   // For use by scrips.Never cleared automatically.
+    public scriptResult = null; // For use by leoPymacs.
+    public permanentScriptDict = {}; // For use by scrips.Never cleared automatically.
 
     public isExternalUnitTest: boolean = false; // True: we are running a unit test externally.
     public runningAllUnitTests: boolean = false; // True: we are running all unit tests(Only for local tests).
@@ -291,19 +347,19 @@ export class LeoApp {
     public suppressImportChecks: boolean = false;
     // Used only in basescanner.py ;
     // True: suppress importCommands.check
-    public unitTestDict = {};   // For communication between unit tests and code.
-    public unitTestGui = null;   // A way to override the gui in external unit tests.
-    public unitTesting = false;   // True if unit testing.
-    public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
+    public unitTestDict = {}; // For communication between unit tests and code.
+    public unitTestGui = null; // A way to override the gui in external unit tests.
+    public unitTesting = false; // True if unit testing.
+    public unitTestMenusDict = {}; // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
 
     //@-<< LeoApp: unit testing ivars >>
 
     public delegate_language_dict: { [key: string]: string } = {};
     public extension_dict: { [key: string]: string } = {};
     public extra_extension_dict: { [key: string]: string } = {};
-    public prolog_prefix_string: string = "";
-    public prolog_postfix_string: string = "";
-    public prolog_namespace_string: string = "";
+    public prolog_prefix_string: string = '';
+    public prolog_postfix_string: string = '';
+    public prolog_namespace_string: string = '';
     public language_delims_dict: { [key: string]: string } = {};
     public language_extension_dict: { [key: string]: string } = {};
 
@@ -327,9 +383,9 @@ export class LeoApp {
         this.delegate_language_dict = {
             // Keys are new language names.
             // Values are existing languages in leo / modes.
-            "less": "css",
-            "hbs": "html",
-            "handlebars": "html",
+            less: 'css',
+            hbs: 'html',
+            handlebars: 'html',
             //"rust": "c",
             // "vue": "c",
         };
@@ -337,156 +393,155 @@ export class LeoApp {
 
     //@+node:felix.20210103024632.17: *5* app.define_extension_dict
     public define_extension_dict(): void {
-
         // Keys are extensions, values are languages
         this.extension_dict = {
             // "ada": "ada",
-            "ada": "ada95", // modes / ada95.py exists.
-            "ahk": "autohotkey",
-            "aj": "aspect_j",
-            "apdl": "apdl",
-            "as": "actionscript", // jason 2003-07 - 03
-            "asp": "asp",
-            "awk": "awk",
-            "b": "b",
-            "bas": "rapidq", // fil 2004-march - 11
-            "bash": "shellscript",
-            "bat": "batch",
-            "bbj": "bbj",
-            "bcel": "bcel",
-            "bib": "bibtex",
-            "c": "c",
-            "c++": "cplusplus",
-            "cbl": "cobol", // Only one extension is valid: .cob
-            "cfg": "config",
-            "cfm": "coldfusion",
-            "clj": "clojure", // 2013 / 09 / 25: Fix bug 879338.
-            "cljs": "clojure",
-            "cljc": "clojure",
-            "ch": "chill", // Other extensions, .c186,.c286
-            "coffee": "coffeescript",
-            "conf": "apacheconf",
-            "cpp": "cplusplus", // 2020 / 08 / 12: was cpp.
-            "css": "css",
-            "d": "d",
-            "dart": "dart",
-            "e": "eiffel",
-            "el": "elisp",
-            "eml": "mail",
-            "erl": "erlang",
-            "ex": "elixir",
-            "f": "fortran",
-            "f90": "fortran90",
-            "factor": "factor",
-            "forth": "forth",
-            "g": "antlr",
-            "groovy": "groovy",
-            "h": "c", // 2012 / 05 / 23.
-            "handlebars": "html", // McNab.
-            "hbs": "html", // McNab.
-            "hs": "haskell",
-            "html": "html",
-            "hx": "haxe",
-            "i": "swig",
-            "i4gl": "i4gl",
-            "icn": "icon",
-            "idl": "idl",
-            "inf": "inform",
-            "info": "texinfo",
-            "ini": "ini",
-            "io": "io",
-            "ipynb": "jupyter",
-            "iss": "inno_setup",
-            "java": "java",
-            "jhtml": "jhtml",
-            "jmk": "jmk",
-            "js": "javascript", // For javascript import test.
-            "jsp": "javaserverpage",
-            "json": "json",
+            ada: 'ada95', // modes / ada95.py exists.
+            ahk: 'autohotkey',
+            aj: 'aspect_j',
+            apdl: 'apdl',
+            as: 'actionscript', // jason 2003-07 - 03
+            asp: 'asp',
+            awk: 'awk',
+            b: 'b',
+            bas: 'rapidq', // fil 2004-march - 11
+            bash: 'shellscript',
+            bat: 'batch',
+            bbj: 'bbj',
+            bcel: 'bcel',
+            bib: 'bibtex',
+            c: 'c',
+            'c++': 'cplusplus',
+            cbl: 'cobol', // Only one extension is valid: .cob
+            cfg: 'config',
+            cfm: 'coldfusion',
+            clj: 'clojure', // 2013 / 09 / 25: Fix bug 879338.
+            cljs: 'clojure',
+            cljc: 'clojure',
+            ch: 'chill', // Other extensions, .c186,.c286
+            coffee: 'coffeescript',
+            conf: 'apacheconf',
+            cpp: 'cplusplus', // 2020 / 08 / 12: was cpp.
+            css: 'css',
+            d: 'd',
+            dart: 'dart',
+            e: 'eiffel',
+            el: 'elisp',
+            eml: 'mail',
+            erl: 'erlang',
+            ex: 'elixir',
+            f: 'fortran',
+            f90: 'fortran90',
+            factor: 'factor',
+            forth: 'forth',
+            g: 'antlr',
+            groovy: 'groovy',
+            h: 'c', // 2012 / 05 / 23.
+            handlebars: 'html', // McNab.
+            hbs: 'html', // McNab.
+            hs: 'haskell',
+            html: 'html',
+            hx: 'haxe',
+            i: 'swig',
+            i4gl: 'i4gl',
+            icn: 'icon',
+            idl: 'idl',
+            inf: 'inform',
+            info: 'texinfo',
+            ini: 'ini',
+            io: 'io',
+            ipynb: 'jupyter',
+            iss: 'inno_setup',
+            java: 'java',
+            jhtml: 'jhtml',
+            jmk: 'jmk',
+            js: 'javascript', // For javascript import test.
+            jsp: 'javaserverpage',
+            json: 'json',
             // "jsp": "jsp",
-            "ksh": "kshell",
-            "kv": "kivy", // PeckJ 2014/05/05
-            "latex": "latex",
-            "less": "css", // McNab
-            "lua": "lua", // ddm 13/02/06
-            "ly": "lilypond",
-            "m": "matlab",
-            "mak": "makefile",
-            "md": "md", // PeckJ 2013/02/07
-            "ml": "ml",
-            "mm": "objective_c", // Only one extension is valid: .m
-            "mod": "modula3",
-            "mpl": "maple",
-            "mqsc": "mqsc",
-            "nqc": "nqc",
-            "nsi": "nsi", // EKR: 2010/10/27
+            ksh: 'kshell',
+            kv: 'kivy', // PeckJ 2014/05/05
+            latex: 'latex',
+            less: 'css', // McNab
+            lua: 'lua', // ddm 13/02/06
+            ly: 'lilypond',
+            m: 'matlab',
+            mak: 'makefile',
+            md: 'md', // PeckJ 2013/02/07
+            ml: 'ml',
+            mm: 'objective_c', // Only one extension is valid: .m
+            mod: 'modula3',
+            mpl: 'maple',
+            mqsc: 'mqsc',
+            nqc: 'nqc',
+            nsi: 'nsi', // EKR: 2010/10/27
             // "nsi": "nsis2",
-            "nw": "noweb",
-            "occ": "occam",
-            "otl": "vimoutline", // TL 8/25/08 Vim's outline plugin
-            "p": "pascal",
+            nw: 'noweb',
+            occ: 'occam',
+            otl: 'vimoutline', // TL 8/25/08 Vim's outline plugin
+            p: 'pascal',
             // "p": "pop11", // Conflicts with pascal.
-            "php": "php",
-            "pike": "pike",
-            "pl": "perl",
-            "pl1": "pl1",
-            "po": "gettext",
-            "pod": "perlpod",
-            "pov": "povray",
-            "prg": "foxpro",
-            "pro": "prolog",
-            "ps": "postscript",
-            "psp": "psp",
-            "ptl": "ptl",
-            "py": "python",
-            "pyx": "cython", // Other extensions, .pyd,.pyi
+            php: 'php',
+            pike: 'pike',
+            pl: 'perl',
+            pl1: 'pl1',
+            po: 'gettext',
+            pod: 'perlpod',
+            pov: 'povray',
+            prg: 'foxpro',
+            pro: 'prolog',
+            ps: 'postscript',
+            psp: 'psp',
+            ptl: 'ptl',
+            py: 'python',
+            pyx: 'cython', // Other extensions, .pyd,.pyi
             // "pyx": "pyrex",
             // "r": "r", # modes / r.py does not exist.
-            "r": "rebol", // jason 2003-07 - 03
-            "rb": "ruby", // thyrsus 2008-11 - 05
-            "rest": "rst",
-            "rex": "objectrexx",
-            "rhtml": "rhtml",
-            "rib": "rib",
-            "rs": "rust", // EKR: 2019/08/11
-            "sas": "sas",
-            "scala": "scala",
-            "scm": "scheme",
-            "scpt": "applescript",
-            "sgml": "sgml",
-            "sh": "shell", // DS 4/1/04.modes / shell.py exists.
-            "shtml": "shtml",
-            "sm": "smalltalk",
-            "splus": "splus",
-            "sql": "plsql", // qt02537 2005-05 - 27
-            "sqr": "sqr",
-            "ss": "ssharp",
-            "ssi": "shtml",
-            "sty": "latex",
-            "tcl": "tcl", // modes / tcl.py exists.
+            r: 'rebol', // jason 2003-07 - 03
+            rb: 'ruby', // thyrsus 2008-11 - 05
+            rest: 'rst',
+            rex: 'objectrexx',
+            rhtml: 'rhtml',
+            rib: 'rib',
+            rs: 'rust', // EKR: 2019/08/11
+            sas: 'sas',
+            scala: 'scala',
+            scm: 'scheme',
+            scpt: 'applescript',
+            sgml: 'sgml',
+            sh: 'shell', // DS 4/1/04.modes / shell.py exists.
+            shtml: 'shtml',
+            sm: 'smalltalk',
+            splus: 'splus',
+            sql: 'plsql', // qt02537 2005-05 - 27
+            sqr: 'sqr',
+            ss: 'ssharp',
+            ssi: 'shtml',
+            sty: 'latex',
+            tcl: 'tcl', // modes / tcl.py exists.
             // "tcl": "tcltk",
-            "tex": "latex",
+            tex: 'latex',
             // "tex": "tex",
-            "tpl": "tpl",
-            "ts": "typescript",
-            "txt": "plain",
+            tpl: 'tpl',
+            ts: 'typescript',
+            txt: 'plain',
             // "txt": "text",
             // "txt": "unknown", # Set when @comment is seen.
-            "uc": "uscript",
-            "v": "verilog",
-            "vbs": "vbscript",
-            "vhd": "vhdl",
-            "vhdl": "vhdl",
-            "vim": "vim",
-            "vtl": "velocity",
-            "w": "cweb",
-            "wiki": "moin",
-            "xml": "xml",
-            "xom": "omnimark",
-            "xsl": "xsl",
-            "yaml": "yaml",
-            "vue": "javascript",
-            "zpt": "zpt"
+            uc: 'uscript',
+            v: 'verilog',
+            vbs: 'vbscript',
+            vhd: 'vhdl',
+            vhdl: 'vhdl',
+            vim: 'vim',
+            vtl: 'velocity',
+            w: 'cweb',
+            wiki: 'moin',
+            xml: 'xml',
+            xom: 'omnimark',
+            xsl: 'xsl',
+            yaml: 'yaml',
+            vue: 'javascript',
+            zpt: 'zpt',
         };
 
         /*
@@ -512,191 +567,192 @@ export class LeoApp {
         */
 
         this.extra_extension_dict = {
-            'pod': 'perl',
-            'unknown_language': 'none',
-            'w': 'none' // cweb
+            pod: 'perl',
+            unknown_language: 'none',
+            w: 'none', // cweb
         };
     }
 
     //@+node:felix.20210103024632.18: *5* app.define_global_constants
     public define_global_constants(): void {
         // this.prolog_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        this.prolog_prefix_string = "<?xml version=\"1.0\" encoding=";
-        this.prolog_postfix_string = "?>";
-        this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
+        this.prolog_prefix_string = '<?xml version="1.0" encoding=';
+        this.prolog_postfix_string = '?>';
+        // this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
+        this.prolog_namespace_string =
+            'xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1"';
     }
 
     //@+node:felix.20210103024632.19: *5* app.define_language_delims_dict
     public define_language_delims_dict(): void {
-
         this.language_delims_dict = {
             // Internally, lower case is used for all language names.
-            // Keys are languages, values are 1, 2 or 3-tuples of delims.
-            "actionscript": "// /* */", // jason 2003-07 - 03
-            "ada": "--",
-            "ada95": "--",
-            "ahk": ";",
-            "antlr": "// /* */",
-            "apacheconf": "#",
-            "apdl": "!",
-            "applescript": "-- (* *)",
-            "asp": "<!-- -->",
-            "aspect_j": "// /* */",
-            "assembly_macro32": ";",
-            "assembly_mcs51": ";",
-            "assembly_parrot": "#",
-            "assembly_r2000": "#",
-            "assembly_x86": ";",
-            "autohotkey": "; /* */", // TL - AutoHotkey language
-            "awk": "#",
-            "b": "// /* */",
-            "batch": "REM_", // Use the REM hack.
-            "bbj": "/* */",
-            "bcel": "// /* */",
-            "bibtex": "%",
-            "c": "// /* */", // C, C++ or objective C.
-            "chill": "/* */",
-            "clojure": ";", // 2013 / 09 / 25: Fix bug 879338.
-            "cobol": "*",
-            "coldfusion": "<!-- -->",
-            "coffeescript": "#", // 2016 / 02 / 26.
-            "config": "#", // Leo 4.5.1
-            "cplusplus": "// /* */",
-            "cpp": "// /* */",// C++.
-            "csharp": "// /* */", // C#
-            "css": "/* */", // 4 / 1 / 04
-            "cweb": "@q@ @>", // Use the "cweb hack"
-            "cython": "#",
-            "d": "// /* */",
-            "dart": "// /* */", // Leo 5.0.
-            "doxygen": "#",
-            "eiffel": "--",
-            "elisp": ";",
-            "erlang": "%",
-            "elixir": "#",
-            "factor": "!_ ( )", // Use the rem hack.
-            "forth": "\\_ _(_ _)", // Use the "REM hack"
-            "fortran": "C",
-            "fortran90": "!",
-            "foxpro": "&&",
-            "gettext": "# ",
-            "groovy": "// /* */",
-            "handlebars": "<!-- -->", // McNab: delegate to html.
-            "haskell": "--_ {-_ _-}",
-            "haxe": "// /* */",
-            "hbs": "<!-- -->", // McNab: delegate to html.
-            "html": "<!-- -->",
-            "i4gl": "-- { }",
-            "icon": "#",
-            "idl": "// /* */",
-            "inform": "!",
-            "ini": ";",
-            "inno_setup": ";",
-            "interlis": "/* */",
-            "io": "// */",
-            "java": "// /* */",
-            "javascript": "// /* */", // EKR: 2011 / 11 / 12: For javascript import test.
-            "javaserverpage": "<%-- --%>", // EKR: 2011 / 11 / 25(See also, jsp)
-            "jhtml": "<!-- -->",
-            "jmk": "#",
-            "json": "#", // EKR: 2020 / 07 / 27: Json has no delims.This is a dummy entry.
-            "jsp": "<%-- --%>",
-            "jupyter": "<%-- --%>", // Default to markdown ?
-            "kivy": "#", // PeckJ 2014 / 05 / 05
-            "kshell": "#", // Leo 4.5.1.
-            "latex": "%",
-            "less": "/* */", // NcNab: delegate to css.
-            "lilypond": "% %{ %}",
-            "lisp": ";", // EKR: 2010 / 09 / 29
-            "lotos": "(* *)",
-            "lua": "--", // ddm 13 / 02 / 06
-            "mail": ">",
-            "makefile": "#",
-            "maple": "//",
-            "markdown": "<!-- -->", // EKR, 2018 / 03 / 03: html comments.
-            "matlab": "%", // EKR: 2011 / 10 / 21
-            "md": "<!-- -->", // PeckJ: 2013 / 02 / 08
-            "ml": "(* *)",
-            "modula3": "(* *)",
-            "moin": "##",
-            "mqsc": "*",
-            "netrexx": "-- /* */",
-            "noweb": "%", // EKR: 2009 - 01 - 30. Use Latex for doc chunks.
-            "nqc": "// /* */",
-            "nsi": ";", // EKR: 2010 / 10 / 27
-            "nsis2": ";",
-            "objective_c": "// /* */",
-            "objectrexx": "-- /* */",
-            "occam": "--",
-            "omnimark": ";",
-            "pandoc": "<!-- -->",
-            "pascal": "// { }",
-            "perl": "#",
-            "perlpod": "# __=pod__ __=cut__", // 9 / 25 / 02: The perlpod hack.
-            "php": "// /* */", // 6 / 23 / 07: was "//",
-            "pike": "// /* */",
-            "pl1": "/* */",
-            "plain": "#", // We must pick something.
-            "plsql": "-- /* */", // SQL scripts qt02537 2005 - 05 - 27
-            "pop11": ";;; /* */",
-            "postscript": "%",
-            "povray": "// /* */",
-            "powerdynamo": "// <!-- -->",
-            "prolog": "% /* */",
-            "psp": "<!-- -->",
-            "ptl": "#",
-            "pvwave": ";",
-            "pyrex": "#",
-            "python": "#",
-            "r": "#",
-            "rapidq": "'", // fil 2004 - march - 11
-            "rebol": ";", // jason 2003 - 07 - 03
-            "redcode": ";",
-            "rest": ".._",
-            "rhtml": "<%# %>",
-            "rib": "#",
-            "rpmspec": "#",
-            "rst": ".._",
-            "rust": "// /* */",
-            "ruby": "#", // thyrsus 2008 - 11 - 05
-            "rview": "// /* */",
-            "sas": "* /* */",
-            "scala": "// /* */",
-            "scheme": "; #| |#",
-            "sdl_pr": "/* */",
-            "sgml": "<!-- -->",
-            "shell": "#",     // shell scripts
-            "shellscript": "#",
-            "shtml": "<!-- -->",
-            "smalltalk": '" "', // Comments are enclosed in double quotes(!!)
-            "smi_mib": "--",
-            "splus": "#",
-            "sqr": "!",
-            "squidconf": "#",
-            "ssharp": "#",
-            "swig": "// /* */",
-            "tcl": "#",
-            "tcltk": "#",
-            "tex": "%", // Bug fix: 2008 - 1 - 30: Fixed Mark Edginton's bug.
-            "text": "#", // We must pick something.
-            "texinfo": "@c",
-            "tpl": "<!-- -->",
-            "tsql": "-- /* */",
-            "typescript": "// /* */", // For typescript import test.
-            "unknown": "#", // Set when @comment is seen.
-            "unknown_language": '#--unknown-language--', // For unknown extensions in @shadow files.
-            "uscript": "// /* */",
-            "vbscript": "'",
-            "velocity": "## #* *#",
-            "verilog": "// /* */",
-            "vhdl": "--",
-            "vim": "\"",
-            "vimoutline": "#", // TL 8 / 25 / 08 Vim's outline plugin
-            "xml": "<!-- -->",
-            "xsl": "<!-- -->",
-            "xslt": "<!-- -->",
-            "yaml": "#",
-            "zpt": "<!-- -->"
+            // Keys are languages, values are strings that contain 1, 2 or 3 delims separated by spaces.
+            actionscript: '// /* */', // jason 2003-07 - 03
+            ada: '--',
+            ada95: '--',
+            ahk: ';',
+            antlr: '// /* */',
+            apacheconf: '#',
+            apdl: '!',
+            applescript: '-- (* *)',
+            asp: '<!-- -->',
+            aspect_j: '// /* */',
+            assembly_macro32: ';',
+            assembly_mcs51: ';',
+            assembly_parrot: '#',
+            assembly_r2000: '#',
+            assembly_x86: ';',
+            autohotkey: '; /* */', // TL - AutoHotkey language
+            awk: '#',
+            b: '// /* */',
+            batch: 'REM_', // Use the REM hack.
+            bbj: '/* */',
+            bcel: '// /* */',
+            bibtex: '%',
+            c: '// /* */', // C, C++ or objective C.
+            chill: '/* */',
+            clojure: ';', // 2013 / 09 / 25: Fix bug 879338.
+            cobol: '*',
+            coldfusion: '<!-- -->',
+            coffeescript: '#', // 2016 / 02 / 26.
+            config: '#', // Leo 4.5.1
+            cplusplus: '// /* */',
+            cpp: '// /* */', // C++.
+            csharp: '// /* */', // C#
+            css: '/* */', // 4 / 1 / 04
+            cweb: '@q@ @>', // Use the "cweb hack"
+            cython: '#',
+            d: '// /* */',
+            dart: '// /* */', // Leo 5.0.
+            doxygen: '#',
+            eiffel: '--',
+            elisp: ';',
+            erlang: '%',
+            elixir: '#',
+            factor: '!_ ( )', // Use the rem hack.
+            forth: '\\_ _(_ _)', // Use the "REM hack"
+            fortran: 'C',
+            fortran90: '!',
+            foxpro: '&&',
+            gettext: '# ',
+            groovy: '// /* */',
+            handlebars: '<!-- -->', // McNab: delegate to html.
+            haskell: '--_ {-_ _-}',
+            haxe: '// /* */',
+            hbs: '<!-- -->', // McNab: delegate to html.
+            html: '<!-- -->',
+            i4gl: '-- { }',
+            icon: '#',
+            idl: '// /* */',
+            inform: '!',
+            ini: ';',
+            inno_setup: ';',
+            interlis: '/* */',
+            io: '// */',
+            java: '// /* */',
+            javascript: '// /* */', // EKR: 2011 / 11 / 12: For javascript import test.
+            javaserverpage: '<%-- --%>', // EKR: 2011 / 11 / 25(See also, jsp)
+            jhtml: '<!-- -->',
+            jmk: '#',
+            json: '#', // EKR: 2020 / 07 / 27: Json has no delims.This is a dummy entry.
+            jsp: '<%-- --%>',
+            jupyter: '<%-- --%>', // Default to markdown ?
+            kivy: '#', // PeckJ 2014 / 05 / 05
+            kshell: '#', // Leo 4.5.1.
+            latex: '%',
+            less: '/* */', // NcNab: delegate to css.
+            lilypond: '% %{ %}',
+            lisp: ';', // EKR: 2010 / 09 / 29
+            lotos: '(* *)',
+            lua: '--', // ddm 13 / 02 / 06
+            mail: '>',
+            makefile: '#',
+            maple: '//',
+            markdown: '<!-- -->', // EKR, 2018 / 03 / 03: html comments.
+            matlab: '%', // EKR: 2011 / 10 / 21
+            md: '<!-- -->', // PeckJ: 2013 / 02 / 08
+            ml: '(* *)',
+            modula3: '(* *)',
+            moin: '##',
+            mqsc: '*',
+            netrexx: '-- /* */',
+            noweb: '%', // EKR: 2009 - 01 - 30. Use Latex for doc chunks.
+            nqc: '// /* */',
+            nsi: ';', // EKR: 2010 / 10 / 27
+            nsis2: ';',
+            objective_c: '// /* */',
+            objectrexx: '-- /* */',
+            occam: '--',
+            omnimark: ';',
+            pandoc: '<!-- -->',
+            pascal: '// { }',
+            perl: '#',
+            perlpod: '# __=pod__ __=cut__', // 9 / 25 / 02: The perlpod hack.
+            php: '// /* */', // 6 / 23 / 07: was "//",
+            pike: '// /* */',
+            pl1: '/* */',
+            plain: '#', // We must pick something.
+            plsql: '-- /* */', // SQL scripts qt02537 2005 - 05 - 27
+            pop11: ';;; /* */',
+            postscript: '%',
+            povray: '// /* */',
+            powerdynamo: '// <!-- -->',
+            prolog: '% /* */',
+            psp: '<!-- -->',
+            ptl: '#',
+            pvwave: ';',
+            pyrex: '#',
+            python: '#',
+            r: '#',
+            rapidq: "'", // fil 2004 - march - 11
+            rebol: ';', // jason 2003 - 07 - 03
+            redcode: ';',
+            rest: '.._',
+            rhtml: '<%# %>',
+            rib: '#',
+            rpmspec: '#',
+            rst: '.._',
+            rust: '// /* */',
+            ruby: '#', // thyrsus 2008 - 11 - 05
+            rview: '// /* */',
+            sas: '* /* */',
+            scala: '// /* */',
+            scheme: '; #| |#',
+            sdl_pr: '/* */',
+            sgml: '<!-- -->',
+            shell: '#', // shell scripts
+            shellscript: '#',
+            shtml: '<!-- -->',
+            smalltalk: '" "', // Comments are enclosed in double quotes(!!)
+            smi_mib: '--',
+            splus: '#',
+            sqr: '!',
+            squidconf: '#',
+            ssharp: '#',
+            swig: '// /* */',
+            tcl: '#',
+            tcltk: '#',
+            tex: '%', // Bug fix: 2008 - 1 - 30: Fixed Mark Edginton's bug.
+            text: '#', // We must pick something.
+            texinfo: '@c',
+            tpl: '<!-- -->',
+            tsql: '-- /* */',
+            typescript: '// /* */', // For typescript import test.
+            unknown: '#', // Set when @comment is seen.
+            unknown_language: '#--unknown-language--', // For unknown extensions in @shadow files.
+            uscript: '// /* */',
+            vbscript: "'",
+            velocity: '## #* *#',
+            verilog: '// /* */',
+            vhdl: '--',
+            vim: '"',
+            vimoutline: '#', // TL 8 / 25 / 08 Vim's outline plugin
+            xml: '<!-- -->',
+            xsl: '<!-- -->',
+            xslt: '<!-- -->',
+            yaml: '#',
+            zpt: '<!-- -->',
 
             // These aren't real languages, or have no delims...
             // "cvs_commit"         : "",
@@ -713,155 +769,153 @@ export class LeoApp {
             // "rtf"                : "",
             // "svn_commit"         : "",
         };
-
     }
 
     //@+node:felix.20210103024632.20: *5* app.define_language_extension_dict
     public define_language_extension_dict(): void {
-
         // Used only by g.app.externalFilesController.get_ext.
 
         // Keys are languages, values are extensions.
         this.language_extension_dict = {
-            "actionscript": "as", // jason 2003-07 - 03
-            "ada": "ada",
-            "ada95": "ada",
-            "ahk": "ahk",
-            "antlr": "g",
-            "apacheconf": "conf",
-            "apdl": "apdl",
-            "applescript": "scpt",
-            "asp": "asp",
-            "aspect_j": "aj",
-            "autohotkey": "ahk", // TL - AutoHotkey language
-            "awk": "awk",
-            "b": "b",
-            "batch": "bat", // Leo 4.5.1.
-            "bbj": "bbj",
-            "bcel": "bcel",
-            "bibtex": "bib",
-            "c": "c",
-            "chill": "ch", // Only one extension is valid: .c186, .c286
-            "clojure": "clj", // 2013 / 09 / 25: Fix bug 879338.
-            "cobol": "cbl", // Only one extension is valid: .cob
-            "coldfusion": "cfm",
-            "coffeescript": "coffee",
-            "config": "cfg",
-            "cplusplus": "c++",
-            "cpp": "cpp",
-            "css": "css", // 4 / 1 / 04
-            "cweb": "w",
-            "cython": "pyx", // Only one extension is valid at present: .pyi, .pyd.
-            "d": "d",
-            "dart": "dart",
-            "eiffel": "e",
-            "elisp": "el",
-            "erlang": "erl",
-            "elixir": "ex",
-            "factor": "factor",
-            "forth": "forth",
-            "fortran": "f",
-            "fortran90": "f90",
-            "foxpro": "prg",
-            "gettext": "po",
-            "groovy": "groovy",
-            "haskell": "hs",
-            "haxe": "hx",
-            "html": "html",
-            "i4gl": "i4gl",
-            "icon": "icn",
-            "idl": "idl",
-            "inform": "inf",
-            "ini": "ini",
-            "inno_setup": "iss",
-            "io": "io",
-            "java": "java",
-            "javascript": "js", // EKR: 2011/11/12: For javascript import test.
-            "javaserverpage": "jsp", // EKR: 2011/11/25
-            "jhtml": "jhtml",
-            "jmk": "jmk",
-            "json": "json",
-            "jsp": "jsp",
-            "jupyter": "ipynb",
-            "kivy": "kv", // PeckJ 2014/05/05
-            "kshell": "ksh", // Leo 4.5.1.
-            "latex": "tex", // 1 / 8 / 04
-            "lilypond": "ly",
-            "lua": "lua", // ddm 13/02/06
-            "mail": "eml",
-            "makefile": "mak",
-            "maple": "mpl",
-            "matlab": "m",
-            "md": "md", // PeckJ: 2013/02/07
-            "ml": "ml",
-            "modula3": "mod",
-            "moin": "wiki",
-            "mqsc": "mqsc",
-            "noweb": "nw",
-            "nqc": "nqc",
-            "nsi": "nsi", // EKR: 2010/10/27
-            "nsis2": "nsi",
-            "objective_c": "mm", // Only one extension is valid: .m
-            "objectrexx": "rex",
-            "occam": "occ",
-            "omnimark": "xom",
-            "pascal": "p",
-            "perl": "pl",
-            "perlpod": "pod",
-            "php": "php",
-            "pike": "pike",
-            "pl1": "pl1",
-            "plain": "txt",
-            "plsql": "sql", // qt02537 2005-05 - 27
+            actionscript: 'as', // jason 2003-07 - 03
+            ada: 'ada',
+            ada95: 'ada',
+            ahk: 'ahk',
+            antlr: 'g',
+            apacheconf: 'conf',
+            apdl: 'apdl',
+            applescript: 'scpt',
+            asp: 'asp',
+            aspect_j: 'aj',
+            autohotkey: 'ahk', // TL - AutoHotkey language
+            awk: 'awk',
+            b: 'b',
+            batch: 'bat', // Leo 4.5.1.
+            bbj: 'bbj',
+            bcel: 'bcel',
+            bibtex: 'bib',
+            c: 'c',
+            chill: 'ch', // Only one extension is valid: .c186, .c286
+            clojure: 'clj', // 2013 / 09 / 25: Fix bug 879338.
+            cobol: 'cbl', // Only one extension is valid: .cob
+            coldfusion: 'cfm',
+            coffeescript: 'coffee',
+            config: 'cfg',
+            cplusplus: 'c++',
+            cpp: 'cpp',
+            css: 'css', // 4 / 1 / 04
+            cweb: 'w',
+            cython: 'pyx', // Only one extension is valid at present: .pyi, .pyd.
+            d: 'd',
+            dart: 'dart',
+            eiffel: 'e',
+            elisp: 'el',
+            erlang: 'erl',
+            elixir: 'ex',
+            factor: 'factor',
+            forth: 'forth',
+            fortran: 'f',
+            fortran90: 'f90',
+            foxpro: 'prg',
+            gettext: 'po',
+            groovy: 'groovy',
+            haskell: 'hs',
+            haxe: 'hx',
+            html: 'html',
+            i4gl: 'i4gl',
+            icon: 'icn',
+            idl: 'idl',
+            inform: 'inf',
+            ini: 'ini',
+            inno_setup: 'iss',
+            io: 'io',
+            java: 'java',
+            javascript: 'js', // EKR: 2011/11/12: For javascript import test.
+            javaserverpage: 'jsp', // EKR: 2011/11/25
+            jhtml: 'jhtml',
+            jmk: 'jmk',
+            json: 'json',
+            jsp: 'jsp',
+            jupyter: 'ipynb',
+            kivy: 'kv', // PeckJ 2014/05/05
+            kshell: 'ksh', // Leo 4.5.1.
+            latex: 'tex', // 1 / 8 / 04
+            lilypond: 'ly',
+            lua: 'lua', // ddm 13/02/06
+            mail: 'eml',
+            makefile: 'mak',
+            maple: 'mpl',
+            matlab: 'm',
+            md: 'md', // PeckJ: 2013/02/07
+            ml: 'ml',
+            modula3: 'mod',
+            moin: 'wiki',
+            mqsc: 'mqsc',
+            noweb: 'nw',
+            nqc: 'nqc',
+            nsi: 'nsi', // EKR: 2010/10/27
+            nsis2: 'nsi',
+            objective_c: 'mm', // Only one extension is valid: .m
+            objectrexx: 'rex',
+            occam: 'occ',
+            omnimark: 'xom',
+            pascal: 'p',
+            perl: 'pl',
+            perlpod: 'pod',
+            php: 'php',
+            pike: 'pike',
+            pl1: 'pl1',
+            plain: 'txt',
+            plsql: 'sql', // qt02537 2005-05 - 27
             // "pop11"       : "p", // Conflicts with pascal.
-            "postscript": "ps",
-            "povray": "pov",
-            "prolog": "pro",
-            "psp": "psp",
-            "ptl": "ptl",
-            "pyrex": "pyx",
-            "python": "py",
-            "r": "r",
-            "rapidq": "bas", // fil 2004-march - 11
-            "rebol": "r", // jason 2003-07 - 03
-            "rhtml": "rhtml",
-            "rib": "rib",
-            "rst": "rest",
-            "ruby": "rb", // thyrsus 2008-11 - 05
-            "rust": "rs", // EKR: 2019/08/11
-            "sas": "sas",
-            "scala": "scala",
-            "scheme": "scm",
-            "sgml": "sgml",
-            "shell": "sh", // DS 4/1/04
-            "shellscript": "bash",
-            "shtml": "ssi", // Only one extension is valid: .shtml
-            "smalltalk": "sm",
-            "splus": "splus",
-            "sqr": "sqr",
-            "ssharp": "ss",
-            "swig": "i",
-            "tcl": "tcl",
-            "tcltk": "tcl",
-            "tex": "tex",
-            "texinfo": "info",
-            "text": "txt",
-            "tpl": "tpl",
-            "tsql": "sql", // A guess.
-            "typescript": "ts",
-            "unknown": "txt", // Set when @comment is seen.
-            "uscript": "uc",
-            "vbscript": "vbs",
-            "velocity": "vtl",
-            "verilog": "v",
-            "vhdl": "vhd", // Only one extension is valid: .vhdl
-            "vim": "vim",
-            "vimoutline": "otl", // TL 8 / 25 / 08 Vim's outline plugin
-            "xml": "xml",
-            "xsl": "xsl",
-            "xslt": "xsl",
-            "yaml": "yaml",
-            "zpt": "zpt"
+            postscript: 'ps',
+            povray: 'pov',
+            prolog: 'pro',
+            psp: 'psp',
+            ptl: 'ptl',
+            pyrex: 'pyx',
+            python: 'py',
+            r: 'r',
+            rapidq: 'bas', // fil 2004-march - 11
+            rebol: 'r', // jason 2003-07 - 03
+            rhtml: 'rhtml',
+            rib: 'rib',
+            rst: 'rest',
+            ruby: 'rb', // thyrsus 2008-11 - 05
+            rust: 'rs', // EKR: 2019/08/11
+            sas: 'sas',
+            scala: 'scala',
+            scheme: 'scm',
+            sgml: 'sgml',
+            shell: 'sh', // DS 4/1/04
+            shellscript: 'bash',
+            shtml: 'ssi', // Only one extension is valid: .shtml
+            smalltalk: 'sm',
+            splus: 'splus',
+            sqr: 'sqr',
+            ssharp: 'ss',
+            swig: 'i',
+            tcl: 'tcl',
+            tcltk: 'tcl',
+            tex: 'tex',
+            texinfo: 'info',
+            text: 'txt',
+            tpl: 'tpl',
+            tsql: 'sql', // A guess.
+            typescript: 'ts',
+            unknown: 'txt', // Set when @comment is seen.
+            uscript: 'uc',
+            vbscript: 'vbs',
+            velocity: 'vtl',
+            verilog: 'v',
+            vhdl: 'vhd', // Only one extension is valid: .vhdl
+            vim: 'vim',
+            vimoutline: 'otl', // TL 8 / 25 / 08 Vim's outline plugin
+            xml: 'xml',
+            xsl: 'xsl',
+            xslt: 'xsl',
+            yaml: 'yaml',
+            zpt: 'zpt',
         };
 
         /*
@@ -879,7 +933,6 @@ export class LeoApp {
                 # squidconf:        .conf
                 # rpmspec:          .rpm
         */
-
     }
 
     //@+node:felix.20210103024632.21: *5* app.init_at_auto_names
@@ -887,7 +940,7 @@ export class LeoApp {
      * Init the app.atAutoNames set.
      */
     public init_at_auto_names(): void {
-        this.atAutoNames = ["@auto-rst", "@auto"];
+        this.atAutoNames = ['@auto-rst', '@auto'];
     }
 
     //@+node:felix.20210103024632.22: *5* app.init_at_file_names
@@ -896,12 +949,16 @@ export class LeoApp {
      */
     public init_at_file_names(): void {
         this.atFileNames = [
-            "@asis",
-            "@edit",
-            "@file-asis", "@file-thin", "@file-nosent", "@file",
-            "@clean", "@nosent",
-            "@shadow",
-            "@thin",
+            '@asis',
+            '@edit',
+            '@file-asis',
+            '@file-thin',
+            '@file-nosent',
+            '@file',
+            '@clean',
+            '@nosent',
+            '@shadow',
+            '@thin',
         ];
     }
 
@@ -909,7 +966,6 @@ export class LeoApp {
 
     //@+node:felix.20220417165216.1: *4* app.computeSignon & printSignon
     public computeSignon(): void {
-
         const app = this;
         if (app.signon && app.signon1) {
             return;
@@ -917,18 +973,20 @@ export class LeoApp {
 
         let guiVersion = 'VSCode version ' + vscode.version;
 
-        const w_LeoJSExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+        const w_LeoJSExtension = vscode.extensions.getExtension(
+            Constants.PUBLISHER + '.' + Constants.NAME
+        )!;
         const w_leojsPackageJson = w_LeoJSExtension.packageJSON;
 
         const leoVer: string = w_leojsPackageJson.version;
 
         // n1, n2, n3, junk1, junk2 = sys.version_info
-        let n1: string = "";
+        let n1: string = '';
         if (process.version) {
             n1 = 'Node.js ' + process.version;
-            // @ts-expect-error
+            // // @ts-expect-error
         } else if (location.hostname) {
-            // @ts-expect-error
+            // // @ts-expect-error
             n1 = location.hostname;
             // if dots take 2 last parts
             if (n1.includes('.')) {
@@ -936,35 +994,34 @@ export class LeoApp {
                 if (n1_split.length > 2) {
                     n1_split = n1_split.slice(-2);
                 }
-                n1 = n1_split.join(".");
+                n1 = n1_split.join('.');
             }
-
         }
         if (n1) {
             n1 += ', ';
         }
 
-        let sysVersion: string = "Browser";
+        let sysVersion: string = 'Browser';
 
         if (process.platform) {
             sysVersion = process.platform;
         } else {
             let browserResult: any;
-            // @ts-expect-error
+            // // @ts-expect-error
             if (navigator.userAgent) {
-                // @ts-expect-error
+                // // @ts-expect-error
                 browserResult = Bowser.parse(navigator.userAgent);
                 sysVersion = browserResult.browser.name;
                 if (browserResult.browser.version) {
-                    sysVersion += " " + browserResult.browser.version;
+                    sysVersion += ' ' + browserResult.browser.version;
                 }
 
                 if (browserResult.os) {
                     if (browserResult.os.name) {
-                        sysVersion += " on " + browserResult.os.name;
+                        sysVersion += ' on ' + browserResult.os.name;
                     }
                     if (browserResult.os.version) {
-                        sysVersion += " " + browserResult.os.version;
+                        sysVersion += ' ' + browserResult.os.version;
                     }
                 }
             }
@@ -1035,28 +1092,51 @@ export class LeoApp {
         g.es_print(app.signon);
         g.es_print(app.signon1);
     }
+    //@+node:felix.20230805210538.1: *4* app.setGlobalDb
+    /**
+     * Create global pickleshare db
+     *
+     * Usable by:
+     *
+     *    g.app.db['hello'] = [1,2,5]
+     */
+    public async setGlobalDb(): Promise<void> {
+
+        // Fixes bug 670108.
+
+        g.app.global_cacher = new GlobalCacher();
+        await g.app.global_cacher.init();
+        g.app.db = g.app.global_cacher.db;
+        g.app.commander_cacher = new CommanderCacher();
+        await g.app.commander_cacher.init();
+        g.app.commander_db = g.app.commander_cacher.db;
+
+    }
     //@+node:felix.20220417215228.1: *4* app.setLeoID & helpers
     /**
      * Get g.app.leoID from various sources.
      */
-    public async setLeoID(useDialog: boolean = true, verbose: boolean = true): Promise<string> {
-        this.leoID = "";
+    public async setLeoID(
+        useDialog: boolean = true,
+        verbose: boolean = true
+    ): Promise<string> {
+        this.leoID = '';
 
-        // tslint:disable-next-line: strict-comparisons
-        console.assert(this === g.app);
+        g.assert(this === g.app);
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        if (g.unitTesting) {
-            this.leoID = "unittestid";
-        }
+        // if (g.unitTesting) {
+        //     this.leoID = "unittestid";
+        // }
 
-        let w_userName = ""; // = "TestUserName";
+        let w_userName = ''; // = "TestUserName";
 
         // 1 - set leoID from configuration settings
         if (!this.leoID && vscode && vscode.workspace) {
-            w_userName = vscode.workspace.getConfiguration(
-                Constants.CONFIG_NAME).get(
+            w_userName = vscode.workspace
+                .getConfiguration(Constants.CONFIG_NAME)
+                .get(
                     Constants.CONFIG_NAMES.LEO_ID,
                     Constants.CONFIG_DEFAULTS.LEO_ID
                 );
@@ -1069,7 +1149,10 @@ export class LeoApp {
         if (!this.leoID && os && os.userInfo) {
             w_userName = os.userInfo().username;
             if (w_userName) {
-                this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
+                this.leoID = this.cleanLeoID(
+                    w_userName,
+                    'os.userInfo().username'
+                );
             }
         }
 
@@ -1078,20 +1161,33 @@ export class LeoApp {
             const w_id = await utils.getIdFromDialog();
             this.leoID = this.cleanLeoID(w_id, '');
             if (this.leoID && vscode && vscode.workspace) {
-                const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
-                // tslint:disable-next-line: strict-comparisons
-                if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
+                const w_vscodeConfig = vscode.workspace.getConfiguration(
+                    Constants.CONFIG_NAME
+                );
+
+                if (
+                    w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
+                        .defaultValue === this.leoID
+                ) {
                     // Set as undefined - same as default
-                    w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
+                    await w_vscodeConfig.update(
+                        Constants.CONFIG_NAMES.LEO_ID,
+                        undefined,
+                        true
+                    );
                 } else {
                     // Set as value which is not default
-                    await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
+                    await w_vscodeConfig.update(
+                        Constants.CONFIG_NAMES.LEO_ID,
+                        this.leoID,
+                        true
+                    );
                 }
             }
         }
         if (!this.leoID) {
             // throw new Error("Could not get Leo ID");
-            this.leoID = "None";
+            this.leoID = 'None';
         }
         return this.leoID;
     }
@@ -1103,24 +1199,29 @@ export class LeoApp {
     public cleanLeoID(id_: string, tag: string): string {
         const old_id: string = id_.toString();
         try {
-            id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
+            id_ = id_
+                .replace(/\./g, '')
+                .replace(/\,/g, '')
+                .replace(/\"/g, '')
+                .replace(/\'/g, '');
             //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
             id_ = id_.split(' ').join('');
-        }
-        catch (exception) {
+        } catch (exception) {
             g.es_exception(exception);
             id_ = '';
         }
         if (id_.length < 3) {
-            id_ = "";
-            // throw new Error("Invalid Leo ID");
-            // TODO: Show Leo Id syntax error message
-            // g.EmergencyDialog(
-            //   title=f"Invalid Leo ID: {tag}",
-            //    message=(
-            //        f"Invalid Leo ID: {old_id!r}\n\n"
-            //       "Your id should contain only letters and numbers\n"
-            //        "and must be at least 3 characters in length."))
+            id_ = '';
+            void vscode.window.showInformationMessage(
+                `Invalid Leo ID: ${tag}`,
+                {
+                    detail:
+                        `Invalid Leo ID: ${old_id}\n\n` +
+                        'Your id should contain only letters and numbers\n' +
+                        'and must be at least 3 characters in length.',
+                    modal: true,
+                }
+            );
         }
         return id_;
     }
@@ -1137,12 +1238,16 @@ export class LeoApp {
      *               during initial load, so UI remains for files
      *               further along the command line.
      */
-    public async closeLeoWindow(frame: LeoFrame, new_c?: Commands, finish_quit = true): Promise<boolean> {
+    public async closeLeoWindow(
+        frame: LeoFrame,
+        new_c?: Commands,
+        finish_quit = true
+    ): Promise<boolean> {
         const c = frame.c;
         if (g.app.debug.includes('shutdown')) {
             g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
         }
-        c.endEditing();  // Commit any open edits.
+        c.endEditing(); // Commit any open edits.
         if (c.promptingForClose) {
             // There is already a dialog open asking what to do.
             return false;
@@ -1162,22 +1267,21 @@ export class LeoApp {
         }
         // g.app.setLog(None)  // no log until we reactive a window.
 
-        g.doHook("close-frame", { c: c });
+        g.doHook('close-frame', { c: c });
         //
         // Save the window state for *all* open files.
         if (g.app.commander_cacher) {
-            g.app.commander_cacher.commit();  // store cache, but don't close it.
+            await g.app.commander_cacher.commit(); // store cache, but don't close it.
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
-            g.app.destroyWindow(frame);
+            await g.app.destroyWindow(frame);
 
             // Remove frame
             let index = g.app.windowList.indexOf(frame, 0);
             if (index > -1) {
                 g.app.windowList.splice(index, 1);
             }
-
         } else {
             // #69.
             g.app.forgetOpenFile(c.fileName());
@@ -1190,18 +1294,21 @@ export class LeoApp {
             // * Does not terminate when last is closed: Present 'new' and 'open' buttons instead!
             // g.app.finishQuit();
         }
-        return true;  // The window has been closed.
+        return true; // The window has been closed.
     }
     //@+node:felix.20220511231737.4: *4* app.destroyWindow
     /**
      * Destroy all ivars in a Leo frame.
      */
-    public destroyWindow(frame: LeoFrame): void {
+    public async destroyWindow(frame: LeoFrame): Promise<void> {
         if (g.app.debug.includes('shutdown')) {
             g.pr(`destroyWindow:  ${frame.c.shortFileName()}`);
         }
-        if (g.app.externalFilesController && g.app.externalFilesController.destroy_frame) {
-            g.app.externalFilesController.destroy_frame(frame);
+        if (
+            g.app.externalFilesController &&
+            g.app.externalFilesController.destroy_frame
+        ) {
+            await g.app.externalFilesController.destroy_frame(frame);
         }
         if (g.app.windowList.includes(frame)) {
             g.app.forgetOpenFile(frame.c.fileName());
@@ -1215,7 +1322,7 @@ export class LeoApp {
      * Return list of currently active controllers
      */
     public commanders(): Commands[] {
-        return g.app.windowList.map(f => f.c);
+        return g.app.windowList.map((f) => f.c);
     }
     //@+node:felix.20211226221235.1: *3* app.Detecting already-open files
     //@+node:felix.20211226221235.2: *4* app.checkForOpenFile
@@ -1229,7 +1336,8 @@ export class LeoApp {
             // #302: revert to saved doesn't reset external file change monitoring
             g.app.already_open_files = [];
         }
-        if (d === undefined ||
+        if (
+            d === undefined ||
             g.unitTesting ||
             g.app.batchMode ||
             g.app.reverting ||
@@ -1237,6 +1345,8 @@ export class LeoApp {
         ) {
             return;
         }
+        console.log('TODO : checkForOpenFile');
+
         // #1519: check os.path.exists.
         /*
         const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
@@ -1266,20 +1376,19 @@ export class LeoApp {
         // TODO maybe
         // Temp fix
         g.app.rememberOpenFile(fn);
-
     }
     //@+node:felix.20211226221235.3: *4* app.forgetOpenFile
     /**
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
+        console.log('TODO : TEST forgetOpenFile');
 
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
 
         if (!d || !fn) {
-
             return; // #69.
         }
 
@@ -1288,7 +1397,6 @@ export class LeoApp {
         fn = path.normalize(fn);
 
         if (aList.includes(fn)) {
-
             // aList.remove(fn)
             const index = aList.indexOf(fn);
             if (index > -1) {
@@ -1299,18 +1407,22 @@ export class LeoApp {
                 g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
             }
             d[tag] = aList;
-
         }
-
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
+        console.log('TODO : TEST rememberOpenFile');
 
         // Do not call g.trace, etc. here.
         const d = g.app.db;
         const tag = 'open-leo-files';
 
-        if (d === undefined || g.unitTesting || g.app.batchMode || g.app.reverting) {
+        if (
+            d === undefined ||
+            g.unitTesting ||
+            g.app.batchMode ||
+            g.app.reverting
+        ) {
             // pass
         } else if (g.app.preReadFlag) {
             // pass
@@ -1336,6 +1448,36 @@ export class LeoApp {
     //             title='Already Open Files',
     //             message=message,
     //             text="Ok")
+    //@+node:felix.20230518231054.1: *3* app.Import utils
+    //@+node:felix.20230518231054.2: *4* app.scanner_for_at_auto
+    /**
+     * A factory returning a scanner function for p, an @auto node.
+     */
+    public scanner_for_at_auto(
+        c: Commands,
+        p: Position
+    ): ((...args: any[]) => any) | undefined {
+        const d = g.app.atAutoDict;
+        for (const key in d) {
+            // USING 'in' for KEYS
+
+            const func = d[key];
+            if (func && g.match_word(p.h, 0, key)) {
+                return func;
+            }
+        }
+        return undefined;
+    }
+    //@+node:felix.20230518231054.3: *4* app.scanner_for_ext
+    /**
+     * A factory returning a scanner function for the given file extension.
+     */
+    public scanner_for_ext(
+        c: Commands,
+        ext: string
+    ): ((...args: any[]) => any) | undefined {
+        return g.app.classDispatchDict[ext];
+    }
     //@+node:felix.20220417215246.1: *3* app.makeAllBindings
     /**
      * LeoApp.makeAllBindings:
@@ -1357,9 +1499,9 @@ export class LeoApp {
      */
     public newCommander(
         fileName: string,
-        gui?: NullGui,
+        gui?: LeoGui,
         previousSettings?: PreviousSettings,
-        relativeFileName?: string,
+        relativeFileName?: string
     ): Commands {
         // Create the commander and its subcommanders.
         // This takes about 3/4 sec when called by the leoBridge module.
@@ -1394,15 +1536,16 @@ export class LeoApp {
             // master is a TabbedTopLevel.
             // Selecting the new tab ensures focus is set.
             master.select(c)
-        if 1:
-            c.initialFocusHelper()
-        else:
-            c.bodyWantsFocus()
-        c.outerUpdate()
         */
+
+        if (1) {
+            c.initialFocusHelper();
+        } else {
+            c.bodyWantsFocus();
+        }
+        c.outerUpdate();
     }
     //@-others
-
 }
 
 //@+node:felix.20210118015431.1: ** class LoadManager
@@ -1410,7 +1553,6 @@ export class LeoApp {
  * A class to manage loading .leo files, including configuration files.
  */
 export class LoadManager {
-
     // Global settings & shortcuts dicts...
     // The are the defaults for computing settings and shortcuts for all loaded files.
 
@@ -1451,19 +1593,19 @@ export class LoadManager {
 
     //@+node:felix.20220610002953.1: *3* LM.Directory & file utils
     //@+node:felix.20220610002953.2: *4* LM.completeFileName
-    /* 
-    def completeFileName(self, fileName):
-        fileName = g.toUnicode(fileName)
-        fileName = g.os_path_finalize(fileName)
-        # 2011/10/12: don't add .leo to *any* file.
-        return fileName
-     */
+
+    public completeFileName(fileName: string): string {
+        fileName = g.toUnicode(fileName);
+        fileName = g.finalize(fileName);
+        // 2011/10/12: don't add .leo to *any* file.
+        return fileName;
+    }
     //@+node:felix.20220610002953.3: *4* LM.computeLeoSettingsPath
     /* 
     def computeLeoSettingsPath(self):
         """Return the full path to leoSettings.leo."""
         # lm = self
-        join = g.os_path_finalize_join
+        join = g.finalize_join
         settings_fn = 'leoSettings.leo'
         table = (
             # First, leoSettings.leo in the home directories.
@@ -1487,36 +1629,51 @@ export class LoadManager {
      * The "footnote": Get the local directory from lm.files[0]
      */
     public async computeMyLeoSettingsPath(): Promise<string | undefined> {
-
         const lm = this;
-        const join = g.os_path_finalize_join;
+        const join = g.finalize_join;
         const settings_fn = 'myLeoSettings.leo';
         // This seems pointless: we need a machine *directory*.
+
+        // TODO ?
+        /*
+        // For now, however, we'll keep the existing code as is.
+        machine_fn = lm.computeMachineName() + settings_fn
+        */
 
         // First, compute the directory of the first loaded file.
         // All entries in lm.files are full, absolute paths.
         let localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
         // IF NO FILES IN lm.files THEN USE WORKSPACE ROOT !
         if (!localDir) {
-            localDir = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.path : "";
+            localDir = vscode.workspace.workspaceFolders
+                ? vscode.workspace.workspaceFolders[0].uri.path
+                : '';
         }
 
         const table = [
             // First, myLeoSettings.leo in the local directory
-            join(undefined, localDir, settings_fn),
+            join(localDir, settings_fn),
         ];
         // Next, myLeoSettings.leo in the home directories.
         if (g.app.homeDir) {
-            table.push(join(undefined, g.app.homeDir, settings_fn));
+            table.push(join(g.app.homeDir, settings_fn));
         }
         if (g.app.homeLeoDir) {
-            table.push(join(undefined, g.app.homeLeoDir, settings_fn));
+            table.push(join(g.app.homeLeoDir, settings_fn));
         }
+
+        // TODO ?
+        /*
+        // Next, <machine-name>myLeoSettings.leo in the home directories.
+        join(g.app.homeDir, machine_fn),
+        join(g.app.homeLeoDir, machine_fn),
+        // Last, leoSettings.leo in leo/config directory.
+        join(g.app.globalConfigDir, settings_fn),
+        */
 
         let hasBreak = false;
         let path: string | undefined;
         for (let p_path of table) {
-
             const exists = await g.os_path_exists(p_path);
             if (exists) {
                 path = p_path;
@@ -1537,18 +1694,17 @@ export class LoadManager {
      * set the corresponding ivars.
      */
     public async computeStandardDirectories(): Promise<unknown> {
-
         const lm = this;
-        const join = path.join;
-        g.app.loadDir = lm.computeLoadDir(); // UNUSED The leo / core directory. 
-        g.app.globalConfigDir = lm.computeGlobalConfigDir(); // UNUSED leo / config directory 
+        const join = g.PYTHON_os_path_join;
+        g.app.loadDir = lm.computeLoadDir(); // UNUSED The leo / core directory.
+        g.app.globalConfigDir = lm.computeGlobalConfigDir(); // UNUSED leo / config directory
         g.app.homeDir = await lm.computeHomeDir(); // * The user's home directory.
         g.app.homeLeoDir = await lm.computeHomeLeoDir(); // * The user's home/.leo directory.
-        // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs 
+        // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs
         // These use g.app.loadDir...
-        g.app.extensionsDir = ""; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
+        g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
         // g.app.leoEditorDir = join(g.app.loadDir, '..', '..');
-        // g.app.testDir = join(g.app.loadDir, '..', 'test');
+        g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
     }
@@ -1556,7 +1712,7 @@ export class LoadManager {
     //@+node:felix.20220610002953.6: *5* LM.computeGlobalConfigDir
 
     public computeGlobalConfigDir(): string {
-        let theDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+        let theDir: string = ''; // ! unused : RETURN EMPTY / FALSY FOR NOW
 
         /* 
         const leo_config_dir = getattr(sys, 'leo_config_directory', None)
@@ -1578,7 +1734,7 @@ export class LoadManager {
      * Returns the user's home directory.
      */
     public async computeHomeDir(): Promise<string> {
-        let home: string = "";
+        let home: string = '';
 
         // Windows searches the HOME, HOMEPATH and HOMEDRIVE
         // environment vars, then gives up.
@@ -1595,11 +1751,11 @@ export class LoadManager {
         if (home) {
             // Important: This returns the _working_ directory if home is None!
             // This was the source of the 4.3 .leoID.txt problems.
-            home = g.os_path_finalize(home);
+            home = g.finalize(home);
             const exists = await g.os_path_exists(home);
             const isDir = await g.os_path_isdir(home);
             if (!exists || !isDir) {
-                home = "";
+                home = '';
             }
         }
 
@@ -1608,14 +1764,14 @@ export class LoadManager {
     //@+node:felix.20220610002953.8: *5* LM.computeHomeLeoDir
 
     public async computeHomeLeoDir(): Promise<string> {
-        let homeLeoDir: string = "";
+        let homeLeoDir: string = '';
 
         // * RETURN FALSY STRING IF NO HOME DIR (possibly in browser)
         if (!g.app.homeDir) {
-            return "";
+            return '';
         }
 
-        homeLeoDir = g.os_path_finalize_join(undefined, g.app.homeDir, '.leo');
+        homeLeoDir = g.finalize_join(g.app.homeDir, '.leo');
         const exists = await g.os_path_exists(homeLeoDir);
 
         if (exists) {
@@ -1627,11 +1783,9 @@ export class LoadManager {
         try {
             await vscode.workspace.fs.createDirectory(w_uri);
             return homeLeoDir;
-        }
-        catch (exception) {
+        } catch (exception) {
             return '';
         }
-
     }
     //@+node:felix.20220610002953.9: *5* LM.computeLeoDir
     /* 
@@ -1646,7 +1800,24 @@ export class LoadManager {
      * Returns the directory containing leo.py.
      */
     public computeLoadDir(): string {
-        let loadDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+        let loadDir: string = __dirname || './';
+        let w_uri;
+        if (vscode.workspace.workspaceFolders) {
+            w_uri = vscode.workspace.workspaceFolders[0].uri;
+        }
+
+        // ! TRY TO GET EXTENSION FOLDER WITHOUT REQUIRING CONTEXT ! 
+        const extension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+        if (extension) {
+            loadDir = extension.extensionUri.fsPath; // ! OVERRIDE WITH REAL EXTENION PATH !
+        } else {
+            console.log(' -------------- leojs EXTENSION FOLDER NOT FOUND --------------');
+        }
+
+        // const loadDir2 = w_uri?.fsPath;
+        loadDir = g.finalize(loadDir);
+        // console.log(' -------------- loadDir => ', loadDir);
+        return loadDir;
         /* 
         try:
             # Fix a hangnail: on Windows the drive letter returned by
@@ -1668,7 +1839,7 @@ export class LoadManager {
                     if len(path) > 2 and path[1] == ':':
                         # Convert the drive name to upper case.
                         path = path[0].upper() + path[1:]
-                path = g.os_path_finalize(path)
+                path = g.finalize(path)
                 loadDir = g.os_path_dirname(path)
             else: loadDir = None
             if (
@@ -1682,7 +1853,7 @@ export class LoadManager {
                     loadDir += "/leo/plugins"
                 else:
                     g.pr("Exception getting load directory")
-            loadDir = g.os_path_finalize(loadDir)
+            loadDir = g.finalize(loadDir)
             return loadDir
         except Exception:
             print("Exception getting load directory")
@@ -1708,13 +1879,38 @@ export class LoadManager {
             name = ''
         return name
      */
+
+
+    /**
+     * Return the name of the current machine, i.e, HOSTNAME.
+     * This is prepended to leoSettings.leo or myLeoSettings.leo
+     * to give the machine-specific setting name.
+     * How can this be worth doing??
+     */
+    public computeMachineName(): string {
+        let name: string = '';
+        try {
+            name = process.env['HOSTNAME'] || '';
+            if (!name) {
+                name = process.env['COMPUTERNAME'] || '';
+            }
+            if (!name) {
+                // No equivalent of socket.gethostname() in Node.js.
+                // Using os module to get hostname.
+                name = os.hostname();
+            }
+        } catch (error) {
+            name = '';
+        }
+        return name;
+    }
     //@+node:felix.20220610002953.13: *4* LM.computeThemeDirectories
     /* 
     def computeThemeDirectories(self):
         """
         Return a list of *existing* directories that might contain theme .leo files.
         """
-        join = g.os_path_finalize_join
+        join = g.finalize_join
         home = g.app.homeDir
         leo = join(g.app.loadDir, '..')
         table = [
@@ -1813,9 +2009,9 @@ export class LoadManager {
         if g.unitTesting or g.app.batchMode:
             return None
         fn = g.app.config.getString(setting='default_leo_file') or '~/.leo/workbook.leo'
-        fn = g.os_path_finalize(fn)
-        directory = g.os_path_finalize(os.path.dirname(fn))
-        # #1415.
+        fn = g.finalize(fn)
+        directory = g.finalize(os.path.dirname(fn))
+        
         return fn if os.path.exists(directory) else None
      */
     //@+node:felix.20220610002953.17: *4* LM.reportDirectories
@@ -1865,15 +2061,20 @@ export class LoadManager {
      * Merge the settings dicts from c's outline into *new copies of*
      * settings_d and bindings_d.
      */
-    public computeLocalSettings(c: Commands, settings_d: g.SettingsDict, bindings_d: g.SettingsDict, localFlag: boolean): [g.SettingsDict, g.SettingsDict] {
-
+    public async computeLocalSettings(
+        c: Commands,
+        settings_d: g.SettingsDict,
+        bindings_d: g.SettingsDict,
+        localFlag: boolean
+    ): Promise<[g.SettingsDict, g.SettingsDict]> {
         const lm = this;
         let shortcuts_d2;
         let settings_d2;
 
-        [shortcuts_d2, settings_d2] = lm.createSettingsDicts(c, localFlag);
+        [shortcuts_d2, settings_d2] = await lm.createSettingsDicts(c, localFlag);
 
-        if (!bindings_d) {// #1766: unit tests.
+        if (!bindings_d) {
+            // #1766: unit tests.
             [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
         }
         if (settings_d2) {
@@ -1892,7 +2093,7 @@ export class LoadManager {
             settings_d.update(settings_d2);
         }
         if (shortcuts_d2) {
-            // TODO support shortcuts needed? 
+            // TODO support shortcuts needed?
             // bindings_d = lm.mergeShortcutsDicts(c, bindings_d, shortcuts_d2, localFlag);
         }
 
@@ -1904,7 +2105,6 @@ export class LoadManager {
      * Create lm.globalSettingsDict & lm.globalBindingsDict.
      */
     public createDefaultSettingsDicts(): [g.SettingsDict, g.SettingsDict] {
-
         const settings_d = new g.SettingsDict('lm.globalSettingsDict');
 
         settings_d.setName('lm.globalSettingsDict');
@@ -1915,17 +2115,19 @@ export class LoadManager {
     }
 
     //@+node:felix.20220602202929.1: *4* LM.createSettingsDicts
-    public createSettingsDicts(c: Commands, localFlag: boolean): [g.SettingsDict | undefined, g.SettingsDict | undefined] {
+    public async createSettingsDicts(
+        c: Commands,
+        localFlag: boolean
+    ): Promise<[g.SettingsDict | undefined, g.SettingsDict | undefined]> {
         if (c) {
             // returns the *raw* shortcutsDict, not a *merged* shortcuts dict.
             const parser = new SettingsTreeParser(c, localFlag);
             let shortcutsDict;
             let settingsDict;
-            [shortcutsDict, settingsDict] = parser.traverse();
+            [shortcutsDict, settingsDict] = await parser.traverse();
             return [shortcutsDict, settingsDict];
         }
         return [undefined, undefined];
-
     }
 
     //@+node:felix.20220418170221.1: *4* LM.getPreviousSettings
@@ -1933,32 +2135,30 @@ export class LoadManager {
      * Return the settings in effect for fn. Typically, this involves pre-reading fn.
      */
     public async getPreviousSettings(fn?: string): Promise<PreviousSettings> {
-
         const lm = this;
         const settingsName = `settings dict for ${g.shortFileName(fn)}`;
         const shortcutsName = `shortcuts dict for ${g.shortFileName(fn)}`;
         // A special case: settings in leoSettings.leo do *not* override
         // the global settings, that is, settings in myLeoSettings.leo.
-        const isLeoSettings = fn && g.shortFileName(fn).toLowerCase() === 'leosettings.leo';
+        const isLeoSettings =
+            fn && g.shortFileName(fn).toLowerCase() === 'leosettings.leo';
         const exists = await g.os_path_exists(fn);
 
         let c: Commands | undefined;
         let d1;
         let d2;
 
-
         if (fn && exists && lm.isLeoFile(fn) && !isLeoSettings) {
-            // Open the file usinging a null gui.
+            // Open the file using a null gui.
             try {
                 g.app.preReadFlag = true;
                 c = await lm.openSettingsFile(fn);
-            }
-            finally {
+            } finally {
                 g.app.preReadFlag = false;
             }
             // Merge the settings from c into *copies* of the global dicts.
 
-            [d1, d2] = lm.computeLocalSettings(
+            [d1, d2] = await lm.computeLocalSettings(
                 c!,
                 lm.globalSettingsDict,
                 lm.globalBindingsDict,
@@ -1974,7 +2174,8 @@ export class LoadManager {
         //
         // The file does not exist, or is not valid.
         // Get the settings from the globals settings dicts.
-        if (lm.globalSettingsDict && lm.globalBindingsDict) {  // #1766.
+        if (lm.globalSettingsDict && lm.globalBindingsDict) {
+            // #1766.
             d1 = lm.globalSettingsDict.copy(settingsName);
             d2 = lm.globalBindingsDict.copy(shortcutsName);
         } else {
@@ -1982,7 +2183,6 @@ export class LoadManager {
             d2 = undefined;
         }
         return new PreviousSettings(d1, d2);
-
     }
 
     //@+node:felix.20220602203148.1: *4* LM.mergeShortcutsDicts & helpers
@@ -1991,7 +2191,12 @@ export class LoadManager {
      *
      * Both old_d and new_d remain unchanged.
      */
-    public mergeShortcutsDicts(c: Commands, old_d: any, new_d: any, localFlag: boolean): any {
+    public mergeShortcutsDicts(
+        c: Commands,
+        old_d: any,
+        new_d: any,
+        localFlag: boolean
+    ): any {
         /* 
         const lm = this;
         if (!old_d){
@@ -2072,16 +2277,17 @@ export class LoadManager {
      * Duplicates happen only if panes conflict.
      */
     public checkForDuplicateShortcuts(c: Commands, d: any): void {
-
         // Fix bug 951921: check for duplicate shortcuts only in the new file.
         //for (let ks of sorted(list(d.keys())))
         for (let ks of Object.keys(d).sort()) {
             const duplicates = [];
             const panes = ['all'];
-            const aList = d.get(ks);  // A list of bi objects.
+            const aList = d.get(ks); // A list of bi objects.
 
             // aList2 = [z for z in aList if not z.pane.startsWith('mode')];
-            const aList2 = aList.filter((z: { pane: string }) => !z.pane.startsWith('mode'));
+            const aList2 = aList.filter(
+                (z: { pane: string }) => !z.pane.startsWith('mode')
+            );
 
             if (aList.length > 1) {
                 for (let bi of aList2) {
@@ -2094,7 +2300,7 @@ export class LoadManager {
             }
 
             if (duplicates.length) {
-                // bindings = list(set([z.stroke.s for z in duplicates])); 
+                // bindings = list(set([z.stroke.s for z in duplicates]));
                 const bindings: string[] = [];
                 for (let z of duplicates) {
                     if (!bindings.includes(z.stroke.s)) {
@@ -2121,14 +2327,13 @@ export class LoadManager {
      * returning a dict whose keys are strokes.
      */
     public invert(d: any): g.SettingsDict {
-
         const result = new SettingsDict(`inverted ${d.name()}`);
 
         for (let commandName of Object.keys(d)) {
             for (let bi of d.get(commandName, [])) {
-                const stroke = bi.stroke;  // This is canonicalized.
-                bi.commandName = commandName;  // Add info.
-                console.assert(stroke);
+                const stroke = bi.stroke; // This is canonicalized.
+                bi.commandName = commandName; // Add info.
+                g.assert(stroke);
                 result.add_to_list(stroke, bi);
             }
         }
@@ -2142,19 +2347,18 @@ export class LoadManager {
      * returning a dict whose keys are command names.
      */
     public uninvert(d: g.SettingsDict): SettingsDict {
-
-        // console.assert(d.keyType === g.KeyStroke, d.keyType); // TODO ? Needed ?
+        // ! LEOJS : NO KEYSTROKES HANDLING
+        // g.assert(d.keyType === g.KeyStroke, d.keyType);
         const result = new SettingsDict(`uninverted ${d.name()}`);
 
         for (let stroke of Object.keys(d)) {
             for (let bi of d.get(stroke, [])) {
                 const commandName = bi.commandName;
-                console.assert(commandName);
+                g.assert(commandName);
                 result.add_to_list(commandName, bi);
             }
         }
         return result;
-
     }
 
     //@+node:felix.20220418185142.1: *4* LM.openSettingsFile
@@ -2164,11 +2368,17 @@ export class LoadManager {
      * The caller must init the c.config object.
      */
     public async openSettingsFile(fn?: string): Promise<Commands | undefined> {
-
         const lm = this;
 
         if (!fn) {
             return undefined;
+        }
+        if (fn !== 'leoSettings.leo') { // ! HACK FOR LEOJS special case for internal leoSettings.leo
+            const w_exists = await g.os_path_exists(fn);
+            if (!w_exists || !lm.isLeoFile(fn)) {
+                g.es_print("ERROR: open settings file cannot open :", fn);
+                return undefined;
+            }
         }
         /* 
         const theFile = lm.openAnyLeoFile(fn);
@@ -2179,7 +2389,7 @@ export class LoadManager {
          */
         if (!(g.unitTesting || g.app.silentMode || g.app.batchMode)) {
             // This occurs early in startup, so use the following.
-            const s = `reading settings in ${(fn)}`;
+            const s = `reading settings in ${fn}`;
             if (g.app.debug.includes('startup')) {
                 console.log(s);
             }
@@ -2193,41 +2403,43 @@ export class LoadManager {
         const oldGui = g.app.gui;
         g.app.gui = g.app.nullGui;
         const c = g.app.newCommander(fn);
-        const frame = c.frame;
+        const fc = c.fileCommands;
 
+        //const frame = c.frame;
         // frame.log.enable(false);
         // g.app.lockLog();
 
-        g.app.openingSettingsFile = true;
 
         let ok: VNode | undefined;
         try {
             // ! HACK FOR LEOJS: MAKE COMMANDER FROM FAKE leoSettings.leo STRING !
-            const w_fastRead: FastRead = new FastRead(c, c.fileCommands.gnxDict);
+            const w_fastRead: FastRead = new FastRead(
+                c,
+                c.fileCommands.gnxDict
+            );
+            const w_leoSettingsUri = vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
+            let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
+
             let g_element;
             if (fn === 'leoSettings.leo') {
-                [ok, g_element] = w_fastRead.readWithElementTree(fn, leojsSettingsXml);
+                [ok, g_element] = w_fastRead.readWithJsonTree(
+                    fn,
+                    g.toUnicode(readData)
+                );
                 if (ok) {
                     c.hiddenRootNode = ok;
                 }
             } else {
-                ok = await c.fileCommands.openLeoFile(fn, false, true);
+                ok = await fc.getAnyLeoFileByName(fn, false, false);
             }
-        }
-        catch (p_err) {
+
+        } catch (p_err) {
             //
         }
-        finally {
-            g.app.openingSettingsFile = false;
-        }
-
         // g.app.unlockLog();
-        frame.openDirectory = g.os_path_dirname(fn);
-        c.openDirectory = frame.openDirectory;
         g.app.gui = oldGui;
 
         return ok ? c : undefined;
-
     }
 
     //@+node:felix.20220417222319.1: *4* LM.readGlobalSettingsFiles
@@ -2237,7 +2449,6 @@ export class LoadManager {
      * New in Leo 6.1: this sets ivars for the ActiveSettingsOutline class.
      */
     public async readGlobalSettingsFiles(): Promise<unknown> {
-
         const trace = g.app.debug.includes('themes');
         const lm = this;
         // Open the standard settings files with a nullGui.
@@ -2251,7 +2462,7 @@ export class LoadManager {
         lm.my_settings_c = await lm.openSettingsFile(lm.my_settings_path);
 
         let commanders = [lm.leo_settings_c, lm.my_settings_c];
-        commanders = commanders.filter(c => !!c);
+        commanders = commanders.filter((c) => !!c);
 
         let settings_d: g.SettingsDict;
         let bindings_d: g.SettingsDict;
@@ -2261,7 +2472,7 @@ export class LoadManager {
         for (let c of commanders) {
             // Merge the settings dicts from c's outline into
             // *new copies of* settings_d and bindings_d.
-            [settings_d, bindings_d] = lm.computeLocalSettings(
+            [settings_d, bindings_d] = await lm.computeLocalSettings(
                 c!, // Commands for sure because of filter(c => !!c)
                 settings_d,
                 bindings_d,
@@ -2274,10 +2485,10 @@ export class LoadManager {
         lm.globalSettingsDict = settings_d;
         lm.globalBindingsDict = bindings_d;
 
-        // TODO : ? THEMES NOT NEEDED ?
+        // ! LEOJS : THEMES NOT NEEDED !
         /* 
         // Add settings from --theme or @string theme-name files.
-        // This must be done *after* reading myLeoSettigns.leo.
+        // This must be done *after* reading myLeoSettings.leo.
         lm.theme_path = lm.computeThemeFilePath()
 
         if lm.theme_path
@@ -2303,7 +2514,6 @@ export class LoadManager {
         }
 
         return;
-
     }
 
     //@+node:felix.20210120004121.1: *3* LM.load & helpers
@@ -2311,7 +2521,6 @@ export class LoadManager {
      * This is Leo's main startup method.
      */
     public async load(fileName?: string): Promise<unknown> {
-
         const lm: LoadManager = this;
 
         const t1 = process.hrtime();
@@ -2320,31 +2529,40 @@ export class LoadManager {
         await lm.doPrePluginsInit(fileName);
         g.app.computeSignon();
         g.app.printSignon();
-
+        if (lm.options['version']) {
+            return;
+        }
         if (!g.app.gui) {
             return;
         }
         // Disable redraw until all files are loaded.
         g.app.disable_redraw = true;
         const t2 = process.hrtime();
-        g.doHook("start1");
+        g.doHook('start1');
+        const t3 = process.hrtime();
 
         if (g.app.killed) {
             return;
         }
 
-        // TODO: idleTimeManager
-        // g.app.idleTimeManager.start();
+        // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ----------------
+        g.app.idleTimeManager.start();
+        // ! ----------------------------------------------------------------------------------------
 
-        const t3 = process.hrtime();
+        const t4 = process.hrtime();
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
         g.app.makeAllBindings();
 
         g.app.gui.finishStartup();
 
-        g.es('');  // Clears horizontal scrolling in the log pane.
+        g.es(''); // Clears horizontal scrolling in the log pane.
 
         if (!ok) {
+            // --screen-shot causes an immediate exit.
+            if (g.app.debug.includes('shutdown') || g.app.debug.includes('startup')) {
+                g.es_print('Can not create a commander');
+                // g.app.forceShutdown() // ! LEOJS NEEDED ? ?
+            }
             return;
         }
         if (g.app.listen_to_log_flag) {
@@ -2352,15 +2570,16 @@ export class LoadManager {
             // g.app.listenToLog();
         }
         if (g.app.debug.includes('startup')) {
-            const t4 = process.hrtime();
+            const t5 = process.hrtime();
             console.log('');
             g.es_print(`settings:${utils.getDurationMs(t1, t2)} ms`);
             g.es_print(` plugins:${utils.getDurationMs(t2, t3)} ms`);
             g.es_print(`   files:${utils.getDurationMs(t3, t4)} ms`);
-            g.es_print(`   total:${utils.getDurationMs(t1, t4)} ms`);
+            g.es_print(`  frames:${utils.getDurationMs(t4, t5)} ms`);
+            g.es_print(`   total:${utils.getDurationMs(t1, t5)} ms`);
             console.log('');
         }
-
+        g.app.gui.fullRefresh();
         return ok;
     }
 
@@ -2371,61 +2590,58 @@ export class LoadManager {
     public async doPostPluginsInit(): Promise<boolean> {
         // Clear g.app.initing _before_ creating commanders.
         const lm: LoadManager = this;
-        g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
+        g.app.initing = false; // "idle" hooks may now call g.app.forceShutdown.
         // Create the main frame.Show it and all queued messages.
         let c: Commands | undefined;
         let c1: Commands | undefined;
-        let fn: string = "";
+        g.app.loaded_session = !lm.files.length;
+        let fn: string = '';
         if (lm.files.length) {
-            try {  // #1403.
+            try {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
-                    lm.more_cmdline_files = n < (lm.files.length - 1);
+                    lm.more_cmdline_files = n < lm.files.length - 1;
                     c = await lm.loadLocalFile(fn, g.app.gui);
                     // Returns None if the file is open in another instance of Leo.
-                    if (c && !c1) {  // #1416:
+                    if (c && !c1) {
                         c1 = c;
                     }
                 }
-            }
-            catch (exception) {
+            } catch (exception) {
                 g.es_print(`Unexpected exception reading ${fn}`);
                 g.es_exception(exception);
                 c = undefined;
             }
         }
 
-        // Load (and save later) a session *only* if the command line contains no files.
         /*
-        g.app.loaded_session = !lm.files.length;
-        if (g.app.sessionManager && g.app.loaded_session){
-            try{  // #1403.
-                aList = g.app.sessionManager.load_snapshot();
-                if aList:
-                    g.app.sessionManager.load_session(c1, aList);
-                    // #659.
-                    if g.app.windowList:
-                        c = c1 = g.app.windowList[0].c;
-                    else:
-                        c = c1 = None;
-            }
 
-            catch( Exception){
-                g.es_print('Can not load session');
-                g.es_exception();
-            }
-        }
+        # Load a session if the command line contains no files.
+        if g.app.sessionManager and not lm.files:
+            try:
+                aList = g.app.sessionManager.load_snapshot()
+                if aList:
+                    g.app.sessionManager.load_session(c1, aList)
+                    if g.app.windowList:
+                        c = c1 = g.app.windowList[0].c
+                    else:
+                        c = c1 = None
+            except Exception:
+                g.es_print('Can not load session')
+                g.es_exception()
+
         */
+
         // Enable redraws.
         g.app.disable_redraw = false;
 
         if (!c1) {
-            try { // #1403.
-                c1 = await lm.openEmptyWorkBook();
+            // Open or create a workbook.
+            try {
+                c1 = await lm.openWorkBook();
                 // Calls LM.loadLocalFile.
-            }
-            catch (exception) {
-                g.es_print('Can not create empty workbook');
+            } catch (exception) {
+                g.es_print('Can not create workbook');
                 g.es_exception(exception);
             }
         }
@@ -2435,7 +2651,7 @@ export class LoadManager {
             return false;
         }
         // #199.
-        // TODO
+        // LEOJS TODO ?
         // g.app.runAlreadyOpenDialog(c1);
 
         // Final inits...
@@ -2443,70 +2659,57 @@ export class LoadManager {
         g.app.initComplete = true;
 
         // c.setLog();
-        // c.redraw();
-        // g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
-        // c.initialFocusHelper();
-        const screenshot_fn: string = lm.options['screenshot_fn'];
-        if (screenshot_fn) {
-            lm.make_screen_shot(screenshot_fn);
-            return false;  // Force an immediate exit.
-        }
+        c.redraw();
+        g.doHook("start2", { c: c, p: c.p, fileName: c.fileName() });
+        c.initialFocusHelper();
         return true;
-    }
-
-    //@+node:felix.20210120004121.4: *5* LM.make_screen_shot
-    public make_screen_shot(fn: string): void {
-        // TODO
-        console.log('TODO: make_screen_shot');
-
     }
 
     //@+node:felix.20210120004121.5: *5* LM.openEmptyWorkBook
     /**
-     * Open an empty frame and paste the contents of CheatSheet.leo into it.
+     * Open or create a new workbook.
+     * 
+     * @string default-leo-file gives the path, defaulting to ~/.leo/workbook.leo.
+     *
+     * Return the new commander.
      */
-    public async openEmptyWorkBook(): Promise<Commands | undefined> {
-        // TODO
+    public async openWorkBook(): Promise<Commands | undefined> {
+
+        // TODO !
+
+        void vscode.window.showInformationMessage('TODO : openWorkBook');
+
         const lm: LoadManager = this;
 
         /*
-        // Create an empty frame.
-        fn = lm.computeWorkbookFileName()
-        if not fn:
-            return None  # #1415
-        c = lm.loadLocalFile(fn, gui=g.app.gui, old_c=None)
-        if not c:
-            return None  # #1201: AttributeError below.
-        if g.app.batchMode and g.os_path_exists(fn):
-            return c
-        # Open the cheatsheet.
-        fn = g.os_path_finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
-        if not g.os_path_exists(fn):
-            g.es(f"file not found: {fn}")
+        # Never create a workbook during unit tests or in batch mode.
+        if g.unitTesting or g.app.batchMode:
             return None
-        # Paste the contents of CheetSheet.leo into c.
-        old_clipboard = g.app.gui.getTextFromClipboard()  # #933: Save clipboard.
-        c2 = g.openWithFileName(fn, old_c=c)
-        for p2 in c2.rootPosition().self_and_siblings():
-            c2.setCurrentPosition(p2)  # 1380
-            c2.copyOutline()
-            # #1380 & #1381: Add guard & use vnode methods to prevent redraw.
-            p = c.pasteOutline()
-            if p:
-                c.setCurrentPosition(p)  # 1380
-                p.v.contract()
-                p.v.clearDirty()
-        c2.close(new_c=c)
-        # Delete the dummy first node.
-        root = c.rootPosition()
-        root.doDelete(newNode=root.next())
-        c.target_language = 'rest'
+        fn = self.computeWorkbookFileName()
+        exists = fn and os.path.exists(fn)
+        if not fn:
+            # The usual directory does not exist. Create an empty file.
+            c = self.openEmptyLeoFile(gui=g.app.gui, old_c=None)
+            c.rootPosition().h = 'Workbook'
+        else:
+            # Open the workboook or create an empty file.
+            c = self.loadLocalFile(fn, gui=g.app.gui, old_c=None)
+            if not exists:
+                c.rootPosition().h = 'Workbook'
+        # Create the outline with workbook's name.
+        c.frame.title = title = c.computeWindowTitle(fn)
+        c.frame.setTitle(title)
+        c.openDirectory = c.frame.openDirectory = g.os_path_dirname(fn)
+        if hasattr(c.frame, 'top'):
+            c.frame.top.leo_master.setTabName(c, fn)
+        # Finish: Do *not* save the file!
+        g.chdir(fn)
+        g.app.already_open_files = []
         c.clearChanged()
-        c.redraw(c.rootPosition())  # # 1380: Select the root.
-        g.app.gui.replaceClipboardWith(old_clipboard)  # #933: Restore clipboard
+        # Do not redraw. Do not set c.p.
         return c
         */
-        const fn: string = "";
+        const fn: string = '';
         const c = await lm.loadLocalFile(fn, g.app.gui);
         if (!c) {
             return undefined;
@@ -2518,40 +2721,261 @@ export class LoadManager {
     /**
      * Scan options, set directories and read settings.
      */
-    public async doPrePluginsInit(fileName?: string): Promise<unknown> {
+    public async doPrePluginsInit(fileName?: string): Promise<void> {
         const lm: LoadManager = this;
         await lm.computeStandardDirectories();
 
         // Scan the command line options as early as possible.
-        const options = {}; // lm.scanOptions(fileName); 
+        const options = {}; // lm.scanOptions(fileName);
         lm.options = options; // ! no command line options !
 
         // const script:string = options['script'];
         // const verbose:boolean = !script;
 
         // Init the app.
-        return lm.initApp().finally(async () => {
-            // g.app.setGlobalDb()
+        await lm.initApp();
 
-            // lm.reportDirectories(verbose)
+        console.log('**************************************************');
+        console.log('*** Uncomment line below to enable Global D.B. ***');
+        console.log('***      // await g.app.setGlobalDb();         ***');
+        console.log('**************************************************');
+        // await g.app.setGlobalDb();
 
-            // Read settings *after* setting g.app.config and *before* opening plugins.
-            // This means if-gui has effect only in per-file settings.
-            await lm.readGlobalSettingsFiles();
-            // reads only standard settings files, using a null gui.
-            // uses lm.files[0] to compute the local directory
-            // that might contain myLeoSettings.leo.
-            // Read the recent files file.
-            const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
+        // lm.reportDirectories(verbose)
 
-            // TODO: ? recent-file management ?
-            // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+        // Read settings *after* setting g.app.config and *before* opening plugins.
+        // This means if-gui has effect only in per-file settings.
+        await lm.readGlobalSettingsFiles();
 
-            // Create the gui after reading options and settings.
-            lm.createGui();
-            // We can't print the signon until we know the gui.
-            g.app.computeSignon();  // Set app.signon/signon1 for commanders.
-        });
+        // reads only standard settings files, using a null gui.
+        // uses lm.files[0] to compute the local directory
+        // that might contain myLeoSettings.leo.
+        // Read the recent files file.
+        const localConfigFile =
+            lm.files && lm.files.length ? lm.files[0] : undefined;
+
+        // TODO: ? recent-file management ?
+        // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+
+        // Create the gui after reading options and settings.
+        lm.createGui();
+        // We can't print the signon until we know the gui.
+        return g.app.computeSignon(); // Set app.signon/signon1 for commanders.
+    }
+
+    //@+node:felix.20230529220941.1: *5* LM.createAllImporterData & helpers
+    /**
+     * New in Leo 5.5:
+     *
+     * Create global data structures describing importers and writers.
+     */
+    public createAllImporterData(): void {
+        g.assert(g.app.loadDir); // This is the only data required.
+        this.createWritersData(); // Was an AtFile method.
+        this.createImporterData(); // Was a LeoImportCommands method.
+    }
+    //@+node:felix.20230529220941.2: *6* LM.createImporterData & helper
+    /**
+     * Create the data structures describing importer plugins.
+     */
+    public createImporterData(): void {
+
+        const table: [string, any][] = [
+            ["c", importer_c],
+            ["coffeescript", importer_coffeescript],
+            ["csharp", importer_csharp],
+            ["cython", importer_cython],
+            ["dart", importer_dart],
+            ["elisp", importer_elisp],
+            ["html", importer_html],
+            ["ini", importer_ini],
+            ["java", importer_java],
+            ["javascript", importer_javascript],
+            ["leo_rst", importer_leo_rst],
+            ["lua", importer_lua],
+            ["markdown", importer_markdown],
+            ["org", importer_org],
+            ["otl", importer_otl],
+            ["pascal", importer_pascal],
+            ["perl", importer_perl],
+            ["php", importer_php],
+            ["python", importer_python],
+            ["rust", importer_rust],
+            ["tcl", importer_tcl],
+            ["treepad", importer_treepad],
+            ["typescript", importer_typescript],
+            ["xml", importer_xml],
+        ];
+
+        for (const language of table) {
+            this.parse_importer_dict(language[0], language[1]);
+        }
+
+        // // Allow plugins to be defined in ~/.leo/plugins.
+        // for (const pattern of [
+        //     // ~/.leo/plugins.
+        //     g.finalize_join(g.app.homeDir, '.leo', 'plugins'),
+        //     // leo/plugins/importers.
+        //     g.finalize_join(g.app.loadDir, '..', 'plugins', 'importers', '*.py'),
+        // ]){
+        //     filenames = g.glob_glob(pattern)
+        //     for filename in filenames:
+        //         sfn = g.shortFileName(filename)
+        //         if sfn != '__init__.py':
+        //             try:
+        //                 module_name = sfn[:-3]
+        //                 // Important: use importlib to give imported modules their fully qualified names.
+        //                 m = importlib.import_module(f"leo.plugins.importers.{module_name}")
+        //                 self.parse_importer_dict(sfn, m)
+        //                 // print('createImporterData', m.__name__)
+        //             except Exception:
+        //                 g.warning(f"can not import leo.plugins.importers.{module_name}")
+        //                 g.printObj(filenames)
+
+        // }
+
+    }
+    //@+node:felix.20230529220941.3: *7* LM.parse_importer_dict
+    /**
+     *  Set entries in g.app.classDispatchDict, g.app.atAutoDict and
+     * g.app.atAutoNames using entries in m.importer_dict.
+     */
+    public parse_importer_dict(sfn: string, m: any): void {
+
+        const importer_d = m['importer_dict'];
+
+        if (importer_d) {
+            const at_auto = importer_d['@auto'] || [];
+            const scanner_func = importer_d['func'];
+            // scanner_name = scanner_class.__name__
+            const extensions = importer_d['extensions'] || [];
+            if (at_auto) {
+                // Make entries for each @auto type.
+                const d = g.app.atAutoDict;
+                for (const s of at_auto) {
+                    d[s] = scanner_func;
+                    g.app.atAutoDict[s] = scanner_func;
+                    if (!g.app.atAutoNames.includes(s)) {
+                        g.app.atAutoNames.push(s);
+                    }
+                }
+            }
+
+            if (extensions && extensions.length) {
+                // Make entries for each extension.
+                const d = g.app.classDispatchDict;
+                for (const ext of extensions) {
+                    d[ext] = scanner_func;  // importer_d.get('func')#scanner_class
+                }
+            }
+
+        }
+
+        // elif sfn not in (
+        //     // These are base classes, not real plugins.
+        //     'basescanner.py',
+        //     'linescanner.py',
+        // ):
+        //     g.warning(f"leo/plugins/importers/{sfn} has no importer_dict")
+
+    }
+    //@+node:felix.20230529220941.4: *6* LM.createWritersData & helper
+    /**
+     * Create the data structures describing writer plugins.
+     */
+    public createWritersData(): void {
+
+        const table: [string, any][] = [
+            ['dart', writer_dart],
+            ['leo_rst', writer_leo_rst],
+            ['markdown', writer_markdown],
+            ['org', writer_org],
+            ['otl', writer_otl],
+            ['treepad', writer_treepad],
+        ];
+
+        for (const language of table) {
+            this.parse_writer_dict(language[0], language[1]);
+        }
+
+        // // Do *not* remove this trace.
+        // const trace = false && 'createWritersData' not in g.app.debug_dict
+        // if trace
+        //     // Suppress multiple traces.
+        //     g.app.debug_dict['createWritersData'] = True
+        // g.app.writersDispatchDict = {}
+        // g.app.atAutoWritersDict = {}
+
+        // // Allow plugins to be defined in ~/.leo/plugins.
+        // for pattern in (
+        //     g.finalize_join(g.app.homeDir, '.leo', 'plugins'),  // ~/.leo/plugins.
+        //     g.finalize_join(g.app.loadDir, '..', 'plugins', 'writers', '*.py'),  // leo/plugins/writers
+        // ):
+        //     for filename in g.glob_glob(pattern):
+        //         sfn = g.shortFileName(filename)
+        //         if sfn.endswith('.py') && sfn !== '__init__.py':
+        //             try:
+        //                 // Important: use importlib to give imported modules their fully qualified names.
+        //                 m = importlib.import_module(f"leo.plugins.writers.{sfn[:-3]}")
+        //                 self.parse_writer_dict(sfn, m)
+        //             except Exception:
+        //                 g.es_exception()
+        //                 g.warning(f"can not import leo.plugins.writers.{sfn}")
+        // if trace:
+        //     g.trace('LM.writersDispatchDict')
+        //     g.printDict(g.app.writersDispatchDict)
+        //     g.trace('LM.atAutoWritersDict')
+        //     g.printDict(g.app.atAutoWritersDict)
+
+    }
+    //@+node:felix.20230529220941.5: *7* LM.parse_writer_dict
+    /**
+     * Set entries in g.app.writersDispatchDict and g.app.atAutoWritersDict
+     * using entries in m.writers_dict.
+     */
+    public parse_writer_dict(sfn: string, m: any): void {
+
+        const writer_d = m['writer_dict']; // getattr(m, 'writer_dict', None)
+
+        if (writer_d) {
+            const at_auto = writer_d['@auto'] || [];
+            const scanner_class = writer_d['class'];
+            const extensions: string[] = writer_d['extensions'] || [];
+
+            if (at_auto) {
+                // Make entries for each @auto type.
+                const d = g.app.atAutoWritersDict;
+                for (const s of at_auto) {
+                    const aClass = d[s];
+                    if (aClass && aClass !== scanner_class) {
+                        g.trace(`${sfn}: duplicate ${s} class`);
+                    } else {
+                        d[s] = scanner_class;
+                        if (!g.app.atAutoNames.includes(s)) {
+
+                            g.app.atAutoNames.push(s);
+                        }
+                    }
+                }
+            }
+
+            if (extensions && extensions.length) {
+                // Make entries for each extension.
+                const d = g.app.writersDispatchDict;
+                for (const ext of extensions) {
+                    const aClass = d[ext];
+                    if (aClass && aClass !== scanner_class) {
+                        g.trace(`${sfn}: duplicate ${ext} class`);
+                    } else {
+                        d[ext] = scanner_class;
+                    }
+                }
+            }
+
+        }
+
+        // elif sfn not in ('basewriter.py',):
+        //     g.warning(f"leo/plugins/writers/{sfn} has no writer_dict")
 
     }
 
@@ -2584,15 +3008,21 @@ export class LoadManager {
             lm.createSpecialGui(gui_option, pymacs, script, windowFlag)
 
         */
+
     }
 
     //@+node:felix.20210120004121.16: *5* LM.initApp
     public async initApp(verbose?: boolean): Promise<unknown> {
-
-        console.assert(g.app.loadManager);
+        // Can be done early. Uses only g.app.loadDir & g.app.homeDir.
+        this.createAllImporterData();
+        g.assert(g.app.loadManager);
 
         // Make sure we call the new leoPlugins.init top-level function.
-        // leoPlugins.init(); // TODO: plugins system ? 
+        // leoPlugins.init(); // TODO: plugins system ?
+        // ! TEMP EQUIVALENT TO leoPlugins.init();
+        g.app.pluginsController = {
+            // TODO
+        }; // new LeoPluginsController();
 
         // Force the user to set g.app.leoID.
         await g.app.setLeoID(true, verbose);
@@ -2601,35 +3031,41 @@ export class LoadManager {
         g.app.idleTimeManager = new IdleTimeManager();
         // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
         g.app.externalFilesController = new ExternalFilesController();
-        // g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
+
+        g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
+
         g.app.config = new GlobalConfigManager();
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
-        // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
 
-        // TODO: plugins system ? 
+        g.app.sessionManager = new SessionManager(); // ! HANDLED with vscode workspace recent files
+
+        // TODO: plugins system ?
         // Complete the plugins class last.
         // g.app.pluginsController.finishCreate();
 
-        return g.app.leoID;
-
+        return;
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public async loadLocalFile(fn: string, gui: NullGui, old_c?: Commands): Promise<Commands | undefined> {
+    public async loadLocalFile(
+        fn: string,
+        gui?: LeoGui,
+        old_c?: Commands
+    ): Promise<Commands | undefined> {
+        /*
+            Completely read a file, creating the corresponding outline.
 
-        /*Completely read a file, creating the corresonding outline.
+            1. If fn is an existing .leo file (possibly zipped), read it twice:
+            the first time with a NullGui to discover settings,
+            the second time with the requested gui to create the outline.
 
-        1. If fn is an existing .leo file (possibly zipped), read it twice:
-        the first time with a NullGui to discover settings,
-        the second time with the requested gui to create the outline.
+            2. If fn is an external file:
+            get settings from the leoSettings.leo and myLeoSetting.leo, then
+            create a "wrapper" outline containing an @file node for the external file.
 
-        2. If fn is an external file:
-        get settings from the leoSettings.leo and myLeoSetting.leo, then
-        create a "wrapper" outline continain an @file node for the external file.
-
-        3. If fn is empty:
-        get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
-        or open an empty outline.
+            3. If fn is empty:
+            get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
+            or open an empty outline.
         */
         const lm: LoadManager = this;
         let c: Commands | undefined;
@@ -2641,18 +3077,20 @@ export class LoadManager {
         }
 
         // Step 0: Return if the file is already open.
-        // fn = g.os_path_finalize(fn);
+        // fn = g.finalize(fn);
 
         if (fn) {
             c = lm.findOpenFile(fn);
             if (c) {
-                return c; // Found it aready opened ! 
+                return c; // Found it aready opened !
             }
         }
         // Step 1: get the previous settings.
         // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
         // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-        const previousSettings: PreviousSettings = await lm.getPreviousSettings(fn);
+        const previousSettings: PreviousSettings = await lm.getPreviousSettings(
+            fn
+        );
 
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
@@ -2663,21 +3101,31 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public async openEmptyLeoFile(gui: NullGui, old_c?: Commands): Promise<Commands> {
-
+    public async openEmptyLeoFile(
+        gui?: LeoGui,
+        old_c?: Commands
+    ): Promise<Commands> {
         const lm = this;
         const w_previousSettings = await lm.getPreviousSettings(undefined);
         // Create the commander for the .leo  file.
-        const c: Commands = g.app.newCommander(
-            "",
-            gui,
-            w_previousSettings
-        );
+        const c: Commands = g.app.newCommander('', gui, w_previousSettings);
+
+        // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
+        // c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        // if (c.openDirectory) {
+        //     c.frame.openDirectory = c.openDirectory;
+        // }
+
         g.doHook('open0');
 
-        g.doHook("open1", { old_c: old_c, c: c, new_c: c, fileName: undefined });
+        g.doHook('open1', {
+            old_c: old_c,
+            c: c,
+            new_c: c,
+            fileName: undefined,
+        });
 
-        c.mFileName = "";
+        c.mFileName = '';
         c.wrappedFileName = undefined;
 
         // Late inits. Order matters.
@@ -2685,8 +3133,18 @@ export class LoadManager {
             c.chapterController.finishCreate();
         }
         c.clearChanged();
-        g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: undefined });
-        g.doHook("new", { old_c: old_c, c: c, new_c: c });
+        g.doHook('open2', {
+            old_c: old_c,
+            c: c,
+            new_c: c,
+            fileName: undefined,
+        });
+
+        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
+
+        g.doHook('new', { old_c: old_c, c: c, new_c: c });
 
         lm.finishOpen(c);
 
@@ -2695,71 +3153,129 @@ export class LoadManager {
 
     //@+node:felix.20210120004121.32: *5* LM.openFileByName & helpers
     /**
-     * Read the local file whose full path is fn using the given gui.
-     * fn may be a Leo file (including .leo or zipped file) or an external file.
+     *  Create an outline (Commander) for either:
+     *  - a Leo file (including .leo or zipped file),
+     *  - an external file.
      *
-     * This is not a pre-read: the previousSettings always exist and
-     * the commander created here persists until the user closes the outline.
-     *
-     * Reads the entire outline if fn exists and is a .leo file or zipped file.
-     * Creates an empty outline if fn is a non-existent Leo file.
-     * Creates an wrapper outline if fn is an external file, existing or not.
+     *  Note: The settings don't matter for pre-reads!
+     *  For second read, the settings for the file are *exactly* previousSettings.
      */
-    public async openFileByName(fn: string, gui: NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
-
+    public async openFileByName(
+        fn: string,
+        gui?: LeoGui,
+        old_c?: Commands,
+        previousSettings?: PreviousSettings
+    ): Promise<Commands | undefined> {
         const lm: LoadManager = this;
+        if (!fn) {
+            return undefined;  // Should not happen.
+        }
         // Disable the log.
-        // g.app.setLog(None);
-        // g.app.lockLog();
+        // g.app.setLog(None)
+        // g.app.lockLog()
 
         // Create the a commander for the .leo file.
-        // Important.  The settings don't matter for pre-reads!
-        // For second read, the settings for the file are *exactly* previousSettings.
-        const c: Commands = g.app.newCommander(fn, gui, previousSettings);
-        // Open the file, if possible.
+        let c = g.app.newCommander(fn, gui, previousSettings);
+
         g.doHook('open0');
 
-        /*
-        theFile = lm.openAnyLeoFile(fn);
-        if isinstance(theFile, sqlite3.Connection):
-            // this commander is associated with sqlite db
-            c.sqlite_connection = theFile
-        */
+        // Do common completion tasks.
+        const complete_inits = (c: Commands) => {
 
-        // Enable the log.
-        // g.app.unlockLog();
-        // c.frame.log.enable(true);
+            // g.app.unlockLog()
+            // c.frame.log.enable(True)
+            // g.app.writeWaitingLog(c);
+            // c.setLog()
+            // lm.createMenu(c, fn)
+            lm.finishOpen(c);
+        };
 
-        // Phase 2: Create the outline.
-        g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
+        if (!lm.isLeoFile(fn)) {
+            // Handle a wrapper file.
+            c = await lm.initWrapperLeoFile(c, fn); // #2489
+            // Finish.
+            g.doHook("new", { old_c: old_c, c: c, new_c: c });  // #2489.
+            g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
+            // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+            c.theScriptingController = new ScriptingController(c);
+            await c.theScriptingController.createAllButtons();
 
-        const exists = await g.os_path_exists(fn);
-
-        if (fn && exists) {
-            const readAtFileNodesFlag = !!(previousSettings);
-            // The log is not set properly here.
-            const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
-
-            if (!ok) {
+            complete_inits(c);
+            return c;
+        }
+        // Read the outline, but only if it exists.
+        if (await g.os_path_exists(fn)) {
+            const v = await c.fileCommands.getAnyLeoFileByName(fn, !!previousSettings);
+            if (!v) {
                 return undefined;
             }
-        } else {
-            // Create a wrapper .leo file if:
-            // a) fn is a .leo file that does not exist or
-            // b) fn is an external file, existing or not.
-            await lm.initWrapperLeoFile(c, fn);
         }
+        // Finish.
+        g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
+        g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
+        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
 
-
-        g.doHook("open2", { old_c: undefined, c: c, new_c: c, fileName: fn });
-
-        // Phase 3: Complete the initialization.
-        // g.app.writeWaitingLog(c)
-        // c.setLog()
-        // lm.createMenu(c, fn)
-        lm.finishOpen(c); // c.initAfterLoad()
-
+        complete_inits(c);
         return c;
+
+        // // Disable the log.
+        // // g.app.setLog(None);
+        // // g.app.lockLog();
+
+        // // Create the a commander for the .leo file.
+        // // Important.  The settings don't matter for pre-reads!
+        // // For second read, the settings for the file are *exactly* previousSettings.
+        // const c: Commands = g.app.newCommander(fn, gui, previousSettings);
+        // // Open the file, if possible.
+        // g.doHook('open0');
+
+        // /*
+        // theFile = lm.openAnyLeoFile(fn);
+        // if isinstance(theFile, sqlite3.Connection):
+        //     // this commander is associated with sqlite db
+        //     c.sqlite_connection = theFile
+        // */
+
+        // // Enable the log.
+        // // g.app.unlockLog();
+        // // c.frame.log.enable(true);
+
+        // // Phase 2: Create the outline.
+        // g.doHook('open1', { old_c: undefined, c: c, new_c: c, fileName: fn });
+
+        // const exists = await g.os_path_exists(fn);
+
+        // if (fn && exists) {
+        //     const readAtFileNodesFlag = !!previousSettings;
+        //     // The log is not set properly here.
+        //     const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
+
+        //     if (!ok) {
+        //         return undefined;
+        //     }
+        // } else {
+        //     // Create a wrapper .leo file if:
+        //     // a) fn is a .leo file that does not exist or
+        //     // b) fn is an external file, existing or not.
+        //     await lm.initWrapperLeoFile(c, fn);
+        // }
+
+        // g.doHook('open2', { old_c: undefined, c: c, new_c: c, fileName: fn });
+
+        // // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        // c.theScriptingController = new ScriptingController(c);
+        // await c.theScriptingController.createAllButtons();
+        // c.evalController = new EvalController(c);
+
+        // // Phase 3: Complete the initialization.
+        // // g.app.writeWaitingLog(c)
+        // // c.setLog()
+        // // lm.createMenu(c, fn)
+        // lm.finishOpen(c); // c.initAfterLoad()
+
+        // return c;
     }
 
     //@+node:felix.20210124192005.1: *6* LM.findOpenFile
@@ -2775,8 +3291,10 @@ export class LoadManager {
         let index = 0;
         for (let frame of g.app.windowList) {
             const c = frame.c;
-            if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
-
+            if (
+                g.os_path_realpath(munge(fn)) ===
+                g.os_path_realpath(munge(c.mFileName))
+            ) {
                 g.app.gui.frameIndex = index;
 
                 c.outerUpdate();
@@ -2790,10 +3308,9 @@ export class LoadManager {
 
     //@+node:felix.20220418013716.1: *6* LM.finishOpen
     public finishOpen(c: Commands): void {
-
         // lm = self
         // const k = c.k;
-        // console.assert(k);
+        // g.assert(k);
 
         // New in Leo 4.6: provide an official way for very late initialization.
         // c.frame.tree.initAfterLoad();
@@ -2820,7 +3337,7 @@ export class LoadManager {
             g.app.gui.frameIndex = index;
         }
 
-        c.outerUpdate();  // #181: Honor focus requests.
+        c.outerUpdate(); // #181: Honor focus requests.
     }
     //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
     /**
@@ -2828,8 +3345,10 @@ export class LoadManager {
      *
      * Otherwise, create an @edit or @file node for the external file.
      */
-    public async initWrapperLeoFile(c: Commands, fn: string): Promise<Commands> {
-
+    public async initWrapperLeoFile(
+        c: Commands,
+        fn: string
+    ): Promise<Commands> {
         let p: Position | undefined;
 
         const exists = await g.os_path_exists(fn);
@@ -2838,7 +3357,7 @@ export class LoadManager {
             p = c.rootPosition()!;
             // Create an empty @edit node unless fn is an .leo file.
             // Fix #1070: Use "newHeadline", not fn.
-            p.h = fn.endsWith('.leo') ? "newHeadline" : `@edit ${fn}`;
+            p.h = fn.endsWith('.leo') ? 'newHeadline' : `@edit ${fn}`;
             c.selectPosition(p);
 
             // TODO: importCommands and importDerivedFiles method !
@@ -2847,7 +3366,7 @@ export class LoadManager {
 
             }else if( c.looksLikeDerivedFile(fn)){
                 // 2011/10/10: Create an @file node.
-                p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
+                p = await c.importCommands.importDerivedFiles(parent=c.rootPosition(),
                     paths=[fn], command=undefined);  // Not undoable.
                 if p && p.hasBack()
                     p.back().doDelete();
@@ -2856,7 +3375,6 @@ export class LoadManager {
                     return undefined;
 
             */
-
         } else {
             // Create an @<file> node.
             p = c.rootPosition();
@@ -2888,100 +3406,42 @@ export class LoadManager {
         if (!fn) {
             return false;
         }
+        console.log('TODO: isZippedFile');
         // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
-        return fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs');
+        return (
+            fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs')
+        );
     }
     public isZippedFile(fn: string): boolean {
-        // ? NEEDED ?
+
         // TODO : zip support ?
+
+        console.log('TODO: isZippedFile');
+
         return false;
-        // return fn && zipfile.is_zipfile(fn);
-    }
-    //@+node:felix.20220109233001.1: *6* LM.openAnyLeoFile
-    /**
-     * @deprecated Now using async vscode.workspace.fs functions
-     * Open a .leo, .leojs or .db file.
-     * @param fn
-     * @returns number: file descriptor
-     */
-    public openAnyLeoFile(fn: string): number | undefined {
-
-        const lm: LoadManager = this;
-
-        if (fn.endsWith('.db')) {
-            // TODO !
-            // return sqlite3.connect(fn);
-            return undefined;
-
-        }
-        let theFile: number | undefined;
-
-        // ! now use vscode.workspace.fs async functions
-        /*
-        if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
-            // ? NEEDED ZIP SUPPORT ?
-            // if (lm.isZippedFile(fn)){
-            //     theFile = lm.openZipFile(fn);
-            // }else{
-            //     theFile = lm.openLeoFile(fn);
-            // }
-            theFile = lm.openLeoFile(fn);
-        }
-        */
-        return theFile;
-    }
-    //@+node:felix.20220109233518.1: *6* LM.openLeoFile
-    /**
-     * @deprecated Now using async vscode.workspace.fs functions
-     * @param fn
-     * @returns number: file descriptor
-     */
-    public openLeoFile(fn: string): number | undefined {
-
-        return undefined;
-
-        // const lm: LoadManager = this;
         /*
         try {
-            let theFile: number;
+            const buffer = Buffer.alloc(4);
+            const fd = fs.openSync(filePath, 'r');
+            
+            // Read the first 4 bytes of the file
+            fs.readSync(fd, buffer, 0, 4, 0);
+            fs.closeSync(fd);
 
-            theFile = fs.openSync(fn, 'r');
-
-            return theFile;
-        }
-        catch (iOError) {
-            // Do not use string + here: it will fail for non-ascii strings!
-            if (!g.unitTesting) {
-                g.error("can not open:", fn);
+            // Check if the first 4 bytes match the ZIP file signature
+            const zipSignature = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+            for (let i = 0; i < 4; i++) {
+                if (buffer[i] !== zipSignature[i]) {
+                    return false;
+                }
             }
-            return undefined;
+            
+            return true;
+        } catch (error) {
+            return false;
         }
         */
-    }
-    //@+node:felix.20220418230225.1: *6* LM.readOpenedLeoFile
-    /**
-     * Call c.fileCommands.openLeoFile to open some kind of Leo file.
-     *
-     * the_file: An open file, which is a StringIO file for zipped files.
-     *
-     * Note: g.app.log is not inited here.
-     */
-    public async readOpenedLeoFile(c: Commands, fn: string, readAtFileNodesFlag: boolean): Promise<VNode | undefined> {
-
-        // New in Leo 4.10: The open1 event does not allow an override of the init logic.
-        // assert theFile
-
-        // Read and close the file.
-        const w_result = await c.fileCommands.openLeoFile(fn, readAtFileNodesFlag);
-        if (w_result) {
-            if (!c.openDirectory) {
-                const theDir = g.os_path_finalize(g.os_path_dirname(fn));  // 1341
-                c.openDirectory = theDir;
-                c.frame.openDirectory = theDir;
-            }
-        }
-        return w_result;
-
+        // return fn && zipfile.is_zipfile(fn);
     }
     //@+node:felix.20220109232545.1: *3* LM.revertCommander
     /**
@@ -2989,18 +3449,31 @@ export class LoadManager {
      */
     public async revertCommander(c: Commands): Promise<void> {
         const lm: LoadManager = this;
+        const fc = c.fileCommands;
         const fn: string = c.mFileName;
+        if (!fn) {
+            return;
+        }
+        if (! await g.os_path_exists(fn)) {
+            return;
+        }
+        if (!lm.isLeoFile(fn)) {
+            return;
+        }
         // Re-read the file.
         // const theFile = lm.openAnyLeoFile(fn);
 
-        // const w_uri = vscode.Uri.file(fn);
         const w_uri = g.makeVscodeUri(fn);
 
         try {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
-            c.fileCommands.getLeoFile(fn, undefined, undefined, false);
+            // await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
+            const v = await fc.getAnyLeoFileByName(fn, true);
+            if (!v) {
+                g.error(`Revert failed: {fn}`);
+            }
         } catch {
             // Does not exist !
         }
@@ -3017,8 +3490,12 @@ export class PreviousSettings {
     public settingsDict: g.SettingsDict | undefined;
     public shortcutsDict: g.SettingsDict | undefined;
 
-    constructor(settingsDict: g.SettingsDict | undefined, shortcutsDict: g.SettingsDict | undefined) {
-        if (!shortcutsDict || !settingsDict) {  // #1766: unit tests.
+    constructor(
+        settingsDict: g.SettingsDict | undefined,
+        shortcutsDict: g.SettingsDict | undefined
+    ) {
+        if (!shortcutsDict || !settingsDict) {
+            // #1766: unit tests.
             const lm = g.app.loadManager!;
             [settingsDict, shortcutsDict] = lm.createDefaultSettingsDicts();
         }
@@ -3031,8 +3508,530 @@ export class PreviousSettings {
         return (
             `<PreviousSettings\n` +
             `${this.settingsDict}\n` +
-            `${this.shortcutsDict}\n>`);
+            `${this.shortcutsDict}\n>`
+        );
     };
+}
+//@+node:felix.20230923185723.1: ** class RecentFilesManager
+/** 
+ * A class to manipulate leoRecentFiles.txt.
+ */
+export class RecentFilesManager {
+
+    public edit_headline = 'Recent files. Do not change this headline!';
+    public groupedMenus: any[] = [];  // Set in rf.createRecentFilesMenuItems.
+    public recentFiles: any[] = []; // List of g.Bunches describing .leoRecentFiles.txt files.
+    public recentFilesMenuName = 'Recent Files';  // May be changed later.
+    public recentFileMessageWritten = false;  // To suppress all but the first message.
+    public write_recent_files_as_needed = false;  // Will be set later.
+
+    //@+others
+    //@+node:felix.20230923185723.2: *3* rf.appendToRecentFiles
+    public appendToRecentFiles(files: string[]): void {
+        const rf = this;
+        files = files.map((theFile: string) => theFile.trim());
+
+        function munge(name: string): string {
+            return g.os_path_normpath(name || '').toLowerCase();
+        }
+
+        for (const name of files) {
+            // Remove all variants of name.
+            for (const name2 of [...rf.recentFiles]) {
+                if (munge(name) === munge(name2)) {
+                    rf.recentFiles.splice(rf.recentFiles.indexOf(name2), 1);
+                }
+            }
+            rf.recentFiles.push(name);
+        }
+
+    }
+    //@+node:felix.20230923185723.3: *3* rf.cleanRecentFiles
+    /**
+     * Remove items from the recent files list that no longer exist.
+     *
+     * This almost never does anything because Leo's startup logic removes
+     * nonexistent files from the recent files list.
+     */
+    public async cleanRecentFiles(c: Commands): Promise<void> {
+
+        // Filtering recent files to remove nonexistent ones...w
+        const result = await Promise.all(
+            this.recentFiles.map(async (z: string) => {
+                if (await g.os_path_exists(z)) {
+                    return z;
+                }
+                return null;
+            })
+        );
+
+        // Checking if the result differs from the original recent files...
+        if (result.some((path) => path == null)) {
+            for (const w_path of result) {
+                if (w_path !== null) {
+                    this.updateRecentFiles(w_path);
+                }
+            }
+            await this.writeRecentFilesFile(c);
+        }
+
+    }
+    //@+node:felix.20230923185723.4: *3* rf.demangleRecentFiles
+    /**
+     * Rewrite recent files based on c.config.getData('path-demangle')
+     */
+    public async demangleRecentFiles(c: Commands, data: string[]): Promise<void> {
+
+        const changes: [string, string][] = [];
+        let replace: string | null = null;
+
+        for (const line of data) {
+            const text: string = line.trim();
+
+            if (text.startsWith('REPLACE: ')) {
+                const firstSpaceIndex = text.indexOf(' ');
+                const secondPart = firstSpaceIndex !== -1 ? text.slice(firstSpaceIndex + 1) : '';
+                replace = secondPart.trim();
+            }
+
+            if (text.startsWith('WITH:') && replace !== null) {
+                const with_ = text.substr(5).trim();
+                changes.push([replace, with_]);
+                g.es(`${replace} -> ${with_}`);
+            }
+        }
+
+        const orig: string[] = this.recentFiles.filter((z: string) => z.startsWith('/'));
+        this.recentFiles = [];
+
+        for (const i of orig) {
+            let t: string = i;
+
+            for (const change of changes) {
+                t = t.split(change[0]).join(change[1]);
+            }
+
+            this.updateRecentFiles(t);
+        }
+
+        await this.writeRecentFilesFile(c);
+    }
+    //@+node:felix.20230923185723.5: *3* rf.clearRecentFiles
+    /**
+     * Clear the recent files list, then add the present file.
+     */
+    public async clearRecentFiles(c: Commands): Promise<void> {
+
+        let rf: this = this;
+        // let menu: Menu = c.frame.menu;
+        // let u: Undoer = c.undoer;
+        // let bunch: any = u.beforeClearRecentFiles();
+        // let recentFilesMenu: Menu = menu.getMenu(this.recentFilesMenuName);
+
+        /* Clear the recent files menu items... */
+        // menu.deleteRecentFilesMenuItems(recentFilesMenu);
+
+        /* Add the present file to recent files... */
+        rf.recentFiles = [c.fileName()];
+
+        /* Create recent files menu items for all open windows... */
+        // for (const frame of g.app.windowList) {
+        //     rf.createRecentFilesMenuItems(frame.c);
+        // }
+
+        /* Finalize clearing recent files... */
+        // u.afterClearRecentFiles(bunch);
+
+        /* Write the file immediately... */
+        await rf.writeRecentFilesFile(c);
+
+        /* Clearing recent files completed. Terminating protocol... */
+        /* Recent files purged. Commencing data write... */
+    }
+    //@+node:felix.20230923185723.6: *3* rf.createRecentFilesMenuItems
+    public createRecentFilesMenuItems(c: Commands): void {
+        // rf = self
+        // menu = c.frame.menu
+        // recentFilesMenu = menu.getMenu(self.recentFilesMenuName)
+        // if not recentFilesMenu:
+        //     return
+        // # Delete all previous entries.
+        // menu.deleteRecentFilesMenuItems(recentFilesMenu)
+        // # Create the permanent (static) menu entries.
+        // table = rf.getRecentFilesTable()
+        // menu.createMenuEntries(recentFilesMenu, table)
+        // # Create all the other entries (a maximum of 36).
+        // accel_ch = string.digits + string.ascii_uppercase  # Not a unicode problem.
+        // i = 0
+        // n = len(accel_ch)
+        // # see if we're grouping when files occur in more than one place
+        // rf_group = c.config.getBool("recent-files-group")
+        // rf_always = c.config.getBool("recent-files-group-always")
+        // groupedEntries = rf_group or rf_always
+        // if groupedEntries:  # if so, make dict of groups
+        //     dirCount: dict[str, Any] = {}
+        //     for fileName in rf.getRecentFiles()[:n]:
+        //         dirName, baseName = g.os_path_split(fileName)
+        //         if baseName not in dirCount:
+        //             dirCount[baseName] = {'dirs': [], 'entry': None}
+        //         dirCount[baseName]['dirs'].append(dirName)
+        // for name in rf.getRecentFiles()[:n]:
+        //     # pylint: disable=cell-var-from-loop
+        //     if name.strip() == "":
+        //         continue  # happens with empty list/new file
+
+        //     def recentFilesCallback(event: Event = None, c: Cmdr = c, name: str = name) -> None:
+        //         c.openRecentFile(fn=name)
+
+        //     if groupedEntries:
+        //         dirName, baseName = g.os_path_split(name)
+        //         entry = dirCount[baseName]
+        //         if len(entry['dirs']) > 1 or rf_always:  # sub menus
+        //             if entry['entry'] is None:
+        //                 entry['entry'] = menu.createNewMenu(baseName, "Recent Files...")
+        //                 # acts as a flag for the need to create the menu
+        //             c.add_command(menu.getMenu(baseName), label=dirName,
+        //                 command=recentFilesCallback, underline=0)
+        //         else:  # single occurrence, no submenu
+        //             c.add_command(recentFilesMenu, label=baseName,
+        //                 command=recentFilesCallback, underline=0)
+        //     else:  # original behavior
+        //         label = f"{accel_ch[i]} {g.computeWindowTitle(name)}"
+        //         c.add_command(recentFilesMenu, label=label,
+        //             command=recentFilesCallback, underline=0)
+        //     i += 1
+        // if groupedEntries:  # store so we can delete them later
+        //     rf.groupedMenus = [z for z in dirCount
+        //         if dirCount[z]['entry'] is not None]
+    }
+    //@+node:felix.20230923185723.7: *3* rf.editRecentFiles
+    public editRecentFiles(c: Commands): void {
+        let rf: this = this;
+        let p1: any = c.lastTopLevel().insertAfter();
+        p1.h = this.edit_headline;
+        p1.b = rf.recentFiles.join('\n');
+
+        c.redraw();
+
+        c.selectPosition(p1);
+
+        c.redraw();
+
+        c.bodyWantsFocusNow();
+
+        g.es('edit list and run write-edited-recent-files to save recentFiles');
+    }
+    //@+node:felix.20230923185723.8: *3* rf.getRecentFiles
+    async getRecentFiles(): Promise<string[]> {
+        /* Initializing protocol for retrieving recent files... */
+        const validFiles: string[] = [];
+
+        for (const z of this.recentFiles) {
+            if (await g.os_path_exists(z)) {
+                validFiles.push(z);
+            }
+        }
+
+        this.recentFiles = validFiles;
+        return this.recentFiles;
+
+    }
+    //@+node:felix.20230923185723.9: *3* rf.getRecentFilesTable
+    public getRecentFilesTable(): any {
+        return [
+            "*clear-recent-files",
+            "*clean-recent-files",
+            "*demangle-recent-files",
+            "*sort-recent-files",
+            ["-", undefined, undefined],
+        ];
+    }
+    //@+node:felix.20230923185723.10: *3* rf.readRecentFiles & helpers
+    /**
+     * Read all .leoRecentFiles.txt files.
+     */
+    public async readRecentFiles(localConfigFile: string): Promise<void> {
+        // Read all .leoRecentFiles.txt files.
+        // The order of files in this list affects the order of the recent files list.
+        const rf = this;
+        const seen: string[] = [];
+        const localConfigPath: string = g.os_path_dirname(localConfigFile);
+        for (const w_path of [g.app.homeLeoDir, g.app.globalConfigDir, localConfigPath]) {
+            let realPath = w_path;
+            if (w_path) {
+                realPath = g.os_path_realpath(g.finalize(w_path));
+            }
+            if (realPath && !seen.includes(realPath)) {
+                const ok = await rf.readRecentFilesFile(realPath);
+                if (ok) {
+                    seen.push(realPath);
+                }
+            }
+        }
+        if (seen.length === 0 && rf.write_recent_files_as_needed) {
+            await rf.createRecentFiles();
+        }
+    }
+    //@+node:felix.20230923185723.11: *4* rf.createRecentFiles
+    /**
+     * Try to create .leoRecentFiles.txt, in the users home directory,
+     * or in Leo's config directory if that fails.
+     */
+    public async createRecentFiles(): Promise<void> {
+
+        for (const theDir of [g.app.homeLeoDir, g.app.globalConfigDir]) {
+            if (theDir) {
+                const fn = g.os_path_join(theDir, '.leoRecentFiles.txt');
+                try {
+                    const w_uri = g.makeVscodeUri(fn);
+                    const writeData = Buffer.from('', 'utf8');
+                    await vscode.workspace.fs.writeFile(w_uri, writeData);
+                    g.es('created', fn);
+                    return;
+                } catch (err) {
+                    g.error('can not create', fn);
+                    g.es_exception(err);
+                }
+            }
+        }
+    }
+    //@+node:felix.20230923185723.12: *4* rf.readRecentFilesFile
+    public async readRecentFilesFile(path: string): Promise<boolean> {
+        const fileName = g.os_path_join(path, '.leoRecentFiles.txt');
+        const exists = await g.os_path_exists(fileName);
+        if (!exists) {
+            return false;
+        }
+        let lines: string[] | undefined;
+
+        try {
+            const fileContents = await g.readFileIntoUnicodeString(fileName);
+
+            try {
+                lines = fileContents?.split('\n');
+            } catch (err) {
+                lines = undefined;
+            }
+        } catch (err) {
+            g.trace('can not open', fileName);
+            return false;
+        }
+        if (lines && this.sanitize(lines[0]) === 'readonly') {
+            lines = lines.slice(1);
+        }
+        if (lines) {
+            lines = lines.map(line => g.toUnicode(g.os_path_normpath(line)));
+            this.appendToRecentFiles(lines);
+        }
+        return true;
+    }
+    //@+node:felix.20230923185723.13: *3* rf.sanitize
+    /**
+     * Return a sanitized file name.
+     */
+    public sanitize(p_name?: string): string | undefined {
+        if (p_name == null) {
+            return undefined;
+        }
+        p_name = p_name.toLowerCase();
+        for (const ch of ['-', '_', ' ', '\n']) {
+            const regex = new RegExp(ch, 'g');
+            p_name = p_name.replace(regex, '');
+        }
+        return p_name || undefined;
+    }
+    //@+node:felix.20230923185723.14: *3* rf.setRecentFiles
+    /**
+     * Update the recent files list.
+     */
+    public setRecentFiles(files: string[]): void {
+        const rf = this;
+        rf.appendToRecentFiles(files);
+    }
+    //@+node:felix.20230923185723.15: *3* rf.sortRecentFiles
+    /**
+     * Sort the recent files list.
+     */
+    public async sortRecentFiles(c: Commands): Promise<void> {
+
+        const rf = this;
+
+        const key = (path: string): string => {
+            // Sort only the base name. That's what will appear in the menu.
+            const s = g.os_path_basename(path);
+            return g.isWindows ? s.toLowerCase() : s;
+        };
+
+        const aList = rf.recentFiles.sort((a, b) => key(a).localeCompare(key(b)));
+        rf.recentFiles = [];
+        for (const z of aList.reverse()) {
+            rf.updateRecentFiles(z);
+        }
+        await rf.writeRecentFilesFile(c);
+    }
+    //@+node:felix.20230923185723.16: *3* rf.updateRecentFiles
+    /**
+     * Create the RecentFiles menu. May be called with Null fileName.
+     */
+    public updateRecentFiles(fileName?: string): void {
+
+        const rf = this;
+        if (g.unitTesting) {
+            return;
+        }
+
+        const munge = (name: string | null): string => {
+            return g.finalize(name || '').toLowerCase();
+        };
+
+        const munge2 = (name: string | null): string => {
+            return g.finalize_join(g.app.loadDir!, name || '');
+        };
+
+        // Update the recent files list in all windows.
+        if (fileName) {
+            for (const frame of g.app.windowList) {
+                // Remove all versions of the file name.
+                for (const name of rf.recentFiles) {
+                    if (
+                        munge(fileName) === munge(name) ||
+                        munge2(fileName) === munge2(name)
+                    ) {
+                        const index = rf.recentFiles.indexOf(name);
+                        if (index > -1) {
+                            rf.recentFiles.splice(index, 1);
+                        }
+                    }
+                }
+                rf.recentFiles.unshift(fileName);
+                // Recreate the Recent Files menu.
+                rf.createRecentFilesMenuItems(frame.c);
+            }
+        } else {
+            for (const frame of g.app.windowList) {
+                rf.createRecentFilesMenuItems(frame.c);
+            }
+        }
+    }
+    //@+node:felix.20230923185723.17: *3* rf.writeEditedRecentFiles
+    /**
+     * Write content of "edit_headline" node as recentFiles and recreates menus.
+     */
+    async writeEditedRecentFiles(c: Commands): Promise<void> {
+        const rf = this;
+        let p = g.findNodeAnywhere(c, rf.edit_headline);
+
+        if (p && p.__bool__()) {
+            const files: string[] = [];
+            for (const z of p.b.split(/\r?\n/)) {
+                if (z && await g.os_path_exists(z)) {
+                    files.push(z);
+                }
+            }
+            rf.recentFiles = files;
+            await rf.writeRecentFilesFile(c);
+            rf.updateRecentFiles();
+            c.selectPosition(p);
+            c.deleteOutline();
+        } else {
+            g.red('not found:', rf.edit_headline);
+        }
+    }
+    //@+node:felix.20230923185723.18: *3* rf.writeRecentFilesFile & helper
+    /**
+     * Write the appropriate .leoRecentFiles.txt file.
+     */
+    public async writeRecentFilesFile(c: Commands): Promise<void> {
+
+        const tag = '.leoRecentFiles.txt';
+        const rf = this;
+        if (g.unitTesting || g.app.inBridge) {
+            return;
+        }
+
+        const localFileName = c.fileName();
+        let localPath: string | null = null;
+        if (localFileName) {
+            localPath = g.os_path_split(localFileName)[0];
+        }
+        let written = false;
+        const seen: string[] = [];
+
+        for (const w_path of [localPath, g.app.globalConfigDir, g.app.homeLeoDir]) {
+            if (w_path) {
+                const fileName = g.os_path_join(w_path, tag);
+                if (await g.os_path_exists(fileName) && !seen.includes(fileName.toLowerCase())) {
+                    seen.push(fileName.toLowerCase());
+                    const ok = await rf.writeRecentFilesFileHelper(fileName);
+                    if (ok) {
+                        written = true;
+                    }
+                    if (!rf.recentFileMessageWritten && !g.unitTesting && !g.app.silentMode) {
+                        if (ok) {
+                            g.es_print(`wrote recent file: ${fileName}`);
+                        } else {
+                            g.error(`failed to write recent file: ${fileName}`);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (written) {
+            rf.recentFileMessageWritten = true;
+        } else {
+            if (g.app.homeLeoDir) {
+                const fileName = g.finalize_join(g.app.homeLeoDir, tag);
+                if (!(await g.os_path_exists(fileName))) {
+                    g.red(`creating: ${fileName}`);
+                }
+                await rf.writeRecentFilesFileHelper(fileName);
+            }
+        }
+    }
+    //@+node:felix.20230923185723.19: *4* rf.writeRecentFilesFileHelper
+    /**
+     * Don't update the file if it begins with read-only.
+     */
+    async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
+
+        let lines: string[] | undefined = undefined;
+
+        // Part 1: Return False if the first line is "readonly".
+        if (await g.os_path_exists(fileName)) {
+            try {
+
+                const data = await g.readFileIntoUnicodeString(fileName);
+                lines = data?.split('\n');
+
+            } catch (error) {
+                lines = undefined;
+            }
+
+            if (lines && this.sanitize(lines[0]) === 'readonly') {
+                return false;
+            }
+        }
+
+        // Part 2: write the files.
+        try {
+            const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
+
+            await g.writeFile(fileName, 'utf-8', g.toUnicode(s),);
+
+            return true;
+        } catch (error) {
+            if (error) {
+                g.error('error writing', fileName);
+                g.es_exception(error);
+                if (g.unitTesting) {
+                    throw error;
+                }
+            }
+            return false;
+        }
+    }
+    //@-others
 
 }
 //@-others

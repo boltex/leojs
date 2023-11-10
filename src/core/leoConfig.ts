@@ -6,6 +6,7 @@ import { Commands } from './leoCommands';
 import { FileCommands } from './leoFileCommands';
 import * as g from './leoGlobals';
 import { Position, VNode } from './leoNodes';
+import { build_rclick_tree } from './mod_scripting';
 
 //@-<< imports >>
 //@+<< class ParserBaseClass >>
@@ -14,7 +15,6 @@ import { Position, VNode } from './leoNodes';
  * The base class for settings parsers.
  */
 export class ParserBaseClass {
-
     public c: Commands;
     public clipBoard: any[];
     // True if this is the .leo file being opened,
@@ -23,10 +23,17 @@ export class ParserBaseClass {
 
     public shortcutsDict: g.SettingsDict;
 
-    public openWithList: { [key: string]: any }[];   // A list of dicts containing 'name','shortcut','command' keys.
+    public openWithList: { [key: string]: any }[]; // A list of dicts containing 'name','shortcut','command' keys.
 
     // Keys are canonicalized names.
-    public dispatchDict: { [key: string]: (p: Position, kind: string, name: string, val: any) => any };
+    public dispatchDict: {
+        [key: string]: (
+            p: Position,
+            kind: string,
+            name: string,
+            val: any
+        ) => any;
+    };
     public debug_count: number;
 
     //@+<< ParserBaseClass data >>
@@ -78,49 +85,47 @@ export class ParserBaseClass {
      * Ctor for the ParserBaseClass class.
      */
     constructor(c: Commands, localFlag: boolean) {
-
         this.c = c;
         this.clipBoard = [];
         // True if this is the .leo file being opened,
         // as opposed to myLeoSettings.leo or leoSettings.leo.
         this.localFlag = localFlag;
         this.shortcutsDict = new g.SettingsDict('parser.shortcutsDict');
-        this.openWithList = [];  // A list of dicts containing 'name','shortcut','command' keys.
+        this.openWithList = []; // A list of dicts containing 'name','shortcut','command' keys.
         // Keys are canonicalized names.
         this.dispatchDict = {
-            'bool': this.doBool,
-            'buttons': this.doButtons, // New in 4.4.4
-            'color': this.doColor,
-            'commands': this.doCommands, // New in 4.4.8.
-            'data': this.doData, // New in 4.4.6
-            'directory': this.doDirectory,
-            'enabledplugins': this.doEnabledPlugins,
-            'font': this.doFont,
-            'ifenv': this.doIfEnv, // New in 5.2 b1.
-            'ifhostname': this.doIfHostname,
-            'ifplatform': this.doIfPlatform,
-            'ignore': this.doIgnore,
-            'int': this.doInt,
-            'ints': this.doInts,
-            'float': this.doFloat,
-            'menus': this.doMenus, // New in 4.4.4
-            'menuat': this.doMenuat,
-            'popup': this.doPopup, // New in 4.4.8
-            'mode': this.doMode, // New in 4.4b1.
-            'openwith': this.doOpenWith, // New in 4.4.3 b1.
-            'outlinedata': this.doOutlineData, // New in 4.11.1.
-            'path': this.doPath,
-            'ratio': this.doRatio,
-            'shortcuts': this.doShortcuts,
-            'string': this.doString,
-            'strings': this.doStrings,
+            bool: this.doBool,
+            buttons: this.doButtons, // New in 4.4.4
+            color: this.doColor,
+            commands: this.doCommands, // New in 4.4.8.
+            data: this.doData, // New in 4.4.6
+            directory: this.doDirectory,
+            enabledplugins: this.doEnabledPlugins,
+            font: this.doFont,
+            ifenv: this.doIfEnv, // New in 5.2 b1.
+            ifhostname: this.doIfHostname,
+            ifplatform: this.doIfPlatform,
+            ignore: this.doIgnore,
+            int: this.doInt,
+            ints: this.doInts,
+            float: this.doFloat,
+            menus: this.doMenus, // New in 4.4.4
+            menuat: this.doMenuat,
+            popup: this.doPopup, // New in 4.4.8
+            mode: this.doMode, // New in 4.4b1.
+            openwith: this.doOpenWith, // New in 4.4.3 b1.
+            outlinedata: this.doOutlineData, // New in 4.11.1.
+            path: this.doPath,
+            ratio: this.doRatio,
+            shortcuts: this.doShortcuts,
+            string: this.doString,
+            strings: this.doStrings,
         };
         this.debug_count = 0;
     }
 
     //@+node:felix.20220529184714.4: *3* pbc.computeModeName
     public computeModeName(name: string): string {
-
         let s = name.trim().toLowerCase();
         const j = s.indexOf(' ');
 
@@ -149,25 +154,26 @@ export class ParserBaseClass {
         return modeName;
     }
     //@+node:felix.20220529184714.5: *3* pbc.createModeCommand
-    public createModeCommand(modeName: string, name: string, modeDict: any): void {
-
-        console.log('TODO : createModeCommand');
-
-        /*
-        modeName = 'enter-' + modeName.replace(/\s/g , '-');
+    /**
+     * Create a mode command.
+     */
+    public createModeCommand(
+        modeName: string,
+        name: string,
+        modeDict: any
+    ): void {
+        // The prompt is everything after the '::'
+        modeName = 'enter-' + modeName.replace(' ', '-');
         const i = name.indexOf('::');
-        if (i > -1){
-            // The prompt is everything after the '::'
-            const prompt = name.substring(i + 2).trim();
-            modeDict['*command-prompt*'] = g.BindingInfo(kind=prompt);
-        }    
+        if (i > -1) {
+            const prompt = name.slice(i + 2).trim();
+            modeDict['*command-prompt*'] = { kind: prompt };  // BindingInfo
+        }
         // Save the info for k.finishCreate and k.makeAllBindings.
         const d = g.app.config.modeCommandsDict;
         // New in 4.4.1 b2: silently allow redefinitions of modes.
-        d[modeName] = modeDict;
-        */
+        d.set(modeName, modeDict);
     }
-
     //@+node:felix.20220529184714.6: *3* pbc.error
     public error(s: string): void {
         g.pr(s);
@@ -191,45 +197,38 @@ export class ParserBaseClass {
     /**
      * Create buttons for each @button node in an @buttons tree.
      */
-    public doButtons(p: Position, kind: string, name: string, val: any): void {
-
+    public async doButtons(p: Position, kind: string, name: string, val: any): Promise<void> {
         const c: Commands = this.c;
         const tag = '@button';
         const aList: any[] = [];
         const seen: VNode[] = [];
-
         const after = p.nodeAfterTree();
 
-        console.log('TODO: doButtons in parserBaseClass');
-
-        /* 
-        while (p && p.__bool__() && !p.__eq__(after)){
-            if(seen.includes(p.v)){
+        while (p && p.__bool__() && !p.__eq__(after)) {
+            if (seen.includes(p.v)) {
                 p.moveToNodeAfterTree();
-            }else if (p.isAtIgnoreNode()){
-                seen.append(p.v);
-                p.moveToNodeAfterTree();
-            }else{
+            } else if (p.isAtIgnoreNode()) {
                 seen.push(p.v);
-                if( g.match_word(p.h, 0, tag)){
+                p.moveToNodeAfterTree();
+            } else {
+                seen.push(p.v);
+                if (g.match_word(p.h, 0, tag)) {
                     // We can not assume that p will be valid when it is used.
-                    script = g.getScript(
+                    const script = await g.getScript(
                         c,
                         p,
-                        useSelectedText:false,
-                        forcePythonSentinels:true,
-                        useSentinels:true
+                        false,
+                        true,
+                        true
                     );
                     // #2011: put rclicks in aList. Do not inject into command_p.
-                    command_p = p.copy();
-                    const rclicks = build_rclick_tree(command_p, top_level=true);
-                    aList.append((command_p, script, rclicks));
+                    const command_p = p.copy();
+                    const rclicks = build_rclick_tree(command_p, undefined, true);
+                    aList.push([command_p, script, rclicks]);
                 }
                 p.moveToThreadNext();
-
             }
         }
-        */
 
         // This setting is handled differently from most other settings,
         // because the last setting must be retrieved before any commander exists.
@@ -238,7 +237,6 @@ export class ParserBaseClass {
             g.app.config.atCommonButtonsList.push(...aList);
             g.app.config.buttonsFileName = c ? c.shortFileName() : '<no settings file>';
         }
-
     }
     //@+node:felix.20220529184714.10: *4* pbc.doColor
     public doColor(p: Position, kind: string, name: string, val: any): void {
@@ -247,14 +245,17 @@ export class ParserBaseClass {
         val = val.replace(/^\"+|\"+$/g, '');
         val = val.replace(/^\'+|\'+$/g, '');
         this.set(p, kind, name, val);
-
     }
     //@+node:felix.20220529184714.11: *4* pbc.doCommands
     /**
      * Handle an @commands tree.
      */
-    public doCommands(p: Position, kind: string, name: string, val: any): void {
-
+    public async doCommands(
+        p: Position,
+        kind: string,
+        name: string,
+        val: any
+    ): Promise<void> {
         const c = this.c;
         const aList: [Position, string][] = [];
         const tag = '@command';
@@ -271,7 +272,7 @@ export class ParserBaseClass {
                 seen.push(p.v);
                 if (g.match_word(p.h, 0, tag)) {
                     // We can not assume that p will be valid when it is used.
-                    const script = g.getScript(c, p, false, true, true);
+                    const script = await g.getScript(c, p, false, true, true);
                     aList.push([p.copy(), script]);
                 }
                 p.moveToThreadNext();
@@ -303,16 +304,19 @@ export class ParserBaseClass {
             }
         }
         this.set(p, kind, name, data);
-
     }
 
     //@+node:felix.20220529184714.13: *4* pbc.doOutlineData & helper
-    public doOutlineData(p: Position, kind: string, name: string, val: any): string {
+    public doOutlineData(
+        p: Position,
+        kind: string,
+        name: string,
+        val: any
+    ): string {
         // New in Leo 4.11: do not strip lines.
         const data = this.getOutlineDataHelper(p);
         this.set(p, kind, name, data);
         return 'skip';
-
     }
     //@+node:felix.20220529184714.14: *5* pbc.getOutlineDataHelper
     public getOutlineDataHelper(p: Position): string | undefined {
@@ -325,16 +329,20 @@ export class ParserBaseClass {
             // Copy the entire tree to s.
             c.fileCommands.leo_file_encoding = 'utf-8';
             s = c.fileCommands.outline_to_clipboard_string(p);
-            s = g.toUnicode(s, 'utf-8');
-        }
-        catch (exception) {
+            s = g.toUnicode(s!, 'utf-8');
+        } catch (exception) {
             g.es_exception(exception);
             s = undefined;
         }
         return s;
     }
     //@+node:felix.20220529184714.15: *4* pbc.doDirectory & doPath
-    public doDirectory(p: Position, kind: string, name: string, val: any): void {
+    public doDirectory(
+        p: Position,
+        kind: string,
+        name: string,
+        val: any
+    ): void {
         // At present no checking is done.
         this.set(p, kind, name, val);
     }
@@ -346,7 +354,12 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.16: *4* pbc.doEnabledPlugins
-    public doEnabledPlugins(p: Position, kind: string, name: string, val: any): void {
+    public doEnabledPlugins(
+        p: Position,
+        kind: string,
+        name: string,
+        val: any
+    ): void {
         const c = this.c;
         let s = p.b;
         // This setting is handled differently from all other settings,
@@ -358,17 +371,18 @@ export class ParserBaseClass {
         for (let s of lines) {
             let i = s.indexOf('#');
             if (i > -1) {
-                s = s.substring(0, i) + '\n';  // 2011/09/29: must add newline back in.
+                s = s.substring(0, i) + '\n'; // 2011/09/29: must add newline back in.
             }
             if (s.trim()) {
                 aList.push(s.trimStart());
             }
         }
-        s = aList.join();
+        s = aList.join('');
         // Set the global config ivars.
         g.app.config.enabledPluginsString = s;
-        g.app.config.enabledPluginsFileName = c ? c.shortFileName() : '<no settings file>';
-
+        g.app.config.enabledPluginsFileName = c
+            ? c.shortFileName()
+            : '<no settings file>';
     }
 
     //@+node:felix.20220529184714.17: *4* pbc.doFloat
@@ -376,8 +390,7 @@ export class ParserBaseClass {
         try {
             val = Number(val);
             this.set(p, kind, name, val);
-        }
-        catch (valError) {
+        } catch (valError) {
             this.valueError(p, kind, name, val);
         }
     }
@@ -387,7 +400,6 @@ export class ParserBaseClass {
      * Handle an @font node. Such nodes affect syntax coloring *only*.
      */
     public doFont(p: Position, kind: string, name: string, val: any): void {
-
         const d = this.parseFont(p);
         // Set individual settings.
         for (let key of ['family', 'size', 'slant', 'weight']) {
@@ -408,8 +420,12 @@ export class ParserBaseClass {
      *
      * Enable descendant settings if the value of os.getenv is in any of the names.
      */
-    public doIfEnv(p: Position, kind: string, name: string, val: any): string | undefined {
-
+    public doIfEnv(
+        p: Position,
+        kind: string,
+        name: string,
+        val: any
+    ): string | undefined {
         const aList = name.split(',');
         if (!aList.length) {
             return 'skip';
@@ -430,8 +446,6 @@ export class ParserBaseClass {
             }
         }
         return 'skip';
-
-
     }
 
     //@+node:felix.20220529184714.20: *4* pbc.doIfHostname
@@ -446,51 +460,48 @@ export class ParserBaseClass {
      * @ifhostname !harry
      * Enable descendant settings if h != 'harry'
      */
-    public doIfHostname(p: Position, kind: string, name: string, val: any): string | undefined {
+    public doIfHostname(
+        p: Position,
+        kind: string,
+        name: string,
+        val: any
+    ): string | undefined {
 
-        console.log('TODO : doIfHostname');
-
-        /* 
-        const lm = g.app.loadManager;
-        const h = lm.computeMachineName().trim()
-        const s = name.trim()
-        if( s.startsWith('!')){
-            if (h === s.substring(1)){
+        const lm = g.app.loadManager!;
+        const h = lm.computeMachineName().trim();
+        const s = name.trim();
+        if (s.startsWith('!')) {
+            if (h === s.slice(1)) {
                 return 'skip';
             }
-        }else if( h !== s){
+        } else if (h !== s) {
             return 'skip';
         }
-        */
         return undefined;
-
     }
 
     //@+node:felix.20220529184714.21: *4* pbc.doIfPlatform
     /**
      * Support @ifplatform in @settings trees.
      */
-    public doIfPlatform(p: Position, kind: string, name: string, val: any): string | undefined {
-
-        console.log('TODO : doIfPlatform');
-        return undefined;
-
-        /* 
-
-        const platform = sys.platform.lower();
-        for (let s of name.split(',')){
-            if( platform === s.lower()){
+    public doIfPlatform(
+        p: Position,
+        kind: string,
+        name: string,
+        val: any
+    ): string | undefined {
+        const platform = process.platform.toLowerCase();
+        for (const s of name.split(',')) {
+            if (platform && platform === s.toLowerCase()) {
                 return undefined;
             }
         }
-        return "skip";
-
-        */
+        return 'skip';
     }
 
     //@+node:felix.20220529184714.22: *4* pbc.doIgnore
     public doIgnore(p: Position, kind: string, name: string, val: any): string {
-        return "skip";
+        return 'skip';
     }
 
     //@+node:felix.20220529184714.23: *4* pbc.doInt
@@ -498,10 +509,8 @@ export class ParserBaseClass {
         try {
             val = Number(val);
             val = Math.trunc(val);
-
             this.set(p, kind, name, val);
-        }
-        catch (valError) {
+        } catch (valError) {
             this.valueError(p, kind, name, val);
         }
     }
@@ -513,7 +522,6 @@ export class ParserBaseClass {
      *@ints aName[val1,val2,...]=val
      */
     public doInts(p: Position, kind: string, name: string, val: any): void {
-
         name = name.trim(); // The name indicates the valid values.
         let i = name.indexOf('[');
         let j = name.indexOf(']');
@@ -525,22 +533,26 @@ export class ParserBaseClass {
 
             try {
                 // items = [int(item.trim()) for item in items]  // type:ignore
-                items = items.map((item) => { return Number(item.trim()); });
-            }
-            catch (valueError) {
+                items = items.map((item) => {
+                    return Number(item.trim());
+                });
+            } catch (valueError) {
                 items = [];
                 this.valueError(p, 'ints[]', name, val);
                 return;
             }
 
             // kind = `ints[${','.join([str(item) for item in items])}]`;
-            kind = `ints[${items.map((item) => { return item.toString(); }).join(',')}]`;
+            kind = `ints[${items
+                .map((item) => {
+                    return item.toString();
+                })
+                .join(',')}]`;
 
             try {
                 val = Number(val);
                 val = Math.trunc(val);
-            }
-            catch (valueError) {
+            } catch (valueError) {
                 this.valueError(p, 'int', name, val);
                 return;
             }
@@ -560,11 +572,8 @@ export class ParserBaseClass {
      * Handle @menuat setting.
      */
     public doMenuat(p: Position, kind: string, name: string, val: any): void {
-
-        console.log('TODO : doMenuat');
-
+        // TODO ?
         /* 
-        
         if g.app.config.menusList:
             // get the patch fragment
             patch: List[Any] = []
@@ -616,7 +625,6 @@ export class ParserBaseClass {
             g.es_print("ERROR: @menuat found but no menu tree to patch")
 
         */
-
     }
 
     //@+node:felix.20220529184714.26: *5* pbc.getName
@@ -629,22 +637,18 @@ export class ParserBaseClass {
         // for i in "*.-& \t\n":
         //     val = val.replace(i, '')
 
-        const str = "*.-& \t\n";
+        const str = '*.-& \t\n';
         for (var i = 0; i < str.length; i++) {
             val = val.split(str[i]).join('');
         }
 
         return val.toLowerCase();
-
     }
 
     //@+node:felix.20220529184714.27: *5* pbc.dumpMenuTree
     public dumpMenuTree(aList: any[], level = 0, path = ''): void {
-
-        // Todo 
-
+        // Todo ?
         /*
-
         for z in aList:
             kind, val, val2 = z
             pad = '    ' * level
@@ -655,13 +659,12 @@ export class ParserBaseClass {
                 name = self.getName(kind.replace('@menu ', ''))
                 g.es_print(f"{pad} {kind}... [{path + '/' + name}]")
                 self.dumpMenuTree(val, level + 1, path=path + '/' + name)
-
         */
     }
 
     //@+node:felix.20220529184714.28: *5* pbc.patchMenuTree
     public patchMenuTree(orig: any[], targetPath: string, path = ''): any {
-        // TODO 
+        // TODO ?
         /* 
         kind: str
         val: Any
@@ -684,14 +687,10 @@ export class ParserBaseClass {
 
         */
         return undefined;
-
-
     }
     //@+node:felix.20220529184714.29: *4* pbc.doMenus & helper
     public doMenus(p: Position, kind: string, name: string, val: any): void {
-
-        console.log('TODO: doMenus');
-
+        // TODO ?
         /* 
         
         c = self.c
@@ -726,13 +725,11 @@ export class ParserBaseClass {
             g.app.config.menusFileName = name
 
         */
-
     }
 
     //@+node:felix.20220529184714.30: *5* pbc.doItems
     public doItems(p: Position, aList: any[]): void {
-
-        // TODO 
+        // TODO
         /* 
         p = p.copy()
         after = p.nodeAfterTree()
@@ -773,12 +770,10 @@ export class ParserBaseClass {
      * Parse an @mode node and create the enter-<name>-mode command.
      */
     public doMode(p: Position, kind: string, name: string, val: any): void {
-
         const c = this.c;
         const name1 = name;
         const modeName = this.computeModeName(name);
         const d = new g.SettingsDict(`modeDict for ${modeName}`);
-
         const s = p.b;
         const lines = g.splitLines(s);
         for (let line in lines) {
@@ -815,8 +810,6 @@ export class ParserBaseClass {
             // Restore the global shortcutsDict.
             // Create the command, but not any bindings to it.
             this.createModeCommand(modeName, name1, d);
-
-
         }
     }
 
@@ -830,7 +823,6 @@ export class ParserBaseClass {
 
         this.openWithList.push(d);
         this.set(p, kind, name, this.openWithList);
-
     }
 
     //@+node:felix.20220529184714.33: *4* pbc.doPopup & helper
@@ -838,7 +830,6 @@ export class ParserBaseClass {
      * Handle @popup menu items in @settings trees.
      */
     public doPopup(p: Position, kind: string, name: string, val: any): void {
-
         const popupName = name;
         // popupType = val
         const aList: any[] = [];
@@ -849,7 +840,6 @@ export class ParserBaseClass {
             g.app.config.context_menus = {};
         }
         g.app.config.context_menus[popupName] = aList;
-
     }
 
     //@+node:felix.20220529184714.34: *5* pbc.doPopupItems
@@ -872,7 +862,7 @@ export class ParserBaseClass {
                             const aList2: any[] = [];
                             kind = `${itemName}`;
                             body = p.b;
-                            this.doPopupItems(p, aList2);  // Huh?
+                            this.doPopupItems(p, aList2); // Huh?
                             aList.push([kind + '\n' + body, aList2]);
                             p.moveToNodeAfterTree();
                             hadBreak = true;
@@ -887,12 +877,10 @@ export class ParserBaseClass {
                             break;
                         }
                     }
-
                 }
                 if (!hadBreak) {
                     p.moveToThreadNext();
                 }
-
             }
         }
     }
@@ -906,8 +894,7 @@ export class ParserBaseClass {
             } else {
                 this.valueError(p, kind, name, val);
             }
-        }
-        catch (valError) {
+        } catch (valError) {
             this.valueError(p, kind, name, val);
         }
     }
@@ -916,8 +903,13 @@ export class ParserBaseClass {
     /**
      * Handle an @shortcut or @shortcuts node.
      */
-    public doShortcuts(p: Position, kind: string, junk_name: string, junk_val: any, s?: string): void {
-
+    public doShortcuts(
+        p: Position,
+        kind: string,
+        junk_name: string,
+        junk_val: any,
+        s?: string
+    ): void {
         const c = this.c;
         const d = this.shortcutsDict;
 
@@ -931,24 +923,25 @@ export class ParserBaseClass {
                 let commandName;
                 let bi;
                 [commandName, bi] = this.parseShortcutLine(fn, line);
-                if (bi === undefined) {  // Fix #718.
+                if (bi === undefined) {
+                    // Fix #718.
                     console.log(`\nWarning: bad shortcut specifier: ${line}\n`);
                 } else {
-                    if (bi && ![undefined, 'none', 'None'].includes(bi.stroke)) {
+                    if (
+                        bi &&
+                        ![undefined, 'none', 'None'].includes(bi.stroke)
+                    ) {
                         this.doOneShortcut(bi, commandName!, p);
-                    } else
-                        // New in Leo 5.7: Add local assignments to None to c.k.killedBindings.
-                        if (c.config.isLocalSettingsFile()) {
+                    }
+                    // New in Leo 5.7: Add local assignments to None to c.k.killedBindings.
+                    else if (c.config.isLocalSettingsFile()) {
+                        if (c.k.killedBindings) {
                             c.k.killedBindings.append(commandName);
                         }
-
+                    }
                 }
-
             }
-
         }
-
-
     }
 
     //@+node:felix.20220529184714.37: *5* pbc.doOneShortcut
@@ -956,19 +949,16 @@ export class ParserBaseClass {
      * Handle a regular shortcut.
      */
     public doOneShortcut(bi: any, commandName: string, p: Position): void {
-
         const d = this.shortcutsDict;
         const aList: any[] = d.get(commandName) || [];
         aList.push(bi);
         d.set(commandName, aList);
-
     }
 
     //@+node:felix.20220529184714.38: *4* pbc.doString
     public doString(p: Position, kind: string, name: string, val: any): void {
         // At present no checking is done.
         this.set(p, kind, name, val);
-
     }
 
     //@+node:felix.20220529184714.39: *4* pbc.doStrings
@@ -978,7 +968,6 @@ export class ParserBaseClass {
      * @strings [val1,val2,...]aName=val
      */
     public doStrings(p: Position, kind: string, name: string, val: any): void {
-
         name = name.trim();
         let i = name.indexOf('[');
         let j = name.indexOf(']');
@@ -1002,21 +991,22 @@ export class ParserBaseClass {
     //@+node:felix.20220529184714.41: *3* pbc.oops
     public oops(): void {
         g.pr(
-            "ParserBaseClass oops:",
+            'ParserBaseClass oops:',
             g.callers(),
-            "must be overridden in subclass"
+            'must be overridden in subclass'
         );
     }
 
     //@+node:felix.20220529184714.42: *3* pbc.parsers
     //@+node:felix.20220529184714.43: *4* pbc.parseFont & helper
-    public parseFont(p: Position): { [key: string]: any } { //  -> Dict[str, Any]:
+    public parseFont(p: Position): { [key: string]: any } {
+        //  -> Dict[str, Any]:
         const d: { [key: string]: any } = {
-            'comments': [],
-            'family': undefined,
-            'size': undefined,
-            'slant': undefined,
-            'weight': undefined,
+            comments: [],
+            family: undefined,
+            size: undefined,
+            slant: undefined,
+            weight: undefined,
         };
 
         const s = p.b;
@@ -1039,8 +1029,7 @@ export class ParserBaseClass {
 
         try {
             s = s.toString();
-        }
-        catch (unicodeError) {
+        } catch (unicodeError) {
             // pass
         }
 
@@ -1067,13 +1056,12 @@ export class ParserBaseClass {
             // trim single and double quotes
             val = val.replace(/^\"+|\"+$/g, '');
             val = val.replace(/^\'+|\'+$/g, '');
-
         }
 
         for (let tag of ['_family', '_size', '_slant', '_weight']) {
             if (name.endsWith(tag)) {
                 const kind = tag.substring(1);
-                d[kind] = [name, val];  // Used only by doFont.
+                d[kind] = [name, val]; // Used only by doFont.
                 return;
             }
         }
@@ -1085,8 +1073,9 @@ export class ParserBaseClass {
      * Return (kind,name,val).
      * Leo 4.11.1: Ignore everything after @data name.
      */
-    public parseHeadline(s: string): [string | undefined, string | undefined, any] {
-
+    public parseHeadline(
+        s: string
+    ): [string | undefined, string | undefined, any] {
         let kind;
         let name;
         let val;
@@ -1116,23 +1105,19 @@ export class ParserBaseClass {
                         // val is everything after the '='
                         val = s.substring(j + 1).trim();
                     }
-
                 }
             }
         }
 
         return [kind, name, val];
-
     }
     //@+node:felix.20220529184714.46: *4* pbc.parseOpenWith & helper
     public parseOpenWith(p: Position): { [key: string]: any } {
-
-        const d = { 'command': undefined };  // d contains args, kind, etc tags.
+        const d = { command: undefined }; // d contains args, kind, etc tags.
         for (let line of g.splitLines(p.b)) {
             this.parseOpenWithLine(line, d);
         }
         return d;
-
     }
 
     //@+node:felix.20220529184714.47: *5* pbc.parseOpenWithLine
@@ -1159,18 +1144,16 @@ export class ParserBaseClass {
         }
         i += 1;
 
-        const val = s.substring(i).trim() || '';  // An empty val is valid.
+        const val = s.substring(i).trim() || ''; // An empty val is valid.
         if (tag === 'arg') {
             const aList: any[] = d.get('args', []);
             aList.push(val);
             d['args'] = aList;
-
         } else if (d.get(tag)) {
             g.es_print(`ignoring duplicate definition of ${tag} ${s}`);
         } else {
             d[tag] = val;
         }
-
     }
 
     //@+node:felix.20220529184714.48: *4* pbc.parseShortcutLine
@@ -1183,9 +1166,11 @@ export class ParserBaseClass {
      *  command-name --> mode-name = binding
      *  command-name --> same = binding
      */
-    public parseShortcutLine(kind: string, s: string): [string | undefined, any] {
-
-        s = s.replace(/[\x7F]/g, '');  // Can happen on MacOS. Very weird.
+    public parseShortcutLine(
+        kind: string,
+        s: string
+    ): [string | undefined, any] {
+        s = s.replace(/[\x7F]/g, ''); // Can happen on MacOS. Very weird.
         let name;
         let val;
         let nextMode;
@@ -1195,19 +1180,23 @@ export class ParserBaseClass {
         let j;
         let entryCommandName;
 
-        if (g.match(s, i, '-->')) {  // New in 4.4.1 b1: allow mode-entry commands.
+        if (g.match(s, i, '-->')) {
+            // New in 4.4.1 b1: allow mode-entry commands.
             j = g.skip_ws(s, i + 3);
             i = g.skip_id(s, j, '-');
             entryCommandName = s.substring(j, i);
 
             // TODO : ? support key binding / keyStroke ?
-            console.log('TODO support key binding / keyStroke : ', entryCommandName);
+            console.log(
+                'TODO support key binding / keyStroke : ',
+                entryCommandName
+            );
 
             //  return [undefined, new g.BindingInfo('*entry-command*', commandName=entryCommandName)]
             return [undefined, undefined];
         }
         j = i;
-        i = g.skip_id(s, j, '-@');  // #718.
+        i = g.skip_id(s, j, '-@'); // #718.
         name = s.substring(j, i);
         // #718: Allow @button- and @command- prefixes.
         for (let tag of ['@button-', '@command-']) {
@@ -1221,14 +1210,16 @@ export class ParserBaseClass {
         }
         // New in Leo 4.4b2.
         i = g.skip_ws(s, i);
-        if (g.match(s, i, '->')) { // New in 4.4: allow pane-specific shortcuts.
+        if (g.match(s, i, '->')) {
+            // New in 4.4: allow pane-specific shortcuts.
             j = g.skip_ws(s, i + 2);
             i = g.skip_id(s, j);
             nextMode = s.substring(j, i);
         }
         i = g.skip_ws(s, i);
         let pane;
-        if (g.match(s, i, '!')) {  // New in 4.4: allow pane-specific shortcuts.
+        if (g.match(s, i, '!')) {
+            // New in 4.4: allow pane-specific shortcuts.
             j = g.skip_ws(s, i + 1);
             i = g.skip_id(s, j);
             pane = s.substring(j, i);
@@ -1264,7 +1255,6 @@ export class ParserBaseClass {
         // stroke = g.KeyStroke(binding=val) if val else undefined;
         // bi = g.BindingInfo(kind=kind, nextMode=nextMode, pane=pane, stroke=stroke);
         // return [name, bi];
-
     }
 
     //@+node:felix.20220529184714.49: *3* pbc.set
@@ -1272,7 +1262,6 @@ export class ParserBaseClass {
      * Init the setting for name to val.
      */
     public set(p: Position, kind: string, name: string, val: any): void {
-
         const c = this.c;
         // Note: when kind is 'shortcut', name is a command name.
         const key = this.munge(name);
@@ -1292,39 +1281,38 @@ export class ParserBaseClass {
         const gs = d.get(key);
 
         if (gs) {
-            console.assert(gs instanceof g.GeneralSetting, gs);
+            g.assert(gs instanceof g.GeneralSetting, gs);
             const w_path = gs.path;
-            if (g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {
-                g.es("over-riding setting:", name, "from", w_path);  // 1341
+            if (g.finalize(c.mFileName) !== g.finalize(w_path)) {
+                g.es('over-riding setting:', name, 'from', w_path); // 1341
             }
         }
         // Important: we can't use c here: it may be destroyed!
 
-        d.set(key, new g.GeneralSetting(
-            {
-                kind: kind,  // type:ignore
+        d.set(
+            key,
+            new g.GeneralSetting({
+                kind: kind, // type:ignore
                 path: c.mFileName,
                 tag: 'setting',
-                unl: (p && p.__bool__()) ? p.get_UNL() : '',
-                val: val
-            }
-        ));
-
+                unl: p && p.__bool__() ? p.get_UNL() : '',
+                val: val,
+            })
+        );
     }
 
     //@+node:felix.20220529184714.50: *3* pbc.traverse
     /**
      * Traverse the entire settings tree.
      */
-    public traverse(): [g.SettingsDict, g.SettingsDict] {
-
+    public async traverse(): Promise<[g.SettingsDict, g.SettingsDict]> {
         const c = this.c;
 
-        this.settingsDict = new g.SettingsDict(  // type:ignore
+        this.settingsDict = new g.SettingsDict( // type:ignore
             `settingsDict for ${c.shortFileName()}`
         );
 
-        this.shortcutsDict = new g.SettingsDict(  // was TypedDictOfLists.
+        this.shortcutsDict = new g.SettingsDict( // was TypedDictOfLists.
             `shortcutsDict for ${c.shortFileName()}`
         );
 
@@ -1337,21 +1325,18 @@ export class ParserBaseClass {
             return [this.shortcutsDict, this.settingsDict];
         }
 
-
         const after: Position = p.nodeAfterTree();
         while (p && p.__bool__() && !p.__eq__(after)) {
-            const result = this.visitNode(p);
-            if (result === "skip") {
+            const result = await this.visitNode(p);
+            if (result === 'skip') {
                 // g.warning('skipping settings in',p.h)
                 p.moveToNodeAfterTree();
             } else {
                 p.moveToThreadNext();
             }
-
         }
         // Return the raw dict, unmerged.
         return [this.shortcutsDict, this.settingsDict];
-
     }
 
     //@+node:felix.20220529184714.51: *3* pbc.valueError
@@ -1359,19 +1344,17 @@ export class ParserBaseClass {
      * Give an error: val is not valid for kind.
      */
     public valueError(p: Position, kind: string, name: string, val: any): void {
-
         this.error(`${val} is not a valid ${kind} for ${name}`);
-
     }
 
     //@+node:felix.20220529184714.52: *3* pbc.visitNode (must be overwritten in subclasses)
-    public visitNode(p: Position): string | undefined {
+    public async visitNode(p: Position): Promise<string | undefined> {
+        await Promise.resolve();
         this.oops();
         return '';
     }
 
     //@-others
-
 }
 
 //@-<< class ParserBaseClass >>
@@ -1381,8 +1364,6 @@ export class ParserBaseClass {
  * A class to manage configuration settings.
  */
 export class GlobalConfigManager {
-
-
     public atCommonButtonsList: any[];
     public atCommonCommandsList: any[];
     public atLocalButtonsList: any[];
@@ -1413,7 +1394,6 @@ export class GlobalConfigManager {
     public output_newline!: string; // = 'nl';
     public redirect_execute_script_output_to_log_pane!: boolean; // = true;
 
-
     //@+others
     //@+node:felix.20220207005211.2: *3* gcm.ctor
     constructor() {
@@ -1422,23 +1402,19 @@ export class GlobalConfigManager {
         this.atCommonButtonsList = []; // List of info for common @buttons nodes.
         this.atCommonCommandsList = []; // List of info for common @commands nodes.
         this.atLocalButtonsList = []; // List of positions of @button nodes.
-        this.atLocalCommandsList = [];  // List of positions of @command nodes.
+        this.atLocalCommandsList = []; // List of positions of @command nodes.
         this.buttonsFileName = '';
-        this.configsExist = false;  // True when we successfully open a setting file.
+        this.configsExist = false; // True when we successfully open a setting file.
         this.default_derived_file_encoding = 'utf-8';
         this.enabledPluginsFileName = undefined;
         this.enabledPluginsString = '';
         this.menusList = [];
         this.menusFileName = '';
-        this.modeCommandsDict = new g.SettingsDict(
-            'modeCommandsDict'
-        );  // was TypedDictOfLists.
+        this.modeCommandsDict = new g.SettingsDict('modeCommandsDict'); // was TypedDictOfLists.
         this.panes = undefined;
         this.recentFiles = [];
         this.sc = undefined;
         this.tree = undefined;
-
-
     }
 
     //@+node:felix.20220206213914.36: *3* gcm.config_iter
@@ -1450,17 +1426,18 @@ export class GlobalConfigManager {
      *   F loaded .leo File
      *   M myLeoSettings.leo
      *   @ @button, @command, @mode.
-     * 
-     * @param c 
+     *
+     * @param c
      */
-    public *config_iter(c: Commands): Generator<[string, any, Commands, string]> {
-
+    public *config_iter(
+        c: Commands
+    ): Generator<[string, any, Commands, string]> {
         const lm = g.app.loadManager!;
         const d = c ? c.config.settingsDict : lm.globalSettingsDict;
 
         let limit = c.config.getInt('print-settings-at-data-limit');
         if (limit === undefined) {
-            limit = 20;  // A resonable default.
+            limit = 20; // A resonable default.
         }
         // pylint: disable=len-as-condition
         for (let key of [...d.keys()].sort()) {
@@ -1473,8 +1450,12 @@ export class GlobalConfigManager {
                 if (gs.kind === 'data') {
                     // #748: Remove comments
                     const aList = (val as string[])
-                        .filter((z) => { return z.trim() && !z.trim().startsWith('#'); })
-                        .map((z) => { return '        ' + z.trimRight(); });
+                        .filter((z) => {
+                            return z.trim() && !z.trim().startsWith('#');
+                        })
+                        .map((z) => {
+                            return '        ' + z.trimRight();
+                        });
                     // [' ' * 8 + z.rstrip() for z in val if z.strip() && !z.strip().startsWith('#')] ;
 
                     if (!aList.length) {
@@ -1486,8 +1467,10 @@ export class GlobalConfigManager {
                     } else {
                         val = `<${aList.length} non-comment lines>`;
                     }
-
-                } else if ((typeof val === 'string' || val instanceof String) && val.startsWith('<?xml')) {
+                } else if (
+                    (typeof val === 'string' || val instanceof String) &&
+                    val.startsWith('<?xml')
+                ) {
                     val = '<xml>';
                 }
                 let key2 = `@${gs.kind} ${key}`;
@@ -1534,12 +1517,11 @@ export class GlobalConfigManager {
         }
         name = name.toLowerCase();
 
-        ['-', '_', ' ', '\n'].forEach(ch => {
+        ['-', '_', ' ', '\n'].forEach((ch) => {
             name = name!.split(ch).join('');
         });
 
         return name ? name : undefined;
-
     }
 
     // munge = canonicalizeSettingName
@@ -1566,19 +1548,17 @@ export class GlobalConfigManager {
      * Get the setting and make sure its type matches the expected type.
      */
     public get(setting: string, kind: string): any {
-
         // It *is* valid to call this method: it returns the global settings.
         const lm = g.app.loadManager!;
         const d = lm.globalSettingsDict;
         if (d) {
-            console.assert(d instanceof g.SettingsDict, d.toString());
+            g.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: boolean;
             [val, junk] = this.getValFromDict(d, setting, kind);
             return val;
         }
         return undefined;
-
     }
 
     //@+node:felix.20220207005224.5: *5* gcm.getValFromDict
@@ -1587,14 +1567,19 @@ export class GlobalConfigManager {
      * does not (loosely) match the actual type.
      * returns (val,exists)
      */
-    public getValFromDict(d: g.SettingsDict, setting: string, requestedType: string, warn: boolean = true): [any, boolean] {
+    public getValFromDict(
+        d: g.SettingsDict,
+        setting: string,
+        requestedType: string,
+        warn: boolean = true
+    ): [any, boolean] {
         let tag = 'gcm.getValFromDict';
         const gs = d.get(this.munge(setting)!);
         if (!gs) {
             return [undefined, false];
         }
 
-        console.assert(gs instanceof g.GeneralSetting, gs.toString());
+        g.assert(gs instanceof g.GeneralSetting, gs.toString());
 
         const val = gs.val;
         const isNone = ['Undefined', 'None', 'none', ''].includes(val);
@@ -1621,9 +1606,6 @@ export class GlobalConfigManager {
         return [val, true];
     }
 
-
-
-
     //@+node:felix.20220207005224.6: *5* gcm.typesMatch
     /**
      * Return True if type1, the actual type, matches type2, the requeseted type.
@@ -1635,20 +1617,19 @@ export class GlobalConfigManager {
      * - Shortcut matches shortcuts.
      */
     public typesMatch(type1: string, type2: string): boolean {
-
         // The shortcuts logic no longer uses the get/set code.
         const shortcuts = ['shortcut', 'shortcuts'];
         if (shortcuts.includes(type1) || shortcuts.includes(type2)) {
             g.trace('oops: type in shortcuts');
         }
         return (
-            type1 === undefined
-            || type2 === undefined
-            || type1.startsWith('string') && !shortcuts.includes(type2)
-            || type1 === 'language' && type2 === 'string'
-            || type1 === 'int' && type2 === 'size'
-            || (shortcuts.includes(type1) && shortcuts.includes(type2))
-            || type1 === type2
+            type1 === undefined ||
+            type2 === undefined ||
+            (type1.startsWith('string') && !shortcuts.includes(type2)) ||
+            (type1 === 'language' && type2 === 'string') ||
+            (type1 === 'int' && type2 === 'size') ||
+            (shortcuts.includes(type1) && shortcuts.includes(type2)) ||
+            type1 === type2
         );
     }
 
@@ -1664,42 +1645,52 @@ export class GlobalConfigManager {
     //@+node:felix.20220207005224.8: *4* gcm.getBool
     /**
      * Return the value of @bool setting, or the default if the setting is not found.
-     * @param setting 
-     * @param defaultVal 
+     * @param setting
+     * @param defaultVal
      * @returns the boolean setting's value, or default
      */
     public getBool(setting: string, defaultVal: any): any {
-        const val = this.get(setting, "bool");
+        const val = this.get(setting, 'bool');
         if ([true, false].includes(val)) {
             return val;
         }
         return defaultVal;
     }
     //@+node:felix.20220207005224.9: *4* gcm.getButtons
-    /* def getButtons(self):
-        """Return a list of tuples (x,y) for common @button nodes."""
-        return g.app.config.atCommonButtonsList
+    /**
+     * Return a list of tuples (x,y) for common @button nodes.
      */
+    public getButtons(): [any, any][] {
+        return g.app.config.atCommonButtonsList;
+    }
     //@+node:felix.20220207005224.10: *4* gcm.getColor
-    /* def getColor(self, setting):
-        """Return the value of @color setting."""
-        col = this.get(setting, "color")
-        while col and col.startswith('@'):
-            col = this.get(col[1:], "color")
-        return col
+    /**
+     * Return the value of @color setting.
      */
+    public getColor(setting: string): string {
+        let col = this.get(setting, "color");
+        while (col && col.startsWith('@')) {
+            col = this.get(col.substring(1), "color");
+        }
+        return col;
+    }
     //@+node:felix.20220207005224.11: *4* gcm.getCommonCommands
-    /* def getCommonAtCommands(self):
-        """Return the list of tuples (headline,script) for common @command nodes."""
-        return g.app.config.atCommonCommandsList
+    /**
+     * Return the list of tuples (headline,script) for common @command nodes.
      */
+    public getCommonAtCommands(): Array<[string, string]> {
+        return g.app.config.atCommonCommandsList;
+    }
     //@+node:felix.20220207005224.12: *4* gcm.getData & getOutlineData
     /**
      * Return a list of non-comment strings in the body text of @data setting.
      */
-    public getData(setting: string, strip_comments = true, strip_data = true): string[] {
-
-        let data: string[] = this.get(setting, "data") || [];
+    public getData(
+        setting: string,
+        strip_comments = true,
+        strip_data = true
+    ): string[] {
+        let data: string[] = this.get(setting, 'data') || [];
         // New in Leo 4.12.1: add two keyword arguments, with legacy defaults.
         if (data && data.length && strip_comments) {
             data = data.filter((z) => {
@@ -1707,45 +1698,58 @@ export class GlobalConfigManager {
             });
         }
         if (data && data.length && strip_data) {
-            data = data.map((z) => { return z.trim(); }).filter((z) => { return !!z; });
+            data = data
+                .map((z) => {
+                    return z.trim();
+                })
+                .filter((z) => {
+                    return !!z;
+                });
         }
         return data;
     }
 
     /**
      * Return the pastable (xml text) of the entire @outline-data tree.
-     * @param setting  
-     * @returns 
+     * @param setting
+     * @returns
      */
     public getOutlineData(setting: string): string[] {
-        return this.get(setting, "outlinedata");
+        return this.get(setting, 'outlinedata');
     }
 
     //@+node:felix.20220207005224.13: *4* gcm.getDirectory
-    /* def getDirectory(self, setting):
-        """Return the value of @directory setting, or None if the directory does not exist."""
-        # Fix https://bugs.launchpad.net/leo-editor/+bug/1173763
-        theDir = self.get(setting, 'directory')
-        if g.os_path_exists(theDir) and g.os_path_isdir(theDir):
-            return theDir
-        return None
+    /**
+     * Return the value of @directory setting, or null if the directory does not exist.
      */
+    public async getDirectory(setting: string): Promise<string | undefined> {
+        const theDir = this.get(setting, 'directory');
+        if (await g.os_path_exists(theDir) && await g.os_path_isdir(theDir)) {
+            return theDir;
+        }
+        return undefined;
+    }
     //@+node:felix.20220207005224.14: *4* gcm.getEnabledPlugins
+    // * LEOJS : UNUSED FOR NOW
     /* def getEnabledPlugins(self):
         """Return the body text of the @enabled-plugins node."""
         return g.app.config.enabledPluginsString
      */
     //@+node:felix.20220207005224.15: *4* gcm.getFloat
-    /* def getFloat(self, setting):
-        """Return the value of @float setting."""
-        val = self.get(setting, "float")
-        try:
-            val = float(val)
-            return val
-        except TypeError:
-            return None
+    /**
+     * Return the value of @float setting.
      */
+    public getFloat(setting: string): number | undefined {
+        let val = this.get(setting, "float");
+        try {
+            val = parseFloat(val);
+            return val;
+        } catch (e) {
+            return undefined;
+        }
+    }
     //@+node:felix.20220207005224.16: *4* gcm.getFontFromParams
+    // * LEOJS : UNUSED FOR NOW
     /* def getFontFromParams(self, family, size, slant, weight, defaultSize=12):
         """Compute a font from font parameters.
 
@@ -1768,91 +1772,109 @@ export class GlobalConfigManager {
         return g.app.gui.getFontFromParams(family, size, slant, weight)
      */
     //@+node:felix.20220207005224.17: *4* gcm.getInt
-    /* def getInt(self, setting):
-        """Return the value of @int setting."""
-        val = self.get(setting, "int")
-        try:
-            val = int(val)
-            return val
-        except TypeError:
-            return None
+    /**
+     * Return the value of @int setting.
      */
+    public getInt(setting: string): number | undefined {
+        let val = this.get(setting, "int");
+        try {
+            val = parseInt(val, 10);
+            return val;
+        } catch (e) {
+            return undefined;
+        }
+    }
     //@+node:felix.20220207005224.18: *4* gcm.getLanguage
-    /* def getLanguage(self, setting):
-        """Return the setting whose value should be a language known to Leo."""
-        language = self.getString(setting)
-        return language
+    /**
+     * Return the setting whose value should be a language known to Leo.
      */
+    public getLanguage(setting: string): string {
+        const language = this.getString(setting);
+        return language;
+    }
     //@+node:felix.20220207005224.19: *4* gcm.getMenusList
-    /* def getMenusList(self):
-        """Return the list of entries for the @menus tree."""
-        aList = self.get('menus', 'menus')
-        # aList is typically empty.
-        return aList or g.app.config.menusList
+    /**
+     * Return the list of entries for the @menus tree.
      */
+    public getMenusList(): any[] {
+        const aList = this.get('menus', 'menus');
+        // aList is typically empty.
+        return aList || g.app.config.menusList;
+    }
     //@+node:felix.20220207005224.20: *4* gcm.getOpenWith
-    /* def getOpenWith(self):
-        """Return a list of dictionaries corresponding to @openwith nodes."""
-        val = self.get('openwithtable', 'openwithtable')
-        return val
+    /**
+     * Return a list of dictionaries corresponding to @openwith nodes.
      */
+    public getOpenWith(): Record<string, any>[] {
+        const val = this.get('openwithtable', 'openwithtable');
+        return val;
+    }
     //@+node:felix.20220207005224.21: *4* gcm.getRatio
-    /* def getRatio(self, setting):
-        """Return the value of @float setting.
-
-        Warn if the value is less than 0.0 or greater than 1.0."""
-        val = self.get(setting, "ratio")
-        try:
-            val = float(val)
-            if 0.0 <= val <= 1.0:
-                return val
-        except TypeError:
-            pass
-        return None
+    /**
+     * Return the value of @float setting, or None if there is an error.
      */
+    public getRatio(setting: string): number | undefined {
+        let val = this.get(setting, "ratio");
+        try {
+            val = parseFloat(val);
+            if (val >= 0.0 && val <= 1.0) {
+                return val;
+            }
+        } catch (e) {
+            // pass
+        }
+        return undefined;
+    }
     //@+node:felix.20220207005224.22: *4* gcm.getRecentFiles
-    /* def getRecentFiles(self):
-        """Return the list of recently opened files."""
-        return self.recentFiles
+    /**
+     * Return the list of recently opened files.
      */
+    public getRecentFiles(): string[] {
+        return this.recentFiles;
+    }
     //@+node:felix.20220207005224.23: *4* gcm.getString
     /**
      * Return the value of @string setting.
      */
     public getString(setting: string): string {
-        return this.get(setting, "string");
+        return this.get(setting, 'string');
     }
     //@+node:felix.20220206213914.37: *3* gcm.valueInMyLeoSettings
-    /* def valueInMyLeoSettings(self, settingName):
-        """Return the value of the setting, if any, in myLeoSettings.leo."""
-        lm = g.app.loadManager
-        d = lm.globalSettingsDict
-        gs = d.get(self.munge(settingName))
-            # A GeneralSetting object.
-        if gs:
-            path = gs.path
-            if path.find('myLeoSettings.leo') > -1:
-                return gs.val
-        return None
+    /**
+     * Return the value of the setting, if any, in myLeoSettings.leo.
      */
+    public valueInMyLeoSettings(settingName: string): any {
+
+        const lm = g.app.loadManager!;
+        const d = lm.globalSettingsDict;
+        const mungedSettingName = this.munge(settingName);
+        if (mungedSettingName) {
+
+            const gs = d.get(mungedSettingName); // A GeneralSetting object.
+            if (gs) {
+                const w_path = gs.path;
+                if (w_path.indexOf('myLeoSettings.leo') > -1) {
+                    return gs.val;
+                }
+            }
+        }
+        return undefined;
+    }
     //@-others
-
-
 }
 
 // Aliases for GlobalConfigManager members
 export interface GlobalConfigManager {
     munge: (name?: string) => string | undefined;
-
 }
 
-GlobalConfigManager.prototype.munge = GlobalConfigManager.prototype.canonicalizeSettingName;
+GlobalConfigManager.prototype.munge =
+    GlobalConfigManager.prototype.canonicalizeSettingName;
 //@+node:felix.20220214191554.1: ** class LocalConfigManager
 /**
  * A class to hold config settings for commanders.
  */
 export class LocalConfigManager {
-
     public c: Commands;
     public settingsDict: g.SettingsDict;
     public shortcutsDict: g.SettingsDict;
@@ -1862,8 +1884,8 @@ export class LocalConfigManager {
     public defaultMenuFontSize: number;
     public defaultTreeFontSize: number;
 
-    public default_derived_file_encoding!: string;
-    public default_at_auto_file_encoding!: string;
+    public default_derived_file_encoding!: BufferEncoding;
+    public default_at_auto_file_encoding!: BufferEncoding;
     public new_leo_file_encoding!: string;
     public save_clears_undo_buffer!: boolean;
 
@@ -1897,18 +1919,30 @@ export class LocalConfigManager {
         if (previousSettings) {
             this.settingsDict = previousSettings.settingsDict;
             this.shortcutsDict = previousSettings.shortcutsDict;
-            console.assert(this.settingsDict instanceof g.SettingsDict, JSON.stringify(this.settingsDict, null, 4));
-            console.assert(this.shortcutsDict instanceof g.SettingsDict, JSON.stringify(this.shortcutsDict, null, 4));
+            g.assert(
+                this.settingsDict instanceof g.SettingsDict,
+                JSON.stringify(this.settingsDict, null, 4)
+            );
+            g.assert(
+                this.shortcutsDict instanceof g.SettingsDict,
+                JSON.stringify(this.shortcutsDict, null, 4)
+            );
         } else {
             this.settingsDict = lm.globalSettingsDict;
             let d1 = this.settingsDict;
             this.shortcutsDict = lm.globalBindingsDict;
             let d2 = this.shortcutsDict;
             if (d1) {
-                console.assert(d1 instanceof g.SettingsDict, JSON.stringify(d1, null, 4));
+                g.assert(
+                    d1 instanceof g.SettingsDict,
+                    JSON.stringify(d1, null, 4)
+                );
             }
             if (d2) {
-                console.assert(d2 instanceof g.SettingsDict, JSON.stringify(d2, null, 4));
+                g.assert(
+                    d2 instanceof g.SettingsDict,
+                    JSON.stringify(d2, null, 4)
+                );
             }
         }
 
@@ -1917,11 +1951,10 @@ export class LocalConfigManager {
         this.default_derived_file_encoding = 'utf-8';
         this.new_leo_file_encoding = 'utf-8';
         // Default fonts.
-        this.defaultBodyFontSize = 12;  // 9 if sys.platform == "win32" else 12
-        this.defaultLogFontSize = 12;  // 8 if sys.platform == "win32" else 12
-        this.defaultMenuFontSize = 12;  // 9 if sys.platform == "win32" else 12
-        this.defaultTreeFontSize = 12;  // 9 if sys.platform == "win32" else 12
-
+        this.defaultBodyFontSize = 12; // 9 if sys.platform == "win32" else 12
+        this.defaultLogFontSize = 12; // 8 if sys.platform == "win32" else 12
+        this.defaultMenuFontSize = 12; // 9 if sys.platform == "win32" else 12
+        this.defaultTreeFontSize = 12; // 9 if sys.platform == "win32" else 12
     }
 
     //@+node:felix.20220214191554.6: *3* c.config.createActivesSettingsOutline (new: #852)
@@ -1943,7 +1976,6 @@ export class LocalConfigManager {
      * one of ("local_file", "theme_file", "myLeoSettings", "leoSettings", "ignore", "error")
      */
     public getSource(setting: g.GeneralSetting): string {
-
         let trace = false;
 
         // ? needed ?
@@ -1952,16 +1984,15 @@ export class LocalConfigManager {
         let w_path: string;
         try {
             w_path = setting.path!;
-        }
-        catch (exception) {
-            return "error";
+        } catch (exception) {
+            return 'error';
         }
 
         const val = setting.val.toString().substring(0, 50);
 
         if (!w_path) {
             // g.trace('NO PATH', setting.kind, val)
-            return "local_file";
+            return 'local_file';
         }
 
         w_path = w_path.toLowerCase();
@@ -1979,17 +2010,26 @@ export class LocalConfigManager {
             }
         }
         const theme_path = g.app.loadManager!.theme_path;
-        if (theme_path && w_path.indexOf(g.shortFileName(theme_path.toLowerCase())) >= 0) {
+        if (
+            theme_path &&
+            w_path.indexOf(g.shortFileName(theme_path.toLowerCase())) >= 0
+        ) {
             if (trace) {
-                g.trace('FOUND:', "theme_file", setting.kind, setting.ivar, val);
+                g.trace(
+                    'FOUND:',
+                    'theme_file',
+                    setting.kind,
+                    setting.ivar,
+                    val
+                );
             }
-            return "theme_file";
+            return 'theme_file';
         }
         // g.trace('NOT FOUND', repr(theme_path), repr(path))
         if (w_path === 'register-command' || w_path.indexOf('mode') > -1) {
             return 'ignore';
         }
-        return "local_file";
+        return 'local_file';
     }
 
     //@+node:felix.20220214191554.8: *3* c.config.Getters
@@ -2000,7 +2040,6 @@ export class LocalConfigManager {
      * Return the position for the setting in the @settings tree for c.
      */
     public findSettingsPosition(setting: string): Position | undefined {
-
         const munge = g.app.config.munge;
 
         const root = this.settingsRoot();
@@ -2012,13 +2051,12 @@ export class LocalConfigManager {
 
         for (let p of root.subtree()) {
             //BJ munge will return None if a headstring is empty
-            const h: string = p.h ? (munge(p.h)! || '') : '';
+            const h: string = p.h ? munge(p.h)! || '' : '';
             if (h.startsWith(setting)) {
                 return p.copy();
             }
         }
         return undefined;
-
     }
 
     //@+node:felix.20220214191554.10: *5* c.config.settingsRoot
@@ -2029,7 +2067,7 @@ export class LocalConfigManager {
         const c = this.c;
         for (let p of c.all_unique_positions()) {
             // #1792: Allow comments after @settings.
-            if (g.match_word(p.h.trimEnd(), 0, "@settings")) {
+            if (g.match_word(p.h.trimEnd(), 0, '@settings')) {
                 return p.copy();
             }
         }
@@ -2063,7 +2101,7 @@ export class LocalConfigManager {
         const d = this.settingsDict;
         if (d) {
             // assert isinstance(d, g.TypedDict), repr(d)
-            console.assert(d instanceof g.SettingsDict, d.toString());
+            g.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: any;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -2076,13 +2114,18 @@ export class LocalConfigManager {
      * Look up the setting in d. If warn is True, warn if the requested type
      * does not (loosely) match the actual type.
      * returns (val,exists)
-     * @param d 
-     * @param setting 
-     * @param requestedType 
+     * @param d
+     * @param setting
+     * @param requestedType
      * @param warn flag to have method warn if value not found
      * @returns array of value, and exist flag
      */
-    public getValFromDict(d: g.SettingsDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
+    public getValFromDict(
+        d: g.SettingsDict,
+        setting: string,
+        requestedType?: string,
+        warn = true
+    ): [any, boolean] {
         const tag = 'c.config.getValFromDict';
         const mungedSetting = g.app.config.munge(setting)!;
         const gs = d.get(mungedSetting);
@@ -2090,7 +2133,7 @@ export class LocalConfigManager {
             return [undefined, false];
         }
 
-        console.assert(gs instanceof g.GeneralSetting, gs.toString());
+        g.assert(gs instanceof g.GeneralSetting, gs.toString());
 
         const val = gs.val;
         const isNone = ['None', 'none', ''].includes(val);
@@ -2103,7 +2146,8 @@ export class LocalConfigManager {
                 g.error(
                     `${tag}: ignoring '${setting}' setting.\n` +
                     `${tag}: '${gs.kind}' is not '${requestedType}'.\n` +
-                    `${tag}: there may be conflicting settings!`);
+                    `${tag}: there may be conflicting settings!`
+                );
             }
             return [undefined, false];
         }
@@ -2116,42 +2160,44 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.14: *6* c.config.typesMatch
     /**
      * Return True if type1, the actual type, matches type2, the requeseted type.
-     * 
+     *
      * The following equivalences are allowed:
-     * 
+     *
      * - None matches anything.
      * - An actual type of string or strings matches anything *except* shortcuts.
      * - Shortcut matches shortcuts.
-     * 
+     *
      * @param type1 string
      * @param type2 string
      */
     public typesMatch(type1?: string, type2?: string): boolean {
         // The shortcuts logic no longer uses the get/set code.
         const shortcuts = ['shortcut', 'shortcuts'];
-        if ((type1 && shortcuts.includes(type1)) || (type2 && shortcuts.includes(type2))) {
+        if (
+            (type1 && shortcuts.includes(type1)) ||
+            (type2 && shortcuts.includes(type2))
+        ) {
             g.trace('oops: type in shortcuts');
         }
         return (
-            type1 === null
-            || type2 === null
-            || type1 === undefined
-            || type2 === undefined
-            || type1.startsWith('string') && !shortcuts.includes(type2)
-            || type1 === 'language' && type2 === 'string'
-            || type1 === 'int' && type2 === 'size'
+            type1 === null ||
+            type2 === null ||
+            type1 === undefined ||
+            type2 === undefined ||
+            (type1.startsWith('string') && !shortcuts.includes(type2)) ||
+            (type1 === 'language' && type2 === 'string') ||
+            (type1 === 'int' && type2 === 'size') ||
             // added for javascript
-            || type1 === 'int' && type2 === 'number'
-            || type1 === 'float' && type2 === 'number'
-            || (shortcuts.includes(type1) && shortcuts.includes(type2))
-            || type1 === type2
+            (type1 === 'int' && type2 === 'number') ||
+            (type1 === 'float' && type2 === 'number') ||
+            (shortcuts.includes(type1) && shortcuts.includes(type2)) ||
+            type1 === type2
         );
-
     }
     //@+node:felix.20220214191554.15: *5* c.config.getAbbrevDict
     /**
      * Search all dictionaries for the setting & check it's type
-     * @returns 
+     * @returns
      */
     public getAbbrevDict(): any {
         const d = this.get('abbrev', 'abbrev');
@@ -2165,7 +2211,7 @@ export class LocalConfigManager {
      * @returns the boolean setting's value, or default
      */
     public getBool(setting: string, defaultVal?: boolean): boolean {
-        const val = this.get(setting, "bool");
+        const val = this.get(setting, 'bool');
         if ([true, false].includes(val)) {
             return val;
         }
@@ -2178,42 +2224,51 @@ export class LocalConfigManager {
      * @returns color string
      */
     public getColor(setting: string): string {
-        let col: string = this.get(setting, "color");
+        let col: string = this.get(setting, 'color');
         while (col && col.startsWith('@')) {
-            col = this.get(col.substring(1), "color");
+            col = this.get(col.substring(1), 'color');
         }
         return col;
     }
     //@+node:felix.20220214191554.18: *5* c.config.getData
     /**
      * Return a list of non-comment strings in the body text of @data setting.
-     * @param setting 
-     * @param strip_comments 
-     * @param strip_data 
+     * @param setting
+     * @param strip_comments
+     * @param strip_data
      */
-    public getData(setting: string, strip_comments = true, strip_data = true): string[] {
-
+    public getData(
+        setting: string,
+        strip_comments = true,
+        strip_data = true
+    ): string[] {
         // 904: Add local abbreviations to global settings.
         const append: boolean = setting === 'global-abbreviations';
         let data0: string[] = [];
         if (append) {
             data0 = g.app.config.getData(setting, strip_comments, strip_data);
         }
-        let data: string | string[] = this.get(setting, "data");
+        let data: string | string[] = this.get(setting, 'data');
         // New in Leo 4.11: parser.doData strips only comments now.
         // New in Leo 4.12: parser.doData strips *nothing*.
-        if ((typeof data === 'string' || data instanceof String)) {
+        if (typeof data === 'string' || data instanceof String) {
             data = [data as string];
         }
         if (data && data.length && strip_comments) {
             // data = [z for z in data if not z.strip().startswith('#')]
             data = data.filter((z) => {
-                !z.trim().startsWith('#');
+                return !z.trim().startsWith('#');
             });
         }
         if (data && data.length && strip_data) {
             // data = [z.strip() for z in data if z.strip()]
-            data = data.map((z) => { return z.trim(); }).filter((z) => { return !!z; });
+            data = data
+                .map((z) => {
+                    return z.trim();
+                })
+                .filter((z) => {
+                    return !!z;
+                });
         }
         if (append && JSON.stringify(data) !== JSON.stringify(data0)) {
             if (data && data.length) {
@@ -2227,18 +2282,21 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.19: *5* c.config.getOutlineData
     /**
      * Return the pastable (xml) text of the entire @outline-data tree.
-     * @param setting  
+     * @param setting
      * @returns string
      */
     public getOutlineData(setting: string): string[] {
-
-        let data = this.get(setting, "outlinedata");
+        let data = this.get(setting, 'outlinedata');
         if (setting === 'tree-abbreviations') {
             // 904: Append local tree abbreviations to the global abbreviations.
             const data0 = g.app.config.getOutlineData(setting);
             if (data && data0 && data !== data0) {
-                console.assert(typeof data0 === 'string' || data0 instanceof String);
-                console.assert(typeof data === 'string' || data instanceof String);
+                g.assert(
+                    typeof data0 === 'string' || data0 instanceof String
+                );
+                g.assert(
+                    typeof data === 'string' || data instanceof String
+                );
                 // We can't merge the data here: they are .leo files!
                 // abbrev.init_tree_abbrev_helper does the merge.
                 data = [data0, data];
@@ -2249,16 +2307,17 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.20: *5* c.config.getDirectory
     /**
      * Return the value of @directory setting, or None if the directory does not exist.
-     * @param setting 
+     * @param setting
      */
-    public getDirectory(setting: string): string | undefined {
+    public async getDirectory(setting: string): Promise<string | undefined> {
         // Fix https://bugs.launchpad.net/leo-editor/+bug/1173763
         const theDir: string = this.get(setting, 'directory');
-        // TODO MAYBE CHECK???
-        // if( g.os_path_exists(theDir) && g.os_path_isdir(theDir)){
-        //     return theDir;
-        // }
-        if (theDir) {
+        if (!theDir) {
+            return undefined;
+        }
+        const w_exists = await g.os_path_exists(theDir);
+        const w_isDir = await g.os_path_isdir(theDir);
+        if (w_exists && w_isDir) {
             return theDir;
         }
         return undefined;
@@ -2266,15 +2325,14 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.21: *5* c.config.getFloat
     /**
      * Return the value of @float setting.
-     * @param setting 
+     * @param setting
      */
     public getFloat(setting: string): number | undefined {
-        let val = this.get(setting, "float");
+        let val = this.get(setting, 'float');
         try {
             val = Number(val);
             return val;
-        }
-        catch (TypeError) {
+        } catch (TypeError) {
             return undefined;
         }
     }
@@ -2293,29 +2351,33 @@ export class LocalConfigManager {
      * @param weight 
      * @param defaultSize 
      */
-    public getFontFromParams(family: string, size: number, slant: number, weight: number, defaultSize = 12): string {
-
-        return "";
+    public getFontFromParams(
+        family: string,
+        size: number,
+        slant: number,
+        weight: number,
+        defaultSize = 12
+    ): string {
+        return '';
     }
     //@+node:felix.20220214191554.23: *5* c.config.getInt
     /**
      * Return the value of @int setting.
-     * @param setting 
+     * @param setting
      */
     public getInt(setting: string): number | undefined {
-        let val = this.get(setting, "int");
+        let val = this.get(setting, 'int');
         try {
             val = Number(val);
             return val;
-        }
-        catch (TypeError) {
+        } catch (TypeError) {
             return undefined;
         }
     }
     //@+node:felix.20220214191554.24: *5* c.config.getLanguage
     /**
      * Return the setting whose value should be a language known to Leo.
-     * @param setting 
+     * @param setting
      */
     public getLanguage(setting: string): string {
         const language = this.getString(setting);
@@ -2333,7 +2395,7 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.26: *5* c.config.getOpenWith
     /**
      * Return a list of dictionaries corresponding to @openwith nodes.
-     * @returns 
+     * @returns
      */
     public getOpenWith(): any {
         const val = this.get('openwithtable', 'openwithtable');
@@ -2341,19 +2403,16 @@ export class LocalConfigManager {
     }
     //@+node:felix.20220214191554.27: *5* c.config.getRatio
     /**
-     * Return the value of @float setting.
-     *
-     * Warn if the value is less than 0.0 or greater than 1.0.
+     * Return the value of @float setting, or None if there is an error.
      */
     public getRatio(setting: string): any {
-        let val = this.get(setting, "ratio");
+        let val = this.get(setting, 'ratio');
         try {
             val = Number(val);
             if (0.0 <= val && val <= 1.0) {
                 return val;
             }
-        }
-        catch (TypeError) {
+        } catch (TypeError) {
             // pass
         }
         return undefined;
@@ -2361,12 +2420,12 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.28: *5* c.config.getSettingSource
     /**
      * return the name of the file responsible for setting.
-     * @param setting 
+     * @param setting
      */
     public getSettingSource(setting: string): [string, any] | undefined {
         const d = this.settingsDict;
         if (d) {
-            console.assert(d instanceof g.SettingsDict, d.toString());
+            g.assert(d instanceof g.SettingsDict, d.toString());
             const bi = d.get(setting);
             if (bi === undefined) {
                 return ['unknown setting', undefined];
@@ -2376,7 +2435,7 @@ export class LocalConfigManager {
         //
         // lm.readGlobalSettingsFiles is opening a settings file.
         // lm.readGlobalSettingsFiles has not yet set lm.globalSettingsDict.
-        console.assert(d === undefined || d === null);
+        g.assert(d === undefined || d === null);
         return undefined;
     }
     //@+node:felix.20220214191554.29: *5* c.config.getShortcut
@@ -2385,11 +2444,10 @@ export class LocalConfigManager {
     // ? Needed ?
     /**
      * Return rawKey,accel for shortcutName
-     * @param commandName 
-     * @returns 
+     * @param commandName
+     * @returns
      */
     public getShortcut(commandName: string): [string | undefined, any[]] {
-
         // c = this.c
         // d = this.shortcutsDict
         // if not c.frame.menu:
@@ -2416,49 +2474,50 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.30: *5* c.config.getString
     /**
      * Return the value of @string setting.
-     * @param setting 
+     * @param setting
      */
     public getString(setting: string): string {
-        return this.get(setting, "string");
+        return this.get(setting, 'string');
     }
     //@+node:felix.20220214191554.31: *4* c.config.Getters: redirect to g.app.config
     /**
      * Return a list of tuples (x,y) for common @button nodes.
-     * @param setting 
+     * @param setting
      */
     public getButtons(): any {
-        return g.app.config.atCommonButtonsList;  // unusual.
+        return g.app.config.atCommonButtonsList; // unusual.
     }
     /**
      * Return the list of tuples (headline,script) for common @command nodes.
-     * @param setting 
+     * @param setting
      */
     public getCommands(): any {
-        return g.app.config.atCommonCommandsList;  // unusual.
+        return g.app.config.atCommonCommandsList; // unusual.
     }
     /**
      * Return the body text of the @enabled-plugins node.
-     * @param setting 
+     * @param setting
      */
     public getEnabledPlugins(): any {
-        return g.app.config.enabledPluginsString;  // unusual.
+        return g.app.config.enabledPluginsString; // unusual.
     }
     /**
      * Return the list of recently opened files.
-     * @param setting 
+     * @param setting
      */
     public getRecentFiles(): string[] {
-        // TODO !
-        // return g.app.config.getRecentFiles()  // unusual
-        return [];
+        return g.app.config.getRecentFiles();
     }
     //@+node:felix.20220214191554.32: *4* c.config.isLocalSetting
     /**
      * Return True if the indicated setting comes from a local .leo file.
-     * @param setting 
+     * @param setting
      */
     public isLocalSetting(setting: string, kind: string): boolean {
-        if (!kind || ['shortcut', 'shortcuts', 'openwithtable'].includes(kind)) {
+        if (
+            !kind ||
+            ['shortcut', 'shortcuts', 'openwithtable'].includes(kind)
+        ) {
             return false;
         }
         let key = g.app.config.munge(setting);
@@ -2475,7 +2534,7 @@ export class LocalConfigManager {
 
         // assert isinstance(gs, g.GeneralSetting), repr(gs)
         let w_path: string = gs.path!.toLowerCase();
-        ['myLeoSettings.leo', 'leoSettings.leo'].forEach(fn => {
+        ['myLeoSettings.leo', 'leoSettings.leo'].forEach((fn) => {
             if (w_path.endsWith(fn.toLowerCase())) {
                 return false;
             }
@@ -2485,13 +2544,13 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.33: *4* c.config.isLocalSettingsFile
     /**
      * Return true if c is not leoSettings.leo or myLeoSettings.leo
-     * @param setting 
+     * @param setting
      */
     public isLocalSettingsFile(): any {
         const c = this.c;
 
         const fn = c.shortFileName().toLowerCase();
-        ['leoSettings.leo', 'myLeoSettings.leo'].forEach(fn2 => {
+        ['leoSettings.leo', 'myLeoSettings.leo'].forEach((fn2) => {
             if (fn.endsWith(fn2.toLowerCase())) {
                 return false;
             }
@@ -2502,7 +2561,7 @@ export class LocalConfigManager {
     //@+node:felix.20220214191554.34: *4* c.exists
     /**
      * Return true if a setting of the given kind exists, even if it is None.
-     * @param setting 
+     * @param setting
      */
     public exists(c: Commands, setting: string, kind: string): boolean {
         let d = this.settingsDict;
@@ -2529,14 +2588,14 @@ export class LocalConfigManager {
      *  - [T] theme .leo file.
      */
     public printSettings(): void {
-
-        const legend = "legend:" +
-            "    leoSettings.leo" +
-            "@  @button, @command, @mode" +
-            "[D] default settings" +
-            "[F] loaded .leo File" +
-            "[M] myLeoSettings.leo" +
-            "[T] theme .leo file.";
+        const legend =
+            'legend:' +
+            '    leoSettings.leo' +
+            '@  @button, @command, @mode' +
+            '[D] default settings' +
+            '[F] loaded .leo File' +
+            '[M] myLeoSettings.leo' +
+            '[T] theme .leo file.';
 
         const c = this.c;
 
@@ -2566,33 +2625,45 @@ export class LocalConfigManager {
      *
      * The "p" arg is not used.
      */
-    public set(p: any, kind: string, name: string, val: any, warn = true): void {
-
+    public set(
+        p: any,
+        kind: string,
+        name: string,
+        val: any,
+        warn = true
+    ): void {
         const c = this.c;
 
         // Note: when kind is 'shortcut', name is a command name.
         let key: string = g.app.config.munge(name)!;
         let d = this.settingsDict;
-        console.assert(d instanceof g.SettingsDict, d.toString());
+        g.assert(d instanceof g.SettingsDict, d.toString());
         let gs = d.get(key);
         if (gs) {
             // assert isinstance(gs, g.GeneralSetting), repr(gs)
             let w_path = gs.path!;
-            if (warn && g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {  // #1341.
-                g.es("over-riding setting:", name, "from", w_path);
+            if (warn && g.finalize(c.mFileName) !== g.finalize(w_path)) {
+                // #1341.
+                g.es('over-riding setting:', name, 'from', w_path);
             }
         }
 
         // ? equivalent of d[key] = g.GeneralSetting(kind, path=c.mFileName, val=val, tag='setting')
-        d.set(key, new g.GeneralSetting({ kind: kind, path: c.mFileName, val: val, tag: 'setting' }));
-
+        d.set(
+            key,
+            new g.GeneralSetting({
+                kind: kind,
+                path: c.mFileName,
+                val: val,
+                tag: 'setting',
+            })
+        );
     }
     //@+node:felix.20220214191554.37: *3* c.config.settingIsActiveInPath
     /**
      * Return True if settings file given by path actually defines the setting, gs.
      */
     public settingIsActiveInPath(gs: any, target_path: string): boolean {
-
         // assert isinstance(gs, g.GeneralSetting), repr(gs)
         return gs.path === target_path;
     }
@@ -2601,18 +2672,14 @@ export class LocalConfigManager {
      * Find and set the indicated setting, either in the local file or in
      * myLeoSettings.leo.
      */
-    public setUserSetting(setting: string, value: any): void {
-
+    public async setUserSetting(setting: string, value: any): Promise<void> {
         let c: Commands | undefined = this.c;
 
         let fn: string = g.shortFileName(c.fileName());
         let p: Position | undefined = this.findSettingsPosition(setting);
 
         if (!p || !p.__bool__()) {
-            // c = c.openMyLeoSettings();
-            // TODO !
-            // ! Make command that builds outline of settings!
-            // ! From the leojs vscode config settings
+            c = await c.openMyLeoSettings();
             if (!c) {
                 return;
             }
@@ -2633,10 +2700,10 @@ export class LocalConfigManager {
         let h = setting;
         let i = h.indexOf('=');
         if (i > -1) {
-            h = h.substring(2).trim();
+            h = h.slice(0, i).trim();
         }
         p.h = `${h} = ${value}`;
-        console.log(`Updated '${setting}' in ${fn}`);  // #2390.
+        console.log(`Updated '${setting}' in ${fn}`); // #2390.
         //
         // Delay the second redraw until idle time.
         c.setChanged();
@@ -2644,7 +2711,6 @@ export class LocalConfigManager {
         c.redraw_later();
     }
     //@-others
-
 }
 //@+node:felix.20220602232038.1: ** class SettingsTreeParser (ParserBaseClass)
 /**
@@ -2653,7 +2719,6 @@ export class LocalConfigManager {
  * Used by read settings logic.
  */
 export class SettingsTreeParser extends ParserBaseClass {
-
     constructor(c: Commands, localFlag = true) {
         super(c, localFlag);
     }
@@ -2664,8 +2729,7 @@ export class SettingsTreeParser extends ParserBaseClass {
     /**
      * Init any settings found in node p.
      */
-    public visitNode(p: Position): string | undefined {
-
+    public async visitNode(p: Position): Promise<string | undefined> {
         p = p.copy();
 
         const munge = g.app.config.munge;
@@ -2678,33 +2742,33 @@ export class SettingsTreeParser extends ParserBaseClass {
 
         const isNone = ['None', 'none', '', undefined].includes(val);
 
-        if (!kind) {  // Not an @x node. (New in Leo 4.4.4)
+        if (!kind) {
+            // Not an @x node. (New in Leo 4.4.4)
             // pass
-        } else if (kind === "settings") {
+        } else if (kind === 'settings') {
             // pass
         } else if (SettingsTreeParser.basic_types.includes(kind) && isNone) {
             // None is valid for all basic types.
             this.set(p, kind, name!, undefined);
-        } else if (SettingsTreeParser.control_types.includes(kind) || SettingsTreeParser.basic_types.includes(kind)) {
+        } else if (
+            SettingsTreeParser.control_types.includes(kind) ||
+            SettingsTreeParser.basic_types.includes(kind)
+        ) {
             const f = this.dispatchDict[kind];
             if (f) {
                 try {
-                    return f.bind(this)(p, kind, name!, val);  // type:ignore
-                }
-                catch (exception) {
+                    const result = await Promise.resolve(f.bind(this)(p, kind, name!, val));
+                } catch (exception) {
                     g.es_exception(exception);
                 }
-
             } else {
-                g.pr("*** no handler", kind);
+                g.pr('*** no handler', kind);
             }
-
         }
         return undefined;
     }
 
     //@-others
-
 }
 
 //@-others

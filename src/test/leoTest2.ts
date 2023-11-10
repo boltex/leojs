@@ -8,12 +8,8 @@
  * Support for LeoJS's new unit tests, contained in src/tests/.
  */
 
-// import time
-// import unittest
-// import warnings
-// from leo.core import leoGlobals as g
-// from leo.core import leoApp
-
+import * as path from 'path';
+import * as os from 'os';
 import * as g from '../core/leoGlobals';
 import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
@@ -22,6 +18,7 @@ import { GlobalConfigManager } from '../core/leoConfig';
 import { NullGui } from '../core/leoGui';
 import * as assert from 'assert';
 import { ISettings } from '../core/leoFind';
+import { AtFile } from '../core/leoAtFile';
 
 //@+others
 //@+node:felix.20220130224933.2: ** function.create_app
@@ -57,19 +54,14 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
 
     // g.app.recentFilesManager = leoApp.RecentFilesManager()
 
-    // lm.computeStandardDirectories()
+    await lm.computeStandardDirectories();
 
-    const leoID = await g.app.setLeoID(false, true);
-
-    if (!leoID) {
-        throw Error("unable to set LeoID.");
-    }
-
+    g.app.leoID = 'TestLeoId';  // Use a standard user id for all tests.
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
     g.app.config = new GlobalConfigManager();
 
     // g.app.db = g.NullObject('g.app.db')
-    // g.app.pluginsController = g.NullObject('g.app.pluginsController')
+    g.app.pluginsController = new g.NullObject('g.app.pluginsController');
     // g.app.commander_cacher = g.NullObject('g.app.commander_cacher')
 
     if (gui_name === 'null') {
@@ -128,14 +120,19 @@ export class LeoUnitTest {
     public root_p!: Position;
     public settings_p!: Position;
     public x: any;
+    public at!: AtFile;
     public settings!: ISettings;
+    public command_name: string = "";
+    public parent_p!: Position;
+    public tempNode!: Position;
+    public before_p!: Position;
+    public after_p!: Position;
 
     //@+others
     //@+node:felix.20220130224933.4: *3* LeoUnitTest.setUp, tearDown & setUpClass
-
     constructor() { }
 
-    public async setUpClass(): Promise<Commands> {
+    public setUpClass(): Promise<Commands> {
         return create_app('null');
     }
 
@@ -147,9 +144,18 @@ export class LeoUnitTest {
         // Set g.unitTesting *early*, for guards.
         (g.unitTesting as boolean) = true;
 
+        // Default.
+        g.app.write_black_sentinels = false;
+
         // Create a new commander for each test.
         // This is fast, because setUpClass has done all the imports.
-        const c = new Commands("", new NullGui());
+
+
+        // fileName = g.os_path_finalize_join(g.app.loadDir, 'LeoPyRef.leo')
+        const fileName = g.os_path_finalize_join(g.app.loadDir!, 'Leojs.leo');
+        // const fileName = g.os_path_finalize_join(g.vsCodeContext.extensionUri.fsPath, 'Leojs.leo');
+
+        const c = new Commands(fileName, new NullGui());
         this.c = c;
         // Init the 'root' and '@settings' nodes.
         this.root_p = c.rootPosition()!;
@@ -164,6 +170,44 @@ export class LeoUnitTest {
         // unneeded ?
     }
 
+    //@+node:felix.20230724005349.1: *3* LeoUnitTest: setup helpers and related tests
+    //@+node:felix.20230724005349.2: *4* LeoUnitTest._set_setting
+    /**
+     * Call c.config.set with the given args, suppressing stdout.
+     */
+    public _set_setting(c: Commands, kind: string, name: string, val: any): void {
+
+        c.config.set(undefined, kind, name, val);
+
+        // try:
+        //     old_stdout = sys.stdout
+        //     sys.stdout = open(os.devnull, 'w')
+        //     c.config.set(p=None, kind=kind, name=name, val=val)
+        // catch(e){
+
+        // }
+        // finally{
+        //     sys.stdout = old_stdout
+        // }
+
+    }
+
+    //@+node:felix.20230724005349.3: *4* LeoUnitTest.verbose_test_set_setting
+    public verbose_test_set_setting(): void {
+        // Not run by default. To run:
+        // python -m unittest leo.core.leoTest2.LeoUnitTest.verbose_test_set_setting
+        const c = this.c;
+        let val: any;
+        let name = '';
+        for (const w_val in [true, false]) {
+            name = 'test-bool-setting';
+            this._set_setting(c, 'bool', name, val);
+            assert.ok(c.config.getBool(name) === val);
+        }
+        val = 'aString';
+        this._set_setting(c, 'string', name, val);
+        assert.ok(c.config.getString(name) === val);
+    }
     //@+node:felix.20220130224933.5: *3* LeoUnitTest.create_test_outline
     public create_test_outline(): void {
         const p: Position = this.c!.p;
@@ -209,12 +253,26 @@ export class LeoUnitTest {
         clone.moveToLastChildOf(p);
     }
 
+    //@+node:felix.20230529213901.1: *3* LeoUnitTest.dump_headlines
+    /**
+     * Dump root's headlines, or all headlines if root is None.
+     */
+    public dump_headlines(root?: Position, tag?: string): void {
+        console.log('');
+        if (tag) {
+            console.log(tag);
+        }
+        const _iter = root ? root.self_and_subtree.bind(root) : this.c.all_positions.bind(this.c);
+        for (const p of _iter()) {
+            console.log('');
+            console.log('level:', p.level(), p.h);
+        }
+    }
     //@+node:felix.20230224231417.1: *3* LeoUnitTest.dump_tree
     /**
      * Dump root's tree, or the entire tree if root is None.
      */
     public dump_tree(root?: Position, tag?: string): void {
-
         console.log('');
         if (tag) {
             console.log(tag);
@@ -225,6 +283,122 @@ export class LeoUnitTest {
             console.log('level:', p.level(), p.h);
             g.printObj(g.splitLines(p.v.b));
         }
+    }
+    //@+node:felix.20230805124519.1: *3* TestOutlineCommands.clean_tree
+    /**
+     * Clear everything but the root node.
+     */
+    public clean_tree(): void {
+
+        const p = this.root_p;
+        assert.ok(p.h === 'root');
+        p.deleteAllChildren();
+        while (p.hasNext()) {
+            p.next().doDelete();
+        }
+
+    }
+    //@+node:felix.20230805124525.1: *3* TestOutlineCommands.copy_node
+    /**
+     * Copy c.p to the clipboard.
+     */
+    public async copy_node(is_json = false): Promise<string> {
+
+        const c = this.c;
+        let s;
+        if (is_json) {
+            s = c.fileCommands.outline_to_clipboard_json_string();
+        } else {
+            s = c.fileCommands.outline_to_clipboard_string() || "";
+        }
+        await g.app.gui.replaceClipboardWith(s);
+        return s;
+
+    }
+    //@+node:felix.20230805124530.1: *3* TestOutlineCommands.create_test_paste_outline
+    /**
+     * Create the following tree:
+     *
+     *      aa
+     *          aa:child1
+     *      bb
+     *      cc:child1 (clone)
+     *      cc
+     *        cc:child1 (clone)
+     *        cc:child2
+     *      dd
+     *        dd:child1
+     *          dd:child1:child1
+     *        dd:child2
+     *      ee
+     *
+     *  return cc.
+     */
+    public create_test_paste_outline(): Position {
+
+        const c = this.c;
+        const root = c.rootPosition()!;
+        const aa = root.insertAfter();
+        aa.h = 'aa';
+        const aa_child1 = aa.insertAsLastChild();
+        aa_child1.h = 'aa:child1';
+        const bb = aa.insertAfter();
+        bb.h = 'bb';
+        let cc = bb.insertAfter();
+        cc.h = 'cc';
+        const cc_child1 = cc.insertAsLastChild();
+        cc_child1.h = 'cc:child1';
+        const cc_child2 = cc_child1.insertAfter();
+        cc_child2.h = 'cc:child2';
+        const dd = cc.insertAfter();
+        dd.h = 'dd';
+        const dd_child1 = dd.insertAsLastChild();
+        dd_child1.h = 'dd:child1';
+        const dd_child2 = dd.insertAsLastChild();
+        dd_child2.h = 'dd:child2';
+        const dd_child1_child1 = dd_child1.insertAsLastChild();
+        dd_child1_child1.h = 'dd:child1:child1';
+        const ee = dd.insertAfter();
+        ee.h = 'ee';
+        const clone = cc_child1.clone();
+        clone.moveAfter(bb);
+        assert.ok(clone.v === cc_child1.v);
+        // Careful: position cc has changed.
+        cc = clone.next().copy();
+        // Initial checks.
+        assert.ok(cc.h === 'cc');
+        // Make *sure* clones are as expected.
+        for (const p of c.all_positions()) {
+            if (p.h === 'cc:child1') {
+                assert.ok(p.isCloned(), p.h);
+            } else {
+                assert.ok(!p.isCloned(), p.h);
+            }
+        }
+        return cc;
+
+    }
+    //@+node:felix.20230805124535.1: *3* TestOutlineCommands.create_test_sort_outline
+    /**
+     * Create a test outline suitable for sort commands.
+     */
+    public create_test_sort_outline(): void {
+        const p = this.c.p;
+        assert.ok(p.__eq__(this.root_p));
+        assert.ok(p.h === 'root');
+
+        const table = [
+            'child a',
+            'child z',
+            'child b',
+            'child w',
+        ];
+
+        for (const h of table) {
+            const child = p.insertAsLastChild();
+            child.h = h;
+        }
+
     }
     //@-others
 

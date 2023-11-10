@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220429005433.1: * @file src/core/leoChapters.ts
-// * Classes that manage chapters in Leo's core.
+/**
+ * Classes that manage chapters in Leo's core.
+ */
 //@+<< leoChapters imports >>
 //@+node:felix.20221110000315.1: ** << leoChapters imports >>
 import * as g from './leoGlobals';
@@ -64,8 +66,7 @@ export class ChapterController {
         if (cc.use_tabs) {
             if (
                 c.frame &&
-                c.frame.iconBar &&
-                c.frame.iconBar.createChaptersIcon
+                c.frame.iconBar
             ) {
                 if (!cc.tt) {
                     console.log(
@@ -145,13 +146,20 @@ export class ChapterController {
 
         // Replace the docstring for proper details label in minibuffer, etc.
         if (chapterName === 'main') {
-            select_chapter_callback.__doc__ = "Select the main chapter";
+            select_chapter_callback.__doc__ = 'Select the main chapter';
         } else {
-            select_chapter_callback.__doc__ = "Select chapter \"" + chapterName + "\".";
+            select_chapter_callback.__doc__ =
+                'Select chapter "' + chapterName + '".';
         }
 
         for (let shortcut of bindings) {
-            c.registerCommand(commandName, select_chapter_callback, shortcut);
+            c.registerCommand(
+                commandName,
+                select_chapter_callback,
+                undefined,
+                undefined,
+                shortcut
+            );
         }
     }
     //@+node:felix.20220429005433.9: *3* cc.selectChapter
@@ -159,25 +167,19 @@ export class ChapterController {
         'chapter-select',
         'Prompt for a chapter name and select the given chapter.'
     )
-    public selectChapter(): void {
-        return g.app.gui.chapterSelect(); // TODO : Only have gui for dialog, move implementation here.
-        // const cc = this;
-        // const k = this.c.k;
-        // const names = cc.setAllChapterNames();
-        // g.es('Chapters:\n' + names.join('\n'));
-        // k.setLabelBlue('Select chapter: ');
-        // k.get1Arg(this.selectChapter1, names);
+    public selectChapter(): Thenable<void> {
+        const cc = this;
+        const names = cc.setAllChapterNames();
+        const options = { placeHolder: "Select chapter" };
+        return g.app.gui.get1Arg(options, undefined, names).then(
+            (arg) => {
+                if (arg) {
+                    cc.selectChapterByName(arg);
+                }
+            }
+        );
     }
 
-    public selectChapter1(): void {
-        const cc = this;
-        const k = this.c.k;
-        k.clearState();
-        k.resetLabel();
-        if (k.arg) {
-            cc.selectChapterByName(k.arg);
-        }
-    }
     //@+node:felix.20220429005433.10: *3* cc.selectNext/Back
     @cmd('chapter-back', 'Select the previous chapter.')
     public backChapter(): void {
@@ -272,7 +274,7 @@ export class ChapterController {
         //        - Expanding chapter.p would be confusing and annoying.
         chapter.select();
         c.selectPosition(chapter.p);
-        c.redraw();  // #2718.
+        c.redraw(); // #2718.
     }
     //@+node:felix.20220429005433.13: *3* cc.Utils
     //@+node:felix.20220429005433.14: *4* cc.error/note/warning
@@ -287,7 +289,7 @@ export class ChapterController {
                 g.trace('=====', s, g.callers());
             }
             if (killUnitTest) {
-                console.assert(false, s); // noqa
+                g.assert(false, s); // noqa
             }
         } else {
             g.note(`Note: ${s}`);
@@ -389,7 +391,7 @@ export class ChapterController {
             // name=group(1), binding=group(3)
         }
 
-        const m: RegExpExecArray | null = this.re_chapter.exec(p.h);
+        const m: RegExpMatchArray | null = p.h.match(this.re_chapter);
         let chapterName: string | undefined;
         let binding: string | undefined;
 
@@ -488,7 +490,7 @@ export class ChapterController {
         }
 
         // Fix bug 869385: Chapters make the nav_qt.py plugin useless
-        console.assert(!this.selectChapterLockout);
+        g.assert(!this.selectChapterLockout);
         // New in Leo 5.6: don't call c.redraw immediately.
         c.redraw_later();
     }
@@ -630,8 +632,8 @@ export class Chapter {
 
         // Next, recompute p and possibly select a new editor.
         if (w) {
-            console.assert(w === c.frame.body.wrapper);
-            console.assert(w.leo_p);
+            g.assert(w === c.frame.body.wrapper);
+            g.assert(w.leo_p);
             this.p = this.findPositionInChapter(w.leo_p) || root.copy();
             p = this.p;
         } else {

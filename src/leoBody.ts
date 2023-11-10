@@ -167,7 +167,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                     return w_buffer;
                 } else {
                     if (!this._errorRefreshFlag) {
-                        this._leoUi.fullRefresh(); // TODO ?
+                        this._leoUi.fullRefresh();
                     }
                     if (this._lastGnx === w_gnx) {
                         // was last gnx of closed file about to be switched to new document selected
@@ -200,7 +200,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
         if (!this.preventSaveToLeo) {
-            this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+            void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
         } else {
             this.preventSaveToLeo = false;
         }
@@ -208,9 +208,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         if (!this._openedBodiesGnx.includes(w_gnx)) {
             console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
         }
-
         this._setOpenedBodyTime(w_gnx);
-
         this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
     }
 

@@ -231,12 +231,20 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
  */
 export function getDurationMs(p_start: [number, number], p_end?: [number, number]): number {
     if (!p_end) {
-        p_end = process.hrtime(p_start);
+        p_end = process.hrtime();
     }
-    const [w_secs, w_nanosecs] = p_end;
+    const w_secs = p_end[0] - p_start[0];
+    const w_nanosecs = p_end[1] - p_start[1];
+
     return w_secs * 1000 + Math.floor(w_nanosecs / 1000000);
 }
 
+/**
+ * Milliseconds converted into seconds, limiting to two decimals. 
+ */
+export function getDurationSeconds(p_start: [number, number], p_end?: [number, number]): number {
+    return parseFloat((getDurationMs(p_start, p_end) / 1000).toFixed(2));
+}
 /**
  * * Extracts the file name from a full path, such as "foo.bar" from "/abc/def/foo.bar"
  * @param p_path Full path such as "/var/drop/foo/boo/moo.js" or "C:\Documents and Settings\img\recycled log.jpg"
