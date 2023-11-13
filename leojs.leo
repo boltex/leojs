@@ -4051,8 +4051,7 @@ private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChange
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
         this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
-        // TODO: Check if needed
-        // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
+        this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
     }
 }
 
@@ -4066,8 +4065,6 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
         this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
-        // TODO: Check if needed
-        // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
     }
 }
 
@@ -12841,15 +12838,34 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
  */
 public setDocumentSelection(p_frame: LeoFrame): void {
     setTimeout(() =&gt; {
-        if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_frame) {
-            // console.log('setDocumentSelection: already selected!');
-        } else if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.visible) {
-            this._lastLeoDocuments.reveal(p_frame, { select: true, focus: false }).then(
-                () =&gt; { }, // Ok
-                (p_error) =&gt; {
-                    console.log('setDocumentSelection could not reveal');
-                }
-            );
+        if (!this._leoDocuments.visible &amp;&amp; !this._leoDocumentsExplorer.visible) {
+            return;
+        }
+        let w_trigger = false;
+        let w_docView: undefined | vscode.TreeView&lt;LeoFrame&gt;;
+        if (this._leoDocuments.visible &amp;&amp; this._lastLeoDocuments === this._leoDocuments) {
+            w_docView = this._leoDocuments;
+        } else if (this._leoDocumentsExplorer === this._lastLeoDocuments) {
+            w_docView = this._leoDocumentsExplorer;
+        }
+        if (!w_docView) {
+            return;
+        }
+        if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_frame) {
+            // console.log('already selected!');
+        } else {
+            w_trigger = true;
+        }
+        if (w_trigger) {
+            w_docView.reveal(p_frame, { select: true, focus: false })
+                .then(
+                    (p_result) =&gt; {
+                        // Shown document node
+                    },
+                    (p_reason) =&gt; {
+                        console.log('shown doc error on reveal: ', p_reason);
+                    }
+                );
         }
     }, 0);
 }
