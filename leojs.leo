@@ -3794,6 +3794,12 @@ export class LeoUI extends NullGui {
             backward: false
         };
 
+    // * Reveal Timers
+    private _gotSelectedNodeBodyTimer: undefined | NodeJS.Timeout;
+    private _gotSelectedNodeRevealTimer: undefined | NodeJS.Timeout;
+    private _showBodySwitchBodyTimer: undefined | NodeJS.Timeout;
+    private _leoDocumentsRevealTimer: undefined | NodeJS.Timeout;
+
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
     private _leoDocuments!: vscode.TreeView&lt;LeoFrame&gt;;
@@ -7704,14 +7710,20 @@ public gotSelectedNode(p_node: Position): void {
 
     ) {
         // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
-        setTimeout(() =&gt; {
+        if (this._gotSelectedNodeBodyTimer) {
+            clearTimeout(this._gotSelectedNodeBodyTimer);
+        }
+        this._gotSelectedNodeBodyTimer = setTimeout(() =&gt; {
             // SAME with scroll information specified
             void this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
         }, 25);
     } else {
 
         if (this._revealType) {
-            setTimeout(() =&gt; {
+            if (this._gotSelectedNodeRevealTimer) {
+                clearTimeout(this._gotSelectedNodeRevealTimer);
+            }
+            this._gotSelectedNodeRevealTimer = setTimeout(() =&gt; {
                 this._lastTreeView.reveal(p_node, {
                     select: true,
                     focus: w_focusTree
@@ -11843,9 +11855,11 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         // }
 
         if (w_needRefreshFlag) {
-
+            if (this._showBodySwitchBodyTimer) {
+                clearTimeout(this._showBodySwitchBodyTimer);
+            }
             // redo apply to body!
-            setTimeout(() =&gt; {
+            this._showBodySwitchBodyTimer = setTimeout(() =&gt; {
                 if (this.lastSelectedNode) {
                     void this._switchBody(false, p_preventTakingFocus);
                 }
@@ -12837,7 +12851,10 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
  * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
  */
 public setDocumentSelection(p_frame: LeoFrame): void {
-    setTimeout(() =&gt; {
+    if (this._leoDocumentsRevealTimer) {
+        clearTimeout(this._leoDocumentsRevealTimer);
+    }
+    this._leoDocumentsRevealTimer = setTimeout(() =&gt; {
         if (!this._leoDocuments.visible &amp;&amp; !this._leoDocumentsExplorer.visible) {
             return;
         }

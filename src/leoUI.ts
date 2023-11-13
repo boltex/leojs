@@ -144,6 +144,12 @@ export class LeoUI extends NullGui {
             backward: false
         };
 
+    // * Reveal Timers
+    private _gotSelectedNodeBodyTimer: undefined | NodeJS.Timeout;
+    private _gotSelectedNodeRevealTimer: undefined | NodeJS.Timeout;
+    private _showBodySwitchBodyTimer: undefined | NodeJS.Timeout;
+    private _leoDocumentsRevealTimer: undefined | NodeJS.Timeout;
+
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
     private _leoDocuments!: vscode.TreeView<LeoFrame>;
@@ -1771,14 +1777,20 @@ export class LeoUI extends NullGui {
 
         ) {
             // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
-            setTimeout(() => {
+            if (this._gotSelectedNodeBodyTimer) {
+                clearTimeout(this._gotSelectedNodeBodyTimer);
+            }
+            this._gotSelectedNodeBodyTimer = setTimeout(() => {
                 // SAME with scroll information specified
                 void this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
             }, 25);
         } else {
 
             if (this._revealType) {
-                setTimeout(() => {
+                if (this._gotSelectedNodeRevealTimer) {
+                    clearTimeout(this._gotSelectedNodeRevealTimer);
+                }
+                this._gotSelectedNodeRevealTimer = setTimeout(() => {
                     this._lastTreeView.reveal(p_node, {
                         select: true,
                         focus: w_focusTree
@@ -2411,9 +2423,11 @@ export class LeoUI extends NullGui {
             // }
 
             if (w_needRefreshFlag) {
-
+                if (this._showBodySwitchBodyTimer) {
+                    clearTimeout(this._showBodySwitchBodyTimer);
+                }
                 // redo apply to body!
-                setTimeout(() => {
+                this._showBodySwitchBodyTimer = setTimeout(() => {
                     if (this.lastSelectedNode) {
                         void this._switchBody(false, p_preventTakingFocus);
                     }
@@ -4425,7 +4439,10 @@ export class LeoUI extends NullGui {
      * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
      */
     public setDocumentSelection(p_frame: LeoFrame): void {
-        setTimeout(() => {
+        if (this._leoDocumentsRevealTimer) {
+            clearTimeout(this._leoDocumentsRevealTimer);
+        }
+        this._leoDocumentsRevealTimer = setTimeout(() => {
             if (!this._leoDocuments.visible && !this._leoDocumentsExplorer.visible) {
                 return;
             }
