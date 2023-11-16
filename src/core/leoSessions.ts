@@ -3,13 +3,13 @@
 /**
  * Support for sessions in Leo.
  */
-//@+<< leoSessions imports  & annotations >>
+//@+<< leoSessions imports & annotations >>
 //@+node:felix.20231003223423.1: ** << leoSessions imports & annotations >>
 import * as vscode from 'vscode';
 import * as g from './leoGlobals';
 import { command } from '../core/decorators';
 import { Commands } from './leoCommands';
-//@-<< leoSessions imports  & annotations >>
+//@-<< leoSessions imports & annotations >>
 //@+others
 //@+node:felix.20231003002311.1: ** class SessionManager
 /**

@@ -413,12 +413,15 @@ export class LeoApp {
             bib: 'bibtex',
             c: 'c',
             'c++': 'cplusplus',
+            cc: "cplusplus",
             cbl: 'cobol', // Only one extension is valid: .cob
             cfg: 'config',
             cfm: 'coldfusion',
             clj: 'clojure', // 2013 / 09 / 25: Fix bug 879338.
             cljs: 'clojure',
             cljc: 'clojure',
+            "cmd": "batch",
+            "codon": "codon",
             ch: 'chill', // Other extensions, .c186,.c286
             coffee: 'coffeescript',
             conf: 'apacheconf',
@@ -438,6 +441,7 @@ export class LeoApp {
             g: 'antlr',
             groovy: 'groovy',
             h: 'c', // 2012 / 05 / 23.
+            "hh": "cplusplus",
             handlebars: 'html', // McNab.
             hbs: 'html', // McNab.
             hs: 'haskell',
@@ -615,6 +619,7 @@ export class LeoApp {
             chill: '/* */',
             clojure: ';', // 2013 / 09 / 25: Fix bug 879338.
             cobol: '*',
+            "codon": "#",
             coldfusion: '<!-- -->',
             coffeescript: '#', // 2016 / 02 / 26.
             config: '#', // Leo 4.5.1
@@ -637,6 +642,7 @@ export class LeoApp {
             fortran90: '!',
             foxpro: '&&',
             gettext: '# ',
+            "go": "//",
             groovy: '// /* */',
             handlebars: '<!-- -->', // McNab: delegate to html.
             haskell: '--_ {-_ _-}',
@@ -685,6 +691,7 @@ export class LeoApp {
             objective_c: '// /* */',
             objectrexx: '-- /* */',
             occam: '--',
+            "ocaml": "(* *)",
             omnimark: ';',
             pandoc: '<!-- -->',
             pascal: '// { }',
@@ -799,6 +806,7 @@ export class LeoApp {
             chill: 'ch', // Only one extension is valid: .c186, .c286
             clojure: 'clj', // 2013 / 09 / 25: Fix bug 879338.
             cobol: 'cbl', // Only one extension is valid: .cob
+            "codon": "codon",
             coldfusion: 'cfm',
             coffeescript: 'coffee',
             config: 'cfg',
@@ -859,6 +867,7 @@ export class LeoApp {
             objective_c: 'mm', // Only one extension is valid: .m
             objectrexx: 'rex',
             occam: 'occ',
+            "ocaml": "ml",
             omnimark: 'xom',
             pascal: 'p',
             perl: 'pl',
@@ -2205,6 +2214,7 @@ export class LoadManager {
         new_d: any,
         localFlag: boolean
     ): any {
+        // ! NO NEED FOR SHORTCUTS : SO THIS IS UNUSED !
         /* 
         const lm = this;
         if (!old_d){
@@ -2397,11 +2407,10 @@ export class LoadManager {
          */
         if (!(g.unitTesting || g.app.silentMode || g.app.batchMode)) {
             // This occurs early in startup, so use the following.
-            const s = `reading settings in ${fn}`;
+            const s = `reading settings in ${g.os_path_normpath(fn)}`;
             if (g.app.debug.includes('startup')) {
                 console.log(s);
             }
-            // g.es(s, 'blue');
             g.es(s);
         }
         // A useful trace.
@@ -2416,7 +2425,6 @@ export class LoadManager {
         //const frame = c.frame;
         // frame.log.enable(false);
         // g.app.lockLog();
-
 
         let ok: VNode | undefined;
         try {
@@ -2442,7 +2450,7 @@ export class LoadManager {
             }
 
         } catch (p_err) {
-            //
+            ok = undefined;
         }
         // g.app.unlockLog();
         g.app.gui = oldGui;
@@ -2621,6 +2629,9 @@ export class LoadManager {
                 c = undefined;
             }
         }
+
+        // ! LEOJS USE PER WORKSPACE SESSIONS
+        console.log('TODO : PER WORKSPACE SESSIONS !');
 
         /*
 
@@ -3469,12 +3480,9 @@ export class LoadManager {
         if (!lm.isLeoFile(fn)) {
             return;
         }
-        // Re-read the file.
-        // const theFile = lm.openAnyLeoFile(fn);
-
-        const w_uri = g.makeVscodeUri(fn);
-
         try {
+            // Re-read the file.
+            const w_uri = g.makeVscodeUri(fn);
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
