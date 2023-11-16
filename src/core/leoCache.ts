@@ -338,7 +338,12 @@ class SqlitePickleShare {
      */
     constructor(root: string) {
 
+        console.log('Constructor: SqlitePickleShare, root:', root);
+
         this.root = abspath(expanduser(root));
+
+        console.log('this.root:', this.root);
+
         // Keys are normalized file names.
         // Values are tuples (obj, orig_mod_time)
         this.cache = {};
@@ -352,24 +357,20 @@ class SqlitePickleShare {
                     if (!w_isdir && !g.unitTesting) {
                         await this._makedirs(this.root);
                     }
-
-                    const dbfile = join(root, 'cache.sqlite');
                     if (g.unitTesting) {
-                        // TODO : GET FILE
-                        console.log('TODO : GET FILE for SqlitePickleShare unitTesting');
+                        this.conn = new g.SQL.Database();
+                    } else {
+                        // TODO : CHECK IF RUNNING AS WEB EXTENSION!
+                        // TODO : USE WORKSPACE TO GET INSTEAD OF READFILE !
+                        const dbfile = join(root, 'cache.sqlite');
 
                         // this.conn = await sqlite3.connect(dbfile);
                         const filebuffer = await vscode.workspace.fs.readFile(
-                            g.makeVscodeUri(path.join(this.root))
-                            // vscode.Uri.joinPath(p_context.extensionUri, 'test1.db')
+                            g.makeVscodeUri(dbfile)
                         );
                         this.conn = new g.SQL.Database(filebuffer);
-                    } else {
-                        this.conn = new g.SQL.Database();
                     }
 
-                    // LEOJS: replaced function & call.
-                    // USED TO BE : this.init_dbtables(this.conn)
                     const sql = 'create table if not exists cachevalues(key text primary key, data blob);';
                     this.conn.exec(sql);
 

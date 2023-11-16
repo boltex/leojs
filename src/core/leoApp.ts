@@ -192,11 +192,12 @@ export class LeoApp {
     //@-<< LeoApp: error messages >>
     //@+<< LeoApp: global directories >>
     //@+node:felix.20210103024632.5: *5* << LeoApp: global directories >>
-    public extensionsDir: string | undefined; // The leo / extensions directory
+    // public extensionsDir: string | undefined; // The leo / extensions directory // UNUSED in leojs
     public globalConfigDir: string | undefined; // leo / config directory
     public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir: string | undefined; // The user's home directory.
     public homeLeoDir: string | undefined; // The user's home/.leo directory.
+    public leoEditorDir: string | undefined; // The leo-editor directory.
     public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
     public vscodeExtensionDir: string | undefined;
@@ -1329,7 +1330,9 @@ export class LeoApp {
     /**
      * Warn if fn is already open and add fn to already_open_files list.
      */
-    public checkForOpenFile(c: Commands, fn: string): void {
+    public async checkForOpenFile(c: Commands, fn: string): Promise<void> {
+        console.log('TODO : TEST checkForOpenFile');
+
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
         if (g.app.reverting) {
@@ -1345,14 +1348,13 @@ export class LeoApp {
         ) {
             return;
         }
-        console.log('TODO : checkForOpenFile');
 
         // #1519: check os.path.exists.
-        /*
         const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
         let w_any: boolean = false;
         for (let z of aList) {
-            if (fs.existsSync(z) && z.toString().trim() === fn.toString().trim()) {
+            const w_exists = await g.os_path_exists(z);
+            if (w_exists && z.toString().trim() === fn.toString().trim()) {
                 w_any = true;
             }
         }
@@ -1364,18 +1366,16 @@ export class LeoApp {
             // A dialog will warn the user such files later.
             fn = path.normalize(fn);
             if (!g.app.already_open_files.includes(fn)) {
-                g.es('may be open in another Leo:', 'red');
+                g.es('may be open in another Leo:');
                 g.es(fn);
+                console.log(`May be open in another Leo: ${fn}`);
                 g.app.already_open_files.push(fn);
             }
 
         } else {
             g.app.rememberOpenFile(fn);
         }
-        */
-        // TODO maybe
-        // Temp fix
-        g.app.rememberOpenFile(fn);
+
     }
     //@+node:felix.20211226221235.3: *4* app.forgetOpenFile
     /**
@@ -1434,22 +1434,26 @@ export class LeoApp {
         }
     }
     //@+node:felix.20211226221235.5: *4* app.runAlreadyOpenDialog
-    // def runAlreadyOpenDialog(self, c):
-    //     """Warn about possibly already-open files."""
-    //     if g.app.already_open_files:
-    //         aList = sorted(set(g.app.already_open_files))
-    //         g.app.already_open_files = []
-    //         g.app.gui.dismiss_splash_screen()
-    //         message = (
-    //             'The following files may already be open\n'
-    //             'in another copy of Leo:\n\n' +
-    //             '\n'.join(aList))
-    //         g.app.gui.runAskOkDialog(c,
-    //             title='Already Open Files',
-    //             message=message,
-    //             text="Ok")
-    //@+node:felix.20230518231054.1: *3* app.Import utils
-    //@+node:felix.20230518231054.2: *4* app.scanner_for_at_auto
+    /**
+     *  Warn about possibly already-open files.
+     */
+    public async runAlreadyOpenDialog(c: Commands): Promise<void> {
+
+        if (g.app.already_open_files) {
+            const aList: string[] = Array.from(new Set(g.app.already_open_files)).sort();
+            g.app.already_open_files = [];
+            g.app.gui.dismiss_splash_screen();
+            const message: string = (
+                'The following files may already be open\n' +
+                'in another copy of Leo:\n\n' +
+                aList.join('\n'));
+            await g.app.gui.runAskOkDialog(c,
+                'Already Open Files',
+                message,
+                "Ok"
+            );
+        }
+    }
     /**
      * A factory returning a scanner function for p, an @auto node.
      */
@@ -1702,8 +1706,8 @@ export class LoadManager {
         g.app.homeLeoDir = await lm.computeHomeLeoDir(); // * The user's home/.leo directory.
         // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs
         // These use g.app.loadDir...
-        g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
-        // g.app.leoEditorDir = join(g.app.loadDir, '..', '..');
+        // g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
+        g.app.leoEditorDir = g.app.vscodeExtensionDir; // join(g.app.loadDir, '..', '..');
         g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
@@ -2015,18 +2019,22 @@ export class LoadManager {
         return fn if os.path.exists(directory) else None
      */
     //@+node:felix.20220610002953.17: *4* LM.reportDirectories
-    /* 
-    def reportDirectories(self):
-        """Report directories."""
-        # The cwd changes later, so it would be misleading to report it here.
-        for kind, theDir in (
-            ('home', g.app.homeDir),
-            ('leo-editor', g.app.leoEditorDir),
-            ('load', g.app.loadDir),
-            ('config', g.app.globalConfigDir),
-        ):  # g.blue calls g.es_print, and that's annoying.
-            g.es(f"{kind:>10}:", os.path.normpath(theDir), color='blue')
+    /**
+     * Report directories.
      */
+    public reportDirectories(): void {
+        // The cwd changes later, so it would be misleading to report it here.
+        const directories = [
+            { kind: 'home', theDir: g.app.homeDir },
+            { kind: 'leo-editor', theDir: g.app.leoEditorDir },
+            { kind: 'load', theDir: g.app.loadDir },
+            { kind: 'config', theDir: g.app.globalConfigDir },
+        ];
+        for (const { kind, theDir } of directories) {
+            // g.blue calls g.es_print, and that's annoying.
+            g.es(`${kind.padStart(10, ' ')}:`, path.normalize(theDir!));
+        }
+    }
     //@+node:felix.20220406235904.1: *3* LM.Settings
     //@+node:felix.20220406235925.1: *4* LM.computeBindingLetter
     public computeBindingLetter(c: Commands, p_path: string): string {
@@ -2676,8 +2684,8 @@ export class LoadManager {
     public async openWorkBook(): Promise<Commands | undefined> {
 
         // TODO !
-
-        void vscode.window.showInformationMessage('TODO : openWorkBook');
+        // void vscode.window.showInformationMessage('TODO : openWorkBook');
+        console.log('STARTUP:          TODO openWorkBook');
 
         const lm: LoadManager = this;
 
@@ -2726,22 +2734,24 @@ export class LoadManager {
         await lm.computeStandardDirectories();
 
         // Scan the command line options as early as possible.
-        const options = {}; // lm.scanOptions(fileName);
+        const options: Record<string, any> = {}; // lm.scanOptions(fileName);
         lm.options = options; // ! no command line options !
 
-        // const script:string = options['script'];
-        // const verbose:boolean = !script;
+        const script: string = options['script'];
+        const verbose: boolean = !script;
 
         // Init the app.
         await lm.initApp();
 
-        console.log('**************************************************');
-        console.log('*** Uncomment line below to enable Global D.B. ***');
-        console.log('***      // await g.app.setGlobalDb();         ***');
-        console.log('**************************************************');
-        // await g.app.setGlobalDb();
+        // console.log('**************************************************');
+        // console.log('*** Uncomment line below to enable Global D.B. ***');
+        // console.log('***      // await g.app.setGlobalDb();         ***');
+        // console.log('**************************************************');
+        await g.app.setGlobalDb();
 
-        // lm.reportDirectories(verbose)
+        if (verbose) {
+            lm.reportDirectories();
+        }
 
         // Read settings *after* setting g.app.config and *before* opening plugins.
         // This means if-gui has effect only in per-file settings.
@@ -2754,8 +2764,7 @@ export class LoadManager {
         const localConfigFile =
             lm.files && lm.files.length ? lm.files[0] : undefined;
 
-        // TODO: ? recent-file management ?
-        // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+        await g.app.recentFilesManager.readRecentFiles(localConfigFile);
 
         // Create the gui after reading options and settings.
         lm.createGui();
@@ -3750,7 +3759,7 @@ export class RecentFilesManager {
     /**
      * Read all .leoRecentFiles.txt files.
      */
-    public async readRecentFiles(localConfigFile: string): Promise<void> {
+    public async readRecentFiles(localConfigFile?: string): Promise<void> {
         // Read all .leoRecentFiles.txt files.
         // The order of files in this list affects the order of the recent files list.
         const rf = this;

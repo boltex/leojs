@@ -281,17 +281,16 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-        // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
-        // TODO FIX THIS !
-        // console.log('g.app.db', g.app.db); // undefined as of now so 
-
-        this.db = {};
+        if (g.app.commander_cacher) {
+            this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
+        } else {
+            this.db = {};
+        }
 
         // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);
 
-        // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
-        this.frame = new LeoFrame(this, title, this.gui);
+        this.frame = this.gui.createLeoFrame(c, title);
         g.assert(this.frame.c === this);
 
         this.nodeHistory = new NodeHistory(c);

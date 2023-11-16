@@ -1437,7 +1437,7 @@ export class FileCommands {
         if (v) {
             // c.frame.resizePanesToRatio(c.frame.ratio, c.frame.secondary_ratio);
             if (checkOpenFiles) {
-                g.app.checkForOpenFile(c, p_path);
+                await g.app.checkForOpenFile(c, p_path);
             }
         }
         return v;
@@ -2245,7 +2245,6 @@ export class FileCommands {
             fc.prepareDbTables(conn);
             fc.exportDbVersion(conn);
 
-            // fc.exportVnodesToSqlite(conn, (dbrow(v) for v in c.all_unique_nodes()))
             const w_dbRows: sqlDbRow[] = [];
             for (let v of c.all_unique_nodes()) {
                 w_dbRows.push(dbrow(v));
@@ -2255,7 +2254,6 @@ export class FileCommands {
             fc.exportGeomToSqlite(conn);
             fc.exportHashesToSqlite(conn);
 
-            // conn.commit(); // ! support db sqlite files by 'writing' as commit !
             const db_data = conn.export();
             const db_buffer = Buffer.from(db_data);
 

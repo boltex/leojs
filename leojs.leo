@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
-<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
+<leo_file xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -1642,8 +1642,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
         );
         console.log('got db file!!  Length in bytes: ', filebuffer.length);
 
-
-
         // Load the db.
         const db: Database = new SQL.Database(filebuffer);
         console.log('db', db);
@@ -1662,8 +1660,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
         const w_insertQuery = `INSERT OR IGNORE INTO extra_infos (name, value) VALUES ('${w_dateStringKey}', '${w_dateStringVal}');`;
         console.log("w_insertQuery", w_insertQuery);
-
-
 
         const q_result2 = db.exec(w_insertQuery);
         console.log('result2', q_result2);
@@ -7015,15 +7011,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const button = d[p_node.button.index];
-
     let result: any;
-
     if (p_node.rclicks.length) {
         // Has rclicks so show menu to choose
         this._rclickSelected = [];
@@ -7033,7 +7024,6 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         if (
             p_picked
         ) {
-
             // Check if only one in this._rclickSelected and is zero: normal press
             if (this._rclickSelected.length === 1 &amp;&amp; this._rclickSelected[0] === 0) {
                 // Normal 'top' button, not one of it's child rclicks.
@@ -7056,7 +7046,6 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
                     if (w_rclickChosen) {
                         result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
                     }
-
                 } else {
                     // Normal 'top' button.
                     result = await Promise.resolve(button.command());
@@ -7098,17 +7087,11 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const tag: string = 'remove_button';
-
     const index = p_node.button.index;
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const butWidget = d[index];
-
     if (butWidget) {
         try {
             d.splice(index, 1);
@@ -7118,9 +7101,7 @@ public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
     } else {
         console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
     }
-
     this.setupRefresh(Focus.NoChange, { buttons: true });
-
     return this.launchRefresh();
 
 }
@@ -9368,13 +9349,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
     ).then((p_uri) =&gt; {
         if (p_uri) {
-            // console.log('CHOSE SAVE URI');
-            // console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
-            // console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
-            // console.log('SAVE toString: ' + p_uri.toString());
-            // console.log('test path: ' + path.normalize(p_uri.path));
-
-
             return p_uri.fsPath;
         } else {
             return "";
@@ -11023,13 +10997,10 @@ private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promis
     w_choices.push(
         ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
     );
-
     const w_options: vscode.QuickPickOptions = {
         placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
     };
-
     const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
-
     if (w_picked) {
         this._rclickSelected.push(w_picked.index);
         if (topLevelName &amp;&amp; w_picked.index === 0) {
@@ -11053,18 +11024,11 @@ private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promis
 public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const tag = 'goto_script';
-
     const index = p_node.button.index;
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const butWidget = d[index];
-
-    console.log('goto script ! :  button', p_node);
 
     if (butWidget) {
 
@@ -11102,7 +11066,6 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         }
 
     }
-
     return Promise.resolve(false);
 
 }
@@ -12919,10 +12882,8 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
         action = "undo"; // Constants.LEOBRIDGE.UNDO;
         repeat = (-p_undo.beadIndex) + 1;
     }
-
     const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
-
     for (let x = 0; x &lt; repeat; x++) {
         if (action === "redo") {
             if (u.canRedo()) {
@@ -12934,7 +12895,6 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
             }
         }
     }
-
     this.setupRefresh(
         Focus.Outline,
         {
@@ -13189,9 +13149,7 @@ public static OLD_POS_OFFSETS = {
 </t>
 <t tx="felix.20221026222034.1">public set_focus(commander: Commands, widget: any): void {
     this.focusWidget = widget;
-
     const w_widgetName = this.widget_name(widget);
-
     // * LeoJS custom finalFocus replacement.
     if (widget &amp;&amp; this.finalFocus === Focus.NoChange) {
         // * Check which panel to focus

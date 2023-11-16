@@ -143,8 +143,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
         );
         console.log('got db file!!  Length in bytes: ', filebuffer.length);
 
-
-
         // Load the db.
         const db: Database = new SQL.Database(filebuffer);
         console.log('db', db);
@@ -163,8 +161,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
         const w_insertQuery = `INSERT OR IGNORE INTO extra_infos (name, value) VALUES ('${w_dateStringKey}', '${w_dateStringVal}');`;
         console.log("w_insertQuery", w_insertQuery);
-
-
 
         const q_result2 = db.exec(w_insertQuery);
         console.log('result2', q_result2);

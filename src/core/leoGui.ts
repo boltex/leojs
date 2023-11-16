@@ -14,7 +14,7 @@ import * as g from './leoGlobals';
 import { StringFindTabManager } from './findTabManager';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
-import { StringTextWrapper } from './leoFrame';
+import { LeoFrame, StringTextWrapper } from './leoFrame';
 //@-<< leoGui imports >>
 //@+others
 //@+node:felix.20221119205229.1: ** class LeoGui
@@ -359,7 +359,7 @@ export class LeoGui {
     /**
      * Create a new Leo frame.
      */
-    public createLeoFrame(c: Commands, title: string): void {
+    public createLeoFrame(c: Commands, title: string): any {
         this.oops();
     }
     /**
@@ -652,6 +652,10 @@ export class NullGui extends LeoGui {
         cancelMessage = ''
     ): Thenable<string> {
         return Promise.resolve('');
+    }
+
+    public createLeoFrame(c: Commands, title: string): LeoFrame {
+        return new LeoFrame(c, title, this);
     }
 
     public showLeoIDMessage(): void {

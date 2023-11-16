@@ -419,12 +419,7 @@ export class CommanderFileCommands {
                 }
             }
             await p_c.raise_error_dialogs('write');
-            // g.app.runAlreadyOpenDialog(p_c); // ? Needed ?
-
-            // openWithFileName sets focus if ok.
-            if (!ok) {
-                // p_c.initialFocusHelper();  // ? Needed ?
-            }
+            await g.app.runAlreadyOpenDialog(p_c); // ? Needed ?
 
             return q_result;
         }

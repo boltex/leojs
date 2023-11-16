@@ -4819,15 +4819,10 @@ export class LeoUI extends NullGui {
     public async clickAtButton(p_node: LeoButtonNode): Promise<unknown> {
 
         await this.triggerBodySave(true);
-
         const c = g.app.windowList[g.app.gui.frameIndex].c;
-
         const d = c.theScriptingController.buttonsArray;
-
         const button = d[p_node.button.index];
-
         let result: any;
-
         if (p_node.rclicks.length) {
             // Has rclicks so show menu to choose
             this._rclickSelected = [];
@@ -4837,7 +4832,6 @@ export class LeoUI extends NullGui {
             if (
                 p_picked
             ) {
-
                 // Check if only one in this._rclickSelected and is zero: normal press
                 if (this._rclickSelected.length === 1 && this._rclickSelected[0] === 0) {
                     // Normal 'top' button, not one of it's child rclicks.
@@ -4860,7 +4854,6 @@ export class LeoUI extends NullGui {
                         if (w_rclickChosen) {
                             result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
                         }
-
                     } else {
                         // Normal 'top' button.
                         result = await Promise.resolve(button.command());
@@ -4907,13 +4900,10 @@ export class LeoUI extends NullGui {
         w_choices.push(
             ...p_rclicks.map((p_rclick): ChooseRClickItem => { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
         );
-
         const w_options: vscode.QuickPickOptions = {
             placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
         };
-
         const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
-
         if (w_picked) {
             this._rclickSelected.push(w_picked.index);
             if (topLevelName && w_picked.index === 0) {
@@ -4936,18 +4926,11 @@ export class LeoUI extends NullGui {
     public async gotoScript(p_node: LeoButtonNode): Promise<unknown> {
 
         await this.triggerBodySave(true);
-
         const tag = 'goto_script';
-
         const index = p_node.button.index;
-
         const c = g.app.windowList[g.app.gui.frameIndex].c;
-
         const d = c.theScriptingController.buttonsArray;
-
         const butWidget = d[index];
-
-        console.log('goto script ! :  button', p_node);
 
         if (butWidget) {
 
@@ -4985,7 +4968,6 @@ export class LeoUI extends NullGui {
             }
 
         }
-
         return Promise.resolve(false);
 
     }
@@ -4998,17 +4980,11 @@ export class LeoUI extends NullGui {
     public async removeAtButton(p_node: LeoButtonNode): Promise<unknown> {
 
         await this.triggerBodySave(true);
-
         const tag: string = 'remove_button';
-
         const index = p_node.button.index;
-
         const c = g.app.windowList[g.app.gui.frameIndex].c;
-
         const d = c.theScriptingController.buttonsArray;
-
         const butWidget = d[index];
-
         if (butWidget) {
             try {
                 d.splice(index, 1);
@@ -5018,9 +4994,7 @@ export class LeoUI extends NullGui {
         } else {
             console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
         }
-
         this.setupRefresh(Focus.NoChange, { buttons: true });
-
         return this.launchRefresh();
 
     }
@@ -5039,10 +5013,8 @@ export class LeoUI extends NullGui {
             action = "undo"; // Constants.LEOBRIDGE.UNDO;
             repeat = (-p_undo.beadIndex) + 1;
         }
-
         const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
-
         for (let x = 0; x < repeat; x++) {
             if (action === "redo") {
                 if (u.canRedo()) {
@@ -5054,7 +5026,6 @@ export class LeoUI extends NullGui {
                 }
             }
         }
-
         this.setupRefresh(
             Focus.Outline,
             {
@@ -5209,9 +5180,7 @@ export class LeoUI extends NullGui {
 
     public set_focus(commander: Commands, widget: any): void {
         this.focusWidget = widget;
-
         const w_widgetName = this.widget_name(widget);
-
         // * LeoJS custom finalFocus replacement.
         if (widget && this.finalFocus === Focus.NoChange) {
             // * Check which panel to focus
@@ -5434,13 +5403,6 @@ export class LeoUI extends NullGui {
             }
         ).then((p_uri) => {
             if (p_uri) {
-                // console.log('CHOSE SAVE URI');
-                // console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
-                // console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
-                // console.log('SAVE toString: ' + p_uri.toString());
-                // console.log('test path: ' + path.normalize(p_uri.path));
-
-
                 return p_uri.fsPath;
             } else {
                 return "";
