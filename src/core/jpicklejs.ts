@@ -58,17 +58,17 @@ var Parser = function () {
 
 // @ts-expect-error
 Parser.prototype.load = function (pickle) {
-    if (Buffer.isBuffer(pickle)) {
-        console.log("It's a Buffer");
-    } else if (pickle instanceof Uint8Array) {
-        console.log("It's a Uint8Array");
-    } else if (pickle instanceof Uint16Array) {
-        console.log("It's a Uint16Array");
-    } else if (typeof pickle === 'string') {
-        console.log("It's a string");
-    } else {
-        console.log("It's an unknown type:", typeof pickle);
-    }
+    // if (Buffer.isBuffer(pickle)) {
+    //     console.log("It's a Buffer");
+    // } else if (pickle instanceof Uint8Array) {
+    //     console.log("It's a Uint8Array");
+    // } else if (pickle instanceof Uint16Array) {
+    //     console.log("It's a Uint16Array");
+    // } else if (typeof pickle === 'string') {
+    //     console.log("It's a string");
+    // } else {
+    //     console.log("It's an unknown type:", typeof pickle);
+    // }
 
     var MARK = '(', // push special markobject on stack
         STOP = '.', // every pickle ends with STOP
@@ -137,30 +137,12 @@ Parser.prototype.load = function (pickle) {
     for (var i = 0; i < pickle.length;) {
         var opindex = i,
             opcode = pickle[i++];
-        console.log(
-            'opcode index: ' + opindex +
-            '  opcode: ' + opcode +
-            " type " + typeof opcode
-        );
-        console.log(
-            [
-                PROTO,
-                NEWOBJ,
-                TUPLE1,
-                TUPLE2,
-                TUPLE3,
-                NEWTRUE,
-                NEWFALSE,
-                LONG1,
-                LONG4
-            ].includes(opcode) ? "IS SPECIAL OPCODE:" + opcode : ""
-        );
+
         // switch (String.fromCharCode(opcode)) {
         switch (opcode) {
             // protocol 2
             case PROTO:
                 var proto = buffer.readUInt8(i++);
-                console.log('PROTO proto: ', proto);
                 if (proto !== 2 && proto !== 3) {
                     throw new Error(
                         'Unhandled pickle protocol version: ' + proto

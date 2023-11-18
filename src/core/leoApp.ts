@@ -1391,7 +1391,7 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
-        console.log('TODO : TEST forgetOpenFile');
+        console.log('TODO : TEST forgetOpenFile for filename:', fn);
 
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
@@ -2696,7 +2696,8 @@ export class LoadManager {
 
         // TODO !
         // void vscode.window.showInformationMessage('TODO : openWorkBook');
-        console.log('STARTUP:          TODO openWorkBook');
+        // console.log('STARTUP:          TODO openWorkBook');
+        // ! NEEDED ? --> USE A NEW EMPTY FILE INSTEAD ??
 
         const lm: LoadManager = this;
 
@@ -2754,8 +2755,7 @@ export class LoadManager {
         // Init the app.
         await lm.initApp();
 
-
-        console.log('*** Uncomment line below to enable Global D.B. ***');
+        //console.log('*** Uncomment line below to enable Global D.B. ***');
         await g.app.setGlobalDb();
 
         if (verbose) {
@@ -3424,7 +3424,7 @@ export class LoadManager {
         if (!fn) {
             return false;
         }
-        console.log('TODO: isZippedFile');
+        // console.log('TODO: isZippedFile');
         // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
         return (
             fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs')

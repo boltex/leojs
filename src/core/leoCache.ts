@@ -338,13 +338,7 @@ class SqlitePickleShare {
      * 
      */
     constructor(root: string) {
-
-        console.log('Constructor: SqlitePickleShare, root:', root);
-
         this.root = abspath(expanduser(root));
-
-        console.log('this.root:', this.root);
-
         // Keys are normalized file names.
         // Values are tuples (obj, orig_mod_time)
         this.cache = {};
@@ -416,9 +410,6 @@ class SqlitePickleShare {
                 if (prop === "conn") {
                     return target.conn;
                 }
-                // OVERRIDDEN USAGE WITH SQLITE
-                console.log('OVERRIDDEN USAGE WITH SQLITE');
-
                 return target.get(prop);
             },
             set(target, prop, value) {
@@ -460,7 +451,6 @@ class SqlitePickleShare {
      *  db['key'] reading 
      */
     public __getitem__(key: string): any {
-        console.log('GET ITEM ', key);
         let obj = undefined;
         let w_found = false;
         if (this.conn) {
@@ -475,16 +465,12 @@ class SqlitePickleShare {
                     break;
                 }
                 if (!w_found) {
-                    console.log("No such property exists !", key);
                     throw new Error("No such property exists " + key);
                 }
             } catch (e) {
-                console.log("No such property exists !", key);
                 throw new Error("No such property exists " + key);
             }
         }
-        console.log('GET ITEM GOT: ', obj);
-
         return obj;
     }
     //@+node:felix.20230802145823.45: *4* __iter__
@@ -533,47 +519,11 @@ class SqlitePickleShare {
      * REBUILDS an object
      */
     private loader(data: Uint8Array): any {
-        console.log('loader data', data);
-        console.log(Array.from(data));
         if (data !== null && data !== undefined) {
             let val;
             // Retain this code for maximum compatibility.
             const inflated = pako.inflate(data);
-            console.log('inflated', inflated);
-            console.log(Array.from(inflated));
-
-            const string_val1 = g.toEncodedString(inflated);
-            const string_val2 = g.toEncodedString(inflated, 'binary');
-            // // unhexlify is string to string
-            // // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
-            // bin = binascii.unhexlify(s_bytes);
-
-            const string_val3 = g.toUnicode(inflated);
-            const string_val4 = g.toUnicode(inflated, 'binary');
-            console.log('string_val1', string_val1);
-            // console.log('string_val2', string_val2);
-            // console.log('string_val3', string_val3);
-            // console.log('string_val4', string_val4);
-
-            const tounicode = g.toUnicode(string_val2);
-
-            console.log('before unhexligied1', tounicode);
-            // unhexlify is string to string
-            // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
-            const binString1 = binascii.unhexlify(tounicode); // unhexlify is string to string
-            // const binString2 = binascii.unhexlify(string_val2); // unhexlify is string to string
-            // const binString3 = binascii.unhexlify(string_val3); // unhexlify is string to string
-            // const binString4 = binascii.unhexlify(string_val4); // unhexlify is string to string
-
-
-
-            console.log('unhexligied1', binString1);
-            // console.log('unhexligied2', binString2);
-            // console.log('unhexligied3', binString3);
-            // console.log('unhexligied4', binString4);
             try {
-                // val = pickle.loads(string_val1);
-                // val = pickle.loads(inflated);
                 val = pickle.loads(String.fromCharCode(...inflated));
             } catch (e) {
                 console.log('error in loader:', e);
@@ -621,8 +571,6 @@ class SqlitePickleShare {
     }
     //@+node:felix.20230802145823.54: *3* get  (SqlitePickleShare)
     public get(key: string, p_default?: any): any {
-        console.log('------------------------ REGULAR USAGE WITH SQLITE');
-
         if (!this.has_key(key)) {
             return p_default;
         }
@@ -679,10 +627,9 @@ class SqlitePickleShare {
         const PROTOCOLKEY = '__cache_pickle_protocol__';
         const prot = this.get(PROTOCOLKEY, 3);
         if (prot === 2) {
-            console.log("PROT IS 2", prot);
             return;
         }
-        console.log("PROT IS NOT 2", prot);
+
         //@+others
         //@+node:felix.20230802145823.59: *4* viewrendered special case
 

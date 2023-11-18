@@ -1009,6 +1009,9 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
+const activateDebug = false;
+
+
 @language typescript
 @tabwidth -4
 @others
@@ -1531,15 +1534,17 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
-    if (p_context.extensionUri) {
+    if (p_context.extensionUri &amp;&amp; activateDebug) {
         console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
 
-    console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
-    console.log('STARTUP:             path.sep: ', path.sep);
-    console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
-    console.log('STARTUP:          env appHost: ', vscode.env.appHost);
-    console.log('STARTUP:          process.cwd(): ', process.cwd());
+    if (activateDebug) {
+        console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
+        console.log('STARTUP:             path.sep: ', path.sep);
+        console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
+        console.log('STARTUP:          env appHost: ', vscode.env.appHost);
+        console.log('STARTUP:          process.cwd(): ', process.cwd());
+    }
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
@@ -1565,8 +1570,9 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT extension installed as g.gitAPI");
-
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT extension installed as g.gitAPI");
+                }
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -1579,7 +1585,11 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+                }
+
             } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
@@ -1597,27 +1607,32 @@ export async function activate(p_context: vscode.ExtensionContext) {
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
-            console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+
+            if (activateDebug) {
+                console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+            }
         }
 
         // Test paco
-        console.log('paco start test:  ');
-        const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
-
-        const compressed = pako.deflate(JSON.stringify(test));
-
-        const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
-        console.log('paco restored test:  ', restored);
+        // console.log('paco start test:  ');
+        // const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
+        // const compressed = pako.deflate(JSON.stringify(test));
+        // const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
+        // console.log('paco restored test:  ', restored);
 
 
-        console.log('SQL start test:  ');
+        // console.log('SQL start');
         const sqliteBits = await vscode.workspace.fs.readFile(
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
-        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
+        // console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
         SQL = await initSqlJs(undefined, sqliteBits);
-        console.log("STARTUP:          SQLITE has started");
+
+        if (activateDebug) {
+            console.log("STARTUP:          SQLITE has started");
+        }
+
         (g.SQL as SqlJsStatic) = SQL;
 
 
@@ -1791,8 +1806,9 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 await runLeo(p_context);
             } else {
@@ -11139,8 +11155,9 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 void runLeo(p_context);
             } else {
