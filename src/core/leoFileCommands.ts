@@ -290,8 +290,15 @@ export class FastRead {
         let binString = '';
         try {
             // The javascript binascii library needs a string representation.
+            console.log('before toUnicode "val":', val);
             const string_val = g.toUnicode(val);
-            binString = binascii.unhexlify(string_val);
+            console.log('after toUnicode "string_val":', string_val);
+
+            // unhexlify is string to string
+            // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
+            binString = binascii.unhexlify(string_val); // unhexlify is string to string
+            console.log('after unhexlify "string_val":', binString);
+
 
         } catch (e) {
             // Assume that Leo 4.1 or above wrote the attribute.
@@ -308,6 +315,9 @@ export class FastRead {
         } catch (err) {
             try {
                 // TODO: cannot use second string 'bytes' parameter
+                console.log(' TODO FIX THIS!', "cannot use second string 'bytes' parameter");
+                console.log('typeof binString', typeof binString);
+                // binString = g.toUnicode(binString as Uint8Array);
                 const val2 = pickle.loads(binString);
                 return g.toUnicode(val2);
             } catch (e) {
@@ -1862,8 +1872,15 @@ export class FileCommands {
 
         try {
             // Changed in version 3.2: Accept only bytestring or bytearray objects as input.
+            console.log('before encoded "s":', s);
             const s_bytes = g.toEncodedString(s); // 2011/02/22
+            console.log('after encoded "s_bytes":', s_bytes);
+
+            // unhexlify is string to string
+            // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
             bin = binascii.unhexlify(s_bytes);
+            console.log('after unhexlify "bin":', bin);
+
             // Throws a TypeError if val is not a hex string.
             val = pickle.loads(bin);
             return val;

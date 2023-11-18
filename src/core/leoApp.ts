@@ -1448,7 +1448,7 @@ export class LeoApp {
      */
     public async runAlreadyOpenDialog(c: Commands): Promise<void> {
 
-        if (g.app.already_open_files) {
+        if (g.app.already_open_files && g.app.already_open_files.length) {
             const aList: string[] = Array.from(new Set(g.app.already_open_files)).sort();
             g.app.already_open_files = [];
             g.app.gui.dismiss_splash_screen();
@@ -2754,10 +2754,8 @@ export class LoadManager {
         // Init the app.
         await lm.initApp();
 
-        // console.log('**************************************************');
-        // console.log('*** Uncomment line below to enable Global D.B. ***');
-        // console.log('***      // await g.app.setGlobalDb();         ***');
-        // console.log('**************************************************');
+
+        console.log('*** Uncomment line below to enable Global D.B. ***');
         await g.app.setGlobalDb();
 
         if (verbose) {

@@ -4,7 +4,6 @@
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
 import { Utils as uriUtils } from 'vscode-uri';
-import { Database, SqlJsStatic } from 'sql.js';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
