@@ -40,6 +40,7 @@ import { ScriptingController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
+import { CommanderWrapper } from './leoCache';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -228,7 +229,7 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: Record<string, any>; // IS A DATABASE 
+    public db: CommanderWrapper;//  Record<string, any>; // IS A DATABASE 
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
     public controlCommands: any = undefined;
@@ -280,11 +281,7 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-        if (g.app.commander_cacher) {
-            this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
-        } else {
-            this.db = {};
-        }
+        this.db = g.app.commander_cacher.get_wrapper(c);
 
         // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);

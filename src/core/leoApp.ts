@@ -18,7 +18,7 @@ import { ExternalFilesController } from './leoExternalFiles';
 import { LeoFrame } from './leoFrame';
 import { SettingsDict } from './leoGlobals';
 import { LeoUI } from '../leoUI';
-import { CommanderCacher, GlobalCacher } from './leoCache';
+import { CommanderCacher, GlobalCacher, SqlitePickleShare } from './leoCache';
 // importers
 import * as importer_c from '../importers/c';
 import * as importer_coffeescript from '../importers/coffeescript';
@@ -233,11 +233,10 @@ export class LeoApp {
     public commander_cacher!: CommanderCacher; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
-    public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
+    public db!: SqlitePickleShare; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
     public global_cacher!: GlobalCacher; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
-    public ipk: any = null; // python kernel instance
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
     // The singleton LogManager instance.

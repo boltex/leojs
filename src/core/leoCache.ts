@@ -133,7 +133,7 @@ export class CommanderCacher {
 
         save and save-as set changeName to True, save-to does not.
      */
-    public async save(c: Commands, fn: string): Promise<void> {
+    public async save(c: Commands, fn?: string): Promise<void> {
 
         await this.commit();
         if (fn) {
@@ -142,7 +142,7 @@ export class CommanderCacher {
             // if( isinstance(c.db, CommanderWrapper)){
             if (c.db.constructor.name === "CommanderWrapper") {
                 c.db.key = fn;
-                await this.commit();
+                // await this.commit(); // ? Needed ?
             } else {
                 g.trace('can not happen', c.db.constructor.name);
             }
@@ -155,7 +155,7 @@ export class CommanderCacher {
 /** 
  * A class to distinguish keys from separate commanders.
  */
-class CommanderWrapper {
+export class CommanderWrapper {
 
     private c: Commands;
     private db: SqlitePickleShare;
@@ -316,7 +316,7 @@ export class GlobalCacher {
 /**
  * The main 'connection' object for SqlitePickleShare database
  */
-class SqlitePickleShare {
+export class SqlitePickleShare {
 
     public root: string;
     public conn: Database | undefined;
