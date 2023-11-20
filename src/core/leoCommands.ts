@@ -40,7 +40,7 @@ import { ScriptingController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
-import { CommanderWrapper } from './leoCache';
+import { CommanderWrapper, SqlitePickleShare } from './leoCache';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -229,7 +229,7 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: CommanderWrapper;//  Record<string, any>; // IS A DATABASE 
+    public db: any;// CommanderWrapper;//  Record<string, any>; // IS A DATABASE 
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
     public controlCommands: any = undefined;

@@ -70,15 +70,17 @@ export class CommanderCacher {
     //@+node:felix.20230802145823.5: *3* cacher.close
     public async close(): Promise<void> {
         // Careful: self.db may be a dict.
-        if (this.db.hasOwnProperty('conn')) {
+        if (this.db.conn) {
+            // if (this.db.hasOwnProperty('conn')) {
             await this.db.commit();
-            this.db.conn!.close();
+            this.db.conn.close();
         }
     }
     //@+node:felix.20230802145823.6: *3* cacher.commit
     public async commit(): Promise<void> {
         // Careful: self.db may be a dict.
-        if (this.db.hasOwnProperty('conn')) {
+        if (this.db.conn) {
+            // if (this.db.hasOwnProperty('conn')) {
             await this.db.commit();
         }
     }
@@ -291,7 +293,7 @@ export class GlobalCacher {
     public async commit_and_close(): Promise<void> {
         // Careful: this.db may be a dict.
 
-        if (this.db.conn && this.db.hasOwnProperty('conn')) {
+        if (this.db.conn) {
 
             if (g.app.debug.includes('cache')) {
                 this.dump('Shutdown');
@@ -319,9 +321,14 @@ export class GlobalCacher {
 export class SqlitePickleShare {
 
     public root: string;
+    public dbfile: string;
     public conn: Database | undefined;
     public init: Promise<Database>;
     public cache: Record<string, any>;
+    public commitTimeout: NodeJS.Timeout | undefined;
+    private _needWatchSetup = false;
+    private _selfChanged = false;
+    private _refreshTimeout: NodeJS.Timeout | undefined;
 
     // Allow index signature to allow any arbitrary property
     [key: string]: any;
@@ -339,6 +346,7 @@ export class SqlitePickleShare {
      */
     constructor(root: string) {
         this.root = abspath(expanduser(root));
+        this.dbfile = join(root, 'cache.sqlite');
         // Keys are normalized file names.
         // Values are tuples (obj, orig_mod_time)
         this.cache = {};
@@ -357,13 +365,22 @@ export class SqlitePickleShare {
                     } else {
                         // TODO : CHECK IF RUNNING AS WEB EXTENSION!
                         // TODO : USE WORKSPACE TO GET INSTEAD OF READFILE !
-                        const dbfile = join(root, 'cache.sqlite');
 
-                        // this.conn = await sqlite3.connect(dbfile);
-                        const filebuffer = await vscode.workspace.fs.readFile(
-                            g.makeVscodeUri(dbfile)
-                        );
-                        this.conn = new g.SQL.Database(filebuffer);
+                        // Open empty if not exist.
+                        const w_exists = await g.os_path_exists(this.dbfile);
+                        if (w_exists) {
+                            // this.conn = await sqlite3.connect(dbfile);
+                            const filebuffer = await vscode.workspace.fs.readFile(
+                                g.makeVscodeUri(this.dbfile)
+                            );
+                            this.conn = new g.SQL.Database(filebuffer);
+                            this.watchSetup(this.dbfile);
+                        } else {
+                            // will setup watch at next commit in reset_protocol_in_values
+                            this._needWatchSetup = true;
+                            this.conn = new g.SQL.Database();
+                        }
+
                     }
 
                     const sql = 'create table if not exists cachevalues(key text primary key, data blob);';
@@ -402,6 +419,9 @@ export class SqlitePickleShare {
                 }
                 if (prop === "has_key") {
                     return target.has_key.bind(target);
+                }
+                if (prop === "commit") {
+                    return target.commit.bind(target);
                 }
                 // Properties to allow through
                 if (prop === "init") {
@@ -497,20 +517,97 @@ export class SqlitePickleShare {
                     'replace into cachevalues(key, data) values(?,?);',
                     [key, data]
                 );
+                // Set Timeout to auto-save!
+                if (this.commitTimeout) {
+                    clearTimeout(this.commitTimeout);
+                }
+                // Leo Editor is originally in autocommit mode.
+                // See https://docs.python.org/3/library/sqlite3.html#sqlite3-transaction-control-isolation-level
+                this.commitTimeout = setTimeout(() => {
+                    void this.commit();
+                }, 50);
             }
         } catch (e) {
             g.es_exception(e);
         }
 
     }
+    //@+node:felix.20231119225011.1: *3* watchSetup
+    public watchSetup(databaseFilePath: string): vscode.FileSystemWatcher {
+        console.log('watchSetup');
+        // No backslashes in glob pattern for watching a file pattern. (single file in this case)
+        const watcher = vscode.workspace.createFileSystemWatcher(databaseFilePath.replace(/\\/g, '/'));
+
+        // Handle file changes
+        watcher.onDidChange(uri => {
+            console.log(`Database file changed: ${uri.fsPath}`);
+            this.refreshFromFile();
+            // Implement debounce logic and database reconnection here
+        });
+
+        // Handle file creation (if necessary)
+        watcher.onDidCreate(uri => {
+            console.log(`Database file created: ${uri.fsPath}`);
+            this.refreshFromFile();
+            // Handle file creation
+        });
+
+        // Handle file deletion (if necessary)
+        // watcher.onDidDelete(uri => {
+        //     console.log(`Database file deleted: ${uri.fsPath}`);
+        //     // Handle file deletion
+        // });
+
+        // Remember to dispose of the watcher when no longer needed
+        return watcher;
+
+    }
+
+    //@+node:felix.20231119225037.1: *3* refreshFromFile
+    public refreshFromFile(): void {
+        console.log('refreshFromFile');
+        if (this._selfChanged) {
+            this._selfChanged = false;
+            console.log('SKIP refreshFromFile');
+        } else {
+            console.log('do refreshFromFile');
+            if (this._refreshTimeout) {
+                clearTimeout(this._refreshTimeout);
+            }
+            // 100 millisecond debounce
+            setTimeout(() => {
+                // REFRESH
+                if (this.conn) {
+                    this.conn.close();
+                }
+                vscode.workspace.fs.readFile(
+                    g.makeVscodeUri(this.dbfile)
+                ).then((p_result) => {
+                    this.conn = new g.SQL.Database(p_result);
+                }, (p_reason) => {
+                    console.log("Error in refreshing sqlite db: É" + this.dbfile, p_reason);
+                    throw (p_reason);
+                });
+            }, 100);
+        }
+    }
+
     //@+node:felix.20230807231629.1: *3* commit
     public async commit(): Promise<void> {
         if (this.conn) {
             const db_data = this.conn.export();
             const db_buffer = Buffer.from(db_data);
-            const db_fileName = path.join(this.root);
-            const db_uri = g.makeVscodeUri(db_fileName);
+            const db_uri = g.makeVscodeUri(this.dbfile);
+            if (!this._needWatchSetup) {
+                // already setup so setup flag to warn not to refresh own-change.
+                this._selfChanged = true; // WE ARE ABOUT TO WRITE/CHANGE THE FILE!
+            }
             await vscode.workspace.fs.writeFile(db_uri, db_buffer);
+            if (this._needWatchSetup) {
+                console.log(' DO WATCH SETUP !');
+                this.watchSetup(this.dbfile);
+                this._needWatchSetup = false;
+            }
         }
         return;
     }
@@ -627,6 +724,7 @@ export class SqlitePickleShare {
         const PROTOCOLKEY = '__cache_pickle_protocol__';
         const prot = this.get(PROTOCOLKEY, 3);
         if (prot === 2) {
+            console.log('PROTOCOL ALREADY 2: reset_protocol_in_values OK WITHOUT CHANGING DATABASE');
             return;
         }
 

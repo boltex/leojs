@@ -1339,9 +1339,7 @@ export class LeoApp {
      * Warn if fn is already open and add fn to already_open_files list.
      */
     public async checkForOpenFile(c: Commands, fn: string): Promise<void> {
-        console.log('TODO : TEST checkForOpenFile');
-
-        const d: any = g.app.db;
+        const d = g.app.db;
         const tag: string = 'open-leo-files';
         if (g.app.reverting) {
             // #302: revert to saved doesn't reset external file change monitoring
@@ -1358,7 +1356,8 @@ export class LeoApp {
         }
 
         // #1519: check os.path.exists.
-        const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
+        let aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
+        aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
         let w_any: boolean = false;
         for (let z of aList) {
             const w_exists = await g.os_path_exists(z);
@@ -1368,11 +1367,15 @@ export class LeoApp {
         }
         // any(os.path.exists(z) and os.path.samefile(z, fn) for z in aList)
         if (w_any) {
+            console.log('FOUND checkForOpenFile aList for fn: ' + fn);
+            console.log(aList);
             // The file may be open in another copy of Leo, or not:
             // another Leo may have been killed prematurely.
             // Put the file on the global list.
             // A dialog will warn the user such files later.
-            fn = path.normalize(fn);
+            fn = g.os_path_fix_drive(path.normalize(fn));
+            console.log('fn after normalize', fn);
+
             if (!g.app.already_open_files.includes(fn)) {
                 g.es('may be open in another Leo:');
                 g.es(fn);
@@ -1381,6 +1384,8 @@ export class LeoApp {
             }
 
         } else {
+            console.log('NOT FOUND checkForOpenFile aList for fn: ' + fn);
+            console.log(aList);
             g.app.rememberOpenFile(fn);
         }
 
@@ -1390,8 +1395,6 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
-        console.log('TODO : TEST forgetOpenFile for filename:', fn);
-
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
@@ -1400,11 +1403,16 @@ export class LeoApp {
             return; // #69.
         }
 
-        const aList: string[] = d[tag] || [];
+        let aList: string[] = d[tag] || [];
+        aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
 
-        fn = path.normalize(fn);
+        console.log('BEFORE forgetOpenFile aList for fn: ' + fn);
+        console.log(aList);
 
+        fn = g.os_path_fix_drive(path.normalize(fn));
+        console.log('fn after normalize', fn);
         if (aList.includes(fn)) {
+
             // aList.remove(fn)
             const index = aList.indexOf(fn);
             if (index > -1) {
@@ -1414,13 +1422,14 @@ export class LeoApp {
             if (trace) {
                 g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
             }
+            console.log('AFTER forgetOpenFile REMOVED fn: ' + fn);
+            console.log('forgetOpenFile NEW LIST: ', aList);
+
             d[tag] = aList;
         }
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
-        console.log('TODO : TEST rememberOpenFile');
-
         // Do not call g.trace, etc. here.
         const d = g.app.db;
         const tag = 'open-leo-files';
@@ -1435,10 +1444,15 @@ export class LeoApp {
         } else if (g.app.preReadFlag) {
             // pass
         } else {
-            const aList: string[] = d[tag] || [];
+            let aList: string[] = d[tag] || [];
+            aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
+            console.log('rememberOpenFile aList after appending fn:' + fn);
             // It's proper to add duplicates to this list.
-            aList.push(path.normalize(fn));
+            fn = g.os_path_fix_drive(path.normalize(fn));
+            aList.push(fn);
+            console.log('fn after normalize', fn);
             d[tag] = aList;
+            console.log(aList);
         }
     }
     //@+node:felix.20211226221235.5: *4* app.runAlreadyOpenDialog
@@ -1446,7 +1460,6 @@ export class LeoApp {
      *  Warn about possibly already-open files.
      */
     public async runAlreadyOpenDialog(c: Commands): Promise<void> {
-
         if (g.app.already_open_files && g.app.already_open_files.length) {
             const aList: string[] = Array.from(new Set(g.app.already_open_files)).sort();
             g.app.already_open_files = [];

@@ -443,10 +443,15 @@ export class CommanderFileCommands {
         ];
         // maybe from c.k.
         let fileName: string = c.k?.givenArgs?.join('');
+
         // override with given argument
+
         if (p_uri && p_uri.fsPath && p_uri.fsPath.trim()) {
-            fileName = p_uri.fsPath.replace(/\\/g, '/');
+            // TODO : ARE BACKSLASHES A PROBLEM ? ? 
+            // fileName = p_uri.fsPath.replace(/\\/g, '/');
+            fileName = p_uri.fsPath;
         }
+
         if (fileName) {
             return open_completer(c, closeFlag, fileName);
         }
@@ -458,6 +463,9 @@ export class CommanderFileCommands {
             g.defaultLeoFileExtension(c),
             false
         )) as string;
+
+        console.log('VERIFY SLASHES: open file: ', fileName);
+
         return open_completer(c, closeFlag, fileName);
     }
     //@+node:felix.20220105210716.12: *4* c_file.refreshFromDisk

@@ -4663,7 +4663,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "da66669",
+  "gitBranch": "leoCache",
+  "gitDate": "2023-11-18 21:05:40 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -7169,7 +7172,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         // node from other tree that has this command in title
 
         if (p_uri &amp;&amp; p_uri?.fsPath?.trim() &amp;&amp; g.app.loadManager) {
-            fileName = p_uri.fsPath.replace(/\\/g, '/');
+            // fileName = p_uri.fsPath.replace(/\\/g, '/');
+            fileName = p_uri.fsPath;
+            // TODO : are backslashes a problem?
         } else {
             fileName = await this.runOpenFileDialog(
                 undefined,

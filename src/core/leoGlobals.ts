@@ -5032,6 +5032,14 @@ export function os_path_join(...args: any[]): string {
     w_path = os_path_normslashes(w_path);
     return w_path;
 }
+//@+node:felix.20231119175232.1: *3* g.os_path_fix_drive
+export function os_path_fix_drive(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+    return p_path.replace(/^([a-z]):/, (match, driveLetter) => driveLetter.toUpperCase() + ':');
+}
+
 //@+node:felix.20211227182611.16: *3* g.os_path_normcase
 /**
  * Normalize the path's case.
