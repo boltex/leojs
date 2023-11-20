@@ -3708,8 +3708,5 @@
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "da66669",
-  "gitBranch": "leoCache",
-  "gitDate": "2023-11-18 21:05:40 -0500"
+  }
 }

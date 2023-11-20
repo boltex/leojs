@@ -234,7 +234,7 @@ export class LeoApp {
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db!: SqlitePickleShare; // The singleton global db, managed by g.app.global_cacher.
-    public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
+    public externalFilesController: ExternalFilesController | undefined; // The singleton ExternalFilesController instance.
     public global_cacher!: GlobalCacher; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
@@ -1301,9 +1301,25 @@ export class LeoApp {
             g.app.selectLeoWindow(c2);
         } else if (finish_quit && !g.unitTesting) {
             // * Does not terminate when last is closed: Present 'new' and 'open' buttons instead!
-            // g.app.finishQuit();
+            await g.app.finishQuit();
         }
         return true; // The window has been closed.
+    }
+    //@+node:felix.20231120013945.1: *4* app.destroyAllOpenWithFiles
+    /**
+     * Remove temp files created with the Open With command.
+     */
+    public async destroyAllOpenWithFiles(): Promise<void> {
+
+        if (g.app.debug.includes('shutdown')) {
+            g.pr('destroyAllOpenWithFiles');
+        }
+
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.shut_down();
+            g.app.externalFilesController = undefined;
+        }
+
     }
     //@+node:felix.20220511231737.4: *4* app.destroyWindow
     /**
@@ -1325,6 +1341,92 @@ export class LeoApp {
         // force the window to go away now.
         // Important: this also destroys all the objects of the commander.
         frame.destroySelf();
+    }
+    //@+node:felix.20231120013952.1: *4* app.finishQuit
+    public async finishQuit(): Promise<void> {
+        // forceShutdown may already have fired the "end1" hook.
+        g.assert(this === g.app, g.app.toString());
+        const trace = g.app.debug.includes('shutdown');
+        if (trace) {
+            g.pr('finishQuit: killed:', g.app.killed);
+        }
+        if (!g.app.killed) {
+            g.doHook("end1");
+            if (g.app.global_cacher) {  // #1766.
+                await g.app.global_cacher.commit_and_close();
+            }
+            if (g.app.commander_cacher) {  // #1766.
+                await g.app.commander_cacher.commit();
+                await g.app.commander_cacher.close();
+            }
+        }
+        // if g.app.ipk
+        //     g.app.ipk.cleanup_consoles()
+
+        await g.app.destroyAllOpenWithFiles();
+
+        // if hasattr(g.app, 'pyzo_close_handler')
+        //     // pylint: disable=no-member
+        //     g.app.pyzo_close_handler();
+
+        // Disable all further hooks and events.
+        // Alas, "idle" events can still be called
+        // even after the following code.
+        g.app.killed = true;
+        if (g.app.gui) {
+            g.app.gui.destroySelf();  // Calls qtApp.quit()
+        }
+    }
+
+    //@+node:felix.20231120013956.1: *4* app.forceShutdown
+    // public async forceShutdown(self) -> None:
+    //     """
+    //     Forces an immediate shutdown of Leo at any time.
+
+    //     In particular, may be called from plugins during startup.
+    //     """
+    //     trace = 'shutdown' in g.app.debug
+    //     app = self
+    //     if trace:
+    //         g.pr('forceShutdown')
+    //     for c in app.commanders():
+    //         app.forgetOpenFile(c.fileName())
+    //     # Wait until everything is quiet before really quitting.
+    //     if trace:
+    //         g.pr('forceShutdown: before end1')
+    //     g.doHook("end1")
+    //     if trace:
+    //         g.pr('forceShutdown: after end1')
+    //     self.log = None  # Disable writeWaitingLog
+    //     self.killed = True  # Disable all further hooks.
+    //     for w in self.windowList[:]:
+    //         if trace:
+    //             g.pr(f"forceShutdown: {w}")
+    //         self.destroyWindow(w)
+    //     if trace:
+    //         g.pr('before finishQuit')
+    //     self.finishQuit()
+    //@+node:felix.20231120014001.1: *4* app.onQuit
+    // @cmd('exit-leo')
+    // @cmd('quit-leo')
+    // def onQuit(self, event: Event = None) -> None:
+    //     """Exit Leo, prompting to save unsaved outlines first."""
+    //     if 'shutdown' in g.app.debug:
+    //         g.trace()
+    //     # #2433 - use the same method as clicking on the close box.
+    //     g.app.gui.close_event(QCloseEvent())  # type:ignore
+    //@+node:felix.20231120014009.1: *4* app.saveSession
+    /**
+     * Save session data depending on command-line arguments.
+     */
+    public async saveSession(): Promise<void> {
+
+        if (this.sessionManager && (
+            this.loaded_session || this.always_write_session_data
+        )) {
+            await this.sessionManager.save_snapshot();
+        }
+
     }
     //@+node:felix.20220106225805.1: *3* app.commanders
     /**

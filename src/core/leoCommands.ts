@@ -281,7 +281,12 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-        this.db = g.app.commander_cacher.get_wrapper(c);
+
+        if (g.app.commander_cacher) {
+            this.db = g.app.commander_cacher.get_wrapper(c);
+        } else {
+            this.db = {};
+        }
 
         // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);

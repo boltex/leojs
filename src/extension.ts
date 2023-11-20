@@ -33,6 +33,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     */
 
+    (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
     if (p_context.extensionUri && activateDebug) {
@@ -406,7 +407,14 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-    // pass
+    console.log("TODO: deactivate !");
+    // if (databaseConnection) {
+    //     databaseConnection.close(); // Close database connection
+    // }
+    // if (backgroundTask) {
+    //     clearInterval(backgroundTask); // Stop any background task
+    // }
+    console.log('LeoJS extension has been deactivated.');
 }
 
 /**
