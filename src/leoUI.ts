@@ -5412,5 +5412,9 @@ export class LeoUI extends NullGui {
         });
     }
 
+    public destroySelf(): void {
+        // pass // Nothing more needs to be done once all windows have been destroyed.
+    }
+
 }
 

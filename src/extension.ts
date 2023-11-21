@@ -406,15 +406,24 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {
-    console.log("TODO: deactivate !");
-    // if (databaseConnection) {
-    //     databaseConnection.close(); // Close database connection
-    // }
-    // if (backgroundTask) {
-    //     clearInterval(backgroundTask); // Stop any background task
-    // }
-    console.log('LeoJS extension has been deactivated.');
+export async function deactivate(): Promise<void> {
+
+    if (g.app) {
+        // Save session data.
+        await g.app.saveSession();
+        // Similar to qt_gui.close_event.
+        for (const c of g.app.commanders()) {
+            if (c.exists) {
+                await g.app.closeLeoWindow(c.frame, undefined, true);
+            }
+            // allow = c.exists && g.app.closeLeoWindow(c.frame)
+            // if (!allow)
+            //     return
+        }
+        // sys.exit(0)
+
+        console.log('LeoJS extension has been deactivated.');
+    }
 }
 
 /**

@@ -1242,7 +1242,8 @@ export class LeoApp {
      *
      * Return False if the user veto's the close.
      *
-     * finish_quit - usually True, close Leo when last file closes, but
+     * finish_quit - usually True, * FALSE IN LEOJS. USED TO FORCE QUIT ! * 
+     *               close Leo when last file closes, but
      *               False when closing an already-open-elsewhere file
      *               during initial load, so UI remains for files
      *               further along the command line.
@@ -1250,7 +1251,7 @@ export class LeoApp {
     public async closeLeoWindow(
         frame: LeoFrame,
         new_c?: Commands,
-        finish_quit = true
+        finish_quit = false
     ): Promise<boolean> {
         const c = frame.c;
         if (g.app.debug.includes('shutdown')) {
@@ -1266,7 +1267,7 @@ export class LeoApp {
         // Make sure .leoRecentFiles.txt is written.
         // g.app.recentFilesManager.writeRecentFilesFile(c)
 
-        if (c.changed) {
+        if (c.changed && !finish_quit) {
             c.promptingForClose = true;
             const veto = await frame.promptForSave();
             c.promptingForClose = false;

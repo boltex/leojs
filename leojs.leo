@@ -250,6 +250,7 @@
 <v t="felix.20220516005841.1"><vh>runAskYesNoCancelDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
+<v t="felix.20231120232158.1"><vh>destroySelf</vh></v>
 </v>
 </v>
 </v>
@@ -1058,15 +1059,24 @@ const activateDebug = false;
 - Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
-export function deactivate() {
-    console.log("TODO: deactivate !");
-    // if (databaseConnection) {
-    //     databaseConnection.close(); // Close database connection
-    // }
-    // if (backgroundTask) {
-    //     clearInterval(backgroundTask); // Stop any background task
-    // }
-    console.log('LeoJS extension has been deactivated.');
+export async function deactivate(): Promise&lt;void&gt; {
+
+    if (g.app) {
+        // Save session data.
+        await g.app.saveSession();
+        // Similar to qt_gui.close_event.
+        for (const c of g.app.commanders()) {
+            if (c.exists) {
+                await g.app.closeLeoWindow(c.frame, undefined, true);
+            }
+            // allow = c.exists &amp;&amp; g.app.closeLeoWindow(c.frame)
+            // if (!allow)
+            //     return
+        }
+        // sys.exit(0)
+
+        console.log('LeoJS extension has been deactivated.');
+    }
 }
 
 </t>
@@ -14884,6 +14894,11 @@ get leoEditHeadline(): boolean {
 set leoEditHeadline(p_value: boolean) {
     this._leoEditHeadline = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_EDIT_HEADLINE, p_value);
+}
+
+</t>
+<t tx="felix.20231120232158.1">public destroySelf(): void {
+    // pass // Nothing more needs to be done once all windows have been destroyed.
 }
 
 </t>

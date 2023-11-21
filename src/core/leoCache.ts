@@ -290,7 +290,7 @@ export class GlobalCacher {
 
     }
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
-    public async commit_and_close(): Promise<void> {
+    public commit_and_close(): void {
         // Careful: this.db may be a dict.
 
         if (this.db.conn) {
@@ -298,7 +298,7 @@ export class GlobalCacher {
             if (g.app.debug.includes('cache')) {
                 this.dump('Shutdown');
             }
-            await this.db.commit();
+            void this.db.commit();
             this.db.conn.close();
         }
     }
@@ -326,6 +326,7 @@ export class SqlitePickleShare {
     public init: Promise<Database>;
     public cache: Record<string, any>;
     public commitTimeout: NodeJS.Timeout | undefined;
+    public watcher: vscode.FileSystemWatcher | undefined;
     private _needWatchSetup = false;
     private _selfChanged = false;
     private _refreshTimeout: NodeJS.Timeout | undefined;
@@ -509,7 +510,6 @@ export class SqlitePickleShare {
      *  db['key'] = 5
      */
     public __setitem__(key: string, value: any): void {
-
         try {
             const data = this.dumper(value);
             if (this.conn) {
@@ -534,24 +534,29 @@ export class SqlitePickleShare {
     }
     //@+node:felix.20231119225011.1: *3* watchSetup
     public watchSetup(databaseFilePath: string): vscode.FileSystemWatcher {
-        console.log('watchSetup');
         // No backslashes in glob pattern for watching a file pattern. (single file in this case)
-        const watcher = vscode.workspace.createFileSystemWatcher(databaseFilePath.replace(/\\/g, '/'));
+        const watcher = vscode.workspace.createFileSystemWatcher(
+            // don't use string!
+            // databaseFilePath.replace(/\\/g, '/')
+            new vscode.RelativePattern(
+                g.makeVscodeUri(this.root),
+                'cache.sqlite'
+            )
+        );
 
         // Handle file changes
         watcher.onDidChange(uri => {
-            console.log(`Database file changed: ${uri.fsPath}`);
             this.refreshFromFile();
             // Implement debounce logic and database reconnection here
         });
 
         // Handle file creation (if necessary)
         watcher.onDidCreate(uri => {
-            console.log(`Database file created: ${uri.fsPath}`);
             this.refreshFromFile();
             // Handle file creation
         });
 
+        g.extensionContext.subscriptions.push(watcher);
         // Handle file deletion (if necessary)
         // watcher.onDidDelete(uri => {
         //     console.log(`Database file deleted: ${uri.fsPath}`);
@@ -565,12 +570,9 @@ export class SqlitePickleShare {
 
     //@+node:felix.20231119225037.1: *3* refreshFromFile
     public refreshFromFile(): void {
-        console.log('refreshFromFile');
         if (this._selfChanged) {
             this._selfChanged = false;
-            console.log('SKIP refreshFromFile');
         } else {
-            console.log('do refreshFromFile');
             if (this._refreshTimeout) {
                 clearTimeout(this._refreshTimeout);
             }
@@ -585,7 +587,7 @@ export class SqlitePickleShare {
                 ).then((p_result) => {
                     this.conn = new g.SQL.Database(p_result);
                 }, (p_reason) => {
-                    console.log("Error in refreshing sqlite db: É" + this.dbfile, p_reason);
+                    console.log("Error in refreshing sqlite db: " + this.dbfile, p_reason);
                     throw (p_reason);
                 });
             }, 100);
@@ -593,23 +595,49 @@ export class SqlitePickleShare {
     }
 
     //@+node:felix.20230807231629.1: *3* commit
-    public async commit(): Promise<void> {
+    public commit(): Promise<void> {
         if (this.conn) {
-            const db_data = this.conn.export();
-            const db_buffer = Buffer.from(db_data);
-            const db_uri = g.makeVscodeUri(this.dbfile);
+            let db_data: Uint8Array;
+            let db_buffer: Buffer;
+            let db_uri: vscode.Uri;
+
+            try {
+                db_data = this.conn.export();
+            } catch (e) {
+                console.error("ERROR this.conn.export() FAILED with error: ", e);
+                return Promise.resolve();
+            }
+            try {
+                db_buffer = Buffer.from(db_data);
+            } catch (e) {
+                console.error("ERROR Buffer.from(db_data) FAILED with error: ", e);
+                return Promise.resolve();
+            }
+            try {
+                db_uri = g.makeVscodeUri(this.dbfile);
+            } catch (e) {
+                console.error("ERROR g.makeVscodeUri(this.dbfile) FAILED with error: ", e);
+                return Promise.resolve();
+            }
+
             if (!this._needWatchSetup) {
                 // already setup so setup flag to warn not to refresh own-change.
                 this._selfChanged = true; // WE ARE ABOUT TO WRITE/CHANGE THE FILE!
             }
-            await vscode.workspace.fs.writeFile(db_uri, db_buffer);
-            if (this._needWatchSetup) {
-                console.log(' DO WATCH SETUP !');
-                this.watchSetup(this.dbfile);
-                this._needWatchSetup = false;
-            }
+
+            const q_commit = vscode.workspace.fs.writeFile(db_uri, db_buffer).then(
+                () => {
+
+                    if (this._needWatchSetup) {
+                        console.log(' NEW DB !!! DO WATCH SETUP from commit !');
+                        this.watchSetup(this.dbfile);
+                        this._needWatchSetup = false;
+                    }
+                });
+
+            return Promise.resolve(q_commit);
         }
-        return;
+        return Promise.resolve();
     }
     //@+node:felix.20230804140347.1: *3* loader
     /**
@@ -724,7 +752,6 @@ export class SqlitePickleShare {
         const PROTOCOLKEY = '__cache_pickle_protocol__';
         const prot = this.get(PROTOCOLKEY, 3);
         if (prot === 2) {
-            console.log('PROTOCOL ALREADY 2: reset_protocol_in_values OK WITHOUT CHANGING DATABASE');
             return;
         }
 
