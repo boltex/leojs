@@ -1461,6 +1461,9 @@ export class LeoApp {
         // #1519: check os.path.exists.
         let aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
         aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
+
+        // ALSO FIX Filename parameter from vscode's dialog !
+        fn = g.os_path_fix_drive(path.normalize(fn));
         let w_any: boolean = false;
         for (let z of aList) {
             const w_exists = await g.os_path_exists(z);
@@ -1470,14 +1473,10 @@ export class LeoApp {
         }
         // any(os.path.exists(z) and os.path.samefile(z, fn) for z in aList)
         if (w_any) {
-            console.log('FOUND checkForOpenFile aList for fn: ' + fn);
-            console.log(aList);
             // The file may be open in another copy of Leo, or not:
             // another Leo may have been killed prematurely.
             // Put the file on the global list.
             // A dialog will warn the user such files later.
-            fn = g.os_path_fix_drive(path.normalize(fn));
-            console.log('fn after normalize', fn);
 
             if (!g.app.already_open_files.includes(fn)) {
                 g.es('may be open in another Leo:');
@@ -1487,8 +1486,6 @@ export class LeoApp {
             }
 
         } else {
-            console.log('NOT FOUND checkForOpenFile aList for fn: ' + fn);
-            console.log(aList);
             g.app.rememberOpenFile(fn);
         }
 
@@ -1509,25 +1506,16 @@ export class LeoApp {
         let aList: string[] = d[tag] || [];
         aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
 
-        console.log('BEFORE forgetOpenFile aList for fn: ' + fn);
-        console.log(aList);
-
         fn = g.os_path_fix_drive(path.normalize(fn));
-        console.log('fn after normalize', fn);
         if (aList.includes(fn)) {
-
             // aList.remove(fn)
             const index = aList.indexOf(fn);
             if (index > -1) {
                 aList.splice(index, 1);
             }
-
             if (trace) {
                 g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
             }
-            console.log('AFTER forgetOpenFile REMOVED fn: ' + fn);
-            console.log('forgetOpenFile NEW LIST: ', aList);
-
             d[tag] = aList;
         }
     }
@@ -1549,11 +1537,9 @@ export class LeoApp {
         } else {
             let aList: string[] = d[tag] || [];
             aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
-            console.log('rememberOpenFile aList after appending fn:' + fn);
             // It's proper to add duplicates to this list.
             fn = g.os_path_fix_drive(path.normalize(fn));
             aList.push(fn);
-            console.log('fn after normalize', fn);
             d[tag] = aList;
             console.log(aList);
         }
@@ -2785,8 +2771,7 @@ export class LoadManager {
             return false;
         }
         // #199.
-        // LEOJS TODO ?
-        // g.app.runAlreadyOpenDialog(c1);
+        await g.app.runAlreadyOpenDialog(c1!);
 
         // Final inits...
         g.app.logInited = true;

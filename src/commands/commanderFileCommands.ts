@@ -419,7 +419,7 @@ export class CommanderFileCommands {
                 }
             }
             await p_c.raise_error_dialogs('write');
-            await g.app.runAlreadyOpenDialog(p_c); // ? Needed ?
+            await g.app.runAlreadyOpenDialog(p_c);
 
             return q_result;
         }
