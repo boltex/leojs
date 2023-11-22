@@ -758,8 +758,13 @@ export class SqlitePickleShare {
         //@+others
         //@+node:felix.20230802145823.59: *4* viewrendered special case
 
-        const row_a = this.get('viewrendered_default_layouts') || [undefined, undefined];
-        const row_o = [JSON.parse(JSON.stringify(row_a[0])), JSON.parse(JSON.stringify(row_a[1]))];
+        const row_a = this.get('viewrendered_default_layouts');
+        let row_o;
+        if (row_a) {
+            row_o = [JSON.parse(JSON.stringify(row_a[0])), JSON.parse(JSON.stringify(row_a[1]))];
+        } else {
+            row_o = [null, null];
+        }
 
         this.__setitem__('viewrendered_default_layouts', row_o);
         //@+node:felix.20230802145823.60: *4* do_block

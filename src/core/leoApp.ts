@@ -1541,7 +1541,6 @@ export class LeoApp {
             fn = g.os_path_fix_drive(path.normalize(fn));
             aList.push(fn);
             d[tag] = aList;
-            console.log(aList);
         }
     }
     //@+node:felix.20211226221235.5: *4* app.runAlreadyOpenDialog
