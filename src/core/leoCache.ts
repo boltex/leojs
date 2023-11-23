@@ -368,10 +368,19 @@ export class SqlitePickleShare {
                         // TODO : USE WORKSPACE TO GET INSTEAD OF READFILE !
 
                         // Open empty if not exist.
-                        const w_exists = await g.os_path_exists(this.dbfile);
+                        let w_exists;
+                        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                            // web
+                            w_exists = g.extensionContext.workspaceState.get<string>(
+                                g.makeVscodeUri(this.dbfile).fsPath
+                            );
+                        } else {
+                            // Desktop
+                            w_exists = await g.os_path_exists(this.dbfile);
+                        }
                         if (w_exists) {
                             // this.conn = await sqlite3.connect(dbfile);
-                            const filebuffer = await vscode.workspace.fs.readFile(
+                            const filebuffer = await this.readFileBuffer(
                                 g.makeVscodeUri(this.dbfile)
                             );
                             this.conn = new g.SQL.Database(filebuffer);
@@ -576,7 +585,11 @@ export class SqlitePickleShare {
     }
 
     //@+node:felix.20231119225011.1: *3* watchSetup
-    public watchSetup(databaseFilePath: string): vscode.FileSystemWatcher {
+    public watchSetup(databaseFilePath: string): void {
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web NO NEED TO WATCH IF WEB EXTENSION!
+            return;
+        }
         // No backslashes in glob pattern for watching a file pattern. (single file in this case)
         const watcher = vscode.workspace.createFileSystemWatcher(
             // don't use string!
@@ -607,7 +620,7 @@ export class SqlitePickleShare {
         // });
 
         // Remember to dispose of the watcher when no longer needed
-        return watcher;
+        return;
 
     }
 
@@ -625,7 +638,7 @@ export class SqlitePickleShare {
                 if (this.conn) {
                     this.conn.close();
                 }
-                vscode.workspace.fs.readFile(
+                this.readFileBuffer(
                     g.makeVscodeUri(this.dbfile)
                 ).then((p_result) => {
                     this.conn = new g.SQL.Database(p_result);
@@ -668,7 +681,7 @@ export class SqlitePickleShare {
                 this._selfChanged = true; // WE ARE ABOUT TO WRITE/CHANGE THE FILE!
             }
 
-            const q_commit = vscode.workspace.fs.writeFile(db_uri, db_buffer).then(
+            const q_commit = this.writeFileBuffer(db_uri, db_buffer).then(
                 () => {
 
                     if (this._needWatchSetup) {
