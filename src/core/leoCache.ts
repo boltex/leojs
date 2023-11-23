@@ -533,19 +533,32 @@ export class SqlitePickleShare {
 
     }
     //@+node:felix.20231122235658.1: *3* readFileBuffer
-    public async readFileBuffer(): Promise<Uint8Array> {
-        // TODO 
-        console.log("TODO readFileBuffer");
-        const test = await Promise.resolve(new Uint8Array([65, 66, 67, 68]));
-        return test;
+    public readFileBuffer(db_uri: vscode.Uri): Thenable<Uint8Array | null> {
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            const encodedData = g.extensionContext.workspaceState.get<string>(db_uri.fsPath);
+            if (encodedData) {
+                const data = this.base64ToBuffer(encodedData); // Convert Base64 back to ArrayBuffer
+                return Promise.resolve(data);
+            }
+            return Promise.resolve(null);
+        } else {
+            // desktop
+            return vscode.workspace.fs.readFile(db_uri);
+        }
     }
 
     //@+node:felix.20231123000604.1: *3* writeFileBuffer
-    public async writeFileBuffer(data: Uint8Array): Promise<void> {
-        // TODO 
-        console.log("TODO writeFileBuffer");
-        await Promise.resolve();
-        return;
+    public writeFileBuffer(db_uri: vscode.Uri, db_buffer: Uint8Array): Thenable<void> {
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            const encodedData = this.bufferToBase64(db_buffer); // Convert Uint8Array to Base64
+            return g.extensionContext.workspaceState.update(db_uri.fsPath, encodedData); // Store Base64 string
+        } else {
+            // desktop
+            return vscode.workspace.fs.writeFile(db_uri, db_buffer);
+
+        }
     }
 
     //@+node:felix.20231122235830.1: *3* bufferToBase64
@@ -554,10 +567,12 @@ export class SqlitePickleShare {
     }
 
     //@+node:felix.20231122235908.1: *3* saveDatabase
-    public async saveDatabase(context: vscode.ExtensionContext, db: any): Promise<void> {
-        const data = db.export(); // Export SQLite database to Uint8Array
-        const encodedData = this.bufferToBase64(data); // Convert Uint8Array to Base64
-        await context.workspaceState.update('database', encodedData); // Store Base64 string
+    public async saveDatabase(): Promise<void> {
+        if (this.conn) {
+            const data = this.conn.export(); // Export SQLite database to Uint8Array
+            const encodedData = this.bufferToBase64(data); // Convert Uint8Array to Base64
+            await g.extensionContext.workspaceState.update('database', encodedData); // Store Base64 string
+        }
     }
 
     //@+node:felix.20231119225011.1: *3* watchSetup
