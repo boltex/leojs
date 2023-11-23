@@ -532,6 +532,34 @@ export class SqlitePickleShare {
         }
 
     }
+    //@+node:felix.20231122235658.1: *3* readFileBuffer
+    public async readFileBuffer(): Promise<Uint8Array> {
+        // TODO 
+        console.log("TODO readFileBuffer");
+        const test = await Promise.resolve(new Uint8Array([65, 66, 67, 68]));
+        return test;
+    }
+
+    //@+node:felix.20231123000604.1: *3* writeFileBuffer
+    public async writeFileBuffer(data: Uint8Array): Promise<void> {
+        // TODO 
+        console.log("TODO writeFileBuffer");
+        await Promise.resolve();
+        return;
+    }
+
+    //@+node:felix.20231122235830.1: *3* bufferToBase64
+    public bufferToBase64(buffer: Uint8Array): string {
+        return Buffer.from(buffer).toString('base64');
+    }
+
+    //@+node:felix.20231122235908.1: *3* saveDatabase
+    public async saveDatabase(context: vscode.ExtensionContext, db: any): Promise<void> {
+        const data = db.export(); // Export SQLite database to Uint8Array
+        const encodedData = this.bufferToBase64(data); // Convert Uint8Array to Base64
+        await context.workspaceState.update('database', encodedData); // Store Base64 string
+    }
+
     //@+node:felix.20231119225011.1: *3* watchSetup
     public watchSetup(databaseFilePath: string): vscode.FileSystemWatcher {
         // No backslashes in glob pattern for watching a file pattern. (single file in this case)
