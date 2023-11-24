@@ -115,6 +115,7 @@ export class Undoer {
     public newP!: Position;
     public newParent!: Position;
     public newParent_v!: VNode;
+    public newRecentFiles!: string[];
     public newSel!: number[];
     public newTree!: TreeData[];
     public newYScroll!: number;
@@ -127,6 +128,7 @@ export class Undoer {
     public oldN!: number;
     public oldParent!: Position;
     public oldParent_v!: VNode;
+    public oldRecentFiles!: string[];
     public oldSel!: number[];
     public oldTree!: TreeData[];
     public oldYScroll!: number;
@@ -714,6 +716,16 @@ export class Undoer {
     //     bunch.newTree = u.saveTree(p);
     //     u.pushBead(bunch);
     // }
+    //@+node:felix.20231123235346.1: *5* u.afterClearRecentFiles
+    public afterClearRecentFiles(bunch: Bead): Bead {
+        const u = this;
+        bunch.newRecentFiles = g.app.config.recentFiles.slice();
+        bunch.undoType = 'Clear Recent Files';
+        bunch.undoHelper = u.undoClearRecentFiles;
+        bunch.redoHelper = u.redoClearRecentFiles;
+        u.pushBead(bunch);
+        return bunch;
+    }
     //@+node:felix.20211026230613.37: *5* u.afterCloneMarkedNodes
     public afterCloneMarkedNodes(p: Position): void {
         const u: Undoer = this;
@@ -1053,6 +1065,14 @@ export class Undoer {
     //     bunch.oldTree = u.saveTree(p);
     //     return bunch;
     // }
+    //@+node:felix.20231123235410.1: *5* u.beforeClearRecentFiles
+    public beforeClearRecentFiles(): Bead {
+        const u = this;
+        const p = u.c.p;
+        const bunch: Bead = u.createCommonBunch(p);
+        bunch.oldRecentFiles = g.app.config.recentFiles.slice();
+        return bunch;
+    }
     //@+node:felix.20211026230613.57: *5* u.beforeCloneNode
     public beforeCloneNode(p: Position): Bead {
         const u: Undoer = this;
@@ -1502,6 +1522,14 @@ export class Undoer {
         c.copyMarked();
         u.newP = c.p;
     }
+    //@+node:felix.20231123235536.1: *4* u.redoClearRecentFiles
+    public redoClearRecentFiles(): void {
+        const c = this.c;
+        const u = this;
+        const rf = g.app.recentFilesManager;
+        rf.setRecentFiles(u.newRecentFiles.slice());
+        rf.createRecentFilesMenuItems(c);
+    }
     //@+node:felix.20211026230613.89: *4* u.redoCloneNode
     public redoCloneNode(): void {
         const u: Undoer = this;
@@ -1943,6 +1971,14 @@ export class Undoer {
             // #1333.
             c.selectPosition(u.p);
         }
+    }
+    //@+node:felix.20231123235503.1: *4* u.undoClearRecentFiles
+    public undoClearRecentFiles(): void {
+        const c = this.c;
+        const u = this;
+        const rf = g.app.recentFilesManager;
+        rf.setRecentFiles(u.oldRecentFiles.slice());
+        rf.createRecentFilesMenuItems(c);
     }
     //@+node:felix.20211026230613.109: *4* u.undoCloneMarkedNodes
     public undoCloneMarkedNodes(): void {

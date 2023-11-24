@@ -1263,9 +1263,8 @@ export class LeoApp {
             return false;
         }
 
-        // TODO : NEEDED ?
         // Make sure .leoRecentFiles.txt is written.
-        // g.app.recentFilesManager.writeRecentFilesFile(c)
+        await g.app.recentFilesManager.writeRecentFilesFile(c);
 
         if (c.changed && !finish_quit) {
             c.promptingForClose = true;
@@ -3865,7 +3864,6 @@ export class RecentFilesManager {
      * Read all .leoRecentFiles.txt files.
      */
     public async readRecentFiles(localConfigFile?: string): Promise<void> {
-        // Read all .leoRecentFiles.txt files.
         // The order of files in this list affects the order of the recent files list.
         const rf = this;
         const seen: string[] = [];
@@ -4094,6 +4092,7 @@ export class RecentFilesManager {
         if (written) {
             rf.recentFileMessageWritten = true;
         } else {
+            // Attempt to create .leoRecentFiles.txt in the user's home directory.
             if (g.app.homeLeoDir) {
                 const fileName = g.finalize_join(g.app.homeLeoDir, tag);
                 if (!(await g.os_path_exists(fileName))) {
