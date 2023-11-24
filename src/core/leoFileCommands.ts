@@ -2517,17 +2517,9 @@ export class FileCommands {
     public async write_Leo_file(fileName: string): Promise<boolean> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
-
-        if (c.checkOutline()) {
-            g.error('Structural errors in outline! outline not written');
-            return Promise.resolve(false);
-        }
-
-        // TODO : recentFilesManager !
-        // g.app.recentFilesManager.writeRecentFilesFile(c);
-
+        await g.app.recentFilesManager.writeRecentFilesFile(c);
         await fc.writeAllAtFileNodes();
-        return fc.writeOutline(fileName);  // Calls c.checkOutline.
+        return fc.writeOutline(fileName); // Calls c.checkOutline.
     }
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
     /**
