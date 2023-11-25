@@ -3910,14 +3910,27 @@ export class RecentFilesManager {
     //@+node:felix.20230923185723.12: *4* rf.readRecentFilesFile
     public async readRecentFilesFile(path: string): Promise<boolean> {
         const fileName = g.os_path_join(path, '.leoRecentFiles.txt');
-        const exists = await g.os_path_exists(fileName);
-        if (!exists) {
-            return false;
-        }
         let lines: string[] | undefined;
 
+        console.log('GOING TO READ RECENT FILES LIST', fileName);
+
         try {
-            const fileContents = await g.readFileIntoUnicodeString(fileName);
+            let fileContents;
+
+            if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                // * Web
+                fileContents = await g.extensionContext.workspaceState.get(fileName);
+            } else {
+                const exists = await g.os_path_exists(fileName);
+                if (!exists) {
+                    return false;
+                }
+                // * Desktop
+                fileContents = await g.readFileIntoUnicodeString(fileName);
+                if (!fileContents) {
+                    fileContents = "";
+                }
+            }
 
             try {
                 lines = fileContents?.split('\n');
@@ -3928,13 +3941,15 @@ export class RecentFilesManager {
             g.trace('can not open', fileName);
             return false;
         }
-        if (lines && this.sanitize(lines[0]) === 'readonly') {
+        if (lines && lines.length && this.sanitize(lines[0]) === 'readonly') {
             lines = lines.slice(1);
         }
-        if (lines) {
+        if (lines && lines.length) {
             lines = lines.map(line => g.toUnicode(g.os_path_normpath(line)));
             this.appendToRecentFiles(lines);
         }
+        console.log("READ IT, LINES WERE:", lines);
+
         return true;
     }
     //@+node:felix.20230923185723.13: *3* rf.sanitize
@@ -4055,6 +4070,8 @@ export class RecentFilesManager {
      */
     public async writeRecentFilesFile(c: Commands): Promise<void> {
 
+        console.log("WRITING RECENT FILES LIST");
+
         const tag = '.leoRecentFiles.txt';
         const rf = this;
         if (g.unitTesting || g.app.inBridge) {
@@ -4072,10 +4089,14 @@ export class RecentFilesManager {
         for (const w_path of [localPath, g.app.globalConfigDir, g.app.homeLeoDir]) {
             if (w_path) {
                 const fileName = g.os_path_join(w_path, tag);
+                console.log("TRYING TO WRITE RECENT FILES LIST with path:", w_path);
+
                 if (await g.os_path_exists(fileName) && !seen.includes(fileName.toLowerCase())) {
                     seen.push(fileName.toLowerCase());
                     const ok = await rf.writeRecentFilesFileHelper(fileName);
                     if (ok) {
+                        console.log("OK-> WROTE RECENT FILES LIST! ");
+
                         written = true;
                     }
                     if (!rf.recentFileMessageWritten && !g.unitTesting && !g.app.silentMode) {
@@ -4092,13 +4113,19 @@ export class RecentFilesManager {
         if (written) {
             rf.recentFileMessageWritten = true;
         } else {
-            // Attempt to create .leoRecentFiles.txt in the user's home directory.
-            if (g.app.homeLeoDir) {
-                const fileName = g.finalize_join(g.app.homeLeoDir, tag);
-                if (!(await g.os_path_exists(fileName))) {
-                    g.red(`creating: ${fileName}`);
+            if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                // * Web
+                await this.writeRecentFilesFileHelper(tag);
+            } else {
+                // * Desktop
+                // Attempt to create .leoRecentFiles.txt in the user's home directory.
+                if (g.app.homeLeoDir) {
+                    const fileName = g.finalize_join(g.app.homeLeoDir, tag);
+                    if (!(await g.os_path_exists(fileName))) {
+                        g.red(`creating: ${fileName}`);
+                    }
+                    await rf.writeRecentFilesFileHelper(fileName);
                 }
-                await rf.writeRecentFilesFileHelper(fileName);
             }
         }
     }
@@ -4108,12 +4135,17 @@ export class RecentFilesManager {
      */
     async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
 
+        const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            await g.extensionContext.workspaceState.update(fileName, s);
+            return true;
+        }
+
         let lines: string[] | undefined = undefined;
 
         // Part 1: Return False if the first line is "readonly".
         if (await g.os_path_exists(fileName)) {
             try {
-
                 const data = await g.readFileIntoUnicodeString(fileName);
                 lines = data?.split('\n');
 
@@ -4128,10 +4160,7 @@ export class RecentFilesManager {
 
         // Part 2: write the files.
         try {
-            const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
-
             await g.writeFile(fileName, 'utf-8', g.toUnicode(s),);
-
             return true;
         } catch (error) {
             if (error) {
