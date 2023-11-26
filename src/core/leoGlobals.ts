@@ -675,7 +675,7 @@ export function callers(
     // if (verbose) {
     // return ''; //''.join([f"\n  {z}" for z in result]);
     // }
-    return result.join(',');
+    return result.join(',\n');
 }
 
 //@+node:felix.20211104212435.1: *3* g._callerName
@@ -1655,6 +1655,9 @@ export async function rmdir(folderName: string): Promise<void> {
     await vscode.workspace.fs.delete(w_uri, { recursive: true });
 }
 //@+node:felix.20220511212935.1: *3* g.computeWindowTitle
+/**
+ * @deprecated
+ */
 export function computeWindowTitle(fileName: string): string {
     let branch;
     let commit;
@@ -2128,9 +2131,9 @@ export async function writeFile(
 
         return true;
     } catch (e) {
-        console.log(`exception writing: ${fileName}:\n${e}`);
-        // g.trace(g.callers())
-        // g.es_exception()
+        console.log(`exception writing: ${fileName}`);
+        trace(callers());
+        es_exception(e);
         return false;
     }
 }
@@ -2776,6 +2779,17 @@ export function getVSCodeRepository(c: Commands): null | GitAPI.Repository {
     const w_uri = makeVscodeUri(filename);
     return gitAPI.getRepository(w_uri);
 }
+//@+node:felix.20231125162441.1: *3* g.gitBranchName
+/**
+ * Return the git branch name associated with path/.git, or the empty
+ * string if path/.git does not exist. If path is None, use the leo-editor
+ * directory.
+ */
+export function gitBranchName(p_path?: string): string {
+    let [branch, commit] = gitInfo(p_path);
+    return branch;
+}
+
 //@+node:felix.20220511213305.1: *3* g.gitInfoForFile
 /**
  * Return the git (branch, commit) info associated for the given file.

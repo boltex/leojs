@@ -1441,6 +1441,12 @@ export class LeoApp {
      * Warn if fn is already open and add fn to already_open_files list.
      */
     public async checkForOpenFile(c: Commands, fn: string): Promise<void> {
+
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            return;
+        }
+
         const d = g.app.db;
         const tag: string = 'open-leo-files';
         if (g.app.reverting) {
@@ -1494,6 +1500,12 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
+
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            return;
+        }
+
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
@@ -1515,11 +1527,17 @@ export class LeoApp {
             if (trace) {
                 g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
             }
+            console.log('Changing DB to "remove opened file": ', fn);
             d[tag] = aList;
         }
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            return;
+        }
+
         // Do not call g.trace, etc. here.
         const d = g.app.db;
         const tag = 'open-leo-files';
@@ -2815,7 +2833,7 @@ export class LoadManager {
             if not exists:
                 c.rootPosition().h = 'Workbook'
         # Create the outline with workbook's name.
-        c.frame.title = title = c.computeWindowTitle(fn)
+        c.frame.title = title = c.computeWindowTitle()
         c.frame.setTitle(title)
         c.openDirectory = c.frame.openDirectory = g.os_path_dirname(fn)
         if hasattr(c.frame, 'top'):
@@ -3505,7 +3523,7 @@ export class LoadManager {
         // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
         c.mFileName = fn.endsWith('.leo') ? fn : `${fn}.leo`;
         c.wrappedFileName = fn;
-        c.frame.title = c.computeWindowTitle(c.mFileName);
+        c.frame.title = c.computeWindowTitle();
 
         // chapterController.finishCreate must be called after the first real redraw
         // because it requires a valid value for c.rootPosition().
@@ -3809,7 +3827,7 @@ export class RecentFilesManager {
         //             c.add_command(recentFilesMenu, label=baseName,
         //                 command=recentFilesCallback, underline=0)
         //     else:  # original behavior
-        //         label = f"{accel_ch[i]} {g.computeWindowTitle(name)}"
+        //         label = f"{accel_ch[i]} {c.computeWindowTitle()}"
         //         c.add_command(recentFilesMenu, label=label,
         //             command=recentFilesCallback, underline=0)
         //     i += 1
@@ -3912,7 +3930,7 @@ export class RecentFilesManager {
         const fileName = g.os_path_join(path, '.leoRecentFiles.txt');
         let lines: string[] | undefined;
 
-        console.log('GOING TO READ RECENT FILES LIST', fileName);
+        console.log('GOING TO READ RECENT FILES LIST: ', fileName);
 
         try {
             let fileContents;
@@ -3948,7 +3966,8 @@ export class RecentFilesManager {
             lines = lines.map(line => g.toUnicode(g.os_path_normpath(line)));
             this.appendToRecentFiles(lines);
         }
-        console.log("READ IT, LINES WERE:", lines);
+
+        console.log("READ IT, LINES WERE: ", lines);
 
         return true;
     }
@@ -4083,6 +4102,11 @@ export class RecentFilesManager {
         if (localFileName) {
             localPath = g.os_path_split(localFileName)[0];
         }
+
+        console.log('first path looked is local: ', localPath);
+        console.log('second path looked is g.app.globalConfigDir: ', g.app.globalConfigDir);
+        console.log('third path looked is g.app.homeLeoDir: ', g.app.homeLeoDir);
+
         let written = false;
         const seen: string[] = [];
 
@@ -4090,8 +4114,8 @@ export class RecentFilesManager {
             if (w_path) {
                 const fileName = g.os_path_join(w_path, tag);
                 console.log("TRYING TO WRITE RECENT FILES LIST with path:", w_path);
-
-                if (await g.os_path_exists(fileName) && !seen.includes(fileName.toLowerCase())) {
+                const w_exists = await g.os_path_exists(fileName);
+                if (w_exists && !seen.includes(fileName.toLowerCase())) {
                     seen.push(fileName.toLowerCase());
                     const ok = await rf.writeRecentFilesFileHelper(fileName);
                     if (ok) {
@@ -4133,9 +4157,11 @@ export class RecentFilesManager {
     /**
      * Don't update the file if it begins with read-only.
      */
-    async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
+    public async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
+        console.log("writeRecentFilesFileHelper for ", fileName);
 
         const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
+
         if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
             await g.extensionContext.workspaceState.update(fileName, s);
             return true;
@@ -4148,7 +4174,7 @@ export class RecentFilesManager {
             try {
                 const data = await g.readFileIntoUnicodeString(fileName);
                 lines = data?.split('\n');
-
+                console.log("check for readonly: ", lines);
             } catch (error) {
                 lines = undefined;
             }
@@ -4160,7 +4186,7 @@ export class RecentFilesManager {
 
         // Part 2: write the files.
         try {
-            await g.writeFile(fileName, 'utf-8', g.toUnicode(s),);
+            await g.writeFile(g.toUnicode(s), 'utf-8', fileName);
             return true;
         } catch (error) {
             if (error) {

@@ -142,11 +142,15 @@ export class CommanderCacher {
             // 1484: Change only the key!
 
             // if( isinstance(c.db, CommanderWrapper)){
-            if (c.db.constructor.name === "CommanderWrapper") {
+            // if (c.db.constructor.name === "CommanderWrapper") {
+            if (c.db.key) {
+                console.log("was CommanderWrapper");
                 c.db.key = fn;
                 // await this.commit(); // ? Needed ?
             } else {
-                g.trace('can not happen', c.db.constructor.name);
+                console.log("was NOT CommanderWrapper");
+                // g.trace('can not happen', c.db.constructor.name);
+                g.trace('can not happen');
             }
         }
     }
@@ -192,6 +196,9 @@ export class CommanderWrapper {
     }
 
     public get(target: CommanderWrapper, prop: string): any {
+        if (prop === "key") {
+            return true;
+        }
         if (prop === "keys") {
             return this.keys.bind(target);
         }
@@ -208,6 +215,10 @@ export class CommanderWrapper {
     }
 
     public set(target: CommanderWrapper, prop: string, value: any): boolean {
+        if (prop === "key") {
+            this.key = value;
+            return true;
+        }
         this.user_keys.add(prop);
         this.db[`${this.key}:::${prop}`] = value;
         return true;
@@ -290,15 +301,14 @@ export class GlobalCacher {
 
     }
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
-    public commit_and_close(): void {
+    public async commit_and_close(): Promise<void> {
         // Careful: this.db may be a dict.
-
         if (this.db.conn) {
 
             if (g.app.debug.includes('cache')) {
                 this.dump('Shutdown');
             }
-            void this.db.commit();
+            await this.db.commit();
             this.db.conn.close();
         }
     }
@@ -411,6 +421,9 @@ export class SqlitePickleShare {
             get(target, prop) {
                 prop = prop.toString();
                 // ALSO SUPPORT : toString, valueOf, iterator
+                if (prop === "key") {
+                    return false;
+                }
                 if (prop === "toString") {
                     return target.__repr__.bind(target);
                 }
@@ -651,7 +664,13 @@ export class SqlitePickleShare {
     }
 
     //@+node:felix.20230807231629.1: *3* commit
-    public commit(): Promise<void> {
+    public async commit(): Promise<void> {
+
+        // May have been called directly while waiting for debounced call from __setItem__
+        if (this.commitTimeout) {
+            clearTimeout(this.commitTimeout);
+        }
+
         if (this.conn) {
             let db_data: Uint8Array;
             let db_buffer: Buffer;
@@ -681,19 +700,15 @@ export class SqlitePickleShare {
                 this._selfChanged = true; // WE ARE ABOUT TO WRITE/CHANGE THE FILE!
             }
 
-            const q_commit = this.writeFileBuffer(db_uri, db_buffer).then(
-                () => {
+            await this.writeFileBuffer(db_uri, db_buffer);
 
-                    if (this._needWatchSetup) {
-                        console.log(' NEW DB !!! DO WATCH SETUP from commit !');
-                        this.watchSetup(this.dbfile);
-                        this._needWatchSetup = false;
-                    }
-                });
-
-            return Promise.resolve(q_commit);
+            if (this._needWatchSetup) {
+                console.log(' NEW DB !!! DO WATCH SETUP from commit !');
+                this.watchSetup(this.dbfile);
+                this._needWatchSetup = false;
+            }
         }
-        return Promise.resolve();
+
     }
     //@+node:felix.20230804140347.1: *3* loader
     /**

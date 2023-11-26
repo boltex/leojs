@@ -67,7 +67,7 @@ export class CommanderFileCommands {
         }
 
         // Set various ivars.
-        const title = c.computeWindowTitle(c.mFileName);
+        const title = c.computeWindowTitle();
         c.frame.title = title;
         c.frame.setTitle(title);
         try {
@@ -297,7 +297,7 @@ export class CommanderFileCommands {
 
         // Retain all previous settings. Very important for theme code.
         const t2 = process.hrtime();
-
+        g.app.numberOfUntitledWindows += 1;
         const c = g.app.newCommander(
             '',
             gui,
@@ -1366,18 +1366,6 @@ export class CommanderFileCommands {
 
         g.app.recentFilesManager.editRecentFiles(c);
     }
-    //@+node:felix.20220105210716.41: *4* c_file.openRecentFile
-    // ! UNUSED IN LEOJS    
-    // @commander_command('open-recent-file')
-    // public async openRecentFile(this: Commands): Promise<void>
-    // const c: Commands = this;
-
-    //     if g.doHook("recentfiles1", c=c, p=c.p, v=c.p, fileName=fn):
-    //         return
-    //     c2 = g.openWithFileName(fn, old_c=c)
-    //     if c2:
-    //         g.app.makeAllBindings()
-    //         g.doHook("recentfiles2", c=c2, p=c2.p, v=c2.p, fileName=fn)
     //@+node:felix.20220105210716.42: *4* c_file.sortRecentFiles
 
     @commander_command('sort-recent-files', 'Sort the recent files list.')

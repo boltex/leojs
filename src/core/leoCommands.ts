@@ -289,7 +289,7 @@ export class Commands {
         }
 
         // Create the gui frame.
-        const title = this.computeWindowTitle(c.mFileName);
+        const title = this.computeWindowTitle();
 
         this.frame = this.gui.createLeoFrame(c, title);
         g.assert(this.frame.c === this);
@@ -356,24 +356,61 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20231125161943.1: *4* c.computeTabTitle
+    /**
+     * Return the tab title for this commander.
+     */
+    public computeTabTitle(): string {
+        const c: Commands = this;
+        const file_name = c.fileName();
+        if (file_name) {
+            return file_name;
+        }
+        // Return 'untitled' or 'untitled{n}
+        const n = g.app.numberOfUntitledWindows;
+        const n_s = n === 1 ? '' : n.toString();
+        const title = `untitled${n_s}`;
+        return title;
+    }
+
     //@+node:felix.20220511214845.1: *4* c.computeWindowTitle
     /**
-     * Set the window title and fileName.
+     * Return the title for the top-level window.
      */
-    public computeWindowTitle(fileName: string): string {
-        let title: string;
-        if (fileName) {
-            title = g.computeWindowTitle(fileName);
+    public computeWindowTitle(fileName?: string): string {
+        const c: Commands = this;
+
+        // NO USE FOR BRANCHES IN LEOJS TITLES
+        // const branch = g.gitBranchName(fileName || c.fileName());
+        // const branch_s = branch ? `${branch}: ` : '';
+        // const name_s = fileName || c.fileName() || 'untitled';
+
+        let w_path;
+        let fn;
+        let title;
+        [w_path, fn] = g.os_path_split(fileName || c.fileName());
+        if (w_path) {
+            title = fn + ' in ' + w_path;
         } else {
-            let s = 'untitled';
-            let n = g.app.numberOfUntitledWindows;
-            if (n > 0) {
-                s += n.toString();
-            }
-            title = g.computeWindowTitle(s);
-            g.app.numberOfUntitledWindows = n + 1;
+            title = fn;
         }
         return title;
+
+        // return `${branch_s}${name_s}`;
+
+        // let title: string;
+        // if (fileName) {
+        //     title = g.computeWindowTitle(fileName);
+        // } else {
+        //     let s = 'untitled';
+        //     let n = g.app.numberOfUntitledWindows;
+        //     if (n > 0) {
+        //         s += n.toString();
+        //     }
+        //     title = g.computeWindowTitle(s);
+        //     g.app.numberOfUntitledWindows = n + 1;
+        // }
+        // return title;
     }
     //@+node:felix.20220605211419.1: *4* c.initConfigSettings
     /**
@@ -3026,6 +3063,26 @@ export class Commands {
         }
         c.fileCommands.gnxDict = d;
     }
+    //@+node:felix.20231125172649.1: *4* c_file.openRecentFile
+
+    // ! UNUSED IN LEOJS    
+
+    /**
+     * c.openRecentFile: This is not a command!
+     *
+     * This method is a helper called only from the recentFilesCallback in
+     * rf.createRecentFilesMenuItems.
+     */
+    // public async openRecentFile(this: Commands): Promise<void>
+    // const c: Commands = this;
+
+    //     if g.doHook("recentfiles1", c=c, p=c.p, v=c.p, fileName=fn):
+    //         return
+    //     c2 = g.openWithFileName(fn, old_c=c)
+    //     if c2:
+    //         g.app.makeAllBindings()
+    //         g.doHook("recentfiles2", c=c2, p=c2.p, v=c2.p, fileName=fn)
+
     //@+node:felix.20230730160811.1: *3* c.Git
     //@+node:felix.20230730160811.2: *4* c.diff_file
     /**
