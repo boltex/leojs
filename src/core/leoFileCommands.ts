@@ -104,6 +104,7 @@ export class FastRead {
         let s;
         if (theFile == null) {
             const w_uri = g.makeVscodeUri(p_path);
+            console.log('going to READFILE from path:', p_path, ' with vscode.Uri: ', w_uri);
             const readData = await vscode.workspace.fs.readFile(w_uri);
             s = Buffer.from(readData).toString('utf8');
         } else {
@@ -138,6 +139,8 @@ export class FastRead {
         let s;
         if (theFile == null) {
             const w_uri = g.makeVscodeUri(p_path);
+            console.log('going to READJSONFILE from path:', p_path, ' with vscode.Uri: ', w_uri);
+
             const readData = await vscode.workspace.fs.readFile(w_uri);
             s = Buffer.from(readData).toString('utf8');
         } else {
@@ -1431,6 +1434,8 @@ export class FileCommands {
         readAtFileNodesFlag = true,
     ): Promise<VNode | undefined> {
 
+        console.log('getAnyLeoFileByName: p_path', p_path);
+
         const c = this.c;
         const fc = c.fileCommands;
         this.gnxDict = {};  // #1437
@@ -1712,6 +1717,8 @@ export class FileCommands {
 
         // return Promise.resolve(undefined);
         const w_uri = g.makeVscodeUri(fileName);
+        console.log('going to RETRIEVEVNODESFROMDB from path:', fileName, ' with vscode.Uri: ', w_uri);
+
         const filebuffer = await vscode.workspace.fs.readFile(w_uri);
 
         const conn = new g.SQL.Database(filebuffer);

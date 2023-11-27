@@ -623,8 +623,12 @@ export class CommanderFileCommands {
          * Common save code.
          */
         const do_save = async (c: Commands, fileName: string): Promise<void> => {
-            await c.fileCommands.save(fileName);
+
+            // updateRecentFiles should be before the save.
             g.app.recentFilesManager.updateRecentFiles(fileName);
+
+            await c.fileCommands.save(fileName);
+
             await g.chdir(fileName);
         };
 
@@ -712,9 +716,15 @@ export class CommanderFileCommands {
             }
             // 2. Finalize fileName and set related ivars.
             let new_file_name = this.set_name_and_title(c, fileName);
+
             // 3. Do the save and related tasks.
-            await c.fileCommands.saveAs(new_file_name);
+
+            // updateRecentFiles should be before the save.
             g.app.recentFilesManager.updateRecentFiles(new_file_name);
+
+            await c.fileCommands.saveAs(new_file_name);
+
+
             await g.chdir(new_file_name);
             return new_file_name;
         };
@@ -777,9 +787,12 @@ export class CommanderFileCommands {
 
         const do_save_to = async (c: Commands, fileName: string): Promise<void> => {
             /** Common save-to code. */
+
+            g.app.recentFilesManager.updateRecentFiles(fileName);
+
             // *Never* change c.mFileName or c.frame.title.
             await c.fileCommands.saveTo(fileName, silent);
-            g.app.recentFilesManager.updateRecentFiles(fileName);
+
             // *Never* call g.chdir!
         };
 

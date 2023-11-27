@@ -1010,7 +1010,7 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = false;
+const activateDebug = true;
 
 
 @language typescript
@@ -1059,15 +1059,26 @@ const activateDebug = false;
 - Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
-export async function deactivate(): Promise&lt;void&gt; {
+export async function deactivate(): Promise&lt;unknown&gt; {
+    console.log('------------------------start deactivate');
 
     if (g.app) {
-        // Save session data.
-        await g.app.saveSession();
-        // Similar to qt_gui.close_event.
+
+        // ! NOT SAVED ON EXIT !
+        // // Save session data.
+        // console.log('------------------------start saveSession');
+
+        // await g.app.saveSession();
+        // // Similar to qt_gui.close_event.
+        // console.log('------------------------end saveSession');
+
         for (const c of g.app.commanders()) {
             if (c.exists) {
+                console.log('------------------------start closeLeoWindow', c.frame.title);
+
                 await g.app.closeLeoWindow(c.frame, undefined, true);
+                console.log('------------------------end closeLeoWindow');
+
             }
             // allow = c.exists &amp;&amp; g.app.closeLeoWindow(c.frame)
             // if (!allow)
@@ -1075,8 +1086,88 @@ export async function deactivate(): Promise&lt;void&gt; {
         }
         // sys.exit(0)
 
+        console.log('-----------------------------------------------------');
+        console.log('-----------------------------------------------------');
+        console.log('-----------------------------------------------------');
         console.log('LeoJS extension has been deactivated.');
+        console.log('-----------------------------------------------------');
+        console.log('-----------------------------------------------------');
+        console.log('-----------------------------------------------------');
+
+        return undefined;
+    } else {
+        console.log('no g.app');
     }
+
+    // return new Promise((p_resolve, p_reject) =&gt; {
+    //     // Immediately-invoked async function expression
+    //     void (async () =&gt; {
+    //         try {
+
+    //             if (g.app) {
+
+    //                 // ! NOT SAVED ON EXIT !
+    //                 // // Save session data.
+    //                 // console.log('------------------------start saveSession');
+
+    //                 // await g.app.saveSession();
+    //                 // // Similar to qt_gui.close_event.
+    //                 // console.log('------------------------end saveSession');
+
+    //                 for (const c of g.app.commanders()) {
+    //                     if (c.exists) {
+    //                         console.log('------------------------start closeLeoWindow', c.frame.title);
+
+    //                         await g.app.closeLeoWindow(c.frame, undefined, true);
+    //                         console.log('------------------------end closeLeoWindow');
+
+    //                     }
+    //                     // allow = c.exists &amp;&amp; g.app.closeLeoWindow(c.frame)
+    //                     // if (!allow)
+    //                     //     return
+    //                 }
+    //                 // sys.exit(0)
+
+    //                 console.log('-----------------------------------------------------');
+    //                 console.log('-----------------------------------------------------');
+    //                 console.log('-----------------------------------------------------');
+    //                 console.log('LeoJS extension has been deactivated.');
+    //                 console.log('-----------------------------------------------------');
+    //                 console.log('-----------------------------------------------------');
+    //                 console.log('-----------------------------------------------------');
+
+    //                 return undefined;
+    //             } else {
+    //                 console.log('no g.app');
+
+    //             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //         } catch (error) {
+    //             p_reject(error);
+    //         }
+    //     })();
+
+
+
+    //     console.log('------------------------setting setTimeout');
+    //     setTimeout(() =&gt; {
+    //         console.log("deactivate TIMEOUT resolved");
+    //         p_resolve(true);
+    //     }, 3000);
+    // });
 }
 
 </t>
@@ -2794,6 +2885,7 @@ import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { RClick } from "./core/mod_scripting";
+import { nullButtonWidget } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -2838,7 +2930,14 @@ public refreshTreeRoot(): void {
 
         const c = g.app.windowList[g.app.gui.frameIndex].c;
 
-        const d = c.theScriptingController.buttonsArray;
+        let d: nullButtonWidget[];
+        if (c &amp;&amp; c.theScriptingController) {
+            console.log('refreshed buttons ok !');
+            d = c.theScriptingController.buttonsArray;
+        } else {
+            console.log('TRIED TO REFRESH BUTTONS BUT NO theScriptingController !');
+            d = [];
+        }
 
         const buttons = [];
 

@@ -675,14 +675,14 @@ export function callers(
     // if (verbose) {
     // return ''; //''.join([f"\n  {z}" for z in result]);
     // }
-    return result.join(',\n');
+    return `callers ${n} total shown: ${i} \n` + result.join(',\n');
 }
 
 //@+node:felix.20211104212435.1: *3* g._callerName
 export function _callerName(n: number, verbose: boolean = false): string {
     // TODO : see Error().stack to access names from the call stack
     return new Error().stack?.split("\n")[n] || ''; // or something close to that
-    return '<_callerName>';
+    // return '<_callerName>';
 }
 
 //@+node:felix.20211104220458.1: *3* g.get_line & get_line__after
@@ -2185,6 +2185,10 @@ export function makeVscodeUri(p_fn: string): vscode.Uri {
         p_fn = p_fn.replace(/\\/g, "/");
         try {
             const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
+
+            // console.log("Made uri from :", p_fn, " to this vscode.Uri", newUri, "makeVscodeUri");
+            console.log("Made uri from :", p_fn, " to this vscode.Uri", newUri, "makeVscodeUri CALLERS:\n", callers(9));
+
             return newUri;
         } catch (e) {
             console.log(
@@ -4778,6 +4782,23 @@ export function os_path_basename(p_path: string): string {
     if (!p_path) {
         return '';
     }
+
+    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+        console.log("-------------------------------------> WEB os_path_basename before " + p_path);
+
+        p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
+        let lastSlashIndex = p_path.lastIndexOf('/');
+
+        if (lastSlashIndex === -1) {
+            console.log("-------------------------------------> WEB os_path_basename after ASIS" + p_path);
+            return p_path;
+        };
+
+        p_path = p_path.substring(lastSlashIndex + 1);
+        console.log("-------------------------------------> WEB os_path_basename after " + p_path);
+        return p_path;
+    }
+
     p_path = path.basename(p_path);
     p_path = os_path_normslashes(p_path);
     return p_path;
@@ -4787,12 +4808,30 @@ export function os_path_basename(p_path: string): string {
  * Return the first half of the pair returned by split(path).
  */
 export function os_path_dirname(p_path?: string): string {
+
     if (!p_path) {
         return '';
     }
 
+    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+        console.log("-------------------------------------> WEB os_path_dirname before " + p_path);
+        p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
+        let lastSlashIndex = p_path.lastIndexOf('/');
+
+        if (lastSlashIndex === -1) {
+            console.log("-------------------------------------> WEB os_path_basename NO SLASHES!" + p_path);
+            return '';
+        }
+        p_path = p_path.substring(0, lastSlashIndex);
+
+        console.log("-------------------------------------> WEB os_path_dirname after " + p_path);
+        return p_path;
+    }
+
+    console.log("-------------------------------------> os_path_dirname before " + p_path);
     p_path = path.dirname(p_path);
     // os.path.normpath does the *reverse* of what we want.
+    console.log("-------------------------------------> os_path_dirname after " + p_path);
 
     if (isWindows) {
         p_path = p_path.split('\\').join('/');

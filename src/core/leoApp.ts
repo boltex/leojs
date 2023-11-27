@@ -1264,7 +1264,8 @@ export class LeoApp {
         }
 
         // Make sure .leoRecentFiles.txt is written.
-        await g.app.recentFilesManager.writeRecentFilesFile(c);
+        // ! IN LEOJS : make sure .leoRecentFiles.txt is written on open and save file instead.
+        // await g.app.recentFilesManager.writeRecentFilesFile(c);
 
         if (c.changed && !finish_quit) {
             c.promptingForClose = true;
@@ -1294,6 +1295,12 @@ export class LeoApp {
         } else {
             // #69.
             g.app.forgetOpenFile(c.fileName());
+        }
+
+        if (!finish_quit) {
+            // NOT FINISH_QUIT SO SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!
+            console.log("closing but not quitting. SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!");
+            await g.app.saveSession();
         }
 
         if (g.app.windowList.length) {
@@ -1344,6 +1351,9 @@ export class LeoApp {
     }
     //@+node:felix.20231120013952.1: *4* app.finishQuit
     public async finishQuit(): Promise<void> {
+        console.log('-----------------------------------------------------');
+        console.log('finishQuit.');
+        console.log('-----------------------------------------------------');
         // forceShutdown may already have fired the "end1" hook.
         g.assert(this === g.app, g.app.toString());
         const trace = g.app.debug.includes('shutdown');
@@ -1356,8 +1366,12 @@ export class LeoApp {
                 await g.app.global_cacher.commit_and_close();
             }
             if (g.app.commander_cacher) {  // #1766.
-                await g.app.commander_cacher.commit();
+
+                // await g.app.commander_cacher.commit(); 
+                // ALREADY COMMITS IN 'close()'.
+
                 await g.app.commander_cacher.close();
+
             }
         }
         // if g.app.ipk
@@ -1372,6 +1386,9 @@ export class LeoApp {
         // Disable all further hooks and events.
         // Alas, "idle" events can still be called
         // even after the following code.
+        console.log('-----------------------------------------------------');
+        console.log(' Done finishQuit.');
+        console.log('-----------------------------------------------------');
         g.app.killed = true;
         if (g.app.gui) {
             g.app.gui.destroySelf();  // Calls qtApp.quit()
@@ -4058,6 +4075,7 @@ export class RecentFilesManager {
                 rf.createRecentFilesMenuItems(frame.c);
             }
         }
+
     }
     //@+node:felix.20230923185723.17: *3* rf.writeEditedRecentFiles
     /**

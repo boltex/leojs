@@ -11,6 +11,7 @@ import * as pako from 'pako';
 import { Database } from 'sql.js';
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
+import * as fs from 'fs';
 
 var binascii = require('binascii');
 var pickle = require('./jpicklejs');
@@ -38,7 +39,7 @@ export class CommanderCacher {
 
     constructor() {
         try {
-            const w_path = join(g.app.homeLeoDir, 'db', 'global_data');
+            const w_path = join(g.app.homeLeoDir || "/", 'db', 'global_data');
             this.db = new SqlitePickleShare(w_path);
         } catch (e) {
             // @ts-expect-error
@@ -69,6 +70,9 @@ export class CommanderCacher {
     }
     //@+node:felix.20230802145823.5: *3* cacher.close
     public async close(): Promise<void> {
+        console.log('-----------------------------------------------------');
+        console.log('Final close.');
+        console.log('-----------------------------------------------------');
         // Careful: self.db may be a dict.
         if (this.db.conn) {
             // if (this.db.hasOwnProperty('conn')) {
@@ -254,7 +258,7 @@ export class GlobalCacher {
         const trace = g.app.debug.includes('cache');
 
         try {
-            const w_path = join(g.app.homeLeoDir, 'db', 'g_app_db');
+            const w_path = join(g.app.homeLeoDir || "/", 'db', 'g_app_db');
             if (trace) {
                 g.es_print('path for g.app.db:', w_path.toString());
             }
@@ -303,6 +307,9 @@ export class GlobalCacher {
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
     public async commit_and_close(): Promise<void> {
         // Careful: this.db may be a dict.
+        console.log('-----------------------------------------------------');
+        console.log('Final commit_and_close.');
+        console.log('-----------------------------------------------------');
         if (this.db.conn) {
 
             if (g.app.debug.includes('cache')) {
@@ -367,10 +374,15 @@ export class SqlitePickleShare {
 
             void (async () => {
                 try {
-                    const w_isdir = await isdir(this.root);
-                    if (!w_isdir && !g.unitTesting) {
-                        await this._makedirs(this.root);
+                    if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                        // PASS no need to create folders for web version: Saved in workspaceStorage.
+                    } else {
+                        const w_isdir = await isdir(this.root);
+                        if (!w_isdir && !g.unitTesting) {
+                            await this._makedirs(this.root);
+                        }
                     }
+
                     if (g.unitTesting) {
                         this.conn = new g.SQL.Database();
                     } else {
@@ -556,12 +568,23 @@ export class SqlitePickleShare {
     }
     //@+node:felix.20231122235658.1: *3* readFileBuffer
     public readFileBuffer(db_uri: vscode.Uri): Thenable<Uint8Array | null> {
+        console.log('readFileBuffer fsPath:', db_uri.fsPath);
         if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
             // web
             const encodedData = g.extensionContext.workspaceState.get<string>(db_uri.fsPath);
             if (encodedData) {
-                const data = this.base64ToBuffer(encodedData); // Convert Base64 back to ArrayBuffer
-                return Promise.resolve(data);
+
+                const binaryString = atob(encodedData);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                console.log('readFileBuffer fsPath:', db_uri.fsPath);
+                console.log('Read from web extension workspaceState byteLength:', bytes.byteLength);
+
+                return Promise.resolve(bytes);
             }
             return Promise.resolve(null);
         } else {
@@ -572,13 +595,26 @@ export class SqlitePickleShare {
 
     //@+node:felix.20231123000604.1: *3* writeFileBuffer
     public writeFileBuffer(db_uri: vscode.Uri, db_buffer: Uint8Array): Thenable<void> {
+        console.log('writeFileBuffer fsPath:', db_uri.fsPath);
         if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
             // web
             const encodedData = this.bufferToBase64(db_buffer); // Convert Uint8Array to Base64
+            console.log('Writing to web extension workspaceState length:', encodedData.length);
+
             return g.extensionContext.workspaceState.update(db_uri.fsPath, encodedData); // Store Base64 string
         } else {
             // desktop
-            return vscode.workspace.fs.writeFile(db_uri, db_buffer);
+            // return vscode.workspace.fs.writeFile(db_uri, db_buffer);
+            return new Promise((resolve, reject) => {
+                const filePath = db_uri.fsPath;
+                fs.writeFile(filePath, db_buffer, (err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
 
         }
     }
