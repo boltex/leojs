@@ -54,7 +54,10 @@ export class SessionManager {
     });
 
     for (const c of outlines) {
-      result.push(c.p.get_full_gnx_UNL());
+      if (c.fileName()) {
+        result.push(c.p.get_full_gnx_UNL());
+      } else {
+      }
     }
     return result;
   }

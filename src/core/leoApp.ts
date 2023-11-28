@@ -1285,6 +1285,13 @@ export class LeoApp {
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
+
+            if (!finish_quit && g.app.windowList.length === 1) {
+                // This was the last one. Closed one by one
+                // so save as last session for next open.
+                await g.app.saveSession();
+            }
+
             await g.app.destroyWindow(frame);
 
             // Remove frame
@@ -1297,9 +1304,8 @@ export class LeoApp {
             g.app.forgetOpenFile(c.fileName());
         }
 
-        if (!finish_quit) {
+        if (!finish_quit && g.app.windowList.length) {
             // NOT FINISH_QUIT SO SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!
-            console.log("closing but not quitting. SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!");
             await g.app.saveSession();
         }
 
@@ -2764,26 +2770,23 @@ export class LoadManager {
             }
         }
 
-        // ! LEOJS USE PER WORKSPACE SESSIONS
-        console.log('TODO : PER WORKSPACE SESSIONS !');
-
-        /*
-
-        # Load a session if the command line contains no files.
-        if g.app.sessionManager and not lm.files:
-            try:
-                aList = g.app.sessionManager.load_snapshot()
-                if aList:
-                    g.app.sessionManager.load_session(c1, aList)
-                    if g.app.windowList:
-                        c = c1 = g.app.windowList[0].c
-                    else:
-                        c = c1 = None
-            except Exception:
-                g.es_print('Can not load session')
-                g.es_exception()
-
-        */
+        // Load a session if the command line contains no files.
+        if (g.app.sessionManager && !lm.files.length) {
+            try {
+                const aList = g.app.sessionManager.load_snapshot();
+                if (aList && aList.length) {
+                    await g.app.sessionManager.load_session(c1, aList);
+                    if (g.app.windowList.length) {
+                        c = c1 = g.app.windowList[0].c;
+                    } else {
+                        c = c1 = undefined;
+                    }
+                }
+            } catch (e) {
+                g.es_print('Can not load session');
+                g.es_exception(e);
+            }
+        }
 
         // Enable redraws.
         g.app.disable_redraw = false;
@@ -2829,7 +2832,7 @@ export class LoadManager {
 
         // TODO !
         // void vscode.window.showInformationMessage('TODO : openWorkBook');
-        // console.log('STARTUP:          TODO openWorkBook');
+        console.log(' TODO openWorkBook ( new outline instead! ) ');
         // ! NEEDED ? --> USE A NEW EMPTY FILE INSTEAD ??
 
         const lm: LoadManager = this;

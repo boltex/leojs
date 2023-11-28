@@ -724,7 +724,6 @@ export class CommanderFileCommands {
 
             await c.fileCommands.saveAs(new_file_name);
 
-
             await g.chdir(new_file_name);
             return new_file_name;
         };
