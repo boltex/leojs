@@ -250,6 +250,11 @@ export class Config implements ConfigMembers {
         }
     }
 
+    public setConfirmBeforeClose(p_state: boolean): Thenable<void> {
+        return vscode.workspace.getConfiguration("window")
+            .update("confirmBeforeClose", p_state ? "always" : "never", true);
+    }
+
     /**
      * * Build config from settings from vscode's saved config settings
      */

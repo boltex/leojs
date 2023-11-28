@@ -23,6 +23,7 @@
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
+<v t="felix.20231127195758.1"><vh>setConfirmBeforeClose</vh></v>
 <v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
 </v>
 </v>
@@ -121,6 +122,7 @@
 <v t="felix.20220930215012.1"><vh>_onDocumentChanged</vh></v>
 <v t="felix.20220930215020.1"><vh>setFindPanel</vh></v>
 <v t="felix.20221101220727.1"><vh>refreshDesc</vh></v>
+<v t="felix.20231127210614.1"><vh>checkConfirmBeforeClose</vh></v>
 </v>
 <v t="felix.20211204144931.1"><vh>Body Editing</vh>
 <v t="felix.20211204144931.2"><vh>triggerBodySave</vh></v>
@@ -3832,6 +3834,7 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
+    public lastRefreshHadDirty = false; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -4079,7 +4082,6 @@ private _triggerGetStates(): void {
         this.refreshUndoPane();
     }
     // Set leoChanged and leoOpenedFilename
-
     this.leoStates.leoChanged = c.changed;
     this.leoStates.leoOpenedFileName = c.fileName();
 
@@ -4122,6 +4124,7 @@ public showOutline(p_focusOutline?: boolean): void {
  */
 private _refreshDocumentsPane(): void {
     this._leoDocumentsProvider.refreshTreeRoot();
+    this.checkConfirmBeforeClose();
 }
 
 </t>
@@ -13451,8 +13454,6 @@ public refreshDesc(): void {
     //     }
     // }
 
-
-
 }
 
 </t>
@@ -14998,6 +14999,29 @@ set leoEditHeadline(p_value: boolean) {
 </t>
 <t tx="felix.20231120232158.1">public destroySelf(): void {
     // pass // Nothing more needs to be done once all windows have been destroyed.
+}
+
+</t>
+<t tx="felix.20231127195758.1">public setConfirmBeforeClose(p_state: boolean): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("window")
+        .update("confirmBeforeClose", p_state ? "always" : "never", true);
+}
+
+</t>
+<t tx="felix.20231127210614.1">public checkConfirmBeforeClose(): void {
+
+    let hasDirty = false;
+    for (const frame of g.app.windowList) {
+        if (frame.c.changed) {
+            hasDirty = true;
+        }
+    }
+    if (hasDirty !== this.lastRefreshHadDirty) {
+        // don't wait for this promise!
+        void this.config.setConfirmBeforeClose(hasDirty);
+    }
+    this.lastRefreshHadDirty = hasDirty;
+
 }
 
 </t>

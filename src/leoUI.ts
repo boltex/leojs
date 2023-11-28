@@ -53,6 +53,7 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
+    public lastRefreshHadDirty = false; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -573,7 +574,6 @@ export class LeoUI extends NullGui {
             this.refreshUndoPane();
         }
         // Set leoChanged and leoOpenedFilename
-
         this.leoStates.leoChanged = c.changed;
         this.leoStates.leoOpenedFileName = c.fileName();
 
@@ -1127,7 +1127,21 @@ export class LeoUI extends NullGui {
         //     }
         // }
 
+    }
 
+    public checkConfirmBeforeClose(): void {
+
+        let hasDirty = false;
+        for (const frame of g.app.windowList) {
+            if (frame.c.changed) {
+                hasDirty = true;
+            }
+        }
+        if (hasDirty !== this.lastRefreshHadDirty) {
+            // don't wait for this promise!
+            void this.config.setConfirmBeforeClose(hasDirty);
+        }
+        this.lastRefreshHadDirty = hasDirty;
 
     }
 
@@ -1859,6 +1873,7 @@ export class LeoUI extends NullGui {
      */
     private _refreshDocumentsPane(): void {
         this._leoDocumentsProvider.refreshTreeRoot();
+        this.checkConfirmBeforeClose();
     }
 
     /**
