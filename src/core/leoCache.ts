@@ -70,9 +70,6 @@ export class CommanderCacher {
     }
     //@+node:felix.20230802145823.5: *3* cacher.close
     public async close(): Promise<void> {
-        console.log('-----------------------------------------------------');
-        console.log('Final close.');
-        console.log('-----------------------------------------------------');
         // Careful: self.db may be a dict.
         if (this.db.conn) {
             // if (this.db.hasOwnProperty('conn')) {
@@ -148,11 +145,9 @@ export class CommanderCacher {
             // if( isinstance(c.db, CommanderWrapper)){
             // if (c.db.constructor.name === "CommanderWrapper") {
             if (c.db.key) {
-                console.log("was CommanderWrapper");
                 c.db.key = fn;
                 // await this.commit(); // ? Needed ?
             } else {
-                console.log("was NOT CommanderWrapper");
                 // g.trace('can not happen', c.db.constructor.name);
                 g.trace('can not happen');
             }
@@ -307,9 +302,6 @@ export class GlobalCacher {
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
     public async commit_and_close(): Promise<void> {
         // Careful: this.db may be a dict.
-        console.log('-----------------------------------------------------');
-        console.log('Final commit_and_close.');
-        console.log('-----------------------------------------------------');
         if (this.db.conn) {
 
             if (g.app.debug.includes('cache')) {
@@ -568,7 +560,7 @@ export class SqlitePickleShare {
     }
     //@+node:felix.20231122235658.1: *3* readFileBuffer
     public readFileBuffer(db_uri: vscode.Uri): Thenable<Uint8Array | null> {
-        console.log('readFileBuffer fsPath:', db_uri.fsPath);
+
         if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
             // web
             const encodedData = g.extensionContext.workspaceState.get<string>(db_uri.fsPath);
@@ -581,9 +573,6 @@ export class SqlitePickleShare {
                     bytes[i] = binaryString.charCodeAt(i);
                 }
 
-                console.log('readFileBuffer fsPath:', db_uri.fsPath);
-                console.log('Read from web extension workspaceState byteLength:', bytes.byteLength);
-
                 return Promise.resolve(bytes);
             }
             return Promise.resolve(null);
@@ -595,12 +584,9 @@ export class SqlitePickleShare {
 
     //@+node:felix.20231123000604.1: *3* writeFileBuffer
     public writeFileBuffer(db_uri: vscode.Uri, db_buffer: Uint8Array): Thenable<void> {
-        console.log('writeFileBuffer fsPath:', db_uri.fsPath);
         if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
             // web
             const encodedData = this.bufferToBase64(db_buffer); // Convert Uint8Array to Base64
-            console.log('Writing to web extension workspaceState length:', encodedData.length);
-
             return g.extensionContext.workspaceState.update(db_uri.fsPath, encodedData); // Store Base64 string
         } else {
             // desktop

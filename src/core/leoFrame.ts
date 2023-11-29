@@ -68,7 +68,8 @@ export class LeoFrame {
 
     //@+node:felix.20220512220820.1: *3* destroySelf
     public destroySelf(): void {
-        console.log('TODO: FRAME DestroySelf');
+        // console.log('TODO: FRAME DestroySelf');
+        // TODO : Check if needed (are subsriptions disposed?)
     }
     //@+node:felix.20220512222542.1: *3* finishCreate
     public finishCreate() {

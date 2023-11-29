@@ -16,7 +16,7 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = true;
+const activateDebug = false;
 
 
 /**
@@ -407,8 +407,6 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export async function deactivate(): Promise<unknown> {
-    console.log('------------------------start deactivate');
-
     if (g.app) {
 
         // ! NOT SAVED ON EXIT !
@@ -421,100 +419,18 @@ export async function deactivate(): Promise<unknown> {
 
         for (const c of g.app.commanders()) {
             if (c.exists) {
-                console.log('------------------------start closeLeoWindow', c.frame.title);
-
                 await g.app.closeLeoWindow(c.frame, undefined, true);
-                console.log('------------------------end closeLeoWindow');
-
             }
             // allow = c.exists && g.app.closeLeoWindow(c.frame)
             // if (!allow)
             //     return
         }
         // sys.exit(0)
-
-        console.log('-----------------------------------------------------');
-        console.log('-----------------------------------------------------');
-        console.log('-----------------------------------------------------');
         console.log('LeoJS extension has been deactivated.');
-        console.log('-----------------------------------------------------');
-        console.log('-----------------------------------------------------');
-        console.log('-----------------------------------------------------');
-
         return undefined;
     } else {
         console.log('no g.app');
     }
-
-    // return new Promise((p_resolve, p_reject) => {
-    //     // Immediately-invoked async function expression
-    //     void (async () => {
-    //         try {
-
-    //             if (g.app) {
-
-    //                 // ! NOT SAVED ON EXIT !
-    //                 // // Save session data.
-    //                 // console.log('------------------------start saveSession');
-
-    //                 // await g.app.saveSession();
-    //                 // // Similar to qt_gui.close_event.
-    //                 // console.log('------------------------end saveSession');
-
-    //                 for (const c of g.app.commanders()) {
-    //                     if (c.exists) {
-    //                         console.log('------------------------start closeLeoWindow', c.frame.title);
-
-    //                         await g.app.closeLeoWindow(c.frame, undefined, true);
-    //                         console.log('------------------------end closeLeoWindow');
-
-    //                     }
-    //                     // allow = c.exists && g.app.closeLeoWindow(c.frame)
-    //                     // if (!allow)
-    //                     //     return
-    //                 }
-    //                 // sys.exit(0)
-
-    //                 console.log('-----------------------------------------------------');
-    //                 console.log('-----------------------------------------------------');
-    //                 console.log('-----------------------------------------------------');
-    //                 console.log('LeoJS extension has been deactivated.');
-    //                 console.log('-----------------------------------------------------');
-    //                 console.log('-----------------------------------------------------');
-    //                 console.log('-----------------------------------------------------');
-
-    //                 return undefined;
-    //             } else {
-    //                 console.log('no g.app');
-
-    //             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //         } catch (error) {
-    //             p_reject(error);
-    //         }
-    //     })();
-
-
-
-    //     console.log('------------------------setting setTimeout');
-    //     setTimeout(() => {
-    //         console.log("deactivate TIMEOUT resolved");
-    //         p_resolve(true);
-    //     }, 3000);
-    // });
 }
 
 /**

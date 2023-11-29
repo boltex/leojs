@@ -2265,13 +2265,11 @@ export class Commands {
         let absbase;
         const fn = c.fileName();
         if (fn) {
-            console.log("scanAtPathDirectives has a filename! " + fn);
             absbase = g.os_path_dirname(fn);
         } else {
             // TODO !
             absbase = ""; //  g.os_getcwd(); // ! FIX THIS !
         }
-        console.log("so absbase is -> " + absbase + "<- absbase");
         // Look for @path directives.
         const w_paths: string[] = [];
         let w_path: string;

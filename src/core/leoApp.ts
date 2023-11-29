@@ -1357,9 +1357,6 @@ export class LeoApp {
     }
     //@+node:felix.20231120013952.1: *4* app.finishQuit
     public async finishQuit(): Promise<void> {
-        console.log('-----------------------------------------------------');
-        console.log('finishQuit.');
-        console.log('-----------------------------------------------------');
         // forceShutdown may already have fired the "end1" hook.
         g.assert(this === g.app, g.app.toString());
         const trace = g.app.debug.includes('shutdown');
@@ -1392,9 +1389,6 @@ export class LeoApp {
         // Disable all further hooks and events.
         // Alas, "idle" events can still be called
         // even after the following code.
-        console.log('-----------------------------------------------------');
-        console.log(' Done finishQuit.');
-        console.log('-----------------------------------------------------');
         g.app.killed = true;
         if (g.app.gui) {
             g.app.gui.destroySelf();  // Calls qtApp.quit()
@@ -3335,7 +3329,6 @@ export class LoadManager {
 
         // Do common completion tasks.
         const complete_inits = (c: Commands) => {
-
             // g.app.unlockLog()
             // c.frame.log.enable(True)
             // g.app.writeWaitingLog(c);
@@ -3950,8 +3943,6 @@ export class RecentFilesManager {
         const fileName = g.os_path_join(path, '.leoRecentFiles.txt');
         let lines: string[] | undefined;
 
-        console.log('GOING TO READ RECENT FILES LIST: ', fileName);
-
         try {
             let fileContents;
 
@@ -3986,8 +3977,6 @@ export class RecentFilesManager {
             lines = lines.map(line => g.toUnicode(g.os_path_normpath(line)));
             this.appendToRecentFiles(lines);
         }
-
-        console.log("READ IT, LINES WERE: ", lines);
 
         return true;
     }
@@ -4110,8 +4099,6 @@ export class RecentFilesManager {
      */
     public async writeRecentFilesFile(c: Commands): Promise<void> {
 
-        console.log("WRITING RECENT FILES LIST");
-
         const tag = '.leoRecentFiles.txt';
         const rf = this;
         if (g.unitTesting || g.app.inBridge) {
@@ -4124,24 +4111,17 @@ export class RecentFilesManager {
             localPath = g.os_path_split(localFileName)[0];
         }
 
-        console.log('first path looked is local: ', localPath);
-        console.log('second path looked is g.app.globalConfigDir: ', g.app.globalConfigDir);
-        console.log('third path looked is g.app.homeLeoDir: ', g.app.homeLeoDir);
-
         let written = false;
         const seen: string[] = [];
 
         for (const w_path of [localPath, g.app.globalConfigDir, g.app.homeLeoDir]) {
             if (w_path) {
                 const fileName = g.os_path_join(w_path, tag);
-                console.log("TRYING TO WRITE RECENT FILES LIST with path:", w_path);
                 const w_exists = await g.os_path_exists(fileName);
                 if (w_exists && !seen.includes(fileName.toLowerCase())) {
                     seen.push(fileName.toLowerCase());
                     const ok = await rf.writeRecentFilesFileHelper(fileName);
                     if (ok) {
-                        console.log("OK-> WROTE RECENT FILES LIST! ");
-
                         written = true;
                     }
                     if (!rf.recentFileMessageWritten && !g.unitTesting && !g.app.silentMode) {
@@ -4195,7 +4175,6 @@ export class RecentFilesManager {
             try {
                 const data = await g.readFileIntoUnicodeString(fileName);
                 lines = data?.split('\n');
-                console.log("check for readonly: ", lines);
             } catch (error) {
                 lines = undefined;
             }
