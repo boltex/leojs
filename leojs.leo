@@ -1012,7 +1012,7 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = true;
+const activateDebug = false;
 
 
 @language typescript

@@ -1719,6 +1719,8 @@ export class FileCommands {
 
         try {
             const resultElements = conn.exec(sql)[0];
+            // Got what we needed 
+            conn.close();
             for (const row of resultElements.values) {
                 let [gnx, h, b, children, parents, iconVal, statusBits, ua] = row;
                 try {
@@ -1798,9 +1800,6 @@ export class FileCommands {
      * Initializes tables and returns None
      */
     public async initNewDb(): Promise<VNode> {
-
-        const conn = new g.SQL.Database();
-
         const c: Commands = this.c;
         const fc: FileCommands = this;
         const v: VNode = new VNode(c);
@@ -2266,6 +2265,8 @@ export class FileCommands {
             fc.exportHashesToSqlite(conn);
 
             const db_data = conn.export();
+            // Got what we needed 
+            conn.close();
             const db_buffer = Buffer.from(db_data);
 
             const db_uri = g.makeVscodeUri(fileName);
