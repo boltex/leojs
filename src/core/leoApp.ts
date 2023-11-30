@@ -1485,7 +1485,7 @@ export class LeoApp {
         aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
 
         // ALSO FIX Filename parameter from vscode's dialog !
-        fn = g.os_path_fix_drive(path.normalize(fn));
+        fn = g.os_path_fix_drive(path.normalize(fn)); // path.normalize adds BACKSLASHES ON WINDOWS! 
         let w_any: boolean = false;
         for (let z of aList) {
             const w_exists = await g.os_path_exists(z);
@@ -1534,7 +1534,9 @@ export class LeoApp {
         let aList: string[] = d[tag] || [];
         aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
 
-        fn = g.os_path_fix_drive(path.normalize(fn));
+        // path.normalize is like os.path.normpath in python to add backslashes on Windows.
+        fn = g.os_path_fix_drive(path.normalize(fn));  // path.normalize adds BACKSLASHES ON WINDOWS! 
+
         if (aList.includes(fn)) {
             // aList.remove(fn)
             const index = aList.indexOf(fn);
@@ -1544,7 +1546,6 @@ export class LeoApp {
             if (trace) {
                 g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
             }
-            console.log('Changing DB to "remove opened file": ', fn);
             d[tag] = aList;
         }
     }
@@ -1572,7 +1573,7 @@ export class LeoApp {
             let aList: string[] = d[tag] || [];
             aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
             // It's proper to add duplicates to this list.
-            fn = g.os_path_fix_drive(path.normalize(fn));
+            fn = g.os_path_fix_drive(path.normalize(fn));  // path.normalize adds BACKSLASHES ON WINDOWS! 
             aList.push(fn);
             d[tag] = aList;
         }
@@ -2175,7 +2176,7 @@ export class LoadManager {
         ];
         for (const { kind, theDir } of directories) {
             // g.blue calls g.es_print, and that's annoying.
-            g.es(`${kind.padStart(10, ' ')}:`, path.normalize(theDir!));
+            g.es(`${kind.padStart(10, ' ')}:`, path.normalize(theDir!));  // path.normalize adds BACKSLASHES ON WINDOWS! 
         }
     }
     //@+node:felix.20220406235904.1: *3* LM.Settings
@@ -3215,6 +3216,9 @@ export class LoadManager {
             get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
             or open an empty outline.
         */
+
+        fn = g.os_path_fix_drive(fn); // EMULATE PYTHON WITH CAPITAL DRIVE LETTERS
+
         const lm: LoadManager = this;
         let c: Commands | undefined;
 
@@ -4159,7 +4163,6 @@ export class RecentFilesManager {
      * Don't update the file if it begins with read-only.
      */
     public async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
-        console.log("writeRecentFilesFileHelper for ", fileName);
 
         const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
 

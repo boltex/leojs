@@ -419,13 +419,6 @@ export class LeoGui {
     ): void {
         this.oops();
     }
-    /**
-     * Return the window information.
-     */
-    public get_window_info(window: string): [number, number, number, number] {
-        this.oops();
-        return [0, 0, 0, 0];
-    }
     //@+node:felix.20221120001229.17: *5* LeoGui.Font
     public getFontFromParams(
         family: string,

@@ -137,7 +137,6 @@ export class CommanderCacher {
         save and save-as set changeName to True, save-to does not.
      */
     public async save(c: Commands, fn?: string): Promise<void> {
-
         await this.commit();
         if (fn) {
             // 1484: Change only the key!
@@ -198,6 +197,9 @@ export class CommanderWrapper {
         if (prop === "key") {
             return true;
         }
+        if (prop === "get") {
+            return this._get.bind(target);
+        }
         if (prop === "keys") {
             return this.keys.bind(target);
         }
@@ -221,6 +223,15 @@ export class CommanderWrapper {
         this.user_keys.add(prop);
         this.db[`${this.key}:::${prop}`] = value;
         return true;
+    }
+
+    _get(key: string, p_default?: any): any {
+        const w_result = this.db[`${this.key}:::${key}`];
+        if (w_result == null) {
+            return p_default;
+        } else {
+            return w_result;
+        }
     }
 
     valueOf() {
@@ -786,6 +797,7 @@ export class SqlitePickleShare {
         // It would be more thorough to delete everything
         // below the root directory, but it's not necessary.
         this.conn!.exec('delete from cachevalues;');
+        void this.commit();
     }
     //@+node:felix.20230802145823.54: *3* get  (SqlitePickleShare)
     public get(key: string, p_default?: any): any {
@@ -794,6 +806,9 @@ export class SqlitePickleShare {
         }
         try {
             const val = this.__getitem__(key);
+            if (val == null) {
+                return p_default;
+            }
             return val;
         } catch (e) {  // #1444: Was KeyError.
             return p_default;
@@ -927,7 +942,7 @@ function dump_cache(db: SqlitePickleShare, tag: string): void {
     const d: Record<string, any> = {};
     for (const x_key of db.keys()) {
         const key = x_key[0];
-        const val = db.get(key); // TODO : MAYBE USE  db[key] 
+        const val = db[key];
         const data = key.split(':::');
         let fn;
         let key2;
@@ -936,7 +951,7 @@ function dump_cache(db: SqlitePickleShare, tag: string): void {
         } else {
             [fn, key2] = ['None', key];
         }
-        const aList = d.get(fn, []);
+        const aList = d[fn] || [];
         aList.push([key2, val]);
         d[fn] = aList;
 

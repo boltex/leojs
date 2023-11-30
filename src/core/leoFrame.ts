@@ -33,6 +33,13 @@ export class LeoFrame {
     public body: NullBody;
     public tab_width: number = 0;
 
+    public w: number = 800;
+    public h: number = 500;
+    public x: number = 50;
+    public y: number = 50;
+    public ratio: number = 0.5;
+    public secondary_ratio: number = 0.5;
+
     //@+others
     //@+node:felix.20220512211350.1: *3* frame.ctor
     constructor(c: Commands, title: string, gui: LeoGui) {
@@ -92,6 +99,19 @@ export class LeoFrame {
     public setTitle(title: string): void {
         this.title = title;
     }
+    //@+node:felix.20231129153233.1: *3* LeoFrame.get_window_info
+    /**
+     * Return the geometry of the top window.
+     */
+    public get_window_info(): [number, number, number, number] {
+        return [
+            this.w,
+            this.h,
+            this.x,
+            this.y
+        ];
+    }
+
     //@+node:felix.20221105172647.1: *3* LeoFrame.setTabWidth
     /**
      * Set the tab width in effect for this frame.
@@ -99,6 +119,23 @@ export class LeoFrame {
     public setTabWidth(w: number): void {
         // Subclasses may override this to affect drawing.
         this.tab_width = w;
+    }
+    //@+node:felix.20231129133050.1: *3* LeoFrame.setTopGeometry
+    public setTopGeometry(w: number, h: number, x: number, y: number): void {
+        // Kept as-is in LeoJS.
+        this.w = w;
+        this.h = h;
+        this.x = x;
+        this.y = y;
+    }
+    //@+node:felix.20231129133208.1: *3* LeoFrame.resizePanesToRatio
+    /**
+     * Resize splitter1 and splitter2 using the given ratios.
+     */
+    public resizePanesToRatio(ratio: number, ratio2: number): void {
+        // Kept as-is in LeoJS.
+        this.ratio = ratio;
+        this.secondary_ratio = ratio2;
     }
     //@+node:felix.20220516001519.1: *3* LeoFrame.promptForSave
     /**

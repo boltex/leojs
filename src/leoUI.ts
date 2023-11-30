@@ -4589,9 +4589,7 @@ export class LeoUI extends NullGui {
             // node from other tree that has this command in title
 
             if (p_uri && p_uri?.fsPath?.trim() && g.app.loadManager) {
-                // fileName = p_uri.fsPath.replace(/\\/g, '/');
                 fileName = p_uri.fsPath;
-                // TODO : are backslashes a problem?
             } else {
                 fileName = await this.runOpenFileDialog(
                     undefined,

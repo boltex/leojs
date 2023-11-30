@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
-<leo_file xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
+<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -4699,7 +4699,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "78e75c9",
+  "gitBranch": "leoCache",
+  "gitDate": "2023-11-28 23:15:28 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -7205,9 +7208,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         // node from other tree that has this command in title
 
         if (p_uri &amp;&amp; p_uri?.fsPath?.trim() &amp;&amp; g.app.loadManager) {
-            // fileName = p_uri.fsPath.replace(/\\/g, '/');
             fileName = p_uri.fsPath;
-            // TODO : are backslashes a problem?
         } else {
             fileName = await this.runOpenFileDialog(
                 undefined,

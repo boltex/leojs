@@ -4690,7 +4690,7 @@ export function finalize(p_path: string): string {
     p_path = path.resolve(p_path);
 
     // p_path = os.path.normpath(p_path)
-    p_path = path.normalize(p_path);
+    p_path = path.normalize(p_path); // path.normalize adds BACKSLASHES ON WINDOWS! 
 
     // Convert backslashes to forward slashes, regardless of platform.
     p_path = os_path_normslashes(p_path);
@@ -4735,7 +4735,7 @@ export function finalize_join(...args: string[]): string {
     // w_path = os.path.normpath(w_path)
 
     w_path = path.resolve(w_path);
-    w_path = path.normalize(w_path);
+    w_path = path.normalize(w_path);  // path.normalize adds BACKSLASHES ON WINDOWS! 
 
     // Convert backslashes to forward slashes, regardless of platform.
     w_path = os_path_normslashes(w_path);
@@ -4872,9 +4872,9 @@ export function os_path_expanduser(p_path: string): string {
             if (p_path.startsWith('~\\')) {
                 p_path = p_path.replace('~', homeDir);
             }
-            p_path = p_path.replace('\\\\', '\\');
+            p_path = p_path.replace(/\\\\/g, '\\');
         }
-        p_path = p_path.replace('//', '/');
+        p_path = p_path.replace(/\/\//g, '/');
     }
     return p_path;
 
@@ -5087,7 +5087,7 @@ export function os_path_fix_drive(p_path: string): string {
 
 //@+node:felix.20211227182611.16: *3* g.os_path_normcase
 /**
- * Normalize the path's case.
+ * Normalize the path's case.  Also Replace backslashes for slashes.
  */
 export function os_path_normcase(p_path: string): string {
     if (!p_path) {
@@ -5101,17 +5101,13 @@ export function os_path_normcase(p_path: string): string {
 }
 //@+node:felix.20211227182611.17: *3* g.os_path_normpath
 /**
- * Normalize the path.
+ * Normalize the path. Also Replace backslashes for slashes.
  */
 export function os_path_normpath(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    p_path = path.normalize(p_path);
-    // os.path.normpath does the *reverse* of what we want.
-    // if (isWindows) {
-    //     p_path = p_path.split('\\').join('/').toLowerCase();
-    // }
+    p_path = path.normalize(p_path); // ADDS BACKSLASHES ON WINDOWS like os.path.normpath in PYTHON
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
