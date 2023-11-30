@@ -1354,8 +1354,8 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.38: *4* c_file.cleanRecentFiles
     @commander_command(
         'clean-recent-files',
-        "Remove items from the recent files list that no longer exist.\n" +
-        "This almost never does anything because Leo's startup logic removes\n" +
+        "Remove items from the recent files list that no longer exist. " +
+        "This almost never does anything because Leo's startup logic removes " +
         "nonexistent files from the recent files list."
     )
     public async cleanRecentFiles(this: Commands): Promise<void> {

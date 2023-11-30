@@ -4699,10 +4699,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "78e75c9",
-  "gitBranch": "leoCache",
-  "gitDate": "2023-11-28 23:15:28 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4724,9 +4721,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 {
   "command": "leojs.recentLeoFiles",
+  "title": "Recent Files",
   "category": "Leojs",
   "enablement": "leojsReady",
-  "title": "Recent Files"
+  "icon": {
+    "light": "resources/light/open-recent.svg",
+    "dark": "resources/dark/open-recent.svg"
+  }
 },
 {
   "command": "leojs.switchLeoFile",
@@ -6134,6 +6135,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "group": "navigation@9"
   },
   {
+    "command": "leojs.recentLeoFiles",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
+    "group": "navigation@8"
+  },
+  {
     "command": "leojs.findQuickSelected",
     "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
@@ -7262,14 +7268,28 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
  * * Shows the recent Leo files list, choosing one will open it
  * @returns A promise that resolves when the a file is finally opened, rejected otherwise
  */
-public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
-
-    void vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
+public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
 
     // if shown, chosen and opened
-    return Promise.resolve(true);
+    const w_recentFiles: string[] = g.app.recentFilesManager.recentFiles;
 
-    // return Promise.resolve(undefined); // if cancelled
+    let q_chooseFile: Thenable&lt;string | undefined&gt;;
+    if (w_recentFiles.length) {
+        q_chooseFile = vscode.window.showQuickPick(w_recentFiles, {
+            placeHolder: Constants.USER_MESSAGES.OPEN_RECENT_FILE,
+        });
+    } else {
+        // No file to list
+        return Promise.resolve(undefined);
+    }
+    const w_result = await q_chooseFile;
+    if (w_result) {
+        return this.openLeoFile(vscode.Uri.file(w_result));
+    } else {
+        // Canceled
+        return Promise.resolve(undefined);
+    }
+
 }
 
 </t>

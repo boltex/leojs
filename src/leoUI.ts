@@ -4642,14 +4642,28 @@ export class LeoUI extends NullGui {
      * * Shows the recent Leo files list, choosing one will open it
      * @returns A promise that resolves when the a file is finally opened, rejected otherwise
      */
-    public showRecentLeoFiles(): Thenable<unknown> {
-
-        void vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
+    public async showRecentLeoFiles(): Promise<unknown> {
 
         // if shown, chosen and opened
-        return Promise.resolve(true);
+        const w_recentFiles: string[] = g.app.recentFilesManager.recentFiles;
 
-        // return Promise.resolve(undefined); // if cancelled
+        let q_chooseFile: Thenable<string | undefined>;
+        if (w_recentFiles.length) {
+            q_chooseFile = vscode.window.showQuickPick(w_recentFiles, {
+                placeHolder: Constants.USER_MESSAGES.OPEN_RECENT_FILE,
+            });
+        } else {
+            // No file to list
+            return Promise.resolve(undefined);
+        }
+        const w_result = await q_chooseFile;
+        if (w_result) {
+            return this.openLeoFile(vscode.Uri.file(w_result));
+        } else {
+            // Canceled
+            return Promise.resolve(undefined);
+        }
+
     }
 
     /**

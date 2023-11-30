@@ -3668,7 +3668,7 @@ export class RecentFilesManager {
 
     public edit_headline = 'Recent files. Do not change this headline!';
     public groupedMenus: any[] = [];  // Set in rf.createRecentFilesMenuItems.
-    public recentFiles: any[] = []; // List of g.Bunches describing .leoRecentFiles.txt files.
+    public recentFiles: string[] = []; // List of g.Bunches describing .leoRecentFiles.txt files.
     public recentFilesMenuName = 'Recent Files';  // May be changed later.
     public recentFileMessageWritten = false;  // To suppress all but the first message.
     public write_recent_files_as_needed = false;  // Will be set later.
