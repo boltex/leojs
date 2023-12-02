@@ -368,6 +368,13 @@ export class CommanderFileCommands {
             closeFlag: boolean,
             fileName?: string
         ): Promise<unknown> {
+
+            // FIX SLASHES AND CAPITALIZE DRIVE LETTERS TO EMULATE PYTHON OPEN FILE DIALOG RESULT
+            if (fileName) {
+                fileName = g.os_path_fix_drive(fileName);
+                fileName = g.os_path_normslashes(fileName);
+            }
+
             p_c.bringToFront();
             p_c.init_error_dialogs();
 
@@ -447,8 +454,6 @@ export class CommanderFileCommands {
         // override with given argument
 
         if (p_uri && p_uri.fsPath && p_uri.fsPath.trim()) {
-            // TODO : ARE BACKSLASHES A PROBLEM ? ? 
-            // fileName = p_uri.fsPath.replace(/\\/g, '/');
             fileName = p_uri.fsPath;
         }
 
@@ -463,8 +468,6 @@ export class CommanderFileCommands {
             g.defaultLeoFileExtension(c),
             false
         )) as string;
-
-        console.log('VERIFY SLASHES: open file: ', fileName);
 
         return open_completer(c, closeFlag, fileName);
     }

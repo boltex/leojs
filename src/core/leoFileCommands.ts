@@ -347,24 +347,6 @@ export class FastRead {
         let [r1, r2] = [d['r1'], d['r2']];
         c.frame.resizePanesToRatio(r1, r2);
 
-        /*
-        frameFactory = getattr(g.app.gui, 'frameFactory', undefined)
-        if not frameFactory
-            return;
-
-        assert frameFactory is not undefined
-        mf = frameFactory.masterFrame;
-
-        if g.app.start_minimized
-            mf.showMinimized();
-        else if g.app.start_maximized
-            // #1189: fast.scanGlobals calls showMaximized later.
-            mf.showMaximized();
-        else if g.app.start_fullscreen
-            mf.showFullScreen();
-        else
-            mf.show();
-        */
     }
     //@+node:felix.20211213223342.9: *5* fast.getGlobalData
     /**
@@ -627,13 +609,13 @@ export class FastRead {
      * Set the geometries from the globals dict.
      */
     public scanJsonGlobals(json_d: { [key: string]: any }): void {
-        console.log("TODO scanJsonGlobals");
-        return;
-        // ? Needed ? FIX WHEN DB AVAILABLE !!
 
         const c: Commands = this.c;
         const toInt = (x: number, d_val: number): number => {
             try {
+                if (typeof x !== 'number') {
+                    return d_val;
+                }
                 return Math.floor(x);
             } catch (exception) {
                 return d_val;
@@ -684,28 +666,9 @@ export class FastRead {
             g.trace(width, height, left, top, c.shortFileName());
         }
         // c.frame may be a NullFrame.
-        // ? NOT NEEDED ?
-        // c.frame.setTopGeometry(width, height, left, top);
-        // ? NOT NEEDED ?
-        // c.frame.resizePanesToRatio(r1, r2);
-        const frameFactory: any = undefined; // getattr(g.app.gui, 'frameFactory', undefined);
-        if (!frameFactory) {
-            return;
-        }
+        c.frame.setTopGeometry(width, height, left, top);
+        c.frame.resizePanesToRatio(r1, r2);
 
-        // NOT NEEDED IN LEOJS
-        // g.assert(frameFactory !== undefined);
-        // const mf = frameFactory.masterFrame;
-        // if (g.app.start_minimized){
-        //     mf.showMinimized();
-        // }else if (g.app.start_maximized){
-        //     // #1189: fast.scanGlobals calls showMaximized later.
-        //     mf.showMaximized();
-        // }else if (g.app.start_fullscreen){
-        //     mf.showFullScreen();
-        // }else{
-        //     mf.show();
-        // }
     }
     //@+node:felix.20230322233910.3: *4* fast.scanJsonTnodes
     public scanJsonTnodes(t_elements: any): { [key: string]: string } {
@@ -1434,6 +1397,7 @@ export class FileCommands {
             v = await fc._getLeoFileByName(p_path, readAtFileNodesFlag);
         }
         if (v) {
+            // LEOJS: This would apply last opened file ratio to this new one. Let it be.
             // c.frame.resizePanesToRatio(c.frame.ratio, c.frame.secondary_ratio);
             if (checkOpenFiles) {
                 await g.app.checkForOpenFile(c, p_path);
