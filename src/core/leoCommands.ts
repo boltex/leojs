@@ -937,6 +937,7 @@ export class Commands {
     public fileName(): string {
         let s: string = this.mFileName || '';
         if (g.isWindows) {
+            s = g.os_path_fix_drive(s);
             s = s.split('\\').join('/');
         }
 

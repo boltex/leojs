@@ -1886,9 +1886,10 @@ export async function makeAllNonExistentDirectories(
 export function openWithFileName(
     fileName: string,
     old_c?: Commands,
-    gui?: LeoGui
+    gui?: LeoGui,
+    skipSaveSession?: boolean
 ): Promise<Commands | undefined> {
-    return app.loadManager!.loadLocalFile(fileName, gui, old_c);
+    return app.loadManager!.loadLocalFile(fileName, gui, old_c, skipSaveSession);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
 /**
@@ -4693,6 +4694,7 @@ export function finalize(p_path: string): string {
     p_path = path.normalize(p_path); // path.normalize adds BACKSLASHES ON WINDOWS! 
 
     // Convert backslashes to forward slashes, regardless of platform.
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4738,6 +4740,7 @@ export function finalize_join(...args: string[]): string {
     w_path = path.normalize(w_path);  // path.normalize adds BACKSLASHES ON WINDOWS! 
 
     // Convert backslashes to forward slashes, regardless of platform.
+    w_path = os_path_fix_drive(w_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
     w_path = os_path_normslashes(w_path);
     return w_path;
 }
@@ -4796,6 +4799,7 @@ export function os_path_basename(p_path: string): string {
     }
 
     p_path = path.basename(p_path);
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4827,6 +4831,7 @@ export function os_path_dirname(p_path?: string): string {
     if (isWindows) {
         p_path = p_path.split('\\').join('/');
     }
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
 
     return p_path;
 }

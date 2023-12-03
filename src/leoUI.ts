@@ -5410,9 +5410,17 @@ export class LeoUI extends NullGui {
                 });
             }
             if (multiple) {
-                return names;
+
+                return names.map((p_name) => {
+                    let fileName = g.os_path_fix_drive(p_name);
+                    fileName = g.os_path_normslashes(fileName);
+                    return fileName;
+                });
             } else {
-                return names.length ? names[0] : ""; // Not multiple: return as string!
+                // Not multiple: return as string!
+                let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+                fileName = g.os_path_normslashes(fileName);
+                return fileName;
             }
         });
     }
@@ -5432,7 +5440,9 @@ export class LeoUI extends NullGui {
             }
         ).then((p_uri) => {
             if (p_uri) {
-                return p_uri.fsPath;
+                let fileName = g.os_path_fix_drive(p_uri.fsPath);
+                fileName = g.os_path_normslashes(fileName);
+                return fileName;
             } else {
                 return "";
             }

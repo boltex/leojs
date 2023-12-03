@@ -100,7 +100,7 @@ export class SessionManager {
       if (g.app.debug.includes('startup')) {
         g.trace('loading session file:', fn);
       }
-      await g.app.loadManager!.loadLocalFile(fn, g.app.gui, c);
+      await g.app.loadManager!.loadLocalFile(fn, g.app.gui, c, true);
     }
   }
   //@+node:felix.20231003002311.7: *3* SessionManager.load_snapshot

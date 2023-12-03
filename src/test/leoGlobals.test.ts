@@ -206,12 +206,16 @@ suite('Tests for leo.core.leoGlobals', () => {
     async function _test_per_commander_data(): Promise<void> {
 
         const c = self.c;
+        console.log('TEST 1');
+
         // All dicts must have the same keys.
         for (const d of [error_messages, error_patterns, error_templates]) {
             assert.ok(g.compareArrays(tools, Object.keys(d).sort()));
         }
         // Pretest: all absolute paths must exist.
         //          #3497: Silently skip this test if not.
+        console.log('TEST 2');
+
         for (const z of absolute_paths) {
             const w_exists = await g.os_path_exists(z);
             // assert.ok(w_exists, z.toString());
@@ -220,6 +224,8 @@ suite('Tests for leo.core.leoGlobals', () => {
             }
         }
         // Pretest: all generated error messages must match the tool's pattern.
+        console.log('TEST 3');
+
         for (const tool of tools) {
             const pattern = error_patterns[tool];
             const messages = error_messages[tool];
@@ -232,6 +238,7 @@ suite('Tests for leo.core.leoGlobals', () => {
                 );
             }
         }
+        console.log('TEST 4');
         // More tests...
         for (const data of files_data) {// <@file> <filename>
             const [kind, relative_path] = data;

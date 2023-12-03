@@ -3199,7 +3199,8 @@ export class LoadManager {
     public async loadLocalFile(
         fn: string,
         gui?: LeoGui,
-        old_c?: Commands
+        old_c?: Commands,
+        skipSaveSession?: boolean
     ): Promise<Commands | undefined> {
         /*
             Completely read a file, creating the corresponding outline.
@@ -3218,6 +3219,7 @@ export class LoadManager {
         */
 
         fn = g.os_path_fix_drive(fn); // EMULATE PYTHON WITH CAPITAL DRIVE LETTERS
+        fn = g.os_path_normslashes(fn);
 
         const lm: LoadManager = this;
         let c: Commands | undefined;
@@ -3247,6 +3249,11 @@ export class LoadManager {
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
         c = await lm.openFileByName(fn, gui, old_c, previousSettings);
+
+        if (!skipSaveSession) {
+            await g.app.saveSession(); // IN LEOJS: Save sessions here to skip saving session on program exit.
+        }
+
         return c;
     }
     //@+node:felix.20220418012120.1: *5* LM.openEmptyLeoFile

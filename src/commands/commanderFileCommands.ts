@@ -672,6 +672,8 @@ export class CommanderFileCommands {
             if (new_file_name) {
                 let final_file_name = this.set_name_and_title(c, new_file_name);
                 await do_save(c, final_file_name);
+
+                await g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.
             }
 
         } finally {
@@ -728,6 +730,9 @@ export class CommanderFileCommands {
             await c.fileCommands.saveAs(new_file_name);
 
             await g.chdir(new_file_name);
+
+            await g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.
+
             return new_file_name;
         };
 

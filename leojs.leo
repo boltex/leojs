@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
-<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
+<leo_file xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -4699,7 +4699,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "65afa76",
+  "gitBranch": "leoCache",
+  "gitDate": "2023-12-02 01:19:29 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -9386,9 +9389,17 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
             });
         }
         if (multiple) {
-            return names;
+
+            return names.map((p_name) =&gt; {
+                let fileName = g.os_path_fix_drive(p_name);
+                fileName = g.os_path_normslashes(fileName);
+                return fileName;
+            });
         } else {
-            return names.length ? names[0] : ""; // Not multiple: return as string!
+            // Not multiple: return as string!
+            let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
         }
     });
 }
@@ -9424,7 +9435,9 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
     ).then((p_uri) =&gt; {
         if (p_uri) {
-            return p_uri.fsPath;
+            let fileName = g.os_path_fix_drive(p_uri.fsPath);
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
         } else {
             return "";
         }
