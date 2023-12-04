@@ -1100,6 +1100,16 @@ export class LeoApp {
         // * Modified for leojs SINGLE log pane
         g.es_print(app.signon);
         g.es_print(app.signon1);
+
+        // Is this the first possible valid output to log pane?
+        // If so empty the log Buffer first.
+        const buffer = g.logBuffer;
+        if (buffer.length) {
+            while (buffer.length > 0) {
+                // Pop the bottom one and append it
+                g.es_print(buffer.shift()!);
+            }
+        }
     }
     //@+node:felix.20230805210538.1: *4* app.setGlobalDb
     /**
@@ -1957,15 +1967,14 @@ export class LoadManager {
         // ! TRY TO GET EXTENSION FOLDER WITHOUT REQUIRING CONTEXT ! 
         const extension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
         if (extension) {
-            loadDir = extension.extensionUri.fsPath; // ! OVERRIDE WITH REAL EXTENION PATH !
+            loadDir = extension.extensionUri.fsPath; // ! OVERRIDE WITH REAL EXTENSION PATH !
         } else {
             console.log(' -------------- leojs EXTENSION FOLDER NOT FOUND --------------');
         }
 
         // const loadDir2 = w_uri?.fsPath;
         loadDir = g.finalize(loadDir);
-        // console.log(' -------------- loadDir => ', loadDir);
-        return loadDir;
+
         /* 
         try:
             # Fix a hangnail: on Windows the drive letter returned by
@@ -2166,7 +2175,7 @@ export class LoadManager {
     /**
      * Report directories.
      */
-    public reportDirectories(): void {
+    public async reportDirectories(): Promise<void> {
         // The cwd changes later, so it would be misleading to report it here.
         const directories = [
             { kind: 'home', theDir: g.app.homeDir },
@@ -2177,6 +2186,16 @@ export class LoadManager {
         for (const { kind, theDir } of directories) {
             // g.blue calls g.es_print, and that's annoying.
             g.es(`${kind.padStart(10, ' ')}:`, path.normalize(theDir!));  // path.normalize adds BACKSLASHES ON WINDOWS! 
+            try {
+                const w_testUrl = g.makeVscodeUri(theDir!);
+                const w_dirContent = await vscode.workspace.fs.readDirectory(w_testUrl);
+
+                console.log(`reportDirectories theDir: ${theDir}`, w_dirContent);
+
+            } catch (e) {
+                console.log("ERROR IN reportDirectories: ", e);
+            }
+
         }
     }
     //@+node:felix.20220406235904.1: *3* LM.Settings
@@ -2305,6 +2324,8 @@ export class LoadManager {
             try {
                 g.app.preReadFlag = true;
                 c = await lm.openSettingsFile(fn);
+            } catch (e) {
+                console.log('ERROR in getPreviousSettings', e);
             } finally {
                 g.app.preReadFlag = false;
             }
@@ -2562,6 +2583,7 @@ export class LoadManager {
         // g.app.lockLog();
 
         let ok: VNode | undefined;
+        let g_element;
         try {
             // ! HACK FOR LEOJS: MAKE COMMANDER FROM FAKE leoSettings.leo STRING !
             const w_fastRead: FastRead = new FastRead(
@@ -2571,7 +2593,6 @@ export class LoadManager {
             const w_leoSettingsUri = vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
             let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
 
-            let g_element;
             if (fn === 'leoSettings.leo') {
                 [ok, g_element] = w_fastRead.readWithJsonTree(
                     fn,
@@ -2678,7 +2699,6 @@ export class LoadManager {
 
         // sets lm.options and lm.files
         await lm.doPrePluginsInit(fileName);
-        g.app.computeSignon();
         g.app.printSignon();
         if (lm.options['version']) {
             return;
@@ -2886,11 +2906,10 @@ export class LoadManager {
         // Init the app.
         await lm.initApp();
 
-        //console.log('*** Uncomment line below to enable Global D.B. ***');
         await g.app.setGlobalDb();
 
         if (verbose) {
-            lm.reportDirectories();
+            await lm.reportDirectories();
         }
 
         // Read settings *after* setting g.app.config and *before* opening plugins.

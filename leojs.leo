@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
-<leo_file xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
+<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -1012,7 +1012,7 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = false;
+const activateDebug = true;
 
 
 @language typescript
@@ -1590,7 +1590,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
+        (g.app as LeoApp).vscodeExtensionDir = g.os_path_fix_drive(p_context.extensionUri.fsPath);
 
         const gitExtension = vscode.extensions.getExtension&lt;GitAPI.GitExtension&gt;('vscode.git');
         if (gitExtension) {
@@ -4650,7 +4650,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4699,10 +4699,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "65afa76",
-  "gitBranch": "leoCache",
-  "gitDate": "2023-12-02 01:19:29 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -11652,7 +11649,9 @@ public showLogPane(p_focus?: boolean): Thenable&lt;unknown&gt; {
  * * Hides the log pane
  */
 public hideLogPane(): void {
-    this._leoLogPane.hide();
+    if (this._leoLogPane) {
+        this._leoLogPane.hide();
+    }
 }
 
 </t>

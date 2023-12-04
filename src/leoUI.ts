@@ -529,7 +529,9 @@ export class LeoUI extends NullGui {
      * * Hides the log pane
      */
     public hideLogPane(): void {
-        this._leoLogPane.hide();
+        if (this._leoLogPane) {
+            this._leoLogPane.hide();
+        }
     }
 
     /**

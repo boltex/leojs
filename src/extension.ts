@@ -16,7 +16,7 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = false;
+const activateDebug = true;
 
 
 /**
@@ -65,7 +65,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
+        (g.app as LeoApp).vscodeExtensionDir = g.os_path_fix_drive(p_context.extensionUri.fsPath);
 
         const gitExtension = vscode.extensions.getExtension<GitAPI.GitExtension>('vscode.git');
         if (gitExtension) {

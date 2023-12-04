@@ -167,7 +167,7 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
 
 //@-<< define global decorator dicts >>
 //@+<< define global error regexes >>
-//@+node:felix.20230724131219.1: ** << define global error regexes >> (leoGlobals.py)
+//@+node:felix.20230724131219.1: ** << define global error regexes >>
 // Most code need only know about the *existence* of these patterns.
 
 // For all *present* patterns, m.group(1) is the filename and m.group(2) is the line number.
@@ -282,6 +282,8 @@ export let inScript: boolean = false; // A synonym for app.inScript
 export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 
 export let unicode_warnings: { [key: string]: any } = {}; // Keys are callers.
+
+export const logBuffer: string[] = [];
 
 //@+others
 //@+node:felix.20230413003654.1: ** g.codecs
@@ -2186,10 +2188,6 @@ export function makeVscodeUri(p_fn: string): vscode.Uri {
         p_fn = p_fn.replace(/\\/g, "/");
         try {
             const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
-
-            // console.log("Made uri from :", p_fn, " to this vscode.Uri", newUri, "makeVscodeUri");
-            console.log("Made uri from :", p_fn, " to this vscode.Uri", newUri, "makeVscodeUri CALLERS:\n", callers(9));
-
             return newUri;
         } catch (e) {
             console.log(
@@ -4129,26 +4127,28 @@ export const warning = es_print;
 
 //@+node:felix.20211104212741.1: *3* g.es
 export function es(...args: any[]): void {
-    if (app && app.gui) {
-        let s: string = '';
-        args.forEach((p_entry) => {
-            if (s) {
-                s += ' ';
-            }
-            if (typeof p_entry === 'string' || p_entry instanceof String) {
-                // it's a string
-                s += p_entry;
+    let s: string = '';
+    args.forEach((p_entry) => {
+        if (s) {
+            s += ' ';
+        }
+        if (typeof p_entry === 'string' || p_entry instanceof String) {
+            // it's a string
+            s += p_entry;
+        } else {
+            if (p_entry !== undefined) {
+                s += p_entry.toString();
             } else {
-                if (p_entry !== undefined) {
-                    s += p_entry.toString();
-                } else {
-                    s += 'undefined';
-                }
+                s += 'undefined';
             }
-        });
+        }
+    });
+
+    if (app && app.gui) {
         app.gui.addLogPaneEntry(s);
     } else {
-        console.log(...args);
+        logBuffer.push(s);
+        console.log("Log Pane Not Ready: ", s);
     }
 }
 
@@ -4229,6 +4229,8 @@ export function es_print(...args: any[]): void {
     pr(...args);
     if (app && app.gui && !unitTesting) {
         es(...args);
+    } else {
+        logBuffer.push(...args);
     }
 }
 //@+node:felix.20211227232452.1: *3* g.internalError
@@ -4771,7 +4773,7 @@ export function os_path_abspath(p_path: string): string {
     p_path = path.resolve(p_path);
 
     // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         p_path = p_path.split('\\').join('/');
     }
     return p_path;
@@ -4828,7 +4830,7 @@ export function os_path_dirname(p_path?: string): string {
     p_path = path.dirname(p_path);
     // os.path.normpath does the *reverse* of what we want.
 
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         p_path = p_path.split('\\').join('/');
     }
     p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
@@ -5098,9 +5100,10 @@ export function os_path_normcase(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         p_path = p_path.toLowerCase();
     }
+    p_path = os_path_fix_drive(p_path);
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -5127,9 +5130,7 @@ export function os_path_normslashes(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/');
-    }
+    p_path = p_path.split('\\').join('/');
     return p_path;
 }
 //@+node:felix.20211227182611.19: *3* g.os_path_realpath
@@ -5252,7 +5253,7 @@ export function os_path_split(p_path: string): [string, string] {
     }
 
     let testPath = p_path;
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         testPath = testPath.split('\\').join('/');
     }
 

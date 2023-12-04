@@ -311,7 +311,8 @@ export class LeoGui {
         return Promise.resolve('no');
     }
     //@+node:felix.20221120210715.1: *4* LeoGui.addLogPaneEntry (LeoJs)
-    public addLogPaneEntry(s: string): void {
+    public addLogPaneEntry(...args: any[]): void {
+        this.oops();
         // Adds a message string to LeoJS log pane. See LeoUi.ts
     }
     //@+node:felix.20230902142624.1: *4* LeoGui.focusLogPane (LeoJs)
@@ -552,6 +553,7 @@ export class NullGui extends LeoGui {
     }
 
     public addLogPaneEntry(...args: any[]): void {
+        g.logBuffer.push(...args);
         console.log('NullGui:', ...args);
     }
 
