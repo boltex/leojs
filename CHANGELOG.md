@@ -38,3 +38,8 @@
 - Implemented importers
 - Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
 - Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
+- Implemented Global Settings, Sessions and recent files. (saved to db and other files in the .leo folder.)
+- Fixed log pane.
+
+# 0.1.7
+- First feature complete version (Some bugs remain when generating external files!)
