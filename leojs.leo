@@ -1053,7 +1053,7 @@ const activateDebug = false;
 - Implemented Leo's atFile, atShadow and external files features
 - Implemented javascript scripting, along with c, g and p references.
 
-# 0.1.6
+# 0.1.6 December 5 2023
 
 - Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
 - Implemented importers
@@ -1063,7 +1063,7 @@ const activateDebug = false;
 - Fixed log pane.
 
 # 0.1.7
-- First feature complete version (Some bugs remain when generating external files!)
+- First feature complete version
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
