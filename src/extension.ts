@@ -16,7 +16,7 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = true;
+const activateDebug = false;
 
 
 /**
@@ -30,22 +30,21 @@ export async function activate(p_context: vscode.ExtensionContext) {
         g.app = leoApp.LeoApp()
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
-
     */
 
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
     if (p_context.extensionUri && activateDebug) {
-        console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
+        console.log('STARTUP: context.extensionUri.fsPath: ', p_context.extensionUri.fsPath);
+        console.log('STARTUP: context.extensionUri.scheme: ', p_context.extensionUri.scheme,);
     }
-
     if (activateDebug) {
-        console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
-        console.log('STARTUP:             path.sep: ', path.sep);
-        console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
-        console.log('STARTUP:          env appHost: ', vscode.env.appHost);
-        console.log('STARTUP:          process.cwd(): ', process.cwd());
+        console.log('STARTUP:                 g.osBrowser: ', g.isBrowser);
+        console.log('STARTUP:                    path.sep: ', path.sep);
+        console.log('STARTUP:                  env scheme: ', vscode.env.uriScheme);
+        console.log('STARTUP:                 env appHost: ', vscode.env.appHost);
+        console.log('STARTUP:               process.cwd(): ', process.cwd());
     }
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
@@ -65,7 +64,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = g.os_path_fix_drive(p_context.extensionUri.fsPath);
+        (g.app as LeoApp).vscodeExtensionDir = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
 
         const gitExtension = vscode.extensions.getExtension<GitAPI.GitExtension>('vscode.git');
         if (gitExtension) {
@@ -287,23 +286,27 @@ export async function activate(p_context: vscode.ExtensionContext) {
         }
         await runLeo(p_context);
     } else {
-        // Web Browser Extension: CHeck for type of workspace opened first
+        // Web Browser Extension: Check for type of workspace opened first
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
-                    .then(selection => {
-                        if (selection === "More Info") {
-                            vscode.env.openExternal(
-                                vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
-                            ).then(() => { }, (e) => {
-                                console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                            });
-                        }
-                    });
-                console.log('NOT started because not writable workspace');
-                void setStartupDoneContext(true);
-                return;
+
+                // NOTE : ! THIS RETURNS FALSE POSITIVES ! 
+                console.log('NOT WRITABLE WORKSPACE: FALSE POSITIVE?');
+
+                // void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
+                //     .then(selection => {
+                //         if (selection === "More Info") {
+                //             vscode.env.openExternal(
+                //                 vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                //             ).then(() => { }, (e) => {
+                //                 console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                //             });
+                //         }
+                //     });
+                // console.log('NOT started because not writable workspace');
+                // void setStartupDoneContext(true);
+                // return;
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.

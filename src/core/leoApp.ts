@@ -1905,6 +1905,10 @@ export class LoadManager {
         if (os) {
             home = os.homedir();
         }
+        if (g.isBrowser) {
+            // BROWSER: Root of repo
+            home = g.app.vscodeWorkspaceUri!.fsPath;
+        }
 
         if (home) {
             // Important: This returns the _working_ directory if home is None!
@@ -2175,27 +2179,30 @@ export class LoadManager {
     /**
      * Report directories.
      */
-    public async reportDirectories(): Promise<void> {
+    public reportDirectories(): void {
+        // SKIP FOR BROWSER: NO 'HOME' & NO 'LEO-EDITOR' FOLDERS.
+        let directories: {
+            kind: string;
+            theDir: string | undefined;
+        }[];
+
         // The cwd changes later, so it would be misleading to report it here.
-        const directories = [
-            { kind: 'home', theDir: g.app.homeDir },
-            { kind: 'leo-editor', theDir: g.app.leoEditorDir },
-            { kind: 'load', theDir: g.app.loadDir },
-            { kind: 'config', theDir: g.app.globalConfigDir },
-        ];
+        if (g.isBrowser) {
+            directories = [
+                { kind: 'repository', theDir: g.app.homeDir },
+            ];
+        } else {
+            directories = [
+                { kind: 'home', theDir: g.app.homeDir },
+                { kind: 'leo-editor', theDir: g.app.leoEditorDir },
+                { kind: 'load', theDir: g.app.loadDir },
+                { kind: 'config', theDir: g.app.globalConfigDir },
+            ];
+        }
+
         for (const { kind, theDir } of directories) {
             // g.blue calls g.es_print, and that's annoying.
             g.es(`${kind.padStart(10, ' ')}:`, path.normalize(theDir!));  // path.normalize adds BACKSLASHES ON WINDOWS! 
-            try {
-                const w_testUrl = g.makeVscodeUri(theDir!);
-                const w_dirContent = await vscode.workspace.fs.readDirectory(w_testUrl);
-
-                console.log(`reportDirectories theDir: ${theDir}`, w_dirContent);
-
-            } catch (e) {
-                console.log("ERROR IN reportDirectories: ", e);
-            }
-
         }
     }
     //@+node:felix.20220406235904.1: *3* LM.Settings
@@ -2909,7 +2916,7 @@ export class LoadManager {
         await g.app.setGlobalDb();
 
         if (verbose) {
-            await lm.reportDirectories();
+            lm.reportDirectories();
         }
 
         // Read settings *after* setting g.app.config and *before* opening plugins.
