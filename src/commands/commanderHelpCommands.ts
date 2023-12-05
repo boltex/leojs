@@ -264,7 +264,7 @@ export class CommanderHelpCommands {
                 fileName = g.os_path_join(localDir, name);
             }
 
-            const c2 = await g.openWithFileName(fileName, c, g.app.gui);
+            const c2 = await g.openWithFileName(fileName, c, g.app.gui, true);
             // add content to outline
             let nd = c2!.rootPosition()!;
             nd.h = 'Settings README';

@@ -4,7 +4,6 @@
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
 import { Utils as uriUtils } from 'vscode-uri';
-import { Database, SqlJsStatic } from 'sql.js';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
@@ -41,6 +40,7 @@ import { ScriptingController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
+import { CommanderWrapper, SqlitePickleShare } from './leoCache';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -229,7 +229,7 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: Record<string, any>; // IS A DATABASE 
+    public db: any;// CommanderWrapper;//  Record<string, any>; // IS A DATABASE 
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
     public controlCommands: any = undefined;
@@ -281,17 +281,17 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-        // this.db = g.app.commander_cacher.get_wrapper(c); // TODO TEST! made from g.app.db !!
-        // TODO FIX THIS !
-        // console.log('g.app.db', g.app.db); // undefined as of now so 
 
-        this.db = {};
+        if (g.app.commander_cacher) {
+            this.db = g.app.commander_cacher.get_wrapper(c);
+        } else {
+            this.db = {};
+        }
 
         // Create the gui frame.
-        const title = this.computeWindowTitle(c.mFileName);
+        const title = this.computeWindowTitle();
 
-        // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
-        this.frame = new LeoFrame(this, title, this.gui);
+        this.frame = this.gui.createLeoFrame(c, title);
         g.assert(this.frame.c === this);
 
         this.nodeHistory = new NodeHistory(c);
@@ -356,24 +356,61 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20231125161943.1: *4* c.computeTabTitle
+    /**
+     * Return the tab title for this commander.
+     */
+    public computeTabTitle(): string {
+        const c: Commands = this;
+        const file_name = c.fileName();
+        if (file_name) {
+            return file_name;
+        }
+        // Return 'untitled' or 'untitled{n}
+        const n = g.app.numberOfUntitledWindows;
+        const n_s = n === 1 ? '' : n.toString();
+        const title = `untitled${n_s}`;
+        return title;
+    }
+
     //@+node:felix.20220511214845.1: *4* c.computeWindowTitle
     /**
-     * Set the window title and fileName.
+     * Return the title for the top-level window.
      */
-    public computeWindowTitle(fileName: string): string {
-        let title: string;
-        if (fileName) {
-            title = g.computeWindowTitle(fileName);
+    public computeWindowTitle(fileName?: string): string {
+        const c: Commands = this;
+
+        // NO USE FOR BRANCHES IN LEOJS TITLES
+        // const branch = g.gitBranchName(fileName || c.fileName());
+        // const branch_s = branch ? `${branch}: ` : '';
+        // const name_s = fileName || c.fileName() || 'untitled';
+
+        let w_path;
+        let fn;
+        let title;
+        [w_path, fn] = g.os_path_split(fileName || c.fileName());
+        if (w_path) {
+            title = fn + ' in ' + w_path;
         } else {
-            let s = 'untitled';
-            let n = g.app.numberOfUntitledWindows;
-            if (n > 0) {
-                s += n.toString();
-            }
-            title = g.computeWindowTitle(s);
-            g.app.numberOfUntitledWindows = n + 1;
+            title = fn;
         }
         return title;
+
+        // return `${branch_s}${name_s}`;
+
+        // let title: string;
+        // if (fileName) {
+        //     title = g.computeWindowTitle(fileName);
+        // } else {
+        //     let s = 'untitled';
+        //     let n = g.app.numberOfUntitledWindows;
+        //     if (n > 0) {
+        //         s += n.toString();
+        //     }
+        //     title = g.computeWindowTitle(s);
+        //     g.app.numberOfUntitledWindows = n + 1;
+        // }
+        // return title;
     }
     //@+node:felix.20220605211419.1: *4* c.initConfigSettings
     /**
@@ -899,7 +936,8 @@ export class Commands {
 
     public fileName(): string {
         let s: string = this.mFileName || '';
-        if (g.isWindows) {
+        if (g.isWindows || g.isBrowser) {
+            s = g.os_path_fix_drive(s);
             s = s.split('\\').join('/');
         }
 
@@ -2226,8 +2264,9 @@ export class Commands {
         const c: Commands = this;
         c.scanAtPathDirectivesCount += 1; // An important statistic.
         let absbase;
-        if (c.fileName()) {
-            absbase = g.os_path_dirname(c.fileName());
+        const fn = c.fileName();
+        if (fn) {
+            absbase = g.os_path_dirname(fn);
         } else {
             // TODO !
             absbase = ""; //  g.os_getcwd(); // ! FIX THIS !
@@ -3026,6 +3065,26 @@ export class Commands {
         }
         c.fileCommands.gnxDict = d;
     }
+    //@+node:felix.20231125172649.1: *4* c_file.openRecentFile
+
+    // ! UNUSED IN LEOJS    
+
+    /**
+     * c.openRecentFile: This is not a command!
+     *
+     * This method is a helper called only from the recentFilesCallback in
+     * rf.createRecentFilesMenuItems.
+     */
+    // public async openRecentFile(this: Commands): Promise<void>
+    // const c: Commands = this;
+
+    //     if g.doHook("recentfiles1", c=c, p=c.p, v=c.p, fileName=fn):
+    //         return
+    //     c2 = g.openWithFileName(fn, old_c=c)
+    //     if c2:
+    //         g.app.makeAllBindings()
+    //         g.doHook("recentfiles2", c=c2, p=c2.p, v=c2.p, fileName=fn)
+
     //@+node:felix.20230730160811.1: *3* c.Git
     //@+node:felix.20230730160811.2: *4* c.diff_file
     /**

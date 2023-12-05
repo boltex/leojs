@@ -8,10 +8,12 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as pako from 'pako';
-import { Database, SqlJsStatic } from 'sql.js';
+import { Database } from 'sql.js';
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
+import * as fs from 'fs';
 
+var binascii = require('binascii');
 var pickle = require('./jpicklejs');
 
 //@-<< leoCache imports & annotations >>
@@ -37,7 +39,7 @@ export class CommanderCacher {
 
     constructor() {
         try {
-            const w_path = join(g.app.homeLeoDir, 'db', 'global_data');
+            const w_path = join(g.app.homeLeoDir || "/", 'db', 'global_data');
             this.db = new SqlitePickleShare(w_path);
         } catch (e) {
             // @ts-expect-error
@@ -69,15 +71,17 @@ export class CommanderCacher {
     //@+node:felix.20230802145823.5: *3* cacher.close
     public async close(): Promise<void> {
         // Careful: self.db may be a dict.
-        if (this.db.hasOwnProperty('conn')) {
+        if (this.db.conn) {
+            // if (this.db.hasOwnProperty('conn')) {
             await this.db.commit();
-            this.db.conn!.close();
+            this.db.conn.close();
         }
     }
     //@+node:felix.20230802145823.6: *3* cacher.commit
     public async commit(): Promise<void> {
         // Careful: self.db may be a dict.
-        if (this.db.hasOwnProperty('conn')) {
+        if (this.db.conn) {
+            // if (this.db.hasOwnProperty('conn')) {
             await this.db.commit();
         }
     }
@@ -132,18 +136,19 @@ export class CommanderCacher {
 
         save and save-as set changeName to True, save-to does not.
      */
-    public async save(c: Commands, fn: string): Promise<void> {
-
+    public async save(c: Commands, fn?: string): Promise<void> {
         await this.commit();
         if (fn) {
             // 1484: Change only the key!
 
             // if( isinstance(c.db, CommanderWrapper)){
-            if (c.db.constructor.name === "CommanderWrapper") {
+            // if (c.db.constructor.name === "CommanderWrapper") {
+            if (c.db.key) {
                 c.db.key = fn;
-                await this.commit();
+                // await this.commit(); // ? Needed ?
             } else {
-                g.trace('can not happen', c.db.constructor.name);
+                // g.trace('can not happen', c.db.constructor.name);
+                g.trace('can not happen');
             }
         }
     }
@@ -154,7 +159,7 @@ export class CommanderCacher {
 /** 
  * A class to distinguish keys from separate commanders.
  */
-class CommanderWrapper {
+export class CommanderWrapper {
 
     private c: Commands;
     private db: SqlitePickleShare;
@@ -189,6 +194,12 @@ class CommanderWrapper {
     }
 
     public get(target: CommanderWrapper, prop: string): any {
+        if (prop === "key") {
+            return true;
+        }
+        if (prop === "get") {
+            return this._get.bind(target);
+        }
         if (prop === "keys") {
             return this.keys.bind(target);
         }
@@ -205,9 +216,22 @@ class CommanderWrapper {
     }
 
     public set(target: CommanderWrapper, prop: string, value: any): boolean {
+        if (prop === "key") {
+            this.key = value;
+            return true;
+        }
         this.user_keys.add(prop);
         this.db[`${this.key}:::${prop}`] = value;
         return true;
+    }
+
+    _get(key: string, p_default?: any): any {
+        const w_result = this.db[`${this.key}:::${key}`];
+        if (w_result == null) {
+            return p_default;
+        } else {
+            return w_result;
+        }
     }
 
     valueOf() {
@@ -240,7 +264,7 @@ export class GlobalCacher {
         const trace = g.app.debug.includes('cache');
 
         try {
-            const w_path = join(g.app.homeLeoDir, 'db', 'g_app_db');
+            const w_path = join(g.app.homeLeoDir || "/", 'db', 'g_app_db');
             if (trace) {
                 g.es_print('path for g.app.db:', w_path.toString());
             }
@@ -289,8 +313,7 @@ export class GlobalCacher {
     //@+node:felix.20230802145823.14: *3* g_cacher.commit_and_close()
     public async commit_and_close(): Promise<void> {
         // Careful: this.db may be a dict.
-
-        if (this.db.conn && this.db.hasOwnProperty('conn')) {
+        if (this.db.conn) {
 
             if (g.app.debug.includes('cache')) {
                 this.dump('Shutdown');
@@ -315,12 +338,18 @@ export class GlobalCacher {
 /**
  * The main 'connection' object for SqlitePickleShare database
  */
-class SqlitePickleShare {
+export class SqlitePickleShare {
 
     public root: string;
+    public dbfile: string;
     public conn: Database | undefined;
     public init: Promise<Database>;
     public cache: Record<string, any>;
+    public commitTimeout: NodeJS.Timeout | undefined;
+    public watcher: vscode.FileSystemWatcher | undefined;
+    private _needWatchSetup = false;
+    private _selfChanged = false;
+    private _refreshTimeout: NodeJS.Timeout | undefined;
 
     // Allow index signature to allow any arbitrary property
     [key: string]: any;
@@ -337,8 +366,8 @@ class SqlitePickleShare {
      * 
      */
     constructor(root: string) {
-
         this.root = abspath(expanduser(root));
+        this.dbfile = join(root, 'cache.sqlite');
         // Keys are normalized file names.
         // Values are tuples (obj, orig_mod_time)
         this.cache = {};
@@ -348,34 +377,54 @@ class SqlitePickleShare {
 
             void (async () => {
                 try {
-                    const w_isdir = await isdir(this.root);
-                    if (!w_isdir && !g.unitTesting) {
-                        await this._makedirs(this.root);
-                    }
-
-                    const dbfile = join(root, 'cache.sqlite');
-                    if (g.unitTesting) {
-                        // TODO : GET FILE
-                        console.log('TODO : GET FILE for SqlitePickleShare unitTesting');
-
-                        // this.conn = await sqlite3.connect(dbfile);
-                        const filebuffer = await vscode.workspace.fs.readFile(
-                            g.makeVscodeUri(path.join(this.root))
-                            // vscode.Uri.joinPath(p_context.extensionUri, 'test1.db')
-                        );
-                        this.conn = new g.SQL.Database(filebuffer);
+                    if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                        // PASS no need to create folders for web version: Saved in workspaceStorage.
                     } else {
-                        this.conn = new g.SQL.Database();
+                        const w_isdir = await isdir(this.root);
+                        if (!w_isdir && !g.unitTesting) {
+                            await this._makedirs(this.root);
+                        }
                     }
 
-                    // LEOJS: replaced function & call.
-                    // USED TO BE : this.init_dbtables(this.conn)
+                    if (g.unitTesting) {
+                        this.conn = new g.SQL.Database();
+                    } else {
+                        // TODO : CHECK IF RUNNING AS WEB EXTENSION!
+                        // TODO : USE WORKSPACE TO GET INSTEAD OF READFILE !
+
+                        // Open empty if not exist.
+                        let w_exists;
+                        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                            // web
+                            w_exists = g.extensionContext.workspaceState.get<string>(
+                                g.makeVscodeUri(this.dbfile).fsPath
+                            );
+                        } else {
+                            // Desktop
+                            w_exists = await g.os_path_exists(this.dbfile);
+                        }
+                        if (w_exists) {
+                            // this.conn = await sqlite3.connect(dbfile);
+                            const filebuffer = await this.readFileBuffer(
+                                g.makeVscodeUri(this.dbfile)
+                            );
+                            this.conn = new g.SQL.Database(filebuffer);
+                            this.watchSetup(this.dbfile);
+                        } else {
+                            // will setup watch at next commit in reset_protocol_in_values
+                            this._needWatchSetup = true;
+                            this.conn = new g.SQL.Database();
+                        }
+
+                    }
+
                     const sql = 'create table if not exists cachevalues(key text primary key, data blob);';
                     this.conn.exec(sql);
 
                     await this.reset_protocol_in_values();
                     resolve(this.conn);
                 } catch (e) {
+                    console.log('SqlitePickleShare failed init Error:', e);
                     reject('LEOJS: SqlitePickleShare failed init');
                 }
 
@@ -387,6 +436,9 @@ class SqlitePickleShare {
             get(target, prop) {
                 prop = prop.toString();
                 // ALSO SUPPORT : toString, valueOf, iterator
+                if (prop === "key") {
+                    return false;
+                }
                 if (prop === "toString") {
                     return target.__repr__.bind(target);
                 }
@@ -406,6 +458,9 @@ class SqlitePickleShare {
                 if (prop === "has_key") {
                     return target.has_key.bind(target);
                 }
+                if (prop === "commit") {
+                    return target.commit.bind(target);
+                }
                 // Properties to allow through
                 if (prop === "init") {
                     return target.init;
@@ -413,8 +468,7 @@ class SqlitePickleShare {
                 if (prop === "conn") {
                     return target.conn;
                 }
-                // OVERRIDDEN USAGE WITH SQLITE
-                return target.__getitem__(prop);
+                return target.get(prop);
             },
             set(target, prop, value) {
                 target.__setitem__(prop.toString(), value);
@@ -465,15 +519,14 @@ class SqlitePickleShare {
                     // TODO : CHECK IF row.values[0] is OK !!
                     // TODO : maybe use this instead: row.values[0][0]
                     obj = this.loader(row.values[0][0] as Uint8Array);
-
                     w_found = true;
                     break;
                 }
                 if (!w_found) {
-                    throw new Error("No such property exists");
+                    throw new Error("No such property exists " + key);
                 }
             } catch (e) {
-                throw new Error("No such property exists");
+                throw new Error("No such property exists " + key);
             }
         }
         return obj;
@@ -494,7 +547,6 @@ class SqlitePickleShare {
      *  db['key'] = 5
      */
     public __setitem__(key: string, value: any): void {
-
         try {
             const data = this.dumper(value);
             if (this.conn) {
@@ -502,22 +554,194 @@ class SqlitePickleShare {
                     'replace into cachevalues(key, data) values(?,?);',
                     [key, data]
                 );
+                // Set Timeout to auto-save!
+                if (this.commitTimeout) {
+                    clearTimeout(this.commitTimeout);
+                }
+                // Leo Editor is originally in autocommit mode.
+                // See https://docs.python.org/3/library/sqlite3.html#sqlite3-transaction-control-isolation-level
+                this.commitTimeout = setTimeout(() => {
+                    void this.commit();
+                }, 50);
             }
         } catch (e) {
             g.es_exception(e);
         }
 
     }
+    //@+node:felix.20231122235658.1: *3* readFileBuffer
+    public readFileBuffer(db_uri: vscode.Uri): Thenable<Uint8Array | null> {
+
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            const encodedData = g.extensionContext.workspaceState.get<string>(db_uri.fsPath);
+            if (encodedData) {
+
+                const binaryString = atob(encodedData);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                return Promise.resolve(bytes);
+            }
+            return Promise.resolve(null);
+        } else {
+            // desktop
+            return vscode.workspace.fs.readFile(db_uri);
+        }
+    }
+
+    //@+node:felix.20231123000604.1: *3* writeFileBuffer
+    public writeFileBuffer(db_uri: vscode.Uri, db_buffer: Uint8Array): Thenable<void> {
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            const encodedData = this.bufferToBase64(db_buffer); // Convert Uint8Array to Base64
+            return g.extensionContext.workspaceState.update(db_uri.fsPath, encodedData); // Store Base64 string
+        } else {
+            // desktop
+            // return vscode.workspace.fs.writeFile(db_uri, db_buffer);
+            return new Promise((resolve, reject) => {
+                const filePath = db_uri.fsPath;
+                fs.writeFile(filePath, db_buffer, (err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+
+        }
+    }
+
+    //@+node:felix.20231122235830.1: *3* bufferToBase64
+    public bufferToBase64(buffer: Uint8Array): string {
+        return Buffer.from(buffer).toString('base64');
+    }
+
+    //@+node:felix.20231122235908.1: *3* saveDatabase
+    public async saveDatabase(): Promise<void> {
+        if (this.conn) {
+            const data = this.conn.export(); // Export SQLite database to Uint8Array
+            const encodedData = this.bufferToBase64(data); // Convert Uint8Array to Base64
+            await g.extensionContext.workspaceState.update('database', encodedData); // Store Base64 string
+        }
+    }
+
+    //@+node:felix.20231119225011.1: *3* watchSetup
+    public watchSetup(databaseFilePath: string): void {
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web NO NEED TO WATCH IF WEB EXTENSION!
+            return;
+        }
+        // No backslashes in glob pattern for watching a file pattern. (single file in this case)
+        const watcher = vscode.workspace.createFileSystemWatcher(
+            // don't use string!
+            // databaseFilePath.replace(/\\/g, '/')
+            new vscode.RelativePattern(
+                g.makeVscodeUri(this.root),
+                'cache.sqlite'
+            )
+        );
+
+        // Handle file changes
+        watcher.onDidChange(uri => {
+            this.refreshFromFile();
+            // Implement debounce logic and database reconnection here
+        });
+
+        // Handle file creation (if necessary)
+        watcher.onDidCreate(uri => {
+            this.refreshFromFile();
+            // Handle file creation
+        });
+
+        g.extensionContext.subscriptions.push(watcher);
+        // Handle file deletion (if necessary)
+        // watcher.onDidDelete(uri => {
+        //     console.log(`Database file deleted: ${uri.fsPath}`);
+        //     // Handle file deletion
+        // });
+
+        // Remember to dispose of the watcher when no longer needed
+        return;
+
+    }
+
+    //@+node:felix.20231119225037.1: *3* refreshFromFile
+    public refreshFromFile(): void {
+        if (this._selfChanged) {
+            this._selfChanged = false;
+        } else {
+            if (this._refreshTimeout) {
+                clearTimeout(this._refreshTimeout);
+            }
+            // 100 millisecond debounce
+            setTimeout(() => {
+                // REFRESH
+                if (this.conn) {
+                    this.conn.close();
+                }
+                this.readFileBuffer(
+                    g.makeVscodeUri(this.dbfile)
+                ).then((p_result) => {
+                    this.conn = new g.SQL.Database(p_result);
+                }, (p_reason) => {
+                    console.log("Error in refreshing sqlite db: " + this.dbfile, p_reason);
+                    throw (p_reason);
+                });
+            }, 100);
+        }
+    }
+
     //@+node:felix.20230807231629.1: *3* commit
     public async commit(): Promise<void> {
-        if (this.conn) {
-            const db_data = this.conn.export();
-            const db_buffer = Buffer.from(db_data);
-            const db_fileName = path.join(this.root);
-            const db_uri = g.makeVscodeUri(db_fileName);
-            await vscode.workspace.fs.writeFile(db_uri, db_buffer);
+
+        // May have been called directly while waiting for debounced call from __setItem__
+        if (this.commitTimeout) {
+            clearTimeout(this.commitTimeout);
         }
-        return;
+
+        if (this.conn) {
+            let db_data: Uint8Array;
+            let db_buffer: Buffer;
+            let db_uri: vscode.Uri;
+
+            try {
+                db_data = this.conn.export();
+            } catch (e) {
+                console.error("ERROR this.conn.export() FAILED with error: ", e);
+                return Promise.resolve();
+            }
+            try {
+                db_buffer = Buffer.from(db_data);
+            } catch (e) {
+                console.error("ERROR Buffer.from(db_data) FAILED with error: ", e);
+                return Promise.resolve();
+            }
+            try {
+                db_uri = g.makeVscodeUri(this.dbfile);
+            } catch (e) {
+                console.error("ERROR g.makeVscodeUri(this.dbfile) FAILED with error: ", e);
+                return Promise.resolve();
+            }
+
+            if (!this._needWatchSetup) {
+                // already setup so setup flag to warn not to refresh own-change.
+                this._selfChanged = true; // WE ARE ABOUT TO WRITE/CHANGE THE FILE!
+            }
+
+            await this.writeFileBuffer(db_uri, db_buffer);
+
+            if (this._needWatchSetup) {
+                console.log(' NEW DB !!! DO WATCH SETUP from commit !');
+                this.watchSetup(this.dbfile);
+                this._needWatchSetup = false;
+            }
+        }
+
     }
     //@+node:felix.20230804140347.1: *3* loader
     /**
@@ -527,9 +751,11 @@ class SqlitePickleShare {
         if (data !== null && data !== undefined) {
             let val;
             // Retain this code for maximum compatibility.
+            const inflated = pako.inflate(data);
             try {
-                val = pickle.loads(pako.inflate(data));
+                val = pickle.loads(String.fromCharCode(...inflated));
             } catch (e) {
+                console.log('error in loader:', e);
                 g.es("Unpickling error - Python 3 data accessed from Python 2?");
                 return undefined;
             }
@@ -571,15 +797,18 @@ class SqlitePickleShare {
         // It would be more thorough to delete everything
         // below the root directory, but it's not necessary.
         this.conn!.exec('delete from cachevalues;');
+        void this.commit();
     }
     //@+node:felix.20230802145823.54: *3* get  (SqlitePickleShare)
     public get(key: string, p_default?: any): any {
-
         if (!this.has_key(key)) {
             return p_default;
         }
         try {
             const val = this.__getitem__(key);
+            if (val == null) {
+                return p_default;
+            }
             return val;
         } catch (e) {  // #1444: Was KeyError.
             return p_default;
@@ -629,16 +858,21 @@ class SqlitePickleShare {
     public async reset_protocol_in_values(): Promise<void> {
 
         const PROTOCOLKEY = '__cache_pickle_protocol__';
-
-        if (this.get(PROTOCOLKEY, 3) === 2) {
+        const prot = this.get(PROTOCOLKEY, 3);
+        if (prot === 2) {
             return;
         }
 
         //@+others
         //@+node:felix.20230802145823.59: *4* viewrendered special case
 
-        const row_a = this.get('viewrendered_default_layouts') || [undefined, undefined];
-        const row_o = [JSON.parse(JSON.stringify(row_a[0])), JSON.parse(JSON.stringify(row_a[1]))];
+        const row_a = this.get('viewrendered_default_layouts');
+        let row_o;
+        if (row_a) {
+            row_o = [JSON.parse(JSON.stringify(row_a[0])), JSON.parse(JSON.stringify(row_a[1]))];
+        } else {
+            row_o = [null, null];
+        }
 
         this.__setitem__('viewrendered_default_layouts', row_o);
         //@+node:felix.20230802145823.60: *4* do_block
@@ -708,7 +942,7 @@ function dump_cache(db: SqlitePickleShare, tag: string): void {
     const d: Record<string, any> = {};
     for (const x_key of db.keys()) {
         const key = x_key[0];
-        const val = db.get(key); // TODO : MAYBE USE  db[key] 
+        const val = db[key];
         const data = key.split(':::');
         let fn;
         let key2;
@@ -717,7 +951,7 @@ function dump_cache(db: SqlitePickleShare, tag: string): void {
         } else {
             [fn, key2] = ['None', key];
         }
-        const aList = d.get(fn, []);
+        const aList = d[fn] || [];
         aList.push([key2, val]);
         d[fn] = aList;
 

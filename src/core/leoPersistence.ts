@@ -701,10 +701,10 @@ export class PersistenceDataController {
      */
     public unpickle(s: string): any {
         // An actual uA.
-
         try {
             // Throws TypeError if s is not a hex string.
-            const bin = binascii.unhexlify(g.toEncodedString(s));
+            const encodedString = g.toEncodedString(s);
+            const bin = binascii.unhexlify(encodedString);
             return pickle.loads(bin);
         } catch (exception) {
             g.es_exception(exception);

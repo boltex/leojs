@@ -18,7 +18,7 @@ import { ExternalFilesController } from './leoExternalFiles';
 import { LeoFrame } from './leoFrame';
 import { SettingsDict } from './leoGlobals';
 import { LeoUI } from '../leoUI';
-import { CommanderCacher, GlobalCacher } from './leoCache';
+import { CommanderCacher, GlobalCacher, SqlitePickleShare } from './leoCache';
 // importers
 import * as importer_c from '../importers/c';
 import * as importer_coffeescript from '../importers/coffeescript';
@@ -192,11 +192,12 @@ export class LeoApp {
     //@-<< LeoApp: error messages >>
     //@+<< LeoApp: global directories >>
     //@+node:felix.20210103024632.5: *5* << LeoApp: global directories >>
-    public extensionsDir: string | undefined; // The leo / extensions directory
+    // public extensionsDir: string | undefined; // The leo / extensions directory // UNUSED in leojs
     public globalConfigDir: string | undefined; // leo / config directory
     public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir: string | undefined; // The user's home directory.
     public homeLeoDir: string | undefined; // The user's home/.leo directory.
+    public leoEditorDir: string | undefined; // The leo-editor directory.
     public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
     public vscodeExtensionDir: string | undefined;
@@ -232,11 +233,10 @@ export class LeoApp {
     public commander_cacher!: CommanderCacher; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
-    public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
-    public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
+    public db!: SqlitePickleShare; // The singleton global db, managed by g.app.global_cacher.
+    public externalFilesController: ExternalFilesController | undefined; // The singleton ExternalFilesController instance.
     public global_cacher!: GlobalCacher; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
-    public ipk: any = null; // python kernel instance
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
     // The singleton LogManager instance.
@@ -412,12 +412,15 @@ export class LeoApp {
             bib: 'bibtex',
             c: 'c',
             'c++': 'cplusplus',
+            cc: "cplusplus",
             cbl: 'cobol', // Only one extension is valid: .cob
             cfg: 'config',
             cfm: 'coldfusion',
             clj: 'clojure', // 2013 / 09 / 25: Fix bug 879338.
             cljs: 'clojure',
             cljc: 'clojure',
+            "cmd": "batch",
+            "codon": "codon",
             ch: 'chill', // Other extensions, .c186,.c286
             coffee: 'coffeescript',
             conf: 'apacheconf',
@@ -437,6 +440,7 @@ export class LeoApp {
             g: 'antlr',
             groovy: 'groovy',
             h: 'c', // 2012 / 05 / 23.
+            "hh": "cplusplus",
             handlebars: 'html', // McNab.
             hbs: 'html', // McNab.
             hs: 'haskell',
@@ -614,6 +618,7 @@ export class LeoApp {
             chill: '/* */',
             clojure: ';', // 2013 / 09 / 25: Fix bug 879338.
             cobol: '*',
+            "codon": "#",
             coldfusion: '<!-- -->',
             coffeescript: '#', // 2016 / 02 / 26.
             config: '#', // Leo 4.5.1
@@ -636,6 +641,7 @@ export class LeoApp {
             fortran90: '!',
             foxpro: '&&',
             gettext: '# ',
+            "go": "//",
             groovy: '// /* */',
             handlebars: '<!-- -->', // McNab: delegate to html.
             haskell: '--_ {-_ _-}',
@@ -684,6 +690,7 @@ export class LeoApp {
             objective_c: '// /* */',
             objectrexx: '-- /* */',
             occam: '--',
+            "ocaml": "(* *)",
             omnimark: ';',
             pandoc: '<!-- -->',
             pascal: '// { }',
@@ -798,6 +805,7 @@ export class LeoApp {
             chill: 'ch', // Only one extension is valid: .c186, .c286
             clojure: 'clj', // 2013 / 09 / 25: Fix bug 879338.
             cobol: 'cbl', // Only one extension is valid: .cob
+            "codon": "codon",
             coldfusion: 'cfm',
             coffeescript: 'coffee',
             config: 'cfg',
@@ -858,6 +866,7 @@ export class LeoApp {
             objective_c: 'mm', // Only one extension is valid: .m
             objectrexx: 'rex',
             occam: 'occ',
+            "ocaml": "ml",
             omnimark: 'xom',
             pascal: 'p',
             perl: 'pl',
@@ -1091,6 +1100,16 @@ export class LeoApp {
         // * Modified for leojs SINGLE log pane
         g.es_print(app.signon);
         g.es_print(app.signon1);
+
+        // Is this the first possible valid output to log pane?
+        // If so empty the log Buffer first.
+        const buffer = g.logBuffer;
+        if (buffer.length) {
+            while (buffer.length > 0) {
+                // Pop the bottom one and append it
+                g.es_print(buffer.shift()!);
+            }
+        }
     }
     //@+node:felix.20230805210538.1: *4* app.setGlobalDb
     /**
@@ -1233,7 +1252,8 @@ export class LeoApp {
      *
      * Return False if the user veto's the close.
      *
-     * finish_quit - usually True, close Leo when last file closes, but
+     * finish_quit - usually True, * FALSE IN LEOJS. USED TO FORCE QUIT ! * 
+     *               close Leo when last file closes, but
      *               False when closing an already-open-elsewhere file
      *               during initial load, so UI remains for files
      *               further along the command line.
@@ -1241,7 +1261,7 @@ export class LeoApp {
     public async closeLeoWindow(
         frame: LeoFrame,
         new_c?: Commands,
-        finish_quit = true
+        finish_quit = false
     ): Promise<boolean> {
         const c = frame.c;
         if (g.app.debug.includes('shutdown')) {
@@ -1253,11 +1273,11 @@ export class LeoApp {
             return false;
         }
 
-        // TODO : NEEDED ?
         // Make sure .leoRecentFiles.txt is written.
-        // g.app.recentFilesManager.writeRecentFilesFile(c)
+        // ! IN LEOJS : make sure .leoRecentFiles.txt is written on open and save file instead.
+        // await g.app.recentFilesManager.writeRecentFilesFile(c);
 
-        if (c.changed) {
+        if (c.changed && !finish_quit) {
             c.promptingForClose = true;
             const veto = await frame.promptForSave();
             c.promptingForClose = false;
@@ -1275,6 +1295,13 @@ export class LeoApp {
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
+
+            if (!finish_quit && g.app.windowList.length === 1) {
+                // This was the last one. Closed one by one
+                // so save as last session for next open.
+                await g.app.saveSession();
+            }
+
             await g.app.destroyWindow(frame);
 
             // Remove frame
@@ -1287,14 +1314,35 @@ export class LeoApp {
             g.app.forgetOpenFile(c.fileName());
         }
 
+        if (!finish_quit && g.app.windowList.length) {
+            // NOT FINISH_QUIT SO SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!
+            await g.app.saveSession();
+        }
+
         if (g.app.windowList.length) {
             const c2 = new_c || g.app.windowList[0].c;
             g.app.selectLeoWindow(c2);
         } else if (finish_quit && !g.unitTesting) {
             // * Does not terminate when last is closed: Present 'new' and 'open' buttons instead!
-            // g.app.finishQuit();
+            await g.app.finishQuit();
         }
         return true; // The window has been closed.
+    }
+    //@+node:felix.20231120013945.1: *4* app.destroyAllOpenWithFiles
+    /**
+     * Remove temp files created with the Open With command.
+     */
+    public async destroyAllOpenWithFiles(): Promise<void> {
+
+        if (g.app.debug.includes('shutdown')) {
+            g.pr('destroyAllOpenWithFiles');
+        }
+
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.shut_down();
+            g.app.externalFilesController = undefined;
+        }
+
     }
     //@+node:felix.20220511231737.4: *4* app.destroyWindow
     /**
@@ -1317,6 +1365,96 @@ export class LeoApp {
         // Important: this also destroys all the objects of the commander.
         frame.destroySelf();
     }
+    //@+node:felix.20231120013952.1: *4* app.finishQuit
+    public async finishQuit(): Promise<void> {
+        // forceShutdown may already have fired the "end1" hook.
+        g.assert(this === g.app, g.app.toString());
+        const trace = g.app.debug.includes('shutdown');
+        if (trace) {
+            g.pr('finishQuit: killed:', g.app.killed);
+        }
+        if (!g.app.killed) {
+            g.doHook("end1");
+            if (g.app.global_cacher) {  // #1766.
+                await g.app.global_cacher.commit_and_close();
+            }
+            if (g.app.commander_cacher) {  // #1766.
+
+                // await g.app.commander_cacher.commit(); 
+                // ALREADY COMMITS IN 'close()'.
+
+                await g.app.commander_cacher.close();
+
+            }
+        }
+        // if g.app.ipk
+        //     g.app.ipk.cleanup_consoles()
+
+        await g.app.destroyAllOpenWithFiles();
+
+        // if hasattr(g.app, 'pyzo_close_handler')
+        //     // pylint: disable=no-member
+        //     g.app.pyzo_close_handler();
+
+        // Disable all further hooks and events.
+        // Alas, "idle" events can still be called
+        // even after the following code.
+        g.app.killed = true;
+        if (g.app.gui) {
+            g.app.gui.destroySelf();  // Calls qtApp.quit()
+        }
+    }
+
+    //@+node:felix.20231120013956.1: *4* app.forceShutdown
+    // public async forceShutdown(self) -> None:
+    //     """
+    //     Forces an immediate shutdown of Leo at any time.
+
+    //     In particular, may be called from plugins during startup.
+    //     """
+    //     trace = 'shutdown' in g.app.debug
+    //     app = self
+    //     if trace:
+    //         g.pr('forceShutdown')
+    //     for c in app.commanders():
+    //         app.forgetOpenFile(c.fileName())
+    //     # Wait until everything is quiet before really quitting.
+    //     if trace:
+    //         g.pr('forceShutdown: before end1')
+    //     g.doHook("end1")
+    //     if trace:
+    //         g.pr('forceShutdown: after end1')
+    //     self.log = None  # Disable writeWaitingLog
+    //     self.killed = True  # Disable all further hooks.
+    //     for w in self.windowList[:]:
+    //         if trace:
+    //             g.pr(f"forceShutdown: {w}")
+    //         self.destroyWindow(w)
+    //     if trace:
+    //         g.pr('before finishQuit')
+    //     self.finishQuit()
+    //@+node:felix.20231120014001.1: *4* app.onQuit
+    // @cmd('exit-leo')
+    // @cmd('quit-leo')
+    // def onQuit(self, event: Event = None) -> None:
+    //     """Exit Leo, prompting to save unsaved outlines first."""
+    //     if 'shutdown' in g.app.debug:
+    //         g.trace()
+    //     # #2433 - use the same method as clicking on the close box.
+    //     g.app.gui.close_event(QCloseEvent())  # type:ignore
+    //@+node:felix.20231120014009.1: *4* app.saveSession
+    /**
+     * Save session data depending on command-line arguments.
+     */
+    public async saveSession(): Promise<void> {
+
+        if (this.sessionManager && (
+            this.loaded_session || this.always_write_session_data
+        )) {
+            await this.sessionManager.save_snapshot();
+        }
+
+    }
     //@+node:felix.20220106225805.1: *3* app.commanders
     /**
      * Return list of currently active controllers
@@ -1329,8 +1467,14 @@ export class LeoApp {
     /**
      * Warn if fn is already open and add fn to already_open_files list.
      */
-    public checkForOpenFile(c: Commands, fn: string): void {
-        const d: any = g.app.db;
+    public async checkForOpenFile(c: Commands, fn: string): Promise<void> {
+
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            return;
+        }
+
+        const d = g.app.db;
         const tag: string = 'open-leo-files';
         if (g.app.reverting) {
             // #302: revert to saved doesn't reset external file change monitoring
@@ -1345,14 +1489,17 @@ export class LeoApp {
         ) {
             return;
         }
-        console.log('TODO : checkForOpenFile');
 
         // #1519: check os.path.exists.
-        /*
-        const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
+        let aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
+        aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
+
+        // ALSO FIX Filename parameter from vscode's dialog !
+        fn = g.os_path_fix_drive(path.normalize(fn)); // path.normalize adds BACKSLASHES ON WINDOWS! 
         let w_any: boolean = false;
         for (let z of aList) {
-            if (fs.existsSync(z) && z.toString().trim() === fn.toString().trim()) {
+            const w_exists = await g.os_path_exists(z);
+            if (w_exists && z.toString().trim() === fn.toString().trim()) {
                 w_any = true;
             }
         }
@@ -1362,27 +1509,29 @@ export class LeoApp {
             // another Leo may have been killed prematurely.
             // Put the file on the global list.
             // A dialog will warn the user such files later.
-            fn = path.normalize(fn);
+
             if (!g.app.already_open_files.includes(fn)) {
-                g.es('may be open in another Leo:', 'red');
+                g.es('may be open in another Leo:');
                 g.es(fn);
+                console.log(`May be open in another Leo: ${fn}`);
                 g.app.already_open_files.push(fn);
             }
 
         } else {
             g.app.rememberOpenFile(fn);
         }
-        */
-        // TODO maybe
-        // Temp fix
-        g.app.rememberOpenFile(fn);
+
     }
     //@+node:felix.20211226221235.3: *4* app.forgetOpenFile
     /**
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
-        console.log('TODO : TEST forgetOpenFile');
+
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            return;
+        }
 
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
@@ -1392,9 +1541,11 @@ export class LeoApp {
             return; // #69.
         }
 
-        const aList: string[] = d[tag] || [];
+        let aList: string[] = d[tag] || [];
+        aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
 
-        fn = path.normalize(fn);
+        // path.normalize is like os.path.normpath in python to add backslashes on Windows.
+        fn = g.os_path_fix_drive(path.normalize(fn));  // path.normalize adds BACKSLASHES ON WINDOWS! 
 
         if (aList.includes(fn)) {
             // aList.remove(fn)
@@ -1402,7 +1553,6 @@ export class LeoApp {
             if (index > -1) {
                 aList.splice(index, 1);
             }
-
             if (trace) {
                 g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
             }
@@ -1411,7 +1561,10 @@ export class LeoApp {
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
-        console.log('TODO : TEST rememberOpenFile');
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            // web
+            return;
+        }
 
         // Do not call g.trace, etc. here.
         const d = g.app.db;
@@ -1427,29 +1580,34 @@ export class LeoApp {
         } else if (g.app.preReadFlag) {
             // pass
         } else {
-            const aList: string[] = d[tag] || [];
+            let aList: string[] = d[tag] || [];
+            aList = aList.map((p_fn: string) => { return p_fn.replace(/\\\\/g, '\\'); });
             // It's proper to add duplicates to this list.
-            aList.push(path.normalize(fn));
+            fn = g.os_path_fix_drive(path.normalize(fn));  // path.normalize adds BACKSLASHES ON WINDOWS! 
+            aList.push(fn);
             d[tag] = aList;
         }
     }
     //@+node:felix.20211226221235.5: *4* app.runAlreadyOpenDialog
-    // def runAlreadyOpenDialog(self, c):
-    //     """Warn about possibly already-open files."""
-    //     if g.app.already_open_files:
-    //         aList = sorted(set(g.app.already_open_files))
-    //         g.app.already_open_files = []
-    //         g.app.gui.dismiss_splash_screen()
-    //         message = (
-    //             'The following files may already be open\n'
-    //             'in another copy of Leo:\n\n' +
-    //             '\n'.join(aList))
-    //         g.app.gui.runAskOkDialog(c,
-    //             title='Already Open Files',
-    //             message=message,
-    //             text="Ok")
-    //@+node:felix.20230518231054.1: *3* app.Import utils
-    //@+node:felix.20230518231054.2: *4* app.scanner_for_at_auto
+    /**
+     *  Warn about possibly already-open files.
+     */
+    public async runAlreadyOpenDialog(c: Commands): Promise<void> {
+        if (g.app.already_open_files && g.app.already_open_files.length) {
+            const aList: string[] = Array.from(new Set(g.app.already_open_files)).sort();
+            g.app.already_open_files = [];
+            g.app.gui.dismiss_splash_screen();
+            const message: string = (
+                'The following files may already be open\n' +
+                'in another copy of Leo:\n\n' +
+                aList.join('\n'));
+            await g.app.gui.runAskOkDialog(c,
+                'Already Open Files',
+                message,
+                "Ok"
+            );
+        }
+    }
     /**
      * A factory returning a scanner function for p, an @auto node.
      */
@@ -1702,8 +1860,8 @@ export class LoadManager {
         g.app.homeLeoDir = await lm.computeHomeLeoDir(); // * The user's home/.leo directory.
         // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs
         // These use g.app.loadDir...
-        g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
-        // g.app.leoEditorDir = join(g.app.loadDir, '..', '..');
+        // g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
+        g.app.leoEditorDir = g.app.vscodeExtensionDir; // join(g.app.loadDir, '..', '..');
         g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
@@ -1746,6 +1904,10 @@ export class LoadManager {
 
         if (os) {
             home = os.homedir();
+        }
+        if (g.isBrowser) {
+            // BROWSER: Root of repo
+            home = g.app.vscodeWorkspaceUri!.fsPath;
         }
 
         if (home) {
@@ -1809,15 +1971,14 @@ export class LoadManager {
         // ! TRY TO GET EXTENSION FOLDER WITHOUT REQUIRING CONTEXT ! 
         const extension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
         if (extension) {
-            loadDir = extension.extensionUri.fsPath; // ! OVERRIDE WITH REAL EXTENION PATH !
+            loadDir = extension.extensionUri.fsPath; // ! OVERRIDE WITH REAL EXTENSION PATH !
         } else {
             console.log(' -------------- leojs EXTENSION FOLDER NOT FOUND --------------');
         }
 
         // const loadDir2 = w_uri?.fsPath;
         loadDir = g.finalize(loadDir);
-        // console.log(' -------------- loadDir => ', loadDir);
-        return loadDir;
+
         /* 
         try:
             # Fix a hangnail: on Windows the drive letter returned by
@@ -2015,18 +2176,36 @@ export class LoadManager {
         return fn if os.path.exists(directory) else None
      */
     //@+node:felix.20220610002953.17: *4* LM.reportDirectories
-    /* 
-    def reportDirectories(self):
-        """Report directories."""
-        # The cwd changes later, so it would be misleading to report it here.
-        for kind, theDir in (
-            ('home', g.app.homeDir),
-            ('leo-editor', g.app.leoEditorDir),
-            ('load', g.app.loadDir),
-            ('config', g.app.globalConfigDir),
-        ):  # g.blue calls g.es_print, and that's annoying.
-            g.es(f"{kind:>10}:", os.path.normpath(theDir), color='blue')
+    /**
+     * Report directories.
      */
+    public reportDirectories(): void {
+        let directories: {
+            kind: string;
+            theDir: string | undefined;
+        }[];
+
+        // The cwd changes later, so it would be misleading to report it here.
+        // ! SKIP FOR BROWSER: NO 'HOME' & NO 'LEO-EDITOR' FOLDERS !
+        if (g.isBrowser) {
+            directories = [
+                { kind: 'repository', theDir: g.app.homeDir },
+            ];
+        } else {
+            // ! LOAD AND CONFIG HAVE NO USE IN LEOJS !
+            directories = [
+                { kind: 'home', theDir: g.app.homeDir },
+                { kind: 'leo-editor', theDir: g.app.leoEditorDir },
+                // { kind: 'load', theDir: g.app.loadDir },
+                // { kind: 'config', theDir: g.app.globalConfigDir },
+            ];
+        }
+
+        for (const { kind, theDir } of directories) {
+            // g.blue calls g.es_print, and that's annoying.
+            g.es(`${kind.padStart(10, ' ')}:`, path.normalize(theDir!));  // path.normalize adds BACKSLASHES ON WINDOWS! 
+        }
+    }
     //@+node:felix.20220406235904.1: *3* LM.Settings
     //@+node:felix.20220406235925.1: *4* LM.computeBindingLetter
     public computeBindingLetter(c: Commands, p_path: string): string {
@@ -2153,6 +2332,8 @@ export class LoadManager {
             try {
                 g.app.preReadFlag = true;
                 c = await lm.openSettingsFile(fn);
+            } catch (e) {
+                console.log('ERROR in getPreviousSettings', e);
             } finally {
                 g.app.preReadFlag = false;
             }
@@ -2197,6 +2378,7 @@ export class LoadManager {
         new_d: any,
         localFlag: boolean
     ): any {
+        // ! NO NEED FOR SHORTCUTS : SO THIS IS UNUSED !
         /* 
         const lm = this;
         if (!old_d){
@@ -2389,11 +2571,10 @@ export class LoadManager {
          */
         if (!(g.unitTesting || g.app.silentMode || g.app.batchMode)) {
             // This occurs early in startup, so use the following.
-            const s = `reading settings in ${fn}`;
+            const s = `reading settings in ${g.os_path_normpath(fn)}`;
             if (g.app.debug.includes('startup')) {
                 console.log(s);
             }
-            // g.es(s, 'blue');
             g.es(s);
         }
         // A useful trace.
@@ -2409,8 +2590,8 @@ export class LoadManager {
         // frame.log.enable(false);
         // g.app.lockLog();
 
-
         let ok: VNode | undefined;
+        let g_element;
         try {
             // ! HACK FOR LEOJS: MAKE COMMANDER FROM FAKE leoSettings.leo STRING !
             const w_fastRead: FastRead = new FastRead(
@@ -2420,7 +2601,6 @@ export class LoadManager {
             const w_leoSettingsUri = vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
             let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
 
-            let g_element;
             if (fn === 'leoSettings.leo') {
                 [ok, g_element] = w_fastRead.readWithJsonTree(
                     fn,
@@ -2434,7 +2614,7 @@ export class LoadManager {
             }
 
         } catch (p_err) {
-            //
+            ok = undefined;
         }
         // g.app.unlockLog();
         g.app.gui = oldGui;
@@ -2527,7 +2707,6 @@ export class LoadManager {
 
         // sets lm.options and lm.files
         await lm.doPrePluginsInit(fileName);
-        g.app.computeSignon();
         g.app.printSignon();
         if (lm.options['version']) {
             return;
@@ -2614,23 +2793,23 @@ export class LoadManager {
             }
         }
 
-        /*
-
-        # Load a session if the command line contains no files.
-        if g.app.sessionManager and not lm.files:
-            try:
-                aList = g.app.sessionManager.load_snapshot()
-                if aList:
-                    g.app.sessionManager.load_session(c1, aList)
-                    if g.app.windowList:
-                        c = c1 = g.app.windowList[0].c
-                    else:
-                        c = c1 = None
-            except Exception:
-                g.es_print('Can not load session')
-                g.es_exception()
-
-        */
+        // Load a session if the command line contains no files.
+        if (g.app.sessionManager && !lm.files.length) {
+            try {
+                const aList = g.app.sessionManager.load_snapshot();
+                if (aList && aList.length) {
+                    await g.app.sessionManager.load_session(c1, aList);
+                    if (g.app.windowList.length) {
+                        c = c1 = g.app.windowList[0].c;
+                    } else {
+                        c = c1 = undefined;
+                    }
+                }
+            } catch (e) {
+                g.es_print('Can not load session');
+                g.es_exception(e);
+            }
+        }
 
         // Enable redraws.
         g.app.disable_redraw = false;
@@ -2651,8 +2830,7 @@ export class LoadManager {
             return false;
         }
         // #199.
-        // LEOJS TODO ?
-        // g.app.runAlreadyOpenDialog(c1);
+        await g.app.runAlreadyOpenDialog(c1!);
 
         // Final inits...
         g.app.logInited = true;
@@ -2676,8 +2854,9 @@ export class LoadManager {
     public async openWorkBook(): Promise<Commands | undefined> {
 
         // TODO !
-
-        void vscode.window.showInformationMessage('TODO : openWorkBook');
+        // void vscode.window.showInformationMessage('TODO : openWorkBook');
+        console.log(' TODO openWorkBook ( new outline instead! ) ');
+        // ! NEEDED ? --> USE A NEW EMPTY FILE INSTEAD ??
 
         const lm: LoadManager = this;
 
@@ -2697,7 +2876,7 @@ export class LoadManager {
             if not exists:
                 c.rootPosition().h = 'Workbook'
         # Create the outline with workbook's name.
-        c.frame.title = title = c.computeWindowTitle(fn)
+        c.frame.title = title = c.computeWindowTitle()
         c.frame.setTitle(title)
         c.openDirectory = c.frame.openDirectory = g.os_path_dirname(fn)
         if hasattr(c.frame, 'top'):
@@ -2726,22 +2905,20 @@ export class LoadManager {
         await lm.computeStandardDirectories();
 
         // Scan the command line options as early as possible.
-        const options = {}; // lm.scanOptions(fileName);
+        const options: Record<string, any> = {}; // lm.scanOptions(fileName);
         lm.options = options; // ! no command line options !
 
-        // const script:string = options['script'];
-        // const verbose:boolean = !script;
+        const script: string = options['script'];
+        const verbose: boolean = !script;
 
         // Init the app.
         await lm.initApp();
 
-        console.log('**************************************************');
-        console.log('*** Uncomment line below to enable Global D.B. ***');
-        console.log('***      // await g.app.setGlobalDb();         ***');
-        console.log('**************************************************');
-        // await g.app.setGlobalDb();
+        await g.app.setGlobalDb();
 
-        // lm.reportDirectories(verbose)
+        if (verbose) {
+            lm.reportDirectories();
+        }
 
         // Read settings *after* setting g.app.config and *before* opening plugins.
         // This means if-gui has effect only in per-file settings.
@@ -2754,8 +2931,7 @@ export class LoadManager {
         const localConfigFile =
             lm.files && lm.files.length ? lm.files[0] : undefined;
 
-        // TODO: ? recent-file management ?
-        // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+        await g.app.recentFilesManager.readRecentFiles(localConfigFile);
 
         // Create the gui after reading options and settings.
         lm.createGui();
@@ -3050,7 +3226,8 @@ export class LoadManager {
     public async loadLocalFile(
         fn: string,
         gui?: LeoGui,
-        old_c?: Commands
+        old_c?: Commands,
+        skipSaveSession?: boolean
     ): Promise<Commands | undefined> {
         /*
             Completely read a file, creating the corresponding outline.
@@ -3067,6 +3244,10 @@ export class LoadManager {
             get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
             or open an empty outline.
         */
+
+        fn = g.os_path_fix_drive(fn); // EMULATE PYTHON WITH CAPITAL DRIVE LETTERS
+        fn = g.os_path_normslashes(fn);
+
         const lm: LoadManager = this;
         let c: Commands | undefined;
 
@@ -3095,6 +3276,11 @@ export class LoadManager {
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
         c = await lm.openFileByName(fn, gui, old_c, previousSettings);
+
+        if (!skipSaveSession) {
+            await g.app.saveSession(); // IN LEOJS: Save sessions here to skip saving session on program exit.
+        }
+
         return c;
     }
     //@+node:felix.20220418012120.1: *5* LM.openEmptyLeoFile
@@ -3181,7 +3367,6 @@ export class LoadManager {
 
         // Do common completion tasks.
         const complete_inits = (c: Commands) => {
-
             // g.app.unlockLog()
             // c.frame.log.enable(True)
             // g.app.writeWaitingLog(c);
@@ -3389,7 +3574,7 @@ export class LoadManager {
         // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
         c.mFileName = fn.endsWith('.leo') ? fn : `${fn}.leo`;
         c.wrappedFileName = fn;
-        c.frame.title = c.computeWindowTitle(c.mFileName);
+        c.frame.title = c.computeWindowTitle();
 
         // chapterController.finishCreate must be called after the first real redraw
         // because it requires a valid value for c.rootPosition().
@@ -3406,7 +3591,7 @@ export class LoadManager {
         if (!fn) {
             return false;
         }
-        console.log('TODO: isZippedFile');
+        // console.log('TODO: isZippedFile');
         // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
         return (
             fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs')
@@ -3460,12 +3645,9 @@ export class LoadManager {
         if (!lm.isLeoFile(fn)) {
             return;
         }
-        // Re-read the file.
-        // const theFile = lm.openAnyLeoFile(fn);
-
-        const w_uri = g.makeVscodeUri(fn);
-
         try {
+            // Re-read the file.
+            const w_uri = g.makeVscodeUri(fn);
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
@@ -3520,7 +3702,7 @@ export class RecentFilesManager {
 
     public edit_headline = 'Recent files. Do not change this headline!';
     public groupedMenus: any[] = [];  // Set in rf.createRecentFilesMenuItems.
-    public recentFiles: any[] = []; // List of g.Bunches describing .leoRecentFiles.txt files.
+    public recentFiles: string[] = []; // List of g.Bunches describing .leoRecentFiles.txt files.
     public recentFilesMenuName = 'Recent Files';  // May be changed later.
     public recentFileMessageWritten = false;  // To suppress all but the first message.
     public write_recent_files_as_needed = false;  // Will be set later.
@@ -3696,7 +3878,7 @@ export class RecentFilesManager {
         //             c.add_command(recentFilesMenu, label=baseName,
         //                 command=recentFilesCallback, underline=0)
         //     else:  # original behavior
-        //         label = f"{accel_ch[i]} {g.computeWindowTitle(name)}"
+        //         label = f"{accel_ch[i]} {c.computeWindowTitle()}"
         //         c.add_command(recentFilesMenu, label=label,
         //             command=recentFilesCallback, underline=0)
         //     i += 1
@@ -3750,8 +3932,7 @@ export class RecentFilesManager {
     /**
      * Read all .leoRecentFiles.txt files.
      */
-    public async readRecentFiles(localConfigFile: string): Promise<void> {
-        // Read all .leoRecentFiles.txt files.
+    public async readRecentFiles(localConfigFile?: string): Promise<void> {
         // The order of files in this list affects the order of the recent files list.
         const rf = this;
         const seen: string[] = [];
@@ -3798,14 +3979,25 @@ export class RecentFilesManager {
     //@+node:felix.20230923185723.12: *4* rf.readRecentFilesFile
     public async readRecentFilesFile(path: string): Promise<boolean> {
         const fileName = g.os_path_join(path, '.leoRecentFiles.txt');
-        const exists = await g.os_path_exists(fileName);
-        if (!exists) {
-            return false;
-        }
         let lines: string[] | undefined;
 
         try {
-            const fileContents = await g.readFileIntoUnicodeString(fileName);
+            let fileContents;
+
+            if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                // * Web
+                fileContents = await g.extensionContext.workspaceState.get(fileName);
+            } else {
+                const exists = await g.os_path_exists(fileName);
+                if (!exists) {
+                    return false;
+                }
+                // * Desktop
+                fileContents = await g.readFileIntoUnicodeString(fileName);
+                if (!fileContents) {
+                    fileContents = "";
+                }
+            }
 
             try {
                 lines = fileContents?.split('\n');
@@ -3816,13 +4008,14 @@ export class RecentFilesManager {
             g.trace('can not open', fileName);
             return false;
         }
-        if (lines && this.sanitize(lines[0]) === 'readonly') {
+        if (lines && lines.length && this.sanitize(lines[0]) === 'readonly') {
             lines = lines.slice(1);
         }
-        if (lines) {
+        if (lines && lines.length) {
             lines = lines.map(line => g.toUnicode(g.os_path_normpath(line)));
             this.appendToRecentFiles(lines);
         }
+
         return true;
     }
     //@+node:felix.20230923185723.13: *3* rf.sanitize
@@ -3912,6 +4105,7 @@ export class RecentFilesManager {
                 rf.createRecentFilesMenuItems(frame.c);
             }
         }
+
     }
     //@+node:felix.20230923185723.17: *3* rf.writeEditedRecentFiles
     /**
@@ -3954,13 +4148,15 @@ export class RecentFilesManager {
         if (localFileName) {
             localPath = g.os_path_split(localFileName)[0];
         }
+
         let written = false;
         const seen: string[] = [];
 
         for (const w_path of [localPath, g.app.globalConfigDir, g.app.homeLeoDir]) {
             if (w_path) {
                 const fileName = g.os_path_join(w_path, tag);
-                if (await g.os_path_exists(fileName) && !seen.includes(fileName.toLowerCase())) {
+                const w_exists = await g.os_path_exists(fileName);
+                if (w_exists && !seen.includes(fileName.toLowerCase())) {
                     seen.push(fileName.toLowerCase());
                     const ok = await rf.writeRecentFilesFileHelper(fileName);
                     if (ok) {
@@ -3980,12 +4176,19 @@ export class RecentFilesManager {
         if (written) {
             rf.recentFileMessageWritten = true;
         } else {
-            if (g.app.homeLeoDir) {
-                const fileName = g.finalize_join(g.app.homeLeoDir, tag);
-                if (!(await g.os_path_exists(fileName))) {
-                    g.red(`creating: ${fileName}`);
+            if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                // * Web
+                await this.writeRecentFilesFileHelper(tag);
+            } else {
+                // * Desktop
+                // Attempt to create .leoRecentFiles.txt in the user's home directory.
+                if (g.app.homeLeoDir) {
+                    const fileName = g.finalize_join(g.app.homeLeoDir, tag);
+                    if (!(await g.os_path_exists(fileName))) {
+                        g.red(`creating: ${fileName}`);
+                    }
+                    await rf.writeRecentFilesFileHelper(fileName);
                 }
-                await rf.writeRecentFilesFileHelper(fileName);
             }
         }
     }
@@ -3993,17 +4196,22 @@ export class RecentFilesManager {
     /**
      * Don't update the file if it begins with read-only.
      */
-    async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
+    public async writeRecentFilesFileHelper(fileName: string): Promise<boolean> {
+
+        const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
+
+        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            await g.extensionContext.workspaceState.update(fileName, s);
+            return true;
+        }
 
         let lines: string[] | undefined = undefined;
 
         // Part 1: Return False if the first line is "readonly".
         if (await g.os_path_exists(fileName)) {
             try {
-
                 const data = await g.readFileIntoUnicodeString(fileName);
                 lines = data?.split('\n');
-
             } catch (error) {
                 lines = undefined;
             }
@@ -4015,10 +4223,7 @@ export class RecentFilesManager {
 
         // Part 2: write the files.
         try {
-            const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
-
-            await g.writeFile(fileName, 'utf-8', g.toUnicode(s),);
-
+            await g.writeFile(g.toUnicode(s), 'utf-8', fileName);
             return true;
         } catch (error) {
             if (error) {

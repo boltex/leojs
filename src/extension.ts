@@ -16,6 +16,9 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
+const activateDebug = false;
+
+
 /**
  * Entry point for Leo in Javascript.
  */
@@ -27,20 +30,22 @@ export async function activate(p_context: vscode.ExtensionContext) {
         g.app = leoApp.LeoApp()
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
-
     */
 
+    (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
-    if (p_context.extensionUri) {
-        console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
+    if (p_context.extensionUri && activateDebug) {
+        console.log('STARTUP: context.extensionUri.fsPath: ', p_context.extensionUri.fsPath);
+        console.log('STARTUP: context.extensionUri.scheme: ', p_context.extensionUri.scheme,);
     }
-
-    console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
-    console.log('STARTUP:             path.sep: ', path.sep);
-    console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
-    console.log('STARTUP:          env appHost: ', vscode.env.appHost);
-    console.log('STARTUP:          process.cwd(): ', process.cwd());
+    if (activateDebug) {
+        console.log('STARTUP:                 g.osBrowser: ', g.isBrowser);
+        console.log('STARTUP:                    path.sep: ', path.sep);
+        console.log('STARTUP:                  env scheme: ', vscode.env.uriScheme);
+        console.log('STARTUP:                 env appHost: ', vscode.env.appHost);
+        console.log('STARTUP:               process.cwd(): ', process.cwd());
+    }
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
@@ -59,15 +64,16 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
+        (g.app as LeoApp).vscodeExtensionDir = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
 
         const gitExtension = vscode.extensions.getExtension<GitAPI.GitExtension>('vscode.git');
         if (gitExtension) {
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT extension installed as g.gitAPI");
-
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT extension installed as g.gitAPI");
+                }
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -80,7 +86,11 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+                }
+
             } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
@@ -98,27 +108,32 @@ export async function activate(p_context: vscode.ExtensionContext) {
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
-            console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+
+            if (activateDebug) {
+                console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+            }
         }
 
         // Test paco
-        console.log('paco start test:  ');
-        const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
-
-        const compressed = pako.deflate(JSON.stringify(test));
-
-        const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
-        console.log('paco restored test:  ', restored);
+        // console.log('paco start test:  ');
+        // const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
+        // const compressed = pako.deflate(JSON.stringify(test));
+        // const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
+        // console.log('paco restored test:  ', restored);
 
 
-        console.log('SQL start test:  ');
+        // console.log('SQL start');
         const sqliteBits = await vscode.workspace.fs.readFile(
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
-        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
+        // console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
         SQL = await initSqlJs(undefined, sqliteBits);
-        console.log("STARTUP:          SQLITE has started");
+
+        if (activateDebug) {
+            console.log("STARTUP:          SQLITE has started");
+        }
+
         (g.SQL as SqlJsStatic) = SQL;
 
 
@@ -143,8 +158,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
         );
         console.log('got db file!!  Length in bytes: ', filebuffer.length);
 
-
-
         // Load the db.
         const db: Database = new SQL.Database(filebuffer);
         console.log('db', db);
@@ -163,8 +176,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
         const w_insertQuery = `INSERT OR IGNORE INTO extra_infos (name, value) VALUES ('${w_dateStringKey}', '${w_dateStringVal}');`;
         console.log("w_insertQuery", w_insertQuery);
-
-
 
         const q_result2 = db.exec(w_insertQuery);
         console.log('result2', q_result2);
@@ -275,29 +286,34 @@ export async function activate(p_context: vscode.ExtensionContext) {
         }
         await runLeo(p_context);
     } else {
-        // Web Browser Extension: CHeck for type of workspace opened first
+        // Web Browser Extension: Check for type of workspace opened first
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
-                    .then(selection => {
-                        if (selection === "More Info") {
-                            vscode.env.openExternal(
-                                vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
-                            ).then(() => { }, (e) => {
-                                console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                            });
-                        }
-                    });
-                console.log('NOT started because not writable workspace');
-                void setStartupDoneContext(true);
-                return;
+
+                // NOTE : ! THIS RETURNS FALSE POSITIVES ! 
+                console.log('NOT WRITABLE WORKSPACE: FALSE POSITIVE?');
+
+                // void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
+                //     .then(selection => {
+                //         if (selection === "More Info") {
+                //             vscode.env.openExternal(
+                //                 vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                //             ).then(() => { }, (e) => {
+                //                 console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                //             });
+                //         }
+                //     });
+                // console.log('NOT started because not writable workspace');
+                // void setStartupDoneContext(true);
+                // return;
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 await runLeo(p_context);
             } else {
@@ -357,8 +373,9 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
         if (!g.app.loadManager && g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 void runLeo(p_context);
             } else {
@@ -392,8 +409,31 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {
-    // pass
+export async function deactivate(): Promise<unknown> {
+    if (g.app) {
+
+        // ! NOT SAVED ON EXIT !
+        // // Save session data.
+        // console.log('------------------------start saveSession');
+
+        // await g.app.saveSession();
+        // // Similar to qt_gui.close_event.
+        // console.log('------------------------end saveSession');
+
+        for (const c of g.app.commanders()) {
+            if (c.exists) {
+                await g.app.closeLeoWindow(c.frame, undefined, true);
+            }
+            // allow = c.exists && g.app.closeLeoWindow(c.frame)
+            // if (!allow)
+            //     return
+        }
+        // sys.exit(0)
+        console.log('LeoJS extension has been deactivated.');
+        return undefined;
+    } else {
+        console.log('no g.app');
+    }
 }
 
 /**

@@ -32,9 +32,14 @@
 - Implemented Leo's atFile, atShadow and external files features
 - Implemented javascript scripting, along with c, g and p references.
 
-# 0.1.6
+# 0.1.6 December 5 2023
 
 - Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
 - Implemented importers
 - Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
 - Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
+- Implemented Global Settings, Sessions and recent files. (saved to db and other files in the .leo folder.)
+- Fixed log pane.
+
+# 0.1.7
+- First feature complete version

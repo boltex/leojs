@@ -58,6 +58,18 @@ var Parser = function () {
 
 // @ts-expect-error
 Parser.prototype.load = function (pickle) {
+    // if (Buffer.isBuffer(pickle)) {
+    //     console.log("It's a Buffer");
+    // } else if (pickle instanceof Uint8Array) {
+    //     console.log("It's a Uint8Array");
+    // } else if (pickle instanceof Uint16Array) {
+    //     console.log("It's a Uint16Array");
+    // } else if (typeof pickle === 'string') {
+    //     console.log("It's a string");
+    // } else {
+    //     console.log("It's an unknown type:", typeof pickle);
+    // }
+
     var MARK = '(', // push special markobject on stack
         STOP = '.', // every pickle ends with STOP
         POP = '0', // discard topmost stack item
@@ -86,7 +98,7 @@ Parser.prototype.load = function (pickle) {
         APPENDS = 'e', // extend list on stack by topmost stack slice
         GET = 'g', // push item from memo on stack; index is string arg
         BINGET = 'h', //   "    "    "    "   "   "  ;   "    " 1-byte arg
-        // missing INST
+        INST = 'i',  // build a class instance
         LONG_BINGET = 'j', // push item from memo on stack; index is 4-byte arg
         LIST = 'l', // build list from topmost stack items
         EMPTY_LIST = ']', // push empty list
@@ -112,8 +124,8 @@ Parser.prototype.load = function (pickle) {
         // protocol 3
         BINBYTES = 'B', // push bytes; counted binary string argument
         SHORT_BINBYTES = 'C'; //  "     "   ;    "      "       "      " < 256 bytes
-    // @ts-expect-error
-    var buffer = new Buffer.from(pickle, 'binary');
+
+    const buffer: any = Buffer.from(pickle, 'binary');
     buffer.readLine = function (i: any) {
         var index = pickle.indexOf('\n', i);
         if (index === -1) {
@@ -125,7 +137,8 @@ Parser.prototype.load = function (pickle) {
     for (var i = 0; i < pickle.length;) {
         var opindex = i,
             opcode = pickle[i++];
-        //console.log('opcode ' + opindex + ' ' + opcode);
+
+        // switch (String.fromCharCode(opcode)) {
         switch (opcode) {
             // protocol 2
             case PROTO:
@@ -197,6 +210,23 @@ Parser.prototype.load = function (pickle) {
             case BINGET:
                 var index = buffer.readUInt8(i++);
                 this.stack.push(this.memo['' + index]);
+                break;
+            case INST:
+                var module = buffer.readLine(i);
+                i += module.length + 1;
+                var name = buffer.readLine(i);
+                i += name.length + 1;
+                var func = emulated[module + '.' + name] as any;
+                if (func === undefined) {
+                    throw "Cannot emulate global: " + module + " " + name;
+                }
+                var obj = new func();
+                var mark = this.marker();
+                for (var pos = mark + 1; pos < this.stack.length; pos += 2) {
+                    obj[this.stack[pos]] = this.stack[pos + 1];
+                }
+                this.stack = this.stack.slice(0, mark);
+                this.stack.push(obj);
                 break;
             case LONG_BINGET:
                 var index = buffer.readUInt32LE(i);

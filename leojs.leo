@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
-<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
+<leo_file xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -23,6 +23,7 @@
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
+<v t="felix.20231127195758.1"><vh>setConfirmBeforeClose</vh></v>
 <v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
 </v>
 </v>
@@ -121,6 +122,7 @@
 <v t="felix.20220930215012.1"><vh>_onDocumentChanged</vh></v>
 <v t="felix.20220930215020.1"><vh>setFindPanel</vh></v>
 <v t="felix.20221101220727.1"><vh>refreshDesc</vh></v>
+<v t="felix.20231127210614.1"><vh>checkConfirmBeforeClose</vh></v>
 </v>
 <v t="felix.20211204144931.1"><vh>Body Editing</vh>
 <v t="felix.20211204144931.2"><vh>triggerBodySave</vh></v>
@@ -250,6 +252,7 @@
 <v t="felix.20220516005841.1"><vh>runAskYesNoCancelDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
+<v t="felix.20231120232158.1"><vh>destroySelf</vh></v>
 </v>
 </v>
 </v>
@@ -1009,6 +1012,9 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
+const activateDebug = false;
+
+
 @language typescript
 @tabwidth -4
 @others
@@ -1047,16 +1053,44 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 - Implemented Leo's atFile, atShadow and external files features
 - Implemented javascript scripting, along with c, g and p references.
 
-# 0.1.6
+# 0.1.6 December 5 2023
 
 - Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
 - Implemented importers
 - Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
 - Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
+- Implemented Global Settings, Sessions and recent files. (saved to db and other files in the .leo folder.)
+- Fixed log pane.
+
+# 0.1.7
+- First feature complete version
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
-export function deactivate() {
-    // pass
+export async function deactivate(): Promise&lt;unknown&gt; {
+    if (g.app) {
+
+        // ! NOT SAVED ON EXIT !
+        // // Save session data.
+        // console.log('------------------------start saveSession');
+
+        // await g.app.saveSession();
+        // // Similar to qt_gui.close_event.
+        // console.log('------------------------end saveSession');
+
+        for (const c of g.app.commanders()) {
+            if (c.exists) {
+                await g.app.closeLeoWindow(c.frame, undefined, true);
+            }
+            // allow = c.exists &amp;&amp; g.app.closeLeoWindow(c.frame)
+            // if (!allow)
+            //     return
+        }
+        // sys.exit(0)
+        console.log('LeoJS extension has been deactivated.');
+        return undefined;
+    } else {
+        console.log('no g.app');
+    }
 }
 
 </t>
@@ -1526,20 +1560,22 @@ export async function activate(p_context: vscode.ExtensionContext) {
         g.app = leoApp.LeoApp()
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
-
     */
 
+    (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
-    if (p_context.extensionUri) {
-        console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
+    if (p_context.extensionUri &amp;&amp; activateDebug) {
+        console.log('STARTUP: context.extensionUri.fsPath: ', p_context.extensionUri.fsPath);
+        console.log('STARTUP: context.extensionUri.scheme: ', p_context.extensionUri.scheme,);
     }
-
-    console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
-    console.log('STARTUP:             path.sep: ', path.sep);
-    console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
-    console.log('STARTUP:          env appHost: ', vscode.env.appHost);
-    console.log('STARTUP:          process.cwd(): ', process.cwd());
+    if (activateDebug) {
+        console.log('STARTUP:                 g.osBrowser: ', g.isBrowser);
+        console.log('STARTUP:                    path.sep: ', path.sep);
+        console.log('STARTUP:                  env scheme: ', vscode.env.uriScheme);
+        console.log('STARTUP:                 env appHost: ', vscode.env.appHost);
+        console.log('STARTUP:               process.cwd(): ', process.cwd());
+    }
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
@@ -1558,15 +1594,16 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
+        (g.app as LeoApp).vscodeExtensionDir = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
 
         const gitExtension = vscode.extensions.getExtension&lt;GitAPI.GitExtension&gt;('vscode.git');
         if (gitExtension) {
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT extension installed as g.gitAPI");
-
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT extension installed as g.gitAPI");
+                }
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -1579,7 +1616,11 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+                }
+
             } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
@@ -1597,27 +1638,32 @@ export async function activate(p_context: vscode.ExtensionContext) {
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
-            console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+
+            if (activateDebug) {
+                console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+            }
         }
 
         // Test paco
-        console.log('paco start test:  ');
-        const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
-
-        const compressed = pako.deflate(JSON.stringify(test));
-
-        const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
-        console.log('paco restored test:  ', restored);
+        // console.log('paco start test:  ');
+        // const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
+        // const compressed = pako.deflate(JSON.stringify(test));
+        // const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
+        // console.log('paco restored test:  ', restored);
 
 
-        console.log('SQL start test:  ');
+        // console.log('SQL start');
         const sqliteBits = await vscode.workspace.fs.readFile(
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
-        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
+        // console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
         SQL = await initSqlJs(undefined, sqliteBits);
-        console.log("STARTUP:          SQLITE has started");
+
+        if (activateDebug) {
+            console.log("STARTUP:          SQLITE has started");
+        }
+
         (g.SQL as SqlJsStatic) = SQL;
 
 
@@ -1642,8 +1688,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
         );
         console.log('got db file!!  Length in bytes: ', filebuffer.length);
 
-
-
         // Load the db.
         const db: Database = new SQL.Database(filebuffer);
         console.log('db', db);
@@ -1662,8 +1706,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
         const w_insertQuery = `INSERT OR IGNORE INTO extra_infos (name, value) VALUES ('${w_dateStringKey}', '${w_dateStringVal}');`;
         console.log("w_insertQuery", w_insertQuery);
-
-
 
         const q_result2 = db.exec(w_insertQuery);
         console.log('result2', q_result2);
@@ -1774,29 +1816,34 @@ export async function activate(p_context: vscode.ExtensionContext) {
         }
         await runLeo(p_context);
     } else {
-        // Web Browser Extension: CHeck for type of workspace opened first
+        // Web Browser Extension: Check for type of workspace opened first
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
-                    .then(selection =&gt; {
-                        if (selection === "More Info") {
-                            vscode.env.openExternal(
-                                vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
-                            ).then(() =&gt; { }, (e) =&gt; {
-                                console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                            });
-                        }
-                    });
-                console.log('NOT started because not writable workspace');
-                void setStartupDoneContext(true);
-                return;
+
+                // NOTE : ! THIS RETURNS FALSE POSITIVES ! 
+                console.log('NOT WRITABLE WORKSPACE: FALSE POSITIVE?');
+
+                // void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
+                //     .then(selection =&gt; {
+                //         if (selection === "More Info") {
+                //             vscode.env.openExternal(
+                //                 vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                //             ).then(() =&gt; { }, (e) =&gt; {
+                //                 console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                //             });
+                //         }
+                //     });
+                // console.log('NOT started because not writable workspace');
+                // void setStartupDoneContext(true);
+                // return;
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 await runLeo(p_context);
             } else {
@@ -2764,6 +2811,7 @@ import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { RClick } from "./core/mod_scripting";
+import { nullButtonWidget } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -2808,7 +2856,12 @@ public refreshTreeRoot(): void {
 
         const c = g.app.windowList[g.app.gui.frameIndex].c;
 
-        const d = c.theScriptingController.buttonsArray;
+        let d: nullButtonWidget[];
+        if (c &amp;&amp; c.theScriptingController) {
+            d = c.theScriptingController.buttonsArray || [];
+        } else {
+            d = [];
+        }
 
         const buttons = [];
 
@@ -3703,6 +3756,7 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
+    public lastRefreshHadDirty = false; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -3950,7 +4004,6 @@ private _triggerGetStates(): void {
         this.refreshUndoPane();
     }
     // Set leoChanged and leoOpenedFilename
-
     this.leoStates.leoChanged = c.changed;
     this.leoStates.leoOpenedFileName = c.fileName();
 
@@ -3993,6 +4046,7 @@ public showOutline(p_focusOutline?: boolean): void {
  */
 private _refreshDocumentsPane(): void {
     this._leoDocumentsProvider.refreshTreeRoot();
+    this.checkConfirmBeforeClose();
 }
 
 </t>
@@ -4602,7 +4656,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4673,9 +4727,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 {
   "command": "leojs.recentLeoFiles",
+  "title": "Recent Files",
   "category": "Leojs",
   "enablement": "leojsReady",
-  "title": "Recent Files"
+  "icon": {
+    "light": "resources/light/open-recent.svg",
+    "dark": "resources/dark/open-recent.svg"
+  }
 },
 {
   "command": "leojs.switchLeoFile",
@@ -6083,6 +6141,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "group": "navigation@9"
   },
   {
+    "command": "leojs.recentLeoFiles",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
+    "group": "navigation@8"
+  },
+  {
     "command": "leojs.findQuickSelected",
     "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
@@ -7015,15 +7078,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const button = d[p_node.button.index];
-
     let result: any;
-
     if (p_node.rclicks.length) {
         // Has rclicks so show menu to choose
         this._rclickSelected = [];
@@ -7033,7 +7091,6 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         if (
             p_picked
         ) {
-
             // Check if only one in this._rclickSelected and is zero: normal press
             if (this._rclickSelected.length === 1 &amp;&amp; this._rclickSelected[0] === 0) {
                 // Normal 'top' button, not one of it's child rclicks.
@@ -7056,7 +7113,6 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
                     if (w_rclickChosen) {
                         result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
                     }
-
                 } else {
                     // Normal 'top' button.
                     result = await Promise.resolve(button.command());
@@ -7098,17 +7154,11 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const tag: string = 'remove_button';
-
     const index = p_node.button.index;
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const butWidget = d[index];
-
     if (butWidget) {
         try {
             d.splice(index, 1);
@@ -7118,9 +7168,7 @@ public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
     } else {
         console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
     }
-
     this.setupRefresh(Focus.NoChange, { buttons: true });
-
     return this.launchRefresh();
 
 }
@@ -7172,7 +7220,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         // node from other tree that has this command in title
 
         if (p_uri &amp;&amp; p_uri?.fsPath?.trim() &amp;&amp; g.app.loadManager) {
-            fileName = p_uri.fsPath.replace(/\\/g, '/');
+            fileName = p_uri.fsPath;
         } else {
             fileName = await this.runOpenFileDialog(
                 undefined,
@@ -7226,14 +7274,28 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
  * * Shows the recent Leo files list, choosing one will open it
  * @returns A promise that resolves when the a file is finally opened, rejected otherwise
  */
-public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
-
-    void vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
+public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
 
     // if shown, chosen and opened
-    return Promise.resolve(true);
+    const w_recentFiles: string[] = g.app.recentFilesManager.recentFiles;
 
-    // return Promise.resolve(undefined); // if cancelled
+    let q_chooseFile: Thenable&lt;string | undefined&gt;;
+    if (w_recentFiles.length) {
+        q_chooseFile = vscode.window.showQuickPick(w_recentFiles, {
+            placeHolder: Constants.USER_MESSAGES.OPEN_RECENT_FILE,
+        });
+    } else {
+        // No file to list
+        return Promise.resolve(undefined);
+    }
+    const w_result = await q_chooseFile;
+    if (w_result) {
+        return this.openLeoFile(vscode.Uri.file(w_result));
+    } else {
+        // Canceled
+        return Promise.resolve(undefined);
+    }
+
 }
 
 </t>
@@ -9330,9 +9392,17 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
             });
         }
         if (multiple) {
-            return names;
+
+            return names.map((p_name) =&gt; {
+                let fileName = g.os_path_fix_drive(p_name);
+                fileName = g.os_path_normslashes(fileName);
+                return fileName;
+            });
         } else {
-            return names.length ? names[0] : ""; // Not multiple: return as string!
+            // Not multiple: return as string!
+            let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
         }
     });
 }
@@ -9368,14 +9438,9 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
     ).then((p_uri) =&gt; {
         if (p_uri) {
-            // console.log('CHOSE SAVE URI');
-            // console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
-            // console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
-            // console.log('SAVE toString: ' + p_uri.toString());
-            // console.log('test path: ' + path.normalize(p_uri.path));
-
-
-            return p_uri.fsPath;
+            let fileName = g.os_path_fix_drive(p_uri.fsPath);
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
         } else {
             return "";
         }
@@ -11023,13 +11088,10 @@ private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promis
     w_choices.push(
         ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
     );
-
     const w_options: vscode.QuickPickOptions = {
         placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
     };
-
     const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
-
     if (w_picked) {
         this._rclickSelected.push(w_picked.index);
         if (topLevelName &amp;&amp; w_picked.index === 0) {
@@ -11053,18 +11115,11 @@ private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promis
 public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const tag = 'goto_script';
-
     const index = p_node.button.index;
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const butWidget = d[index];
-
-    console.log('goto script ! :  button', p_node);
 
     if (butWidget) {
 
@@ -11102,7 +11157,6 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         }
 
     }
-
     return Promise.resolve(false);
 
 }
@@ -11176,8 +11230,9 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 void runLeo(p_context);
             } else {
@@ -11600,7 +11655,9 @@ public showLogPane(p_focus?: boolean): Thenable&lt;unknown&gt; {
  * * Hides the log pane
  */
 public hideLogPane(): void {
-    this._leoLogPane.hide();
+    if (this._leoLogPane) {
+        this._leoLogPane.hide();
+    }
 }
 
 </t>
@@ -12919,10 +12976,8 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
         action = "undo"; // Constants.LEOBRIDGE.UNDO;
         repeat = (-p_undo.beadIndex) + 1;
     }
-
     const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
-
     for (let x = 0; x &lt; repeat; x++) {
         if (action === "redo") {
             if (u.canRedo()) {
@@ -12934,7 +12989,6 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
             }
         }
     }
-
     this.setupRefresh(
         Focus.Outline,
         {
@@ -13189,9 +13243,7 @@ public static OLD_POS_OFFSETS = {
 </t>
 <t tx="felix.20221026222034.1">public set_focus(commander: Commands, widget: any): void {
     this.focusWidget = widget;
-
     const w_widgetName = this.widget_name(widget);
-
     // * LeoJS custom finalFocus replacement.
     if (widget &amp;&amp; this.finalFocus === Focus.NoChange) {
         // * Check which panel to focus
@@ -13356,8 +13408,6 @@ public refreshDesc(): void {
     //         this._leoTreeExView.description = "";
     //     }
     // }
-
-
 
 }
 
@@ -14899,6 +14949,34 @@ get leoEditHeadline(): boolean {
 set leoEditHeadline(p_value: boolean) {
     this._leoEditHeadline = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_EDIT_HEADLINE, p_value);
+}
+
+</t>
+<t tx="felix.20231120232158.1">public destroySelf(): void {
+    // pass // Nothing more needs to be done once all windows have been destroyed.
+}
+
+</t>
+<t tx="felix.20231127195758.1">public setConfirmBeforeClose(p_state: boolean): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("window")
+        .update("confirmBeforeClose", p_state ? "always" : "never", true);
+}
+
+</t>
+<t tx="felix.20231127210614.1">public checkConfirmBeforeClose(): void {
+
+    let hasDirty = false;
+    for (const frame of g.app.windowList) {
+        if (frame.c.changed) {
+            hasDirty = true;
+        }
+    }
+    if (hasDirty !== this.lastRefreshHadDirty) {
+        // don't wait for this promise!
+        void this.config.setConfirmBeforeClose(hasDirty);
+    }
+    this.lastRefreshHadDirty = hasDirty;
+
 }
 
 </t>

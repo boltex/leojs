@@ -64,6 +64,7 @@ import { SqlJsStatic } from 'sql.js';
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
+export let extensionContext: vscode.ExtensionContext;
 export let extensionUri: vscode.Uri;  // For accessing files in extension package.
 
 //@+<< define g.globalDirectiveList >>
@@ -166,7 +167,7 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
 
 //@-<< define global decorator dicts >>
 //@+<< define global error regexes >>
-//@+node:felix.20230724131219.1: ** << define global error regexes >> (leoGlobals.py)
+//@+node:felix.20230724131219.1: ** << define global error regexes >>
 // Most code need only know about the *existence* of these patterns.
 
 // For all *present* patterns, m.group(1) is the filename and m.group(2) is the line number.
@@ -281,6 +282,8 @@ export let inScript: boolean = false; // A synonym for app.inScript
 export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 
 export let unicode_warnings: { [key: string]: any } = {}; // Keys are callers.
+
+export const logBuffer: string[] = [];
 
 //@+others
 //@+node:felix.20230413003654.1: ** g.codecs
@@ -674,14 +677,14 @@ export function callers(
     // if (verbose) {
     // return ''; //''.join([f"\n  {z}" for z in result]);
     // }
-    return result.join(',');
+    return `callers ${n} total shown: ${i} \n` + result.join(',\n');
 }
 
 //@+node:felix.20211104212435.1: *3* g._callerName
 export function _callerName(n: number, verbose: boolean = false): string {
     // TODO : see Error().stack to access names from the call stack
     return new Error().stack?.split("\n")[n] || ''; // or something close to that
-    return '<_callerName>';
+    // return '<_callerName>';
 }
 
 //@+node:felix.20211104220458.1: *3* g.get_line & get_line__after
@@ -1654,6 +1657,9 @@ export async function rmdir(folderName: string): Promise<void> {
     await vscode.workspace.fs.delete(w_uri, { recursive: true });
 }
 //@+node:felix.20220511212935.1: *3* g.computeWindowTitle
+/**
+ * @deprecated
+ */
 export function computeWindowTitle(fileName: string): string {
     let branch;
     let commit;
@@ -1882,9 +1888,10 @@ export async function makeAllNonExistentDirectories(
 export function openWithFileName(
     fileName: string,
     old_c?: Commands,
-    gui?: LeoGui
+    gui?: LeoGui,
+    skipSaveSession?: boolean
 ): Promise<Commands | undefined> {
-    return app.loadManager!.loadLocalFile(fileName, gui, old_c);
+    return app.loadManager!.loadLocalFile(fileName, gui, old_c, skipSaveSession);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
 /**
@@ -2127,9 +2134,9 @@ export async function writeFile(
 
         return true;
     } catch (e) {
-        console.log(`exception writing: ${fileName}:\n${e}`);
-        // g.trace(g.callers())
-        // g.es_exception()
+        console.log(`exception writing: ${fileName}`);
+        trace(callers());
+        es_exception(e);
         return false;
     }
 }
@@ -2775,6 +2782,17 @@ export function getVSCodeRepository(c: Commands): null | GitAPI.Repository {
     const w_uri = makeVscodeUri(filename);
     return gitAPI.getRepository(w_uri);
 }
+//@+node:felix.20231125162441.1: *3* g.gitBranchName
+/**
+ * Return the git branch name associated with path/.git, or the empty
+ * string if path/.git does not exist. If path is None, use the leo-editor
+ * directory.
+ */
+export function gitBranchName(p_path?: string): string {
+    let [branch, commit] = gitInfo(p_path);
+    return branch;
+}
+
 //@+node:felix.20220511213305.1: *3* g.gitInfoForFile
 /**
  * Return the git (branch, commit) info associated for the given file.
@@ -4109,26 +4127,28 @@ export const warning = es_print;
 
 //@+node:felix.20211104212741.1: *3* g.es
 export function es(...args: any[]): void {
-    if (app && app.gui) {
-        let s: string = '';
-        args.forEach((p_entry) => {
-            if (s) {
-                s += ' ';
-            }
-            if (typeof p_entry === 'string' || p_entry instanceof String) {
-                // it's a string
-                s += p_entry;
+    let s: string = '';
+    args.forEach((p_entry) => {
+        if (s) {
+            s += ' ';
+        }
+        if (typeof p_entry === 'string' || p_entry instanceof String) {
+            // it's a string
+            s += p_entry;
+        } else {
+            if (p_entry !== undefined) {
+                s += p_entry.toString();
             } else {
-                if (p_entry !== undefined) {
-                    s += p_entry.toString();
-                } else {
-                    s += 'undefined';
-                }
+                s += 'undefined';
             }
-        });
+        }
+    });
+
+    if (app && app.gui) {
         app.gui.addLogPaneEntry(s);
     } else {
-        console.log(...args);
+        logBuffer.push(s);
+        console.log("Log Pane Not Ready: ", s);
     }
 }
 
@@ -4209,6 +4229,8 @@ export function es_print(...args: any[]): void {
     pr(...args);
     if (app && app.gui && !unitTesting) {
         es(...args);
+    } else {
+        logBuffer.push(...args);
     }
 }
 //@+node:felix.20211227232452.1: *3* g.internalError
@@ -4671,9 +4693,10 @@ export function finalize(p_path: string): string {
     p_path = path.resolve(p_path);
 
     // p_path = os.path.normpath(p_path)
-    p_path = path.normalize(p_path);
+    p_path = path.normalize(p_path); // path.normalize adds BACKSLASHES ON WINDOWS! 
 
     // Convert backslashes to forward slashes, regardless of platform.
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4716,9 +4739,10 @@ export function finalize_join(...args: string[]): string {
     // w_path = os.path.normpath(w_path)
 
     w_path = path.resolve(w_path);
-    w_path = path.normalize(w_path);
+    w_path = path.normalize(w_path);  // path.normalize adds BACKSLASHES ON WINDOWS! 
 
     // Convert backslashes to forward slashes, regardless of platform.
+    w_path = os_path_fix_drive(w_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
     w_path = os_path_normslashes(w_path);
     return w_path;
 }
@@ -4749,7 +4773,7 @@ export function os_path_abspath(p_path: string): string {
     p_path = path.resolve(p_path);
 
     // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         p_path = p_path.split('\\').join('/');
     }
     return p_path;
@@ -4763,7 +4787,21 @@ export function os_path_basename(p_path: string): string {
     if (!p_path) {
         return '';
     }
+
+    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+        p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
+        let lastSlashIndex = p_path.lastIndexOf('/');
+
+        if (lastSlashIndex === -1) {
+            return p_path;
+        };
+
+        p_path = p_path.substring(lastSlashIndex + 1);
+        return p_path;
+    }
+
     p_path = path.basename(p_path);
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4772,16 +4810,30 @@ export function os_path_basename(p_path: string): string {
  * Return the first half of the pair returned by split(path).
  */
 export function os_path_dirname(p_path?: string): string {
+
     if (!p_path) {
         return '';
+    }
+
+    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+        p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
+        let lastSlashIndex = p_path.lastIndexOf('/');
+
+        if (lastSlashIndex === -1) {
+            return '';
+        }
+        p_path = p_path.substring(0, lastSlashIndex);
+
+        return p_path;
     }
 
     p_path = path.dirname(p_path);
     // os.path.normpath does the *reverse* of what we want.
 
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         p_path = p_path.split('\\').join('/');
     }
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
 
     return p_path;
 }
@@ -4827,9 +4879,9 @@ export function os_path_expanduser(p_path: string): string {
             if (p_path.startsWith('~\\')) {
                 p_path = p_path.replace('~', homeDir);
             }
-            p_path = p_path.replace('\\\\', '\\');
+            p_path = p_path.replace(/\\\\/g, '\\');
         }
-        p_path = p_path.replace('//', '/');
+        p_path = p_path.replace(/\/\//g, '/');
     }
     return p_path;
 
@@ -5032,33 +5084,38 @@ export function os_path_join(...args: any[]): string {
     w_path = os_path_normslashes(w_path);
     return w_path;
 }
+//@+node:felix.20231119175232.1: *3* g.os_path_fix_drive
+export function os_path_fix_drive(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+    return p_path.replace(/^([a-z]):/, (match, driveLetter) => driveLetter.toUpperCase() + ':');
+}
+
 //@+node:felix.20211227182611.16: *3* g.os_path_normcase
 /**
- * Normalize the path's case.
+ * Normalize the path's case.  Also Replace backslashes for slashes.
  */
 export function os_path_normcase(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         p_path = p_path.toLowerCase();
     }
+    p_path = os_path_fix_drive(p_path);
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
 //@+node:felix.20211227182611.17: *3* g.os_path_normpath
 /**
- * Normalize the path.
+ * Normalize the path. Also Replace backslashes for slashes.
  */
 export function os_path_normpath(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    p_path = path.normalize(p_path);
-    // os.path.normpath does the *reverse* of what we want.
-    // if (isWindows) {
-    //     p_path = p_path.split('\\').join('/').toLowerCase();
-    // }
+    p_path = path.normalize(p_path); // ADDS BACKSLASHES ON WINDOWS like os.path.normpath in PYTHON
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -5073,9 +5130,7 @@ export function os_path_normslashes(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/');
-    }
+    p_path = p_path.split('\\').join('/');
     return p_path;
 }
 //@+node:felix.20211227182611.19: *3* g.os_path_realpath
@@ -5198,7 +5253,7 @@ export function os_path_split(p_path: string): [string, string] {
     }
 
     let testPath = p_path;
-    if (isWindows) {
+    if (isWindows || isBrowser) {
         testPath = testPath.split('\\').join('/');
     }
 

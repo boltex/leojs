@@ -13,6 +13,7 @@ import 'date-format-lite';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 import * as difflib from 'difflib';
+import { Database } from 'sql.js';
 var binascii = require('binascii');
 var pickle = require('./jpicklejs');
 
@@ -212,7 +213,7 @@ export class FastRead {
             // g.es_print('\n' + message, 'red');
             g.es_print('\n' + message);
             g.es_print(g.toUnicode((e as any).toString()));
-            // console.log('');
+
             return [undefined, undefined]; // #1510: Return a tuple.
         }
 
@@ -291,7 +292,10 @@ export class FastRead {
         try {
             // The javascript binascii library needs a string representation.
             const string_val = g.toUnicode(val);
-            binString = binascii.unhexlify(string_val);
+
+            // unhexlify is string to string
+            // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
+            binString = binascii.unhexlify(string_val); // unhexlify is string to string
 
         } catch (e) {
             // Assume that Leo 4.1 or above wrote the attribute.
@@ -308,6 +312,9 @@ export class FastRead {
         } catch (err) {
             try {
                 // TODO: cannot use second string 'bytes' parameter
+                console.log(' TODO FIX THIS!', "cannot use second string 'bytes' parameter");
+                console.log('typeof binString', typeof binString);
+                // binString = g.toUnicode(binString as Uint8Array);
                 const val2 = pickle.loads(binString);
                 return g.toUnicode(val2);
             } catch (e) {
@@ -321,47 +328,25 @@ export class FastRead {
      * Get global data from the cache, with reasonable defaults.
      */
     public scanGlobals(g_element: any): void {
-        // TODO ? Not Needed in leojs ?
-        /*
+
         const c: Commands = this.c;
-        let d = this.getGlobalData();
-        windowSize = g.app.loadManager.options.get('windowSize')
-        windowSpot = g.app.loadManager.options.get('windowSpot')
-        if windowSize is not undefined
-            h, w = windowSize  // checked in LM.scanOption.
-        else
-            w, h = d.get('width'), d.get('height')
 
-        if windowSpot is undefined
-            x, y = d.get('left'), d.get('top')
-        else
-            y, x = windowSpot  // #1263: (top, left)
+        const d = this.getGlobalData(); // this gets data FROM DATABASE
 
-        if 'size' in g.app.debug
-            g.trace(w, h, x, y, c.shortFileName())
+        let [w, h] = [d['width'], d['height']];
+
+        let [x, y] = [d['left'], d['top']];
+
+        if (g.app.debug.includes('size')) {
+            g.trace(w, h, x, y, c.shortFileName());
+        }
 
         // c.frame may be a NullFrame.
-        c.frame.setTopGeometry(w, h, x, y)
-        r1, r2 = d.get('r1'), d.get('r2')
-        c.frame.resizePanesToRatio(r1, r2)
-        frameFactory = getattr(g.app.gui, 'frameFactory', undefined)
+        c.frame.setTopGeometry(w, h, x, y);
 
-        if not frameFactory
-            return;
+        let [r1, r2] = [d['r1'], d['r2']];
+        c.frame.resizePanesToRatio(r1, r2);
 
-        assert frameFactory is not undefined
-        mf = frameFactory.masterFrame;
-
-        if g.app.start_minimized
-            mf.showMinimized();
-        else if g.app.start_maximized
-            // #1189: fast.scanGlobals calls showMaximized later.
-            mf.showMaximized();
-        else if g.app.start_fullscreen
-            mf.showFullScreen();
-        else
-            mf.show();
-        */
     }
     //@+node:felix.20211213223342.9: *5* fast.getGlobalData
     /**
@@ -376,27 +361,24 @@ export class FastRead {
         r2: number;
     } {
         const c: Commands = this.c;
-
-        // TODO
-        /*
-        try
-            window_pos = c.db.get('window_position')
-            r1 = float(c.db.get('body_outline_ratio', '0.5'))
-            r2 = float(c.db.get('body_secondary_ratio', '0.5'))
-            top, left, height, width = window_pos
+        try {
+            const window_pos: [number, number, number, number] = c.db.get('window_position') || [50, 50, 500, 800];
+            const r1 = Number(c.db.get('body_outline_ratio', '0.5'));
+            const r2 = Number(c.db.get('body_secondary_ratio', '0.5'));
+            const [top, left, height, width] = window_pos;
             return {
-                'top': int(top),
-                'left': int(left),
-                'height': int(height),
-                'width': int(width),
+                'top': Number(top),
+                'left': Number(left),
+                'height': Number(height),
+                'width': Number(width),
                 'r1': r1,
                 'r2': r2,
             };
-        except Exception:
-            pass
-        */
-
-        // Use reasonable defaults.
+        } catch (e) {
+            console.log("GOT ERROR IN getGlobalData", e);
+            // pass
+        }
+        // Default to reasonable defaults.
         return {
             top: 50,
             left: 50,
@@ -627,12 +609,13 @@ export class FastRead {
      * Set the geometries from the globals dict.
      */
     public scanJsonGlobals(json_d: { [key: string]: any }): void {
-        return;
-        // ? Needed ?
 
         const c: Commands = this.c;
         const toInt = (x: number, d_val: number): number => {
             try {
+                if (typeof x !== 'number') {
+                    return d_val;
+                }
                 return Math.floor(x);
             } catch (exception) {
                 return d_val;
@@ -683,27 +666,9 @@ export class FastRead {
             g.trace(width, height, left, top, c.shortFileName());
         }
         // c.frame may be a NullFrame.
-        // ? NOT NEEDED ?
-        // c.frame.setTopGeometry(width, height, left, top);
-        // ? NOT NEEDED ?
-        // c.frame.resizePanesToRatio(r1, r2);
-        const frameFactory: any = undefined; // getattr(g.app.gui, 'frameFactory', undefined);
-        if (!frameFactory) {
-            return;
-        }
-        // ? NOT NEEDED ?
-        // g.assert(frameFactory !== undefined);
-        // const mf = frameFactory.masterFrame;
-        // if (g.app.start_minimized){
-        //     mf.showMinimized();
-        // }else if (g.app.start_maximized){
-        //     // #1189: fast.scanGlobals calls showMaximized later.
-        //     mf.showMaximized();
-        // }else if (g.app.start_fullscreen){
-        //     mf.showFullScreen();
-        // }else{
-        //     mf.show();
-        // }
+        c.frame.setTopGeometry(width, height, left, top);
+        c.frame.resizePanesToRatio(r1, r2);
+
     }
     //@+node:felix.20230322233910.3: *4* fast.scanJsonTnodes
     public scanJsonTnodes(t_elements: any): { [key: string]: string } {
@@ -1307,9 +1272,6 @@ export class FileCommands {
         return p;
     }
 
-    // TODO ?
-    // getLeoOutline = getLeoOutlineFromClipboard  // for compatibility
-
     //@+node:felix.20211213224232.5: *5* fc.getLeoOutlineFromClipBoardRetainingClones
     /**
      * Read a Leo outline from string s in clipboard format.
@@ -1435,9 +1397,10 @@ export class FileCommands {
             v = await fc._getLeoFileByName(p_path, readAtFileNodesFlag);
         }
         if (v) {
+            // LEOJS: This would apply last opened file ratio to this new one. Let it be.
             // c.frame.resizePanesToRatio(c.frame.ratio, c.frame.secondary_ratio);
             if (checkOpenFiles) {
-                g.app.checkForOpenFile(c, p_path);
+                await g.app.checkForOpenFile(c, p_path);
             }
         }
         return v;
@@ -1472,7 +1435,7 @@ export class FileCommands {
             if (w_fromDb) {
                 v = w_fromDb;
             } else {
-                v = await fc.initNewDb();
+                v = await fc.initNewDb(p_path);
             }
             if (!v) {
                 return undefined;
@@ -1704,14 +1667,15 @@ export class FileCommands {
 
         const vnodes: VNode[] = [];
 
-        // return Promise.resolve(undefined);
         const w_uri = g.makeVscodeUri(fileName);
+
         const filebuffer = await vscode.workspace.fs.readFile(w_uri);
 
         const conn = new g.SQL.Database(filebuffer);
 
         try {
             const resultElements = conn.exec(sql)[0];
+
             for (const row of resultElements.values) {
                 let [gnx, h, b, children, parents, iconVal, statusBits, ua] = row;
                 try {
@@ -1752,16 +1716,17 @@ export class FileCommands {
                 g.internalError(er);
             }
             // there is no vnodes table
+            conn.close();
             return undefined;
         }
 
         // * as string, will be converted below.
         const rootChildren = vnodes.filter(x => (x.parents as unknown as string[]).includes('hidden-root-vnode-gnx'));
-
         // const rootChildren = [x for x in vnodes if 'hidden-root-vnode-gnx' in x.parents]
 
         if (!rootChildren.length) {
             g.trace('there should be at least one top level node!');
+            conn.close();
             return undefined;
         }
 
@@ -1776,13 +1741,14 @@ export class FileCommands {
         }
         c.hiddenRootNode.children = rootChildren;
 
-        console.log('TODO: getWindowGeometryFromDb to get current_position when opening db file');
+        let [w, h, x, y, r1, r2, encp] = fc.getWindowGeometryFromDb(conn);
+        // Got what we needed 
+        conn.close();
 
-        // let [w, h, x, y, r1, r2, encp] = fc.getWindowGeometryFromDb(conn);
-        // c.frame.setTopGeometry(w, h, x, y);
-        // c.frame.resizePanesToRatio(r1, r2);
-        // const p = fc.decodePosition(encp);
-        // c.setCurrentPosition(p);
+        c.frame.setTopGeometry(w, h, x, y);
+        c.frame.resizePanesToRatio(r1, r2);
+        const p = fc.decodePosition(encp);
+        c.setCurrentPosition(p);
         return rootChildren[0];
 
     }
@@ -1790,40 +1756,59 @@ export class FileCommands {
     /**
      * Initializes tables and returns None
      */
-    public async initNewDb(): Promise<VNode> {
-
-        const conn = new g.SQL.Database();
+    public async initNewDb(fileName: string): Promise<VNode> {
 
         const c: Commands = this.c;
         const fc: FileCommands = this;
         const v: VNode = new VNode(c);
         c.hiddenRootNode.children = [v];
-        // (w, h, x, y, r1, r2, encp) = fc.getWindowGeometryFromDb(conn)
-        // c.frame.setTopGeometry(w, h, x, y)
-        // c.frame.resizePanesToRatio(r1, r2)
-        await fc.exportToSqlite(c.mFileName);
+
+        const [w, h, x, y, r1, r2, encp] = [600, 400, 50, 50, 0.5, 0.5, ''];
+        c.frame.setTopGeometry(w, h, x, y);
+        c.frame.resizePanesToRatio(r1, r2);
+
+        // await fc.exportToSqlite(c.mFileName); // ? ? ? Is c.mFileName OR fileName CORRECT ???
+        await fc.exportToSqlite(fileName);
         return Promise.resolve(v);
     }
     //@+node:felix.20211213224232.17: *6* fc.getWindowGeometryFromDb
-    // ! unneeded ?
-    // def getWindowGeometryFromDb(self, conn):
-    //     geom = (600, 400, 50, 50, 0.5, 0.5, '')
-    //     keys = ('width', 'height', 'left', 'top',
-    //               'ratio', 'secondary_ratio',
-    //               'current_position')
-    //     try:
-    //         d = dict(
-    //             conn.execute(
-    //                 '''select * from extra_infos
-    //                 where name in (?, ?, ?, ?, ?, ?, ?)''',
-    //                 keys,
-    //             ).fetchall(),
-    //         )
-    //         // mypy complained that geom must be a tuple, not a generator.
-    //         geom = tuple(d.get(*x) for x in zip(keys, geom))  // type:ignore
-    //     except sqlite3.OperationalError:
-    //         pass
-    //     return geom
+
+    public getWindowGeometryFromDb(conn: Database): [number, number, number, number, number, number, string] {
+        let geom: [number, number, number, number, number, number, string] = [600, 400, 50, 50, 0.5, 0.5, '']; // Default geometry.
+        const keys = ['width', 'height', 'left', 'top',
+            'ratio', 'secondary_ratio',
+            'current_position'];
+        try {
+            const a = conn.exec(
+                "select * from extra_infos where name in (?, ?, ?, ?, ?, ?, ?)",
+                keys,
+            );
+
+            // mypy complained that geom must be a tuple, not a generator.
+            // geom = tuple(d.get(* x) for x in zip(keys, geom)) 
+            if (a[0] && a[0].values) {
+                const d = a[0].values.reduce((acc, [key, value]) => {
+                    acc[key as string] = value;
+                    return acc;
+                }, {} as Record<string, any>);
+
+                geom = [
+                    d['width'],
+                    d['height'],
+                    d['left'],
+                    d['top'],
+                    d['ratio'],
+                    d['secondary_ratio'],
+                    d['current_position']
+                ];
+            }
+        }
+        catch (e) {
+            // pass
+        }
+
+        return geom;
+    }
     //@+node:felix.20211213224232.30: *4* fc: Read Utils
     // Methods common to both the sax and non-sax code.
     //@+node:felix.20211213224232.31: *5* fc.archivedPositionToPosition
@@ -1863,7 +1848,11 @@ export class FileCommands {
         try {
             // Changed in version 3.2: Accept only bytestring or bytearray objects as input.
             const s_bytes = g.toEncodedString(s); // 2011/02/22
+
+            // unhexlify is string to string
+            // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
             bin = binascii.unhexlify(s_bytes);
+
             // Throws a TypeError if val is not a hex string.
             val = pickle.loads(bin);
             return val;
@@ -2037,7 +2026,7 @@ export class FileCommands {
             }
         }
 
-        if (marks.length || expanded.length) {
+        if (Object.keys(marks).length || Object.keys(expanded).length) {
             for (let p of c.all_unique_positions()) {
                 if (marks[p.v.toString()]) {
                     p.v.initMarkedBit();
@@ -2200,8 +2189,6 @@ export class FileCommands {
         const dump_u = (v: VNode) => {
             let s = new Uint8Array();
             try {
-                // s = '';
-                // ! FIX THIS !
                 s = pickle.dumps(v.u, 1);
             } catch (e) {
                 s = new Uint8Array();  // 2021/06/25: fixed via mypy complaint.
@@ -2245,7 +2232,6 @@ export class FileCommands {
             fc.prepareDbTables(conn);
             fc.exportDbVersion(conn);
 
-            // fc.exportVnodesToSqlite(conn, (dbrow(v) for v in c.all_unique_nodes()))
             const w_dbRows: sqlDbRow[] = [];
             for (let v of c.all_unique_nodes()) {
                 w_dbRows.push(dbrow(v));
@@ -2255,8 +2241,9 @@ export class FileCommands {
             fc.exportGeomToSqlite(conn);
             fc.exportHashesToSqlite(conn);
 
-            // conn.commit(); // ! support db sqlite files by 'writing' as commit !
             const db_data = conn.export();
+            // Got what we needed 
+            conn.close();
             const db_buffer = Buffer.from(db_data);
 
             const db_uri = g.makeVscodeUri(fileName);
@@ -2321,7 +2308,7 @@ export class FileCommands {
         return res.join(jn);
     }
     //@+node:felix.20211213224237.13: *6* fc.prepareDbTables
-    public prepareDbTables(conn: any): void {
+    public prepareDbTables(conn: Database): void {
         conn.run('drop table if exists vnodes;');
 
         conn.run(
@@ -2345,7 +2332,7 @@ export class FileCommands {
     /**
      * Called only from fc.exportToSqlite.
      */
-    public exportVnodesToSqlite(conn: any, rows: sqlDbRow[]): void {
+    public exportVnodesToSqlite(conn: Database, rows: sqlDbRow[]): void {
         for (let row of rows) {
             conn.run(
                 `insert into vnodes
@@ -2357,46 +2344,35 @@ export class FileCommands {
         }
     }
     //@+node:felix.20211213224237.15: *6* fc.exportGeomToSqlite
-    public exportGeomToSqlite(conn: any): void {
+    public exportGeomToSqlite(conn: Database): void {
         const c: Commands = this.c;
 
-        // data = zip(
-        //     (
-        //         'width', 'height', 'left', 'top',
-        //         'ratio', 'secondary_ratio',
-        //         'current_position'
-        //     ),
+        const [width, height, left, top] = c.frame.get_window_info(); // Destructuring the return array
+        const data = [
+            { name: 'width', value: width },
+            { name: 'height', value: height },
+            { name: 'left', value: left },
+            { name: 'top', value: top },
+            { name: 'ratio', value: c.frame.ratio },
+            { name: 'secondary_ratio', value: c.frame.secondary_ratio },
+            { name: 'current_position', value: this.encodePosition(c.p) }
+        ];
 
-        //     c.frame.get_window_info() +
-        //     (
-        //         c.frame.ratio, c.frame.secondary_ratio,
-        //         self.encodePosition(c.p)
-        //     )
+        for (const item of data) {
+            conn.run('replace into extra_infos(name, value) values(?, ?)', [item.name, item.value]);
+        }
 
-        // )
-
-        const data = ['current_position', this.encodePosition(c.p)];
-
-        conn.run('replace into extra_infos(name, value) values(?, ?)', data);
     }
     //@+node:felix.20211213224237.16: *6* fc.exportDbVersion
-    public exportDbVersion(conn: any): void {
+    public exportDbVersion(conn: Database): void {
         conn.run(
             "replace into extra_infos(name, value) values('dbversion', ?)",
             ['1.0']
         );
     }
     //@+node:felix.20211213224237.17: *6* fc.exportHashesToSqlite
-    public exportHashesToSqlite(conn: any): void {
+    public exportHashesToSqlite(conn: Database): void {
         const c: Commands = this.c;
-
-        // def md5(x):
-        //     try:
-        //         s = open(x, 'rb').read()
-        //     except Exception:
-        //         return ''
-        //     s = s.replace(b'\r\n', b'\n')
-        //     return hashlib.md5(s).hexdigest()
 
         const files: [string, string][] = [];
 
@@ -2418,9 +2394,6 @@ export class FileCommands {
             conn.run('replace into extra_infos(name, value) values(?,?)', file);
         }
 
-        // conn.executemany(
-        //     'replace into extra_infos(name, value) values(?,?)',
-        //     map(lambda x: (x[1], md5(x[0])), files))
     }
     //@+node:felix.20211213224237.18: *5* fc.outline_to_clipboard_string
     public outline_to_clipboard_string(p?: Position): string | undefined {
@@ -2509,17 +2482,9 @@ export class FileCommands {
     public async write_Leo_file(fileName: string): Promise<boolean> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
-
-        if (c.checkOutline()) {
-            g.error('Structural errors in outline! outline not written');
-            return Promise.resolve(false);
-        }
-
-        // TODO : recentFilesManager !
-        // g.app.recentFilesManager.writeRecentFilesFile(c);
-
+        await g.app.recentFilesManager.writeRecentFilesFile(c);
         await fc.writeAllAtFileNodes();
-        return fc.writeOutline(fileName);  // Calls c.checkOutline.
+        return fc.writeOutline(fileName); // Calls c.checkOutline.
     }
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
     /**
@@ -2690,34 +2655,22 @@ export class FileCommands {
     /**
      * Put json representation of Leo's cached globals.
      */
-    public leojs_globals(): any {
+    public leojs_globals(): void {
         const c: Commands = this.c;
 
-        const d: any = {};
-        //  [width, height, left, top] = c.frame.get_window_info()
+        const w_windowInfo = c.frame.get_window_info();
+        const [width, height, left, top] = w_windowInfo;
 
-        // TODO : No globals for now
-        // TODO support db sqlite files !
+        console.log('leojs_globals saving window geom to db : ', w_windowInfo);
 
-        // if 1:  // Write to the cache, not the file.
-        //     d: Dict[str, str] = {}
-        //     c.db['body_outline_ratio'] = str(c.frame.ratio)
-        //     c.db['body_secondary_ratio'] = str(c.frame.secondary_ratio)
-        //     c.db['window_position'] = str(top), str(left), str(height), str(width)
-        // if 'size' in g.app.debug:
-        //     g.trace('set window_position:', c.db['window_position'], c.shortFileName())
-        // else:
-        //     d = {
-        //         'body_outline_ratio': c.frame.ratio,
-        //         'body_secondary_ratio': c.frame.secondary_ratio,
-        //         'globalWindowPosition': {
-        //             'top': top,
-        //             'left': left,
-        //             'width': width,
-        //             'height': height,
-        //         },
-        //     }
-        return d;
+        c.db['body_outline_ratio'] = c.frame.ratio.toString();
+        c.db['body_secondary_ratio'] = c.frame.secondary_ratio.toString();
+        c.db['window_position'] = [top.toString(), left.toString(), height.toString(), width.toString()];
+
+        if (g.app.debug.includes('size')) {
+            g.trace('set window_position:', c.db['window_position'], c.shortFileName());
+        }
+
     }
     //@+node:felix.20211213224237.24: *6* fc.leojs_vnodes
     /**
@@ -3087,9 +3040,17 @@ export class FileCommands {
             return;
         }
 
+        c.db['body_outline_ratio'] = c.frame.ratio.toString();
+        c.db['body_secondary_ratio'] = c.frame.secondary_ratio.toString();
+
+        const w_windowInfo = c.frame.get_window_info();
+        const [w, h, left, t] = w_windowInfo;
+
+        c.db['window_position'] = [t.toString(), left.toString(), h.toString(), w.toString()];
+
         if (trace) {
             g.trace(`\nset c.db for ${c.shortFileName()}`);
-            // console.log('window_position:', c.db['window_position']);
+            console.log('window_position:', c.db['window_position']);
         }
     }
     //@+node:felix.20211213224237.36: *5* fc.putHeader
@@ -3445,9 +3406,9 @@ export class FileCommands {
             }
         }
 
-        c.db['expanded'] = expanded.join(', ');
-        c.db['marked'] = marked.join(', ');
-        c.db['current_position'] = current.join(', ');
+        c.db['expanded'] = expanded.join(',');
+        c.db['marked'] = marked.join(',');
+        c.db['current_position'] = current.join(',');
 
         if (trace) {
             g.trace(`\nset c.db for ${c.shortFileName()}`);
