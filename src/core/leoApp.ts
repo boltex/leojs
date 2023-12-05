@@ -2180,23 +2180,24 @@ export class LoadManager {
      * Report directories.
      */
     public reportDirectories(): void {
-        // SKIP FOR BROWSER: NO 'HOME' & NO 'LEO-EDITOR' FOLDERS.
         let directories: {
             kind: string;
             theDir: string | undefined;
         }[];
 
         // The cwd changes later, so it would be misleading to report it here.
+        // ! SKIP FOR BROWSER: NO 'HOME' & NO 'LEO-EDITOR' FOLDERS !
         if (g.isBrowser) {
             directories = [
                 { kind: 'repository', theDir: g.app.homeDir },
             ];
         } else {
+            // ! LOAD AND CONFIG HAVE NO USE IN LEOJS !
             directories = [
                 { kind: 'home', theDir: g.app.homeDir },
                 { kind: 'leo-editor', theDir: g.app.leoEditorDir },
-                { kind: 'load', theDir: g.app.loadDir },
-                { kind: 'config', theDir: g.app.globalConfigDir },
+                // { kind: 'load', theDir: g.app.loadDir },
+                // { kind: 'config', theDir: g.app.globalConfigDir },
             ];
         }
 

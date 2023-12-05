@@ -40,8 +40,8 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
 
             let d: nullButtonWidget[];
             if (c && c.theScriptingController) {
-                console.log('refreshed buttons ok !');
-                d = c.theScriptingController.buttonsArray;
+                console.log('refreshed buttons c.theScriptingController.buttonsArray ', c.theScriptingController.buttonsArray);
+                d = c.theScriptingController.buttonsArray || [];
             } else {
                 console.log('TRIED TO REFRESH BUTTONS BUT NO theScriptingController !');
                 d = [];
