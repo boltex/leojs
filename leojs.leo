@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
-<leo_file xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
+<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -1086,7 +1086,7 @@ export async function deactivate(): Promise&lt;unknown&gt; {
             //     return
         }
         // sys.exit(0)
-        console.log('LeoJS extension has been deactivated.');
+        console.log('leojs extension has been deactivated.');
         return undefined;
     } else {
         console.log('no g.app');
@@ -4705,7 +4705,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "8df179b",
+  "gitBranch": "devel",
+  "gitDate": "2023-12-05 00:56:29 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{

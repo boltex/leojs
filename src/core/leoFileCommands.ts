@@ -201,7 +201,8 @@ export class FastRead {
         let xroot: et.ElementTree;
 
         try {
-            xroot = et.parse(contents);
+            // To match python's implementation of XML : /r/n replaced by /n
+            xroot = et.parse(contents.replace(/\r\n/g, '\n'));
         } catch (e) {
             let message: string;
             // #970: Report failure here.

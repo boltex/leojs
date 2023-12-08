@@ -429,7 +429,7 @@ export async function deactivate(): Promise<unknown> {
             //     return
         }
         // sys.exit(0)
-        console.log('LeoJS extension has been deactivated.');
+        console.log('leojs extension has been deactivated.');
         return undefined;
     } else {
         console.log('no g.app');

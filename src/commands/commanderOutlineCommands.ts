@@ -551,7 +551,8 @@ export class CommanderOutlineCommands {
 
         const x = new FastRead(c, {});
         if (!isJson) {
-            xroot = et.parse(s);
+            // To match python's implementation of XML : /r/n replaced by /n
+            xroot = et.parse(s.replace(/\r\n/g, '\n'));
             xvelements = xroot.find('vnodes')!.getchildren();
             xtelements = xroot.find('tnodes')!.getchildren();
             [bodies, uas] = x.scanTnodes(xtelements);
