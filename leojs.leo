@@ -4705,10 +4705,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "8df179b",
-  "gitBranch": "devel",
-  "gitDate": "2023-12-05 00:56:29 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -11936,9 +11933,10 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
 
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri.fsPath === w_openedDocument.uri.fsPath) {
                 vscode.workspace.textDocuments.forEach((p_textDocument) =&gt; {
-                    if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
+                    if (p_textDocument.uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp; p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
                         this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                         this._bodyMainSelectionColumn = p_tab.group.viewColumn;
                         if (p_preventReveal) {
