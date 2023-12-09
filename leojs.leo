@@ -1550,9 +1550,10 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201214150149.1">/**
- * Entry point for Leo in Javascript.
+ * Entry point for Leo in Javascript. 
+ * @returns Leo’s leo.core.leoGlobals containing many useful functions, including g.es.
  */
-export async function activate(p_context: vscode.ExtensionContext) {
+export async function activate(p_context: vscode.ExtensionContext): Promise&lt;typeof g&gt; {
 
     /*
         * Original Leo startup *
@@ -1569,6 +1570,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
         console.log('STARTUP: context.extensionUri.fsPath: ', p_context.extensionUri.fsPath);
         console.log('STARTUP: context.extensionUri.scheme: ', p_context.extensionUri.scheme,);
     }
+
     if (activateDebug) {
         console.log('STARTUP:                 g.osBrowser: ', g.isBrowser);
         console.log('STARTUP:                    path.sep: ', path.sep);
@@ -1859,7 +1861,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
                 });
                 console.log('NOT started because no remote workspace yet');
                 void setStartupDoneContext(true);
-                return;
+                return g;
             }
         } else {
             console.log('NOT started because no remote workspace yet');
@@ -1867,7 +1869,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
         }
 
     }
-
+    return g;
 }
 
 </t>
