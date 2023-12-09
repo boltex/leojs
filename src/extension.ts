@@ -449,7 +449,7 @@ async function closeLeoTextEditors(): Promise<unknown> {
 
             if (p_tab.input &&
                 (p_tab.input as vscode.TabInputText).uri &&
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                 !p_tab.isDirty
 
             ) {

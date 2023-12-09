@@ -641,7 +641,7 @@ export class LeoUI extends NullGui {
         if (!this._bodyFileSystemStarted) {
             this._context.subscriptions.push(
                 vscode.workspace.registerFileSystemProvider(
-                    Constants.URI_LEO_SCHEME,
+                    Constants.URI_LEOJS_SCHEME,
                     this._leoFileSystem,
                     { isCaseSensitive: true }
                 )
@@ -856,7 +856,7 @@ export class LeoUI extends NullGui {
         p_internalCall?: boolean
     ): void {
 
-        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
                 void this._hideDeleteBody(p_editor);
             }
@@ -875,7 +875,7 @@ export class LeoUI extends NullGui {
     public _changedTextEditorViewColumn(
         p_columnChangeEvent: vscode.TextEditorViewColumnChangeEvent
     ): void {
-        if (p_columnChangeEvent && p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_columnChangeEvent && p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             this._checkPreviewMode(p_columnChangeEvent.textEditor);
         }
         void this.triggerBodySave(true, true);
@@ -889,7 +889,7 @@ export class LeoUI extends NullGui {
         if (p_editors && p_editors.length) {
             // May be no changes - so check length
             p_editors.forEach((p_textEditor) => {
-                if (p_textEditor && p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+                if (p_textEditor && p_textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
                     if (this.bodyUri.fsPath !== p_textEditor.document.uri.fsPath) {
                         void this._hideDeleteBody(p_textEditor);
                     }
@@ -914,7 +914,7 @@ export class LeoUI extends NullGui {
      * @param p_event a change event containing the active editor's selection, if any.
      */
     private _onChangeEditorSelection(p_event: vscode.TextEditorSelectionChangeEvent): void {
-        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (p_event.selections.length) {
                 this._selectionDirty = true;
                 this._selection = p_event.selections[0];
@@ -928,7 +928,7 @@ export class LeoUI extends NullGui {
      * @param p_event a change event containing the active editor's visible range, if any.
      */
     private _onChangeEditorScroll(p_event: vscode.TextEditorVisibleRangesChangeEvent): void {
-        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (p_event.visibleRanges.length) {
                 this._scrollDirty = true;
                 this._scroll = p_event.visibleRanges[0];
@@ -947,7 +947,7 @@ export class LeoUI extends NullGui {
         if (
             this.lastSelectedNode &&
             p_textDocumentChange.contentChanges.length &&
-            p_textDocumentChange.document.uri.scheme === Constants.URI_LEO_SCHEME
+            p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
         ) {
 
             // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
@@ -1979,7 +1979,7 @@ export class LeoUI extends NullGui {
                         p_tabGroup.tabs.forEach((p_tab) => {
                             if (p_tab.input &&
                                 (p_tab.input as vscode.TabInputText).uri &&
-                                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                                 (p_tab.input as vscode.TabInputText).uri.fsPath === w_oldUri.fsPath
                             ) {
                                 // Make sure it's saved AGAIN!!
@@ -2016,7 +2016,7 @@ export class LeoUI extends NullGui {
                 p_tabGroup.tabs.forEach((p_tab) => {
                     if (p_tab.input &&
                         (p_tab.input as vscode.TabInputText).uri &&
-                        (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                        (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                         w_newUri.fsPath !== (p_tab.input as vscode.TabInputText).uri.fsPath // Maybe useless to check if different!
                     ) {
 
@@ -2075,6 +2075,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                     utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri) === p_gnx
                 ) {
                     vscode.workspace.textDocuments.forEach((p_textDocument) => {
@@ -2102,7 +2103,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
                 ) {
                     w_total++;
                 }
@@ -2122,7 +2123,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
                 ) {
                     w_found = true;
                     if (!p_tab.isPreview) {
@@ -2158,7 +2159,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                     (p_tab.input as vscode.TabInputText).uri.fsPath === w_editorFsPath &&
                     this.bodyUri.fsPath !== w_editorFsPath // if BODY is now the same, dont hide!
                 ) {
@@ -2184,6 +2185,7 @@ export class LeoUI extends NullGui {
     private _checkPreviewMode(p_editor: vscode.TextEditor): void {
         // if selected gnx but in another column
         if (
+            p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME &&
             p_editor.document.uri.fsPath === this.bodyUri.fsPath &&
             p_editor.viewColumn !== this._bodyMainSelectionColumn
         ) {
@@ -2204,7 +2206,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
                 ) {
                     w_foundTabs.push(p_tab);
                 }
@@ -2454,17 +2456,23 @@ export class LeoUI extends NullGui {
             }
         }
 
-        // Find body pane's position if already opened with same gnx (language still needs to be set per position)
+        // Find body pane's position if already opened with same gnx 
+        // Note: language still needs to be set per position
         let w_foundDocOpened = false;
         vscode.window.tabGroups.all.forEach((p_tabGroup) => {
             p_tabGroup.tabs.forEach((p_tab) => {
 
-                if (p_tab.input &&
+                if (
+                    p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
-                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_openedDocument.uri.fsPath) {
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_openedDocument.uri.fsPath
+                ) {
                     vscode.workspace.textDocuments.forEach((p_textDocument) => {
-                        if (p_textDocument.uri.scheme === Constants.URI_LEO_SCHEME && p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
+                        if (
+                            p_textDocument.uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                            p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath
+                        ) {
                             this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                             this._bodyMainSelectionColumn = p_tab.group.viewColumn;
                             if (p_preventReveal) {
@@ -2480,11 +2488,7 @@ export class LeoUI extends NullGui {
             });
         });
 
-        // console.log('pre found TAB: ', w_preFoundTabOpened);
-        // console.log('pre found DOC: ', w_preFoundDocOpened);
 
-        // console.log('POST found TAB: ', w_foundTabOpened);
-        // console.log('POST found DOC: ', w_foundDocOpened);
         if (!w_foundDocOpened && p_preventReveal) {
             return; // ! HAD PREVENT REVEAL !
         }
