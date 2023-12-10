@@ -869,12 +869,15 @@ export class ExternalFilesController {
             this.checksum_d[p_path] = await this.checksum(p_path);
             return false;
         }
+        if (!this.checksum_d[p_path]) {
+            this.checksum_d[p_path] = await this.checksum(p_path);
+        }
         if (old_time === new_time) {
             return false;
         }
         //
         // Check the checksums *only* if the mod times don't match.
-        const old_sum = await this.checksum_d[p_path];
+        const old_sum = this.checksum_d[p_path];
         const new_sum = await this.checksum(p_path);
         if (new_sum === old_sum) {
             // The modtime changed, but it's contents didn't.
