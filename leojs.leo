@@ -4662,7 +4662,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
-  "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
+  "description": "LeoJS — The literate editor with outline javascript implementation",
   "version": "0.2.1",
   "publisher": "boltex",
   "author": {
@@ -4690,7 +4690,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "Other"
   ],
   "galleryBanner": {
-    "color": "#f1af88",
+    "color": "#faeadb",
     "theme": "light"
   },
   "preview": true,
