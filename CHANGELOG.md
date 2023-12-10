@@ -53,3 +53,7 @@
 # 0.2.0 
 
 - First alpha release
+
+# 0.2.1
+
+- Changes

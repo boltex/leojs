@@ -1068,7 +1068,10 @@ const activateDebug = false;
 # 0.2.0 
 
 - First alpha release
-</t>
+
+# 0.2.1
+
+- Changes</t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
     if (g.app) {
@@ -4660,7 +4663,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
