@@ -1011,9 +1011,26 @@ export class LeoApp {
         }
 
         let sysVersion: string = 'Browser';
+        let arch = "";
+        let version = "";
+        let release = "";
 
         if (process.platform) {
             sysVersion = process.platform;
+
+            if (os.arch) {
+                arch = os.arch();
+            }
+            if (os.version) {
+                version = os.version();
+            }
+            if (os.release) {
+                release = os.release();
+            }
+            if (arch && version) {
+                sysVersion = version + " " + arch + (release ? ` (build ${release})` : "");
+            }
+
         } else {
             let browserResult: any;
             // // @ts-expect-error
@@ -1035,27 +1052,6 @@ export class LeoApp {
                 }
             }
         }
-        // TODO: fleshout Windows info
-        /*
-        if sys.platform.startswith('win'):
-            sysVersion = 'Windows '
-            try:
-                // peckj 20140416: determine true OS architecture
-                // the following code should return the proper architecture
-                // regardless of whether or not the python architecture matches
-                // the OS architecture (i.e. python 32-bit on windows 64-bit will return 64-bit)
-                v = platform.win32_ver()
-                release, winbuild, sp, ptype = v
-                true_platform = os.environ['PROCESSOR_ARCHITECTURE']
-                try:
-                    true_platform = os.environ['PROCESSOR_ARCHITEw6432']
-                except KeyError:
-                    pass
-                sysVersion = f"Windows {release} {true_platform} (build {winbuild}) {sp}"
-            except Exception:
-                pass
-        else: sysVersion = sys.platform 
-        */
 
         // branch, junk_commit = g.gitInfo()
         const branch = w_leojsPackageJson.gitBranch;
