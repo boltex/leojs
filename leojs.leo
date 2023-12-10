@@ -762,21 +762,17 @@ or on [github](https://github.com/leo-editor/leo-editor).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
 
-# 🚧 This Extension is a WIP 🏗️
+# Web-Based Development
 
-Please report bugs and missing features in the repository's [Issues Page](https://github.com/boltex/leojs/issues).
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project). It can edit Leo documents directly inside online repositories such as on GitHub and Azure Repos.
 
-If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
+_You can open a GitHub repository in VS Code for the Web directly from a URL, following the schema:_ `https://vscode.dev/github/&lt;organization&gt;/&lt;repo&gt;`
 
-# LeoJS can be run on the web
+Or, simply visit your desired GitHub repository, Press the period '.' key on your keyboard to switch to web edition of VSCode. Make sure the LeoJS extension is installed and you're good to go!
 
-LeoJS can be run as a web extension for VSCode on the web! It can edit Leo documents directly inside online repositories. _Use the regular desktop version for VSCode to edit local Leo documents and projects._
+&gt; The web extension version of LeoJS cannot open local files: Use the regular desktop LeoJS version to edit local Leo documents and projects.
 
-Visit a github repository you want to work on. Press the period '.' key on your keyboard to switch to the vscode.dev web edition of VSCode directly from github.
-
-Make sure the LeoJS extension is installed and you're good to go!
-
-## Features
+# Features
 
 -   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
@@ -869,7 +865,7 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 
 ---
 
-## Derive External Files
+## External Files
 
 Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty Files** commands to derive external files for any type of **@file** nodes.
 
@@ -944,7 +940,7 @@ Use the undo / redo icons above the outline or above the undo pane itself. You c
 
 ![Undo pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/undo-pane.gif)
 
-## Issues
+# Issues
 
 Common issues are listed below. See the repository's [Issues Page](https://github.com/boltex/leojs/issues) to submit issues.
 
@@ -972,9 +968,9 @@ So select at least one character to use the previously assigned original keyboar
 
 &gt; Refer to the [issue tracker](https://github.com/boltex/leojs/issues) page to learn more about the known issues, or to contribute with additional information if you encounter some yourself.
 
----
+If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
 
-## Acknowledgments
+# Acknowledgments
 
 ### _Thanks to_
 
@@ -989,8 +985,6 @@ So select at least one character to use the previously assigned original keyboar
 -   [Ville M. Vainio](https://github.com/vivainio) for his Nav tab original concept
 -   [Jacob M. Peck](https://github.com/gatesphere) for his Tags tab original concept
 -   [Matt Wilkie](https://github.com/maphew) for his contributions and support
-
----
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
@@ -1027,7 +1021,7 @@ const activateDebug = false;
 
 ## 0.1.1 Dec 31, 2021
 
-- Outline, undos and commands.
+- Outline, undos and commands
 
 ## 0.1.2 Jan 01 2022
 
@@ -1055,15 +1049,25 @@ const activateDebug = false;
 
 # 0.1.6 December 5 2023
 
-- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
+- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar
 - Implemented importers
-- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
-- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
+- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'
+- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands
 - Implemented Global Settings, Sessions and recent files. (saved to db and other files in the .leo folder.)
-- Fixed log pane.
+- Fixed log pane
 
 # 0.1.7
+
 - First feature complete version
+- Fixed external file generation bugs
+- Fixed conflict with leointeg when both expansions showed the same gnx body
+- Fixed creation of local .leo folder when running as web extension
+- Fixed md5 checksum and external file change detection bugs
+- Various small bug fixes and corrections
+
+# 0.2.0 
+
+- First alpha release
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
@@ -1329,9 +1333,7 @@ You can then run the **Run Extension** target, as shown above, in the **Debug Vi
 
 ## Web extension version
 
-Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
-
-**In the meantime**, see 'Running Development version as a web extension' below to try out leojs in a browser.
+See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example
 
 ## Running Development version as a web extension
 
@@ -4658,7 +4660,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"

@@ -6,7 +6,7 @@
 
 ## 0.1.1 Dec 31, 2021
 
-- Outline, undos and commands.
+- Outline, undos and commands
 
 ## 0.1.2 Jan 01 2022
 
@@ -34,12 +34,22 @@
 
 # 0.1.6 December 5 2023
 
-- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
+- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar
 - Implemented importers
-- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
-- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
+- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'
+- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands
 - Implemented Global Settings, Sessions and recent files. (saved to db and other files in the .leo folder.)
-- Fixed log pane.
+- Fixed log pane
 
 # 0.1.7
+
 - First feature complete version
+- Fixed external file generation bugs
+- Fixed conflict with leointeg when both expansions showed the same gnx body
+- Fixed creation of local .leo folder when running as web extension
+- Fixed md5 checksum and external file change detection bugs
+- Various small bug fixes and corrections
+
+# 0.2.0 
+
+- First alpha release

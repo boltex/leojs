@@ -20,9 +20,7 @@ You can then run the **Run Extension** target, as shown above, in the **Debug Vi
 
 ## Web extension version
 
-Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
-
-**In the meantime**, see 'Running Development version as a web extension' below to try out leojs in a browser.
+See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example
 
 ## Running Development version as a web extension
 
