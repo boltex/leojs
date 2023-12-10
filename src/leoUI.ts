@@ -4748,17 +4748,21 @@ export class LeoUI extends NullGui {
 
         const c = g.app.windowList[this.frameIndex].c;
 
-        this.setupRefresh(
-            p_fromOutline ? Focus.Outline : Focus.Body,
-            {
-                tree: true,
-                states: true,
-                documents: true
-            }
-        );
-
         await c.save();
-        void this.launchRefresh();
+
+        // ON THE WEB THE SAVE DOES NOT FINISH BEFORE INTERUPTING OTHER COMMANDS!
+        setTimeout(() => {
+            this.setupRefresh(
+                p_fromOutline ? Focus.Outline : Focus.Body,
+                {
+                    tree: true,
+                    states: true,
+                    documents: true
+                }
+            );
+            void this.launchRefresh();
+        });
+
         return Promise.resolve();
     }
 
