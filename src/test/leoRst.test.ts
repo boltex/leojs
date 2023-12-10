@@ -77,7 +77,7 @@ suite('A class to run rst-related unit tests.', () => {
 
             This is the body of the section.
 
-`); // * Keep this line without spaces !
+    `);
         // Get and check the rst result.
         rc.nodeNumber = 0;
         rc.http_server_support = true;  // Override setting for testing.
@@ -146,7 +146,7 @@ suite('A class to run rst-related unit tests.', () => {
 
             End of test.
 
-`); // * Keep this line without spaces !
+    `); // * Keep this line without spaces !
         // Get and check the rst result.
         rc.nodeNumber = 0;
         rc.http_server_support = true;  // Override setting for testing.
@@ -212,7 +212,7 @@ suite('A class to run rst-related unit tests.', () => {
             @c
             This is the body of the section.
 
-`); // * Keep this line without spaces !
+    `); // * Keep this line without spaces !
         // Get and check the rst result.
         rc.nodeNumber = 0;
         rc.http_server_support = true;  // Override setting for testing.

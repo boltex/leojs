@@ -9,6 +9,7 @@
 import * as g from '../core/leoGlobals';
 import { Commands } from '../core/leoCommands';
 import { StringTextWrapper } from '../core/leoFrame';
+import { Bead } from '../core/leoUndo';
 //@-<< baseCommands imports & abbreviations >>
 
 //@+others
@@ -19,7 +20,7 @@ import { StringTextWrapper } from '../core/leoFrame';
 export class BaseEditCommandsClass {
     public c: Commands;
     public w!: StringTextWrapper;
-    public undoData: { [key: string]: any } | undefined;
+    public undoData: Bead | undefined;
 
     //@+others
     //@+node:felix.20221220234605.2: *3* BaseEdit.ctor

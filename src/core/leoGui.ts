@@ -14,7 +14,7 @@ import * as g from './leoGlobals';
 import { StringFindTabManager } from './findTabManager';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
-import { StringTextWrapper } from './leoFrame';
+import { LeoFrame, StringTextWrapper } from './leoFrame';
 //@-<< leoGui imports >>
 //@+others
 //@+node:felix.20221119205229.1: ** class LeoGui
@@ -311,7 +311,8 @@ export class LeoGui {
         return Promise.resolve('no');
     }
     //@+node:felix.20221120210715.1: *4* LeoGui.addLogPaneEntry (LeoJs)
-    public addLogPaneEntry(s: string): void {
+    public addLogPaneEntry(...args: any[]): void {
+        this.oops();
         // Adds a message string to LeoJS log pane. See LeoUi.ts
     }
     //@+node:felix.20230902142624.1: *4* LeoGui.focusLogPane (LeoJs)
@@ -359,7 +360,7 @@ export class LeoGui {
     /**
      * Create a new Leo frame.
      */
-    public createLeoFrame(c: Commands, title: string): void {
+    public createLeoFrame(c: Commands, title: string): any {
         this.oops();
     }
     /**
@@ -418,13 +419,6 @@ export class LeoGui {
         pady = 0
     ): void {
         this.oops();
-    }
-    /**
-     * Return the window information.
-     */
-    public get_window_info(window: string): [number, number, number, number] {
-        this.oops();
-        return [0, 0, 0, 0];
     }
     //@+node:felix.20221120001229.17: *5* LeoGui.Font
     public getFontFromParams(
@@ -559,6 +553,7 @@ export class NullGui extends LeoGui {
     }
 
     public addLogPaneEntry(...args: any[]): void {
+        g.logBuffer.push(...args);
         console.log('NullGui:', ...args);
     }
 
@@ -652,6 +647,10 @@ export class NullGui extends LeoGui {
         cancelMessage = ''
     ): Thenable<string> {
         return Promise.resolve('');
+    }
+
+    public createLeoFrame(c: Commands, title: string): LeoFrame {
+        return new LeoFrame(c, title, this);
     }
 
     public showLeoIDMessage(): void {

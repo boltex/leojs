@@ -248,7 +248,6 @@ export class ExternalFilesController {
             }
             // Prevent further checks for path.
             await this.set_time(w_path);
-            this.checksum_d[w_path] = await this.checksum(w_path);
             // Check file.
             if (p.isAtAsisFileNode() || p.isAtNoSentFileNode()) {
                 // #1081: issue a warning.
@@ -279,7 +278,6 @@ export class ExternalFilesController {
         }
         // Always update the path & time to prevent future warnings.
         await this.set_time(w_path);
-        this.checksum_d[w_path] = await this.checksum(w_path);
         // #1888:
         const val = await this.ask(c, w_path);
         if (['yes', 'yes-all'].includes(val)) {
@@ -866,7 +864,6 @@ export class ExternalFilesController {
         if (!old_time) {
             // Initialize.
             await this.set_time(p_path, new_time);
-            this.checksum_d[p_path] = await this.checksum(p_path);
             return false;
         }
         if (old_time === new_time) {
@@ -874,7 +871,7 @@ export class ExternalFilesController {
         }
         //
         // Check the checksums *only* if the mod times don't match.
-        const old_sum = await this.checksum_d[p_path];
+        const old_sum = this.checksum_d[p_path];
         const new_sum = await this.checksum(p_path);
         if (new_sum === old_sum) {
             // The modtime changed, but it's contents didn't.
@@ -925,6 +922,8 @@ export class ExternalFilesController {
             t = await this.get_mtime(p_path);
         }
         this._time_d[g.os_path_realpath(p_path)] = t;
+        // To prevent false positives when timestamp (not content) is modified by external program
+        this.checksum_d[p_path] = await this.checksum(p_path);
     }
     //@+node:felix.20230503004807.31: *4* efc.warn
     /**

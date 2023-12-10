@@ -67,7 +67,7 @@ export class CommanderFileCommands {
         }
 
         // Set various ivars.
-        const title = c.computeWindowTitle(c.mFileName);
+        const title = c.computeWindowTitle();
         c.frame.title = title;
         c.frame.setTitle(title);
         try {
@@ -297,7 +297,7 @@ export class CommanderFileCommands {
 
         // Retain all previous settings. Very important for theme code.
         const t2 = process.hrtime();
-
+        g.app.numberOfUntitledWindows += 1;
         const c = g.app.newCommander(
             '',
             gui,
@@ -368,6 +368,13 @@ export class CommanderFileCommands {
             closeFlag: boolean,
             fileName?: string
         ): Promise<unknown> {
+
+            // FIX SLASHES AND CAPITALIZE DRIVE LETTERS TO EMULATE PYTHON OPEN FILE DIALOG RESULT
+            if (fileName) {
+                fileName = g.os_path_fix_drive(fileName);
+                fileName = g.os_path_normslashes(fileName);
+            }
+
             p_c.bringToFront();
             p_c.init_error_dialogs();
 
@@ -419,12 +426,7 @@ export class CommanderFileCommands {
                 }
             }
             await p_c.raise_error_dialogs('write');
-            // g.app.runAlreadyOpenDialog(p_c); // ? Needed ?
-
-            // openWithFileName sets focus if ok.
-            if (!ok) {
-                // p_c.initialFocusHelper();  // ? Needed ?
-            }
+            await g.app.runAlreadyOpenDialog(p_c);
 
             return q_result;
         }
@@ -448,10 +450,13 @@ export class CommanderFileCommands {
         ];
         // maybe from c.k.
         let fileName: string = c.k?.givenArgs?.join('');
+
         // override with given argument
+
         if (p_uri && p_uri.fsPath && p_uri.fsPath.trim()) {
-            fileName = p_uri.fsPath.replace(/\\/g, '/');
+            fileName = p_uri.fsPath;
         }
+
         if (fileName) {
             return open_completer(c, closeFlag, fileName);
         }
@@ -463,6 +468,7 @@ export class CommanderFileCommands {
             g.defaultLeoFileExtension(c),
             false
         )) as string;
+
         return open_completer(c, closeFlag, fileName);
     }
     //@+node:felix.20220105210716.12: *4* c_file.refreshFromDisk
@@ -620,8 +626,12 @@ export class CommanderFileCommands {
          * Common save code.
          */
         const do_save = async (c: Commands, fileName: string): Promise<void> => {
-            await c.fileCommands.save(fileName);
+
+            // updateRecentFiles should be before the save.
             g.app.recentFilesManager.updateRecentFiles(fileName);
+
+            await c.fileCommands.save(fileName);
+
             await g.chdir(fileName);
         };
 
@@ -662,6 +672,8 @@ export class CommanderFileCommands {
             if (new_file_name) {
                 let final_file_name = this.set_name_and_title(c, new_file_name);
                 await do_save(c, final_file_name);
+
+                await g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.
             }
 
         } finally {
@@ -709,10 +721,18 @@ export class CommanderFileCommands {
             }
             // 2. Finalize fileName and set related ivars.
             let new_file_name = this.set_name_and_title(c, fileName);
+
             // 3. Do the save and related tasks.
-            await c.fileCommands.saveAs(new_file_name);
+
+            // updateRecentFiles should be before the save.
             g.app.recentFilesManager.updateRecentFiles(new_file_name);
+
+            await c.fileCommands.saveAs(new_file_name);
+
             await g.chdir(new_file_name);
+
+            await g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.
+
             return new_file_name;
         };
 
@@ -774,9 +794,12 @@ export class CommanderFileCommands {
 
         const do_save_to = async (c: Commands, fileName: string): Promise<void> => {
             /** Common save-to code. */
+
+            g.app.recentFilesManager.updateRecentFiles(fileName);
+
             // *Never* change c.mFileName or c.frame.title.
             await c.fileCommands.saveTo(fileName, silent);
-            g.app.recentFilesManager.updateRecentFiles(fileName);
+
             // *Never* call g.chdir!
         };
 
@@ -1337,69 +1360,47 @@ export class CommanderFileCommands {
     }
     //@+node:felix.20220105210716.37: *3* Recent Files
     //@+node:felix.20220105210716.38: *4* c_file.cleanRecentFiles
-    // ? unused ?
-    // @commander_command('clean-recent-files')
-    // def cleanRecentFiles(this: Commands)
-    //     """
-    //     Remove items from the recent files list that no longer exist.
-
-    //     This almost never does anything because Leo's startup logic removes
-    //     nonexistent files from the recent files list.
-    //     """
-    //     c = self
-    //     g.app.recentFilesManager.cleanRecentFiles(c)
+    @commander_command(
+        'clean-recent-files',
+        "Remove items from the recent files list that no longer exist. " +
+        "This almost never does anything because Leo's startup logic removes " +
+        "nonexistent files from the recent files list."
+    )
+    public async cleanRecentFiles(this: Commands): Promise<void> {
+        const c: Commands = this;
+        await g.app.recentFilesManager.cleanRecentFiles(c);
+    }
     //@+node:felix.20220105210716.39: *4* c_file.clearRecentFiles
-    // ? unused ?
-    // @commander_command('clear-recent-files')
-    // def clearRecentFiles(this: Commands)
-    //     """Clear the recent files list, then add the present file."""
 
+    @commander_command('clear-recent-files', 'Clear the recent files list, then add the present file.')
+    public async clearRecentFiles(this: Commands): Promise<void> {
+        const c: Commands = this;
+        await g.app.recentFilesManager.clearRecentFiles(c);
+    }
     //@+node:felix.20220105210716.40: *4* c_file.editRecentFiles
-    // ? unused ?
-    // @commander_command('edit-recent-files')
-    // def editRecentFiles(this: Commands)
-    //     """Opens recent files list in a new node for editing."""
-    //     c = self
-    //     g.app.recentFilesManager.editRecentFiles(c)
-    //@+node:felix.20220105210716.41: *4* c_file.openRecentFile
-    // ? unused ?
-    // @commander_command('open-recent-file')
-    // def openRecentFile(self, event=None, fn=None):
-    //     c = self
-    //     // Automatically close the previous window if...
-    //     closeFlag = (
-    //         c.frame.startupWindow and
-    //             // The window was open on startup
-    //         not c.changed and not c.frame.saved and
-    //             // The window has never been changed
-    //         g.app.numberOfUntitledWindows == 1)
-    //             // Only one untitled window has ever been opened.
-    //     if g.doHook("recentfiles1", c=c, p=c.p, v=c.p, fileName=fn, closeFlag=closeFlag):
-    //         return
-    //     c2 = g.openWithFileName(fn, old_c=c)
-    //     if c2:
-    //         g.app.makeAllBindings()
-    //     if closeFlag and c2 and c2 != c:
-    //         g.app.destroyWindow(c.frame)
-    //         c2.setLog()
-    //         g.doHook("recentfiles2",
-    //             c=c2, p=c2.p, v=c2.p, fileName=fn, closeFlag=closeFlag)
+
+    @commander_command('edit-recent-files', 'Opens recent files list in a new node for editing.')
+    public editRecentFiles(this: Commands): void {
+
+        const c: Commands = this;
+
+        g.app.recentFilesManager.editRecentFiles(c);
+    }
     //@+node:felix.20220105210716.42: *4* c_file.sortRecentFiles
-    // ? unused ?
-    // @commander_command('sort-recent-files')
-    // def sortRecentFiles(this: Commands)
-    //     """Sort the recent files list."""
-    //     c = self
-    //     g.app.recentFilesManager.sortRecentFiles(c)
+
+    @commander_command('sort-recent-files', 'Sort the recent files list.')
+    public async sortRecentFiles(this: Commands): Promise<void> {
+        const c: Commands = this;
+
+        await g.app.recentFilesManager.sortRecentFiles(c);
+    }
     //@+node:felix.20220105210716.43: *4* c_file.writeEditedRecentFiles
-    // ? unused ?
-    // @commander_command('write-edited-recent-files')
-    // def writeEditedRecentFiles(this: Commands)
-    //     """
-    //     Write content of "edit_headline" node as recentFiles and recreates
-    //     menus.
-    //     """
-    //     c = self
+
+    @commander_command('write-edited-recent-files', 'Write content of "edit_headline" node as recentFiles and recreates menus.')
+    public async writeEditedRecentFiles(this: Commands): Promise<void> {
+        const c: Commands = this;
+        await g.app.recentFilesManager.writeEditedRecentFiles(c);
+    }
     //     g.app.recentFilesManager.writeEditedRecentFiles(c)
     //@+node:felix.20220105210716.44: *3* Reference outline commands
     //@+node:felix.20220105210716.45: *4* c_file.updateRefLeoFile

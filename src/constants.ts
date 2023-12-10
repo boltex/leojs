@@ -41,7 +41,7 @@ export class Constants {
 
     public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
 
-    public static URI_LEO_SCHEME: string = "leojs";
+    public static URI_LEOJS_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
     public static URI_SCHEME_HEADER: string = "leojs:/";
     public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.

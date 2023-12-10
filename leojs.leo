@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
-<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
+<leo_file xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -23,6 +23,7 @@
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
+<v t="felix.20231127195758.1"><vh>setConfirmBeforeClose</vh></v>
 <v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
 </v>
 </v>
@@ -121,6 +122,7 @@
 <v t="felix.20220930215012.1"><vh>_onDocumentChanged</vh></v>
 <v t="felix.20220930215020.1"><vh>setFindPanel</vh></v>
 <v t="felix.20221101220727.1"><vh>refreshDesc</vh></v>
+<v t="felix.20231127210614.1"><vh>checkConfirmBeforeClose</vh></v>
 </v>
 <v t="felix.20211204144931.1"><vh>Body Editing</vh>
 <v t="felix.20211204144931.2"><vh>triggerBodySave</vh></v>
@@ -250,6 +252,7 @@
 <v t="felix.20220516005841.1"><vh>runAskYesNoCancelDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
+<v t="felix.20231120232158.1"><vh>destroySelf</vh></v>
 </v>
 </v>
 </v>
@@ -759,23 +762,19 @@ or on [github](https://github.com/leo-editor/leo-editor).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
 
-# 🚧 This Extension is a WIP 🏗️
+# Web-Based Development
 
-Please report bugs and missing features in the repository's [Issues Page](https://github.com/boltex/leojs/issues).
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project). It can edit Leo documents directly inside online repositories such as on GitHub and Azure Repos.
 
-If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
+_You can open a GitHub repository in VS Code for the Web directly from a URL, following the schema:_ `https://vscode.dev/github/&lt;organization&gt;/&lt;repo&gt;`
 
-# LeoJS can be run on the web
+Or, simply visit your desired GitHub repository, Press the period '.' key on your keyboard to switch to web edition of VSCode. Make sure the LeoJS extension is installed and you're good to go!
 
-LeoJS can be run as a web extension for VSCode on the web! It can edit Leo documents directly inside online repositories. _Use the regular desktop version for VSCode to edit local Leo documents and projects._
+&gt; The web extension version of LeoJS cannot open local files: Use the regular desktop LeoJS version to edit local Leo documents and projects.
 
-Visit a github repository you want to work on. Press the period '.' key on your keyboard to switch to the vscode.dev web edition of VSCode directly from github.
+# Features
 
-Make sure the LeoJS extension is installed and you're good to go!
-
-## Features
-
--   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector**, **find panel**, along with a **Log Window** and **Terminal** [output channels](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
 -   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
@@ -866,7 +865,7 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 
 ---
 
-## Derive External Files
+## External Files
 
 Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty Files** commands to derive external files for any type of **@file** nodes.
 
@@ -883,13 +882,6 @@ Leo will detect external file changes, and will ask to either **refresh from dis
 
 ![Derive files](https://raw.githubusercontent.com/boltex/leojs/master/resources/derived-file.gif)
 
-## Automate External Files Synchronization
-
-The **change detection** process can be automated to always refresh, or ignore file changes:
-A **notification** will inform you of the action taken instead.
-
-![Auto sync](https://raw.githubusercontent.com/boltex/leojs/master/resources/auto-sync.gif)
-
 ## Extension Settings
 
 ### Open the command palette `Ctrl+Shift+P` and start typing `LeoJS settings` to access LeoJS's welcome/settings screen
@@ -902,7 +894,7 @@ A **notification** will inform you of the action taken instead.
 -   Choose to either focus on the body pane, or keep focus in the outline when a node is selected.
 -   Hide or show the "Open on the side" command in the context menu to open a node beside the active editor
 
-![Settings](https://raw.githubusercontent.com/boltex/leojs/master/resources/welcome-settings.gif)
+![Settings](https://raw.githubusercontent.com/boltex/leojs/master/resources/welcome-settings.png)
 
 ## Navigating a Leo Document
 
@@ -948,7 +940,7 @@ Use the undo / redo icons above the outline or above the undo pane itself. You c
 
 ![Undo pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/undo-pane.gif)
 
-## Issues
+# Issues
 
 Common issues are listed below. See the repository's [Issues Page](https://github.com/boltex/leojs/issues) to submit issues.
 
@@ -976,25 +968,23 @@ So select at least one character to use the previously assigned original keyboar
 
 &gt; Refer to the [issue tracker](https://github.com/boltex/leojs/issues) page to learn more about the known issues, or to contribute with additional information if you encounter some yourself.
 
----
+If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
 
-## Acknowledgments
+# Acknowledgments
 
 ### _Thanks to_
 
 -   [Edward K. Ream](https://github.com/edreamleo) creator of the [Leo Editor](https://leo-editor.github.io/leo-editor/)
 -   [Eric Amodio](https://github.com/eamodio) for the [welcome screen templates](https://github.com/eamodio/vscode-gitlens/tree/master/src/webviews)
--   [Vitalije](https://github.com/vitalije) for his contributions and support
--   [Arjan](https://github.com/ar-jan) for his suggestions and ideas
--   [Thomas](https://github.com/tbpassin) for his contributions and support
+-   [Vitalije Milošević](https://github.com/vitalije) for his contributions and support
+-   [Arjan Mossel](https://github.com/ar-jan) for his suggestions and ideas
+-   [Thomas Passin](https://github.com/tbpassin) for his contributions and support
 -   [Viktor](https://github.com/ranvik14) for his contributions and support
 -   [Gaurami](https://github.com/ATikhonov2) for his suggestions, bug reports and support
 -   [Kevin Henderson](https://github.com/kghenderson) for his suggestions and support
 -   [Ville M. Vainio](https://github.com/vivainio) for his Nav tab original concept
 -   [Jacob M. Peck](https://github.com/gatesphere) for his Tags tab original concept
 -   [Matt Wilkie](https://github.com/maphew) for his contributions and support
-
----
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
@@ -1016,6 +1006,9 @@ import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
+const activateDebug = false;
+
+
 @language typescript
 @tabwidth -4
 @others
@@ -1028,7 +1021,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 
 ## 0.1.1 Dec 31, 2021
 
-- Outline, undos and commands.
+- Outline, undos and commands
 
 ## 0.1.2 Jan 01 2022
 
@@ -1054,16 +1047,54 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 - Implemented Leo's atFile, atShadow and external files features
 - Implemented javascript scripting, along with c, g and p references.
 
-# 0.1.6
+# 0.1.6 December 5 2023
 
-- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar.
+- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar
 - Implemented importers
-- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'.
-- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands.
+- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'
+- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands
+- Implemented Global Settings, Sessions and recent files. (saved to db and other files in the .leo folder.)
+- Fixed log pane
+
+# 0.1.7
+
+- First feature complete version
+- Fixed external file generation bugs
+- Fixed conflict with leointeg when both expansions showed the same gnx body
+- Fixed creation of local .leo folder when running as web extension
+- Fixed md5 checksum and external file change detection bugs
+- Various small bug fixes and corrections
+
+# 0.2.0 
+
+- First alpha release
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
-export function deactivate() {
-    // pass
+export async function deactivate(): Promise&lt;unknown&gt; {
+    if (g.app) {
+
+        // ! NOT SAVED ON EXIT !
+        // // Save session data.
+        // console.log('------------------------start saveSession');
+
+        // await g.app.saveSession();
+        // // Similar to qt_gui.close_event.
+        // console.log('------------------------end saveSession');
+
+        for (const c of g.app.commanders()) {
+            if (c.exists) {
+                await g.app.closeLeoWindow(c.frame, undefined, true);
+            }
+            // allow = c.exists &amp;&amp; g.app.closeLeoWindow(c.frame)
+            // if (!allow)
+            //     return
+        }
+        // sys.exit(0)
+        console.log('leojs extension has been deactivated.');
+        return undefined;
+    } else {
+        console.log('no g.app');
+    }
 }
 
 </t>
@@ -1302,9 +1333,7 @@ You can then run the **Run Extension** target, as shown above, in the **Debug Vi
 
 ## Web extension version
 
-Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
-
-**In the meantime**, see 'Running Development version as a web extension' below to try out leojs in a browser.
+See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example
 
 ## Running Development version as a web extension
 
@@ -1523,9 +1552,10 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201214150149.1">/**
- * Entry point for Leo in Javascript.
+ * Entry point for Leo in Javascript. 
+ * @returns Leo’s leo.core.leoGlobals containing many useful functions, including g.es.
  */
-export async function activate(p_context: vscode.ExtensionContext) {
+export async function activate(p_context: vscode.ExtensionContext): Promise&lt;typeof g&gt; {
 
     /*
         * Original Leo startup *
@@ -1533,20 +1563,23 @@ export async function activate(p_context: vscode.ExtensionContext) {
         g.app = leoApp.LeoApp()
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
-
     */
 
+    (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
-    if (p_context.extensionUri) {
-        console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
+    if (p_context.extensionUri &amp;&amp; activateDebug) {
+        console.log('STARTUP: context.extensionUri.fsPath: ', p_context.extensionUri.fsPath);
+        console.log('STARTUP: context.extensionUri.scheme: ', p_context.extensionUri.scheme,);
     }
 
-    console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
-    console.log('STARTUP:             path.sep: ', path.sep);
-    console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
-    console.log('STARTUP:          env appHost: ', vscode.env.appHost);
-    console.log('STARTUP:          process.cwd(): ', process.cwd());
+    if (activateDebug) {
+        console.log('STARTUP:                 g.osBrowser: ', g.isBrowser);
+        console.log('STARTUP:                    path.sep: ', path.sep);
+        console.log('STARTUP:                  env scheme: ', vscode.env.uriScheme);
+        console.log('STARTUP:                 env appHost: ', vscode.env.appHost);
+        console.log('STARTUP:               process.cwd(): ', process.cwd());
+    }
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
@@ -1565,15 +1598,16 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = p_context.extensionUri.fsPath;
+        (g.app as LeoApp).vscodeExtensionDir = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
 
         const gitExtension = vscode.extensions.getExtension&lt;GitAPI.GitExtension&gt;('vscode.git');
         if (gitExtension) {
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT extension installed as g.gitAPI");
-
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT extension installed as g.gitAPI");
+                }
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -1586,7 +1620,11 @@ export async function activate(p_context: vscode.ExtensionContext) {
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-                console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+
+                if (activateDebug) {
+                    console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
+                }
+
             } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
@@ -1604,27 +1642,32 @@ export async function activate(p_context: vscode.ExtensionContext) {
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
-            console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+
+            if (activateDebug) {
+                console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
+            }
         }
 
         // Test paco
-        console.log('paco start test:  ');
-        const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
-
-        const compressed = pako.deflate(JSON.stringify(test));
-
-        const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
-        console.log('paco restored test:  ', restored);
+        // console.log('paco start test:  ');
+        // const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
+        // const compressed = pako.deflate(JSON.stringify(test));
+        // const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
+        // console.log('paco restored test:  ', restored);
 
 
-        console.log('SQL start test:  ');
+        // console.log('SQL start');
         const sqliteBits = await vscode.workspace.fs.readFile(
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
-        console.log('got sql-wasm-debug.wasm', sqliteBits.length);
+        // console.log('got sql-wasm-debug.wasm', sqliteBits.length);
 
         SQL = await initSqlJs(undefined, sqliteBits);
-        console.log("STARTUP:          SQLITE has started");
+
+        if (activateDebug) {
+            console.log("STARTUP:          SQLITE has started");
+        }
+
         (g.SQL as SqlJsStatic) = SQL;
 
 
@@ -1649,8 +1692,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
         );
         console.log('got db file!!  Length in bytes: ', filebuffer.length);
 
-
-
         // Load the db.
         const db: Database = new SQL.Database(filebuffer);
         console.log('db', db);
@@ -1669,8 +1710,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
         const w_insertQuery = `INSERT OR IGNORE INTO extra_infos (name, value) VALUES ('${w_dateStringKey}', '${w_dateStringVal}');`;
         console.log("w_insertQuery", w_insertQuery);
-
-
 
         const q_result2 = db.exec(w_insertQuery);
         console.log('result2', q_result2);
@@ -1781,29 +1820,34 @@ export async function activate(p_context: vscode.ExtensionContext) {
         }
         await runLeo(p_context);
     } else {
-        // Web Browser Extension: CHeck for type of workspace opened first
+        // Web Browser Extension: Check for type of workspace opened first
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
-                    .then(selection =&gt; {
-                        if (selection === "More Info") {
-                            vscode.env.openExternal(
-                                vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
-                            ).then(() =&gt; { }, (e) =&gt; {
-                                console.error('LEOJS: Could not open external vscode help URL in browser.', e);
-                            });
-                        }
-                    });
-                console.log('NOT started because not writable workspace');
-                void setStartupDoneContext(true);
-                return;
+
+                // NOTE : ! THIS RETURNS FALSE POSITIVES ! 
+                console.log('NOT WRITABLE WORKSPACE: FALSE POSITIVE?');
+
+                // void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info")
+                //     .then(selection =&gt; {
+                //         if (selection === "More Info") {
+                //             vscode.env.openExternal(
+                //                 vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                //             ).then(() =&gt; { }, (e) =&gt; {
+                //                 console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                //             });
+                //         }
+                //     });
+                // console.log('NOT started because not writable workspace');
+                // void setStartupDoneContext(true);
+                // return;
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 await runLeo(p_context);
             } else {
@@ -1819,7 +1863,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
                 });
                 console.log('NOT started because no remote workspace yet');
                 void setStartupDoneContext(true);
-                return;
+                return g;
             }
         } else {
             console.log('NOT started because no remote workspace yet');
@@ -1827,7 +1871,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
         }
 
     }
-
+    return g;
 }
 
 </t>
@@ -2455,7 +2499,7 @@ public static JS_FILE_EXTENSION: string = "leojs";
 
 public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
 
-public static URI_LEO_SCHEME: string = "leojs";
+public static URI_LEOJS_SCHEME: string = "leojs";
 public static URI_FILE_SCHEME: string = "file";
 public static URI_SCHEME_HEADER: string = "leojs:/";
 public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
@@ -2771,6 +2815,7 @@ import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { RClick } from "./core/mod_scripting";
+import { nullButtonWidget } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -2815,7 +2860,12 @@ public refreshTreeRoot(): void {
 
         const c = g.app.windowList[g.app.gui.frameIndex].c;
 
-        const d = c.theScriptingController.buttonsArray;
+        let d: nullButtonWidget[];
+        if (c &amp;&amp; c.theScriptingController) {
+            d = c.theScriptingController.buttonsArray || [];
+        } else {
+            d = [];
+        }
 
         const buttons = [];
 
@@ -3710,6 +3760,7 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
+    public lastRefreshHadDirty = false; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -3800,6 +3851,12 @@ export class LeoUI extends NullGui {
             regex: false,
             backward: false
         };
+
+    // * Reveal Timers
+    private _gotSelectedNodeBodyTimer: undefined | NodeJS.Timeout;
+    private _gotSelectedNodeRevealTimer: undefined | NodeJS.Timeout;
+    private _showBodySwitchBodyTimer: undefined | NodeJS.Timeout;
+    private _leoDocumentsRevealTimer: undefined | NodeJS.Timeout;
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
@@ -3951,7 +4008,6 @@ private _triggerGetStates(): void {
         this.refreshUndoPane();
     }
     // Set leoChanged and leoOpenedFilename
-
     this.leoStates.leoChanged = c.changed;
     this.leoStates.leoOpenedFileName = c.fileName();
 
@@ -3994,6 +4050,7 @@ public showOutline(p_focusOutline?: boolean): void {
  */
 private _refreshDocumentsPane(): void {
     this._leoDocumentsProvider.refreshTreeRoot();
+    this.checkConfirmBeforeClose();
 }
 
 </t>
@@ -4058,8 +4115,7 @@ private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChange
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
         this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
-        // TODO: Check if needed
-        // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
+        this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
     }
 }
 
@@ -4073,8 +4129,6 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
         this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
-        // TODO: Check if needed
-        // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
     }
 }
 
@@ -4606,7 +4660,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4677,9 +4731,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 {
   "command": "leojs.recentLeoFiles",
+  "title": "Recent Files",
   "category": "Leojs",
   "enablement": "leojsReady",
-  "title": "Recent Files"
+  "icon": {
+    "light": "resources/light/open-recent.svg",
+    "dark": "resources/dark/open-recent.svg"
+  }
 },
 {
   "command": "leojs.switchLeoFile",
@@ -6087,6 +6145,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "group": "navigation@9"
   },
   {
+    "command": "leojs.recentLeoFiles",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
+    "group": "navigation@8"
+  },
+  {
     "command": "leojs.findQuickSelected",
     "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
@@ -7019,15 +7082,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const button = d[p_node.button.index];
-
     let result: any;
-
     if (p_node.rclicks.length) {
         // Has rclicks so show menu to choose
         this._rclickSelected = [];
@@ -7037,7 +7095,6 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         if (
             p_picked
         ) {
-
             // Check if only one in this._rclickSelected and is zero: normal press
             if (this._rclickSelected.length === 1 &amp;&amp; this._rclickSelected[0] === 0) {
                 // Normal 'top' button, not one of it's child rclicks.
@@ -7060,7 +7117,6 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
                     if (w_rclickChosen) {
                         result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
                     }
-
                 } else {
                     // Normal 'top' button.
                     result = await Promise.resolve(button.command());
@@ -7102,17 +7158,11 @@ public async clickAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const tag: string = 'remove_button';
-
     const index = p_node.button.index;
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const butWidget = d[index];
-
     if (butWidget) {
         try {
             d.splice(index, 1);
@@ -7122,9 +7172,7 @@ public async removeAtButton(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
     } else {
         console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
     }
-
     this.setupRefresh(Focus.NoChange, { buttons: true });
-
     return this.launchRefresh();
 
 }
@@ -7176,7 +7224,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         // node from other tree that has this command in title
 
         if (p_uri &amp;&amp; p_uri?.fsPath?.trim() &amp;&amp; g.app.loadManager) {
-            fileName = p_uri.fsPath.replace(/\\/g, '/');
+            fileName = p_uri.fsPath;
         } else {
             fileName = await this.runOpenFileDialog(
                 undefined,
@@ -7230,14 +7278,28 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
  * * Shows the recent Leo files list, choosing one will open it
  * @returns A promise that resolves when the a file is finally opened, rejected otherwise
  */
-public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
-
-    void vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
+public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
 
     // if shown, chosen and opened
-    return Promise.resolve(true);
+    const w_recentFiles: string[] = g.app.recentFilesManager.recentFiles;
 
-    // return Promise.resolve(undefined); // if cancelled
+    let q_chooseFile: Thenable&lt;string | undefined&gt;;
+    if (w_recentFiles.length) {
+        q_chooseFile = vscode.window.showQuickPick(w_recentFiles, {
+            placeHolder: Constants.USER_MESSAGES.OPEN_RECENT_FILE,
+        });
+    } else {
+        // No file to list
+        return Promise.resolve(undefined);
+    }
+    const w_result = await q_chooseFile;
+    if (w_result) {
+        return this.openLeoFile(vscode.Uri.file(w_result));
+    } else {
+        // Canceled
+        return Promise.resolve(undefined);
+    }
+
 }
 
 </t>
@@ -7276,17 +7338,21 @@ public async saveLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
 
     const c = g.app.windowList[this.frameIndex].c;
 
-    this.setupRefresh(
-        p_fromOutline ? Focus.Outline : Focus.Body,
-        {
-            tree: true,
-            states: true,
-            documents: true
-        }
-    );
-
     await c.save();
-    void this.launchRefresh();
+
+    // ON THE WEB THE SAVE DOES NOT FINISH BEFORE INTERUPTING OTHER COMMANDS!
+    setTimeout(() =&gt; {
+        this.setupRefresh(
+            p_fromOutline ? Focus.Outline : Focus.Body,
+            {
+                tree: true,
+                states: true,
+                documents: true
+            }
+        );
+        void this.launchRefresh();
+    });
+
     return Promise.resolve();
 }
 
@@ -7683,7 +7749,7 @@ private _setupOpenedLeoDocument(): void {
     if (!this._bodyFileSystemStarted) {
         this._context.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
-                Constants.URI_LEO_SCHEME,
+                Constants.URI_LEOJS_SCHEME,
                 this._leoFileSystem,
                 { isCaseSensitive: true }
             )
@@ -7714,14 +7780,20 @@ public gotSelectedNode(p_node: Position): void {
 
     ) {
         // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
-        setTimeout(() =&gt; {
+        if (this._gotSelectedNodeBodyTimer) {
+            clearTimeout(this._gotSelectedNodeBodyTimer);
+        }
+        this._gotSelectedNodeBodyTimer = setTimeout(() =&gt; {
             // SAME with scroll information specified
             void this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
         }, 25);
     } else {
 
         if (this._revealType) {
-            setTimeout(() =&gt; {
+            if (this._gotSelectedNodeRevealTimer) {
+                clearTimeout(this._gotSelectedNodeRevealTimer);
+            }
+            this._gotSelectedNodeRevealTimer = setTimeout(() =&gt; {
                 this._lastTreeView.reveal(p_node, {
                     select: true,
                     focus: w_focusTree
@@ -9328,9 +9400,17 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
             });
         }
         if (multiple) {
-            return names;
+
+            return names.map((p_name) =&gt; {
+                let fileName = g.os_path_fix_drive(p_name);
+                fileName = g.os_path_normslashes(fileName);
+                return fileName;
+            });
         } else {
-            return names.length ? names[0] : ""; // Not multiple: return as string!
+            // Not multiple: return as string!
+            let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
         }
     });
 }
@@ -9366,14 +9446,9 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
     ).then((p_uri) =&gt; {
         if (p_uri) {
-            // console.log('CHOSE SAVE URI');
-            // console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
-            // console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
-            // console.log('SAVE toString: ' + p_uri.toString());
-            // console.log('test path: ' + path.normalize(p_uri.path));
-
-
-            return p_uri.fsPath;
+            let fileName = g.os_path_fix_drive(p_uri.fsPath);
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
         } else {
             return "";
         }
@@ -11021,13 +11096,10 @@ private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promis
     w_choices.push(
         ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
     );
-
     const w_options: vscode.QuickPickOptions = {
         placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
     };
-
     const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
-
     if (w_picked) {
         this._rclickSelected.push(w_picked.index);
         if (topLevelName &amp;&amp; w_picked.index === 0) {
@@ -11051,18 +11123,11 @@ private async _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Promis
 public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-
     const tag = 'goto_script';
-
     const index = p_node.button.index;
-
     const c = g.app.windowList[g.app.gui.frameIndex].c;
-
     const d = c.theScriptingController.buttonsArray;
-
     const butWidget = d[index];
-
-    console.log('goto script ! :  button', p_node);
 
     if (butWidget) {
 
@@ -11100,7 +11165,6 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         }
 
     }
-
     return Promise.resolve(false);
 
 }
@@ -11174,8 +11238,9 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-
-                console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                if (activateDebug) {
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                }
 
                 void runLeo(p_context);
             } else {
@@ -11598,7 +11663,9 @@ public showLogPane(p_focus?: boolean): Thenable&lt;unknown&gt; {
  * * Hides the log pane
  */
 public hideLogPane(): void {
-    this._leoLogPane.hide();
+    if (this._leoLogPane) {
+        this._leoLogPane.hide();
+    }
 }
 
 </t>
@@ -11615,7 +11682,7 @@ public closeBody(): Thenable&lt;any&gt; {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
             ) {
                 w_foundTabs.push(p_tab);
             }
@@ -11853,9 +11920,11 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         // }
 
         if (w_needRefreshFlag) {
-
+            if (this._showBodySwitchBodyTimer) {
+                clearTimeout(this._showBodySwitchBodyTimer);
+            }
             // redo apply to body!
-            setTimeout(() =&gt; {
+            this._showBodySwitchBodyTimer = setTimeout(() =&gt; {
                 if (this.lastSelectedNode) {
                     void this._switchBody(false, p_preventTakingFocus);
                 }
@@ -11865,16 +11934,23 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         }
     }
 
-    // Find body pane's position if already opened with same gnx (language still needs to be set per position)
+    // Find body pane's position if already opened with same gnx 
+    // Note: language still needs to be set per position
     let w_foundDocOpened = false;
     vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
 
-            if (p_tab.input &amp;&amp;
+            if (
+                p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.fsPath === w_openedDocument.uri.fsPath) {
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.fsPath === w_openedDocument.uri.fsPath
+            ) {
                 vscode.workspace.textDocuments.forEach((p_textDocument) =&gt; {
-                    if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
+                    if (
+                        p_textDocument.uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
+                        p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath
+                    ) {
                         this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                         this._bodyMainSelectionColumn = p_tab.group.viewColumn;
                         if (p_preventReveal) {
@@ -11890,11 +11966,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         });
     });
 
-    // console.log('pre found TAB: ', w_preFoundTabOpened);
-    // console.log('pre found DOC: ', w_preFoundDocOpened);
 
-    // console.log('POST found TAB: ', w_foundTabOpened);
-    // console.log('POST found DOC: ', w_foundDocOpened);
     if (!w_foundDocOpened &amp;&amp; p_preventReveal) {
         return; // ! HAD PREVENT REVEAL !
     }
@@ -11937,9 +12009,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         (p_result) =&gt; {
             this.showBodyIfClosed = false; // * BODY IS ACTUALLY SHOWN!
             return p_result;
-        },
-        (p_reason) =&gt; {
-            console.log('showTextDocument rejected: ', p_reason);
         }
     );
 
@@ -12219,7 +12288,7 @@ private _switchBody(
                     p_tabGroup.tabs.forEach((p_tab) =&gt; {
                         if (p_tab.input &amp;&amp;
                             (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                            (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
+                            (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
                             (p_tab.input as vscode.TabInputText).uri.fsPath === w_oldUri.fsPath
                         ) {
                             // Make sure it's saved AGAIN!!
@@ -12256,7 +12325,7 @@ private _switchBody(
             p_tabGroup.tabs.forEach((p_tab) =&gt; {
                 if (p_tab.input &amp;&amp;
                     (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
                     w_newUri.fsPath !== (p_tab.input as vscode.TabInputText).uri.fsPath // Maybe useless to check if different!
                 ) {
 
@@ -12316,6 +12385,7 @@ private _locateOpenedBody(p_gnx: string): boolean {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
                 utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri) === p_gnx
             ) {
                 vscode.workspace.textDocuments.forEach((p_textDocument) =&gt; {
@@ -12344,7 +12414,7 @@ private _isBodyVisible(): number {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
             ) {
                 w_total++;
             }
@@ -12365,7 +12435,7 @@ private _isBodyPreview(): boolean {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
             ) {
                 w_found = true;
                 if (!p_tab.isPreview) {
@@ -12403,7 +12473,7 @@ private _hideDeleteBody(p_textEditor: vscode.TextEditor): Thenable&lt;unknown&gt
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri.fsPath === w_editorFsPath &amp;&amp;
                 this.bodyUri.fsPath !== w_editorFsPath // if BODY is now the same, dont hide!
             ) {
@@ -12430,6 +12500,7 @@ private _hideDeleteBody(p_textEditor: vscode.TextEditor): Thenable&lt;unknown&gt
 private _checkPreviewMode(p_editor: vscode.TextEditor): void {
     // if selected gnx but in another column
     if (
+        p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
         p_editor.document.uri.fsPath === this.bodyUri.fsPath &amp;&amp;
         p_editor.viewColumn !== this._bodyMainSelectionColumn
     ) {
@@ -12646,7 +12717,7 @@ private _onActiveEditorChanged(
     p_internalCall?: boolean
 ): void {
 
-    if (p_editor &amp;&amp; p_editor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+    if (p_editor &amp;&amp; p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
         if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
             void this._hideDeleteBody(p_editor);
         }
@@ -12666,7 +12737,7 @@ private _onActiveEditorChanged(
 public _changedTextEditorViewColumn(
     p_columnChangeEvent: vscode.TextEditorViewColumnChangeEvent
 ): void {
-    if (p_columnChangeEvent &amp;&amp; p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+    if (p_columnChangeEvent &amp;&amp; p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
         this._checkPreviewMode(p_columnChangeEvent.textEditor);
     }
     void this.triggerBodySave(true, true);
@@ -12681,7 +12752,7 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
     if (p_editors &amp;&amp; p_editors.length) {
         // May be no changes - so check length
         p_editors.forEach((p_textEditor) =&gt; {
-            if (p_textEditor &amp;&amp; p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+            if (p_textEditor &amp;&amp; p_textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
                 if (this.bodyUri.fsPath !== p_textEditor.document.uri.fsPath) {
                     void this._hideDeleteBody(p_textEditor);
                 }
@@ -12708,7 +12779,7 @@ public _changedWindowState(p_windowState: vscode.WindowState): void {
  * @param p_event a change event containing the active editor's selection, if any.
  */
 private _onChangeEditorSelection(p_event: vscode.TextEditorSelectionChangeEvent): void {
-    if (p_event.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+    if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
         if (p_event.selections.length) {
             this._selectionDirty = true;
             this._selection = p_event.selections[0];
@@ -12723,7 +12794,7 @@ private _onChangeEditorSelection(p_event: vscode.TextEditorSelectionChangeEvent)
  * @param p_event a change event containing the active editor's visible range, if any.
  */
 private _onChangeEditorScroll(p_event: vscode.TextEditorVisibleRangesChangeEvent): void {
-    if (p_event.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+    if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
         if (p_event.visibleRanges.length) {
             this._scrollDirty = true;
             this._scroll = p_event.visibleRanges[0];
@@ -12743,7 +12814,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
     if (
         this.lastSelectedNode &amp;&amp;
         p_textDocumentChange.contentChanges.length &amp;&amp;
-        p_textDocumentChange.document.uri.scheme === Constants.URI_LEO_SCHEME
+        p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
     ) {
 
         // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
@@ -12850,16 +12921,38 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
  * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
  */
 public setDocumentSelection(p_frame: LeoFrame): void {
-    setTimeout(() =&gt; {
-        if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_frame) {
-            // console.log('setDocumentSelection: already selected!');
-        } else if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.visible) {
-            this._lastLeoDocuments.reveal(p_frame, { select: true, focus: false }).then(
-                () =&gt; { }, // Ok
-                (p_error) =&gt; {
-                    console.log('setDocumentSelection could not reveal');
-                }
-            );
+    if (this._leoDocumentsRevealTimer) {
+        clearTimeout(this._leoDocumentsRevealTimer);
+    }
+    this._leoDocumentsRevealTimer = setTimeout(() =&gt; {
+        if (!this._leoDocuments.visible &amp;&amp; !this._leoDocumentsExplorer.visible) {
+            return;
+        }
+        let w_trigger = false;
+        let w_docView: undefined | vscode.TreeView&lt;LeoFrame&gt;;
+        if (this._leoDocuments.visible &amp;&amp; this._lastLeoDocuments === this._leoDocuments) {
+            w_docView = this._leoDocuments;
+        } else if (this._leoDocumentsExplorer === this._lastLeoDocuments) {
+            w_docView = this._leoDocumentsExplorer;
+        }
+        if (!w_docView) {
+            return;
+        }
+        if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_frame) {
+            // console.log('already selected!');
+        } else {
+            w_trigger = true;
+        }
+        if (w_trigger) {
+            w_docView.reveal(p_frame, { select: true, focus: false })
+                .then(
+                    (p_result) =&gt; {
+                        // Shown document node
+                    },
+                    (p_reason) =&gt; {
+                        console.log('shown doc error on reveal: ', p_reason);
+                    }
+                );
         }
     }, 0);
 }
@@ -12896,10 +12989,8 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
         action = "undo"; // Constants.LEOBRIDGE.UNDO;
         repeat = (-p_undo.beadIndex) + 1;
     }
-
     const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
-
     for (let x = 0; x &lt; repeat; x++) {
         if (action === "redo") {
             if (u.canRedo()) {
@@ -12911,7 +13002,6 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
             }
         }
     }
-
     this.setupRefresh(
         Focus.Outline,
         {
@@ -12968,7 +13058,7 @@ async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
 
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
                 !p_tab.isDirty
 
             ) {
@@ -13166,9 +13256,7 @@ public static OLD_POS_OFFSETS = {
 </t>
 <t tx="felix.20221026222034.1">public set_focus(commander: Commands, widget: any): void {
     this.focusWidget = widget;
-
     const w_widgetName = this.widget_name(widget);
-
     // * LeoJS custom finalFocus replacement.
     if (widget &amp;&amp; this.finalFocus === Focus.NoChange) {
         // * Check which panel to focus
@@ -13333,8 +13421,6 @@ public refreshDesc(): void {
     //         this._leoTreeExView.description = "";
     //     }
     // }
-
-
 
 }
 
@@ -14876,6 +14962,34 @@ get leoEditHeadline(): boolean {
 set leoEditHeadline(p_value: boolean) {
     this._leoEditHeadline = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_EDIT_HEADLINE, p_value);
+}
+
+</t>
+<t tx="felix.20231120232158.1">public destroySelf(): void {
+    // pass // Nothing more needs to be done once all windows have been destroyed.
+}
+
+</t>
+<t tx="felix.20231127195758.1">public setConfirmBeforeClose(p_state: boolean): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("window")
+        .update("confirmBeforeClose", p_state ? "always" : "never", true);
+}
+
+</t>
+<t tx="felix.20231127210614.1">public checkConfirmBeforeClose(): void {
+
+    let hasDirty = false;
+    for (const frame of g.app.windowList) {
+        if (frame.c.changed) {
+            hasDirty = true;
+        }
+    }
+    if (hasDirty !== this.lastRefreshHadDirty) {
+        // don't wait for this promise!
+        void this.config.setConfirmBeforeClose(hasDirty);
+    }
+    this.lastRefreshHadDirty = hasDirty;
+
 }
 
 </t>

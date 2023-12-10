@@ -2,7 +2,7 @@
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -778,9 +778,13 @@
       },
       {
         "command": "leojs.recentLeoFiles",
+        "title": "Recent Files",
         "category": "Leojs",
         "enablement": "leojsReady",
-        "title": "Recent Files"
+        "icon": {
+          "light": "resources/light/open-recent.svg",
+          "dark": "resources/dark/open-recent.svg"
+        }
       },
       {
         "command": "leojs.switchLeoFile",
@@ -2672,6 +2676,11 @@
           "group": "navigation@9"
         },
         {
+          "command": "leojs.recentLeoFiles",
+          "when": "view =~ /^leojsDocuments/ && leojsReady",
+          "group": "navigation@8"
+        },
+        {
           "command": "leojs.findQuickSelected",
           "when": "view =~ /^leojsGotoPanel/ && leojsTreeOpened",
           "group": "navigation@1"
@@ -3708,8 +3717,5 @@
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "29f2fad",
-  "gitBranch": "devel",
-  "gitDate": "2023-11-08 23:56:28 -0500"
+  }
 }

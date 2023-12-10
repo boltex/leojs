@@ -476,8 +476,6 @@ export class AtFile {
         const files = at.findFilesToRead(root, true);
 
         for (const p of files) {
-            console.log('readFileAtPosition: ', p.h);
-
             await at.readFileAtPosition(p);
         }
         for (const p of files) {

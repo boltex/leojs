@@ -15,23 +15,19 @@ or on [github](https://github.com/leo-editor/leo-editor).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
 
-# 🚧 This Extension is a WIP 🏗️
+# Web-Based Development
 
-Please report bugs and missing features in the repository's [Issues Page](https://github.com/boltex/leojs/issues).
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project). It can edit Leo documents directly inside online repositories such as on GitHub and Azure Repos.
 
-If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
+_You can open a GitHub repository in VS Code for the Web directly from a URL, following the schema:_ `https://vscode.dev/github/<organization>/<repo>`
 
-# LeoJS can be run on the web
+Or, simply visit your desired GitHub repository, Press the period '.' key on your keyboard to switch to web edition of VSCode. Make sure the LeoJS extension is installed and you're good to go!
 
-LeoJS can be run as a web extension for VSCode on the web! It can edit Leo documents directly inside online repositories. _Use the regular desktop version for VSCode to edit local Leo documents and projects._
+> The web extension version of LeoJS cannot open local files: Use the regular desktop LeoJS version to edit local Leo documents and projects.
 
-Visit a github repository you want to work on. Press the period '.' key on your keyboard to switch to the vscode.dev web edition of VSCode directly from github.
+# Features
 
-Make sure the LeoJS extension is installed and you're good to go!
-
-## Features
-
--   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector**, **find panel**, along with a **Log Window** and **Terminal** [output channels](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
 -   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
@@ -122,7 +118,7 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 
 ---
 
-## Derive External Files
+## External Files
 
 Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty Files** commands to derive external files for any type of **@file** nodes.
 
@@ -197,7 +193,7 @@ Use the undo / redo icons above the outline or above the undo pane itself. You c
 
 ![Undo pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/undo-pane.gif)
 
-## Issues
+# Issues
 
 Common issues are listed below. See the repository's [Issues Page](https://github.com/boltex/leojs/issues) to submit issues.
 
@@ -225,24 +221,22 @@ So select at least one character to use the previously assigned original keyboar
 
 > Refer to the [issue tracker](https://github.com/boltex/leojs/issues) page to learn more about the known issues, or to contribute with additional information if you encounter some yourself.
 
----
+If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
 
-## Acknowledgments
+# Acknowledgments
 
 ### _Thanks to_
 
 -   [Edward K. Ream](https://github.com/edreamleo) creator of the [Leo Editor](https://leo-editor.github.io/leo-editor/)
 -   [Eric Amodio](https://github.com/eamodio) for the [welcome screen templates](https://github.com/eamodio/vscode-gitlens/tree/master/src/webviews)
--   [Vitalije](https://github.com/vitalije) for his contributions and support
--   [Arjan](https://github.com/ar-jan) for his suggestions and ideas
--   [Thomas](https://github.com/tbpassin) for his contributions and support
+-   [Vitalije Milošević](https://github.com/vitalije) for his contributions and support
+-   [Arjan Mossel](https://github.com/ar-jan) for his suggestions and ideas
+-   [Thomas Passin](https://github.com/tbpassin) for his contributions and support
 -   [Viktor](https://github.com/ranvik14) for his contributions and support
 -   [Gaurami](https://github.com/ATikhonov2) for his suggestions, bug reports and support
 -   [Kevin Henderson](https://github.com/kghenderson) for his suggestions and support
 -   [Ville M. Vainio](https://github.com/vivainio) for his Nav tab original concept
 -   [Jacob M. Peck](https://github.com/gatesphere) for his Tags tab original concept
 -   [Matt Wilkie](https://github.com/maphew) for his contributions and support
-
----
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)

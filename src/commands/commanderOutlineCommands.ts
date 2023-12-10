@@ -226,8 +226,9 @@ export class CommanderOutlineCommands {
             return undefined;
         }
         // Handle the "before" data for undo.
-        let undoData: any;
+        let undoData: Bead;
         if (undoFlag) {
+            // undoData now exists for sure because of undoFlag
             undoData = c.undoer.beforeInsertNode(c.p, false, []);
         }
         // Paste the node into the outline.
@@ -246,7 +247,8 @@ export class CommanderOutlineCommands {
         }
         // Finish the command.
         if (undoFlag) {
-            c.undoer.afterInsertNode(pasted, 'Paste Node', undoData);
+            // undoData does exists for sure because of undoFlag
+            c.undoer.afterInsertNode(pasted, 'Paste Node', undoData!);
         }
         c.redraw(pasted);
         // c.recolor()
@@ -298,7 +300,7 @@ export class CommanderOutlineCommands {
         }
         // Handle the "before" data for undo.
         let vnodeInfoDict: any;
-        let undoData: any;
+        let undoData: Bead;
         if (true) { // undoFlag
             vnodeInfoDict = computeVnodeInfoDict(c);
             undoData = c.undoer.beforeInsertNode(
@@ -379,9 +381,9 @@ export class CommanderOutlineCommands {
         let pasted: VNode;
         let index: number;
         let parStack: StackEntry[];
-        let xroot: et.ElementTree | any;
-        let xvelements: et.Element[] | any;
-        let xtelements: et.Element[] | any;
+        let xroot: et.ElementTree | any; // ElementTree from leo, any from JSON
+        let xvelements: et.Element[] | any; // Element from leo, any from JSON
+        let xtelements: et.Element[] | any; // Element from leo, any from JSON
         const gnx2v = c.fileCommands.gnxDict;
 
         //@+others
@@ -549,7 +551,8 @@ export class CommanderOutlineCommands {
 
         const x = new FastRead(c, {});
         if (!isJson) {
-            xroot = et.parse(s);
+            // To match python's implementation of XML : /r/n replaced by /n
+            xroot = et.parse(s.replace(/\r\n/g, '\n'));
             xvelements = xroot.find('vnodes')!.getchildren();
             xtelements = xroot.find('tnodes')!.getchildren();
             [bodies, uas] = x.scanTnodes(xtelements);

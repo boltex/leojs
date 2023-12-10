@@ -53,6 +53,7 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
+    public lastRefreshHadDirty = false; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -143,6 +144,12 @@ export class LeoUI extends NullGui {
             regex: false,
             backward: false
         };
+
+    // * Reveal Timers
+    private _gotSelectedNodeBodyTimer: undefined | NodeJS.Timeout;
+    private _gotSelectedNodeRevealTimer: undefined | NodeJS.Timeout;
+    private _showBodySwitchBodyTimer: undefined | NodeJS.Timeout;
+    private _leoDocumentsRevealTimer: undefined | NodeJS.Timeout;
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
@@ -522,7 +529,9 @@ export class LeoUI extends NullGui {
      * * Hides the log pane
      */
     public hideLogPane(): void {
-        this._leoLogPane.hide();
+        if (this._leoLogPane) {
+            this._leoLogPane.hide();
+        }
     }
 
     /**
@@ -567,7 +576,6 @@ export class LeoUI extends NullGui {
             this.refreshUndoPane();
         }
         // Set leoChanged and leoOpenedFilename
-
         this.leoStates.leoChanged = c.changed;
         this.leoStates.leoOpenedFileName = c.fileName();
 
@@ -633,7 +641,7 @@ export class LeoUI extends NullGui {
         if (!this._bodyFileSystemStarted) {
             this._context.subscriptions.push(
                 vscode.workspace.registerFileSystemProvider(
-                    Constants.URI_LEO_SCHEME,
+                    Constants.URI_LEOJS_SCHEME,
                     this._leoFileSystem,
                     { isCaseSensitive: true }
                 )
@@ -765,8 +773,7 @@ export class LeoUI extends NullGui {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
             this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
-            // TODO: Check if needed
-            // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
+            this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
         }
     }
 
@@ -779,8 +786,6 @@ export class LeoUI extends NullGui {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
             this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
-            // TODO: Check if needed
-            // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
         }
     }
 
@@ -851,7 +856,7 @@ export class LeoUI extends NullGui {
         p_internalCall?: boolean
     ): void {
 
-        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
                 void this._hideDeleteBody(p_editor);
             }
@@ -870,7 +875,7 @@ export class LeoUI extends NullGui {
     public _changedTextEditorViewColumn(
         p_columnChangeEvent: vscode.TextEditorViewColumnChangeEvent
     ): void {
-        if (p_columnChangeEvent && p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_columnChangeEvent && p_columnChangeEvent.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             this._checkPreviewMode(p_columnChangeEvent.textEditor);
         }
         void this.triggerBodySave(true, true);
@@ -884,7 +889,7 @@ export class LeoUI extends NullGui {
         if (p_editors && p_editors.length) {
             // May be no changes - so check length
             p_editors.forEach((p_textEditor) => {
-                if (p_textEditor && p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+                if (p_textEditor && p_textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
                     if (this.bodyUri.fsPath !== p_textEditor.document.uri.fsPath) {
                         void this._hideDeleteBody(p_textEditor);
                     }
@@ -909,7 +914,7 @@ export class LeoUI extends NullGui {
      * @param p_event a change event containing the active editor's selection, if any.
      */
     private _onChangeEditorSelection(p_event: vscode.TextEditorSelectionChangeEvent): void {
-        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (p_event.selections.length) {
                 this._selectionDirty = true;
                 this._selection = p_event.selections[0];
@@ -923,7 +928,7 @@ export class LeoUI extends NullGui {
      * @param p_event a change event containing the active editor's visible range, if any.
      */
     private _onChangeEditorScroll(p_event: vscode.TextEditorVisibleRangesChangeEvent): void {
-        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (p_event.visibleRanges.length) {
                 this._scrollDirty = true;
                 this._scroll = p_event.visibleRanges[0];
@@ -942,7 +947,7 @@ export class LeoUI extends NullGui {
         if (
             this.lastSelectedNode &&
             p_textDocumentChange.contentChanges.length &&
-            p_textDocumentChange.document.uri.scheme === Constants.URI_LEO_SCHEME
+            p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
         ) {
 
             // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
@@ -1124,7 +1129,21 @@ export class LeoUI extends NullGui {
         //     }
         // }
 
+    }
 
+    public checkConfirmBeforeClose(): void {
+
+        let hasDirty = false;
+        for (const frame of g.app.windowList) {
+            if (frame.c.changed) {
+                hasDirty = true;
+            }
+        }
+        if (hasDirty !== this.lastRefreshHadDirty) {
+            // don't wait for this promise!
+            void this.config.setConfirmBeforeClose(hasDirty);
+        }
+        this.lastRefreshHadDirty = hasDirty;
 
     }
 
@@ -1774,14 +1793,20 @@ export class LeoUI extends NullGui {
 
         ) {
             // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
-            setTimeout(() => {
+            if (this._gotSelectedNodeBodyTimer) {
+                clearTimeout(this._gotSelectedNodeBodyTimer);
+            }
+            this._gotSelectedNodeBodyTimer = setTimeout(() => {
                 // SAME with scroll information specified
                 void this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
             }, 25);
         } else {
 
             if (this._revealType) {
-                setTimeout(() => {
+                if (this._gotSelectedNodeRevealTimer) {
+                    clearTimeout(this._gotSelectedNodeRevealTimer);
+                }
+                this._gotSelectedNodeRevealTimer = setTimeout(() => {
                     this._lastTreeView.reveal(p_node, {
                         select: true,
                         focus: w_focusTree
@@ -1850,6 +1875,7 @@ export class LeoUI extends NullGui {
      */
     private _refreshDocumentsPane(): void {
         this._leoDocumentsProvider.refreshTreeRoot();
+        this.checkConfirmBeforeClose();
     }
 
     /**
@@ -1953,7 +1979,7 @@ export class LeoUI extends NullGui {
                         p_tabGroup.tabs.forEach((p_tab) => {
                             if (p_tab.input &&
                                 (p_tab.input as vscode.TabInputText).uri &&
-                                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                                 (p_tab.input as vscode.TabInputText).uri.fsPath === w_oldUri.fsPath
                             ) {
                                 // Make sure it's saved AGAIN!!
@@ -1990,7 +2016,7 @@ export class LeoUI extends NullGui {
                 p_tabGroup.tabs.forEach((p_tab) => {
                     if (p_tab.input &&
                         (p_tab.input as vscode.TabInputText).uri &&
-                        (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                        (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                         w_newUri.fsPath !== (p_tab.input as vscode.TabInputText).uri.fsPath // Maybe useless to check if different!
                     ) {
 
@@ -2049,6 +2075,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                     utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri) === p_gnx
                 ) {
                     vscode.workspace.textDocuments.forEach((p_textDocument) => {
@@ -2076,7 +2103,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
                 ) {
                     w_total++;
                 }
@@ -2096,7 +2123,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
                 ) {
                     w_found = true;
                     if (!p_tab.isPreview) {
@@ -2132,7 +2159,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
                     (p_tab.input as vscode.TabInputText).uri.fsPath === w_editorFsPath &&
                     this.bodyUri.fsPath !== w_editorFsPath // if BODY is now the same, dont hide!
                 ) {
@@ -2158,6 +2185,7 @@ export class LeoUI extends NullGui {
     private _checkPreviewMode(p_editor: vscode.TextEditor): void {
         // if selected gnx but in another column
         if (
+            p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME &&
             p_editor.document.uri.fsPath === this.bodyUri.fsPath &&
             p_editor.viewColumn !== this._bodyMainSelectionColumn
         ) {
@@ -2178,7 +2206,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
                 ) {
                     w_foundTabs.push(p_tab);
                 }
@@ -2414,9 +2442,11 @@ export class LeoUI extends NullGui {
             // }
 
             if (w_needRefreshFlag) {
-
+                if (this._showBodySwitchBodyTimer) {
+                    clearTimeout(this._showBodySwitchBodyTimer);
+                }
                 // redo apply to body!
-                setTimeout(() => {
+                this._showBodySwitchBodyTimer = setTimeout(() => {
                     if (this.lastSelectedNode) {
                         void this._switchBody(false, p_preventTakingFocus);
                     }
@@ -2426,16 +2456,23 @@ export class LeoUI extends NullGui {
             }
         }
 
-        // Find body pane's position if already opened with same gnx (language still needs to be set per position)
+        // Find body pane's position if already opened with same gnx 
+        // Note: language still needs to be set per position
         let w_foundDocOpened = false;
         vscode.window.tabGroups.all.forEach((p_tabGroup) => {
             p_tabGroup.tabs.forEach((p_tab) => {
 
-                if (p_tab.input &&
+                if (
+                    p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_openedDocument.uri.fsPath) {
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_openedDocument.uri.fsPath
+                ) {
                     vscode.workspace.textDocuments.forEach((p_textDocument) => {
-                        if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
+                        if (
+                            p_textDocument.uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                            p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath
+                        ) {
                             this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                             this._bodyMainSelectionColumn = p_tab.group.viewColumn;
                             if (p_preventReveal) {
@@ -2451,11 +2488,7 @@ export class LeoUI extends NullGui {
             });
         });
 
-        // console.log('pre found TAB: ', w_preFoundTabOpened);
-        // console.log('pre found DOC: ', w_preFoundDocOpened);
 
-        // console.log('POST found TAB: ', w_foundTabOpened);
-        // console.log('POST found DOC: ', w_foundDocOpened);
         if (!w_foundDocOpened && p_preventReveal) {
             return; // ! HAD PREVENT REVEAL !
         }
@@ -4428,16 +4461,38 @@ export class LeoUI extends NullGui {
      * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
      */
     public setDocumentSelection(p_frame: LeoFrame): void {
-        setTimeout(() => {
-            if (this._lastLeoDocuments && this._lastLeoDocuments.selection.length && this._lastLeoDocuments.selection[0] === p_frame) {
-                // console.log('setDocumentSelection: already selected!');
-            } else if (this._lastLeoDocuments && this._lastLeoDocuments.visible) {
-                this._lastLeoDocuments.reveal(p_frame, { select: true, focus: false }).then(
-                    () => { }, // Ok
-                    (p_error) => {
-                        console.log('setDocumentSelection could not reveal');
-                    }
-                );
+        if (this._leoDocumentsRevealTimer) {
+            clearTimeout(this._leoDocumentsRevealTimer);
+        }
+        this._leoDocumentsRevealTimer = setTimeout(() => {
+            if (!this._leoDocuments.visible && !this._leoDocumentsExplorer.visible) {
+                return;
+            }
+            let w_trigger = false;
+            let w_docView: undefined | vscode.TreeView<LeoFrame>;
+            if (this._leoDocuments.visible && this._lastLeoDocuments === this._leoDocuments) {
+                w_docView = this._leoDocuments;
+            } else if (this._leoDocumentsExplorer === this._lastLeoDocuments) {
+                w_docView = this._leoDocumentsExplorer;
+            }
+            if (!w_docView) {
+                return;
+            }
+            if (w_docView.selection.length && w_docView.selection[0] === p_frame) {
+                // console.log('already selected!');
+            } else {
+                w_trigger = true;
+            }
+            if (w_trigger) {
+                w_docView.reveal(p_frame, { select: true, focus: false })
+                    .then(
+                        (p_result) => {
+                            // Shown document node
+                        },
+                        (p_reason) => {
+                            console.log('shown doc error on reveal: ', p_reason);
+                        }
+                    );
             }
         }, 0);
     }
@@ -4541,7 +4596,7 @@ export class LeoUI extends NullGui {
             // node from other tree that has this command in title
 
             if (p_uri && p_uri?.fsPath?.trim() && g.app.loadManager) {
-                fileName = p_uri.fsPath.replace(/\\/g, '/');
+                fileName = p_uri.fsPath;
             } else {
                 fileName = await this.runOpenFileDialog(
                     undefined,
@@ -4594,14 +4649,28 @@ export class LeoUI extends NullGui {
      * * Shows the recent Leo files list, choosing one will open it
      * @returns A promise that resolves when the a file is finally opened, rejected otherwise
      */
-    public showRecentLeoFiles(): Thenable<unknown> {
-
-        void vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
+    public async showRecentLeoFiles(): Promise<unknown> {
 
         // if shown, chosen and opened
-        return Promise.resolve(true);
+        const w_recentFiles: string[] = g.app.recentFilesManager.recentFiles;
 
-        // return Promise.resolve(undefined); // if cancelled
+        let q_chooseFile: Thenable<string | undefined>;
+        if (w_recentFiles.length) {
+            q_chooseFile = vscode.window.showQuickPick(w_recentFiles, {
+                placeHolder: Constants.USER_MESSAGES.OPEN_RECENT_FILE,
+            });
+        } else {
+            // No file to list
+            return Promise.resolve(undefined);
+        }
+        const w_result = await q_chooseFile;
+        if (w_result) {
+            return this.openLeoFile(vscode.Uri.file(w_result));
+        } else {
+            // Canceled
+            return Promise.resolve(undefined);
+        }
+
     }
 
     /**
@@ -4679,17 +4748,21 @@ export class LeoUI extends NullGui {
 
         const c = g.app.windowList[this.frameIndex].c;
 
-        this.setupRefresh(
-            p_fromOutline ? Focus.Outline : Focus.Body,
-            {
-                tree: true,
-                states: true,
-                documents: true
-            }
-        );
-
         await c.save();
-        void this.launchRefresh();
+
+        // ON THE WEB THE SAVE DOES NOT FINISH BEFORE INTERUPTING OTHER COMMANDS!
+        setTimeout(() => {
+            this.setupRefresh(
+                p_fromOutline ? Focus.Outline : Focus.Body,
+                {
+                    tree: true,
+                    states: true,
+                    documents: true
+                }
+            );
+            void this.launchRefresh();
+        });
+
         return Promise.resolve();
     }
 
@@ -4786,15 +4859,10 @@ export class LeoUI extends NullGui {
     public async clickAtButton(p_node: LeoButtonNode): Promise<unknown> {
 
         await this.triggerBodySave(true);
-
         const c = g.app.windowList[g.app.gui.frameIndex].c;
-
         const d = c.theScriptingController.buttonsArray;
-
         const button = d[p_node.button.index];
-
         let result: any;
-
         if (p_node.rclicks.length) {
             // Has rclicks so show menu to choose
             this._rclickSelected = [];
@@ -4804,7 +4872,6 @@ export class LeoUI extends NullGui {
             if (
                 p_picked
             ) {
-
                 // Check if only one in this._rclickSelected and is zero: normal press
                 if (this._rclickSelected.length === 1 && this._rclickSelected[0] === 0) {
                     // Normal 'top' button, not one of it's child rclicks.
@@ -4827,7 +4894,6 @@ export class LeoUI extends NullGui {
                         if (w_rclickChosen) {
                             result = c.theScriptingController.executeScriptFromButton(button, '', w_rclickChosen.position, '');
                         }
-
                     } else {
                         // Normal 'top' button.
                         result = await Promise.resolve(button.command());
@@ -4874,13 +4940,10 @@ export class LeoUI extends NullGui {
         w_choices.push(
             ...p_rclicks.map((p_rclick): ChooseRClickItem => { return { label: p_rclick.position.h, index: w_index++, rclick: p_rclick }; })
         );
-
         const w_options: vscode.QuickPickOptions = {
             placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
         };
-
         const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
-
         if (w_picked) {
             this._rclickSelected.push(w_picked.index);
             if (topLevelName && w_picked.index === 0) {
@@ -4903,18 +4966,11 @@ export class LeoUI extends NullGui {
     public async gotoScript(p_node: LeoButtonNode): Promise<unknown> {
 
         await this.triggerBodySave(true);
-
         const tag = 'goto_script';
-
         const index = p_node.button.index;
-
         const c = g.app.windowList[g.app.gui.frameIndex].c;
-
         const d = c.theScriptingController.buttonsArray;
-
         const butWidget = d[index];
-
-        console.log('goto script ! :  button', p_node);
 
         if (butWidget) {
 
@@ -4952,7 +5008,6 @@ export class LeoUI extends NullGui {
             }
 
         }
-
         return Promise.resolve(false);
 
     }
@@ -4965,17 +5020,11 @@ export class LeoUI extends NullGui {
     public async removeAtButton(p_node: LeoButtonNode): Promise<unknown> {
 
         await this.triggerBodySave(true);
-
         const tag: string = 'remove_button';
-
         const index = p_node.button.index;
-
         const c = g.app.windowList[g.app.gui.frameIndex].c;
-
         const d = c.theScriptingController.buttonsArray;
-
         const butWidget = d[index];
-
         if (butWidget) {
             try {
                 d.splice(index, 1);
@@ -4985,9 +5034,7 @@ export class LeoUI extends NullGui {
         } else {
             console.log(`LEOJS : ERROR ${tag}: button ${String(index)} does not exist`);
         }
-
         this.setupRefresh(Focus.NoChange, { buttons: true });
-
         return this.launchRefresh();
 
     }
@@ -5006,10 +5053,8 @@ export class LeoUI extends NullGui {
             action = "undo"; // Constants.LEOBRIDGE.UNDO;
             repeat = (-p_undo.beadIndex) + 1;
         }
-
         const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
-
         for (let x = 0; x < repeat; x++) {
             if (action === "redo") {
                 if (u.canRedo()) {
@@ -5021,7 +5066,6 @@ export class LeoUI extends NullGui {
                 }
             }
         }
-
         this.setupRefresh(
             Focus.Outline,
             {
@@ -5176,9 +5220,7 @@ export class LeoUI extends NullGui {
 
     public set_focus(commander: Commands, widget: any): void {
         this.focusWidget = widget;
-
         const w_widgetName = this.widget_name(widget);
-
         // * LeoJS custom finalFocus replacement.
         if (widget && this.finalFocus === Focus.NoChange) {
             // * Check which panel to focus
@@ -5379,9 +5421,17 @@ export class LeoUI extends NullGui {
                 });
             }
             if (multiple) {
-                return names;
+
+                return names.map((p_name) => {
+                    let fileName = g.os_path_fix_drive(p_name);
+                    fileName = g.os_path_normslashes(fileName);
+                    return fileName;
+                });
             } else {
-                return names.length ? names[0] : ""; // Not multiple: return as string!
+                // Not multiple: return as string!
+                let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+                fileName = g.os_path_normslashes(fileName);
+                return fileName;
             }
         });
     }
@@ -5401,18 +5451,17 @@ export class LeoUI extends NullGui {
             }
         ).then((p_uri) => {
             if (p_uri) {
-                // console.log('CHOSE SAVE URI');
-                // console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
-                // console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
-                // console.log('SAVE toString: ' + p_uri.toString());
-                // console.log('test path: ' + path.normalize(p_uri.path));
-
-
-                return p_uri.fsPath;
+                let fileName = g.os_path_fix_drive(p_uri.fsPath);
+                fileName = g.os_path_normslashes(fileName);
+                return fileName;
             } else {
                 return "";
             }
         });
+    }
+
+    public destroySelf(): void {
+        // pass // Nothing more needs to be done once all windows have been destroyed.
     }
 
 }

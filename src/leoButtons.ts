@@ -4,6 +4,7 @@ import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { RClick } from "./core/mod_scripting";
+import { nullButtonWidget } from "./core/leoFrame";
 
 /**
  * * '@buttons' shown as a list with this TreeDataProvider implementation
@@ -37,7 +38,12 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
 
             const c = g.app.windowList[g.app.gui.frameIndex].c;
 
-            const d = c.theScriptingController.buttonsArray;
+            let d: nullButtonWidget[];
+            if (c && c.theScriptingController) {
+                d = c.theScriptingController.buttonsArray || [];
+            } else {
+                d = [];
+            }
 
             const buttons = [];
 
