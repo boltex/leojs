@@ -1942,6 +1942,10 @@ export class LoadManager {
 
         // const ok = g.makeAllNonExistentDirectories(homeLeoDir);
         const w_uri = g.makeVscodeUri(homeLeoDir);
+        if (g.isBrowser) {
+            return homeLeoDir;
+        }
+
         try {
             await vscode.workspace.fs.createDirectory(w_uri);
             return homeLeoDir;
