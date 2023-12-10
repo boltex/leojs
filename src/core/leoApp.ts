@@ -1014,15 +1014,15 @@ export class LeoApp {
         let arch = "";
         let version = "";
         let release = "";
-
         if (process.platform) {
             sysVersion = process.platform;
-
+            if (sysVersion.toLowerCase().startsWith("win") && os.version) {
+                version = os.version();
+            } else {
+                version = sysVersion;
+            }
             if (os.arch) {
                 arch = os.arch();
-            }
-            if (os.version) {
-                version = os.version();
             }
             if (os.release) {
                 release = os.release();
@@ -1033,9 +1033,7 @@ export class LeoApp {
 
         } else {
             let browserResult: any;
-            // // @ts-expect-error
             if (navigator.userAgent) {
-                // // @ts-expect-error
                 browserResult = Bowser.parse(navigator.userAgent);
                 sysVersion = browserResult.browser.name;
                 if (browserResult.browser.version) {

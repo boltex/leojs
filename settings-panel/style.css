@@ -503,7 +503,7 @@ ul {
 }
 
 .header__logo--highlight {
-  color: #a24b15;
+  color: #c15b00;
 }
 
 .header__subtitle {
@@ -1114,8 +1114,8 @@ fieldset p span {
 }
 
 .highlight {
-  background-color: #cc701a;
-  border-bottom: 2px solid #cc701a;
+  background-color: #c96d18;
+  border-bottom: 2px solid #c96d18;
   border-radius: 3px;
   color: #f2f2f2;
   margin: 0 0.25em;
