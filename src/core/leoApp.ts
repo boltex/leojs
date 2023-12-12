@@ -53,6 +53,7 @@ import * as writer_otl from '../writers/otl';
 import * as writer_treepad from '../writers/treepad';
 import { ScriptingController } from './mod_scripting';
 import { SessionManager } from './leoSessions';
+import { BaseWriter } from '../writers/basewriter';
 
 //@-<< imports >>
 //@+others
@@ -255,7 +256,7 @@ export class LeoApp {
     //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
     public atAutoWritersDict: Record<string, (...args: any[]) => any> = {};
-    public writersDispatchDict: Record<string, (...args: any[]) => any> = {};
+    public writersDispatchDict: Record<string, typeof BaseWriter> = {};
 
     // From leoImport.py
     // Keys are @auto names, values are scanner functions..

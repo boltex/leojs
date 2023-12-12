@@ -789,7 +789,7 @@ export class RstCommands {
             //     g.error('Docutils error:')
             //     g.blue(error)
             g.es_print('Unexpected docutils exception');
-            g.es_exception();
+            g.es_exception(exception);
         }
 
         return result;
@@ -985,7 +985,7 @@ export class RstCommands {
             try {
                 return this.user_filter_b(c, p);
             } catch (exception) {
-                g.es_exception();
+                g.es_exception(exception);
                 this.user_filter_b = undefined;
                 return p.b;
             }
