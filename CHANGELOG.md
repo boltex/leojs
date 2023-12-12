@@ -57,3 +57,7 @@
 # 0.2.1
 
 - Fixed importer and @auto related bugs.
+
+# 0.2.2
+
+- Fixed ...
