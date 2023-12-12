@@ -13,6 +13,7 @@ import { Position, VNode } from './leoNodes';
 import { FileCommands } from './leoFileCommands';
 import { Commands } from './leoCommands';
 import dayjs = require('dayjs');
+import { BaseWriter } from '../writers/basewriter';
 //@-<< imports >>
 //@+others
 //@+node:felix.20211225220217.1: ** atFile.cmd
@@ -1069,7 +1070,7 @@ export class AtFile {
             //     at.error(f"can not open {fileName}")
             // pragma: no cover
             at.error(`Exception reading ${fileName}`);
-            g.es_exception();
+            g.es_exception(exception);
         }
         return s;
     }
@@ -1677,7 +1678,7 @@ export class AtFile {
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
         }
     }
 
@@ -1816,7 +1817,7 @@ export class AtFile {
             );
             return true;
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
             return false;
         }
     }
@@ -1843,18 +1844,17 @@ export class AtFile {
         const d = g.app.atAutoWritersDict;
         for (const key in d) {
             // ! USING 'IN' for key
-            const aClass = d[key];
+            const aClass: typeof BaseWriter = d[key] as any;
             if (aClass && g.match_word(root.h, 0, key)) {
                 const writer_for_at_auto_cb = (
                     root: Position
-                ): string | undefined => {
-                    // pylint: disable=cell-var-from-loop
+                ): string | void => {
                     try {
-                        const writer = aClass(at.c); // noqa
-                        const s = writer.write(root);
-                        return s;
+                        const writer = new aClass(at.c);
+                        const s = writer.write(root) as any;
+                        return s ? s : undefined;
                     } catch (exception) {
-                        g.es_exception();
+                        g.es_exception(exception);
                         return undefined;
                     }
                 };
@@ -1870,13 +1870,13 @@ export class AtFile {
     public writer_for_ext(ext: string): undefined | ((p: Position) => void) {
         const at = this;
         const d = g.app.writersDispatchDict;
-        const aClass = d[ext];
+        const aClass: typeof BaseWriter = d[ext] as any;
         if (aClass) {
-            const writer_for_ext_cb = (root: Position): string | undefined => {
+            const writer_for_ext_cb = (root: Position): string | void => {
                 try {
-                    return aClass(at.c).write(root);
+                    return new aClass(at.c).write(root);
                 } catch (exception) {
-                    g.es_exception();
+                    g.es_exception(exception);
                     return undefined;
                 }
             };
@@ -1915,7 +1915,7 @@ export class AtFile {
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
         }
     }
     //@+node:felix.20230415162517.26: *6* at.writeOneAtEditNode
@@ -1959,7 +1959,7 @@ export class AtFile {
             await c.raise_error_dialogs('write');
             return true;
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
             return false;
         }
     }
@@ -1996,7 +1996,7 @@ export class AtFile {
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
         }
     }
     //@+node:felix.20230415162517.28: *6* at.writeOneAtNosentNode
@@ -2031,7 +2031,7 @@ export class AtFile {
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
         }
     }
     //@+node:felix.20230415162517.29: *6* at.writeOneAtShadowNode & helper
@@ -2135,7 +2135,7 @@ export class AtFile {
             }
             return !at.errors;
         } catch (exception) {
-            await at.writeException(full_path, root);
+            await at.writeException(exception, full_path, root);
             return false;
         }
     }
@@ -2180,7 +2180,7 @@ export class AtFile {
             }
             return at.errors ? '' : at.outputList.join('');
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
             return '';
         }
     }
@@ -2203,7 +2203,7 @@ export class AtFile {
             }
             return (await at.writeAtAutoContents(fileName, root)) || '';
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
             return '';
         }
     }
@@ -2223,7 +2223,7 @@ export class AtFile {
             at.putFile(root, undefined, false);
             return at.errors ? '' : at.outputList.join('');
         } catch (e) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(e, fileName || '', root);
             return '';
         }
     }
@@ -2258,7 +2258,7 @@ export class AtFile {
                 .join('');
             return contents;
         } catch (exception) {
-            await at.writeException(fileName || '', root);
+            await at.writeException(exception, fileName || '', root);
             return '';
         }
     }
@@ -2282,7 +2282,7 @@ export class AtFile {
             const contents = at.errors ? '' : at.outputList.join('');
             return contents;
         } catch (exception) {
-            at.exception('exception preprocessing script');
+            at.exception(exception, 'exception preprocessing script');
             root.v._p_changed = true;
             return '';
         }
@@ -2320,7 +2320,7 @@ export class AtFile {
             }
             return contents;
         } catch (exception) {
-            at.exception('exception preprocessing script');
+            at.exception(exception, 'exception preprocessing script');
             return '';
         }
     }
@@ -3724,12 +3724,13 @@ export class AtFile {
     }
     //@+node:felix.20230415162517.93: *5* at.writeException
     public async writeException(
+        e: any,
         fileName: string,
         root: Position
     ): Promise<void> {
         const at = this;
         g.error('exception writing:', fileName);
-        g.es_exception();
+        g.es_exception(e);
         if (at.outputFile) {
             // at.outputFile.flush();
             // at.outputFile.close();
@@ -3757,9 +3758,9 @@ export class AtFile {
         }
     }
     //@+node:felix.20230415162522.3: *4* at.exception
-    public exception(message: string): void {
+    public exception(e: any, message: string): void {
         this.error(message);
-        g.es_exception();
+        g.es_exception(e);
     }
     //@+node:felix.20230415162522.4: *4* at.file operations...
     // Error checking versions of corresponding functions in Python's os module.
@@ -3775,7 +3776,7 @@ export class AtFile {
             console.log('TODO : leoAtfile.ts -> chmod');
         } catch (exception) {
             g.es('exception in os.chmod', fileName);
-            g.es_exception();
+            g.es_exception(exception);
         }
     }
     //@+node:felix.20230415162522.6: *5* at.remove
@@ -3792,7 +3793,7 @@ export class AtFile {
         } catch (exception) {
             if (!g.unitTesting) {
                 this.error(`exception removing: ${fileName}`);
-                g.es_exception();
+                g.es_exception(exception);
             }
             return false;
         }

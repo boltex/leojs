@@ -1068,6 +1068,10 @@ const activateDebug = false;
 # 0.2.0 
 
 - First alpha release
+
+# 0.2.1
+
+- Fixed importer and @auto related bugs.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
@@ -4659,8 +4663,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
-  "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.2.0",
+  "description": "LeoJS — The literate editor with outline javascript implementation",
+  "version": "0.2.1",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4687,7 +4691,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "Other"
   ],
   "galleryBanner": {
-    "color": "#f1af88",
+    "color": "#faeadb",
     "theme": "light"
   },
   "preview": true,

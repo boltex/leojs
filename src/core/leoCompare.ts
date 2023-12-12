@@ -206,7 +206,7 @@ export class BaseLeoCompare {
                     }
                 } catch (exception) {
                     this.show('exception in filecmp.cmp');
-                    g.es_exception();
+                    g.es_exception(exception);
                     missing1.push(f1);
                 }
             } else {
@@ -290,7 +290,7 @@ export class BaseLeoCompare {
             }
         } catch (exception) {
             this.show('exception comparing files');
-            g.es_exception();
+            g.es_exception(exception);
         }
 
         try {
@@ -651,7 +651,7 @@ export class BaseLeoCompare {
         } catch (exception) {
             this.outputFile = undefined;
             this.show('exception opening output file');
-            g.es_exception();
+            g.es_exception(exception);
             return false;
         }
     }
