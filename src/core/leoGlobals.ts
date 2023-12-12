@@ -1826,8 +1826,7 @@ export async function is_binary_external_file(
         //     s = f.read(1024)  // bytes, in Python 3.
         const w_readUri = makeVscodeUri(fileName);
         const readData = await vscode.workspace.fs.readFile(w_readUri);
-        const trimmedData = readData.slice(0, 1024);
-        const s = Buffer.from(trimmedData).toString();
+        const s = readData.slice(0, 1024);
         return is_binary_string(s);
         // except IOError:
         //     return False
@@ -1836,16 +1835,18 @@ export async function is_binary_external_file(
         return false;
     }
 }
-export function is_binary_string(s: string): boolean {
+export function is_binary_string(s: Uint8Array): boolean {
     // http://stackoverflow.com/questions/898669
     // aList is a list of all non-binary characters.
     // aList = [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))
-    // return bool(s.translate(None, bytes(aList)))  // type:ignore
-
-    const nullCharacter = '\x00';
-    const nonPrintableCharactersRegex = /[^\x09\x0A\x0D\x20-\x7E]/;
-
-    return s.includes(nullCharacter) || nonPrintableCharactersRegex.test(s);
+    for (let i = 0; i < s.length; i++) {
+        const byte = s[i];
+        if ((byte < 0x20 || byte > 0xFF) && // Check for non-ASCII and extended ASCII range
+            ![0x07, 0x08, 0x09, 0x0A, 0x0C, 0x0D, 0x1B].includes(byte)) { // Exclude specific control characters
+            return true; // Binary byte found
+        }
+    }
+    return false; // No binary bytes found
 }
 //@+node:felix.20230413202326.1: *3* g.makeAllNonExistentDirectories
 /**
