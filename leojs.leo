@@ -1071,7 +1071,8 @@ const activateDebug = false;
 
 # 0.2.1
 
-- Changes</t>
+- Fixed importer and @auto related bugs.
+</t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
     if (g.app) {
