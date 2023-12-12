@@ -208,7 +208,7 @@ export class ShadowController {
             return true;
         } catch (IOError) {
             x.error(`unexpected exception writing file: ${fileName}`);
-            g.es_exception();
+            g.es_exception(IOError);
             return false;
         }
     }

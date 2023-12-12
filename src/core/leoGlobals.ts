@@ -4184,7 +4184,7 @@ export function es_print_error(...args: any[]): void {
     es_print(...args);
 }
 //@+node:felix.20211104212802.1: *3* g.es_exception
-export function es_exception(p_error?: any, c?: Commands): string {
+export function es_exception(p_error?: any, c?: Commands): void {
     const getCircularReplacer = () => {
         const seen = new WeakSet();
         return (key: string, value: any) => {
@@ -4200,12 +4200,12 @@ export function es_exception(p_error?: any, c?: Commands): string {
 
     // p_error = JSON.stringify(p_error, getCircularReplacer());
 
-    if (p_error.stack) {
+    if (p_error && p_error.stack) {
         es_print_error([p_error.stack]);
-    } else {
+    } else if (p_error) {
         es_print_error('es_exception called with error: ', p_error);
     }
-    return '<no file>';
+    es_print_error('es_exception called without error!');
 }
 
 /*

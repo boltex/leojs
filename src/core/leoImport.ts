@@ -1061,7 +1061,7 @@ export class LeoImportCommands {
                 }
             } catch (exception) {
                 g.es_print('Exception importing', fn);
-                g.es_exception();
+                g.es_exception(exception);
             }
         }
 

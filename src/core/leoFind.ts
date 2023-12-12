@@ -307,7 +307,7 @@ export class LeoFind {
             }
             return count;
         } catch (e) {
-            g.es_exception();
+            g.es_exception(e);
             return 0;
         }
     }

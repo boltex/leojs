@@ -142,7 +142,7 @@ export class IdleTime {
             this.time = Date.now();
             this.handler();
         } catch (exception) {
-            g.es_exception();
+            g.es_exception(exception);
             this.stop();
         }
     }

@@ -143,7 +143,7 @@ export class SessionManager {
       g.app.db['session'] = session;
     } catch (e) {
       g.trace('Unexpected exception in SessionManager.save_snapshot');
-      g.es_exception();
+      g.es_exception(e);
     }
   }
   //@-others

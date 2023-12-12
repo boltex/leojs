@@ -577,7 +577,7 @@ export class FastRead {
             d = JSON.parse(s);
         } catch (exception) {
             g.trace(`Error converting JSON from .leojs file: ${p_path}`);
-            g.es_exception();
+            g.es_exception(exception);
             return [undefined, undefined];
         }
         let g_element: { [key: string]: any };
@@ -1125,11 +1125,12 @@ export class FileCommands {
      * Report an exception. f is an open file, or None.
      */
     public async handleWriteLeoFileException(
+        e: any,
         fileName: string,
         backupName: string
     ): Promise<void> {
         g.es('exception writing:', fileName);
-        g.es_exception();
+        g.es_exception(e);
 
         // Delete fileName.
         const w_fileExists = await g.os_path_exists(fileName);
@@ -2542,7 +2543,7 @@ export class FileCommands {
             this.mFileName = fileName;
             return true;
         } catch (exception) {
-            await this.handleWriteLeoFileException(fileName, backupName!);
+            await this.handleWriteLeoFileException(exception, fileName, backupName!);
             return false;
         }
     }
@@ -2791,7 +2792,7 @@ export class FileCommands {
             }
             return true;
         } catch (exception) {
-            await this.handleWriteLeoFileException(fileName, backupName!);
+            await this.handleWriteLeoFileException(exception, fileName, backupName!);
             return false;
         }
     }
@@ -2913,7 +2914,6 @@ export class FileCommands {
             // fs.writeSync(this.outputFile, s);
             // ! SHOULD NOT HAPPEN : USING vscode.workspace.fs async methods
         } else {
-            g.es_exception();
             // g.es('Internal error writing OUTPUT FILE IS UNDEFINED', 'red');
             g.es('Internal error writing OUTPUT FILE IS UNDEFINED');
         }

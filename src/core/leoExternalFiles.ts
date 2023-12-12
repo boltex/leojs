@@ -575,7 +575,7 @@ export class ExternalFilesController {
                 await vscode.workspace.fs.writeFile(w_uri, s);
             } catch (IOError) {
                 g.error(`exception creating temp file: ${w_path}`);
-                g.es_exception();
+                g.es_exception(IOError);
                 return undefined;
             }
         }
