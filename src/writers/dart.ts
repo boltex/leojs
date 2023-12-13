@@ -25,7 +25,15 @@ export class DartWriter extends BaseWriter {
         for (const p of root.subtree()) {
             const indent = p.level() - root_level;
             this.put('*'.repeat(indent) + ' ' + p.h);
-            for (const s of p.b.split('\n')) {
+            const lines = p.b.split('\n');
+            // In JavaScript, when you split a string like '\n\n' with split(/\n/),
+            // it treats each newline character as a separator and includes an 
+            // empty string for the segment following the last newline, even if 
+            // there's no text there. This results in an extra empty string in the array.
+            if (lines.length && lines[lines.length - 1] === '') {
+                lines.pop();
+            }
+            for (const s of lines) {
                 if (!g.isDirective(s)) {
                     this.put(s);
                 }

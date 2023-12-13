@@ -1823,9 +1823,17 @@ export class MindMapImporter {
             }
         }
         for (const p of target.unique_subtree()) {
-            if (p.b.split(/\r?\n/).length === 1) {
-                if (p.b.split(/\r?\n/)[0].length < max_chars_in_header) {
-                    p.h = p.b.split(/\r?\n/)[0];
+            const pbSplit = p.b.split(/\r?\n/);
+            // In JavaScript, when you split a string like '\n\n' with split(/\n/),
+            // it treats each newline character as a separator and includes an 
+            // empty string for the segment following the last newline, even if 
+            // there's no text there. This results in an extra empty string in the array.
+            if (pbSplit.length && pbSplit[pbSplit.length - 1] === '') {
+                pbSplit.pop();
+            }
+            if (pbSplit.length === 1) {
+                if (pbSplit[0].length < max_chars_in_header) {
+                    p.h = pbSplit[0];
                     p.b = '';
                 } else {
                     p.h = '@node_with_long_text';

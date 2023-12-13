@@ -32,6 +32,13 @@ export class MarkdownWriter extends BaseWriter {
             this.write_headline(p);
             const s = p.b.trimEnd() + '\n\n';
             const lines = s.split('\n');
+            // In JavaScript, when you split a string like '\n\n' with split(/\n/),
+            // it treats each newline character as a separator and includes an 
+            // empty string for the segment following the last newline, even if 
+            // there's no text there. This results in an extra empty string in the array.
+            if (lines.length && lines[lines.length - 1] === '') {
+                lines.pop();
+            }
             for (const line of lines) {
                 if (!g.isDirective(line)) {
                     this.put(line);
@@ -54,7 +61,7 @@ export class MarkdownWriter extends BaseWriter {
         if (kind === '!') {
             // The signal for a declaration node.
         } else {
-            this.put(`${'#'.repeat(level)} ${p.h.trimLeft()}`); // Leo 6.6.4: preserve spacing.
+            this.put(`${'#'.repeat(level)} ${p.h.trimStart()}`); // Leo 6.6.4: preserve spacing.
         }
     }
     //@+node:felix.20230914214935.5: *3* mdw.write_root

@@ -1072,6 +1072,11 @@ const activateDebug = false;
 # 0.2.1
 
 - Fixed importer and @auto related bugs.
+
+# 0.2.2
+
+- Fixed more importer and @auto related bugs.
+- Added 'Recent Files' icons and buttons.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
@@ -1399,6 +1404,10 @@ No need for 'm' switch for a '\$' match if the tested string has no newlines at 
 A "for in" loop in python loops over the values which is equivalent to a "for of" loop in js.
 
 Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
+
+### Arrays of strings from **spitlines** VS **split('\n')**
+
+Splitlines outputs one less entry if the last one was an empty string!
 </t>
 <t tx="felix.20201209011931.1">export class LeoOutlineProvider implements vscode.TreeDataProvider&lt;Position&gt; {
     private _onDidChangeTreeData: vscode.EventEmitter&lt;Position | undefined&gt; = new vscode.EventEmitter&lt;Position | undefined&gt;();
@@ -4664,7 +4673,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -5919,12 +5928,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "view": "leojsOutline",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
   },
   {
     "view": "leojsOutlineExplorer",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
   },
   {
@@ -6152,6 +6161,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "command": "leojs.recentLeoFiles",
     "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
     "group": "navigation@8"
+  },
+  {
+    "command": "leojs.recentLeoFiles",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsReady &amp;&amp; !leojsTreeOpened",
+    "group": "navigation@1"
   },
   {
     "command": "leojs.findQuickSelected",
