@@ -1075,7 +1075,7 @@ const activateDebug = false;
 
 # 0.2.2
 
-- Fixed ...
+- Fixed more importer and @auto related bugs.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
@@ -1403,6 +1403,10 @@ No need for 'm' switch for a '\$' match if the tested string has no newlines at 
 A "for in" loop in python loops over the values which is equivalent to a "for of" loop in js.
 
 Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
+
+### Arrays of strings from **spitlines** VS **split('\n')**
+
+Splitlines outputs one less entry if the last one was an empty string!
 </t>
 <t tx="felix.20201209011931.1">export class LeoOutlineProvider implements vscode.TreeDataProvider&lt;Position&gt; {
     private _onDidChangeTreeData: vscode.EventEmitter&lt;Position | undefined&gt; = new vscode.EventEmitter&lt;Position | undefined&gt;();

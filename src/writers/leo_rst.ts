@@ -53,6 +53,13 @@ export class RstWriter extends BaseWriter {
             this.put(ch.repeat(n));
             let s = p.b.trimEnd() + '\n\n';
             const lines = s.split('\n');
+            // In JavaScript, when you split a string like '\n\n' with split(/\n/),
+            // it treats each newline character as a separator and includes an 
+            // empty string for the segment following the last newline, even if 
+            // there's no text there. This results in an extra empty string in the array.
+            if (lines.length && lines[lines.length - 1] === '') {
+                lines.pop();
+            }
             if (lines.length > 0 && lines[0].trim() !== '') {
                 this.put('');
             }

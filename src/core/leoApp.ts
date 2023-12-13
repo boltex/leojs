@@ -4215,7 +4215,7 @@ export class RecentFilesManager {
                 lines = undefined;
             }
 
-            if (lines && this.sanitize(lines[0]) === 'readonly') {
+            if (lines && lines.length && this.sanitize(lines[0]) === 'readonly') {
                 return false;
             }
         }
