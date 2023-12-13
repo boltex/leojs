@@ -62,3 +62,7 @@
 
 - Fixed more importer and @auto related bugs.
 - Added 'Recent Files' icons and buttons.
+
+# 0.2.3
+
+- Fixed ...
