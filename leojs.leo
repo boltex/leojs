@@ -1076,6 +1076,7 @@ const activateDebug = false;
 # 0.2.2
 
 - Fixed more importer and @auto related bugs.
+- Added 'Recent Files' icons and buttons.
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
@@ -5927,12 +5928,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "view": "leojsOutline",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
   },
   {
     "view": "leojsOutlineExplorer",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
   },
   {
@@ -6160,6 +6161,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "command": "leojs.recentLeoFiles",
     "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
     "group": "navigation@8"
+  },
+  {
+    "command": "leojs.recentLeoFiles",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsReady &amp;&amp; !leojsTreeOpened",
+    "group": "navigation@1"
   },
   {
     "command": "leojs.findQuickSelected",

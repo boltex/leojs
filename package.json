@@ -619,12 +619,12 @@
       },
       {
         "view": "leojsOutline",
-        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
+        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
         "when": "leojsReady && !leojsTreeOpened && leojsStartupDone"
       },
       {
         "view": "leojsOutlineExplorer",
-        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
+        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
         "when": "leojsReady && !leojsTreeOpened && leojsStartupDone"
       },
       {
@@ -2679,6 +2679,11 @@
           "command": "leojs.recentLeoFiles",
           "when": "view =~ /^leojsDocuments/ && leojsReady",
           "group": "navigation@8"
+        },
+        {
+          "command": "leojs.recentLeoFiles",
+          "when": "view =~ /^leojsOutline/ && leojsReady && !leojsTreeOpened",
+          "group": "navigation@1"
         },
         {
           "command": "leojs.findQuickSelected",
