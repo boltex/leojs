@@ -82,3 +82,7 @@ No need for 'm' switch for a '\$' match if the tested string has no newlines at 
 A "for in" loop in python loops over the values which is equivalent to a "for of" loop in js.
 
 Although legal in js, it is NOT equivalent: A "for in" loop in js loops over the keys, not the values.
+
+### Arrays of strings from **spitlines** VS **split('\n')**
+
+Splitlines outputs one less entry if the last one was an empty string!

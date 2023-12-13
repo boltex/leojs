@@ -60,4 +60,4 @@
 
 # 0.2.2
 
-- Fixed ...
+- Fixed more importer and @auto related bugs.
