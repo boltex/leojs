@@ -8898,7 +8898,7 @@ public getTextFromClipboard(): string {
   {
     "scheme": "leojs",
     "formatting": {
-      "label": "LEOJS: BODY",
+      "label": "LeoJS: Body",
       "separator": "/",
       "workspaceSuffix": ""
     }

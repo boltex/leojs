@@ -3648,7 +3648,7 @@
       {
         "scheme": "leojs",
         "formatting": {
-          "label": "LEOJS: BODY",
+          "label": "LeoJS: Body",
           "separator": "/",
           "workspaceSuffix": ""
         }
@@ -3722,5 +3722,8 @@
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  }
+  },
+  "gitCommit": "257c04e",
+  "gitBranch": "boltex/issue67",
+  "gitDate": "2023-12-13 00:21:59 -0500"
 }
