@@ -1291,11 +1291,12 @@ export class LeoApp {
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
 
-            if (!finish_quit && g.app.windowList.length === 1) {
-                // This was the last one. Closed one by one
-                // so save as last session for next open.
-                await g.app.saveSession();
-            }
+            // ! UNCOMMENT TO KEEP LAST CLOSED ONE IN SESSION !
+            // if (!finish_quit && g.app.windowList.length === 1) {
+            //     // This was the last one. Closed one by one
+            //     // so save as last session for next open.
+            //     await g.app.saveSession();
+            // }
 
             await g.app.destroyWindow(frame);
 
@@ -1309,7 +1310,13 @@ export class LeoApp {
             g.app.forgetOpenFile(c.fileName());
         }
 
-        if (!finish_quit && g.app.windowList.length) {
+        // ! UNCOMMENT TO KEEP LAST CLOSED ONE IN SESSION !
+        // if (!finish_quit && g.app.windowList.length) {
+        //     // NOT FINISH_QUIT SO SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!
+        //     await g.app.saveSession();
+        // }
+
+        if (!finish_quit) {
             // NOT FINISH_QUIT SO SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!
             await g.app.saveSession();
         }
@@ -2813,7 +2820,9 @@ export class LoadManager {
         // Enable redraws.
         g.app.disable_redraw = false;
 
-        if (!c1) {
+        const allowNoDocumentStart = true; // ! TODO: FIX THIS EXPERIMENTAL FLAG !
+
+        if (!c1 && !allowNoDocumentStart) {
             // Open or create a workbook.
             try {
                 c1 = await lm.openWorkBook();
@@ -2824,7 +2833,7 @@ export class LoadManager {
             }
         }
         c = c1;
-        if (!c) {
+        if (!c && !allowNoDocumentStart) {
             // Leo is out of options: Force an immediate exit.
             return false;
         }
@@ -2836,9 +2845,11 @@ export class LoadManager {
         g.app.initComplete = true;
 
         // c.setLog();
-        c.redraw();
-        g.doHook("start2", { c: c, p: c.p, fileName: c.fileName() });
-        c.initialFocusHelper();
+        if (c) {
+            c.redraw();
+            g.doHook("start2", { c: c, p: c.p, fileName: c.fileName() });
+            c.initialFocusHelper();
+        }
         return true;
     }
 
@@ -3402,64 +3413,17 @@ export class LoadManager {
         await c.theScriptingController.createAllButtons();
 
         complete_inits(c);
+        // ! IN LEOJS : make sure .leoRecentFiles.txt is written on open and save file instead.
+        if (g.app.recentFilesManager) {
+            const oldFiles = JSON.stringify(g.app.recentFilesManager.recentFiles);
+            g.app.recentFilesManager.updateRecentFiles(fn);
+            const newFiles = JSON.stringify(g.app.recentFilesManager.recentFiles);
+            if (newFiles !== oldFiles) {
+                await g.app.recentFilesManager.writeRecentFilesFile(c);
+            }
+        }
         return c;
 
-        // // Disable the log.
-        // // g.app.setLog(None);
-        // // g.app.lockLog();
-
-        // // Create the a commander for the .leo file.
-        // // Important.  The settings don't matter for pre-reads!
-        // // For second read, the settings for the file are *exactly* previousSettings.
-        // const c: Commands = g.app.newCommander(fn, gui, previousSettings);
-        // // Open the file, if possible.
-        // g.doHook('open0');
-
-        // /*
-        // theFile = lm.openAnyLeoFile(fn);
-        // if isinstance(theFile, sqlite3.Connection):
-        //     // this commander is associated with sqlite db
-        //     c.sqlite_connection = theFile
-        // */
-
-        // // Enable the log.
-        // // g.app.unlockLog();
-        // // c.frame.log.enable(true);
-
-        // // Phase 2: Create the outline.
-        // g.doHook('open1', { old_c: undefined, c: c, new_c: c, fileName: fn });
-
-        // const exists = await g.os_path_exists(fn);
-
-        // if (fn && exists) {
-        //     const readAtFileNodesFlag = !!previousSettings;
-        //     // The log is not set properly here.
-        //     const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
-
-        //     if (!ok) {
-        //         return undefined;
-        //     }
-        // } else {
-        //     // Create a wrapper .leo file if:
-        //     // a) fn is a .leo file that does not exist or
-        //     // b) fn is an external file, existing or not.
-        //     await lm.initWrapperLeoFile(c, fn);
-        // }
-
-        // g.doHook('open2', { old_c: undefined, c: c, new_c: c, fileName: fn });
-
-        // // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
-        // c.theScriptingController = new ScriptingController(c);
-        // await c.theScriptingController.createAllButtons();
-        // c.evalController = new EvalController(c);
-
-        // // Phase 3: Complete the initialization.
-        // // g.app.writeWaitingLog(c)
-        // // c.setLog()
-        // // lm.createMenu(c, fn)
-        // lm.finishOpen(c); // c.initAfterLoad()
-
-        // return c;
     }
 
     //@+node:felix.20210124192005.1: *6* LM.findOpenFile
@@ -3813,7 +3777,11 @@ export class RecentFilesManager {
         // menu.deleteRecentFilesMenuItems(recentFilesMenu);
 
         /* Add the present file to recent files... */
-        rf.recentFiles = [c.fileName()];
+        rf.recentFiles = [];
+        const filename = c.fileName();
+        if (filename) {
+            rf.recentFiles.push(filename);
+        }
 
         /* Create recent files menu items for all open windows... */
         // for (const frame of g.app.windowList) {
