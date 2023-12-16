@@ -1086,7 +1086,9 @@ const activateDebug = false;
 - Closing the last Leo document before closing vscode will remove it from the session.
 - Fixed labeling of body pane tab.
 
-</t>
+# 0.2.4
+
+- Fixed ...</t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
     if (g.app) {
@@ -4682,7 +4684,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"

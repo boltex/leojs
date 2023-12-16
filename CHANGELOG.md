@@ -71,3 +71,6 @@
 - Closing the last Leo document before closing vscode will remove it from the session.
 - Fixed labeling of body pane tab.
 
+# 0.2.4
+
+- Fixed ...
