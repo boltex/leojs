@@ -413,7 +413,6 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export async function deactivate(): Promise<unknown> {
     if (g.app) {
-
         // ! NOT SAVED ON EXIT !
         // // Save session data.
         // console.log('------------------------start saveSession');

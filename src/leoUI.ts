@@ -53,7 +53,7 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
-    public lastRefreshHadDirty = false; // We start with fresh documents.
+    public lastRefreshHadDirty: undefined | boolean; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -349,7 +349,8 @@ export class LeoUI extends NullGui {
 
         // * Configuration / Welcome webview
         this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
-
+        // Set confirm on close to 'never' on startup 
+        void this.checkConfirmBeforeClose();
         void this.showLogPane();
     }
 
