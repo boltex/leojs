@@ -3617,7 +3617,7 @@ export class LoadManager {
             // await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
             const v = await fc.getAnyLeoFileByName(fn, true);
             if (!v) {
-                g.error(`Revert failed: {fn}`);
+                g.error(`Revert failed: ${fn}`);
             }
         } catch {
             // Does not exist !

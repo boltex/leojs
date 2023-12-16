@@ -2723,8 +2723,8 @@ export class AtFile {
         } else {
             // Do give this error even if unit testing.
             at.writeError(
-                `undefined section: {g.truncate(name, 60)}\n` +
-                `  referenced from: {g.truncate(p.h, 60)}`
+                `undefined section: ${g.truncate(name, 60)}\n` +
+                `  referenced from: ${g.truncate(p.h, 60)}`
             );
         }
     }
@@ -3268,7 +3268,7 @@ export class AtFile {
         const theDir = g.os_path_dirname(fileName);
         const w_exists = await g.os_path_exists(theDir);
         if (theDir && !w_exists) {
-            at.error(`Directory not found:\n{theDir}`);
+            at.error(`Directory not found:\n${theDir}`);
             return false;
         }
         //

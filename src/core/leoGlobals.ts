@@ -890,9 +890,9 @@ export function comment_delims_from_extension(
     }
 
     trace(
-        `unknown extension: {ext!r},` +
-        `filename: {filename!r},` +
-        `root: {root!r}`
+        `unknown extension: ${ext}, ` +
+        `filename: ${filename}, ` +
+        `root: ${root}`
     );
 
     return ['', '', ''];

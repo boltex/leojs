@@ -1620,7 +1620,7 @@ export class Commands {
                 g.es_print(`multiple vnodes with gnx: ${gnx}`);
                 for (let v of aList) {
                     gnx_errors += 1;
-                    g.es_print(`id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`);
+                    g.es_print(`gnx: ${v.fileIndex} ${v.h}`);
                     v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 }
             }
@@ -2936,7 +2936,7 @@ export class Commands {
         const language: string = g.app.extension_dict[ext];
         let prefix: string;
         if (language) {
-            prefix = `@color\n@language {language}\n\n`;
+            prefix = `@color\n@language ${language}\n\n`;
         } else {
             prefix = '@killcolor\n\n';
         }
