@@ -3757,7 +3757,7 @@ import { RClick } from "./core/mod_scripting";
 
     // * Configuration / Welcome webview
     this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
-    // Set confirm on close to never on startup 
+    // Set confirm on close to 'never' on startup 
     void this.checkConfirmBeforeClose();
     void this.showLogPane();
 }
@@ -7740,7 +7740,6 @@ private _setupNoOpenedLeoDocument(): void {
     this.refreshDocumentsPane();
     this.refreshButtonsPane();
     this.refreshUndoPane();
-    this.checkConfirmBeforeClose();
     void this.closeBody();
 }
 
