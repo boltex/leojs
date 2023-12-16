@@ -2587,7 +2587,7 @@ export class RecursiveImportController {
                 this.kind
             )
         ) {
-            this.error(`bad kind param: {self.kind}`);
+            this.error(`bad kind param: ${this.kind}`);
             return;
         }
 

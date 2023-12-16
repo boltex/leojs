@@ -438,6 +438,7 @@ export class CommanderFileCommands {
             c.frame.startupWindow &&
             // The window was open on startup
             !c.changed &&
+            !c.fileName() &&
             !c.frame.saved &&
             // The window has never been changed
             g.app.numberOfUntitledWindows === 1;

@@ -271,7 +271,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             const p2 = p.insertAsLastChild();
             p2.h = `child ${n}`;
             p2.b = `def child${n}():\n` +
-                `    v4{n} = 2\n` +
+                `    v${n} = 2\n` +
                 `    # node ${n} line 1: blabla second blabla bla second ble blu\n` +
                 `    # node ${n} line 2: blabla second blabla bla second ble blu`;
             return p2;

@@ -53,7 +53,7 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
-    public lastRefreshHadDirty = false; // We start with fresh documents.
+    public lastRefreshHadDirty: undefined | boolean; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -349,7 +349,8 @@ export class LeoUI extends NullGui {
 
         // * Configuration / Welcome webview
         this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
-
+        // Set confirm on close to 'never' on startup 
+        void this.checkConfirmBeforeClose();
         void this.showLogPane();
     }
 
@@ -357,7 +358,10 @@ export class LeoUI extends NullGui {
      * * Set all remaining local objects, set ready flag(s) and refresh all panels
      */
     public finishStartup(): void {
-        g.app.windowList[this.frameIndex].startupWindow = true;
+
+        if (g.app.windowList[this.frameIndex]) {
+            g.app.windowList[this.frameIndex].startupWindow = true;
+        }
 
         // * Create Leo Opened Documents Treeview Providers and tree views
         this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
@@ -487,8 +491,11 @@ export class LeoUI extends NullGui {
                 this._onDidOpenTextDocument(p_document)
             )
         );
-
-        this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady
+        if (g.app.windowList.length) {
+            this._setupOpenedLeoDocument();// this sets this.leoStates.fileOpenedReady
+        } else {
+            this._setupNoOpenedLeoDocument(); // All closed now!
+        }
 
         this.leoStates.leoReady = true;
         this.leoStates.leojsStartupDone = true;
@@ -1450,6 +1457,7 @@ export class LeoUI extends NullGui {
      * * Launches refresh for UI components and context states (Debounced)
      */
     public async _launchRefresh(): Promise<unknown> {
+
         if (!this.refreshPreserveRange) {
             if (this.findFocusTree) {
                 // had a range but now refresh from other than find/replace
@@ -1469,12 +1477,17 @@ export class LeoUI extends NullGui {
                 return this._setupNoOpenedLeoDocument(); // All closed now!
             }
         }
+
+        // Maybe first refresh after opening
         if (this.leoStates.leoReady && !this.leoStates.fileOpenedReady) {
             // Was all closed
             if (g.app.windowList.length) {
                 this._setupOpenedLeoDocument();
                 // Has a commander opened, but wait for UI!
                 await this.leoStates.qLastContextChange;
+            } else {
+                // First time starting: not even an untitled nor workbook.leo
+                return;
             }
         }
 
@@ -4652,7 +4665,8 @@ export class LeoUI extends NullGui {
     public async showRecentLeoFiles(): Promise<unknown> {
 
         // if shown, chosen and opened
-        const w_recentFiles: string[] = g.app.recentFilesManager.recentFiles;
+        let w_recentFiles: string[] = g.app.recentFilesManager.recentFiles;
+        w_recentFiles = w_recentFiles.filter(str => str.trim() !== "");
 
         let q_chooseFile: Thenable<string | undefined>;
         if (w_recentFiles.length) {
@@ -4661,7 +4675,7 @@ export class LeoUI extends NullGui {
             });
         } else {
             // No file to list
-            return Promise.resolve(undefined);
+            return vscode.window.showInformationMessage('Recent files list empty');
         }
         const w_result = await q_chooseFile;
         if (w_result) {
