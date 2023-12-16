@@ -1080,7 +1080,12 @@ const activateDebug = false;
 
 # 0.2.3
 
-- Fixed ...
+- Reset Confirm-Before-Close setting upon starting up.
+- Fixed section-reference read-write operation.
+- Fixed output messages strings.
+- Closing the last Leo document before closing vscode will remove it from the session.
+- Fixed labeling of body pane tab.
+
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {

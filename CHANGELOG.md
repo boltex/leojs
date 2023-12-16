@@ -65,4 +65,9 @@
 
 # 0.2.3
 
-- Fixed ...
+- Reset Confirm-Before-Close setting upon starting up.
+- Fixed section-reference read-write operation.
+- Fixed output messages strings.
+- Closing the last Leo document before closing vscode will remove it from the session.
+- Fixed labeling of body pane tab.
+
