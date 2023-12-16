@@ -2614,8 +2614,17 @@ export class AtFile {
             n1 = s.indexOf(at.section_delim1, i);
             n2 = s.indexOf(at.section_delim2, i);
         } else {
-            n1 = s.slice(i, end).indexOf(at.section_delim1) + i; // s.indexOf(at.section_delim1, i, end);
-            n2 = s.slice(i, end).indexOf(at.section_delim2) + i; // s.indexOf(at.section_delim2, i, end);
+            const tempSlice = s.slice(i, end);
+            n1 = tempSlice.indexOf(at.section_delim1); // s.indexOf(at.section_delim1, i, end);
+            n2 = tempSlice.indexOf(at.section_delim2); // s.indexOf(at.section_delim2, i, end);
+        }
+        if (end !== -1) {
+            if (n1 !== -1) {
+                n1 += i;
+            };
+            if (n2 !== -1) {
+                n2 += i;
+            };
         }
         let n3 = n2 + at.section_delim2.length;
         if (-1 < n1 && n1 < n2) {
