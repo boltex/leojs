@@ -1683,13 +1683,13 @@
       {
         "command": "leojs.gotoNextCloneSelection",
         "category": "Leojs",
-        "enablement": "leojsTreeOpened && leojsCloned",
+        "enablement": "leojsTreeOpened",
         "title": "Goto Next Clone"
       },
       {
         "command": "leojs.gotoNextCloneSelectionFromOutline",
         "category": "Leojs",
-        "enablement": "leojsTreeOpened && leojsCloned",
+        "enablement": "leojsTreeOpened",
         "title": "Goto Next Clone"
       },
       {

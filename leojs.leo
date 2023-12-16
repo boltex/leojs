@@ -5610,13 +5610,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoNextCloneSelection",
   "category": "Leojs",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsCloned",
+  "enablement": "leojsTreeOpened",
   "title": "Goto Next Clone"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
   "category": "Leojs",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsCloned",
+  "enablement": "leojsTreeOpened",
   "title": "Goto Next Clone"
 },
 </t>
