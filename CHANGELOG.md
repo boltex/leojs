@@ -2,9 +2,8 @@
 
 ## 0.2.5
 
-- Fixed ...
+- Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
 
-pa
 ## 0.2.4
 
 - Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.

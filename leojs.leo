@@ -15014,8 +15014,8 @@ set leoEditHeadline(p_value: boolean) {
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
-- Fixed ...
+- Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
 
-pa</t>
+</t>
 </tnodes>
 </leo_file>
