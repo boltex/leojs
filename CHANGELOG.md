@@ -2,7 +2,8 @@
 
 ## 0.2.4
 
-- Fixed ...
+- Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
+- Fixed goto-next-clone and goto-next-marked refresh cycles.
 
 ## 0.2.3
 

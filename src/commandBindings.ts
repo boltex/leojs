@@ -132,7 +132,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.EXPAND_AND_GO_RIGHT, () => p_leoUI.command(LEOCMD.EXPAND_AND_GO_RIGHT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 
         [CMD.GOTO_NEXT_CLONE, (p_node: Position) => p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
-        [CMD.GOTO_NEXT_CLONE_SELECTION, () => p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+        [CMD.GOTO_NEXT_CLONE_SELECTION, () => p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body, isNavigation: true })],
         [CMD.GOTO_NEXT_CLONE_SELECTION_FO, () => p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 
         [CMD.GOTO_NEXT_MARKED, () => p_leoUI.command(LEOCMD.GOTO_NEXT_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],

@@ -2022,7 +2022,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 </t>
 <t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
-[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body, isNavigation: true })],
 [CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 
 [CMD.GOTO_NEXT_MARKED, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
@@ -8003,6 +8003,7 @@ import * as utils from "./utils";
 import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 @language typescript
 @tabwidth -4
@@ -8177,10 +8178,18 @@ export class Config implements ConfigMembers {
 
     private _isBusySettingConfig: boolean = false;
 
+    private _confirmOffValue: string;
+
     constructor(
         private _context: vscode.ExtensionContext,
         private _leoUI: LeoUI
-    ) { }
+    ) {
+        if (g.isBrowser) {
+            this._confirmOffValue = 'keyboardOnly';
+        } else {
+            this._confirmOffValue = 'never';
+        }
+    }
 
     @others
 }
@@ -14950,7 +14959,7 @@ set leoEditHeadline(p_value: boolean) {
 </t>
 <t tx="felix.20231127195758.1">public setConfirmBeforeClose(p_state: boolean): Thenable&lt;void&gt; {
     return vscode.workspace.getConfiguration("window")
-        .update("confirmBeforeClose", p_state ? "always" : "never", true);
+        .update("confirmBeforeClose", p_state ? "always" : this._confirmOffValue, true);
 }
 
 </t>
@@ -14971,35 +14980,36 @@ set leoEditHeadline(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20231216165857.1">## 0.2.0 
+<t tx="felix.20231216165857.1">
+## 0.2.0 
 
 - First alpha release
 
 </t>
-<t tx="felix.20231216165946.1">## 0.2.1
+<t tx="felix.20231216165946.1">
+## 0.2.1
 
 - Fixed importer and @auto related bugs.
-
 </t>
-<t tx="felix.20231216170008.1">## 0.2.2
+<t tx="felix.20231216170008.1">
+## 0.2.2
 
 - Fixed more importer and @auto related bugs.
 - Added 'Recent Files' icons and buttons.
-
 </t>
-<t tx="felix.20231216170011.1">## 0.2.3
+<t tx="felix.20231216170011.1">
+## 0.2.3
 
 - Reset Confirm-Before-Close setting upon starting up.
 - Fixed section-reference read-write operation.
 - Fixed output messages strings.
 - Closing the last Leo document before closing vscode will remove it from the session.
 - Fixed labeling of body pane tab.
-
 </t>
 <t tx="felix.20231216170017.1">## 0.2.4
 
-- Fixed ...
-
+- Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
+- Fixed goto-next-clone and goto-next-marked refresh cycles.
 </t>
 </tnodes>
 </leo_file>

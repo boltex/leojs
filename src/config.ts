@@ -3,6 +3,7 @@ import * as utils from "./utils";
 import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 /**
  * * Configuration Settings Service
@@ -52,10 +53,18 @@ export class Config implements ConfigMembers {
 
     private _isBusySettingConfig: boolean = false;
 
+    private _confirmOffValue: string;
+
     constructor(
         private _context: vscode.ExtensionContext,
         private _leoUI: LeoUI
-    ) { }
+    ) {
+        if (g.isBrowser) {
+            this._confirmOffValue = 'keyboardOnly';
+        } else {
+            this._confirmOffValue = 'never';
+        }
+    }
 
     /**
      * * Get actual 'live' Leojs configuration
@@ -252,7 +261,7 @@ export class Config implements ConfigMembers {
 
     public setConfirmBeforeClose(p_state: boolean): Thenable<void> {
         return vscode.workspace.getConfiguration("window")
-            .update("confirmBeforeClose", p_state ? "always" : "never", true);
+            .update("confirmBeforeClose", p_state ? "always" : this._confirmOffValue, true);
     }
 
     /**
