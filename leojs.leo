@@ -8,7 +8,13 @@
 <vnodes>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
-<v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
+<v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20231216170017.1"><vh>0.2.4</vh></v>
+<v t="felix.20231216170011.1"><vh>0.2.3</vh></v>
+<v t="felix.20231216170008.1"><vh>0.2.2</vh></v>
+<v t="felix.20231216165946.1"><vh>0.2.1</vh></v>
+<v t="felix.20231216165857.1"><vh>0.2.0</vh></v>
+</v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 <v t="felix.20230330224010.1"><vh>@clean BACKERS.md</vh></v>
 </v>
@@ -1013,79 +1019,11 @@ const activateDebug = false;
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1"># Change Log
+<t tx="felix.20201208214506.1">@language md
+@tabwidth -4
+# Change Log
 
-## 0.1.0 Dec 9, 2020
-
-- Initial state
-
-## 0.1.1 Dec 31, 2021
-
-- Outline, undos and commands
-
-## 0.1.2 Jan 01 2022
-
-- Support web extension compilation for vscode.dev
-
-## 0.1.3 Mar 11 2023
-
-- Implemented Find and Goto panels and commands
-
-## 0.1.4 Apr 04 2023
-
-- Implemented extract &amp; extract-names commands
-- Fixed clipboard handling of JSON clipbard content
-- Added new headline numbering commands
-- Fixed undo behavior and added multiple-headline-change helpers
-- Fixed @chapter/hoisting related issues
-- implemented c.registerCommand (instead of c.k.registerCommand)
-- Fixed reading/writing JSON leojs file format
-- Removed status bar indicator (until vscode API can provide focus status)
-
-# 0.1.5 June 24 2023
-
-- Implemented Leo's atFile, atShadow and external files features
-- Implemented javascript scripting, along with c, g and p references.
-
-# 0.1.6 December 5 2023
-
-- Added new option setting "showBranchInOutlineTitle" to show the branch with the filename in the outline's title bar
-- Implemented importers
-- Instead of Leo's original SaveAsLeojs command, (accessible via alt+x) Using SaveAsLeojs from vscode's menu interaction resolves to 'Save as .leojs' instead of 'Save To .leojs'
-- Editing a headline, when inserting or renaming a node, can now be interrupted by most other keyboard shortcuts and commands
-- Implemented Global Settings, Sessions and recent files. (saved to db and other files in the .leo folder.)
-- Fixed log pane
-
-# 0.1.7
-
-- First feature complete version
-- Fixed external file generation bugs
-- Fixed conflict with leointeg when both expansions showed the same gnx body
-- Fixed creation of local .leo folder when running as web extension
-- Fixed md5 checksum and external file change detection bugs
-- Various small bug fixes and corrections
-
-# 0.2.0 
-
-- First alpha release
-
-# 0.2.1
-
-- Fixed importer and @auto related bugs.
-
-# 0.2.2
-
-- Fixed more importer and @auto related bugs.
-- Added 'Recent Files' icons and buttons.
-
-# 0.2.3
-
-- Reset Confirm-Before-Close setting upon starting up.
-- Fixed section-reference read-write operation.
-- Fixed output messages strings.
-- Closing the last Leo document before closing vscode will remove it from the session.
-- Fixed labeling of body pane tab.
-
+@others
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
@@ -2083,11 +2021,11 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.EXPAND_AND_GO_RIGHT, () =&gt; p_leoUI.command(LEOCMD.EXPAND_AND_GO_RIGHT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 
 </t>
-<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { node: p_node, refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
-[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Body, isNavigation: true })],
-[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body, isNavigation: true })],
+[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 
-[CMD.GOTO_NEXT_MARKED, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_MARKED, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_NEXT_MARKED, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 [CMD.GOTO_FIRST_SIBLING, () =&gt; p_leoUI.command(LEOCMD.GOTO_FIRST_SIBLING, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 [CMD.GOTO_LAST_SIBLING, () =&gt; p_leoUI.command(LEOCMD.GOTO_LAST_SIBLING, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 [CMD.GOTO_FIRST_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_FIRST_VISIBLE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
@@ -4682,7 +4620,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4709,7 +4647,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "Other"
   ],
   "galleryBanner": {
-    "color": "#faeadb",
+    "color": "#f7e6c6",
     "theme": "light"
   },
   "preview": true,
@@ -5608,13 +5546,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.gotoNextCloneSelection",
   "category": "Leojs",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsCloned",
+  "enablement": "leojsTreeOpened",
   "title": "Goto Next Clone"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
   "category": "Leojs",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsCloned",
+  "enablement": "leojsTreeOpened",
   "title": "Goto Next Clone"
 },
 </t>
@@ -8065,6 +8003,7 @@ import * as utils from "./utils";
 import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 @language typescript
 @tabwidth -4
@@ -8239,10 +8178,18 @@ export class Config implements ConfigMembers {
 
     private _isBusySettingConfig: boolean = false;
 
+    private _confirmOffValue: string;
+
     constructor(
         private _context: vscode.ExtensionContext,
         private _leoUI: LeoUI
-    ) { }
+    ) {
+        if (g.isBrowser) {
+            this._confirmOffValue = 'keyboardOnly';
+        } else {
+            this._confirmOffValue = 'never';
+        }
+    }
 
     @others
 }
@@ -15012,7 +14959,7 @@ set leoEditHeadline(p_value: boolean) {
 </t>
 <t tx="felix.20231127195758.1">public setConfirmBeforeClose(p_state: boolean): Thenable&lt;void&gt; {
     return vscode.workspace.getConfiguration("window")
-        .update("confirmBeforeClose", p_state ? "always" : "never", true);
+        .update("confirmBeforeClose", p_state ? "always" : this._confirmOffValue, true);
 }
 
 </t>
@@ -15032,6 +14979,37 @@ set leoEditHeadline(p_value: boolean) {
 
 }
 
+</t>
+<t tx="felix.20231216165857.1">
+## 0.2.0 
+
+- First alpha release
+
+</t>
+<t tx="felix.20231216165946.1">
+## 0.2.1
+
+- Fixed importer and @auto related bugs.
+</t>
+<t tx="felix.20231216170008.1">
+## 0.2.2
+
+- Fixed more importer and @auto related bugs.
+- Added 'Recent Files' icons and buttons.
+</t>
+<t tx="felix.20231216170011.1">
+## 0.2.3
+
+- Reset Confirm-Before-Close setting upon starting up.
+- Fixed section-reference read-write operation.
+- Fixed output messages strings.
+- Closing the last Leo document before closing vscode will remove it from the session.
+- Fixed labeling of body pane tab.
+</t>
+<t tx="felix.20231216170017.1">## 0.2.4
+
+- Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
+- Fixed goto-next-clone and goto-next-marked refresh cycles.
 </t>
 </tnodes>
 </leo_file>
