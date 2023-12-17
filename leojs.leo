@@ -4647,7 +4647,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "Other"
   ],
   "galleryBanner": {
-    "color": "#faeadb",
+    "color": "#f7e6c6",
     "theme": "light"
   },
   "preview": true,
