@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="fil.20231216220210.1"><vh>0.2.5</vh></v>
 <v t="felix.20231216170017.1"><vh>0.2.4</vh></v>
 <v t="felix.20231216170011.1"><vh>0.2.3</vh></v>
 <v t="felix.20231216170008.1"><vh>0.2.2</vh></v>
@@ -4620,7 +4621,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -15011,5 +15012,10 @@ set leoEditHeadline(p_value: boolean) {
 - Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
 - Fixed goto-next-clone and goto-next-marked refresh cycles.
 </t>
+<t tx="fil.20231216220210.1">## 0.2.5
+
+- Fixed ...
+
+pa</t>
 </tnodes>
 </leo_file>

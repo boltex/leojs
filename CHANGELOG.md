@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.2.5
+
+- Fixed ...
+
+pa
 ## 0.2.4
 
 - Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
