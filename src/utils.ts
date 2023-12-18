@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
 import { Constants } from "./constants";
 import { Icon } from "./types";
-import { LeoOutlineNode } from "./leoOutline";
 import { Position } from "./core/leoNodes";
 
 // String and other types/structures helper functions, along with common vscode API calls

@@ -3,7 +3,6 @@
 //@+<< imports >>
 //@+node:felix.20211031230614.1: ** << imports >>
 import { Commands } from './leoCommands';
-import { FileCommands } from './leoFileCommands';
 import * as g from './leoGlobals';
 import { Position, VNode } from './leoNodes';
 import { build_rclick_tree } from './mod_scripting';

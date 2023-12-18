@@ -562,7 +562,7 @@ export class AtFile {
         } else if (p.isAtShadowFileNode()) {
             await at.readOneAtShadowNode(fileName, p);
         } else if (p.isAtAsisFileNode() || p.isAtNoSentFileNode()) {
-            await at.rememberReadPath(c.fullPath(p), p);
+            at.rememberReadPath(c.fullPath(p), p);
         } else if (p.isAtCleanNode()) {
             await at.readOneAtCleanNode(p);
         }

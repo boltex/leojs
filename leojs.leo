@@ -1068,10 +1068,8 @@ import { Position } from './core/leoNodes';
 
 </t>
 <t tx="felix.20201208224407.1">import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
 import { Constants } from "./constants";
 import { Icon } from "./types";
-import { LeoOutlineNode } from "./leoOutline";
 import { Position } from "./core/leoNodes";
 
 // String and other types/structures helper functions, along with common vscode API calls
@@ -3409,9 +3407,7 @@ private _updateLeoObjectIndicator(): void {
 </t>
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
-import { LeoOutlineNode } from "./leoOutline";
 import { RClick } from "./core/mod_scripting";
-import { nullButtonWidget } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -3558,9 +3554,7 @@ export interface LeoButton {
 
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri"; // May be useful!
 import { DebouncedFunc, debounce } from "lodash";
-import * as path from 'path'; // May be useful!
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -8001,7 +7995,6 @@ public incTreeId(): void {
 },
 </t>
 <t tx="felix.20211007213344.1">import * as vscode from "vscode";
-import * as utils from "./utils";
 import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8524,10 +8517,8 @@ public static FIND_INPUTS_IDS = {
 
 </t>
 <t tx="felix.20211010192923.1">import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
 import * as utils from "./utils";
 import * as path from 'path';
-import { Constants } from "./constants";
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';

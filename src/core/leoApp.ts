@@ -11,7 +11,7 @@ import * as utils from '../utils';
 import { LeoGui, NullGui } from './leoGui';
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
-import { FastRead, FileCommands } from './leoFileCommands';
+import { FastRead } from './leoFileCommands';
 import { GlobalConfigManager, SettingsTreeParser } from './leoConfig';
 import { Constants } from '../constants';
 import { ExternalFilesController } from './leoExternalFiles';

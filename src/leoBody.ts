@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
 import * as utils from "./utils";
 import * as path from 'path';
-import { Constants } from "./constants";
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
