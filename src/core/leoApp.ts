@@ -1760,7 +1760,7 @@ export class LoadManager {
         // 2011/10/12: don't add .leo to *any* file.
         return fileName;
     }
-    //@+node:felix.20220610002953.3: *4* LM.computeLeoSettingsPath
+    //@+node:felix.20220610002953.3: *4* LM.computeLeoSettingsUri
     /* 
     def computeLeoSettingsPath(self):
         """Return the full path to leoSettings.leo."""
@@ -1781,6 +1781,15 @@ export class LoadManager {
             path = None
         return path
      */
+
+    /**
+     * Return the Uri of this extension's leojsSettings.leojs,
+     * the LeoJs equivalent of leoSettings.leo.
+     */
+    public computeLeoSettingsUri(): vscode.Uri {
+        return vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
+    }
+
     //@+node:felix.20220610002953.4: *4* LM.computeMyLeoSettingsPath
 
     /**
@@ -2577,7 +2586,12 @@ export class LoadManager {
          */
         if (!(g.unitTesting || g.app.silentMode || g.app.batchMode)) {
             // This occurs early in startup, so use the following.
-            const s = `reading settings in ${g.os_path_normpath(fn)}`;
+            let s;
+            if (fn === 'leoSettings.leo') {
+                s = `reading settings in leojsSettings.leojs`;
+            } else {
+                s = `reading settings in ${path.normalize(fn)}`;
+            }
             if (g.app.debug.includes('startup')) {
                 console.log(s);
             }
@@ -2604,10 +2618,10 @@ export class LoadManager {
                 c,
                 c.fileCommands.gnxDict
             );
-            const w_leoSettingsUri = vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
-            let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
 
             if (fn === 'leoSettings.leo') {
+                const w_leoSettingsUri = lm.computeLeoSettingsUri();
+                let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
                 [ok, g_element] = w_fastRead.readWithJsonTree(
                     fn,
                     g.toUnicode(readData)

@@ -159,7 +159,7 @@ export class CommanderHelpCommands {
 
             let ok: VNode | undefined;
 
-            const w_leoSettingsUri = vscode.Uri.joinPath(g.extensionUri, 'leojsSettings.leojs');
+            const w_leoSettingsUri = lm.computeLeoSettingsUri();
             let readData = await vscode.workspace.fs.readFile(w_leoSettingsUri);
 
             let g_element;
