@@ -2223,7 +2223,7 @@ export class LoadManager {
     }
     //@+node:felix.20220406235904.1: *3* LM.Settings
     //@+node:felix.20220406235925.1: *4* LM.computeBindingLetter
-    public computeBindingLetter(c: Commands, p_path: string): string {
+    public computeBindingLetter(c: Commands, p_path?: string): string {
         const lm = this;
         if (!p_path) {
             return 'D';

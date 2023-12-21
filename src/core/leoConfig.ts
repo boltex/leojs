@@ -1358,6 +1358,387 @@ export class ParserBaseClass {
 
 //@-<< class ParserBaseClass >>
 //@+others
+//@+node:felix.20231220235423.1: ** class ActiveSettingsOutline
+export class ActiveSettingsOutline {
+
+    public c: Commands;
+    public commander!: Commands;
+    public commanders!: [string, Commands][]
+    public local_c: undefined | Commands;
+    public parents!: Position[];
+    public level!: number;
+    public ready: Promise<void>;
+
+    constructor(c: Commands) {
+
+        this.c = c;
+        this.ready = this.start().then(() => {
+            this.create_outline();
+        });
+
+    }
+
+    //@+others
+    //@+node:felix.20231220235423.2: *3* aso.start & helpers
+    /** 
+     * Do everything except populating the new outline.
+     */
+    public async start(): Promise<void> {
+
+        // Copy settings.
+        const c = this.c;
+        const settings = c.config.settingsDict;
+        const shortcuts = c.config.shortcutsDict;
+        // g.assert( isinstance(settings, SettingsDict), settings.toString() );
+        // g.assert( isinstance(shortcuts, SettingsDict), shortcuts.toString() );
+        const settings_copy = settings.copy();
+        const shortcuts_copy = shortcuts.copy();
+        // Create the new commander.
+        this.commander = await this.new_commander();
+        // Open hidden commanders for non-local settings files.
+        await this.load_hidden_commanders();
+        // Create the ordered list of commander tuples, including the local .leo file.
+        this.create_commanders_list();
+        // Jam the old settings into the new commander.
+        this.commander.config.settingsDict = settings_copy;
+        this.commander.config.shortcutsDict = shortcuts_copy;
+    }
+
+    //@+node:felix.20231220235423.3: *4* aso.create_commanders_list
+    /**
+     * Create the commanders list. Order matters.
+     */
+    public create_commanders_list(): void {
+
+
+        const lm = g.app.loadManager!;
+
+        // The first element of each tuple must match the return values of c.config.getSource.
+        // "local_file", "theme_file", "myLeoSettings", "leoSettings"
+
+        this.commanders = [
+            ['leoSettings', lm.leo_settings_c!],
+            ['myLeoSettings', lm.my_settings_c!],
+        ];
+
+        if (lm.theme_c) {
+            this.commanders.push(['theme_file', lm.theme_c]);
+        }
+
+        if (this.c.config.settingsRoot()) {
+            this.commanders.push(['local_file', this.c]);
+        }
+
+    }
+    //@+node:felix.20231220235423.4: *4* aso.load_hidden_commanders
+    /**
+     * Open hidden commanders for leoSettings.leo, myLeoSettings.leo and theme.leo.
+     */
+    public async load_hidden_commanders(): Promise<void> {
+
+        const lm = g.app.loadManager!;
+        await lm.readGlobalSettingsFiles();
+        // Make sure to reload the local file.
+        const c = g.app.commanders()[0];
+        const fn = c.fileName();
+        if (fn) {
+            this.local_c = await lm.openSettingsFile(fn);
+        }
+    }
+    //@+node:felix.20231220235423.5: *4* aso.new_commander
+    /**
+     * Create the new commander, and load all settings files.
+     */
+    public async new_commander(): Promise<Commands> {
+
+        const lm = g.app.loadManager!;
+        const old_c = this.c;
+
+        // Save any changes so they can be seen.
+        if (old_c.isChanged()) {
+            await old_c.save();
+        }
+        old_c.outerUpdate();
+
+        // Suppress redraws until later.
+        g.app.disable_redraw = true;
+        // g.app.setLog(null);
+        // g.app.lockLog();
+
+        // Switch to the new commander. Do *not* use previous settings.
+        const fileName = `${old_c.fileName()}-active-settings`;
+        g.es(fileName);
+        const c = g.app.newCommander(fileName);
+
+        // NOT NEEDED IN LEOJS
+        // Restore the layout, if we have ever saved this file.
+        // if (!old_c) {
+        //     c.frame.setInitialWindowGeometry();
+        // }
+        // // #1340: Don't do this. It is no longer needed.
+        // // g.app.restoreWindowState(c)
+
+        // c.frame.resizePanesToRatio(c.frame.ratio, c.frame.secondary_ratio);
+        c.clearChanged();  // Clears all dirty bits.
+
+        // Finish.
+        lm.finishOpen(c);
+        return c;
+
+    }
+    //@+node:felix.20231220235423.6: *3* aso.create_outline & helper
+    /**
+     * Create the summary outline
+     */
+    public create_outline(): void {
+
+        const c = this.commander;
+        //
+        // Create the root node, with the legend in the body text.
+        const root = c.rootPosition()!;
+        root.h = `Legend for ${this.c.shortFileName()}`;
+        root.b = this.legend();
+        //
+        // Create all the inner settings outlines.
+        for (const [kind, commander] of this.commanders) {
+            const p = root.insertAfter();
+            p.h = g.shortFileName(commander.fileName());
+            p.b = '@language rest\n@wrap\n';
+            this.create_inner_outline(commander, kind, p);
+        }
+        //
+        // Clean all dirty/changed bits, so closing this outline won't prompt for a save.
+        for (const v of c.all_nodes()) {
+            v.clearDirty();
+        }
+        c.setChanged();
+        c.redraw();
+
+    }
+    //@+node:felix.20231220235423.7: *4* aso.legend
+    /**
+     * Compute legend for self.c
+     */
+    public legend(): string {
+
+        const lm = g.app.loadManager!;
+        let legend = `\
+            @language rest
+
+            legend:
+
+                leoSettings.leo
+             @  @button, @command, @mode
+            [D] default settings
+            [F] local file: {c.shortFileName()}
+            [M] myLeoSettings.leo
+            `;
+
+        if (lm.theme_path) {
+            legend = legend + `[T] theme file: ${g.shortFileName(lm.theme_path)}\n`;
+        }
+
+        return g.dedent(legend);
+
+    }
+
+    //@+node:felix.20231220235423.8: *3* aso.create_inner_outline
+    /**
+     * Create the outline for the given hidden commander, as descendants of root.
+     */
+    public create_inner_outline(c: Commands, kind: string, root: Position): void {
+
+        // Find the settings tree
+        const settings_root = c.config.settingsRoot();
+
+        if (!settings_root) {
+            // This should not be called if the local file has no @settings node.
+            g.trace('no @settings node!!', c.shortFileName());
+            return;
+        }
+        // Unify all settings.
+        this.create_unified_settings(kind, root, settings_root);
+        this.clean(root);
+
+    }
+    //@+node:felix.20231220235423.9: *3* aso.create_unified_settings
+    /**
+     * Create the active settings tree under root.
+     */
+    public create_unified_settings(kind: string, root: Position, settings_root: Position): void {
+
+        const c = this.commander;
+        const lm = g.app.loadManager!;
+        const settings_pat = /^(@[\w-]+)(\s+[\w\-\.]+)?/;
+        const valid_list = [
+            '@bool', '@color', '@directory', '@encoding',
+            '@int', '@float', '@ratio', '@string',
+        ];
+        const d = this.filter_settings(kind);
+        let ignore: Position | undefined;
+        let outline_data: Position | undefined;
+        this.parents = [root];
+        this.level = settings_root.level();
+        for (const p of settings_root.subtree()) {
+            //@+<< continue if we should ignore p >>
+            //@+node:felix.20231220235423.10: *4* << continue if we should ignore p >>
+            if (ignore) {
+                if (p.__eq__(ignore)) {
+                    ignore = undefined;
+                } else {
+                    // g.trace('IGNORE', p.h)
+                    continue;
+                }
+            }
+            if (outline_data) {
+                if (p.__eq__(outline_data)) {
+                    outline_data = undefined;
+                } else {
+                    this.add(p);
+                    continue;
+                }
+            }
+            //@-<< continue if we should ignore p >>
+            const m = settings_pat.exec(p.h);
+            if (!m) {
+                this.add(p, 'ORG:' + p.h);
+                continue;
+            }
+            if (m[2] && valid_list.includes(m[1])) {
+                //@+<< handle a real setting >>
+                //@+node:felix.20231220235423.11: *4* << handle a real setting >>
+                const key = g.app.config.munge(m[2].trim())!;
+                let val = d[key];
+                if (val instanceof g.GeneralSetting) {
+                    this.add(p);
+                } else {
+                    // Look at all the settings to discover where the setting is defined.
+                    val = c.config.settingsDict.get(key)
+                    if (val instanceof g.GeneralSetting) {
+                        // Use this.c, not this.commander.
+                        const letter = lm.computeBindingLetter(this.c, val.path);
+                        p.h = `[${letter}] INACTIVE: ${p.h}`;
+                        p.h = `UNUSED: ${p.h}`;
+                    }
+                    this.add(p);
+                }
+                //@-<< handle a real setting >>
+                continue;
+            }
+            // Not a setting. Handle special cases.
+            if (m[1] === '@ignore') {
+                ignore = p.nodeAfterTree();
+            }
+            else if (['@data', '@outline-data'].includes(m[1])) {
+                outline_data = p.nodeAfterTree();
+                this.add(p);
+            } else {
+                this.add(p);
+            }
+        }
+    }
+    //@+node:felix.20231220235423.12: *3* aso.add
+    /**
+     * Add a node for p.
+     *
+     * We must *never* alter p in any way.
+     * Instead, the org flag tells whether the "ORG:" prefix.
+     */
+    public add(p: Position, h?: string): void {
+
+        let pad;
+
+        if (0) {
+            pad = ' '.repeat(p.level());
+            console.log(pad, p.h);
+        }
+        const p_level = p.level();
+
+        if (p_level > this.level + 1) {
+            g.trace('OOPS', p.v.context.shortFileName(), this.level, p_level, p.h);
+            return;
+        }
+        while (p_level < this.level + 1 && this.parents.length > 1) {
+            this.parents.pop();
+            this.level -= 1;
+        }
+        const parent = this.parents[-1];
+        const child = parent.insertAsLastChild();
+        child.h = h || p.h;
+        child.b = p.b;
+        this.parents!.push(child);
+        this.level! += 1;
+
+    }
+    //@+node:felix.20231220235423.13: *3* aso.clean
+    /**
+     * Remove all unnecessary nodes.
+     * Remove the "ORG:" prefix from remaining nodes.
+     */
+    public clean(root: Position): void {
+        this.clean_node(root);
+    }
+
+    /**
+     * Remove p if it contains no children after cleaning its children.
+     */
+    public clean_node(p: Position): void {
+
+        const tag = 'ORG:';
+        // There are no clones, so deleting children in reverse preserves positions.
+        for (const child of [...p.children()].reverse()) {
+            this.clean_node(child);
+        }
+        if (p.h.startsWith(tag)) {
+            if (p.hasChildren()) {
+                p.h = p.h.replace(tag, '').trim();
+            } else {
+                p.doDelete();
+            }
+        }
+    }
+    //@+node:felix.20231220235423.14: *3* aso.filter_settings
+    /**
+     * Return a dict containing only settings defined in the file given by kind.
+     */
+    public filter_settings(target_kind: string): Record<string, unknown> {
+
+        // Crucial: Always use the newly-created commander.
+        //          It's settings are guaranteed to be correct.
+        const c = this.commander;
+        const valid_kinds = ['local_file', 'theme_file', 'myLeoSettings', 'leoSettings'];
+        g.assert(valid_kinds.includes(target_kind), target_kind.toString());
+        const d = c.config.settingsDict;
+        const result: Record<string, any> = {};
+        for (const key of d.keys()) {
+            const gs = d.get(key);
+            g.assert(gs instanceof g.GeneralSetting, gs.toString());
+            if (!gs.kind) {
+                g.trace('OOPS: no kind', gs.toString());
+                continue;
+            }
+            const kind = c.config.getSource(gs);
+
+            if (kind === 'ignore') {
+                g.trace('IGNORE:', kind, key);
+                continue;
+            }
+            if (kind === 'error') { // 2021/09/18.
+                g.trace('ERROR:', kind, key);
+                continue;
+            }
+            if (kind === target_kind) {
+                result[key] = gs;
+            }
+
+        }
+
+        return result;
+
+    }
+    //@-others
+
+}
 //@+node:felix.20220206213914.1: ** class GlobalConfigManager
 /**
  * A class to manage configuration settings.
