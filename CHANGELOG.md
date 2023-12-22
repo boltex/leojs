@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.7
+
+- Fixed ...
+
 ## 0.2.6
 
 - Fixed keyboard navigation of the outline while being hoisted.

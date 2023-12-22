@@ -9,7 +9,8 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
-<v t="felix.20231216233654.1"><vh>0.2.6</vh></v>
+<v t="felix.20231216233654.1"><vh>0.2.7</vh></v>
+<v t="felix.20231221231533.1"><vh>0.2.6</vh></v>
 <v t="fil.20231216220210.1"><vh>0.2.5</vh></v>
 <v t="felix.20231216170017.1"><vh>0.2.4</vh></v>
 <v t="felix.20231216170011.1"><vh>0.2.3</vh></v>
@@ -4627,7 +4628,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -14980,40 +14981,40 @@ set leoEditHeadline(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20231216165857.1">
-## 0.2.0 
+<t tx="felix.20231216165857.1">## 0.2.0 
 
 - First alpha release
 
 </t>
-<t tx="felix.20231216165946.1">
-## 0.2.1
+<t tx="felix.20231216165946.1">## 0.2.1
 
 - Fixed importer and @auto related bugs.
+
 </t>
-<t tx="felix.20231216170008.1">
-## 0.2.2
+<t tx="felix.20231216170008.1">## 0.2.2
 
 - Fixed more importer and @auto related bugs.
 - Added 'Recent Files' icons and buttons.
+
 </t>
-<t tx="felix.20231216170011.1">
-## 0.2.3
+<t tx="felix.20231216170011.1">## 0.2.3
 
 - Reset Confirm-Before-Close setting upon starting up.
 - Fixed section-reference read-write operation.
 - Fixed output messages strings.
 - Closing the last Leo document before closing vscode will remove it from the session.
 - Fixed labeling of body pane tab.
+
 </t>
 <t tx="felix.20231216170017.1">## 0.2.4
 
 - Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
 - Fixed goto-next-clone and goto-next-marked refresh cycles.
-</t>
-<t tx="felix.20231216233654.1">## 0.2.6
 
-- Fixed keyboard navigation of the outline while being hoisted.
+</t>
+<t tx="felix.20231216233654.1">## 0.2.7
+
+- Fixed ...
 
 </t>
 <t tx="felix.20231219233411.1"></t>
@@ -15870,6 +15871,11 @@ div.col-nav {
   vertical-align: top;
   line-height: 18px;
 }</t>
+<t tx="felix.20231221231533.1">## 0.2.6
+
+- Fixed keyboard navigation of the outline while being hoisted.
+
+</t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
