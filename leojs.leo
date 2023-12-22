@@ -1504,6 +1504,13 @@ public refreshTreeRoot(): void {
 <t tx="felix.20201209011931.6">public getParent(element: Position): vscode.ProviderResult&lt;Position&gt; {
     if (element) {
         const p_parent = element.parent();
+        const w_c = g.app.windowList[this._leoUI.frameIndex].c;
+        if (w_c.hoistStack &amp;&amp; w_c.hoistStack.length) {
+            const topHoistPos = w_c.hoistStack[w_c.hoistStack.length - 1].p;
+            if (element.__eq__(topHoistPos) || p_parent.__eq__(topHoistPos)) {
+                return undefined;
+            }
+        }
         if (p_parent.v) {
             return p_parent;
         } else {
@@ -11159,19 +11166,15 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         const w_u = element.v.u;
         const w_uaLength = Object.keys(w_u).length;
         if (w_uaLength) {
-
             if (w_uaLength === 1 &amp;&amp; w_u.__node_tags &amp;&amp; w_u.__node_tags.length) {
                 // list tags instead
                 item.tooltip = item.label.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
-
             } else {
                 item.tooltip = item.label.label + "\n" +
                     JSON.stringify(w_u, undefined, 2);
             }
-
             return item;
         }
-
     }
     item.tooltip = item.label.label; // * Fallsback to whole headline as tooltip
     return item;
@@ -15010,7 +15013,7 @@ set leoEditHeadline(p_value: boolean) {
 </t>
 <t tx="felix.20231216233654.1">## 0.2.6
 
-- Fixed ...
+- Fixed keyboard navigation of the outline while being hoisted.
 
 </t>
 <t tx="felix.20231219233411.1"></t>

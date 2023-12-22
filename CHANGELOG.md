@@ -2,7 +2,7 @@
 
 ## 0.2.6
 
-- Fixed ...
+- Fixed keyboard navigation of the outline while being hoisted.
 
 ## 0.2.5
 
