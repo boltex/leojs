@@ -163,6 +163,13 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     public getParent(element: Position): vscode.ProviderResult<Position> {
         if (element) {
             const p_parent = element.parent();
+            const w_c = g.app.windowList[this._leoUI.frameIndex].c;
+            if (w_c.hoistStack && w_c.hoistStack.length) {
+                const topHoistPos = w_c.hoistStack[w_c.hoistStack.length - 1].p;
+                if (element.__eq__(topHoistPos) || p_parent.__eq__(topHoistPos)) {
+                    return undefined;
+                }
+            }
             if (p_parent.v) {
                 return p_parent;
             } else {
@@ -177,19 +184,15 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             const w_u = element.v.u;
             const w_uaLength = Object.keys(w_u).length;
             if (w_uaLength) {
-
                 if (w_uaLength === 1 && w_u.__node_tags && w_u.__node_tags.length) {
                     // list tags instead
                     item.tooltip = item.label.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
-
                 } else {
                     item.tooltip = item.label.label + "\n" +
                         JSON.stringify(w_u, undefined, 2);
                 }
-
                 return item;
             }
-
         }
         item.tooltip = item.label.label; // * Fallsback to whole headline as tooltip
         return item;

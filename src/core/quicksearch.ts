@@ -6,7 +6,7 @@
 //@+<< quicksearch imports >>
 //@+node:felix.20221106160744.1: ** << quicksearch imports >>
 import * as g from './leoGlobals';
-import { Position, VNode } from './leoNodes';
+import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
 //@-<< quicksearch imports >>
 //@+others

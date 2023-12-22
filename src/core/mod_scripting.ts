@@ -223,18 +223,11 @@ most brilliant idea in Leo's history.
 //@-<< mod_scripting docstring >>
 //@+<< mod_scripting imports & annotations >>
 //@+node:felix.20230924174338.3: ** << mod_scripting imports & annotations >>
-import * as vscode from 'vscode';
-
 import * as g from '../core/leoGlobals';
-
-import { new_cmd_decorator } from '../core/decorators';
 
 import { Position } from '../core/leoNodes';
 import { Commands } from '../core/leoCommands';
 
-import { LoadManager, PreviousSettings } from '../core/leoApp';
-import { AtFile } from '../core/leoAtFile';
-import { NullGui } from '../core/leoGui';
 import { NullIconBarClass, nullButtonWidget } from './leoFrame';
 
 type Widget = any;

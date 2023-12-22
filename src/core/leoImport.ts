@@ -3,14 +3,9 @@
 //@+<< leoImport imports >>
 //@+node:felix.20230510231730.1: ** << leoImport imports >>
 import * as vscode from 'vscode';
-import { Utils as uriUtils } from 'vscode-uri';
 import * as utils from '../utils';
 
-import * as os from 'os';
 import * as csv from 'csvtojson';
-import * as path from 'path';
-
-const docutils = false;
 
 const lxml = false;
 

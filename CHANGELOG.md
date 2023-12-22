@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.6
+
+- Fixed keyboard navigation of the outline while being hoisted.
+
 ## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.

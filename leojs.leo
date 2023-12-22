@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20231216233654.1"><vh>0.2.6</vh></v>
 <v t="fil.20231216220210.1"><vh>0.2.5</vh></v>
 <v t="felix.20231216170017.1"><vh>0.2.4</vh></v>
 <v t="felix.20231216170011.1"><vh>0.2.3</vh></v>
@@ -20,6 +21,10 @@
 <v t="felix.20230330224010.1"><vh>@clean BACKERS.md</vh></v>
 </v>
 <v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
+<v t="felix.20231219233411.1"><vh>Find Panel Webview</vh>
+<v t="felix.20231219233427.1"><vh>@clean find-panel/main.js</vh></v>
+<v t="felix.20231219233431.1"><vh>@clean find-panel/style.css</vh></v>
+</v>
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
 <v t="felix.20211007213344.2"><vh>class Config</vh>
 <v t="felix.20211007213344.3"><vh>getConfig</vh></v>
@@ -1067,10 +1072,8 @@ import { Position } from './core/leoNodes';
 
 </t>
 <t tx="felix.20201208224407.1">import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
 import { Constants } from "./constants";
 import { Icon } from "./types";
-import { LeoOutlineNode } from "./leoOutline";
 import { Position } from "./core/leoNodes";
 
 // String and other types/structures helper functions, along with common vscode API calls
@@ -1501,6 +1504,13 @@ public refreshTreeRoot(): void {
 <t tx="felix.20201209011931.6">public getParent(element: Position): vscode.ProviderResult&lt;Position&gt; {
     if (element) {
         const p_parent = element.parent();
+        const w_c = g.app.windowList[this._leoUI.frameIndex].c;
+        if (w_c.hoistStack &amp;&amp; w_c.hoistStack.length) {
+            const topHoistPos = w_c.hoistStack[w_c.hoistStack.length - 1].p;
+            if (element.__eq__(topHoistPos) || p_parent.__eq__(topHoistPos)) {
+                return undefined;
+            }
+        }
         if (p_parent.v) {
             return p_parent;
         } else {
@@ -3408,9 +3418,7 @@ private _updateLeoObjectIndicator(): void {
 </t>
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
-import { LeoOutlineNode } from "./leoOutline";
 import { RClick } from "./core/mod_scripting";
-import { nullButtonWidget } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -3557,9 +3565,7 @@ export interface LeoButton {
 
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri"; // May be useful!
 import { DebouncedFunc, debounce } from "lodash";
-import * as path from 'path'; // May be useful!
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -4621,7 +4627,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -8000,7 +8006,6 @@ public incTreeId(): void {
 },
 </t>
 <t tx="felix.20211007213344.1">import * as vscode from "vscode";
-import * as utils from "./utils";
 import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8523,10 +8528,8 @@ public static FIND_INPUTS_IDS = {
 
 </t>
 <t tx="felix.20211010192923.1">import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
 import * as utils from "./utils";
 import * as path from 'path';
-import { Constants } from "./constants";
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
@@ -11163,19 +11166,15 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         const w_u = element.v.u;
         const w_uaLength = Object.keys(w_u).length;
         if (w_uaLength) {
-
             if (w_uaLength === 1 &amp;&amp; w_u.__node_tags &amp;&amp; w_u.__node_tags.length) {
                 // list tags instead
                 item.tooltip = item.label.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
-
             } else {
                 item.tooltip = item.label.label + "\n" +
                     JSON.stringify(w_u, undefined, 2);
             }
-
             return item;
         }
-
     }
     item.tooltip = item.label.label; // * Fallsback to whole headline as tooltip
     return item;
@@ -15012,6 +15011,865 @@ set leoEditHeadline(p_value: boolean) {
 - Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
 - Fixed goto-next-clone and goto-next-marked refresh cycles.
 </t>
+<t tx="felix.20231216233654.1">## 0.2.6
+
+- Fixed keyboard navigation of the outline while being hoisted.
+
+</t>
+<t tx="felix.20231219233411.1"></t>
+<t tx="felix.20231219233427.1">// @ts-check
+
+// This script will be run within the webview itself
+// It cannot access the main VS Code APIs directly.
+// Send message to LeoJS with vscode.postMessage({ keyNameEx1: someValue, ... });
+// Receive messages from LeoJS with window.addEventListener('message', event =&gt; { ... });
+(function () {
+    // @ts-expect-error
+    const vscode = acquireVsCodeApi();
+
+    let timer; // for debouncing sending the settings from this webview to LeoJS
+    let dirty = false; // all but nav input
+    let navTextDirty = false;
+
+    let firstTabElId = 'searchOptions'; // The first tabbable element used to be 'findText' before nav inputs
+    let lastTabElId = 'searchBody';
+
+    /**
+     * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
+     * - Resets when switching to tag, or when clearing the input field.
+     * - Sets when pressing Enter with non-empty input field &amp;&amp; not tag mode.
+     */
+    let frozen = false;
+    let w_freezeElement = document.getElementById("freeze");
+    if (w_freezeElement) {
+        w_freezeElement.style.display = 'none';
+    }
+    let navSearchTimer; // for debouncing the search-headline while typing if unfrozen
+
+    // * LeoSearchSettings Type
+    let searchSettings = {
+        // Nav settings
+        navText: '',
+        showParents: true,
+        isTag: false,
+        searchOptions: 0,
+        // Find/replace
+        findText: '',
+        replaceText: '',
+        wholeWord: false,
+        ignoreCase: true,
+        regExp: false,
+        markFinds: false,
+        markChanges: false,
+        searchHeadline: true,
+        searchBody: true,
+        searchScope: 0, // 0 is entire outline (1: sub-outline, 2: node only)
+    };
+
+    // * Search related controls (No nav inputs)
+    let findReplaceInputIds = ['findText', 'replaceText'];
+    let checkboxIds = [
+        'wholeWord',
+        'ignoreCase',
+        'regExp',
+        'markFinds',
+        'markChanges',
+        'searchHeadline',
+        'searchBody',
+    ];
+    let radioIds = ['entireOutline', 'subOutlineOnly', 'nodeOnly', 'fileOnly'];
+
+    function resetTagNav() {
+        navSearchTimer = setTimeout(() =&gt; {
+            if (navTextDirty) {
+                navTextDirty = false;
+                if (navSearchTimer) {
+                    clearTimeout(navSearchTimer);
+                }
+                sendSearchConfig();
+            }
+            vscode.postMessage({ type: 'leoNavTextChange' });
+        }, 250); // quarter second
+    }
+
+    function navTextChange() {
+        // cancel timer, reset 'debounced' timer after checks, if still needed
+        if (navSearchTimer) {
+            clearTimeout(navSearchTimer);
+        }
+
+        // * Needed Checks
+        if (searchSettings.navText.length === 0) {
+            setFrozen(false);
+            // if tagging but empty: SEND SEARCH LIST-ALL-TAGS COMMAND
+            if (searchSettings.isTag) {
+                resetTagNav();
+            }
+
+        }
+        if (searchSettings.navText === "m" &amp;&amp; !searchSettings.isTag) {
+            // ! Easter Egg: calls 'marked-list', which list all marked nodes !
+            navSearchTimer = setTimeout(() =&gt; {
+                if (navTextDirty) {
+                    navTextDirty = false;
+                    if (navSearchTimer) {
+                        clearTimeout(navSearchTimer);
+                    }
+                    sendSearchConfig();
+                }
+                vscode.postMessage({ type: 'leoNavMarkedList' });
+
+            }, 40); // Shorter delay for this command
+            return false;
+        }
+
+        // User changed text in nav text input
+        if (frozen || searchSettings.navText.length &lt; 3) {
+            return; // dont even continue if not long enough or already frozen
+        }
+
+        // DEBOUNCE .25 to .5 seconds with navSearchTimer
+        navSearchTimer = setTimeout(() =&gt; {
+            if (navTextDirty) {
+                navTextDirty = false;
+                if (navSearchTimer) {
+                    clearTimeout(navSearchTimer);
+                }
+                sendSearchConfig();
+            }
+            vscode.postMessage({ type: 'leoNavTextChange' });
+        }, 400); // almost half second
+
+    }
+
+    function setSearchSetting(p_id) {
+        if (checkboxIds.includes(p_id)) {
+            toggleCheckbox(p_id);
+        } else if (radioIds.includes(p_id)) {
+            setRadio(p_id);
+        }
+    }
+
+    function setFrozen(p_focus) {
+        frozen = p_focus;
+        w_freezeElement = document.getElementById("freeze");
+        if (w_freezeElement) {
+            if (frozen) {
+                w_freezeElement.style.display = '';
+            } else {
+                w_freezeElement.style.display = 'none';
+            }
+        }
+    }
+
+    function setSettings(p_settings) {
+        if (p_settings["navText"] || p_settings["navText"] === '') {
+
+            // Nav controls
+            // @ts-expect-error
+            document.getElementById("navText").value = p_settings["navText"];
+            searchSettings["navText"] = p_settings["navText"];
+
+            // showParents
+            // @ts-expect-error
+            document.getElementById("showParents").checked = p_settings["showParents"];
+            searchSettings["showParents"] = p_settings["showParents"];
+
+            // isTag
+            // @ts-expect-error
+            document.getElementById("isTag").checked = p_settings["isTag"];
+            searchSettings["isTag"] = p_settings["isTag"];
+            handleIsTagSwitch(false);
+
+            // searchOptions
+            // @ts-expect-error
+            document.getElementById("searchOptions").value = p_settings["searchOptions"];
+            searchSettings["searchOptions"] = p_settings["searchOptions"];
+        } else {
+            // ! Not at least Leo 6.6 final : hide top elements !
+            firstTabElId = 'findText';
+            var elements = document.getElementsByClassName("nav-element");
+
+            for (var i = 0; i &lt; elements.length; i++) {
+                // @ts-expect-error
+                elements[i].style.display = "none";
+            }
+        }
+
+        // When opening a Leo document, set default values of fields
+        findReplaceInputIds.forEach((p_inputId) =&gt; {
+            // @ts-expect-error
+            document.getElementById(p_inputId).value = p_settings[p_inputId];
+            searchSettings[p_inputId] = p_settings[p_inputId];
+        });
+        checkboxIds.forEach((p_inputId) =&gt; {
+            // @ts-expect-error
+            document.getElementById(p_inputId).checked = p_settings[p_inputId];
+            searchSettings[p_inputId] = p_settings[p_inputId];
+        });
+        // @ts-expect-error
+        document.getElementById(radioIds[p_settings['searchScope']]).checked = true;
+        searchSettings.searchScope = p_settings['searchScope'];
+    }
+
+    function sendSearchConfig() {
+        dirty = false; // clear dirty flag
+        vscode.postMessage({ type: 'searchConfig', value: searchSettings });
+    }
+
+    function processChange() {
+        clearTimeout(timer);
+        dirty = true;
+        timer = setTimeout(() =&gt; {
+            sendSearchConfig();
+        }, 300);
+    }
+
+    function toggleCheckbox(p_inputId) {
+        let w_checkbox = document.getElementById(p_inputId);
+        let w_setTo = true;
+        // @ts-expect-error
+        if (w_checkbox.checked) {
+            w_setTo = false;
+        }
+        // @ts-expect-error
+        w_checkbox.checked = w_setTo;
+        searchSettings[p_inputId] = w_setTo;
+        if (timer) {
+            clearTimeout(timer);
+        }
+        sendSearchConfig();
+    }
+
+    function setRadio(p_inputId) {
+        // @ts-expect-error
+        document.getElementById(p_inputId).checked = true;
+        searchSettings['searchScope'] = parseInt(
+            // @ts-expect-error
+            document.querySelector('input[name="searchScope"]:checked').value
+        );
+        if (timer) {
+            clearTimeout(timer);
+        }
+        sendSearchConfig();
+    }
+
+    function checkKeyDown(p_event) {
+        if (!p_event) {
+            p_event = window.event;
+        }
+        var keyCode = p_event.code || p_event.key;
+
+        // Detect CTRL+F
+        if (p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 70) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            focusOnField('findText');
+            return;
+        }
+
+        // ? NEEDED ?
+        /*
+        // Detect F2
+        if (!p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 113) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'leoFindPrevious' });
+            return;
+        }
+        // Detect F3
+        if (!p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 114) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'leoFindNext' });
+            return;
+        }
+        // Detect Ctrl + =
+        if (p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 187) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'replace' });
+            return;
+        }
+        // Detect Ctrl + -
+        if (p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 189) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'replaceThenFind' });
+            return;
+        }
+        */
+
+        if (keyCode === 'Tab') {
+            var actEl = document.activeElement;
+            var lastEl = document.getElementById(lastTabElId);
+
+            if (p_event.shiftKey) {
+                // shift + tab so if first got last
+                var firstEl = document.getElementById(firstTabElId);
+                if (lastEl &amp;&amp; actEl === firstEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    lastEl.focus();
+                    return;
+                }
+            } else {
+                // tab, so if last goto first
+                if (actEl === lastEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    focusOnField(firstTabElId);
+                    return;
+                }
+            }
+        }
+    }
+
+    function focusOnField(p_id) {
+        const inputField = document.querySelector('#' + p_id);
+        if (inputField) {
+            // @ts-expect-error
+            inputField.select();
+            // TODO : TEST IF NEEDED TO PREVENT FLICKER ON FIRST TRY?
+            setTimeout(() =&gt; {
+                // @ts-expect-error
+                inputField.select();
+            }, 0);
+        }
+    }
+
+    function getSettings() {
+        // clear dirty, clear timer,
+        if (dirty) {
+            dirty = false;
+            clearTimeout(timer);
+            sendSearchConfig(); // just trigger send settings
+        }
+    }
+
+    function handleIsTagSwitch(p_wasSet) {
+        let w_input = document.getElementById('navText');
+        let w_showParent = document.getElementById('showParents');
+        let w_navSelect = document.getElementById('searchOptions');
+        if (searchSettings.isTag) {
+
+            if (w_input) {
+                // @ts-expect-error
+                w_input.placeholder = "&lt;tag pattern here&gt;";
+                w_input.title = "Enter a tag name to list tagged nodes in the Goto pane&amp;#013;Clear this field to list all tags used in this file";
+            }
+
+            // @ts-expect-error
+            w_showParent.disabled = true;
+            // @ts-expect-error
+            w_navSelect.disabled = true;
+            if (p_wasSet) {
+                // if nav text is empty: show all tags
+                setTimeout(() =&gt; {
+                    clearTimeout(timer);
+                    sendSearchConfig();
+                    navTextChange();
+                }, 100);
+            }
+        } else {
+            if (w_input) {
+                // @ts-expect-error
+                w_input.placeholder = "&lt;nav pattern here&gt;";
+                w_input.title = "Typing searches headlines interactively&amp;#013;Enter freezes input and searches body text";
+            }
+            // @ts-expect-error
+            w_showParent.disabled = false;
+            // @ts-expect-error
+            w_navSelect.disabled = false;
+        }
+
+    }
+
+    // * Nav text input detection
+    const w_navTextEl = document.getElementById('navText');
+    if (w_navTextEl) {
+        w_navTextEl.onkeypress = function (p_event) {
+            if (!p_event) {
+                // @ts-expect-error
+                p_event = window.event;
+            }
+            var keyCode = p_event.code || p_event.key;
+            if (keyCode === 'Enter') {
+                if (searchSettings.navText.length === 0 &amp;&amp; searchSettings.isTag) {
+                    setFrozen(false);
+                    resetTagNav();
+                } else {
+                    if (searchSettings.navText.length &gt;= 3 || searchSettings.isTag) {
+                        setFrozen(true);
+                        if (navTextDirty) {
+                            navTextDirty = false;
+                            if (timer) {
+                                clearTimeout(timer);
+                            }
+                            if (navSearchTimer) {
+                                clearTimeout(navSearchTimer);
+                            }
+                            sendSearchConfig();
+                        }
+                        vscode.postMessage({ type: 'leoNavEnter' });
+                    }
+                    if (searchSettings.navText.length === 0) {
+                        vscode.postMessage({ type: 'leoNavClear' });
+                    }
+                }
+
+                return false;
+            }
+        };
+
+        w_navTextEl.addEventListener('input', function (p_event) {
+            // @ts-expect-error
+            searchSettings.navText = this.value;
+            navTextDirty = true;
+            navTextChange(); // DEBOUNCE THIS! Don't process change too fast!
+        });
+    }
+
+    const w_showParentsEl = document.getElementById('showParents');
+    if (w_showParentsEl) {
+        w_showParentsEl.addEventListener('change', function (p_event) {
+            // @ts-expect-error
+            searchSettings.showParents = this.checked;
+            processChange();
+        });
+    }
+
+    const w_isTagEl = document.getElementById('isTag');
+    if (w_isTagEl) {
+        w_isTagEl.addEventListener('change', function (p_event) {
+            // @ts-expect-error
+            let w_checked = this.checked;
+            let w_wasSet = false;
+            if (searchSettings.isTag !== w_checked) {
+                setFrozen(false); // Switched tagging so reset freeze
+                if (w_checked) {
+                    w_wasSet = true;
+                }
+            }
+            searchSettings.isTag = w_checked;
+            // Set placeholder text
+            processChange();
+            handleIsTagSwitch(w_wasSet);
+        });
+    }
+
+    // * Find &amp; Replace controls change detection
+    const w_searchOptionsEl = document.getElementById('searchOptions');
+    if (w_searchOptionsEl) {
+        w_searchOptionsEl.addEventListener('change', function (p_event) {
+            // @ts-expect-error
+            searchSettings.searchOptions = Number(this.value);
+            processChange();
+        });
+
+    }
+
+    findReplaceInputIds.forEach((p_inputId) =&gt; {
+        const w_inputEl = document.getElementById(p_inputId);
+        if (w_inputEl) {
+
+            w_inputEl.onkeypress = function (p_event) {
+                if (!p_event) {
+                    // @ts-expect-error
+                    p_event = window.event;
+                }
+                var keyCode = p_event.code || p_event.key;
+                if (keyCode === 'Enter') {
+                    if (timer) {
+                        clearTimeout(timer);
+                        sendSearchConfig();
+                    }
+                    vscode.postMessage({ type: 'leoFindNext' });
+                    return false;
+                }
+            };
+            w_inputEl.addEventListener('input', function (p_event) {
+                // @ts-expect-error
+                searchSettings[p_inputId] = this.value;
+                processChange();
+            });
+        }
+    });
+
+    checkboxIds.forEach((p_inputId) =&gt; {
+        const w_inputEl = document.getElementById(p_inputId);
+        if (w_inputEl) {
+
+            w_inputEl.addEventListener('change', function (p_event) {
+                // @ts-expect-error
+                searchSettings[p_inputId] = this.checked;
+                processChange();
+            });
+        }
+    });
+
+    radioIds.forEach((p_inputId) =&gt; {
+        const w_inputEl = document.getElementById(p_inputId);
+        if (w_inputEl) {
+
+            w_inputEl.addEventListener('change', function (p_event) {
+                searchSettings['searchScope'] = parseInt(
+                    // @ts-expect-error
+                    document.querySelector('input[name="searchScope"]:checked').value
+                );
+                processChange();
+            });
+        }
+    });
+
+    const w_findTextsEl = document.getElementById('findText');
+    if (w_findTextsEl) {
+        w_findTextsEl.addEventListener('click', function () {
+            // @ts-expect-error
+            if (w_findTextsEl.value === "&lt;find pattern here&gt;") {
+                // @ts-expect-error
+                w_findTextsEl.select();
+            }
+        });
+    }
+
+    document.onkeydown = checkKeyDown;
+
+    document.addEventListener('focusin', (event) =&gt; {
+        vscode.postMessage({ type: 'gotFocus' });
+    });
+    document.addEventListener('focusout', (event) =&gt; {
+        vscode.postMessage({ type: 'lostFocus' });
+    });
+
+    // Handle messages sent from the extension to the webview
+    window.addEventListener('message', (event) =&gt; {
+        const message = event.data; // The json data that the extension sent
+        switch (message.type) {
+            // * Nav Tab Controls
+            // Focus and select all text in 'nav' field
+            case 'selectNav': {
+                focusOnField('navText');
+                if (message.text || message.text === "") {
+                    // @ts-expect-error
+                    document.getElementById("navText").value = message.text;
+                    searchSettings["navText"] = message.text;
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                    sendSearchConfig();
+                }
+                break;
+            }
+            // * Find Tab Controls
+            // Focus and select all text in 'find' field
+            case 'selectFind': {
+                focusOnField('findText');
+                break;
+            }
+            // Focus and select all text in 'replace' field
+            case 'selectReplace': {
+                focusOnField('replaceText');
+                break;
+            }
+            case 'getSettings': {
+                getSettings();
+                break;
+            }
+            case 'setSettings': {
+                setSettings(message.value);
+                break;
+            }
+            case 'setSearchSetting': {
+                setSearchSetting(message.id);
+                break;
+            }
+        }
+    });
+
+    vscode.postMessage({ type: 'refreshSearchConfig' });
+})();
+</t>
+<t tx="felix.20231219233431.1">html {
+  box-sizing: border-box;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+html:hover {
+  overflow: overlay;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ol,
+ul {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+:root {
+  --input-padding-vertical: 6px;
+  --input-padding-horizontal: 4px;
+  --input-margin-vertical: 4px;
+  --input-margin-horizontal: 0;
+  height: 100%;
+  padding-right: 14px;
+}
+
+html:focus {
+  outline: 1px solid;
+  outline-width: 1px;
+  outline-style: solid;
+  outline-offset: -1px;
+  outline-color: var(--vscode-focusBorder);
+}
+
+body {
+  margin-left: 20px;
+  background-color: transparent;
+  padding: 0 var(--container-padding);
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
+  font-weight: var(--vscode-font-weight);
+  font-family: var(--vscode-font-family);
+}
+
+ol,
+ul {
+  padding-left: var(--container-padding);
+}
+
+body&gt;*,
+form&gt;* {
+  margin-block-start: var(--input-margin-vertical);
+  margin-block-end: var(--input-margin-vertical);
+}
+
+*:focus {
+  outline-color: var(--vscode-focusBorder);
+}
+
+a {
+  color: var(--vscode-textLink-foreground);
+}
+
+a:hover,
+a:active {
+  color: var(--vscode-textLink-activeForeground);
+}
+
+code {
+  font-size: var(--vscode-editor-font-size);
+  font-family: var(--vscode-editor-font-family);
+}
+
+button {
+  border: none;
+  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+  width: 100%;
+  text-align: center;
+  outline: 1px solid transparent;
+  outline-offset: 2px !important;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+}
+
+button:hover {
+  cursor: pointer;
+  background: var(--vscode-button-hoverBackground);
+}
+
+button:focus {
+  outline-color: var(--vscode-focusBorder);
+}
+
+button.secondary {
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+}
+
+button.secondary:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+select {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-input-foreground);
+  border-color: var(--vscode-dropdown-border);
+  cursor: pointer;
+  width: 50px;
+  left: 15%;
+  position: relative;
+  border-radius: 2px;
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+select option {
+  background-color: var(--vscode-dropdown-listBackground);
+}
+
+select option:focus {
+  background-color: var(--vscode-input-background);
+  outline-color: var(--vscode-input-border);
+}
+
+input:not([type="radio"]):not([type="checkbox"]),
+textarea {
+  display: block;
+  margin-right: 20px;
+  width: 100%;
+  border: none;
+  font-family: var(--vscode-font-family);
+  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+  padding: 3px var(--input-padding-horizontal);
+  border-radius: 2px;
+  color: var(--vscode-input-foreground);
+  outline-color: var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+input[type="checkbox"]:focus+label {
+  border: 1px solid var(--vscode-button-background);
+}
+
+input[type="radio"]:focus+label {
+  border: 1px solid var(--vscode-button-background);
+}
+
+input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+}
+
+u {
+  color: var(--vscode-editor-foreground);
+  text-decoration-color: var(--vscode-foreground);
+  text-underline-offset: 0.04em;
+}
+
+body&gt;div&gt;div&gt;label:focus,
+body&gt;div&gt;div&gt;label:active {
+  outline-color: none !important;
+  border: none !important;
+}
+
+#freeze {
+  cursor: default;
+  position: absolute;
+  right: 0.9em;
+  line-height: 1em;
+  top: 1.05em;
+  font-size: 1.8em;
+  color: #5c87ff80;
+  padding: 0;
+  margin: 0;
+}
+
+.comment {
+  display: none;
+}
+
+div.row {
+  overflow-x: hidden;
+  white-space: nowrap;
+}
+
+div.col {
+  vertical-align: top;
+  width: 50%;
+  max-width: 9.5em;
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+div.col-nav {
+  width: 50%;
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
+
+.mt-4 {
+  margin-top: 4px;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mb-4 {
+  margin-bottom: 4px;
+}
+
+.mb-6 {
+  margin-bottom: 6px;
+}
+
+.input-holder {
+  padding: 0;
+  margin-right: 6px;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}
+
+.no-overflow {
+  text-overflow: unset !important;
+}
+
+.label-fix {
+  vertical-align: top;
+  line-height: 18px;
+}</t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.

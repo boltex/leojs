@@ -99,7 +99,7 @@
 //@+<< nodetags imports >>
 //@+node:felix.20221019001703.1: ** << nodetags imports >>
 import * as g from './leoGlobals';
-import { Position, VNode } from './leoNodes';
+import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
 //@-<< nodetags imports >>
 //@+others

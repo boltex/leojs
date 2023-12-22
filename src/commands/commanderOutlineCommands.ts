@@ -7,7 +7,7 @@ import * as et from 'elementtree';
 import * as g from '../core/leoGlobals';
 import { commander_command } from '../core/decorators';
 import { StackEntry, Position, VNode } from '../core/leoNodes';
-import { FastRead, FileCommands } from '../core/leoFileCommands';
+import { FastRead } from '../core/leoFileCommands';
 import { Commands, HoistStackEntry } from '../core/leoCommands';
 import { Bead, Undoer } from '../core/leoUndo';
 

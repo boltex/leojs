@@ -6,14 +6,12 @@
 //@+<< leoCache imports & annotations >>
 //@+node:felix.20230802145823.2: ** << leoCache imports & annotations >>
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as pako from 'pako';
 import { Database } from 'sql.js';
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
 import * as fs from 'fs';
 
-var binascii = require('binascii');
 var pickle = require('./jpicklejs');
 
 //@-<< leoCache imports & annotations >>

@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri"; // May be useful!
 import { DebouncedFunc, debounce } from "lodash";
-import * as path from 'path'; // May be useful!
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";

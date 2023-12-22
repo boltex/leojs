@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
-import { LeoOutlineNode } from "./leoOutline";
 import { RClick } from "./core/mod_scripting";
-import { nullButtonWidget } from "./core/leoFrame";
 
 /**
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.

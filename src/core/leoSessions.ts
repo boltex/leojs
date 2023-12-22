@@ -5,7 +5,6 @@
  */
 //@+<< leoSessions imports & annotations >>
 //@+node:felix.20231003223423.1: ** << leoSessions imports & annotations >>
-import * as vscode from 'vscode';
 import * as g from './leoGlobals';
 import { command } from '../core/decorators';
 import { Commands } from './leoCommands';
