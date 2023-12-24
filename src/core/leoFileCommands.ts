@@ -362,9 +362,9 @@ export class FastRead {
     } {
         const c: Commands = this.c;
         try {
-            const window_pos: [number, number, number, number] = c.db.get('window_position') || [50, 50, 500, 800];
-            const r1 = Number(c.db.get('body_outline_ratio', '0.5'));
-            const r2 = Number(c.db.get('body_secondary_ratio', '0.5'));
+            const window_pos: [number, number, number, number] = c.db['window_position'] || [50, 50, 500, 800];
+            const r1 = Number(c.db['body_outline_ratio'] || '0.5');
+            const r2 = Number(c.db['body_secondary_ratio'] || '0.5');
             const [top, left, height, width] = window_pos;
             return {
                 'top': Number(top),

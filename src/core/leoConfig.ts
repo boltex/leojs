@@ -402,7 +402,7 @@ export class ParserBaseClass {
         const d = this.parseFont(p);
         // Set individual settings.
         for (let key of ['family', 'size', 'slant', 'weight']) {
-            const data = d.get(key);
+            const data = d[key];
             if (data) {
                 let name;
                 let w_val;
@@ -1013,7 +1013,7 @@ export class ParserBaseClass {
         for (let line of lines) {
             this.parseFontLine(line, d);
         }
-        const comments = d.get('comments');
+        const comments = d['comments'];
         d['comments'] = comments.join('\n');
         return d;
     }
@@ -1035,7 +1035,7 @@ export class ParserBaseClass {
         let comments;
         if (g.match(s, 0, '#')) {
             s = s.substring(1).trim();
-            comments = d.get('comments');
+            comments = d['comments'];
             comments.push(s);
             d['comments'] = comments;
             return;
@@ -1145,10 +1145,10 @@ export class ParserBaseClass {
 
         const val = s.substring(i).trim() || ''; // An empty val is valid.
         if (tag === 'arg') {
-            const aList: any[] = d.get('args', []);
+            const aList: any[] = d['args'] || [];
             aList.push(val);
             d['args'] = aList;
-        } else if (d.get(tag)) {
+        } else if (d[tag]) {
             g.es_print(`ignoring duplicate definition of ${tag} ${s}`);
         } else {
             d[tag] = val;
@@ -1613,7 +1613,7 @@ export class ActiveSettingsOutline {
                     this.add(p);
                 } else {
                     // Look at all the settings to discover where the setting is defined.
-                    val = c.config.settingsDict.get(key)
+                    val = c.config.settingsDict.get(key);
                     if (val instanceof g.GeneralSetting) {
                         // Use this.c, not this.commander.
                         const letter = lm.computeBindingLetter(this.c, val.path);

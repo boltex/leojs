@@ -9,7 +9,8 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
-<v t="felix.20231216233654.1"><vh>0.2.6</vh></v>
+<v t="felix.20231216233654.1"><vh>0.2.7</vh></v>
+<v t="felix.20231221231533.1"><vh>0.2.6</vh></v>
 <v t="fil.20231216220210.1"><vh>0.2.5</vh></v>
 <v t="felix.20231216170017.1"><vh>0.2.4</vh></v>
 <v t="felix.20231216170011.1"><vh>0.2.3</vh></v>
@@ -2626,8 +2627,8 @@ public static USER_MESSAGES = {
     IGNORED: " They were ignored.", // with voluntary leading space
     TOO_FAST: "Leo is busy! ", // with voluntary trailing space
 
-    UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
-    LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
+    UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language coloring not yet supported.",
+    LANGUAGE_NOT_SUPPORTED: " language coloring not yet supported.", // with leading space
     MINIBUFFER_BUTTON_START: "@button-",
     MINIBUFFER_RCLICK_START: "@rclick-",
     MINIBUFFER_SCRIPT_BUTTON: "script-button",
@@ -4627,7 +4628,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -12102,8 +12103,8 @@ private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): T
         (p_mewDocument) =&gt; { return p_mewDocument; }, // ok - language found
         (p_error) =&gt; {
             let w_langName: string = p_error.toString().split('\n')[0];
-            if (w_langName.length &gt; 36 &amp;&amp; w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
-                w_langName = w_langName.substring(36);
+            if (w_langName.length &gt; 38 &amp;&amp; w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
+                w_langName = w_langName.substring(38);
             } else {
                 w_langName = "";
             }
@@ -12625,7 +12626,8 @@ public static LANGUAGE_CODES: { [key: string]: string | undefined } = {
     cplusplus: 'cpp',
     md: 'markdown',
     rest: 'restructuredtext',
-    rst: 'restructuredtext'
+    rst: 'restructuredtext',
+    text: 'plain'
 };
 
 </t>
@@ -14980,40 +14982,43 @@ set leoEditHeadline(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20231216165857.1">
-## 0.2.0 
+<t tx="felix.20231216165857.1">## 0.2.0 
 
 - First alpha release
 
 </t>
-<t tx="felix.20231216165946.1">
-## 0.2.1
+<t tx="felix.20231216165946.1">## 0.2.1
 
 - Fixed importer and @auto related bugs.
+
 </t>
-<t tx="felix.20231216170008.1">
-## 0.2.2
+<t tx="felix.20231216170008.1">## 0.2.2
 
 - Fixed more importer and @auto related bugs.
 - Added 'Recent Files' icons and buttons.
+
 </t>
-<t tx="felix.20231216170011.1">
-## 0.2.3
+<t tx="felix.20231216170011.1">## 0.2.3
 
 - Reset Confirm-Before-Close setting upon starting up.
 - Fixed section-reference read-write operation.
 - Fixed output messages strings.
 - Closing the last Leo document before closing vscode will remove it from the session.
 - Fixed labeling of body pane tab.
+
 </t>
 <t tx="felix.20231216170017.1">## 0.2.4
 
 - Fixed 'ConfirmBeforeClose' for mobile to prevent closing on keyboard commands.
 - Fixed goto-next-clone and goto-next-marked refresh cycles.
-</t>
-<t tx="felix.20231216233654.1">## 0.2.6
 
-- Fixed keyboard navigation of the outline while being hoisted.
+</t>
+<t tx="felix.20231216233654.1">## 0.2.7
+
+- Fixed tooltips of the 'nav' input box in the find panel.
+- Fixed 'Language coloring not supported yet for this language' message.
+- Fixed 'object member adressing' d.get() bugs.
+- Fixed 'ini' and 'java' importers.
 
 </t>
 <t tx="felix.20231219233411.1"></t>
@@ -15358,7 +15363,7 @@ set leoEditHeadline(p_value: boolean) {
             if (w_input) {
                 // @ts-expect-error
                 w_input.placeholder = "&lt;tag pattern here&gt;";
-                w_input.title = "Enter a tag name to list tagged nodes in the Goto pane&amp;#013;Clear this field to list all tags used in this file";
+                w_input.title = "Enter a tag name to list tagged nodes in the Goto pane\nClear this field to list all tags used in this file";
             }
 
             // @ts-expect-error
@@ -15377,7 +15382,7 @@ set leoEditHeadline(p_value: boolean) {
             if (w_input) {
                 // @ts-expect-error
                 w_input.placeholder = "&lt;nav pattern here&gt;";
-                w_input.title = "Typing searches headlines interactively&amp;#013;Enter freezes input and searches body text";
+                w_input.title = "Typing searches headlines interactively\nEnter freezes input and searches body text";
             }
             // @ts-expect-error
             w_showParent.disabled = false;
@@ -15870,6 +15875,11 @@ div.col-nav {
   vertical-align: top;
   line-height: 18px;
 }</t>
+<t tx="felix.20231221231533.1">## 0.2.6
+
+- Fixed keyboard navigation of the outline while being hoisted.
+
+</t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.

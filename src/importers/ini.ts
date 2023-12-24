@@ -4,16 +4,15 @@
  * The @auto importer for .ini files.
  */
 import { Commands } from '../core/leoCommands';
-import * as g from '../core/leoGlobals';
 import { Position } from '../core/leoNodes';
-import { Block, Importer } from './base_importer';
+import { Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230912223510.2: ** class Ini_Importer(Importer)
 export class Ini_Importer extends Importer {
     public language = 'ini';
 
-    public section_pat = /^\s*\[.*\]/;
+    public section_pat = /^\s*(\[.*\])/;
     public block_patterns: [string, RegExp][] = [['section', this.section_pat]];
 
     constructor(c: Commands) {

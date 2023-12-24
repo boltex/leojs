@@ -196,8 +196,8 @@ export class Constants {
         IGNORED: " They were ignored.", // with voluntary leading space
         TOO_FAST: "Leo is busy! ", // with voluntary trailing space
 
-        UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
-        LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
+        UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language coloring not yet supported.",
+        LANGUAGE_NOT_SUPPORTED: " language coloring not yet supported.", // with leading space
         MINIBUFFER_BUTTON_START: "@button-",
         MINIBUFFER_RCLICK_START: "@rclick-",
         MINIBUFFER_SCRIPT_BUTTON: "script-button",
@@ -457,7 +457,8 @@ export class Constants {
         cplusplus: 'cpp',
         md: 'markdown',
         rest: 'restructuredtext',
-        rst: 'restructuredtext'
+        rst: 'restructuredtext',
+        text: 'plain'
     };
 
     /**

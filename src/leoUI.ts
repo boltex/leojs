@@ -2696,8 +2696,8 @@ export class LeoUI extends NullGui {
             (p_mewDocument) => { return p_mewDocument; }, // ok - language found
             (p_error) => {
                 let w_langName: string = p_error.toString().split('\n')[0];
-                if (w_langName.length > 36 && w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
-                    w_langName = w_langName.substring(36);
+                if (w_langName.length > 38 && w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
+                    w_langName = w_langName.substring(38);
                 } else {
                     w_langName = "";
                 }
