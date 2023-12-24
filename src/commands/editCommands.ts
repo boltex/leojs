@@ -268,26 +268,32 @@ export class TopLevelEditCommands {
         if (!c) {
             return;
         }
-        const p = c.p;
-
-        g.es(`Ancestors of ${p.h}...`);
-        for (const clone of c.all_positions()) {
-            if (clone.v === p.v) {
-                let unl = clone.get_legacy_UNL();
-                let message = unl;
+        g.es(`Ancestors of ${c.p.h}...`);
+        const seen: Set<string> = new Set();
+        for (const p of c.vnode2allPositions(c.p.v)) {
+            for (const ancestor of p.parents()) {
+                let unl = ancestor.get_legacy_UNL();
                 // Drop the file part.
                 const i = unl.indexOf('#');
-                if (i > 0) {
-                    message = unl.substring(i + 1);
+                let message = i >= 0 ? unl.substring(i + 1) : unl;
+                // The following block is deactivated as it is too confusing.
+                /*
+                if (false) {
+                    // Drop the target node from the message.
+                    const parts = message.split('-->');
+                    if (parts.length > 1) {
+                        message = parts.slice(0, -1).join('-->');
+                    }
                 }
-                // Drop the target node from the message.
-                const parts = message.split('-->');
-                if (parts.length > 1) {
-                    message = parts.slice(0, -1).join('-->');
+                */
+                if (!seen.has(message)) {
+                    seen.add(message);
+
+                    // TODO : CHECK THIS!
+                    g.es(`${message}\n${unl}::1`);
+
+                    // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
                 }
-                // c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
-                // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
-                g.es(`${message}\n${unl}::1`);
             }
         }
     }
@@ -302,24 +308,25 @@ export class TopLevelEditCommands {
             return;
         }
 
-        const seen: any[] = [];
+        const seen: Set<string> = new Set();
+        g.es(`Parents of ${c.p.h}...`);
         for (const clone of c.vnode2allPositions(c.p.v)) {
             const parent = clone.parent();
-            if (parent && !seen.includes(parent)) {
-                seen.push(parent);
+            if (parent) {
                 let unl = parent.get_legacy_UNL();
-                let message = unl;
                 // Drop the file part.
                 const i = unl.indexOf('#');
-                if (i > 0) {
-                    message = unl.substring(i + 1);
+                let message = i >= 0 ? unl.substring(i + 1) : unl;
+                if (!seen.has(message)) {
+                    seen.add(message);
+
+                    // TODO : CHECK THIS!
+                    g.es(`${message}\n${unl}::1`);
+
+                    // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
                 }
-                // c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
-                // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
-                g.es(`${message}\n${unl}::1`);
             }
         }
-
     }
     //@+node:felix.20220504203200.5: *3* @g.command('unmark-node-and-parents')
     @command('unmark-node-and-parents', 'Unmark the node and all its parents.')
