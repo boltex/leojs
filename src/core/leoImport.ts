@@ -13,7 +13,7 @@ const lxml = false;
 import * as g from './leoGlobals';
 import { command } from '../core/decorators';
 import { Commands } from './leoCommands';
-import { Position, VNode } from './leoNodes';
+import { Position } from './leoNodes';
 import { Bead } from './leoUndo';
 //@-<< leoImport imports >>
 //@+others

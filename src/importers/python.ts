@@ -129,7 +129,7 @@ export class Python_Importer extends Importer {
      * Return the length of the leading whitespace for s.
     */
     const lws_n = (s: string): number => {
-      return s.length - s.trimLeft().length;
+      return s.length - s.trimStart().length;
     };
 
     //  Look behind to see what the previous block was.

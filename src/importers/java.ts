@@ -4,9 +4,8 @@
  * The @auto importer for the java language.
  */
 import { Commands } from '../core/leoCommands';
-import * as g from '../core/leoGlobals';
 import { Position } from '../core/leoNodes';
-import { Block, Importer } from './base_importer';
+import { Importer } from './base_importer';
 
 //@+others
 //@+node:felix.20230913212159.2: ** class Java_Importer(Importer)
@@ -20,7 +19,7 @@ export class Java_Importer extends Importer {
   public block_patterns: [string, RegExp][] = [
     ['class', /.*?\bclass\s+(\w+)/],
     ['func', /.*?\b(\w+)\s*\(.*?\)\s*{/],
-    ['interface', /^\w*\binterface\w*{/], // Added caret to be used as in python to match at start of string
+    ['interface', /^.*?\binterface\s+(\w*)\s*{/], // Added caret to be used as in python to match at start of string
   ];
 
   constructor(c: Commands) {

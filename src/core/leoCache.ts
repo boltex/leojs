@@ -958,11 +958,11 @@ function dump_cache(db: SqlitePickleShare, tag: string): void {
     let files = 0;
     for (const key of [...d.keys()].sort()) {
         if (key !== 'None') {
-            dump_list('File: ' + key, d.get(key));
+            dump_list('File: ' + key, d[key]);
             files += 1;
         }
     }
-    const d_none = d.get('None');
+    const d_none = d['None'];
     if (d_none && d_none.length) {
         const heading = files ? `All others (${tag})` : '';
         dump_list(heading, d_none);

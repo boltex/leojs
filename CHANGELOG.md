@@ -2,7 +2,10 @@
 
 ## 0.2.7
 
-- Fixed ...
+- Fixed tooltips of the 'nav' input box in the find panel.
+- Fixed 'Language coloring not supported yet for this language' message.
+- Fixed 'object member adressing' d.get() bugs.
+- Fixed 'ini' and 'java' importers.
 
 ## 0.2.6
 

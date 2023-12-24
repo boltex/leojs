@@ -2627,8 +2627,8 @@ public static USER_MESSAGES = {
     IGNORED: " They were ignored.", // with voluntary leading space
     TOO_FAST: "Leo is busy! ", // with voluntary trailing space
 
-    UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
-    LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
+    UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language coloring not yet supported.",
+    LANGUAGE_NOT_SUPPORTED: " language coloring not yet supported.", // with leading space
     MINIBUFFER_BUTTON_START: "@button-",
     MINIBUFFER_RCLICK_START: "@rclick-",
     MINIBUFFER_SCRIPT_BUTTON: "script-button",
@@ -12103,8 +12103,8 @@ private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): T
         (p_mewDocument) =&gt; { return p_mewDocument; }, // ok - language found
         (p_error) =&gt; {
             let w_langName: string = p_error.toString().split('\n')[0];
-            if (w_langName.length &gt; 36 &amp;&amp; w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
-                w_langName = w_langName.substring(36);
+            if (w_langName.length &gt; 38 &amp;&amp; w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
+                w_langName = w_langName.substring(38);
             } else {
                 w_langName = "";
             }
@@ -12626,7 +12626,8 @@ public static LANGUAGE_CODES: { [key: string]: string | undefined } = {
     cplusplus: 'cpp',
     md: 'markdown',
     rest: 'restructuredtext',
-    rst: 'restructuredtext'
+    rst: 'restructuredtext',
+    text: 'plain'
 };
 
 </t>
@@ -15014,7 +15015,10 @@ set leoEditHeadline(p_value: boolean) {
 </t>
 <t tx="felix.20231216233654.1">## 0.2.7
 
-- Fixed ...
+- Fixed tooltips of the 'nav' input box in the find panel.
+- Fixed 'Language coloring not supported yet for this language' message.
+- Fixed 'object member adressing' d.get() bugs.
+- Fixed 'ini' and 'java' importers.
 
 </t>
 <t tx="felix.20231219233411.1"></t>
@@ -15359,7 +15363,7 @@ set leoEditHeadline(p_value: boolean) {
             if (w_input) {
                 // @ts-expect-error
                 w_input.placeholder = "&lt;tag pattern here&gt;";
-                w_input.title = "Enter a tag name to list tagged nodes in the Goto pane&amp;#013;Clear this field to list all tags used in this file";
+                w_input.title = "Enter a tag name to list tagged nodes in the Goto pane\nClear this field to list all tags used in this file";
             }
 
             // @ts-expect-error
@@ -15378,7 +15382,7 @@ set leoEditHeadline(p_value: boolean) {
             if (w_input) {
                 // @ts-expect-error
                 w_input.placeholder = "&lt;nav pattern here&gt;";
-                w_input.title = "Typing searches headlines interactively&amp;#013;Enter freezes input and searches body text";
+                w_input.title = "Typing searches headlines interactively\nEnter freezes input and searches body text";
             }
             // @ts-expect-error
             w_showParent.disabled = false;
