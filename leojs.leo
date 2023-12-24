@@ -4628,7 +4628,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
