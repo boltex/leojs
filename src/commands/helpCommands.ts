@@ -716,7 +716,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20231224164520.37: *3* help.showSettingsOutline
     @cmd(
         'show-settings-outline',
-        'Create and open an outline, summarizing all presently active settings.\n' +
+        'Create and open an outline, summarizing all presently active settings. ' +
         'The outline retains the organization of all active settings files.'
     )
     public showSettingsOutline(): void {

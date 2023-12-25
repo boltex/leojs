@@ -3151,7 +3151,7 @@ export class Commands {
      */
     public putHelpFor(s: string, short_title = ''): void {
         const c = this;
-        void g.app.gui.put_help(c, s, short_title);
+        g.app.gui.put_help(c, s, short_title);
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
     /**

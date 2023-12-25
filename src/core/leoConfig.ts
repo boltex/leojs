@@ -1498,6 +1498,7 @@ export class ActiveSettingsOutline {
         const root = c.rootPosition()!;
         root.h = `Legend for ${this.c.shortFileName()}`;
         root.b = this.legend();
+        root.v.clearDirty();
         //
         // Create all the inner settings outlines.
         for (const [kind, commander] of this.commanders) {
@@ -1511,9 +1512,13 @@ export class ActiveSettingsOutline {
         for (const v of c.all_nodes()) {
             v.clearDirty();
         }
-        c.setChanged();
+        for (const p of c.all_positions()) {
+            p.clearDirty();
+        }
+        c.rootPosition()!.clearDirty();
+        // c.setChanged();
         c.redraw();
-
+        g.app.gui.fullRefresh();
     }
     //@+node:felix.20231220235423.7: *4* aso.legend
     /**
@@ -1662,7 +1667,7 @@ export class ActiveSettingsOutline {
             this.parents.pop();
             this.level -= 1;
         }
-        const parent = this.parents[-1];
+        const parent = this.parents[this.parents.length - 1];
         const child = parent.insertAsLastChild();
         child.h = h || p.h;
         child.b = p.b;
@@ -2367,7 +2372,11 @@ export class LocalConfigManager {
             return 'error';
         }
 
-        const val = setting.val.toString().substring(0, 50);
+        let val = setting.val;
+        if (val == null) {
+            val = ""; // Default to empty string if undefined.
+        }
+        val = val.toString().substring(0, 50);
 
         if (!w_path) {
             // g.trace('NO PATH', setting.kind, val)

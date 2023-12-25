@@ -369,6 +369,7 @@ export class LeoUI extends NullGui {
         // * Register a content provider for the help text panel
         this.helpDocumentPaneProvider = new HelpPanel(this);
         this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
+        this.helpDocumentPaneProvider.update(vscode.Uri.parse('helpPanel:' + "LeoJS Help"));
 
         // * Create Leo Opened Documents Treeview Providers and tree views
         this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
@@ -520,14 +521,15 @@ export class LeoUI extends NullGui {
         void this.leoSettingsWebview.openWebview();
     }
 
-    public async put_help(C: Commands, s: string): Promise<void> {
+    public put_help(C: Commands, s: string): void {
         s = g.dedent(s.trimEnd());
         this.helpPanelText = s;
         const uri = vscode.Uri.parse('helpPanel:' + "LeoJS Help");
         this.helpDocumentPaneProvider.update(uri);
-
-        // * Open the virtual document in the preview pane
-        await vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
+        setTimeout(() => {
+            // * Open the virtual document in the preview pane
+            void vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
+        }, 60);
 
         // * Showing with standard readonly text document provider
         // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
