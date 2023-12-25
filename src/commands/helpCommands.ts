@@ -37,29 +37,22 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         const md_s = `\
         **Welcome to Leo\'s help system.**
 
-        Alt-0 (vr-toggle) hides this help message.
-
         To learn about \"\<Alt-X\>\" commands, type:
 
             <Alt-X>help-for-minibuffer<Enter>
 
         To get a list of help topics, type:
 
-            <Alt-X>help-<tab>
+            <Alt-X>help-
 
-        For Leo commands (tab completion allowed), type:
+        For Leo commands, type:
 
             <Alt-X>help-for-command<Enter>
             <a Leo command name><Enter>
 
-        To use Python\'s help system, type:
-
-            <Alt-X>help-for-python<Enter>
-            <a python symbol><Enter>
-
         For the command bound to a key, type:
 
-            <Alt-X>help-for-keystroke<Enter><any key>
+            <Alt-X>help-for-keystroke<Enter>
         `;
         //@-<< define md_s >>
         this.c.putHelpFor(md_s);
@@ -137,27 +130,18 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
                 Invoke Leo\'s help-for-command as follows:
 
-                    <F1>
                     <Alt-X>help-for-command<return>
 
-                Next, type the name of one of Leo\'s commands. You can use tab
-                completion. Examples:
-
-                    <F1><tab>           shows all commands.
-                    <F1>help-for<tab>   shows all help-for- commands.
+                Next, type the name of one of Leo\'s commands.
 
                 Here are the help-for commands:
 
-                    help-for-abbreviations
-                    help-for-autocompletion
-                    help-for-bindings
                     help-for-command
-                    help-for-debugging-commands
-                    help-for-dynamic-abbreviations
+                    help-for-creating-external-files
                     help-for-find-commands
                     help-for-minibuffer
-                    help-for-python
-                    help-for-regular-expressions
+                    help-for-scripting
+                    help-for-settings
                 `;
                 //@-<< set s to about help-for-command >>
             }
@@ -332,8 +316,6 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
         const s = `\
         # Finding & replacing text
-
-        Alt-0 (vr-toggle) hides this help message.
 
         **Ctrl-F** (start-search) shows the Find pane and puts focus in the find
         box.
