@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20231224200501.1"><vh>0.2.8</vh></v>
 <v t="felix.20231216233654.1"><vh>0.2.7</vh></v>
 <v t="felix.20231221231533.1"><vh>0.2.6</vh></v>
 <v t="fil.20231216220210.1"><vh>0.2.5</vh></v>
@@ -69,6 +70,9 @@
 <v t="felix.20221002011858.1"><vh>closeLeoTextEditors</vh></v>
 <v t="felix.20221002011903.1"><vh>showWelcomeIfNewer</vh></v>
 </v>
+<v t="felix.20231224201746.1"><vh>@clean src/helpPanel.ts</vh>
+<v t="felix.20231224201802.1"><vh>class HelpPanel</vh></v>
+</v>
 <v t="felix.20211010192923.1"><vh>@clean src/leoBody.ts</vh>
 <v t="felix.20211010192923.2"><vh>class LeoBodyProvider</vh>
 <v t="felix.20211010192923.3"><vh>setNewBodyUriTime</vh></v>
@@ -106,6 +110,7 @@
 <v t="felix.20220201235548.1"><vh>Finish Startup</vh></v>
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20221113002623.1"><vh>showSettings</vh></v>
+<v t="felix.20231224193540.1"><vh>put_help</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
 <v t="felix.20220920001018.3"><vh>showLogPane</vh></v>
@@ -555,6 +560,7 @@
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
+<v t="felix.20231224164322.1"><vh>@file src/commands/helpCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
 </v>
 <v t="felix.20221119204248.1"><vh>Gui base classes</vh>
@@ -758,7 +764,9 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 </t>
 <t tx="felix.20201208214250.2"></t>
-<t tx="felix.20201208214319.1"># ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
+<t tx="felix.20201208214319.1">@language md
+@tabwidth -4
+# ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
 LeoJS is a javascript implementation of the Leo Editor.
 
@@ -1269,8 +1277,8 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 }
 
 </t>
-<t tx="felix.20201208224703.1">@language rest
-@wrap
+<t tx="felix.20201208224703.1">@language md
+@tabwidth -4
 # How to install and run the development version
 
 Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
@@ -3603,12 +3611,13 @@ import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
 import { LeoSettingsProvider } from "./leoSettingsWebview";
-import { ISettings, LeoFind } from "./core/leoFind";
+import { LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
+import { HelpPanel } from "./helpPanel";
 
 @language typescript
 @tabwidth -4
@@ -3732,6 +3741,10 @@ export class LeoUI extends NullGui {
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
+
+    // * Help Panel
+    public helpPanelText = '';
+    public helpDocumentPaneProvider!: HelpPanel;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -9606,6 +9619,10 @@ public finishStartup(): void {
         g.app.windowList[this.frameIndex].startupWindow = true;
     }
 
+    // * Register a content provider for the help text panel
+    this.helpDocumentPaneProvider = new HelpPanel(this);
+    this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
+
     // * Create Leo Opened Documents Treeview Providers and tree views
     this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
     this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
@@ -13727,6 +13744,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
 <t tx="felix.20221113002623.1">public showSettings(): void {
     void this.leoSettingsWebview.openWebview();
 }
+
 </t>
 <t tx="felix.20221113165005.1">"editor/context": [
   {
@@ -15879,6 +15897,53 @@ div.col-nav {
 
 - Fixed keyboard navigation of the outline while being hoisted.
 
+</t>
+<t tx="felix.20231224193540.1">public async put_help(C: Commands, s: string): Promise&lt;void&gt; {
+    s = g.dedent(s.trimEnd());
+    this.helpPanelText = s;
+    const uri = vscode.Uri.parse('helpPanel:' + "LeoJS Help");
+    this.helpDocumentPaneProvider.update(uri);
+
+    // * Open the virtual document in the preview pane
+    await vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
+
+    // * Showing with standard readonly text document provider
+    // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
+    // await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+}
+
+</t>
+<t tx="felix.20231224200501.1">## 0.2.8
+
+- Translated most of helpCommands.py to typescript, enabling 'help' commands.
+
+</t>
+<t tx="felix.20231224201746.1">import * as vscode from 'vscode';
+import { LeoUI } from './leoUI';
+
+export class HelpPanel implements vscode.TextDocumentContentProvider {
+@language typescript
+@tabwidth -4
+@others
+
+</t>
+<t tx="felix.20231224201802.1">
+    // emitter and its event
+    onDidChangeEmitter = new vscode.EventEmitter&lt;vscode.Uri&gt;();
+    onDidChange = this.onDidChangeEmitter.event;
+
+    constructor(private _ui: LeoUI) { }
+
+    provideTextDocumentContent(p_uri: vscode.Uri): string {
+        return this._ui.helpPanelText;
+    }
+
+    // Call this method to signal that the content has changed
+    public update(uri: vscode.Uri) {
+        this.onDidChangeEmitter.fire(uri);
+    }
+
+}
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

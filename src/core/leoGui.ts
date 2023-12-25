@@ -486,7 +486,7 @@ export class LeoGui {
         }
     }
     //@+node:felix.20221120001229.26: *4* LeoGui.put_help
-    public put_help(c: Commands, s: string, short_title: string): void {
+    public async put_help(c: Commands, s: string, short_title: string): Promise<void> {
         // pass
     }
     //@+node:felix.20221120001229.27: *4* LeoGui.widget_name (LeoGui)

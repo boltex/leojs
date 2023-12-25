@@ -36,12 +36,13 @@ import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
 import { LeoSettingsProvider } from "./leoSettingsWebview";
-import { ISettings, LeoFind } from "./core/leoFind";
+import { LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
+import { HelpPanel } from "./helpPanel";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -55,6 +56,10 @@ export class LeoUI extends NullGui {
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
+
+    // * Help Panel
+    public helpPanelText = '';
+    public helpDocumentPaneProvider!: HelpPanel;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -361,6 +366,10 @@ export class LeoUI extends NullGui {
             g.app.windowList[this.frameIndex].startupWindow = true;
         }
 
+        // * Register a content provider for the help text panel
+        this.helpDocumentPaneProvider = new HelpPanel(this);
+        this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
+
         // * Create Leo Opened Documents Treeview Providers and tree views
         this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
         this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
@@ -510,6 +519,21 @@ export class LeoUI extends NullGui {
     public showSettings(): void {
         void this.leoSettingsWebview.openWebview();
     }
+
+    public async put_help(C: Commands, s: string): Promise<void> {
+        s = g.dedent(s.trimEnd());
+        this.helpPanelText = s;
+        const uri = vscode.Uri.parse('helpPanel:' + "LeoJS Help");
+        this.helpDocumentPaneProvider.update(uri);
+
+        // * Open the virtual document in the preview pane
+        await vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
+
+        // * Showing with standard readonly text document provider
+        // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
+        // await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+    }
+
     /**
      * * Adds a message string to LeoJS log pane. Used when leoBridge receives an async 'log' command.
      * @param p_message The string to be added in the log

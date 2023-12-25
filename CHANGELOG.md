@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.8
+
+- Translated most of helpCommands.py to typescript, enabling 'help' commands.
+
 ## 0.2.7
 
 - Fixed tooltips of the 'nav' input box in the find panel.

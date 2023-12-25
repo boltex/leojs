@@ -2345,10 +2345,9 @@ export class LocalConfigManager {
      *
      * See #852: https://github.com/leo-editor/leo-editor/issues/852
      */
-    // ! uncomment if needed
-    // public createActivesSettingsOutline(): void {
-    //     ActiveSettingsOutline(this.c);
-    // }
+    public createActivesSettingsOutline(): void {
+        new ActiveSettingsOutline(this.c);
+    }
 
     //@+node:felix.20220214191554.7: *3* c.config.getSource
     /**

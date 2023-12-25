@@ -41,6 +41,7 @@ import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper, SqlitePickleShare } from './leoCache';
+import { HelpCommandsClass } from '../commands/helpCommands';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -239,7 +240,7 @@ export class Commands {
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
     public rstCommands: RstCommands;
-    public helpCommands: any = undefined;
+    public helpCommands: HelpCommandsClass;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
     public keyHandlerCommands: any = undefined;
@@ -313,6 +314,7 @@ export class Commands {
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
+        this.helpCommands = new HelpCommandsClass(c);
 
         this.rstCommands = new RstCommands(c);
 
@@ -3142,6 +3144,14 @@ export class Commands {
     //@+node:felix.20220611010339.1: *5* c.notValidInBatchMode
     public notValidInBatchMode(commandName: string): void {
         g.es('the', commandName, 'command is not valid in batch mode');
+    }
+    //@+node:felix.20231224185423.1: *5* c.putHelpFor
+    /**
+     * Helper for various help commands.
+     */
+    public putHelpFor(s: string, short_title = ''): void {
+        const c = this;
+        void g.app.gui.put_help(c, s, short_title);
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
     /**
