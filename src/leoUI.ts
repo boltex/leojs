@@ -58,7 +58,7 @@ export class LeoUI extends NullGui {
     private _hasShownContextOpenMessage: boolean = false;
 
     // * Help Panel
-    public helpPanelText = '';
+    public helpPanelText = '# LeoJS Help Panel\n\nDocumentation given by \'help\' commands is shown here.\n\nUse Alt+X to open the minibuffer and type \'help\'';
     public helpDocumentPaneProvider!: HelpPanel;
 
     // * Timers
@@ -369,7 +369,9 @@ export class LeoUI extends NullGui {
         // * Register a content provider for the help text panel
         this.helpDocumentPaneProvider = new HelpPanel(this);
         this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
-        this.helpDocumentPaneProvider.update(vscode.Uri.parse('helpPanel:' + "LeoJS Help"));
+        setTimeout(() => {
+            this.helpDocumentPaneProvider.update(vscode.Uri.parse('helpPanel:' + "LeoJS Help"));
+        }, 250);
 
         // * Create Leo Opened Documents Treeview Providers and tree views
         this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);

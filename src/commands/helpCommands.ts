@@ -10,6 +10,7 @@ import * as vscode from 'vscode';
 import * as g from '../core/leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
 import { BaseEditCommandsClass } from './baseCommands';
+import { Constants } from '../constants';
 //@-<< helpCommands imports & annotations >>
 
 //@+others
@@ -59,8 +60,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20231224164520.10: *3* helpForCommand & helpers
     @cmd('help-for-command', 'Prompts for a command name and prints the help message for that command.')
-    public helpForCommand(): void {
-        void vscode.window.showInformationMessage("TODO : helpForCommand");
+    public async helpForCommand(): Promise<void> {
 
         // c= this.c;
         // k  this.c.k;
@@ -69,6 +69,114 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
         // Type the name of the command, followed by Return.
         // `;
+        const c = this.c;
+        const commands: vscode.QuickPickItem[] = [];
+        const cDict = c.commandsDict;
+        for (let key in cDict) {
+            const command = cDict[key];
+            // Going to get replaced. Don't take those that begin with 'async-'
+            const w_name = (command as any).__name__ || '';
+            if (!w_name.startsWith('async-')) {
+                commands.push({
+                    label: key,
+                    detail: (command as any).__doc__
+                });
+            }
+        }
+        const w_noDetails: vscode.QuickPickItem[] = [];
+        const stash_button: string[] = [];
+        const stash_rclick: string[] = [];
+        const stash_command: string[] = [];
+
+        for (const w_com of commands) {
+            if (
+                !w_com.detail && !(
+                    w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START) ||
+                    w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_RCLICK_START) ||
+                    w_com.label === Constants.USER_MESSAGES.MINIBUFFER_SCRIPT_BUTTON ||
+                    w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_SCRIPT_BUTTON) ||
+                    w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_BUTTON_START) ||
+                    w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)
+                )
+            ) {
+                w_noDetails.push(w_com);
+            }
+
+            if (w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START)) {
+                stash_button.push(w_com.label);
+            }
+            if (w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_RCLICK_START)) {
+                stash_rclick.push(w_com.label);
+            }
+            if (w_com.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)) {
+                stash_command.push(w_com.label);
+            }
+        }
+
+        const w_withDetails = commands.filter(p_command => !!p_command.detail);
+
+        // Only sort 'regular' Leo commands, leaving custom commands at the top
+        w_withDetails.sort((a, b) => {
+            return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1);
+        });
+
+        const w_choices: vscode.QuickPickItem[] = [];
+
+        w_choices.push(...w_withDetails);
+        const w_disposables: vscode.Disposable[] = [];
+        const q_minibufferQuickPick: Promise<vscode.QuickPickItem | undefined> = new Promise((resolve, reject) => {
+            const quickPick = vscode.window.createQuickPick();
+            quickPick.items = w_choices;
+            quickPick.placeholder = Constants.USER_MESSAGES.MINIBUFFER_PROMPT;
+            quickPick.matchOnDetail = true;
+
+            w_disposables.push(
+                quickPick.onDidChangeSelection(selection => {
+                    if (selection[0]) {
+                        resolve(selection[0]);
+                        quickPick.hide();
+                    }
+                }),
+                quickPick.onDidChangeValue(changed => {
+                    if (/^\d+$/.test(changed)) {
+                        if (quickPick.items.length) {
+                            quickPick.items = [];
+                        }
+                    } else if (quickPick.items !== w_choices) {
+                        quickPick.items = w_choices;
+                    }
+                }),
+                quickPick.onDidHide(() => {
+                    resolve(undefined);
+                }),
+                quickPick
+            );
+            quickPick.show();
+
+        });
+
+        const w_picked: vscode.QuickPickItem | undefined = await q_minibufferQuickPick;
+
+        w_disposables.forEach(d => d.dispose());
+
+        if (w_picked) {
+            this.helpForCommandFinisher(w_picked.label);
+        }
+
+        // -------------------------------------------
+
+        // const command = await g.app.gui.get1Arg(
+        //     {
+        //         title: 'Help for Command',
+        //         prompt: 'Type the name of the command',
+        //         placeHolder: '<command>',
+        //     }
+        // );
+        // if (command) {
+        //     this.helpForCommandFinisher(command);
+        // }
+
+        // -------------------------------------------
 
         // c.putHelpFor(s);
         // c.minibufferWantsFocusNow();
@@ -109,7 +217,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         } else {
             if (commandName) {
                 const bindings = this.getBindingsForCommand(commandName);
-                const func = c.commandsDict.get(commandName);
+                const func = c.commandsDict[commandName];
                 s = g.getDocStringForFunction(func);
                 if (s) {
                     s = this.replaceBindingPatterns(s);
@@ -118,8 +226,8 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
                 }
                 // Create the title.
                 const s2 = bindings ? `${commandName} (${bindings})` : commandName;
-                const underline = '+'.repeat(s2.length);
-                const title = `${s2}\n${underline}\n\n`;
+                // const underline = '+'.repeat(s2.length);
+                const title = `# ${s2}\n\n`; // `${s2}\n${underline}\n\n`;
                 s = title + g.dedent(s);
 
             } else {
@@ -158,7 +266,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         let pattern = new RegExp('!<(.*)>!', 'g');
         let m: RegExpExecArray | null;
 
-        void vscode.window.showInformationMessage("TODO : replaceBindingPatterns");
+        // void vscode.window.showInformationMessage("TODO : replaceBindingPatterns");
 
         // while ((m = pattern.exec(s)) !== null) {
         //     let name = m[1];
@@ -365,10 +473,12 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20231224164520.25: *3* helpForKeystroke
     @cmd('help-for-keystroke', 'Prompts for any key and prints the bindings for that key.')
     public helpForKeystroke(): void {
+        setTimeout(() => {
+            void vscode.commands.executeCommand('workbench.action.openGlobalKeybindings');
+        }, 150);
 
-        void vscode.window.showInformationMessage(
-            "TODO : Call vscode command 'Open Keyboard Shortcuts' !"
-        );
+        // workbench.action.openGlobalKeybindings
+
 
         // c, k = self.c, self.c.k
         // state_name = 'help-for-keystroke'

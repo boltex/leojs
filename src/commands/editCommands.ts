@@ -116,7 +116,7 @@ export class TopLevelEditCommands {
     //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
     @command(
         'merge-node-with-next-node',
-        'Merge p.b into p.next().b and delete p, *provided* that p has no children.' +
+        'Merge p.b into p.next().b and delete p, *provided* that p has no children. ' +
         "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_next_node(this: Commands): void {
@@ -156,7 +156,7 @@ export class TopLevelEditCommands {
     //@+node:felix.20230708211849.1: *3* @g.command('merge-node-with-prev-node')
     @command(
         'merge-node-with-prev-node',
-        'Merge p.b into p.back().b and delete p, *provided* that p has no children.' +
+        'Merge p.b into p.back().b and delete p, *provided* that p has no children. ' +
         "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_prev_node(this: Commands): void {
@@ -510,7 +510,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Put the cursor at the line in the *outline* corresponding to the line ' +
         'with the given line number in the external file. ' +
         'For external files containing sentinels, there may be *several* lines ' +
-        'in the file that correspond to the same line in the outline.' +
+        'in the file that correspond to the same line in the outline. ' +
         'An Easter Egg: <Alt-x>number invokes this code.'
     )
     public async gotoGlobalLine(p_lineNumber?: number): Promise<unknown> {
@@ -557,22 +557,22 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'hn-add-all',
         'Add headline numbers to all nodes of the outline except' +
-        ' @<file> nodes and their descendants' +
-        'and any node whose headline starts with "@".' +
+        ' @<file> nodes and their descendants ' +
+        'and any node whose headline starts with "@". ' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-all',
         'Add headline numbers to all nodes of the outline except' +
-        ' @<file> nodes and their descendants' +
-        'and any node whose headline starts with "@".' +
+        ' @<file> nodes and their descendants ' +
+        'and any node whose headline starts with "@". ' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'add-all-headline-numbers',
         'Add headline numbers to all nodes of the outline except' +
-        ' @<file> nodes and their descendants' +
-        'and any node whose headline starts with "@".' +
+        ' @<file> nodes and their descendants ' +
+        'and any node whose headline starts with "@". ' +
         "Use the *first* clone's position for all clones."
     )
     public hn_add_all(): void {
@@ -628,17 +628,17 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230402171528.4: *4* hn-add-subtree & helper
     @cmd(
         'hn-add-subtree',
-        'Add headline numbers to *all* children of c.p.' +
+        'Add headline numbers to *all* children of c.p. ' +
         "Use the *last* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-subtree',
-        'Add headline numbers to *all* children of c.p.' +
+        'Add headline numbers to *all* children of c.p. ' +
         "Use the *last* clone's position for all clones."
     )
     @cmd(
         'add-subtree-headline-numbers',
-        'Add headline numbers to *all* children of c.p.' +
+        'Add headline numbers to *all* children of c.p. ' +
         "Use the *last* clone's position for all clones."
     )
     public hn_add_children(): void {
