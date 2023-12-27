@@ -111,6 +111,7 @@
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20221113002623.1"><vh>showSettings</vh></v>
 <v t="felix.20231224193540.1"><vh>put_help</vh></v>
+<v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
 <v t="felix.20220920001018.3"><vh>showLogPane</vh></v>
@@ -353,6 +354,7 @@
 <v t="felix.20201214151451.8"><vh>_updateLeoObjectIndicator</vh></v>
 </v>
 </v>
+<v t="felix.20231226205226.1"><vh>@clean src/unlProvider.ts</vh></v>
 <v t="felix.20201214154816.1"><vh>@clean src/types.ts</vh>
 <v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
 <v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
@@ -1967,6 +1969,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
+[CMD.HANDLE_UNL, (p_arg: string) =&gt; p_leoUI.handleUnl(p_arg)],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
@@ -2109,6 +2112,7 @@ public static COMMANDS = {
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
+    HANDLE_UNL: Constants.NAME + ".handleUnl",
     GIT_DIFF: Constants.NAME + ".gitDiff",
     TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
     WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
@@ -2480,6 +2484,8 @@ public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
 
 public static URI_LEOJS_SCHEME: string = "leojs";
 public static URI_FILE_SCHEME: string = "file";
+public static URI_UNTITLED_SCHEME: string = 'untitled';
+public static OUTPUT_CHANNEL_LANGUAGE = 'Log';
 public static URI_SCHEME_HEADER: string = "leojs:/";
 public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
 public static UNTITLED_FILE_NAME: string = "untitled";
@@ -3618,6 +3624,7 @@ import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
 import { HelpPanel } from "./helpPanel";
+import { UnlProvider } from "./unlProvider";
 
 @language typescript
 @tabwidth -4
@@ -3745,6 +3752,9 @@ export class LeoUI extends NullGui {
     // * Help Panel
     public helpPanelText = '# LeoJS Help Panel\n\nDocumentation given by \'help\' commands is shown here.\n\nUse Alt+X to open the minibuffer and type \'help\'';
     public helpDocumentPaneProvider!: HelpPanel;
+
+    // * UNL link provider
+    public linkProvider!: UnlProvider;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -4690,7 +4700,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "dcf7ef3",
+  "gitBranch": "boltex/issue79",
+  "gitDate": "2023-12-26 19:54:22 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -5744,6 +5757,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 {
   "command": "leojs.removeButton",
+  "when": "false"
+},
+{
+  "command": "leojs.handleUnl",
   "when": "false"
 },
 </t>
@@ -7036,6 +7053,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "category": "Leojs",
   "enablement": "!leojsReady",
   "title": "Set Leo ID"
+},
+{
+  "command": "leojs.handleUnl",
+  "category": "Leojs",
+  "enablement": "leojsReady",
+  "title": "Open UNL"
 },
 {
   "command": "leojs.showBody",
@@ -9618,6 +9641,19 @@ public finishStartup(): void {
     if (g.app.windowList[this.frameIndex]) {
         g.app.windowList[this.frameIndex].startupWindow = true;
     }
+
+    this.linkProvider = new UnlProvider();
+    this._context.subscriptions.push(
+        vscode.languages.registerDocumentLinkProvider(
+            [
+                { scheme: Constants.URI_FILE_SCHEME },
+                { scheme: Constants.URI_UNTITLED_SCHEME },
+                { scheme: Constants.URI_LEOJS_SCHEME },
+                { language: Constants.OUTPUT_CHANNEL_LANGUAGE }
+            ],
+            this.linkProvider
+        )
+    );
 
     // * Register a content provider for the help text panel
     this.helpDocumentPaneProvider = new HelpPanel(this);
@@ -14831,6 +14867,17 @@ private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
             Edward K. Ream
         &lt;/td&gt;
         &lt;td align="center"&gt;
+            &lt;a href="https://github.com/tbpassin"&gt;
+                &lt;img src="https://avatars.githubusercontent.com/u/36974235?v=4"
+                     alt="Thomas Passin"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;/a&gt;
+            &lt;br&gt;
+            Thomas Passin
+        &lt;/td&gt;
+        &lt;td align="center"&gt;
             &lt;a href="https://github.com/kghenderson"&gt;
                 &lt;img src="https://avatars.githubusercontent.com/u/3522168?v=4"
                      alt="Kevin Henderson"
@@ -15948,6 +15995,41 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
     }
 
 }
+</t>
+<t tx="felix.20231226205226.1">import * as vscode from 'vscode';
+
+export class UnlProvider implements vscode.DocumentLinkProvider {
+    private gnxUnlRegex = /\bunl:gnx:\/\/[^\s]+/g;
+    private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?(?:[^--&gt;]+(?:--&gt;[^--&gt;]+)*)/g;
+
+    public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult&lt;vscode.DocumentLink[]&gt; {
+        const text = document.getText();
+        const links: vscode.DocumentLink[] = [];
+
+        // GNX-based UNLs
+        let match;
+        while ((match = this.gnxUnlRegex.exec(text)) !== null) {
+            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+            const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        }
+
+        // Headline-based UNLs
+        while ((match = this.headlineUnlRegex.exec(text)) !== null) {
+            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+            const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        }
+
+        return links;
+    }
+}
+</t>
+<t tx="felix.20231226210919.1">public handleUnl(p_jsonArg: string): void {
+    //
+    console.log('HANDLE URL! ', p_jsonArg);
+}
+
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

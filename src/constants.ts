@@ -43,6 +43,8 @@ export class Constants {
 
     public static URI_LEOJS_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
+    public static URI_UNTITLED_SCHEME: string = 'untitled';
+    public static OUTPUT_CHANNEL_LANGUAGE = 'Log';
     public static URI_SCHEME_HEADER: string = "leojs:/";
     public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
     public static UNTITLED_FILE_NAME: string = "untitled";
@@ -495,6 +497,7 @@ export class Constants {
         CLOSE_FILE: Constants.NAME + ".closeLeoFile",
         MINIBUFFER: Constants.NAME + ".minibuffer",
         SET_LEO_ID: Constants.NAME + ".setLeoID",
+        HANDLE_UNL: Constants.NAME + ".handleUnl",
         GIT_DIFF: Constants.NAME + ".gitDiff",
         TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
         WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",

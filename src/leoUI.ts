@@ -43,6 +43,7 @@ import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
 import { HelpPanel } from "./helpPanel";
+import { UnlProvider } from "./unlProvider";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -60,6 +61,9 @@ export class LeoUI extends NullGui {
     // * Help Panel
     public helpPanelText = '# LeoJS Help Panel\n\nDocumentation given by \'help\' commands is shown here.\n\nUse Alt+X to open the minibuffer and type \'help\'';
     public helpDocumentPaneProvider!: HelpPanel;
+
+    // * UNL link provider
+    public linkProvider!: UnlProvider;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -366,6 +370,19 @@ export class LeoUI extends NullGui {
             g.app.windowList[this.frameIndex].startupWindow = true;
         }
 
+        this.linkProvider = new UnlProvider();
+        this._context.subscriptions.push(
+            vscode.languages.registerDocumentLinkProvider(
+                [
+                    { scheme: Constants.URI_FILE_SCHEME },
+                    { scheme: Constants.URI_UNTITLED_SCHEME },
+                    { scheme: Constants.URI_LEOJS_SCHEME },
+                    { language: Constants.OUTPUT_CHANNEL_LANGUAGE }
+                ],
+                this.linkProvider
+            )
+        );
+
         // * Register a content provider for the help text panel
         this.helpDocumentPaneProvider = new HelpPanel(this);
         this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
@@ -536,6 +553,11 @@ export class LeoUI extends NullGui {
         // * Showing with standard readonly text document provider
         // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
         // await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+    }
+
+    public handleUnl(p_jsonArg: string): void {
+        //
+        console.log('HANDLE URL! ', p_jsonArg);
     }
 
     /**
