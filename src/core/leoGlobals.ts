@@ -6552,7 +6552,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
             return undefined;
         }
         //@-<< look for section ref >>
-        let url = undefined;
+        url = undefined;
         let unl = undefined;
 
         //@+<< look for url >>
@@ -6569,7 +6569,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
         while ((match = url_regex.exec(line)) !== null) {
             // Don't open if we click after the url.
             if (match.index <= col && col < url_regex.lastIndex) {
-                const url = match[0];
+                url = match[0];
                 if (isValidUrl(url)) {
                     break;
                 }
@@ -6613,13 +6613,11 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
                 }
 
                 if (target) {
-                    let found_gnx = false;
                     if (c.p.gnx == target) {
                         return target;
                     }
                     for (const p of c.all_unique_positions()) {
                         if (p.v.gnx === target) {
-                            found_gnx = true;
                             c.selectPosition(p);
                             c.redraw();
                             break;

@@ -51,7 +51,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json
         [CMD.SET_LEO_ID, () => p_leoUI.setLeoIDCommand()],
-        [CMD.HANDLE_UNL, (p_arg: string) => p_leoUI.handleUnl(p_arg)],
+        [CMD.HANDLE_UNL, (p_arg: { unl: string }) => p_leoUI.handleUnl(p_arg)],
 
         [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) => p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
         [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) => p_leoUI.gotoScript(p_node)],

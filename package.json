@@ -710,12 +710,6 @@
         "title": "Set Leo ID"
       },
       {
-        "command": "leojs.handleUnl",
-        "category": "Leojs",
-        "enablement": "leojsReady",
-        "title": "Open UNL"
-      },
-      {
         "command": "leojs.showBody",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
@@ -2194,10 +2188,6 @@
         },
         {
           "command": "leojs.removeButton",
-          "when": "false"
-        },
-        {
-          "command": "leojs.handleUnl",
           "when": "false"
         },
         {

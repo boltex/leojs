@@ -1969,7 +1969,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
-[CMD.HANDLE_UNL, (p_arg: string) =&gt; p_leoUI.handleUnl(p_arg)],
+[CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
@@ -4700,10 +4700,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "dcf7ef3",
-  "gitBranch": "boltex/issue79",
-  "gitDate": "2023-12-26 19:54:22 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -5757,10 +5754,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 {
   "command": "leojs.removeButton",
-  "when": "false"
-},
-{
-  "command": "leojs.handleUnl",
   "when": "false"
 },
 </t>
@@ -7053,12 +7046,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "category": "Leojs",
   "enablement": "!leojsReady",
   "title": "Set Leo ID"
-},
-{
-  "command": "leojs.handleUnl",
-  "category": "Leojs",
-  "enablement": "leojsReady",
-  "title": "Open UNL"
 },
 {
   "command": "leojs.showBody",
@@ -16025,9 +16012,34 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
     }
 }
 </t>
-<t tx="felix.20231226210919.1">public handleUnl(p_jsonArg: string): void {
-    //
-    console.log('HANDLE URL! ', p_jsonArg);
+<t tx="felix.20231226210919.1">public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
+
+    const c = g.app.windowList[this.frameIndex].c;
+    try {
+
+        if (p_arg.unl) {
+            this.setupRefresh(
+                Focus.Body, // Finish in body pane given explicitly because last focus was in input box.
+                {
+                    tree: true,
+                    body: true,
+                    goto: true,
+                    states: true,
+                    documents: true,
+                    buttons: true
+                }
+            );
+            await g.openUrlHelper(c, p_arg.unl);
+            void this.launchRefresh();
+            this.loadSearchSettings();
+
+        } else {
+            console.log('NO ARGUMENT FOR HANDLE URL! ', p_arg);
+        }
+    }
+    catch (e) {
+        console.log('FAILED HANDLE URL! ', p_arg);
+    }
 }
 
 </t>

@@ -555,9 +555,34 @@ export class LeoUI extends NullGui {
         // await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
     }
 
-    public handleUnl(p_jsonArg: string): void {
-        //
-        console.log('HANDLE URL! ', p_jsonArg);
+    public async handleUnl(p_arg: { unl: string }): Promise<void> {
+
+        const c = g.app.windowList[this.frameIndex].c;
+        try {
+
+            if (p_arg.unl) {
+                this.setupRefresh(
+                    Focus.Body, // Finish in body pane given explicitly because last focus was in input box.
+                    {
+                        tree: true,
+                        body: true,
+                        goto: true,
+                        states: true,
+                        documents: true,
+                        buttons: true
+                    }
+                );
+                await g.openUrlHelper(c, p_arg.unl);
+                void this.launchRefresh();
+                this.loadSearchSettings();
+
+            } else {
+                console.log('NO ARGUMENT FOR HANDLE URL! ', p_arg);
+            }
+        }
+        catch (e) {
+            console.log('FAILED HANDLE URL! ', p_arg);
+        }
     }
 
     /**
