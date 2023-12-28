@@ -1450,7 +1450,7 @@ export class LeoApp {
      */
     public async checkForOpenFile(c: Commands, fn: string): Promise<void> {
 
-        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+        if (g.isBrowserRepo()) {
             // web
             return;
         }
@@ -1509,7 +1509,7 @@ export class LeoApp {
      */
     public forgetOpenFile(fn: string): void {
 
-        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+        if (g.isBrowserRepo()) {
             // web
             return;
         }
@@ -1542,7 +1542,7 @@ export class LeoApp {
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
-        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+        if (g.isBrowserRepo()) {
             // web
             return;
         }
@@ -3944,7 +3944,7 @@ export class RecentFilesManager {
         try {
             let fileContents;
 
-            if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            if (g.isBrowserRepo()) {
                 // * Web
                 fileContents = await g.extensionContext.workspaceState.get(fileName);
             } else {
@@ -4136,7 +4136,7 @@ export class RecentFilesManager {
         if (written) {
             rf.recentFileMessageWritten = true;
         } else {
-            if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+            if (g.isBrowserRepo()) {
                 // * Web
                 await this.writeRecentFilesFileHelper(tag);
             } else {
@@ -4160,7 +4160,7 @@ export class RecentFilesManager {
 
         const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
 
-        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+        if (g.isBrowserRepo()) {
             await g.extensionContext.workspaceState.update(fileName, s);
             return true;
         }

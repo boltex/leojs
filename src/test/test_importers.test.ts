@@ -100,7 +100,7 @@ export class BaseTestImporter extends LeoUnitTest {
     }
     //@+node:felix.20230529172038.4: *3* BaseTestImporter.compute_unit_test_kind
     /**
-     * Return kind from the given extention.
+     * Return kind from the given extension.
      */
     public compute_unit_test_kind(ext: string): string {
 

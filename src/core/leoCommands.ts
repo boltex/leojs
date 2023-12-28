@@ -2437,7 +2437,7 @@ export class Commands {
         c:          The Commander of the outline.
         command:    The os command to execute the script.
         directory:  Optional: Change to this directory before executing command.
-        ext:        The file extention for the tempory file.
+        ext:        The file extension for the tempory file.
         language:   The language name.
         regex:      Optional regular expression describing error messages.
                     If present, group(1) should evaluate to a line number.

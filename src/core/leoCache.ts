@@ -260,7 +260,7 @@ export class SqlitePickleShare {
 
             void (async () => {
                 try {
-                    if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                    if (g.isBrowserRepo()) {
                         // PASS no need to create folders for web version: Saved in workspaceStorage.
                     } else {
                         const w_isdir = await isdir(this.root);
@@ -277,7 +277,7 @@ export class SqlitePickleShare {
 
                         // Open empty if not exist.
                         let w_exists;
-                        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+                        if (g.isBrowserRepo()) {
                             // web
                             w_exists = g.extensionContext.workspaceState.get<string>(
                                 g.makeVscodeUri(this.dbfile).fsPath
@@ -455,7 +455,7 @@ export class SqlitePickleShare {
     //@+node:felix.20231122235658.1: *3* readFileBuffer
     public readFileBuffer(db_uri: vscode.Uri): Thenable<Uint8Array | null> {
 
-        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+        if (g.isBrowserRepo()) {
             // web
             const encodedData = g.extensionContext.workspaceState.get<string>(db_uri.fsPath);
             if (encodedData) {
@@ -478,7 +478,7 @@ export class SqlitePickleShare {
 
     //@+node:felix.20231123000604.1: *3* writeFileBuffer
     public writeFileBuffer(db_uri: vscode.Uri, db_buffer: Uint8Array): Thenable<void> {
-        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+        if (g.isBrowserRepo()) {
             // web
             const encodedData = this.bufferToBase64(db_buffer); // Convert Uint8Array to Base64
             return g.extensionContext.workspaceState.update(db_uri.fsPath, encodedData); // Store Base64 string
@@ -515,7 +515,7 @@ export class SqlitePickleShare {
 
     //@+node:felix.20231119225011.1: *3* watchSetup
     public watchSetup(databaseFilePath: string): void {
-        if (g.isBrowser || (g.app.vscodeUriScheme && g.app.vscodeUriScheme !== 'file')) {
+        if (g.isBrowserRepo()) {
             // web NO NEED TO WATCH IF WEB EXTENSION!
             return;
         }

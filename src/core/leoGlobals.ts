@@ -1626,6 +1626,11 @@ export function update_directives_pat(): void {
 // #1688: Initialize g.directives_pat
 update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
+//@+node:felix.20231227213922.1: *3* g.isBrowserRepo
+export function isBrowserRepo(): boolean {
+    return isBrowser || (!!app.vscodeUriScheme && app.vscodeUriScheme !== 'file');
+}
+
 //@+node:felix.20220108221428.1: *3* g.chdir
 /**
  * Change current directory to the directory corresponding to path.
