@@ -18,7 +18,7 @@ import { ExternalFilesController } from './leoExternalFiles';
 import { LeoFrame } from './leoFrame';
 import { SettingsDict } from './leoGlobals';
 import { LeoUI } from '../leoUI';
-import { CommanderCacher, GlobalCacher, SqlitePickleShare } from './leoCache';
+import { GlobalCacher, SqlitePickleShare } from './leoCache';
 // importers
 import * as importer_c from '../importers/c';
 import * as importer_coffeescript from '../importers/coffeescript';
@@ -231,8 +231,6 @@ export class LeoApp {
     //@+node:felix.20210103024632.7: *5* << LeoApp: global controller/manager objects >>
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
-    public commander_cacher!: CommanderCacher; // The singleton leoCacher.CommanderCacher instance.
-    public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db!: SqlitePickleShare; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController: ExternalFilesController | undefined; // The singleton ExternalFilesController instance.
@@ -1121,9 +1119,6 @@ export class LeoApp {
         g.app.global_cacher = new GlobalCacher();
         await g.app.global_cacher.init();
         g.app.db = g.app.global_cacher.db;
-        g.app.commander_cacher = new CommanderCacher();
-        await g.app.commander_cacher.init();
-        g.app.commander_db = g.app.commander_cacher.db;
 
     }
     //@+node:felix.20220417215228.1: *4* app.setLeoID & helpers
@@ -1283,11 +1278,7 @@ export class LeoApp {
         // g.app.setLog(None)  // no log until we reactive a window.
 
         g.doHook('close-frame', { c: c });
-        //
-        // Save the window state for *all* open files.
-        if (g.app.commander_cacher) {
-            await g.app.commander_cacher.commit(); // store cache, but don't close it.
-        }
+
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
 
@@ -1380,23 +1371,11 @@ export class LeoApp {
             if (g.app.global_cacher) {  // #1766.
                 await g.app.global_cacher.commit_and_close();
             }
-            if (g.app.commander_cacher) {  // #1766.
-
-                // await g.app.commander_cacher.commit(); 
-                // ALREADY COMMITS IN 'close()'.
-
-                await g.app.commander_cacher.close();
-
-            }
         }
         // if g.app.ipk
         //     g.app.ipk.cleanup_consoles()
 
         await g.app.destroyAllOpenWithFiles();
-
-        // if hasattr(g.app, 'pyzo_close_handler')
-        //     // pylint: disable=no-member
-        //     g.app.pyzo_close_handler();
 
         // Disable all further hooks and events.
         // Alas, "idle" events can still be called

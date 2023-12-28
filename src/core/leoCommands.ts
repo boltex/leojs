@@ -282,10 +282,10 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-
-        if (g.app.commander_cacher) {
-            this.db = g.app.commander_cacher.get_wrapper(c);
-        } else {
+        try {
+            this.db = new CommanderWrapper(c);
+        } catch (e) {
+            console.log('ERROR CREATING DATABASE', e);
             this.db = {};
         }
 

@@ -27,135 +27,12 @@ const normcase = g.os_path_normcase;
 const split = g.os_path_split;
 
 //@+others
-//@+node:felix.20230802145823.3: ** class CommanderCacher
-/**
- * A class to manage per-commander caches.
- */
-export class CommanderCacher {
-
-    public db: SqlitePickleShare;
-
-    constructor() {
-        try {
-            const w_path = join(g.app.homeLeoDir || "/", 'db', 'global_data');
-            this.db = new SqlitePickleShare(w_path);
-        } catch (e) {
-            // @ts-expect-error
-            this.db = {};
-        }
-    }
-
-    //@+others
-    //@+node:felix.20230806001339.1: *3* cacher.init
-    public init(): Promise<unknown> {
-        //
-        return this.db.init;
-    }
-    //@+node:felix.20230802145823.4: *3* cacher.clear
-    /**
-     * Clear the cache for all commanders.
-     */
-    public clear(): void {
-        // Careful: self.db may be a Python dict.
-        try {
-            this.db.clear();
-        } catch (e) {
-            g.trace('unexpected exception');
-            g.es_exception(e);
-            // @ts-expect-error
-            this.db = {};
-        }
-    }
-    //@+node:felix.20230802145823.5: *3* cacher.close
-    public async close(): Promise<void> {
-        // Careful: self.db may be a dict.
-        if (this.db.conn) {
-            // if (this.db.hasOwnProperty('conn')) {
-            await this.db.commit();
-            this.db.conn.close();
-        }
-    }
-    //@+node:felix.20230802145823.6: *3* cacher.commit
-    public async commit(): Promise<void> {
-        // Careful: self.db may be a dict.
-        if (this.db.conn) {
-            // if (this.db.hasOwnProperty('conn')) {
-            await this.db.commit();
-        }
-    }
-    //@+node:felix.20230802145823.7: *3* cacher.dump
-    /**
-     * Dump the indicated cache if --trace-cache is in effect.
-     */
-    public dump(): void {
-        dump_cache(g.app.commander_db, 'Commander Cache');
-    }
-    //@+node:felix.20230802145823.8: *3* cacher.get_wrapper
-    /**
-     * Return a new wrapper for c.
-     */
-    public get_wrapper(c: Commands, fn?: string): CommanderWrapper {
-        return new CommanderWrapper(c, fn);
-    }
-    //@+node:felix.20230802145823.9: *3* cacher.test
-    public async test(): Promise<boolean> {
-
-        if (g.app.gui.guiName() === 'nullGui') {
-            // Null gui's don't normally set the g.app.gui.db.
-            await g.app.setGlobalDb();
-        }
-
-        // Fixes bug 670108.
-        g.assert(!(g.app.db == null));  // a PickleShareDB instance.
-        // Make sure g.guessExternalEditor works.
-        g.app.db["LEO_EDITOR"];
-        // this.initFileDB('~/testpickleshare')
-        const db = this.db;
-        db.clear();
-
-        g.assert(![...db.items()].length);
-
-        // db in prigrams to be used as 'any'
-        db['hello'] = 15;
-        db['aku ankka'] = [1, 2, 313];
-        db['paths/nest/ok/keyname'] = [1, [5, 46]];
-
-        // print(db.keys())
-
-        db.clear();
-        return true;
-
-    }
-    //@+node:felix.20230802145823.10: *3* cacher.save
-    /**
-     * Save the per-commander cache.
-
-        Change the cache prefix if changeName is True.
-
-        save and save-as set changeName to True, save-to does not.
-     */
-    public async save(c: Commands, fn?: string): Promise<void> {
-        await this.commit();
-        if (fn) {
-            // 1484: Change only the key!
-
-            // if( isinstance(c.db, CommanderWrapper)){
-            // if (c.db.constructor.name === "CommanderWrapper") {
-            if (c.db.key) {
-                c.db.key = fn;
-                // await this.commit(); // ? Needed ?
-            } else {
-                // g.trace('can not happen', c.db.constructor.name);
-                g.trace('can not happen');
-            }
-        }
-    }
-    //@-others
-
-}
 //@+node:felix.20230802145823.11: ** class CommanderWrapper
 /** 
- * A class to distinguish keys from separate commanders.
+ * A class that creates distinct keys for all commanders, allowing
+ * commanders to share g.app.db without collisions.
+ *  
+ * Instances of this class are c.db.
  */
 export class CommanderWrapper {
 
@@ -164,11 +41,11 @@ export class CommanderWrapper {
     public key: string;
     private user_keys: Set<string>;
 
-    constructor(c: Commands, fn?: string) {
+    constructor(c: Commands) {
 
         this.c = c;
         this.db = g.app.db;
-        this.key = fn || c.mFileName;
+        this.key = c.mFileName;
         this.user_keys = new Set();
         return new Proxy(this, this);
 
@@ -248,7 +125,12 @@ export class CommanderWrapper {
 }
 //@+node:felix.20230802145823.12: ** class GlobalCacher
 /**
- * A singleton global cacher, g.app.db
+ * A class creating a singleton global database, g.app.db.
+ *
+ * This DB resides in ~/.leo/db.
+ *
+ * New in Leo 6.7.7: All instances of c.db may use g.app.db because the
+ * CommanderWrapper class creates distinct keys for each commander.
  */
 export class GlobalCacher {
 
@@ -297,14 +179,14 @@ export class GlobalCacher {
             g.trace('clear g.app.db');
         }
         try {
-            this.db.clear();
+            this.db.clear(); // SqlitePickleShare.clear.
         } catch (e) {
             // this.db.clear();
             // except Exception
             g.trace('unexpected exception');
             g.es_exception(e);
             // @ts-expect-error
-            this.db = {};
+            this.db = {}; // self.db was a dict.
         }
 
     }
@@ -334,7 +216,10 @@ export class GlobalCacher {
 }
 //@+node:felix.20230802145823.39: ** class SqlitePickleShare
 /**
- * The main 'connection' object for SqlitePickleShare database
+ * The main 'connection' object for SqlitePickleShare database.
+ *   
+ * Opening this DB may fail. If so the GlobalCacher class uses
+ * a plain dict instead.
  */
 export class SqlitePickleShare {
 
@@ -787,13 +672,13 @@ export class SqlitePickleShare {
 
     }
     //@+node:felix.20230802145823.53: *3* clear (SqlitePickleShare)
+    /**
+     * Deletes all files in the fcache subdirectory.
+     *
+     * It would be more thorough to delete everything
+     * below the root directory, but it's not necessary.
+     */
     public clear(): void {
-
-        // TODO : Fix this docstring !
-
-        // Deletes all files in the fcache subdirectory.
-        // It would be more thorough to delete everything
-        // below the root directory, but it's not necessary.
         this.conn!.exec('delete from cachevalues;');
         void this.commit();
     }
