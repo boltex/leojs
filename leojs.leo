@@ -16014,6 +16014,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 </t>
 <t tx="felix.20231226210919.1">public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
 
+    await this.triggerBodySave(true);
     const c = g.app.windowList[this.frameIndex].c;
     try {
 

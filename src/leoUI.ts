@@ -557,6 +557,7 @@ export class LeoUI extends NullGui {
 
     public async handleUnl(p_arg: { unl: string }): Promise<void> {
 
+        await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         try {
 
