@@ -4700,10 +4700,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "9da1702",
-  "gitBranch": "boltex/issue79",
-  "gitDate": "2023-12-27 23:17:58 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -11163,26 +11160,36 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
     await this.triggerBodySave(true);
     const tag = 'goto_script';
     const index = p_node.button.index;
-    const c = g.app.windowList[g.app.gui.frameIndex].c;
-    const d = c.theScriptingController.buttonsArray;
+    const old_c = g.app.windowList[g.app.gui.frameIndex].c;
+    const d = old_c.theScriptingController.buttonsArray;
     const butWidget = d[index];
 
     if (butWidget) {
 
         try {
             const gnx: string = butWidget.command.gnx;
-
+            let new_c = old_c;
+            const w_result = await old_c.theScriptingController.open_gnx(old_c, gnx);
             let p: Position | undefined; // Replace YourPType with actual type
 
-            for (const pos of c.all_positions()) {
-                if (pos.gnx === gnx) {
-                    p = pos;
-                    break;
-                }
+            if (w_result[0] &amp;&amp; w_result[1]) {
+                p = w_result[1];
+                new_c = w_result[0];
+            } else {
+                new_c = old_c;
             }
 
+            g.app.gui.frameIndex = 0;
+            for (const w_f of g.app.windowList) {
+                if (w_f.c === new_c) {
+                    break;
+                }
+                g.app.gui.frameIndex++;
+            }
+            // g.app.gui.frameIndex now points to the selected Commander.
+
             if (p) {
-                c.selectPosition(p);
+                new_c.selectPosition(p);
                 this.setupRefresh(
                     Focus.Outline,
                     {
@@ -16007,45 +16014,35 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
         unl://path/to/file.leo#Headline-with-Dashes--&gt;Sub-section--&gt;Item 1
         unl://anotherPath/docs.leo#Special Characters!--&gt;@$%^&amp;*
         unl://leoFile.leo#Testing--&gt;Edge--&gt;Cases--&gt;with--&gt;Multiple Separators
+
+        REFERENCE IN leoGlobals.py
+         2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):
+        
+            Links of the form `unl:gnx:` + `//{outline}#{gnx}` open the given
+            outline and select the first outline node with the given gnx. These UNLs
+            will work as long as the node exists anywhere in the outline.
+        
+            For example, the link: `unl:gnx://#ekr.20031218072017.2406` refers to this
+            outline's "Code" node. Try it. The link works in this outline.
+
     */
 
+    // private gnxUnlRegex = /\bunl:gnx:[^\r\n#]*#\S*/g; // This allows spaces and content after the UNL.
+    // private headlineUnlRegex = /\bunl:(?!gnx:)[^\r\n#]*#[^\r\n]*\S/g; // This goes on until end of line.
 
-    // private gnxUnlRegex = /\bunl:gnx:\/\/[^\s]+/g;
+    // *It seems that the double slash is required for valid UNLs (as per this comment in p.get_UNL and related methods in leoNodes.py)
 
-    private gnxUnlRegex = /\bunl:gnx:\/\/[^\r\n#]*#.*\S/g;
+    // All unls must contain a file part: f"//{file-name}#"
+    // The file-name may be empty.
 
-
-
-    // private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?[^&gt;]*(?:--&gt;[^&gt;]+)*[^&gt;]*$/g;
-    // private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?[^\s&gt;]*(?:--&gt;[^\s&gt;]+)*(?=\s|$)/g;
-    private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?(?:.*?)(?=--&gt;|$)/g;
-
-    // private unlRegex = /\bunl:[^\s].*?(?=\s|$)/g;
-    // private unlRegex = /\bunl:[^\s][^\r\n]*(?=\s*$|\r\n|\r|\n)/g;
-
-
-
-    // private unl_regex = /\bunl:[^`'"]+/g;
+    private gnxUnlRegex = /\bunl:gnx:\/\/[^\r\n#]*#\S*/g; // This allows spaces and content after the UNL.
+    private headlineUnlRegex = /\bunl:\/\/[^\r\n#]*#[^\r\n]*\S/g; // This goes on until end of line.
 
     public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult&lt;vscode.DocumentLink[]&gt; {
         const text = document.getText();
         const links: vscode.DocumentLink[] = [];
 
         let match;
-
-        // unlRegex
-        // while ((match = this.unlRegex.exec(text)) !== null) {
-        //     const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
-        //     const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-        //     links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
-        // }
-
-        // ORIGINAL FROM LEO
-        // while ((match = this.unl_regex.exec(text)) !== null) {
-        //     const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
-        //     const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-        //     links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
-        // }
 
         // GNX-based UNLs
         while ((match = this.gnxUnlRegex.exec(text)) !== null) {
@@ -16055,12 +16052,11 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
         }
 
         //  Headline - based UNLs
-        // while ((match = this.headlineUnlRegex.exec(text)) !== null) {
-        //     const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
-        //     const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-        //     console.log("found one", match[0]);
-        //     links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
-        // }
+        while ((match = this.headlineUnlRegex.exec(text)) !== null) {
+            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+            const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        }
 
         return links;
     }

@@ -232,7 +232,7 @@ export class LeoApp {
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
-    public db!: SqlitePickleShare; // The singleton global db, managed by g.app.global_cacher.
+    public db!: SqlitePickleShare | Record<string, any>; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController: ExternalFilesController | undefined; // The singleton ExternalFilesController instance.
     public global_cacher!: GlobalCacher; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.

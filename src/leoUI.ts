@@ -5056,26 +5056,36 @@ export class LeoUI extends NullGui {
         await this.triggerBodySave(true);
         const tag = 'goto_script';
         const index = p_node.button.index;
-        const c = g.app.windowList[g.app.gui.frameIndex].c;
-        const d = c.theScriptingController.buttonsArray;
+        const old_c = g.app.windowList[g.app.gui.frameIndex].c;
+        const d = old_c.theScriptingController.buttonsArray;
         const butWidget = d[index];
 
         if (butWidget) {
 
             try {
                 const gnx: string = butWidget.command.gnx;
-
+                let new_c = old_c;
+                const w_result = await old_c.theScriptingController.open_gnx(old_c, gnx);
                 let p: Position | undefined; // Replace YourPType with actual type
 
-                for (const pos of c.all_positions()) {
-                    if (pos.gnx === gnx) {
-                        p = pos;
-                        break;
-                    }
+                if (w_result[0] && w_result[1]) {
+                    p = w_result[1];
+                    new_c = w_result[0];
+                } else {
+                    new_c = old_c;
                 }
 
+                g.app.gui.frameIndex = 0;
+                for (const w_f of g.app.windowList) {
+                    if (w_f.c === new_c) {
+                        break;
+                    }
+                    g.app.gui.frameIndex++;
+                }
+                // g.app.gui.frameIndex now points to the selected Commander.
+
                 if (p) {
-                    c.selectPosition(p);
+                    new_c.selectPosition(p);
                     this.setupRefresh(
                         Focus.Outline,
                         {

@@ -37,7 +37,7 @@ const split = g.os_path_split;
 export class CommanderWrapper {
 
     private c: Commands;
-    private db: SqlitePickleShare;
+    private db: Record<string, any> | SqlitePickleShare;
     public key: string;
     private user_keys: Set<string>;
 
