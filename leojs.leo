@@ -4700,7 +4700,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "9da1702",
+  "gitBranch": "boltex/issue79",
+  "gitDate": "2023-12-27 23:17:58 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -15986,27 +15989,78 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 <t tx="felix.20231226205226.1">import * as vscode from 'vscode';
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
-    private gnxUnlRegex = /\bunl:gnx:\/\/[^\s]+/g;
-    private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?(?:[^--&gt;]+(?:--&gt;[^--&gt;]+)*)/g;
+
+    /*
+        * GNX-based UNL Samples
+        unl:gnx://leoPy.leo#ekr.20230626064652.1
+        unl:gnx://myProject.leo#node12345678.1
+        unl:gnx://codeRepo.leo#function.20231231.1
+    
+        * Headline-based UNL Samples
+        unl://C:/leo.repo/leo-editor/leo/doc/LeoDocs.leo#Getting Started--&gt;Introduction
+        unl://D:/work/notes.leo#Meeting Notes--&gt;2023--&gt;March--&gt;Project X Discussion
+        unl://myDocuments/notes.leo#Ideas--&gt;New Concepts--&gt;brainstorming-session
+        unl://relativePath/myFile.leo#Chapter 1--&gt;Section 2--&gt;Paragraph 3
+        unl://C:/projects/leoProject.leo#Code Review--&gt;Module 1--&gt;Function XYZ--&gt;Improvements
+    
+        * Mixed Characters and Edge Cases
+        unl://path/to/file.leo#Headline-with-Dashes--&gt;Sub-section--&gt;Item 1
+        unl://anotherPath/docs.leo#Special Characters!--&gt;@$%^&amp;*
+        unl://leoFile.leo#Testing--&gt;Edge--&gt;Cases--&gt;with--&gt;Multiple Separators
+    */
+
+
+    // private gnxUnlRegex = /\bunl:gnx:\/\/[^\s]+/g;
+
+    private gnxUnlRegex = /\bunl:gnx:\/\/[^\r\n#]*#.*\S/g;
+
+
+
+    // private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?[^&gt;]*(?:--&gt;[^&gt;]+)*[^&gt;]*$/g;
+    // private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?[^\s&gt;]*(?:--&gt;[^\s&gt;]+)*(?=\s|$)/g;
+    private headlineUnlRegex = /\bunl:\/\/(?:[^\s#]*#)?(?:.*?)(?=--&gt;|$)/g;
+
+    // private unlRegex = /\bunl:[^\s].*?(?=\s|$)/g;
+    // private unlRegex = /\bunl:[^\s][^\r\n]*(?=\s*$|\r\n|\r|\n)/g;
+
+
+
+    // private unl_regex = /\bunl:[^`'"]+/g;
 
     public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult&lt;vscode.DocumentLink[]&gt; {
         const text = document.getText();
         const links: vscode.DocumentLink[] = [];
 
-        // GNX-based UNLs
         let match;
+
+        // unlRegex
+        // while ((match = this.unlRegex.exec(text)) !== null) {
+        //     const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+        //     const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+        //     links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        // }
+
+        // ORIGINAL FROM LEO
+        // while ((match = this.unl_regex.exec(text)) !== null) {
+        //     const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+        //     const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+        //     links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        // }
+
+        // GNX-based UNLs
         while ((match = this.gnxUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
             const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
             links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
         }
 
-        // Headline-based UNLs
-        while ((match = this.headlineUnlRegex.exec(text)) !== null) {
-            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
-            const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
-        }
+        //  Headline - based UNLs
+        // while ((match = this.headlineUnlRegex.exec(text)) !== null) {
+        //     const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+        //     const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+        //     console.log("found one", match[0]);
+        //     links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        // }
 
         return links;
     }
