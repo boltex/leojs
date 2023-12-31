@@ -15964,6 +15964,11 @@ div.col-nav {
 <t tx="felix.20231224200501.1">## 0.2.8
 
 - Translated most of helpCommands.py to typescript, enabling 'help' commands.
+- Added UNL support for both output pane, body panes and all other editor windows.
+- Fixed 'goto-script' for @button items context menu to also work on child of @buttons (plural) nodes in myLeoSettings.leo.
+- Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
+- Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
+- Fixed 'show clone ancestors' and 'show clone parents' commands.
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';
