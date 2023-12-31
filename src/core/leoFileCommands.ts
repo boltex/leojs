@@ -2085,13 +2085,6 @@ export class FileCommands {
         if (ok === undefined) {
             c.endEditing(); // Set the current headline text.
 
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.save
-            ) {
-                await g.app.commander_cacher.save(c, fileName);
-            }
             ok = await c.checkFileTimeStamp(fileName);
             if (ok) {
                 ok = await this.write_Leo_file(fileName);
@@ -2122,13 +2115,6 @@ export class FileCommands {
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
 
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.save
-            ) {
-                await g.app.commander_cacher.save(c, fileName);
-            }
             // Disable path-changed messages in writeAllHelper.
             try {
                 const w_ok = await this.write_Leo_file(fileName);
@@ -2156,13 +2142,6 @@ export class FileCommands {
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
 
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.commit
-            ) {
-                await g.app.commander_cacher.commit(); // Commit, but don't save file name.
-            }
             // Disable path-changed messages in writeAllHelper.
             try {
                 await this.write_Leo_file(fileName);
@@ -2525,13 +2504,6 @@ export class FileCommands {
 
             // f.close();
             // fs.closeSync(f);
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.save
-            ) {
-                await g.app.commander_cacher.save(c, fileName);
-            }
 
             await c.setFileTimeStamp(fileName);
             // Delete backup file.

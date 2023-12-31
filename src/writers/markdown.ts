@@ -23,25 +23,35 @@ export class MarkdownWriter extends BaseWriter {
      * Write all the *descendants* of an @auto-markdown node.
      */
     public write(root: Position): void {
+        const placeholder_regex = /placeholder level [0-9]+/;
         this.root = root;
         this.write_root(root);
+        const total = [...root.subtree()].length;
+        let count = 0;
         for (const p of root.subtree()) {
+            count += 1;
+            let lastFlag = count === total;
             if (g.app.force_at_auto_sentinels) {
                 this.put_node_sentinel(p, '<!--', '-->');
             }
-            this.write_headline(p);
-            const s = p.b.trimEnd() + '\n\n';
-            const lines = s.split('\n');
-            // In JavaScript, when you split a string like '\n\n' with split(/\n/),
-            // it treats each newline character as a separator and includes an 
-            // empty string for the segment following the last newline, even if 
-            // there's no text there. This results in an extra empty string in the array.
-            if (lines.length && lines[lines.length - 1] === '') {
-                lines.pop();
-            }
-            for (const line of lines) {
-                if (!g.isDirective(line)) {
-                    this.put(line);
+            if (placeholder_regex.test(p.h)) {
+                // skip this 'placeholder level X' node
+            } else {
+                this.write_headline(p);
+                // Ensure that every section ends with exactly two newlines.
+                if (p.b.trim().length > 0) {
+                    let s = p.b.trim() + (lastFlag ? '\n' : '\n\n');
+                    const lines = s.split(/\r?\n/);
+                    if (lines.length && lines[lines.length - 1] === '') {
+                        lines.pop();
+                    }
+                    for (const line of lines) {
+                        if (!g.isDirective(line)) {
+                            this.put(line);
+                        }
+                    }
+                } else if (!lastFlag) {  // #3719.
+                    this.put('\n');
                 }
             }
         }

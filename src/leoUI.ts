@@ -43,6 +43,7 @@ import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
 import { HelpPanel } from "./helpPanel";
+import { UnlProvider } from "./unlProvider";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -60,6 +61,9 @@ export class LeoUI extends NullGui {
     // * Help Panel
     public helpPanelText = '# LeoJS Help Panel\n\nDocumentation given by \'help\' commands is shown here.\n\nUse Alt+X to open the minibuffer and type \'help\'';
     public helpDocumentPaneProvider!: HelpPanel;
+
+    // * UNL link provider
+    public linkProvider!: UnlProvider;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -366,6 +370,19 @@ export class LeoUI extends NullGui {
             g.app.windowList[this.frameIndex].startupWindow = true;
         }
 
+        this.linkProvider = new UnlProvider();
+        this._context.subscriptions.push(
+            vscode.languages.registerDocumentLinkProvider(
+                [
+                    { scheme: Constants.URI_FILE_SCHEME },
+                    { scheme: Constants.URI_UNTITLED_SCHEME },
+                    { scheme: Constants.URI_LEOJS_SCHEME },
+                    { language: Constants.OUTPUT_CHANNEL_LANGUAGE }
+                ],
+                this.linkProvider
+            )
+        );
+
         // * Register a content provider for the help text panel
         this.helpDocumentPaneProvider = new HelpPanel(this);
         this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
@@ -536,6 +553,37 @@ export class LeoUI extends NullGui {
         // * Showing with standard readonly text document provider
         // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
         // await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+    }
+
+    public async handleUnl(p_arg: { unl: string }): Promise<void> {
+
+        await this.triggerBodySave(true);
+        const c = g.app.windowList[this.frameIndex].c;
+        try {
+
+            if (p_arg.unl) {
+                this.setupRefresh(
+                    Focus.Body, // Finish in body pane given explicitly because last focus was in input box.
+                    {
+                        tree: true,
+                        body: true,
+                        goto: true,
+                        states: true,
+                        documents: true,
+                        buttons: true
+                    }
+                );
+                await g.openUrlHelper(c, p_arg.unl);
+                void this.launchRefresh();
+                this.loadSearchSettings();
+
+            } else {
+                console.log('NO ARGUMENT FOR HANDLE URL! ', p_arg);
+            }
+        }
+        catch (e) {
+            console.log('FAILED HANDLE URL! ', p_arg);
+        }
     }
 
     /**
@@ -5008,26 +5056,36 @@ export class LeoUI extends NullGui {
         await this.triggerBodySave(true);
         const tag = 'goto_script';
         const index = p_node.button.index;
-        const c = g.app.windowList[g.app.gui.frameIndex].c;
-        const d = c.theScriptingController.buttonsArray;
+        const old_c = g.app.windowList[g.app.gui.frameIndex].c;
+        const d = old_c.theScriptingController.buttonsArray;
         const butWidget = d[index];
 
         if (butWidget) {
 
             try {
                 const gnx: string = butWidget.command.gnx;
-
+                let new_c = old_c;
+                const w_result = await old_c.theScriptingController.open_gnx(old_c, gnx);
                 let p: Position | undefined; // Replace YourPType with actual type
 
-                for (const pos of c.all_positions()) {
-                    if (pos.gnx === gnx) {
-                        p = pos;
-                        break;
-                    }
+                if (w_result[0] && w_result[1]) {
+                    p = w_result[1];
+                    new_c = w_result[0];
+                } else {
+                    new_c = old_c;
                 }
 
+                g.app.gui.frameIndex = 0;
+                for (const w_f of g.app.windowList) {
+                    if (w_f.c === new_c) {
+                        break;
+                    }
+                    g.app.gui.frameIndex++;
+                }
+                // g.app.gui.frameIndex now points to the selected Commander.
+
                 if (p) {
-                    c.selectPosition(p);
+                    new_c.selectPosition(p);
                     this.setupRefresh(
                         Focus.Outline,
                         {

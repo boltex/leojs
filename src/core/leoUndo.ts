@@ -118,6 +118,7 @@ export class Undoer {
     public newRecentFiles!: string[];
     public newSel!: number[];
     public newTree!: TreeData[];
+    public newUA!: Record<string, any>;
     public newYScroll!: number;
     public oldBack!: Position;
     public oldBody!: string;
@@ -131,6 +132,7 @@ export class Undoer {
     public oldRecentFiles!: string[];
     public oldSel!: number[];
     public oldTree!: TreeData[];
+    public oldUA!: Record<string, any>;
     public oldYScroll!: number;
     public pasteAsClone!: boolean;
     public prevSel!: number[];
@@ -716,6 +718,19 @@ export class Undoer {
     //     bunch.newTree = u.saveTree(p);
     //     u.pushBead(bunch);
     // }
+    //@+node:felix.20231227215945.1: *5* u.afterChangeUA
+    public afterChangeUA(p: Position, command: string, bunch: Bead) {
+        const u = this;
+        if (u.redoing || u.undoing) {
+            return;
+        }
+        bunch.undoType = command;
+        bunch.newUA = p.v.u;
+        bunch.undoHelper = u.undoChangeUA;
+        bunch.redoHelper = u.redoChangeUA;
+        u.pushBead(bunch);
+    }
+
     //@+node:felix.20231123235346.1: *5* u.afterClearRecentFiles
     public afterClearRecentFiles(bunch: Bead): Bead {
         const u = this;
@@ -1065,6 +1080,14 @@ export class Undoer {
     //     bunch.oldTree = u.saveTree(p);
     //     return bunch;
     // }
+    //@+node:felix.20231227220022.1: *5* u.beforeChangeUA
+    public beforeChangeUA(p: Position) {
+        const u = this;
+        const bunch: Bead = u.createCommonBunch(p);
+        bunch.oldUA = p.v.u;
+        return bunch;
+    }
+
     //@+node:felix.20231123235410.1: *5* u.beforeClearRecentFiles
     public beforeClearRecentFiles(): Bead {
         const u = this;
@@ -1506,6 +1529,14 @@ export class Undoer {
             c.selectPosition(u.p);
         }
     }
+    //@+node:felix.20231227220055.1: *4* u.redoChangeUA
+    public redoChangeUA() {
+        const u = this;
+        const v = u.p!.v;
+        v.setDirty();
+        v.u = u.newUA;
+    }
+
     //@+node:felix.20211026230613.87: *4* u.redoCloneMarkedNodes
     public redoCloneMarkedNodes(): void {
         const u: Undoer = this;
@@ -1972,6 +2003,14 @@ export class Undoer {
             c.selectPosition(u.p);
         }
     }
+    //@+node:felix.20231227220123.1: *4* u.undoChangeUA
+    public undoChangeUA() {
+        const u = this;
+        const v = u.p!.v;
+        v.setDirty();
+        v.u = u.oldUA;
+    }
+
     //@+node:felix.20231123235503.1: *4* u.undoClearRecentFiles
     public undoClearRecentFiles(): void {
         const c = this.c;

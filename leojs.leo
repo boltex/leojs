@@ -111,6 +111,7 @@
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20221113002623.1"><vh>showSettings</vh></v>
 <v t="felix.20231224193540.1"><vh>put_help</vh></v>
+<v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
 <v t="felix.20220920001018.3"><vh>showLogPane</vh></v>
@@ -353,6 +354,7 @@
 <v t="felix.20201214151451.8"><vh>_updateLeoObjectIndicator</vh></v>
 </v>
 </v>
+<v t="felix.20231226205226.1"><vh>@clean src/unlProvider.ts</vh></v>
 <v t="felix.20201214154816.1"><vh>@clean src/types.ts</vh>
 <v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
 <v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
@@ -1967,6 +1969,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
+[CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
@@ -2109,6 +2112,7 @@ public static COMMANDS = {
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
+    HANDLE_UNL: Constants.NAME + ".handleUnl",
     GIT_DIFF: Constants.NAME + ".gitDiff",
     TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
     WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
@@ -2480,6 +2484,8 @@ public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
 
 public static URI_LEOJS_SCHEME: string = "leojs";
 public static URI_FILE_SCHEME: string = "file";
+public static URI_UNTITLED_SCHEME: string = 'untitled';
+public static OUTPUT_CHANNEL_LANGUAGE = 'Log';
 public static URI_SCHEME_HEADER: string = "leojs:/";
 public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
 public static UNTITLED_FILE_NAME: string = "untitled";
@@ -3618,6 +3624,7 @@ import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
 import { HelpPanel } from "./helpPanel";
+import { UnlProvider } from "./unlProvider";
 
 @language typescript
 @tabwidth -4
@@ -3745,6 +3752,9 @@ export class LeoUI extends NullGui {
     // * Help Panel
     public helpPanelText = '# LeoJS Help Panel\n\nDocumentation given by \'help\' commands is shown here.\n\nUse Alt+X to open the minibuffer and type \'help\'';
     public helpDocumentPaneProvider!: HelpPanel;
+
+    // * UNL link provider
+    public linkProvider!: UnlProvider;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -9619,6 +9629,19 @@ public finishStartup(): void {
         g.app.windowList[this.frameIndex].startupWindow = true;
     }
 
+    this.linkProvider = new UnlProvider();
+    this._context.subscriptions.push(
+        vscode.languages.registerDocumentLinkProvider(
+            [
+                { scheme: Constants.URI_FILE_SCHEME },
+                { scheme: Constants.URI_UNTITLED_SCHEME },
+                { scheme: Constants.URI_LEOJS_SCHEME },
+                { language: Constants.OUTPUT_CHANNEL_LANGUAGE }
+            ],
+            this.linkProvider
+        )
+    );
+
     // * Register a content provider for the help text panel
     this.helpDocumentPaneProvider = new HelpPanel(this);
     this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
@@ -11137,26 +11160,36 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
     await this.triggerBodySave(true);
     const tag = 'goto_script';
     const index = p_node.button.index;
-    const c = g.app.windowList[g.app.gui.frameIndex].c;
-    const d = c.theScriptingController.buttonsArray;
+    const old_c = g.app.windowList[g.app.gui.frameIndex].c;
+    const d = old_c.theScriptingController.buttonsArray;
     const butWidget = d[index];
 
     if (butWidget) {
 
         try {
             const gnx: string = butWidget.command.gnx;
-
+            let new_c = old_c;
+            const w_result = await old_c.theScriptingController.open_gnx(old_c, gnx);
             let p: Position | undefined; // Replace YourPType with actual type
 
-            for (const pos of c.all_positions()) {
-                if (pos.gnx === gnx) {
-                    p = pos;
-                    break;
-                }
+            if (w_result[0] &amp;&amp; w_result[1]) {
+                p = w_result[1];
+                new_c = w_result[0];
+            } else {
+                new_c = old_c;
             }
 
+            g.app.gui.frameIndex = 0;
+            for (const w_f of g.app.windowList) {
+                if (w_f.c === new_c) {
+                    break;
+                }
+                g.app.gui.frameIndex++;
+            }
+            // g.app.gui.frameIndex now points to the selected Commander.
+
             if (p) {
-                c.selectPosition(p);
+                new_c.selectPosition(p);
                 this.setupRefresh(
                     Focus.Outline,
                     {
@@ -14831,6 +14864,17 @@ private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
             Edward K. Ream
         &lt;/td&gt;
         &lt;td align="center"&gt;
+            &lt;a href="https://github.com/tbpassin"&gt;
+                &lt;img src="https://avatars.githubusercontent.com/u/36974235?v=4"
+                     alt="Thomas Passin"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;/a&gt;
+            &lt;br&gt;
+            Thomas Passin
+        &lt;/td&gt;
+        &lt;td align="center"&gt;
             &lt;a href="https://github.com/kghenderson"&gt;
                 &lt;img src="https://avatars.githubusercontent.com/u/3522168?v=4"
                      alt="Kevin Henderson"
@@ -15948,6 +15992,107 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
     }
 
 }
+</t>
+<t tx="felix.20231226205226.1">import * as vscode from 'vscode';
+
+export class UnlProvider implements vscode.DocumentLinkProvider {
+
+    /*
+        * GNX-based UNL Samples
+        unl:gnx://leoPy.leo#ekr.20230626064652.1
+        unl:gnx://myProject.leo#node12345678.1
+        unl:gnx://codeRepo.leo#function.20231231.1
+    
+        * Headline-based UNL Samples
+        unl://C:/leo.repo/leo-editor/leo/doc/LeoDocs.leo#Getting Started--&gt;Introduction
+        unl://D:/work/notes.leo#Meeting Notes--&gt;2023--&gt;March--&gt;Project X Discussion
+        unl://myDocuments/notes.leo#Ideas--&gt;New Concepts--&gt;brainstorming-session
+        unl://relativePath/myFile.leo#Chapter 1--&gt;Section 2--&gt;Paragraph 3
+        unl://C:/projects/leoProject.leo#Code Review--&gt;Module 1--&gt;Function XYZ--&gt;Improvements
+    
+        * Mixed Characters and Edge Cases
+        unl://path/to/file.leo#Headline-with-Dashes--&gt;Sub-section--&gt;Item 1
+        unl://anotherPath/docs.leo#Special Characters!--&gt;@$%^&amp;*
+        unl://leoFile.leo#Testing--&gt;Edge--&gt;Cases--&gt;with--&gt;Multiple Separators
+
+        REFERENCE IN leoGlobals.py
+         2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):
+        
+            Links of the form `unl:gnx:` + `//{outline}#{gnx}` open the given
+            outline and select the first outline node with the given gnx. These UNLs
+            will work as long as the node exists anywhere in the outline.
+        
+            For example, the link: `unl:gnx://#ekr.20031218072017.2406` refers to this
+            outline's "Code" node. Try it. The link works in this outline.
+
+    */
+
+    // private gnxUnlRegex = /\bunl:gnx:[^\r\n#]*#\S*/g; // This allows spaces and content after the UNL.
+    // private headlineUnlRegex = /\bunl:(?!gnx:)[^\r\n#]*#[^\r\n]*\S/g; // This goes on until end of line.
+
+    // *It seems that the double slash is required for valid UNLs (as per this comment in p.get_UNL and related methods in leoNodes.py)
+
+    // All unls must contain a file part: f"//{file-name}#"
+    // The file-name may be empty.
+
+    private gnxUnlRegex = /\bunl:gnx:\/\/[^\r\n#]*#\S*/g; // This allows spaces and content after the UNL.
+    private headlineUnlRegex = /\bunl:\/\/[^\r\n#]*#[^\r\n]*\S/g; // This goes on until end of line.
+
+    public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult&lt;vscode.DocumentLink[]&gt; {
+        const text = document.getText();
+        const links: vscode.DocumentLink[] = [];
+
+        let match;
+
+        // GNX-based UNLs
+        while ((match = this.gnxUnlRegex.exec(text)) !== null) {
+            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+            const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        }
+
+        //  Headline - based UNLs
+        while ((match = this.headlineUnlRegex.exec(text)) !== null) {
+            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+            const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+        }
+
+        return links;
+    }
+}
+</t>
+<t tx="felix.20231226210919.1">public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
+
+    await this.triggerBodySave(true);
+    const c = g.app.windowList[this.frameIndex].c;
+    try {
+
+        if (p_arg.unl) {
+            this.setupRefresh(
+                Focus.Body, // Finish in body pane given explicitly because last focus was in input box.
+                {
+                    tree: true,
+                    body: true,
+                    goto: true,
+                    states: true,
+                    documents: true,
+                    buttons: true
+                }
+            );
+            await g.openUrlHelper(c, p_arg.unl);
+            void this.launchRefresh();
+            this.loadSearchSettings();
+
+        } else {
+            console.log('NO ARGUMENT FOR HANDLE URL! ', p_arg);
+        }
+    }
+    catch (e) {
+        console.log('FAILED HANDLE URL! ', p_arg);
+    }
+}
+
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

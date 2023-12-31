@@ -910,18 +910,24 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('clear-all-uas', 'Clear all uAs in the entire outline.')
     public clearAllUas(): void {
         const c = this.c;
+        const u = this.c.undoer;
+        const undoType = 'clear-all-uas';
         // #1276.
         let changed = false;
-        for (let p of this.c.all_unique_positions()) {
+        u.beforeChangeGroup(c.p, undoType);
+        for (let p of c.all_unique_positions()) {
             if (p.v.u && Object.keys(p.v.u).length) {
+                const bunch = u.beforeChangeUA(p);
                 p.v.u = {};
                 p.setDirty();
+                u.afterChangeUA(p, undoType, bunch);
                 changed = true;
             }
         }
 
         if (changed) {
             c.setChanged();
+            u.afterChangeGroup(c.p, undoType);
             c.redraw();
         }
     }
@@ -982,11 +988,15 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             ) {
                 // ok got both name and val
                 const c = this.c;
+                const u = this.c.undoer;
                 const p = c.p;
+
                 if (!p.v.u) {
                     p.v.u = {}; // assert at least an empty dict if null or non existent
                 }
+                const bunch = u.beforeChangeUA(p);
                 p.v.u[w_name] = w_uaVal;
+                u.afterChangeUA(p, 'set-ua', bunch);
                 this.showNodeUas();
                 return Promise.resolve(true);
             }

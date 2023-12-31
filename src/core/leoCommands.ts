@@ -282,10 +282,10 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-
-        if (g.app.commander_cacher) {
-            this.db = g.app.commander_cacher.get_wrapper(c);
-        } else {
+        try {
+            this.db = new CommanderWrapper(c);
+        } catch (e) {
+            console.log('ERROR CREATING DATABASE', e);
             this.db = {};
         }
 
@@ -2437,7 +2437,7 @@ export class Commands {
         c:          The Commander of the outline.
         command:    The os command to execute the script.
         directory:  Optional: Change to this directory before executing command.
-        ext:        The file extention for the tempory file.
+        ext:        The file extension for the tempory file.
         language:   The language name.
         regex:      Optional regular expression describing error messages.
                     If present, group(1) should evaluate to a line number.
