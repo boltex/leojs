@@ -263,6 +263,7 @@ export class Constants {
     public static CONFIG_NAMES = {
         CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
         DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+        SESSION_PER_WORKSPACE: "sessionPerWorkspace",
         LEO_TREE_BROWSE: "leoTreeBrowse",
         TREE_KEEP_FOCUS: "treeKeepFocus",
         TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
@@ -303,6 +304,7 @@ export class Constants {
     public static CONFIG_DEFAULTS = {
         CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
         DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+        SESSION_PER_WORKSPACE: true,
         LEO_TREE_BROWSE: true,
         TREE_KEEP_FOCUS: true,
         TREE_KEEP_FOCUS_WHEN_ASIDE: false,

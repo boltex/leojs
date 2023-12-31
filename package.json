@@ -76,6 +76,12 @@
             "Ignore All"
           ]
         },
+        "leojs.sessionPerWorkspace": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Keeps one session of files to open per workspace. Setting to false will keep a single session of files to reopen for all instances."
+        },
         "leojs.leoTreeBrowse": {
           "scope": "application",
           "default": true,
@@ -116,7 +122,7 @@
           "scope": "application",
           "default": true,
           "type": "boolean",
-          "description": "Show the outline tree in the explorer view"
+          "description": "Shows the outline tree in the explorer view"
         },
         "leojs.showOpenAside": {
           "scope": "application",
