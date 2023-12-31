@@ -5942,7 +5942,7 @@ Clickable links have four forms:
 
 3. Leo's headline-based UNLs, as shown in the status pane:
 
-   Headline-based UNLs consist of `unl://` + `//{outline}#{headline_list}`
+   Headline-based UNLs consist of `unl://` + `{outline}#{headline_list}`
    where headline_list is list of headlines separated by `-->`.
 
    This link works: `unl://#Code-->About this file`.
@@ -6024,17 +6024,19 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
     let unl = unl_s;
     let file_part;
     let c2;
+    let c3;
     let tail;
     if (unl.startsWith('unl:gnx:')) {
         // Resolve a gnx-based unl.
         unl = unl.slice(8);
         file_part = getUNLFilePart(unl);
         c2 = await openUNLFile(c, file_part);
-        if (!c2) {
+        if (file_part && !c2) {
             return undefined;
         }
+        c3 = c2 || c;
         tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
-        return findGnx(tail, c2);
+        return findGnx(tail, c3);
     }
     // Resolve a file-based unl.
     let found = false;
@@ -6052,13 +6054,13 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
 
     file_part = getUNLFilePart(unl);
     c2 = await openUNLFile(c, file_part);
-    if (!c2) {
+    if (file_part && !c2) {
         return undefined;
     }
-
+    c3 = c2 || c;
     tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
     const unlList = tail.split('-->');
-    return findUnl(unlList, c2);
+    return findUnl(unlList, c3);
 
 }
 //@+node:felix.20230724154323.6: *3* g.findGnx (new unls)
@@ -6625,11 +6627,10 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
                         if (p.v.gnx === target) {
                             c.selectPosition(p);
                             c.redraw();
-                            break;
+                            return target;
                         }
                     }
-
-                    return target;
+                    return undefined;
 
                 }
                 //@-<< look for gnx >>
