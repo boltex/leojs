@@ -7012,6 +7012,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "difflib": "^0.2.4",
 "elementtree": "^0.1.7",
 "jszip": "^3.10.1",
+"ksuid": "^3.0.0",
 "lodash": "^4.17.21",
 "md5": "^2.3.0",
 "os-browserify": "^0.3.0",
