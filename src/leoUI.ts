@@ -5339,7 +5339,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Checks if Session per workspace is true, if so returns file list
+     * Checks if Session per workspace is true, if so returns unl list
      * Undefined otherwise.
      * Note: Can be used to check for Session per workspace flag.
      */
@@ -5352,10 +5352,10 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Sets session files list for this workspace
+     * Sets session unl list for this workspace
      */
-    public setWorkspaceSession(p_files: string[]): Thenable<void> {
-        return this._context.workspaceState.update(Constants.LAST_FILES_KEY, p_files);
+    public setWorkspaceSession(unls: string[]): Thenable<void> {
+        return this._context.workspaceState.update(Constants.LAST_FILES_KEY, unls);
     }
 
     /**

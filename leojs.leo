@@ -1047,21 +1047,11 @@ const activateDebug = false;
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
     if (g.app) {
-        // ! NOT SAVED ON EXIT !
-        // // Save session data.
-        // console.log('------------------------start saveSession');
-
-        // await g.app.saveSession();
-        // // Similar to qt_gui.close_event.
-        // console.log('------------------------end saveSession');
 
         for (const c of g.app.commanders()) {
             if (c.exists) {
                 await g.app.closeLeoWindow(c.frame, undefined, true);
             }
-            // allow = c.exists &amp;&amp; g.app.closeLeoWindow(c.frame)
-            // if (!allow)
-            //     return
         }
         // sys.exit(0)
         console.log('leojs extension has been deactivated.');
@@ -15983,6 +15973,8 @@ div.col-nav {
 - Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
 - Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
 - Fixed 'show clone ancestors' and 'show clone parents' commands.
+- The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
+- LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';
@@ -16114,7 +16106,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 
 </t>
 <t tx="felix.20231231203518.1">/**
- * Checks if Session per workspace is true, if so returns file list
+ * Checks if Session per workspace is true, if so returns unl list
  * Undefined otherwise.
  * Note: Can be used to check for Session per workspace flag.
  */
@@ -16128,10 +16120,10 @@ public getWorkspaceSession(): string[] | undefined {
 
 </t>
 <t tx="felix.20231231203533.1">/**
- * Sets session files list for this workspace
+ * Sets session unl list for this workspace
  */
-public setWorkspaceSession(p_files: string[]): Thenable&lt;void&gt; {
-    return this._context.workspaceState.update(Constants.LAST_FILES_KEY, p_files);
+public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
+    return this._context.workspaceState.update(Constants.LAST_FILES_KEY, unls);
 }
 
 </t>
