@@ -262,6 +262,8 @@
 <v t="felix.20221027153815.1"><vh>widget_name</vh></v>
 <v t="felix.20221026222034.1"><vh>set_focus</vh></v>
 <v t="felix.20221026222040.1"><vh>get_focus</vh></v>
+<v t="felix.20231231203518.1"><vh>getWorkspaceSession</vh></v>
+<v t="felix.20231231203533.1"><vh>setWorkspaceSession</vh></v>
 <v t="felix.20230109233134.1"><vh>focus_to_body</vh></v>
 <v t="felix.20230109233154.1"><vh>focus_to_head</vh></v>
 <v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
@@ -16108,6 +16110,28 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
     catch (e) {
         console.log('FAILED HANDLE URL! ', p_arg);
     }
+}
+
+</t>
+<t tx="felix.20231231203518.1">/**
+ * Checks if Session per workspace is true, if so returns file list
+ * Undefined otherwise.
+ * Note: Can be used to check for Session per workspace flag.
+ */
+public getWorkspaceSession(): string[] | undefined {
+    if (this.config.sessionPerWorkspace) {
+        return this._context.workspaceState.get(Constants.LAST_FILES_KEY) || [];
+    } else {
+        return undefined;
+    }
+}
+
+</t>
+<t tx="felix.20231231203533.1">/**
+ * Sets session files list for this workspace
+ */
+public setWorkspaceSession(p_files: string[]): Thenable&lt;void&gt; {
+    return this._context.workspaceState.update(Constants.LAST_FILES_KEY, p_files);
 }
 
 </t>

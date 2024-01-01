@@ -5339,6 +5339,26 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Checks if Session per workspace is true, if so returns file list
+     * Undefined otherwise.
+     * Note: Can be used to check for Session per workspace flag.
+     */
+    public getWorkspaceSession(): string[] | undefined {
+        if (this.config.sessionPerWorkspace) {
+            return this._context.workspaceState.get(Constants.LAST_FILES_KEY) || [];
+        } else {
+            return undefined;
+        }
+    }
+
+    /**
+     * Sets session files list for this workspace
+     */
+    public setWorkspaceSession(p_files: string[]): Thenable<void> {
+        return this._context.workspaceState.update(Constants.LAST_FILES_KEY, p_files);
+    }
+
+    /**
      * Put focus in body widget.
      */
     public focus_to_body(c: Commands, p: Position): void {

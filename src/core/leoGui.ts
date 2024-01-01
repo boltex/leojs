@@ -333,6 +333,23 @@ export class LeoGui {
     ): Thenable<string | undefined> {
         return Promise.resolve('');
     }
+    //@+node:felix.20231231202753.1: *4* leoGui.getWorkspaceSession
+    /**
+     * Checks if Session per workspace is true, if so returns file list
+     * Undefined otherwise
+     */
+    public getWorkspaceSession(): string[] | undefined {
+        return undefined;
+    }
+
+    //@+node:felix.20231231202816.1: *4* leoGui.setWorkspaceSession
+    /**
+     * Sets session files list for this workspace
+     */
+    public setWorkspaceSession(p_files: string[]): Thenable<void> {
+        return Promise.resolve();
+    }
+
     //@+node:felix.20221120205239.1: *4* LeoGui.makeAllBindings (LeoJs)
     public makeAllBindings(): void {
         // Make all command/key bindings : see LeoJS commadBindings
