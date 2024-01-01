@@ -110,7 +110,15 @@ export class SessionManager {
    */
   public load_snapshot(): string[] | undefined {
     try {
-      const session: string[] = g.app.db['session'];
+      let session: string[];
+      // if LeoJS sessionPerWorkspace is true, use it instead!
+      const workspaceSession = g.app.gui.getWorkspaceSession();
+      if (workspaceSession) {
+        session = workspaceSession;
+      } else {
+        session = g.app.db['session'];
+      }
+
       if (g.app.debug.includes('startup')) {
         g.printObj(session, 'load_snapshot: session data');
       }
@@ -136,10 +144,18 @@ export class SessionManager {
       if (g.app.debug.includes('shutdown')) {
         g.printObj(session, 'save_snapshot: session data');
       }
-      if (!session) {
+      if (!session || !session.length) {
         return; // Don't save an empty session.
       }
-      g.app.db['session'] = session;
+
+      // if LeoJS sessionPerWorkspace is true, use it instead!
+      if (g.app.gui.getWorkspaceSession()) {
+        // No need to wait for this promise.
+        void g.app.gui.setWorkspaceSession(session);
+      } else {
+        g.app.db['session'] = session;
+      }
+
     } catch (e) {
       g.trace('Unexpected exception in SessionManager.save_snapshot');
       g.es_exception(e);

@@ -413,21 +413,11 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export async function deactivate(): Promise<unknown> {
     if (g.app) {
-        // ! NOT SAVED ON EXIT !
-        // // Save session data.
-        // console.log('------------------------start saveSession');
-
-        // await g.app.saveSession();
-        // // Similar to qt_gui.close_event.
-        // console.log('------------------------end saveSession');
 
         for (const c of g.app.commanders()) {
             if (c.exists) {
                 await g.app.closeLeoWindow(c.frame, undefined, true);
             }
-            // allow = c.exists && g.app.closeLeoWindow(c.frame)
-            // if (!allow)
-            //     return
         }
         // sys.exit(0)
         console.log('leojs extension has been deactivated.');

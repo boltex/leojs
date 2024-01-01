@@ -14,6 +14,7 @@ export class Config implements ConfigMembers {
     public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
 
     // Config settings used on vscode's side
+    public sessionPerWorkspace: boolean = Constants.CONFIG_DEFAULTS.SESSION_PER_WORKSPACE; // Used as Context Flag
     public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
     public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
     public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
@@ -73,6 +74,7 @@ export class Config implements ConfigMembers {
         return {
             checkForChangeExternalFiles: this.checkForChangeExternalFiles,
             defaultReloadIgnore: this.defaultReloadIgnore,
+            sessionPerWorkspace: this.sessionPerWorkspace, // Used as Context Flag
             leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
             treeKeepFocus: this.treeKeepFocus,
             treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
@@ -280,6 +282,7 @@ export class Config implements ConfigMembers {
         } else {
             this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
             this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+            this.sessionPerWorkspace = GET(NAME).get(NAMES.SESSION_PER_WORKSPACE, DEFAULTS.SESSION_PER_WORKSPACE);
             this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
             this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
             this.treeKeepFocusWhenAside = GET(NAME).get(NAMES.TREE_KEEP_FOCUS_WHEN_ASIDE, DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE);

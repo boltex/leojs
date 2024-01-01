@@ -8,6 +8,8 @@
 - Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
 - Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
 - Fixed 'show clone ancestors' and 'show clone parents' commands.
+- The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
+- LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
 
 ## 0.2.7
 

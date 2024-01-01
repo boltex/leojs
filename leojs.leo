@@ -262,6 +262,8 @@
 <v t="felix.20221027153815.1"><vh>widget_name</vh></v>
 <v t="felix.20221026222034.1"><vh>set_focus</vh></v>
 <v t="felix.20221026222040.1"><vh>get_focus</vh></v>
+<v t="felix.20231231203518.1"><vh>getWorkspaceSession</vh></v>
+<v t="felix.20231231203533.1"><vh>setWorkspaceSession</vh></v>
 <v t="felix.20230109233134.1"><vh>focus_to_body</vh></v>
 <v t="felix.20230109233154.1"><vh>focus_to_head</vh></v>
 <v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
@@ -1045,21 +1047,11 @@ const activateDebug = false;
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
     if (g.app) {
-        // ! NOT SAVED ON EXIT !
-        // // Save session data.
-        // console.log('------------------------start saveSession');
-
-        // await g.app.saveSession();
-        // // Similar to qt_gui.close_event.
-        // console.log('------------------------end saveSession');
 
         for (const c of g.app.commanders()) {
             if (c.exists) {
                 await g.app.closeLeoWindow(c.frame, undefined, true);
             }
-            // allow = c.exists &amp;&amp; g.app.closeLeoWindow(c.frame)
-            // if (!allow)
-            //     return
         }
         // sys.exit(0)
         console.log('leojs extension has been deactivated.');
@@ -1179,15 +1171,15 @@ export function padNumber2(p_number: number): string {
 
 </t>
 <t tx="felix.20201208224407.4">/**
- * * Performs the actual addition into globalState context
- * @param p_context Needed to get to vscode global storage
+ * * Performs the actual addition into workspaceState context
+ * @param p_context Needed to get to vscode workspace storage
  * @param p_file path+file name string
  * @param p_key A constant string such as RECENT_FILES_KEY or LAST_FILES_KEY
- * @returns A promise that resolves when the global storage modification is done
+ * @returns A promise that resolves when the workspace storage modification is done
  */
-export function addFileToGlobal(p_context: vscode.ExtensionContext, p_file: string, p_key: string): Thenable&lt;void&gt; {
-    // Just push that string into the context.globalState.&lt;something&gt; array
-    const w_contextEntry: string[] = p_context.globalState.get(p_key) || [];
+export function addFileToWorkspace(p_context: vscode.ExtensionContext, p_file: string, p_key: string): Thenable&lt;void&gt; {
+    // Just push that string into the context.workspaceState.&lt;something&gt; array
+    const w_contextEntry: string[] = p_context.workspaceState.get(p_key) || [];
     if (w_contextEntry) {
         if (!w_contextEntry.includes(p_file)) {
             w_contextEntry.push(p_file);
@@ -1195,27 +1187,27 @@ export function addFileToGlobal(p_context: vscode.ExtensionContext, p_file: stri
                 w_contextEntry.shift();
             }
         }
-        return p_context.globalState.update(p_key, w_contextEntry); // Added file
+        return p_context.workspaceState.update(p_key, w_contextEntry); // Added file
     } else {
         // First so create key entry with an array of single file
-        return p_context.globalState.update(p_key, [p_file]);
+        return p_context.workspaceState.update(p_key, [p_file]);
     }
 }
 
 </t>
 <t tx="felix.20201208224407.5">/**
- * * Removes file entry from globalState context
- * @param p_context Needed to get to vscode global storage
+ * * Removes file entry from workspaceState context
+ * @param p_context Needed to get to vscode workspace storage
  * @param p_file path+file name string
  * @param p_key A constant string such as RECENT_FILES_KEY or LAST_FILES_KEY
- * @returns A promise that resolves when the global storage modification is done
+ * @returns A promise that resolves when the workspace storage modification is done
   */
-export function removeFileFromGlobal(p_context: vscode.ExtensionContext, p_file: string, p_key: string): Thenable&lt;void&gt; {
-    // Check if exist in context.globalState.&lt;something&gt; and remove if found
-    const w_files: string[] = p_context.globalState.get(p_key) || [];
+export function removeFileFromWorkspace(p_context: vscode.ExtensionContext, p_file: string, p_key: string): Thenable&lt;void&gt; {
+    // Check if exist in context.workspaceState.&lt;something&gt; and remove if found
+    const w_files: string[] = p_context.workspaceState.get(p_key) || [];
     if (w_files &amp;&amp; w_files.includes(p_file)) {
         w_files.splice(w_files.indexOf(p_file), 1); // Splice and update
-        return p_context.globalState.update(p_key, w_files);
+        return p_context.workspaceState.update(p_key, w_files);
     }
     return Promise.resolve(); // not even in list so just resolve
 }
@@ -7934,6 +7926,12 @@ public incTreeId(): void {
         "Ignore All"
       ]
     },
+    "leojs.sessionPerWorkspace": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Keeps one session of files to open per workspace. Setting to false will keep a single session of files to reopen for all instances."
+    },
     "leojs.leoTreeBrowse": {
       "scope": "application",
       "default": true,
@@ -7974,7 +7972,7 @@ public incTreeId(): void {
       "scope": "application",
       "default": true,
       "type": "boolean",
-      "description": "Show the outline tree in the explorer view"
+      "description": "Shows the outline tree in the explorer view"
     },
     "leojs.showOpenAside": {
       "scope": "application",
@@ -8116,6 +8114,7 @@ public buildFromSavedSettings(): void {
     } else {
         this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
         this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+        this.sessionPerWorkspace = GET(NAME).get(NAMES.SESSION_PER_WORKSPACE, DEFAULTS.SESSION_PER_WORKSPACE);
         this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
         this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
         this.treeKeepFocusWhenAside = GET(NAME).get(NAMES.TREE_KEEP_FOCUS_WHEN_ASIDE, DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE);
@@ -8170,6 +8169,7 @@ export class Config implements ConfigMembers {
     public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
 
     // Config settings used on vscode's side
+    public sessionPerWorkspace: boolean = Constants.CONFIG_DEFAULTS.SESSION_PER_WORKSPACE; // Used as Context Flag
     public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
     public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
     public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
@@ -8232,6 +8232,7 @@ public getConfig(): ConfigMembers {
     return {
         checkForChangeExternalFiles: this.checkForChangeExternalFiles,
         defaultReloadIgnore: this.defaultReloadIgnore,
+        sessionPerWorkspace: this.sessionPerWorkspace, // Used as Context Flag
         leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
         treeKeepFocus: this.treeKeepFocus,
         treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
@@ -8371,6 +8372,7 @@ public clearCloseEmptyGroups(): Thenable&lt;void&gt; {
 export interface ConfigMembers {
     checkForChangeExternalFiles: string;
     defaultReloadIgnore: string;
+    sessionPerWorkspace: boolean;
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
     treeKeepFocusWhenAside: boolean;
@@ -8431,6 +8433,7 @@ export interface FontSettings {
 public static CONFIG_NAMES = {
     CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
     DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+    SESSION_PER_WORKSPACE: "sessionPerWorkspace",
     LEO_TREE_BROWSE: "leoTreeBrowse",
     TREE_KEEP_FOCUS: "treeKeepFocus",
     TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
@@ -8472,6 +8475,7 @@ public static CONFIG_NAMES = {
 public static CONFIG_DEFAULTS = {
     CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
     DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+    SESSION_PER_WORKSPACE: true,
     LEO_TREE_BROWSE: true,
     TREE_KEEP_FOCUS: true,
     TREE_KEEP_FOCUS_WHEN_ASIDE: false,
@@ -15969,6 +15973,8 @@ div.col-nav {
 - Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
 - Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
 - Fixed 'show clone ancestors' and 'show clone parents' commands.
+- The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
+- LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';
@@ -16096,6 +16102,28 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
     catch (e) {
         console.log('FAILED HANDLE URL! ', p_arg);
     }
+}
+
+</t>
+<t tx="felix.20231231203518.1">/**
+ * Checks if Session per workspace is true, if so returns unl list
+ * Undefined otherwise.
+ * Note: Can be used to check for Session per workspace flag.
+ */
+public getWorkspaceSession(): string[] | undefined {
+    if (this.config.sessionPerWorkspace) {
+        return this._context.workspaceState.get(Constants.LAST_FILES_KEY) || [];
+    } else {
+        return undefined;
+    }
+}
+
+</t>
+<t tx="felix.20231231203533.1">/**
+ * Sets session unl list for this workspace
+ */
+public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
+    return this._context.workspaceState.update(Constants.LAST_FILES_KEY, unls);
 }
 
 </t>
