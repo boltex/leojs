@@ -1626,6 +1626,11 @@ export function update_directives_pat(): void {
 // #1688: Initialize g.directives_pat
 update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
+//@+node:felix.20231227213922.1: *3* g.isBrowserRepo
+export function isBrowserRepo(): boolean {
+    return isBrowser || (!!app.vscodeUriScheme && app.vscodeUriScheme !== 'file');
+}
+
 //@+node:felix.20220108221428.1: *3* g.chdir
 /**
  * Change current directory to the directory corresponding to path.
@@ -5937,7 +5942,7 @@ Clickable links have four forms:
 
 3. Leo's headline-based UNLs, as shown in the status pane:
 
-   Headline-based UNLs consist of `unl://` + `//{outline}#{headline_list}`
+   Headline-based UNLs consist of `unl://` + `{outline}#{headline_list}`
    where headline_list is list of headlines separated by `-->`.
 
    This link works: `unl://#Code-->About this file`.
@@ -6019,17 +6024,19 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
     let unl = unl_s;
     let file_part;
     let c2;
+    let c3;
     let tail;
     if (unl.startsWith('unl:gnx:')) {
         // Resolve a gnx-based unl.
         unl = unl.slice(8);
         file_part = getUNLFilePart(unl);
         c2 = await openUNLFile(c, file_part);
-        if (!c2) {
+        if (file_part && !c2) {
             return undefined;
         }
+        c3 = c2 || c;
         tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
-        return findGnx(tail, c2);
+        return findGnx(tail, c3);
     }
     // Resolve a file-based unl.
     let found = false;
@@ -6047,13 +6054,13 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
 
     file_part = getUNLFilePart(unl);
     c2 = await openUNLFile(c, file_part);
-    if (!c2) {
+    if (file_part && !c2) {
         return undefined;
     }
-
+    c3 = c2 || c;
     tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
     const unlList = tail.split('-->');
-    return findUnl(unlList, c2);
+    return findUnl(unlList, c3);
 
 }
 //@+node:felix.20230724154323.6: *3* g.findGnx (new unls)
@@ -6552,7 +6559,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
             return undefined;
         }
         //@-<< look for section ref >>
-        let url = undefined;
+        url = undefined;
         let unl = undefined;
 
         //@+<< look for url >>
@@ -6569,7 +6576,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
         while ((match = url_regex.exec(line)) !== null) {
             // Don't open if we click after the url.
             if (match.index <= col && col < url_regex.lastIndex) {
-                const url = match[0];
+                url = match[0];
                 if (isValidUrl(url)) {
                     break;
                 }
@@ -6613,20 +6620,17 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
                 }
 
                 if (target) {
-                    let found_gnx = false;
                     if (c.p.gnx == target) {
                         return target;
                     }
                     for (const p of c.all_unique_positions()) {
                         if (p.v.gnx === target) {
-                            found_gnx = true;
                             c.selectPosition(p);
                             c.redraw();
-                            break;
+                            return target;
                         }
                     }
-
-                    return target;
+                    return undefined;
 
                 }
                 //@-<< look for gnx >>

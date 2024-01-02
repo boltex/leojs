@@ -116,7 +116,7 @@ export class TopLevelEditCommands {
     //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
     @command(
         'merge-node-with-next-node',
-        'Merge p.b into p.next().b and delete p, *provided* that p has no children.' +
+        'Merge p.b into p.next().b and delete p, *provided* that p has no children. ' +
         "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_next_node(this: Commands): void {
@@ -156,7 +156,7 @@ export class TopLevelEditCommands {
     //@+node:felix.20230708211849.1: *3* @g.command('merge-node-with-prev-node')
     @command(
         'merge-node-with-prev-node',
-        'Merge p.b into p.back().b and delete p, *provided* that p has no children.' +
+        'Merge p.b into p.back().b and delete p, *provided* that p has no children. ' +
         "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
     )
     public merge_node_with_prev_node(this: Commands): void {
@@ -268,26 +268,32 @@ export class TopLevelEditCommands {
         if (!c) {
             return;
         }
-        const p = c.p;
-
-        g.es(`Ancestors of ${p.h}...`);
-        for (const clone of c.all_positions()) {
-            if (clone.v === p.v) {
-                let unl = clone.get_legacy_UNL();
-                let message = unl;
+        g.es(`Ancestors of ${c.p.h}...`);
+        const seen: Set<string> = new Set();
+        for (const p of c.vnode2allPositions(c.p.v)) {
+            for (const ancestor of p.parents()) {
+                let unl = ancestor.get_legacy_UNL();
                 // Drop the file part.
                 const i = unl.indexOf('#');
-                if (i > 0) {
-                    message = unl.substring(i + 1);
+                let message = i >= 0 ? unl.substring(i + 1) : unl;
+                // The following block is deactivated as it is too confusing.
+                /*
+                if (false) {
+                    // Drop the target node from the message.
+                    const parts = message.split('-->');
+                    if (parts.length > 1) {
+                        message = parts.slice(0, -1).join('-->');
+                    }
                 }
-                // Drop the target node from the message.
-                const parts = message.split('-->');
-                if (parts.length > 1) {
-                    message = parts.slice(0, -1).join('-->');
+                */
+                if (!seen.has(message)) {
+                    seen.add(message);
+
+                    // TODO : CHECK THIS!
+                    g.es(`${message}\n${unl}::1`);
+
+                    // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
                 }
-                // c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
-                // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
-                g.es(`${message}\n${unl}::1`);
             }
         }
     }
@@ -302,24 +308,25 @@ export class TopLevelEditCommands {
             return;
         }
 
-        const seen: any[] = [];
+        const seen: Set<string> = new Set();
+        g.es(`Parents of ${c.p.h}...`);
         for (const clone of c.vnode2allPositions(c.p.v)) {
             const parent = clone.parent();
-            if (parent && !seen.includes(parent)) {
-                seen.push(parent);
+            if (parent) {
                 let unl = parent.get_legacy_UNL();
-                let message = unl;
                 // Drop the file part.
                 const i = unl.indexOf('#');
-                if (i > 0) {
-                    message = unl.substring(i + 1);
+                let message = i >= 0 ? unl.substring(i + 1) : unl;
+                if (!seen.has(message)) {
+                    seen.add(message);
+
+                    // TODO : CHECK THIS!
+                    g.es(`${message}\n${unl}::1`);
+
+                    // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
                 }
-                // c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
-                // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
-                g.es(`${message}\n${unl}::1`);
             }
         }
-
     }
     //@+node:felix.20220504203200.5: *3* @g.command('unmark-node-and-parents')
     @command('unmark-node-and-parents', 'Unmark the node and all its parents.')
@@ -503,7 +510,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Put the cursor at the line in the *outline* corresponding to the line ' +
         'with the given line number in the external file. ' +
         'For external files containing sentinels, there may be *several* lines ' +
-        'in the file that correspond to the same line in the outline.' +
+        'in the file that correspond to the same line in the outline. ' +
         'An Easter Egg: <Alt-x>number invokes this code.'
     )
     public async gotoGlobalLine(p_lineNumber?: number): Promise<unknown> {
@@ -550,22 +557,22 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd(
         'hn-add-all',
         'Add headline numbers to all nodes of the outline except' +
-        ' @<file> nodes and their descendants' +
-        'and any node whose headline starts with "@".' +
+        ' @<file> nodes and their descendants ' +
+        'and any node whose headline starts with "@". ' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-all',
         'Add headline numbers to all nodes of the outline except' +
-        ' @<file> nodes and their descendants' +
-        'and any node whose headline starts with "@".' +
+        ' @<file> nodes and their descendants ' +
+        'and any node whose headline starts with "@". ' +
         "Use the *first* clone's position for all clones."
     )
     @cmd(
         'add-all-headline-numbers',
         'Add headline numbers to all nodes of the outline except' +
-        ' @<file> nodes and their descendants' +
-        'and any node whose headline starts with "@".' +
+        ' @<file> nodes and their descendants ' +
+        'and any node whose headline starts with "@". ' +
         "Use the *first* clone's position for all clones."
     )
     public hn_add_all(): void {
@@ -621,17 +628,17 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230402171528.4: *4* hn-add-subtree & helper
     @cmd(
         'hn-add-subtree',
-        'Add headline numbers to *all* children of c.p.' +
+        'Add headline numbers to *all* children of c.p. ' +
         "Use the *last* clone's position for all clones."
     )
     @cmd(
         'headline-number-add-subtree',
-        'Add headline numbers to *all* children of c.p.' +
+        'Add headline numbers to *all* children of c.p. ' +
         "Use the *last* clone's position for all clones."
     )
     @cmd(
         'add-subtree-headline-numbers',
-        'Add headline numbers to *all* children of c.p.' +
+        'Add headline numbers to *all* children of c.p. ' +
         "Use the *last* clone's position for all clones."
     )
     public hn_add_children(): void {
@@ -903,18 +910,24 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('clear-all-uas', 'Clear all uAs in the entire outline.')
     public clearAllUas(): void {
         const c = this.c;
+        const u = this.c.undoer;
+        const undoType = 'clear-all-uas';
         // #1276.
         let changed = false;
-        for (let p of this.c.all_unique_positions()) {
+        u.beforeChangeGroup(c.p, undoType);
+        for (let p of c.all_unique_positions()) {
             if (p.v.u && Object.keys(p.v.u).length) {
+                const bunch = u.beforeChangeUA(p);
                 p.v.u = {};
                 p.setDirty();
+                u.afterChangeUA(p, undoType, bunch);
                 changed = true;
             }
         }
 
         if (changed) {
             c.setChanged();
+            u.afterChangeGroup(c.p, undoType);
             c.redraw();
         }
     }
@@ -975,11 +988,15 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             ) {
                 // ok got both name and val
                 const c = this.c;
+                const u = this.c.undoer;
                 const p = c.p;
+
                 if (!p.v.u) {
                     p.v.u = {}; // assert at least an empty dict if null or non existent
                 }
+                const bunch = u.beforeChangeUA(p);
                 p.v.u[w_name] = w_uaVal;
+                u.afterChangeUA(p, 'set-ua', bunch);
                 this.showNodeUas();
                 return Promise.resolve(true);
             }

@@ -8,6 +8,7 @@ import { RClick } from "./core/mod_scripting";
 export interface ConfigMembers {
     checkForChangeExternalFiles: string;
     defaultReloadIgnore: string;
+    sessionPerWorkspace: boolean;
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
     treeKeepFocusWhenAside: boolean;

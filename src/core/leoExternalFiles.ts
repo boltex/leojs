@@ -258,8 +258,18 @@ export class ExternalFilesController {
                 state = await this.ask(c, w_path, p);
             }
             if (['yes', 'yes-all'].includes(state)) {
-                c.redraw(p);
+                const old_p = c.p;  // To restore selection if refresh option set to yes-all & is descendant of at-file
+                c.redraw(p); // this selects p.
                 await c.refreshFromDisk();
+
+                // ! LEOJS : KEEP SELECTION ON CURRENT NODE IF CHILD OF AT-ANY-FILE REFRESHED !
+                // TODO : Add config option in Leo for this!
+                if (true) {
+                    if (c.positionExists(old_p) && c.p.isAncestorOf(old_p)) {
+                        c.selectPosition(old_p);
+                    }
+                }
+
                 c.redraw();
                 // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
                 g.app.gui.fullRefresh(true);

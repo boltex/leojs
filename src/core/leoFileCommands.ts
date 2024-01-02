@@ -2085,13 +2085,6 @@ export class FileCommands {
         if (ok === undefined) {
             c.endEditing(); // Set the current headline text.
 
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.save
-            ) {
-                await g.app.commander_cacher.save(c, fileName);
-            }
             ok = await c.checkFileTimeStamp(fileName);
             if (ok) {
                 ok = await this.write_Leo_file(fileName);
@@ -2122,13 +2115,6 @@ export class FileCommands {
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
 
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.save
-            ) {
-                await g.app.commander_cacher.save(c, fileName);
-            }
             // Disable path-changed messages in writeAllHelper.
             try {
                 const w_ok = await this.write_Leo_file(fileName);
@@ -2156,13 +2142,6 @@ export class FileCommands {
         if (!g.doHook('save1', { c: c, p: p, fileName: fileName })) {
             c.endEditing(); // Set the current headline text.
 
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.commit
-            ) {
-                await g.app.commander_cacher.commit(); // Commit, but don't save file name.
-            }
             // Disable path-changed messages in writeAllHelper.
             try {
                 await this.write_Leo_file(fileName);
@@ -2409,7 +2388,7 @@ export class FileCommands {
             this.usingClipboard = true;
             if (this.c.config.getBool('json-outline-clipboard', true)) {
                 const d = this.leojs_outline_dict(p || this.c.p);
-                s = JSON.stringify(d, null, 4);
+                s = JSON.stringify(d, null, 2);
             } else {
                 this.outputFile = ''; // io.StringIO()
                 this.putProlog();
@@ -2445,7 +2424,7 @@ export class FileCommands {
         try {
             this.usingClipboard = true;
             const d = this.leojs_outline_dict(p || this.c.p); // Checks for illegal ua's
-            s = JSON.stringify(d, null, 4);
+            s = JSON.stringify(d, null, 2);
         } finally {
             // Restore
             this.descendentTnodeUaDictList = tua;
@@ -2515,7 +2494,7 @@ export class FileCommands {
             // Create the dict corresponding to the JSON.
             const d = this.leojs_outline_dict();
             // Convert the dict to JSON.
-            const json_s = JSON.stringify(d, null, 4); // json.dumps(d, indent = 2);
+            const json_s = JSON.stringify(d, null, 2); // json.dumps(d, indent = 2);
 
             const w_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(
@@ -2525,13 +2504,6 @@ export class FileCommands {
 
             // f.close();
             // fs.closeSync(f);
-            if (
-                g.app &&
-                g.app.commander_cacher &&
-                g.app.commander_cacher.save
-            ) {
-                await g.app.commander_cacher.save(c, fileName);
-            }
 
             await c.setFileTimeStamp(fileName);
             // Delete backup file.

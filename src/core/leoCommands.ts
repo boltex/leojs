@@ -41,6 +41,7 @@ import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper, SqlitePickleShare } from './leoCache';
+import { HelpCommandsClass } from '../commands/helpCommands';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -239,7 +240,7 @@ export class Commands {
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
     public rstCommands: RstCommands;
-    public helpCommands: any = undefined;
+    public helpCommands: HelpCommandsClass;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
     public keyHandlerCommands: any = undefined;
@@ -281,10 +282,10 @@ export class Commands {
         this.k = {};
         this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
-
-        if (g.app.commander_cacher) {
-            this.db = g.app.commander_cacher.get_wrapper(c);
-        } else {
+        try {
+            this.db = new CommanderWrapper(c);
+        } catch (e) {
+            console.log('ERROR CREATING DATABASE', e);
             this.db = {};
         }
 
@@ -313,6 +314,7 @@ export class Commands {
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
+        this.helpCommands = new HelpCommandsClass(c);
 
         this.rstCommands = new RstCommands(c);
 
@@ -2435,7 +2437,7 @@ export class Commands {
         c:          The Commander of the outline.
         command:    The os command to execute the script.
         directory:  Optional: Change to this directory before executing command.
-        ext:        The file extention for the tempory file.
+        ext:        The file extension for the tempory file.
         language:   The language name.
         regex:      Optional regular expression describing error messages.
                     If present, group(1) should evaluate to a line number.
@@ -3142,6 +3144,14 @@ export class Commands {
     //@+node:felix.20220611010339.1: *5* c.notValidInBatchMode
     public notValidInBatchMode(commandName: string): void {
         g.es('the', commandName, 'command is not valid in batch mode');
+    }
+    //@+node:felix.20231224185423.1: *5* c.putHelpFor
+    /**
+     * Helper for various help commands.
+     */
+    public putHelpFor(s: string, short_title = ''): void {
+        const c = this;
+        g.app.gui.put_help(c, s, short_title);
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
     /**

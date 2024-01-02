@@ -789,10 +789,11 @@ export class ScriptingController {
                 await c2.close();
             }
         }
+        // * TODO : UNUSED IN LEOJS ?
         // Fix bug 92: restore the previously selected tab.
-        if (c.frame && (c.frame as any)['top']) {
-            (c.frame as any).leo_master.select(c);
-        }
+        // if (c.frame && (c.frame as any)['top']) {
+        //     (c.frame as any).leo_master.select(c);
+        // }
         return [undefined, undefined];  // 2017/02/02.
     }
     //@+node:felix.20230924174338.29: *3* sc.Scripts, common

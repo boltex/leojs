@@ -1133,7 +1133,7 @@ export class RstCommands {
             if (0 <= n && n < u.length) {
                 ch = u[n];
             } else if (u) {
-                ch = u[-1];
+                ch = u[u.length - 1];
             } else {
                 g.trace('can not happen: no u');
                 ch = '#';

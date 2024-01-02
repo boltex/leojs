@@ -36,12 +36,14 @@ import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
 import { LeoSettingsProvider } from "./leoSettingsWebview";
-import { ISettings, LeoFind } from "./core/leoFind";
+import { LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
 import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
+import { HelpPanel } from "./helpPanel";
+import { UnlProvider } from "./unlProvider";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -55,6 +57,13 @@ export class LeoUI extends NullGui {
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
+
+    // * Help Panel
+    public helpPanelText = '# LeoJS Help Panel\n\nDocumentation given by \'help\' commands is shown here.\n\nUse Alt+X to open the minibuffer and type \'help\'';
+    public helpDocumentPaneProvider!: HelpPanel;
+
+    // * UNL link provider
+    public linkProvider!: UnlProvider;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -361,6 +370,26 @@ export class LeoUI extends NullGui {
             g.app.windowList[this.frameIndex].startupWindow = true;
         }
 
+        this.linkProvider = new UnlProvider();
+        this._context.subscriptions.push(
+            vscode.languages.registerDocumentLinkProvider(
+                [
+                    { scheme: Constants.URI_FILE_SCHEME },
+                    { scheme: Constants.URI_UNTITLED_SCHEME },
+                    { scheme: Constants.URI_LEOJS_SCHEME },
+                    { language: Constants.OUTPUT_CHANNEL_LANGUAGE }
+                ],
+                this.linkProvider
+            )
+        );
+
+        // * Register a content provider for the help text panel
+        this.helpDocumentPaneProvider = new HelpPanel(this);
+        this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
+        setTimeout(() => {
+            this.helpDocumentPaneProvider.update(vscode.Uri.parse('helpPanel:' + "LeoJS Help"));
+        }, 250);
+
         // * Create Leo Opened Documents Treeview Providers and tree views
         this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
         this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
@@ -510,6 +539,53 @@ export class LeoUI extends NullGui {
     public showSettings(): void {
         void this.leoSettingsWebview.openWebview();
     }
+
+    public put_help(C: Commands, s: string): void {
+        s = g.dedent(s.trimEnd());
+        this.helpPanelText = s;
+        const uri = vscode.Uri.parse('helpPanel:' + "LeoJS Help");
+        this.helpDocumentPaneProvider.update(uri);
+        setTimeout(() => {
+            // * Open the virtual document in the preview pane
+            void vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
+        }, 60);
+
+        // * Showing with standard readonly text document provider
+        // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
+        // await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
+    }
+
+    public async handleUnl(p_arg: { unl: string }): Promise<void> {
+
+        await this.triggerBodySave(true);
+        const c = g.app.windowList[this.frameIndex].c;
+        try {
+
+            if (p_arg.unl) {
+                this.setupRefresh(
+                    Focus.Body, // Finish in body pane given explicitly because last focus was in input box.
+                    {
+                        tree: true,
+                        body: true,
+                        goto: true,
+                        states: true,
+                        documents: true,
+                        buttons: true
+                    }
+                );
+                await g.openUrlHelper(c, p_arg.unl);
+                void this.launchRefresh();
+                this.loadSearchSettings();
+
+            } else {
+                console.log('NO ARGUMENT FOR HANDLE URL! ', p_arg);
+            }
+        }
+        catch (e) {
+            console.log('FAILED HANDLE URL! ', p_arg);
+        }
+    }
+
     /**
      * * Adds a message string to LeoJS log pane. Used when leoBridge receives an async 'log' command.
      * @param p_message The string to be added in the log
@@ -4980,26 +5056,36 @@ export class LeoUI extends NullGui {
         await this.triggerBodySave(true);
         const tag = 'goto_script';
         const index = p_node.button.index;
-        const c = g.app.windowList[g.app.gui.frameIndex].c;
-        const d = c.theScriptingController.buttonsArray;
+        const old_c = g.app.windowList[g.app.gui.frameIndex].c;
+        const d = old_c.theScriptingController.buttonsArray;
         const butWidget = d[index];
 
         if (butWidget) {
 
             try {
                 const gnx: string = butWidget.command.gnx;
-
+                let new_c = old_c;
+                const w_result = await old_c.theScriptingController.open_gnx(old_c, gnx);
                 let p: Position | undefined; // Replace YourPType with actual type
 
-                for (const pos of c.all_positions()) {
-                    if (pos.gnx === gnx) {
-                        p = pos;
-                        break;
-                    }
+                if (w_result[0] && w_result[1]) {
+                    p = w_result[1];
+                    new_c = w_result[0];
+                } else {
+                    new_c = old_c;
                 }
 
+                g.app.gui.frameIndex = 0;
+                for (const w_f of g.app.windowList) {
+                    if (w_f.c === new_c) {
+                        break;
+                    }
+                    g.app.gui.frameIndex++;
+                }
+                // g.app.gui.frameIndex now points to the selected Commander.
+
                 if (p) {
-                    c.selectPosition(p);
+                    new_c.selectPosition(p);
                     this.setupRefresh(
                         Focus.Outline,
                         {
@@ -5250,6 +5336,26 @@ export class LeoUI extends NullGui {
 
     public get_focus(c?: Commands): StringTextWrapper {
         return this.focusWidget!;
+    }
+
+    /**
+     * Checks if Session per workspace is true, if so returns unl list
+     * Undefined otherwise.
+     * Note: Can be used to check for Session per workspace flag.
+     */
+    public getWorkspaceSession(): string[] | undefined {
+        if (this.config.sessionPerWorkspace) {
+            return this._context.workspaceState.get(Constants.LAST_FILES_KEY) || [];
+        } else {
+            return undefined;
+        }
+    }
+
+    /**
+     * Sets session unl list for this workspace
+     */
+    public setWorkspaceSession(unls: string[]): Thenable<void> {
+        return this._context.workspaceState.update(Constants.LAST_FILES_KEY, unls);
     }
 
     /**
