@@ -13,6 +13,7 @@ import { FileCommands } from './leoFileCommands';
 import { NullBody } from './leoFrame';
 import 'date-format-lite';
 import KSUID = require('ksuid');
+import { v4 as uuidv4 } from 'uuid';
 //@-<< imports >>
 //@+others
 //@+node:felix.20210102014453.1: ** class NodeIndices
@@ -149,7 +150,7 @@ export class NodeIndices {
         let gnx;
         try {
             if (uuid_kind === 'uuid')
-                gnx = crypto.randomUUID();
+                gnx = uuidv4();
             else if (KSUID && uuid_kind === 'ksuid') {
                 gnx = KSUID.randomSync().string;
             }
