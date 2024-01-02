@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.9
+
+- Fixed ...
+
 ## 0.2.8
 
 - Translated most of helpCommands.py to typescript, enabling 'help' commands.

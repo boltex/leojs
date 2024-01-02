@@ -9,7 +9,8 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
-<v t="felix.20231224200501.1"><vh>0.2.8</vh></v>
+<v t="felix.20231224200501.1"><vh>0.2.9</vh></v>
+<v t="felix.20240101211218.1"><vh>0.2.8</vh></v>
 <v t="felix.20231216233654.1"><vh>0.2.7</vh></v>
 <v t="felix.20231221231533.1"><vh>0.2.6</vh></v>
 <v t="fil.20231216220210.1"><vh>0.2.5</vh></v>
@@ -4643,7 +4644,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -15968,17 +15969,9 @@ div.col-nav {
 }
 
 </t>
-<t tx="felix.20231224200501.1">## 0.2.8
+<t tx="felix.20231224200501.1">## 0.2.9
 
-- Translated most of helpCommands.py to typescript, enabling 'help' commands.
-- Added UNL support for both output pane, body panes and all other editor windows.
-- Fixed 'goto-script' for @button items context menu to also work on child of @buttons (plural) nodes in myLeoSettings.leo.
-- Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
-- Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
-- Fixed 'show clone ancestors' and 'show clone parents' commands.
-- The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
-- LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
-- Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
+- Fixed ...
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';
@@ -16129,6 +16122,19 @@ public getWorkspaceSession(): string[] | undefined {
 public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
     return this._context.workspaceState.update(Constants.LAST_FILES_KEY, unls);
 }
+
+</t>
+<t tx="felix.20240101211218.1">## 0.2.8
+
+- Translated most of helpCommands.py to typescript, enabling 'help' commands.
+- Added UNL support for both output pane, body panes and all other editor windows.
+- Fixed 'goto-script' for @button items context menu to also work on child of @buttons (plural) nodes in myLeoSettings.leo.
+- Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
+- Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
+- Fixed 'show clone ancestors' and 'show clone parents' commands.
+- The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
+- LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
+- Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
