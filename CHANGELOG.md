@@ -10,6 +10,7 @@
 - Fixed 'show clone ancestors' and 'show clone parents' commands.
 - The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
 - LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
+- Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
 
 ## 0.2.7
 

@@ -141,8 +141,7 @@
           "gnx": "ekr.20041120155431.2",
           "vh": "\\@type type-name: script: script-name"
         }
-      ],
-      "status": 32
+      ]
     },
     {
       "gnx": "ekr.20061011082224",
@@ -459,6 +458,10 @@
               "vh": "@bool report-unchanged-files = True"
             },
             {
+              "gnx": "felix.20240101020955.1",
+              "vh": "@string gnx-kind = none"
+            },
+            {
               "gnx": "ekr.20181018113812.1",
               "vh": "@string initial-chooser-directory = None"
             },
@@ -584,7 +587,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "status": 32
         },
         {
           "gnx": "ekr.20041119034357.20",
@@ -1014,7 +1018,8 @@
             }
           ]
         }
-      ]
+      ],
+      "status": 4
     }
   ],
   "tnodes": {
@@ -1101,6 +1106,7 @@
     "ekr.20150216135059.1": "With @clean and @file, Leo can store persistent data in nodes. This\ninformation consists of the node\u2019s gnx (Global Node Index) and the node\u2019s\nuA, (User Attributes).\n\nThe gnx gives each node a unique, immutable identity. Gnx\u2019s make clones\npossible. The uA allows scripts and plugins to associate arbitrarily much\nadditional data with each node.\n\nBy default, Leo\u2019s importers preserve neither gnx\u2019s nor uA\u2019s. This makes\nimported @auto trees second class citizens. To remedy this, if an outline\ncontains an @persistence node, Leo will save data in the @persistence tree\nthat allows Leo to recover gnx\u2019s and uA\u2019s when re-reading @auto files\nlater. This allows clone links and uA\u2019s to persist.\n\nThis is an optional feature. The stored data is akin to bookmarks. The data\ncan \u201cbreak\u201d (become inaccessible) if the structure (including\nclass/method/function names) changes.\n",
     "ekr.20041119041304": "This option applies to directories specified in filenames in all kinds of @file trees, and to filenames specified in the @path directive.\n\nTrue:  Leo attempts to create directories if they do not exist.\nFalse: Leo never attempts to create directories.",
     "ekr.20200226102131.1": "True: report unchanged files when saving a .leo file.",
+    "felix.20240101020955.1": "Specify the format of gnxs:\n\nnone: Generate legacy gnxs: <self.userId>.<timestamp>.<unique number withing timestamp>\n\nuuid: Generate uuids: See https://docs.python.org/3/library/uuid.html\n\nksuid: Generate ksuids: See https://github.com/saresend/KSUID\n    pip install ksuid\n    \nCompatibility notes:\n    \n- All forms of gnx strings (legacy, UUIDs and KSUIDs) may safely coexist in the same document.\n- All versions of Leo from 4.1 onward can read all forms of gnxs.\n- The \"sort by creation date\" of the todo plugin will not work with UUIDs or KSUIDs.\n\nFor more details, see https://github.com/leo-editor/leo-editor/issues/3047\n",
     "ekr.20181018113812.1": "\n",
     "ekr.20041119041304.1": "This option specifies the directory to be used as a prefix for <filename> in\n\n@path <filename>\n@file <filename>\n@root <filename>\n\nwhen <filename> is a relative path.\n\nValid values for this option:\n\n'!' means relative to the location leo.py (recommended).\n'.' means relative to the location of the .leo file in the top window.\n\nAn absolute path (in platform-dependent format).\n\nRelative paths are not allowed because their meaning would depend on the changing value of the current working directory.",
     "ekr.20071110153046": "This option has effect only when importing so-called non-strict languages,\nfor which leading whitespace is not terribly significant.\n\nTrue: @auto warns about mismatches that occur solely in leading whitespace.",

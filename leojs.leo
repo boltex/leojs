@@ -6981,6 +6981,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/pako": "^2.0.0",
 "@types/safe-json-stringify": "^1.1.2",
 "@types/sql.js": "^1.4.4",
+"@types/uuid": "^9.0.7",
 "@types/vscode": "^1.83.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -7012,12 +7013,14 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "difflib": "^0.2.4",
 "elementtree": "^0.1.7",
 "jszip": "^3.10.1",
+"ksuid": "^3.0.0",
 "lodash": "^4.17.21",
 "md5": "^2.3.0",
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
-"stream": "^0.0.2"
+"stream": "^0.0.2",
+"uuid": "^9.0.1"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showSettingsPage",
@@ -15975,6 +15978,7 @@ div.col-nav {
 - Fixed 'show clone ancestors' and 'show clone parents' commands.
 - The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
 - LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
+- Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';

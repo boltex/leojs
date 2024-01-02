@@ -10,8 +10,10 @@ import * as utils from '../utils';
 import { Commands } from './leoCommands';
 import { Bead } from './leoUndo';
 import { FileCommands } from './leoFileCommands';
-import 'date-format-lite';
 import { NullBody } from './leoFrame';
+import 'date-format-lite';
+import KSUID = require('ksuid');
+import { v4 as uuidv4 } from 'uuid';
 //@-<< imports >>
 //@+others
 //@+node:felix.20210102014453.1: ** class NodeIndices
@@ -124,6 +126,8 @@ export class NodeIndices {
     /**
      * Create a new gnx for v or an empty string if the hold flag is set.
      * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
+     * 
+     * New in Leo 6.7.2: Support `@string gnx-kind` setting.
      */
     public getNewIndex(v: VNode | undefined, cached: boolean = false): string {
         if (!v) {
@@ -132,12 +136,34 @@ export class NodeIndices {
         }
         const c: Commands = v.context;
         const fc: FileCommands = c.fileCommands;
-        const t_s: string = this.update();
-        // Updates self.lastTime and self.lastIndex.
-        const gnx: string = g.toUnicode(
-            `${this.userId}.${t_s}.${this.lastIndex}`
-        );
-        v.fileIndex = gnx;
+
+
+        const uuid_kind = (c.config.getString('gnx-kind') || 'none').toLowerCase();
+
+        //  Leo will continue to work when gnxs are UUIDs or KSUIDs:
+        //  1. The FastAtRead.node_start regex uses `([^:]+):` to find gnxs.
+        //     In other words, the gnx is everything up to the first colon.
+        //     Neither UUIDs nor KSUIDs contain colons, so the read code will
+        //     parse all forms of gnx properly.
+        //  2. NodeIndicds.compute_last_index ignores UUIDs and KSUIDs,
+        //     so it and will allocate a new legacy gnx properly.
+        let gnx;
+        try {
+            if (uuid_kind === 'uuid')
+                gnx = uuidv4();
+            else if (KSUID && uuid_kind === 'ksuid') {
+                gnx = KSUID.randomSync().string;
+            }
+        } catch (e) {
+            g.es_exception(e)
+        }
+        if (!gnx) {
+            // Generate a legacy gnx.
+            const t_s: string = this.update(); // Update self.lastTime and self.lastIndex.
+            gnx = `${this.userId}.${t_s}.${this.lastIndex}`;
+        }
+
+        v.fileIndex = g.toUnicode(gnx);
         this.check_gnx(c, gnx, v);
         fc.gnxDict[gnx] = v;
         return gnx;

@@ -2388,7 +2388,7 @@ export class FileCommands {
             this.usingClipboard = true;
             if (this.c.config.getBool('json-outline-clipboard', true)) {
                 const d = this.leojs_outline_dict(p || this.c.p);
-                s = JSON.stringify(d, null, 4);
+                s = JSON.stringify(d, null, 2);
             } else {
                 this.outputFile = ''; // io.StringIO()
                 this.putProlog();
@@ -2424,7 +2424,7 @@ export class FileCommands {
         try {
             this.usingClipboard = true;
             const d = this.leojs_outline_dict(p || this.c.p); // Checks for illegal ua's
-            s = JSON.stringify(d, null, 4);
+            s = JSON.stringify(d, null, 2);
         } finally {
             // Restore
             this.descendentTnodeUaDictList = tua;
@@ -2494,7 +2494,7 @@ export class FileCommands {
             // Create the dict corresponding to the JSON.
             const d = this.leojs_outline_dict();
             // Convert the dict to JSON.
-            const json_s = JSON.stringify(d, null, 4); // json.dumps(d, indent = 2);
+            const json_s = JSON.stringify(d, null, 2); // json.dumps(d, indent = 2);
 
             const w_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(

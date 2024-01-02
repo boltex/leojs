@@ -3690,6 +3690,7 @@
     "@types/pako": "^2.0.0",
     "@types/safe-json-stringify": "^1.1.2",
     "@types/sql.js": "^1.4.4",
+    "@types/uuid": "^9.0.7",
     "@types/vscode": "^1.83.0",
     "@types/webpack-env": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -3722,11 +3723,13 @@
     "difflib": "^0.2.4",
     "elementtree": "^0.1.7",
     "jszip": "^3.10.1",
+    "ksuid": "^3.0.0",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "os-browserify": "^0.3.0",
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
-    "stream": "^0.0.2"
+    "stream": "^0.0.2",
+    "uuid": "^9.0.1"
   }
 }
