@@ -6988,7 +6988,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
-"@vscode/test-web": "^0.0.24",
+"@vscode/test-web": "^0.0.50",
 "assert": "^2.0.0",
 "buffer": "^6.0.3",
 "eslint": "^8.11.0",

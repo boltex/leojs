@@ -155,7 +155,7 @@ export class NodeIndices {
                 gnx = KSUID.randomSync().string;
             }
         } catch (e) {
-            g.es_exception(e)
+            g.es_exception(e);
         }
         if (!gnx) {
             // Generate a legacy gnx.
