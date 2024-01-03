@@ -1397,6 +1397,7 @@ export class AtFile {
             try {
                 await at.writeAllHelper(p, root);
             } catch (exception) {
+                g.es_exception(exception);
                 at.internalWriteError(p);
             }
         }
@@ -1485,7 +1486,6 @@ export class AtFile {
      * Give a more urgent, more specific, more helpful message.
      */
     public internalWriteError(p: Position): void {
-        g.es_exception();
         g.es(`Internal error writing: ${p.h}`);
         g.es('Please report this error to:');
         g.es('https://groups.google.com/forum/#!forum/leo-editor');

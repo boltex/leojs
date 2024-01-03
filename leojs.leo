@@ -15971,6 +15971,7 @@ div.col-nav {
 </t>
 <t tx="felix.20231224200501.1">## 0.2.9
 
+- Fixed es_exception and scripting error reporting.
 - Fixed ...
 
 </t>
