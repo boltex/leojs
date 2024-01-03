@@ -2,6 +2,7 @@
 
 ## 0.2.9
 
+- Fixed es_exception and scripting error reporting.
 - Fixed ...
 
 ## 0.2.8
