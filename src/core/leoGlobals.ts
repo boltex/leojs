@@ -4209,8 +4209,9 @@ export function es_exception(p_error?: any, c?: Commands): void {
         es_print_error([p_error.stack]);
     } else if (p_error) {
         es_print_error('es_exception called with error: ', p_error);
+    } else {
+        es_print_error('es_exception called without error!');
     }
-    es_print_error('es_exception called without error!');
 }
 
 /*
@@ -5630,7 +5631,7 @@ export async function getScript(
         );
     } catch (exception) {
         es_print('unexpected exception in g.getScript');
-        es_exception();
+        es_exception(exception);
         script = '';
     }
     return script;
@@ -5787,10 +5788,15 @@ export function handleScriptException(
     // script1?: string,  // No longer used.
 ): void {
     warning("exception executing script");
-    es_exception(e);
+    if (e) {
+        if (e.message && e.stack.indexOf('eval at executeScriptHelper') >= 0) {
+            e.stack = "    " + e.message;
+        }
+        es_exception(e);
+    }
 
     // Careful: this test is no longer guaranteed.
-    if (p.v.context != c) {
+    if (p.v.context !== c) {
         return;
     }
 
@@ -6341,7 +6347,7 @@ export async function handleUrl(url: string, c: Commands, p: Position): Promise<
         return urll;  // For unit tests.
     } catch (e) {
         es_print("g.handleUrl: exception opening", url.toString());
-        es_exception();
+        es_exception(e);
         return undefined;
     }
 

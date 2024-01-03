@@ -526,7 +526,7 @@ export class Commands {
                 // Wrap script as an IIAFE to allow 'await' right out the box.
                 script = "(async () => {\n try {\n" +
                     script +
-                    "} catch (e) { g.handleScriptException(c, p, e); }" +
+                    "\n} catch (e) { g.handleScriptException(c, p, e); }" +
                     "\n})();";
 
                 try {
