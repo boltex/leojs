@@ -2175,7 +2175,7 @@ export async function write_file_if_changed(
         return true;
     } catch (exception) {
         es_print(`Exception writing ${fn}`);
-        es_exception();
+        es_exception(exception);
         return false;
     }
 }
@@ -3023,7 +3023,8 @@ export function dummy_act_on_node(c: Commands, p: Position): any {
 // This dummy definition keeps pylint happy.
 //# Plugins can change this.
 
-export let act_on_node = dummy_act_on_node;
+export let act_on_node: any = dummy_act_on_node; // TODO make proxy and fix type for CommandChainDispatcher
+export let visit_tree_item: any = dummy_act_on_node; // TODO make proxy and fix type for CommandChainDispatcher
 
 //@+node:felix.20211106230549.3: *3* g.childrenModifiedSet, g.contentModifiedSet
 export const childrenModifiedSet: VNode[] = [];
@@ -3044,29 +3045,22 @@ export const contentModifiedSet: VNode[] = [];
  * Set app.hookError on all exceptions.
  * Scripts may reset app.hookError to try again.
  */
-export function doHook(tag: string, keywords?: { [key: string]: any }): any {
+export function doHook(tag: string, keywords?: Record<string, any>): any {
     if (app.killed || app.hookError) {
         return undefined;
     }
-    // unneeded
-    /*
-    if (args && args.length){
-        // A minor error in Leo's core.
-        pr(`***ignoring args param.  tag = ${tag}`);
-    }
-    */
+
     if (!app.enablePlugins) {
         if (['open0', 'start1'].includes(tag)) {
-            console.log(
+            warning(
                 'Plugins disabled: use_plugins is 0 in a leoSettings.leo file.'
             );
-            // warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
         }
         return undefined;
     }
     // Get the hook handler function.  Usually this is doPlugins.
     const c: Commands = keywords ? keywords['c'] : undefined;
-    // pylint: disable=consider-using-ternary
+
     let f = (c && c.hookFunction) || app.hookFunction;
     if (!f) {
         if (!!app.pluginsController) {
