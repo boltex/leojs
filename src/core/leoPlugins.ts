@@ -89,7 +89,7 @@ class CommandChainDispatcher {
 /**
  * The global plugins controller, g.app.pluginsController
  */
-class LeoPluginsController {
+export class LeoPluginsController {
 
     // Keys are tags, values are lists of bunches.
     public handlers: Record<string, any[]> = {};
@@ -173,8 +173,8 @@ class LeoPluginsController {
      */
     public callTagHandler(bunch: any, tag: string, keywords: Record<string, any>): any {
 
-        const handler = bunch.moduleName;
-        const moduleName = bunch.fn;
+        const moduleName = bunch.moduleName;
+        const handler = bunch.fn;
         // Make sure the new commander exists.
         for (const key of ['c', 'new_c']) {
             const c = keywords[key];
@@ -259,8 +259,7 @@ class LeoPluginsController {
     /**
      * Register one or more handlers
      */
-    public registerHandler(tags: string | string[], fn: () => any): void {
-
+    public registerHandler(tags: string | string[], fn: (...args: any[]) => any): void {
         if (Array.isArray(tags)) {
             for (const tag of tags) {
                 this.registerOneHandler(tag, fn);
