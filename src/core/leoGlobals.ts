@@ -3047,11 +3047,8 @@ export const contentModifiedSet: VNode[] = [];
  */
 export function doHook(tag: string, keywords: Record<string, any> = {}): any {
     if (app.killed || app.hookError) {
-        console.log('app', app);
         return undefined;
     }
-
-    console.log('DO HOOK! ', tag);
 
     if (!app.enablePlugins) {
         if (['open0', 'start1'].includes(tag)) {
@@ -6266,11 +6263,9 @@ export async function handleUnl(unl_s: string, c: Commands): Promise<Commands | 
     if (!unl) {
         return undefined;
     }
-    doHook('hypercclick1', { c: c, p: c.p, v: c.p });
     const p = await findAnyUnl(unl, c);
     if (!p || !p.__bool__()) {
         console.log(`Not found: ${unl}`);
-        doHook('hypercclick2', { c: c, p: c.p, v: c.p });
         return undefined;
     }
     // Do not assume that p is in c.
@@ -6279,7 +6274,6 @@ export async function handleUnl(unl_s: string, c: Commands): Promise<Commands | 
         app.selectLeoWindow(c2);  // Switch outlines.
     }
     c2.redraw(p);
-    doHook('hypercclick2', { c2: c, p: c2.p, v: c2.p });
     return c2;
 
 }
@@ -6382,9 +6376,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         // Mozilla throws a weird exception, then opens the file!
         try {
             // webbrowser.open(url)
-            doHook('hypercclick1', { c: c, p: c.p, v: c.p });
             void vscode.env.openExternal(vscode.Uri.parse(url));
-            doHook('hypercclick2', { c: c, p: c.p, v: c.p });
         } catch (e) {
             // pass
         }
@@ -6479,7 +6471,10 @@ export async function openUrlOnClick(c: Commands, url?: string): Promise<string 
     // QTextEditWrapper.mouseReleaseEvent calls this outside Leo's command logic.
     // Make sure to catch all exceptions
     try {
-        return await openUrlHelper(c, url);
+        doHook('hypercclick1', { c: c, p: c.p, v: c.p });
+        const result = await openUrlHelper(c, url);
+        doHook('hypercclick2', { c: c, p: c.p, v: c.p });
+        return result;
     } catch (e) {
         es_exception(e);
         return undefined;

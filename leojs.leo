@@ -15994,7 +15994,7 @@ div.col-nav {
 <t tx="felix.20231224200501.1">## 0.2.9
 
 - Fixed es_exception and scripting error reporting.
-- Fixed ...
+- Added support of the plugin system's 'g.registerHandler' for most of the original Leo event names.
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';
@@ -16111,7 +16111,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
                     buttons: true
                 }
             );
-            await g.openUrlHelper(c, p_arg.unl);
+            await g.openUrlOnClick(c, p_arg.unl);
             void this.launchRefresh();
             this.loadSearchSettings();
 

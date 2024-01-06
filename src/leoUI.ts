@@ -573,7 +573,7 @@ export class LeoUI extends NullGui {
                         buttons: true
                     }
                 );
-                await g.openUrlHelper(c, p_arg.unl);
+                await g.openUrlOnClick(c, p_arg.unl);
                 void this.launchRefresh();
                 this.loadSearchSettings();
 
