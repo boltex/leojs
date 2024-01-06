@@ -708,7 +708,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
             g.app.gui.guiName()
             g.es(*args,**keys)
             g.es_print(*args,**keys)
-            g.es_exception()
+            g.es_exception(error)
             g.getScript(c,p,
                 useSelectedText=True,
                 forcePythonSentinels=True,

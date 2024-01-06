@@ -629,7 +629,7 @@ export class ExternalFilesController {
     //                     subprocess.Popen(c_arg, shell=True)
     //                 catch OSError
     //                     g.es_print('c_arg', repr(c_arg))
-    //                     g.es_exception()
+    //                     g.es_exception(OSError)
     //         else if kind == 'exec'
     //             g.es_print('open-with exec no longer valid.')
     //         else if kind == 'os.spawnl'
@@ -655,7 +655,7 @@ export class ExternalFilesController {
     //                     subprocess.Popen(c_arg, shell=True)
     //                 catch OSError
     //                     g.es_print('c_arg', repr(c_arg))
-    //                     g.es_exception()
+    //                     g.es_exception(OSError)
     //         else if callable(kind)
     //             // Invoke openWith like this:
     //             // c.openWith(data=[func,None,None])
@@ -670,7 +670,7 @@ export class ExternalFilesController {
     //         return command  // for unit testing.
     //     catch exception:
     //         g.es('exception executing open-with command:', command)
-    //         g.es_exception()
+    //         g.es_exception(exception)
     //         return f"oops: {command}"
     //@+node:felix.20230503004807.19: *5* efc.remove_temp_file
     /**

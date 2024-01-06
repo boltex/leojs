@@ -1970,7 +1970,7 @@ export async function readFileIntoString(
     // ? needed ?
     // catch (exception){
     //     error(`readFileIntoString: unexpected exception reading ${ fileName } `);
-    //     es_exception();
+    //     es_exception(exception);
     // }
 
     return [undefined, undefined];
@@ -2175,7 +2175,7 @@ export async function write_file_if_changed(
         return true;
     } catch (exception) {
         es_print(`Exception writing ${fn}`);
-        es_exception();
+        es_exception(exception);
         return false;
     }
 }
@@ -3023,7 +3023,8 @@ export function dummy_act_on_node(c: Commands, p: Position): any {
 // This dummy definition keeps pylint happy.
 //# Plugins can change this.
 
-export let act_on_node = dummy_act_on_node;
+export let act_on_node: any = dummy_act_on_node; // TODO make proxy and fix type for CommandChainDispatcher
+export let visit_tree_item: any = dummy_act_on_node; // TODO make proxy and fix type for CommandChainDispatcher
 
 //@+node:felix.20211106230549.3: *3* g.childrenModifiedSet, g.contentModifiedSet
 export const childrenModifiedSet: VNode[] = [];
@@ -3044,111 +3045,76 @@ export const contentModifiedSet: VNode[] = [];
  * Set app.hookError on all exceptions.
  * Scripts may reset app.hookError to try again.
  */
-export function doHook(tag: string, keywords?: { [key: string]: any }): any {
+export function doHook(tag: string, keywords: Record<string, any> = {}): any {
     if (app.killed || app.hookError) {
         return undefined;
     }
-    // unneeded
-    /*
-    if (args && args.length){
-        // A minor error in Leo's core.
-        pr(`***ignoring args param.  tag = ${tag}`);
-    }
-    */
+
     if (!app.enablePlugins) {
         if (['open0', 'start1'].includes(tag)) {
-            console.log(
+            warning(
                 'Plugins disabled: use_plugins is 0 in a leoSettings.leo file.'
             );
-            // warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
         }
         return undefined;
     }
     // Get the hook handler function.  Usually this is doPlugins.
     const c: Commands = keywords ? keywords['c'] : undefined;
-    // pylint: disable=consider-using-ternary
+
     let f = (c && c.hookFunction) || app.hookFunction;
     if (!f) {
-        if (!!app.pluginsController) {
-            app.hookFunction = app.pluginsController?.doPlugins;
-            if (app.hookFunction) {
-                f = app.hookFunction;
-            }
+        if (app.pluginsController.doPlugins) {
+            app.hookFunction = app.pluginsController.doPlugins.bind(app.pluginsController);
+        } else {
+            app.hookFunction = (...args: any[]) => {
+                // Dummy function for unit tests. 
+            };
         }
-    }
-    if (!f) {
-        // console.log('TODO: (Plugin system) g.doHook for tag: ', tag);
-        return;
+        if (app.hookFunction) {
+            f = app.hookFunction;
+        }
     }
     try {
         // Pass the hook to the hook handler.
         // pr('doHook',f.__name__,keywords.get('c'))
         return f(tag, keywords);
     } catch (exception) {
-        es_exception();
+        es_exception(exception);
         app.hookError = true; // Suppress this function.
         app.idle_time_hooks_enabled = false;
         return undefined;
     }
-    // TODO !
-    /*
-    if g.app.killed or g.app.hookError:
-        return None
-    if args:
-        # A minor error in Leo's core.
-        g.pr(f"***ignoring args param.  tag = {tag}")
-    if not g.app.config.use_plugins:
-        if tag in ('open0', 'start1'):
-            g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
-        return None
-    # Get the hook handler function.  Usually this is doPlugins.
-    c = keywords.get("c")
-    # pylint: disable=consider-using-ternary
-    f = (c and c.hookFunction) or g.app.hookFunction
-    if not f:
-        g.app.hookFunction = f = g.app.pluginsController.doPlugins
-    try:
-        # Pass the hook to the hook handler.
-        # g.pr('doHook',f.__name__,keywords.get('c'))
-        return f(tag, keywords)
-    catch Exception:
-        g.es_exception()
-        g.app.hookError = True  # Suppress this function.
-        g.app.idle_time_hooks_enabled = False
-        return None
-    */
-    return undefined;
+
 }
 //@+node:felix.20211106230549.5: *3* g.Wrappers for g.app.pluginController methods
 // Important: we can not define g.pc here!
 //@+node:felix.20211106230549.6: *4* g.Loading & registration
 
-/*
-def loadOnePlugin(pluginName, verbose=False):
-    pc = g.app.pluginsController
-    return pc.loadOnePlugin(pluginName, verbose=verbose)
+// def loadOnePlugin(pluginName, verbose=False):
+//     pc = g.app.pluginsController
+//     return pc.loadOnePlugin(pluginName, verbose=verbose)
 
-def registerExclusiveHandler(tags, fn):
-    pc = g.app.pluginsController
-    return pc.registerExclusiveHandler(tags, fn)
+export function registerExclusiveHandler(tags: string | string[], fn: (...args: any[]) => any): any {
+    const pc = app.pluginsController;
+    return pc.registerExclusiveHandler(tags, fn);
+}
+export function registerHandler(tags: string | string[], fn: (...args: any[]) => any): any {
+    const pc = app.pluginsController;
+    return pc.registerHandler(tags, fn);
+}
+// def plugin_signon(module_name, verbose=False):
+//     pc = g.app.pluginsController
+//     return pc.plugin_signon(module_name, verbose)
 
-def registerHandler(tags, fn):
-    pc = g.app.pluginsController
-    return pc.registerHandler(tags, fn)
+// def unloadOnePlugin(moduleOrFileName, verbose=False):
+//     pc = g.app.pluginsController
+//     return pc.unloadOnePlugin(moduleOrFileName, verbose)
 
-def plugin_signon(module_name, verbose=False):
-    pc = g.app.pluginsController
-    return pc.plugin_signon(module_name, verbose)
+export function unregisterHandler(tags: string | string[], fn: (...args: any[]) => any): any {
+    const pc = app.pluginsController;
+    return pc.unregisterHandler(tags, fn);
+}
 
-def unloadOnePlugin(moduleOrFileName, verbose=False):
-    pc = g.app.pluginsController
-    return pc.unloadOnePlugin(moduleOrFileName, verbose)
-
-def unregisterHandler(tags, fn):
-    pc = g.app.pluginsController
-    return pc.unregisterHandler(tags, fn)
-
-*/
 //@+node:felix.20211106230549.7: *4* g.Information
 /*
 def getHandlersForTag(tags):
@@ -4044,10 +4010,10 @@ export function isValidEncoding(encoding: string): boolean {
     //     return false
     // except AttributeError:  # Linux
     //     return false
-    // except Exception:
+    // except e:
     //     // UnicodeEncodeError
     //     g.es_print('Please report the following error')
-    //     g.es_exception()
+    //     g.es_exception(e)
     //     return false
 }
 
@@ -5375,9 +5341,9 @@ export function os_path_splitext(p_path: string): [string, string] {
 //             return
 //         try:
 //             subPopen = subprocess.Popen(['xdg-open', fname], stderr=wre, shell=False)
-//         catch Exception:
+//         catch e:
 //             g.es_print(f"error opening {fname!r}")
-//             g.es_exception()
+//             g.es_exception(e)
 //         try:
 //             itoPoll = g.IdleTime(
 //                 (lambda ito: itPoll(fname, ree, subPopen, g, ito)),
@@ -6505,7 +6471,10 @@ export async function openUrlOnClick(c: Commands, url?: string): Promise<string 
     // QTextEditWrapper.mouseReleaseEvent calls this outside Leo's command logic.
     // Make sure to catch all exceptions
     try {
-        return await openUrlHelper(c, url);
+        doHook('hypercclick1', { c: c, p: c.p, v: c.p });
+        const result = await openUrlHelper(c, url);
+        doHook('hypercclick2', { c: c, p: c.p, v: c.p });
+        return result;
     } catch (e) {
         es_exception(e);
         return undefined;

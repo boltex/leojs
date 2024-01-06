@@ -2695,9 +2695,9 @@ export class RecursiveImportController {
     //             self.import_dir(dir_, parent)
     //         self.post_process(parent)
     //         u.afterInsertNode(parent, 'recursive-import', undoData)
-    //     except Exception:
+    //     except e:
     //         self.error('Exception in recursive import')
-    //         g.es_exception()
+    //         g.es_exception(e)
     //     finally:
     //         g.app.disable_redraw = False
     //         for p2 in parent.self_and_subtree(copy=False):

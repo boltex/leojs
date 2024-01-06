@@ -54,6 +54,7 @@ import * as writer_treepad from '../writers/treepad';
 import { ScriptingController } from './mod_scripting';
 import { SessionManager } from './leoSessions';
 import { BaseWriter } from '../writers/basewriter';
+import * as leoPlugins from './leoPlugins';
 
 //@-<< imports >>
 //@+others
@@ -119,8 +120,7 @@ export class IdleTimeManager {
             }
         }
         // Handle idle-time hooks.
-        // ? TODO : pluginsController ?
-        // g.app.pluginsController.on_idle();
+        g.app.pluginsController.on_idle();
     }
     //@+node:felix.20210102213337.4: *3* itm.start
     /**
@@ -242,7 +242,7 @@ export class LeoApp {
     // public openWithManager: any = null;
     // The singleton OpenWithManager instance.
     public nodeIndices: NodeIndices | undefined; // The singleton nodeIndices instance.
-    public pluginsController: any = null; // The singleton PluginsManager instance. 
+    public pluginsController!: leoPlugins.LeoPluginsController; // The singleton PluginsManager instance. 
     public recentFilesManager!: RecentFilesManager;
     public sessionManager!: SessionManager; // The singleton SessionManager instance. 
     // The Commands class...
@@ -322,7 +322,7 @@ export class LeoApp {
     public hookError: boolean = false; // True: suppress further calls to hooks.
     // g.doHook sets g.app.hookError on all exceptions.
     // Scripts may reset g.app.hookError to try again.
-    public hookFunction = null;
+    public hookFunction!: (tag: string, keys: Record<string, any>) => any;
     // Application wide hook function.
     public idle_time_hooks_enabled: boolean = true;
     // True: idle - time hooks are enabled.
@@ -1169,6 +1169,7 @@ export class LeoApp {
         if (!this.leoID && useDialog) {
             const w_id = await utils.getIdFromDialog();
             this.leoID = this.cleanLeoID(w_id, '');
+            // TODO : FINISH ISOLATION! separate VSCODE from Leo!
             if (this.leoID && vscode && vscode.workspace) {
                 const w_vscodeConfig = vscode.workspace.getConfiguration(
                     Constants.CONFIG_NAME
@@ -3097,8 +3098,8 @@ export class LoadManager {
         //                 // Important: use importlib to give imported modules their fully qualified names.
         //                 m = importlib.import_module(f"leo.plugins.writers.{sfn[:-3]}")
         //                 self.parse_writer_dict(sfn, m)
-        //             except Exception:
-        //                 g.es_exception()
+        //             except e:
+        //                 g.es_exception(e)
         //                 g.warning(f"can not import leo.plugins.writers.{sfn}")
         // if trace:
         //     g.trace('LM.writersDispatchDict')
@@ -3195,17 +3196,10 @@ export class LoadManager {
         // Can be done early. Uses only g.app.loadDir & g.app.homeDir.
         this.createAllImporterData();
         g.assert(g.app.loadManager);
-
         // Make sure we call the new leoPlugins.init top-level function.
-        // leoPlugins.init(); // TODO: plugins system ?
-        // ! TEMP EQUIVALENT TO leoPlugins.init();
-        g.app.pluginsController = {
-            // TODO
-        }; // new LeoPluginsController();
-
+        leoPlugins.init();
         // Force the user to set g.app.leoID.
         await g.app.setLeoID(true, verbose);
-
         // w_leoID will at least be 'None'.
         g.app.idleTimeManager = new IdleTimeManager();
         // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
@@ -3329,6 +3323,7 @@ export class LoadManager {
             fileName: undefined,
         });
 
+        // TODO USE ORIGINAL MECHANICS!
         // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
         c.theScriptingController = new ScriptingController(c);
         await c.theScriptingController.createAllButtons();
@@ -3374,7 +3369,7 @@ export class LoadManager {
             // c.frame.log.enable(True)
             // g.app.writeWaitingLog(c);
             // c.setLog()
-            // lm.createMenu(c, fn)
+            lm.createMenu(c, fn);
             lm.finishOpen(c);
         };
 
@@ -3419,6 +3414,20 @@ export class LoadManager {
 
     }
 
+    //@+node:felix.20240105002740.1: *6* LM.createMenu
+    public createMenu(c: Commands, fn?: string): void {
+        // lm = self
+        // Create the menu as late as possible so it can use user commands.
+        if (!g.doHook("menu1", { c: c, p: c.p, v: c.p })) {
+            // c.frame.menu.createMenuBar(c.frame); // LEOJS : NOT USED
+            // g.app.recentFilesManager.updateRecentFiles(fn);
+            g.doHook("menu2", { c: c, p: c.p, v: c.p });
+            g.doHook("after-create-leo-frame", { c: c });
+            g.doHook("after-create-leo-frame2", { c: c });
+            // Fix bug 844953: tell Unity which menu to use.
+            // c.enableMenuBar()
+        }
+    }
     //@+node:felix.20210124192005.1: *6* LM.findOpenFile
     /**
      * Returns the commander of already opened Leo file

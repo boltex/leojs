@@ -792,7 +792,6 @@ export class NullTree {
         // this.set_status_line(p);
 
         if (call_event_handlers) {
-            //  g.doHook("select2", c=c, new_p=p, old_p=old_p, new_v=p, old_v=old_p)
             g.doHook('select2', {
                 c: c,
                 new_p: p,

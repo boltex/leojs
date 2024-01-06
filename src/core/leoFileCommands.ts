@@ -2484,9 +2484,9 @@ export class FileCommands {
         /*
         try:
             f = open(fileName, 'wb')  # Must write bytes.
-        except Exception:
+        except e:
             g.es(f"can not open {fileName}")
-            g.es_exception()
+            g.es_exception(e)
             return False
         */
 

@@ -3,7 +3,7 @@
 ## 0.2.9
 
 - Fixed es_exception and scripting error reporting.
-- Fixed ...
+- Added support of the plugin system's 'g.registerHandler' for most of the original Leo event names.
 
 ## 0.2.8
 
