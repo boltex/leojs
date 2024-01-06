@@ -4135,6 +4135,8 @@ public async selectTreeNode(
 
     const c = g.app.windowList[this.frameIndex].c;
 
+    g.doHook("headclick1", { c: c, p: p_node, v: p_node });
+
     // * check if used via context menu's "open-aside" on an unselected node: check if p_node is currently selected, if not select it
     if (
         p_aside &amp;&amp;
@@ -4156,6 +4158,7 @@ public async selectTreeNode(
     // (other tree nodes with same gnx may have different syntax language coloring because of parents lineage)
     if (p_node.__eq__(this.lastSelectedNode)) {
         this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
+        g.doHook("headclick2", { c: c, p: p_node, v: p_node });
         return this.showBody(!!p_aside, w_showBodyKeepFocus).catch((p_error) =&gt; {
             return Promise.resolve(); // intercept cancellation as success: next one is going to replace anyways.
         });
@@ -4180,12 +4183,13 @@ public async selectTreeNode(
                     // states: false,
                 }
             );
+            g.doHook("headclick2", { c: c, p: p_node, v: p_node });
             return this._launchRefresh();
         }
         this._refreshType.states = true;
         this.getStates();
     }
-
+    g.doHook("headclick2", { c: c, p: p_node, v: p_node });
     // * Apply the node to the body text without waiting for the selection promise to resolve
     return this._tryApplyNodeToBody(p_node, !!p_aside, w_showBodyKeepFocus);
 
@@ -4526,7 +4530,7 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
  * * Asks for a headline label to be entered and creates (inserts) a new node under the current, or specified, node
  * @param p_node specified under which node to insert, or leave undefined to use whichever is currently selected
  * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
- * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
+ * @param p_asChild Insert as child instead of as sibling
  * @returns Thenable that resolves when done
  */
 public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise&lt;unknown&gt; {
@@ -7854,6 +7858,13 @@ public gotSelectedNode(p_node: Position): void {
         this.leoStates.setSelectedNodeFlags(p_node);
     }
 
+    // Get 'c' before timeout for proper c that was refreshed.
+    const c = g.app.windowList[this.frameIndex].c;
+
+    // Do in a timeout to let rest of tree refresh.
+    setTimeout(() =&gt; {
+        g.doHook('after-redraw-outline', { c: c });
+    }, 0);
 }
 
 </t>
@@ -9253,7 +9264,7 @@ private _bodySaveDocument(
         const w_v = c.fileCommands.gnxDict[w_gnx]; // target to change
         if (w_v) {
 
-            if (body !== w_v.b) {
+            if (body !== w_v.b &amp;&amp; !g.doHook("bodykey1", { c: c, v: w_v })) {
                 // if different, replace body and set dirty
                 let w_p: Position | undefined;
                 if (c.p.gnx === w_v.gnx) {
@@ -9285,7 +9296,7 @@ private _bodySaveDocument(
                     }
                     // this.clearHeadlineSelection();
                 }
-
+                g.doHook("bodykey2", { c: c, v: w_v });
             }
 
         } else {
@@ -14989,13 +15000,23 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         this._hibResolve = p_resolve;
         // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
         this._hibDisposables.push(hib.onDidHide(() =&gt; {
+            let changed = false;
+            const c = g.app.windowList[this.frameIndex].c;
             if (this._hib) {
-                this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+                changed = this._hib.value !== p_options.value;
+                if (g.doHook("headkey1", { c: c, p: c.p, changed: changed })) {
+                    // The hook claims to have handled the event, so 'cancel'.
+                    this._hibLastValue = undefined;
+                } else {
+                    // ok
+                    this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+                }
             }
             this.leoStates.leoEditHeadline = false;
             if (this._hibResolve) {
                 // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
                 this._hibResolve(this._hibLastValue);
+                g.doHook("headkey2", { c: c, p: c.p, changed: changed });
                 // Dispose of everything disposable with the edit headline process.
                 for (const disp of this._hibDisposables) {
                     disp.dispose();

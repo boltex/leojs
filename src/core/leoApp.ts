@@ -3369,7 +3369,7 @@ export class LoadManager {
             // c.frame.log.enable(True)
             // g.app.writeWaitingLog(c);
             // c.setLog()
-            lm.createMenu(c, fn)
+            lm.createMenu(c, fn);
             lm.finishOpen(c);
         };
 

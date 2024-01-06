@@ -3070,7 +3070,7 @@ export function doHook(tag: string, keywords: Record<string, any> = {}): any {
             app.hookFunction = app.pluginsController.doPlugins.bind(app.pluginsController);
         } else {
             app.hookFunction = (...args: any[]) => {
-                // pass
+                // Dummy function for unit tests. 
             };
         }
         if (app.hookFunction) {
@@ -6266,9 +6266,11 @@ export async function handleUnl(unl_s: string, c: Commands): Promise<Commands | 
     if (!unl) {
         return undefined;
     }
+    doHook('hypercclick1', { c: c, p: c.p, v: c.p });
     const p = await findAnyUnl(unl, c);
     if (!p || !p.__bool__()) {
         console.log(`Not found: ${unl}`);
+        doHook('hypercclick2', { c: c, p: c.p, v: c.p });
         return undefined;
     }
     // Do not assume that p is in c.
@@ -6277,6 +6279,7 @@ export async function handleUnl(unl_s: string, c: Commands): Promise<Commands | 
         app.selectLeoWindow(c2);  // Switch outlines.
     }
     c2.redraw(p);
+    doHook('hypercclick2', { c2: c, p: c2.p, v: c2.p });
     return c2;
 
 }
@@ -6379,7 +6382,9 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         // Mozilla throws a weird exception, then opens the file!
         try {
             // webbrowser.open(url)
+            doHook('hypercclick1', { c: c, p: c.p, v: c.p });
             void vscode.env.openExternal(vscode.Uri.parse(url));
+            doHook('hypercclick2', { c: c, p: c.p, v: c.p });
         } catch (e) {
             // pass
         }
