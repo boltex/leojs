@@ -321,7 +321,7 @@ export class CommanderFileCommands {
         // frame.resizePanesToRatio(frame.ratio, frame.secondary_ratio)
         // Resize the _new_ frame.
         // c.frame.createFirstTreeNode()
-        // lm.createMenu(c);
+        lm.createMenu(c);
         lm.finishOpen(c);
         //g.app.writeWaitingLog(c);
         g.doHook('new', { old_c: old_c, c: c, new_c: c });

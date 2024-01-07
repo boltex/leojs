@@ -115,9 +115,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
             const w_gnx = utils.leoUriToStr(p_uri);
             if (p_uri.fsPath.length === 1) {
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-            } else if (false && w_gnx === this._lastGnx && this._openedBodiesGnx.includes(this._lastGnx)) {
-                // ! Always return current size: w_v.b.length ! Not this._lastBodyLength !
-                console.log('had stats: modified: ', this._openedBodiesInfo[this._lastGnx].mtime);
+            } else if (w_gnx === this._lastGnx && this._openedBodiesGnx.includes(this._lastGnx)) {
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[this._lastGnx].ctime,

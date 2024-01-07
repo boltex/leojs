@@ -155,7 +155,7 @@ export class NodeIndices {
                 gnx = KSUID.randomSync().string;
             }
         } catch (e) {
-            g.es_exception(e)
+            g.es_exception(e);
         }
         if (!gnx) {
             // Generate a legacy gnx.
@@ -3733,6 +3733,7 @@ export class VNode {
     public _addLink(childIndex: number, parent_v: VNode): void {
         const v: VNode = this;
         v.context.frame.tree.generation += 1;
+        parent_v.childrenModified();  // For a plugin.
         // Update parent_v.children & v.parents.
         parent_v.children.splice(childIndex, 0, v);
         v.parents.push(parent_v);

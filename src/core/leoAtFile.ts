@@ -444,6 +444,7 @@ export class AtFile {
         const contents = fromString || file_s;
         new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName!, root);
         root.clearDirty();
+        g.doHook('after-reading-external-file', { c: c, p: root });
         return true;
     }
     //@+node:felix.20230415162513.7: *6* at.deleteUnvisitedNodes
@@ -662,6 +663,7 @@ export class AtFile {
             p.clearDirty();
         } else {
             g.doHook('after-auto', { c: c, p: p });
+            g.doHook('after-reading-external-file', { c: c, p: p });
         }
 
         return p; // For #451: return p.
@@ -702,6 +704,8 @@ export class AtFile {
         }
         p.b = head + g.toUnicode(s, encoding, true);
         g.doHook('after-edit', { p: p });
+        g.doHook('after-reading-external-file', { c: c, p: p });
+
     }
     //@+node:felix.20230415162513.15: *5* at.readOneAtAsisNode
     /**
@@ -729,6 +733,7 @@ export class AtFile {
         if (!c.isChanged() && p.b !== old_body) {
             c.setChanged();
         }
+        g.doHook('after-reading-external-file', { c: c, p: p });
     }
     //@+node:felix.20230415162513.16: *5* at.readOneAtCleanNode & helpers
     /**
@@ -786,6 +791,7 @@ export class AtFile {
         const gnx2vnode = at.fileCommands.gnxDict;
         const contents = new_private_lines.join('');
         new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
+        g.doHook('after-reading-external-file', { c: c, p: root });
         return true; // Errors not detected.
     }
     //@+node:felix.20230415162513.17: *6* at.dump_lines
@@ -864,6 +870,7 @@ export class AtFile {
             if (ok) {
                 // Create the private file automatically.
                 await at.writeOneAtShadowNode(p);
+                g.doHook('after-reading-external-file', { c: c, p: p });
             }
         }
     }
@@ -1397,6 +1404,7 @@ export class AtFile {
             try {
                 await at.writeAllHelper(p, root);
             } catch (exception) {
+                g.es_exception(exception);
                 at.internalWriteError(p);
             }
         }
@@ -1485,7 +1493,6 @@ export class AtFile {
      * Give a more urgent, more specific, more helpful message.
      */
     public internalWriteError(p: Position): void {
-        g.es_exception();
         g.es(`Internal error writing: ${p.h}`);
         g.es('Please report this error to:');
         g.es('https://groups.google.com/forum/#!forum/leo-editor');
@@ -1669,6 +1676,12 @@ export class AtFile {
                 at.addToOrphanList(root);
                 return;
             }
+            try {
+                g.doHook('before-writing-external-file', { c: c, p: root });
+            } catch (e) {
+                // The hook must print an error message.
+                return;
+            }
             at.outputList = [];
             for (const p of root.self_and_subtree(false)) {
                 at.writeAsisNode(p);
@@ -1799,6 +1812,12 @@ export class AtFile {
                 at.addToOrphanList(root);
                 return false;
             }
+            try {
+                g.doHook('before-writing-external-file', { c: c, p: root });
+            } catch (e) {
+                // The hook must print an error message.
+                return false;
+            }
             if (c.persistenceController) {
                 c.persistenceController.update_before_write_foreign_file(root);
             }
@@ -1904,6 +1923,12 @@ export class AtFile {
             if (!fileName || !w_precheck) {
                 return;
             }
+            try {
+                g.doHook('before-writing-external-file', { c: c, p: root });
+            } catch (e) {
+                // The hook must print an error message.
+                return;
+            }
             at.outputList = [];
             await at.putFile(root, undefined, false);
             at.warnAboutOrphandAndIgnoredNodes();
@@ -1951,6 +1976,12 @@ export class AtFile {
                 at.addToOrphanList(root);
                 return false;
             }
+            try {
+                g.doHook('before-writing-external-file', { c: c, p: root });
+            } catch (e) {
+                // The hook must print an error message.
+                return false;
+            }
             const contents = g
                 .splitLines(p.b)
                 .filter((s) => at.directiveKind4(s, 0) === AtFile.noDirective)
@@ -1983,6 +2014,12 @@ export class AtFile {
             if (!fileName || !w_precheck) {
                 // Raise dialog warning of data loss.
                 at.addToOrphanList(root);
+                return;
+            }
+            try {
+                g.doHook('before-writing-external-file', { c: c, p: root });
+            } catch (e) {
+                // The hook must print an error message.
                 return;
             }
             at.outputList = [];
@@ -2020,6 +2057,8 @@ export class AtFile {
             if (!fileName || !w_precheck) {
                 return;
             }
+            g.doHook('before-writing-external-file', { c: c, p: root });
+
             at.outputList = [];
             at.putFile(root, undefined, false);
             at.warnAboutOrphandAndIgnoredNodes();
@@ -2073,6 +2112,12 @@ export class AtFile {
             }
             const w_precheck = await at.precheck(full_path, root);
             if (!testing && !w_precheck) {
+                return false;
+            }
+            try {
+                g.doHook('before-writing-external-file', { c: c, p: p });
+            } catch (e) {
+                // The hook must print an error message.
                 return false;
             }
             //
@@ -3023,7 +3068,7 @@ export class AtFile {
         //     }
         // }catch (exception){
         //     g.trace("unexpected exception");
-        //     g.es_exception();
+        //     g.es_exception(exception);
         // }
         // return false;
     }
@@ -3073,7 +3118,7 @@ export class AtFile {
         //         return true;
         //     return true;  // Suppress error if pyflakes can not be imported.
         // catch (exception)
-        //     g.es_exception()
+        //     g.es_exception(exception)
         //     return true;  // Pretend all is well
     }
     //@+node:felix.20230415162517.70: *6* at.runPyflakes
@@ -3092,7 +3137,7 @@ export class AtFile {
         //         return ok
         //     return True  // Suppress error if pyflakes can not be imported.
         // catch (exception)
-        //     g.es_exception()
+        //     g.es_exception(exception)
         //     return true;  // Pretend all is well
     }
     //@+node:felix.20230415162517.71: *5* at.directiveKind4 (write logic)
@@ -3677,9 +3722,9 @@ export class AtFile {
         //     g.es(message)
         //     line2 = repr(str(line))[1:-1]
         //     g.es("offending line:\n", line2)
-        // catch Exception
+        // catch e
         //     g.trace("unexpected exception")
-        //     g.es_exception()
+        //     g.es_exception(e)
         //     raise
     }
     //@+node:felix.20230415162517.91: *5* at.warnAboutOrpanAndIgnoredNodes
@@ -3695,7 +3740,7 @@ export class AtFile {
         }
         for (const p of root.self_and_subtree(false)) {
             if (!p.v.isVisited()) {
-                at.writeError('Orphan node:  ' + p.h);
+                at.writeError('Orphan node 1:  ' + p.h);
                 if (p.hasParent()) {
                     g.blue('parent node:', p.parent().h);
                 }
@@ -3709,7 +3754,7 @@ export class AtFile {
             } else {
                 // #1050: test orphan bit.
                 if (p.isOrphan()) {
-                    at.writeError('Orphan node: ' + p.h);
+                    at.writeError('Orphan node 2: ' + p.h);
                     if (p.hasParent()) {
                         g.blue('parent node:', p.parent().h);
                     }

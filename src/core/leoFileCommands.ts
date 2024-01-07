@@ -2384,9 +2384,8 @@ export class FileCommands {
         const vnodesDict = this.vnodesDict;
         let s: string;
         try {
-            // TODO : USE BUFFER OR OTHER OBJECT ???
             this.usingClipboard = true;
-            if (this.c.config.getBool('json-outline-clipboard', true)) {
+            if (this.c.config.getBool('json-outline-clipboard', false)) {
                 const d = this.leojs_outline_dict(p || this.c.p);
                 s = JSON.stringify(d, null, 2);
             } else {
@@ -2484,9 +2483,9 @@ export class FileCommands {
         /*
         try:
             f = open(fileName, 'wb')  # Must write bytes.
-        except Exception:
+        except e:
             g.es(f"can not open {fileName}")
-            g.es_exception()
+            g.es_exception(e)
             return False
         */
 

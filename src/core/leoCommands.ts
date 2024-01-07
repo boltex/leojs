@@ -128,7 +128,7 @@ export class Commands {
         } & { __ivars__: string[] };
     } = {}; // Keys are command names, values are functions.
     public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
-    public hookFunction: any = undefined; // One of three places that g.doHook looks for hook functions.
+    public hookFunction!: (tag: string, keys: Record<string, any>) => any; // One of three places that g.doHook looks for hook functions.
 
     public ignoreChangedPaths = false; // True: disable path changed message in at.WriteAllHelper.
     public inCommand: boolean = false; // Interlocks to prevent premature closing of a window.
@@ -291,7 +291,9 @@ export class Commands {
 
         // Create the gui frame.
         const title = this.computeWindowTitle();
-
+        if (!g.app.initing) {
+            g.doHook("before-create-leo-frame", { c: c });
+        }
         this.frame = this.gui.createLeoFrame(c, title);
         g.assert(this.frame.c === this);
 
@@ -526,7 +528,7 @@ export class Commands {
                 // Wrap script as an IIAFE to allow 'await' right out the box.
                 script = "(async () => {\n try {\n" +
                     script +
-                    "} catch (e) { g.handleScriptException(c, p, e); }" +
+                    "\n} catch (e) { g.handleScriptException(c, p, e); }" +
                     "\n})();";
 
                 try {
@@ -1436,7 +1438,7 @@ export class Commands {
     public clearMarked(p: Position): void {
         const c: Commands = this;
         p.v.clearMarked();
-        // g.doHook("clear-mark", c, p);
+        g.doHook("clear-mark", { c: c, p: p });
     }
 
     //@+node:felix.20210131011607.7: *5* c.setBodyString
@@ -1549,7 +1551,7 @@ export class Commands {
         const c: Commands = this;
         p.setMarked();
         p.setDirty(); // Defensive programming.
-        // g.doHook("set-mark", c, p);
+        g.doHook("set-mark", { c: c, p: p });
     }
 
     //@+node:felix.20210215204937.1: *5* c.topPosition & c.setTopPosition
@@ -2650,8 +2652,8 @@ export class Commands {
             with open(path, encoding='utf-8', mode='w') as f:
                 f.write(script)
         }
-        except Exception:
-            g.es_exception()
+        except e:
+            g.es_exception(e)
             g.es(f"Failed to write script to {path}")
             // g.es("Check your configuration of script_file_path, currently %s" %
                 // c.config.getString('script-file-path'))
@@ -4505,8 +4507,9 @@ export class Commands {
                 // pylint: disable=not-callable
                 try:
                     func()
-                except Exception:
-                    g.es_exception()
+                    g.doHook("after-reload-settings", c=c)
+                except e:
+                    g.es_exception(e)
                     c.configurables.remove(obj)
 
         */

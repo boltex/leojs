@@ -1363,7 +1363,7 @@ export class ActiveSettingsOutline {
 
     public c: Commands;
     public commander!: Commands;
-    public commanders!: [string, Commands][]
+    public commanders!: [string, Commands][];
     public local_c: undefined | Commands;
     public parents!: Position[];
     public level!: number;

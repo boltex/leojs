@@ -2,7 +2,7 @@
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -3696,7 +3696,7 @@
     "@typescript-eslint/eslint-plugin": "^5.16.0",
     "@typescript-eslint/parser": "^5.16.0",
     "@vscode/test-electron": "^2.0.3",
-    "@vscode/test-web": "^0.0.24",
+    "@vscode/test-web": "^0.0.50",
     "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "eslint": "^8.11.0",

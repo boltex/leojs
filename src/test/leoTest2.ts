@@ -61,7 +61,7 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
     g.app.config = new GlobalConfigManager();
 
     g.app.db = new g.NullObject('g.app.db');
-    g.app.pluginsController = new g.NullObject('g.app.pluginsController');
+    g.app.pluginsController = new g.NullObject('g.app.pluginsController') as any;
 
     if (gui_name === 'null') {
         g.app.gui = new NullGui();

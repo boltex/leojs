@@ -1791,7 +1791,7 @@ export class CommanderOutlineCommands {
         c.endEditing();
         const undoData: Bead = u.beforeInsertNode(current);
         const p: Position = current.insertBefore();
-        // g.doHook('create-node', c, p);
+        g.doHook('create-node', { c: c, p: p });
         p.setDirty();
         c.setChanged();
         u.afterInsertNode(p, op_name, undoData);
@@ -1825,7 +1825,7 @@ export class CommanderOutlineCommands {
         c.endEditing();
         const undoData: Bead = u.beforeInsertNode(current);
         const p: Position = current.insertBefore();
-        // g.doHook('create-node', c, p);
+        g.doHook('create-node', { c: c, p: p });
         p.setDirty();
         c.setChanged();
         u.afterInsertNode(p, op_name, undoData);
@@ -2156,7 +2156,7 @@ export class CommanderOutlineCommands {
             w_p = p;
         }
         if (changed) {
-            // g.doHook("clear-all-marks", c, w_p); // w_p was p
+            g.doHook("clear-all-marks", { c: c, p: w_p });
             c.setChanged();
             u.afterChangeGroup(current, undoType);
         }

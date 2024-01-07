@@ -9,7 +9,8 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
-<v t="felix.20231224200501.1"><vh>0.2.8</vh></v>
+<v t="felix.20231224200501.1"><vh>0.2.9</vh></v>
+<v t="felix.20240101211218.1"><vh>0.2.8</vh></v>
 <v t="felix.20231216233654.1"><vh>0.2.7</vh></v>
 <v t="felix.20231221231533.1"><vh>0.2.6</vh></v>
 <v t="fil.20231216220210.1"><vh>0.2.5</vh></v>
@@ -548,6 +549,7 @@
 <v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
 <v t="felix.20210102012632.1"><vh>@file src/core/leoNodes.ts</vh></v>
 <v t="felix.20230420210348.1"><vh>@file src/core/leoPersistence.ts</vh></v>
+<v t="felix.20240103231120.1"><vh>@file src/core/leoPlugins.ts</vh></v>
 <v t="felix.20230427003032.1"><vh>@file src/core/leoRst.ts</vh></v>
 <v t="felix.20231003002131.1"><vh>@file src/core/leoSessions.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
@@ -3736,7 +3738,6 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
-    public lastRefreshHadDirty: undefined | boolean; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -4133,6 +4134,8 @@ public async selectTreeNode(
 
     const c = g.app.windowList[this.frameIndex].c;
 
+    g.doHook("headclick1", { c: c, p: p_node, v: p_node });
+
     // * check if used via context menu's "open-aside" on an unselected node: check if p_node is currently selected, if not select it
     if (
         p_aside &amp;&amp;
@@ -4154,6 +4157,7 @@ public async selectTreeNode(
     // (other tree nodes with same gnx may have different syntax language coloring because of parents lineage)
     if (p_node.__eq__(this.lastSelectedNode)) {
         this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
+        g.doHook("headclick2", { c: c, p: p_node, v: p_node });
         return this.showBody(!!p_aside, w_showBodyKeepFocus).catch((p_error) =&gt; {
             return Promise.resolve(); // intercept cancellation as success: next one is going to replace anyways.
         });
@@ -4178,12 +4182,13 @@ public async selectTreeNode(
                     // states: false,
                 }
             );
+            g.doHook("headclick2", { c: c, p: p_node, v: p_node });
             return this._launchRefresh();
         }
         this._refreshType.states = true;
         this.getStates();
     }
-
+    g.doHook("headclick2", { c: c, p: p_node, v: p_node });
     // * Apply the node to the body text without waiting for the selection promise to resolve
     return this._tryApplyNodeToBody(p_node, !!p_aside, w_showBodyKeepFocus);
 
@@ -4524,7 +4529,7 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
  * * Asks for a headline label to be entered and creates (inserts) a new node under the current, or specified, node
  * @param p_node specified under which node to insert, or leave undefined to use whichever is currently selected
  * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
- * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
+ * @param p_asChild Insert as child instead of as sibling
  * @returns Thenable that resolves when done
  */
 public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_asChild: boolean): Promise&lt;unknown&gt; {
@@ -4643,7 +4648,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -6987,7 +6992,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
-"@vscode/test-web": "^0.0.24",
+"@vscode/test-web": "^0.0.50",
 "assert": "^2.0.0",
 "buffer": "^6.0.3",
 "eslint": "^8.11.0",
@@ -7702,6 +7707,7 @@ public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveR
  * * Setup UI for having no opened Leo documents
  */
 private _setupNoOpenedLeoDocument(): void {
+    void this.checkConfirmBeforeClose();
     this.leoStates.fileOpenedReady = false;
     this._bodyTextDocument = undefined;
     this.lastSelectedNode = undefined;
@@ -7852,6 +7858,13 @@ public gotSelectedNode(p_node: Position): void {
         this.leoStates.setSelectedNodeFlags(p_node);
     }
 
+    // Get 'c' before timeout for proper c that was refreshed.
+    const c = g.app.windowList[this.frameIndex].c;
+
+    // Do in a timeout to let rest of tree refresh.
+    setTimeout(() =&gt; {
+        g.doHook('after-redraw-outline', { c: c });
+    }, 0);
 }
 
 </t>
@@ -8735,9 +8748,7 @@ public refreshPossibleGnxList(): string[] {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (p_uri.fsPath.length === 1) {
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-        } else if (false &amp;&amp; w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
-            // ! Always return current size: w_v.b.length ! Not this._lastBodyLength !
-            console.log('had stats: modified: ', this._openedBodiesInfo[this._lastGnx].mtime);
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -9246,12 +9257,12 @@ private _bodySaveDocument(
         const u = c.undoer;
         const wrapper = c.frame.body.wrapper;
         const w_gnx = utils.leoUriToStr(p_document.uri);
-        const body = p_document.getText(); // new body text
+        const body = p_document.getText().replace(/\r\n/g, "\n"); // new body text
 
         const w_v = c.fileCommands.gnxDict[w_gnx]; // target to change
         if (w_v) {
 
-            if (body !== w_v.b) {
+            if (body !== w_v.b &amp;&amp; !g.doHook("bodykey1", { c: c, v: w_v })) {
                 // if different, replace body and set dirty
                 let w_p: Position | undefined;
                 if (c.p.gnx === w_v.gnx) {
@@ -9283,7 +9294,7 @@ private _bodySaveDocument(
                     }
                     // this.clearHeadlineSelection();
                 }
-
+                g.doHook("bodykey2", { c: c, v: w_v });
             }
 
         } else {
@@ -9322,7 +9333,7 @@ private _bodySaveDeactivate(
     const c = g.app.windowList[this.frameIndex].c;
     const w_v = c.fileCommands.gnxDict[w_gnx];
     if (w_v) {
-        w_v.b = p_document.getText();
+        w_v.b = p_document.getText().replace(/\r\n/g, "\n");
     }
 
     return Promise.resolve(true);
@@ -12820,6 +12831,10 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
 public _changedWindowState(p_windowState: vscode.WindowState): void {
     // no other action
     void this.triggerBodySave(true, true);
+    if (p_windowState.focused) {
+        // We are focused!
+        this.checkConfirmBeforeClose();
+    }
 }
 
 </t>
@@ -12881,7 +12896,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
             const c = g.app.windowList[this.frameIndex].c;
 
-            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText() === c.p.b) {
+            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText().replace(/\r\n/g, "\n") === c.p.b) {
                 // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                 // Set proper cursor insertion point and selection range.
                 void this.showBody(false, true, true);
@@ -14987,13 +15002,23 @@ private _showHeadlineInputBox(p_options: vscode.InputBoxOptions): Promise&lt;str
         this._hibResolve = p_resolve;
         // onDidHide handles CANCEL AND ACCEPT AND INTERCEPT !
         this._hibDisposables.push(hib.onDidHide(() =&gt; {
+            let changed = false;
+            const c = g.app.windowList[this.frameIndex].c;
             if (this._hib) {
-                this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+                changed = this._hib.value !== p_options.value;
+                if (g.doHook("headkey1", { c: c, p: c.p, changed: changed })) {
+                    // The hook claims to have handled the event, so 'cancel'.
+                    this._hibLastValue = undefined;
+                } else {
+                    // ok
+                    this._hibLastValue = this._hib.value; // * FORCE VALUE EVEN WHEN CANCELLING LIKE IN ORIGINAL LEO !
+                }
             }
             this.leoStates.leoEditHeadline = false;
             if (this._hibResolve) {
                 // RESOLVE whatever value was set otherwise undefined will mean 'canceled'.
                 this._hibResolve(this._hibLastValue);
+                g.doHook("headkey2", { c: c, p: c.p, changed: changed });
                 // Dispose of everything disposable with the edit headline process.
                 for (const disp of this._hibDisposables) {
                     disp.dispose();
@@ -15038,19 +15063,13 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231127210614.1">public checkConfirmBeforeClose(): void {
-
     let hasDirty = false;
     for (const frame of g.app.windowList) {
         if (frame.c.changed) {
             hasDirty = true;
         }
     }
-    if (hasDirty !== this.lastRefreshHadDirty) {
-        // don't wait for this promise!
-        void this.config.setConfirmBeforeClose(hasDirty);
-    }
-    this.lastRefreshHadDirty = hasDirty;
-
+    void this.config.setConfirmBeforeClose(hasDirty);
 }
 
 </t>
@@ -15968,17 +15987,12 @@ div.col-nav {
 }
 
 </t>
-<t tx="felix.20231224200501.1">## 0.2.8
+<t tx="felix.20231224200501.1">## 0.2.9
 
-- Translated most of helpCommands.py to typescript, enabling 'help' commands.
-- Added UNL support for both output pane, body panes and all other editor windows.
-- Fixed 'goto-script' for @button items context menu to also work on child of @buttons (plural) nodes in myLeoSettings.leo.
-- Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
-- Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
-- Fixed 'show clone ancestors' and 'show clone parents' commands.
-- The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
-- LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
-- Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
+- Fixed es_exception and scripting error reporting.
+- Added support of the plugin system's 'g.registerHandler' for most of the original Leo event names.
+- Fixed line ending of body text when transfered from vscode's text editor to make sure it's lf and not crlf. (Fixed 'Orphan Nodes' when section references are newly created)
+- Fixed bug that sometimes asked to 'save' and overwrite/confirm when new node was created with body text containing an ampersand or when using vscode's quick-suggestion autocomplete.
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';
@@ -16095,7 +16109,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
                     buttons: true
                 }
             );
-            await g.openUrlHelper(c, p_arg.unl);
+            await g.openUrlOnClick(c, p_arg.unl);
             void this.launchRefresh();
             this.loadSearchSettings();
 
@@ -16129,6 +16143,19 @@ public getWorkspaceSession(): string[] | undefined {
 public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
     return this._context.workspaceState.update(Constants.LAST_FILES_KEY, unls);
 }
+
+</t>
+<t tx="felix.20240101211218.1">## 0.2.8
+
+- Translated most of helpCommands.py to typescript, enabling 'help' commands.
+- Added UNL support for both output pane, body panes and all other editor windows.
+- Fixed 'goto-script' for @button items context menu to also work on child of @buttons (plural) nodes in myLeoSettings.leo.
+- Fixed @auto markdown .md importer and writer to now preserve full integrity in read-write round-trip cycle.
+- Added support of undo/redo actions for UA related commands (Clear UAs and Set UA).
+- Fixed 'show clone ancestors' and 'show clone parents' commands.
+- The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
+- LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
+- Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
