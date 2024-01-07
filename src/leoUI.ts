@@ -53,7 +53,6 @@ export class LeoUI extends NullGui {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
-    public lastRefreshHadDirty: undefined | boolean; // We start with fresh documents.
 
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -989,6 +988,10 @@ export class LeoUI extends NullGui {
     public _changedWindowState(p_windowState: vscode.WindowState): void {
         // no other action
         void this.triggerBodySave(true, true);
+        if (p_windowState.focused) {
+            // We are focused!
+            this.checkConfirmBeforeClose();
+        }
     }
 
     /**
@@ -1214,19 +1217,13 @@ export class LeoUI extends NullGui {
     }
 
     public checkConfirmBeforeClose(): void {
-
         let hasDirty = false;
         for (const frame of g.app.windowList) {
             if (frame.c.changed) {
                 hasDirty = true;
             }
         }
-        if (hasDirty !== this.lastRefreshHadDirty) {
-            // don't wait for this promise!
-            void this.config.setConfirmBeforeClose(hasDirty);
-        }
-        this.lastRefreshHadDirty = hasDirty;
-
+        void this.config.setConfirmBeforeClose(hasDirty);
     }
 
     /**
