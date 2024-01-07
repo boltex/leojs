@@ -1,5 +1,9 @@
 # Change Log
 
+# 0.2.10
+
+- Fixed ...
+
 ## 0.2.9
 
 - Fixed es_exception and scripting error reporting.

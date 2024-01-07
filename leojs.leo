@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240107181054.1"><vh>0.2.10</vh></v>
 <v t="felix.20231224200501.1"><vh>0.2.9</vh></v>
 <v t="felix.20240101211218.1"><vh>0.2.8</vh></v>
 <v t="felix.20231216233654.1"><vh>0.2.7</vh></v>
@@ -4648,7 +4649,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -16156,6 +16157,11 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
 - LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
 - Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
+
+</t>
+<t tx="felix.20240107181054.1"># 0.2.10
+
+- Fixed ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
