@@ -7708,6 +7708,7 @@ public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveR
  * * Setup UI for having no opened Leo documents
  */
 private _setupNoOpenedLeoDocument(): void {
+    void this.checkConfirmBeforeClose();
     this.leoStates.fileOpenedReady = false;
     this._bodyTextDocument = undefined;
     this.lastSelectedNode = undefined;
@@ -9259,7 +9260,7 @@ private _bodySaveDocument(
         const u = c.undoer;
         const wrapper = c.frame.body.wrapper;
         const w_gnx = utils.leoUriToStr(p_document.uri);
-        const body = p_document.getText(); // new body text
+        const body = p_document.getText().replace(/\r\n/g, "\n"); // new body text
 
         const w_v = c.fileCommands.gnxDict[w_gnx]; // target to change
         if (w_v) {
@@ -9335,7 +9336,7 @@ private _bodySaveDeactivate(
     const c = g.app.windowList[this.frameIndex].c;
     const w_v = c.fileCommands.gnxDict[w_gnx];
     if (w_v) {
-        w_v.b = p_document.getText();
+        w_v.b = p_document.getText().replace(/\r\n/g, "\n");
     }
 
     return Promise.resolve(true);
@@ -12894,7 +12895,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
             const c = g.app.windowList[this.frameIndex].c;
 
-            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText() === c.p.b) {
+            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText().replace(/\r\n/g, "\n") === c.p.b) {
                 // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                 // Set proper cursor insertion point and selection range.
                 void this.showBody(false, true, true);
@@ -15995,6 +15996,7 @@ div.col-nav {
 
 - Fixed es_exception and scripting error reporting.
 - Added support of the plugin system's 'g.registerHandler' for most of the original Leo event names.
+- Fixed line ending of body text when transfered from vscode's text editor to make sure it's lf and not crlf. (Fixed 'Orphan Nodes' when section references are newly created)
 
 </t>
 <t tx="felix.20231224201746.1">import * as vscode from 'vscode';

@@ -2604,10 +2604,11 @@ export function skip_id(s: string, i: number, chars?: string): number {
 }
 
 //@+node:felix.20211104220540.1: *4* g.skip_line, skip_to_start/end_of_line
-/* These methods skip to the next newline, regardless of whether the
-newline may be preceded by a backslash. Consequently, they should be
-used only when we know that we are not in a preprocessor directive or
-string.
+/** 
+ * These methods skip to the next newline, regardless of whether the
+ * newline may be preceded by a backslash. Consequently, they should be
+ * used only when we know that we are not in a preprocessor directive or
+ * string.
 */
 
 export function skip_line(s: string, i: number): number {

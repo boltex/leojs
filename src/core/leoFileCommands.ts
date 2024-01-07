@@ -2384,9 +2384,8 @@ export class FileCommands {
         const vnodesDict = this.vnodesDict;
         let s: string;
         try {
-            // TODO : USE BUFFER OR OTHER OBJECT ???
             this.usingClipboard = true;
-            if (this.c.config.getBool('json-outline-clipboard', true)) {
+            if (this.c.config.getBool('json-outline-clipboard', false)) {
                 const d = this.leojs_outline_dict(p || this.c.p);
                 s = JSON.stringify(d, null, 2);
             } else {

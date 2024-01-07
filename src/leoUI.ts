@@ -678,6 +678,7 @@ export class LeoUI extends NullGui {
      * * Setup UI for having no opened Leo documents
      */
     private _setupNoOpenedLeoDocument(): void {
+        void this.checkConfirmBeforeClose();
         this.leoStates.fileOpenedReady = false;
         this._bodyTextDocument = undefined;
         this.lastSelectedNode = undefined;
@@ -1046,7 +1047,7 @@ export class LeoUI extends NullGui {
 
                 const c = g.app.windowList[this.frameIndex].c;
 
-                if (c.p && c.p.__bool__() && p_textDocumentChange.document.getText() === c.p.b) {
+                if (c.p && c.p.__bool__() && p_textDocumentChange.document.getText().replace(/\r\n/g, "\n") === c.p.b) {
                     // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                     // Set proper cursor insertion point and selection range.
                     void this.showBody(false, true, true);
@@ -1380,7 +1381,7 @@ export class LeoUI extends NullGui {
             const u = c.undoer;
             const wrapper = c.frame.body.wrapper;
             const w_gnx = utils.leoUriToStr(p_document.uri);
-            const body = p_document.getText(); // new body text
+            const body = p_document.getText().replace(/\r\n/g, "\n"); // new body text
 
             const w_v = c.fileCommands.gnxDict[w_gnx]; // target to change
             if (w_v) {
@@ -1455,7 +1456,7 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         const w_v = c.fileCommands.gnxDict[w_gnx];
         if (w_v) {
-            w_v.b = p_document.getText();
+            w_v.b = p_document.getText().replace(/\r\n/g, "\n");
         }
 
         return Promise.resolve(true);
