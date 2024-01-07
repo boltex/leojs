@@ -8748,9 +8748,7 @@ public refreshPossibleGnxList(): string[] {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (p_uri.fsPath.length === 1) {
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-        } else if (false &amp;&amp; w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
-            // ! Always return current size: w_v.b.length ! Not this._lastBodyLength !
-            console.log('had stats: modified: ', this._openedBodiesInfo[this._lastGnx].mtime);
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -12833,8 +12831,9 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
 public _changedWindowState(p_windowState: vscode.WindowState): void {
     // no other action
     void this.triggerBodySave(true, true);
-    if (p_windowState) {
-
+    if (p_windowState.focused) {
+        // We are focused!
+        this.checkConfirmBeforeClose();
     }
 }
 
