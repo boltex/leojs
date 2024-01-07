@@ -5,6 +5,7 @@
 - Fixed es_exception and scripting error reporting.
 - Added support of the plugin system's 'g.registerHandler' for most of the original Leo event names.
 - Fixed line ending of body text when transfered from vscode's text editor to make sure it's lf and not crlf. (Fixed 'Orphan Nodes' when section references are newly created)
+- Fixed bug that sometimes asked to 'save' and overwrite/confirm when new node was created with body text containing an ampersand or when using vscode's quick-suggestion autocomplete.
 
 ## 0.2.8
 

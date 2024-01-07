@@ -6472,13 +6472,9 @@ export async function openUrlOnClick(c: Commands, url?: string): Promise<string 
     // QTextEditWrapper.mouseReleaseEvent calls this outside Leo's command logic.
     // Make sure to catch all exceptions
     try {
-        doHook('hypercclick1', { c: c, p: c.p, v: c.p });
-        const result = await openUrlHelper(c, url);
-        doHook('hypercclick2', { c: c, p: c.p, v: c.p });
-        return result;
+        return await openUrlHelper(c, url);;
     } catch (e) {
         es_exception(e);
-        return undefined;
     }
 }
 //@+node:felix.20230724154323.19: *4* g.openUrlHelper
