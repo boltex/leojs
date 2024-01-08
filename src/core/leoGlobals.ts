@@ -6827,7 +6827,7 @@ const path_data_pattern = /(.+?):\s*(.+)/;
  */
 export function parsePathData(c: Commands): Record<string, string> {
 
-    const lines = c.config.getData('unl-path-prefixes');
+    const lines = c.config.getData('unl-path-prefixes') || [];
     const d: Record<string, string> = {};
     for (const line of lines) {
         const m = line.match(path_data_pattern);

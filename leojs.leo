@@ -9922,7 +9922,7 @@ public findQuickSelected(): Thenable&lt;unknown&gt; {
         const editor = vscode.window.activeTextEditor;
         const selection = editor.selection;
         if (!selection.isEmpty) {
-            const text = editor.document.getText(selection);
+            const text = editor.document.getText(selection).replace(/\r\n/g, "\n");
             return this.findQuick(text);
         }
     }

@@ -555,9 +555,13 @@ export class LeoUI extends NullGui {
     }
 
     public async handleUnl(p_arg: { unl: string }): Promise<void> {
-
-        await this.triggerBodySave(true);
+        if (!g.app.windowList.length) {
+            // No file opened: exit
+            g.es('Handle Unl: No Commanders opened');
+            return;
+        }
         const c = g.app.windowList[this.frameIndex].c;
+        await this.triggerBodySave(true);
         try {
 
             if (p_arg.unl) {
@@ -3702,7 +3706,7 @@ export class LeoUI extends NullGui {
             const editor = vscode.window.activeTextEditor;
             const selection = editor.selection;
             if (!selection.isEmpty) {
-                const text = editor.document.getText(selection);
+                const text = editor.document.getText(selection).replace(/\r\n/g, "\n");
                 return this.findQuick(text);
             }
         }
