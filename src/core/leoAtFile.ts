@@ -3740,7 +3740,7 @@ export class AtFile {
         }
         for (const p of root.self_and_subtree(false)) {
             if (!p.v.isVisited()) {
-                at.writeError('Orphan node 1:  ' + p.h);
+                at.writeError('Orphan node:  ' + p.h);
                 if (p.hasParent()) {
                     g.blue('parent node:', p.parent().h);
                 }
@@ -3754,7 +3754,7 @@ export class AtFile {
             } else {
                 // #1050: test orphan bit.
                 if (p.isOrphan()) {
-                    at.writeError('Orphan node 2: ' + p.h);
+                    at.writeError('Orphan node: ' + p.h);
                     if (p.hasParent()) {
                         g.blue('parent node:', p.parent().h);
                     }
