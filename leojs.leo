@@ -16024,6 +16024,7 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 }
 </t>
 <t tx="felix.20231226205226.1">import * as vscode from 'vscode';
+import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
 
@@ -16078,14 +16079,15 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
         while ((match = this.gnxUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
             const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
         }
 
         //  Headline - based UNLs
         while ((match = this.headlineUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
             const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
+
         }
 
         return links;
@@ -16093,9 +16095,13 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 }
 </t>
 <t tx="felix.20231226210919.1">public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
-
-    await this.triggerBodySave(true);
+    if (!g.app.windowList.length) {
+        // No file opened: exit
+        g.es('Handle Unl: No Commanders opened');
+        return;
+    }
     const c = g.app.windowList[this.frameIndex].c;
+    await this.triggerBodySave(true);
     try {
 
         if (p_arg.unl) {
