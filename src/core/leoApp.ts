@@ -4106,6 +4106,11 @@ export class RecentFilesManager {
      */
     public async writeRecentFilesFile(c: Commands): Promise<void> {
 
+        // LeoJS tries to save the recent files list on open, so skip if starting up.
+        if (!g.app.initComplete) {
+            return;
+        }
+
         const tag = '.leoRecentFiles.txt';
         const rf = this;
         if (g.unitTesting || g.app.inBridge) {
