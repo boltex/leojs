@@ -4106,6 +4106,11 @@ export class RecentFilesManager {
      */
     public async writeRecentFilesFile(c: Commands): Promise<void> {
 
+        // LeoJS tries to save the recent files list on open, so skip if starting up.
+        if (!g.app.initComplete) {
+            return;
+        }
+
         const tag = '.leoRecentFiles.txt';
         const rf = this;
         if (g.unitTesting || g.app.inBridge) {
@@ -4127,6 +4132,23 @@ export class RecentFilesManager {
                 const w_exists = await g.os_path_exists(fileName);
                 if (w_exists && !seen.includes(fileName.toLowerCase())) {
                     seen.push(fileName.toLowerCase());
+                    // Only write if different
+                    let fileContents;
+
+                    if (g.isBrowserRepo()) {
+                        // * Web
+                        fileContents = await g.extensionContext.workspaceState.get(fileName);
+                    } else {
+                        // * Desktop
+                        fileContents = await g.readFileIntoUnicodeString(fileName);
+                        if (!fileContents) {
+                            fileContents = "";
+                        }
+                    }
+                    const s = this.recentFiles.length ? this.recentFiles.join('\n') : '\n';
+                    if (s === fileContents) {
+                        return; // Exactly the same.
+                    }
                     const ok = await rf.writeRecentFilesFileHelper(fileName);
                     if (ok) {
                         written = true;

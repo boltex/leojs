@@ -106,64 +106,6 @@ export class CommanderFileCommands {
         }
         return Promise.resolve();
     }
-    //@+node:felix.20220105210716.4: *3* c_file.restartLeo
-    @commander_command(
-        'restart-leo',
-        'Restart Leo, reloading all presently open outlines.'
-    )
-    public restartLeo(this: Commands): void {
-        const c: Commands = this;
-        const lm: LoadManager = g.app.loadManager!;
-
-        // TODO
-        void vscode.window.showInformationMessage('TODO : restartLeo (or deprecate/remove?)');
-        console.log('TODO : restartLeo (or deprecate/remove?)');
-
-        /*
-        trace = 'shutdown' in g.app.debug
-        # Write .leoRecentFiles.txt.
-        g.app.recentFilesManager.writeRecentFilesFile(c)
-        # Abort the restart if the user veto's any close.
-        for c in g.app.commanders():
-            if c.changed:
-                veto = False
-                try:
-                    c.promptingForClose = True
-                    veto = c.frame.promptForSave()
-                finally:
-                    c.promptingForClose = False
-                if veto:
-                    g.es_print('Cancelling restart-leo command')
-                    return
-        # Officially begin the restart process. A flag for efc.ask.
-        g.app.restarting = True
-        # Save session data.
-        g.app.saveSession()
-        # Close all unsaved outlines.
-        g.app.setLog(None)  # Kill the log.
-        for c in g.app.commanders():
-            frame = c.frame
-            # This is similar to g.app.closeLeoWindow.
-            g.doHook("close-frame", c=c)
-            # Save the window state
-            # This may remove frame from the window list.
-            if frame in g.app.windowList:
-                g.app.destroyWindow(frame)
-                g.app.windowList.remove(frame)
-            else:
-                # #69.
-                g.app.forgetOpenFile(fn=c.fileName())
-        # Complete the shutdown.
-        g.app.finishQuit()
-        # Restart, restoring the original command line.
-        args = ['-c'] + lm.old_argv
-        if trace:
-            g.trace('restarting with args', args)
-        sys.stdout.flush()
-        sys.stderr.flush()
-        os.execv(sys.executable, args)
-        */
-    }
     //@+node:felix.20220105210716.5: *3* c_file.top level
     //@+node:felix.20220105210716.6: *4* c_file.close
     @commander_command(

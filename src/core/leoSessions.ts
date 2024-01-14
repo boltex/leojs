@@ -144,9 +144,11 @@ export class SessionManager {
       if (g.app.debug.includes('shutdown')) {
         g.printObj(session, 'save_snapshot: session data');
       }
-      if (!session || !session.length) {
-        return; // Don't save an empty session.
-      }
+
+      // ! LeoJS: Empty Sessions are allowed. The Leo Issue #2433 does not apply.
+      // if (!g.app.gui.config.sessionPerWorkspace && !session || !session.length) {
+      //   return; // #2433: don't save an empty session.
+      // }
 
       // if LeoJS sessionPerWorkspace is true, use it instead!
       if (g.app.gui.getWorkspaceSession()) {

@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240107181054.1"><vh>0.2.10</vh></v>
 <v t="felix.20231224200501.1"><vh>0.2.9</vh></v>
 <v t="felix.20240101211218.1"><vh>0.2.8</vh></v>
 <v t="felix.20231216233654.1"><vh>0.2.7</vh></v>
@@ -4648,7 +4649,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -9921,7 +9922,7 @@ public findQuickSelected(): Thenable&lt;unknown&gt; {
         const editor = vscode.window.activeTextEditor;
         const selection = editor.selection;
         if (!selection.isEmpty) {
-            const text = editor.document.getText(selection);
+            const text = editor.document.getText(selection).replace(/\r\n/g, "\n");
             return this.findQuick(text);
         }
     }
@@ -16023,6 +16024,7 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 }
 </t>
 <t tx="felix.20231226205226.1">import * as vscode from 'vscode';
+import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
 
@@ -16077,14 +16079,15 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
         while ((match = this.gnxUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
             const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
         }
 
         //  Headline - based UNLs
         while ((match = this.headlineUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
             const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
-            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:leojs.handleUnl?${args}`)));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
+
         }
 
         return links;
@@ -16092,9 +16095,13 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 }
 </t>
 <t tx="felix.20231226210919.1">public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
-
-    await this.triggerBodySave(true);
+    if (!g.app.windowList.length) {
+        // No file opened: exit
+        g.es('Handle Unl: No Commanders opened');
+        return;
+    }
     const c = g.app.windowList[this.frameIndex].c;
+    await this.triggerBodySave(true);
     try {
 
         if (p_arg.unl) {
@@ -16156,6 +16163,15 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - The session (last opened files to reopen at startup) is saved per workspace by default. An options setting can be changed to use the original Leo global session.
 - LeoJS now stays on the currently selected node when refreshing an external file. (if it is a descendent of the external file node itself)
 - Added 'gnx-kind' setting support for generating uuid or ksuid strings instead of regular GNX strings.
+
+</t>
+<t tx="felix.20240107181054.1"># 0.2.10
+
+- Fixed 'Orphan Nodes' when section references were newly created.
+- Removed futile write to recent files just after opening last session.
+- Allow sessions to be empty in sessions manager's save_snapshot method. (as opposed to the original Leo, which will exit the program when closing the last tab)
+- Made the default of using JSON for clipbard be a default in leojsSettings.leojs setting "json-outline-clipboard" instead of being hard-coded.
+- Many small fixes and code cleanup.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
