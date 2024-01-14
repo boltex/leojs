@@ -1,5 +1,9 @@
 # Change Log
 
+# 0.2.11
+
+- Fixed ...
+
 # 0.2.10
 
 - Fixed 'Orphan Nodes' when section references were newly created.

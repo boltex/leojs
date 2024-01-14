@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240113195919.1"><vh>0.2.11</vh></v>
 <v t="felix.20240107181054.1"><vh>0.2.10</vh></v>
 <v t="felix.20231224200501.1"><vh>0.2.9</vh></v>
 <v t="felix.20240101211218.1"><vh>0.2.8</vh></v>
@@ -4649,7 +4650,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -16172,6 +16173,11 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - Allow sessions to be empty in sessions manager's save_snapshot method. (as opposed to the original Leo, which will exit the program when closing the last tab)
 - Made the default of using JSON for clipbard be a default in leojsSettings.leojs setting "json-outline-clipboard" instead of being hard-coded.
 - Many small fixes and code cleanup.
+
+</t>
+<t tx="felix.20240113195919.1"># 0.2.11
+
+- Fixed ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
