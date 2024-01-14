@@ -16167,7 +16167,11 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 </t>
 <t tx="felix.20240107181054.1"># 0.2.10
 
-- Fixed ...
+- Fixed 'Orphan Nodes' when section references were newly created.
+- Removed futile write to recent files just after opening last session.
+- Allow sessions to be empty in sessions manager's save_snapshot method. (as opposed to the original Leo, which will exit the program when closing the last tab)
+- Made the default of using JSON for clipbard be a default in leojsSettings.leojs setting "json-outline-clipboard" instead of being hard-coded.
+- Many small fixes and code cleanup.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
