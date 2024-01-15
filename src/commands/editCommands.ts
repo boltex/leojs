@@ -7,7 +7,6 @@ import { Commands } from '../core/leoCommands';
 import { Bead } from '../core/leoUndo';
 import { StringTextWrapper } from '../core/leoFrame';
 import { BaseEditCommandsClass } from './baseCommands';
-import * as typescript from 'typescript';
 
 //@+others
 //@+node:felix.20220503223721.1: ** editCommands.cmd (decorator)
@@ -374,13 +373,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('do-nothing', 'A placeholder command, useful for testing bindings.')
     public doNothing(): void {
         // pass
-        g.es("do nothing called!");
-
-        const tsCode = 'let num: number = 123;';
-        g.es("Testing transpilation with : ", tsCode);
-
-        const jsCode = typescript.transpile(tsCode);
-        g.es("transpiled code is: ", jsCode);
     }
     //@+node:felix.20220503225225.1: *3* ec.insertHeadlineTime
     @cmd(

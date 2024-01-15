@@ -40,8 +40,9 @@ import { ScriptingController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
-import { CommanderWrapper, SqlitePickleShare } from './leoCache';
+import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
+import * as typescript from 'typescript';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -516,6 +517,33 @@ export class Commands {
         //     prefix = ('c,g,p,script_gnx=None,None,None,None;'
         //               'assert c and g and p and script_gnx;\n')
         //     cc.PyflakesCommand(c).check_script(script_p, prefix + script)
+
+        const aList = g.get_directives_dict_list(script_p);
+        const d = g.scanAtCommentAndAtLanguageDirectives(aList);
+        const language =
+            (d && d['language'])
+            || g.getLanguageFromAncestorAtFileNode(script_p)
+            || c.config.getLanguage('target-language')
+            || 'plain';
+
+        if (language === 'python') {
+            // PREVENT USER FROM RUNNING SCRIPT UNDER PYTHON LANGUAGE DIRECTIVE : @language python
+            g.es("Python language detected\nLeoJS is scriptable in javascript or typescript");
+            return;
+        }
+        if (language === 'typescript') {
+
+            // TODO : USE @data SETTING FOR TYPESCRIPT CONFIG !
+            // TODO : see https://leo-editor.github.io/leo-editor/customizing.html#data
+
+            // TRANSPILE FROM TYPESCRIPT IF UNDER TYPESCRIPT LANGUAGE DIRECTIVE : @language typescript
+            g.es('TYPESCRIPT DETECTED !');
+
+            script = typescript.transpile(script);
+            g.es("transpiled code is: ", script);
+            return;
+
+        }
 
         this.redirectScriptOutput();
         // oldLog = g.app.log  // TODO : needed ?
