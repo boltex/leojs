@@ -255,6 +255,7 @@ export class Commands {
     public vimCommands: any = undefined;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
+    public id: number; // Replaces python id function
 
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
@@ -264,6 +265,7 @@ export class Commands {
         relativeFileName?: string
     ) {
         const c: Commands = this;
+        this.id = ++g.app.commanderIdCounter;
 
         // From Official Ivars
         this.gui = gui || g.app.gui;
