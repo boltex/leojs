@@ -7003,7 +7003,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "process": "^0.11.10",
 "terser-webpack-plugin": "^5.3.1",
 "ts-loader": "^9.2.6",
-"typescript": "^4.5.5",
+"typescript": "^4.9.5",
 "webpack": "^5.70.0",
 "webpack-cli": "^4.9.2",
 "webpack-shell-plugin-next": "^2.2.2"
