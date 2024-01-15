@@ -534,12 +534,18 @@ export class Commands {
         if (language === 'typescript') {
 
             // TODO : USE @data SETTING FOR TYPESCRIPT CONFIG !
-            // TODO : see https://leo-editor.github.io/leo-editor/customizing.html#data
+            // see https://leo-editor.github.io/leo-editor/customizing.html#data
 
-            // TRANSPILE FROM TYPESCRIPT IF UNDER TYPESCRIPT LANGUAGE DIRECTIVE : @language typescript
-            g.es('TYPESCRIPT DETECTED !');
+            // TODO use something like this instead TO CATCH ERRORS !
+            // const result = ts.transpileModule(source, {
+            //     compilerOptions: {
+            //         noEmitOnError: true,
+            //         noImplicitAny: true,
+            //         target: ts.ScriptTarget.ES5,
+            //         module: ts.ModuleKind.CommonJS
+            //     }
+            // });
 
-            script = typescript.transpile(script);
             g.es("transpiled code is: ", script);
             return;
 
