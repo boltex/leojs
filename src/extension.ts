@@ -1,3 +1,5 @@
+/// <reference path="declarations.d.ts"
+
 import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 import * as JSZip from 'jszip';

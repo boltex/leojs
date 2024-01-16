@@ -1017,7 +1017,9 @@ If you would like to modify and build this project yourself, see [CONTRIBUTING.m
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1">import * as vscode from 'vscode';
+<t tx="felix.20201208214322.1">/// &lt;reference path="declarations.d.ts"
+
+import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 import * as JSZip from 'jszip';
 import * as pako from 'pako';

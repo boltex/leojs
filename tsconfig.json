@@ -20,7 +20,13 @@
 		"node_modules",
 		"types",
 		// "src/test", /* UNCOMMENT FOR TYPES GENERATION! */
-		// Example Command dts-bundle-generator -o leojs.d.ts 
+		/*
+
+		  Example Command: 
+
+		  ./node_modules/.bin/dts-bundle-generator -o leojs.d.ts src/extension.ts 
+		  
+		*/
 		".vscode-test"
 	]
 }
