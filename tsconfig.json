@@ -25,7 +25,7 @@
 		  Example Command: 
 
 		  ./node_modules/.bin/dts-bundle-generator -o leojs.d.ts src/extension.ts 
-		  
+
 		*/
 		".vscode-test"
 	]

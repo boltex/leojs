@@ -1017,8 +1017,13 @@ If you would like to modify and build this project yourself, see [CONTRIBUTING.m
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1">/// &lt;reference path="declarations.d.ts"
-
+<t tx="felix.20201208214322.1">// &lt;reference path="declarations.d.ts" // convert to triple slash if needed
+// declare global {
+//     interface Date {
+//         format: (format?: string) =&gt; string;
+//         masks: { default: string };
+//     }
+// }
 import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 import * as JSZip from 'jszip';
@@ -1038,7 +1043,6 @@ import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 const activateDebug = false;
-
 
 @language typescript
 @tabwidth -4
@@ -6998,7 +7002,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@vscode/test-web": "^0.0.50",
 "assert": "^2.0.0",
 "buffer": "^6.0.3",
-"dts-bundle-generator": "^9.2.4",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
@@ -7885,7 +7888,6 @@ interface Date {
     format: (format?: string) =&gt; string;
     masks: { default: string };
 }
-
 </t>
 <t tx="felix.20211002194716.1"></t>
 <t tx="felix.20211003223641.1">/**

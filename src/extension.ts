@@ -1,5 +1,10 @@
-/// <reference path="declarations.d.ts"
-
+// <reference path="declarations.d.ts" // convert to triple slash if needed
+// declare global {
+//     interface Date {
+//         format: (format?: string) => string;
+//         masks: { default: string };
+//     }
+// }
 import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 import * as JSZip from 'jszip';
@@ -19,7 +24,6 @@ import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 const activateDebug = false;
-
 
 /**
  * Entry point for Leo in Javascript. 
