@@ -3,7 +3,7 @@ import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
 import { QuickSearchController } from "./core/quicksearch";
 import { LeoUI } from "./leoUI";
-import { LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
+import { Icon, LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
 import * as utils from "./utils";
 
 /**
@@ -214,7 +214,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     }
 
     // @ts-ignore
-    public get iconPath(): Icon | vscode.ThemeIcon | string {
+    public get iconPath(): Icon | vscode.ThemeIcon | string | undefined {
         if (this._iconIndex < 4) {
             return this._leoUI.gotoIcons[this._iconIndex];
         }

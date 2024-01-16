@@ -1,5 +1,6 @@
 out
 dist
+types
 node_modules
 .vscode-test/
 .vscode-test-web/

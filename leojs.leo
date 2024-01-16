@@ -2924,7 +2924,6 @@ export class LeoButtonNode extends vscode.TreeItem {
 <t tx="felix.20201214151425.3">// @ts-ignore
 public get iconPath(): Icon {
     return this._buttonIcons[this._isAdd ? 2 : this.rclicks.length ? 1 : 0];
-
 }
 
 </t>
@@ -6997,6 +6996,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@vscode/test-web": "^0.0.50",
 "assert": "^2.0.0",
 "buffer": "^6.0.3",
+"dts-bundle-generator": "^9.2.4",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
@@ -10725,7 +10725,7 @@ import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
 import { QuickSearchController } from "./core/quicksearch";
 import { LeoUI } from "./leoUI";
-import { LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
+import { Icon, LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
 import * as utils from "./utils";
 
 @language typescript
@@ -10941,7 +10941,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     }
 
     // @ts-ignore
-    public get iconPath(): Icon | vscode.ThemeIcon | string {
+    public get iconPath(): Icon | vscode.ThemeIcon | string | undefined {
         if (this._iconIndex &lt; 4) {
             return this._leoUI.gotoIcons[this._iconIndex];
         }

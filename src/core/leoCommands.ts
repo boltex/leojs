@@ -531,25 +531,37 @@ export class Commands {
             g.es("Python language detected\nLeoJS is scriptable in javascript or typescript");
             return;
         }
+
+        const tsCompileOptions = {
+            noEmitOnError: true,
+            noImplicitAny: false,
+            target: typescript.ScriptTarget.ES2020,
+            module: typescript.ModuleKind.CommonJS
+        };
+
         if (language === 'typescript') {
-
-            // TODO : USE @data SETTING FOR TYPESCRIPT CONFIG !
-            // see https://leo-editor.github.io/leo-editor/customizing.html#data
-
-            // TODO use something like this instead TO CATCH ERRORS !
-            // const result = ts.transpileModule(source, {
-            //     compilerOptions: {
-            //         noEmitOnError: true,
-            //         noImplicitAny: true,
-            //         target: ts.ScriptTarget.ES5,
-            //         module: ts.ModuleKind.CommonJS
-            //     }
-            // });
-
-            g.es("transpiled code is: ", script);
-            return;
-
+            tsCompileOptions.noImplicitAny = true;
         }
+
+        const result = typescript.transpileModule(script, {
+            compilerOptions: tsCompileOptions
+        });
+        const errors: string[] = [];
+        if (result.diagnostics && result.diagnostics.length > 0) {
+            // Handle the compilation errors.
+            // For example, you can log them:
+            result.diagnostics.forEach(diagnostic => {
+                const message = typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+                errors.push(message);
+            });
+            g.es(errors.join("\n"));
+            return; // Print errors and cancel running the script.
+        } else {
+            // The code compiled successfully, you can now proceed to run it.
+            script = result.outputText;
+        }
+
+        g.es("transpiled code is: ", script);
 
         this.redirectScriptOutput();
         // oldLog = g.app.log  // TODO : needed ?
