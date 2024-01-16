@@ -285,20 +285,7 @@ declare class StatementIterator implements Iterator<Statement>, Iterable<Stateme
 }
 
 declare namespace initSqlJs {
-    export {
-        // types
-        SqlValue,
-        ParamsObject,
-        ParamsCallback,
-        SqlJsConfig,
-        BindParams,
-
-        // interfaces
-        QueryExecResult,
-        StatementIteratorResult,
-        SqlJsStatic,
-        InitSqlJsStatic,
-    };
+    export { SqlValue, ParamsObject, ParamsCallback, SqlJsConfig, BindParams, QueryExecResult, StatementIteratorResult, SqlJsStatic, InitSqlJsStatic };
 
     // classes
     type _Database = Database;
