@@ -26,3 +26,4 @@ test*.db
 scripts.txt
 dummy*.js
 serve.json
+dts-bundle.json

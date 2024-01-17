@@ -17,8 +17,7 @@ import { Constants } from './constants';
 import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
-import { LeoApp } from './core/leoApp';
-import { LoadManager } from "./core/leoApp";
+import { LeoApp, LoadManager } from './core/leoApp';
 import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
