@@ -16179,7 +16179,8 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 </t>
 <t tx="felix.20240113195919.1"># 0.2.11
 
-- Fixed ...
+- Added typescript support for running scripts and using @command or @button nodes.
+- Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

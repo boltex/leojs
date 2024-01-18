@@ -2,7 +2,8 @@
 
 # 0.2.11
 
-- Fixed ...
+- Added typescript support for running scripts and using @command or @button nodes.
+- Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
 
 # 0.2.10
 
