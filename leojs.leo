@@ -2901,13 +2901,6 @@ export class LeoButtonNode extends vscode.TreeItem {
     ) {
         super(button.name);
 
-        // Setup this instance (just differentiate 'script-button' for now)
-        this.command = {
-            command: Constants.COMMANDS.CLICK_BUTTON,
-            title: '',
-            arguments: [this]
-        };
-
         this._isAdd = this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON;
 
         this.rclicks = button.rclicks ? button.rclicks : [];
@@ -5745,6 +5738,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 </t>
 <t tx="felix.20201214205159.42">{
+  "command": "leojs.clickButton",
+  "when": "false"
+},
+{
   "command": "leojs.gotoScript",
   "when": "false"
 },
@@ -6950,16 +6947,20 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "category": "Leojs",
   "title": "Execute Script",
   "enablement": "leojsTreeOpened",
-  "icon": {
-    "light": "resources/light/execute.svg",
-    "dark": "resources/dark/execute.svg"
-  }
+  "icon": "$(play)"
 },
 {
   "command": "leojs.minibuffer",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
   "title": "Minibuffer"
+},
+{
+  "command": "leojs.clickButton",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Click Button",
+  "icon": "$(play)"
 },
 {
   "command": "leojs.gotoScript",
@@ -11123,6 +11124,11 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
 },
 </t>
 <t tx="felix.20220517203332.1">{
+  "command": "leojs.clickButton",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsButtonNode|^leojsButtonAdd/",
+  "group": "inline@1"
+},
+{
   "command": "leojs.removeButton",
   "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsButtonNode/",
   "group": "leojsButtonContext1@1"

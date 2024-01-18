@@ -742,16 +742,20 @@
         "category": "Leojs",
         "title": "Execute Script",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/execute.svg",
-          "dark": "resources/dark/execute.svg"
-        }
+        "icon": "$(play)"
       },
       {
         "command": "leojs.minibuffer",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Minibuffer"
+      },
+      {
+        "command": "leojs.clickButton",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Click Button",
+        "icon": "$(play)"
       },
       {
         "command": "leojs.gotoScript",
@@ -2189,6 +2193,10 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "leojs.clickButton",
+          "when": "false"
+        },
+        {
           "command": "leojs.gotoScript",
           "when": "false"
         },
@@ -2947,6 +2955,11 @@
           "command": "leojs.gotoNextClone",
           "when": "viewItem =~ /leojsNodeCloned/",
           "group": "leojsNodeContext3@3"
+        },
+        {
+          "command": "leojs.clickButton",
+          "when": "leojsTreeOpened && viewItem =~ /^leojsButtonNode|^leojsButtonAdd/",
+          "group": "inline@1"
         },
         {
           "command": "leojs.removeButton",

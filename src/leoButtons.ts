@@ -100,13 +100,6 @@ export class LeoButtonNode extends vscode.TreeItem {
     ) {
         super(button.name);
 
-        // Setup this instance (just differentiate 'script-button' for now)
-        this.command = {
-            command: Constants.COMMANDS.CLICK_BUTTON,
-            title: '',
-            arguments: [this]
-        };
-
         this._isAdd = this.button.name === Constants.BUTTON_STRINGS.SCRIPT_BUTTON;
 
         this.rclicks = button.rclicks ? button.rclicks : [];
