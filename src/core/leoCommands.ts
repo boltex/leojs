@@ -40,8 +40,9 @@ import { ScriptingController } from './mod_scripting';
 import { ShadowController } from './leoShadow';
 import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
-import { CommanderWrapper, SqlitePickleShare } from './leoCache';
+import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
+import * as typescript from 'typescript';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -255,6 +256,7 @@ export class Commands {
     public vimCommands: any = undefined;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
+    public id: number; // Replaces python id function
 
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
@@ -264,6 +266,7 @@ export class Commands {
         relativeFileName?: string
     ) {
         const c: Commands = this;
+        this.id = ++g.app.commanderIdCounter;
 
         // From Official Ivars
         this.gui = gui || g.app.gui;
@@ -514,6 +517,32 @@ export class Commands {
         //     prefix = ('c,g,p,script_gnx=None,None,None,None;'
         //               'assert c and g and p and script_gnx;\n')
         //     cc.PyflakesCommand(c).check_script(script_p, prefix + script)
+
+        const tsCompileOptions: typescript.CompilerOptions = {
+            noEmitOnError: true,
+            noImplicitAny: false,
+            target: typescript.ScriptTarget.ES2020,
+            module: typescript.ModuleKind.CommonJS
+        };
+
+        const result = typescript.transpileModule(script, {
+            compilerOptions: tsCompileOptions
+        });
+        const errors: string[] = [];
+
+        if (result.diagnostics && result.diagnostics.length > 0) {
+            // Handle the compilation errors.
+            // For example, you can log them:
+            result.diagnostics.forEach(diagnostic => {
+                const message = typescript.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+                errors.push(message);
+            });
+            g.es(errors.join("\n"));
+            return; // Print errors and cancel running the script.
+        } else {
+            // The code compiled successfully, you can now proceed to run it.
+            script = result.outputText;
+        }
 
         this.redirectScriptOutput();
         // oldLog = g.app.log  // TODO : needed ?

@@ -117,7 +117,6 @@ export class LeoButtonNode extends vscode.TreeItem {
     // @ts-ignore
     public get iconPath(): Icon {
         return this._buttonIcons[this._isAdd ? 2 : this.rclicks.length ? 1 : 0];
-
     }
 
     // @ts-ignore

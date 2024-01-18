@@ -1,3 +1,4 @@
 src
 !src/core
 !src/commands
+types

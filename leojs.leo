@@ -1029,14 +1029,12 @@ import { Constants } from './constants';
 import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
-import { LeoApp } from './core/leoApp';
-import { LoadManager } from "./core/leoApp";
+import { LeoApp, LoadManager } from './core/leoApp';
 import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 const activateDebug = false;
-
 
 @language typescript
 @tabwidth -4
@@ -2924,7 +2922,6 @@ export class LeoButtonNode extends vscode.TreeItem {
 <t tx="felix.20201214151425.3">// @ts-ignore
 public get iconPath(): Icon {
     return this._buttonIcons[this._isAdd ? 2 : this.rclicks.length ? 1 : 0];
-
 }
 
 </t>
@@ -7003,7 +7000,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "process": "^0.11.10",
 "terser-webpack-plugin": "^5.3.1",
 "ts-loader": "^9.2.6",
-"typescript": "^4.5.5",
+"typescript": "^4.9.5",
 "webpack": "^5.70.0",
 "webpack-cli": "^4.9.2",
 "webpack-shell-plugin-next": "^2.2.2"
@@ -7883,7 +7880,6 @@ interface Date {
     format: (format?: string) =&gt; string;
     masks: { default: string };
 }
-
 </t>
 <t tx="felix.20211002194716.1"></t>
 <t tx="felix.20211003223641.1">/**
@@ -10725,7 +10721,7 @@ import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
 import { QuickSearchController } from "./core/quicksearch";
 import { LeoUI } from "./leoUI";
-import { LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
+import { Icon, LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
 import * as utils from "./utils";
 
 @language typescript
@@ -10941,7 +10937,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     }
 
     // @ts-ignore
-    public get iconPath(): Icon | vscode.ThemeIcon | string {
+    public get iconPath(): Icon | vscode.ThemeIcon | string | undefined {
         if (this._iconIndex &lt; 4) {
             return this._leoUI.gotoIcons[this._iconIndex];
         }
