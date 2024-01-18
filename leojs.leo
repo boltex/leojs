@@ -1017,14 +1017,7 @@ If you would like to modify and build this project yourself, see [CONTRIBUTING.m
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1">// &lt;reference path="declarations.d.ts" // convert to triple slash if needed
-// declare global {
-//     interface Date {
-//         format: (format?: string) =&gt; string;
-//         masks: { default: string };
-//     }
-// }
-import * as vscode from 'vscode';
+<t tx="felix.20201208214322.1">import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 import * as JSZip from 'jszip';
 import * as pako from 'pako';
@@ -1036,8 +1029,7 @@ import { Constants } from './constants';
 import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
-import { LeoApp } from './core/leoApp';
-import { LoadManager } from "./core/leoApp";
+import { LeoApp, LoadManager } from './core/leoApp';
 import { RemoteHubApi } from './remote-hub';
 import { Database, SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process

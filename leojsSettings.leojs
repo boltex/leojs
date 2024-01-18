@@ -451,8 +451,7 @@
             },
             {
               "gnx": "felix.20240107200310.1",
-              "vh": "@bool json-outline-clipboard = True",
-              "status": 32
+              "vh": "@bool json-outline-clipboard = True"
             },
             {
               "gnx": "ekr.20170718054928.1",
@@ -592,8 +591,7 @@
                 }
               ]
             }
-          ],
-          "status": 4
+          ]
         },
         {
           "gnx": "ekr.20041119034357.20",
@@ -1024,7 +1022,7 @@
           ]
         }
       ],
-      "status": 4
+      "status": 32
     }
   ],
   "tnodes": {

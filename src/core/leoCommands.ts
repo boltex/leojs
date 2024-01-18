@@ -518,35 +518,18 @@ export class Commands {
         //               'assert c and g and p and script_gnx;\n')
         //     cc.PyflakesCommand(c).check_script(script_p, prefix + script)
 
-        const aList = g.get_directives_dict_list(script_p);
-        const d = g.scanAtCommentAndAtLanguageDirectives(aList);
-        const language =
-            (d && d['language'])
-            || g.getLanguageFromAncestorAtFileNode(script_p)
-            || c.config.getLanguage('target-language')
-            || 'plain';
-
-        if (language === 'python') {
-            // PREVENT USER FROM RUNNING SCRIPT UNDER PYTHON LANGUAGE DIRECTIVE : @language python
-            g.es("Python language detected\nLeoJS is scriptable in javascript or typescript");
-            return;
-        }
-
-        const tsCompileOptions = {
+        const tsCompileOptions: typescript.CompilerOptions = {
             noEmitOnError: true,
             noImplicitAny: false,
             target: typescript.ScriptTarget.ES2020,
             module: typescript.ModuleKind.CommonJS
         };
 
-        if (language === 'typescript') {
-            tsCompileOptions.noImplicitAny = true;
-        }
-
         const result = typescript.transpileModule(script, {
             compilerOptions: tsCompileOptions
         });
         const errors: string[] = [];
+
         if (result.diagnostics && result.diagnostics.length > 0) {
             // Handle the compilation errors.
             // For example, you can log them:
@@ -560,8 +543,6 @@ export class Commands {
             // The code compiled successfully, you can now proceed to run it.
             script = result.outputText;
         }
-
-        g.es("transpiled code is: ", script);
 
         this.redirectScriptOutput();
         // oldLog = g.app.log  // TODO : needed ?
