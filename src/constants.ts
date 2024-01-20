@@ -369,6 +369,7 @@ export class Constants {
     public static CONTEXT_FLAGS = {
         // Main flags for connection and opened file
         LEO_STARTUP_DONE: "leojsStartupDone",
+        LEO_OPENING_FILE: "leojsOpeningFile",
         LEO_READY: "leojsReady", // Extension activated and classes created and ready
         TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
         TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document

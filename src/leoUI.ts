@@ -4653,9 +4653,11 @@ export class LeoUI extends NullGui {
                 await g.app.loadManager.openEmptyLeoFile(this);
             }
         } else {
+            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
             await this.triggerBodySave(true);
             const c = g.app.windowList[this.frameIndex].c;
             await c.new(this);
+            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
         }
         this.loadSearchSettings();
         return this.launchRefresh();
@@ -4721,6 +4723,7 @@ export class LeoUI extends NullGui {
                 ) as string;
             }
             if (fileName && g.app.loadManager) {
+                await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
                 await g.app.loadManager.loadLocalFile(fileName, this);
                 this.showBodyIfClosed = true;
                 this.showOutlineIfClosed = true;
@@ -4733,13 +4736,16 @@ export class LeoUI extends NullGui {
                     buttons: true
                 });
                 void this.launchRefresh();
+                await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
             } else {
                 return Promise.resolve();
             }
         } else {
             await this.triggerBodySave(true);
             const c = g.app.windowList[this.frameIndex].c;
+            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
             await c.open_outline(p_uri);
+            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
             this.showBodyIfClosed = true;
             this.showOutlineIfClosed = true;
             this.setupRefresh(this.finalFocus, {

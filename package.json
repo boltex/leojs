@@ -615,6 +615,16 @@
       },
       {
         "view": "leojsOutline",
+        "contents": "Opening file...",
+        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone && leojsOpeningFile"
+      },
+      {
+        "view": "leojsOutlineExplorer",
+        "contents": "Opening file...",
+        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone && leojsOpeningFile"
+      },
+      {
+        "view": "leojsOutline",
         "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
         "when": "!leojsReady && leojsStartupDone"
       },
@@ -626,12 +636,12 @@
       {
         "view": "leojsOutline",
         "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
-        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone"
+        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone && !leojsOpeningFile"
       },
       {
         "view": "leojsOutlineExplorer",
         "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
-        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone"
+        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone && !leojsOpeningFile"
       },
       {
         "view": "leojsDocuments",

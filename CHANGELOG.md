@@ -4,6 +4,7 @@
 
 - Added typescript support for running scripts and using @command or @button nodes.
 - Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
+- Leo panel now shows a 'Opening...' message when opening a Leo file if no file were already opened.
 
 # 0.2.10
 
