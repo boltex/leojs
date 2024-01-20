@@ -2702,6 +2702,7 @@ public static ASK_SAVE_CHANGES_BUTTONS: vscode.MessageItem[] = [
 public static CONTEXT_FLAGS = {
     // Main flags for connection and opened file
     LEO_STARTUP_DONE: "leojsStartupDone",
+    LEO_OPENING_FILE: "leojsOpeningFile",
     LEO_READY: "leojsReady", // Extension activated and classes created and ready
     TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
     TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
@@ -5889,6 +5890,16 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "view": "leojsOutline",
+    "contents": "Opening file...",
+    "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone &amp;&amp; leojsOpeningFile"
+  },
+  {
+    "view": "leojsOutlineExplorer",
+    "contents": "Opening file...",
+    "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone &amp;&amp; leojsOpeningFile"
+  },
+  {
+    "view": "leojsOutline",
     "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
     "when": "!leojsReady &amp;&amp; leojsStartupDone"
   },
@@ -5900,12 +5911,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   {
     "view": "leojsOutline",
     "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
-    "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
+    "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone &amp;&amp; !leojsOpeningFile"
   },
   {
     "view": "leojsOutlineExplorer",
     "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\n[Recent Leo Files](command:leojs.recentLeoFiles)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
-    "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
+    "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone &amp;&amp; !leojsOpeningFile"
   },
   {
     "view": "leojsDocuments",
@@ -7235,6 +7246,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
             ) as string;
         }
         if (fileName &amp;&amp; g.app.loadManager) {
+            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
             await g.app.loadManager.loadLocalFile(fileName, this);
             this.showBodyIfClosed = true;
             this.showOutlineIfClosed = true;
@@ -7247,13 +7259,16 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 buttons: true
             });
             void this.launchRefresh();
+            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
         } else {
             return Promise.resolve();
         }
     } else {
         await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
+        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
         await c.open_outline(p_uri);
+        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
         this.showBodyIfClosed = true;
         this.showOutlineIfClosed = true;
         this.setupRefresh(this.finalFocus, {
@@ -11093,9 +11108,11 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
             await g.app.loadManager.openEmptyLeoFile(this);
         }
     } else {
+        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
         await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         await c.new(this);
+        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
     }
     this.loadSearchSettings();
     return this.launchRefresh();
