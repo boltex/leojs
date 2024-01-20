@@ -24,6 +24,19 @@
 </v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 <v t="felix.20230330224010.1"><vh>@clean BACKERS.md</vh></v>
+<v t="felix.20240119221047.1"><vh>Introduction to Leo</vh>
+<v t="felix.20240119221047.2"><vh>Leo has standard outline operations</vh></v>
+<v t="felix.20240119221047.3"><vh>Leo has three unique features</vh>
+<v t="felix.20240119221047.4"><vh>Leo outlines can create files</vh></v>
+<v t="felix.20240119221047.5"><vh>Leo outlines are scriptable</vh></v>
+<v t="felix.20240119221047.6"><vh>Nodes can be cloned</vh>
+<v t="felix.20240119221047.7"><vh>Node A</vh>
+<v t="felix.20240119221047.8"><vh>Node B</vh></v>
+</v>
+</v>
+</v>
+<v t="felix.20240119221047.9"><vh>Summary</vh></v>
+</v>
 </v>
 <v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
 <v t="felix.20231219233411.1"><vh>Find Panel Webview</vh>
@@ -645,6 +658,7 @@
 </v>
 </v>
 </v>
+<v t="felix.20240119221047.1"></v>
 </vnodes>
 <tnodes>
 <t tx="ekr.20140831085423.18630">This outline contains all of Leo's core source code.
@@ -16201,6 +16215,41 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - Leo panel now shows a 'Opening...' message when opening a Leo file if no file were already opened.
 
 </t>
+<t tx="felix.20240119221047.1">This video is a brief introduction to Leo.
+</t>
+<t tx="felix.20240119221047.2">Leo looks like an ordinary outlining program.
+
+The headline describes the contents of an outline node.
+
+The body pane shows the contents, body text, of the selected node.
+
+You can insert, move, delete, copy and paste nodes.</t>
+<t tx="felix.20240119221047.3"></t>
+<t tx="felix.20240119221047.4">@file nodes create **external files** from outlines
+
+External files are files on your file system.
+
+Leo outlines work much like project files in an IDE.</t>
+<t tx="felix.20240119221047.5">- Every outline node can contain a Python script.
+
+- Leo scripts have *easy* access to all data
+  *in the outline in which the script resides*.
+
+Example:
+
+    g.es(p.h)</t>
+<t tx="felix.20240119221047.6">Nodes may appear many times within the same outline.
+
+A change to one clone affects all the other clones ot that node.</t>
+<t tx="felix.20240119221047.7">This is node A.</t>
+<t tx="felix.20240119221047.8">This is node B.</t>
+<t tx="felix.20240119221047.9">1. Leo looks like an ordinary outliner program.
+
+2. Leo really is an IDE
+
+3. Leo scripts have full, easy access to all outline data.
+
+4. Nodes maybe cloned.</t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
