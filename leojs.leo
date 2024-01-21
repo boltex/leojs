@@ -12094,7 +12094,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/c.code-snippets"
   },
   {
+    "language": "leojsbody.c.wrap",
+    "path": "./snippets/c.code-snippets"
+  },
+  {
     "language": "leojsbody.cpp",
+    "path": "./snippets/cpp.code-snippets"
+  },
+  {
+    "language": "leojsbody.cpp.wrap",
     "path": "./snippets/cpp.code-snippets"
   },
   {
@@ -12102,7 +12110,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/fortran90.code-snippets"
   },
   {
+    "language": "leojsbody.fortran90.wrap",
+    "path": "./snippets/fortran90.code-snippets"
+  },
+  {
     "language": "leojsbody.javascript",
+    "path": "./snippets/javascript.code-snippets"
+  },
+  {
+    "language": "leojsbody.javascript.wrap",
     "path": "./snippets/javascript.code-snippets"
   },
   {
@@ -12110,7 +12126,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/typescript.code-snippets"
   },
   {
+    "language": "leojsbody.typescript.wrap",
+    "path": "./snippets/typescript.code-snippets"
+  },
+  {
     "language": "leojsbody.java",
+    "path": "./snippets/java.code-snippets"
+  },
+  {
+    "language": "leojsbody.java.wrap",
     "path": "./snippets/java.code-snippets"
   },
   {
@@ -12118,7 +12142,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/php.code-snippets"
   },
   {
+    "language": "leojsbody.php.wrap",
+    "path": "./snippets/php.code-snippets"
+  },
+  {
     "language": "leojsbody.markdown",
+    "path": "./snippets/markdown.code-snippets"
+  },
+  {
+    "language": "leojsbody.markdown.wrap",
     "path": "./snippets/markdown.code-snippets"
   },
   {
@@ -12126,7 +12158,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/restructuredtext.code-snippets"
   },
   {
+    "language": "leojsbody.restructuredtext.wrap",
+    "path": "./snippets/restructuredtext.code-snippets"
+  },
+  {
     "language": "leojsbody.rust",
+    "path": "./snippets/rust.code-snippets"
+  },
+  {
+    "language": "leojsbody.rust.wrap",
     "path": "./snippets/rust.code-snippets"
   }
 ],
