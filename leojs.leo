@@ -38,6 +38,7 @@
 <v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
 <v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
+<v t="felix.20240121143955.1"><vh>setBodyWrap</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
 <v t="felix.20240121003227.1"><vh>checkBodyWrap</vh></v>
@@ -1959,6 +1960,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_BODY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
+[CMD.SET_BODY_WRAP_SETTINGS, () =&gt; p_leoUI.config.setBodyWrap()],
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
@@ -2293,6 +2295,7 @@ public static COMMANDS = {
     TOGGLE_FIND_WORD_OPTION: Constants.NAME + ".toggleFindWordOption",
     TOGGLE_FIND_SEARCH_BODY_OPTION: Constants.NAME + ".toggleFindSearchBodyOption",
     TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
+    SET_BODY_WRAP_SETTINGS: Constants.NAME + ".setBodyWrapSettings",
     SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
     CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
 };
@@ -2657,13 +2660,13 @@ public static USER_MESSAGES = {
 
     ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
     FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
+    BODY_WRAP_RECOMMEND: "'leojsbody' wordWrap settings are recommended (some currently missing)",
+    BODY_WRAP_SET: "'leojsbody' wordWrap settings were set",
     FIX_IT: "Fix it",
     ENABLE_PREVIEW_SET: "'Enable Preview' setting was set",
     ENABLE_PREVIEW_RECOMMEND: "'Enable Preview' setting is recommended (currently disabled)",
     CLOSE_EMPTY_CLEARED: "'Close Empty Groups' setting was cleared",
     CLOSE_EMPTY_RECOMMEND: "'Close Empty Groups' setting is NOT recommended!",
-    CLOSE_ON_DELETE_SET: "'Close on File Delete' setting was set",
-    CLOSE_ON_DELETE_RECOMMEND: "'Close on File Delete' setting is recommended (currently disabled)",
     SET_LEO_ID_MESSAGE: "Leo ID not found. Please enter an id that identifies you uniquely.",
     GET_LEO_ID_PROMPT: "Please enter an id that identifies you uniquely.\n(Letters and numbers only, and at least 3 characters in length)",
     ENTER_LEO_ID: "Enter Leo id"
@@ -8099,6 +8102,7 @@ public checkEnablePreview(p_forced?: boolean): void {
             ).then(p_chosenButton =&gt; {
                 if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                     void vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
+                    void vscode.window.showInformationMessage(Constants.USER_MESSAGES.ENABLE_PREVIEW_SET);
                 }
             });
         }
@@ -8129,6 +8133,7 @@ public checkCloseEmptyGroups(p_forced?: boolean): void {
             ).then(p_chosenButton =&gt; {
                 if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                     void vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
+                    void vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_EMPTY_CLEARED);
                 }
             });
         }
@@ -16604,27 +16609,41 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 
 </t>
 <t tx="felix.20240121003227.1">public checkBodyWrap(p_forced?: boolean): void {
-    const config = vscode.workspace.getConfiguration();
     let w_missing = false;
 
     let w_languageSettings: Record&lt;string, boolean&gt; | undefined;
+    let w_totalConfigName = "";
 
     for (const w_lang of Constants.LANGUAGES) {
-        let langWrap = Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX;
-        w_languageSettings = config.get('[' + langWrap + ']');
+        let langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
+        w_totalConfigName += langWrap;
+        // w_languageSettings = vscode.workspace.getConfiguration(langWrap);
+    }
+    w_languageSettings = vscode.workspace.getConfiguration(w_totalConfigName);
 
-        if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
-            w_missing = true;
-            console.log("GOT MISSING", langWrap);
-        } else {
-            console.log("ok ", langWrap);
-        }
+    if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
+        w_missing = true;
+        console.log("GOT MISSING");
+    } else {
+        console.log("ok  all there");
     }
 
     if (w_missing &amp;&amp; p_forced) {
-        console.log("-----------------  SOME MISSING!");
+        console.log("-----------------  SOME MISSING! UPDATING: " + w_totalConfigName);
+        void this.setBodyWrap();
+        // ! NOT warning the user for this forced setting at startup because its internal to LeoJS only !
     } else if (w_missing &amp;&amp; !p_forced) {
-        void vscode.window.showInformationMessage("LeoJS: Word-wrap body pane setting missing");
+        void vscode.window.showWarningMessage(
+            Constants.USER_MESSAGES.BODY_WRAP_RECOMMEND,
+            Constants.USER_MESSAGES.FIX_IT
+        ).then(p_chosenButton =&gt; {
+            if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                void vscode.commands.executeCommand(Constants.COMMANDS.SET_BODY_WRAP_SETTINGS);
+                void vscode.window.showInformationMessage(Constants.USER_MESSAGES.BODY_WRAP_SET);
+            }
+        });
+
+
     } else {
         console.log("----------------- ok none missing");
     }
@@ -16638,6 +16657,7 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 public static LANGUAGES = [
     "plain",
     "python",
+    "javascript",
     "typescript",
     "c",
     "cpp",
@@ -16652,6 +16672,19 @@ public static LANGUAGES = [
     "restructuredtext",
     "rust",
 ];
+
+</t>
+<t tx="felix.20240121143955.1">/**
+ * * Sets all 'bodywrap' vscode settings
+ */
+public setBodyWrap(): Thenable&lt;void&gt; {
+    let w_totalConfigName = "";
+    for (const w_lang of Constants.LANGUAGES) {
+        let langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
+        w_totalConfigName += langWrap;
+    }
+    return vscode.workspace.getConfiguration().update(w_totalConfigName, { 'editor.wordWrap': 'on' }, vscode.ConfigurationTarget.Global);
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

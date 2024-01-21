@@ -72,6 +72,7 @@ export class Constants {
     public static LANGUAGES = [
         "plain",
         "python",
+        "javascript",
         "typescript",
         "c",
         "cpp",
@@ -238,13 +239,13 @@ export class Constants {
 
         ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
         FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
+        BODY_WRAP_RECOMMEND: "'leojsbody' wordWrap settings are recommended (some currently missing)",
+        BODY_WRAP_SET: "'leojsbody' wordWrap settings were set",
         FIX_IT: "Fix it",
         ENABLE_PREVIEW_SET: "'Enable Preview' setting was set",
         ENABLE_PREVIEW_RECOMMEND: "'Enable Preview' setting is recommended (currently disabled)",
         CLOSE_EMPTY_CLEARED: "'Close Empty Groups' setting was cleared",
         CLOSE_EMPTY_RECOMMEND: "'Close Empty Groups' setting is NOT recommended!",
-        CLOSE_ON_DELETE_SET: "'Close on File Delete' setting was set",
-        CLOSE_ON_DELETE_RECOMMEND: "'Close on File Delete' setting is recommended (currently disabled)",
         SET_LEO_ID_MESSAGE: "Leo ID not found. Please enter an id that identifies you uniquely.",
         GET_LEO_ID_PROMPT: "Please enter an id that identifies you uniquely.\n(Letters and numbers only, and at least 3 characters in length)",
         ENTER_LEO_ID: "Enter Leo id"
@@ -706,6 +707,7 @@ export class Constants {
         TOGGLE_FIND_WORD_OPTION: Constants.NAME + ".toggleFindWordOption",
         TOGGLE_FIND_SEARCH_BODY_OPTION: Constants.NAME + ".toggleFindSearchBodyOption",
         TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
+        SET_BODY_WRAP_SETTINGS: Constants.NAME + ".setBodyWrapSettings",
         SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
         CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
     };
