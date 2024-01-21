@@ -14870,38 +14870,44 @@ private _setOpenedBodyTime(p_gnx: string): void {
 public async goAnywhere(): Promise&lt;unknown&gt; {
     await this.triggerBodySave(true);
 
-    const allPositions: { label: string; description?: string; position?: Position; }[] = [];
-    // Options for date to look like : Saturday, September 17, 2016
-    const w_dateOptions: Intl.DateTimeFormatOptions = { weekday: "long", year: 'numeric', month: "long", day: 'numeric' };
-    const c = g.app.windowList[this.frameIndex].c;
+    const q_allPositions = new Promise&lt;{ label: string; description?: string; position?: Position; }[]&gt;((resolve, reject) =&gt; {
+        setTimeout(() =&gt; {
+            const allPositions: { label: string; description?: string; position?: Position; }[] = [];
+            // Options for date to look like : Saturday, September 17, 2016
+            const w_dateOptions: Intl.DateTimeFormatOptions = { weekday: "long", year: 'numeric', month: "long", day: 'numeric' };
+            const c = g.app.windowList[this.frameIndex].c;
 
-    // 'true' parameter because each position is kept individually for the time the QuickPick control is opened
-    for (const p_position of c.all_unique_positions(true)) {
+            // 'true' parameter because each position is kept individually for the time the QuickPick control is opened
+            for (const p_position of c.all_unique_positions(true)) {
 
-        let w_description = p_position.gnx; // Defaults as gnx.
-        const w_gnxParts = w_description.split('.');
-        if (w_gnxParts.length === 3 &amp;&amp; w_gnxParts[1].length === 14) {
-            // legit 3 part gnx
-            const dateString = w_gnxParts[1];
-            const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
-            const w_month = +dateString.substring(4, 6);
-            const w_day = +dateString.substring(6, 8);
-            const w_date = new Date(w_year, w_month - 1, w_day);
-            w_description = `by ${w_gnxParts[0]} on ${w_date.toLocaleDateString("en-US", w_dateOptions)}`;
-        }
-        allPositions.push({
-            label: p_position.h,
-            position: p_position,
-            description: w_description
-        });
+                let w_description = p_position.gnx; // Defaults as gnx.
+                const w_gnxParts = w_description.split('.');
+                if (w_gnxParts.length === 3 &amp;&amp; w_gnxParts[1].length === 14) {
+                    // legit 3 part gnx
+                    const dateString = w_gnxParts[1];
+                    const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
+                    const w_month = +dateString.substring(4, 6);
+                    const w_day = +dateString.substring(6, 8);
+                    const w_date = new Date(w_year, w_month - 1, w_day);
+                    w_description = `by ${w_gnxParts[0]} on ${w_date.toLocaleDateString("en-US", w_dateOptions)}`;
+                }
+                allPositions.push({
+                    label: p_position.h,
+                    position: p_position,
+                    description: w_description
+                });
+            }
+            resolve(allPositions);
+        }, 0);
+    });
 
-    }
     // Add Nav tab special commands
     const w_options: vscode.QuickPickOptions = {
         placeHolder: Constants.USER_MESSAGES.SEARCH_POSITION_BY_HEADLINE
     };
 
-    const p_picked = await vscode.window.showQuickPick(allPositions, w_options);
+    const p_picked = await vscode.window.showQuickPick(q_allPositions, w_options);
+    const c = g.app.windowList[this.frameIndex].c;
 
     if (p_picked &amp;&amp; p_picked.label &amp;&amp; p_picked.position) {
         if (c.positionExists(p_picked.position)) {
@@ -16594,6 +16600,7 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - Added typescript support for running scripts and using @command or @button nodes.
 - Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
 - Leo panel now shows a 'Opening...' message when opening a Leo file if no file were already opened.
+- Fixed extraneous delay when opening the 'goAnywhere' palette with CTRL+P when focus is on a LeoJS panel.
 
 </t>
 <t tx="felix.20240121003227.1">public checkBodyWrap(p_forced?: boolean): void {

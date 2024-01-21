@@ -5,6 +5,7 @@
 - Added typescript support for running scripts and using @command or @button nodes.
 - Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
 - Leo panel now shows a 'Opening...' message when opening a Leo file if no file were already opened.
+- Fixed extraneous delay when opening the 'goAnywhere' palette with CTRL+P when focus is on a LeoJS panel.
 
 # 0.2.10
 
