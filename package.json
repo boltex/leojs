@@ -767,7 +767,17 @@
         "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
       },
       {
+        "language": "leojsbody.plain.wrap",
+        "scopeName": "source.leojsbody.plain",
+        "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.python",
+        "scopeName": "source.leojsbody.python",
+        "path": "./syntaxes/leojsbody.python.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.python.wrap",
         "scopeName": "source.leojsbody.python",
         "path": "./syntaxes/leojsbody.python.tmLanguage.json"
       },
@@ -777,7 +787,17 @@
         "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
       },
       {
+        "language": "leojsbody.typescript.wrap",
+        "scopeName": "source.leojsbody.typescript",
+        "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.javascript",
+        "scopeName": "source.leojsbody.javascript",
+        "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.javascript.wrap",
         "scopeName": "source.leojsbody.javascript",
         "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
       },
@@ -787,7 +807,17 @@
         "path": "./syntaxes/leojsbody.c.tmLanguage.json"
       },
       {
+        "language": "leojsbody.c.wrap",
+        "scopeName": "source.leojsbody.c",
+        "path": "./syntaxes/leojsbody.c.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.cpp",
+        "scopeName": "source.leojsbody.cpp",
+        "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.cpp.wrap",
         "scopeName": "source.leojsbody.cpp",
         "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
       },
@@ -797,7 +827,17 @@
         "path": "./syntaxes/leojsbody.css.tmLanguage.json"
       },
       {
+        "language": "leojsbody.css.wrap",
+        "scopeName": "source.leojsbody.css",
+        "path": "./syntaxes/leojsbody.css.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.fortran",
+        "scopeName": "source.leojsbody.fortran",
+        "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.fortran.wrap",
         "scopeName": "source.leojsbody.fortran",
         "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
       },
@@ -807,7 +847,17 @@
         "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
       },
       {
+        "language": "leojsbody.fortran90.wrap",
+        "scopeName": "source.leojsbody.fortran90",
+        "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.html",
+        "scopeName": "source.leojsbody.html",
+        "path": "./syntaxes/leojsbody.html.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.html.wrap",
         "scopeName": "source.leojsbody.html",
         "path": "./syntaxes/leojsbody.html.tmLanguage.json"
       },
@@ -817,7 +867,17 @@
         "path": "./syntaxes/leojsbody.java.tmLanguage.json"
       },
       {
+        "language": "leojsbody.java.wrap",
+        "scopeName": "source.leojsbody.java",
+        "path": "./syntaxes/leojsbody.java.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.json",
+        "scopeName": "source.leojsbody.json",
+        "path": "./syntaxes/leojsbody.json.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.json.wrap",
         "scopeName": "source.leojsbody.json",
         "path": "./syntaxes/leojsbody.json.tmLanguage.json"
       },
@@ -827,7 +887,17 @@
         "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
       },
       {
+        "language": "leojsbody.markdown.wrap",
+        "scopeName": "source.leojsbody.markdown",
+        "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.php",
+        "scopeName": "source.leojsbody.php",
+        "path": "./syntaxes/leojsbody.php.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.php.wrap",
         "scopeName": "source.leojsbody.php",
         "path": "./syntaxes/leojsbody.php.tmLanguage.json"
       },
@@ -837,7 +907,17 @@
         "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
       },
       {
+        "language": "leojsbody.restructuredtext.wrap",
+        "scopeName": "source.leojsbody.restructuredtext",
+        "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.rust",
+        "scopeName": "source.leojsbody.rust",
+        "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.rust.wrap",
         "scopeName": "source.leojsbody.rust",
         "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
       },
@@ -858,7 +938,23 @@
           "source.leojsbody.python",
           "source.leojsbody.restructuredtext",
           "source.leojsbody.rust",
-          "source.leojsbody.typescript"
+          "source.leojsbody.typescript",
+          "source.leojsbody.c.wrap",
+          "source.leojsbody.cpp.wrap",
+          "source.leojsbody.css.wrap",
+          "source.leojsbody.fortran.wrap",
+          "source.leojsbody.fortran90.wrap",
+          "source.leojsbody.html.wrap",
+          "source.leojsbody.java.wrap",
+          "source.leojsbody.javascript.wrap",
+          "source.leojsbody.json.wrap",
+          "source.leojsbody.markdown.wrap",
+          "source.leojsbody.php.wrap",
+          "source.leojsbody.plain.wrap",
+          "source.leojsbody.python.wrap",
+          "source.leojsbody.restructuredtext.wrap",
+          "source.leojsbody.rust.wrap",
+          "source.leojsbody.typescript.wrap"
         ],
         "path": "./syntaxes/leojsbody.tmLanguage.json",
         "scopeName": "leojs.injection"
@@ -3983,7 +4079,8 @@
         "formatting": {
           "label": "LeoJS: Body",
           "separator": "/",
-          "workspaceSuffix": ""
+          "workspaceSuffix": "",
+          "workspaceTooltip": "LeoJS Body Pane"
         }
       }
     ]

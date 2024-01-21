@@ -40,6 +40,7 @@
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
+<v t="felix.20240121003227.1"><vh>checkBodyWrap</vh></v>
 <v t="felix.20231127195758.1"><vh>setConfirmBeforeClose</vh></v>
 <v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
 </v>
@@ -47,6 +48,7 @@
 <v t="felix.20201214151326.1"><vh>@clean src/constants.ts</vh>
 <v t="felix.20201214151326.2"><vh>class Constants</vh>
 <v t="felix.20201214151326.3"><vh>general constants</vh></v>
+<v t="felix.20240121004132.1"><vh>suported languages</vh></v>
 <v t="felix.20201214151326.4"><vh>workbench interface panels</vh></v>
 <v t="felix.20201214151326.5"><vh>user messages</vh></v>
 <v t="felix.20211008004139.1"><vh>find panel ids</vh></v>
@@ -767,6 +769,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
     setTimeout(() =&gt; {
         this.config.checkEnablePreview();
         this.config.checkCloseEmptyGroups();
+        this.config.checkBodyWrap();
     }, 150);
 }
 
@@ -2475,6 +2478,7 @@ public static DB_FILE_EXTENSION: string = "db";
 public static JS_FILE_EXTENSION: string = "leojs";
 
 public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
+public static LEO_WRAP_SUFFIX: string = ".wrap"; // all lowercase.
 
 public static URI_LEOJS_SCHEME: string = "leojs";
 public static URI_FILE_SCHEME: string = "file";
@@ -3636,6 +3640,8 @@ import { UnlProvider } from "./unlProvider";
     // * Set required vscode configs if needed
     this.config.checkEnablePreview(true);
     this.config.checkCloseEmptyGroups(true);
+    this.config.checkBodyWrap(true);
+
 
     // * also check workbench.editor.enablePreview
     this.config.buildFromSavedSettings();
@@ -8922,7 +8928,8 @@ public getTextFromClipboard(): string {
     "formatting": {
       "label": "LeoJS: Body",
       "separator": "/",
-      "workspaceSuffix": ""
+      "workspaceSuffix": "",
+      "workspaceTooltip": "LeoJS Body Pane"
     }
   }
 ]
@@ -11882,7 +11889,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
   },
   {
+    "language": "leojsbody.plain.wrap",
+    "scopeName": "source.leojsbody.plain",
+    "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.python",
+    "scopeName": "source.leojsbody.python",
+    "path": "./syntaxes/leojsbody.python.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.python.wrap",
     "scopeName": "source.leojsbody.python",
     "path": "./syntaxes/leojsbody.python.tmLanguage.json"
   },
@@ -11892,7 +11909,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
   },
   {
+    "language": "leojsbody.typescript.wrap",
+    "scopeName": "source.leojsbody.typescript",
+    "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.javascript",
+    "scopeName": "source.leojsbody.javascript",
+    "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.javascript.wrap",
     "scopeName": "source.leojsbody.javascript",
     "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
   },
@@ -11902,7 +11929,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.c.tmLanguage.json"
   },
   {
+    "language": "leojsbody.c.wrap",
+    "scopeName": "source.leojsbody.c",
+    "path": "./syntaxes/leojsbody.c.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.cpp",
+    "scopeName": "source.leojsbody.cpp",
+    "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.cpp.wrap",
     "scopeName": "source.leojsbody.cpp",
     "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
   },
@@ -11912,7 +11949,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.css.tmLanguage.json"
   },
   {
+    "language": "leojsbody.css.wrap",
+    "scopeName": "source.leojsbody.css",
+    "path": "./syntaxes/leojsbody.css.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.fortran",
+    "scopeName": "source.leojsbody.fortran",
+    "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.fortran.wrap",
     "scopeName": "source.leojsbody.fortran",
     "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
   },
@@ -11922,7 +11969,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
   },
   {
+    "language": "leojsbody.fortran90.wrap",
+    "scopeName": "source.leojsbody.fortran90",
+    "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.html",
+    "scopeName": "source.leojsbody.html",
+    "path": "./syntaxes/leojsbody.html.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.html.wrap",
     "scopeName": "source.leojsbody.html",
     "path": "./syntaxes/leojsbody.html.tmLanguage.json"
   },
@@ -11932,7 +11989,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.java.tmLanguage.json"
   },
   {
+    "language": "leojsbody.java.wrap",
+    "scopeName": "source.leojsbody.java",
+    "path": "./syntaxes/leojsbody.java.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.json",
+    "scopeName": "source.leojsbody.json",
+    "path": "./syntaxes/leojsbody.json.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.json.wrap",
     "scopeName": "source.leojsbody.json",
     "path": "./syntaxes/leojsbody.json.tmLanguage.json"
   },
@@ -11942,7 +12009,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
   },
   {
+    "language": "leojsbody.markdown.wrap",
+    "scopeName": "source.leojsbody.markdown",
+    "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.php",
+    "scopeName": "source.leojsbody.php",
+    "path": "./syntaxes/leojsbody.php.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.php.wrap",
     "scopeName": "source.leojsbody.php",
     "path": "./syntaxes/leojsbody.php.tmLanguage.json"
   },
@@ -11952,7 +12029,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
   },
   {
+    "language": "leojsbody.restructuredtext.wrap",
+    "scopeName": "source.leojsbody.restructuredtext",
+    "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.rust",
+    "scopeName": "source.leojsbody.rust",
+    "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.rust.wrap",
     "scopeName": "source.leojsbody.rust",
     "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
   },
@@ -11973,7 +12060,23 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.python",
       "source.leojsbody.restructuredtext",
       "source.leojsbody.rust",
-      "source.leojsbody.typescript"
+      "source.leojsbody.typescript",
+      "source.leojsbody.c.wrap",
+      "source.leojsbody.cpp.wrap",
+      "source.leojsbody.css.wrap",
+      "source.leojsbody.fortran.wrap",
+      "source.leojsbody.fortran90.wrap",
+      "source.leojsbody.html.wrap",
+      "source.leojsbody.java.wrap",
+      "source.leojsbody.javascript.wrap",
+      "source.leojsbody.json.wrap",
+      "source.leojsbody.markdown.wrap",
+      "source.leojsbody.php.wrap",
+      "source.leojsbody.plain.wrap",
+      "source.leojsbody.python.wrap",
+      "source.leojsbody.restructuredtext.wrap",
+      "source.leojsbody.rust.wrap",
+      "source.leojsbody.typescript.wrap"
     ],
     "path": "./syntaxes/leojsbody.tmLanguage.json",
     "scopeName": "leojs.injection"
@@ -12224,8 +12327,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         const p = c.p;
         let w_language = this._getBodyLanguage();
 
-        // # Get the body wrap state
-        const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
         const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
         const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
 
@@ -12261,14 +12362,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         };
         // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
         // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
-
-        // TODO : Apply tabwidth
-        // console.log('TABWIDTH: ', w_tabWidth);
-        // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-        // console.log('WRAP: ', w_wrap);
-
-        // Replace language string if in 'exceptions' array
-        w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
 
         let w_debugMessage = "";
         let w_needRefreshFlag = false;
@@ -12544,17 +12637,8 @@ public refreshBodyStates(): void {
 
     // * Set document language along with the proper cursor position, selection range and scrolling position
     const c = g.app.windowList[this.frameIndex].c;
-    const p = c.p;
     let w_language = this._getBodyLanguage();
 
-    // # Get the body wrap state
-    let w_wrap = !!g.scanAllAtWrapDirectives(c, p);
-
-    // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-    // console.log('WRAP: ', w_wrap);
-
-    // Replace language string if in 'exceptions' array
-    w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
     // Apply language if the selected node is still the same after all those events
     if (this._bodyTextDocument &amp;&amp;
         !this._bodyTextDocument.isClosed &amp;&amp;
@@ -14865,7 +14949,7 @@ private _getBodyLanguage(): string {
     const c = g.app.windowList[this.frameIndex].c;
     const p = c.p;
     let w_language = "plain";
-
+    const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
     if (g.useSyntaxColoring(p)) {
         const aList = g.get_directives_dict_list(p);
         const d = g.scanAtCommentAndAtLanguageDirectives(aList);
@@ -14877,6 +14961,10 @@ private _getBodyLanguage(): string {
 
         w_language = w_language.toLowerCase();
     }
+    // Replace language string if in 'exceptions' array
+    w_language = Constants.LEO_LANGUAGE_PREFIX +
+        (Constants.LANGUAGE_CODES[w_language] || w_language) +
+        (w_wrap ? Constants.LEO_WRAP_SUFFIX : "");
     return w_language;
 }
 
@@ -16506,6 +16594,57 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - Added typescript support for running scripts and using @command or @button nodes.
 - Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
 - Leo panel now shows a 'Opening...' message when opening a Leo file if no file were already opened.
+
+</t>
+<t tx="felix.20240121003227.1">public checkBodyWrap(p_forced?: boolean): void {
+    const config = vscode.workspace.getConfiguration();
+    let w_missing = false;
+
+    let w_languageSettings: Record&lt;string, boolean&gt; | undefined;
+
+    for (const w_lang of Constants.LANGUAGES) {
+        let langWrap = Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX;
+        w_languageSettings = config.get('[' + langWrap + ']');
+
+        if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
+            w_missing = true;
+            console.log("GOT MISSING", langWrap);
+        } else {
+            console.log("ok ", langWrap);
+        }
+    }
+
+    if (w_missing &amp;&amp; p_forced) {
+        console.log("-----------------  SOME MISSING!");
+    } else if (w_missing &amp;&amp; !p_forced) {
+        void vscode.window.showInformationMessage("LeoJS: Word-wrap body pane setting missing");
+    } else {
+        console.log("----------------- ok none missing");
+    }
+
+}
+
+</t>
+<t tx="felix.20240121004132.1">/**
+ * Supported Languages
+ */
+public static LANGUAGES = [
+    "plain",
+    "python",
+    "typescript",
+    "c",
+    "cpp",
+    "css",
+    "fortran",
+    "fortran90",
+    "html",
+    "java",
+    "json",
+    "markdown",
+    "php",
+    "restructuredtext",
+    "rust",
+];
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

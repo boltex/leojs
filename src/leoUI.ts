@@ -280,6 +280,8 @@ export class LeoUI extends NullGui {
         // * Set required vscode configs if needed
         this.config.checkEnablePreview(true);
         this.config.checkCloseEmptyGroups(true);
+        this.config.checkBodyWrap(true);
+
 
         // * also check workbench.editor.enablePreview
         this.config.buildFromSavedSettings();
@@ -777,6 +779,7 @@ export class LeoUI extends NullGui {
         setTimeout(() => {
             this.config.checkEnablePreview();
             this.config.checkCloseEmptyGroups();
+            this.config.checkBodyWrap();
         }, 150);
     }
 
@@ -2455,8 +2458,6 @@ export class LeoUI extends NullGui {
             const p = c.p;
             let w_language = this._getBodyLanguage();
 
-            // # Get the body wrap state
-            const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
             const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
             const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
 
@@ -2492,14 +2493,6 @@ export class LeoUI extends NullGui {
             };
             // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
             // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
-
-            // TODO : Apply tabwidth
-            // console.log('TABWIDTH: ', w_tabWidth);
-            // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-            // console.log('WRAP: ', w_wrap);
-
-            // Replace language string if in 'exceptions' array
-            w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
 
             let w_debugMessage = "";
             let w_needRefreshFlag = false;
@@ -2758,7 +2751,7 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
         let w_language = "plain";
-
+        const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
         if (g.useSyntaxColoring(p)) {
             const aList = g.get_directives_dict_list(p);
             const d = g.scanAtCommentAndAtLanguageDirectives(aList);
@@ -2770,6 +2763,10 @@ export class LeoUI extends NullGui {
 
             w_language = w_language.toLowerCase();
         }
+        // Replace language string if in 'exceptions' array
+        w_language = Constants.LEO_LANGUAGE_PREFIX +
+            (Constants.LANGUAGE_CODES[w_language] || w_language) +
+            (w_wrap ? Constants.LEO_WRAP_SUFFIX : "");
         return w_language;
     }
 
@@ -2822,17 +2819,8 @@ export class LeoUI extends NullGui {
 
         // * Set document language along with the proper cursor position, selection range and scrolling position
         const c = g.app.windowList[this.frameIndex].c;
-        const p = c.p;
         let w_language = this._getBodyLanguage();
 
-        // # Get the body wrap state
-        let w_wrap = !!g.scanAllAtWrapDirectives(c, p);
-
-        // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-        // console.log('WRAP: ', w_wrap);
-
-        // Replace language string if in 'exceptions' array
-        w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
         // Apply language if the selected node is still the same after all those events
         if (this._bodyTextDocument &&
             !this._bodyTextDocument.isClosed &&

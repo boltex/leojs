@@ -260,6 +260,34 @@ export class Config implements ConfigMembers {
         }
     }
 
+    public checkBodyWrap(p_forced?: boolean): void {
+        const config = vscode.workspace.getConfiguration();
+        let w_missing = false;
+
+        let w_languageSettings: Record<string, boolean> | undefined;
+
+        for (const w_lang of Constants.LANGUAGES) {
+            let langWrap = Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX;
+            w_languageSettings = config.get('[' + langWrap + ']');
+
+            if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
+                w_missing = true;
+                console.log("GOT MISSING", langWrap);
+            } else {
+                console.log("ok ", langWrap);
+            }
+        }
+
+        if (w_missing && p_forced) {
+            console.log("-----------------  SOME MISSING!");
+        } else if (w_missing && !p_forced) {
+            void vscode.window.showInformationMessage("LeoJS: Word-wrap body pane setting missing");
+        } else {
+            console.log("----------------- ok none missing");
+        }
+
+    }
+
     public setConfirmBeforeClose(p_state: boolean): Thenable<void> {
         return vscode.workspace.getConfiguration("window")
             .update("confirmBeforeClose", p_state ? "always" : this._confirmOffValue, true);

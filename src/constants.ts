@@ -40,6 +40,7 @@ export class Constants {
     public static JS_FILE_EXTENSION: string = "leojs";
 
     public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
+    public static LEO_WRAP_SUFFIX: string = ".wrap"; // all lowercase.
 
     public static URI_LEOJS_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
@@ -64,6 +65,27 @@ export class Constants {
     public static CONFIG_NAME: string = "leojs";
     public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
     public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
+
+    /**
+     * Supported Languages
+     */
+    public static LANGUAGES = [
+        "plain",
+        "python",
+        "typescript",
+        "c",
+        "cpp",
+        "css",
+        "fortran",
+        "fortran90",
+        "html",
+        "java",
+        "json",
+        "markdown",
+        "php",
+        "restructuredtext",
+        "rust",
+    ];
 
     /**
      * Strings used in the workbench interface panels (not for messages or dialogs)
