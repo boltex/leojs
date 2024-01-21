@@ -11402,7 +11402,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
   },
   {
+    "id": "leojsbody.plain.wrap",
+    "aliases": [
+      "Leo Body Plain",
+      "leojsbody"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
+  },
+  {
     "id": "leojsbody.python",
+    "aliases": [
+      "Leo Body Python",
+      "leojsbody.python"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.python.wrap",
     "aliases": [
       "Leo Body Python",
       "leojsbody.python"
@@ -11424,7 +11446,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
   },
   {
+    "id": "leojsbody.typescript.wrap",
+    "aliases": [
+      "Leo Body Typescript",
+      "leojsbody.typescript"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
+  },
+  {
     "id": "leojsbody.javascript",
+    "aliases": [
+      "Leo Body Javascript",
+      "leojsbody.javascript"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.javascript.wrap",
     "aliases": [
       "Leo Body Javascript",
       "leojsbody.javascript"
@@ -11446,7 +11490,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
   },
   {
+    "id": "leojsbody.c.wrap",
+    "aliases": [
+      "Leo Body c",
+      "leojsbody.c"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
+  },
+  {
     "id": "leojsbody.cpp",
+    "aliases": [
+      "Leo Body C++",
+      "leojsbody.cpp"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.cpp.wrap",
     "aliases": [
       "Leo Body C++",
       "leojsbody.cpp"
@@ -11468,7 +11534,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
   },
   {
+    "id": "leojsbody.css.wrap",
+    "aliases": [
+      "Leo Body CSS",
+      "leojsbody.css"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
+  },
+  {
     "id": "leojsbody.fortran",
+    "aliases": [
+      "Leo Body Fortran",
+      "leojsbody.fortran"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.fortran.wrap",
     "aliases": [
       "Leo Body Fortran",
       "leojsbody.fortran"
@@ -11490,7 +11578,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
   },
   {
+    "id": "leojsbody.fortran90.wrap",
+    "aliases": [
+      "Leo Body Fortran90",
+      "leojsbody.fortran90"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+  },
+  {
     "id": "leojsbody.html",
+    "aliases": [
+      "Leo Body HTML",
+      "leojsbody.html"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.html.wrap",
     "aliases": [
       "Leo Body HTML",
       "leojsbody.html"
@@ -11512,7 +11622,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
   },
   {
+    "id": "leojsbody.java.wrap",
+    "aliases": [
+      "Leo Body Java",
+      "leojsbody.java"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
+  },
+  {
     "id": "leojsbody.json",
+    "aliases": [
+      "Leo Body Json",
+      "leojsbody.json"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.json.wrap",
     "aliases": [
       "Leo Body Json",
       "leojsbody.json"
@@ -11534,7 +11666,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
   },
   {
+    "id": "leojsbody.markdown.wrap",
+    "aliases": [
+      "Leo Body Markdown",
+      "leojsbody.markdown"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
+  },
+  {
     "id": "leojsbody.php",
+    "aliases": [
+      "Leo Body PHP",
+      "leojsbody.php"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.php.wrap",
     "aliases": [
       "Leo Body PHP",
       "leojsbody.php"
@@ -11556,7 +11710,29 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
   },
   {
+    "id": "leojsbody.restructuredtext.wrap",
+    "aliases": [
+      "Leo Body reStructuredText",
+      "leojsbody.restructuredtext"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
+  },
+  {
     "id": "leojsbody.rust",
+    "aliases": [
+      "Leo Body Rust",
+      "leojsbody.rust"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.rust.wrap",
     "aliases": [
       "Leo Body Rust",
       "leojsbody.rust"
