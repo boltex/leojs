@@ -288,6 +288,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
       },
       {
@@ -299,6 +303,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
       },
       {
@@ -310,6 +318,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
       },
       {
@@ -321,6 +333,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
       },
       {
@@ -332,6 +348,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
       },
       {
@@ -343,6 +363,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
       },
       {
@@ -354,6 +378,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
       },
       {
@@ -365,6 +393,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
       },
       {
@@ -376,6 +408,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
       },
       {
@@ -387,6 +423,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
       },
       {
@@ -398,6 +438,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
       },
       {
@@ -409,6 +453,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
       },
       {
@@ -420,6 +468,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
       },
       {
@@ -431,6 +483,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
       },
       {
@@ -442,6 +498,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
       },
       {
@@ -453,6 +513,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
       },
       {
@@ -464,6 +528,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
       },
       {
@@ -475,6 +543,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
       },
       {
@@ -486,6 +558,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
       },
       {
@@ -497,6 +573,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
       },
       {
@@ -508,6 +588,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
       },
       {
@@ -519,6 +603,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
       },
       {
@@ -530,6 +618,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
       },
       {
@@ -541,6 +633,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
       },
       {
@@ -552,6 +648,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
       },
       {
@@ -563,6 +663,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
       },
       {
@@ -574,6 +678,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
       },
       {
@@ -585,6 +693,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
       },
       {
@@ -596,6 +708,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
       },
       {
@@ -607,6 +723,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
       },
       {
@@ -618,6 +738,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
       },
       {
@@ -629,6 +753,10 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
       }
     ],

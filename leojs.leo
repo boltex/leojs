@@ -7883,7 +7883,10 @@ public gotSelectedNode(p_node: Position): void {
 }
 
 </t>
-<t tx="felix.20210102000055.1"></t>
+<t tx="felix.20210102000055.1"># This file contains almost all of LeoJS sources.
+
+# See the "About this file" node for important notes.
+</t>
 <t tx="felix.20210102000100.1"></t>
 <t tx="felix.20210110210346.1">@language typescript
 @tabwidth -4
@@ -11399,6 +11402,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
   },
   {
@@ -11410,6 +11417,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
   },
   {
@@ -11421,6 +11432,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
   },
   {
@@ -11432,6 +11447,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
   },
   {
@@ -11443,6 +11462,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
   },
   {
@@ -11454,6 +11477,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
   },
   {
@@ -11465,6 +11492,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
   },
   {
@@ -11476,6 +11507,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
   },
   {
@@ -11487,6 +11522,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
   },
   {
@@ -11498,6 +11537,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
   },
   {
@@ -11509,6 +11552,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
   },
   {
@@ -11520,6 +11567,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
   },
   {
@@ -11531,6 +11582,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
   },
   {
@@ -11542,6 +11597,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
   },
   {
@@ -11553,6 +11612,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
   },
   {
@@ -11564,6 +11627,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
   },
   {
@@ -11575,6 +11642,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
   },
   {
@@ -11586,6 +11657,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
   },
   {
@@ -11597,6 +11672,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
   },
   {
@@ -11608,6 +11687,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
   },
   {
@@ -11619,6 +11702,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
   },
   {
@@ -11630,6 +11717,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
   },
   {
@@ -11641,6 +11732,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
   },
   {
@@ -11652,6 +11747,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
   },
   {
@@ -11663,6 +11762,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
   },
   {
@@ -11674,6 +11777,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
   },
   {
@@ -11685,6 +11792,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
   },
   {
@@ -11696,6 +11807,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
   },
   {
@@ -11707,6 +11822,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
   },
   {
@@ -11718,6 +11837,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
   },
   {
@@ -11729,6 +11852,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
   },
   {
@@ -11740,6 +11867,10 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
   }
 ],
