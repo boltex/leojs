@@ -16606,6 +16606,7 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
 - Leo panel now shows a 'Opening...' message when opening a Leo file if no file were already opened.
 - Fixed extraneous delay when opening the 'goAnywhere' palette with CTRL+P when focus is on a LeoJS panel.
+- Added support for the 'wrap' state of the body pane. (Along with @wrap and @nowrap directives)
 
 </t>
 <t tx="felix.20240121003227.1">public checkBodyWrap(p_forced?: boolean): void {
@@ -16623,13 +16624,9 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 
     if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
         w_missing = true;
-        console.log("GOT MISSING");
-    } else {
-        console.log("ok  all there");
     }
 
     if (w_missing &amp;&amp; p_forced) {
-        console.log("-----------------  SOME MISSING! UPDATING: " + w_totalConfigName);
         void this.setBodyWrap();
         // ! NOT warning the user for this forced setting at startup because its internal to LeoJS only !
     } else if (w_missing &amp;&amp; !p_forced) {
@@ -16642,12 +16639,7 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
                 void vscode.window.showInformationMessage(Constants.USER_MESSAGES.BODY_WRAP_SET);
             }
         });
-
-
-    } else {
-        console.log("----------------- ok none missing");
     }
-
 }
 
 </t>
