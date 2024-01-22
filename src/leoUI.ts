@@ -282,7 +282,6 @@ export class LeoUI extends NullGui {
         this.config.checkCloseEmptyGroups(true);
         this.config.checkBodyWrap(true);
 
-
         // * also check workbench.editor.enablePreview
         this.config.buildFromSavedSettings();
         this._bodyEnablePreview = !!vscode.workspace
