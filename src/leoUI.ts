@@ -4650,7 +4650,9 @@ export class LeoUI extends NullGui {
             await this.triggerBodySave(true);
             const c = g.app.windowList[this.frameIndex].c;
             await c.new(this);
-            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            setTimeout(() => {
+                void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            }, 60);
         }
         this.loadSearchSettings();
         return this.launchRefresh();
@@ -4729,7 +4731,9 @@ export class LeoUI extends NullGui {
                     buttons: true
                 });
                 void this.launchRefresh();
-                await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+                setTimeout(() => {
+                    void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+                }, 60);
             } else {
                 return Promise.resolve();
             }
@@ -4738,7 +4742,6 @@ export class LeoUI extends NullGui {
             const c = g.app.windowList[this.frameIndex].c;
             await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
             await c.open_outline(p_uri);
-            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
             this.showBodyIfClosed = true;
             this.showOutlineIfClosed = true;
             this.setupRefresh(this.finalFocus, {
@@ -4749,6 +4752,9 @@ export class LeoUI extends NullGui {
                 documents: true,
                 buttons: true
             });
+            setTimeout(() => {
+                void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            }, 60);
             void this.launchRefresh();
         }
         return this.loadSearchSettings();

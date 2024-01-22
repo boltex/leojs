@@ -7267,7 +7267,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 buttons: true
             });
             void this.launchRefresh();
-            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            setTimeout(() =&gt; {
+                void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            }, 60);
         } else {
             return Promise.resolve();
         }
@@ -7276,7 +7278,6 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         const c = g.app.windowList[this.frameIndex].c;
         await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
         await c.open_outline(p_uri);
-        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
         this.showBodyIfClosed = true;
         this.showOutlineIfClosed = true;
         this.setupRefresh(this.finalFocus, {
@@ -7287,6 +7288,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
             documents: true,
             buttons: true
         });
+        setTimeout(() =&gt; {
+            void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+        }, 60);
         void this.launchRefresh();
     }
     return this.loadSearchSettings();
@@ -11126,7 +11130,9 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
         await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         await c.new(this);
-        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+        setTimeout(() =&gt; {
+            void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+        }, 60);
     }
     this.loadSearchSettings();
     return this.launchRefresh();
