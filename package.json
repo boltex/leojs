@@ -288,6 +288,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.plain.wrap",
+        "aliases": [
+          "Leo Body Plain",
+          "leojsbody"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
       },
       {
@@ -299,6 +318,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.python.wrap",
+        "aliases": [
+          "Leo Body Python",
+          "leojsbody.python"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
       },
       {
@@ -310,6 +348,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.typescript.wrap",
+        "aliases": [
+          "Leo Body Typescript",
+          "leojsbody.typescript"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
       },
       {
@@ -321,6 +378,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.javascript.wrap",
+        "aliases": [
+          "Leo Body Javascript",
+          "leojsbody.javascript"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
       },
       {
@@ -332,6 +408,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.c.wrap",
+        "aliases": [
+          "Leo Body c",
+          "leojsbody.c"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
       },
       {
@@ -343,6 +438,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.cpp.wrap",
+        "aliases": [
+          "Leo Body C++",
+          "leojsbody.cpp"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
       },
       {
@@ -354,6 +468,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.css.wrap",
+        "aliases": [
+          "Leo Body CSS",
+          "leojsbody.css"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
       },
       {
@@ -365,6 +498,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.fortran.wrap",
+        "aliases": [
+          "Leo Body Fortran",
+          "leojsbody.fortran"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
       },
       {
@@ -376,6 +528,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.fortran90.wrap",
+        "aliases": [
+          "Leo Body Fortran90",
+          "leojsbody.fortran90"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
       },
       {
@@ -387,6 +558,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.html.wrap",
+        "aliases": [
+          "Leo Body HTML",
+          "leojsbody.html"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
       },
       {
@@ -398,6 +588,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.java.wrap",
+        "aliases": [
+          "Leo Body Java",
+          "leojsbody.java"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
       },
       {
@@ -409,6 +618,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.json.wrap",
+        "aliases": [
+          "Leo Body Json",
+          "leojsbody.json"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
       },
       {
@@ -420,6 +648,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.markdown.wrap",
+        "aliases": [
+          "Leo Body Markdown",
+          "leojsbody.markdown"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
       },
       {
@@ -431,6 +678,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.php.wrap",
+        "aliases": [
+          "Leo Body PHP",
+          "leojsbody.php"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
       },
       {
@@ -442,6 +708,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.restructuredtext.wrap",
+        "aliases": [
+          "Leo Body reStructuredText",
+          "leojsbody.restructuredtext"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
       },
       {
@@ -453,6 +738,25 @@
         "extensions": [
           ""
         ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.rust.wrap",
+        "aliases": [
+          "Leo Body Rust",
+          "leojsbody.rust"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
         "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
       }
     ],
@@ -463,7 +767,17 @@
         "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
       },
       {
+        "language": "leojsbody.plain.wrap",
+        "scopeName": "source.leojsbody.plain",
+        "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.python",
+        "scopeName": "source.leojsbody.python",
+        "path": "./syntaxes/leojsbody.python.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.python.wrap",
         "scopeName": "source.leojsbody.python",
         "path": "./syntaxes/leojsbody.python.tmLanguage.json"
       },
@@ -473,7 +787,17 @@
         "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
       },
       {
+        "language": "leojsbody.typescript.wrap",
+        "scopeName": "source.leojsbody.typescript",
+        "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.javascript",
+        "scopeName": "source.leojsbody.javascript",
+        "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.javascript.wrap",
         "scopeName": "source.leojsbody.javascript",
         "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
       },
@@ -483,7 +807,17 @@
         "path": "./syntaxes/leojsbody.c.tmLanguage.json"
       },
       {
+        "language": "leojsbody.c.wrap",
+        "scopeName": "source.leojsbody.c",
+        "path": "./syntaxes/leojsbody.c.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.cpp",
+        "scopeName": "source.leojsbody.cpp",
+        "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.cpp.wrap",
         "scopeName": "source.leojsbody.cpp",
         "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
       },
@@ -493,7 +827,17 @@
         "path": "./syntaxes/leojsbody.css.tmLanguage.json"
       },
       {
+        "language": "leojsbody.css.wrap",
+        "scopeName": "source.leojsbody.css",
+        "path": "./syntaxes/leojsbody.css.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.fortran",
+        "scopeName": "source.leojsbody.fortran",
+        "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.fortran.wrap",
         "scopeName": "source.leojsbody.fortran",
         "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
       },
@@ -503,7 +847,17 @@
         "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
       },
       {
+        "language": "leojsbody.fortran90.wrap",
+        "scopeName": "source.leojsbody.fortran90",
+        "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.html",
+        "scopeName": "source.leojsbody.html",
+        "path": "./syntaxes/leojsbody.html.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.html.wrap",
         "scopeName": "source.leojsbody.html",
         "path": "./syntaxes/leojsbody.html.tmLanguage.json"
       },
@@ -513,7 +867,17 @@
         "path": "./syntaxes/leojsbody.java.tmLanguage.json"
       },
       {
+        "language": "leojsbody.java.wrap",
+        "scopeName": "source.leojsbody.java",
+        "path": "./syntaxes/leojsbody.java.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.json",
+        "scopeName": "source.leojsbody.json",
+        "path": "./syntaxes/leojsbody.json.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.json.wrap",
         "scopeName": "source.leojsbody.json",
         "path": "./syntaxes/leojsbody.json.tmLanguage.json"
       },
@@ -523,7 +887,17 @@
         "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
       },
       {
+        "language": "leojsbody.markdown.wrap",
+        "scopeName": "source.leojsbody.markdown",
+        "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.php",
+        "scopeName": "source.leojsbody.php",
+        "path": "./syntaxes/leojsbody.php.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.php.wrap",
         "scopeName": "source.leojsbody.php",
         "path": "./syntaxes/leojsbody.php.tmLanguage.json"
       },
@@ -533,7 +907,17 @@
         "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
       },
       {
+        "language": "leojsbody.restructuredtext.wrap",
+        "scopeName": "source.leojsbody.restructuredtext",
+        "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.rust",
+        "scopeName": "source.leojsbody.rust",
+        "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.rust.wrap",
         "scopeName": "source.leojsbody.rust",
         "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
       },
@@ -554,7 +938,23 @@
           "source.leojsbody.python",
           "source.leojsbody.restructuredtext",
           "source.leojsbody.rust",
-          "source.leojsbody.typescript"
+          "source.leojsbody.typescript",
+          "source.leojsbody.c.wrap",
+          "source.leojsbody.cpp.wrap",
+          "source.leojsbody.css.wrap",
+          "source.leojsbody.fortran.wrap",
+          "source.leojsbody.fortran90.wrap",
+          "source.leojsbody.html.wrap",
+          "source.leojsbody.java.wrap",
+          "source.leojsbody.javascript.wrap",
+          "source.leojsbody.json.wrap",
+          "source.leojsbody.markdown.wrap",
+          "source.leojsbody.php.wrap",
+          "source.leojsbody.plain.wrap",
+          "source.leojsbody.python.wrap",
+          "source.leojsbody.restructuredtext.wrap",
+          "source.leojsbody.rust.wrap",
+          "source.leojsbody.typescript.wrap"
         ],
         "path": "./syntaxes/leojsbody.tmLanguage.json",
         "scopeName": "leojs.injection"
@@ -566,7 +966,15 @@
         "path": "./snippets/c.code-snippets"
       },
       {
+        "language": "leojsbody.c.wrap",
+        "path": "./snippets/c.code-snippets"
+      },
+      {
         "language": "leojsbody.cpp",
+        "path": "./snippets/cpp.code-snippets"
+      },
+      {
+        "language": "leojsbody.cpp.wrap",
         "path": "./snippets/cpp.code-snippets"
       },
       {
@@ -574,7 +982,15 @@
         "path": "./snippets/fortran90.code-snippets"
       },
       {
+        "language": "leojsbody.fortran90.wrap",
+        "path": "./snippets/fortran90.code-snippets"
+      },
+      {
         "language": "leojsbody.javascript",
+        "path": "./snippets/javascript.code-snippets"
+      },
+      {
+        "language": "leojsbody.javascript.wrap",
         "path": "./snippets/javascript.code-snippets"
       },
       {
@@ -582,7 +998,15 @@
         "path": "./snippets/typescript.code-snippets"
       },
       {
+        "language": "leojsbody.typescript.wrap",
+        "path": "./snippets/typescript.code-snippets"
+      },
+      {
         "language": "leojsbody.java",
+        "path": "./snippets/java.code-snippets"
+      },
+      {
+        "language": "leojsbody.java.wrap",
         "path": "./snippets/java.code-snippets"
       },
       {
@@ -590,7 +1014,15 @@
         "path": "./snippets/php.code-snippets"
       },
       {
+        "language": "leojsbody.php.wrap",
+        "path": "./snippets/php.code-snippets"
+      },
+      {
         "language": "leojsbody.markdown",
+        "path": "./snippets/markdown.code-snippets"
+      },
+      {
+        "language": "leojsbody.markdown.wrap",
         "path": "./snippets/markdown.code-snippets"
       },
       {
@@ -598,7 +1030,15 @@
         "path": "./snippets/restructuredtext.code-snippets"
       },
       {
+        "language": "leojsbody.restructuredtext.wrap",
+        "path": "./snippets/restructuredtext.code-snippets"
+      },
+      {
         "language": "leojsbody.rust",
+        "path": "./snippets/rust.code-snippets"
+      },
+      {
+        "language": "leojsbody.rust.wrap",
         "path": "./snippets/rust.code-snippets"
       }
     ],
@@ -3679,7 +4119,8 @@
         "formatting": {
           "label": "LeoJS: Body",
           "separator": "/",
-          "workspaceSuffix": ""
+          "workspaceSuffix": "",
+          "workspaceTooltip": "LeoJS Body Pane"
         }
       }
     ]

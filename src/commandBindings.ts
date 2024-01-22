@@ -302,6 +302,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_BODY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
         [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
+        [CMD.SET_BODY_WRAP_SETTINGS, () => p_leoUI.config.setBodyWrap()],
         [CMD.SET_ENABLE_PREVIEW, () => p_leoUI.config.setEnablePreview()],
         [CMD.CLEAR_CLOSE_EMPTY_GROUPS, () => p_leoUI.config.clearCloseEmptyGroups()],
 
