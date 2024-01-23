@@ -7,4 +7,3 @@ interface Date {
     format: (format?: string) => string;
     masks: { default: string };
 }
-
