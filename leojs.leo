@@ -16669,6 +16669,41 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - Added support for the 'wrap' state of the body pane. (Along with @wrap and @nowrap directives)
 
 </t>
+<t tx="felix.20240119221047.1">This video is a brief introduction to Leo.
+</t>
+<t tx="felix.20240119221047.2">Leo looks like an ordinary outlining program.
+
+The headline describes the contents of an outline node.
+
+The body pane shows the contents, body text, of the selected node.
+
+You can insert, move, delete, copy and paste nodes.</t>
+<t tx="felix.20240119221047.3"></t>
+<t tx="felix.20240119221047.4">@file nodes create **external files** from outlines
+
+External files are files on your file system.
+
+Leo outlines work much like project files in an IDE.</t>
+<t tx="felix.20240119221047.5">- Every outline node can contain a Python script.
+
+- Leo scripts have *easy* access to all data
+  *in the outline in which the script resides*.
+
+Example:
+
+    g.es(p.h)</t>
+<t tx="felix.20240119221047.6">Nodes may appear many times within the same outline.
+
+A change to one clone affects all the other clones ot that node.</t>
+<t tx="felix.20240119221047.7">This is node A.</t>
+<t tx="felix.20240119221047.8">This is node B.</t>
+<t tx="felix.20240119221047.9">1. Leo looks like an ordinary outliner program.
+
+2. Leo really is an IDE
+
+3. Leo scripts have full, easy access to all outline data.
+
+4. Nodes maybe cloned.</t>
 <t tx="felix.20240121003227.1">public checkBodyWrap(p_forced?: boolean): void {
     let w_missing = false;
 
@@ -16744,41 +16779,6 @@ public setBodyWrap(): Thenable&lt;void&gt; {
 - ...
 
 </t>
-<t tx="felix.20240119221047.1">This video is a brief introduction to Leo.
-</t>
-<t tx="felix.20240119221047.2">Leo looks like an ordinary outlining program.
-
-The headline describes the contents of an outline node.
-
-The body pane shows the contents, body text, of the selected node.
-
-You can insert, move, delete, copy and paste nodes.</t>
-<t tx="felix.20240119221047.3"></t>
-<t tx="felix.20240119221047.4">@file nodes create **external files** from outlines
-
-External files are files on your file system.
-
-Leo outlines work much like project files in an IDE.</t>
-<t tx="felix.20240119221047.5">- Every outline node can contain a Python script.
-
-- Leo scripts have *easy* access to all data
-  *in the outline in which the script resides*.
-
-Example:
-
-    g.es(p.h)</t>
-<t tx="felix.20240119221047.6">Nodes may appear many times within the same outline.
-
-A change to one clone affects all the other clones ot that node.</t>
-<t tx="felix.20240119221047.7">This is node A.</t>
-<t tx="felix.20240119221047.8">This is node B.</t>
-<t tx="felix.20240119221047.9">1. Leo looks like an ordinary outliner program.
-
-2. Leo really is an IDE
-
-3. Leo scripts have full, easy access to all outline data.
-
-4. Nodes maybe cloned.</t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
