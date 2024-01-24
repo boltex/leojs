@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240122215450.1"><vh>0.2.12</vh></v>
 <v t="felix.20240113195919.1"><vh>0.2.11</vh></v>
 <v t="felix.20240107181054.1"><vh>0.2.10</vh></v>
 <v t="felix.20231224200501.1"><vh>0.2.9</vh></v>
@@ -51,8 +52,10 @@
 <v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
 <v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
+<v t="felix.20240121143955.1"><vh>setBodyWrap</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
+<v t="felix.20240121003227.1"><vh>checkBodyWrap</vh></v>
 <v t="felix.20231127195758.1"><vh>setConfirmBeforeClose</vh></v>
 <v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
 </v>
@@ -60,6 +63,7 @@
 <v t="felix.20201214151326.1"><vh>@clean src/constants.ts</vh>
 <v t="felix.20201214151326.2"><vh>class Constants</vh>
 <v t="felix.20201214151326.3"><vh>general constants</vh></v>
+<v t="felix.20240121004132.1"><vh>suported languages</vh></v>
 <v t="felix.20201214151326.4"><vh>workbench interface panels</vh></v>
 <v t="felix.20201214151326.5"><vh>user messages</vh></v>
 <v t="felix.20211008004139.1"><vh>find panel ids</vh></v>
@@ -781,6 +785,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
     setTimeout(() =&gt; {
         this.config.checkEnablePreview();
         this.config.checkCloseEmptyGroups();
+        this.config.checkBodyWrap();
     }, 150);
 }
 
@@ -1970,6 +1975,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_BODY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
+[CMD.SET_BODY_WRAP_SETTINGS, () =&gt; p_leoUI.config.setBodyWrap()],
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
@@ -2304,6 +2310,7 @@ public static COMMANDS = {
     TOGGLE_FIND_WORD_OPTION: Constants.NAME + ".toggleFindWordOption",
     TOGGLE_FIND_SEARCH_BODY_OPTION: Constants.NAME + ".toggleFindSearchBodyOption",
     TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
+    SET_BODY_WRAP_SETTINGS: Constants.NAME + ".setBodyWrapSettings",
     SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
     CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
 };
@@ -2489,6 +2496,7 @@ public static DB_FILE_EXTENSION: string = "db";
 public static JS_FILE_EXTENSION: string = "leojs";
 
 public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
+public static LEO_WRAP_SUFFIX: string = ".wrap"; // all lowercase.
 
 public static URI_LEOJS_SCHEME: string = "leojs";
 public static URI_FILE_SCHEME: string = "file";
@@ -2667,13 +2675,13 @@ public static USER_MESSAGES = {
 
     ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
     FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
+    BODY_WRAP_RECOMMEND: "'leojsbody' wordWrap settings are recommended (some currently missing)",
+    BODY_WRAP_SET: "'leojsbody' wordWrap settings were set",
     FIX_IT: "Fix it",
     ENABLE_PREVIEW_SET: "'Enable Preview' setting was set",
     ENABLE_PREVIEW_RECOMMEND: "'Enable Preview' setting is recommended (currently disabled)",
     CLOSE_EMPTY_CLEARED: "'Close Empty Groups' setting was cleared",
     CLOSE_EMPTY_RECOMMEND: "'Close Empty Groups' setting is NOT recommended!",
-    CLOSE_ON_DELETE_SET: "'Close on File Delete' setting was set",
-    CLOSE_ON_DELETE_RECOMMEND: "'Close on File Delete' setting is recommended (currently disabled)",
     SET_LEO_ID_MESSAGE: "Leo ID not found. Please enter an id that identifies you uniquely.",
     GET_LEO_ID_PROMPT: "Please enter an id that identifies you uniquely.\n(Letters and numbers only, and at least 3 characters in length)",
     ENTER_LEO_ID: "Enter Leo id"
@@ -3650,6 +3658,7 @@ import { UnlProvider } from "./unlProvider";
     // * Set required vscode configs if needed
     this.config.checkEnablePreview(true);
     this.config.checkCloseEmptyGroups(true);
+    this.config.checkBodyWrap(true);
 
     // * also check workbench.editor.enablePreview
     this.config.buildFromSavedSettings();
@@ -4655,7 +4664,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -7273,7 +7282,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 buttons: true
             });
             void this.launchRefresh();
-            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            setTimeout(() =&gt; {
+                void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            }, 60);
         } else {
             return Promise.resolve();
         }
@@ -7282,7 +7293,6 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         const c = g.app.windowList[this.frameIndex].c;
         await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
         await c.open_outline(p_uri);
-        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
         this.showBodyIfClosed = true;
         this.showOutlineIfClosed = true;
         this.setupRefresh(this.finalFocus, {
@@ -7293,6 +7303,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
             documents: true,
             buttons: true
         });
+        setTimeout(() =&gt; {
+            void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+        }, 60);
         void this.launchRefresh();
     }
     return this.loadSearchSettings();
@@ -7897,7 +7910,10 @@ public gotSelectedNode(p_node: Position): void {
 }
 
 </t>
-<t tx="felix.20210102000055.1"></t>
+<t tx="felix.20210102000055.1"># This file contains almost all of LeoJS sources.
+
+# See the "About this file" node for important notes.
+</t>
 <t tx="felix.20210102000100.1"></t>
 <t tx="felix.20210110210346.1">@language typescript
 @tabwidth -4
@@ -8104,6 +8120,7 @@ public checkEnablePreview(p_forced?: boolean): void {
             ).then(p_chosenButton =&gt; {
                 if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                     void vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
+                    void vscode.window.showInformationMessage(Constants.USER_MESSAGES.ENABLE_PREVIEW_SET);
                 }
             });
         }
@@ -8134,6 +8151,7 @@ public checkCloseEmptyGroups(p_forced?: boolean): void {
             ).then(p_chosenButton =&gt; {
                 if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                     void vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
+                    void vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_EMPTY_CLEARED);
                 }
             });
         }
@@ -8933,7 +8951,8 @@ public getTextFromClipboard(): string {
     "formatting": {
       "label": "LeoJS: Body",
       "separator": "/",
-      "workspaceSuffix": ""
+      "workspaceSuffix": "",
+      "workspaceTooltip": "LeoJS Body Pane"
     }
   }
 ]
@@ -11126,7 +11145,9 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
         await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         await c.new(this);
-        await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+        setTimeout(() =&gt; {
+            void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+        }, 60);
     }
     this.loadSearchSettings();
     return this.launchRefresh();
@@ -11413,6 +11434,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.plain.wrap",
+    "aliases": [
+      "Leo Body Plain",
+      "leojsbody"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
   },
   {
@@ -11424,6 +11464,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.python.wrap",
+    "aliases": [
+      "Leo Body Python",
+      "leojsbody.python"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
   },
   {
@@ -11435,6 +11494,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.typescript.wrap",
+    "aliases": [
+      "Leo Body Typescript",
+      "leojsbody.typescript"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
   },
   {
@@ -11446,6 +11524,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.javascript.wrap",
+    "aliases": [
+      "Leo Body Javascript",
+      "leojsbody.javascript"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
   },
   {
@@ -11457,6 +11554,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.c.wrap",
+    "aliases": [
+      "Leo Body c",
+      "leojsbody.c"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
   },
   {
@@ -11468,6 +11584,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.cpp.wrap",
+    "aliases": [
+      "Leo Body C++",
+      "leojsbody.cpp"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
   },
   {
@@ -11479,6 +11614,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.css.wrap",
+    "aliases": [
+      "Leo Body CSS",
+      "leojsbody.css"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
   },
   {
@@ -11490,6 +11644,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.fortran.wrap",
+    "aliases": [
+      "Leo Body Fortran",
+      "leojsbody.fortran"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
   },
   {
@@ -11501,6 +11674,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.fortran90.wrap",
+    "aliases": [
+      "Leo Body Fortran90",
+      "leojsbody.fortran90"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
   },
   {
@@ -11512,6 +11704,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.html.wrap",
+    "aliases": [
+      "Leo Body HTML",
+      "leojsbody.html"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
   },
   {
@@ -11523,6 +11734,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.java.wrap",
+    "aliases": [
+      "Leo Body Java",
+      "leojsbody.java"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
   },
   {
@@ -11534,6 +11764,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.json.wrap",
+    "aliases": [
+      "Leo Body Json",
+      "leojsbody.json"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
   },
   {
@@ -11545,6 +11794,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.markdown.wrap",
+    "aliases": [
+      "Leo Body Markdown",
+      "leojsbody.markdown"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
   },
   {
@@ -11556,6 +11824,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.php.wrap",
+    "aliases": [
+      "Leo Body PHP",
+      "leojsbody.php"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
   },
   {
@@ -11567,6 +11854,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.restructuredtext.wrap",
+    "aliases": [
+      "Leo Body reStructuredText",
+      "leojsbody.restructuredtext"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
   },
   {
@@ -11578,6 +11884,25 @@ private _setTreeViewTitle(p_title?: string): void {
     "extensions": [
       ""
     ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.rust.wrap",
+    "aliases": [
+      "Leo Body Rust",
+      "leojsbody.rust"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
     "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
   }
 ],
@@ -11589,7 +11914,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
   },
   {
+    "language": "leojsbody.plain.wrap",
+    "scopeName": "source.leojsbody.plain",
+    "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.python",
+    "scopeName": "source.leojsbody.python",
+    "path": "./syntaxes/leojsbody.python.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.python.wrap",
     "scopeName": "source.leojsbody.python",
     "path": "./syntaxes/leojsbody.python.tmLanguage.json"
   },
@@ -11599,7 +11934,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
   },
   {
+    "language": "leojsbody.typescript.wrap",
+    "scopeName": "source.leojsbody.typescript",
+    "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.javascript",
+    "scopeName": "source.leojsbody.javascript",
+    "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.javascript.wrap",
     "scopeName": "source.leojsbody.javascript",
     "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
   },
@@ -11609,7 +11954,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.c.tmLanguage.json"
   },
   {
+    "language": "leojsbody.c.wrap",
+    "scopeName": "source.leojsbody.c",
+    "path": "./syntaxes/leojsbody.c.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.cpp",
+    "scopeName": "source.leojsbody.cpp",
+    "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.cpp.wrap",
     "scopeName": "source.leojsbody.cpp",
     "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
   },
@@ -11619,7 +11974,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.css.tmLanguage.json"
   },
   {
+    "language": "leojsbody.css.wrap",
+    "scopeName": "source.leojsbody.css",
+    "path": "./syntaxes/leojsbody.css.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.fortran",
+    "scopeName": "source.leojsbody.fortran",
+    "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.fortran.wrap",
     "scopeName": "source.leojsbody.fortran",
     "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
   },
@@ -11629,7 +11994,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
   },
   {
+    "language": "leojsbody.fortran90.wrap",
+    "scopeName": "source.leojsbody.fortran90",
+    "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.html",
+    "scopeName": "source.leojsbody.html",
+    "path": "./syntaxes/leojsbody.html.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.html.wrap",
     "scopeName": "source.leojsbody.html",
     "path": "./syntaxes/leojsbody.html.tmLanguage.json"
   },
@@ -11639,7 +12014,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.java.tmLanguage.json"
   },
   {
+    "language": "leojsbody.java.wrap",
+    "scopeName": "source.leojsbody.java",
+    "path": "./syntaxes/leojsbody.java.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.json",
+    "scopeName": "source.leojsbody.json",
+    "path": "./syntaxes/leojsbody.json.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.json.wrap",
     "scopeName": "source.leojsbody.json",
     "path": "./syntaxes/leojsbody.json.tmLanguage.json"
   },
@@ -11649,7 +12034,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
   },
   {
+    "language": "leojsbody.markdown.wrap",
+    "scopeName": "source.leojsbody.markdown",
+    "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.php",
+    "scopeName": "source.leojsbody.php",
+    "path": "./syntaxes/leojsbody.php.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.php.wrap",
     "scopeName": "source.leojsbody.php",
     "path": "./syntaxes/leojsbody.php.tmLanguage.json"
   },
@@ -11659,7 +12054,17 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
   },
   {
+    "language": "leojsbody.restructuredtext.wrap",
+    "scopeName": "source.leojsbody.restructuredtext",
+    "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.rust",
+    "scopeName": "source.leojsbody.rust",
+    "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.rust.wrap",
     "scopeName": "source.leojsbody.rust",
     "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
   },
@@ -11680,7 +12085,23 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.python",
       "source.leojsbody.restructuredtext",
       "source.leojsbody.rust",
-      "source.leojsbody.typescript"
+      "source.leojsbody.typescript",
+      "source.leojsbody.c.wrap",
+      "source.leojsbody.cpp.wrap",
+      "source.leojsbody.css.wrap",
+      "source.leojsbody.fortran.wrap",
+      "source.leojsbody.fortran90.wrap",
+      "source.leojsbody.html.wrap",
+      "source.leojsbody.java.wrap",
+      "source.leojsbody.javascript.wrap",
+      "source.leojsbody.json.wrap",
+      "source.leojsbody.markdown.wrap",
+      "source.leojsbody.php.wrap",
+      "source.leojsbody.plain.wrap",
+      "source.leojsbody.python.wrap",
+      "source.leojsbody.restructuredtext.wrap",
+      "source.leojsbody.rust.wrap",
+      "source.leojsbody.typescript.wrap"
     ],
     "path": "./syntaxes/leojsbody.tmLanguage.json",
     "scopeName": "leojs.injection"
@@ -11693,7 +12114,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/c.code-snippets"
   },
   {
+    "language": "leojsbody.c.wrap",
+    "path": "./snippets/c.code-snippets"
+  },
+  {
     "language": "leojsbody.cpp",
+    "path": "./snippets/cpp.code-snippets"
+  },
+  {
+    "language": "leojsbody.cpp.wrap",
     "path": "./snippets/cpp.code-snippets"
   },
   {
@@ -11701,7 +12130,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/fortran90.code-snippets"
   },
   {
+    "language": "leojsbody.fortran90.wrap",
+    "path": "./snippets/fortran90.code-snippets"
+  },
+  {
     "language": "leojsbody.javascript",
+    "path": "./snippets/javascript.code-snippets"
+  },
+  {
+    "language": "leojsbody.javascript.wrap",
     "path": "./snippets/javascript.code-snippets"
   },
   {
@@ -11709,7 +12146,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/typescript.code-snippets"
   },
   {
+    "language": "leojsbody.typescript.wrap",
+    "path": "./snippets/typescript.code-snippets"
+  },
+  {
     "language": "leojsbody.java",
+    "path": "./snippets/java.code-snippets"
+  },
+  {
+    "language": "leojsbody.java.wrap",
     "path": "./snippets/java.code-snippets"
   },
   {
@@ -11717,7 +12162,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/php.code-snippets"
   },
   {
+    "language": "leojsbody.php.wrap",
+    "path": "./snippets/php.code-snippets"
+  },
+  {
     "language": "leojsbody.markdown",
+    "path": "./snippets/markdown.code-snippets"
+  },
+  {
+    "language": "leojsbody.markdown.wrap",
     "path": "./snippets/markdown.code-snippets"
   },
   {
@@ -11725,7 +12178,15 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./snippets/restructuredtext.code-snippets"
   },
   {
+    "language": "leojsbody.restructuredtext.wrap",
+    "path": "./snippets/restructuredtext.code-snippets"
+  },
+  {
     "language": "leojsbody.rust",
+    "path": "./snippets/rust.code-snippets"
+  },
+  {
+    "language": "leojsbody.rust.wrap",
     "path": "./snippets/rust.code-snippets"
   }
 ],
@@ -11931,8 +12392,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         const p = c.p;
         let w_language = this._getBodyLanguage();
 
-        // # Get the body wrap state
-        const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
         const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
         const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
 
@@ -11968,14 +12427,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         };
         // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
         // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
-
-        // TODO : Apply tabwidth
-        // console.log('TABWIDTH: ', w_tabWidth);
-        // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-        // console.log('WRAP: ', w_wrap);
-
-        // Replace language string if in 'exceptions' array
-        w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
 
         let w_debugMessage = "";
         let w_needRefreshFlag = false;
@@ -12251,17 +12702,8 @@ public refreshBodyStates(): void {
 
     // * Set document language along with the proper cursor position, selection range and scrolling position
     const c = g.app.windowList[this.frameIndex].c;
-    const p = c.p;
     let w_language = this._getBodyLanguage();
 
-    // # Get the body wrap state
-    let w_wrap = !!g.scanAllAtWrapDirectives(c, p);
-
-    // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-    // console.log('WRAP: ', w_wrap);
-
-    // Replace language string if in 'exceptions' array
-    w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
     // Apply language if the selected node is still the same after all those events
     if (this._bodyTextDocument &amp;&amp;
         !this._bodyTextDocument.isClosed &amp;&amp;
@@ -14493,38 +14935,44 @@ private _setOpenedBodyTime(p_gnx: string): void {
 public async goAnywhere(): Promise&lt;unknown&gt; {
     await this.triggerBodySave(true);
 
-    const allPositions: { label: string; description?: string; position?: Position; }[] = [];
-    // Options for date to look like : Saturday, September 17, 2016
-    const w_dateOptions: Intl.DateTimeFormatOptions = { weekday: "long", year: 'numeric', month: "long", day: 'numeric' };
-    const c = g.app.windowList[this.frameIndex].c;
+    const q_allPositions = new Promise&lt;{ label: string; description?: string; position?: Position; }[]&gt;((resolve, reject) =&gt; {
+        setTimeout(() =&gt; {
+            const allPositions: { label: string; description?: string; position?: Position; }[] = [];
+            // Options for date to look like : Saturday, September 17, 2016
+            const w_dateOptions: Intl.DateTimeFormatOptions = { weekday: "long", year: 'numeric', month: "long", day: 'numeric' };
+            const c = g.app.windowList[this.frameIndex].c;
 
-    // 'true' parameter because each position is kept individually for the time the QuickPick control is opened
-    for (const p_position of c.all_unique_positions(true)) {
+            // 'true' parameter because each position is kept individually for the time the QuickPick control is opened
+            for (const p_position of c.all_unique_positions(true)) {
 
-        let w_description = p_position.gnx; // Defaults as gnx.
-        const w_gnxParts = w_description.split('.');
-        if (w_gnxParts.length === 3 &amp;&amp; w_gnxParts[1].length === 14) {
-            // legit 3 part gnx
-            const dateString = w_gnxParts[1];
-            const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
-            const w_month = +dateString.substring(4, 6);
-            const w_day = +dateString.substring(6, 8);
-            const w_date = new Date(w_year, w_month - 1, w_day);
-            w_description = `by ${w_gnxParts[0]} on ${w_date.toLocaleDateString("en-US", w_dateOptions)}`;
-        }
-        allPositions.push({
-            label: p_position.h,
-            position: p_position,
-            description: w_description
-        });
+                let w_description = p_position.gnx; // Defaults as gnx.
+                const w_gnxParts = w_description.split('.');
+                if (w_gnxParts.length === 3 &amp;&amp; w_gnxParts[1].length === 14) {
+                    // legit 3 part gnx
+                    const dateString = w_gnxParts[1];
+                    const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
+                    const w_month = +dateString.substring(4, 6);
+                    const w_day = +dateString.substring(6, 8);
+                    const w_date = new Date(w_year, w_month - 1, w_day);
+                    w_description = `by ${w_gnxParts[0]} on ${w_date.toLocaleDateString("en-US", w_dateOptions)}`;
+                }
+                allPositions.push({
+                    label: p_position.h,
+                    position: p_position,
+                    description: w_description
+                });
+            }
+            resolve(allPositions);
+        }, 0);
+    });
 
-    }
     // Add Nav tab special commands
     const w_options: vscode.QuickPickOptions = {
         placeHolder: Constants.USER_MESSAGES.SEARCH_POSITION_BY_HEADLINE
     };
 
-    const p_picked = await vscode.window.showQuickPick(allPositions, w_options);
+    const p_picked = await vscode.window.showQuickPick(q_allPositions, w_options);
+    const c = g.app.windowList[this.frameIndex].c;
 
     if (p_picked &amp;&amp; p_picked.label &amp;&amp; p_picked.position) {
         if (c.positionExists(p_picked.position)) {
@@ -14572,7 +15020,7 @@ private _getBodyLanguage(): string {
     const c = g.app.windowList[this.frameIndex].c;
     const p = c.p;
     let w_language = "plain";
-
+    const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
     if (g.useSyntaxColoring(p)) {
         const aList = g.get_directives_dict_list(p);
         const d = g.scanAtCommentAndAtLanguageDirectives(aList);
@@ -14584,6 +15032,10 @@ private _getBodyLanguage(): string {
 
         w_language = w_language.toLowerCase();
     }
+    // Replace language string if in 'exceptions' array
+    w_language = Constants.LEO_LANGUAGE_PREFIX +
+        (Constants.LANGUAGE_CODES[w_language] || w_language) +
+        (w_wrap ? Constants.LEO_WRAP_SUFFIX : "");
     return w_language;
 }
 
@@ -16213,6 +16665,83 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 - Added typescript support for running scripts and using @command or @button nodes.
 - Changed button pane interaction so that 'play' icons must be clicked. (instead of clicking anywhere on the entry)
 - Leo panel now shows a 'Opening...' message when opening a Leo file if no file were already opened.
+- Fixed extraneous delay when opening the 'goAnywhere' palette with CTRL+P when focus is on a LeoJS panel.
+- Added support for the 'wrap' state of the body pane. (Along with @wrap and @nowrap directives)
+
+</t>
+<t tx="felix.20240121003227.1">public checkBodyWrap(p_forced?: boolean): void {
+    let w_missing = false;
+
+    let w_languageSettings: Record&lt;string, boolean&gt; | undefined;
+    let w_totalConfigName = "";
+
+    for (const w_lang of Constants.LANGUAGES) {
+        let langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
+        w_totalConfigName += langWrap;
+        // w_languageSettings = vscode.workspace.getConfiguration(langWrap);
+    }
+    w_languageSettings = vscode.workspace.getConfiguration(w_totalConfigName);
+
+    if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
+        w_missing = true;
+    }
+
+    if (w_missing &amp;&amp; p_forced) {
+        void this.setBodyWrap();
+        // ! NOT warning the user for this forced setting at startup because its internal to LeoJS only !
+    } else if (w_missing &amp;&amp; !p_forced) {
+        void vscode.window.showWarningMessage(
+            Constants.USER_MESSAGES.BODY_WRAP_RECOMMEND,
+            Constants.USER_MESSAGES.FIX_IT
+        ).then(p_chosenButton =&gt; {
+            if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                void vscode.commands.executeCommand(Constants.COMMANDS.SET_BODY_WRAP_SETTINGS);
+                void vscode.window.showInformationMessage(Constants.USER_MESSAGES.BODY_WRAP_SET);
+            }
+        });
+    }
+}
+
+</t>
+<t tx="felix.20240121004132.1">/**
+ * Supported Languages
+ */
+public static LANGUAGES = [
+    "plain",
+    "python",
+    "javascript",
+    "typescript",
+    "c",
+    "cpp",
+    "css",
+    "fortran",
+    "fortran90",
+    "html",
+    "java",
+    "json",
+    "markdown",
+    "php",
+    "restructuredtext",
+    "rust",
+];
+
+</t>
+<t tx="felix.20240121143955.1">/**
+ * * Sets all 'bodywrap' vscode settings
+ */
+public setBodyWrap(): Thenable&lt;void&gt; {
+    let w_totalConfigName = "";
+    for (const w_lang of Constants.LANGUAGES) {
+        let langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
+        w_totalConfigName += langWrap;
+    }
+    return vscode.workspace.getConfiguration().update(w_totalConfigName, { 'editor.wordWrap': 'on' }, vscode.ConfigurationTarget.Global);
+}
+
+</t>
+<t tx="felix.20240122215450.1"># 0.2.12
+
+- ...
 
 </t>
 <t tx="felix.20240119221047.1">This video is a brief introduction to Leo.

@@ -280,6 +280,7 @@ export class LeoUI extends NullGui {
         // * Set required vscode configs if needed
         this.config.checkEnablePreview(true);
         this.config.checkCloseEmptyGroups(true);
+        this.config.checkBodyWrap(true);
 
         // * also check workbench.editor.enablePreview
         this.config.buildFromSavedSettings();
@@ -777,6 +778,7 @@ export class LeoUI extends NullGui {
         setTimeout(() => {
             this.config.checkEnablePreview();
             this.config.checkCloseEmptyGroups();
+            this.config.checkBodyWrap();
         }, 150);
     }
 
@@ -2455,8 +2457,6 @@ export class LeoUI extends NullGui {
             const p = c.p;
             let w_language = this._getBodyLanguage();
 
-            // # Get the body wrap state
-            const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
             const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
             const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
 
@@ -2492,14 +2492,6 @@ export class LeoUI extends NullGui {
             };
             // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
             // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
-
-            // TODO : Apply tabwidth
-            // console.log('TABWIDTH: ', w_tabWidth);
-            // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-            // console.log('WRAP: ', w_wrap);
-
-            // Replace language string if in 'exceptions' array
-            w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
 
             let w_debugMessage = "";
             let w_needRefreshFlag = false;
@@ -2758,7 +2750,7 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
         let w_language = "plain";
-
+        const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
         if (g.useSyntaxColoring(p)) {
             const aList = g.get_directives_dict_list(p);
             const d = g.scanAtCommentAndAtLanguageDirectives(aList);
@@ -2770,6 +2762,10 @@ export class LeoUI extends NullGui {
 
             w_language = w_language.toLowerCase();
         }
+        // Replace language string if in 'exceptions' array
+        w_language = Constants.LEO_LANGUAGE_PREFIX +
+            (Constants.LANGUAGE_CODES[w_language] || w_language) +
+            (w_wrap ? Constants.LEO_WRAP_SUFFIX : "");
         return w_language;
     }
 
@@ -2822,17 +2818,8 @@ export class LeoUI extends NullGui {
 
         // * Set document language along with the proper cursor position, selection range and scrolling position
         const c = g.app.windowList[this.frameIndex].c;
-        const p = c.p;
         let w_language = this._getBodyLanguage();
 
-        // # Get the body wrap state
-        let w_wrap = !!g.scanAllAtWrapDirectives(c, p);
-
-        // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
-        // console.log('WRAP: ', w_wrap);
-
-        // Replace language string if in 'exceptions' array
-        w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
         // Apply language if the selected node is still the same after all those events
         if (this._bodyTextDocument &&
             !this._bodyTextDocument.isClosed &&
@@ -3619,38 +3606,44 @@ export class LeoUI extends NullGui {
     public async goAnywhere(): Promise<unknown> {
         await this.triggerBodySave(true);
 
-        const allPositions: { label: string; description?: string; position?: Position; }[] = [];
-        // Options for date to look like : Saturday, September 17, 2016
-        const w_dateOptions: Intl.DateTimeFormatOptions = { weekday: "long", year: 'numeric', month: "long", day: 'numeric' };
-        const c = g.app.windowList[this.frameIndex].c;
+        const q_allPositions = new Promise<{ label: string; description?: string; position?: Position; }[]>((resolve, reject) => {
+            setTimeout(() => {
+                const allPositions: { label: string; description?: string; position?: Position; }[] = [];
+                // Options for date to look like : Saturday, September 17, 2016
+                const w_dateOptions: Intl.DateTimeFormatOptions = { weekday: "long", year: 'numeric', month: "long", day: 'numeric' };
+                const c = g.app.windowList[this.frameIndex].c;
 
-        // 'true' parameter because each position is kept individually for the time the QuickPick control is opened
-        for (const p_position of c.all_unique_positions(true)) {
+                // 'true' parameter because each position is kept individually for the time the QuickPick control is opened
+                for (const p_position of c.all_unique_positions(true)) {
 
-            let w_description = p_position.gnx; // Defaults as gnx.
-            const w_gnxParts = w_description.split('.');
-            if (w_gnxParts.length === 3 && w_gnxParts[1].length === 14) {
-                // legit 3 part gnx
-                const dateString = w_gnxParts[1];
-                const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
-                const w_month = +dateString.substring(4, 6);
-                const w_day = +dateString.substring(6, 8);
-                const w_date = new Date(w_year, w_month - 1, w_day);
-                w_description = `by ${w_gnxParts[0]} on ${w_date.toLocaleDateString("en-US", w_dateOptions)}`;
-            }
-            allPositions.push({
-                label: p_position.h,
-                position: p_position,
-                description: w_description
-            });
+                    let w_description = p_position.gnx; // Defaults as gnx.
+                    const w_gnxParts = w_description.split('.');
+                    if (w_gnxParts.length === 3 && w_gnxParts[1].length === 14) {
+                        // legit 3 part gnx
+                        const dateString = w_gnxParts[1];
+                        const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
+                        const w_month = +dateString.substring(4, 6);
+                        const w_day = +dateString.substring(6, 8);
+                        const w_date = new Date(w_year, w_month - 1, w_day);
+                        w_description = `by ${w_gnxParts[0]} on ${w_date.toLocaleDateString("en-US", w_dateOptions)}`;
+                    }
+                    allPositions.push({
+                        label: p_position.h,
+                        position: p_position,
+                        description: w_description
+                    });
+                }
+                resolve(allPositions);
+            }, 0);
+        });
 
-        }
         // Add Nav tab special commands
         const w_options: vscode.QuickPickOptions = {
             placeHolder: Constants.USER_MESSAGES.SEARCH_POSITION_BY_HEADLINE
         };
 
-        const p_picked = await vscode.window.showQuickPick(allPositions, w_options);
+        const p_picked = await vscode.window.showQuickPick(q_allPositions, w_options);
+        const c = g.app.windowList[this.frameIndex].c;
 
         if (p_picked && p_picked.label && p_picked.position) {
             if (c.positionExists(p_picked.position)) {
@@ -4657,7 +4650,9 @@ export class LeoUI extends NullGui {
             await this.triggerBodySave(true);
             const c = g.app.windowList[this.frameIndex].c;
             await c.new(this);
-            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            setTimeout(() => {
+                void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            }, 60);
         }
         this.loadSearchSettings();
         return this.launchRefresh();
@@ -4736,7 +4731,9 @@ export class LeoUI extends NullGui {
                     buttons: true
                 });
                 void this.launchRefresh();
-                await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+                setTimeout(() => {
+                    void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+                }, 60);
             } else {
                 return Promise.resolve();
             }
@@ -4745,7 +4742,6 @@ export class LeoUI extends NullGui {
             const c = g.app.windowList[this.frameIndex].c;
             await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
             await c.open_outline(p_uri);
-            await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
             this.showBodyIfClosed = true;
             this.showOutlineIfClosed = true;
             this.setupRefresh(this.finalFocus, {
@@ -4756,6 +4752,9 @@ export class LeoUI extends NullGui {
                 documents: true,
                 buttons: true
             });
+            setTimeout(() => {
+                void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+            }, 60);
             void this.launchRefresh();
         }
         return this.loadSearchSettings();
