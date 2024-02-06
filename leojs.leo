@@ -16684,7 +16684,7 @@ You can insert, move, delete, copy and paste nodes.</t>
 External files are files on your file system.
 
 Leo outlines work much like project files in an IDE.</t>
-<t tx="felix.20240119221047.5">- Every outline node can contain a Python script.
+<t tx="felix.20240119221047.5">- Every outline node can contain a JavaScript or TypeScript script.
 
 - Leo scripts have *easy* access to all data
   *in the outline in which the script resides*.
