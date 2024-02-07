@@ -2976,14 +2976,15 @@ export class LocalConfigManager {
      *  - [T] theme .leo file.
      */
     public printSettings(): void {
-        const legend =
-            'legend:' +
-            '    leoSettings.leo' +
-            '@  @button, @command, @mode' +
-            '[D] default settings' +
-            '[F] loaded .leo File' +
-            '[M] myLeoSettings.leo' +
-            '[T] theme .leo file.';
+        const legend = `
+        legend:
+            leoSettings.leo
+         @  @button, @command, @mode
+        [D] default settings
+        [F] loaded .leo File
+        [M] myLeoSettings.leo
+        [T] theme .leo file.
+        `;
 
         const c = this.c;
 
