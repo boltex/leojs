@@ -2492,6 +2492,8 @@ public static OUTPUT_CHANNEL_LANGUAGE = 'Log';
 public static URI_SCHEME_HEADER: string = "leojs:/";
 public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
 public static UNTITLED_FILE_NAME: string = "untitled";
+public static URI_HELP_SCHEME: string = "helpPanel";
+public static URI_HELP_FILENAME: string = "LeoJS Help";
 public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
@@ -9696,9 +9698,9 @@ public finishStartup(): void {
 
     // * Register a content provider for the help text panel
     this.helpDocumentPaneProvider = new HelpPanel(this);
-    this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
+    this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(Constants.URI_HELP_SCHEME, this.helpDocumentPaneProvider));
     setTimeout(() =&gt; {
-        this.helpDocumentPaneProvider.update(vscode.Uri.parse('helpPanel:' + "LeoJS Help"));
+        this.helpDocumentPaneProvider.update(vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME));
     }, 250);
 
     // * Create Leo Opened Documents Treeview Providers and tree views
@@ -16445,15 +16447,52 @@ div.col-nav {
 - Fixed keyboard navigation of the outline while being hoisted.
 
 </t>
-<t tx="felix.20231224193540.1">public put_help(C: Commands, s: string): void {
+<t tx="felix.20231224193540.1">public async put_help(C: Commands, s: string): Promise&lt;void&gt; {
     s = g.dedent(s.trimEnd());
     this.helpPanelText = s;
-    const uri = vscode.Uri.parse('helpPanel:' + "LeoJS Help");
-    this.helpDocumentPaneProvider.update(uri);
+
+    // * Close all open help panels 
+    const w_foundTabs: vscode.Tab[] = [];
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
+            if (
+                p_tab.label.endsWith(Constants.URI_HELP_FILENAME)
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.label === Constants.URI_HELP_FILENAME &amp;&amp; p_tab.input) {
+                // Not a preview
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
+            }
+        }
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+    await q_closedTabs;
+
     setTimeout(() =&gt; {
-        // * Open the virtual document in the preview pane
-        void vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
-    }, 60);
+        const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);
+        this.helpDocumentPaneProvider.update(w_uri);
+        setTimeout(() =&gt; {
+            // * Open the virtual document in the preview pane
+            void vscode.commands.executeCommand('markdown.showPreviewToSide', w_uri);
+        }, 60);
+    }, 0);
 
     // * Showing with standard readonly text document provider
     // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider

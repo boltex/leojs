@@ -49,6 +49,8 @@ export class Constants {
     public static URI_SCHEME_HEADER: string = "leojs:/";
     public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
     public static UNTITLED_FILE_NAME: string = "untitled";
+    public static URI_HELP_SCHEME: string = "helpPanel";
+    public static URI_HELP_FILENAME: string = "LeoJS Help";
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
