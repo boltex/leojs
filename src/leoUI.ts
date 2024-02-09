@@ -545,38 +545,7 @@ export class LeoUI extends NullGui {
         this.helpPanelText = s;
 
         // * Close all open help panels 
-        const w_foundTabs: vscode.Tab[] = [];
-        vscode.window.tabGroups.all.forEach((p_tabGroup) => {
-            p_tabGroup.tabs.forEach((p_tab) => {
-                if (
-                    p_tab.label.endsWith(Constants.URI_HELP_FILENAME)
-                ) {
-                    w_foundTabs.push(p_tab);
-                }
-            });
-        });
-
-        let q_closedTabs;
-        if (w_foundTabs.length) {
-            q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
-            for (const p_tab of w_foundTabs) {
-                if (p_tab.label === Constants.URI_HELP_FILENAME && p_tab.input) {
-                    // Not a preview
-                    await vscode.commands.executeCommand(
-                        'vscode.removeFromRecentlyOpened',
-                        (p_tab.input as vscode.TabInputText).uri
-                    );
-                    // Delete to close all other body tabs.
-                    // (w_oldUri will be deleted last below)
-                    const w_edit = new vscode.WorkspaceEdit();
-                    w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
-                    await vscode.workspace.applyEdit(w_edit);
-                }
-            }
-        } else {
-            q_closedTabs = Promise.resolve(true);
-        }
-        await q_closedTabs;
+        await utils.closeLeoHelpPanels();
 
         setTimeout(() => {
             const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);

@@ -74,8 +74,6 @@
 <v t="felix.20220523151725.1"><vh>setScheme</vh></v>
 <v t="felix.20220523140004.1"><vh>runLeo</vh></v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
-<v t="felix.20221002011858.1"><vh>closeLeoTextEditors</vh></v>
-<v t="felix.20240209001145.1"><vh>closeLeoHelpPanels</vh></v>
 <v t="felix.20221002011903.1"><vh>showWelcomeIfNewer</vh></v>
 </v>
 <v t="felix.20231224201746.1"><vh>@clean src/helpPanel.ts</vh>
@@ -399,6 +397,8 @@
 <v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
 <v t="felix.20201208224407.1"><vh>@clean src/utils.ts</vh>
 <v t="felix.20220929001102.1"><vh>performanceNow</vh></v>
+<v t="felix.20240209012442.1"><vh>closeLeoTextEditors</vh></v>
+<v t="felix.20240209012451.1"><vh>closeLeoHelpPanels</vh></v>
 <v t="felix.20220505225030.1"><vh>uniqueId</vh></v>
 <v t="felix.20220505225023.1"><vh>getUniqueId</vh></v>
 <v t="felix.20230315215040.1"><vh>getOnce</vh></v>
@@ -1570,8 +1570,8 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
     let SQL: SqlJsStatic;
 
     // * Close remaining Leo Bodies and help panels restored by vscode from last session.
-    await closeLeoTextEditors();
-    await closeLeoHelpPanels();
+    await utils.closeLeoTextEditors();
+    await utils.closeLeoHelpPanels();
 
     // * Show a welcome screen on version updates, then start the actual extension.
     void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
@@ -13579,50 +13579,6 @@ private _refreshButtonsPane(): void {
 }
 
 </t>
-<t tx="felix.20221002011858.1">/**
- * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
- */
-async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
-    const w_foundTabs: vscode.Tab[] = [];
-
-    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
-        p_tabGroup.tabs.forEach((p_tab) =&gt; {
-
-            if (p_tab.input &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
-                !p_tab.isDirty
-
-            ) {
-                w_foundTabs.push(p_tab);
-            }
-        });
-    });
-
-    let q_closedTabs;
-    if (w_foundTabs.length) {
-        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
-        for (const p_tab of w_foundTabs) {
-            if (p_tab.input) {
-                await vscode.commands.executeCommand(
-                    'vscode.removeFromRecentlyOpened',
-                    (p_tab.input as vscode.TabInputText).uri
-                );
-                // Delete to close all other body tabs.
-                // (w_oldUri will be deleted last below)
-                const w_edit = new vscode.WorkspaceEdit();
-                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
-                await vscode.workspace.applyEdit(w_edit);
-            }
-        }
-    } else {
-        q_closedTabs = Promise.resolve(true);
-    }
-
-    return q_closedTabs;
-}
-
-</t>
 <t tx="felix.20221002011903.1">/**
  * * Show welcome screen if needed, based on last version executed
  * @param p_version Current version, as a string, from packageJSON.version
@@ -16455,38 +16411,7 @@ div.col-nav {
     this.helpPanelText = s;
 
     // * Close all open help panels 
-    const w_foundTabs: vscode.Tab[] = [];
-    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
-        p_tabGroup.tabs.forEach((p_tab) =&gt; {
-            if (
-                p_tab.label.endsWith(Constants.URI_HELP_FILENAME)
-            ) {
-                w_foundTabs.push(p_tab);
-            }
-        });
-    });
-
-    let q_closedTabs;
-    if (w_foundTabs.length) {
-        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
-        for (const p_tab of w_foundTabs) {
-            if (p_tab.label === Constants.URI_HELP_FILENAME &amp;&amp; p_tab.input) {
-                // Not a preview
-                await vscode.commands.executeCommand(
-                    'vscode.removeFromRecentlyOpened',
-                    (p_tab.input as vscode.TabInputText).uri
-                );
-                // Delete to close all other body tabs.
-                // (w_oldUri will be deleted last below)
-                const w_edit = new vscode.WorkspaceEdit();
-                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
-                await vscode.workspace.applyEdit(w_edit);
-            }
-        }
-    } else {
-        q_closedTabs = Promise.resolve(true);
-    }
-    await q_closedTabs;
+    await utils.closeLeoHelpPanels();
 
     setTimeout(() =&gt; {
         const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);
@@ -16773,7 +16698,51 @@ public setBodyWrap(): Thenable&lt;void&gt; {
 - ...
 
 </t>
-<t tx="felix.20240209001145.1">async function closeLeoHelpPanels(): Promise&lt;unknown&gt; {
+<t tx="felix.20240209012442.1">/**
+ * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
+ */
+export async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
+    const w_foundTabs: vscode.Tab[] = [];
+
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
+
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
+                !p_tab.isDirty
+
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.input) {
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
+            }
+        }
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+
+    return q_closedTabs;
+}
+
+</t>
+<t tx="felix.20240209012451.1">export async function closeLeoHelpPanels(): Promise&lt;unknown&gt; {
 
     // * Close all open help panels 
     const w_foundTabs: vscode.Tab[] = [];
