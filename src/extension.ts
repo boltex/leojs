@@ -53,8 +53,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
     const w_previousVersion = p_context.globalState.get<string>(Constants.VERSION_STATE_KEY);
     let SQL: SqlJsStatic;
 
-    // * Close remaining Leo Bodies restored by vscode from last session.
+    // * Close remaining Leo Bodies and help panels restored by vscode from last session.
     await closeLeoTextEditors();
+    await closeLeoHelpPanels();
 
     // * Show a welcome screen on version updates, then start the actual extension.
     void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
@@ -464,9 +465,47 @@ async function closeLeoTextEditors(): Promise<unknown> {
     } else {
         q_closedTabs = Promise.resolve(true);
     }
+
     return q_closedTabs;
 }
 
+async function closeLeoHelpPanels(): Promise<unknown> {
+
+    // * Close all open help panels 
+    const w_foundTabs: vscode.Tab[] = [];
+    vscode.window.tabGroups.all.forEach((p_tabGroup) => {
+        p_tabGroup.tabs.forEach((p_tab) => {
+            if (
+                p_tab.label.endsWith(Constants.URI_HELP_FILENAME)
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.label === Constants.URI_HELP_FILENAME && p_tab.input) {
+                // Not a preview
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
+            }
+        }
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+    return q_closedTabs;
+
+}
 /**
  * * Show welcome screen if needed, based on last version executed
  * @param p_version Current version, as a string, from packageJSON.version

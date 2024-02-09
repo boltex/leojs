@@ -417,7 +417,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         this.c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.23: *3* helpForFindCommands
-    @cmd('help-for-find-commands', 'Prints a discussion of of Leo\'s find commands.')
+    @cmd('help-for-find-commands', 'Prints a discussion of Leo\'s find commands.')
     public helpForFindCommands(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.24: *4* << define s >> (help-for-find-commands)
@@ -534,7 +534,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
         ## Overview
 
-        Any Leo node may contain a Python script.
+        Any Leo node may contain a JavaScript or Typescript script.
 
         Ctrl-B (execute-script) executes the body text of the presently selected
         node.
@@ -601,6 +601,8 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
         A position represents the state of a traversal of an outline. Because of
         clones, the same VNode may appear multiple times during a traversal.
+
+        > Note: Use **p.v** for it's boolean/validity value.
 
         Properties of the position class:
 
@@ -731,7 +733,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         this.c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.32: *3* helpForSettings
-    @cmd('help-for-settings', 'Prints a discussion of of Leo\'s find commands.')
+    @cmd('help-for-settings', 'Prints a discussion about Leo\'s settings.')
     public helpForSettings(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.33: *4* << define s >> (helpForSettings)
@@ -742,17 +744,22 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         const s = `\
         # About settings
 
-        **\@settings trees** specify settings. The headline of each node
-        indicates its type. The body text of most nodes contain comments.
+        **\@settings trees** specify settings. 
+        
+        The headline of each node indicates its type. The body text of most nodes contain comments.
+
         However, the body text of \@data, \@font, \@item and \@shortcuts nodes
         may contain data. For more information about the format of \@settings
         trees, see leoSettings.leo.
 
-        leoSettings.leo is Leo\'s main settings file. myLeoSettings.leo contains
-        your personal settings. Settings in myLeoSettings.leo override the
-        settings in leoSettings.leo. Put myLeoSettings.leo in your home \'\~\'
-        directory or in the \'\~/.leo\' directory. Any other .leo file may
-        contain an \@settings tree. Such settings apply only to that file.
+        An internal leojsSettings.leojs is LeoJS\'s main settings file. myLeoSettings.leo contains
+        your personal settings. 
+        
+        Settings in myLeoSettings.leo override the settings in leojsSettings.leojs.
+        
+        Put myLeoSettings.leo in your home \'\~\' directory or in the \'\~/.leo\' directory. 
+        
+        Any other .leo file may contain an \@settings tree. Such settings apply only to that file.
 
         `;
         //@-<< define s >>
