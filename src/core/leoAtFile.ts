@@ -1075,7 +1075,7 @@ export class AtFile {
             if (w_exists) {
                 s = await vscode.workspace.fs.readFile(w_uri);
             } else {
-                g.pr(`can not open ${fileName}`);
+                at.error(`can not open ${fileName}`);
                 return undefined;
             }
         } catch (exception) {
