@@ -310,6 +310,11 @@ export class LeoGui {
         this.oops();
         return Promise.resolve('no');
     }
+
+    public showRecentLeoFiles(): any {
+        this.oops();
+        return Promise.resolve();
+    }
     //@+node:felix.20221120210715.1: *4* LeoGui.addLogPaneEntry (LeoJs)
     public addLogPaneEntry(...args: any[]): void {
         this.oops();

@@ -1328,6 +1328,11 @@ export class CommanderFileCommands {
 
         g.app.recentFilesManager.editRecentFiles(c);
     }
+    //@+node:felix.20240209220106.1: *4* c._file.showRecentFiles
+    @commander_command('show-recent-files', 'Open a file from the recent files list .')
+    public async showRecentFiles(): Promise<void> {
+        await g.app.gui.showRecentLeoFiles();
+    }
     //@+node:felix.20220105210716.42: *4* c_file.sortRecentFiles
 
     @commander_command('sort-recent-files', 'Sort the recent files list.')
