@@ -65,7 +65,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
+        (g.vscodeExtensionDir as string) = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
 
         const gitExtension = vscode.extensions.getExtension<GitAPI.GitExtension>('vscode.git');
         if (gitExtension) {
@@ -262,10 +262,10 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
     }
 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
-        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
-        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+        (g.vscodeWorkspaceUri as vscode.Uri) = vscode.workspace.workspaceFolders[0].uri;
+        (g.vscodeUriScheme as string) = vscode.workspace.workspaceFolders[0].uri.scheme;
+        (g.vscodeUriAuthority as string) = vscode.workspace.workspaceFolders[0].uri.authority;
+        (g.vscodeUriPath as string) = vscode.workspace.workspaceFolders[0].uri.path;
 
         // console.log('GOT WORKSPACE: starting file-system ZIP & DB tests');
         if (0) {
@@ -281,16 +281,16 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
 
     if (!g.isBrowser) {
         // Regular NodeJs Extension: Dont wait for workspace being opened
-        if (!g.app.vscodeUriScheme) {
+        if (!g.vscodeUriScheme) {
             // Only setting if undefined, because regular vscode can still work on remote github virtual filesystem
-            g.app.vscodeUriScheme = 'file';
+            (g.vscodeUriScheme as string) = 'file';
         }
         await runLeo(p_context);
     } else {
         // Web Browser Extension: Check for type of workspace opened first
-        if (g.app.vscodeUriScheme) {
+        if (g.vscodeUriScheme) {
 
-            if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
+            if (!vscode.workspace.fs.isWritableFileSystem(g.vscodeUriScheme)) {
 
                 // NOTE : ! THIS RETURNS FALSE POSITIVES ! 
                 console.log('NOT WRITABLE WORKSPACE: FALSE POSITIVE?');
@@ -311,9 +311,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
-            if (g.app.vscodeUriScheme !== 'file') {
+            if (g.vscodeUriScheme !== 'file') {
                 if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.vscodeWorkspaceUri);
                 }
 
                 await runLeo(p_context);
@@ -349,14 +349,14 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
         console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
 
-        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
-        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
-        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
+        (g.vscodeWorkspaceUri as vscode.Uri) = vscode.workspace.workspaceFolders[0].uri;
+        (g.vscodeUriScheme as string) = vscode.workspace.workspaceFolders[0].uri.scheme;
+        (g.vscodeUriAuthority as string) = vscode.workspace.workspaceFolders[0].uri.authority;
+        (g.vscodeUriPath as string) = vscode.workspace.workspaceFolders[0].uri.path;
+        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.vscodeUriScheme));
 
-        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
-        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
+        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.vscodeWorkspaceUri.toJSON()));
+        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.vscodeWorkspaceUri.toString());
 
         // * Set new and unsaved document's c.openDirectory.
         //  g.app.windowList[this.frameIndex].c;
@@ -373,9 +373,9 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
         // not started yet? 
         if (!g.app.loadManager && g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
-            if (g.app.vscodeUriScheme !== 'file') {
+            if (g.vscodeUriScheme !== 'file') {
                 if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.vscodeWorkspaceUri);
                 }
 
                 void runLeo(p_context);

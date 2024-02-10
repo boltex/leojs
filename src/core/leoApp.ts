@@ -160,7 +160,6 @@ export class LeoApp {
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui!: NullGui; // The gui class.
-    public vscode: typeof vscode = vscode;
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -202,12 +201,7 @@ export class LeoApp {
     public leoEditorDir: string | undefined; // The leo-editor directory.
     public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
-    public vscodeExtensionDir: string | undefined;
     public machineDir: string | undefined; // The machine - specific directory.
-
-    public vscodeWorkspaceUri: vscode.Uri | undefined;
-    public vscodeUriAuthority: string = '';
-    public vscodeUriPath: string = '';
 
     //@-<< LeoApp: global directories >>
     //@+<< LeoApp: global data >>
@@ -215,7 +209,6 @@ export class LeoApp {
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
-    public vscodeUriScheme: string = ''; // * VSCODE WORKSPACE FILE SCHEME
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.
@@ -1853,7 +1846,7 @@ export class LoadManager {
         // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs
         // These use g.app.loadDir...
         // g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
-        g.app.leoEditorDir = g.app.vscodeExtensionDir; // join(g.app.loadDir, '..', '..');
+        g.app.leoEditorDir = g.vscodeExtensionDir; // join(g.app.loadDir, '..', '..');
         g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
@@ -1899,7 +1892,7 @@ export class LoadManager {
         }
         if (g.isBrowser) {
             // BROWSER: Root of repo
-            home = g.app.vscodeWorkspaceUri!.fsPath;
+            home = g.vscodeWorkspaceUri!.fsPath;
         }
 
         if (home) {
@@ -3294,8 +3287,8 @@ export class LoadManager {
         // Create the commander for the .leo  file.
         const c: Commands = g.app.newCommander('', gui, w_previousSettings);
 
-        // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-        // c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        // ! LEOJS : SET c.openDirectory to the g.vscodeWorkspaceUri !
+        // c.openDirectory = g.vscodeWorkspaceUri?.fsPath;
         // if (c.openDirectory) {
         //     c.frame.openDirectory = c.openDirectory;
         // }
