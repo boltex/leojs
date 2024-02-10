@@ -44,74 +44,74 @@ export class CommanderHelpCommands {
 
     //@+node:felix.20220612234816.5: *3* c_help.Open Leo files
     //@+node:felix.20220612234816.6: *4* c_help.leoDocumentation
-    @commander_command(
-        'open-leo-docs-leo',
-        'Open LeoDocs.leo in a new Leo window.'
-    )
-    @commander_command('leo-docs-leo', 'Open LeoDocs.leo in a new Leo window.')
-    public leoDocumentation(this: Commands): void {
-        void vscode.window.showInformationMessage('TODO : open-leo-docs-leo');
+    // @commander_command(
+    //     'open-leo-docs-leo',
+    //     'Open LeoDocs.leo in a new Leo window.'
+    // )
+    // @commander_command('leo-docs-leo', 'Open LeoDocs.leo in a new Leo window.')
+    // public leoDocumentation(this: Commands): void {
+    //     void vscode.window.showInformationMessage('TODO : open-leo-docs-leo');
 
-        /*     
-        c = self
-        name = "LeoDocs.leo"
-        fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
-        # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
-        if g.os_path_exists(fileName):
-            c2 = g.openWithFileName(fileName, old_c=c)
-            if c2:
-                return
-        g.es("not found:", name)
-        */
-    }
+    //     /*     
+    //     c = self
+    //     name = "LeoDocs.leo"
+    //     fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
+    //     # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
+    //     if g.os_path_exists(fileName):
+    //         c2 = g.openWithFileName(fileName, old_c=c)
+    //         if c2:
+    //             return
+    //     g.es("not found:", name)
+    //     */
+    // }
 
     //@+node:felix.20220612234816.7: *4* c_help.leoQuickStart
-    @commander_command(
-        'open-quickstart-leo',
-        'Open quickstart.leo in a new Leo window.'
-    )
-    @commander_command(
-        'leo-quickstart-leo',
-        'Open quickstart.leo in a new Leo window.'
-    )
-    public leoQuickStart(this: Commands): void {
-        void vscode.window.showInformationMessage('TODO : open-quickstart-leo');
+    // @commander_command(
+    //     'open-quickstart-leo',
+    //     'Open quickstart.leo in a new Leo window.'
+    // )
+    // @commander_command(
+    //     'leo-quickstart-leo',
+    //     'Open quickstart.leo in a new Leo window.'
+    // )
+    // public leoQuickStart(this: Commands): void {
+    //     void vscode.window.showInformationMessage('TODO : open-quickstart-leo');
 
-        /* 
-        c = self
-        name = "quickstart.leo"
-        fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
-        # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
-        if g.os_path_exists(fileName):
-            c2 = g.openWithFileName(fileName, old_c=c)
-            if c2:
-                return
-        g.es("not found:", name)
-        */
-    }
+    //     /* 
+    //     c = self
+    //     name = "quickstart.leo"
+    //     fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
+    //     # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
+    //     if g.os_path_exists(fileName):
+    //         c2 = g.openWithFileName(fileName, old_c=c)
+    //         if c2:
+    //             return
+    //     g.es("not found:", name)
+    //     */
+    // }
     //@+node:felix.20220612234816.8: *4* c_help.openCheatSheet
-    @commander_command('open-cheat-sheet-leo', 'Open leo/doc/cheatSheet.leo')
-    @commander_command('leo-cheat-sheet', 'Open leo/doc/cheatSheet.leo')
-    @commander_command('cheat-sheet', 'Open leo/doc/cheatSheet.leo')
-    public openCheatSheet(this: Commands): void {
-        void vscode.window.showInformationMessage(
-            'TODO : open-cheat-sheet-leo'
-        );
+    // @commander_command('open-cheat-sheet-leo', 'Open leo/doc/cheatSheet.leo')
+    // @commander_command('leo-cheat-sheet', 'Open leo/doc/cheatSheet.leo')
+    // @commander_command('cheat-sheet', 'Open leo/doc/cheatSheet.leo')
+    // public openCheatSheet(this: Commands): void {
+    //     void vscode.window.showInformationMessage(
+    //         'TODO : open-cheat-sheet-leo'
+    //     );
 
-        /* 
-        c = self
-        fn = g.finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
-        if not g.os_path_exists(fn):
-            g.es(f"file not found: {fn}")
-            return
-        c2 = g.openWithFileName(fn, old_c=c)
-        p = g.findNodeAnywhere(c2, "Leo's cheat sheet")
-        if p:
-            c2.selectPosition(p)
-            p.expand()
-        c2.redraw()
-        */
-    }
+    //     /* 
+    //     c = self
+    //     fn = g.finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
+    //     if not g.os_path_exists(fn):
+    //         g.es(f"file not found: {fn}")
+    //         return
+    //     c2 = g.openWithFileName(fn, old_c=c)
+    //     p = g.findNodeAnywhere(c2, "Leo's cheat sheet")
+    //     if p:
+    //         c2.selectPosition(p)
+    //         p.expand()
+    //     c2.redraw()
+    //     */
+    // }
 
     //@+node:felix.20220612234816.14: *4* c_help.openLeoSettings & openMyLeoSettings & helper
     @commander_command(

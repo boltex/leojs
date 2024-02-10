@@ -6,7 +6,15 @@
  */
 //@+<< imports >>
 //@+node:felix.20210102181122.1: ** << imports >>
-import * as vscode from 'vscode';
+import * as vscodeObj from 'vscode';
+import {
+    ExtensionContext,
+    Uri,
+    env,
+    workspace,
+    window, commands,
+    FileStat, FileType
+} from 'vscode';
 // import { Utils as uriUtils } from "vscode-uri";
 
 // import * as Bowser from "bowser";
@@ -64,8 +72,9 @@ import { SqlJsStatic } from 'sql.js';
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
-export let extensionContext: vscode.ExtensionContext;
-export let extensionUri: vscode.Uri;  // For accessing files in extension package.
+export let vscode: typeof vscodeObj = vscodeObj;
+export let extensionContext: ExtensionContext;
+export let extensionUri: Uri;  // For accessing files in extension package.
 
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
@@ -1654,12 +1663,12 @@ export async function chdir(p_path: string): Promise<void> {
 //@+node:felix.20230711213447.1: *3* g.mkdir
 export async function mkdir(folderName: string): Promise<void> {
     const w_uri = makeVscodeUri(folderName);
-    await vscode.workspace.fs.createDirectory(w_uri);
+    await workspace.fs.createDirectory(w_uri);
 }
 //@+node:felix.20230714230415.1: *3* g.rmdir
 export async function rmdir(folderName: string): Promise<void> {
     const w_uri = makeVscodeUri(folderName);
-    await vscode.workspace.fs.delete(w_uri, { recursive: true });
+    await workspace.fs.delete(w_uri, { recursive: true });
 }
 //@+node:felix.20220511212935.1: *3* g.computeWindowTitle
 /**
@@ -1740,17 +1749,17 @@ export async function filecmp_cmp(
     shallow = true
 ): Promise<boolean> {
     let w_same = false;
-    let w_uri: vscode.Uri;
+    let w_uri: Uri;
     w_uri = makeVscodeUri(path1); // first uri, no matter if shallow or not.
     if (shallow) {
-        const stats1 = await vscode.workspace.fs.stat(w_uri);
+        const stats1 = await workspace.fs.stat(w_uri);
         w_uri = makeVscodeUri(path2);
-        const stats2 = await vscode.workspace.fs.stat(w_uri);
+        const stats2 = await workspace.fs.stat(w_uri);
         w_same = stats1.size === stats2.size && stats1.mtime === stats2.mtime;
     } else {
-        const file1 = await vscode.workspace.fs.readFile(w_uri);
+        const file1 = await workspace.fs.readFile(w_uri);
         w_uri = makeVscodeUri(path2);
-        const file2 = await vscode.workspace.fs.readFile(w_uri);
+        const file2 = await workspace.fs.readFile(w_uri);
         w_same = Buffer.compare(file1, file2) === 0;
     }
     return w_same;
@@ -1830,7 +1839,7 @@ export async function is_binary_external_file(
         // with open(fileName, 'rb') as f:
         //     s = f.read(1024)  // bytes, in Python 3.
         const w_readUri = makeVscodeUri(fileName);
-        const readData = await vscode.workspace.fs.readFile(w_readUri);
+        const readData = await workspace.fs.readFile(w_readUri);
         const s = readData.slice(0, 1024);
         return is_binary_string(s);
         // except IOError:
@@ -1878,7 +1887,7 @@ export async function makeAllNonExistentDirectories(
     // #1450: Create the directory with os.makedirs.
     try {
         const w_uri = makeVscodeUri(theDir);
-        await vscode.workspace.fs.createDirectory(w_uri);
+        await workspace.fs.createDirectory(w_uri);
         return theDir;
     } catch (exception) {
         return undefined;
@@ -1945,7 +1954,7 @@ export async function readFileIntoString(
 
     try {
         const w_uri = makeVscodeUri(fileName);
-        let readData = await vscode.workspace.fs.readFile(w_uri);
+        let readData = await workspace.fs.readFile(w_uri);
         if (!readData) {
             return ['', undefined];
         }
@@ -1987,7 +1996,7 @@ export async function readFileIntoUnicodeString(
 ): Promise<string | undefined> {
     try {
         const w_uri = makeVscodeUri(fn);
-        let s = await vscode.workspace.fs.readFile(w_uri);
+        let s = await workspace.fs.readFile(w_uri);
         return toUnicode(s, encoding);
     } catch (e) {
         if (!silent) {
@@ -2030,7 +2039,7 @@ export function readlineForceUnixNewline(
 //@+node:felix.20230711202208.1: *3* g.os_remove
 export async function os_remove(fileName: string): Promise<void> {
     const w_uri = makeVscodeUri(fileName);
-    await vscode.workspace.fs.delete(w_uri);
+    await workspace.fs.delete(w_uri);
 }
 //@+node:felix.20220412004053.1: *3* g.sanitize_filename
 /**
@@ -2136,7 +2145,7 @@ export async function writeFile(
         //     f.write(contents)  // type:ignore
 
         const w_uri = makeVscodeUri(fileName);
-        await vscode.workspace.fs.writeFile(w_uri, contents);
+        await workspace.fs.writeFile(w_uri, contents);
 
         return true;
     } catch (e) {
@@ -2163,7 +2172,7 @@ export async function write_file_if_changed(
             // with open(fn, 'rb') as f
             //     contents = f.read()
             const w_uri = makeVscodeUri(fn);
-            const contents = await vscode.workspace.fs.readFile(w_uri);
+            const contents = await workspace.fs.readFile(w_uri);
             if (Buffer.compare(contents, encoded_s) === 0) {
                 return false;
             }
@@ -2171,7 +2180,7 @@ export async function write_file_if_changed(
         // with open(fn, 'wb') as f
         //     f.write(encoded_s);
         const w_uri = makeVscodeUri(fn);
-        await vscode.workspace.fs.writeFile(w_uri, encoded_s);
+        await workspace.fs.writeFile(w_uri, encoded_s);
         return true;
     } catch (exception) {
         es_print(`Exception writing ${fn}`);
@@ -2188,7 +2197,7 @@ export async function write_file_if_changed(
  * @param p_fn String form of fsPath or path
  * @returns An URI for file access compatible with web extensions filesystems
  */
-export function makeVscodeUri(p_fn: string): vscode.Uri {
+export function makeVscodeUri(p_fn: string): Uri {
 
     if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
         p_fn = p_fn.replace(/\\/g, "/");
@@ -2205,7 +2214,7 @@ export function makeVscodeUri(p_fn: string): vscode.Uri {
         }
     } else {
         // Normal file in desktop app
-        return vscode.Uri.file(p_fn);
+        return Uri.file(p_fn);
     }
 }
 
@@ -2843,7 +2852,7 @@ export async function execGitCommand(
 
     if (isBrowser) {
         console.log('LEOJS: GIT COMMAND CALLED FROM BROWSER');
-        void vscode.window.showInformationMessage('LeoJS Git Commands are not yet available in "web" version');
+        void window.showInformationMessage('LeoJS Git Commands are not yet available in "web" version');
         return [];
     }
 
@@ -4573,7 +4582,7 @@ export async function os_listdir(p_path: string): Promise<string[]> {
     let result: string[] = [];
     try {
         const w_uri = makeVscodeUri(p_path);
-        const w_dirInfo = await vscode.workspace.fs.readDirectory(w_uri);
+        const w_dirInfo = await workspace.fs.readDirectory(w_uri);
         result = w_dirInfo.map((p_dirInfo) => p_dirInfo[0]);
     } catch (e) {
         es(`Error listing directory ${p_path}`);
@@ -4582,7 +4591,7 @@ export async function os_listdir(p_path: string): Promise<string[]> {
 }
 //@+node:felix.20230711005109.1: *3* g.setStatusLabel
 export function setStatusLabel(s: string): Thenable<unknown> {
-    return vscode.window.showInformationMessage(s);
+    return window.showInformationMessage(s);
 }
 //@+node:felix.20231012000332.1: *3* g.truncate
 export function truncate(s: string, n: number): string {
@@ -4611,9 +4620,9 @@ export function warnNoOpenDirectory(
     let q_warning: Thenable<string | undefined>;
 
     if (p_items && p_items.length) {
-        q_warning = vscode.window.showWarningMessage(w_message, ...p_items);
+        q_warning = window.showWarningMessage(w_message, ...p_items);
     } else {
-        q_warning = vscode.window.showWarningMessage(
+        q_warning = window.showWarningMessage(
             w_message,
             'Save',
             'Open Folder'
@@ -4622,12 +4631,12 @@ export function warnNoOpenDirectory(
     return q_warning.then((p_result) => {
         // handle choices
         if (p_result === 'Save') {
-            void vscode.commands.executeCommand('leojs.saveLeoFile');
+            void commands.executeCommand('leojs.saveLeoFile');
         } else if (p_result === 'Open Folder') {
             if (isBrowser) {
-                void vscode.commands.executeCommand('remoteHub.openRepository');
+                void commands.executeCommand('remoteHub.openRepository');
             } else {
-                void vscode.commands.executeCommand(
+                void commands.executeCommand(
                     'workbench.action.files.openFolder'
                 );
             }
@@ -4817,7 +4826,7 @@ export function os_path_dirname(p_path?: string): string {
  */
 export async function os_path_exists(
     p_path?: string
-): Promise<boolean | vscode.FileStat> {
+): Promise<boolean | FileStat> {
     if (!p_path) {
         return false;
     }
@@ -4827,7 +4836,7 @@ export async function os_path_exists(
     }
     const w_uri = makeVscodeUri(p_path);
     try {
-        const stat = await vscode.workspace.fs.stat(w_uri);
+        const stat = await workspace.fs.stat(w_uri);
         return stat;
     } catch {
         return false;
@@ -4914,7 +4923,7 @@ export async function os_path_getmtime(p_path: string): Promise<number> {
     try {
         // return os.path.getmtime(p_path);
         const w_uri = makeVscodeUri(p_path);
-        const w_stats = await vscode.workspace.fs.stat(w_uri);
+        const w_stats = await workspace.fs.stat(w_uri);
         return w_stats.mtime;
     } catch (exception) {
         return 0;
@@ -4928,7 +4937,7 @@ export async function os_path_getsize(p_path: string): Promise<number> {
     if (p_path) {
         const w_uri = makeVscodeUri(p_path);
         try {
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+            const fileStat: FileStat = await workspace.fs.stat(
                 w_uri
             );
             // OK exists
@@ -4961,11 +4970,11 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
     if (p_path) {
         try {
             const w_uri = makeVscodeUri(p_path);
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+            const fileStat: FileStat = await workspace.fs.stat(
                 w_uri
             );
             // OK exists
-            return fileStat.type === vscode.FileType.Directory;
+            return fileStat.type === FileType.Directory;
         } catch {
             // Does not exist !
             return false;
@@ -4983,11 +4992,11 @@ export async function os_path_isfile(p_path?: string): Promise<boolean> {
     if (p_path) {
         try {
             const w_uri = makeVscodeUri(p_path);
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+            const fileStat: FileStat = await workspace.fs.stat(
                 w_uri
             );
             // OK exists
-            return fileStat.type === vscode.FileType.File;
+            return fileStat.type === FileType.File;
         } catch {
             // Does not exist !
             return false;
@@ -5164,8 +5173,8 @@ export async function os_path_samefile(
 
     // IF REAL NODE FS ONLY !
     try {
-        const w_stat1: vscode.FileStat = await vscode.workspace.fs.stat(w_uri1);
-        const w_stat2: vscode.FileStat = await vscode.workspace.fs.stat(w_uri2);
+        const w_stat1: FileStat = await workspace.fs.stat(w_uri1);
+        const w_stat2: FileStat = await workspace.fs.stat(w_uri2);
         if (
             (w_stat1 as any)['ino'] &&
             (w_stat1 as any)['dev'] &&
@@ -6377,7 +6386,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         // Mozilla throws a weird exception, then opens the file!
         try {
             // webbrowser.open(url)
-            void vscode.env.openExternal(vscode.Uri.parse(url));
+            void env.openExternal(Uri.parse(url));
         } catch (e) {
             // pass
         }
@@ -6430,7 +6439,7 @@ export function isValidUrl(url: string): boolean {
 
     // const parsed = urlparse.urlparse(url);
     // const parsed = makeVscodeUri(url);
-    const parsed = vscode.Uri.parse(url);
+    const parsed = Uri.parse(url);
 
     const scheme = parsed.scheme;
 
