@@ -1071,11 +1071,14 @@ export class AtFile {
         let s;
         try {
             const w_uri = g.makeVscodeUri(fileName);
-            s = await vscode.workspace.fs.readFile(w_uri);
+            const w_exists = await g.os_path_exists(fileName);
+            if (w_exists) {
+                s = await vscode.workspace.fs.readFile(w_uri);
+            } else {
+                g.pr(`can not open ${fileName}`);
+                return undefined;
+            }
         } catch (exception) {
-            // catch IOError:  // pragma: no cover
-            //     at.error(f"can not open {fileName}")
-            // pragma: no cover
             at.error(`Exception reading ${fileName}`);
             g.es_exception(exception);
         }
