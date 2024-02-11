@@ -408,7 +408,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             u.afterChangeNodeContents(p, undoType, undoData);
         }
 
-        return c.redrawAndEdit(p, true);
+        // return c.redrawAndEdit(p, true);
+        c.redraw(p);
+        return Promise.resolve(p);
+
     }
     //@+node:felix.20220503225231.1: *3* ec.capitalizeHeadline
     @cmd(
