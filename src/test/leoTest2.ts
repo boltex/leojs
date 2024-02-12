@@ -8,12 +8,10 @@
  * Support for LeoJS's new unit tests, contained in src/tests/.
  */
 
-import * as path from 'path';
-import * as os from 'os';
 import * as g from '../core/leoGlobals';
 import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
-import { NodeIndices, VNode, Position } from '../core/leoNodes';
+import { NodeIndices, Position } from '../core/leoNodes';
 import { GlobalConfigManager } from '../core/leoConfig';
 import { NullGui } from '../core/leoGui';
 import * as assert from 'assert';

@@ -150,11 +150,8 @@ export class LeoSettingsProvider {
 
             // 'Normal' uri, not a 'webview.asWebviewUri(...)' !
             const w_fileUri = vscode.Uri.joinPath(this._extensionUri, 'settings-panel', 'index.html');
-
             const w_doc = await vscode.workspace.openTextDocument(w_fileUri);
-
             this._html = w_doc.getText();
-
             return this._html;
         }
     }

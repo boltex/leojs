@@ -68,18 +68,17 @@ import { SqlJsStatic } from 'sql.js';
 
 //@-<< imports >>
 
-// TODO: Maybe make those platform detection methods better with 'bowser' library
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
+/** the VS Code extensibility API */
 export let vscode: typeof vscodeObj = vscodeObj;
+/** The LeoJS 'Extension Context' */
 export let extensionContext: ExtensionContext;
-export let extensionUri: Uri;  // For accessing files in extension package.
-export let vscodeExtensionDir: string;
-export let vscodeWorkspaceUri: Uri;
-export let vscodeUriAuthority: string = '';
-export let vscodeUriPath: string = '';
-export let vscodeUriScheme: string = ''; // * VSCODE WORKSPACE FILE SCHEME
+/** For accessing files in the LeoJS extension package */
+export let extensionUri: Uri;
+/** For accessing files in the current workspace */
+export let workspaceUri: Uri;
 
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
@@ -1642,7 +1641,7 @@ update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
 //@+node:felix.20231227213922.1: *3* g.isBrowserRepo
 export function isBrowserRepo(): boolean {
-    return isBrowser || (!!vscodeUriScheme && vscodeUriScheme !== 'file');
+    return isBrowser || (workspaceUri && workspaceUri.scheme !== 'file');
 }
 
 //@+node:felix.20220108221428.1: *3* g.chdir
@@ -2204,10 +2203,10 @@ export async function write_file_if_changed(
  */
 export function makeVscodeUri(p_fn: string): Uri {
 
-    if (isBrowser || (vscodeUriScheme && vscodeUriScheme !== 'file')) {
+    if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_fn = p_fn.replace(/\\/g, "/");
         try {
-            const newUri = vscodeWorkspaceUri!.with({ path: p_fn });
+            const newUri = workspaceUri!.with({ path: p_fn });
             return newUri;
         } catch (e) {
             console.log(
@@ -4776,7 +4775,7 @@ export function os_path_basename(p_path: string): string {
         return '';
     }
 
-    if (isBrowser || (vscodeUriScheme && vscodeUriScheme !== 'file')) {
+    if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
         let lastSlashIndex = p_path.lastIndexOf('/');
 
@@ -4803,7 +4802,7 @@ export function os_path_dirname(p_path?: string): string {
         return '';
     }
 
-    if (isBrowser || (vscodeUriScheme && vscodeUriScheme !== 'file')) {
+    if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
         let lastSlashIndex = p_path.lastIndexOf('/');
 

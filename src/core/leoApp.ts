@@ -1846,7 +1846,7 @@ export class LoadManager {
         // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs
         // These use g.app.loadDir...
         // g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
-        g.app.leoEditorDir = g.vscodeExtensionDir; // join(g.app.loadDir, '..', '..');
+        g.app.leoEditorDir = g.extensionUri ? g.os_path_normslashes(g.os_path_fix_drive(g.extensionUri.fsPath)) : ''; // join(g.app.loadDir, '..', '..');
         g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
@@ -1892,7 +1892,7 @@ export class LoadManager {
         }
         if (g.isBrowser) {
             // BROWSER: Root of repo
-            home = g.vscodeWorkspaceUri!.fsPath;
+            home = g.workspaceUri!.fsPath;
         }
 
         if (home) {
