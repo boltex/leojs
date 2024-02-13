@@ -16120,17 +16120,7 @@ set leoEditHeadline(p_value: boolean) {
   --input-margin-vertical: 4px;
   --input-margin-horizontal: 0;
   height: 100%;
-  /* padding-right: 4px;
-  scrollbar-gutter: stable; */
 }
-
-/* ::-webkit-scrollbar {
-  width: 10px;
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: block;
-} */
 
 *,
 *:before,
