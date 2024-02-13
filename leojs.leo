@@ -15822,10 +15822,10 @@ set leoEditHeadline(p_value: boolean) {
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
             var lastEl = document.getElementById(lastTabElId);
+            var firstEl = document.getElementById(firstTabElId);
 
             if (p_event.shiftKey) {
                 // shift + tab so if first got last
-                var firstEl = document.getElementById(firstTabElId);
                 if (lastEl &amp;&amp; actEl === firstEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
@@ -15835,11 +15835,11 @@ set leoEditHeadline(p_value: boolean) {
                 }
             } else {
                 // tab, so if last goto first
-                if (actEl === lastEl) {
+                if (firstEl &amp;&amp; actEl === lastEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    focusOnField(firstTabElId);
+                    firstEl.focus();
                     return;
                 }
             }
@@ -16115,11 +16115,22 @@ set leoEditHeadline(p_value: boolean) {
   box-sizing: border-box;
   font-size: 13px;
   overflow: hidden;
+  --input-padding-vertical: 6px;
+  --input-padding-horizontal: 4px;
+  --input-margin-vertical: 4px;
+  --input-margin-horizontal: 0;
+  height: 100%;
+  /* padding-right: 4px;
+  scrollbar-gutter: stable; */
 }
 
-html:hover {
-  overflow: overlay;
-}
+/* ::-webkit-scrollbar {
+  width: 10px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+} */
 
 *,
 *:before,
@@ -16147,31 +16158,41 @@ img {
   height: auto;
 }
 
-:root {
-  --input-padding-vertical: 6px;
-  --input-padding-horizontal: 4px;
-  --input-margin-vertical: 4px;
-  --input-margin-horizontal: 0;
-  height: 100%;
-  padding-right: 14px;
-}
-
-html:focus {
+html:focus:after {
+  content:'';
+  position: fixed;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   outline: 1px solid;
   outline-width: 1px;
   outline-style: solid;
   outline-offset: -1px;
   outline-color: var(--vscode-focusBorder);
+  pointer-events: none;
 }
 
 body {
+  height: 100%;
   margin-left: 20px;
   background-color: transparent;
   padding: 0 var(--container-padding);
+  scrollbar-gutter: stable;
+  overflow:hidden;
+  padding-right: 4px;
   color: var(--vscode-foreground);
   font-size: var(--vscode-font-size);
   font-weight: var(--vscode-font-weight);
   font-family: var(--vscode-font-family);
+}
+
+body:hover {
+  overflow-y: auto;
+} 
+
+.row .col:nth-child(2) {
+  padding-right: 4px;
 }
 
 ol,
@@ -16388,7 +16409,8 @@ div.col-nav {
 .label-fix {
   vertical-align: top;
   line-height: 18px;
-}</t>
+}
+</t>
 <t tx="felix.20231221231533.1">## 0.2.6
 
 - Fixed keyboard navigation of the outline while being hoisted.
