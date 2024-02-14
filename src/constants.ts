@@ -130,7 +130,7 @@ export class Constants {
         SVG_SHEME: "data",
         SVG_OPEN: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">',
         SVG_CLOSE: "</svg>",
-        STATUSBAR_INDICATOR: "$(keyboard) ",
+        STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
         STATUSBAR_COLOR: "fb7c47",
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
@@ -167,6 +167,7 @@ export class Constants {
         FILE_NOT_OPENED: "No files opened.",
 
         // STATUS BAR UNUSED FOR NOW IN LEOJS // 
+        STATUSBAR_TOOLTIP_UNL: "Click to copy UNL to clipboard",
         STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
         STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
 
@@ -498,7 +499,7 @@ export class Constants {
         // Access to the Settings/Welcome Webview
         SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
         SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
-        // STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+        STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY

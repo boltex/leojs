@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as utils from "./utils";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 
@@ -9,7 +8,6 @@ import { LeoUI } from "./leoUI";
 export class LeoStatusBar {
 
     private _leoStatusBarItem: vscode.StatusBarItem;
-    private _statusbarNormalColor = new vscode.ThemeColor(Constants.GUI.THEME_STATUSBAR);  // "statusBar.foreground"
     private _updateStatusBarTimeout: NodeJS.Timeout | undefined;
     private _string: string = ""; // Use this string with indicator, using this will replace the default from config
 
@@ -30,11 +28,9 @@ export class LeoStatusBar {
         this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
         this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
-        // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
-        this._leoStatusBarItem.command = Constants.COMMANDS.SHOW_LOG;
-        // this._leoStatusBarItem.command = "leojs.test"; // just call test function for now to help debugging
+        this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
+        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
 
         this._leoStatusBarItem.hide();
     }
@@ -55,28 +51,21 @@ export class LeoStatusBar {
 
     /**
      * * Sets string to replace default from config & refresh it
-     */
-    public setString(p_string: string): void {
-        this._string = p_string;
-        this._updateLeoObjectIndicator();
-    }
-
-    /**
-     * * Updates the status bar visual indicator visual indicator with optional debouncing delay
-     * @param p_state True/False flag for On or Off status
+     * @p_string string to be displayed on Leo's status bar space.
      * @param p_debounceDelay Optional, in milliseconds
+     * 
      */
-    public update(p_state: boolean, p_debounceDelay?: number, p_forced?: boolean): void {
-        if (p_forced || (p_state !== this.statusBarFlag)) {
-            this.statusBarFlag = p_state;
-            if (p_debounceDelay) {
-                this._updateLeoObjectIndicatorDebounced(p_debounceDelay);
-            } else {
-                this._updateLeoObjectIndicator();
-            }
+    public setString(p_string: string, p_debounceDelay?: number): void {
+        if (this._string === p_string) {
+            return; // cancel
+        }
+        this._string = p_string;
+        if (p_debounceDelay) {
+            this._updateLeoObjectIndicatorDebounced(p_debounceDelay);
+        } else {
+            this._updateLeoObjectIndicator();
         }
     }
-
     /**
      * * Updates the status bar visual indicator flag in a debounced manner
      * @param p_delay number of milliseconds
@@ -98,21 +87,7 @@ export class LeoStatusBar {
         if (this._updateStatusBarTimeout) {
             clearTimeout(this._updateStatusBarTimeout);
         }
-
-        void utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
-
-        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR +
-            (this._string ? this._string : '') + " " +
-            (this._leoJs.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoJs.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
-
-        // Also check in constructor for statusBar properties (the createStatusBarItem call itself)
-        if (this.statusBarFlag && this._leoJs.leoStates.fileOpenedReady) {
-            this._leoStatusBarItem.color = "#" + Constants.GUI.STATUSBAR_COLOR;
-            this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
-        } else {
-            this._leoStatusBarItem.color = this._statusbarNormalColor;
-            this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_OFF;
-        }
+        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR + this._string;
     }
 
 }

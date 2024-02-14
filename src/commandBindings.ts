@@ -49,6 +49,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.SHOW_BODY, () => p_leoUI.showBody(false, undefined)], // Also focuses on body
         [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
+
+        [CMD.STATUS_BAR, () => p_leoUI.statusBar()], // Not referenced in package.json
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json
         [CMD.SET_LEO_ID, () => p_leoUI.setLeoIDCommand()],
         [CMD.HANDLE_UNL, (p_arg: { unl: string }) => p_leoUI.handleUnl(p_arg)],
@@ -123,8 +125,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.SET_UA, () => p_leoUI.command(LEOCMD.SET_UA, { refreshType: REFRESH_TREE, finalFocus: Focus.NoChange })],
 
         // Called by nodes in the tree when selected either by mouse, or with enter
-        [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) => p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
-        [CMD.OPEN_ASIDE, (p_position: Position) => p_leoUI.selectTreeNode(p_position, true)],
+        [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) => p_leoUI.selectTreeNode(p_outlineNode.position, false, false)], // Select is NOT a Position!
+        [CMD.OPEN_ASIDE, (p_position: Position) => p_leoUI.selectTreeNode(p_position, false, true)],
 
         [CMD.CONTRACT_ALL, () => p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.CONTRACT_ALL_FO, () => p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],

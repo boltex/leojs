@@ -117,6 +117,7 @@
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20221113002623.1"><vh>showSettings</vh></v>
 <v t="felix.20231224193540.1"><vh>put_help</vh></v>
+<v t="felix.20240213205001.1"><vh>statusBar</vh></v>
 <v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
@@ -357,7 +358,6 @@
 <v t="felix.20201214151451.3"><vh>show</vh></v>
 <v t="felix.20201214151451.4"><vh>hide</vh></v>
 <v t="felix.20201214151451.5"><vh>setString</vh></v>
-<v t="felix.20201214151451.6"><vh>update</vh></v>
 <v t="felix.20201214151451.7"><vh>_updateLeoObjectIndicatorDebounced</vh></v>
 <v t="felix.20201214151451.8"><vh>_updateLeoObjectIndicator</vh></v>
 </v>
@@ -1961,6 +1961,8 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 </t>
 <t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
+
+[CMD.STATUS_BAR, () =&gt; p_leoUI.statusBar()], // Not referenced in package.json
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
 [CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
@@ -2028,8 +2030,8 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
-[CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.selectTreeNode(p_position, true)],
+[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false, false)], // Select is NOT a Position!
+[CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.selectTreeNode(p_position, false, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.CONTRACT_ALL_FO, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
@@ -2079,7 +2081,7 @@ public static COMMANDS = {
     // Access to the Settings/Welcome Webview
     SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
     SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
-    // STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+    STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -2545,7 +2547,7 @@ public static GUI = {
     SVG_SHEME: "data",
     SVG_OPEN: 'image/svg+xml;utf8,&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;',
     SVG_CLOSE: "&lt;/svg&gt;",
-    STATUSBAR_INDICATOR: "$(keyboard) ",
+    STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
     STATUSBAR_COLOR: "fb7c47",
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
     EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
@@ -2583,6 +2585,7 @@ public static USER_MESSAGES = {
     FILE_NOT_OPENED: "No files opened.",
 
     // STATUS BAR UNUSED FOR NOW IN LEOJS // 
+    STATUSBAR_TOOLTIP_UNL: "Click to copy UNL to clipboard",
     STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
     STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
 
@@ -3293,7 +3296,6 @@ set leoCanDemote(p_value: boolean) {
 
 </t>
 <t tx="felix.20201214151451.1">import * as vscode from "vscode";
-import * as utils from "./utils";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 
@@ -3307,7 +3309,6 @@ import { LeoUI } from "./leoUI";
 export class LeoStatusBar {
 
     private _leoStatusBarItem: vscode.StatusBarItem;
-    private _statusbarNormalColor = new vscode.ThemeColor(Constants.GUI.THEME_STATUSBAR);  // "statusBar.foreground"
     private _updateStatusBarTimeout: NodeJS.Timeout | undefined;
     private _string: string = ""; // Use this string with indicator, using this will replace the default from config
 
@@ -3328,11 +3329,9 @@ export class LeoStatusBar {
         this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
         this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
-        // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
-        this._leoStatusBarItem.command = Constants.COMMANDS.SHOW_LOG;
-        // this._leoStatusBarItem.command = "leojs.test"; // just call test function for now to help debugging
+        this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
+        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
 
         this._leoStatusBarItem.hide();
     }
@@ -3358,29 +3357,21 @@ public hide(): void {
 </t>
 <t tx="felix.20201214151451.5">/**
  * * Sets string to replace default from config &amp; refresh it
- */
-public setString(p_string: string): void {
-    this._string = p_string;
-    this._updateLeoObjectIndicator();
-}
-
-</t>
-<t tx="felix.20201214151451.6">/**
- * * Updates the status bar visual indicator visual indicator with optional debouncing delay
- * @param p_state True/False flag for On or Off status
+ * @p_string string to be displayed on Leo's status bar space.
  * @param p_debounceDelay Optional, in milliseconds
+ * 
  */
-public update(p_state: boolean, p_debounceDelay?: number, p_forced?: boolean): void {
-    if (p_forced || (p_state !== this.statusBarFlag)) {
-        this.statusBarFlag = p_state;
-        if (p_debounceDelay) {
-            this._updateLeoObjectIndicatorDebounced(p_debounceDelay);
-        } else {
-            this._updateLeoObjectIndicator();
-        }
+public setString(p_string: string, p_debounceDelay?: number): void {
+    if (this._string === p_string) {
+        return; // cancel
+    }
+    this._string = p_string;
+    if (p_debounceDelay) {
+        this._updateLeoObjectIndicatorDebounced(p_debounceDelay);
+    } else {
+        this._updateLeoObjectIndicator();
     }
 }
-
 </t>
 <t tx="felix.20201214151451.7">/**
  * * Updates the status bar visual indicator flag in a debounced manner
@@ -3404,21 +3395,7 @@ private _updateLeoObjectIndicator(): void {
     if (this._updateStatusBarTimeout) {
         clearTimeout(this._updateStatusBarTimeout);
     }
-
-    void utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
-
-    this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR +
-        (this._string ? this._string : '') + " " +
-        (this._leoJs.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoJs.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
-
-    // Also check in constructor for statusBar properties (the createStatusBarItem call itself)
-    if (this.statusBarFlag &amp;&amp; this._leoJs.leoStates.fileOpenedReady) {
-        this._leoStatusBarItem.color = "#" + Constants.GUI.STATUSBAR_COLOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
-    } else {
-        this._leoStatusBarItem.color = this._statusbarNormalColor;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_OFF;
-    }
+    this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR + this._string;
 }
 
 </t>
@@ -3600,6 +3577,7 @@ import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
+import { LeoStatusBar } from "./leoStatusBar";
 
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
@@ -3905,7 +3883,7 @@ export class LeoUI extends NullGui {
     private _leoLogPane: vscode.OutputChannel;
 
     // * Status Bar
-    // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
+    private _leoStatusBar: LeoStatusBar | undefined;
 
     // * Edit/Insert Headline Input Box System made with 'createInputBox'.
     private _hib: undefined | vscode.InputBox;
@@ -3954,6 +3932,12 @@ export class LeoUI extends NullGui {
 private _triggerGetStates(): void {
 
     const c = g.app.windowList[this.frameIndex].c;
+
+    if (this._leoStatusBar &amp;&amp; c.p &amp;&amp; c.p.v) {
+        const kind: string = c.config.getString('unl-status-kind') || '';
+        const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
+        this._leoStatusBar.setString(method(), 100);
+    }
 
     if (this._refreshType.states) {
         this._refreshType.states = false;
@@ -4118,7 +4102,8 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 <t tx="felix.20201214202749.1">/**
  * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
  * @param p_node is the position node selected in the tree
- * @param p_reveal
+ * @param p_internalCall Flag used to indicate the selection is forced, and NOT originating from user interaction
+ * @param p_aside Flag to force opening the body "Aside", i.e. when the selection was made from choosing "Open Aside"
  * @returns thenable for reveal to finish or select position to finish
  */
 public async selectTreeNode(
@@ -4146,7 +4131,7 @@ public async selectTreeNode(
     this.showBodyIfClosed = true;
 
     this.leoStates.setSelectedNodeFlags(p_node);
-    // this._leoStatusBar.update(true); // Just selected a node directly, or via expand/collapse
+
     const w_showBodyKeepFocus = p_aside
         ? this.config.treeKeepFocusWhenAside
         : this.config.treeKeepFocus;
@@ -7626,12 +7611,10 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
 
     // * Force refresh tree when body update required for 'navigation/insert node' commands
     if (
-
         this.showBodyIfClosed &amp;&amp;
         this.showOutlineIfClosed &amp;&amp;
         !this.isOutlineVisible() &amp;&amp;
         this._refreshType.body
-
     ) {
         // console.log('HAD TO ADJUST!');
         this._refreshType.tree = true;
@@ -7732,6 +7715,7 @@ public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveR
  */
 private _setupNoOpenedLeoDocument(): void {
     void this.checkConfirmBeforeClose();
+    this._leoStatusBar?.hide();
     this.leoStates.fileOpenedReady = false;
     this._bodyTextDocument = undefined;
     this.lastSelectedNode = undefined;
@@ -7786,6 +7770,7 @@ private _setupOpenedLeoDocument(): void {
     }
 
     this.loadSearchSettings();
+    this._leoStatusBar?.show();
 }
 
 </t>
@@ -9761,7 +9746,7 @@ public finishStartup(): void {
     this._bodyMainSelectionColumn = 1;
 
     // * Create Status bar Entry
-    // this._leoStatusBar = new LeoStatusBar(_context, this);
+    this._leoStatusBar = new LeoStatusBar(this._context, this);
 
     // * Leo Find Panel
     this._leoFindPanelProvider = new LeoFindPanelProvider(
@@ -16779,6 +16764,20 @@ export async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
     return q_closedTabs;
 
 }
+</t>
+<t tx="felix.20240213205001.1">/**
+ * Status bar item clicked: Put unl on clipboard.
+ */
+public statusBar(): Thenable&lt;string | undefined&gt; {
+    const c = g.app.windowList[this.frameIndex].c;
+    if (this._leoStatusBar &amp;&amp; c.p &amp;&amp; c.p.v) {
+        const kind: string = c.config.getString('unl-status-kind') || '';
+        const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
+        return this.replaceClipboardWith(method());
+    }
+    return Promise.resolve(undefined);
+}
+
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

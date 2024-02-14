@@ -28,6 +28,7 @@ import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
+import { LeoStatusBar } from "./leoStatusBar";
 
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
@@ -222,7 +223,7 @@ export class LeoUI extends NullGui {
     private _leoLogPane: vscode.OutputChannel;
 
     // * Status Bar
-    // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
+    private _leoStatusBar: LeoStatusBar | undefined;
 
     // * Edit/Insert Headline Input Box System made with 'createInputBox'.
     private _hib: undefined | vscode.InputBox;
@@ -455,7 +456,7 @@ export class LeoUI extends NullGui {
         this._bodyMainSelectionColumn = 1;
 
         // * Create Status bar Entry
-        // this._leoStatusBar = new LeoStatusBar(_context, this);
+        this._leoStatusBar = new LeoStatusBar(this._context, this);
 
         // * Leo Find Panel
         this._leoFindPanelProvider = new LeoFindPanelProvider(
@@ -561,6 +562,19 @@ export class LeoUI extends NullGui {
         // await vscode.window.showTextDocument(doc, { preview: false, viewColumn: vscode.ViewColumn.Beside });
     }
 
+    /**
+     * Status bar item clicked: Put unl on clipboard.
+     */
+    public statusBar(): Thenable<string | undefined> {
+        const c = g.app.windowList[this.frameIndex].c;
+        if (this._leoStatusBar && c.p && c.p.v) {
+            const kind: string = c.config.getString('unl-status-kind') || '';
+            const method: () => string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
+            return this.replaceClipboardWith(method());
+        }
+        return Promise.resolve(undefined);
+    }
+
     public async handleUnl(p_arg: { unl: string }): Promise<void> {
         if (!g.app.windowList.length) {
             // No file opened: exit
@@ -632,6 +646,12 @@ export class LeoUI extends NullGui {
 
         const c = g.app.windowList[this.frameIndex].c;
 
+        if (this._leoStatusBar && c.p && c.p.v) {
+            const kind: string = c.config.getString('unl-status-kind') || '';
+            const method: () => string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
+            this._leoStatusBar.setString(method(), 100);
+        }
+
         if (this._refreshType.states) {
             this._refreshType.states = false;
             const p = c.p;
@@ -689,6 +709,7 @@ export class LeoUI extends NullGui {
      */
     private _setupNoOpenedLeoDocument(): void {
         void this.checkConfirmBeforeClose();
+        this._leoStatusBar?.hide();
         this.leoStates.fileOpenedReady = false;
         this._bodyTextDocument = undefined;
         this.lastSelectedNode = undefined;
@@ -742,6 +763,7 @@ export class LeoUI extends NullGui {
         }
 
         this.loadSearchSettings();
+        this._leoStatusBar?.show();
     }
 
     /**
@@ -1637,12 +1659,10 @@ export class LeoUI extends NullGui {
 
         // * Force refresh tree when body update required for 'navigation/insert node' commands
         if (
-
             this.showBodyIfClosed &&
             this.showOutlineIfClosed &&
             !this.isOutlineVisible() &&
             this._refreshType.body
-
         ) {
             // console.log('HAD TO ADJUST!');
             this._refreshType.tree = true;
@@ -2868,7 +2888,8 @@ export class LeoUI extends NullGui {
     /**
      * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
      * @param p_node is the position node selected in the tree
-     * @param p_reveal
+     * @param p_internalCall Flag used to indicate the selection is forced, and NOT originating from user interaction
+     * @param p_aside Flag to force opening the body "Aside", i.e. when the selection was made from choosing "Open Aside"
      * @returns thenable for reveal to finish or select position to finish
      */
     public async selectTreeNode(
@@ -2896,7 +2917,7 @@ export class LeoUI extends NullGui {
         this.showBodyIfClosed = true;
 
         this.leoStates.setSelectedNodeFlags(p_node);
-        // this._leoStatusBar.update(true); // Just selected a node directly, or via expand/collapse
+
         const w_showBodyKeepFocus = p_aside
             ? this.config.treeKeepFocusWhenAside
             : this.config.treeKeepFocus;
