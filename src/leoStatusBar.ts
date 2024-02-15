@@ -27,7 +27,7 @@ export class LeoStatusBar {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
         this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
-        this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
+        // this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
         this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;

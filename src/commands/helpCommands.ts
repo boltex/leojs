@@ -290,7 +290,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         return s;
     }
     //@+node:felix.20231224164520.15: *3* helpForCreatingExternalFiles
-    @cmd('help-for-creating-external-files', 'Prints a discussion of creating external files.')
+    @cmd('help-for-creating-external-files', 'Explains how to create external files.')
     public helpForCreatingExternalFiles(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.16: *4* << define s >> (helpForCreatingExternalFiles)
@@ -417,7 +417,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         this.c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.23: *3* helpForFindCommands
-    @cmd('help-for-find-commands', 'Prints a discussion of Leo\'s find commands.')
+    @cmd('help-for-find-commands', 'Explains Leo\'s find commands.')
     public helpForFindCommands(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.24: *4* << define s >> (help-for-find-commands)
@@ -523,7 +523,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.30: *3* helpForScripting
-    @cmd('help-for-scripting', 'Prints a discussion of Leo scripting.')
+    @cmd('help-for-scripting', 'Shows a tutorial about scripting Leo.')
     public helpForScripting(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.31: *4* << define s >> (helpForScripting)
@@ -733,7 +733,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         this.c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.32: *3* helpForSettings
-    @cmd('help-for-settings', 'Prints a discussion about Leo\'s settings.')
+    @cmd('help-for-settings', 'Explains Leo\'s settings.')
     public helpForSettings(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.33: *4* << define s >> (helpForSettings)

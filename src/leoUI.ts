@@ -646,15 +646,14 @@ export class LeoUI extends NullGui {
 
         const c = g.app.windowList[this.frameIndex].c;
 
-        if (this._leoStatusBar && c.p && c.p.v) {
-            const kind: string = c.config.getString('unl-status-kind') || '';
-            const method: () => string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
-            this._leoStatusBar.setString(method(), 100);
-        }
-
         if (this._refreshType.states) {
             this._refreshType.states = false;
             const p = c.p;
+            if (this._leoStatusBar && p && p.v) {
+                const kind: string = c.config.getString('unl-status-kind') || '';
+                const method: () => string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
+                this._leoStatusBar.setString(method());
+            }
             let w_canHoist = true;
             let w_topIsChapter = false;
             if (c.hoistStack.length) {
