@@ -173,6 +173,12 @@
           "description": "Used to uniquely identify nodes - Defaults to the OS/Environment user name",
           "pattern": "(^$|^[a-zA-Z0-9]*$)",
           "patternErrorMessage": "Your id should contain only letters and numbers, and must contain at least 3 characters."
+        },
+        "leojs.showUnlOnStatusBar": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Displays an UNL indicator on the status bar"
         }
       }
     },

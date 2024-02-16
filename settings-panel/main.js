@@ -28,15 +28,10 @@
     // Global variable config
     let frontConfig = {};
     let vscodeConfig = {};
-    let vscodeFontConfig = {};
-    let frontFontConfig = {};
 
     // @ts-expect-error
     vscodeConfig = window.leoConfig; // PRE SET BY leoSettingsWebview
     frontConfig = JSON.parse(JSON.stringify(vscodeConfig));
-    // @ts-expect-error
-    vscodeFontConfig = window.fontConfig; // PRE SET BY leoSettingsWebview
-    frontFontConfig = JSON.parse(JSON.stringify(vscodeFontConfig));
 
     // Handle messages sent from the extension to the webview
     window.addEventListener("message", event => {
@@ -57,14 +52,6 @@
                         toast.className = toast.className.replace("show", "");
                     }, 1500);
                     vscodeConfig = message.config; // next changes will be confronted to those settings
-                    break;
-                case "newFontConfig":
-                    vscodeFontConfig = message.config;
-                    frontFontConfig = JSON.parse(JSON.stringify(message.config));
-                    setFontControls();
-                    break;
-                case "vscodeFontConfig":
-                    vscodeFontConfig = message.config; // next changes will be confronted to those settings
                     break;
                 default:
                     break;
@@ -286,33 +273,8 @@
     }
 
     function onVscodeInputChanged(element) {
-        if (element.id === "zoomLevel") {
-            frontFontConfig.zoomLevel = element.valueAsNumber;
-            applyFontChanges();
-        }
-        if (element.id === "editorFontSize") {
-            frontFontConfig.fontSize = element.valueAsNumber;
-            applyFontChanges();
-        }
         if (element.id === "leoID") {
             showDirtyAndApplyChange();
-        }
-    }
-
-    function setFontControls() {
-        if (frontFontConfig.zoomLevel || frontFontConfig.zoomLevel === 0) {
-            const w_element = document.getElementById("zoomLevel");
-            // @ts-expect-error
-            w_element.valueAsNumber = Number(frontFontConfig.zoomLevel);
-        } else {
-            console.log('Error : vscode font setting "zoomLevel" is missing');
-        }
-        if (frontFontConfig.fontSize) {
-            const w_element = document.getElementById("editorFontSize");
-            // @ts-expect-error
-            w_element.valueAsNumber = Number(frontFontConfig.fontSize);
-        } else {
-            console.log('Error : vscode font setting "fontSize" is missing');
         }
     }
 
@@ -425,19 +387,8 @@
         1500
     );
 
-    var applyFontChanges = debounce(
-        function () {
-            vscode.postMessage({
-                command: "fontConfig",
-                changes: frontFontConfig
-            });
-        },
-        800
-    );
-
     // START
     setControls();
-    setFontControls();
     setVisibility(frontConfig);
     onBind();
 

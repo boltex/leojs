@@ -19,7 +19,6 @@ export class LeoSettingsProvider {
     public async changedConfiguration(p_event?: vscode.ConfigurationChangeEvent): Promise<void> {
         if (this._panel && !this._waitingForUpdate) {
             await this._panel.webview.postMessage({ command: 'newConfig', config: this._leoUI.config.getConfig() });
-            await this._panel.webview.postMessage({ command: 'newFontConfig', config: this._leoUI.config.getFontConfig() });
         }
     }
 
@@ -79,8 +78,6 @@ export class LeoSettingsProvider {
                             /#{endOfBody}/g,
                             `<script type="text/javascript" nonce="${w_nonce}">window.leoConfig = ${JSON.stringify(
                                 this._leoUI.config.getConfig()
-                            )};window.fontConfig = ${JSON.stringify(
-                                this._leoUI.config.getFontConfig()
                             )};</script>
                             <script nonce="${w_nonce}" src="${scriptUri}"></script>
                             `
@@ -114,19 +111,6 @@ export class LeoSettingsProvider {
                                         );
                                         this._waitingForUpdate = false;
                                     });
-                                    break;
-                                case 'getNewFontConfig':
-                                    if (this._panel && !this._waitingForUpdate) {
-                                        void this._panel.webview.postMessage(
-                                            {
-                                                command: 'newFontConfig',
-                                                config: this._leoUI.config.getFontConfig()
-                                            }
-                                        );
-                                    }
-                                    break;
-                                case 'fontConfig':
-                                    this._leoUI.config.setFontConfig(message.changes);
                                     break;
                             }
                         },

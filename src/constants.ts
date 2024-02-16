@@ -240,8 +240,6 @@ export class Constants {
         MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
         MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
-        ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
-        FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
         BODY_WRAP_RECOMMEND: "'leojsbody' wordWrap settings are recommended (some currently missing)",
         BODY_WRAP_SET: "'leojsbody' wordWrap settings were set",
         FIX_IT: "Fix it",
@@ -308,6 +306,7 @@ export class Constants {
         ACTIVITY_VIEW_SHORTCUT: "ActivityViewShortcut",
         GO_ANYWHERE_SHORTCUT: "goAnywhereShortcut",
 
+        SHOW_UNL_ON_STATUSBAR: "showUnlOnStatusBar",
         // SHOW_EDITION_BODY: "showEditionOnBody",
         // SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
         // SHOW_PROMOTE_BODY: "showPromoteOnBody",
@@ -339,6 +338,7 @@ export class Constants {
         ACTIVITY_VIEW_SHORTCUT: true,
         GO_ANYWHERE_SHORTCUT: true,
 
+        SHOW_UNL_ON_STATUSBAR: true,
         // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
         // STATUSBAR_COLOR: "fb7c47",
 

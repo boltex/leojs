@@ -34,9 +34,7 @@
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
 <v t="felix.20211007213344.2"><vh>class Config</vh>
 <v t="felix.20211007213344.3"><vh>getConfig</vh></v>
-<v t="felix.20211007213344.4"><vh>getFontConfig</vh></v>
 <v t="felix.20211007213344.5"><vh>setLeojsSettings</vh></v>
-<v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
 <v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
 <v t="felix.20240121143955.1"><vh>setBodyWrap</vh></v>
@@ -366,7 +364,6 @@
 <v t="felix.20201214154816.1"><vh>@clean src/types.ts</vh>
 <v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
 <v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
-<v t="felix.20211007213915.1"><vh>FontSettings</vh></v>
 <v t="felix.20220922215553.1"><vh>Focus</vh></v>
 <v t="felix.20201214154816.3"><vh>RevealType</vh></v>
 <v t="felix.20201214154816.4"><vh>ReqRefresh</vh></v>
@@ -739,9 +736,10 @@ Leo uses a model/view/controller architecture.
 private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
     if (
-        p_event.affectsConfiguration(Constants.CONFIG_NAME) ||
-        p_event.affectsConfiguration('editor.fontSize') ||
-        p_event.affectsConfiguration('window.zoomLevel')
+        p_event.affectsConfiguration(Constants.CONFIG_NAME)
+        // ||
+        // p_event.affectsConfiguration('editor.fontSize') ||
+        // p_event.affectsConfiguration('window.zoomLevel')
     ) {
         void this.config.setLeoJsSettingsPromise.then(
             () =&gt; {
@@ -2658,8 +2656,6 @@ public static USER_MESSAGES = {
     MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
     MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
-    ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
-    FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
     BODY_WRAP_RECOMMEND: "'leojsbody' wordWrap settings are recommended (some currently missing)",
     BODY_WRAP_SET: "'leojsbody' wordWrap settings were set",
     FIX_IT: "Fix it",
@@ -3328,7 +3324,7 @@ export class LeoStatusBar {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
         this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
-        this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
+        // this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
         this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
@@ -3939,7 +3935,7 @@ private _triggerGetStates(): void {
         if (this._leoStatusBar &amp;&amp; p &amp;&amp; p.v) {
             const kind: string = c.config.getString('unl-status-kind') || '';
             const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
-            this._leoStatusBar.setString(method(), 100);
+            this._leoStatusBar.setString(method());
         }
         let w_canHoist = true;
         let w_topIsChapter = false;
@@ -8049,12 +8045,18 @@ public incTreeId(): void {
       "description": "Used to uniquely identify nodes - Defaults to the OS/Environment user name",
       "pattern": "(^$|^[a-zA-Z0-9]*$)",
       "patternErrorMessage": "Your id should contain only letters and numbers, and must contain at least 3 characters."
+    },
+    "leojs.showUnlOnStatusBar": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Displays an UNL indicator on the status bar"
     }
   }
 },
 </t>
 <t tx="felix.20211007213344.1">import * as vscode from "vscode";
-import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
+import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
@@ -8151,6 +8153,7 @@ public buildFromSavedSettings(): void {
         this.activityViewShortcut = GET(NAME).get(NAMES.ACTIVITY_VIEW_SHORTCUT, DEFAULTS.ACTIVITY_VIEW_SHORTCUT);
         this.goAnywhereShortcut = GET(NAME).get(NAMES.GO_ANYWHERE_SHORTCUT, DEFAULTS.GO_ANYWHERE_SHORTCUT);
 
+        this.showUnlOnStatusBar = GET(NAME).get(NAMES.SHOW_UNL_ON_STATUSBAR, DEFAULTS.SHOW_UNL_ON_STATUSBAR);
         // this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
         // if (this.statusBarString.length &gt; 8) {
         //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
@@ -8206,6 +8209,7 @@ export class Config implements ConfigMembers {
     public activityViewShortcut: boolean = Constants.CONFIG_DEFAULTS.ACTIVITY_VIEW_SHORTCUT;
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
+    public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
     // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
     // public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
@@ -8269,6 +8273,7 @@ public getConfig(): ConfigMembers {
         activityViewShortcut: this.activityViewShortcut,
         goAnywhereShortcut: this.goAnywhereShortcut,
 
+        showUnlOnStatusBar: this.showUnlOnStatusBar,
         // statusBarString: this.statusBarString,
         // statusBarColor: this.statusBarColor,
         treeInExplorer: this.treeInExplorer, // Used as Context Flag
@@ -8294,28 +8299,6 @@ public getConfig(): ConfigMembers {
         invertNodeContrast: this.invertNodeContrast,
         leoID: this.leoID
     };
-}
-
-</t>
-<t tx="felix.20211007213344.4">/**
- * * Get config from vscode for the UI font sizes
- * @returns the font settings object (zoom level and editor font size)
- */
-public getFontConfig(): FontSettings {
-    let w_zoomLevel = vscode.workspace.getConfiguration(
-        "window"
-    ).get("zoomLevel");
-
-    let w_fontSize = vscode.workspace.getConfiguration(
-        "editor"
-    ).get("fontSize");
-
-    const w_config: FontSettings = {
-        zoomLevel: Number(w_zoomLevel),
-        fontSize: Number(w_fontSize)
-    };
-
-    return w_config;
 }
 
 </t>
@@ -8346,33 +8329,6 @@ public setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt; {
         return Promise.resolve();
     });
 
-}
-
-</t>
-<t tx="felix.20211007213344.6">/**
- * * Apply changes in font size settings and save them in user settings.
- */
-public setFontConfig(p_settings: FontSettings): void {
-    if (p_settings.zoomLevel || p_settings.zoomLevel === 0) {
-        if (!isNaN(p_settings.zoomLevel) &amp;&amp; p_settings.zoomLevel &lt;= 12 &amp;&amp; p_settings.zoomLevel &gt;= -12) {
-            void vscode.workspace.getConfiguration("window")
-                .update("zoomLevel", p_settings.zoomLevel, true);
-        } else {
-            void vscode.window.showInformationMessage(
-                Constants.USER_MESSAGES.ZOOM_LEVEL_RANGE_LIMIT
-            );
-        }
-    }
-    if (p_settings.fontSize) {
-        if (!isNaN(p_settings.fontSize) &amp;&amp; p_settings.fontSize &lt;= 30 &amp;&amp; p_settings.fontSize &gt;= 6) {
-            void vscode.workspace.getConfiguration("editor")
-                .update("fontSize", p_settings.fontSize, true);
-        } else {
-            void vscode.window.showInformationMessage(
-                Constants.USER_MESSAGES.FONT_SIZE_RANGE_LIMIT
-            );
-        }
-    }
 }
 
 </t>
@@ -8409,6 +8365,7 @@ export interface ConfigMembers {
     activityViewShortcut: boolean;
     goAnywhereShortcut: boolean;
 
+    showUnlOnStatusBar: boolean,
     // statusBarString: string;
     // statusBarColor: string;
 
@@ -8446,15 +8403,6 @@ export interface ConfigSetting {
 }
 
 </t>
-<t tx="felix.20211007213915.1">/**
- * * Structure for the two vscode font settings
- */
-export interface FontSettings {
-    zoomLevel: number;
-    fontSize: number;
-}
-
-</t>
 <t tx="felix.20211007214102.1">/**
  * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
@@ -8480,6 +8428,7 @@ public static CONFIG_NAMES = {
     ACTIVITY_VIEW_SHORTCUT: "ActivityViewShortcut",
     GO_ANYWHERE_SHORTCUT: "goAnywhereShortcut",
 
+    SHOW_UNL_ON_STATUSBAR: "showUnlOnStatusBar",
     // SHOW_EDITION_BODY: "showEditionOnBody",
     // SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
     // SHOW_PROMOTE_BODY: "showPromoteOnBody",
@@ -8512,6 +8461,7 @@ public static CONFIG_DEFAULTS = {
     ACTIVITY_VIEW_SHORTCUT: true,
     GO_ANYWHERE_SHORTCUT: true,
 
+    SHOW_UNL_ON_STATUSBAR: true,
     // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
     // STATUSBAR_COLOR: "fb7c47",
 

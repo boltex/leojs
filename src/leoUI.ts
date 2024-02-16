@@ -772,9 +772,10 @@ export class LeoUI extends NullGui {
     private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
         if (
-            p_event.affectsConfiguration(Constants.CONFIG_NAME) ||
-            p_event.affectsConfiguration('editor.fontSize') ||
-            p_event.affectsConfiguration('window.zoomLevel')
+            p_event.affectsConfiguration(Constants.CONFIG_NAME)
+            // ||
+            // p_event.affectsConfiguration('editor.fontSize') ||
+            // p_event.affectsConfiguration('window.zoomLevel')
         ) {
             void this.config.setLeoJsSettingsPromise.then(
                 () => {
