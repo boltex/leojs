@@ -761,10 +761,11 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
                 if (!this.config.showUnlOnStatusBar &amp;&amp; this._leoStatusBar) {
                     this._leoStatusBar.hide();
                 }
+                if (p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.LEO_ID)) {
+                    void this.setIdSetting(this.config.leoID);
+                }
             }
         );
-
-
     }
 
     // also check if workbench.editor.enablePreview
@@ -9536,12 +9537,24 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
         code: "leoID",
         value: p_leoID
     }];
-    g.app.leoID = p_leoID;
-    if (g.app.nodeIndices) {
-        g.app.nodeIndices.defaultId = p_leoID;
-        g.app.nodeIndices.userId = p_leoID;
+    if (p_leoID.trim().length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_leoID)) {
+        // OK not empty
+        g.app.leoID = p_leoID;
+        if (g.app.nodeIndices) {
+            g.app.nodeIndices.userId = p_leoID;
+        }
+    } else if (!p_leoID.trim()) {
+        // empty, go back to default
+        if (g.app.nodeIndices &amp;&amp; g.app.nodeIndices.defaultId) {
+            g.app.leoID = g.app.nodeIndices.defaultId;
+            g.app.nodeIndices.userId = g.app.nodeIndices.defaultId;
+        }
     }
-    return this.config.setLeojsSettings(w_changes);
+
+    if (this.config.leoID !== p_leoID) {
+        return this.config.setLeojsSettings(w_changes);
+    }
+    return Promise.resolve();
 }
 
 </t>

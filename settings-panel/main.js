@@ -221,11 +221,6 @@
         listenAll('select[data-setting]', 'change', function (p_this) {
             return onDropdownChanged(p_this.target);
         });
-        listenAll('input[type=number][data-vscode]', 'input', function (
-            p_this
-        ) {
-            return onVscodeInputChanged(p_this.target);
-        });
     }
     function showDirtyAndApplyChange() {
         if (dirty) {
@@ -268,11 +263,7 @@
             element.classList.remove("is-invalid");
             frontConfig[element.id] = element.value;
             showDirtyAndApplyChange();
-
         }
-    }
-
-    function onVscodeInputChanged(element) {
         if (element.id === "leoID") {
             showDirtyAndApplyChange();
         }

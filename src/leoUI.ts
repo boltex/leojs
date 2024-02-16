@@ -799,10 +799,11 @@ export class LeoUI extends NullGui {
                     if (!this.config.showUnlOnStatusBar && this._leoStatusBar) {
                         this._leoStatusBar.hide();
                     }
+                    if (p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.LEO_ID)) {
+                        void this.setIdSetting(this.config.leoID);
+                    }
                 }
             );
-
-
         }
 
         // also check if workbench.editor.enablePreview
@@ -5354,12 +5355,24 @@ export class LeoUI extends NullGui {
             code: "leoID",
             value: p_leoID
         }];
-        g.app.leoID = p_leoID;
-        if (g.app.nodeIndices) {
-            g.app.nodeIndices.defaultId = p_leoID;
-            g.app.nodeIndices.userId = p_leoID;
+        if (p_leoID.trim().length >= 3 && utils.isAlphaNumeric(p_leoID)) {
+            // OK not empty
+            g.app.leoID = p_leoID;
+            if (g.app.nodeIndices) {
+                g.app.nodeIndices.userId = p_leoID;
+            }
+        } else if (!p_leoID.trim()) {
+            // empty, go back to default
+            if (g.app.nodeIndices && g.app.nodeIndices.defaultId) {
+                g.app.leoID = g.app.nodeIndices.defaultId;
+                g.app.nodeIndices.userId = g.app.nodeIndices.defaultId;
+            }
         }
-        return this.config.setLeojsSettings(w_changes);
+
+        if (this.config.leoID !== p_leoID) {
+            return this.config.setLeojsSettings(w_changes);
+        }
+        return Promise.resolve();
     }
 
     public widget_name(w: any): string {
