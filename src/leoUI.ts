@@ -762,7 +762,9 @@ export class LeoUI extends NullGui {
         }
 
         this.loadSearchSettings();
-        this._leoStatusBar?.show();
+        if (this.config.showUnlOnStatusBar) {
+            this._leoStatusBar?.show();
+        }
     }
 
     /**
@@ -791,8 +793,15 @@ export class LeoUI extends NullGui {
                     ) {
                         this.configTreeRefresh();
                     }
+                    if (this.config.showUnlOnStatusBar && this.leoStates.fileOpenedReady && this._leoStatusBar) {
+                        this._leoStatusBar.show();
+                    }
+                    if (!this.config.showUnlOnStatusBar && this._leoStatusBar) {
+                        this._leoStatusBar.hide();
+                    }
                 }
             );
+
 
         }
 

@@ -755,8 +755,15 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
                 ) {
                     this.configTreeRefresh();
                 }
+                if (this.config.showUnlOnStatusBar &amp;&amp; this.leoStates.fileOpenedReady &amp;&amp; this._leoStatusBar) {
+                    this._leoStatusBar.show();
+                }
+                if (!this.config.showUnlOnStatusBar &amp;&amp; this._leoStatusBar) {
+                    this._leoStatusBar.hide();
+                }
             }
         );
+
 
     }
 
@@ -7765,7 +7772,9 @@ private _setupOpenedLeoDocument(): void {
     }
 
     this.loadSearchSettings();
-    this._leoStatusBar?.show();
+    if (this.config.showUnlOnStatusBar) {
+        this._leoStatusBar?.show();
+    }
 }
 
 </t>
