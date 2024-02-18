@@ -58,6 +58,42 @@ export class LeoSettingsProvider {
 
                     const w_nonce = utils.getNonce();
 
+                    this._context.subscriptions.push(
+                        this._panel.webview.onDidReceiveMessage(
+                            message => {
+                                switch (message.command) {
+                                    case 'alert':
+                                        void vscode.window.showErrorMessage(message.text);
+                                        break;
+                                    case 'getNewConfig':
+                                        if (this._panel && !this._waitingForUpdate) {
+                                            void this._panel.webview.postMessage(
+                                                {
+                                                    command: 'newConfig',
+                                                    config: this._leoUI.config.getConfig()
+                                                }
+                                            );
+                                        }
+                                        break;
+                                    case 'config':
+                                        this._waitingForUpdate = true;
+                                        void this._leoUI.config.setLeojsSettings(message.changes).then(() => {
+                                            void this._panel!.webview.postMessage(
+                                                {
+                                                    command: 'vscodeConfig',
+                                                    config: this._leoUI.config.getConfig()
+                                                }
+                                            );
+                                            this._waitingForUpdate = false;
+                                        });
+                                        break;
+                                }
+                            },
+                            null,
+                            this._context.subscriptions
+                        )
+                    );
+
                     this._panel.webview.html = p_baseHtml
                         .replace(
                             /#{nonce}/g,
@@ -83,40 +119,6 @@ export class LeoSettingsProvider {
                             `
                         );
 
-
-                    this._panel.webview.onDidReceiveMessage(
-                        message => {
-                            switch (message.command) {
-                                case 'alert':
-                                    void vscode.window.showErrorMessage(message.text);
-                                    break;
-                                case 'getNewConfig':
-                                    if (this._panel && !this._waitingForUpdate) {
-                                        void this._panel.webview.postMessage(
-                                            {
-                                                command: 'newConfig',
-                                                config: this._leoUI.config.getConfig()
-                                            }
-                                        );
-                                    }
-                                    break;
-                                case 'config':
-                                    this._waitingForUpdate = true;
-                                    void this._leoUI.config.setLeojsSettings(message.changes).then(() => {
-                                        void this._panel!.webview.postMessage(
-                                            {
-                                                command: 'vscodeConfig',
-                                                config: this._leoUI.config.getConfig()
-                                            }
-                                        );
-                                        this._waitingForUpdate = false;
-                                    });
-                                    break;
-                            }
-                        },
-                        null,
-                        this._context.subscriptions
-                    );
                     this._panel.onDidDispose(
                         () => { this._panel = undefined; },
                         null,

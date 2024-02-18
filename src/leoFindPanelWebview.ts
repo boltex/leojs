@@ -25,11 +25,8 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
         webviewView.webview.options = {
             // Allow scripts in the webview
             enableScripts: true,
-
             localResourceRoots: [this._extensionUri],
         };
-
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
         this._context.subscriptions.push(
             webviewView.webview.onDidReceiveMessage((data) => {
@@ -88,6 +85,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                 }
             })
         );
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
         this._leoUI.setFindPanel(this._view);
     }
 
