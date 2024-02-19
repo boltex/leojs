@@ -268,7 +268,7 @@ export class LeoUI extends NullGui {
 
         this.idleTimeClass = IdleTime;
 
-        // * Log pane instanciation
+        // * Log pane instantiation
         this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
         this._context.subscriptions.push(this._leoLogPane);
 
