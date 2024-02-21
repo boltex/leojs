@@ -11838,6 +11838,36 @@ private _setTreeViewTitle(p_title?: string): void {
       "dark": "resources/dark/body-pane.svg"
     },
     "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.xml",
+    "aliases": [
+      "Leo Body XML",
+      "leojsbody.xml"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.xml.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.xml.wrap",
+    "aliases": [
+      "Leo Body XML",
+      "leojsbody.xml"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.xml.language-configuration.json"
   }
 ],
 </t>
@@ -12003,6 +12033,16 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
   },
   {
+    "language": "leojsbody.xml",
+    "scopeName": "source.leojsbody.xml",
+    "path": "./syntaxes/leojsbody.xml.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.xml.wrap",
+    "scopeName": "source.leojsbody.xml",
+    "path": "./syntaxes/leojsbody.xml.tmLanguage.json"
+  },
+  {
     "injectTo": [
       "source.leojsbody.c",
       "source.leojsbody.cpp",
@@ -12020,6 +12060,7 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.restructuredtext",
       "source.leojsbody.rust",
       "source.leojsbody.typescript",
+      "source.leojsbody.xml",
       "source.leojsbody.c.wrap",
       "source.leojsbody.cpp.wrap",
       "source.leojsbody.css.wrap",
@@ -12035,7 +12076,8 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.python.wrap",
       "source.leojsbody.restructuredtext.wrap",
       "source.leojsbody.rust.wrap",
-      "source.leojsbody.typescript.wrap"
+      "source.leojsbody.typescript.wrap",
+      "source.leojsbody.xml.wrap"
     ],
     "path": "./syntaxes/leojsbody.tmLanguage.json",
     "scopeName": "leojs.injection"
@@ -16642,6 +16684,7 @@ public static LANGUAGES = [
     "php",
     "restructuredtext",
     "rust",
+    "xml",
 ];
 
 </t>
