@@ -2633,6 +2633,7 @@ export class FileCommands {
         const w_windowInfo = c.frame.get_window_info();
         const [width, height, left, top] = w_windowInfo;
 
+        // TODO : FIX THIS!
         console.log('leojs_globals saving window geom to db : ', w_windowInfo);
 
         c.db['body_outline_ratio'] = c.frame.ratio.toString();

@@ -2648,7 +2648,6 @@ public static USER_MESSAGES = {
     IGNORED: " They were ignored.", // with voluntary leading space
     TOO_FAST: "Leo is busy! ", // with voluntary trailing space
 
-    UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language coloring not yet supported.",
     LANGUAGE_NOT_SUPPORTED: " language coloring not yet supported.", // with leading space
     MINIBUFFER_BUTTON_START: "@button-",
     MINIBUFFER_RCLICK_START: "@rclick-",
@@ -12602,6 +12601,12 @@ private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): T
             }
             if (w_langName &amp;&amp; !this._languageFlagged.includes(w_langName)) {
                 this._languageFlagged.push(w_langName);
+                if (w_langName.endsWith(Constants.LEO_WRAP_SUFFIX)) {
+                    w_langName = w_langName.slice(0, -Constants.LEO_WRAP_SUFFIX.length);
+                }
+                if (w_langName.startsWith(Constants.LEO_LANGUAGE_PREFIX)) {
+                    w_langName = w_langName.slice(Constants.LEO_LANGUAGE_PREFIX.length);
+                }
                 void vscode.window.showInformationMessage(
                     w_langName + Constants.USER_MESSAGES.LANGUAGE_NOT_SUPPORTED
                 );

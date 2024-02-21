@@ -224,7 +224,6 @@ export class Constants {
         IGNORED: " They were ignored.", // with voluntary leading space
         TOO_FAST: "Leo is busy! ", // with voluntary trailing space
 
-        UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language coloring not yet supported.",
         LANGUAGE_NOT_SUPPORTED: " language coloring not yet supported.", // with leading space
         MINIBUFFER_BUTTON_START: "@button-",
         MINIBUFFER_RCLICK_START: "@rclick-",
