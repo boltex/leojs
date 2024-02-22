@@ -253,7 +253,7 @@ export class Config implements ConfigMembers {
     public checkBodyWrap(p_forced?: boolean): void {
         let w_missing = false;
 
-        let w_languageSettings: Record<string, boolean> | undefined;
+        let w_languageSettings: Record<string, string> | undefined;
         let w_totalConfigName = "";
 
         for (const w_lang of Constants.LANGUAGES) {
@@ -263,7 +263,7 @@ export class Config implements ConfigMembers {
         }
         w_languageSettings = vscode.workspace.getConfiguration(w_totalConfigName);
 
-        if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
+        if (!w_languageSettings || !w_languageSettings['editor.wordWrap'] || w_languageSettings['editor.wordWrap'] !== 'on') {
             w_missing = true;
         }
 
