@@ -50,6 +50,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
 
+        ["leojs.test", () => console.log("CALLED TEST COMMAND!")], // Not referenced in package.json
         [CMD.STATUS_BAR, () => p_leoUI.statusBar()], // Not referenced in package.json
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json
         [CMD.SET_LEO_ID, () => p_leoUI.setLeoIDCommand()],

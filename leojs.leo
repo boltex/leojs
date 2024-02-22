@@ -775,12 +775,12 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
         .get('enablePreview');
 
     // Check For specific vscode settings needed for leojs
-    // Leave small delay for multiple possible forced changes at startup
+    // Leave a delay for multiple possible forced changes at startup
     setTimeout(() =&gt; {
         this.config.checkEnablePreview();
         this.config.checkCloseEmptyGroups();
         this.config.checkBodyWrap();
-    }, 150);
+    }, 1500);
 }
 
 </t>
@@ -1969,6 +1969,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 <t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
 
+["leojs.test", () =&gt; console.log("CALLED TEST COMMAND!")], // Not referenced in package.json
 [CMD.STATUS_BAR, () =&gt; p_leoUI.statusBar()], // Not referenced in package.json
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
@@ -3302,6 +3303,7 @@ set leoCanDemote(p_value: boolean) {
 <t tx="felix.20201214151451.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 @language typescript
 @tabwidth -4
@@ -3335,7 +3337,29 @@ export class LeoStatusBar {
         // this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
         this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
+
+
+        const w_mdToolTip = new vscode.MarkdownString();
+
+        // markdown supports links that execute commands: 
+        // [Run it](command:myCommandId)
+        w_mdToolTip.value = g.dedent(`\
+            # Some Title
+
+            Some text 
+
+            ## some subtitle
+
+            Some more text and a command [Run it](command:leojs.test)
+            
+            `);
+
+        w_mdToolTip.isTrusted = true;
+        w_mdToolTip.supportThemeIcons = true;
+
+        //this._leoStatusBarItem.tooltip =  Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
+        this._leoStatusBarItem.tooltip = w_mdToolTip;
+
 
         this._leoStatusBarItem.hide();
     }
@@ -16640,8 +16664,8 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
     for (const w_lang of Constants.LANGUAGES) {
         let langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
         w_totalConfigName += langWrap;
-        // w_languageSettings = vscode.workspace.getConfiguration(langWrap);
     }
+
     w_languageSettings = vscode.workspace.getConfiguration(w_totalConfigName);
 
     if (!w_languageSettings || !w_languageSettings['editor.wordWrap'] || w_languageSettings['editor.wordWrap'] !== 'on') {

@@ -815,12 +815,12 @@ export class LeoUI extends NullGui {
             .get('enablePreview');
 
         // Check For specific vscode settings needed for leojs
-        // Leave small delay for multiple possible forced changes at startup
+        // Leave a delay for multiple possible forced changes at startup
         setTimeout(() => {
             this.config.checkEnablePreview();
             this.config.checkCloseEmptyGroups();
             this.config.checkBodyWrap();
-        }, 150);
+        }, 1500);
     }
 
     /**

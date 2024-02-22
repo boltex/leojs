@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 /**
  * * Statusbar indicator controller service
@@ -30,7 +31,29 @@ export class LeoStatusBar {
         // this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
         this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
+
+
+        const w_mdToolTip = new vscode.MarkdownString();
+
+        // markdown supports links that execute commands: 
+        // [Run it](command:myCommandId)
+        w_mdToolTip.value = g.dedent(`\
+            # Some Title
+
+            Some text 
+
+            ## some subtitle
+
+            Some more text and a command [Run it](command:leojs.test)
+            
+            `);
+
+        w_mdToolTip.isTrusted = true;
+        w_mdToolTip.supportThemeIcons = true;
+
+        //this._leoStatusBarItem.tooltip =  Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
+        this._leoStatusBarItem.tooltip = w_mdToolTip;
+
 
         this._leoStatusBarItem.hide();
     }

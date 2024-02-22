@@ -259,8 +259,8 @@ export class Config implements ConfigMembers {
         for (const w_lang of Constants.LANGUAGES) {
             let langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
             w_totalConfigName += langWrap;
-            // w_languageSettings = vscode.workspace.getConfiguration(langWrap);
         }
+
         w_languageSettings = vscode.workspace.getConfiguration(w_totalConfigName);
 
         if (!w_languageSettings || !w_languageSettings['editor.wordWrap'] || w_languageSettings['editor.wordWrap'] !== 'on') {
