@@ -297,7 +297,7 @@ export class LeoUI extends NullGui {
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
         this.gotoIcons = utils.buildGotoIconPaths(_context);
 
-        // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
+        // * Debounced refresh flags and UI parts, along with language & wrap, when operation(s) are done executing
         this.getStates = debounce(
             this._triggerGetStates,
             Constants.STATES_DEBOUNCE_DELAY
@@ -689,6 +689,8 @@ export class LeoUI extends NullGui {
         // Set leoChanged and leoOpenedFilename
         this.leoStates.leoChanged = c.changed;
         this.leoStates.leoOpenedFileName = c.fileName();
+
+        this.refreshBodyStates(); // Set language and wrap states, if different.
 
         if (this._refreshType.documents) {
             this._refreshType.documents = false;
@@ -1320,10 +1322,8 @@ export class LeoUI extends NullGui {
             this._bodySaveSelection();  // just save selection if it's changed
             q_savePromise = Promise.resolve(true);
         }
+
         return q_savePromise.then((p_result) => {
-
-            // this.debouncedRefreshBodyStates(); // ! test this !
-
             return p_result;
         }, (p_reason) => {
             console.log('BodySave rejected :', p_reason);
@@ -2852,24 +2852,23 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Refreshes body pane's statuses such as applied language file type, word-wrap state, etc.
+     * * Refreshes body pane's applied language and, word-wrap state.
      */
     public refreshBodyStates(): void {
-        if (!this._bodyTextDocument || !this.lastSelectedNode) {
-            return;
+
+        if (!this._bodyTextDocument ||
+            this._bodyTextDocument.isClosed ||
+            !this.lastSelectedNode ||
+            utils.leoUriToStr(this._bodyTextDocument.uri) !== this.lastSelectedNode.gnx
+        ) {
+            return; // Don't waste time finding out the language!
         }
 
-        // * Set document language along with the proper cursor position, selection range and scrolling position
         const c = g.app.windowList[this.frameIndex].c;
         let w_language = this._getBodyLanguage();
 
-        // Apply language if the selected node is still the same after all those events
-        if (this._bodyTextDocument &&
-            !this._bodyTextDocument.isClosed &&
-            this.lastSelectedNode &&
-            w_language !== this._bodyTextDocument.languageId &&
-            utils.leoUriToStr(this._bodyTextDocument.uri) === this.lastSelectedNode.gnx
-        ) {
+        // Set document language only if different
+        if (w_language !== this._bodyTextDocument.languageId) {
             void this._setBodyLanguage(this._bodyTextDocument, w_language);
         }
 
