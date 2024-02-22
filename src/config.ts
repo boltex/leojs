@@ -170,6 +170,27 @@ export class Config implements ConfigMembers {
     }
 
     /**
+     * Remove body wrap setting from older LeoJS versions
+     * that suported less languages
+     */
+    public removeOldBodyWrap(): void {
+        // Last version did not have XML
+        let w_totalOldVersionConfigName = "";
+
+        // Looping from the first element up to the second-to-last element
+        for (let i = 0; i < Constants.LANGUAGES.length - 1; i++) {
+            const w_lang = Constants.LANGUAGES[i];
+            const langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
+            w_totalOldVersionConfigName += langWrap;
+        }
+
+        if (vscode.workspace.getConfiguration().has(w_totalOldVersionConfigName)) {
+            void vscode.workspace.getConfiguration().update(w_totalOldVersionConfigName, undefined, vscode.ConfigurationTarget.Global);
+        }
+
+    }
+
+    /**
      * * Check if the workbench.editor.enablePreview flag is set
      * @param p_forced Forces the setting instead of just suggesting with a message
      */

@@ -38,6 +38,7 @@
 <v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
 <v t="felix.20240121143955.1"><vh>setBodyWrap</vh></v>
+<v t="felix.20240221212119.1"><vh>removeOldBodyWrap</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
 <v t="felix.20240121003227.1"><vh>checkBodyWrap</vh></v>
@@ -3621,6 +3622,7 @@ import { UnlProvider } from "./unlProvider";
     // * Set required vscode configs if needed
     this.config.checkEnablePreview(true);
     this.config.checkCloseEmptyGroups(true);
+    this.config.removeOldBodyWrap();
     this.config.checkBodyWrap(true);
 
     // * also check workbench.editor.enablePreview
@@ -16799,6 +16801,28 @@ public statusBar(): Thenable&lt;string | undefined&gt; {
         return this.replaceClipboardWith(method());
     }
     return Promise.resolve(undefined);
+}
+
+</t>
+<t tx="felix.20240221212119.1">/**
+ * Remove body wrap setting from older LeoJS versions
+ * that suported less languages
+ */
+public removeOldBodyWrap(): void {
+    // Last version did not have XML
+    let w_totalOldVersionConfigName = "";
+
+    // Looping from the first element up to the second-to-last element
+    for (let i = 0; i &lt; Constants.LANGUAGES.length - 1; i++) {
+        const w_lang = Constants.LANGUAGES[i];
+        const langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
+        w_totalOldVersionConfigName += langWrap;
+    }
+
+    if (vscode.workspace.getConfiguration().has(w_totalOldVersionConfigName)) {
+        void vscode.workspace.getConfiguration().update(w_totalOldVersionConfigName, undefined, vscode.ConfigurationTarget.Global);
+    }
+
 }
 
 </t>
