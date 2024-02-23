@@ -49,8 +49,11 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.SHOW_BODY, () => p_leoUI.showBody(false, undefined)], // Also focuses on body
         [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
+        [CMD.SHORT_GNX_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("shortGnx")], // Not referenced in package.json
+        [CMD.FULL_GNX_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("fullGnx")], // Not referenced in package.json
+        [CMD.SHORT_LECACY_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("shortLegacy")], // Not referenced in package.json
+        [CMD.FULL_LEGACY_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("fullLegacy")], // Not referenced in package.json
 
-        ["leojs.test", () => console.log("CALLED TEST COMMAND!")], // Not referenced in package.json
         [CMD.STATUS_BAR, () => p_leoUI.statusBar()], // Not referenced in package.json
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json
         [CMD.SET_LEO_ID, () => p_leoUI.setLeoIDCommand()],

@@ -206,6 +206,7 @@
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
 <v t="felix.20220103203600.1"><vh>asyncGetTextFromClipboard</vh></v>
 <v t="felix.20211024012523.1"><vh>getTextFromClipboard</vh></v>
+<v t="felix.20240222233600.1"><vh>unlToClipboard</vh></v>
 </v>
 <v t="felix.20220505215916.1"><vh>Nav</vh>
 <v t="felix.20221206201231.1"><vh>goAnywhere</vh></v>
@@ -357,6 +358,8 @@
 <v t="felix.20201214151451.3"><vh>show</vh></v>
 <v t="felix.20201214151451.4"><vh>hide</vh></v>
 <v t="felix.20201214151451.5"><vh>setString</vh></v>
+<v t="felix.20240222220320.1"><vh>setTooltip</vh></v>
+<v t="felix.20240223001320.1"><vh>_buildToolTip</vh></v>
 <v t="felix.20201214151451.7"><vh>_updateLeoObjectIndicatorDebounced</vh></v>
 <v t="felix.20201214151451.8"><vh>_updateLeoObjectIndicator</vh></v>
 </v>
@@ -391,6 +394,7 @@
 <v t="felix.20201214154816.16"><vh>ChooseDocumentItem</vh></v>
 <v t="felix.20220505220706.1"><vh>ChooseRClickItem</vh></v>
 <v t="felix.20201214154816.17"><vh>MinibufferCommand</vh></v>
+<v t="felix.20240222233803.1"><vh>UnlType</vh></v>
 </v>
 <v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
 <v t="felix.20201208224407.1"><vh>@clean src/utils.ts</vh>
@@ -1968,8 +1972,11 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 </t>
 <t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
+[CMD.SHORT_GNX_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("shortGnx")], // Not referenced in package.json
+[CMD.FULL_GNX_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("fullGnx")], // Not referenced in package.json
+[CMD.SHORT_LECACY_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("shortLegacy")], // Not referenced in package.json
+[CMD.FULL_LEGACY_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("fullLegacy")], // Not referenced in package.json
 
-["leojs.test", () =&gt; console.log("CALLED TEST COMMAND!")], // Not referenced in package.json
 [CMD.STATUS_BAR, () =&gt; p_leoUI.statusBar()], // Not referenced in package.json
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
@@ -2117,6 +2124,10 @@ public static COMMANDS = {
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
     HANDLE_UNL: Constants.NAME + ".handleUnl",
+    SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
+    FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
+    SHORT_LECACY_UNL_TO_CLIPBOARD: Constants.NAME + "shortLegacyUnlToClipboard",
+    FULL_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "fullLegacyUnlToClipboard",
     GIT_DIFF: Constants.NAME + ".gitDiff",
     TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
     WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
@@ -3316,7 +3327,8 @@ export class LeoStatusBar {
 
     private _leoStatusBarItem: vscode.StatusBarItem;
     private _updateStatusBarTimeout: NodeJS.Timeout | undefined;
-    private _string: string = ""; // Use this string with indicator, using this will replace the default from config
+    private _string: string = ""; // Use this string with indicator, using this will replace the defult from config
+    private _tooltip: string = ""; // Markdown string built by _buildToolTip from a given headeline
 
     // * Represents having focus on a leo tree, body or document panel to enable leo keybindings
     private _statusBarFlag: boolean = false;
@@ -3341,23 +3353,12 @@ export class LeoStatusBar {
 
         const w_mdToolTip = new vscode.MarkdownString();
 
-        // markdown supports links that execute commands: 
-        // [Run it](command:myCommandId)
-        w_mdToolTip.value = g.dedent(`\
-            # Some Title
-
-            Some text 
-
-            ## some subtitle
-
-            Some more text and a command [Run it](command:leojs.test)
-            
-            `);
+        w_mdToolTip.value = "";
 
         w_mdToolTip.isTrusted = true;
         w_mdToolTip.supportThemeIcons = true;
 
-        //this._leoStatusBarItem.tooltip =  Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
+        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
         this._leoStatusBarItem.tooltip = w_mdToolTip;
 
 
@@ -3394,11 +3395,7 @@ public setString(p_string: string, p_debounceDelay?: number): void {
         return; // cancel
     }
     this._string = p_string;
-    if (p_debounceDelay) {
-        this._updateLeoObjectIndicatorDebounced(p_debounceDelay);
-    } else {
-        this._updateLeoObjectIndicator();
-    }
+    this._updateLeoObjectIndicatorDebounced(p_debounceDelay || 0);
 }
 </t>
 <t tx="felix.20201214151451.7">/**
@@ -3424,6 +3421,7 @@ private _updateLeoObjectIndicator(): void {
         clearTimeout(this._updateStatusBarTimeout);
     }
     this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR + this._string;
+    (this._leoStatusBarItem.tooltip as vscode.MarkdownString).value = this._tooltip;
 }
 
 </t>
@@ -3595,7 +3593,8 @@ import {
     LeoGuiFindTabManagerSettings,
     ChooseDocumentItem,
     LeoDocument,
-    ChooseRClickItem
+    ChooseRClickItem,
+    UnlType
 } from "./types";
 
 import { Config } from "./config";
@@ -3969,6 +3968,7 @@ private _triggerGetStates(): void {
             const kind: string = c.config.getString('unl-status-kind') || '';
             const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
             this._leoStatusBar.setString(method());
+            this._leoStatusBar.setTooltip(p.h);
         }
         let w_canHoist = true;
         let w_topIsChapter = false;
@@ -16566,7 +16566,10 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
     }
 }
 </t>
-<t tx="felix.20231226210919.1">public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
+<t tx="felix.20231226210919.1">/**
+ * Handles the calls from the DocumentLinkProvider for clicks on UNLs.
+ */
+public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
     if (!g.app.windowList.length) {
         // No file opened: exit
         g.es('Handle Unl: No Commanders opened');
@@ -16814,16 +16817,10 @@ export async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
 }
 </t>
 <t tx="felix.20240213205001.1">/**
- * Status bar item clicked: Put unl on clipboard.
+ * Status bar item click handler
  */
 public statusBar(): Thenable&lt;string | undefined&gt; {
-    const c = g.app.windowList[this.frameIndex].c;
-    if (this._leoStatusBar &amp;&amp; c.p &amp;&amp; c.p.v) {
-        const kind: string = c.config.getString('unl-status-kind') || '';
-        const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
-        return this.replaceClipboardWith(method());
-    }
-    return Promise.resolve(undefined);
+    return this.unlToClipboard();
 }
 
 </t>
@@ -16845,6 +16842,87 @@ public removeOldBodyWrap(): void {
     if (vscode.workspace.getConfiguration().has(w_totalOldVersionConfigName)) {
         void vscode.workspace.getConfiguration().update(w_totalOldVersionConfigName, undefined, vscode.ConfigurationTarget.Global);
     }
+
+}
+
+</t>
+<t tx="felix.20240222220320.1">/**
+ * Sets up the tooltip with a given headline string title
+ * for displaying 'click to copy to clipboard' tooltip
+ */
+public setTooltip(p_headline: string, p_debounceDelay?: number): void {
+    if (this._tooltip === p_headline) {
+        return; // cancel
+    }
+    this._tooltip = this._buildToolTip(p_headline);
+    this._updateLeoObjectIndicatorDebounced(p_debounceDelay || 0);
+}
+
+</t>
+<t tx="felix.20240222233600.1">/**
+ * Put UNL of current node on the clipboard. 
+ * @para optional unlType to specify type.
+ */
+public unlToClipboard(unlType?: UnlType): Thenable&lt;string&gt; {
+    let unl = "";
+    const c = g.app.windowList[this.frameIndex].c;
+    const p = c.p;
+    if (!p.v) {
+        return Promise.resolve('');
+    }
+    if (unlType) {
+        switch (unlType) {
+            case 'shortGnx':
+                unl = p.get_short_gnx_UNL();
+                break;
+            case 'fullGnx':
+                unl = p.get_full_gnx_UNL();
+                break;
+            case 'shortLegacy':
+                unl = p.get_short_legacy_UNL();
+                break;
+            case 'fullLegacy':
+                unl = p.get_full_legacy_UNL();
+                break;
+        }
+    } else {
+        const kind: string = c.config.getString('unl-status-kind') || '';
+        const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
+        unl = method();
+    }
+    return this.replaceClipboardWith(unl);
+}
+
+</t>
+<t tx="felix.20240222233803.1">export type UnlType = 'shortGnx' | 'fullGnx' | 'shortLegacy' | 'fullLegacy';
+
+</t>
+<t tx="felix.20240223001320.1">/**
+ * builds tooltip from headline
+ */
+private _buildToolTip(p_headline: string = ""): string {
+
+    // markdown supports links that execute commands: 
+    // [Run it](command:myCommandId)
+
+    let w_tooltip = g.dedent(`\
+    #### **UNL for** _${p_headline}_
+
+    #### [Click to copy UNL to clipboard](command:${Constants.COMMANDS.STATUS_BAR})
+
+    ---
+
+    _Or choose a specific UNL type:_
+
+    **[short gnx](command:${Constants.COMMANDS.SHORT_GNX_UNL_TO_CLIPBOARD})** —
+    **[full gnx](command:${Constants.COMMANDS.FULL_GNX_UNL_TO_CLIPBOARD})**
+
+    **[short legacy](command:${Constants.COMMANDS.SHORT_LECACY_UNL_TO_CLIPBOARD})** —
+    **[full legacy](command:${Constants.COMMANDS.FULL_LEGACY_UNL_TO_CLIPBOARD})**
+
+    `);
+
+    return w_tooltip;
 
 }
 

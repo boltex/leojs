@@ -18,7 +18,8 @@ import {
     LeoGuiFindTabManagerSettings,
     ChooseDocumentItem,
     LeoDocument,
-    ChooseRClickItem
+    ChooseRClickItem,
+    UnlType
 } from "./types";
 
 import { Config } from "./config";
@@ -564,18 +565,15 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Status bar item clicked: Put unl on clipboard.
+     * Status bar item click handler
      */
     public statusBar(): Thenable<string | undefined> {
-        const c = g.app.windowList[this.frameIndex].c;
-        if (this._leoStatusBar && c.p && c.p.v) {
-            const kind: string = c.config.getString('unl-status-kind') || '';
-            const method: () => string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
-            return this.replaceClipboardWith(method());
-        }
-        return Promise.resolve(undefined);
+        return this.unlToClipboard();
     }
 
+    /**
+     * Handles the calls from the DocumentLinkProvider for clicks on UNLs.
+     */
     public async handleUnl(p_arg: { unl: string }): Promise<void> {
         if (!g.app.windowList.length) {
             // No file opened: exit
@@ -654,6 +652,7 @@ export class LeoUI extends NullGui {
                 const kind: string = c.config.getString('unl-status-kind') || '';
                 const method: () => string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
                 this._leoStatusBar.setString(method());
+                this._leoStatusBar.setTooltip(p.h);
             }
             let w_canHoist = true;
             let w_topIsChapter = false;
@@ -3641,6 +3640,40 @@ export class LeoUI extends NullGui {
     */
     public getTextFromClipboard(): string {
         return this.clipboardContents;
+    }
+
+    /**
+     * Put UNL of current node on the clipboard. 
+     * @para optional unlType to specify type.
+     */
+    public unlToClipboard(unlType?: UnlType): Thenable<string> {
+        let unl = "";
+        const c = g.app.windowList[this.frameIndex].c;
+        const p = c.p;
+        if (!p.v) {
+            return Promise.resolve('');
+        }
+        if (unlType) {
+            switch (unlType) {
+                case 'shortGnx':
+                    unl = p.get_short_gnx_UNL();
+                    break;
+                case 'fullGnx':
+                    unl = p.get_full_gnx_UNL();
+                    break;
+                case 'shortLegacy':
+                    unl = p.get_short_legacy_UNL();
+                    break;
+                case 'fullLegacy':
+                    unl = p.get_full_legacy_UNL();
+                    break;
+            }
+        } else {
+            const kind: string = c.config.getString('unl-status-kind') || '';
+            const method: () => string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
+            unl = method();
+        }
+        return this.replaceClipboardWith(unl);
     }
 
     /**

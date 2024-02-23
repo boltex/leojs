@@ -321,3 +321,5 @@ export interface ChooseRClickItem extends vscode.QuickPickItem {
 export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;
 }
+export type UnlType = 'shortGnx' | 'fullGnx' | 'shortLegacy' | 'fullLegacy';
+
