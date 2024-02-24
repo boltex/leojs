@@ -51,7 +51,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.SHORT_GNX_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("shortGnx")], // Not referenced in package.json
         [CMD.FULL_GNX_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("fullGnx")], // Not referenced in package.json
-        [CMD.SHORT_LECACY_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("shortLegacy")], // Not referenced in package.json
+        [CMD.SHORT_LEGACY_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("shortLegacy")], // Not referenced in package.json
         [CMD.FULL_LEGACY_UNL_TO_CLIPBOARD, () => p_leoUI.unlToClipboard("fullLegacy")], // Not referenced in package.json
 
         [CMD.STATUS_BAR, () => p_leoUI.statusBar()], // Not referenced in package.json

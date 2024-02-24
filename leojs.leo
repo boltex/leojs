@@ -1974,7 +1974,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 [CMD.SHORT_GNX_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("shortGnx")], // Not referenced in package.json
 [CMD.FULL_GNX_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("fullGnx")], // Not referenced in package.json
-[CMD.SHORT_LECACY_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("shortLegacy")], // Not referenced in package.json
+[CMD.SHORT_LEGACY_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("shortLegacy")], // Not referenced in package.json
 [CMD.FULL_LEGACY_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("fullLegacy")], // Not referenced in package.json
 
 [CMD.STATUS_BAR, () =&gt; p_leoUI.statusBar()], // Not referenced in package.json
@@ -2126,7 +2126,7 @@ public static COMMANDS = {
     HANDLE_UNL: Constants.NAME + ".handleUnl",
     SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
     FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
-    SHORT_LECACY_UNL_TO_CLIPBOARD: Constants.NAME + "shortLegacyUnlToClipboard",
+    SHORT_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "shortLegacyUnlToClipboard",
     FULL_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "fullLegacyUnlToClipboard",
     GIT_DIFF: Constants.NAME + ".gitDiff",
     TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
@@ -16917,7 +16917,7 @@ private _buildToolTip(p_headline: string = ""): string {
     **[short gnx](command:${Constants.COMMANDS.SHORT_GNX_UNL_TO_CLIPBOARD})** —
     **[full gnx](command:${Constants.COMMANDS.FULL_GNX_UNL_TO_CLIPBOARD})**
 
-    **[short legacy](command:${Constants.COMMANDS.SHORT_LECACY_UNL_TO_CLIPBOARD})** —
+    **[short legacy](command:${Constants.COMMANDS.SHORT_LEGACY_UNL_TO_CLIPBOARD})** —
     **[full legacy](command:${Constants.COMMANDS.FULL_LEGACY_UNL_TO_CLIPBOARD})**
 
     `);

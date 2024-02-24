@@ -529,7 +529,7 @@ export class Constants {
         HANDLE_UNL: Constants.NAME + ".handleUnl",
         SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
         FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
-        SHORT_LECACY_UNL_TO_CLIPBOARD: Constants.NAME + "shortLegacyUnlToClipboard",
+        SHORT_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "shortLegacyUnlToClipboard",
         FULL_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "fullLegacyUnlToClipboard",
         GIT_DIFF: Constants.NAME + ".gitDiff",
         TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",

@@ -107,7 +107,7 @@ export class LeoStatusBar {
         **[short gnx](command:${Constants.COMMANDS.SHORT_GNX_UNL_TO_CLIPBOARD})** —
         **[full gnx](command:${Constants.COMMANDS.FULL_GNX_UNL_TO_CLIPBOARD})**
 
-        **[short legacy](command:${Constants.COMMANDS.SHORT_LECACY_UNL_TO_CLIPBOARD})** —
+        **[short legacy](command:${Constants.COMMANDS.SHORT_LEGACY_UNL_TO_CLIPBOARD})** —
         **[full legacy](command:${Constants.COMMANDS.FULL_LEGACY_UNL_TO_CLIPBOARD})**
 
         `);
