@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" tabindex="-1">
+
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src #{cspSource}; img-src #{cspSource} https:; script-src 'nonce-#{nonce}';" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="#{root}/help-panel/style.css" rel="stylesheet" />
+<title>LeoJS Help</title>
+</head>
+
+<body>
+#{title}
+#{body}
+<!-- end of body -->
+<script nonce="#{nonce}" src="#{root}/help-panel/main.js"></script>
+</body>
+
+</html>

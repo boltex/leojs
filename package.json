@@ -4201,6 +4201,7 @@
     "@types/node": "16.x",
     "@types/pako": "^2.0.0",
     "@types/safe-json-stringify": "^1.1.2",
+    "@types/showdown": "^2.0.6",
     "@types/sql.js": "^1.4.4",
     "@types/uuid": "^9.0.7",
     "@types/vscode": "^1.83.0",
@@ -4241,6 +4242,7 @@
     "os-browserify": "^0.3.0",
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
+    "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "uuid": "^9.0.1"
   }

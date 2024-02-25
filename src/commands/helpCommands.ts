@@ -37,9 +37,9 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         //@@language md
 
         const md_s = `\
-        **Welcome to Leo\'s help system.**
+        #Welcome to Leo\'s help system.
 
-        To learn about \"\<Alt-X\>\" commands, type:
+        To learn about **Alt-X** commands, type:
 
             <Alt-X>help-for-minibuffer<Enter>
 
@@ -77,7 +77,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
             const command = cDict[key];
             // Going to get replaced. Don't take those that begin with 'async-'
             const w_name = (command as any).__name__ || '';
-            if (!w_name.startsWith('async-')) {
+            if (!w_name.startsWith('async-') && !w_name.startsWith('help')) {
                 commands.push({
                     label: key,
                     detail: (command as any).__doc__

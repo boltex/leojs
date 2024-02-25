@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
 import * as utils from "./utils";
@@ -136,6 +137,10 @@ export class LeoUI extends NullGui {
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
+
+    // * Help Panel
+    public showdownConverter: showdown.Converter;
+    private _helpPanel: vscode.WebviewPanel | undefined;
 
     // * Interactive Find Input
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
@@ -357,6 +362,9 @@ export class LeoUI extends NullGui {
             this._lastTreeView = this._leoTreeView;
         }
 
+        // * Help panel helper
+        this.showdownConverter = new showdown.Converter();
+
         // * Configuration / Welcome webview
         this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
         // Set confirm on close to 'never' on startup 
@@ -543,21 +551,96 @@ export class LeoUI extends NullGui {
         void this.leoSettingsWebview.openWebview();
     }
 
-    public async put_help(C: Commands, s: string): Promise<void> {
+    public async put_help(c: Commands, s: string, short_title: string): Promise<void> {
         s = g.dedent(s.trimEnd());
-        this.helpPanelText = s;
+        s = this.showdownConverter.makeHtml(s);
+        // Get the html file content and replace the three strings :
+        // the 'nonce' string, the base url, and 'cspSource', the Content security policy source.
+        const fileUri = g.vscode.Uri.joinPath(this._context.extensionUri, 'help-panel', 'index.html');
+        const htmlDoc = await g.vscode.workspace.openTextDocument(fileUri);
+        const nonce = Array.from({ length: 32 }, () => Math.random().toString(36).charAt(2)).join('');
 
-        // * Close all open help panels 
-        await utils.closeLeoHelpPanels();
+        if (short_title.trim()) {
+            short_title = `<h1>${short_title}</h1>\n`;
+        }
 
-        setTimeout(() => {
-            const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);
-            this.helpDocumentPaneProvider.update(w_uri);
-            setTimeout(() => {
-                // * Open the virtual document in the preview pane
-                void vscode.commands.executeCommand('markdown.showPreviewToSide', w_uri);
-            }, 60);
-        }, 0);
+        if (this._helpPanel) {
+            // Already created
+            const baseUri = this._helpPanel.webview.asWebviewUri(this._context.extensionUri);
+            const html = htmlDoc.getText().replace(
+                /#{nonce}/g,
+                nonce
+            ).replace(
+                /#{root}/g,
+                `${baseUri}`
+            ).replace(
+                /#{cspSource}/g,
+                `${this._helpPanel.webview.cspSource}`
+            ).replace(
+                '#{title}',
+                short_title
+            ).replace(
+                '#{body}',
+                s
+            );
+            this._helpPanel.webview.html = html;
+            this._helpPanel.reveal(undefined, true);
+        } else {
+            // First time showing help panel
+            this._helpPanel = g.vscode.window.createWebviewPanel(
+                'helpPanelWebview',
+                'LeoJS Help',
+                { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+                {
+                    enableScripts: true,
+                }
+            );
+            this._context.subscriptions.push(this._helpPanel);
+            this._helpPanel.onDidDispose(
+                () => {
+
+                    this._helpPanel = undefined;
+                },
+                null,
+                this._context.subscriptions
+            );
+            const baseUri = this._helpPanel.webview.asWebviewUri(this._context.extensionUri);
+            const html = htmlDoc.getText().replace(
+                /#{nonce}/g,
+                nonce
+            ).replace(
+                /#{root}/g,
+                `${baseUri}`
+            ).replace(
+                /#{cspSource}/g,
+                `${this._helpPanel.webview.cspSource}`
+            ).replace(
+                '#{title}',
+                short_title
+            ).replace(
+                '#{body}',
+                s
+            );
+
+            this._helpPanel.iconPath = g.vscode.Uri.joinPath(this._context.extensionUri, 'resources', 'leoapp128px.png');
+            this._helpPanel.webview.html = html;
+
+        }
+
+        // * Showing with Markdown preview, with the "markdown.showPreviewToSide" command
+        // this.helpPanelText = s;
+
+        // // * Close all open help panels 
+        // await utils.closeLeoHelpPanels();
+
+        // setTimeout(() => {
+        //     const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);
+        //     this.helpDocumentPaneProvider.update(w_uri);
+        //     setTimeout(() => {
+        //         // * Open the virtual document in the preview pane
+        //         void vscode.commands.executeCommand('markdown.showPreviewToSide', w_uri);
+        //     }, 60);
+        // }, 0);
 
         // * Showing with standard readonly text document provider
         // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider

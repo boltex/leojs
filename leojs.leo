@@ -31,6 +31,11 @@
 <v t="felix.20231219233427.1"><vh>@clean find-panel/main.js</vh></v>
 <v t="felix.20231219233431.1"><vh>@clean find-panel/style.css</vh></v>
 </v>
+<v t="felix.20240224165738.1"><vh>Help Panel Webview</vh>
+<v t="felix.20240224200656.1"><vh>@clean help-panel/index.html</vh></v>
+<v t="felix.20240224165750.1"><vh>@clean help-panel/style.css</vh></v>
+<v t="felix.20240224165747.1"><vh>@clean help-panel/main.js</vh></v>
+</v>
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
 <v t="felix.20211007213344.2"><vh>class Config</vh>
 <v t="felix.20211007213344.3"><vh>getConfig</vh></v>
@@ -3574,6 +3579,7 @@ export interface LeoButton {
 
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
+import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
 import * as utils from "./utils";
@@ -3720,6 +3726,9 @@ import { UnlProvider } from "./unlProvider";
         this._lastTreeView = this._leoTreeView;
     }
 
+    // * Help panel helper
+    this.showdownConverter = new showdown.Converter();
+
     // * Configuration / Welcome webview
     this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
     // Set confirm on close to 'never' on startup 
@@ -3823,6 +3832,10 @@ export class LeoUI extends NullGui {
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
+
+    // * Help Panel
+    public showdownConverter: showdown.Converter;
+    private _helpPanel: vscode.WebviewPanel | undefined;
 
     // * Interactive Find Input
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
@@ -7016,6 +7029,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/node": "16.x",
 "@types/pako": "^2.0.0",
 "@types/safe-json-stringify": "^1.1.2",
+"@types/showdown": "^2.0.6",
 "@types/sql.js": "^1.4.4",
 "@types/uuid": "^9.0.7",
 "@types/vscode": "^1.83.0",
@@ -7055,6 +7069,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
+"showdown": "^2.1.0",
 "stream": "^0.0.2",
 "uuid": "^9.0.1"
 </t>
@@ -16438,21 +16453,96 @@ div.col-nav {
 - Fixed keyboard navigation of the outline while being hoisted.
 
 </t>
-<t tx="felix.20231224193540.1">public async put_help(C: Commands, s: string): Promise&lt;void&gt; {
+<t tx="felix.20231224193540.1">public async put_help(c: Commands, s: string, short_title: string): Promise&lt;void&gt; {
     s = g.dedent(s.trimEnd());
-    this.helpPanelText = s;
+    s = this.showdownConverter.makeHtml(s);
+    // Get the html file content and replace the three strings :
+    // the 'nonce' string, the base url, and 'cspSource', the Content security policy source.
+    const fileUri = g.vscode.Uri.joinPath(this._context.extensionUri, 'help-panel', 'index.html');
+    const htmlDoc = await g.vscode.workspace.openTextDocument(fileUri);
+    const nonce = Array.from({ length: 32 }, () =&gt; Math.random().toString(36).charAt(2)).join('');
 
-    // * Close all open help panels 
-    await utils.closeLeoHelpPanels();
+    if (short_title.trim()) {
+        short_title = `&lt;h1&gt;${short_title}&lt;/h1&gt;\n`;
+    }
 
-    setTimeout(() =&gt; {
-        const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);
-        this.helpDocumentPaneProvider.update(w_uri);
-        setTimeout(() =&gt; {
-            // * Open the virtual document in the preview pane
-            void vscode.commands.executeCommand('markdown.showPreviewToSide', w_uri);
-        }, 60);
-    }, 0);
+    if (this._helpPanel) {
+        // Already created
+        const baseUri = this._helpPanel.webview.asWebviewUri(this._context.extensionUri);
+        const html = htmlDoc.getText().replace(
+            /#{nonce}/g,
+            nonce
+        ).replace(
+            /#{root}/g,
+            `${baseUri}`
+        ).replace(
+            /#{cspSource}/g,
+            `${this._helpPanel.webview.cspSource}`
+        ).replace(
+            '#{title}',
+            short_title
+        ).replace(
+            '#{body}',
+            s
+        );
+        this._helpPanel.webview.html = html;
+        this._helpPanel.reveal(undefined, true);
+    } else {
+        // First time showing help panel
+        this._helpPanel = g.vscode.window.createWebviewPanel(
+            'helpPanelWebview',
+            'LeoJS Help',
+            { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+            {
+                enableScripts: true,
+            }
+        );
+        this._context.subscriptions.push(this._helpPanel);
+        this._helpPanel.onDidDispose(
+            () =&gt; {
+
+                this._helpPanel = undefined;
+            },
+            null,
+            this._context.subscriptions
+        );
+        const baseUri = this._helpPanel.webview.asWebviewUri(this._context.extensionUri);
+        const html = htmlDoc.getText().replace(
+            /#{nonce}/g,
+            nonce
+        ).replace(
+            /#{root}/g,
+            `${baseUri}`
+        ).replace(
+            /#{cspSource}/g,
+            `${this._helpPanel.webview.cspSource}`
+        ).replace(
+            '#{title}',
+            short_title
+        ).replace(
+            '#{body}',
+            s
+        );
+
+        this._helpPanel.iconPath = g.vscode.Uri.joinPath(this._context.extensionUri, 'resources', 'leoapp128px.png');
+        this._helpPanel.webview.html = html;
+
+    }
+
+    // * Showing with Markdown preview, with the "markdown.showPreviewToSide" command
+    // this.helpPanelText = s;
+
+    // // * Close all open help panels 
+    // await utils.closeLeoHelpPanels();
+
+    // setTimeout(() =&gt; {
+    //     const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);
+    //     this.helpDocumentPaneProvider.update(w_uri);
+    //     setTimeout(() =&gt; {
+    //         // * Open the virtual document in the preview pane
+    //         void vscode.commands.executeCommand('markdown.showPreviewToSide', w_uri);
+    //     }, 60);
+    // }, 0);
 
     // * Showing with standard readonly text document provider
     // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
@@ -16927,6 +17017,185 @@ private _buildToolTip(p_headline: string = ""): string {
 }
 
 </t>
+<t tx="felix.20240224165738.1"></t>
+<t tx="felix.20240224165747.1">// @ts-check
+
+// This script will be run within the webview itself
+// It cannot access the main VS Code APIs directly.
+// Send message to LeoJS with vscode.postMessage({ keyNameEx1: someValue, ... });
+// Receive messages from LeoJS with window.addEventListener('message', event =&gt; { ... });
+(function () {
+    // @ts-expect-error
+    const vscode = acquireVsCodeApi();
+
+    // console.log('Help Panel Started!');
+})();
+</t>
+<t tx="felix.20240224165750.1">@language css
+html {
+  box-sizing: border-box;
+  font-size: 13px;
+  --input-padding-vertical: 6px;
+  --input-padding-horizontal: 4px;
+  --input-margin-vertical: 4px;
+  --input-margin-horizontal: 0;
+  height: 100%;
+}
+
+*:focus {
+  outline-color: var(--vscode-focusBorder);
+}
+
+a {
+  color: var(--vscode-textLink-foreground);
+}
+
+a:hover,
+a:active {
+  color: var(--vscode-textLink-activeForeground);
+}
+
+code {
+  font-size: var(--vscode-editor-font-size);
+  font-family: var(--vscode-editor-font-family);
+  display: inline-block;
+}
+
+button {
+  border: 1px solid var(--vscode-button-border,transparent);
+  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+  border-radius: 2px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  outline: 1px solid transparent;
+  outline-offset: 2px !important;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+}
+
+button:hover {
+  cursor: pointer;
+  background: var(--vscode-button-hoverBackground);
+}
+
+button:focus {
+  outline-color: var(--vscode-focusBorder);
+}
+
+button.secondary {
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+}
+
+button.secondary:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+label {
+  display: inline-block;
+  margin-bottom: 0.2em;
+}
+
+select {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-input-foreground);
+  border-color: var(--vscode-dropdown-border);
+  cursor: pointer;
+  position: relative;
+  border-radius: 2px;
+  padding: 3px var(--input-padding-horizontal);
+  color: var(--vscode-input-foreground);
+}
+
+select:focus {
+  outline-color: var(--vscode-input-border);
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+select option {
+  background-color: var(--vscode-dropdown-listBackground);
+  padding: 3px var(--input-padding-horizontal);
+}
+
+select option:focus {
+  background-color: var(--vscode-input-background);
+  outline-color: var(--vscode-input-border);
+}
+
+input:not([type="radio"]):not([type="checkbox"]),
+textarea {
+  margin-right: 20px;
+  border: none;
+  font-family: var(--vscode-font-family);
+  padding: 3px var(--input-padding-horizontal);
+  border-radius: 2px;
+  color: var(--vscode-input-foreground);
+  outline-color: var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+}
+
+textarea {
+  width: 100%;
+  display: block;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+}
+
+u {
+  color: var(--vscode-editor-foreground);
+  text-decoration-color: var(--vscode-foreground);
+  text-underline-offset: 0.04em;
+}
+
+.row {
+  margin-bottom: 0.5em;
+}
+
+.muted {
+  opacity: 0.6;
+}
+
+.big {
+  font-size: 20px;
+}</t>
+<t tx="felix.20240224200656.1">&lt;!DOCTYPE html&gt;
+&lt;html lang="en" tabindex="-1"&gt;
+
+&lt;head&gt;
+&lt;meta charset="UTF-8" /&gt;
+&lt;meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src #{cspSource}; img-src #{cspSource} https:; script-src 'nonce-#{nonce}';" /&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+&lt;link href="#{root}/help-panel/style.css" rel="stylesheet" /&gt;
+&lt;title&gt;LeoJS Help&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+#{title}
+#{body}
+&lt;!-- end of body --&gt;
+&lt;script nonce="#{nonce}" src="#{root}/help-panel/main.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;</t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
