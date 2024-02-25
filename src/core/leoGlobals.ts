@@ -5929,8 +5929,17 @@ Clickable links have four forms:
    For example, the link: `unl:gnx://#ekr.20031218072017.2406` refers to this
    outline's "Code" node. Try it. The link works in this outline.
 
-   *Note*: `{outline}` is optional. It can be an absolute path name or a relative
-   path name resolved using `@data unl-path-prefixes`.
+   *Note*: `{outline}` can be:
+
+   - An absolute path to a .leo file.
+     The link fails unless the given file exits.
+
+   - A relative path to a .leo file.
+     Leo searches for the gnx:
+     a) among the paths in `@data unl-path-prefixes`,
+     b) among all open commanders.
+
+   - Empty. Leo searches for the gnx in all open commanders.
 
 3. Leo's headline-based UNLs, as shown in the status pane:
 
@@ -6016,20 +6025,48 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
     let unl = unl_s;
     let file_part;
     let c2;
-    let c3;
     let tail;
+
     if (unl.startsWith('unl:gnx:')) {
-        // Resolve a gnx-based unl.
-        unl = unl.slice(8);
+
+        // Init the gnx-based search.
+        unl = unl.substring(8);
         file_part = getUNLFilePart(unl);
-        c2 = await openUNLFile(c, file_part);
-        if (file_part && !c2) {
-            return undefined;
-        }
-        c3 = c2 || c;
         tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
-        return findGnx(tail, c3);
+
+        // First, search the open commander.
+        // #3811: Do *not* fail if this search fails.
+        if (file_part) {
+            c2 = await openUNLFile(c, file_part);
+            if (c2) {
+                if (tail) {
+                    const p = await findGnx(tail, c2);
+                    if (p && p.__bool__()) {
+                        return p;
+                    }
+                } else {
+                    // only the file part, no node part!
+                    return c2.p;
+                }
+            }
+        }
+
+        // Search all open commanders, starting with c.
+        let p = await findGnx(tail, c);
+        if (p && p.__bool__()) {
+            return p;
+        }
+        for (const c2 of app.commanders()) {
+            if (c2 !== c) {
+                p = await findGnx(tail, c2);
+                if (p && p.__bool__()) {
+                    return p;
+                }
+            }
+        }
+        return;
     }
+
     // Resolve a file-based unl.
     let found = false;
     for (const prefix of ['unl:', 'file:']) {
@@ -6040,20 +6077,45 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
         }
     }
     if (!found) {
-        console.log(`Bad unl: ${unl_s}`);
+        es_print(`Bad unl: ${unl_s}`);
         return undefined;
     }
 
+    // Init the headline-based search.
     file_part = getUNLFilePart(unl);
-    c2 = await openUNLFile(c, file_part);
-    if (file_part && !c2) {
-        return undefined;
-    }
-    c3 = c2 || c;
-    tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
+    tail = unl.substring(3 + file_part.length);  // 3: Skip the '//' and '#'
     const unlList = tail.split('-->');
-    return findUnl(unlList, c3);
 
+    // If there is a file part, search *only* the given commander!
+    if (file_part) {
+        const c2 = await openUNLFile(c, file_part);
+        if (!c2) {
+            return;
+        }
+        if (tail) {
+            const p = await findUnl(unlList, c2);
+            return p;  // May be null
+        } else {
+            // only the file part, no node part!
+            return c2.p;
+        }
+    }
+
+    // New in Leo 6.7.7:
+    // There is no file part, so search all open commanders, starting with c.
+    let p = await findUnl(unlList, c);
+    if (p && p.__bool__()) {
+        return p;
+    }
+    for (const c2 of app.commanders()) {
+        if (c2 !== c) {
+            p = await findUnl(unlList, c2);
+            if (p && p.__bool__()) {
+                return p;
+            }
+        }
+    }
+    return;
 }
 //@+node:felix.20230724154323.6: *3* g.findGnx (new unls)
 /**
@@ -6415,7 +6477,9 @@ export function traceUrl(c: Commands, path: string, parsed: any, url: string): v
 }
 //@+node:felix.20230724154323.15: *3* g.isValidUnl
 // unls must contain a (possible empty) file part followed by something else.
-export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#.+/;
+// export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#.+/; 
+export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#/; // ALLOW EMPTY # PART
+
 
 /**
  * Return true if the given unl is valid.
@@ -6747,7 +6811,8 @@ export function unquoteUrl(url: string): string {
 }
 //@+node:felix.20230724154323.26: *3* g: file part utils
 //@+node:felix.20230724154323.27: *4* g.getUNLFilePart
-const file_part_pattern = /\/\/(.*?)#.+/;
+// const file_part_pattern = /\/\/(.*?)#.+/;
+const file_part_pattern = /\/\/(.*?)#/;  // ALLOW EMPTY # PART
 
 /**
  * Return the file part of a unl, that is, everything *between* '//' and '#'.
@@ -6773,11 +6838,21 @@ export function getUNLFilePart(s: string): string {
  */
 export async function openUNLFile(c: Commands, s: string): Promise<Commands | undefined> {
 
+    // Aliases
     const base = os_path_basename;
+    const dirname = os_path_dirname;
+    const exists = os_path_exists;
+    const isabs = os_path_isabs;
+    const join = os_path_finalize_join;  // Not os.path.join
     const norm = os_path_normpath;
+
+    // c's name and directory.
     const c_name = c.fileName();
+    const c_dir = dirname(c_name);
+
     let w_path;
     let w_exists;
+
     /**
      * Standardize the path for easy comparison.
      */
@@ -6794,6 +6869,7 @@ export async function openUNLFile(c: Commands, s: string): Promise<Commands | un
     if (!s.trim()) {
         return undefined;
     }
+
     // Always match within the present file.
     if (os_path_isabs(s) && standard(s) === standard(c_name)) {
         return c;
@@ -6801,42 +6877,48 @@ export async function openUNLFile(c: Commands, s: string): Promise<Commands | un
     if (!os_path_isabs(s) && standard(s) === standard(base(c_name))) {
         return c;
     }
-    if (os_path_isabs(s)) {
-        w_path = standard(s);
-    } else {
-        // Values of d should be directories.
-        const d = parsePathData(c);
-        const base_s = base(s);
-        const directory = d[base_s];
-        if (!directory) {
-            return undefined;
-        }
-        w_exists = await os_path_exists(directory);
+
+    // #3814: From here on we must test that the given file exists.
+
+    // #3814: There is no choice for absolute files.
+    if (isabs(s)) {
+        w_exists = await exists(s);
+        return w_exists ? openWithFileName(s) : undefined;
+    }
+
+    // #3814: Prefer paths in `@data unl-path-prefixes` to any defaults.
+    //        Such paths must match exactly.
+    const base_s = base(s);
+    const d = parsePathData(c);
+    const directory = d[base_s];
+
+    if (directory) {
+        w_path = standard(join(directory, base_s));
+        w_exists = await exists(w_path);
         if (!w_exists) {
             return undefined;
         }
-        w_path = standard(os_path_join(directory, base_s));
-
+    } else {
+        // Resolve relative file parts using c's directory.
+        w_path = standard(join(c_dir, base_s));
     }
+
+    // Search all open commanders.
     if (w_path === standard(c_name)) {
         return c;
     }
-    // Search all open commanders.
-    // This is a good shortcut, && it helps unit tests.
     for (const c2 of app.commanders()) {
         if (w_path === standard(c2.fileName())) {
             return c2;
         }
     }
 
-    // Open the file if possible.
-    w_exists = await os_path_exists(w_path);
+    // #3814: *Open* the file and return the commander.
+    w_exists = await exists(w_path);
     if (!w_exists) {
         return undefined;
     }
-
     return openWithFileName(w_path);
-
 }
 //@+node:felix.20230724154323.29: *4* g.parsePathData
 const path_data_pattern = /(.+?):\s*(.+)/;

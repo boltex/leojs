@@ -686,7 +686,7 @@ export class Importer {
             const lines = this.lines.slice(block.start, block.end);
 
             for (const line of lines) {
-                const stripped_line: string = line.trimLeft();
+                const stripped_line: string = line.trimStart();
 
                 if (stripped_line) {  // Skip empty lines
                     lws_list.push(line.length - stripped_line.length);
