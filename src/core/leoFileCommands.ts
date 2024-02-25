@@ -8,7 +8,6 @@ import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 import 'date-format-lite';
-// import * as AdmZip from 'adm-zip';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 import * as difflib from 'difflib';
@@ -1035,7 +1034,7 @@ export class FileCommands {
                 `${archive_name} containing ${n} file${g.plural(n)}`
             );
 
-            // const f = new AdmZip();
+            // const f = new jszip ! TODO !
 
             console.log(process.env);
 

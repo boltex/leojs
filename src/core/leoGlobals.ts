@@ -29,6 +29,10 @@ import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
 import { RemoteHubApi } from '../remote-hub';
 import { SqlJsStatic } from 'sql.js';
+import * as showdownObj from "showdown";
+import * as pakoObj from 'pako';
+import * as JSZipObj from 'jszip';
+
 
 /*
     import binascii
@@ -283,7 +287,9 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 export let app: LeoApp;
 
 export let SQL: SqlJsStatic;
-
+export let pako: typeof pakoObj = pakoObj;
+export let showdown: typeof showdownObj = showdownObj;
+export let JSZip: typeof JSZipObj = JSZipObj;
 
 // The singleton Git extension exposed API
 export let gitAPI: GitAPI.API;
