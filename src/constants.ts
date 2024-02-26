@@ -132,7 +132,6 @@ export class Constants {
         SVG_OPEN: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">',
         SVG_CLOSE: "</svg>",
         STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
-        STATUSBAR_COLOR: "fb7c47",
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
         TREEVIEW_TITLE: "OUTLINE",
@@ -166,11 +165,6 @@ export class Constants {
         CLEARED_RECENT: "Cleared recent files list",
         CHOOSE_OPENED_FILE: "Select an opened Leojs File",
         FILE_NOT_OPENED: "No files opened.",
-
-        // STATUS BAR UNUSED FOR NOW IN LEOJS // 
-        STATUSBAR_TOOLTIP_UNL: "Click to copy UNL to clipboard",
-        STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
-        STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
 
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
@@ -291,12 +285,9 @@ export class Constants {
         LEO_TREE_BROWSE: "leoTreeBrowse",
         TREE_KEEP_FOCUS: "treeKeepFocus",
         TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
-        // STATUSBAR_STRING: "statusBarString",
-        // STATUSBAR_COLOR: "statusBarColor",
         TREE_IN_EXPLORER: "treeInExplorer",
         SHOW_OPEN_ASIDE: "showOpenAside",
         SHOW_EDIT: "showEditOnNodes",
-        // SHOW_ARROWS: "showArrowsOnNodes",
         SHOW_ADD: "showAddOnNodes",
         SHOW_MARK: "showMarkOnNodes",
         SHOW_CLONE: "showCloneOnNodes",
@@ -339,8 +330,6 @@ export class Constants {
         GO_ANYWHERE_SHORTCUT: true,
 
         SHOW_UNL_ON_STATUSBAR: true,
-        // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
-        // STATUSBAR_COLOR: "fb7c47",
 
         TREE_IN_EXPLORER: true,
         SHOW_OPEN_ASIDE: true,

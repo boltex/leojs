@@ -2572,7 +2572,6 @@ public static GUI = {
     SVG_OPEN: 'image/svg+xml;utf8,&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;',
     SVG_CLOSE: "&lt;/svg&gt;",
     STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
-    STATUSBAR_COLOR: "fb7c47",
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
     EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
     TREEVIEW_TITLE: "OUTLINE",
@@ -2607,11 +2606,6 @@ public static USER_MESSAGES = {
     CLEARED_RECENT: "Cleared recent files list",
     CHOOSE_OPENED_FILE: "Select an opened Leojs File",
     FILE_NOT_OPENED: "No files opened.",
-
-    // STATUS BAR UNUSED FOR NOW IN LEOJS // 
-    STATUSBAR_TOOLTIP_UNL: "Click to copy UNL to clipboard",
-    STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
-    STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
 
     PROMPT_EDIT_HEADLINE: "Edit Headline",
     PROMPT_INSERT_NODE: "Insert Node",
@@ -3351,10 +3345,8 @@ export class LeoStatusBar {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
         this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
-        // this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
         this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
-
 
         const w_mdToolTip = new vscode.MarkdownString();
 
@@ -3363,9 +3355,7 @@ export class LeoStatusBar {
         w_mdToolTip.isTrusted = true;
         w_mdToolTip.supportThemeIcons = true;
 
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_UNL;
         this._leoStatusBarItem.tooltip = w_mdToolTip;
-
 
         this._leoStatusBarItem.hide();
     }
@@ -8465,12 +8455,9 @@ public static CONFIG_NAMES = {
     LEO_TREE_BROWSE: "leoTreeBrowse",
     TREE_KEEP_FOCUS: "treeKeepFocus",
     TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
-    // STATUSBAR_STRING: "statusBarString",
-    // STATUSBAR_COLOR: "statusBarColor",
     TREE_IN_EXPLORER: "treeInExplorer",
     SHOW_OPEN_ASIDE: "showOpenAside",
     SHOW_EDIT: "showEditOnNodes",
-    // SHOW_ARROWS: "showArrowsOnNodes",
     SHOW_ADD: "showAddOnNodes",
     SHOW_MARK: "showMarkOnNodes",
     SHOW_CLONE: "showCloneOnNodes",
@@ -8514,8 +8501,6 @@ public static CONFIG_DEFAULTS = {
     GO_ANYWHERE_SHORTCUT: true,
 
     SHOW_UNL_ON_STATUSBAR: true,
-    // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
-    // STATUSBAR_COLOR: "fb7c47",
 
     TREE_IN_EXPLORER: true,
     SHOW_OPEN_ASIDE: true,
