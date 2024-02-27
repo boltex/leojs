@@ -5920,26 +5920,30 @@ Clickable links have four forms:
    provided the outline contains an `@<file>` node for file mentioned in
    the error message.
 
-2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):
+2. UNLs based on gnx's (global node indices):
 
    Links of the form `unl:gnx:` + `//{outline}#{gnx}` open the given
-   outline and select the first outline node with the given gnx. These UNLs
-   will work as long as the node exists anywhere in the outline.
+   outline and select the first outline node with the given gnx.
 
    For example, the link: `unl:gnx://#ekr.20031218072017.2406` refers to this
    outline's "Code" node. Try it. The link works in this outline.
 
-   *Note*: `{outline}` can be:
+   Either `{outline}` or `{gnx}` may be empty, but at least one must exist.
 
-   - An absolute path to a .leo file.
-     The link fails unless the given file exits.
+   `{outline}` can be:
 
-   - A relative path to a .leo file.
-     Leo searches for the gnx:
+   - An *absolute path* to a .leo file.
+   - A *relative path*, resolved using the outline's directory.
+
+     Leo will select the outline if it is already open.
+     Otherwise, Leo will open the outline if it exists.
+
+   - A *short* name, say x.leo.
+     Leo searches for x.leo file:
      a) among the paths in `@data unl-path-prefixes`,
      b) among all open commanders.
 
-   - Empty. Leo searches for the gnx in all open commanders.
+   - *Empty*. Leo searches for the gnx in all open outlines.
 
 3. Leo's headline-based UNLs, as shown in the status pane:
 
@@ -6839,6 +6843,7 @@ export function getUNLFilePart(s: string): string {
 export async function openUNLFile(c: Commands, s: string): Promise<Commands | undefined> {
 
     // Aliases
+    const abspath = os_path_abspath;
     const base = os_path_basename;
     const dirname = os_path_dirname;
     const exists = os_path_exists;
@@ -6857,7 +6862,11 @@ export async function openUNLFile(c: Commands, s: string): Promise<Commands | un
      * Standardize the path for easy comparison.
      */
     function standard(p_path: string): string {
-        return norm(p_path).toLowerCase();
+        if (isWindows) {
+            return norm(p_path).toLowerCase();
+        } else {
+            return norm(p_path);
+        }
     }
 
     if (!s.trim()) {
@@ -6886,23 +6895,33 @@ export async function openUNLFile(c: Commands, s: string): Promise<Commands | un
         return w_exists ? openWithFileName(s) : undefined;
     }
 
-    // #3814: Prefer paths in `@data unl-path-prefixes` to any defaults.
-    //        Such paths must match exactly.
-    const base_s = base(s);
-    const d = parsePathData(c);
-    const directory = d[base_s];
-
-    if (directory) {
-        w_path = standard(join(directory, base_s));
-        w_exists = await exists(w_path);
-        if (!w_exists) {
-            return undefined;
-        }
-    } else {
-        // Resolve relative file parts using c's directory.
-        w_path = standard(join(c_dir, base_s));
+    if (isWindows) {
+        s = s.replace(/\//g, '\\');
     }
 
+    const is_relative = s.includes(path.sep);
+
+    if (is_relative) {
+        // #3816: Resolve relative paths via c's directory.
+        w_path = standard(abspath(join(c_dir, s)));  // Not base_s.
+    } else {
+        // #3814: Prefer short paths in `@data unl-path-prefixes` to any defaults.
+        //        Such paths must match exactly.
+        const base_s = base(s);
+        const d = parsePathData(c);
+        const directory = d[base_s];
+
+        if (directory) {
+            w_path = standard(join(directory, base_s));
+            w_exists = await exists(w_path);
+            if (!w_exists) {
+                return undefined;
+            }
+        } else {
+            // Resolve relative file parts using c's directory.
+            w_path = standard(join(c_dir, base_s));
+        }
+    }
     // Search all open commanders.
     if (w_path === standard(c_name)) {
         return c;
