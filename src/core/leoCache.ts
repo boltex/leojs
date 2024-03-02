@@ -89,17 +89,26 @@ export class CommanderWrapper {
     }
 
     public set(target: CommanderWrapper, prop: string, value: any): boolean {
-        this.user_keys.add(prop);
-        this.db[`${this.c.mFileName}:::${prop}`] = value;
+        if (this.c.mFileName) {
+            this.user_keys.add(prop);
+            this.db[`${this.c.mFileName}:::${prop}`] = value;
+        } else {
+            console.log('Error db has no filename KEY !');
+        }
         return true;
     }
 
     _get(key: string, p_default?: any): any {
-        const w_result = this.db[`${this.c.mFileName}:::${key}`];
-        if (w_result == null) {
+        let result;
+        if (this.c.mFileName) {
+            result = this.db[`${this.c.mFileName}:::${key}`];
+        } else {
+            console.log('Error db has no filename KEY !');
+        }
+        if (result == null) {
             return p_default;
         } else {
-            return w_result;
+            return result;
         }
     }
 

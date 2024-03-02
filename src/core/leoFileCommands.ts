@@ -332,7 +332,6 @@ export class FastRead {
 
         const d = this.getGlobalData(); // this gets data FROM DATABASE
 
-
         let [w, h] = [d['width'], d['height']];
 
         let [x, y] = [d['left'], d['top']];
@@ -340,8 +339,6 @@ export class FastRead {
         if (g.app.debug.includes('size')) {
             g.trace(w, h, x, y, c.shortFileName());
         }
-
-        console.log('(got from getGlobalData) setTopGeometry from scanGlobals');
 
         // c.frame may be a NullFrame.
         c.frame.setTopGeometry(w, h, x, y);
@@ -615,7 +612,8 @@ export class FastRead {
         const c: Commands = this.c;
         const toInt = (x: number, d_val: number): number => {
             try {
-                if (typeof x !== 'number') {
+                x = Number(x);
+                if (isNaN(x) || typeof x !== 'number') {
                     return d_val;
                 }
                 return Math.floor(x);
@@ -635,6 +633,7 @@ export class FastRead {
             undefined,
             undefined,
         ];
+
         //
         // Priority 3: The globals dict in the .leojs file.
         //             Leo doesn't write the globals element, but leoInteg might.
@@ -668,7 +667,6 @@ export class FastRead {
             g.trace(width, height, left, top, c.shortFileName());
         }
         // c.frame may be a NullFrame.
-        console.log("got gemotry from c.db['window_position'] setting geometry from scanJsonGlobals");
         c.frame.setTopGeometry(width, height, left, top);
         c.frame.resizePanesToRatio(r1, r2);
 
@@ -2635,9 +2633,6 @@ export class FileCommands {
 
         const w_windowInfo = c.frame.get_window_info();
         const [width, height, left, top] = w_windowInfo;
-
-        // TODO : FIX THIS!
-        console.log('leojs_globals saving window geom to db : ', w_windowInfo);
 
         c.db['body_outline_ratio'] = c.frame.ratio.toString();
         c.db['body_secondary_ratio'] = c.frame.secondary_ratio.toString();

@@ -4245,8 +4245,5 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "uuid": "^9.0.1"
-  },
-  "gitCommit": "57ba7b2",
-  "gitBranch": "devel",
-  "gitDate": "2024-02-27 22:19:40 -0500"
+  }
 }
