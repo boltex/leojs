@@ -332,6 +332,7 @@ export class FastRead {
 
         const d = this.getGlobalData(); // this gets data FROM DATABASE
 
+
         let [w, h] = [d['width'], d['height']];
 
         let [x, y] = [d['left'], d['top']];
@@ -339,6 +340,8 @@ export class FastRead {
         if (g.app.debug.includes('size')) {
             g.trace(w, h, x, y, c.shortFileName());
         }
+
+        console.log('(got from getGlobalData) setTopGeometry from scanGlobals');
 
         // c.frame may be a NullFrame.
         c.frame.setTopGeometry(w, h, x, y);
@@ -665,6 +668,7 @@ export class FastRead {
             g.trace(width, height, left, top, c.shortFileName());
         }
         // c.frame may be a NullFrame.
+        console.log("got gemotry from c.db['window_position'] setting geometry from scanJsonGlobals");
         c.frame.setTopGeometry(width, height, left, top);
         c.frame.resizePanesToRatio(r1, r2);
 
@@ -3016,6 +3020,9 @@ export class FileCommands {
 
         const w_windowInfo = c.frame.get_window_info();
         const [w, h, left, t] = w_windowInfo;
+
+        // TODO : FIX THIS!
+        console.log('putGlobals saving window geom to db : ', w_windowInfo);
 
         c.db['window_position'] = [t.toString(), left.toString(), h.toString(), w.toString()];
 

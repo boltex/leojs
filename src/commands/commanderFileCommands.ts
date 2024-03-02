@@ -15,6 +15,7 @@ import { LoadManager, PreviousSettings } from '../core/leoApp';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
 import { ScriptingController } from '../core/mod_scripting';
+import { CommanderWrapper } from '../core/leoCache';
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -59,6 +60,7 @@ export class CommanderFileCommands {
      * Return the finalized name.
      */
     public set_name_and_title(c: Commands, fileName: string): string {
+        const oldFilename = c.mFileName;
         // Finalize fileName.
         if (fileName.endsWith('.leo') || fileName.endsWith('.db') || fileName.endsWith('.leojs')) {
             c.mFileName = fileName;
@@ -70,6 +72,12 @@ export class CommanderFileCommands {
         const title = c.computeWindowTitle();
         c.frame.title = title;
         c.frame.setTitle(title);
+
+        // #3822 if name changed 'save-as' needs to change the keys of settings saved in db.
+        if (oldFilename !== c.mFileName) {
+            c.db = new CommanderWrapper(c);
+        }
+
         try {
             // Does not exist during unit testing. May not exist in all guis.
             // c.frame.top?.leo_master?.setTabName(c, c.mFileName);

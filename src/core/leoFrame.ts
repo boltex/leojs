@@ -122,6 +122,8 @@ export class LeoFrame {
     }
     //@+node:felix.20231129133050.1: *3* LeoFrame.setTopGeometry
     public setTopGeometry(w: number, h: number, x: number, y: number): void {
+        console.log('setTopGeometry', w, h, x, y);
+
         // Kept as-is in LeoJS.
         if (isNaN(w)) {
             console.log("ERROR setTopGeometry!!");
@@ -137,6 +139,7 @@ export class LeoFrame {
      * Resize splitter1 and splitter2 using the given ratios.
      */
     public resizePanesToRatio(ratio: number, ratio2: number): void {
+        console.log('resizePanesToRatio', ratio, ratio2);
         // Kept as-is in LeoJS.
         this.ratio = ratio;
         this.secondary_ratio = ratio2;
