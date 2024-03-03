@@ -973,7 +973,6 @@ export class Commands {
             s = g.os_path_fix_drive(s);
             s = s.split('\\').join('/');
         }
-
         return s;
     }
 

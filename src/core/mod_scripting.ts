@@ -523,7 +523,9 @@ export class ScriptingController {
      */
     public async createAllButtons(): Promise<void> {
         const c = this.c;
-        if (this.scanned) {
+        if (g.app.reverting) {
+            this.deleteAllButtons();
+        } else if (this.scanned) {
             return; // Defensive.
         }
         this.scanned = true;
@@ -720,6 +722,18 @@ export class ScriptingController {
 
         // Reporting this command is way too annoying.
         return b;
+    }
+    //@+node:felix.20240302235510.1: *3* sc.deleteAllButtons
+    /**
+     * Delete all buttons during revert.
+     */
+    public deleteAllButtons(): void {
+
+        for (const w of this.buttonsArray) {
+            this.iconBar.deleteButton(w);
+        }
+        this.buttonsArray = [];
+        this.seen = new Set();
     }
     //@+node:felix.20230924174338.27: *3* sc.executeScriptFromButton
     /**

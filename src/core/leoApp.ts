@@ -3598,25 +3598,35 @@ export class LoadManager {
         if (!fn) {
             return;
         }
-        if (! await g.os_path_exists(fn)) {
+        const exists = await g.os_path_exists(fn);
+        if (!exists) {
             return;
         }
         if (!lm.isLeoFile(fn)) {
             return;
         }
+        // Re-read the file.
+        c.fileCommands.initIvars();
         try {
-            // Re-read the file.
-            const w_uri = g.makeVscodeUri(fn);
-            await vscode.workspace.fs.stat(w_uri);
-            // OK exists
-            c.fileCommands.initIvars();
+            g.app.reverting = true;
             // await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
             const v = await fc.getAnyLeoFileByName(fn, true);
+            // Report failure.
             if (!v) {
                 g.error(`Revert failed: ${fn}`);
             }
+            // #3596: Redo all buttons.
+            const sc = c.theScriptingController;
+            if (sc) {
+                await sc.createAllButtons();
+            }
+            if (!g.unitTesting) {
+                g.es_print(`Reverted ${c.fileName()}`);
+            }
         } catch {
             // Does not exist !
+        } finally {
+            g.app.reverting = false;
         }
     }
     //@-others
