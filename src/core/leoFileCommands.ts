@@ -36,7 +36,7 @@ type sqlDbRow = [
 interface VNodeJSON {
     gnx: string;
     vh: string;
-    status: number;
+    // status: number; // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
     children: VNodeJSON[];
 }
 //@-<< interfaces >>
@@ -734,7 +734,8 @@ export class FastRead {
 
                     v._headString = v_dict['vh'] || '';
                     v._bodyString = gnx2body[gnx!] || '';
-                    v.statusBits = v_dict['status'] || 0; // Needed ?
+                    // status: number; // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
+                    // v.statusBits = v_dict['status'] || 0; // Needed ?
                     if (v.isExpanded()) {
                         fc.descendentExpandedList.push(gnx!);
                     }
@@ -2677,16 +2678,18 @@ export class FileCommands {
         if (forceWrite || this.usingClipboard) {
             v.setWriteBit(); // 4.2: Indicate we wrote the body text.
         }
-        let status = 0;
-        if (v.isMarked()) {
-            status |= StatusFlags.markedBit;
-        }
-        if (p.isExpanded()) {
-            status |= StatusFlags.expandedBit;
-        }
-        if (p.__eq__(c.p)) {
-            status |= StatusFlags.selectedBit;
-        }
+
+        // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
+        // let status = 0;
+        // if (v.isMarked()) {
+        //     status |= StatusFlags.markedBit;
+        // }
+        // if (p.isExpanded()) {
+        //     status |= StatusFlags.expandedBit;
+        // }
+        // if (p.__eq__(c.p)) {
+        //     status |= StatusFlags.selectedBit;
+        // }
 
         const children: VNodeJSON[] = []; // Start empty
 
@@ -2716,10 +2719,11 @@ export class FileCommands {
             }
         }
 
+        // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
         // Else, just add status if needed
-        if (status) {
-            result['status'] = status;
-        }
+        // if (status) {
+        // result['status'] = status;
+        // }
         return result;
     }
     //@+node:felix.20211213224237.25: *5* fc.write_xml_file
