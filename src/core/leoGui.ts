@@ -588,10 +588,6 @@ export class NullGui extends LeoGui {
         //
     }
 
-    public setLeoIDCommand(): void {
-        //
-    }
-
     public widget_name(widget: any): string {
         return '';
     }
