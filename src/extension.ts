@@ -30,6 +30,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
     */
+    void vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_ID_READY, true);
 
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.

@@ -39,6 +39,18 @@ export class LeoStates {
     }
 
     /**
+     * 'LeoID is ready' state represent the validity of current LeoID
+     */
+    private _leoIdReady: boolean = true;
+    get leoIdReady(): boolean {
+        return this._leoIdReady;
+    }
+    set leoIdReady(p_value: boolean) {
+        this._leoIdReady = p_value;
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_READY, p_value);
+    }
+
+    /**
      * A Leo file is opened
      */
     private _fileOpenedReady: boolean = false; // Sets context flag along with treeview title

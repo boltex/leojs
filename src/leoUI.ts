@@ -534,8 +534,12 @@ export class LeoUI extends NullGui {
         } else {
             this._setupNoOpenedLeoDocument(); // All closed now!
         }
-
-        this.leoStates.leoReady = true;
+        if (g.app.leoID && g.app.leoID !== 'None') {
+            this.leoStates.leoIdReady = true;
+            this.leoStates.leoReady = true;
+        } else {
+            this.leoStates.leoIdReady = false; // Block most UI & commands until 'setLeoIDCommand' succeeds.
+        }
         this.leoStates.leojsStartupDone = true;
 
     }
@@ -3829,6 +3833,7 @@ export class LeoUI extends NullGui {
      * Opens the Nav tab and focus on nav text input
      */
     public findQuick(p_string?: string): Thenable<unknown> {
+        void this.triggerBodySave(true);
         let w_panelID = '';
         let w_panel: vscode.WebviewView | undefined;
         if (this._lastTreeView === this._leoTreeExView) {
@@ -3916,6 +3921,7 @@ export class LeoUI extends NullGui {
      * Opens goto and focus in depending on passed options
      */
     public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable<unknown> {
+        void this.triggerBodySave(true);
         let w_panel = "";
 
         if (this._lastTreeView === this._leoTreeExView) {
@@ -4096,6 +4102,8 @@ export class LeoUI extends NullGui {
      * * Opens the find panel and selects all & focuses on the find field.
      */
     public startSearch(): void {
+
+        void this.triggerBodySave(true);
 
         // already instantiated & shown ?
         let w_panel: vscode.WebviewView | undefined;
@@ -4788,6 +4796,7 @@ export class LeoUI extends NullGui {
     * @returns the promise started after it's done creating the frame and commander
     */
     public async newLeoFile(): Promise<unknown> {
+        await this.triggerBodySave(true);
 
         this.showBodyIfClosed = true;
         this.showOutlineIfClosed = true;
@@ -5386,6 +5395,7 @@ export class LeoUI extends NullGui {
     public showLeoIDMessage(): void {
         void vscode.window.showInformationMessage(
             Constants.USER_MESSAGES.SET_LEO_ID_MESSAGE,
+            { modal: true, detail: "test detail string 123 testing 123" },
             Constants.USER_MESSAGES.ENTER_LEO_ID
         ).then(p_chosenButton => {
             if (p_chosenButton === Constants.USER_MESSAGES.ENTER_LEO_ID) {
@@ -5480,8 +5490,18 @@ export class LeoUI extends NullGui {
         if (p_leoID.trim().length >= 3 && utils.isAlphaNumeric(p_leoID)) {
             // OK not empty
             g.app.leoID = p_leoID;
+            void g.app.setIDFile();
             if (g.app.nodeIndices) {
                 g.app.nodeIndices.userId = p_leoID;
+            }
+            // If LeoJS had finish its startup without valid LeoID, set ready flags!
+            if (!this.leoStates.leoReady && this.leoStates.leojsStartupDone && !this.leoStates.leoIdReady) {
+                if (g.app.leoID && g.app.leoID !== 'None') {
+                    this.leoStates.leoIdReady = true;
+                    this.leoStates.leoReady = true;
+                } else {
+                    void vscode.window.showWarningMessage("'None' is a reserved LeoID, please choose another one.");
+                }
             }
         } else if (!p_leoID.trim()) {
             // empty, go back to default

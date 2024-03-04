@@ -331,6 +331,7 @@
 <v t="felix.20201214151447.3"><vh>General State Flags</vh>
 <v t="felix.20221004234249.1"><vh>leojsStartupDone &amp; helper</vh></v>
 <v t="felix.20201214233119.1"><vh>leoReady &amp; helper</vh></v>
+<v t="felix.20240303150445.1"><vh>leoIdReady &amp; helper</vh></v>
 <v t="felix.20201214151447.4"><vh>fileOpenedReady &amp; helper</vh></v>
 <v t="felix.20201214151447.5"><vh>leoOpenedFileName</vh></v>
 <v t="felix.20201214151447.6"><vh>leoChanged &amp; helper</vh></v>
@@ -1564,6 +1565,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
     */
+    void vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_ID_READY, true);
 
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
@@ -2727,6 +2729,7 @@ public static CONTEXT_FLAGS = {
     // Main flags for connection and opened file
     LEO_STARTUP_DONE: "leojsStartupDone",
     LEO_OPENING_FILE: "leojsOpeningFile",
+    LEO_ID_READY: "leojsIdReady",
     LEO_READY: "leojsReady", // Extension activated and classes created and ready
     TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
     TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
@@ -5925,13 +5928,23 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "view": "leojsOutline",
-    "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone"
+    "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdReady"
   },
   {
     "view": "leojsOutlineExplorer",
-    "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone"
+    "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdReady"
+  },
+  {
+    "view": "leojsOutline",
+    "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdReady"
+  },
+  {
+    "view": "leojsOutlineExplorer",
+    "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdReady"
   },
   {
     "view": "leojsOutline",
@@ -9567,8 +9580,18 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
     if (p_leoID.trim().length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_leoID)) {
         // OK not empty
         g.app.leoID = p_leoID;
+        void g.app.setIDFile();
         if (g.app.nodeIndices) {
             g.app.nodeIndices.userId = p_leoID;
+        }
+        // If LeoJS had finish its startup without valid LeoID, set ready flags!
+        if (!this.leoStates.leoReady &amp;&amp; this.leoStates.leojsStartupDone &amp;&amp; !this.leoStates.leoIdReady) {
+            if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
+                this.leoStates.leoIdReady = true;
+                this.leoStates.leoReady = true;
+            } else {
+                void vscode.window.showWarningMessage("'None' is a reserved LeoID, please choose another one.");
+            }
         }
     } else if (!p_leoID.trim()) {
         // empty, go back to default
@@ -9641,6 +9664,7 @@ public setLeoIDCommand(): Thenable&lt;unknown&gt; {
 public showLeoIDMessage(): void {
     void vscode.window.showInformationMessage(
         Constants.USER_MESSAGES.SET_LEO_ID_MESSAGE,
+        { modal: true, detail: "test detail string 123 testing 123" },
         Constants.USER_MESSAGES.ENTER_LEO_ID
     ).then(p_chosenButton =&gt; {
         if (p_chosenButton === Constants.USER_MESSAGES.ENTER_LEO_ID) {
@@ -9812,8 +9836,12 @@ public finishStartup(): void {
     } else {
         this._setupNoOpenedLeoDocument(); // All closed now!
     }
-
-    this.leoStates.leoReady = true;
+    if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
+        this.leoStates.leoIdReady = true;
+        this.leoStates.leoReady = true;
+    } else {
+        this.leoStates.leoIdReady = false; // Block most UI &amp; commands until 'setLeoIDCommand' succeeds.
+    }
     this.leoStates.leojsStartupDone = true;
 
 }
@@ -9823,7 +9851,6 @@ public finishStartup(): void {
     return vscode.window.showInputBox({
         title: Constants.USER_MESSAGES.ENTER_LEO_ID,
         prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
-
     }).then((p_id) =&gt; {
         if (p_id) {
             return p_id;
@@ -9903,6 +9930,7 @@ public makeAllBindings(): void {
  * Opens the Nav tab and focus on nav text input
  */
 public findQuick(p_string?: string): Thenable&lt;unknown&gt; {
+    void this.triggerBodySave(true);
     let w_panelID = '';
     let w_panel: vscode.WebviewView | undefined;
     if (this._lastTreeView === this._leoTreeExView) {
@@ -9996,6 +10024,7 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
  * Opens goto and focus in depending on passed options
  */
 public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknown&gt; {
+    void this.triggerBodySave(true);
     let w_panel = "";
 
     if (this._lastTreeView === this._leoTreeExView) {
@@ -10347,6 +10376,8 @@ public async navTextChange(): Promise&lt;unknown&gt; {
  * * Opens the find panel and selects all &amp; focuses on the find field.
  */
 public startSearch(): void {
+
+    void this.triggerBodySave(true);
 
     // already instantiated &amp; shown ?
     let w_panel: vscode.WebviewView | undefined;
@@ -11089,6 +11120,7 @@ set leoCanGoNext(p_value: boolean) {
 * @returns the promise started after it's done creating the frame and commander
 */
 public async newLeoFile(): Promise&lt;unknown&gt; {
+    await this.triggerBodySave(true);
 
     this.showBodyIfClosed = true;
     this.showOutlineIfClosed = true;
@@ -17183,6 +17215,19 @@ u {
 &lt;/body&gt;
 
 &lt;/html&gt;</t>
+<t tx="felix.20240303150445.1">/**
+ * 'LeoID is ready' state represent the validity of current LeoID
+ */
+private _leoIdReady: boolean = true;
+get leoIdReady(): boolean {
+    return this._leoIdReady;
+}
+set leoIdReady(p_value: boolean) {
+    this._leoIdReady = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_READY, p_value);
+}
+
+</t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.

@@ -1124,75 +1124,29 @@ export class LeoApp {
         verbose: boolean = true
     ): Promise<string> {
         this.leoID = '';
-
         g.assert(this === g.app);
-
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        // if (g.unitTesting) {
-        //     this.leoID = "unittestid";
-        // }
-
-        let w_userName = ''; // = "TestUserName";
-
-        // 1 - set leoID from configuration settings
-        if (!this.leoID && vscode && vscode.workspace) {
-            w_userName = vscode.workspace
-                .getConfiguration(Constants.CONFIG_NAME)
-                .get(
-                    Constants.CONFIG_NAMES.LEO_ID,
-                    Constants.CONFIG_DEFAULTS.LEO_ID
-                );
-            if (w_userName) {
-                this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
+        const table = [this.setIDFromConfigSetting, this.setIDFromFile, this.setIDFromEnv];
+        for (const func of table) {
+            await func.bind(this)(verbose);
+            if (this.leoID) {
+                return this.leoID;
             }
         }
-
-        // 2 - Set leoID from environment
-        if (!this.leoID && os && os.userInfo) {
-            w_userName = os.userInfo().username;
-            if (w_userName) {
-                this.leoID = this.cleanLeoID(
-                    w_userName,
-                    'os.userInfo().username'
-                );
+        if (useDialog) {
+            // LeoJS : utils.getIdFromDialog replaces g.
+            await this.setIdFromDialog();
+            if (this.leoID) {
+                await this.setIDFile();
             }
-        }
 
-        // 3 - Set leoID from user dialog if allowed
-        if (!this.leoID && useDialog) {
-            const w_id = await utils.getIdFromDialog();
-            this.leoID = this.cleanLeoID(w_id, '');
-            // TODO : FINISH ISOLATION! separate VSCODE from Leo!
-            if (this.leoID && vscode && vscode.workspace) {
-                const w_vscodeConfig = vscode.workspace.getConfiguration(
-                    Constants.CONFIG_NAME
-                );
-
-                if (
-                    w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
-                        .defaultValue === this.leoID
-                ) {
-                    // Set as undefined - same as default
-                    await w_vscodeConfig.update(
-                        Constants.CONFIG_NAMES.LEO_ID,
-                        undefined,
-                        true
-                    );
-                } else {
-                    // Set as value which is not default
-                    await w_vscodeConfig.update(
-                        Constants.CONFIG_NAMES.LEO_ID,
-                        this.leoID,
-                        true
-                    );
-                }
-            }
         }
         if (!this.leoID) {
-            // throw new Error("Could not get Leo ID");
+            // TODO : THUS PREVENT LEOREADY AND LEOIDREADY
             this.leoID = 'None';
         }
+
         return this.leoID;
     }
 
@@ -1230,6 +1184,157 @@ export class LeoApp {
         return id_;
     }
 
+    //@+node:felix.20240303184439.1: *5* app.setIDFromConfigSetting
+    public setIDFromConfigSetting(verbose: boolean): Promise<void> {
+        let w_userName = '';
+        // 1 - set leoID from configuration settings
+        if (!this.leoID && vscode && vscode.workspace) {
+            w_userName = vscode.workspace
+                .getConfiguration(Constants.CONFIG_NAME)
+                .get(
+                    Constants.CONFIG_NAMES.LEO_ID,
+                    Constants.CONFIG_DEFAULTS.LEO_ID
+                );
+            if (w_userName) {
+                this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
+            }
+        }
+        return Promise.resolve();
+    }
+    //@+node:felix.20240303184448.1: *5* app.setIDFromFile
+    /** 
+     * Attempt to set g.app.leoID from leoID.txt.
+     */
+    public async setIDFromFile(verbose: boolean): Promise<void> {
+        const tag = ".leoID.txt";
+        for (const theDir of [this.homeLeoDir, this.globalConfigDir, this.loadDir]) {
+            if (!theDir) {
+                continue;  // Do not use the current directory!
+            }
+            const fn = g.os_path_join(theDir, tag);
+            try {
+                const exists = await g.os_path_exists(fn);
+                if (!exists) {
+                    continue;
+                }
+                // * Desktop
+                let s = await g.readFileIntoUnicodeString(fn);
+                if (!s) {
+                    continue;
+                }
+                // #1404: Ensure valid ID.
+                // cleanLeoID raises a warning dialog.
+                const id_ = this.cleanLeoID(s, tag).split('\n')[0].trim(); // get first line
+                if (id_.length > 2) {
+                    this.leoID = id_;
+                    return;
+                }
+
+            } catch (exception) {
+                g.error('unexpected exception in app.setLeoID');
+                g.es_exception(exception);
+            }
+        }
+    }
+    //@+node:felix.20240303184457.1: *5* app.setIDFromEnv
+    public setIDFromEnv(verbose: boolean): Promise<void> {
+        return Promise.resolve();
+    }
+    //@+node:felix.20240303184507.1: *5* app.setIdFromDialog
+    /**
+     * Get leoID from a VSCode dialog.
+     */
+    public async setIdFromDialog(): Promise<void> {
+
+        // Get the id, making sure it is at least three characters long.
+
+        const w_id = await utils.getIdFromDialog();
+
+        this.leoID = this.cleanLeoID(w_id, '');
+
+        // * ORIGINAL LEO RETRIED 3 TIMES AND THEN QUIT IF NOT VALID !
+        // attempt = 0
+        // id_ = None
+        // while attempt < 2:
+        //     attempt += 1
+        //     dialog = g.TkIDDialog()
+        //     dialog.run()
+        //     # #1404: Make sure the id will not corrupt the .leo file.
+        //     #        cleanLeoID raises a warning dialog.
+        //     id_ = self.cleanLeoID(dialog.val, "")
+        //     if id_ and len(id_) > 2:
+        //         break
+        // #
+        // # Put result in g.app.leoID.
+        // # Put result in g.app.leoID.
+        // # Note: For unit tests, leoTest2.py: create_app sets g.app.leoID.
+        // if not id_:
+        //     print('Leo can not start without an id.')
+        //     print('Leo will now exit')
+        //     sys.exit(1)
+        // self.leoID = id_
+        // g.blue('leoID=', repr(self.leoID), spaces=False)
+    }
+    //@+node:felix.20240303184516.1: *5* app.setIDFile
+    /** 
+     * Create leoID.txt. Also set LeoJS own leoID config setting.
+     */
+    public async setIDFile(): Promise<void> {
+        // If desktop (not browser) write to .leoID.txt file
+        if (g.isBrowser) {
+            return;
+        }
+        const tag = ".leoID.txt";
+        for (const theDir of [this.homeLeoDir, this.globalConfigDir, this.loadDir]) {
+            if (theDir) {
+                try {
+                    const fn = g.os_path_join(theDir, tag);
+
+                    // with open(fn, 'w') as f
+                    //     f.write(self.leoID)
+                    await g.writeFile(this.leoID, 'utf8', fn);
+
+                    const w_exists = await g.os_path_exists(fn);
+                    if (w_exists) {
+                        g.error('', tag, 'created in', theDir);
+                    }
+
+                    return;
+
+                }
+                catch (IOError) {
+                    //pass
+                }
+                g.error('can not create', tag, 'in', theDir)
+            }
+        }
+        // Set LeoJS vscode config 
+        if (this.leoID && vscode && vscode.workspace) {
+            const w_vscodeConfig = vscode.workspace.getConfiguration(
+                Constants.CONFIG_NAME
+            );
+
+            if (
+                w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
+                    .defaultValue === this.leoID
+            ) {
+                // Set as undefined - same as default
+                await w_vscodeConfig.update(
+                    Constants.CONFIG_NAMES.LEO_ID,
+                    undefined,
+                    true
+                );
+            } else {
+                // Set as value which is not default
+                await w_vscodeConfig.update(
+                    Constants.CONFIG_NAMES.LEO_ID,
+                    this.leoID,
+                    true
+                );
+            }
+        }
+
+    }
     //@+node:felix.20220511231737.1: *3* app.Closing
     //@+node:felix.20220511231737.2: *4* app.closeLeoWindow
     /**

@@ -679,8 +679,6 @@ export class NullGui extends LeoGui {
         // pass
     }
 
-    public setIdSetting(p_id: string): void { }
-
     public getIdFromSetting(): string {
         return '';
     }

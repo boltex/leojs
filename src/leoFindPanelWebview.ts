@@ -48,6 +48,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                     case 'gotFocus': {
+                        void this._leoUI.triggerBodySave(true);
                         void utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
                         break;
                     }
@@ -76,6 +77,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                     case 'refreshSearchConfig': {
+                        void this._leoUI.triggerBodySave(true);
                         // Leave a cycle before getting settings
                         setTimeout(() => {
                             this._leoUI.loadSearchSettings();
