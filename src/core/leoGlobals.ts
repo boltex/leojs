@@ -4288,6 +4288,19 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20240304235518.1: *3* g.IDDialog
+export function IDDialog(): Thenable<string> {
+    return vscode.window.showInputBox({
+        title: "Enter Leo id",
+        prompt: "Please enter an id that identifies you uniquely.\n(Letters and numbers only, and at least 3 characters in length)",
+        ignoreFocusOut: true,
+    }).then((id) => {
+        if (id) {
+            return id;
+        }
+        return '';
+    });
+}
 //@+node:felix.20230529144955.1: *3* g.maketrans
 export function maketrans(
     from: string,

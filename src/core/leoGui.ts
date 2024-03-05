@@ -194,12 +194,6 @@ export class LeoGui {
     ): any {
         this.oops();
     }
-    /**
-     * Create and run a dialog to get g.app.LeoID.
-     */
-    public runAskLeoIDDialog(): any {
-        this.oops();
-    }
 
     /**
      * Create and run an askOK dialog .
@@ -613,10 +607,6 @@ export class NullGui extends LeoGui {
         url: string,
         email: string
     ): Thenable<unknown> {
-        return Promise.resolve('');
-    }
-
-    public runAskLeoIDDialog(): Thenable<string> {
         return Promise.resolve('');
     }
 

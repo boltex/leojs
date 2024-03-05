@@ -232,7 +232,6 @@
 <v t="felix.20221222003636.1"><vh>navTextClear</vh></v>
 <v t="felix.20220505215924.4"><vh>startSearch</vh></v>
 <v t="felix.20220930222931.1"><vh>checkForceFindFocus</vh></v>
-<v t="felix.20220505215924.6"><vh>_inputFindPattern</vh></v>
 <v t="felix.20220505215924.7"><vh>find</vh></v>
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
@@ -280,7 +279,6 @@
 <v t="felix.20230109233154.1"><vh>focus_to_head</vh></v>
 <v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
-<v t="felix.20240304223939.1"><vh>runAskLeoIDDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
 <v t="felix.20220516005841.1"><vh>runAskYesNoCancelDialog</vh></v>
@@ -7787,7 +7785,9 @@ private _setupOpenedLeoDocument(): void {
     this.leoStates.leoChanged = c.changed;
 
     // * Startup flag
-    this.leoStates.fileOpenedReady = true;
+    if (!this.leoStates.leoIdUnset &amp;&amp; g.app.leoID !== 'None') {
+        this.leoStates.fileOpenedReady = true;
+    }
 
     this._revealType = RevealType.RevealSelect; // For initial outline 'visible' event
 
@@ -9577,8 +9577,11 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
     }];
     if (p_leoID.trim().length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_leoID)) {
         // OK not empty
-        g.app.leoID = p_leoID;
-        void g.app.setIDFile();
+        if (g.app.leoID !== p_leoID) {
+            g.app.leoID = p_leoID;
+            void g.app.setIDFile();
+        }
+
         if (g.app.nodeIndices) {
             g.app.nodeIndices.userId = p_leoID;
         }
@@ -9587,6 +9590,10 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
             if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
                 this.leoStates.leoIdUnset = false;
                 this.leoStates.leoReady = true;
+                if (g.app.windowList.length) {
+                    this.leoStates.fileOpenedReady = true;
+                    this.fullRefresh();
+                }
             } else {
                 void vscode.window.showWarningMessage("'None' is a reserved LeoID, please choose another one.");
             }
@@ -9619,7 +9626,7 @@ public getIdFromSetting(): string {
  * Start leojs if the ID is valid, and not already started.
  */
 public setLeoIDCommand(): Thenable&lt;unknown&gt; {
-    return utils.getIdFromDialog().then((p_id) =&gt; {
+    return g.IDDialog().then((p_id) =&gt; {
         p_id = p_id.trim();
         p_id = g.app.cleanLeoID(p_id, '');
         if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
@@ -9662,7 +9669,7 @@ public setLeoIDCommand(): Thenable&lt;unknown&gt; {
 public showLeoIDMessage(): void {
     void vscode.window.showInformationMessage(
         Constants.USER_MESSAGES.SET_LEO_ID_MESSAGE,
-        { modal: true, detail: "test detail string 123 testing 123" },
+        { modal: true, detail: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT },
         Constants.USER_MESSAGES.ENTER_LEO_ID
     ).then(p_chosenButton =&gt; {
         if (p_chosenButton === Constants.USER_MESSAGES.ENTER_LEO_ID) {
@@ -9834,6 +9841,7 @@ public finishStartup(): void {
     } else {
         this._setupNoOpenedLeoDocument(); // All closed now!
     }
+
     if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
         this.leoStates.leoIdUnset = false;
         this.leoStates.leoReady = true;
@@ -10389,25 +10397,6 @@ public startSearch(): void {
     }
     void vscode.commands.executeCommand(w_panelID + '.focus');
 
-}
-
-</t>
-<t tx="felix.20220505215924.6">/**
- * * Get a find pattern string input from the user
- * @param p_replace flag for doing a 'replace' instead of a 'find'
- * @returns Promise of string or undefined if cancelled
- */
-private _inputFindPattern(p_replace?: boolean, p_value?: string): Thenable&lt;string | undefined&gt; {
-    let w_title, w_prompt, w_placeHolder;
-    w_title = p_replace ? Constants.USER_MESSAGES.REPLACE_TITLE : Constants.USER_MESSAGES.SEARCH_TITLE;
-    w_prompt = p_replace ? Constants.USER_MESSAGES.REPLACE_PROMPT : Constants.USER_MESSAGES.SEARCH_PROMPT;
-    w_placeHolder = p_replace ? Constants.USER_MESSAGES.REPLACE_PLACEHOLDER : Constants.USER_MESSAGES.SEARCH_PLACEHOLDER;
-    return vscode.window.showInputBox({
-        title: w_title,
-        prompt: w_prompt,
-        value: p_value,
-        placeHolder: w_placeHolder,
-    });
 }
 
 </t>
@@ -17231,19 +17220,6 @@ get leoIdUnset(): boolean {
 set leoIdUnset(p_value: boolean) {
     this._leoIdUnset = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_UNSET, p_value);
-}
-
-</t>
-<t tx="felix.20240304223939.1">public runAskLeoIDDialog(): Thenable&lt;string&gt; {
-    return vscode.window.showInputBox({
-        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
-        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
-    }).then((p_id) =&gt; {
-        if (p_id) {
-            return p_id;
-        }
-        return '';
-    });
 }
 
 </t>

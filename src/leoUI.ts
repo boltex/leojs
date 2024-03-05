@@ -534,6 +534,7 @@ export class LeoUI extends NullGui {
         } else {
             this._setupNoOpenedLeoDocument(); // All closed now!
         }
+
         if (g.app.leoID && g.app.leoID !== 'None') {
             this.leoStates.leoIdUnset = false;
             this.leoStates.leoReady = true;
@@ -820,7 +821,9 @@ export class LeoUI extends NullGui {
         this.leoStates.leoChanged = c.changed;
 
         // * Startup flag
-        this.leoStates.fileOpenedReady = true;
+        if (!this.leoStates.leoIdUnset && g.app.leoID !== 'None') {
+            this.leoStates.fileOpenedReady = true;
+        }
 
         this._revealType = RevealType.RevealSelect; // For initial outline 'visible' event
 
@@ -4154,24 +4157,6 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Get a find pattern string input from the user
-     * @param p_replace flag for doing a 'replace' instead of a 'find'
-     * @returns Promise of string or undefined if cancelled
-     */
-    private _inputFindPattern(p_replace?: boolean, p_value?: string): Thenable<string | undefined> {
-        let w_title, w_prompt, w_placeHolder;
-        w_title = p_replace ? Constants.USER_MESSAGES.REPLACE_TITLE : Constants.USER_MESSAGES.SEARCH_TITLE;
-        w_prompt = p_replace ? Constants.USER_MESSAGES.REPLACE_PROMPT : Constants.USER_MESSAGES.SEARCH_PROMPT;
-        w_placeHolder = p_replace ? Constants.USER_MESSAGES.REPLACE_PLACEHOLDER : Constants.USER_MESSAGES.SEARCH_PLACEHOLDER;
-        return vscode.window.showInputBox({
-            title: w_title,
-            prompt: w_prompt,
-            value: p_value,
-            placeHolder: w_placeHolder,
-        });
-    }
-
-    /**
      * * Find next / previous commands
      * @param p_fromOutline
      * @param p_reverse
@@ -5395,7 +5380,7 @@ export class LeoUI extends NullGui {
     public showLeoIDMessage(): void {
         void vscode.window.showInformationMessage(
             Constants.USER_MESSAGES.SET_LEO_ID_MESSAGE,
-            { modal: true, detail: "test detail string 123 testing 123" },
+            { modal: true, detail: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT },
             Constants.USER_MESSAGES.ENTER_LEO_ID
         ).then(p_chosenButton => {
             if (p_chosenButton === Constants.USER_MESSAGES.ENTER_LEO_ID) {
@@ -5459,7 +5444,7 @@ export class LeoUI extends NullGui {
      * Start leojs if the ID is valid, and not already started.
      */
     public setLeoIDCommand(): Thenable<unknown> {
-        return this.runAskLeoIDDialog().then((p_id) => {
+        return g.IDDialog().then((p_id) => {
             p_id = p_id.trim();
             p_id = g.app.cleanLeoID(p_id, '');
             if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
@@ -5489,8 +5474,11 @@ export class LeoUI extends NullGui {
         }];
         if (p_leoID.trim().length >= 3 && utils.isAlphaNumeric(p_leoID)) {
             // OK not empty
-            g.app.leoID = p_leoID;
-            void g.app.setIDFile();
+            if (g.app.leoID !== p_leoID) {
+                g.app.leoID = p_leoID;
+                void g.app.setIDFile();
+            }
+
             if (g.app.nodeIndices) {
                 g.app.nodeIndices.userId = p_leoID;
             }
@@ -5499,6 +5487,10 @@ export class LeoUI extends NullGui {
                 if (g.app.leoID && g.app.leoID !== 'None') {
                     this.leoStates.leoIdUnset = false;
                     this.leoStates.leoReady = true;
+                    if (g.app.windowList.length) {
+                        this.leoStates.fileOpenedReady = true;
+                        this.fullRefresh();
+                    }
                 } else {
                     void vscode.window.showWarningMessage("'None' is a reserved LeoID, please choose another one.");
                 }
@@ -5629,18 +5621,6 @@ export class LeoUI extends NullGui {
                 modal: true,
                 detail: theCopyright
             });
-    }
-
-    public runAskLeoIDDialog(): Thenable<string> {
-        return vscode.window.showInputBox({
-            title: Constants.USER_MESSAGES.ENTER_LEO_ID,
-            prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
-        }).then((p_id) => {
-            if (p_id) {
-                return p_id;
-            }
-            return '';
-        });
     }
 
     public runAskOkDialog(

@@ -1135,12 +1135,10 @@ export class LeoApp {
             }
         }
         if (useDialog) {
-            // LeoJS : utils.getIdFromDialog replaces g.TkIDDialogis 
             await this.setIdFromDialog();
             if (this.leoID) {
                 await this.setIDFile();
             }
-
         }
         if (!this.leoID) {
             // LeoJS UI will block all commands at startup if LeoID is None/Falsy.
@@ -1248,7 +1246,7 @@ export class LeoApp {
 
         // Get the id, making sure it is at least three characters long.
 
-        const w_id = await this.gui.runAskLeoIDDialog();
+        const w_id = await g.IDDialog();
 
         this.leoID = this.cleanLeoID(w_id, '');
 
@@ -1279,11 +1277,38 @@ export class LeoApp {
     /** 
      * Create leoID.txt. Also set LeoJS own leoID config setting.
      */
-    public async setIDFile(): Promise<void> {
-        // If desktop (not browser) write to .leoID.txt file
+    public async setIDFile(): Promise<boolean> {
+
         if (g.isBrowser) {
-            return;
+            // Set LeoJS vscode config ONLY IF ".leoID.txt" NOT WRITTEN
+            // TODO : SEPARATE VSCODE AND LEO !
+            if (this.leoID && vscode && vscode.workspace) {
+                const w_vscodeConfig = vscode.workspace.getConfiguration(
+                    Constants.CONFIG_NAME
+                );
+
+                if (
+                    w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
+                        .defaultValue === this.leoID
+                ) {
+                    // Set as undefined - same as default
+                    await w_vscodeConfig.update(
+                        Constants.CONFIG_NAMES.LEO_ID,
+                        undefined,
+                        true
+                    );
+                } else {
+                    // Set as value which is not default
+                    await w_vscodeConfig.update(
+                        Constants.CONFIG_NAMES.LEO_ID,
+                        this.leoID,
+                        true
+                    );
+                }
+            }
+            return false;
         }
+        // If desktop (not browser) write to .leoID.txt file
         const tag = ".leoID.txt";
         for (const theDir of [this.homeLeoDir, this.globalConfigDir, this.loadDir]) {
             if (theDir) {
@@ -1299,41 +1324,17 @@ export class LeoApp {
                         g.error('', tag, 'created in', theDir);
                     }
 
-                    return;
+                    return !!w_exists;
 
                 }
                 catch (IOError) {
                     //pass
                 }
-                g.error('can not create', tag, 'in', theDir)
-            }
-        }
-        // Set LeoJS vscode config 
-        if (this.leoID && vscode && vscode.workspace) {
-            const w_vscodeConfig = vscode.workspace.getConfiguration(
-                Constants.CONFIG_NAME
-            );
-
-            if (
-                w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!
-                    .defaultValue === this.leoID
-            ) {
-                // Set as undefined - same as default
-                await w_vscodeConfig.update(
-                    Constants.CONFIG_NAMES.LEO_ID,
-                    undefined,
-                    true
-                );
-            } else {
-                // Set as value which is not default
-                await w_vscodeConfig.update(
-                    Constants.CONFIG_NAMES.LEO_ID,
-                    this.leoID,
-                    true
-                );
+                g.error('can not create', tag, 'in', theDir);
             }
         }
 
+        return false;
     }
     //@+node:felix.20220511231737.1: *3* app.Closing
     //@+node:felix.20220511231737.2: *4* app.closeLeoWindow
