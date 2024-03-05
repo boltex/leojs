@@ -535,10 +535,10 @@ export class LeoUI extends NullGui {
             this._setupNoOpenedLeoDocument(); // All closed now!
         }
         if (g.app.leoID && g.app.leoID !== 'None') {
-            this.leoStates.leoIdReady = true;
+            this.leoStates.leoIdUnset = false;
             this.leoStates.leoReady = true;
         } else {
-            this.leoStates.leoIdReady = false; // Block most UI & commands until 'setLeoIDCommand' succeeds.
+            this.leoStates.leoIdUnset = true; // Block most UI & commands until 'setLeoIDCommand' succeeds.
         }
         this.leoStates.leojsStartupDone = true;
 
@@ -5459,7 +5459,7 @@ export class LeoUI extends NullGui {
      * Start leojs if the ID is valid, and not already started.
      */
     public setLeoIDCommand(): Thenable<unknown> {
-        return utils.getIdFromDialog().then((p_id) => {
+        return this.runAskLeoIDDialog().then((p_id) => {
             p_id = p_id.trim();
             p_id = g.app.cleanLeoID(p_id, '');
             if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
@@ -5495,9 +5495,9 @@ export class LeoUI extends NullGui {
                 g.app.nodeIndices.userId = p_leoID;
             }
             // If LeoJS had finish its startup without valid LeoID, set ready flags!
-            if (!this.leoStates.leoReady && this.leoStates.leojsStartupDone && !this.leoStates.leoIdReady) {
+            if (!this.leoStates.leoReady && this.leoStates.leojsStartupDone && this.leoStates.leoIdUnset) {
                 if (g.app.leoID && g.app.leoID !== 'None') {
-                    this.leoStates.leoIdReady = true;
+                    this.leoStates.leoIdUnset = false;
                     this.leoStates.leoReady = true;
                 } else {
                     void vscode.window.showWarningMessage("'None' is a reserved LeoID, please choose another one.");
@@ -5629,6 +5629,18 @@ export class LeoUI extends NullGui {
                 modal: true,
                 detail: theCopyright
             });
+    }
+
+    public runAskLeoIDDialog(): Thenable<string> {
+        return vscode.window.showInputBox({
+            title: Constants.USER_MESSAGES.ENTER_LEO_ID,
+            prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
+        }).then((p_id) => {
+            if (p_id) {
+                return p_id;
+            }
+            return '';
+        });
     }
 
     public runAskOkDialog(

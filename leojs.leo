@@ -280,6 +280,7 @@
 <v t="felix.20230109233154.1"><vh>focus_to_head</vh></v>
 <v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
+<v t="felix.20240304223939.1"><vh>runAskLeoIDDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
 <v t="felix.20220516005841.1"><vh>runAskYesNoCancelDialog</vh></v>
@@ -422,7 +423,6 @@
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20230416212643.1"><vh>getDurationSeconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
-<v t="felix.20220417151556.1"><vh>getIdFromDialog</vh></v>
 <v t="felix.20220201195806.1"><vh>isAlphaNumeric</vh></v>
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
 <v t="felix.20211007214455.1"><vh>isHexColor</vh></v>
@@ -1565,8 +1565,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
     */
-    void vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_ID_READY, true);
-
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
@@ -2729,7 +2727,7 @@ public static CONTEXT_FLAGS = {
     // Main flags for connection and opened file
     LEO_STARTUP_DONE: "leojsStartupDone",
     LEO_OPENING_FILE: "leojsOpeningFile",
-    LEO_ID_READY: "leojsIdReady",
+    LEO_ID_UNSET: "leojsIdUnset",
     LEO_READY: "leojsReady", // Extension activated and classes created and ready
     TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
     TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
@@ -5929,22 +5927,22 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   {
     "view": "leojsOutline",
     "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdReady"
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdUnset"
   },
   {
     "view": "leojsOutlineExplorer",
     "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdReady"
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdUnset"
   },
   {
     "view": "leojsOutline",
     "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdReady"
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdUnset"
   },
   {
     "view": "leojsOutlineExplorer",
     "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdReady"
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdUnset"
   },
   {
     "view": "leojsOutline",
@@ -9585,9 +9583,9 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
             g.app.nodeIndices.userId = p_leoID;
         }
         // If LeoJS had finish its startup without valid LeoID, set ready flags!
-        if (!this.leoStates.leoReady &amp;&amp; this.leoStates.leojsStartupDone &amp;&amp; !this.leoStates.leoIdReady) {
+        if (!this.leoStates.leoReady &amp;&amp; this.leoStates.leojsStartupDone &amp;&amp; this.leoStates.leoIdUnset) {
             if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
-                this.leoStates.leoIdReady = true;
+                this.leoStates.leoIdUnset = false;
                 this.leoStates.leoReady = true;
             } else {
                 void vscode.window.showWarningMessage("'None' is a reserved LeoID, please choose another one.");
@@ -9837,26 +9835,13 @@ public finishStartup(): void {
         this._setupNoOpenedLeoDocument(); // All closed now!
     }
     if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
-        this.leoStates.leoIdReady = true;
+        this.leoStates.leoIdUnset = false;
         this.leoStates.leoReady = true;
     } else {
-        this.leoStates.leoIdReady = false; // Block most UI &amp; commands until 'setLeoIDCommand' succeeds.
+        this.leoStates.leoIdUnset = true; // Block most UI &amp; commands until 'setLeoIDCommand' succeeds.
     }
     this.leoStates.leojsStartupDone = true;
 
-}
-
-</t>
-<t tx="felix.20220417151556.1">export function getIdFromDialog(): Thenable&lt;string&gt; {
-    return vscode.window.showInputBox({
-        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
-        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
-    }).then((p_id) =&gt; {
-        if (p_id) {
-            return p_id;
-        }
-        return '';
-    });
 }
 
 </t>
@@ -17237,15 +17222,28 @@ u {
 
 &lt;/html&gt;</t>
 <t tx="felix.20240303150445.1">/**
- * 'LeoID is ready' state represent the validity of current LeoID
+ * 'LeoID is unset' state for an empty/unset LeoID state preventing startup
  */
-private _leoIdReady: boolean = true;
-get leoIdReady(): boolean {
-    return this._leoIdReady;
+private _leoIdUnset: boolean = false;
+get leoIdUnset(): boolean {
+    return this._leoIdUnset;
 }
-set leoIdReady(p_value: boolean) {
-    this._leoIdReady = p_value;
-    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_READY, p_value);
+set leoIdUnset(p_value: boolean) {
+    this._leoIdUnset = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_UNSET, p_value);
+}
+
+</t>
+<t tx="felix.20240304223939.1">public runAskLeoIDDialog(): Thenable&lt;string&gt; {
+    return vscode.window.showInputBox({
+        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
+        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
+    }).then((p_id) =&gt; {
+        if (p_id) {
+            return p_id;
+        }
+        return '';
+    });
 }
 
 </t>

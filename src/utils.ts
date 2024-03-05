@@ -332,18 +332,6 @@ export function getFileFromPath(p_path: string): string {
     return p_path.replace(/^.*[\\\/]/, '');
 }
 
-export function getIdFromDialog(): Thenable<string> {
-    return vscode.window.showInputBox({
-        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
-        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
-    }).then((p_id) => {
-        if (p_id) {
-            return p_id;
-        }
-        return '';
-    });
-}
-
 export function isAlphaNumeric(str: string): boolean {
     let code: number;
     let i: number;

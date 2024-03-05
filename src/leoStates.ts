@@ -39,15 +39,15 @@ export class LeoStates {
     }
 
     /**
-     * 'LeoID is ready' state represent the validity of current LeoID
+     * 'LeoID is unset' state for an empty/unset LeoID state preventing startup
      */
-    private _leoIdReady: boolean = true;
-    get leoIdReady(): boolean {
-        return this._leoIdReady;
+    private _leoIdUnset: boolean = false;
+    get leoIdUnset(): boolean {
+        return this._leoIdUnset;
     }
-    set leoIdReady(p_value: boolean) {
-        this._leoIdReady = p_value;
-        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_READY, p_value);
+    set leoIdUnset(p_value: boolean) {
+        this._leoIdUnset = p_value;
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_UNSET, p_value);
     }
 
     /**

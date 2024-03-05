@@ -1135,7 +1135,7 @@ export class LeoApp {
             }
         }
         if (useDialog) {
-            // LeoJS : utils.getIdFromDialog replaces g.
+            // LeoJS : utils.getIdFromDialog replaces g.TkIDDialogis 
             await this.setIdFromDialog();
             if (this.leoID) {
                 await this.setIDFile();
@@ -1143,7 +1143,7 @@ export class LeoApp {
 
         }
         if (!this.leoID) {
-            // TODO : THUS PREVENT LEOREADY AND LEOIDREADY
+            // LeoJS UI will block all commands at startup if LeoID is None/Falsy.
             this.leoID = 'None';
         }
 
@@ -1248,7 +1248,7 @@ export class LeoApp {
 
         // Get the id, making sure it is at least three characters long.
 
-        const w_id = await utils.getIdFromDialog();
+        const w_id = await this.gui.runAskLeoIDDialog();
 
         this.leoID = this.cleanLeoID(w_id, '');
 

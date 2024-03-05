@@ -1114,22 +1114,22 @@
       {
         "view": "leojsOutline",
         "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-        "when": "!leojsReady && leojsStartupDone && leojsIdReady"
+        "when": "!leojsReady && leojsStartupDone && !leojsIdUnset"
       },
       {
         "view": "leojsOutlineExplorer",
         "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-        "when": "!leojsReady && leojsStartupDone && leojsIdReady"
+        "when": "!leojsReady && leojsStartupDone && !leojsIdUnset"
       },
       {
         "view": "leojsOutline",
         "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
-        "when": "!leojsReady && leojsStartupDone && !leojsIdReady"
+        "when": "!leojsReady && leojsStartupDone && leojsIdUnset"
       },
       {
         "view": "leojsOutlineExplorer",
         "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
-        "when": "!leojsReady && leojsStartupDone && !leojsIdReady"
+        "when": "!leojsReady && leojsStartupDone && leojsIdUnset"
       },
       {
         "view": "leojsOutline",

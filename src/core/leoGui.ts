@@ -616,6 +616,10 @@ export class NullGui extends LeoGui {
         return Promise.resolve('');
     }
 
+    public runAskLeoIDDialog(): Thenable<string> {
+        return Promise.resolve('');
+    }
+
     public runOpenFileDialog(
         c: Commands,
         title: string,
@@ -669,18 +673,6 @@ export class NullGui extends LeoGui {
 
     public createLeoFrame(c: Commands, title: string): LeoFrame {
         return new LeoFrame(c, title, this);
-    }
-
-    public showLeoIDMessage(): void {
-        // pass
-    }
-
-    public getIdFromSetting(): string {
-        return '';
-    }
-
-    public getIdFromDialog(): Thenable<string> {
-        return Promise.resolve('');
     }
 
     public ensure_commander_visible(c: Commands): void { }
