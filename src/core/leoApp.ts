@@ -1236,6 +1236,15 @@ export class LeoApp {
     }
     //@+node:felix.20240303184457.1: *5* app.setIDFromEnv
     public setIDFromEnv(verbose: boolean): Promise<void> {
+        if (os && os.userInfo) {
+            const userName = os.userInfo().username;
+            if (userName) {
+                this.leoID = this.cleanLeoID(
+                    userName,
+                    'os.userInfo().username'
+                );
+            }
+        }
         return Promise.resolve();
     }
     //@+node:felix.20240303184507.1: *5* app.setIdFromDialog
