@@ -3724,7 +3724,6 @@ import { UnlProvider } from "./unlProvider";
     this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
     // Set confirm on close to 'never' on startup 
     void this.checkConfirmBeforeClose();
-    void this.showLogPane();
 }
 
 </t>
@@ -7818,7 +7817,7 @@ private _setupOpenedLeoDocument(): void {
     }
 
     this.loadSearchSettings();
-    if (this.config.showUnlOnStatusBar) {
+    if (this.config.showUnlOnStatusBar &amp;&amp; !this.leoStates.leoIdUnset &amp;&amp; g.app.leoID !== 'None') {
         this._leoStatusBar?.show();
     }
 }
@@ -9588,9 +9587,13 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
         // If LeoJS had finish its startup without valid LeoID, set ready flags!
         if (!this.leoStates.leoReady &amp;&amp; this.leoStates.leojsStartupDone &amp;&amp; this.leoStates.leoIdUnset) {
             if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
+                void this.showLogPane();
                 this.leoStates.leoIdUnset = false;
                 this.leoStates.leoReady = true;
                 if (g.app.windowList.length) {
+                    if (this.config.showUnlOnStatusBar) {
+                        this._leoStatusBar?.show();
+                    }
                     this.leoStates.fileOpenedReady = true;
                     this.fullRefresh();
                 }
@@ -9843,6 +9846,7 @@ public finishStartup(): void {
     }
 
     if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
+        void this.showLogPane();
         this.leoStates.leoIdUnset = false;
         this.leoStates.leoReady = true;
     } else {

@@ -226,7 +226,7 @@ export class LeoUI extends NullGui {
     public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
-    private _leoLogPane: vscode.OutputChannel;
+    private _leoLogPane: vscode.OutputChannel | undefined;
 
     // * Status Bar
     private _leoStatusBar: LeoStatusBar | undefined;
@@ -273,10 +273,6 @@ export class LeoUI extends NullGui {
         this.isNullGui = false;
 
         this.idleTimeClass = IdleTime;
-
-        // * Log pane instantiation
-        this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
-        this._context.subscriptions.push(this._leoLogPane);
 
         // * Setup States
         this.leoStates = new LeoStates(_context, this);
@@ -369,7 +365,6 @@ export class LeoUI extends NullGui {
         this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
         // Set confirm on close to 'never' on startup 
         void this.checkConfirmBeforeClose();
-        void this.showLogPane();
     }
 
     /**
@@ -536,6 +531,7 @@ export class LeoUI extends NullGui {
         }
 
         if (g.app.leoID && g.app.leoID !== 'None') {
+            void this.showLogPane();
             this.leoStates.leoIdUnset = false;
             this.leoStates.leoReady = true;
         } else {
@@ -698,11 +694,15 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Adds a message string to LeoJS log pane. Used when leoBridge receives an async 'log' command.
+     * * Adds a message string to LeoJS log pane.
      * @param p_message The string to be added in the log
      */
     public addLogPaneEntry(p_message: string): void {
-        this._leoLogPane.appendLine(p_message);
+        if (this._leoLogPane) {
+            this._leoLogPane.appendLine(p_message);
+        } else {
+            g.logBuffer.push(p_message);
+        }
     }
 
     /**
@@ -713,6 +713,17 @@ export class LeoUI extends NullGui {
             this._leoLogPane.show(!p_focus); // use flag to preserve focus
             return Promise.resolve(true);
         } else {
+            // * Log pane instantiation
+            this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+            this._context.subscriptions.push(this._leoLogPane);
+            if (g.logBuffer.length && g.app.leoID && g.app.leoID !== 'None') {
+                const buffer = g.logBuffer;
+                while (buffer.length > 0) {
+                    // Pop the bottom one and append it
+                    g.es_print(buffer.shift()!);
+                }
+            }
+            this._leoLogPane.show(!p_focus);
             return Promise.resolve(undefined); // if cancelled
         }
     }
@@ -854,7 +865,7 @@ export class LeoUI extends NullGui {
         }
 
         this.loadSearchSettings();
-        if (this.config.showUnlOnStatusBar) {
+        if (this.config.showUnlOnStatusBar && !this.leoStates.leoIdUnset && g.app.leoID !== 'None') {
             this._leoStatusBar?.show();
         }
     }
@@ -5485,9 +5496,13 @@ export class LeoUI extends NullGui {
             // If LeoJS had finish its startup without valid LeoID, set ready flags!
             if (!this.leoStates.leoReady && this.leoStates.leojsStartupDone && this.leoStates.leoIdUnset) {
                 if (g.app.leoID && g.app.leoID !== 'None') {
+                    void this.showLogPane();
                     this.leoStates.leoIdUnset = false;
                     this.leoStates.leoReady = true;
                     if (g.app.windowList.length) {
+                        if (this.config.showUnlOnStatusBar) {
+                            this._leoStatusBar?.show();
+                        }
                         this.leoStates.fileOpenedReady = true;
                         this.fullRefresh();
                     }

@@ -212,6 +212,7 @@ export class LeoApp {
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.
+    public LeoIDWarningShown = false; // LEOJS : to prevent second warning. (Original would have exited before)
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
     public lossage: any[] = []; // List of last 100 keystrokes.
     public paste_c: any = null; // The commander that pasted the last outline.
@@ -1091,7 +1092,7 @@ export class LeoApp {
         // Is this the first possible valid output to log pane?
         // If so empty the log Buffer first.
         const buffer = g.logBuffer;
-        if (buffer.length) {
+        if (buffer.length && app.leoID && app.leoID !== 'None') { // * Modified for LeoJS
             while (buffer.length > 0) {
                 // Pop the bottom one and append it
                 g.es_print(buffer.shift()!);
@@ -1168,16 +1169,19 @@ export class LeoApp {
         }
         if (id_.length < 3) {
             id_ = '';
-            void vscode.window.showInformationMessage(
-                `Invalid Leo ID: ${tag}`,
-                {
-                    detail:
-                        `Invalid Leo ID: ${old_id}\n\n` +
-                        'Your id should contain only letters and numbers\n' +
-                        'and must be at least 3 characters in length.',
-                    modal: true,
-                }
-            );
+            if (!this.LeoIDWarningShown) {
+                this.LeoIDWarningShown = true;
+                void vscode.window.showInformationMessage(
+                    `Invalid Leo ID: ${tag}`,
+                    {
+                        detail:
+                            `Invalid Leo ID: ${old_id}\n\n` +
+                            'Your id should contain only letters and numbers\n' +
+                            'and must be at least 3 characters in length.',
+                        modal: true,
+                    }
+                );
+            }
         }
         return id_;
     }
@@ -1254,10 +1258,10 @@ export class LeoApp {
     public async setIdFromDialog(): Promise<void> {
 
         // Get the id, making sure it is at least three characters long.
-        let attempt = 0
+        let attempt = 0;
         let id_ = "";
         while (attempt < 2) {
-            attempt += 1
+            attempt += 1;
             const dialogVal = await g.IDDialog();
             // #1404: Make sure the id will not corrupt the .leo file.
             //        cleanLeoID raises a warning dialog.
@@ -1276,7 +1280,9 @@ export class LeoApp {
             // sys.exit(1) 
         }
         this.leoID = id_;
-        g.blue('leoID=', this.leoID);
+        if (this.leoID) {
+            g.blue('leoID=', this.leoID);
+        }
 
     }
     //@+node:felix.20240303184516.1: *5* app.setIDFile
