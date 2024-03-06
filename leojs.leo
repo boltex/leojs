@@ -4922,7 +4922,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.prev",
   "category": "Leojs",
   "title": "Prev",
-  "enablement": "leojsCanGoBack",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoBack",
   "icon": {
     "light": "resources/light/prev.svg",
     "dark": "resources/dark/prev.svg"
@@ -4932,7 +4932,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.prevFromOutline",
   "category": "Leojs",
   "title": "Prev",
-  "enablement": "leojsCanGoBack",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoBack",
   "icon": {
     "light": "resources/light/prev.svg",
     "dark": "resources/dark/prev.svg"
@@ -4942,7 +4942,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.next",
   "category": "Leojs",
   "title": "Next",
-  "enablement": "leojsCanGoNext",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoNext",
   "icon": {
     "light": "resources/light/next.svg",
     "dark": "resources/dark/next.svg"
@@ -4952,7 +4952,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.nextFromOutline",
   "category": "Leojs",
   "title": "Next",
-  "enablement": "leojsCanGoNext",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoNext",
   "icon": {
     "light": "resources/light/next.svg",
     "dark": "resources/dark/next.svg"
@@ -5424,7 +5424,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.promoteSelection",
   "category": "Leojs",
   "title": "Promote Children",
-  "enablement": "leojsCanPromote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanPromote",
   "icon": {
     "light": "resources/light/promote.svg",
     "dark": "resources/dark/promote.svg"
@@ -5434,7 +5434,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.promoteSelectionFromOutline",
   "category": "Leojs",
   "title": "Promote Children",
-  "enablement": "leojsCanPromote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanPromote",
   "icon": {
     "light": "resources/light/promote.svg",
     "dark": "resources/dark/promote.svg"
@@ -5454,7 +5454,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.demoteSelection",
   "category": "Leojs",
   "title": "Demote Siblings",
-  "enablement": "leojsCanDemote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanDemote",
   "icon": {
     "light": "resources/light/demote.svg",
     "dark": "resources/dark/demote.svg"
@@ -5464,7 +5464,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.demoteSelectionFromOutline",
   "category": "Leojs",
   "title": "Demote Siblings",
-  "enablement": "leojsCanDemote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanDemote",
   "icon": {
     "light": "resources/light/demote.svg",
     "dark": "resources/dark/demote.svg"
@@ -5602,7 +5602,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.undo",
   "category": "Leojs",
   "title": "Undo",
-  "enablement": "leojsCanUndo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanUndo",
   "icon": {
     "light": "resources/light/undo.svg",
     "dark": "resources/dark/undo.svg"
@@ -5612,7 +5612,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.undoFromOutline",
   "category": "Leojs",
   "title": "Undo",
-  "enablement": "leojsCanUndo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanUndo",
   "icon": {
     "light": "resources/light/undo.svg",
     "dark": "resources/dark/undo.svg"
@@ -5622,7 +5622,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.redo",
   "category": "Leojs",
   "title": "Redo",
-  "enablement": "leojsCanRedo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanRedo",
   "icon": {
     "light": "resources/light/redo.svg",
     "dark": "resources/dark/redo.svg"
@@ -5632,7 +5632,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.redoFromOutline",
   "category": "Leojs",
   "title": "Redo",
-  "enablement": "leojsCanRedo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanRedo",
   "icon": {
     "light": "resources/light/redo.svg",
     "dark": "resources/dark/redo.svg"

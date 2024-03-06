@@ -1133,7 +1133,9 @@ export class LeoApp {
         g.assert(this === g.app);
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        const table = [this.setIDFromConfigSetting, this.setIDFromFile, this.setIDFromEnv];
+        const table = [this.setIDFromConfigSetting, this.setIDFromFile];
+        // const table = [this.setIDFromConfigSetting, this.setIDFromFile, this.setIDFromEnv];
+
         for (const func of table) {
             await func.bind(this)(verbose);
             if (this.leoID) {
