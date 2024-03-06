@@ -4119,6 +4119,9 @@ export const warning = es_print;
 
 //@+node:felix.20211104212741.1: *3* g.es
 export function es(...args: any[]): void {
+    if (app && app.logIsLocked) {
+        return;
+    }
     let s: string = '';
     args.forEach((p_entry) => {
         if (s) {

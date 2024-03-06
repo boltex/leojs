@@ -1086,16 +1086,21 @@ export class LeoApp {
         }
         */
         // * Modified for leojs SINGLE log pane
-        g.es_print(app.signon);
-        g.es_print(app.signon1);
+        // g.es_print(app.signon);
+        // g.es_print(app.signon1);
 
         // Is this the first possible valid output to log pane?
         // If so empty the log Buffer first.
         const buffer = g.logBuffer;
-        if (buffer.length && app.leoID && app.leoID !== 'None') { // * Modified for LeoJS
-            while (buffer.length > 0) {
+        buffer.unshift(app.signon1);
+        buffer.unshift(app.signon);
+
+        if (buffer.length) {
+            let len = buffer.length; // Only do loop once if logPano not visible
+            while (len > 0) {
                 // Pop the bottom one and append it
                 g.es_print(buffer.shift()!);
+                len = len - 1;
             }
         }
     }
@@ -1208,6 +1213,9 @@ export class LeoApp {
      * Attempt to set g.app.leoID from leoID.txt.
      */
     public async setIDFromFile(verbose: boolean): Promise<void> {
+        if (g.isBrowser) {
+            return;
+        }
         const tag = ".leoID.txt";
         for (const theDir of [this.homeLeoDir, this.globalConfigDir, this.loadDir]) {
             if (!theDir) {
@@ -1347,6 +1355,27 @@ export class LeoApp {
         }
 
         return false;
+    }
+    //@+node:testttt.20240305234320.1: *4* app.setLog, lockLog, unlocklog
+    // def setLog(self, log: Any) -> None:
+    //     """set the frame to which log messages will go"""
+    //     if not self.logIsLocked:
+    //         self.log = log
+
+    /**
+     * Disable changes to the log
+     */
+    public lockLog(): void {
+        // print("app.lockLog:")
+        this.logIsLocked = true;
+    }
+
+    /**
+     * Enable changes to the log
+     */
+    public unlockLog(): void {
+        // print("app.unlockLog:")
+        this.logIsLocked = false;
     }
     //@+node:felix.20220511231737.1: *3* app.Closing
     //@+node:felix.20220511231737.2: *4* app.closeLeoWindow
@@ -2698,9 +2727,9 @@ export class LoadManager {
         const c = g.app.newCommander(fn);
         const fc = c.fileCommands;
 
-        //const frame = c.frame;
+        // const frame = c.frame;
         // frame.log.enable(false);
-        // g.app.lockLog();
+        g.app.lockLog();
 
         let ok: VNode | undefined;
         let g_element;
@@ -2728,7 +2757,7 @@ export class LoadManager {
         } catch (p_err) {
             ok = undefined;
         }
-        // g.app.unlockLog();
+        g.app.unlockLog();
         g.app.gui = oldGui;
 
         return ok ? c : undefined;

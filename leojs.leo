@@ -3629,10 +3629,6 @@ import { UnlProvider } from "./unlProvider";
 
     this.idleTimeClass = IdleTime;
 
-    // * Log pane instantiation
-    this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
-    this._context.subscriptions.push(this._leoLogPane);
-
     // * Setup States
     this.leoStates = new LeoStates(_context, this);
 
@@ -3911,7 +3907,7 @@ export class LeoUI extends NullGui {
     public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
-    private _leoLogPane: vscode.OutputChannel;
+    private _leoLogPane: vscode.OutputChannel | undefined;
 
     // * Status Bar
     private _leoStatusBar: LeoStatusBar | undefined;
@@ -12207,11 +12203,15 @@ private _setTreeViewTitle(p_title?: string): void {
 </t>
 <t tx="felix.20220920001018.1"></t>
 <t tx="felix.20220920001018.2">/**
- * * Adds a message string to LeoJS log pane. Used when leoBridge receives an async 'log' command.
+ * * Adds a message string to LeoJS log pane.
  * @param p_message The string to be added in the log
  */
 public addLogPaneEntry(p_message: string): void {
-    this._leoLogPane.appendLine(p_message);
+    if (this._leoLogPane) {
+        this._leoLogPane.appendLine(p_message);
+    } else {
+        g.logBuffer.push(p_message);
+    }
 }
 
 </t>
@@ -12223,6 +12223,17 @@ public showLogPane(p_focus?: boolean): Thenable&lt;unknown&gt; {
         this._leoLogPane.show(!p_focus); // use flag to preserve focus
         return Promise.resolve(true);
     } else {
+        // * Log pane instantiation
+        this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+        this._context.subscriptions.push(this._leoLogPane);
+        if (g.logBuffer.length) {
+            const buffer = g.logBuffer;
+            while (buffer.length &gt; 0) {
+                // Pop the bottom one and append it
+                g.es_print(buffer.shift()!);
+            }
+        }
+        this._leoLogPane.show(!p_focus);
         return Promise.resolve(undefined); // if cancelled
     }
 }

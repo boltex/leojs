@@ -716,7 +716,7 @@ export class LeoUI extends NullGui {
             // * Log pane instantiation
             this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
             this._context.subscriptions.push(this._leoLogPane);
-            if (g.logBuffer.length && g.app.leoID && g.app.leoID !== 'None') {
+            if (g.logBuffer.length) {
                 const buffer = g.logBuffer;
                 while (buffer.length > 0) {
                     // Pop the bottom one and append it
