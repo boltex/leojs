@@ -1254,33 +1254,30 @@ export class LeoApp {
     public async setIdFromDialog(): Promise<void> {
 
         // Get the id, making sure it is at least three characters long.
+        let attempt = 0
+        let id_ = "";
+        while (attempt < 2) {
+            attempt += 1
+            const dialogVal = await g.IDDialog();
+            // #1404: Make sure the id will not corrupt the .leo file.
+            //        cleanLeoID raises a warning dialog.
+            id_ = this.cleanLeoID(dialogVal, "");
+            if (id_ && id_.length > 2) {
+                break;
+            }
+        }
 
-        const w_id = await g.IDDialog();
+        // Put result in g.app.leoID.
+        // Note: For unit tests, leoTest2.py: create_app sets g.app.leoID.
+        if (!id_) {
+            g.es_print('Leo can not start without an id.');
+            // * LeoJS will block all commands instead until re-set by user.
+            // print('Leo will now exit');
+            // sys.exit(1) 
+        }
+        this.leoID = id_;
+        g.blue('leoID=', this.leoID);
 
-        this.leoID = this.cleanLeoID(w_id, '');
-
-        // * ORIGINAL LEO RETRIED 3 TIMES AND THEN QUIT IF NOT VALID !
-        // attempt = 0
-        // id_ = None
-        // while attempt < 2:
-        //     attempt += 1
-        //     dialog = g.TkIDDialog()
-        //     dialog.run()
-        //     # #1404: Make sure the id will not corrupt the .leo file.
-        //     #        cleanLeoID raises a warning dialog.
-        //     id_ = self.cleanLeoID(dialog.val, "")
-        //     if id_ and len(id_) > 2:
-        //         break
-        // #
-        // # Put result in g.app.leoID.
-        // # Put result in g.app.leoID.
-        // # Note: For unit tests, leoTest2.py: create_app sets g.app.leoID.
-        // if not id_:
-        //     print('Leo can not start without an id.')
-        //     print('Leo will now exit')
-        //     sys.exit(1)
-        // self.leoID = id_
-        // g.blue('leoID=', repr(self.leoID), spaces=False)
     }
     //@+node:felix.20240303184516.1: *5* app.setIDFile
     /** 
