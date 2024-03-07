@@ -3845,6 +3845,10 @@ export class LeoUI extends NullGui {
     private _showBodySwitchBodyTimer: undefined | NodeJS.Timeout;
     private _leoDocumentsRevealTimer: undefined | NodeJS.Timeout;
 
+    // * Reveal Promises
+    private _documentPaneReveal: Thenable&lt;void&gt; | undefined;
+    private _undoPaneReveal: Thenable&lt;void&gt; | undefined;
+
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
     private _leoDocuments!: vscode.TreeView&lt;LeoFrame&gt;;
@@ -4709,7 +4713,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "067651d",
+  "gitBranch": "devel",
+  "gitDate": "2024-03-06 00:10:32 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -9575,6 +9582,7 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
         if (g.app.leoID !== p_leoID) {
             g.app.leoID = p_leoID;
             void g.app.setIDFile();
+            g.blue('leoID=' + p_leoID);
         }
 
         if (g.app.nodeIndices) {
@@ -13249,6 +13257,7 @@ private _onGotoTreeViewVisibilityChanged(
     p_explorerView: boolean
 ): void {
     if (p_event.visible) {
+        // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
         this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
     }
 }
@@ -13514,11 +13523,12 @@ public setDocumentSelection(p_frame: LeoFrame): void {
         } else {
             w_trigger = true;
         }
-        if (w_trigger) {
-            w_docView.reveal(p_frame, { select: true, focus: false })
+        if (w_trigger &amp;&amp; !this._documentPaneReveal) {
+            this._documentPaneReveal = w_docView.reveal(p_frame, { select: true, focus: false })
                 .then(
                     (p_result) =&gt; {
                         // Shown document node
+                        this._documentPaneReveal = undefined;
                     },
                     (p_reason) =&gt; {
                         console.log('shown doc error on reveal: ', p_reason);
@@ -13535,9 +13545,11 @@ public setDocumentSelection(p_frame: LeoFrame): void {
  * @param p_undoNode Node instance in the Leo History view to be the 'selected' one.
  */
 private _setUndoSelection(p_undoNode: LeoUndoNode): void {
-    if (this._lastLeoUndos &amp;&amp; this._lastLeoUndos.visible) {
-        this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
-            () =&gt; { }, // Ok - do nothing
+    if (this._lastLeoUndos &amp;&amp; this._lastLeoUndos.visible &amp;&amp; !this._undoPaneReveal) {
+        this._undoPaneReveal = this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
+            () =&gt; {
+                this._undoPaneReveal = undefined;
+            },
             (p_error) =&gt; {
                 console.log('setUndoSelection could not reveal');
             }

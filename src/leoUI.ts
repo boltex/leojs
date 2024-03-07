@@ -164,6 +164,10 @@ export class LeoUI extends NullGui {
     private _showBodySwitchBodyTimer: undefined | NodeJS.Timeout;
     private _leoDocumentsRevealTimer: undefined | NodeJS.Timeout;
 
+    // * Reveal Promises
+    private _documentPaneReveal: Thenable<void> | undefined;
+    private _undoPaneReveal: Thenable<void> | undefined;
+
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
     private _leoDocuments!: vscode.TreeView<LeoFrame>;
@@ -1027,6 +1031,7 @@ export class LeoUI extends NullGui {
         p_explorerView: boolean
     ): void {
         if (p_event.visible) {
+            // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
             this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
         }
     }
@@ -4749,11 +4754,12 @@ export class LeoUI extends NullGui {
             } else {
                 w_trigger = true;
             }
-            if (w_trigger) {
-                w_docView.reveal(p_frame, { select: true, focus: false })
+            if (w_trigger && !this._documentPaneReveal) {
+                this._documentPaneReveal = w_docView.reveal(p_frame, { select: true, focus: false })
                     .then(
                         (p_result) => {
                             // Shown document node
+                            this._documentPaneReveal = undefined;
                         },
                         (p_reason) => {
                             console.log('shown doc error on reveal: ', p_reason);
@@ -5374,9 +5380,11 @@ export class LeoUI extends NullGui {
      * @param p_undoNode Node instance in the Leo History view to be the 'selected' one.
      */
     private _setUndoSelection(p_undoNode: LeoUndoNode): void {
-        if (this._lastLeoUndos && this._lastLeoUndos.visible) {
-            this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
-                () => { }, // Ok - do nothing
+        if (this._lastLeoUndos && this._lastLeoUndos.visible && !this._undoPaneReveal) {
+            this._undoPaneReveal = this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
+                () => {
+                    this._undoPaneReveal = undefined;
+                },
                 (p_error) => {
                     console.log('setUndoSelection could not reveal');
                 }
@@ -5488,6 +5496,7 @@ export class LeoUI extends NullGui {
             if (g.app.leoID !== p_leoID) {
                 g.app.leoID = p_leoID;
                 void g.app.setIDFile();
+                g.blue('leoID=' + p_leoID);
             }
 
             if (g.app.nodeIndices) {

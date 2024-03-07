@@ -1133,8 +1133,7 @@ export class LeoApp {
         g.assert(this === g.app);
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        const table = [this.setIDFromConfigSetting, this.setIDFromFile];
-        // const table = [this.setIDFromConfigSetting, this.setIDFromFile, this.setIDFromEnv];
+        const table = [this.setIDFromConfigSetting, this.setIDFromFile, this.setIDFromEnv];
 
         for (const func of table) {
             await func.bind(this)(verbose);
@@ -1284,14 +1283,15 @@ export class LeoApp {
         // Put result in g.app.leoID.
         // Note: For unit tests, leoTest2.py: create_app sets g.app.leoID.
         if (!id_) {
-            g.es_print('Leo can not start without an id.');
+            // g.es_print('Leo can not start without an id.');
             // * LeoJS will block all commands instead until re-set by user.
             // print('Leo will now exit');
             // sys.exit(1) 
-        }
-        this.leoID = id_;
-        if (this.leoID) {
-            g.blue('leoID=', this.leoID);
+        } else {
+            this.leoID = id_;
+            if (this.leoID) {
+                g.blue('leoID=' + this.leoID);
+            }
         }
 
     }
