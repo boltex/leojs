@@ -1803,12 +1803,14 @@ export class LeoUI extends NullGui {
                 this._leoTreeProvider.incTreeId();
                 this._revealType = w_revealType;
                 void vscode.commands.executeCommand(w_treeName + '.focus');
+
                 // } else if (!this.isOutlineVisible() && this.showOutlineIfClosed) {
                 //     const c = g.app.windowList[this.frameIndex].c;
                 //     this._lastTreeView.reveal(c.p, { select: true });
                 // } else {
                 //     this._refreshOutline(true, w_revealType);
                 // }
+
             } else {
                 this._refreshOutline(true, w_revealType);
             }
@@ -1944,7 +1946,6 @@ export class LeoUI extends NullGui {
             console.log('_refreshOutline could not reveal. Catch Error: ', error);
             this._leoTreeProvider.refreshTreeRoot();
         }
-
     }
 
     /**
@@ -2025,6 +2026,18 @@ export class LeoUI extends NullGui {
             this._lastTreeView.visible
 
         ) {
+            void this._lastTreeView.reveal(p_node, {
+                select: true,
+                focus: false
+            }).then(
+                () => {
+                    //ok
+                },
+                () => {
+                    // 
+                    console.log('gotSelectedNode scroll mode reveal error catched');
+                }
+            );
             // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
             if (this._gotSelectedNodeBodyTimer) {
                 clearTimeout(this._gotSelectedNodeBodyTimer);
@@ -2838,10 +2851,11 @@ export class LeoUI extends NullGui {
                             if (this._refreshType.goto) {
                                 this._refreshType.goto = false;
                                 let w_viewName: string;
-                                if (this._lastTreeView === this._leoTreeExView) {
-                                    w_viewName = Constants.GOTO_EXPLORER_ID;
-                                } else {
+                                const gotoView = this._leoGotoProvider.getLastGotoView();
+                                if (gotoView && gotoView.title === "Goto") {
                                     w_viewName = Constants.GOTO_ID;
+                                } else {
+                                    w_viewName = Constants.GOTO_EXPLORER_ID;
                                 }
                                 void vscode.commands.executeCommand(w_viewName + ".focus");
                             }

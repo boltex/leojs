@@ -24,6 +24,7 @@
 - Changed .leojs file format to have no state bits in file anymore, and instead save them in db.
 - Fixed at-buttons panel to refresh properly after a 'revert-to-saved' command.
 - Fixed startup process to block all commands if no LeoID is found, except for the 'Set Leo ID' command.
+- Fixed 'Goto' panel's navigation's stability issues after switching panels.
 
 # 0.2.11
 

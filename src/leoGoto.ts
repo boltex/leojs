@@ -18,6 +18,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     private _lastGotoView: vscode.TreeView<LeoGotoNode> | undefined;
 
     private _nodeList: LeoGotoNode[] = []; // Node list kept here.
+    private _viewSwitch: boolean = false;
 
     private _selectedNodeIndex: number = 0;
 
@@ -25,6 +26,14 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
 
     public setLastGotoView(p_view: vscode.TreeView<LeoGotoNode>): void {
         this._lastGotoView = p_view;
+        if (this._nodeList && this._nodeList.length) {
+            this._viewSwitch = true;
+            this._onDidChangeTreeData.fire(undefined);
+        }
+    }
+
+    public getLastGotoView(): vscode.TreeView<LeoGotoNode> | undefined {
+        return this._lastGotoView;
     }
 
     public resetSelectedNode(p_node?: LeoGotoNode): void {
@@ -33,6 +42,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
             const w_found = this._nodeList.indexOf(p_node);
             if (w_found >= 0) {
                 this._selectedNodeIndex = w_found;
+                return;
             }
         }
     }
@@ -61,10 +71,10 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                     this._selectedNodeIndex -= 1;
                 }
                 break;
-
         }
-        await this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
-        await this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
+        const node = this._nodeList[this._selectedNodeIndex];
+        await this._leoUI.gotoNavEntry(node);
+        await this._lastGotoView?.reveal(node, {
             select: true,
             focus: true
         });
@@ -79,14 +89,30 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public getTreeItem(element: LeoGotoNode): Thenable<LeoGotoNode> | LeoGotoNode {
+    public getTreeItem(element: LeoGotoNode): LeoGotoNode {
         return element;
     }
 
-    public getChildren(element?: LeoGotoNode): Thenable<LeoGotoNode[]> {
+    public getChildren(element?: LeoGotoNode): LeoGotoNode[] {
 
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady && !element) {
+
+            // WAS JUST A VIEW SWITCH:
+            if (this._viewSwitch) {
+                this._viewSwitch = false;
+                setTimeout(() => {
+                    if (this._nodeList.length && (this._selectedNodeIndex + 1) <= this._nodeList.length) {
+                        void this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
+                            select: true,
+                            focus: false
+                        }).then(() => { }, () => {
+                            console.log('Reveal failed for goto panel switching detected.');
+                        });
+                    }
+                }, 0);
+                return this._nodeList; // Make sure the nodes are valid (give back)
+            }
 
             const c = g.app.windowList[this._leoUI.frameIndex].c;
             const scon: QuickSearchController = c.quicksearchController;
@@ -119,17 +145,17 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                         this._nodeList.push(w_newNode);
                     });
                 }
-                return Promise.resolve(this._nodeList);
+                return this._nodeList;
             } else {
-                return Promise.resolve([]);
+                return [];
             }
 
         } else {
-            return Promise.resolve([]); // Defaults to an empty list of children
+            return []; // Defaults to an empty list of children
         }
     }
 
-    public getParent(element: LeoGotoNode): vscode.ProviderResult<LeoGotoNode> | null {
+    public getParent(element: LeoGotoNode): LeoGotoNode | null {
         // Leo documents are just a list, as such, entries are always child of root, so return null
         return null;
     }
