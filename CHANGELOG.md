@@ -1,5 +1,9 @@
 # Change Log
 
+# 0.2.13
+
+- Fixed ...
+
 # 0.2.12
 
 - Help commands were changed from markdown preview panes to html webviews.
