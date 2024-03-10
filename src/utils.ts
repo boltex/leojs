@@ -15,6 +15,86 @@ export function performanceNow(): number {
 }
 
 /**
+ * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
+ */
+export async function closeLeoTextEditors(): Promise<unknown> {
+    const w_foundTabs: vscode.Tab[] = [];
+
+    vscode.window.tabGroups.all.forEach((p_tabGroup) => {
+        p_tabGroup.tabs.forEach((p_tab) => {
+
+            if (p_tab.input &&
+                (p_tab.input as vscode.TabInputText).uri &&
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                !p_tab.isDirty
+
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.input) {
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
+            }
+        }
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+
+    return q_closedTabs;
+}
+
+export async function closeLeoHelpPanels(): Promise<unknown> {
+
+    // * Close all open help panels 
+    const w_foundTabs: vscode.Tab[] = [];
+    vscode.window.tabGroups.all.forEach((p_tabGroup) => {
+        p_tabGroup.tabs.forEach((p_tab) => {
+            if (
+                p_tab.label.endsWith(Constants.URI_HELP_FILENAME)
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.label === Constants.URI_HELP_FILENAME && p_tab.input) {
+                // Not a preview
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
+            }
+        }
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+    return q_closedTabs;
+
+}
+/**
  * * Unique numeric Id
  */
 var uniqueId: number = 0;
@@ -250,19 +330,6 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
  */
 export function getFileFromPath(p_path: string): string {
     return p_path.replace(/^.*[\\\/]/, '');
-}
-
-export function getIdFromDialog(): Thenable<string> {
-    return vscode.window.showInputBox({
-        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
-        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
-
-    }).then((p_id) => {
-        if (p_id) {
-            return p_id;
-        }
-        return '';
-    });
 }
 
 export function isAlphaNumeric(str: string): boolean {

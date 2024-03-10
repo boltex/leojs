@@ -169,9 +169,7 @@ export class Python_Importer extends Importer {
   /**
    * i is the index of the class/def line (within the *guide* lines).
    *
-   * Return the index of the line *following* the entire class/def
-   *
-   * Note: All following blank/comment lines are *excluded* from the block.
+   * Return the index of the line *following* the entire class/def.
    */
   public find_end_of_block(i: number, i2: number): number {
 
@@ -179,12 +177,8 @@ export class Python_Importer extends Importer {
      * Return the length of the leading whitespace for s.
      */
     const lws_n = (s: string): number => {
-      return s.length - s.trimLeft().length;
+      return s.length - s.trimStart().length;
     };
-
-    if (i >= i2) {
-      return i2;
-    }
 
     const prev_line = this.guide_lines[i - 1];
     const kinds = ['class', 'def', '->']; //  '->' denotes a coffeescript function.
@@ -202,27 +196,48 @@ export class Python_Importer extends Importer {
         }
       }
     }
+    let non_tail_lines = 0;
     let tail_lines = 0;
     if (i < i2) {
       const lws1 = lws_n(prev_line);
       while (i < i2) {
-        const s = this.guide_lines[i];
-        i += 1;
+        let s = this.guide_lines[i];
         if (s.trim()) {
+          // A code line.
           if (lws_n(s) <= lws1) {
-            // A non-comment line that ends the block.
-            // Exclude all tail lines.
-            return i - tail_lines - 1;
+            // A codeline that ends the block.
+            return non_tail_lines === 0 ? i : i - tail_lines;
           }
-          // A non-comment line that does not end the block.
+          // A code line in the block.
+          non_tail_lines += 1;
           tail_lines = 0;
-        } else {
-          // A comment line.
-          tail_lines += 1;
+          i += 1;
+          continue;
         }
+        // A blank, comment or docstring line.
+        s = this.lines[i];
+        const s_strip = s.trim();
+        if (!s_strip) {
+          // A blank line.
+          tail_lines += 1;
+        } else if (s_strip.startsWith('#')) {
+          // A comment line.
+          if (s_strip && lws_n(s) < lws1) {
+            if (non_tail_lines > 0) {
+              return i - tail_lines;
+            }
+          }
+          tail_lines += 1;
+        } else {
+          // A string/docstring line.
+          non_tail_lines += 1;
+          tail_lines = 0;
+        }
+        i += 1;
+
       }
     }
-    return i2 - tail_lines;
+    return i2;
   }
   //@+node:felix.20231011211322.5: *3* python_i.postprocess & helpers
   /**

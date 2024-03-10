@@ -370,9 +370,7 @@ export class ChapterController {
     //@+node:felix.20220429005433.20: *4* cc.inChapter
     public inChapter(): boolean {
         const cc = this;
-
         const theChapter = cc.getSelectedChapter();
-
         return !!(theChapter && theChapter.name !== 'main');
     }
     //@+node:felix.20220429005433.21: *4* cc.parseHeadline

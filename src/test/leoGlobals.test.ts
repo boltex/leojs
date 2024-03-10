@@ -307,7 +307,7 @@ suite('Tests for leo.core.leoGlobals', () => {
      * Patch @data unl-path-prefixes so that g.findAnyUnl will find nodes in
      * the new commander.
      *
-     * Return the commander for the new outline.
+     * Return the commander for the *second* new outline.
      */
     function _patch_at_data_unl_path_prefixes() {
 
@@ -329,30 +329,6 @@ suite('Tests for leo.core.leoGlobals', () => {
         c2.mFileName = g.os_path_normpath(g.os_path_join(directory, c2_name));
         assert.ok(c1_name, g.os_path_basename(c.fileName()));
         assert.ok(c2_name, g.os_path_basename(c2.fileName()));
-
-        function make_line(c: Commands) {
-            const file_name = c.fileName();
-            const key = g.os_path_basename(file_name);
-            // Values must be directories.
-            const value = g.os_path_normpath(g.os_path_dirname(file_name));
-            // print(f"{key:17} {value}")
-            return `${key}: ${value}`;
-        }
-
-        // Init the @data unl-path-prefixes.
-
-        // lines = [make_line(z) for z in (c, c2)]
-        const lines = [c, c2].map((z) => make_line(z));
-
-        self._set_setting(c, 'data', 'unl-path-prefixes', lines);
-        const lines2 = c.config.getData('unl-path-prefixes');
-        assert.ok(g.compareArrays(lines.sort(), lines2.sort()));
-        const d = g.parsePathData(c);
-        if (0) {
-            console.log('');
-            g.printObj(d);
-        }
-
         return c2;
 
     }
@@ -1671,7 +1647,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         // Create a new commander
         const c1 = self.c;
         const c2 = _patch_at_data_unl_path_prefixes();
-        // Change both filenames.
+        // Use short file names.
         const file_name1 = g.os_path_basename(c1.fileName());
         const file_name2 = g.os_path_basename(c2.fileName());
         // Cross-file tests.
@@ -1679,7 +1655,9 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.strictEqual(c3, c2);
         const c4 = await g.openUNLFile(c2, file_name1);
         assert.strictEqual(c4, c1);
-
+        // Test of short file names.
+        const c5 = await g.openUNLFile(c1, c1.shortFileName());
+        assert.strictEqual(c5, c1);
     });
     //@-others
 

@@ -11,6 +11,7 @@ import * as g from '../core/leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
 import { BaseEditCommandsClass } from './baseCommands';
 import { Constants } from '../constants';
+import { Position } from '../core/leoNodes';
 //@-<< helpCommands imports & annotations >>
 
 //@+others
@@ -36,9 +37,9 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         //@@language md
 
         const md_s = `\
-        **Welcome to Leo\'s help system.**
+        #Welcome to Leo\'s help system.
 
-        To learn about \"\<Alt-X\>\" commands, type:
+        To learn about **Alt-X** commands, type:
 
             <Alt-X>help-for-minibuffer<Enter>
 
@@ -76,7 +77,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
             const command = cDict[key];
             // Going to get replaced. Don't take those that begin with 'async-'
             const w_name = (command as any).__name__ || '';
-            if (!w_name.startsWith('async-')) {
+            if (!w_name.startsWith('async-') && !w_name.startsWith('help')) {
                 commands.push({
                     label: key,
                     detail: (command as any).__doc__
@@ -289,7 +290,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         return s;
     }
     //@+node:felix.20231224164520.15: *3* helpForCreatingExternalFiles
-    @cmd('help-for-creating-external-files', 'Prints a discussion of creating external files.')
+    @cmd('help-for-creating-external-files', 'Explains how to create external files.')
     public helpForCreatingExternalFiles(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.16: *4* << define s >> (helpForCreatingExternalFiles)
@@ -416,7 +417,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         this.c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.23: *3* helpForFindCommands
-    @cmd('help-for-find-commands', 'Prints a discussion of of Leo\'s find commands.')
+    @cmd('help-for-find-commands', 'Explains Leo\'s find commands.')
     public helpForFindCommands(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.24: *4* << define s >> (help-for-find-commands)
@@ -511,13 +512,18 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         const s = `\
         # About the Minibuffer
 
-        TODO : Add proper LeoJS Minibuffer documentation and usage
+        The mini-buffer is intended to be like the Emacs buffer:
+
+        (default shortcut: Alt-x) Puts the focus in the minibuffer. Type a
+        full command name, then hit <Return> to execute the command. 
+
+        Use the help-for-command command to see documentation for a particular command.
         `;
         //@-<< define s >>
         c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.30: *3* helpForScripting
-    @cmd('help-for-scripting', 'Prints a discussion of Leo scripting.')
+    @cmd('help-for-scripting', 'Shows a tutorial about scripting Leo.')
     public helpForScripting(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.31: *4* << define s >> (helpForScripting)
@@ -528,7 +534,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
         ## Overview
 
-        Any Leo node may contain a Python script.
+        Any Leo node may contain a JavaScript or Typescript script.
 
         Ctrl-B (execute-script) executes the body text of the presently selected
         node.
@@ -595,6 +601,8 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
         A position represents the state of a traversal of an outline. Because of
         clones, the same VNode may appear multiple times during a traversal.
+
+        > Note: Use **p.v** for it's boolean/validity value.
 
         Properties of the position class:
 
@@ -725,7 +733,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         this.c.putHelpFor(s);
     }
     //@+node:felix.20231224164520.32: *3* helpForSettings
-    @cmd('help-for-settings', 'Prints a discussion of of Leo\'s find commands.')
+    @cmd('help-for-settings', 'Explains Leo\'s settings.')
     public helpForSettings(): void {
         //@+<< define s >>
         //@+node:felix.20231224164520.33: *4* << define s >> (helpForSettings)
@@ -736,54 +744,27 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         const s = `\
         # About settings
 
-        **\@settings trees** specify settings. The headline of each node
-        indicates its type. The body text of most nodes contain comments.
+        **\@settings trees** specify settings. 
+        
+        The headline of each node indicates its type. The body text of most nodes contain comments.
+
         However, the body text of \@data, \@font, \@item and \@shortcuts nodes
         may contain data. For more information about the format of \@settings
         trees, see leoSettings.leo.
 
-        leoSettings.leo is Leo\'s main settings file. myLeoSettings.leo contains
-        your personal settings. Settings in myLeoSettings.leo override the
-        settings in leoSettings.leo. Put myLeoSettings.leo in your home \'\~\'
-        directory or in the \'\~/.leo\' directory. Any other .leo file may
-        contain an \@settings tree. Such settings apply only to that file.
+        An internal leojsSettings.leojs is LeoJS\'s main settings file. myLeoSettings.leo contains
+        your personal settings. 
+        
+        Settings in myLeoSettings.leo override the settings in leojsSettings.leojs.
+        
+        Put myLeoSettings.leo in your home \'\~\' directory or in the \'\~/.leo\' directory. 
+        
+        Any other .leo file may contain an \@settings tree. Such settings apply only to that file.
 
         `;
         //@-<< define s >>
         this.c.putHelpFor(s);
     }
-    //@+node:felix.20231224164520.34: *3* help.showColorSettings
-    // @cmd('show-color-settings')
-    // def showColorSettings(self, event: Event = None) -> None:
-    //     """
-    //     Print the value of all @color settings.
-
-    //     The following shows where the each setting comes from:
-
-    //     -     leoSettings.leo,
-    //     -  @  @button, @command, @mode.
-    //     - [D] default settings.
-    //     - [F] indicates the file being loaded,
-    //     - [M] myLeoSettings.leo,
-    //     - [T] theme .leo file.
-    //     """
-    //     self.c.config.printColorSettings()
-    //@+node:felix.20231224164520.35: *3* help.showFontSettings
-    // @cmd('show-font-settings')
-    // def showFontSettings(self, event: Event = None) -> None:
-    //     """
-    //     Print the value of every @font setting.
-
-    //     The following shows where the each setting comes from:
-
-    //     -     leoSettings.leo,
-    //     -  @  @button, @command, @mode.
-    //     - [D] default settings.
-    //     - [F] indicates the file being loaded,
-    //     - [M] myLeoSettings.leo,
-    //     - [T] theme .leo file.
-    //     """
-    //     self.c.config.printFontSettings()
     //@+node:felix.20231224164520.36: *3* help.showSettings
     @cmd(
         'show-settings',
@@ -818,37 +799,130 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         this.c.config.createActivesSettingsOutline();
 
     }
-    //@+node:felix.20231224164520.38: *3* pythonHelp
-    // @cmd('help-for-python')
-    // def pythonHelp(self, event: Event = None) -> None:
-    //     """Prompt for a arg for Python's help function, and put it to the VR pane."""
-    //     c, k = self.c, self.c.k
-    //     c.minibufferWantsFocus()
-    //     k.setLabelBlue('Python help: ')
-    //     k.get1Arg(event, handler=self.pythonHelp1)
+    //@+node:felix.20240206234225.1: *3* printButtons
+    // Originally from leoKeys.py
+    @cmd(
+        'show-buttons',
+        'Print all @button and @command commands.'
+    )
+    public printButtons(): void {
 
-    // def pythonHelp1(self, event: Event) -> str:
-    //     c, k = self.c, self.c.k
-    //     k.clearState()
-    //     k.resetLabel()
-    //     s = k.arg.strip()
-    //     if not s:
-    //         return ''
-    //     old = sys.stdout
-    //     try:
-    //         sys.stdout = io.StringIO()
-    //         #  If the argument is a string, the string is looked up as a name...
-    //         # and a help page is printed on the console.
-    //         help(str(s))
-    //         s2 = sys.stdout.getvalue()  # #2165
-    //     finally:
-    //         sys.stdout = old
-    //     if not s2:
-    //         return ''
-    //     # Send it to the vr pane as a <pre> block
-    //     s2 = '<pre>' + s2 + '</pre>'
-    //     c.putHelpFor(s2)
-    //     return s2  # For unit tests.
+        const c = this.c;
+        const tabName = '@buttons \& @commands';
+
+        let data: [string, string][] = [];
+        const configs = [c.config.getButtons(), c.config.getCommands()];
+        configs.forEach(aList => {
+            aList.forEach((z: [Position, string, unknown]) => {
+                const [p, script, rclicks] = z;
+                const cContext = p.v.context;
+                const tag = (
+                    cContext.shortFileName().endsWith('myLeoSettings.leo') ||
+                    cContext.shortFileName().endsWith('myLeoSettings.leojs')
+                ) ? 'M' : 'G';
+                data.push([p.h, tag]);
+            });
+        });
+        const lists = [g.app.config.atLocalButtonsList, g.app.config.atLocalCommandsList];
+        lists.forEach(aList => {
+            aList.forEach(p => {
+                data.push([p.h, 'L']);
+            });
+        });
+        const result = data.sort((a, b) => a[0].localeCompare(b[0])).map(z => `**${z[1]}** ${z[0]}\n`);
+
+        result.unshift('# ' + tabName, '');
+        result.push(
+            '',
+            'legend:\n',
+            ' - **G** leojsSettings.leojs',
+            ' - **L** local .leo File',
+            ' - **M** myLeoSettings.leo',
+        );
+
+        const s = result.join('\n');
+        this.c.putHelpFor(s);
+
+    }
+    //@+node:felix.20240206234256.1: *3* printCommands
+    // Originally from leoKeys.py
+    @cmd('show-commands', 'Print all the known commands.')
+    public printCommands(): void {
+
+        const c = this.c;
+        const tabName = 'Commands';
+
+        let data: string[] = [];
+        for (let commandName of Object.keys(c.commandsDict).sort()) {
+            data.push(commandName.trim() + '\n');
+        }
+
+        const s = '# ' + tabName + '\n\n' + data.join('\n');
+        this.c.putHelpFor(s);
+
+    }
+
+    //@+node:felix.20240206235351.1: *3* printCommandsWithDocs
+    // Originally from leoKeys.py
+    @cmd('show-commands-with-docs', 'Show all the known commands and their docstring.')
+    public printCommandsWithDocs(): void {
+
+        const c = this.c;
+        const tabName = 'List';
+
+        let data: string[] = [];
+        for (let commandName of Object.keys(c.commandsDict).sort()) {
+            const doc: string = (c.commandsDict[commandName] as any)['__doc__'];
+            data.push("## " + commandName.trim() + "\n\n");
+            if (doc) {
+                data.push(doc.trim() + "\n\n");
+            }
+        }
+
+        const s = '# ' + tabName + '\n\n' + data.join('\n');
+        this.c.putHelpFor(s);
+
+    }
+
+    /*
+    c, k = self.c, self
+    tabName = 'List'
+    c.frame.log.clearTab(tabName)
+    inverseBindingDict = k.computeInverseBindingDict()
+    data = []
+    key: str
+    dataList: list[tuple[str, str]]
+    for commandName in sorted(c.commandsDict):
+        dataList = inverseBindingDict.get(commandName, [('', ''),])
+        for pane, key in dataList:
+            key = k.prettyPrintKey(key)
+            binding = pane + key
+            cmd = commandName.strip()
+            doc = f'{c.commandsDict.get(commandName).__doc__}' or ''
+            if doc == 'None':
+                doc = ''
+            # Formatting for multi-line docstring
+            if doc.count('\n') > 0:
+                doc = f'\n{doc}\n'
+            else:
+                doc = f'   {doc}'
+            if doc.startswith('\n'):
+                doc.replace('\n', '', 1)
+            toolong = doc.count('\n') > 5
+            manylines = False
+            if toolong:
+                lines = doc.split('\n')[:4]
+                lines[-1] += ' ...\n'
+                doc = '\n'.join(lines)
+                manylines = True
+            n = min(2, len(binding))
+            if manylines:
+                doc = textwrap.fill(doc, width=50, initial_indent=' ' * 4,
+                        subsequent_indent=' ' * 4)
+            data.append((binding, cmd, doc))
+    lines = ['[%*s] %s%s\n' % (-n, binding, cmd, doc) for binding, cmd, doc in data]
+    g.es(''.join(lines), tabName=tabName)
+    */
     //@-others
 
 }

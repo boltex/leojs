@@ -12,7 +12,7 @@ import { Position } from './leoNodes';
  */
 export class NodeHistory {
     public c: Commands;
-    public beadList: [Position, Chapter][]; // a list of (position,chapter) tuples.
+    public beadList: [Position, Chapter | undefined][]; // a list of (position,chapter) tuples.
     public beadPointer: number;
     public skipBeadUpdate: boolean;
 
@@ -31,15 +31,14 @@ export class NodeHistory {
      * * Dump the beadList
      */
     public dump(): void {
-        const c = this.c;
         if (g.unitTesting || !this.beadList.length) {
             return;
         }
-        g.es_print(`NodeHistory.beadList: ${c.shortFileName()}:`);
+        // g.es_print(`NodeHistory.beadList: ${c.shortFileName()}:`);
         this.beadList.forEach((data, i) => {
             let p: Position = data[0];
             let p_s: string;
-            let chapter: Chapter = data[1];
+            let chapter: Chapter | undefined = data[1];
             let chapter_s: string;
             if (p && p.__bool__()) {
                 p_s = p.h;
@@ -60,108 +59,96 @@ export class NodeHistory {
     /**
      * * Select the next node, if possible.
      */
-    public goNext(): Position | undefined {
-        if (this.beadPointer + 1 < this.beadList.length) {
-            this.beadPointer += 1;
-            const p = this.beadList[this.beadPointer][0];
-            const chapter: Chapter = this.beadList[this.beadPointer][1];
-            this.select(p, chapter);
-            return p;
+    public goNext(): void {
+        let c = this.c;
+        if (this.beadPointer + 1 >= this.beadList.length) {
+            return;
         }
-        return undefined;
+        this.beadPointer += 1;
+        let [p, chapter] = this.beadList[this.beadPointer];
+        if (c.positionExists(p)) {
+            [p, chapter] = this.beadList[this.beadPointer];
+            this.update(p);
+            this.select(p, chapter);
+        } else {
+            this.beadList.splice(this.beadPointer, 1);
+            this.beadPointer -= 1;
+        }
     }
 
     //@+node:felix.20211021231651.6: *3* NodeHistory.goPrev
     /**
      * * Select the previously visited node, if possible.
      */
-    public goPrev(): Position | undefined {
-        if (this.beadPointer > 0) {
-            this.beadPointer -= 1;
-            const p = this.beadList[this.beadPointer][0];
-            const chapter: Chapter = this.beadList[this.beadPointer][1];
-            this.select(p, chapter);
-            return p;
+    public goPrev(): void {
+        const c = this.c;
+        if (this.beadPointer <= 0) {
+            return;
         }
-        return undefined;
+        this.beadPointer -= 1;
+        let [p, chapter] = this.beadList[this.beadPointer];
+        if (c.positionExists(p)) {
+            [p, chapter] = this.beadList[this.beadPointer];
+            this.update(p);
+            this.select(p, chapter);
+        } else {
+            delete this.beadList[this.beadPointer];
+            this.beadPointer += 1;
+        }
     }
 
     //@+node:felix.20211021231651.7: *3* NodeHistory.select
     /**
-     * Update the history list when selecting p.
-     * 
-     * Only self.goNext and self.goPrev call this method.
+     * Select p in the given chapter.
      */
-    public select(p: Position, chapter: Chapter): void {
-        const c: Commands = this.c;
+    public select(p: Position, chapter: Chapter | undefined): void {
+        const c = this.c;
         const cc = this.c.chapterController;
-        if (cc && c.positionExists(p)) {
-            this.skipBeadUpdate = true;
-            try {
-                const oldChapter = cc.getSelectedChapter();
-                if (oldChapter !== chapter) {
-                    cc.selectChapterForPosition(p, chapter);
-                }
-                c.selectPosition(p); // Calls cc.selectChapterForPosition
-            } finally {
-                this.skipBeadUpdate = false;
-            }
+        g.assert(c.positionExists(p), p.toString());
+        const oldChapter = cc.getSelectedChapter();
+        if (oldChapter !== chapter) {
+            cc.selectChapterForPosition(p, chapter);
         }
-        // Fix bug #180: Always call this.update here.
-        this.update(p, false);
+        c.selectPosition(p); // Calls cc.selectChapterForPosition
     }
 
     //@+node:felix.20211021231651.8: *3* NodeHistory.update
     /**
      * Update the beadList while p is being selected.
-     * 
-     *  change: True:  The caller is c.frame.tree.selectHelper.
-     *          False: The caller is NodeHistory.select.
      */
-    public update(p: Position, change: boolean = true): void {
-        const c: Commands = this.c;
+    public update(p: Position): void {
+        const c = this.c;
         const cc = this.c.chapterController;
-        if (!p.__bool__() || !c.positionExists(p) || this.skipBeadUpdate) {
+        if (!p || !c.positionExists(p)) {
             return;
         }
-        // A hack: don't add @chapter nodes.
+
+        // Don't add @chapter nodes.
         // These are selected during the transitions to a new chapter.
         if (p.h.startsWith('@chapter ')) {
             return;
         }
-        // Fix bug #180: handle the change flag.
-        const aList: [Position, Chapter][] = [];
-        let found: number = -1;
 
-        this.beadList.forEach((data, i) => {
-            const p2: Position = data[0];
-            const junk_chapter: Chapter = data[1];
-
-            if (c.positionExists(p2)) {
-                if (p.__eq__(p2)) {
-                    if (change) {
-                        //pass  // We'll append later.
-                    } else if (found === -1) {
-                        found = i;
-                        aList.push(data);
-                    } else {
-                        // pass  // Remove any duplicate.
-                    }
-                } else {
-                    aList.push(data);
-                }
-            }
-        });
-
-        if (change || found === -1) {
-            const data: [Position, Chapter] = [p.copy(), cc.getSelectedChapter()!];
-            aList.push(data);
-            this.beadPointer = aList.length - 1;
-        } else {
-            this.beadPointer = found;
+        // #3800: Do nothing if p is the top of the bead list.
+        const last_p = this.beadList.length > 0 ? this.beadList[this.beadList.length - 1][0] : null;
+        if (last_p === p) {
+            return;
         }
-        this.beadList = aList;
-        // this.dump();
+
+        // #3800: Remove p from the bead list, adjusting the bead pointer.
+        let n_deleted = 0;
+        for (const z of this.beadList) {
+            if (z[0].v === p.v) {
+                n_deleted += 1;
+            }
+        }
+        this.beadList = this.beadList.filter(z => z[0].v !== p.v);
+        this.beadPointer -= n_deleted;
+
+        // #3800: Insert an entry in the *middle* of the bead list, *not* at the end.
+        const data: [Position, Chapter | undefined] = [p.copy(), cc.getSelectedChapter()];
+        this.beadList.splice(this.beadPointer + 1, 0, data);
+        this.beadPointer += 1;
     }
 
     //@-others

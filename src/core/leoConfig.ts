@@ -5,7 +5,7 @@
 import { Commands } from './leoCommands';
 import * as g from './leoGlobals';
 import { Position, VNode } from './leoNodes';
-import { build_rclick_tree } from './mod_scripting';
+import { RClick, build_rclick_tree } from './mod_scripting';
 
 //@-<< imports >>
 //@+<< class ParserBaseClass >>
@@ -199,7 +199,7 @@ export class ParserBaseClass {
     public async doButtons(p: Position, kind: string, name: string, val: any): Promise<void> {
         const c: Commands = this.c;
         const tag = '@button';
-        const aList: any[] = [];
+        const aList: [Position, string, RClick[]][] = [];
         const seen: VNode[] = [];
         const after = p.nodeAfterTree();
 
@@ -1749,8 +1749,8 @@ export class ActiveSettingsOutline {
  * A class to manage configuration settings.
  */
 export class GlobalConfigManager {
-    public atCommonButtonsList: any[];
-    public atCommonCommandsList: any[];
+    public atCommonButtonsList: [Position, string, RClick[]][];
+    public atCommonCommandsList: [Position, string][];
     public atLocalButtonsList: any[];
     public atLocalCommandsList: any[];
     public buttonsFileName: string;
@@ -2045,7 +2045,7 @@ export class GlobalConfigManager {
     /**
      * Return a list of tuples (x,y) for common @button nodes.
      */
-    public getButtons(): [any, any][] {
+    public getButtons(): [Position, string, RClick[]][] {
         return g.app.config.atCommonButtonsList;
     }
     //@+node:felix.20220207005224.10: *4* gcm.getColor
@@ -2063,7 +2063,7 @@ export class GlobalConfigManager {
     /**
      * Return the list of tuples (headline,script) for common @command nodes.
      */
-    public getCommonAtCommands(): Array<[string, string]> {
+    public getCommonAtCommands(): Array<[Position, string]> {
         return g.app.config.atCommonCommandsList;
     }
     //@+node:felix.20220207005224.12: *4* gcm.getData & getOutlineData
@@ -2976,14 +2976,15 @@ export class LocalConfigManager {
      *  - [T] theme .leo file.
      */
     public printSettings(): void {
-        const legend =
-            'legend:' +
-            '    leoSettings.leo' +
-            '@  @button, @command, @mode' +
-            '[D] default settings' +
-            '[F] loaded .leo File' +
-            '[M] myLeoSettings.leo' +
-            '[T] theme .leo file.';
+        const legend = `
+        legend:
+            leoSettings.leo
+         @  @button, @command, @mode
+        [D] default settings
+        [F] loaded .leo File
+        [M] myLeoSettings.leo
+        [T] theme .leo file.
+        `;
 
         const c = this.c;
 

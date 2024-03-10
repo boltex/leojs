@@ -160,7 +160,6 @@ export class LeoApp {
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui!: NullGui; // The gui class.
-    public vscode: typeof vscode = vscode;
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -202,12 +201,7 @@ export class LeoApp {
     public leoEditorDir: string | undefined; // The leo-editor directory.
     public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
-    public vscodeExtensionDir: string | undefined;
     public machineDir: string | undefined; // The machine - specific directory.
-
-    public vscodeWorkspaceUri: vscode.Uri | undefined;
-    public vscodeUriAuthority: string = '';
-    public vscodeUriPath: string = '';
 
     //@-<< LeoApp: global directories >>
     //@+<< LeoApp: global data >>
@@ -215,10 +209,10 @@ export class LeoApp {
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
-    public vscodeUriScheme: string = ''; // * VSCODE WORKSPACE FILE SCHEME
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.
+    public LeoIDWarningShown = false; // LEOJS : to prevent second warning. (Original would have exited before)
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
     public lossage: any[] = []; // List of last 100 keystrokes.
     public paste_c: any = null; // The commander that pasted the last outline.
@@ -1092,16 +1086,21 @@ export class LeoApp {
         }
         */
         // * Modified for leojs SINGLE log pane
-        g.es_print(app.signon);
-        g.es_print(app.signon1);
+        // g.es_print(app.signon);
+        // g.es_print(app.signon1);
 
         // Is this the first possible valid output to log pane?
         // If so empty the log Buffer first.
         const buffer = g.logBuffer;
+        buffer.unshift(app.signon1);
+        buffer.unshift(app.signon);
+
         if (buffer.length) {
-            while (buffer.length > 0) {
+            let len = buffer.length; // Only do loop once if logPano not visible
+            while (len > 0) {
                 // Pop the bottom one and append it
                 g.es_print(buffer.shift()!);
+                len = len - 1;
             }
         }
     }
@@ -1131,17 +1130,71 @@ export class LeoApp {
         verbose: boolean = true
     ): Promise<string> {
         this.leoID = '';
-
         g.assert(this === g.app);
-
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        // if (g.unitTesting) {
-        //     this.leoID = "unittestid";
-        // }
+        const table = [this.setIDFromConfigSetting, this.setIDFromFile, this.setIDFromEnv];
 
-        let w_userName = ''; // = "TestUserName";
+        for (const func of table) {
+            await func.bind(this)(verbose);
+            if (this.leoID) {
+                return this.leoID;
+            }
+        }
+        if (useDialog) {
+            await this.setIdFromDialog();
+            if (this.leoID) {
+                await this.setIDFile();
+            }
+        }
+        if (!this.leoID) {
+            // LeoJS UI will block all commands at startup if LeoID is None/Falsy.
+            this.leoID = 'None';
+        }
 
+        return this.leoID;
+    }
+
+    //@+node:felix.20220417215228.2: *5* app.cleanLeoID
+    /**
+     * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
+     */
+    public cleanLeoID(id_: string, tag: string): string {
+        const old_id: string = id_.toString();
+        try {
+            id_ = id_
+                .replace(/\./g, '')
+                .replace(/\,/g, '')
+                .replace(/\"/g, '')
+                .replace(/\'/g, '');
+            //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
+            id_ = id_.split(' ').join('');
+        } catch (exception) {
+            g.es_exception(exception);
+            id_ = '';
+        }
+        if (id_.length < 3) {
+            id_ = '';
+            if (!this.LeoIDWarningShown) {
+                this.LeoIDWarningShown = true;
+                void vscode.window.showInformationMessage(
+                    `Invalid Leo ID: ${tag}`,
+                    {
+                        detail:
+                            `Invalid Leo ID: ${old_id}\n\n` +
+                            'Your id should contain only letters and numbers\n' +
+                            'and must be at least 3 characters in length.',
+                        modal: true,
+                    }
+                );
+            }
+        }
+        return id_;
+    }
+
+    //@+node:felix.20240303184439.1: *5* app.setIDFromConfigSetting
+    public setIDFromConfigSetting(verbose: boolean): Promise<void> {
+        let w_userName = '';
         // 1 - set leoID from configuration settings
         if (!this.leoID && vscode && vscode.workspace) {
             w_userName = vscode.workspace
@@ -1154,23 +1207,103 @@ export class LeoApp {
                 this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
             }
         }
+        return Promise.resolve();
+    }
+    //@+node:felix.20240303184448.1: *5* app.setIDFromFile
+    /** 
+     * Attempt to set g.app.leoID from leoID.txt.
+     */
+    public async setIDFromFile(verbose: boolean): Promise<void> {
+        if (g.isBrowser) {
+            return;
+        }
+        const tag = ".leoID.txt";
+        for (const theDir of [this.homeLeoDir, this.globalConfigDir, this.loadDir]) {
+            if (!theDir) {
+                continue;  // Do not use the current directory!
+            }
+            const fn = g.os_path_join(theDir, tag);
+            try {
+                const exists = await g.os_path_exists(fn);
+                if (!exists) {
+                    continue;
+                }
+                // * Desktop
+                let s = await g.readFileIntoUnicodeString(fn);
+                if (!s) {
+                    continue;
+                }
+                // #1404: Ensure valid ID.
+                // cleanLeoID raises a warning dialog.
+                const id_ = this.cleanLeoID(s, tag).split('\n')[0].trim(); // get first line
+                if (id_.length > 2) {
+                    this.leoID = id_;
+                    return;
+                }
 
-        // 2 - Set leoID from environment
-        if (!this.leoID && os && os.userInfo) {
-            w_userName = os.userInfo().username;
-            if (w_userName) {
+            } catch (exception) {
+                g.error('unexpected exception in app.setLeoID');
+                g.es_exception(exception);
+            }
+        }
+    }
+    //@+node:felix.20240303184457.1: *5* app.setIDFromEnv
+    public setIDFromEnv(verbose: boolean): Promise<void> {
+        if (os && os.userInfo) {
+            const userName = os.userInfo().username;
+            if (userName) {
                 this.leoID = this.cleanLeoID(
-                    w_userName,
+                    userName,
                     'os.userInfo().username'
                 );
             }
         }
+        return Promise.resolve();
+    }
+    //@+node:felix.20240303184507.1: *5* app.setIdFromDialog
+    /**
+     * Get leoID from a VSCode dialog.
+     */
+    public async setIdFromDialog(): Promise<void> {
 
-        // 3 - Set leoID from user dialog if allowed
-        if (!this.leoID && useDialog) {
-            const w_id = await utils.getIdFromDialog();
-            this.leoID = this.cleanLeoID(w_id, '');
-            // TODO : FINISH ISOLATION! separate VSCODE from Leo!
+        // Get the id, making sure it is at least three characters long.
+        let attempt = 0;
+        let id_ = "";
+        while (attempt < 2) {
+            attempt += 1;
+            const dialogVal = await g.IDDialog();
+            // #1404: Make sure the id will not corrupt the .leo file.
+            //        cleanLeoID raises a warning dialog.
+            id_ = this.cleanLeoID(dialogVal, "");
+            if (id_ && id_.length > 2) {
+                break;
+            }
+        }
+
+        // Put result in g.app.leoID.
+        // Note: For unit tests, leoTest2.py: create_app sets g.app.leoID.
+        if (!id_) {
+            // g.es_print('Leo can not start without an id.');
+            // * LeoJS will block all commands instead until re-set by user.
+            // print('Leo will now exit');
+            // sys.exit(1) 
+        } else {
+            this.leoID = id_;
+            if (this.leoID) {
+                g.blue('leoID=' + this.leoID);
+            }
+        }
+
+    }
+    //@+node:felix.20240303184516.1: *5* app.setIDFile
+    /** 
+     * Create leoID.txt. Also set LeoJS own leoID config setting.
+     */
+    public async setIDFile(): Promise<boolean> {
+
+        if (g.isBrowser) {
+            // Set LeoJS vscode config ONLY IF ".leoID.txt" NOT WRITTEN
+            // TODO : SEPARATE VSCODE AND LEO !
             if (this.leoID && vscode && vscode.workspace) {
                 const w_vscodeConfig = vscode.workspace.getConfiguration(
                     Constants.CONFIG_NAME
@@ -1195,48 +1328,57 @@ export class LeoApp {
                     );
                 }
             }
+            return false;
         }
-        if (!this.leoID) {
-            // throw new Error("Could not get Leo ID");
-            this.leoID = 'None';
-        }
-        return this.leoID;
-    }
+        // If desktop (not browser) write to .leoID.txt file
+        const tag = ".leoID.txt";
+        for (const theDir of [this.homeLeoDir, this.globalConfigDir, this.loadDir]) {
+            if (theDir) {
+                try {
+                    const fn = g.os_path_join(theDir, tag);
 
-    //@+node:felix.20220417215228.2: *5* app.cleanLeoID
-    /**
-     * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
-     */
-    public cleanLeoID(id_: string, tag: string): string {
-        const old_id: string = id_.toString();
-        try {
-            id_ = id_
-                .replace(/\./g, '')
-                .replace(/\,/g, '')
-                .replace(/\"/g, '')
-                .replace(/\'/g, '');
-            //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
-            id_ = id_.split(' ').join('');
-        } catch (exception) {
-            g.es_exception(exception);
-            id_ = '';
-        }
-        if (id_.length < 3) {
-            id_ = '';
-            void vscode.window.showInformationMessage(
-                `Invalid Leo ID: ${tag}`,
-                {
-                    detail:
-                        `Invalid Leo ID: ${old_id}\n\n` +
-                        'Your id should contain only letters and numbers\n' +
-                        'and must be at least 3 characters in length.',
-                    modal: true,
+                    // with open(fn, 'w') as f
+                    //     f.write(self.leoID)
+                    await g.writeFile(this.leoID, 'utf8', fn);
+
+                    const w_exists = await g.os_path_exists(fn);
+                    if (w_exists) {
+                        g.error('', tag, 'created in', theDir);
+                    }
+
+                    return !!w_exists;
+
                 }
-            );
+                catch (IOError) {
+                    //pass
+                }
+                g.error('can not create', tag, 'in', theDir);
+            }
         }
-        return id_;
+
+        return false;
+    }
+    //@+node:testttt.20240305234320.1: *4* app.setLog, lockLog, unlocklog
+    // def setLog(self, log: Any) -> None:
+    //     """set the frame to which log messages will go"""
+    //     if not self.logIsLocked:
+    //         self.log = log
+
+    /**
+     * Disable changes to the log
+     */
+    public lockLog(): void {
+        // print("app.lockLog:")
+        this.logIsLocked = true;
     }
 
+    /**
+     * Enable changes to the log
+     */
+    public unlockLog(): void {
+        // print("app.unlockLog:")
+        this.logIsLocked = false;
+    }
     //@+node:felix.20220511231737.1: *3* app.Closing
     //@+node:felix.20220511231737.2: *4* app.closeLeoWindow
     /**
@@ -1853,7 +1995,7 @@ export class LoadManager {
         // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs
         // These use g.app.loadDir...
         // g.app.extensionsDir = ''; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
-        g.app.leoEditorDir = g.app.vscodeExtensionDir; // join(g.app.loadDir, '..', '..');
+        g.app.leoEditorDir = g.extensionUri ? g.os_path_normslashes(g.os_path_fix_drive(g.extensionUri.fsPath)) : ''; // join(g.app.loadDir, '..', '..');
         g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
@@ -1899,7 +2041,7 @@ export class LoadManager {
         }
         if (g.isBrowser) {
             // BROWSER: Root of repo
-            home = g.app.vscodeWorkspaceUri!.fsPath;
+            home = g.workspaceUri!.fsPath;
         }
 
         if (home) {
@@ -2587,9 +2729,9 @@ export class LoadManager {
         const c = g.app.newCommander(fn);
         const fc = c.fileCommands;
 
-        //const frame = c.frame;
+        // const frame = c.frame;
         // frame.log.enable(false);
-        // g.app.lockLog();
+        g.app.lockLog();
 
         let ok: VNode | undefined;
         let g_element;
@@ -2617,7 +2759,7 @@ export class LoadManager {
         } catch (p_err) {
             ok = undefined;
         }
-        // g.app.unlockLog();
+        g.app.unlockLog();
         g.app.gui = oldGui;
 
         return ok ? c : undefined;
@@ -3294,8 +3436,8 @@ export class LoadManager {
         // Create the commander for the .leo  file.
         const c: Commands = g.app.newCommander('', gui, w_previousSettings);
 
-        // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-        // c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        // ! LEOJS : SET c.openDirectory to the g.vscodeWorkspaceUri !
+        // c.openDirectory = g.vscodeWorkspaceUri?.fsPath;
         // if (c.openDirectory) {
         //     c.frame.openDirectory = c.openDirectory;
         // }
@@ -3605,25 +3747,35 @@ export class LoadManager {
         if (!fn) {
             return;
         }
-        if (! await g.os_path_exists(fn)) {
+        const exists = await g.os_path_exists(fn);
+        if (!exists) {
             return;
         }
         if (!lm.isLeoFile(fn)) {
             return;
         }
+        // Re-read the file.
+        c.fileCommands.initIvars();
         try {
-            // Re-read the file.
-            const w_uri = g.makeVscodeUri(fn);
-            await vscode.workspace.fs.stat(w_uri);
-            // OK exists
-            c.fileCommands.initIvars();
+            g.app.reverting = true;
             // await c.fileCommands.getLeoFile(undefined, fn, undefined, undefined, false);
             const v = await fc.getAnyLeoFileByName(fn, true);
+            // Report failure.
             if (!v) {
                 g.error(`Revert failed: ${fn}`);
             }
+            // #3596: Redo all buttons.
+            const sc = c.theScriptingController;
+            if (sc) {
+                await sc.createAllButtons();
+            }
+            if (!g.unitTesting) {
+                g.es_print(`Reverted ${c.fileName()}`);
+            }
         } catch {
             // Does not exist !
+        } finally {
+            g.app.reverting = false;
         }
     }
     //@-others

@@ -122,6 +122,7 @@ export class LeoFrame {
     }
     //@+node:felix.20231129133050.1: *3* LeoFrame.setTopGeometry
     public setTopGeometry(w: number, h: number, x: number, y: number): void {
+
         // Kept as-is in LeoJS.
         if (isNaN(w)) {
             console.log("ERROR setTopGeometry!!");

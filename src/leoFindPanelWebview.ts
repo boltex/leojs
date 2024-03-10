@@ -25,11 +25,8 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
         webviewView.webview.options = {
             // Allow scripts in the webview
             enableScripts: true,
-
             localResourceRoots: [this._extensionUri],
         };
-
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
         this._context.subscriptions.push(
             webviewView.webview.onDidReceiveMessage((data) => {
@@ -51,6 +48,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                     case 'gotFocus': {
+                        void this._leoUI.triggerBodySave(true);
                         void utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
                         break;
                     }
@@ -79,6 +77,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                     case 'refreshSearchConfig': {
+                        void this._leoUI.triggerBodySave(true);
                         // Leave a cycle before getting settings
                         setTimeout(() => {
                             this._leoUI.loadSearchSettings();
@@ -88,6 +87,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                 }
             })
         );
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
         this._leoUI.setFindPanel(this._view);
     }
 

@@ -49,6 +49,8 @@ export class Constants {
     public static URI_SCHEME_HEADER: string = "leojs:/";
     public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
     public static UNTITLED_FILE_NAME: string = "untitled";
+    public static URI_HELP_SCHEME: string = "helpPanel";
+    public static URI_HELP_FILENAME: string = "LeoJS Help";
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
@@ -86,6 +88,7 @@ export class Constants {
         "php",
         "restructuredtext",
         "rust",
+        "xml",
     ];
 
     /**
@@ -128,8 +131,7 @@ export class Constants {
         SVG_SHEME: "data",
         SVG_OPEN: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">',
         SVG_CLOSE: "</svg>",
-        STATUSBAR_INDICATOR: "$(keyboard) ",
-        STATUSBAR_COLOR: "fb7c47",
+        STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
         TREEVIEW_TITLE: "OUTLINE",
@@ -163,10 +165,6 @@ export class Constants {
         CLEARED_RECENT: "Cleared recent files list",
         CHOOSE_OPENED_FILE: "Select an opened Leojs File",
         FILE_NOT_OPENED: "No files opened.",
-
-        // STATUS BAR UNUSED FOR NOW IN LEOJS // 
-        STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
-        STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
 
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
@@ -221,7 +219,6 @@ export class Constants {
         IGNORED: " They were ignored.", // with voluntary leading space
         TOO_FAST: "Leo is busy! ", // with voluntary trailing space
 
-        UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language coloring not yet supported.",
         LANGUAGE_NOT_SUPPORTED: " language coloring not yet supported.", // with leading space
         MINIBUFFER_BUTTON_START: "@button-",
         MINIBUFFER_RCLICK_START: "@rclick-",
@@ -237,8 +234,6 @@ export class Constants {
         MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
         MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
-        ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
-        FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
         BODY_WRAP_RECOMMEND: "'leojsbody' wordWrap settings are recommended (some currently missing)",
         BODY_WRAP_SET: "'leojsbody' wordWrap settings were set",
         FIX_IT: "Fix it",
@@ -290,12 +285,9 @@ export class Constants {
         LEO_TREE_BROWSE: "leoTreeBrowse",
         TREE_KEEP_FOCUS: "treeKeepFocus",
         TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
-        // STATUSBAR_STRING: "statusBarString",
-        // STATUSBAR_COLOR: "statusBarColor",
         TREE_IN_EXPLORER: "treeInExplorer",
         SHOW_OPEN_ASIDE: "showOpenAside",
         SHOW_EDIT: "showEditOnNodes",
-        // SHOW_ARROWS: "showArrowsOnNodes",
         SHOW_ADD: "showAddOnNodes",
         SHOW_MARK: "showMarkOnNodes",
         SHOW_CLONE: "showCloneOnNodes",
@@ -305,6 +297,7 @@ export class Constants {
         ACTIVITY_VIEW_SHORTCUT: "ActivityViewShortcut",
         GO_ANYWHERE_SHORTCUT: "goAnywhereShortcut",
 
+        SHOW_UNL_ON_STATUSBAR: "showUnlOnStatusBar",
         // SHOW_EDITION_BODY: "showEditionOnBody",
         // SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
         // SHOW_PROMOTE_BODY: "showPromoteOnBody",
@@ -336,8 +329,7 @@ export class Constants {
         ACTIVITY_VIEW_SHORTCUT: true,
         GO_ANYWHERE_SHORTCUT: true,
 
-        // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
-        // STATUSBAR_COLOR: "fb7c47",
+        SHOW_UNL_ON_STATUSBAR: true,
 
         TREE_IN_EXPLORER: true,
         SHOW_OPEN_ASIDE: true,
@@ -393,6 +385,7 @@ export class Constants {
         // Main flags for connection and opened file
         LEO_STARTUP_DONE: "leojsStartupDone",
         LEO_OPENING_FILE: "leojsOpeningFile",
+        LEO_ID_UNSET: "leojsIdUnset",
         LEO_READY: "leojsReady", // Extension activated and classes created and ready
         TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
         TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
@@ -496,7 +489,7 @@ export class Constants {
         // Access to the Settings/Welcome Webview
         SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
         SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
-        // STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+        STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -524,6 +517,10 @@ export class Constants {
         MINIBUFFER: Constants.NAME + ".minibuffer",
         SET_LEO_ID: Constants.NAME + ".setLeoID",
         HANDLE_UNL: Constants.NAME + ".handleUnl",
+        SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
+        FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
+        SHORT_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "shortLegacyUnlToClipboard",
+        FULL_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "fullLegacyUnlToClipboard",
         GIT_DIFF: Constants.NAME + ".gitDiff",
         TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
         WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",

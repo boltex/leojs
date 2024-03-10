@@ -8,7 +8,6 @@ import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 import 'date-format-lite';
-// import * as AdmZip from 'adm-zip';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 import * as difflib from 'difflib';
@@ -37,7 +36,7 @@ type sqlDbRow = [
 interface VNodeJSON {
     gnx: string;
     vh: string;
-    status: number;
+    // status: number; // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
     children: VNodeJSON[];
 }
 //@-<< interfaces >>
@@ -613,7 +612,8 @@ export class FastRead {
         const c: Commands = this.c;
         const toInt = (x: number, d_val: number): number => {
             try {
-                if (typeof x !== 'number') {
+                x = Number(x);
+                if (isNaN(x) || typeof x !== 'number') {
                     return d_val;
                 }
                 return Math.floor(x);
@@ -633,6 +633,7 @@ export class FastRead {
             undefined,
             undefined,
         ];
+
         //
         // Priority 3: The globals dict in the .leojs file.
         //             Leo doesn't write the globals element, but leoInteg might.
@@ -733,7 +734,8 @@ export class FastRead {
 
                     v._headString = v_dict['vh'] || '';
                     v._bodyString = gnx2body[gnx!] || '';
-                    v.statusBits = v_dict['status'] || 0; // Needed ?
+                    // status: number; // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
+                    // v.statusBits = v_dict['status'] || 0; // Needed ?
                     if (v.isExpanded()) {
                         fc.descendentExpandedList.push(gnx!);
                     }
@@ -1035,7 +1037,7 @@ export class FileCommands {
                 `${archive_name} containing ${n} file${g.plural(n)}`
             );
 
-            // const f = new AdmZip();
+            // const f = new jszip ! TODO !
 
             console.log(process.env);
 
@@ -2633,8 +2635,6 @@ export class FileCommands {
         const w_windowInfo = c.frame.get_window_info();
         const [width, height, left, top] = w_windowInfo;
 
-        console.log('leojs_globals saving window geom to db : ', w_windowInfo);
-
         c.db['body_outline_ratio'] = c.frame.ratio.toString();
         c.db['body_secondary_ratio'] = c.frame.secondary_ratio.toString();
         c.db['window_position'] = [top.toString(), left.toString(), height.toString(), width.toString()];
@@ -2678,16 +2678,18 @@ export class FileCommands {
         if (forceWrite || this.usingClipboard) {
             v.setWriteBit(); // 4.2: Indicate we wrote the body text.
         }
-        let status = 0;
-        if (v.isMarked()) {
-            status |= StatusFlags.markedBit;
-        }
-        if (p.isExpanded()) {
-            status |= StatusFlags.expandedBit;
-        }
-        if (p.__eq__(c.p)) {
-            status |= StatusFlags.selectedBit;
-        }
+
+        // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
+        // let status = 0;
+        // if (v.isMarked()) {
+        //     status |= StatusFlags.markedBit;
+        // }
+        // if (p.isExpanded()) {
+        //     status |= StatusFlags.expandedBit;
+        // }
+        // if (p.__eq__(c.p)) {
+        //     status |= StatusFlags.selectedBit;
+        // }
 
         const children: VNodeJSON[] = []; // Start empty
 
@@ -2717,10 +2719,11 @@ export class FileCommands {
             }
         }
 
+        // #73 Removed from .leojs file format. All status saved in db like for xml .leo files.
         // Else, just add status if needed
-        if (status) {
-            result['status'] = status;
-        }
+        // if (status) {
+        // result['status'] = status;
+        // }
         return result;
     }
     //@+node:felix.20211213224237.25: *5* fc.write_xml_file
@@ -3016,6 +3019,9 @@ export class FileCommands {
 
         const w_windowInfo = c.frame.get_window_info();
         const [w, h, left, t] = w_windowInfo;
+
+        // TODO : FIX THIS!
+        console.log('putGlobals saving window geom to db : ', w_windowInfo);
 
         c.db['window_position'] = [t.toString(), left.toString(), h.toString(), w.toString()];
 

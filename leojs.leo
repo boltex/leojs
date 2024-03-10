@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240122215450.1"><vh>0.2.12</vh></v>
 <v t="felix.20240113195919.1"><vh>0.2.11</vh></v>
 <v t="felix.20240107181054.1"><vh>0.2.10</vh></v>
 <v t="felix.20231224200501.1"><vh>0.2.9</vh></v>
@@ -30,15 +31,19 @@
 <v t="felix.20231219233427.1"><vh>@clean find-panel/main.js</vh></v>
 <v t="felix.20231219233431.1"><vh>@clean find-panel/style.css</vh></v>
 </v>
+<v t="felix.20240224165738.1"><vh>Help Panel Webview</vh>
+<v t="felix.20240224200656.1"><vh>@clean help-panel/index.html</vh></v>
+<v t="felix.20240224165750.1"><vh>@clean help-panel/style.css</vh></v>
+<v t="felix.20240224165747.1"><vh>@clean help-panel/main.js</vh></v>
+</v>
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
 <v t="felix.20211007213344.2"><vh>class Config</vh>
 <v t="felix.20211007213344.3"><vh>getConfig</vh></v>
-<v t="felix.20211007213344.4"><vh>getFontConfig</vh></v>
 <v t="felix.20211007213344.5"><vh>setLeojsSettings</vh></v>
-<v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
 <v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
 <v t="felix.20240121143955.1"><vh>setBodyWrap</vh></v>
+<v t="felix.20240221212119.1"><vh>removeOldBodyWrap</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
 <v t="felix.20240121003227.1"><vh>checkBodyWrap</vh></v>
@@ -73,7 +78,6 @@
 <v t="felix.20220523151725.1"><vh>setScheme</vh></v>
 <v t="felix.20220523140004.1"><vh>runLeo</vh></v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
-<v t="felix.20221002011858.1"><vh>closeLeoTextEditors</vh></v>
 <v t="felix.20221002011903.1"><vh>showWelcomeIfNewer</vh></v>
 </v>
 <v t="felix.20231224201746.1"><vh>@clean src/helpPanel.ts</vh>
@@ -117,6 +121,7 @@
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20221113002623.1"><vh>showSettings</vh></v>
 <v t="felix.20231224193540.1"><vh>put_help</vh></v>
+<v t="felix.20240213205001.1"><vh>statusBar</vh></v>
 <v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
@@ -206,6 +211,7 @@
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
 <v t="felix.20220103203600.1"><vh>asyncGetTextFromClipboard</vh></v>
 <v t="felix.20211024012523.1"><vh>getTextFromClipboard</vh></v>
+<v t="felix.20240222233600.1"><vh>unlToClipboard</vh></v>
 </v>
 <v t="felix.20220505215916.1"><vh>Nav</vh>
 <v t="felix.20221206201231.1"><vh>goAnywhere</vh></v>
@@ -226,7 +232,6 @@
 <v t="felix.20221222003636.1"><vh>navTextClear</vh></v>
 <v t="felix.20220505215924.4"><vh>startSearch</vh></v>
 <v t="felix.20220930222931.1"><vh>checkForceFindFocus</vh></v>
-<v t="felix.20220505215924.6"><vh>_inputFindPattern</vh></v>
 <v t="felix.20220505215924.7"><vh>find</vh></v>
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
@@ -325,6 +330,7 @@
 <v t="felix.20201214151447.3"><vh>General State Flags</vh>
 <v t="felix.20221004234249.1"><vh>leojsStartupDone &amp; helper</vh></v>
 <v t="felix.20201214233119.1"><vh>leoReady &amp; helper</vh></v>
+<v t="felix.20240303150445.1"><vh>leoIdReady &amp; helper</vh></v>
 <v t="felix.20201214151447.4"><vh>fileOpenedReady &amp; helper</vh></v>
 <v t="felix.20201214151447.5"><vh>leoOpenedFileName</vh></v>
 <v t="felix.20201214151447.6"><vh>leoChanged &amp; helper</vh></v>
@@ -357,7 +363,8 @@
 <v t="felix.20201214151451.3"><vh>show</vh></v>
 <v t="felix.20201214151451.4"><vh>hide</vh></v>
 <v t="felix.20201214151451.5"><vh>setString</vh></v>
-<v t="felix.20201214151451.6"><vh>update</vh></v>
+<v t="felix.20240222220320.1"><vh>setTooltip</vh></v>
+<v t="felix.20240223001320.1"><vh>_buildToolTip</vh></v>
 <v t="felix.20201214151451.7"><vh>_updateLeoObjectIndicatorDebounced</vh></v>
 <v t="felix.20201214151451.8"><vh>_updateLeoObjectIndicator</vh></v>
 </v>
@@ -366,7 +373,6 @@
 <v t="felix.20201214154816.1"><vh>@clean src/types.ts</vh>
 <v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
 <v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
-<v t="felix.20211007213915.1"><vh>FontSettings</vh></v>
 <v t="felix.20220922215553.1"><vh>Focus</vh></v>
 <v t="felix.20201214154816.3"><vh>RevealType</vh></v>
 <v t="felix.20201214154816.4"><vh>ReqRefresh</vh></v>
@@ -393,10 +399,13 @@
 <v t="felix.20201214154816.16"><vh>ChooseDocumentItem</vh></v>
 <v t="felix.20220505220706.1"><vh>ChooseRClickItem</vh></v>
 <v t="felix.20201214154816.17"><vh>MinibufferCommand</vh></v>
+<v t="felix.20240222233803.1"><vh>UnlType</vh></v>
 </v>
 <v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
 <v t="felix.20201208224407.1"><vh>@clean src/utils.ts</vh>
 <v t="felix.20220929001102.1"><vh>performanceNow</vh></v>
+<v t="felix.20240209012442.1"><vh>closeLeoTextEditors</vh></v>
+<v t="felix.20240209012451.1"><vh>closeLeoHelpPanels</vh></v>
 <v t="felix.20220505225030.1"><vh>uniqueId</vh></v>
 <v t="felix.20220505225023.1"><vh>getUniqueId</vh></v>
 <v t="felix.20230315215040.1"><vh>getOnce</vh></v>
@@ -412,7 +421,6 @@
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20230416212643.1"><vh>getDurationSeconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
-<v t="felix.20220417151556.1"><vh>getIdFromDialog</vh></v>
 <v t="felix.20220201195806.1"><vh>isAlphaNumeric</vh></v>
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
 <v t="felix.20211007214455.1"><vh>isHexColor</vh></v>
@@ -737,9 +745,10 @@ Leo uses a model/view/controller architecture.
 private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
     if (
-        p_event.affectsConfiguration(Constants.CONFIG_NAME) ||
-        p_event.affectsConfiguration('editor.fontSize') ||
-        p_event.affectsConfiguration('window.zoomLevel')
+        p_event.affectsConfiguration(Constants.CONFIG_NAME)
+        // ||
+        // p_event.affectsConfiguration('editor.fontSize') ||
+        // p_event.affectsConfiguration('window.zoomLevel')
     ) {
         void this.config.setLeoJsSettingsPromise.then(
             () =&gt; {
@@ -755,9 +764,17 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
                 ) {
                     this.configTreeRefresh();
                 }
+                if (this.config.showUnlOnStatusBar &amp;&amp; this.leoStates.fileOpenedReady &amp;&amp; this._leoStatusBar) {
+                    this._leoStatusBar.show();
+                }
+                if (!this.config.showUnlOnStatusBar &amp;&amp; this._leoStatusBar) {
+                    this._leoStatusBar.hide();
+                }
+                if (p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.LEO_ID)) {
+                    void this.setIdSetting(this.config.leoID);
+                }
             }
         );
-
     }
 
     // also check if workbench.editor.enablePreview
@@ -766,12 +783,12 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
         .get('enablePreview');
 
     // Check For specific vscode settings needed for leojs
-    // Leave small delay for multiple possible forced changes at startup
+    // Leave a delay for multiple possible forced changes at startup
     setTimeout(() =&gt; {
         this.config.checkEnablePreview();
         this.config.checkCloseEmptyGroups();
         this.config.checkBodyWrap();
-    }, 150);
+    }, 1500);
 }
 
 </t>
@@ -810,6 +827,7 @@ Or, simply visit your desired GitHub repository, Press the period '.' key on you
 -   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
+- **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
 -   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
 -   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
 -   **Nav and Tag panel** controls are integrated in the Find panel
@@ -1326,7 +1344,9 @@ Then, from your extension's path, start an HTTP server by running
 $ npx serve --cors -l 5000 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/certs/localhost-key.pem
 ```
 
-Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000`
+Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/testleojs1` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000`
+
+&gt; NOTE: To 'sideload' an extension in order to test it, you have to use VScode for the web from an adress starting with 'vscode.dev' and not 'github.dev' E.g. at https://vscode.dev/github/boltex/testleojs1 not FROM https://github.dev/boltex/testleojs1
 
 # Converting from Python to Typescript
 
@@ -1543,7 +1563,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
     */
-
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
@@ -1566,8 +1585,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
     const w_previousVersion = p_context.globalState.get&lt;string&gt;(Constants.VERSION_STATE_KEY);
     let SQL: SqlJsStatic;
 
-    // * Close remaining Leo Bodies restored by vscode from last session.
-    await closeLeoTextEditors();
+    // * Close remaining Leo Bodies and help panels restored by vscode from last session.
+    await utils.closeLeoTextEditors();
+    await utils.closeLeoHelpPanels();
 
     // * Show a welcome screen on version updates, then start the actual extension.
     void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
@@ -1577,7 +1597,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
 
         const gitExtension = vscode.extensions.getExtension&lt;GitAPI.GitExtension&gt;('vscode.git');
         if (gitExtension) {
@@ -1774,10 +1793,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
     }
 
     if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
-        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
-        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+        (g.workspaceUri as vscode.Uri) = vscode.workspace.workspaceFolders[0].uri;
 
         // console.log('GOT WORKSPACE: starting file-system ZIP &amp; DB tests');
         if (0) {
@@ -1792,17 +1808,12 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
     }
 
     if (!g.isBrowser) {
-        // Regular NodeJs Extension: Dont wait for workspace being opened
-        if (!g.app.vscodeUriScheme) {
-            // Only setting if undefined, because regular vscode can still work on remote github virtual filesystem
-            g.app.vscodeUriScheme = 'file';
-        }
         await runLeo(p_context);
     } else {
         // Web Browser Extension: Check for type of workspace opened first
-        if (g.app.vscodeUriScheme) {
+        if (g.workspaceUri) {
 
-            if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
+            if (!vscode.workspace.fs.isWritableFileSystem(g.workspaceUri.scheme)) {
 
                 // NOTE : ! THIS RETURNS FALSE POSITIVES ! 
                 console.log('NOT WRITABLE WORKSPACE: FALSE POSITIVE?');
@@ -1823,9 +1834,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
-            if (g.app.vscodeUriScheme !== 'file') {
+            if (g.workspaceUri.scheme !== 'file') {
                 if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
                 }
 
                 await runLeo(p_context);
@@ -1966,6 +1977,12 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 </t>
 <t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
+[CMD.SHORT_GNX_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("shortGnx")], // Not referenced in package.json
+[CMD.FULL_GNX_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("fullGnx")], // Not referenced in package.json
+[CMD.SHORT_LEGACY_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("shortLegacy")], // Not referenced in package.json
+[CMD.FULL_LEGACY_UNL_TO_CLIPBOARD, () =&gt; p_leoUI.unlToClipboard("fullLegacy")], // Not referenced in package.json
+
+[CMD.STATUS_BAR, () =&gt; p_leoUI.statusBar()], // Not referenced in package.json
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
 [CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
@@ -2033,8 +2050,8 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
-[CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.selectTreeNode(p_position, true)],
+[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false, false)], // Select is NOT a Position!
+[CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.selectTreeNode(p_position, false, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.CONTRACT_ALL_FO, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
@@ -2084,7 +2101,7 @@ public static COMMANDS = {
     // Access to the Settings/Welcome Webview
     SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
     SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
-    // STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+    STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -2112,6 +2129,10 @@ public static COMMANDS = {
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
     HANDLE_UNL: Constants.NAME + ".handleUnl",
+    SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
+    FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
+    SHORT_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "shortLegacyUnlToClipboard",
+    FULL_LEGACY_UNL_TO_CLIPBOARD: Constants.NAME + "fullLegacyUnlToClipboard",
     GIT_DIFF: Constants.NAME + ".gitDiff",
     TAB_CYCLE_NEXT: Constants.NAME + ".tabCycleNext",
     WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
@@ -2490,6 +2511,8 @@ public static OUTPUT_CHANNEL_LANGUAGE = 'Log';
 public static URI_SCHEME_HEADER: string = "leojs:/";
 public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
 public static UNTITLED_FILE_NAME: string = "untitled";
+public static URI_HELP_SCHEME: string = "helpPanel";
+public static URI_HELP_FILENAME: string = "LeoJS Help";
 public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
@@ -2548,8 +2571,7 @@ public static GUI = {
     SVG_SHEME: "data",
     SVG_OPEN: 'image/svg+xml;utf8,&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;',
     SVG_CLOSE: "&lt;/svg&gt;",
-    STATUSBAR_INDICATOR: "$(keyboard) ",
-    STATUSBAR_COLOR: "fb7c47",
+    STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
     EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
     TREEVIEW_TITLE: "OUTLINE",
@@ -2584,10 +2606,6 @@ public static USER_MESSAGES = {
     CLEARED_RECENT: "Cleared recent files list",
     CHOOSE_OPENED_FILE: "Select an opened Leojs File",
     FILE_NOT_OPENED: "No files opened.",
-
-    // STATUS BAR UNUSED FOR NOW IN LEOJS // 
-    STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
-    STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
 
     PROMPT_EDIT_HEADLINE: "Edit Headline",
     PROMPT_INSERT_NODE: "Insert Node",
@@ -2642,7 +2660,6 @@ public static USER_MESSAGES = {
     IGNORED: " They were ignored.", // with voluntary leading space
     TOO_FAST: "Leo is busy! ", // with voluntary trailing space
 
-    UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language coloring not yet supported.",
     LANGUAGE_NOT_SUPPORTED: " language coloring not yet supported.", // with leading space
     MINIBUFFER_BUTTON_START: "@button-",
     MINIBUFFER_RCLICK_START: "@rclick-",
@@ -2658,8 +2675,6 @@ public static USER_MESSAGES = {
     MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
     MINIBUFFER_HISTORY_DESC: "Choose from last run commands...",
 
-    ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
-    FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
     BODY_WRAP_RECOMMEND: "'leojsbody' wordWrap settings are recommended (some currently missing)",
     BODY_WRAP_SET: "'leojsbody' wordWrap settings were set",
     FIX_IT: "Fix it",
@@ -2710,6 +2725,7 @@ public static CONTEXT_FLAGS = {
     // Main flags for connection and opened file
     LEO_STARTUP_DONE: "leojsStartupDone",
     LEO_OPENING_FILE: "leojsOpeningFile",
+    LEO_ID_UNSET: "leojsIdUnset",
     LEO_READY: "leojsReady", // Extension activated and classes created and ready
     TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
     TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
@@ -3296,9 +3312,9 @@ set leoCanDemote(p_value: boolean) {
 
 </t>
 <t tx="felix.20201214151451.1">import * as vscode from "vscode";
-import * as utils from "./utils";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 @language typescript
 @tabwidth -4
@@ -3310,9 +3326,9 @@ import { LeoUI } from "./leoUI";
 export class LeoStatusBar {
 
     private _leoStatusBarItem: vscode.StatusBarItem;
-    private _statusbarNormalColor = new vscode.ThemeColor(Constants.GUI.THEME_STATUSBAR);  // "statusBar.foreground"
     private _updateStatusBarTimeout: NodeJS.Timeout | undefined;
-    private _string: string = ""; // Use this string with indicator, using this will replace the default from config
+    private _string: string = ""; // Use this string with indicator, using this will replace the defult from config
+    private _tooltip: string = ""; // Markdown string built by _buildToolTip from a given headeline
 
     // * Represents having focus on a leo tree, body or document panel to enable leo keybindings
     private _statusBarFlag: boolean = false;
@@ -3330,12 +3346,17 @@ export class LeoStatusBar {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
         this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
-        this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
-        // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
-        this._leoStatusBarItem.command = Constants.COMMANDS.SHOW_LOG;
-        // this._leoStatusBarItem.command = "leojs.test"; // just call test function for now to help debugging
+        this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
+
+        const w_mdToolTip = new vscode.MarkdownString();
+
+        w_mdToolTip.value = "";
+
+        w_mdToolTip.isTrusted = true;
+        w_mdToolTip.supportThemeIcons = true;
+
+        this._leoStatusBarItem.tooltip = w_mdToolTip;
 
         this._leoStatusBarItem.hide();
     }
@@ -3361,29 +3382,17 @@ public hide(): void {
 </t>
 <t tx="felix.20201214151451.5">/**
  * * Sets string to replace default from config &amp; refresh it
- */
-public setString(p_string: string): void {
-    this._string = p_string;
-    this._updateLeoObjectIndicator();
-}
-
-</t>
-<t tx="felix.20201214151451.6">/**
- * * Updates the status bar visual indicator visual indicator with optional debouncing delay
- * @param p_state True/False flag for On or Off status
+ * @p_string string to be displayed on Leo's status bar space.
  * @param p_debounceDelay Optional, in milliseconds
+ * 
  */
-public update(p_state: boolean, p_debounceDelay?: number, p_forced?: boolean): void {
-    if (p_forced || (p_state !== this.statusBarFlag)) {
-        this.statusBarFlag = p_state;
-        if (p_debounceDelay) {
-            this._updateLeoObjectIndicatorDebounced(p_debounceDelay);
-        } else {
-            this._updateLeoObjectIndicator();
-        }
+public setString(p_string: string, p_debounceDelay?: number): void {
+    if (this._string === p_string) {
+        return; // cancel
     }
+    this._string = p_string;
+    this._updateLeoObjectIndicatorDebounced(p_debounceDelay || 0);
 }
-
 </t>
 <t tx="felix.20201214151451.7">/**
  * * Updates the status bar visual indicator flag in a debounced manner
@@ -3407,21 +3416,8 @@ private _updateLeoObjectIndicator(): void {
     if (this._updateStatusBarTimeout) {
         clearTimeout(this._updateStatusBarTimeout);
     }
-
-    void utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
-
-    this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR +
-        (this._string ? this._string : '') + " " +
-        (this._leoJs.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoJs.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
-
-    // Also check in constructor for statusBar properties (the createStatusBarItem call itself)
-    if (this.statusBarFlag &amp;&amp; this._leoJs.leoStates.fileOpenedReady) {
-        this._leoStatusBarItem.color = "#" + Constants.GUI.STATUSBAR_COLOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
-    } else {
-        this._leoStatusBarItem.color = this._statusbarNormalColor;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_OFF;
-    }
+    this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR + this._string;
+    (this._leoStatusBarItem.tooltip as vscode.MarkdownString).value = this._tooltip;
 }
 
 </t>
@@ -3574,6 +3570,7 @@ export interface LeoButton {
 
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
+import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
 import * as utils from "./utils";
@@ -3593,7 +3590,8 @@ import {
     LeoGuiFindTabManagerSettings,
     ChooseDocumentItem,
     LeoDocument,
-    ChooseRClickItem
+    ChooseRClickItem,
+    UnlType
 } from "./types";
 
 import { Config } from "./config";
@@ -3603,6 +3601,7 @@ import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
+import { LeoStatusBar } from "./leoStatusBar";
 
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
@@ -3630,10 +3629,6 @@ import { UnlProvider } from "./unlProvider";
 
     this.idleTimeClass = IdleTime;
 
-    // * Log pane instanciation
-    this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
-    this._context.subscriptions.push(this._leoLogPane);
-
     // * Setup States
     this.leoStates = new LeoStates(_context, this);
 
@@ -3643,6 +3638,7 @@ import { UnlProvider } from "./unlProvider";
     // * Set required vscode configs if needed
     this.config.checkEnablePreview(true);
     this.config.checkCloseEmptyGroups(true);
+    this.config.removeOldBodyWrap();
     this.config.checkBodyWrap(true);
 
     // * also check workbench.editor.enablePreview
@@ -3658,7 +3654,7 @@ import { UnlProvider } from "./unlProvider";
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
     this.gotoIcons = utils.buildGotoIconPaths(_context);
 
-    // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
+    // * Debounced refresh flags and UI parts, along with language &amp; wrap, when operation(s) are done executing
     this.getStates = debounce(
         this._triggerGetStates,
         Constants.STATES_DEBOUNCE_DELAY
@@ -3717,11 +3713,13 @@ import { UnlProvider } from "./unlProvider";
         this._lastTreeView = this._leoTreeView;
     }
 
+    // * Help panel helper
+    this.showdownConverter = new showdown.Converter();
+
     // * Configuration / Welcome webview
     this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
     // Set confirm on close to 'never' on startup 
     void this.checkConfirmBeforeClose();
-    void this.showLogPane();
 }
 
 </t>
@@ -3821,6 +3819,10 @@ export class LeoUI extends NullGui {
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
 
+    // * Help Panel
+    public showdownConverter: showdown.Converter;
+    private _helpPanel: vscode.WebviewPanel | undefined;
+
     // * Interactive Find Input
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
     private _interactiveSearchOptions: {
@@ -3842,6 +3844,10 @@ export class LeoUI extends NullGui {
     private _gotSelectedNodeRevealTimer: undefined | NodeJS.Timeout;
     private _showBodySwitchBodyTimer: undefined | NodeJS.Timeout;
     private _leoDocumentsRevealTimer: undefined | NodeJS.Timeout;
+
+    // * Reveal Promises
+    private _documentPaneReveal: Thenable&lt;void&gt; | undefined;
+    private _undoPaneReveal: Thenable&lt;void&gt; | undefined;
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
@@ -3905,10 +3911,10 @@ export class LeoUI extends NullGui {
     public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
-    private _leoLogPane: vscode.OutputChannel;
+    private _leoLogPane: vscode.OutputChannel | undefined;
 
     // * Status Bar
-    // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
+    private _leoStatusBar: LeoStatusBar | undefined;
 
     // * Edit/Insert Headline Input Box System made with 'createInputBox'.
     private _hib: undefined | vscode.InputBox;
@@ -3961,6 +3967,12 @@ private _triggerGetStates(): void {
     if (this._refreshType.states) {
         this._refreshType.states = false;
         const p = c.p;
+        if (this._leoStatusBar &amp;&amp; p &amp;&amp; p.v) {
+            const kind: string = c.config.getString('unl-status-kind') || '';
+            const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
+            this._leoStatusBar.setString(method());
+            this._leoStatusBar.setTooltip(p.h);
+        }
         let w_canHoist = true;
         let w_topIsChapter = false;
         if (c.hoistStack.length) {
@@ -3995,6 +4007,8 @@ private _triggerGetStates(): void {
     // Set leoChanged and leoOpenedFilename
     this.leoStates.leoChanged = c.changed;
     this.leoStates.leoOpenedFileName = c.fileName();
+
+    this.refreshBodyStates(); // Set language and wrap states, if different.
 
     if (this._refreshType.documents) {
         this._refreshType.documents = false;
@@ -4121,7 +4135,8 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 <t tx="felix.20201214202749.1">/**
  * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
  * @param p_node is the position node selected in the tree
- * @param p_reveal
+ * @param p_internalCall Flag used to indicate the selection is forced, and NOT originating from user interaction
+ * @param p_aside Flag to force opening the body "Aside", i.e. when the selection was made from choosing "Open Aside"
  * @returns thenable for reveal to finish or select position to finish
  */
 public async selectTreeNode(
@@ -4149,7 +4164,7 @@ public async selectTreeNode(
     this.showBodyIfClosed = true;
 
     this.leoStates.setSelectedNodeFlags(p_node);
-    // this._leoStatusBar.update(true); // Just selected a node directly, or via expand/collapse
+
     const w_showBodyKeepFocus = p_aside
         ? this.config.treeKeepFocusWhenAside
         : this.config.treeKeepFocus;
@@ -4649,7 +4664,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4911,7 +4926,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.prev",
   "category": "Leojs",
   "title": "Prev",
-  "enablement": "leojsCanGoBack",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoBack",
   "icon": {
     "light": "resources/light/prev.svg",
     "dark": "resources/dark/prev.svg"
@@ -4921,7 +4936,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.prevFromOutline",
   "category": "Leojs",
   "title": "Prev",
-  "enablement": "leojsCanGoBack",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoBack",
   "icon": {
     "light": "resources/light/prev.svg",
     "dark": "resources/dark/prev.svg"
@@ -4931,7 +4946,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.next",
   "category": "Leojs",
   "title": "Next",
-  "enablement": "leojsCanGoNext",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoNext",
   "icon": {
     "light": "resources/light/next.svg",
     "dark": "resources/dark/next.svg"
@@ -4941,7 +4956,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.nextFromOutline",
   "category": "Leojs",
   "title": "Next",
-  "enablement": "leojsCanGoNext",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoNext",
   "icon": {
     "light": "resources/light/next.svg",
     "dark": "resources/dark/next.svg"
@@ -5413,7 +5428,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.promoteSelection",
   "category": "Leojs",
   "title": "Promote Children",
-  "enablement": "leojsCanPromote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanPromote",
   "icon": {
     "light": "resources/light/promote.svg",
     "dark": "resources/dark/promote.svg"
@@ -5423,7 +5438,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.promoteSelectionFromOutline",
   "category": "Leojs",
   "title": "Promote Children",
-  "enablement": "leojsCanPromote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanPromote",
   "icon": {
     "light": "resources/light/promote.svg",
     "dark": "resources/dark/promote.svg"
@@ -5443,7 +5458,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.demoteSelection",
   "category": "Leojs",
   "title": "Demote Siblings",
-  "enablement": "leojsCanDemote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanDemote",
   "icon": {
     "light": "resources/light/demote.svg",
     "dark": "resources/dark/demote.svg"
@@ -5453,7 +5468,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.demoteSelectionFromOutline",
   "category": "Leojs",
   "title": "Demote Siblings",
-  "enablement": "leojsCanDemote",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanDemote",
   "icon": {
     "light": "resources/light/demote.svg",
     "dark": "resources/dark/demote.svg"
@@ -5591,7 +5606,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.undo",
   "category": "Leojs",
   "title": "Undo",
-  "enablement": "leojsCanUndo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanUndo",
   "icon": {
     "light": "resources/light/undo.svg",
     "dark": "resources/dark/undo.svg"
@@ -5601,7 +5616,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.undoFromOutline",
   "category": "Leojs",
   "title": "Undo",
-  "enablement": "leojsCanUndo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanUndo",
   "icon": {
     "light": "resources/light/undo.svg",
     "dark": "resources/dark/undo.svg"
@@ -5611,7 +5626,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.redo",
   "category": "Leojs",
   "title": "Redo",
-  "enablement": "leojsCanRedo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanRedo",
   "icon": {
     "light": "resources/light/redo.svg",
     "dark": "resources/dark/redo.svg"
@@ -5621,7 +5636,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.redoFromOutline",
   "category": "Leojs",
   "title": "Redo",
-  "enablement": "leojsCanRedo",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanRedo",
   "icon": {
     "light": "resources/light/redo.svg",
     "dark": "resources/dark/redo.svg"
@@ -5908,13 +5923,23 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "view": "leojsOutline",
-    "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone"
+    "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdUnset"
   },
   {
     "view": "leojsOutlineExplorer",
-    "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-    "when": "!leojsReady &amp;&amp; leojsStartupDone"
+    "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; !leojsIdUnset"
+  },
+  {
+    "view": "leojsOutline",
+    "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdUnset"
+  },
+  {
+    "view": "leojsOutlineExplorer",
+    "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
+    "when": "!leojsReady &amp;&amp; leojsStartupDone &amp;&amp; leojsIdUnset"
   },
   {
     "view": "leojsOutline",
@@ -7004,6 +7029,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/node": "16.x",
 "@types/pako": "^2.0.0",
 "@types/safe-json-stringify": "^1.1.2",
+"@types/showdown": "^2.0.6",
 "@types/sql.js": "^1.4.4",
 "@types/uuid": "^9.0.7",
 "@types/vscode": "^1.83.0",
@@ -7043,6 +7069,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
+"showdown": "^2.1.0",
 "stream": "^0.0.2",
 "uuid": "^9.0.1"
 </t>
@@ -7525,7 +7552,6 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
         console.log('_refreshOutline could not reveal. Catch Error: ', error);
         this._leoTreeProvider.refreshTreeRoot();
     }
-
 }
 
 </t>
@@ -7629,12 +7655,10 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
 
     // * Force refresh tree when body update required for 'navigation/insert node' commands
     if (
-
         this.showBodyIfClosed &amp;&amp;
         this.showOutlineIfClosed &amp;&amp;
         !this.isOutlineVisible() &amp;&amp;
         this._refreshType.body
-
     ) {
         // console.log('HAD TO ADJUST!');
         this._refreshType.tree = true;
@@ -7659,12 +7683,14 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
             this._leoTreeProvider.incTreeId();
             this._revealType = w_revealType;
             void vscode.commands.executeCommand(w_treeName + '.focus');
+
             // } else if (!this.isOutlineVisible() &amp;&amp; this.showOutlineIfClosed) {
             //     const c = g.app.windowList[this.frameIndex].c;
             //     this._lastTreeView.reveal(c.p, { select: true });
             // } else {
             //     this._refreshOutline(true, w_revealType);
             // }
+
         } else {
             this._refreshOutline(true, w_revealType);
         }
@@ -7735,6 +7761,7 @@ public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveR
  */
 private _setupNoOpenedLeoDocument(): void {
     void this.checkConfirmBeforeClose();
+    this._leoStatusBar?.hide();
     this.leoStates.fileOpenedReady = false;
     this._bodyTextDocument = undefined;
     this.lastSelectedNode = undefined;
@@ -7758,7 +7785,9 @@ private _setupOpenedLeoDocument(): void {
     this.leoStates.leoChanged = c.changed;
 
     // * Startup flag
-    this.leoStates.fileOpenedReady = true;
+    if (!this.leoStates.leoIdUnset &amp;&amp; g.app.leoID !== 'None') {
+        this.leoStates.fileOpenedReady = true;
+    }
 
     this._revealType = RevealType.RevealSelect; // For initial outline 'visible' event
 
@@ -7789,6 +7818,9 @@ private _setupOpenedLeoDocument(): void {
     }
 
     this.loadSearchSettings();
+    if (this.config.showUnlOnStatusBar &amp;&amp; !this.leoStates.leoIdUnset &amp;&amp; g.app.leoID !== 'None') {
+        this._leoStatusBar?.show();
+    }
 }
 
 </t>
@@ -7810,6 +7842,18 @@ public gotSelectedNode(p_node: Position): void {
         this._lastTreeView.visible
 
     ) {
+        void this._lastTreeView.reveal(p_node, {
+            select: true,
+            focus: false
+        }).then(
+            () =&gt; {
+                //ok
+            },
+            () =&gt; {
+                // 
+                console.log('gotSelectedNode scroll mode reveal error catched');
+            }
+        );
         // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
         if (this._gotSelectedNodeBodyTimer) {
             clearTimeout(this._gotSelectedNodeBodyTimer);
@@ -8068,12 +8112,18 @@ public incTreeId(): void {
       "description": "Used to uniquely identify nodes - Defaults to the OS/Environment user name",
       "pattern": "(^$|^[a-zA-Z0-9]*$)",
       "patternErrorMessage": "Your id should contain only letters and numbers, and must contain at least 3 characters."
+    },
+    "leojs.showUnlOnStatusBar": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Displays an UNL indicator on the status bar"
     }
   }
 },
 </t>
 <t tx="felix.20211007213344.1">import * as vscode from "vscode";
-import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
+import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
@@ -8170,6 +8220,7 @@ public buildFromSavedSettings(): void {
         this.activityViewShortcut = GET(NAME).get(NAMES.ACTIVITY_VIEW_SHORTCUT, DEFAULTS.ACTIVITY_VIEW_SHORTCUT);
         this.goAnywhereShortcut = GET(NAME).get(NAMES.GO_ANYWHERE_SHORTCUT, DEFAULTS.GO_ANYWHERE_SHORTCUT);
 
+        this.showUnlOnStatusBar = GET(NAME).get(NAMES.SHOW_UNL_ON_STATUSBAR, DEFAULTS.SHOW_UNL_ON_STATUSBAR);
         // this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
         // if (this.statusBarString.length &gt; 8) {
         //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
@@ -8225,6 +8276,7 @@ export class Config implements ConfigMembers {
     public activityViewShortcut: boolean = Constants.CONFIG_DEFAULTS.ACTIVITY_VIEW_SHORTCUT;
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
+    public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
     // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
     // public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
@@ -8288,6 +8340,7 @@ public getConfig(): ConfigMembers {
         activityViewShortcut: this.activityViewShortcut,
         goAnywhereShortcut: this.goAnywhereShortcut,
 
+        showUnlOnStatusBar: this.showUnlOnStatusBar,
         // statusBarString: this.statusBarString,
         // statusBarColor: this.statusBarColor,
         treeInExplorer: this.treeInExplorer, // Used as Context Flag
@@ -8313,28 +8366,6 @@ public getConfig(): ConfigMembers {
         invertNodeContrast: this.invertNodeContrast,
         leoID: this.leoID
     };
-}
-
-</t>
-<t tx="felix.20211007213344.4">/**
- * * Get config from vscode for the UI font sizes
- * @returns the font settings object (zoom level and editor font size)
- */
-public getFontConfig(): FontSettings {
-    let w_zoomLevel = vscode.workspace.getConfiguration(
-        "window"
-    ).get("zoomLevel");
-
-    let w_fontSize = vscode.workspace.getConfiguration(
-        "editor"
-    ).get("fontSize");
-
-    const w_config: FontSettings = {
-        zoomLevel: Number(w_zoomLevel),
-        fontSize: Number(w_fontSize)
-    };
-
-    return w_config;
 }
 
 </t>
@@ -8365,33 +8396,6 @@ public setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt; {
         return Promise.resolve();
     });
 
-}
-
-</t>
-<t tx="felix.20211007213344.6">/**
- * * Apply changes in font size settings and save them in user settings.
- */
-public setFontConfig(p_settings: FontSettings): void {
-    if (p_settings.zoomLevel || p_settings.zoomLevel === 0) {
-        if (!isNaN(p_settings.zoomLevel) &amp;&amp; p_settings.zoomLevel &lt;= 12 &amp;&amp; p_settings.zoomLevel &gt;= -12) {
-            void vscode.workspace.getConfiguration("window")
-                .update("zoomLevel", p_settings.zoomLevel, true);
-        } else {
-            void vscode.window.showInformationMessage(
-                Constants.USER_MESSAGES.ZOOM_LEVEL_RANGE_LIMIT
-            );
-        }
-    }
-    if (p_settings.fontSize) {
-        if (!isNaN(p_settings.fontSize) &amp;&amp; p_settings.fontSize &lt;= 30 &amp;&amp; p_settings.fontSize &gt;= 6) {
-            void vscode.workspace.getConfiguration("editor")
-                .update("fontSize", p_settings.fontSize, true);
-        } else {
-            void vscode.window.showInformationMessage(
-                Constants.USER_MESSAGES.FONT_SIZE_RANGE_LIMIT
-            );
-        }
-    }
 }
 
 </t>
@@ -8428,6 +8432,7 @@ export interface ConfigMembers {
     activityViewShortcut: boolean;
     goAnywhereShortcut: boolean;
 
+    showUnlOnStatusBar: boolean,
     // statusBarString: string;
     // statusBarColor: string;
 
@@ -8465,15 +8470,6 @@ export interface ConfigSetting {
 }
 
 </t>
-<t tx="felix.20211007213915.1">/**
- * * Structure for the two vscode font settings
- */
-export interface FontSettings {
-    zoomLevel: number;
-    fontSize: number;
-}
-
-</t>
 <t tx="felix.20211007214102.1">/**
  * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
@@ -8484,12 +8480,9 @@ public static CONFIG_NAMES = {
     LEO_TREE_BROWSE: "leoTreeBrowse",
     TREE_KEEP_FOCUS: "treeKeepFocus",
     TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
-    // STATUSBAR_STRING: "statusBarString",
-    // STATUSBAR_COLOR: "statusBarColor",
     TREE_IN_EXPLORER: "treeInExplorer",
     SHOW_OPEN_ASIDE: "showOpenAside",
     SHOW_EDIT: "showEditOnNodes",
-    // SHOW_ARROWS: "showArrowsOnNodes",
     SHOW_ADD: "showAddOnNodes",
     SHOW_MARK: "showMarkOnNodes",
     SHOW_CLONE: "showCloneOnNodes",
@@ -8499,6 +8492,7 @@ public static CONFIG_NAMES = {
     ACTIVITY_VIEW_SHORTCUT: "ActivityViewShortcut",
     GO_ANYWHERE_SHORTCUT: "goAnywhereShortcut",
 
+    SHOW_UNL_ON_STATUSBAR: "showUnlOnStatusBar",
     // SHOW_EDITION_BODY: "showEditionOnBody",
     // SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
     // SHOW_PROMOTE_BODY: "showPromoteOnBody",
@@ -8531,8 +8525,7 @@ public static CONFIG_DEFAULTS = {
     ACTIVITY_VIEW_SHORTCUT: true,
     GO_ANYWHERE_SHORTCUT: true,
 
-    // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
-    // STATUSBAR_COLOR: "fb7c47",
+    SHOW_UNL_ON_STATUSBAR: true,
 
     TREE_IN_EXPLORER: true,
     SHOW_OPEN_ASIDE: true,
@@ -9184,10 +9177,8 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean
         this._bodySaveSelection();  // just save selection if it's changed
         q_savePromise = Promise.resolve(true);
     }
+
     return q_savePromise.then((p_result) =&gt; {
-
-        // this.debouncedRefreshBodyStates(); // ! test this !
-
         return p_result;
     }, (p_reason) =&gt; {
         console.log('BodySave rejected :', p_reason);
@@ -9596,12 +9587,46 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
         code: "leoID",
         value: p_leoID
     }];
-    g.app.leoID = p_leoID;
-    if (g.app.nodeIndices) {
-        g.app.nodeIndices.defaultId = p_leoID;
-        g.app.nodeIndices.userId = p_leoID;
+    if (p_leoID.trim().length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_leoID)) {
+        // OK not empty
+        if (g.app.leoID !== p_leoID) {
+            g.app.leoID = p_leoID;
+            void g.app.setIDFile();
+            g.blue('leoID=' + p_leoID);
+        }
+
+        if (g.app.nodeIndices) {
+            g.app.nodeIndices.userId = p_leoID;
+        }
+        // If LeoJS had finish its startup without valid LeoID, set ready flags!
+        if (!this.leoStates.leoReady &amp;&amp; this.leoStates.leojsStartupDone &amp;&amp; this.leoStates.leoIdUnset) {
+            if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
+                void this.showLogPane();
+                this.leoStates.leoIdUnset = false;
+                this.leoStates.leoReady = true;
+                if (g.app.windowList.length) {
+                    if (this.config.showUnlOnStatusBar) {
+                        this._leoStatusBar?.show();
+                    }
+                    this.leoStates.fileOpenedReady = true;
+                    this.fullRefresh();
+                }
+            } else {
+                void vscode.window.showWarningMessage("'None' is a reserved LeoID, please choose another one.");
+            }
+        }
+    } else if (!p_leoID.trim()) {
+        // empty, go back to default
+        if (g.app.nodeIndices &amp;&amp; g.app.nodeIndices.defaultId) {
+            g.app.leoID = g.app.nodeIndices.defaultId;
+            g.app.nodeIndices.userId = g.app.nodeIndices.defaultId;
+        }
     }
-    return this.config.setLeojsSettings(w_changes);
+
+    if (this.config.leoID !== p_leoID) {
+        return this.config.setLeojsSettings(w_changes);
+    }
+    return Promise.resolve();
 }
 
 </t>
@@ -9618,7 +9643,7 @@ public getIdFromSetting(): string {
  * Start leojs if the ID is valid, and not already started.
  */
 public setLeoIDCommand(): Thenable&lt;unknown&gt; {
-    return utils.getIdFromDialog().then((p_id) =&gt; {
+    return g.IDDialog().then((p_id) =&gt; {
         p_id = p_id.trim();
         p_id = g.app.cleanLeoID(p_id, '');
         if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
@@ -9661,6 +9686,7 @@ public setLeoIDCommand(): Thenable&lt;unknown&gt; {
 public showLeoIDMessage(): void {
     void vscode.window.showInformationMessage(
         Constants.USER_MESSAGES.SET_LEO_ID_MESSAGE,
+        { modal: true, detail: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT },
         Constants.USER_MESSAGES.ENTER_LEO_ID
     ).then(p_chosenButton =&gt; {
         if (p_chosenButton === Constants.USER_MESSAGES.ENTER_LEO_ID) {
@@ -9694,9 +9720,9 @@ public finishStartup(): void {
 
     // * Register a content provider for the help text panel
     this.helpDocumentPaneProvider = new HelpPanel(this);
-    this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("helpPanel", this.helpDocumentPaneProvider));
+    this._context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(Constants.URI_HELP_SCHEME, this.helpDocumentPaneProvider));
     setTimeout(() =&gt; {
-        this.helpDocumentPaneProvider.update(vscode.Uri.parse('helpPanel:' + "LeoJS Help"));
+        this.helpDocumentPaneProvider.update(vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME));
     }, 250);
 
     // * Create Leo Opened Documents Treeview Providers and tree views
@@ -9764,7 +9790,7 @@ public finishStartup(): void {
     this._bodyMainSelectionColumn = 1;
 
     // * Create Status bar Entry
-    // this._leoStatusBar = new LeoStatusBar(_context, this);
+    this._leoStatusBar = new LeoStatusBar(this._context, this);
 
     // * Leo Find Panel
     this._leoFindPanelProvider = new LeoFindPanelProvider(
@@ -9833,23 +9859,15 @@ public finishStartup(): void {
         this._setupNoOpenedLeoDocument(); // All closed now!
     }
 
-    this.leoStates.leoReady = true;
+    if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
+        void this.showLogPane();
+        this.leoStates.leoIdUnset = false;
+        this.leoStates.leoReady = true;
+    } else {
+        this.leoStates.leoIdUnset = true; // Block most UI &amp; commands until 'setLeoIDCommand' succeeds.
+    }
     this.leoStates.leojsStartupDone = true;
 
-}
-
-</t>
-<t tx="felix.20220417151556.1">export function getIdFromDialog(): Thenable&lt;string&gt; {
-    return vscode.window.showInputBox({
-        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
-        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
-
-    }).then((p_id) =&gt; {
-        if (p_id) {
-            return p_id;
-        }
-        return '';
-    });
 }
 
 </t>
@@ -9923,6 +9941,7 @@ public makeAllBindings(): void {
  * Opens the Nav tab and focus on nav text input
  */
 public findQuick(p_string?: string): Thenable&lt;unknown&gt; {
+    void this.triggerBodySave(true);
     let w_panelID = '';
     let w_panel: vscode.WebviewView | undefined;
     if (this._lastTreeView === this._leoTreeExView) {
@@ -10016,6 +10035,7 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
  * Opens goto and focus in depending on passed options
  */
 public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknown&gt; {
+    void this.triggerBodySave(true);
     let w_panel = "";
 
     if (this._lastTreeView === this._leoTreeExView) {
@@ -10368,6 +10388,8 @@ public async navTextChange(): Promise&lt;unknown&gt; {
  */
 public startSearch(): void {
 
+    void this.triggerBodySave(true);
+
     // already instantiated &amp; shown ?
     let w_panel: vscode.WebviewView | undefined;
 
@@ -10393,25 +10415,6 @@ public startSearch(): void {
     }
     void vscode.commands.executeCommand(w_panelID + '.focus');
 
-}
-
-</t>
-<t tx="felix.20220505215924.6">/**
- * * Get a find pattern string input from the user
- * @param p_replace flag for doing a 'replace' instead of a 'find'
- * @returns Promise of string or undefined if cancelled
- */
-private _inputFindPattern(p_replace?: boolean, p_value?: string): Thenable&lt;string | undefined&gt; {
-    let w_title, w_prompt, w_placeHolder;
-    w_title = p_replace ? Constants.USER_MESSAGES.REPLACE_TITLE : Constants.USER_MESSAGES.SEARCH_TITLE;
-    w_prompt = p_replace ? Constants.USER_MESSAGES.REPLACE_PROMPT : Constants.USER_MESSAGES.SEARCH_PROMPT;
-    w_placeHolder = p_replace ? Constants.USER_MESSAGES.REPLACE_PLACEHOLDER : Constants.USER_MESSAGES.SEARCH_PLACEHOLDER;
-    return vscode.window.showInputBox({
-        title: w_title,
-        prompt: w_prompt,
-        value: p_value,
-        placeHolder: w_placeHolder,
-    });
 }
 
 </t>
@@ -10774,6 +10777,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     private _lastGotoView: vscode.TreeView&lt;LeoGotoNode&gt; | undefined;
 
     private _nodeList: LeoGotoNode[] = []; // Node list kept here.
+    private _viewSwitch: boolean = false;
 
     private _selectedNodeIndex: number = 0;
 
@@ -10781,6 +10785,14 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
 
     public setLastGotoView(p_view: vscode.TreeView&lt;LeoGotoNode&gt;): void {
         this._lastGotoView = p_view;
+        if (this._nodeList &amp;&amp; this._nodeList.length) {
+            this._viewSwitch = true;
+            this._onDidChangeTreeData.fire(undefined);
+        }
+    }
+
+    public getLastGotoView(): vscode.TreeView&lt;LeoGotoNode&gt; | undefined {
+        return this._lastGotoView;
     }
 
     public resetSelectedNode(p_node?: LeoGotoNode): void {
@@ -10789,6 +10801,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
             const w_found = this._nodeList.indexOf(p_node);
             if (w_found &gt;= 0) {
                 this._selectedNodeIndex = w_found;
+                return;
             }
         }
     }
@@ -10817,10 +10830,10 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                     this._selectedNodeIndex -= 1;
                 }
                 break;
-
         }
-        await this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
-        await this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
+        const node = this._nodeList[this._selectedNodeIndex];
+        await this._leoUI.gotoNavEntry(node);
+        await this._lastGotoView?.reveal(node, {
             select: true,
             focus: true
         });
@@ -10835,14 +10848,30 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public getTreeItem(element: LeoGotoNode): Thenable&lt;LeoGotoNode&gt; | LeoGotoNode {
+    public getTreeItem(element: LeoGotoNode): LeoGotoNode {
         return element;
     }
 
-    public getChildren(element?: LeoGotoNode): Thenable&lt;LeoGotoNode[]&gt; {
+    public getChildren(element?: LeoGotoNode): LeoGotoNode[] {
 
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady &amp;&amp; !element) {
+
+            // WAS JUST A VIEW SWITCH:
+            if (this._viewSwitch) {
+                this._viewSwitch = false;
+                setTimeout(() =&gt; {
+                    if (this._nodeList.length &amp;&amp; (this._selectedNodeIndex + 1) &lt;= this._nodeList.length) {
+                        void this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
+                            select: true,
+                            focus: false
+                        }).then(() =&gt; { }, () =&gt; {
+                            console.log('Reveal failed for goto panel switching detected.');
+                        });
+                    }
+                }, 0);
+                return this._nodeList; // Make sure the nodes are valid (give back)
+            }
 
             const c = g.app.windowList[this._leoUI.frameIndex].c;
             const scon: QuickSearchController = c.quicksearchController;
@@ -10875,17 +10904,17 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                         this._nodeList.push(w_newNode);
                     });
                 }
-                return Promise.resolve(this._nodeList);
+                return this._nodeList;
             } else {
-                return Promise.resolve([]);
+                return [];
             }
 
         } else {
-            return Promise.resolve([]); // Defaults to an empty list of children
+            return []; // Defaults to an empty list of children
         }
     }
 
-    public getParent(element: LeoGotoNode): vscode.ProviderResult&lt;LeoGotoNode&gt; | null {
+    public getParent(element: LeoGotoNode): LeoGotoNode | null {
         // Leo documents are just a list, as such, entries are always child of root, so return null
         return null;
     }
@@ -11109,6 +11138,7 @@ set leoCanGoNext(p_value: boolean) {
 * @returns the promise started after it's done creating the frame and commander
 */
 public async newLeoFile(): Promise&lt;unknown&gt; {
+    await this.triggerBodySave(true);
 
     this.showBodyIfClosed = true;
     this.showOutlineIfClosed = true;
@@ -11313,14 +11343,11 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
     if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
         console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
 
-        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
-        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
-        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
+        (g.workspaceUri as vscode.Uri) = vscode.workspace.workspaceFolders[0].uri;
+        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.workspaceUri.scheme));
 
-        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
-        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
+        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.workspaceUri.toJSON()));
+        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.workspaceUri.toString());
 
         // * Set new and unsaved document's c.openDirectory.
         //  g.app.windowList[this.frameIndex].c;
@@ -11337,9 +11364,9 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         // not started yet? 
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
-            if (g.app.vscodeUriScheme !== 'file') {
+            if (g.workspaceUri.scheme !== 'file') {
                 if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
                 }
 
                 void runLeo(p_context);
@@ -11889,6 +11916,36 @@ private _setTreeViewTitle(p_title?: string): void {
       "dark": "resources/dark/body-pane.svg"
     },
     "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.xml",
+    "aliases": [
+      "Leo Body XML",
+      "leojsbody.xml"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.xml.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.xml.wrap",
+    "aliases": [
+      "Leo Body XML",
+      "leojsbody.xml"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.xml.language-configuration.json"
   }
 ],
 </t>
@@ -12054,6 +12111,16 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
   },
   {
+    "language": "leojsbody.xml",
+    "scopeName": "source.leojsbody.xml",
+    "path": "./syntaxes/leojsbody.xml.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.xml.wrap",
+    "scopeName": "source.leojsbody.xml",
+    "path": "./syntaxes/leojsbody.xml.tmLanguage.json"
+  },
+  {
     "injectTo": [
       "source.leojsbody.c",
       "source.leojsbody.cpp",
@@ -12071,6 +12138,7 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.restructuredtext",
       "source.leojsbody.rust",
       "source.leojsbody.typescript",
+      "source.leojsbody.xml",
       "source.leojsbody.c.wrap",
       "source.leojsbody.cpp.wrap",
       "source.leojsbody.css.wrap",
@@ -12086,7 +12154,8 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.python.wrap",
       "source.leojsbody.restructuredtext.wrap",
       "source.leojsbody.rust.wrap",
-      "source.leojsbody.typescript.wrap"
+      "source.leojsbody.typescript.wrap",
+      "source.leojsbody.xml.wrap"
     ],
     "path": "./syntaxes/leojsbody.tmLanguage.json",
     "scopeName": "leojs.injection"
@@ -12178,11 +12247,15 @@ private _setTreeViewTitle(p_title?: string): void {
 </t>
 <t tx="felix.20220920001018.1"></t>
 <t tx="felix.20220920001018.2">/**
- * * Adds a message string to LeoJS log pane. Used when leoBridge receives an async 'log' command.
+ * * Adds a message string to LeoJS log pane.
  * @param p_message The string to be added in the log
  */
 public addLogPaneEntry(p_message: string): void {
-    this._leoLogPane.appendLine(p_message);
+    if (this._leoLogPane) {
+        this._leoLogPane.appendLine(p_message);
+    } else {
+        g.logBuffer.push(p_message);
+    }
 }
 
 </t>
@@ -12194,6 +12267,17 @@ public showLogPane(p_focus?: boolean): Thenable&lt;unknown&gt; {
         this._leoLogPane.show(!p_focus); // use flag to preserve focus
         return Promise.resolve(true);
     } else {
+        // * Log pane instantiation
+        this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+        this._context.subscriptions.push(this._leoLogPane);
+        if (g.logBuffer.length) {
+            const buffer = g.logBuffer;
+            while (buffer.length &gt; 0) {
+                // Pop the bottom one and append it
+                g.es_print(buffer.shift()!);
+            }
+        }
+        this._leoLogPane.show(!p_focus);
         return Promise.resolve(undefined); // if cancelled
     }
 }
@@ -12616,10 +12700,11 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                         if (this._refreshType.goto) {
                             this._refreshType.goto = false;
                             let w_viewName: string;
-                            if (this._lastTreeView === this._leoTreeExView) {
-                                w_viewName = Constants.GOTO_EXPLORER_ID;
-                            } else {
+                            const gotoView = this._leoGotoProvider.getLastGotoView();
+                            if (gotoView &amp;&amp; gotoView.title === "Goto") {
                                 w_viewName = Constants.GOTO_ID;
+                            } else {
+                                w_viewName = Constants.GOTO_EXPLORER_ID;
                             }
                             void vscode.commands.executeCommand(w_viewName + ".focus");
                         }
@@ -12652,6 +12737,12 @@ private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): T
             }
             if (w_langName &amp;&amp; !this._languageFlagged.includes(w_langName)) {
                 this._languageFlagged.push(w_langName);
+                if (w_langName.endsWith(Constants.LEO_WRAP_SUFFIX)) {
+                    w_langName = w_langName.slice(0, -Constants.LEO_WRAP_SUFFIX.length);
+                }
+                if (w_langName.startsWith(Constants.LEO_LANGUAGE_PREFIX)) {
+                    w_langName = w_langName.slice(Constants.LEO_LANGUAGE_PREFIX.length);
+                }
                 void vscode.window.showInformationMessage(
                     w_langName + Constants.USER_MESSAGES.LANGUAGE_NOT_SUPPORTED
                 );
@@ -12678,24 +12769,23 @@ private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): T
 
 </t>
 <t tx="felix.20220922000450.14">/**
- * * Refreshes body pane's statuses such as applied language file type, word-wrap state, etc.
+ * * Refreshes body pane's applied language and, word-wrap state.
  */
 public refreshBodyStates(): void {
-    if (!this._bodyTextDocument || !this.lastSelectedNode) {
-        return;
+
+    if (!this._bodyTextDocument ||
+        this._bodyTextDocument.isClosed ||
+        !this.lastSelectedNode ||
+        utils.leoUriToStr(this._bodyTextDocument.uri) !== this.lastSelectedNode.gnx
+    ) {
+        return; // Don't waste time finding out the language!
     }
 
-    // * Set document language along with the proper cursor position, selection range and scrolling position
     const c = g.app.windowList[this.frameIndex].c;
     let w_language = this._getBodyLanguage();
 
-    // Apply language if the selected node is still the same after all those events
-    if (this._bodyTextDocument &amp;&amp;
-        !this._bodyTextDocument.isClosed &amp;&amp;
-        this.lastSelectedNode &amp;&amp;
-        w_language !== this._bodyTextDocument.languageId &amp;&amp;
-        utils.leoUriToStr(this._bodyTextDocument.uri) === this.lastSelectedNode.gnx
-    ) {
+    // Set document language only if different
+    if (w_language !== this._bodyTextDocument.languageId) {
         void this._setBodyLanguage(this._bodyTextDocument, w_language);
     }
 
@@ -13204,6 +13294,7 @@ private _onGotoTreeViewVisibilityChanged(
     p_explorerView: boolean
 ): void {
     if (p_event.visible) {
+        // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
         this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
     }
 }
@@ -13469,11 +13560,12 @@ public setDocumentSelection(p_frame: LeoFrame): void {
         } else {
             w_trigger = true;
         }
-        if (w_trigger) {
-            w_docView.reveal(p_frame, { select: true, focus: false })
+        if (w_trigger &amp;&amp; !this._documentPaneReveal) {
+            this._documentPaneReveal = w_docView.reveal(p_frame, { select: true, focus: false })
                 .then(
                     (p_result) =&gt; {
                         // Shown document node
+                        this._documentPaneReveal = undefined;
                     },
                     (p_reason) =&gt; {
                         console.log('shown doc error on reveal: ', p_reason);
@@ -13490,9 +13582,11 @@ public setDocumentSelection(p_frame: LeoFrame): void {
  * @param p_undoNode Node instance in the Leo History view to be the 'selected' one.
  */
 private _setUndoSelection(p_undoNode: LeoUndoNode): void {
-    if (this._lastLeoUndos &amp;&amp; this._lastLeoUndos.visible) {
-        this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
-            () =&gt; { }, // Ok - do nothing
+    if (this._lastLeoUndos &amp;&amp; this._lastLeoUndos.visible &amp;&amp; !this._undoPaneReveal) {
+        this._undoPaneReveal = this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
+            () =&gt; {
+                this._undoPaneReveal = undefined;
+            },
             (p_error) =&gt; {
                 console.log('setUndoSelection could not reveal');
             }
@@ -13570,49 +13664,6 @@ public checkForceFindFocus(p_fromInit: boolean): void {
  */
 private _refreshButtonsPane(): void {
     this._leoButtonsProvider.refreshTreeRoot();
-}
-
-</t>
-<t tx="felix.20221002011858.1">/**
- * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
- */
-async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
-    const w_foundTabs: vscode.Tab[] = [];
-
-    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
-        p_tabGroup.tabs.forEach((p_tab) =&gt; {
-
-            if (p_tab.input &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
-                !p_tab.isDirty
-
-            ) {
-                w_foundTabs.push(p_tab);
-            }
-        });
-    });
-
-    let q_closedTabs;
-    if (w_foundTabs.length) {
-        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
-        for (const p_tab of w_foundTabs) {
-            if (p_tab.input) {
-                await vscode.commands.executeCommand(
-                    'vscode.removeFromRecentlyOpened',
-                    (p_tab.input as vscode.TabInputText).uri
-                );
-                // Delete to close all other body tabs.
-                // (w_oldUri will be deleted last below)
-                const w_edit = new vscode.WorkspaceEdit();
-                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
-                await vscode.workspace.applyEdit(w_edit);
-            }
-        }
-    } else {
-        q_closedTabs = Promise.resolve(true);
-    }
-    return q_closedTabs;
 }
 
 </t>
@@ -15871,10 +15922,10 @@ set leoEditHeadline(p_value: boolean) {
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
             var lastEl = document.getElementById(lastTabElId);
+            var firstEl = document.getElementById(firstTabElId);
 
             if (p_event.shiftKey) {
                 // shift + tab so if first got last
-                var firstEl = document.getElementById(firstTabElId);
                 if (lastEl &amp;&amp; actEl === firstEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
@@ -15884,11 +15935,11 @@ set leoEditHeadline(p_value: boolean) {
                 }
             } else {
                 // tab, so if last goto first
-                if (actEl === lastEl) {
+                if (firstEl &amp;&amp; actEl === lastEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    focusOnField(firstTabElId);
+                    firstEl.focus();
                     return;
                 }
             }
@@ -16164,10 +16215,11 @@ set leoEditHeadline(p_value: boolean) {
   box-sizing: border-box;
   font-size: 13px;
   overflow: hidden;
-}
-
-html:hover {
-  overflow: overlay;
+  --input-padding-vertical: 6px;
+  --input-padding-horizontal: 4px;
+  --input-margin-vertical: 4px;
+  --input-margin-horizontal: 0;
+  height: 100%;
 }
 
 *,
@@ -16196,31 +16248,41 @@ img {
   height: auto;
 }
 
-:root {
-  --input-padding-vertical: 6px;
-  --input-padding-horizontal: 4px;
-  --input-margin-vertical: 4px;
-  --input-margin-horizontal: 0;
-  height: 100%;
-  padding-right: 14px;
-}
-
-html:focus {
+html:focus:after {
+  content:'';
+  position: fixed;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   outline: 1px solid;
   outline-width: 1px;
   outline-style: solid;
   outline-offset: -1px;
   outline-color: var(--vscode-focusBorder);
+  pointer-events: none;
 }
 
 body {
+  height: 100%;
   margin-left: 20px;
   background-color: transparent;
   padding: 0 var(--container-padding);
+  scrollbar-gutter: stable;
+  overflow:hidden;
+  padding-right: 4px;
   color: var(--vscode-foreground);
   font-size: var(--vscode-font-size);
   font-weight: var(--vscode-font-weight);
   font-family: var(--vscode-font-family);
+}
+
+body:hover {
+  overflow-y: auto;
+} 
+
+.row .col:nth-child(2) {
+  padding-right: 4px;
 }
 
 ol,
@@ -16290,6 +16352,10 @@ select {
   left: 15%;
   position: relative;
   border-radius: 2px;
+}
+
+select:focus {
+  outline-color: var(--vscode-input-border);
 }
 
 select:disabled {
@@ -16437,21 +16503,103 @@ div.col-nav {
 .label-fix {
   vertical-align: top;
   line-height: 18px;
-}</t>
+}
+</t>
 <t tx="felix.20231221231533.1">## 0.2.6
 
 - Fixed keyboard navigation of the outline while being hoisted.
 
 </t>
-<t tx="felix.20231224193540.1">public put_help(C: Commands, s: string): void {
+<t tx="felix.20231224193540.1">public async put_help(c: Commands, s: string, short_title: string): Promise&lt;void&gt; {
     s = g.dedent(s.trimEnd());
-    this.helpPanelText = s;
-    const uri = vscode.Uri.parse('helpPanel:' + "LeoJS Help");
-    this.helpDocumentPaneProvider.update(uri);
-    setTimeout(() =&gt; {
-        // * Open the virtual document in the preview pane
-        void vscode.commands.executeCommand('markdown.showPreviewToSide', uri);
-    }, 60);
+    s = this.showdownConverter.makeHtml(s);
+    // Get the html file content and replace the three strings :
+    // the 'nonce' string, the base url, and 'cspSource', the Content security policy source.
+    const fileUri = g.vscode.Uri.joinPath(this._context.extensionUri, 'help-panel', 'index.html');
+    const htmlDoc = await g.vscode.workspace.openTextDocument(fileUri);
+    const nonce = Array.from({ length: 32 }, () =&gt; Math.random().toString(36).charAt(2)).join('');
+
+    if (short_title.trim()) {
+        short_title = `&lt;h1&gt;${short_title}&lt;/h1&gt;\n`;
+    }
+
+    if (this._helpPanel) {
+        // Already created
+        const baseUri = this._helpPanel.webview.asWebviewUri(this._context.extensionUri);
+        const html = htmlDoc.getText().replace(
+            /#{nonce}/g,
+            nonce
+        ).replace(
+            /#{root}/g,
+            `${baseUri}`
+        ).replace(
+            /#{cspSource}/g,
+            `${this._helpPanel.webview.cspSource}`
+        ).replace(
+            '#{title}',
+            short_title
+        ).replace(
+            '#{body}',
+            s
+        );
+        this._helpPanel.webview.html = html;
+        this._helpPanel.reveal(undefined, true);
+    } else {
+        // First time showing help panel
+        this._helpPanel = g.vscode.window.createWebviewPanel(
+            'helpPanelWebview',
+            'LeoJS Help',
+            { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+            {
+                enableScripts: true,
+            }
+        );
+        this._context.subscriptions.push(this._helpPanel);
+        this._helpPanel.onDidDispose(
+            () =&gt; {
+
+                this._helpPanel = undefined;
+            },
+            null,
+            this._context.subscriptions
+        );
+        const baseUri = this._helpPanel.webview.asWebviewUri(this._context.extensionUri);
+        const html = htmlDoc.getText().replace(
+            /#{nonce}/g,
+            nonce
+        ).replace(
+            /#{root}/g,
+            `${baseUri}`
+        ).replace(
+            /#{cspSource}/g,
+            `${this._helpPanel.webview.cspSource}`
+        ).replace(
+            '#{title}',
+            short_title
+        ).replace(
+            '#{body}',
+            s
+        );
+
+        this._helpPanel.iconPath = g.vscode.Uri.joinPath(this._context.extensionUri, 'resources', 'leoapp128px.png');
+        this._helpPanel.webview.html = html;
+
+    }
+
+    // * Showing with Markdown preview, with the "markdown.showPreviewToSide" command
+    // this.helpPanelText = s;
+
+    // // * Close all open help panels 
+    // await utils.closeLeoHelpPanels();
+
+    // setTimeout(() =&gt; {
+    //     const w_uri = vscode.Uri.parse(Constants.URI_HELP_SCHEME + ":" + Constants.URI_HELP_FILENAME);
+    //     this.helpDocumentPaneProvider.update(w_uri);
+    //     setTimeout(() =&gt; {
+    //         // * Open the virtual document in the preview pane
+    //         void vscode.commands.executeCommand('markdown.showPreviewToSide', w_uri);
+    //     }, 60);
+    // }, 0);
 
     // * Showing with standard readonly text document provider
     // const doc = await vscode.workspace.openTextDocument(uri); // calls back into the provider
@@ -16565,7 +16713,10 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
     }
 }
 </t>
-<t tx="felix.20231226210919.1">public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
+<t tx="felix.20231226210919.1">/**
+ * Handles the calls from the DocumentLinkProvider for clicks on UNLs.
+ */
+public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
     if (!g.app.windowList.length) {
         // No file opened: exit
         g.es('Handle Unl: No Commanders opened');
@@ -16657,17 +16808,17 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
 <t tx="felix.20240121003227.1">public checkBodyWrap(p_forced?: boolean): void {
     let w_missing = false;
 
-    let w_languageSettings: Record&lt;string, boolean&gt; | undefined;
+    let w_languageSettings: Record&lt;string, string&gt; | undefined;
     let w_totalConfigName = "";
 
     for (const w_lang of Constants.LANGUAGES) {
         let langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
         w_totalConfigName += langWrap;
-        // w_languageSettings = vscode.workspace.getConfiguration(langWrap);
     }
+
     w_languageSettings = vscode.workspace.getConfiguration(w_totalConfigName);
 
-    if (!w_languageSettings || !w_languageSettings['editor.wordWrap']) {
+    if (!w_languageSettings || !w_languageSettings['editor.wordWrap'] || w_languageSettings['editor.wordWrap'] !== 'on') {
         w_missing = true;
     }
 
@@ -16708,6 +16859,7 @@ public static LANGUAGES = [
     "php",
     "restructuredtext",
     "rust",
+    "xml",
 ];
 
 </t>
@@ -16721,6 +16873,418 @@ public setBodyWrap(): Thenable&lt;void&gt; {
         w_totalConfigName += langWrap;
     }
     return vscode.workspace.getConfiguration().update(w_totalConfigName, { 'editor.wordWrap': 'on' }, vscode.ConfigurationTarget.Global);
+}
+
+</t>
+<t tx="felix.20240122215450.1"># 0.2.12
+
+- Help commands were changed from markdown preview panes to html webviews.
+- (Breaking Change) Made vscode accessible via g.vscode instead of g.app.vscode.
+- Made more external libraries accessible via the global 'g' object:
+    - SQL
+    - pako
+    - showdown
+    - JSZip
+- Made more OS path related constants available in the global 'g' object:
+    - extensionContext
+    - extensionUri
+    - workspaceUri
+- Added 'show-recent-files' command.
+- Fixed Find-Panel's behavior and styling.
+- Fixed 'open-aside' command.
+- Added hover menu to the UNL status bar item to choose from any UNL formats to be copied to the clipboard.
+- Removed 'font-size &amp; zoom' related config settings following VSCode's new ZOOM settings API.
+- Added support for XML language colorization.
+- Implemented Leo's new UNL relative path support.
+- Fixed settings being saved properly in db for newly created files from a 'save-as' command.
+- Changed .leojs file format to have no state bits in file anymore, and instead save them in db.
+- Fixed at-buttons panel to refresh properly after a 'revert-to-saved' command.
+- Fixed startup process to block all commands if no LeoID is found, except for the 'Set Leo ID' command.
+- Fixed 'Goto' panel's navigation's stability issues after switching panels.
+
+</t>
+<t tx="felix.20240209012442.1">/**
+ * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
+ */
+export async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
+    const w_foundTabs: vscode.Tab[] = [];
+
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
+
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
+                !p_tab.isDirty
+
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.input) {
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
+            }
+        }
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+
+    return q_closedTabs;
+}
+
+</t>
+<t tx="felix.20240209012451.1">export async function closeLeoHelpPanels(): Promise&lt;unknown&gt; {
+
+    // * Close all open help panels 
+    const w_foundTabs: vscode.Tab[] = [];
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
+            if (
+                p_tab.label.endsWith(Constants.URI_HELP_FILENAME)
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        for (const p_tab of w_foundTabs) {
+            if (p_tab.label === Constants.URI_HELP_FILENAME &amp;&amp; p_tab.input) {
+                // Not a preview
+                await vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                await vscode.workspace.applyEdit(w_edit);
+            }
+        }
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+    return q_closedTabs;
+
+}
+</t>
+<t tx="felix.20240213205001.1">/**
+ * Status bar item click handler
+ */
+public statusBar(): Thenable&lt;string | undefined&gt; {
+    return this.unlToClipboard();
+}
+
+</t>
+<t tx="felix.20240221212119.1">/**
+ * Remove body wrap setting from older LeoJS versions
+ * that suported less languages
+ */
+public removeOldBodyWrap(): void {
+    // Last version did not have XML
+    let w_totalOldVersionConfigName = "";
+
+    // Looping from the first element up to the second-to-last element
+    for (let i = 0; i &lt; Constants.LANGUAGES.length - 1; i++) {
+        const w_lang = Constants.LANGUAGES[i];
+        const langWrap = '[' + Constants.LEO_LANGUAGE_PREFIX + w_lang + Constants.LEO_WRAP_SUFFIX + ']';
+        w_totalOldVersionConfigName += langWrap;
+    }
+
+    if (vscode.workspace.getConfiguration().has(w_totalOldVersionConfigName)) {
+        void vscode.workspace.getConfiguration().update(w_totalOldVersionConfigName, undefined, vscode.ConfigurationTarget.Global);
+    }
+
+}
+
+</t>
+<t tx="felix.20240222220320.1">/**
+ * Sets up the tooltip with a given headline string title
+ * for displaying 'click to copy to clipboard' tooltip
+ */
+public setTooltip(p_headline: string, p_debounceDelay?: number): void {
+    if (this._tooltip === p_headline) {
+        return; // cancel
+    }
+    this._tooltip = this._buildToolTip(p_headline);
+    this._updateLeoObjectIndicatorDebounced(p_debounceDelay || 0);
+}
+
+</t>
+<t tx="felix.20240222233600.1">/**
+ * Put UNL of current node on the clipboard. 
+ * @para optional unlType to specify type.
+ */
+public unlToClipboard(unlType?: UnlType): Thenable&lt;string&gt; {
+    let unl = "";
+    const c = g.app.windowList[this.frameIndex].c;
+    const p = c.p;
+    if (!p.v) {
+        return Promise.resolve('');
+    }
+    if (unlType) {
+        switch (unlType) {
+            case 'shortGnx':
+                unl = p.get_short_gnx_UNL();
+                break;
+            case 'fullGnx':
+                unl = p.get_full_gnx_UNL();
+                break;
+            case 'shortLegacy':
+                unl = p.get_short_legacy_UNL();
+                break;
+            case 'fullLegacy':
+                unl = p.get_full_legacy_UNL();
+                break;
+        }
+    } else {
+        const kind: string = c.config.getString('unl-status-kind') || '';
+        const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
+        unl = method();
+    }
+    return this.replaceClipboardWith(unl);
+}
+
+</t>
+<t tx="felix.20240222233803.1">export type UnlType = 'shortGnx' | 'fullGnx' | 'shortLegacy' | 'fullLegacy';
+
+</t>
+<t tx="felix.20240223001320.1">/**
+ * builds tooltip from headline
+ */
+private _buildToolTip(p_headline: string = ""): string {
+
+    // markdown supports links that execute commands: 
+    // [Run it](command:myCommandId)
+
+    let w_tooltip = g.dedent(`\
+    #### **UNL for** _${p_headline}_
+
+    #### [Click to copy UNL to clipboard](command:${Constants.COMMANDS.STATUS_BAR})
+
+    ---
+
+    _Or choose a specific UNL type:_
+
+    **[short gnx](command:${Constants.COMMANDS.SHORT_GNX_UNL_TO_CLIPBOARD})** —
+    **[full gnx](command:${Constants.COMMANDS.FULL_GNX_UNL_TO_CLIPBOARD})**
+
+    **[short legacy](command:${Constants.COMMANDS.SHORT_LEGACY_UNL_TO_CLIPBOARD})** —
+    **[full legacy](command:${Constants.COMMANDS.FULL_LEGACY_UNL_TO_CLIPBOARD})**
+
+    `);
+
+    return w_tooltip;
+
+}
+
+</t>
+<t tx="felix.20240224165738.1"></t>
+<t tx="felix.20240224165747.1">// @ts-check
+
+// This script will be run within the webview itself
+// It cannot access the main VS Code APIs directly.
+// Send message to LeoJS with vscode.postMessage({ keyNameEx1: someValue, ... });
+// Receive messages from LeoJS with window.addEventListener('message', event =&gt; { ... });
+(function () {
+    // @ts-expect-error
+    const vscode = acquireVsCodeApi();
+
+    // console.log('Help Panel Started!');
+})();
+</t>
+<t tx="felix.20240224165750.1">@language css
+html {
+  box-sizing: border-box;
+  font-size: 13px;
+  --input-padding-vertical: 6px;
+  --input-padding-horizontal: 4px;
+  --input-margin-vertical: 4px;
+  --input-margin-horizontal: 0;
+  height: 100%;
+}
+
+*:focus {
+  outline-color: var(--vscode-focusBorder);
+}
+
+a {
+  color: var(--vscode-textLink-foreground);
+}
+
+a:hover,
+a:active {
+  color: var(--vscode-textLink-activeForeground);
+}
+
+code {
+  font-size: var(--vscode-editor-font-size);
+  font-family: var(--vscode-editor-font-family);
+  display: inline-block;
+}
+
+button {
+  border: 1px solid var(--vscode-button-border,transparent);
+  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+  border-radius: 2px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  outline: 1px solid transparent;
+  outline-offset: 2px !important;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+}
+
+button:hover {
+  cursor: pointer;
+  background: var(--vscode-button-hoverBackground);
+}
+
+button:focus {
+  outline-color: var(--vscode-focusBorder);
+}
+
+button.secondary {
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+}
+
+button.secondary:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+label {
+  display: inline-block;
+  margin-bottom: 0.2em;
+}
+
+select {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-input-foreground);
+  border-color: var(--vscode-dropdown-border);
+  cursor: pointer;
+  position: relative;
+  border-radius: 2px;
+  padding: 3px var(--input-padding-horizontal);
+  color: var(--vscode-input-foreground);
+}
+
+select:focus {
+  outline-color: var(--vscode-input-border);
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+select option {
+  background-color: var(--vscode-dropdown-listBackground);
+  padding: 3px var(--input-padding-horizontal);
+}
+
+select option:focus {
+  background-color: var(--vscode-input-background);
+  outline-color: var(--vscode-input-border);
+}
+
+input:not([type="radio"]):not([type="checkbox"]),
+textarea {
+  margin-right: 20px;
+  border: none;
+  font-family: var(--vscode-font-family);
+  padding: 3px var(--input-padding-horizontal);
+  border-radius: 2px;
+  color: var(--vscode-input-foreground);
+  outline-color: var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+}
+
+textarea {
+  width: 100%;
+  display: block;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--vscode-input-placeholderForeground);
+}
+
+u {
+  color: var(--vscode-editor-foreground);
+  text-decoration-color: var(--vscode-foreground);
+  text-underline-offset: 0.04em;
+}
+
+.row {
+  margin-bottom: 0.5em;
+}
+
+.muted {
+  opacity: 0.6;
+}
+
+.big {
+  font-size: 20px;
+}</t>
+<t tx="felix.20240224200656.1">&lt;!DOCTYPE html&gt;
+&lt;html lang="en" tabindex="-1"&gt;
+
+&lt;head&gt;
+&lt;meta charset="UTF-8" /&gt;
+&lt;meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src #{cspSource}; img-src #{cspSource} https:; script-src 'nonce-#{nonce}';" /&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+&lt;link href="#{root}/help-panel/style.css" rel="stylesheet" /&gt;
+&lt;title&gt;LeoJS Help&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+#{title}
+#{body}
+&lt;!-- end of body --&gt;
+&lt;script nonce="#{nonce}" src="#{root}/help-panel/main.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;</t>
+<t tx="felix.20240303150445.1">/**
+ * 'LeoID is unset' state for an empty/unset LeoID state preventing startup
+ */
+private _leoIdUnset: boolean = false;
+get leoIdUnset(): boolean {
+    return this._leoIdUnset;
+}
+set leoIdUnset(p_value: boolean) {
+    this._leoIdUnset = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_UNSET, p_value);
 }
 
 </t>

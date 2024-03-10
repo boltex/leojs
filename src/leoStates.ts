@@ -39,6 +39,18 @@ export class LeoStates {
     }
 
     /**
+     * 'LeoID is unset' state for an empty/unset LeoID state preventing startup
+     */
+    private _leoIdUnset: boolean = false;
+    get leoIdUnset(): boolean {
+        return this._leoIdUnset;
+    }
+    set leoIdUnset(p_value: boolean) {
+        this._leoIdUnset = p_value;
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_UNSET, p_value);
+    }
+
+    /**
      * A Leo file is opened
      */
     private _fileOpenedReady: boolean = false; // Sets context flag along with treeview title

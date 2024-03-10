@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import * as utils from "./utils";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 /**
  * * Statusbar indicator controller service
@@ -9,9 +9,9 @@ import { LeoUI } from "./leoUI";
 export class LeoStatusBar {
 
     private _leoStatusBarItem: vscode.StatusBarItem;
-    private _statusbarNormalColor = new vscode.ThemeColor(Constants.GUI.THEME_STATUSBAR);  // "statusBar.foreground"
     private _updateStatusBarTimeout: NodeJS.Timeout | undefined;
-    private _string: string = ""; // Use this string with indicator, using this will replace the default from config
+    private _string: string = ""; // Use this string with indicator, using this will replace the defult from config
+    private _tooltip: string = ""; // Markdown string built by _buildToolTip from a given headeline
 
     // * Represents having focus on a leo tree, body or document panel to enable leo keybindings
     private _statusBarFlag: boolean = false;
@@ -29,12 +29,17 @@ export class LeoStatusBar {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
         this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
-        this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
-        // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
-        this._leoStatusBarItem.command = Constants.COMMANDS.SHOW_LOG;
-        // this._leoStatusBarItem.command = "leojs.test"; // just call test function for now to help debugging
+        this._leoStatusBarItem.command = Constants.COMMANDS.STATUS_BAR;
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
-        this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
+
+        const w_mdToolTip = new vscode.MarkdownString();
+
+        w_mdToolTip.value = "";
+
+        w_mdToolTip.isTrusted = true;
+        w_mdToolTip.supportThemeIcons = true;
+
+        this._leoStatusBarItem.tooltip = w_mdToolTip;
 
         this._leoStatusBarItem.hide();
     }
@@ -55,26 +60,56 @@ export class LeoStatusBar {
 
     /**
      * * Sets string to replace default from config & refresh it
+     * @p_string string to be displayed on Leo's status bar space.
+     * @param p_debounceDelay Optional, in milliseconds
+     * 
      */
-    public setString(p_string: string): void {
+    public setString(p_string: string, p_debounceDelay?: number): void {
+        if (this._string === p_string) {
+            return; // cancel
+        }
         this._string = p_string;
-        this._updateLeoObjectIndicator();
+        this._updateLeoObjectIndicatorDebounced(p_debounceDelay || 0);
+    }
+    /**
+     * Sets up the tooltip with a given headline string title
+     * for displaying 'click to copy to clipboard' tooltip
+     */
+    public setTooltip(p_headline: string, p_debounceDelay?: number): void {
+        if (this._tooltip === p_headline) {
+            return; // cancel
+        }
+        this._tooltip = this._buildToolTip(p_headline);
+        this._updateLeoObjectIndicatorDebounced(p_debounceDelay || 0);
     }
 
     /**
-     * * Updates the status bar visual indicator visual indicator with optional debouncing delay
-     * @param p_state True/False flag for On or Off status
-     * @param p_debounceDelay Optional, in milliseconds
+     * builds tooltip from headline
      */
-    public update(p_state: boolean, p_debounceDelay?: number, p_forced?: boolean): void {
-        if (p_forced || (p_state !== this.statusBarFlag)) {
-            this.statusBarFlag = p_state;
-            if (p_debounceDelay) {
-                this._updateLeoObjectIndicatorDebounced(p_debounceDelay);
-            } else {
-                this._updateLeoObjectIndicator();
-            }
-        }
+    private _buildToolTip(p_headline: string = ""): string {
+
+        // markdown supports links that execute commands: 
+        // [Run it](command:myCommandId)
+
+        let w_tooltip = g.dedent(`\
+        #### **UNL for** _${p_headline}_
+
+        #### [Click to copy UNL to clipboard](command:${Constants.COMMANDS.STATUS_BAR})
+
+        ---
+
+        _Or choose a specific UNL type:_
+
+        **[short gnx](command:${Constants.COMMANDS.SHORT_GNX_UNL_TO_CLIPBOARD})** —
+        **[full gnx](command:${Constants.COMMANDS.FULL_GNX_UNL_TO_CLIPBOARD})**
+
+        **[short legacy](command:${Constants.COMMANDS.SHORT_LEGACY_UNL_TO_CLIPBOARD})** —
+        **[full legacy](command:${Constants.COMMANDS.FULL_LEGACY_UNL_TO_CLIPBOARD})**
+
+        `);
+
+        return w_tooltip;
+
     }
 
     /**
@@ -98,21 +133,8 @@ export class LeoStatusBar {
         if (this._updateStatusBarTimeout) {
             clearTimeout(this._updateStatusBarTimeout);
         }
-
-        void utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
-
-        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR +
-            (this._string ? this._string : '') + " " +
-            (this._leoJs.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoJs.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
-
-        // Also check in constructor for statusBar properties (the createStatusBarItem call itself)
-        if (this.statusBarFlag && this._leoJs.leoStates.fileOpenedReady) {
-            this._leoStatusBarItem.color = "#" + Constants.GUI.STATUSBAR_COLOR;
-            this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
-        } else {
-            this._leoStatusBarItem.color = this._statusbarNormalColor;
-            this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_OFF;
-        }
+        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR + this._string;
+        (this._leoStatusBarItem.tooltip as vscode.MarkdownString).value = this._tooltip;
     }
 
 }

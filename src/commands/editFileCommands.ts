@@ -632,7 +632,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.18: *3* efc.deleteFile
     @cmd('file-delete', 'Prompt for the name of a file and delete it.')
     public async deleteFile(): Promise<void> {
-        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.workspaceUri?.fsPath;
         const w_value = w_dir + path.sep;
         const fileName = await g.app.gui.get1Arg({
             title: 'Delete File',
@@ -749,7 +749,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230709010427.24: *3* efc.makeDirectory
     @cmd('directory-make', 'Prompt for the name of a directory and create it.')
     public async makeDirectory(): Promise<void> {
-        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.workspaceUri?.fsPath;
         const w_value = w_dir + path.sep;
         const folderName = await g.app.gui.get1Arg({
             title: 'Make Directory',
@@ -774,7 +774,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         'file-open-by-name: Prompt for the name of a Leo outline and open it.'
     )
     public async openOutlineByName(): Promise<void> {
-        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.workspaceUri?.fsPath;
         const w_value = w_dir + path.sep;
         const fn = await g.app.gui.get1Arg({
             title: 'Open Leo Outline',
@@ -804,7 +804,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         'Prompt for the name of a directory and delete it.'
     )
     public async removeDirectory(): Promise<void> {
-        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.app.vscodeWorkspaceUri?.fsPath;
+        const w_dir = this.c.fileName() ? g.os_path_dirname(this.c.fileName()) : g.workspaceUri?.fsPath;
         const w_value = w_dir + path.sep;
         const folderName = await g.app.gui.get1Arg({
             title: 'Remove Directory',

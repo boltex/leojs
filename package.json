@@ -2,7 +2,7 @@
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -173,6 +173,12 @@
           "description": "Used to uniquely identify nodes - Defaults to the OS/Environment user name",
           "pattern": "(^$|^[a-zA-Z0-9]*$)",
           "patternErrorMessage": "Your id should contain only letters and numbers, and must contain at least 3 characters."
+        },
+        "leojs.showUnlOnStatusBar": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Displays an UNL indicator on the status bar"
         }
       }
     },
@@ -758,6 +764,36 @@
           "dark": "resources/dark/body-pane.svg"
         },
         "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.xml",
+        "aliases": [
+          "Leo Body XML",
+          "leojsbody.xml"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.xml.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.xml.wrap",
+        "aliases": [
+          "Leo Body XML",
+          "leojsbody.xml"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.xml.language-configuration.json"
       }
     ],
     "grammars": [
@@ -922,6 +958,16 @@
         "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
       },
       {
+        "language": "leojsbody.xml",
+        "scopeName": "source.leojsbody.xml",
+        "path": "./syntaxes/leojsbody.xml.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.xml.wrap",
+        "scopeName": "source.leojsbody.xml",
+        "path": "./syntaxes/leojsbody.xml.tmLanguage.json"
+      },
+      {
         "injectTo": [
           "source.leojsbody.c",
           "source.leojsbody.cpp",
@@ -939,6 +985,7 @@
           "source.leojsbody.restructuredtext",
           "source.leojsbody.rust",
           "source.leojsbody.typescript",
+          "source.leojsbody.xml",
           "source.leojsbody.c.wrap",
           "source.leojsbody.cpp.wrap",
           "source.leojsbody.css.wrap",
@@ -954,7 +1001,8 @@
           "source.leojsbody.python.wrap",
           "source.leojsbody.restructuredtext.wrap",
           "source.leojsbody.rust.wrap",
-          "source.leojsbody.typescript.wrap"
+          "source.leojsbody.typescript.wrap",
+          "source.leojsbody.xml.wrap"
         ],
         "path": "./syntaxes/leojsbody.tmLanguage.json",
         "scopeName": "leojs.injection"
@@ -1065,13 +1113,23 @@
       },
       {
         "view": "leojsOutline",
-        "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-        "when": "!leojsReady && leojsStartupDone"
+        "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
+        "when": "!leojsReady && leojsStartupDone && !leojsIdUnset"
       },
       {
         "view": "leojsOutlineExplorer",
-        "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-        "when": "!leojsReady && leojsStartupDone"
+        "contents": "Open a remote repository to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
+        "when": "!leojsReady && leojsStartupDone && !leojsIdUnset"
+      },
+      {
+        "view": "leojsOutline",
+        "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
+        "when": "!leojsReady && leojsStartupDone && leojsIdUnset"
+      },
+      {
+        "view": "leojsOutlineExplorer",
+        "contents": "Choose your LeoID to start\n[Enter an id](command:leojs.setLeoID)",
+        "when": "!leojsReady && leojsStartupDone && leojsIdUnset"
       },
       {
         "view": "leojsOutline",
@@ -1486,7 +1544,7 @@
         "command": "leojs.prev",
         "category": "Leojs",
         "title": "Prev",
-        "enablement": "leojsCanGoBack",
+        "enablement": "leojsTreeOpened && leojsCanGoBack",
         "icon": {
           "light": "resources/light/prev.svg",
           "dark": "resources/dark/prev.svg"
@@ -1496,7 +1554,7 @@
         "command": "leojs.prevFromOutline",
         "category": "Leojs",
         "title": "Prev",
-        "enablement": "leojsCanGoBack",
+        "enablement": "leojsTreeOpened && leojsCanGoBack",
         "icon": {
           "light": "resources/light/prev.svg",
           "dark": "resources/dark/prev.svg"
@@ -1506,7 +1564,7 @@
         "command": "leojs.next",
         "category": "Leojs",
         "title": "Next",
-        "enablement": "leojsCanGoNext",
+        "enablement": "leojsTreeOpened && leojsCanGoNext",
         "icon": {
           "light": "resources/light/next.svg",
           "dark": "resources/dark/next.svg"
@@ -1516,7 +1574,7 @@
         "command": "leojs.nextFromOutline",
         "category": "Leojs",
         "title": "Next",
-        "enablement": "leojsCanGoNext",
+        "enablement": "leojsTreeOpened && leojsCanGoNext",
         "icon": {
           "light": "resources/light/next.svg",
           "dark": "resources/dark/next.svg"
@@ -1982,7 +2040,7 @@
         "command": "leojs.promoteSelection",
         "category": "Leojs",
         "title": "Promote Children",
-        "enablement": "leojsCanPromote",
+        "enablement": "leojsTreeOpened && leojsCanPromote",
         "icon": {
           "light": "resources/light/promote.svg",
           "dark": "resources/dark/promote.svg"
@@ -1992,7 +2050,7 @@
         "command": "leojs.promoteSelectionFromOutline",
         "category": "Leojs",
         "title": "Promote Children",
-        "enablement": "leojsCanPromote",
+        "enablement": "leojsTreeOpened && leojsCanPromote",
         "icon": {
           "light": "resources/light/promote.svg",
           "dark": "resources/dark/promote.svg"
@@ -2012,7 +2070,7 @@
         "command": "leojs.demoteSelection",
         "category": "Leojs",
         "title": "Demote Siblings",
-        "enablement": "leojsCanDemote",
+        "enablement": "leojsTreeOpened && leojsCanDemote",
         "icon": {
           "light": "resources/light/demote.svg",
           "dark": "resources/dark/demote.svg"
@@ -2022,7 +2080,7 @@
         "command": "leojs.demoteSelectionFromOutline",
         "category": "Leojs",
         "title": "Demote Siblings",
-        "enablement": "leojsCanDemote",
+        "enablement": "leojsTreeOpened && leojsCanDemote",
         "icon": {
           "light": "resources/light/demote.svg",
           "dark": "resources/dark/demote.svg"
@@ -2246,7 +2304,7 @@
         "command": "leojs.undo",
         "category": "Leojs",
         "title": "Undo",
-        "enablement": "leojsCanUndo",
+        "enablement": "leojsTreeOpened && leojsCanUndo",
         "icon": {
           "light": "resources/light/undo.svg",
           "dark": "resources/dark/undo.svg"
@@ -2256,7 +2314,7 @@
         "command": "leojs.undoFromOutline",
         "category": "Leojs",
         "title": "Undo",
-        "enablement": "leojsCanUndo",
+        "enablement": "leojsTreeOpened && leojsCanUndo",
         "icon": {
           "light": "resources/light/undo.svg",
           "dark": "resources/dark/undo.svg"
@@ -2266,7 +2324,7 @@
         "command": "leojs.redo",
         "category": "Leojs",
         "title": "Redo",
-        "enablement": "leojsCanRedo",
+        "enablement": "leojsTreeOpened && leojsCanRedo",
         "icon": {
           "light": "resources/light/redo.svg",
           "dark": "resources/dark/redo.svg"
@@ -2276,7 +2334,7 @@
         "command": "leojs.redoFromOutline",
         "category": "Leojs",
         "title": "Redo",
-        "enablement": "leojsCanRedo",
+        "enablement": "leojsTreeOpened && leojsCanRedo",
         "icon": {
           "light": "resources/light/redo.svg",
           "dark": "resources/dark/redo.svg"
@@ -4153,6 +4211,7 @@
     "@types/node": "16.x",
     "@types/pako": "^2.0.0",
     "@types/safe-json-stringify": "^1.1.2",
+    "@types/showdown": "^2.0.6",
     "@types/sql.js": "^1.4.4",
     "@types/uuid": "^9.0.7",
     "@types/vscode": "^1.83.0",
@@ -4193,6 +4252,7 @@
     "os-browserify": "^0.3.0",
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
+    "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "uuid": "^9.0.1"
   }

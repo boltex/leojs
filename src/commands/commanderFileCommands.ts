@@ -15,6 +15,7 @@ import { LoadManager, PreviousSettings } from '../core/leoApp';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
 import { ScriptingController } from '../core/mod_scripting';
+import { CommanderWrapper } from '../core/leoCache';
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -70,6 +71,7 @@ export class CommanderFileCommands {
         const title = c.computeWindowTitle();
         c.frame.title = title;
         c.frame.setTitle(title);
+
         try {
             // Does not exist during unit testing. May not exist in all guis.
             // c.frame.top?.leo_master?.setTabName(c, c.mFileName);
@@ -1327,6 +1329,11 @@ export class CommanderFileCommands {
         const c: Commands = this;
 
         g.app.recentFilesManager.editRecentFiles(c);
+    }
+    //@+node:felix.20240209220106.1: *4* c._file.showRecentFiles
+    @commander_command('show-recent-files', 'Open a file from the recent files list .')
+    public async showRecentFiles(): Promise<void> {
+        await g.app.gui.showRecentLeoFiles();
     }
     //@+node:felix.20220105210716.42: *4* c_file.sortRecentFiles
 

@@ -30,7 +30,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
         g.app.loadManager = leoApp.LoadManager()
         g.app.loadManager.load(fileName, pymacs)
     */
-
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
@@ -53,8 +52,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
     const w_previousVersion = p_context.globalState.get<string>(Constants.VERSION_STATE_KEY);
     let SQL: SqlJsStatic;
 
-    // * Close remaining Leo Bodies restored by vscode from last session.
-    await closeLeoTextEditors();
+    // * Close remaining Leo Bodies and help panels restored by vscode from last session.
+    await utils.closeLeoTextEditors();
+    await utils.closeLeoHelpPanels();
 
     // * Show a welcome screen on version updates, then start the actual extension.
     void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
@@ -64,7 +64,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
-        (g.app as LeoApp).vscodeExtensionDir = g.os_path_normslashes(g.os_path_fix_drive(p_context.extensionUri.fsPath));
 
         const gitExtension = vscode.extensions.getExtension<GitAPI.GitExtension>('vscode.git');
         if (gitExtension) {
@@ -261,10 +260,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
     }
 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
-        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
-        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+        (g.workspaceUri as vscode.Uri) = vscode.workspace.workspaceFolders[0].uri;
 
         // console.log('GOT WORKSPACE: starting file-system ZIP & DB tests');
         if (0) {
@@ -279,17 +275,12 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
     }
 
     if (!g.isBrowser) {
-        // Regular NodeJs Extension: Dont wait for workspace being opened
-        if (!g.app.vscodeUriScheme) {
-            // Only setting if undefined, because regular vscode can still work on remote github virtual filesystem
-            g.app.vscodeUriScheme = 'file';
-        }
         await runLeo(p_context);
     } else {
         // Web Browser Extension: Check for type of workspace opened first
-        if (g.app.vscodeUriScheme) {
+        if (g.workspaceUri) {
 
-            if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
+            if (!vscode.workspace.fs.isWritableFileSystem(g.workspaceUri.scheme)) {
 
                 // NOTE : ! THIS RETURNS FALSE POSITIVES ! 
                 console.log('NOT WRITABLE WORKSPACE: FALSE POSITIVE?');
@@ -310,9 +301,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
-            if (g.app.vscodeUriScheme !== 'file') {
+            if (g.workspaceUri.scheme !== 'file') {
                 if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
                 }
 
                 await runLeo(p_context);
@@ -348,14 +339,11 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
         console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
 
-        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
-        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
-        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
-        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
+        (g.workspaceUri as vscode.Uri) = vscode.workspace.workspaceFolders[0].uri;
+        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.workspaceUri.scheme));
 
-        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
-        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
+        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.workspaceUri.toJSON()));
+        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.workspaceUri.toString());
 
         // * Set new and unsaved document's c.openDirectory.
         //  g.app.windowList[this.frameIndex].c;
@@ -372,9 +360,9 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
         // not started yet? 
         if (!g.app.loadManager && g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
-            if (g.app.vscodeUriScheme !== 'file') {
+            if (g.workspaceUri.scheme !== 'file') {
                 if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.app.vscodeWorkspaceUri);
+                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
                 }
 
                 void runLeo(p_context);
@@ -423,48 +411,6 @@ export async function deactivate(): Promise<unknown> {
     } else {
         console.log('no g.app');
     }
-}
-
-/**
- * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
- */
-async function closeLeoTextEditors(): Promise<unknown> {
-    const w_foundTabs: vscode.Tab[] = [];
-
-    vscode.window.tabGroups.all.forEach((p_tabGroup) => {
-        p_tabGroup.tabs.forEach((p_tab) => {
-
-            if (p_tab.input &&
-                (p_tab.input as vscode.TabInputText).uri &&
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
-                !p_tab.isDirty
-
-            ) {
-                w_foundTabs.push(p_tab);
-            }
-        });
-    });
-
-    let q_closedTabs;
-    if (w_foundTabs.length) {
-        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
-        for (const p_tab of w_foundTabs) {
-            if (p_tab.input) {
-                await vscode.commands.executeCommand(
-                    'vscode.removeFromRecentlyOpened',
-                    (p_tab.input as vscode.TabInputText).uri
-                );
-                // Delete to close all other body tabs.
-                // (w_oldUri will be deleted last below)
-                const w_edit = new vscode.WorkspaceEdit();
-                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
-                await vscode.workspace.applyEdit(w_edit);
-            }
-        }
-    } else {
-        q_closedTabs = Promise.resolve(true);
-    }
-    return q_closedTabs;
 }
 
 /**

@@ -1,5 +1,31 @@
 # Change Log
 
+# 0.2.12
+
+- Help commands were changed from markdown preview panes to html webviews.
+- (Breaking Change) Made vscode accessible via g.vscode instead of g.app.vscode.
+- Made more external libraries accessible via the global 'g' object:
+    - SQL
+    - pako
+    - showdown
+    - JSZip
+- Made more OS path related constants available in the global 'g' object:
+    - extensionContext
+    - extensionUri
+    - workspaceUri
+- Added 'show-recent-files' command.
+- Fixed Find-Panel's behavior and styling.
+- Fixed 'open-aside' command.
+- Added hover menu to the UNL status bar item to choose from any UNL formats to be copied to the clipboard.
+- Removed 'font-size & zoom' related config settings following VSCode's new ZOOM settings API.
+- Added support for XML language colorization.
+- Implemented Leo's new UNL relative path support.
+- Fixed settings being saved properly in db for newly created files from a 'save-as' command.
+- Changed .leojs file format to have no state bits in file anymore, and instead save them in db.
+- Fixed at-buttons panel to refresh properly after a 'revert-to-saved' command.
+- Fixed startup process to block all commands if no LeoID is found, except for the 'Set Leo ID' command.
+- Fixed 'Goto' panel's navigation's stability issues after switching panels.
+
 # 0.2.11
 
 - Added typescript support for running scripts and using @command or @button nodes.

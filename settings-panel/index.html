@@ -35,7 +35,7 @@
     <div class="content__area">
       <section id="welcome" class="section--full mb-0">
         <h2 class="section__title section__title--primary">
-          Welcome to <span class="highlight">LeoJS 0.2.11</span>
+          Welcome to <span class="highlight">LeoJS 0.2.12</span>
         </h2>
         <div class="center mt-1">
           <a class="button button--flat is-sidebar-hidden"
@@ -44,7 +44,7 @@
             <span class="heart">&#x2764;</span>
           </a>
           <a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features">
-            See What's New in LeoJS 0.2.11
+            See What's New in LeoJS 0.2.12
           </a>
         </div>
         <p class="blurb center ml-0 mr-0">
@@ -142,7 +142,7 @@
             <div class="setting">
               <div class="setting__input">
                 <input id="sessionPerWorkspace" name="sessionPerWorkspace" type="checkbox" data-setting />
-                <label for="sessionPerWorkspace">Keep one session per wokspace</label>
+                <label for="sessionPerWorkspace">Keep one session per workspace</label>
               </div>
               <span class="setting__hint">Reopen the same set of files for
                 each workspace.<br />
@@ -345,50 +345,30 @@
           </div>
         </div>
       </section>
-      <section id="font-sizes" class="section--settings">
+
+      <section id="status-bar" class="section--settings">
         <div class="section__content">
           <div class="section__header">
-            <h2>Outline and Body Font Sizes</h2>
+            <h2>Status Bar Indicator</h2>
             <p class="section__header-hint">
-              <em>Start by adjusting the Outline pane</em>, by
-              changing the global <em>Zoom Level</em>.<br />
-              Then, resize the the
-              <em>Body Pane font size</em> by changing the
-              <em>Editor Font Size</em>.
+              UNL is shown at the bottom in the status bar
             </p>
           </div>
 
           <div class="settings">
             <div class="setting">
               <div class="setting__input">
-                <label for="zoomLevel">Zoom Level</label>
-                <input id="zoomLevel" name="zoomLevel" type="number" min="-12" max="12" maxlength="2"
-                  placeholder="Number" data-vscode />
+                <input id="showUnlOnStatusBar" name="showUnlOnStatusBar" type="checkbox" data-setting />
+                <label for="showUnlOnStatusBar">Enable UNL in status bar</label>
               </div>
-              <span class="setting__hint">
-                Adjust the zoom level<br />
-                of the window.<br />
-                (Original size is 0 and each<br />
-                increment above 1 or below -1<br />
-                represents zooming 20%.<br />
-                You can also use decimals.)
-              </span>
-            </div>
-            <div class="setting">
-              <div class="setting__input">
-                <label for="editorFontSize">Editor Font Size</label>
-                <input id="editorFontSize" name="editorFontSize" type="number" min="6" max="30" maxlength="2"
-                  placeholder="Number" data-vscode />
-              </div>
-              <span class="setting__hint">
-                Controls the Text-Editor<br />
-                pane font size in pixels.<br />
-                Set this after having set the<br />
-                Zoom Level for the outline, as<br />
-                it's affected by the Zoom Level.
-              </span>
+              <span class="setting__hint">Click the indicator to copy the UNL to the clipboard</span>
             </div>
           </div>
+        </div>
+        <div class="section__preview">
+          <img class="image__preview" src="#{root}/resources/unl-off.png" />
+          <img class="image__preview--overlay hidden" src="#{root}/resources/unl-on.png"
+            data-visibility="showUnlOnStatusBar" />
         </div>
       </section>
     </div>
@@ -428,7 +408,7 @@
             <a href="#node-commands" title="Outline nodes settings">Node Hover Commands</a>
           </li>
           <li>
-            <a href="#font-sizes" title="Font size settings">Font Sizes</a>
+            <a href="#status-bar" title="Status bar indicator">Status Bar Indicator</a>
           </li>
         </ul>
       </div>

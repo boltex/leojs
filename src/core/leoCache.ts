@@ -38,14 +38,12 @@ export class CommanderWrapper {
 
     private c: Commands;
     private db: Record<string, any> | SqlitePickleShare;
-    public key: string;
     private user_keys: Set<string>;
 
     constructor(c: Commands) {
 
         this.c = c;
         this.db = g.app.db;
-        this.key = c.mFileName;
         this.user_keys = new Set();
         return new Proxy(this, this);
 
@@ -56,14 +54,14 @@ export class CommanderWrapper {
     }
 
     public has(target: CommanderWrapper, prop: string) {
-        return `${this.key}:::${prop}` in this.db;
+        return `${this.c.mFileName}:::${prop}` in this.db;
     }
 
     public deleteProperty(target: CommanderWrapper, prop: string): boolean {
         if (this.user_keys.has(prop)) {
             this.user_keys.delete(prop);
         }
-        delete this.db[`${this.key}:::${prop}`];
+        delete this.db[`${this.c.mFileName}:::${prop}`];
         return true;
 
     }
@@ -87,38 +85,43 @@ export class CommanderWrapper {
         if (prop === "Symbol(Symbol.iterator)") {
             return this[Symbol.iterator].bind(target);
         }
-        return this.db[`${this.key}:::${prop}`];  // May (properly) raise KeyError
+        return this.db[`${this.c.mFileName}:::${prop}`];  // May (properly) raise KeyError
     }
 
     public set(target: CommanderWrapper, prop: string, value: any): boolean {
-        if (prop === "key") {
-            this.key = value;
-            return true;
+        if (this.c.mFileName) {
+            this.user_keys.add(prop);
+            this.db[`${this.c.mFileName}:::${prop}`] = value;
+        } else {
+            console.log('Error db has no filename KEY !');
         }
-        this.user_keys.add(prop);
-        this.db[`${this.key}:::${prop}`] = value;
         return true;
     }
 
     _get(key: string, p_default?: any): any {
-        const w_result = this.db[`${this.key}:::${key}`];
-        if (w_result == null) {
+        let result;
+        if (this.c.mFileName) {
+            result = this.db[`${this.c.mFileName}:::${key}`];
+        } else {
+            console.log('Error db has no filename KEY !');
+        }
+        if (result == null) {
             return p_default;
         } else {
-            return w_result;
+            return result;
         }
     }
 
     valueOf() {
-        return 'CommanderWrapper: ' + this.key + JSON.stringify(this.user_keys);
+        return 'CommanderWrapper: ' + this.c.mFileName + JSON.stringify(this.user_keys);
     }
     toString() {
-        return 'CommanderWrapper: ' + this.key + JSON.stringify(this.user_keys);
+        return 'CommanderWrapper: ' + this.c.mFileName + JSON.stringify(this.user_keys);
     }
 
     *[Symbol.iterator]() {
         for (const key of this.user_keys) {
-            yield [key, this.db[`${this.key}:::${key}`]];
+            yield [key, this.db[`${this.c.mFileName}:::${key}`]];
         }
     }
 

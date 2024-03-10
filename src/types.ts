@@ -17,6 +17,7 @@ export interface ConfigMembers {
     activityViewShortcut: boolean;
     goAnywhereShortcut: boolean;
 
+    showUnlOnStatusBar: boolean,
     // statusBarString: string;
     // statusBarColor: string;
 
@@ -50,14 +51,6 @@ export interface ConfigMembers {
 export interface ConfigSetting {
     code: string;
     value: any;
-}
-
-/**
- * * Structure for the two vscode font settings
- */
-export interface FontSettings {
-    zoomLevel: number;
-    fontSize: number;
 }
 
 /**
@@ -328,3 +321,5 @@ export interface ChooseRClickItem extends vscode.QuickPickItem {
 export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;
 }
+export type UnlType = 'shortGnx' | 'fullGnx' | 'shortLegacy' | 'fullLegacy';
+

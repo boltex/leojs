@@ -3676,9 +3676,6 @@ suite('TestPython', () => {
             @dec_for_f2
             def f2(): pass
 
-
-            class A: pass
-            # About main.
             def main():
                 pass
 
@@ -3708,11 +3705,7 @@ suite('TestPython', () => {
                 '@dec_for_f2\n' +
                 'def f2(): pass\n'
             ],
-            [1, 'class A',
-                'class A: pass\n'
-            ],
             [1, 'function: main',
-                '# About main.\n' +
                 'def main():\n' +
                 '    pass\n'
             ]

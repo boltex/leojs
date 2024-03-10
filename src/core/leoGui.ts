@@ -194,12 +194,6 @@ export class LeoGui {
     ): any {
         this.oops();
     }
-    /**
-     * Create and run a dialog to get g.app.LeoID.
-     */
-    public runAskLeoIDDialog(): any {
-        this.oops();
-    }
 
     /**
      * Create and run an askOK dialog .
@@ -309,6 +303,11 @@ export class LeoGui {
     ): Thenable<string> {
         this.oops();
         return Promise.resolve('no');
+    }
+
+    public showRecentLeoFiles(): any {
+        this.oops();
+        return Promise.resolve();
     }
     //@+node:felix.20221120210715.1: *4* LeoGui.addLogPaneEntry (LeoJs)
     public addLogPaneEntry(...args: any[]): void {
@@ -583,10 +582,6 @@ export class NullGui extends LeoGui {
         //
     }
 
-    public setLeoIDCommand(): void {
-        //
-    }
-
     public widget_name(widget: any): string {
         return '';
     }
@@ -668,20 +663,6 @@ export class NullGui extends LeoGui {
 
     public createLeoFrame(c: Commands, title: string): LeoFrame {
         return new LeoFrame(c, title, this);
-    }
-
-    public showLeoIDMessage(): void {
-        // pass
-    }
-
-    public setIdSetting(p_id: string): void { }
-
-    public getIdFromSetting(): string {
-        return '';
-    }
-
-    public getIdFromDialog(): Thenable<string> {
-        return Promise.resolve('');
     }
 
     public ensure_commander_visible(c: Commands): void { }

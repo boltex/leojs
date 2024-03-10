@@ -55,7 +55,6 @@ export class SessionManager {
     for (const c of outlines) {
       if (c.fileName()) {
         result.push(c.p.get_full_gnx_UNL());
-      } else {
       }
     }
     return result;

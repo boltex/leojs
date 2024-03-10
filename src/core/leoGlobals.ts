@@ -6,7 +6,15 @@
  */
 //@+<< imports >>
 //@+node:felix.20210102181122.1: ** << imports >>
-import * as vscode from 'vscode';
+import * as vscodeObj from 'vscode';
+import {
+    ExtensionContext,
+    Uri,
+    env,
+    workspace,
+    window, commands,
+    FileStat, FileType
+} from 'vscode';
 // import { Utils as uriUtils } from "vscode-uri";
 
 // import * as Bowser from "bowser";
@@ -21,6 +29,10 @@ import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
 import { RemoteHubApi } from '../remote-hub';
 import { SqlJsStatic } from 'sql.js';
+import * as showdownObj from "showdown";
+import * as pakoObj from 'pako';
+import * as JSZipObj from 'jszip';
+
 
 /*
     import binascii
@@ -60,12 +72,17 @@ import { SqlJsStatic } from 'sql.js';
 
 //@-<< imports >>
 
-// TODO: Maybe make those platform detection methods better with 'bowser' library
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
-export let extensionContext: vscode.ExtensionContext;
-export let extensionUri: vscode.Uri;  // For accessing files in extension package.
+/** the VS Code extensibility API */
+export let vscode: typeof vscodeObj = vscodeObj;
+/** The LeoJS 'Extension Context' */
+export let extensionContext: ExtensionContext;
+/** For accessing files in the LeoJS extension package */
+export let extensionUri: Uri;
+/** For accessing files in the current workspace */
+export let workspaceUri: Uri;
 
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
@@ -270,7 +287,9 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 export let app: LeoApp;
 
 export let SQL: SqlJsStatic;
-
+export let pako: typeof pakoObj = pakoObj;
+export let showdown: typeof showdownObj = showdownObj;
+export let JSZip: typeof JSZipObj = JSZipObj;
 
 // The singleton Git extension exposed API
 export let gitAPI: GitAPI.API;
@@ -1628,7 +1647,7 @@ update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
 //@+node:felix.20231227213922.1: *3* g.isBrowserRepo
 export function isBrowserRepo(): boolean {
-    return isBrowser || (!!app.vscodeUriScheme && app.vscodeUriScheme !== 'file');
+    return isBrowser || (workspaceUri && workspaceUri.scheme !== 'file');
 }
 
 //@+node:felix.20220108221428.1: *3* g.chdir
@@ -1654,12 +1673,12 @@ export async function chdir(p_path: string): Promise<void> {
 //@+node:felix.20230711213447.1: *3* g.mkdir
 export async function mkdir(folderName: string): Promise<void> {
     const w_uri = makeVscodeUri(folderName);
-    await vscode.workspace.fs.createDirectory(w_uri);
+    await workspace.fs.createDirectory(w_uri);
 }
 //@+node:felix.20230714230415.1: *3* g.rmdir
 export async function rmdir(folderName: string): Promise<void> {
     const w_uri = makeVscodeUri(folderName);
-    await vscode.workspace.fs.delete(w_uri, { recursive: true });
+    await workspace.fs.delete(w_uri, { recursive: true });
 }
 //@+node:felix.20220511212935.1: *3* g.computeWindowTitle
 /**
@@ -1740,17 +1759,17 @@ export async function filecmp_cmp(
     shallow = true
 ): Promise<boolean> {
     let w_same = false;
-    let w_uri: vscode.Uri;
+    let w_uri: Uri;
     w_uri = makeVscodeUri(path1); // first uri, no matter if shallow or not.
     if (shallow) {
-        const stats1 = await vscode.workspace.fs.stat(w_uri);
+        const stats1 = await workspace.fs.stat(w_uri);
         w_uri = makeVscodeUri(path2);
-        const stats2 = await vscode.workspace.fs.stat(w_uri);
+        const stats2 = await workspace.fs.stat(w_uri);
         w_same = stats1.size === stats2.size && stats1.mtime === stats2.mtime;
     } else {
-        const file1 = await vscode.workspace.fs.readFile(w_uri);
+        const file1 = await workspace.fs.readFile(w_uri);
         w_uri = makeVscodeUri(path2);
-        const file2 = await vscode.workspace.fs.readFile(w_uri);
+        const file2 = await workspace.fs.readFile(w_uri);
         w_same = Buffer.compare(file1, file2) === 0;
     }
     return w_same;
@@ -1830,7 +1849,7 @@ export async function is_binary_external_file(
         // with open(fileName, 'rb') as f:
         //     s = f.read(1024)  // bytes, in Python 3.
         const w_readUri = makeVscodeUri(fileName);
-        const readData = await vscode.workspace.fs.readFile(w_readUri);
+        const readData = await workspace.fs.readFile(w_readUri);
         const s = readData.slice(0, 1024);
         return is_binary_string(s);
         // except IOError:
@@ -1878,7 +1897,7 @@ export async function makeAllNonExistentDirectories(
     // #1450: Create the directory with os.makedirs.
     try {
         const w_uri = makeVscodeUri(theDir);
-        await vscode.workspace.fs.createDirectory(w_uri);
+        await workspace.fs.createDirectory(w_uri);
         return theDir;
     } catch (exception) {
         return undefined;
@@ -1945,7 +1964,7 @@ export async function readFileIntoString(
 
     try {
         const w_uri = makeVscodeUri(fileName);
-        let readData = await vscode.workspace.fs.readFile(w_uri);
+        let readData = await workspace.fs.readFile(w_uri);
         if (!readData) {
             return ['', undefined];
         }
@@ -1987,7 +2006,7 @@ export async function readFileIntoUnicodeString(
 ): Promise<string | undefined> {
     try {
         const w_uri = makeVscodeUri(fn);
-        let s = await vscode.workspace.fs.readFile(w_uri);
+        let s = await workspace.fs.readFile(w_uri);
         return toUnicode(s, encoding);
     } catch (e) {
         if (!silent) {
@@ -2030,7 +2049,7 @@ export function readlineForceUnixNewline(
 //@+node:felix.20230711202208.1: *3* g.os_remove
 export async function os_remove(fileName: string): Promise<void> {
     const w_uri = makeVscodeUri(fileName);
-    await vscode.workspace.fs.delete(w_uri);
+    await workspace.fs.delete(w_uri);
 }
 //@+node:felix.20220412004053.1: *3* g.sanitize_filename
 /**
@@ -2136,7 +2155,7 @@ export async function writeFile(
         //     f.write(contents)  // type:ignore
 
         const w_uri = makeVscodeUri(fileName);
-        await vscode.workspace.fs.writeFile(w_uri, contents);
+        await workspace.fs.writeFile(w_uri, contents);
 
         return true;
     } catch (e) {
@@ -2163,7 +2182,7 @@ export async function write_file_if_changed(
             // with open(fn, 'rb') as f
             //     contents = f.read()
             const w_uri = makeVscodeUri(fn);
-            const contents = await vscode.workspace.fs.readFile(w_uri);
+            const contents = await workspace.fs.readFile(w_uri);
             if (Buffer.compare(contents, encoded_s) === 0) {
                 return false;
             }
@@ -2171,7 +2190,7 @@ export async function write_file_if_changed(
         // with open(fn, 'wb') as f
         //     f.write(encoded_s);
         const w_uri = makeVscodeUri(fn);
-        await vscode.workspace.fs.writeFile(w_uri, encoded_s);
+        await workspace.fs.writeFile(w_uri, encoded_s);
         return true;
     } catch (exception) {
         es_print(`Exception writing ${fn}`);
@@ -2188,12 +2207,12 @@ export async function write_file_if_changed(
  * @param p_fn String form of fsPath or path
  * @returns An URI for file access compatible with web extensions filesystems
  */
-export function makeVscodeUri(p_fn: string): vscode.Uri {
+export function makeVscodeUri(p_fn: string): Uri {
 
-    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+    if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_fn = p_fn.replace(/\\/g, "/");
         try {
-            const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
+            const newUri = workspaceUri!.with({ path: p_fn });
             return newUri;
         } catch (e) {
             console.log(
@@ -2205,7 +2224,7 @@ export function makeVscodeUri(p_fn: string): vscode.Uri {
         }
     } else {
         // Normal file in desktop app
-        return vscode.Uri.file(p_fn);
+        return Uri.file(p_fn);
     }
 }
 
@@ -2843,7 +2862,7 @@ export async function execGitCommand(
 
     if (isBrowser) {
         console.log('LEOJS: GIT COMMAND CALLED FROM BROWSER');
-        void vscode.window.showInformationMessage('LeoJS Git Commands are not yet available in "web" version');
+        void window.showInformationMessage('LeoJS Git Commands are not yet available in "web" version');
         return [];
     }
 
@@ -4100,6 +4119,9 @@ export const warning = es_print;
 
 //@+node:felix.20211104212741.1: *3* g.es
 export function es(...args: any[]): void {
+    if (app && app.logIsLocked) {
+        return;
+    }
     let s: string = '';
     args.forEach((p_entry) => {
         if (s) {
@@ -4269,6 +4291,19 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20240304235518.1: *3* g.IDDialog
+export function IDDialog(): Thenable<string> {
+    return vscode.window.showInputBox({
+        title: "Enter Leo id",
+        prompt: "Please enter an id that identifies you uniquely.\n(Letters and numbers only, and at least 3 characters in length)",
+        ignoreFocusOut: true,
+    }).then((id) => {
+        if (id) {
+            return id;
+        }
+        return '';
+    });
+}
 //@+node:felix.20230529144955.1: *3* g.maketrans
 export function maketrans(
     from: string,
@@ -4573,7 +4608,7 @@ export async function os_listdir(p_path: string): Promise<string[]> {
     let result: string[] = [];
     try {
         const w_uri = makeVscodeUri(p_path);
-        const w_dirInfo = await vscode.workspace.fs.readDirectory(w_uri);
+        const w_dirInfo = await workspace.fs.readDirectory(w_uri);
         result = w_dirInfo.map((p_dirInfo) => p_dirInfo[0]);
     } catch (e) {
         es(`Error listing directory ${p_path}`);
@@ -4582,7 +4617,7 @@ export async function os_listdir(p_path: string): Promise<string[]> {
 }
 //@+node:felix.20230711005109.1: *3* g.setStatusLabel
 export function setStatusLabel(s: string): Thenable<unknown> {
-    return vscode.window.showInformationMessage(s);
+    return window.showInformationMessage(s);
 }
 //@+node:felix.20231012000332.1: *3* g.truncate
 export function truncate(s: string, n: number): string {
@@ -4611,9 +4646,9 @@ export function warnNoOpenDirectory(
     let q_warning: Thenable<string | undefined>;
 
     if (p_items && p_items.length) {
-        q_warning = vscode.window.showWarningMessage(w_message, ...p_items);
+        q_warning = window.showWarningMessage(w_message, ...p_items);
     } else {
-        q_warning = vscode.window.showWarningMessage(
+        q_warning = window.showWarningMessage(
             w_message,
             'Save',
             'Open Folder'
@@ -4622,12 +4657,12 @@ export function warnNoOpenDirectory(
     return q_warning.then((p_result) => {
         // handle choices
         if (p_result === 'Save') {
-            void vscode.commands.executeCommand('leojs.saveLeoFile');
+            void commands.executeCommand('leojs.saveLeoFile');
         } else if (p_result === 'Open Folder') {
             if (isBrowser) {
-                void vscode.commands.executeCommand('remoteHub.openRepository');
+                void commands.executeCommand('remoteHub.openRepository');
             } else {
-                void vscode.commands.executeCommand(
+                void commands.executeCommand(
                     'workbench.action.files.openFolder'
                 );
             }
@@ -4762,7 +4797,7 @@ export function os_path_basename(p_path: string): string {
         return '';
     }
 
-    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+    if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
         let lastSlashIndex = p_path.lastIndexOf('/');
 
@@ -4789,7 +4824,7 @@ export function os_path_dirname(p_path?: string): string {
         return '';
     }
 
-    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
+    if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_path = p_path = p_path.split('\\').join('/'); // FORCE to slashes on web
         let lastSlashIndex = p_path.lastIndexOf('/');
 
@@ -4817,7 +4852,7 @@ export function os_path_dirname(p_path?: string): string {
  */
 export async function os_path_exists(
     p_path?: string
-): Promise<boolean | vscode.FileStat> {
+): Promise<boolean | FileStat> {
     if (!p_path) {
         return false;
     }
@@ -4827,7 +4862,7 @@ export async function os_path_exists(
     }
     const w_uri = makeVscodeUri(p_path);
     try {
-        const stat = await vscode.workspace.fs.stat(w_uri);
+        const stat = await workspace.fs.stat(w_uri);
         return stat;
     } catch {
         return false;
@@ -4914,7 +4949,7 @@ export async function os_path_getmtime(p_path: string): Promise<number> {
     try {
         // return os.path.getmtime(p_path);
         const w_uri = makeVscodeUri(p_path);
-        const w_stats = await vscode.workspace.fs.stat(w_uri);
+        const w_stats = await workspace.fs.stat(w_uri);
         return w_stats.mtime;
     } catch (exception) {
         return 0;
@@ -4928,7 +4963,7 @@ export async function os_path_getsize(p_path: string): Promise<number> {
     if (p_path) {
         const w_uri = makeVscodeUri(p_path);
         try {
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+            const fileStat: FileStat = await workspace.fs.stat(
                 w_uri
             );
             // OK exists
@@ -4961,11 +4996,11 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
     if (p_path) {
         try {
             const w_uri = makeVscodeUri(p_path);
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+            const fileStat: FileStat = await workspace.fs.stat(
                 w_uri
             );
             // OK exists
-            return fileStat.type === vscode.FileType.Directory;
+            return fileStat.type === FileType.Directory;
         } catch {
             // Does not exist !
             return false;
@@ -4983,11 +5018,11 @@ export async function os_path_isfile(p_path?: string): Promise<boolean> {
     if (p_path) {
         try {
             const w_uri = makeVscodeUri(p_path);
-            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(
+            const fileStat: FileStat = await workspace.fs.stat(
                 w_uri
             );
             // OK exists
-            return fileStat.type === vscode.FileType.File;
+            return fileStat.type === FileType.File;
         } catch {
             // Does not exist !
             return false;
@@ -5164,8 +5199,8 @@ export async function os_path_samefile(
 
     // IF REAL NODE FS ONLY !
     try {
-        const w_stat1: vscode.FileStat = await vscode.workspace.fs.stat(w_uri1);
-        const w_stat2: vscode.FileStat = await vscode.workspace.fs.stat(w_uri2);
+        const w_stat1: FileStat = await workspace.fs.stat(w_uri1);
+        const w_stat2: FileStat = await workspace.fs.stat(w_uri2);
         if (
             (w_stat1 as any)['ino'] &&
             (w_stat1 as any)['dev'] &&
@@ -5901,17 +5936,30 @@ Clickable links have four forms:
    provided the outline contains an `@<file>` node for file mentioned in
    the error message.
 
-2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):
+2. UNLs based on gnx's (global node indices):
 
    Links of the form `unl:gnx:` + `//{outline}#{gnx}` open the given
-   outline and select the first outline node with the given gnx. These UNLs
-   will work as long as the node exists anywhere in the outline.
+   outline and select the first outline node with the given gnx.
 
    For example, the link: `unl:gnx://#ekr.20031218072017.2406` refers to this
    outline's "Code" node. Try it. The link works in this outline.
 
-   *Note*: `{outline}` is optional. It can be an absolute path name or a relative
-   path name resolved using `@data unl-path-prefixes`.
+   Either `{outline}` or `{gnx}` may be empty, but at least one must exist.
+
+   `{outline}` can be:
+
+   - An *absolute path* to a .leo file.
+   - A *relative path*, resolved using the outline's directory.
+
+     Leo will select the outline if it is already open.
+     Otherwise, Leo will open the outline if it exists.
+
+   - A *short* name, say x.leo.
+     Leo searches for x.leo file:
+     a) among the paths in `@data unl-path-prefixes`,
+     b) among all open commanders.
+
+   - *Empty*. Leo searches for the gnx in all open outlines.
 
 3. Leo's headline-based UNLs, as shown in the status pane:
 
@@ -5955,7 +6003,7 @@ export function computeFileUrl(fn: string, c: Commands, p: Position): string {
             w_path = url;
         }
         // Handle ancestor @path directives.
-        // TODO : MAY HAVE TO USE g.app.vscodeWorkspaceUri?.fsPath 
+        // TODO : MAY HAVE TO USE g.vscodeWorkspaceUri?.fsPath 
         if (c && c.fileName()) {
             const base = c.getNodePath(p);
             w_path = finalize_join(os_path_dirname(c.fileName()), base, w_path);
@@ -5997,20 +6045,48 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
     let unl = unl_s;
     let file_part;
     let c2;
-    let c3;
     let tail;
+
     if (unl.startsWith('unl:gnx:')) {
-        // Resolve a gnx-based unl.
-        unl = unl.slice(8);
+
+        // Init the gnx-based search.
+        unl = unl.substring(8);
         file_part = getUNLFilePart(unl);
-        c2 = await openUNLFile(c, file_part);
-        if (file_part && !c2) {
-            return undefined;
-        }
-        c3 = c2 || c;
         tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
-        return findGnx(tail, c3);
+
+        // First, search the open commander.
+        // #3811: Do *not* fail if this search fails.
+        if (file_part) {
+            c2 = await openUNLFile(c, file_part);
+            if (c2) {
+                if (tail) {
+                    const p = await findGnx(tail, c2);
+                    if (p && p.__bool__()) {
+                        return p;
+                    }
+                } else {
+                    // only the file part, no node part!
+                    return c2.p;
+                }
+            }
+        }
+
+        // Search all open commanders, starting with c.
+        let p = await findGnx(tail, c);
+        if (p && p.__bool__()) {
+            return p;
+        }
+        for (const c2 of app.commanders()) {
+            if (c2 !== c) {
+                p = await findGnx(tail, c2);
+                if (p && p.__bool__()) {
+                    return p;
+                }
+            }
+        }
+        return;
     }
+
     // Resolve a file-based unl.
     let found = false;
     for (const prefix of ['unl:', 'file:']) {
@@ -6021,20 +6097,45 @@ export async function findAnyUnl(unl_s: string, c: Commands): Promise<Position |
         }
     }
     if (!found) {
-        console.log(`Bad unl: ${unl_s}`);
+        es_print(`Bad unl: ${unl_s}`);
         return undefined;
     }
 
+    // Init the headline-based search.
     file_part = getUNLFilePart(unl);
-    c2 = await openUNLFile(c, file_part);
-    if (file_part && !c2) {
-        return undefined;
-    }
-    c3 = c2 || c;
-    tail = unl.slice(3 + file_part.length);  // 3: Skip the '//' and '#'
+    tail = unl.substring(3 + file_part.length);  // 3: Skip the '//' and '#'
     const unlList = tail.split('-->');
-    return findUnl(unlList, c3);
 
+    // If there is a file part, search *only* the given commander!
+    if (file_part) {
+        const c2 = await openUNLFile(c, file_part);
+        if (!c2) {
+            return;
+        }
+        if (tail) {
+            const p = await findUnl(unlList, c2);
+            return p;  // May be null
+        } else {
+            // only the file part, no node part!
+            return c2.p;
+        }
+    }
+
+    // New in Leo 6.7.7:
+    // There is no file part, so search all open commanders, starting with c.
+    let p = await findUnl(unlList, c);
+    if (p && p.__bool__()) {
+        return p;
+    }
+    for (const c2 of app.commanders()) {
+        if (c2 !== c) {
+            p = await findUnl(unlList, c2);
+            if (p && p.__bool__()) {
+                return p;
+            }
+        }
+    }
+    return;
 }
 //@+node:felix.20230724154323.6: *3* g.findGnx (new unls)
 /**
@@ -6377,7 +6478,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         // Mozilla throws a weird exception, then opens the file!
         try {
             // webbrowser.open(url)
-            void vscode.env.openExternal(vscode.Uri.parse(url));
+            void env.openExternal(Uri.parse(url));
         } catch (e) {
             // pass
         }
@@ -6396,7 +6497,9 @@ export function traceUrl(c: Commands, path: string, parsed: any, url: string): v
 }
 //@+node:felix.20230724154323.15: *3* g.isValidUnl
 // unls must contain a (possible empty) file part followed by something else.
-export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#.+/;
+// export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#.+/; 
+export const valid_unl_pattern = /(unl:gnx|unl|file):\/\/(.*?)#/; // ALLOW EMPTY # PART
+
 
 /**
  * Return true if the given unl is valid.
@@ -6430,7 +6533,7 @@ export function isValidUrl(url: string): boolean {
 
     // const parsed = urlparse.urlparse(url);
     // const parsed = makeVscodeUri(url);
-    const parsed = vscode.Uri.parse(url);
+    const parsed = Uri.parse(url);
 
     const scheme = parsed.scheme;
 
@@ -6728,7 +6831,8 @@ export function unquoteUrl(url: string): string {
 }
 //@+node:felix.20230724154323.26: *3* g: file part utils
 //@+node:felix.20230724154323.27: *4* g.getUNLFilePart
-const file_part_pattern = /\/\/(.*?)#.+/;
+// const file_part_pattern = /\/\/(.*?)#.+/;
+const file_part_pattern = /\/\/(.*?)#/;  // ALLOW EMPTY # PART
 
 /**
  * Return the file part of a unl, that is, everything *between* '//' and '#'.
@@ -6754,16 +6858,31 @@ export function getUNLFilePart(s: string): string {
  */
 export async function openUNLFile(c: Commands, s: string): Promise<Commands | undefined> {
 
+    // Aliases
+    const abspath = os_path_abspath;
     const base = os_path_basename;
+    const dirname = os_path_dirname;
+    const exists = os_path_exists;
+    const isabs = os_path_isabs;
+    const join = os_path_finalize_join;  // Not os.path.join
     const norm = os_path_normpath;
+
+    // c's name and directory.
     const c_name = c.fileName();
+    const c_dir = dirname(c_name);
+
     let w_path;
     let w_exists;
+
     /**
      * Standardize the path for easy comparison.
      */
     function standard(p_path: string): string {
-        return norm(p_path).toLowerCase();
+        if (isWindows) {
+            return norm(p_path).toLowerCase();
+        } else {
+            return norm(p_path);
+        }
     }
 
     if (!s.trim()) {
@@ -6775,6 +6894,7 @@ export async function openUNLFile(c: Commands, s: string): Promise<Commands | un
     if (!s.trim()) {
         return undefined;
     }
+
     // Always match within the present file.
     if (os_path_isabs(s) && standard(s) === standard(c_name)) {
         return c;
@@ -6782,42 +6902,58 @@ export async function openUNLFile(c: Commands, s: string): Promise<Commands | un
     if (!os_path_isabs(s) && standard(s) === standard(base(c_name))) {
         return c;
     }
-    if (os_path_isabs(s)) {
-        w_path = standard(s);
-    } else {
-        // Values of d should be directories.
-        const d = parsePathData(c);
-        const base_s = base(s);
-        const directory = d[base_s];
-        if (!directory) {
-            return undefined;
-        }
-        w_exists = await os_path_exists(directory);
-        if (!w_exists) {
-            return undefined;
-        }
-        w_path = standard(os_path_join(directory, base_s));
 
+    // #3814: From here on we must test that the given file exists.
+
+    // #3814: There is no choice for absolute files.
+    if (isabs(s)) {
+        w_exists = await exists(s);
+        return w_exists ? openWithFileName(s) : undefined;
     }
+
+    if (isWindows) {
+        s = s.replace(/\//g, '\\');
+    }
+
+    const is_relative = s.includes(path.sep);
+
+    if (is_relative) {
+        // #3816: Resolve relative paths via c's directory.
+        w_path = standard(abspath(join(c_dir, s)));  // Not base_s.
+    } else {
+        // #3814: Prefer short paths in `@data unl-path-prefixes` to any defaults.
+        //        Such paths must match exactly.
+        const base_s = base(s);
+        const d = parsePathData(c);
+        const directory = d[base_s];
+
+        if (directory) {
+            w_path = standard(join(directory, base_s));
+            w_exists = await exists(w_path);
+            if (!w_exists) {
+                return undefined;
+            }
+        } else {
+            // Resolve relative file parts using c's directory.
+            w_path = standard(join(c_dir, base_s));
+        }
+    }
+    // Search all open commanders.
     if (w_path === standard(c_name)) {
         return c;
     }
-    // Search all open commanders.
-    // This is a good shortcut, && it helps unit tests.
     for (const c2 of app.commanders()) {
         if (w_path === standard(c2.fileName())) {
             return c2;
         }
     }
 
-    // Open the file if possible.
-    w_exists = await os_path_exists(w_path);
+    // #3814: *Open* the file and return the commander.
+    w_exists = await exists(w_path);
     if (!w_exists) {
         return undefined;
     }
-
     return openWithFileName(w_path);
-
 }
 //@+node:felix.20230724154323.29: *4* g.parsePathData
 const path_data_pattern = /(.+?):\s*(.+)/;
