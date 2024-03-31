@@ -8,7 +8,8 @@ _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.githu
 
 ### Break down your code into a structured outline that generates or parses back your source files
 
-> Leo is a fundamentally different way of using and organizing data, programs and scripts. [📺 Introduction Video](https://www.youtube.com/watch?v=SYwlfdEukD4)
+> Leo is a fundamentally different way of using and organizing data, programs and scripts.  
+> [📺 Introduction Video](https://www.youtube.com/watch?v=j0eo7SlnnSY)
 
 See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).
@@ -17,20 +18,20 @@ or on [github](https://github.com/leo-editor/leo-editor).
 
 # Web-Based Development
 
-LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project). It can edit Leo documents directly inside online repositories such as on GitHub and Azure Repos.
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents directly inside online repositories such as on GitHub and Azure Repos.
 
-_You can open a GitHub repository in VS Code for the Web directly from a URL, following the schema:_ `https://vscode.dev/github/<organization>/<repo>`
+To access this browser-based editor, you can go to your repo on github.com and press . (period key)
 
-Or, simply visit your desired GitHub repository, Press the period '.' key on your keyboard to switch to web edition of VSCode. Make sure the LeoJS extension is installed and you're good to go!
+This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)** shows many use-cases about working in an online repository with LeoJS and VSCode for the web.
 
-> The web extension version of LeoJS cannot open local files: Use the regular desktop LeoJS version to edit local Leo documents and projects.
+> The web extension version of LeoJS cannot open local files: Use the regular desktop LeoJS version to edit local Leo files and projects.
 
 # Features
 
 -   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
-- **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
+-   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
 -   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
 -   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
 -   **Nav and Tag panel** controls are integrated in the Find panel
