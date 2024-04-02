@@ -382,6 +382,15 @@ export function strToLeoUri(p_str: string): vscode.Uri {
 }
 
 /**
+* Builds a 'Leo Detached Scheme' vscode.Uri from a gnx 
+* @param p_str leo node gnx strings are used to build Uri
+* @returns A vscode 'Uri' object
+*/
+export function strToLeoDetachedUri(p_str: string): vscode.Uri {
+    return vscode.Uri.parse(Constants.URI_SCHEME_DETACHED_HEADER + p_str);
+}
+
+/**
  * * Gets the gnx, (or another string like 'LEO BODY' or other), from a vscode.Uri object
  * @param p_uri Source uri to extract from
  * @returns The string source that was used to build this Uri

@@ -102,6 +102,24 @@
 <v t="felix.20211010192923.15"><vh>_fireSoon</vh></v>
 </v>
 </v>
+<v t="felix.20240401213604.1"><vh>@clean src/leoBodyDetached.ts</vh>
+<v t="felix.20240401213604.2"><vh>class LeoBodyDetachedProvider</vh>
+<v t="felix.20240401213604.3"><vh>setNewBodyUriTime</vh></v>
+<v t="felix.20240401213604.4"><vh>_setOpenedBodyTime</vh></v>
+<v t="felix.20240401213604.5"><vh>fireRefreshFile</vh></v>
+<v t="felix.20240401213604.6"><vh>refreshPossibleGnxList</vh></v>
+<v t="felix.20240401213604.7"><vh>watch</vh></v>
+<v t="felix.20240401213604.8"><vh>stat</vh></v>
+<v t="felix.20240401213604.9"><vh>readFile</vh></v>
+<v t="felix.20240401213604.10"><vh>readDirectory</vh></v>
+<v t="felix.20240401213604.11"><vh>createDirectory</vh></v>
+<v t="felix.20240401213604.12"><vh>writeFile</vh></v>
+<v t="felix.20240401213604.13"><vh>rename</vh></v>
+<v t="felix.20240401213604.14"><vh>delete</vh></v>
+<v t="felix.20240401213604.15"><vh>copy</vh></v>
+<v t="felix.20240401213604.16"><vh>_fireSoon</vh></v>
+</v>
+</v>
 <v t="felix.20201208223553.1"><vh>@clean src/leoOutline.ts</vh>
 <v t="felix.20201209011931.1"><vh>class LeoOutlineProvider</vh>
 <v t="felix.20201209011931.2"><vh>constructor</vh></v>
@@ -187,6 +205,7 @@
 <v t="felix.20220922000450.8"><vh>_hideDeleteBody</vh></v>
 <v t="felix.20220922000450.9"><vh>_checkPreviewMode</vh></v>
 <v t="felix.20220922000450.10"><vh>closeBody</vh></v>
+<v t="felix.20240401153751.1"><vh>closeBodyAside</vh></v>
 <v t="felix.20220922000450.11"><vh>cleanupBody</vh></v>
 <v t="felix.20220922000450.12"><vh>showBody</vh></v>
 <v t="felix.20230112203533.1"><vh>_row_col_pv_dict</vh></v>
@@ -198,6 +217,7 @@
 </v>
 <v t="felix.20201214194144.6"><vh>Commands</vh>
 <v t="felix.20201214202749.1"><vh>selectTreeNode</vh></v>
+<v t="felix.20240401145215.1"><vh>openAside</vh></v>
 <v t="felix.20201214202755.1"><vh>command</vh></v>
 <v t="felix.20201214202757.1"><vh>minibuffer</vh></v>
 <v t="felix.20221002124249.1"><vh>_showMinibufferHistory</vh></v>
@@ -426,6 +446,7 @@
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
 <v t="felix.20211007214455.1"><vh>isHexColor</vh></v>
 <v t="felix.20201208224407.14"><vh>strToLeoUri</vh></v>
+<v t="felix.20240401213850.1"><vh>strToLeoDetachedUri</vh></v>
 <v t="felix.20201208224407.15"><vh>leoUriToStr</vh></v>
 <v t="felix.20201208224407.16"><vh>setContext</vh></v>
 </v>
@@ -2053,7 +2074,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
 [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false, false)], // Select is NOT a Position!
-[CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.selectTreeNode(p_position, false, true)],
+[CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.openAside(p_position)],
 
 [CMD.CONTRACT_ALL, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.CONTRACT_ALL_FO, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
@@ -2147,7 +2168,7 @@ public static COMMANDS = {
     GOTO_SCRIPT: Constants.NAME + ".gotoScript",
     // Outline Node User Interaction
     SELECT_NODE: Constants.NAME + ".selectTreeNode",
-    OPEN_ASIDE: Constants.NAME + ".openAside", // selects and opens body splitting the workspace
+    OPEN_ASIDE: Constants.NAME + ".openAside", // Opens aside a body pane locked to this gnx &amp; commander.
     // Goto operations that always finish with focus in outline
     PAGE_UP: Constants.NAME + ".pageUp",
     PAGE_DOWN: Constants.NAME + ".pageDown",
@@ -2507,10 +2528,12 @@ public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
 public static LEO_WRAP_SUFFIX: string = ".wrap"; // all lowercase.
 
 public static URI_LEOJS_SCHEME: string = "leojs";
+public static URI_LEOJS_DETACHED_SCHEME: string = "leojsDetached";
 public static URI_FILE_SCHEME: string = "file";
 public static URI_UNTITLED_SCHEME: string = 'untitled';
-public static OUTPUT_CHANNEL_LANGUAGE = 'Log';
+public static OUTPUT_CHANNEL_LANGUAGE: string = 'Log';
 public static URI_SCHEME_HEADER: string = "leojs:/";
+public static URI_SCHEME_DETACHED_HEADER: string = "leojsDetached:/";
 public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
 public static UNTITLED_FILE_NAME: string = "untitled";
 public static URI_HELP_SCHEME: string = "helpPanel";
@@ -8603,6 +8626,8 @@ import * as path from 'path';
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
+import { Commands } from "./core/leoCommands";
+import { VNode } from "./core/leoNodes";
 
 @language typescript
 @tabwidth -4
@@ -8697,6 +8722,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
+    private _asidePattern = /^\/(\d+)\//;
 
     // * An event to signal that a resource has been changed
     // * It should fire for resources that are being watched by clients of this provider
@@ -8716,7 +8742,11 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
  */
 public setNewBodyUriTime(p_uri: vscode.Uri): void {
     const w_gnx = utils.leoUriToStr(p_uri);
-    this._lastBodyTimeGnx = w_gnx;
+    if (p_uri.path.match(this._asidePattern)) {
+        // pass
+    } else {
+        this._lastBodyTimeGnx = w_gnx;
+    }
     this._setOpenedBodyTime(w_gnx);
 }
 
@@ -8782,14 +8812,29 @@ public refreshPossibleGnxList(): string[] {
                 size: this._lastBodyLength
             };
         } else if (this._openedBodiesGnx.includes(w_gnx)) {
-            const c = g.app.windowList[this._leoUi.frameIndex].c;
-            const w_v = c.fileCommands.gnxDict[w_gnx];
-            return {
-                type: vscode.FileType.File,
-                ctime: this._openedBodiesInfo[w_gnx].ctime,
-                mtime: this._openedBodiesInfo[w_gnx].mtime,
-                size: w_v.b.length
-            };
+            let c: Commands;
+            let w_v: VNode | undefined;
+            if (p_uri.path.match(this._asidePattern)) {
+                const id = p_uri.path.split("/")[1];
+                for (const w_frame of g.app.windowList) {
+                    if (w_frame.c.id.toString() === id) {
+                        c = w_frame.c;
+                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                        break;
+                    }
+                }
+            } else {
+                c = g.app.windowList[this._leoUi.frameIndex].c;
+                w_v = c.fileCommands.gnxDict[w_gnx];
+            }
+            if (w_v) {
+                return {
+                    type: vscode.FileType.File,
+                    ctime: this._openedBodiesInfo[w_gnx].ctime,
+                    mtime: this._openedBodiesInfo[w_gnx].mtime,
+                    size: w_v.b.length
+                };
+            }
         }
     }
     // throw vscode.FileSystemError.FileNotFound();
@@ -8811,12 +8856,27 @@ public refreshPossibleGnxList(): string[] {
                     '\n *** readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
                 );
             }
-
-            const c = g.app.windowList[this._leoUi.frameIndex].c;
-            const w_v = c.fileCommands.gnxDict[w_gnx];
+            let c: Commands;
+            let w_v: VNode | undefined;
+            const w_isAside = p_uri.path.match(this._asidePattern);
+            if (w_isAside) {
+                const id = p_uri.path.split("/")[1];
+                for (const w_frame of g.app.windowList) {
+                    if (w_frame.c.id.toString() === id) {
+                        c = w_frame.c;
+                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                        break;
+                    }
+                }
+            } else {
+                c = g.app.windowList[this._leoUi.frameIndex].c;
+                w_v = c.fileCommands.gnxDict[w_gnx];
+            }
             if (w_v) {
                 this._errorRefreshFlag = false; // got body so reset possible flag!
-                this._lastGnx = w_gnx;
+                if (!w_isAside) {
+                    this._lastGnx = w_gnx;
+                }
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                 this._lastBodyLength = w_buffer.byteLength;
@@ -8846,6 +8906,7 @@ public refreshPossibleGnxList(): string[] {
         w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
         return w_directory;
     } else {
+        console.log('LEOJS Error: Asked to read Directory! uri path: ' + p_uri.path);
         throw vscode.FileSystemError.FileNotFound(p_uri);
     }
 }
@@ -12461,7 +12522,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         // * Get the language.
         const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
-        let w_language = this._getBodyLanguage();
+        const w_language = this._getBodyLanguage(p);
 
         const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
         const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
@@ -12729,7 +12790,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
  */
 private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): Thenable&lt;vscode.TextDocument&gt; {
     return vscode.languages.setTextDocumentLanguage(p_document, p_language).then(
-        (p_mewDocument) =&gt; { return p_mewDocument; }, // ok - language found
+        (p_newDocument) =&gt; { return p_newDocument; }, // ok - language found
         (p_error) =&gt; {
             let w_langName: string = p_error.toString().split('\n')[0];
             if (w_langName.length &gt; 38 &amp;&amp; w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
@@ -12784,7 +12845,7 @@ public refreshBodyStates(): void {
     }
 
     const c = g.app.windowList[this.frameIndex].c;
-    let w_language = this._getBodyLanguage();
+    let w_language = this._getBodyLanguage(c.p);
 
     // Set document language only if different
     if (w_language !== this._bodyTextDocument.languageId) {
@@ -13048,7 +13109,8 @@ private _isBodyPreview(): boolean {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
+                !(p_tab.input as vscode.TabInputText).uri.path.match(/^\/(\d+)\//)
             ) {
                 w_found = true;
                 if (!p_tab.isPreview) {
@@ -15052,11 +15114,10 @@ public async goAnywhere(): Promise&lt;unknown&gt; {
 }
 </t>
 <t tx="felix.20221214003903.1">/**
- * * Looks for c.p coloring language, taking account of '@killcolor', etc.
+ * * Looks for given position's coloring language, taking account of '@killcolor', etc.
  */
-private _getBodyLanguage(): string {
+private _getBodyLanguage(p: Position): string {
     const c = g.app.windowList[this.frameIndex].c;
-    const p = c.p;
     let w_language = "plain";
     const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
     if (g.useSyntaxColoring(p)) {
@@ -17287,6 +17348,442 @@ get leoIdUnset(): boolean {
 set leoIdUnset(p_value: boolean) {
     this._leoIdUnset = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_ID_UNSET, p_value);
+}
+
+</t>
+<t tx="felix.20240401145215.1">/**
+ * * Opens aside, and set focus in a body pane locked to its commander/gnx. 
+ * - Does not select the node in the outline.
+ * - If already opened aside in the same targeted column, just reveal.
+ * @param p is the position node to be opened aside
+ */
+public async openAside(p: Position): Promise&lt;unknown&gt; {
+    // Those 'body panes' opened aside, (other than the main body pane), 
+    // stay opened until the node's gnx becomes invalid/deleted, or it's commander is closed.
+
+    const c = g.app.windowList[this.frameIndex].c;
+    const asideUri = utils.strToLeoUri(`${c.id}/${p.gnx}`);
+    //
+    console.log("Open Aside path: " + asideUri.path);
+    //
+    // * Step 1 : Open the document
+    this._leoFileSystem.setNewBodyUriTime(asideUri);
+    const w_openedDocument = await vscode.workspace.openTextDocument(asideUri);
+    let w_bodySel: BodySelectionInfo | undefined;
+    const w_language = this._getBodyLanguage(p);
+    const insert = p.v.insertSpot;
+    const start = p.v.selectionStart;
+    const end = p.v.selectionStart + p.v.selectionLength;
+    const scroll = p.v.scrollBarSpot;
+
+    w_bodySel = {
+        "gnx": p.v.gnx,
+        "scroll": scroll,
+        "insert": this._row_col_pv_dict(insert, p.v.b),
+        "start": this._row_col_pv_dict(start, p.v.b),
+        "end": this._row_col_pv_dict(end, p.v.b)
+    };
+    void this._setBodyLanguage(w_openedDocument, w_language);
+
+    const w_showOptions: vscode.TextDocumentShowOptions =
+    {
+        viewColumn: vscode.ViewColumn.Beside,
+        preserveFocus: false, // dont preserve focus, set it in the opened body
+        preview: true, // should text document be in preview only? set false for fully opened
+    };
+    // * Actually Show the body pane document in a text editor
+    const q_showTextDocument = vscode.window.showTextDocument(
+        w_openedDocument,
+        w_showOptions
+    ).then(
+        (p_textEditor: vscode.TextEditor) =&gt; {
+
+            // * Set text selection range
+            const w_bodyTextEditor = p_textEditor;
+            if (!w_bodySel) {
+                console.log("no selection in returned package from get_body_states");
+            }
+
+            const w_leoBodySel: BodySelectionInfo = w_bodySel!;
+
+            // Cursor position and selection range
+            const w_activeRow: number = w_leoBodySel.insert.line;
+            const w_activeCol: number = w_leoBodySel.insert.col;
+            let w_anchorLine: number = w_leoBodySel.start.line;
+            let w_anchorCharacter: number = w_leoBodySel.start.col;
+
+            if (w_activeRow === w_anchorLine &amp;&amp; w_activeCol === w_anchorCharacter) {
+                // Active insertion same as start selection, so use the other ones
+                w_anchorLine = w_leoBodySel.end.line;
+                w_anchorCharacter = w_leoBodySel.end.col;
+            }
+
+            const w_selection = new vscode.Selection(
+                w_anchorLine,
+                w_anchorCharacter,
+                w_activeRow,
+                w_activeCol
+            );
+
+            let w_scrollRange: vscode.Range | undefined;
+
+            // Build scroll position from selection range.
+            w_scrollRange = new vscode.Range(
+                w_activeRow,
+                w_activeCol,
+                w_activeRow,
+                w_activeCol
+            );
+
+            if (w_bodyTextEditor) {
+
+                w_bodyTextEditor.selection = w_selection; // set cursor insertion point &amp; selection range
+                if (!w_scrollRange) {
+                    w_scrollRange = w_bodyTextEditor.document.lineAt(0).range;
+                }
+
+                w_bodyTextEditor.revealRange(w_scrollRange, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+
+            } else {
+                console.log("no selection in returned package from showTextDocument");
+            }
+
+        }
+    );
+
+    return q_showTextDocument;
+}
+
+</t>
+<t tx="felix.20240401153751.1">/**
+ * Closes specific body pane for an opened aside body.
+ */
+public closeBodyAside(p_gnx: string): Thenable&lt;any&gt; {
+    //
+    console.log('TODO : closeBodyAside');
+    return Promise.resolve();
+
+}
+
+</t>
+<t tx="felix.20240401213604.1">import * as vscode from "vscode";
+import * as utils from "./utils";
+import * as path from 'path';
+import { BodyTimeInfo } from "./types";
+import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
+import { Commands } from "./core/leoCommands";
+import { VNode } from "./core/leoNodes";
+
+@language typescript
+@tabwidth -4
+@others
+</t>
+<t tx="felix.20240401213604.10">public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
+    if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
+        const w_directory: [string, vscode.FileType][] = [];
+        w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
+        return w_directory;
+    } else {
+        console.log('LEOJS Error: Asked to read Directory! uri path: ' + p_uri.path);
+        throw vscode.FileSystemError.FileNotFound(p_uri);
+    }
+}
+
+</t>
+<t tx="felix.20240401213604.11">public createDirectory(p_uri: vscode.Uri): void {
+    console.warn('Called createDirectory with ', p_uri.fsPath); // should not happen
+    throw vscode.FileSystemError.NoPermissions();
+}
+
+</t>
+<t tx="felix.20240401213604.12">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+    if (!this.preventSaveToLeo) {
+        void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+    } else {
+        this.preventSaveToLeo = false;
+    }
+    const w_gnx = utils.leoUriToStr(p_uri);
+    if (!this._openedBodiesGnx.includes(w_gnx)) {
+        console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
+    }
+    this._setOpenedBodyTime(w_gnx);
+    this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
+}
+
+</t>
+<t tx="felix.20240401213604.13">public rename(p_oldUri: vscode.Uri, p_newUri: vscode.Uri, p_options: { overwrite: boolean }): void {
+    console.warn('Called rename on ', p_oldUri.fsPath, p_newUri.fsPath); // should not happen
+    this._fireSoon(
+        { type: vscode.FileChangeType.Deleted, uri: p_oldUri },
+        { type: vscode.FileChangeType.Created, uri: p_newUri }
+    );
+}
+
+</t>
+<t tx="felix.20240401213604.14">public delete(p_uri: vscode.Uri): void {
+    const w_gnx = utils.leoUriToStr(p_uri);
+    if (this._openedBodiesGnx.includes(w_gnx)) {
+        this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
+        delete this._openedBodiesInfo[w_gnx];
+    } else {
+        // console.log("not deleted");
+    }
+
+    // dirname is just a slash "/"
+    let w_dirname = p_uri.with({ path: path.posix.dirname(p_uri.path) });
+
+    this._fireSoon(
+        { type: vscode.FileChangeType.Changed, uri: w_dirname },
+        { uri: p_uri, type: vscode.FileChangeType.Deleted }
+    );
+}
+
+</t>
+<t tx="felix.20240401213604.15">public copy(p_uri: vscode.Uri): void {
+    console.warn('Called copy on ', p_uri.fsPath); // should not happen
+    throw vscode.FileSystemError.NoPermissions();
+}
+
+</t>
+<t tx="felix.20240401213604.16">private _fireSoon(...p_events: vscode.FileChangeEvent[]): void {
+    this._bufferedEvents.push(...p_events);
+    if (this._fireSoonHandle) {
+        clearTimeout(this._fireSoonHandle);
+    }
+    this._fireSoonHandle = setTimeout(() =&gt; {
+        this._onDidChangeFileEmitter.fire(this._bufferedEvents);
+        this._bufferedEvents.length = 0; // clearing events array
+    }, 5);
+}
+
+</t>
+<t tx="felix.20240401213604.2">/**
+ * * Body panes implementation as a file system using "leojs" as a scheme identifier
+ */
+export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
+
+    // * Flag normally false
+    public preventSaveToLeo: boolean = false;
+    private _errorRefreshFlag: boolean = false;
+
+    // * Last file read data with the readFile method
+    private _lastGnx: string = ""; // gnx of last file read
+    private _lastBodyData: string = ""; // body content of last file read
+    private _lastBodyLength: number = 0; // length of last file read
+
+    // * List of currently opened body panes gnx (from 'watch' &amp; 'dispose' methods)
+    private _watchedBodiesGnx: string[] = [];
+
+    // * List of gnx that should be available (from more.selectNode and fs.delete)
+    private _openedBodiesGnx: string[] = [];
+    private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
+
+    private _lastBodyTimeGnx: string = "";
+    private _asidePattern = /^\/(\d+)\//;
+
+    // * An event to signal that a resource has been changed
+    // * It should fire for resources that are being watched by clients of this provider
+    private _onDidChangeFileEmitter = new vscode.EventEmitter&lt;vscode.FileChangeEvent[]&gt;();
+    readonly onDidChangeFile: vscode.Event&lt;vscode.FileChangeEvent[]&gt; = this._onDidChangeFileEmitter.event;
+    private _bufferedEvents: vscode.FileChangeEvent[] = [];
+    private _fireSoonHandle?: NodeJS.Timer;
+
+    constructor(private _leoUi: LeoUI) { }
+
+    @others
+}
+</t>
+<t tx="felix.20240401213604.3">/**
+ * * Sets selected node body's modified time for this gnx virtual file
+ * @param p_uri URI of file for which to set made-up modified time
+ */
+public setNewBodyUriTime(p_uri: vscode.Uri): void {
+    const w_gnx = utils.leoUriToStr(p_uri);
+    if (p_uri.path.match(this._asidePattern)) {
+        // pass
+    } else {
+        this._lastBodyTimeGnx = w_gnx;
+    }
+    this._setOpenedBodyTime(w_gnx);
+}
+
+</t>
+<t tx="felix.20240401213604.4">/**
+ * * Adds entries in _openedBodiesGnx and _openedBodiesInfo if needed
+ * * and sets the modified time of an opened body.
+ */
+private _setOpenedBodyTime(p_gnx: string): void {
+    const w_now = new Date().getTime();
+    let w_created = w_now;
+    if (!this._openedBodiesGnx.includes(p_gnx)) {
+        this._openedBodiesGnx.push(p_gnx);
+    } else {
+        w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
+    }
+    this._openedBodiesInfo[p_gnx] = {
+        ctime: w_created, // w_now, // maybe kept.
+        mtime: w_now // new 'modified' time for sure.
+    };
+}
+
+</t>
+<t tx="felix.20240401213604.5">/**
+ * * Refresh the body pane for a particular gnx by telling vscode that the file from the Leo file provider has changed
+ * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
+ */
+public fireRefreshFile(p_gnx: string): void {
+
+    if (!this._openedBodiesGnx.includes(p_gnx)) {
+        console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+    }
+
+    this._setOpenedBodyTime(p_gnx);
+
+    this._onDidChangeFileEmitter.fire([{
+        type: vscode.FileChangeType.Changed,
+        uri: utils.strToLeoUri(p_gnx)
+    }]);
+}
+
+</t>
+<t tx="felix.20240401213604.6">/**
+ * ? Maybe deprecated 
+ * * Refreshes the '_possibleGnxList' list of all unique gnx from Leo
+ * @returns a 'fresh' gnx string array
+ */
+public refreshPossibleGnxList(): string[] {
+    // * Get updated list of possible gnx
+
+    // all_gnx = [p.v.gnx for p in c.all_unique_positions(copy=False)]
+    const c = g.app.windowList[this._leoUi.frameIndex].c;
+    return [...c.all_unique_positions(false)].map(p =&gt; p.v.gnx);
+}
+
+</t>
+<t tx="felix.20240401213604.7">public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
+    const w_gnx = utils.leoUriToStr(p_resource);
+    if (!this._watchedBodiesGnx.includes(w_gnx)) {
+        this._watchedBodiesGnx.push(w_gnx); // add gnx
+    }
+    // else already in list
+    return new vscode.Disposable(() =&gt; {
+        const w_position = this._watchedBodiesGnx.indexOf(w_gnx); // find and remove it
+        if (w_position &gt; -1) {
+            this._watchedBodiesGnx.splice(w_position, 1);
+        }
+    });
+}
+
+</t>
+<t tx="felix.20240401213604.8">public stat(p_uri: vscode.Uri): vscode.FileStat {
+    if (this._leoUi.leoStates.fileOpenedReady) {
+        const w_gnx = utils.leoUriToStr(p_uri);
+        if (p_uri.fsPath.length === 1) {
+            return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
+            return {
+                type: vscode.FileType.File,
+                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                size: this._lastBodyLength
+            };
+        } else if (this._openedBodiesGnx.includes(w_gnx)) {
+            let c: Commands;
+            let w_v: VNode | undefined;
+            if (p_uri.path.match(this._asidePattern)) {
+                const id = p_uri.path.split("/")[1];
+                for (const w_frame of g.app.windowList) {
+                    if (w_frame.c.id.toString() === id) {
+                        c = w_frame.c;
+                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                        break;
+                    }
+                }
+            } else {
+                c = g.app.windowList[this._leoUi.frameIndex].c;
+                w_v = c.fileCommands.gnxDict[w_gnx];
+            }
+            if (w_v) {
+                return {
+                    type: vscode.FileType.File,
+                    ctime: this._openedBodiesInfo[w_gnx].ctime,
+                    mtime: this._openedBodiesInfo[w_gnx].mtime,
+                    size: w_v.b.length
+                };
+            }
+        }
+    }
+    // throw vscode.FileSystemError.FileNotFound();
+    // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
+    return { type: vscode.FileType.File, ctime: 0, mtime: 0, size: 0 };
+}
+
+</t>
+<t tx="felix.20240401213604.9">public readFile(p_uri: vscode.Uri): Uint8Array {
+    if (this._leoUi.leoStates.fileOpenedReady) {
+        if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
+            throw vscode.FileSystemError.FileIsADirectory();
+        } else {
+            const w_gnx = utils.leoUriToStr(p_uri);
+
+            if (!this._openedBodiesGnx.includes(w_gnx)) {
+                console.log(
+                    " _openedBodiesGnx length: ", this._openedBodiesGnx.length,
+                    '\n *** readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
+                );
+            }
+            let c: Commands;
+            let w_v: VNode | undefined;
+            const w_isAside = p_uri.path.match(this._asidePattern);
+            if (w_isAside) {
+                const id = p_uri.path.split("/")[1];
+                for (const w_frame of g.app.windowList) {
+                    if (w_frame.c.id.toString() === id) {
+                        c = w_frame.c;
+                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                        break;
+                    }
+                }
+            } else {
+                c = g.app.windowList[this._leoUi.frameIndex].c;
+                w_v = c.fileCommands.gnxDict[w_gnx];
+            }
+            if (w_v) {
+                this._errorRefreshFlag = false; // got body so reset possible flag!
+                if (!w_isAside) {
+                    this._lastGnx = w_gnx;
+                }
+                this._lastBodyData = w_v.b;
+                const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                this._lastBodyLength = w_buffer.byteLength;
+                return w_buffer;
+            } else {
+                if (!this._errorRefreshFlag) {
+                    this._leoUi.fullRefresh();
+                }
+                if (this._lastGnx === w_gnx) {
+                    // was last gnx of closed file about to be switched to new document selected
+                    console.log('Passed in not found: ' + w_gnx);
+                    return Buffer.from(this._lastBodyData);
+                }
+                console.error("ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
+                return Buffer.from("");
+            }
+        }
+    } else {
+        throw vscode.FileSystemError.FileNotFound();
+    }
+}
+
+</t>
+<t tx="felix.20240401213850.1">/**
+* Builds a 'Leo Detached Scheme' vscode.Uri from a gnx 
+* @param p_str leo node gnx strings are used to build Uri
+* @returns A vscode 'Uri' object
+*/
+export function strToLeoDetachedUri(p_str: string): vscode.Uri {
+    return vscode.Uri.parse(Constants.URI_SCHEME_DETACHED_HEADER + p_str);
 }
 
 </t>

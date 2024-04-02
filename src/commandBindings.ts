@@ -130,7 +130,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         // Called by nodes in the tree when selected either by mouse, or with enter
         [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) => p_leoUI.selectTreeNode(p_outlineNode.position, false, false)], // Select is NOT a Position!
-        [CMD.OPEN_ASIDE, (p_position: Position) => p_leoUI.selectTreeNode(p_position, false, true)],
+        [CMD.OPEN_ASIDE, (p_position: Position) => p_leoUI.openAside(p_position)],
 
         [CMD.CONTRACT_ALL, () => p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.CONTRACT_ALL_FO, () => p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],

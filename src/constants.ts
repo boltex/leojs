@@ -43,10 +43,12 @@ export class Constants {
     public static LEO_WRAP_SUFFIX: string = ".wrap"; // all lowercase.
 
     public static URI_LEOJS_SCHEME: string = "leojs";
+    public static URI_LEOJS_DETACHED_SCHEME: string = "leojsDetached";
     public static URI_FILE_SCHEME: string = "file";
     public static URI_UNTITLED_SCHEME: string = 'untitled';
-    public static OUTPUT_CHANNEL_LANGUAGE = 'Log';
+    public static OUTPUT_CHANNEL_LANGUAGE: string = 'Log';
     public static URI_SCHEME_HEADER: string = "leojs:/";
+    public static URI_SCHEME_DETACHED_HEADER: string = "leojsDetached:/";
     public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
     public static UNTITLED_FILE_NAME: string = "untitled";
     public static URI_HELP_SCHEME: string = "helpPanel";
@@ -533,7 +535,7 @@ export class Constants {
         GOTO_SCRIPT: Constants.NAME + ".gotoScript",
         // Outline Node User Interaction
         SELECT_NODE: Constants.NAME + ".selectTreeNode",
-        OPEN_ASIDE: Constants.NAME + ".openAside", // selects and opens body splitting the workspace
+        OPEN_ASIDE: Constants.NAME + ".openAside", // Opens aside a body pane locked to this gnx & commander.
         // Goto operations that always finish with focus in outline
         PAGE_UP: Constants.NAME + ".pageUp",
         PAGE_DOWN: Constants.NAME + ".pageDown",

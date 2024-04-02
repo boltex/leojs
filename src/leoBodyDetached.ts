@@ -10,7 +10,7 @@ import { VNode } from "./core/leoNodes";
 /**
  * * Body panes implementation as a file system using "leojs" as a scheme identifier
  */
-export class LeoBodyProvider implements vscode.FileSystemProvider {
+export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     // * Flag normally false
     public preventSaveToLeo: boolean = false;

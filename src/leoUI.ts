@@ -2376,7 +2376,8 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                    !(p_tab.input as vscode.TabInputText).uri.path.match(/^\/(\d+)\//)
                 ) {
                     w_found = true;
                     if (!p_tab.isPreview) {
@@ -2502,6 +2503,16 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Closes specific body pane for an opened aside body.
+     */
+    public closeBodyAside(p_gnx: string): Thenable<any> {
+        //
+        console.log('TODO : closeBodyAside');
+        return Promise.resolve();
+
+    }
+
+    /**
      * * cleanupBody closes all remaining body pane to shut down this vscode window
      * @returns a promise that resolves when done saving and closing
      */
@@ -2610,7 +2621,7 @@ export class LeoUI extends NullGui {
             // * Get the language.
             const c = g.app.windowList[this.frameIndex].c;
             const p = c.p;
-            let w_language = this._getBodyLanguage();
+            const w_language = this._getBodyLanguage(p);
 
             const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
             const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
@@ -2900,11 +2911,10 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Looks for c.p coloring language, taking account of '@killcolor', etc.
+     * * Looks for given position's coloring language, taking account of '@killcolor', etc.
      */
-    private _getBodyLanguage(): string {
+    private _getBodyLanguage(p: Position): string {
         const c = g.app.windowList[this.frameIndex].c;
-        const p = c.p;
         let w_language = "plain";
         const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
         if (g.useSyntaxColoring(p)) {
@@ -2930,7 +2940,7 @@ export class LeoUI extends NullGui {
      */
     private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): Thenable<vscode.TextDocument> {
         return vscode.languages.setTextDocumentLanguage(p_document, p_language).then(
-            (p_mewDocument) => { return p_mewDocument; }, // ok - language found
+            (p_newDocument) => { return p_newDocument; }, // ok - language found
             (p_error) => {
                 let w_langName: string = p_error.toString().split('\n')[0];
                 if (w_langName.length > 38 && w_langName.includes(Constants.LEO_LANGUAGE_PREFIX)) {
@@ -2984,7 +2994,7 @@ export class LeoUI extends NullGui {
         }
 
         const c = g.app.windowList[this.frameIndex].c;
-        let w_language = this._getBodyLanguage();
+        let w_language = this._getBodyLanguage(c.p);
 
         // Set document language only if different
         if (w_language !== this._bodyTextDocument.languageId) {
@@ -3096,6 +3106,109 @@ export class LeoUI extends NullGui {
         // * Apply the node to the body text without waiting for the selection promise to resolve
         return this._tryApplyNodeToBody(p_node, !!p_aside, w_showBodyKeepFocus);
 
+    }
+
+    /**
+     * * Opens aside, and set focus in a body pane locked to its commander/gnx. 
+     * - Does not select the node in the outline.
+     * - If already opened aside in the same targeted column, just reveal.
+     * @param p is the position node to be opened aside
+     */
+    public async openAside(p: Position): Promise<unknown> {
+        // Those 'body panes' opened aside, (other than the main body pane), 
+        // stay opened until the node's gnx becomes invalid/deleted, or it's commander is closed.
+
+        const c = g.app.windowList[this.frameIndex].c;
+        const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
+        //
+        console.log("Open Aside path: " + detachedUri.path);
+        //
+        // * Step 1 : Open the document
+        this._leoFileSystem.setNewBodyUriTime(detachedUri);
+        const w_openedDocument = await vscode.workspace.openTextDocument(detachedUri);
+        let w_bodySel: BodySelectionInfo | undefined;
+        const w_language = this._getBodyLanguage(p);
+        const insert = p.v.insertSpot;
+        const start = p.v.selectionStart;
+        const end = p.v.selectionStart + p.v.selectionLength;
+        const scroll = p.v.scrollBarSpot;
+
+        w_bodySel = {
+            "gnx": p.v.gnx,
+            "scroll": scroll,
+            "insert": this._row_col_pv_dict(insert, p.v.b),
+            "start": this._row_col_pv_dict(start, p.v.b),
+            "end": this._row_col_pv_dict(end, p.v.b)
+        };
+        void this._setBodyLanguage(w_openedDocument, w_language);
+
+        const w_showOptions: vscode.TextDocumentShowOptions =
+        {
+            viewColumn: vscode.ViewColumn.Beside,
+            preserveFocus: false, // dont preserve focus, set it in the opened body
+            preview: true, // should text document be in preview only? set false for fully opened
+        };
+        // * Actually Show the body pane document in a text editor
+        const q_showTextDocument = vscode.window.showTextDocument(
+            w_openedDocument,
+            w_showOptions
+        ).then(
+            (p_textEditor: vscode.TextEditor) => {
+
+                // * Set text selection range
+                const w_bodyTextEditor = p_textEditor;
+                if (!w_bodySel) {
+                    console.log("no selection in returned package from get_body_states");
+                }
+
+                const w_leoBodySel: BodySelectionInfo = w_bodySel!;
+
+                // Cursor position and selection range
+                const w_activeRow: number = w_leoBodySel.insert.line;
+                const w_activeCol: number = w_leoBodySel.insert.col;
+                let w_anchorLine: number = w_leoBodySel.start.line;
+                let w_anchorCharacter: number = w_leoBodySel.start.col;
+
+                if (w_activeRow === w_anchorLine && w_activeCol === w_anchorCharacter) {
+                    // Active insertion same as start selection, so use the other ones
+                    w_anchorLine = w_leoBodySel.end.line;
+                    w_anchorCharacter = w_leoBodySel.end.col;
+                }
+
+                const w_selection = new vscode.Selection(
+                    w_anchorLine,
+                    w_anchorCharacter,
+                    w_activeRow,
+                    w_activeCol
+                );
+
+                let w_scrollRange: vscode.Range | undefined;
+
+                // Build scroll position from selection range.
+                w_scrollRange = new vscode.Range(
+                    w_activeRow,
+                    w_activeCol,
+                    w_activeRow,
+                    w_activeCol
+                );
+
+                if (w_bodyTextEditor) {
+
+                    w_bodyTextEditor.selection = w_selection; // set cursor insertion point & selection range
+                    if (!w_scrollRange) {
+                        w_scrollRange = w_bodyTextEditor.document.lineAt(0).range;
+                    }
+
+                    w_bodyTextEditor.revealRange(w_scrollRange, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+
+                } else {
+                    console.log("no selection in returned package from showTextDocument");
+                }
+
+            }
+        );
+
+        return q_showTextDocument;
     }
 
     /**

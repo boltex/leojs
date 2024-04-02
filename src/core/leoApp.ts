@@ -150,7 +150,7 @@ export class LeoApp {
     //@+node:felix.20210102214029.1: *4* app.__init__ (helpers contain language dicts)
     //@+<< LeoApp: command-line arguments >>
     //@+node:felix.20210103024632.2: *5* << LeoApp: command-line arguments >>
-    public commanderIdCounter = 0; // Used for generating commander ids. (replaces python id function)
+    public commanderIdCounter = 0; // Used for generating commander ids. (Replaces python id) Increment before using, so first one is 1.
     // TODO : CHECK IF always_write_session_data IS NEEDED ! 
     public always_write_session_data: boolean = false;  // Default: write session data only if no files on command line.
 
