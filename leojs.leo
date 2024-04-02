@@ -8626,8 +8626,6 @@ import * as path from 'path';
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
-import { Commands } from "./core/leoCommands";
-import { VNode } from "./core/leoNodes";
 
 @language typescript
 @tabwidth -4
@@ -8722,7 +8720,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
-    private _asidePattern = /^\/(\d+)\//;
 
     // * An event to signal that a resource has been changed
     // * It should fire for resources that are being watched by clients of this provider
@@ -8742,11 +8739,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
  */
 public setNewBodyUriTime(p_uri: vscode.Uri): void {
     const w_gnx = utils.leoUriToStr(p_uri);
-    if (p_uri.path.match(this._asidePattern)) {
-        // pass
-    } else {
-        this._lastBodyTimeGnx = w_gnx;
-    }
+    this._lastBodyTimeGnx = w_gnx;
     this._setOpenedBodyTime(w_gnx);
 }
 
@@ -8812,29 +8805,14 @@ public refreshPossibleGnxList(): string[] {
                 size: this._lastBodyLength
             };
         } else if (this._openedBodiesGnx.includes(w_gnx)) {
-            let c: Commands;
-            let w_v: VNode | undefined;
-            if (p_uri.path.match(this._asidePattern)) {
-                const id = p_uri.path.split("/")[1];
-                for (const w_frame of g.app.windowList) {
-                    if (w_frame.c.id.toString() === id) {
-                        c = w_frame.c;
-                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
-                        break;
-                    }
-                }
-            } else {
-                c = g.app.windowList[this._leoUi.frameIndex].c;
-                w_v = c.fileCommands.gnxDict[w_gnx];
-            }
-            if (w_v) {
-                return {
-                    type: vscode.FileType.File,
-                    ctime: this._openedBodiesInfo[w_gnx].ctime,
-                    mtime: this._openedBodiesInfo[w_gnx].mtime,
-                    size: w_v.b.length
-                };
-            }
+            const c = g.app.windowList[this._leoUi.frameIndex].c;
+            const w_v = c.fileCommands.gnxDict[w_gnx];
+            return {
+                type: vscode.FileType.File,
+                ctime: this._openedBodiesInfo[w_gnx].ctime,
+                mtime: this._openedBodiesInfo[w_gnx].mtime,
+                size: w_v.b.length
+            };
         }
     }
     // throw vscode.FileSystemError.FileNotFound();
@@ -8856,27 +8834,12 @@ public refreshPossibleGnxList(): string[] {
                     '\n *** readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
                 );
             }
-            let c: Commands;
-            let w_v: VNode | undefined;
-            const w_isAside = p_uri.path.match(this._asidePattern);
-            if (w_isAside) {
-                const id = p_uri.path.split("/")[1];
-                for (const w_frame of g.app.windowList) {
-                    if (w_frame.c.id.toString() === id) {
-                        c = w_frame.c;
-                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
-                        break;
-                    }
-                }
-            } else {
-                c = g.app.windowList[this._leoUi.frameIndex].c;
-                w_v = c.fileCommands.gnxDict[w_gnx];
-            }
+
+            const c = g.app.windowList[this._leoUi.frameIndex].c;
+            const w_v = c.fileCommands.gnxDict[w_gnx];
             if (w_v) {
                 this._errorRefreshFlag = false; // got body so reset possible flag!
-                if (!w_isAside) {
-                    this._lastGnx = w_gnx;
-                }
+                this._lastGnx = w_gnx;
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                 this._lastBodyLength = w_buffer.byteLength;
@@ -8906,7 +8869,6 @@ public refreshPossibleGnxList(): string[] {
         w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
         return w_directory;
     } else {
-        console.log('LEOJS Error: Asked to read Directory! uri path: ' + p_uri.path);
         throw vscode.FileSystemError.FileNotFound(p_uri);
     }
 }
@@ -17362,13 +17324,13 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
     // stay opened until the node's gnx becomes invalid/deleted, or it's commander is closed.
 
     const c = g.app.windowList[this.frameIndex].c;
-    const asideUri = utils.strToLeoUri(`${c.id}/${p.gnx}`);
+    const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
     //
-    console.log("Open Aside path: " + asideUri.path);
+    console.log("Open Aside path: " + detachedUri.path);
     //
     // * Step 1 : Open the document
-    this._leoFileSystem.setNewBodyUriTime(asideUri);
-    const w_openedDocument = await vscode.workspace.openTextDocument(asideUri);
+    this._leoFileSystem.setNewBodyUriTime(detachedUri);
+    const w_openedDocument = await vscode.workspace.openTextDocument(detachedUri);
     let w_bodySel: BodySelectionInfo | undefined;
     const w_language = this._getBodyLanguage(p);
     const insert = p.v.insertSpot;
