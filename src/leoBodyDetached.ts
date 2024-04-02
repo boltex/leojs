@@ -86,7 +86,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
         this._onDidChangeFileEmitter.fire([{
             type: vscode.FileChangeType.Changed,
-            uri: utils.strToLeoUri(p_gnx)
+            uri: utils.strToLeoDetachedUri(p_gnx)
         }]);
     }
 

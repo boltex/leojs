@@ -3643,6 +3643,7 @@ import { IdleTime } from "./core/idle_time";
 import { RClick } from "./core/mod_scripting";
 import { HelpPanel } from "./helpPanel";
 import { UnlProvider } from "./unlProvider";
+import { LeoBodyDetachedProvider } from "./leoBodyDetached";
 
 @language typescript
 @tabwidth -4
@@ -3902,8 +3903,10 @@ export class LeoUI extends NullGui {
 
     // * Body pane
     private _bodyFileSystemStarted: boolean = false;
+    private _detachedFileSystemStarted: boolean = false;
     private _bodyEnablePreview: boolean = true;
     private _leoFileSystem!: LeoBodyProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
+    private _leoDetachedFileSystem!: LeoBodyDetachedProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
@@ -7841,6 +7844,16 @@ private _setupOpenedLeoDocument(): void {
         );
         this._bodyFileSystemStarted = true;
     }
+    if (!this._detachedFileSystemStarted) {
+        this._context.subscriptions.push(
+            vscode.workspace.registerFileSystemProvider(
+                Constants.URI_LEOJS_DETACHED_SCHEME,
+                this._leoDetachedFileSystem,
+                { isCaseSensitive: true }
+            )
+        );
+        this._detachedFileSystemStarted = true;
+    }
 
     this.loadSearchSettings();
     if (this.config.showUnlOnStatusBar &amp;&amp; !this.leoStates.leoIdUnset &amp;&amp; g.app.leoID !== 'None') {
@@ -9811,6 +9824,7 @@ public finishStartup(): void {
 
     // * Create Body Pane
     this._leoFileSystem = new LeoBodyProvider(this);
+    this._leoDetachedFileSystem = new LeoBodyDetachedProvider(this);
 
     this._bodyMainSelectionColumn = 1;
 
@@ -17603,7 +17617,7 @@ public fireRefreshFile(p_gnx: string): void {
 
     this._onDidChangeFileEmitter.fire([{
         type: vscode.FileChangeType.Changed,
-        uri: utils.strToLeoUri(p_gnx)
+        uri: utils.strToLeoDetachedUri(p_gnx)
     }]);
 }
 
