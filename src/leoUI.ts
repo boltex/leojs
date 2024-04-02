@@ -2376,8 +2376,7 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
-                    !(p_tab.input as vscode.TabInputText).uri.path.match(/^\/(\d+)\//)
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
                 ) {
                     w_found = true;
                     if (!p_tab.isPreview) {

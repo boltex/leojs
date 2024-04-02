@@ -13071,8 +13071,7 @@ private _isBodyPreview(): boolean {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
-                !(p_tab.input as vscode.TabInputText).uri.path.match(/^\/(\d+)\//)
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
             ) {
                 w_found = true;
                 if (!p_tab.isPreview) {
