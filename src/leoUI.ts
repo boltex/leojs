@@ -3137,7 +3137,7 @@ export class LeoUI extends NullGui {
         console.log("Open Aside path: " + detachedUri.path);
         //
         // * Step 1 : Open the document
-        this._leoFileSystem.setNewBodyUriTime(detachedUri);
+        this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri);
         const w_openedDocument = await vscode.workspace.openTextDocument(detachedUri);
         let w_bodySel: BodySelectionInfo | undefined;
         const w_language = this._getBodyLanguage(p);
