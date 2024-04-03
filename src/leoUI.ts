@@ -34,7 +34,7 @@ import { LeoStatusBar } from "./leoStatusBar";
 
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
-import { Position } from "./core/leoNodes";
+import { Position, VNode } from "./core/leoNodes";
 import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
@@ -1620,6 +1620,30 @@ export class LeoUI extends NullGui {
             w_v.b = p_document.getText().replace(/\r\n/g, "\n");
         }
 
+        return Promise.resolve(true);
+    }
+
+    /**
+     * Save detached body content to leo
+     */
+    public _detachedSaveDocument(p_uri: vscode.Uri, p_document: vscode.TextDocument): Thenable<unknown> {
+        // If detached scheme: 
+        //     separate id and gnx
+        if (p_uri.path.match(/^\/(\d+)\//)) {
+            let c: Commands;
+            let w_v: VNode | undefined;
+            const id = p_uri.path.split("/")[1];
+
+            // find commander
+            for (const w_frame of g.app.windowList) {
+                if (w_frame.c.id.toString() === id) {
+                    c = w_frame.c;
+                    w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                    break;
+                }
+
+            }
+        }
         return Promise.resolve(true);
     }
 

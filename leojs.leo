@@ -178,6 +178,7 @@
 <v t="felix.20211204144931.3"><vh>_bodySaveSelection</vh></v>
 <v t="felix.20211204144931.4"><vh>_bodySaveDocument</vh></v>
 <v t="felix.20211204144931.5"><vh>_bodySaveDeactivate</vh></v>
+<v t="felix.20240403003937.1"><vh>_detachedSaveDocument</vh></v>
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
 <v t="felix.20220725004247.1"><vh>_setTreeViewTitle</vh></v>
@@ -3630,7 +3631,7 @@ import { LeoStatusBar } from "./leoStatusBar";
 
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
-import { Position } from "./core/leoNodes";
+import { Position, VNode } from "./core/leoNodes";
 import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
@@ -17759,6 +17760,31 @@ public refreshPossibleGnxList(): string[] {
 */
 export function strToLeoDetachedUri(p_str: string): vscode.Uri {
     return vscode.Uri.parse(Constants.URI_SCHEME_DETACHED_HEADER + p_str);
+}
+
+</t>
+<t tx="felix.20240403003937.1">/**
+ * Save detached body content to leo
+ */
+public _detachedSaveDocument(p_uri: vscode.Uri, p_document: vscode.TextDocument): Thenable&lt;unknown&gt; {
+    // If detached scheme: 
+    //     separate id and gnx
+    if (p_uri.path.match(/^\/(\d+)\//)) {
+        let c: Commands;
+        let w_v: VNode | undefined;
+        const id = p_uri.path.split("/")[1];
+
+        // find commander
+        for (const w_frame of g.app.windowList) {
+            if (w_frame.c.id.toString() === id) {
+                c = w_frame.c;
+                w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                break;
+            }
+
+        }
+    }
+    return Promise.resolve(true);
 }
 
 </t>
