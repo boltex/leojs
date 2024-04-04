@@ -4180,6 +4180,15 @@
           "workspaceSuffix": "",
           "workspaceTooltip": "LeoJS Body Pane"
         }
+      },
+      {
+        "scheme": "leojsDetached",
+        "formatting": {
+          "label": "LeoJS: Detached",
+          "separator": "/",
+          "workspaceSuffix": "",
+          "workspaceTooltip": "LeoJS Detached Body Pane"
+        }
       }
     ]
   },

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
+import { Constants } from "./constants";
 import * as path from 'path';
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
@@ -29,7 +30,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
-    private _asidePattern = /^\/(\d+)\//;
 
     // * An event to signal that a resource has been changed
     // * It should fire for resources that are being watched by clients of this provider
@@ -46,7 +46,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
      */
     public setNewBodyUriTime(p_uri: vscode.Uri): void {
         const w_gnx = utils.leoUriToStr(p_uri);
-        if (p_uri.path.match(this._asidePattern)) {
+        if (p_uri.path.match(Constants.DETACHED_REGEX)) {
             // pass
         } else {
             this._lastBodyTimeGnx = w_gnx;
@@ -132,7 +132,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             } else if (this._openedBodiesGnx.includes(w_gnx)) {
                 let c: Commands;
                 let w_v: VNode | undefined;
-                if (p_uri.path.match(this._asidePattern)) {
+                if (p_uri.path.match(Constants.DETACHED_REGEX)) {
                     const id = p_uri.path.split("/")[1];
                     for (const w_frame of g.app.windowList) {
                         if (w_frame.c.id.toString() === id) {
@@ -175,7 +175,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                 }
                 let c: Commands;
                 let w_v: VNode | undefined;
-                const w_isAside = p_uri.path.match(this._asidePattern);
+                const w_isAside = p_uri.path.match(Constants.DETACHED_REGEX);
                 if (w_isAside) {
                     const id = p_uri.path.split("/")[1];
                     for (const w_frame of g.app.windowList) {

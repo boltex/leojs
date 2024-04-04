@@ -48,6 +48,7 @@ import { RClick } from "./core/mod_scripting";
 import { HelpPanel } from "./helpPanel";
 import { UnlProvider } from "./unlProvider";
 import { LeoBodyDetachedProvider } from "./leoBodyDetached";
+import { Undoer } from "./core/leoUndo";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -202,6 +203,7 @@ export class LeoUI extends NullGui {
     private _leoFileSystem!: LeoBodyProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
     private _leoDetachedFileSystem!: LeoBodyDetachedProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
+    private _bodyDetachedTextDocument: vscode.TextDocument | undefined; // Last active detached body.
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _languageFlagged: string[] = [];
@@ -209,6 +211,7 @@ export class LeoUI extends NullGui {
     private _bodyPreviewMode: boolean = true;
 
     private _editorTouched: boolean = false; // Flag for applying editor changes to body when 'icon' state change and 'undo' back to untouched
+    private _editorDetachedTouched: boolean = false; // Flag for applying editor changes to body when 'icon' state change and 'undo' back to untouched
 
     private _bodyStatesTimer: NodeJS.Timeout | undefined;
 
@@ -390,6 +393,7 @@ export class LeoUI extends NullGui {
                     { scheme: Constants.URI_FILE_SCHEME },
                     { scheme: Constants.URI_UNTITLED_SCHEME },
                     { scheme: Constants.URI_LEOJS_SCHEME },
+                    { scheme: Constants.URI_LEOJS_DETACHED_SCHEME },
                     { language: Constants.OUTPUT_CHANNEL_LANGUAGE }
                 ],
                 this.linkProvider
@@ -490,8 +494,16 @@ export class LeoUI extends NullGui {
             )
         );
 
-        // * 'onDid' event detections all pushed as disposables in context.subscription
+        // * 'onDid' event detections. All pushed as disposables in context.subscription.
         this._context.subscriptions.push(
+
+            vscode.window.tabGroups.onDidChangeTabGroups((p_tabGroupEvent) =>
+                this._onTabGroupsChanged(p_tabGroupEvent)
+            ),
+            vscode.window.tabGroups.onDidChangeTabs((p_tabEvent) =>
+                this._onTabsChanged(p_tabEvent)
+            ),
+
             // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
             vscode.window.onDidChangeActiveTextEditor((p_editor) =>
                 this._onActiveEditorChanged(p_editor)
@@ -967,7 +979,7 @@ export class LeoUI extends NullGui {
      * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
      */
     private async _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): Promise<unknown> {
-
+        console.log('_onChangeCollapsedState!');
         // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
         await this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
         if (p_treeView.selection.length && p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
@@ -1093,6 +1105,16 @@ export class LeoUI extends NullGui {
         }
     }
 
+    public _onTabGroupsChanged(p_event: vscode.TabGroupChangeEvent): void {
+        console.log('_onTabGroupsChanged');
+        //
+    }
+
+    public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
+        console.log('_onTabsChanged');
+        //
+    }
+
     /**
      * * Handles detection of the active editor having changed from one to another, or closed
      * @param p_editor The editor itself that is now active
@@ -1102,7 +1124,10 @@ export class LeoUI extends NullGui {
         p_editor: vscode.TextEditor | undefined,
         p_internalCall?: boolean
     ): void {
-
+        console.log('_onActiveEditorChanged');
+        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
+            this._bodyDetachedTextDocument = p_editor.document;
+        }
         if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
                 void this._hideDeleteBody(p_editor);
@@ -1117,7 +1142,7 @@ export class LeoUI extends NullGui {
 
     /**
      * * Moved a document to another column
-     * @param p_columnChangeEvent  event describing the change of a text editor's view column
+     * @param p_columnChangeEvent Event describing the change of a text editor's view column
      */
     public _changedTextEditorViewColumn(
         p_columnChangeEvent: vscode.TextEditorViewColumnChangeEvent
@@ -1165,7 +1190,10 @@ export class LeoUI extends NullGui {
      * @param p_event a change event containing the active editor's selection, if any.
      */
     private _onChangeEditorSelection(p_event: vscode.TextEditorSelectionChangeEvent): void {
-        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
+        if (
+            p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME ||
+            p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+        ) {
             if (p_event.selections.length) {
                 this._selectionDirty = true;
                 this._selection = p_event.selections[0];
@@ -1179,7 +1207,8 @@ export class LeoUI extends NullGui {
      * @param p_event a change event containing the active editor's visible range, if any.
      */
     private _onChangeEditorScroll(p_event: vscode.TextEditorVisibleRangesChangeEvent): void {
-        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
+        if (p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME ||
+            p_event.textEditor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
             if (p_event.visibleRanges.length) {
                 this._scrollDirty = true;
                 this._scroll = p_event.visibleRanges[0];
@@ -1193,6 +1222,15 @@ export class LeoUI extends NullGui {
      * @param p_textDocumentChange Text changed event passed by vscode
      */
     private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent): void {
+
+        if (
+            p_textDocumentChange.contentChanges.length &&
+            p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+        ) {
+            // ! DETACHED !
+            // TODO : HANDLE DETACHED CASE
+        }
+
 
         // ".length" check necessary, see https://github.com/microsoft/vscode/issues/50344
         if (
@@ -1415,6 +1453,9 @@ export class LeoUI extends NullGui {
             return w_resolveAfterEditHeadline;
         }
 
+        // * Save any 'detached' dirty panels to leo
+        this.triggerDetachedSave(p_forcedVsCodeSave);
+
         // * Save body to Leo if a change has been made to the body 'document' so far
         let q_savePromise: Thenable<boolean>;
         if (
@@ -1450,8 +1491,24 @@ export class LeoUI extends NullGui {
         });
     }
 
+    public triggerDetachedSave(p_forcedVsCodeSave?: boolean): void {
+        // Find any detached bodies
+        vscode.window.tabGroups.all.forEach((p_tabGroup) => {
+            p_tabGroup.tabs.forEach((p_tab) => {
+                if (p_tab.input &&
+                    (p_tab.input as vscode.TabInputText).uri &&
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+                ) {
+                    // is a detached body
+
+                }
+            });
+        });
+    }
+
     /**
-     * * Saves the cursor position along with the text selection range and scroll position
+     * Saves the cursor position along with the text selection range and scroll position
+     * of the last bodym or detached body panem that had its cursor info set in this._selection, etc.
      */
     private _bodySaveSelection(): void {
 
@@ -1466,7 +1523,23 @@ export class LeoUI extends NullGui {
         } else {
             scroll = 0;
         }
-        const gnx = this._selectionGnx;
+
+        let gnx: string | undefined;
+        let c: Commands | undefined;
+        let id: string;
+
+        if (!this._selectionGnx.includes('/')) {
+            c = g.app.windowList[this.frameIndex].c;
+            gnx = this._selectionGnx;
+        } else {
+            [id, gnx] = this._selectionGnx.split('/');
+            for (const w_f of g.app.windowList) {
+                if (w_f.c.id.toString() === id) {
+                    c = w_f.c;
+                    break;
+                }
+            }
+        }
 
         const start = {
             line: this._selection.start.line || 0,
@@ -1480,8 +1553,9 @@ export class LeoUI extends NullGui {
             line: this._selection.active.line || 0,
             col: this._selection.active.character || 0,
         };
-
-        const c = g.app.windowList[this.frameIndex].c;
+        if (!c || !gnx) {
+            return;
+        }
         let p: Position | undefined;
         if (c.p.gnx === gnx) {
             p = c.p;
@@ -1527,7 +1601,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Sets new body text on leo's side, and may optionally save vsCode's body editor (which will trim spaces)
+     * * Sets new body (or detached body) text on leo's side, and may optionally save vsCode's body editor (which will trim spaces)
      * @param p_document Vscode's text document which content will be used to be the new node's body text in Leo
      * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
      * @returns a promise that resolves when the complete saving process is finished
@@ -1538,14 +1612,45 @@ export class LeoUI extends NullGui {
     ): Thenable<boolean> {
         if (p_document) {
 
-            const c = g.app.windowList[this.frameIndex].c;
-            const u = c.undoer;
-            const wrapper = c.frame.body.wrapper;
-            const w_gnx = utils.leoUriToStr(p_document.uri);
+            // const c = g.app.windowList[this.frameIndex].c;
+            // const u = c.undoer;
+            // const wrapper = c.frame.body.wrapper;
+            // const w_gnx = utils.leoUriToStr(p_document.uri);
             const body = p_document.getText().replace(/\r\n/g, "\n"); // new body text
 
-            const w_v = c.fileCommands.gnxDict[w_gnx]; // target to change
-            if (w_v) {
+            let id: string = ""; // STARTS FALSY
+            let c: Commands | undefined;
+            let u: Undoer | undefined;
+            let wrapper: StringTextWrapper | undefined;
+            let w_gnx: string | undefined;
+            let w_v: VNode | undefined;
+
+            if (p_document.uri.path.match(Constants.DETACHED_REGEX)) {
+                // detached body
+                id = p_document.uri.path.split("/")[1];
+                // find commander
+                for (const w_frame of g.app.windowList) {
+                    if (w_frame.c.id.toString() === id) {
+                        c = w_frame.c;
+                        break;
+                    }
+                }
+                if (c) {
+                    u = c.undoer;
+                    wrapper = c.frame.body.wrapper;
+                    w_gnx = p_document.uri.path.split("/")[2];
+                    w_v = c.fileCommands.gnxDict[w_gnx];
+                }
+            } else {
+                // regular body
+                c = g.app.windowList[this.frameIndex].c;
+                u = c.undoer;
+                wrapper = c.frame.body.wrapper;
+                w_gnx = utils.leoUriToStr(p_document.uri);
+                w_v = c.fileCommands.gnxDict[w_gnx];
+            }
+
+            if (c && w_v && w_gnx && wrapper && u) {
 
                 if (body !== w_v.b && !g.doHook("bodykey1", { c: c, v: w_v })) {
                     // if different, replace body and set dirty
@@ -1590,11 +1695,15 @@ export class LeoUI extends NullGui {
                 return Promise.resolve(false); // EARLY EXIT
             }
 
-            // save the cursor selection
+            // save the cursor selection, supports both body and detached bodies
             this._bodySaveSelection();
 
-            this._refreshType.states = true;
-            this.getStates();
+            if (!id) {
+                // if NOT detached
+                this._refreshType.states = true;
+                this.getStates();
+            }
+
             if (p_forcedVsCodeSave) {
                 return p_document.save(); // ! USED INTENTIONALLY: This trims trailing spaces
             }
@@ -1620,30 +1729,6 @@ export class LeoUI extends NullGui {
             w_v.b = p_document.getText().replace(/\r\n/g, "\n");
         }
 
-        return Promise.resolve(true);
-    }
-
-    /**
-     * Save detached body content to leo
-     */
-    public _detachedSaveDocument(p_uri: vscode.Uri, p_document: vscode.TextDocument): Thenable<unknown> {
-        // If detached scheme: 
-        //     separate id and gnx
-        if (p_uri.path.match(/^\/(\d+)\//)) {
-            let c: Commands;
-            let w_v: VNode | undefined;
-            const id = p_uri.path.split("/")[1];
-
-            // find commander
-            for (const w_frame of g.app.windowList) {
-                if (w_frame.c.id.toString() === id) {
-                    c = w_frame.c;
-                    w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
-                    break;
-                }
-
-            }
-        }
         return Promise.resolve(true);
     }
 
