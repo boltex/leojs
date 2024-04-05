@@ -1227,8 +1227,26 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
         ) {
-            // ! DETACHED !
-            // TODO : HANDLE DETACHED CASE
+            // TODO !
+            // !  DETACHED !
+
+            this._bodyDetachedTextDocument = p_textDocumentChange.document;
+            this._editorDetachedTouched = true;
+
+            const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
+            const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
+            const w_hasBody = !!w_bodyText.length;
+
+
+            // Check if exact same node as currently selected body
+            if (
+                g.app.windowList[this.frameIndex].c.id.toString() === id &&
+                this.lastSelectedNode &&
+                gnx === this.lastSelectedNode.gnx
+            ) {
+                // Same commander and gnx  !  
+
+            }
         }
 
 
@@ -1249,12 +1267,13 @@ export class LeoUI extends NullGui {
             if (
                 utils.leoUriToStr(p_textDocumentChange.document.uri) === this.lastSelectedNode.gnx
             ) {
-                const w_hasBody = !!p_textDocumentChange.document.getText().length;
+                const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
+                const w_hasBody = !!w_bodyText.length;
                 const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody) || this.findFocusTree;
 
                 const c = g.app.windowList[this.frameIndex].c;
 
-                if (c.p && c.p.__bool__() && p_textDocumentChange.document.getText().replace(/\r\n/g, "\n") === c.p.b) {
+                if (c.p && c.p.__bool__() && w_bodyText === c.p.b) {
                     // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                     // Set proper cursor insertion point and selection range.
                     void this.showBody(false, true, true);
@@ -1282,6 +1301,13 @@ export class LeoUI extends NullGui {
                         this.refreshDocumentsPane();
                     }
                 }
+
+                // IF SAME AS DETACHED update it!
+                // TODO !
+                // if () {
+
+                // }
+
             }
 
             // * If body changed a line with and '@' directive refresh body states
@@ -3246,8 +3272,8 @@ export class LeoUI extends NullGui {
         console.log("Open Aside path: " + detachedUri.path);
         //
         // * Step 1 : Open the document
-        this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri);
-        const w_openedDocument = await vscode.workspace.openTextDocument(detachedUri);
+        this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
+        this._bodyDetachedTextDocument = await vscode.workspace.openTextDocument(detachedUri);
         let w_bodySel: BodySelectionInfo | undefined;
         const w_language = this._getBodyLanguage(p);
         const insert = p.v.insertSpot;
@@ -3262,7 +3288,7 @@ export class LeoUI extends NullGui {
             "start": this._row_col_pv_dict(start, p.v.b),
             "end": this._row_col_pv_dict(end, p.v.b)
         };
-        void this._setBodyLanguage(w_openedDocument, w_language);
+        void this._setBodyLanguage(this._bodyDetachedTextDocument, w_language);
 
         const w_showOptions: vscode.TextDocumentShowOptions =
         {
@@ -3272,7 +3298,7 @@ export class LeoUI extends NullGui {
         };
         // * Actually Show the body pane document in a text editor
         const q_showTextDocument = vscode.window.showTextDocument(
-            w_openedDocument,
+            this._bodyDetachedTextDocument,
             w_showOptions
         ).then(
             (p_textEditor: vscode.TextEditor) => {

@@ -27,6 +27,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     // * List of gnx that should be available (from more.selectNode and fs.delete)
     private _openedBodiesGnx: string[] = [];
+    private _openedBodiesVNodes: { [key: string]: VNode } = {};
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
@@ -44,7 +45,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
      * * Sets selected node body's modified time for this gnx virtual file
      * @param p_uri URI of file for which to set made-up modified time
      */
-    public setNewBodyUriTime(p_uri: vscode.Uri): void {
+    public setNewBodyUriTime(p_uri: vscode.Uri, v: VNode): void {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (p_uri.path.match(Constants.DETACHED_REGEX)) {
             // pass
@@ -52,6 +53,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             this._lastBodyTimeGnx = w_gnx;
         }
         this._setOpenedBodyTime(w_gnx);
+        this._openedBodiesVNodes[w_gnx] = v;
     }
 
     /**
@@ -105,6 +107,8 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
         const w_gnx = utils.leoUriToStr(p_resource);
+
+        // TODO : save a position instead!
         if (!this._watchedBodiesGnx.includes(w_gnx)) {
             this._watchedBodiesGnx.push(w_gnx); // add gnx
         }
@@ -132,18 +136,13 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             } else if (this._openedBodiesGnx.includes(w_gnx)) {
                 let c: Commands;
                 let w_v: VNode | undefined;
-                if (p_uri.path.match(Constants.DETACHED_REGEX)) {
-                    const id = p_uri.path.split("/")[1];
-                    for (const w_frame of g.app.windowList) {
-                        if (w_frame.c.id.toString() === id) {
-                            c = w_frame.c;
-                            w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
-                            break;
-                        }
+                const id = p_uri.path.split("/")[1];
+                for (const w_frame of g.app.windowList) {
+                    if (w_frame.c.id.toString() === id) {
+                        c = w_frame.c;
+                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                        break;
                     }
-                } else {
-                    c = g.app.windowList[this._leoUi.frameIndex].c;
-                    w_v = c.fileCommands.gnxDict[w_gnx];
                 }
                 if (w_v) {
                     return {
@@ -152,6 +151,8 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                         mtime: this._openedBodiesInfo[w_gnx].mtime,
                         size: w_v.b.length
                     };
+                } else {
+                    console.log('Leojs DETACHED BODY stat: not found!');
                 }
             }
         }
@@ -259,6 +260,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
         if (this._openedBodiesGnx.includes(w_gnx)) {
             this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
             delete this._openedBodiesInfo[w_gnx];
+            delete this._openedBodiesVNodes[w_gnx];
         } else {
             // console.log("not deleted");
         }

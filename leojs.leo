@@ -13557,8 +13557,26 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
     ) {
-        // ! DETACHED !
-        // TODO : HANDLE DETACHED CASE
+        // TODO !
+        // !  DETACHED !
+
+        this._bodyDetachedTextDocument = p_textDocumentChange.document;
+        this._editorDetachedTouched = true;
+
+        const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
+        const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
+        const w_hasBody = !!w_bodyText.length;
+
+
+        // Check if exact same node as currently selected body
+        if (
+            g.app.windowList[this.frameIndex].c.id.toString() === id &amp;&amp;
+            this.lastSelectedNode &amp;&amp;
+            gnx === this.lastSelectedNode.gnx
+        ) {
+            // Same commander and gnx  !  
+
+        }
     }
 
 
@@ -13579,12 +13597,13 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         if (
             utils.leoUriToStr(p_textDocumentChange.document.uri) === this.lastSelectedNode.gnx
         ) {
-            const w_hasBody = !!p_textDocumentChange.document.getText().length;
+            const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
+            const w_hasBody = !!w_bodyText.length;
             const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody) || this.findFocusTree;
 
             const c = g.app.windowList[this.frameIndex].c;
 
-            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText().replace(/\r\n/g, "\n") === c.p.b) {
+            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; w_bodyText === c.p.b) {
                 // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                 // Set proper cursor insertion point and selection range.
                 void this.showBody(false, true, true);
@@ -13612,6 +13631,13 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                     this.refreshDocumentsPane();
                 }
             }
+
+            // IF SAME AS DETACHED update it!
+            // TODO !
+            // if () {
+
+            // }
+
         }
 
         // * If body changed a line with and '@' directive refresh body states
@@ -17438,8 +17464,8 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
     console.log("Open Aside path: " + detachedUri.path);
     //
     // * Step 1 : Open the document
-    this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri);
-    const w_openedDocument = await vscode.workspace.openTextDocument(detachedUri);
+    this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
+    this._bodyDetachedTextDocument = await vscode.workspace.openTextDocument(detachedUri);
     let w_bodySel: BodySelectionInfo | undefined;
     const w_language = this._getBodyLanguage(p);
     const insert = p.v.insertSpot;
@@ -17454,7 +17480,7 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
         "start": this._row_col_pv_dict(start, p.v.b),
         "end": this._row_col_pv_dict(end, p.v.b)
     };
-    void this._setBodyLanguage(w_openedDocument, w_language);
+    void this._setBodyLanguage(this._bodyDetachedTextDocument, w_language);
 
     const w_showOptions: vscode.TextDocumentShowOptions =
     {
@@ -17464,7 +17490,7 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
     };
     // * Actually Show the body pane document in a text editor
     const q_showTextDocument = vscode.window.showTextDocument(
-        w_openedDocument,
+        this._bodyDetachedTextDocument,
         w_showOptions
     ).then(
         (p_textEditor: vscode.TextEditor) =&gt; {
@@ -17598,6 +17624,7 @@ import { VNode } from "./core/leoNodes";
     if (this._openedBodiesGnx.includes(w_gnx)) {
         this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
         delete this._openedBodiesInfo[w_gnx];
+        delete this._openedBodiesVNodes[w_gnx];
     } else {
         // console.log("not deleted");
     }
@@ -17649,6 +17676,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     // * List of gnx that should be available (from more.selectNode and fs.delete)
     private _openedBodiesGnx: string[] = [];
+    private _openedBodiesVNodes: { [key: string]: VNode } = {};
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
@@ -17669,7 +17697,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
  * * Sets selected node body's modified time for this gnx virtual file
  * @param p_uri URI of file for which to set made-up modified time
  */
-public setNewBodyUriTime(p_uri: vscode.Uri): void {
+public setNewBodyUriTime(p_uri: vscode.Uri, v: VNode): void {
     const w_gnx = utils.leoUriToStr(p_uri);
     if (p_uri.path.match(Constants.DETACHED_REGEX)) {
         // pass
@@ -17677,6 +17705,7 @@ public setNewBodyUriTime(p_uri: vscode.Uri): void {
         this._lastBodyTimeGnx = w_gnx;
     }
     this._setOpenedBodyTime(w_gnx);
+    this._openedBodiesVNodes[w_gnx] = v;
 }
 
 </t>
@@ -17734,6 +17763,8 @@ public refreshPossibleGnxList(): string[] {
 </t>
 <t tx="felix.20240401213604.7">public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
     const w_gnx = utils.leoUriToStr(p_resource);
+
+    // TODO : save a position instead!
     if (!this._watchedBodiesGnx.includes(w_gnx)) {
         this._watchedBodiesGnx.push(w_gnx); // add gnx
     }
@@ -17762,18 +17793,13 @@ public refreshPossibleGnxList(): string[] {
         } else if (this._openedBodiesGnx.includes(w_gnx)) {
             let c: Commands;
             let w_v: VNode | undefined;
-            if (p_uri.path.match(Constants.DETACHED_REGEX)) {
-                const id = p_uri.path.split("/")[1];
-                for (const w_frame of g.app.windowList) {
-                    if (w_frame.c.id.toString() === id) {
-                        c = w_frame.c;
-                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
-                        break;
-                    }
+            const id = p_uri.path.split("/")[1];
+            for (const w_frame of g.app.windowList) {
+                if (w_frame.c.id.toString() === id) {
+                    c = w_frame.c;
+                    w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                    break;
                 }
-            } else {
-                c = g.app.windowList[this._leoUi.frameIndex].c;
-                w_v = c.fileCommands.gnxDict[w_gnx];
             }
             if (w_v) {
                 return {
@@ -17782,6 +17808,8 @@ public refreshPossibleGnxList(): string[] {
                     mtime: this._openedBodiesInfo[w_gnx].mtime,
                     size: w_v.b.length
                 };
+            } else {
+                console.log('Leojs DETACHED BODY stat: not found!');
             }
         }
     }
