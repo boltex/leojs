@@ -1829,6 +1829,8 @@ export class LeoUI extends NullGui {
      */
     public async _launchRefresh(): Promise<unknown> {
 
+        this._refreshDetachedBodies();
+
         if (!this.refreshPreserveRange) {
             if (this.findFocusTree) {
                 // had a range but now refresh from other than find/replace
@@ -2022,6 +2024,10 @@ export class LeoUI extends NullGui {
             }
         );
         void this.launchRefresh();
+    }
+
+    private _refreshDetachedBodies() {
+        // TODO: Refresh detached bodies as needed
     }
 
     /**

@@ -189,6 +189,7 @@
 <v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
 <v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
 <v t="felix.20220923001725.1"><vh>fullRefresh</vh></v>
+<v t="felix.20240405235538.1"><vh>_refreshDetachedBodies</vh></v>
 <v t="felix.20220923001235.1"><vh>isTsStillValid</vh></v>
 <v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
 <v t="felix.20220922235942.1"><vh>_revealNode</vh></v>
@@ -7593,6 +7594,8 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
  * * Launches refresh for UI components and context states (Debounced)
  */
 public async _launchRefresh(): Promise&lt;unknown&gt; {
+
+    this._refreshDetachedBodies();
 
     if (!this.refreshPreserveRange) {
         if (this.findFocusTree) {
@@ -17911,6 +17914,11 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 <t tx="felix.20240403174627.1">public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
     console.log('_onTabsChanged');
     //
+}
+
+</t>
+<t tx="felix.20240405235538.1">private _refreshDetachedBodies(){
+    // TODO: Refresh detached bodies as needed
 }
 
 </t>
