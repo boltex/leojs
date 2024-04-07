@@ -177,7 +177,6 @@
 </v>
 <v t="felix.20211204144931.1"><vh>Body Editing</vh>
 <v t="felix.20211204144931.2"><vh>triggerBodySave</vh></v>
-<v t="felix.20240403165752.1"><vh>triggerDetachedSave</vh></v>
 <v t="felix.20211204144931.3"><vh>_bodySaveSelection</vh></v>
 <v t="felix.20211204144931.4"><vh>_bodySaveDocument</vh></v>
 <v t="felix.20211204144931.5"><vh>_bodySaveDeactivate</vh></v>
@@ -7595,7 +7594,9 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
  */
 public async _launchRefresh(): Promise&lt;unknown&gt; {
 
-    this._refreshDetachedBodies();
+    if (this._refreshType.body) {
+        this._refreshDetachedBodies();
+    }
 
     if (!this.refreshPreserveRange) {
         if (this.findFocusTree) {
@@ -9208,7 +9209,9 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean
     }
 
     // * Save any 'detached' dirty panels to leo
-    this.triggerDetachedSave(p_forcedVsCodeSave);
+    if (this._bodyDetachedTextDocument &amp;&amp; this._bodyDetachedTextDocument.isDirty) {
+        void this._bodySaveDocument(this._bodyDetachedTextDocument);
+    }
 
     // * Save body to Leo if a change has been made to the body 'document' so far
     let q_savePromise: Thenable&lt;boolean&gt;;
@@ -9248,7 +9251,7 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean
 </t>
 <t tx="felix.20211204144931.3">/**
  * Saves the cursor position along with the text selection range and scroll position
- * of the last bodym or detached body panem that had its cursor info set in this._selection, etc.
+ * of the last body, or detached body pane, that had its cursor info set in this._selection, etc.
  */
 private _bodySaveSelection(): void {
 
@@ -13566,18 +13569,40 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         this._bodyDetachedTextDocument = p_textDocumentChange.document;
         this._editorDetachedTouched = true;
 
-        const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
-        const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
+        const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
+        const w_bodyText = this._bodyDetachedTextDocument.getText().replace(/\r\n/g, "\n");
         const w_hasBody = !!w_bodyText.length;
 
-
+        const w_selectedCId = g.app.windowList[this.frameIndex].c.id.toString();
+        let w_alreadySaved = false;
         // Check if exact same node as currently selected body
         if (
-            g.app.windowList[this.frameIndex].c.id.toString() === id &amp;&amp;
-            this.lastSelectedNode &amp;&amp;
-            gnx === this.lastSelectedNode.gnx
+            w_selectedCId === id &amp;&amp; this.lastSelectedNode &amp;&amp; gnx === this.lastSelectedNode.gnx
         ) {
             // Same commander and gnx  !  
+            void this._bodySaveDocument(this._bodyDetachedTextDocument);
+            w_alreadySaved = true;
+            // fire body node refresh if opened!!
+            this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
+
+        }
+
+        // If same commander, and node icon changed (or whole document was unchanged)
+        if (w_selectedCId === id) {
+            const w_uriKey = utils.leoUriToStr(this._bodyDetachedTextDocument.uri);
+            const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
+            const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
+            if (!this.leoStates.leoChanged || w_detachedIconChanged) {
+                if (!w_alreadySaved) {
+                    void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                    if (w_detachedIconChanged) {
+                        this.findFocusTree = false;
+                        // NOT incrementing this.treeID to keep ids intact
+                        // NoReveal since we're keeping the same id.
+                        this._refreshOutline(false, RevealType.NoReveal);
+                    }
+                }
+            }
 
         }
     }
@@ -13636,10 +13661,15 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             }
 
             // IF SAME AS DETACHED update it!
-            // TODO !
-            // if () {
+            if (this._bodyDetachedTextDocument) {
+                const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
+                if (id === c.id.toString() &amp;&amp; this.lastSelectedNode &amp;&amp; gnx === this.lastSelectedNode.gnx) {
+                    void this._bodySaveDocument(p_textDocumentChange.document);
+                    // fire body node refresh if opened!!
+                    this._leoDetachedFileSystem.fireRefreshFile(utils.leoUriToStr(this._bodyDetachedTextDocument.uri));
 
-            // }
+                }
+            }
 
         }
 
@@ -17627,7 +17657,7 @@ import { VNode } from "./core/leoNodes";
     if (this._openedBodiesGnx.includes(w_gnx)) {
         this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
         delete this._openedBodiesInfo[w_gnx];
-        delete this._openedBodiesVNodes[w_gnx];
+        delete this.openedBodiesVNodes[w_gnx];
     } else {
         // console.log("not deleted");
     }
@@ -17679,7 +17709,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     // * List of gnx that should be available (from more.selectNode and fs.delete)
     private _openedBodiesGnx: string[] = [];
-    private _openedBodiesVNodes: { [key: string]: VNode } = {};
+    public openedBodiesVNodes: { [key: string]: VNode } = {};
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
@@ -17708,7 +17738,7 @@ public setNewBodyUriTime(p_uri: vscode.Uri, v: VNode): void {
         this._lastBodyTimeGnx = w_gnx;
     }
     this._setOpenedBodyTime(w_gnx);
-    this._openedBodiesVNodes[w_gnx] = v;
+    this.openedBodiesVNodes[w_gnx] = v;
 }
 
 </t>
@@ -17889,22 +17919,6 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 }
 
 </t>
-<t tx="felix.20240403165752.1">public triggerDetachedSave(p_forcedVsCodeSave?: boolean): void {
-    // Find any detached bodies
-    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
-        p_tabGroup.tabs.forEach((p_tab) =&gt; {
-            if (p_tab.input &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
-            ) {
-                // is a detached body
-
-            }
-        });
-    });
-}
-
-</t>
 <t tx="felix.20240403174622.1">public _onTabGroupsChanged(p_event: vscode.TabGroupChangeEvent): void {
     console.log('_onTabGroupsChanged');
     //
@@ -17917,8 +17931,10 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 }
 
 </t>
-<t tx="felix.20240405235538.1">private _refreshDetachedBodies(){
-    // TODO: Refresh detached bodies as needed
+<t tx="felix.20240405235538.1">private _refreshDetachedBodies() {
+    //  Refresh detached bodies as needed IF SAME COMMANDER
+    //  For each tabgroup and tab, if its URI is in same commander, fire refresh
+    // TODO 
 }
 
 </t>

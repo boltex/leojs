@@ -27,7 +27,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     // * List of gnx that should be available (from more.selectNode and fs.delete)
     private _openedBodiesGnx: string[] = [];
-    private _openedBodiesVNodes: { [key: string]: VNode } = {};
+    public openedBodiesVNodes: { [key: string]: VNode } = {};
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
@@ -53,7 +53,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             this._lastBodyTimeGnx = w_gnx;
         }
         this._setOpenedBodyTime(w_gnx);
-        this._openedBodiesVNodes[w_gnx] = v;
+        this.openedBodiesVNodes[w_gnx] = v;
     }
 
     /**
@@ -260,7 +260,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
         if (this._openedBodiesGnx.includes(w_gnx)) {
             this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
             delete this._openedBodiesInfo[w_gnx];
-            delete this._openedBodiesVNodes[w_gnx];
+            delete this.openedBodiesVNodes[w_gnx];
         } else {
             // console.log("not deleted");
         }
