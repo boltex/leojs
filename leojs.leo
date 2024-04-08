@@ -4093,7 +4093,7 @@ private _refreshDocumentsPane(): void {
  * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
  */
 private async _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Position&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;Position&gt;): Promise&lt;unknown&gt; {
-    console.log('_onChangeCollapsedState!');
+
     // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
     await this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
     if (p_treeView.selection.length &amp;&amp; p_treeView.selection[0] &amp;&amp; p_treeView.selection[0].__eq__(p_event.element)) {
@@ -13451,7 +13451,6 @@ private _onActiveEditorChanged(
     p_editor: vscode.TextEditor | undefined,
     p_internalCall?: boolean
 ): void {
-    console.log('_onActiveEditorChanged');
     if (p_editor &amp;&amp; p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
         this._bodyDetachedTextDocument = p_editor.document;
     }
@@ -13627,7 +13626,6 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                 ) {
                     const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
                     if (id === c_id &amp;&amp; gnx === this.lastSelectedNode.gnx) {
-                        console.log('found self detached');
                         w_hasDetached = true;
                         break;
                     }
@@ -17778,7 +17776,7 @@ private _setOpenedBodyTime(p_gnx: string): void {
  * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
  */
 public fireRefreshFile(p_gnx: string): void {
-    console.log("fireRefreshFile called for gnx: ", p_gnx);
+    // console.log("fireRefreshFile called for gnx: ", p_gnx);
     if (!this._openedBodiesGnx.includes(p_gnx)) {
         console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
     }
@@ -17931,13 +17929,13 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 
 </t>
 <t tx="felix.20240403174622.1">public _onTabGroupsChanged(p_event: vscode.TabGroupChangeEvent): void {
-    console.log('_onTabGroupsChanged');
+    // console.log('_onTabGroupsChanged');
     //
 }
 
 </t>
 <t tx="felix.20240403174627.1">public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
-    console.log('_onTabsChanged');
+    // console.log('_onTabsChanged');
     //
 }
 

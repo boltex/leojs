@@ -979,7 +979,7 @@ export class LeoUI extends NullGui {
      * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
      */
     private async _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): Promise<unknown> {
-        console.log('_onChangeCollapsedState!');
+
         // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
         await this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
         if (p_treeView.selection.length && p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
@@ -1106,12 +1106,12 @@ export class LeoUI extends NullGui {
     }
 
     public _onTabGroupsChanged(p_event: vscode.TabGroupChangeEvent): void {
-        console.log('_onTabGroupsChanged');
+        // console.log('_onTabGroupsChanged');
         //
     }
 
     public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
-        console.log('_onTabsChanged');
+        // console.log('_onTabsChanged');
         //
     }
 
@@ -1124,7 +1124,6 @@ export class LeoUI extends NullGui {
         p_editor: vscode.TextEditor | undefined,
         p_internalCall?: boolean
     ): void {
-        console.log('_onActiveEditorChanged');
         if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
             this._bodyDetachedTextDocument = p_editor.document;
         }
@@ -1294,7 +1293,6 @@ export class LeoUI extends NullGui {
                     ) {
                         const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
                         if (id === c_id && gnx === this.lastSelectedNode.gnx) {
-                            console.log('found self detached');
                             w_hasDetached = true;
                             break;
                         }
