@@ -529,7 +529,7 @@ export class LeoUI extends NullGui {
                 this._changedWindowState(p_windowState)
             ), // Focus state of the current window changes
 
-            // * React when typing and changing body pane
+            // * React when TYPING and changing body pane
             vscode.workspace.onDidChangeTextDocument((p_textDocumentChange) =>
                 this._onDocumentChanged(p_textDocumentChange)
             ),
@@ -1227,9 +1227,6 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
         ) {
-            // TODO !
-            // !  DETACHED !
-
             this._bodyDetachedTextDocument = p_textDocumentChange.document;
             this._editorDetachedTouched = true;
 
@@ -1271,6 +1268,7 @@ export class LeoUI extends NullGui {
             }
         }
 
+        const c = g.app.windowList[this.frameIndex].c;
 
         // ".length" check necessary, see https://github.com/microsoft/vscode/issues/50344
         if (
@@ -1284,6 +1282,29 @@ export class LeoUI extends NullGui {
             this._bodyLastChangedDocumentSaved = false;
             this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
             this._bodyPreviewMode = false;
+            let w_hasDetached = false;
+            const c_id = c.id.toString();
+
+            // CHECK FOR DETACHED THAT MATCHES! 
+            for (const p_tabGroup of vscode.window.tabGroups.all) {
+                for (const p_tab of p_tabGroup.tabs) {
+                    if (p_tab.input &&
+                        (p_tab.input as vscode.TabInputText).uri &&
+                        (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+                    ) {
+                        const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+                        if (id === c_id && gnx === this.lastSelectedNode.gnx) {
+                            console.log('found self detached');
+                            w_hasDetached = true;
+                            break;
+                        }
+                    }
+                }
+                if (w_hasDetached) {
+                    break;
+                }
+            }
+
 
             // * If icon should change then do it now (if there's no document edit pending)
             if (
@@ -1293,8 +1314,6 @@ export class LeoUI extends NullGui {
                 const w_hasBody = !!w_bodyText.length;
                 const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody) || this.findFocusTree;
 
-                const c = g.app.windowList[this.frameIndex].c;
-
                 if (c.p && c.p.__bool__() && w_bodyText === c.p.b) {
                     // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                     // Set proper cursor insertion point and selection range.
@@ -1302,9 +1321,13 @@ export class LeoUI extends NullGui {
                     return;
                 }
 
-                if (!this.leoStates.leoChanged || w_iconChanged) {
+                if (!this.leoStates.leoChanged || w_iconChanged || w_hasDetached) {
                     // Document pane icon needs refresh (changed) and/or outline icon changed
                     void this._bodySaveDocument(p_textDocumentChange.document).then(() => {
+                        if (w_hasDetached && this.lastSelectedNode) {
+                            // Ok to fire refresh now!
+                            this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${this.lastSelectedNode.gnx}`);
+                        }
                         // todo : Really saved to node, no need to set dirty or hasbody -> Check & test to see if icon changes!
                         // if (this.lastSelectedNode) {
                         //     this.lastSelectedNode.dirty = true;
@@ -1322,41 +1345,45 @@ export class LeoUI extends NullGui {
                         // also refresh document panel (icon may be dirty now)
                         this.refreshDocumentsPane();
                     }
+
                 }
 
-                // IF SAME AS DETACHED update it!
-                if (this._bodyDetachedTextDocument) {
-                    const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
-                    if (id === c.id.toString() && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx) {
-                        void this._bodySaveDocument(p_textDocumentChange.document);
-                        // fire body node refresh if opened!!
-                        this._leoDetachedFileSystem.fireRefreshFile(utils.leoUriToStr(this._bodyDetachedTextDocument.uri));
+                // ! WRONG ! FIX THIS! 
+                //IF SAME AS DETACHED update it!
+                // if (this._bodyDetachedTextDocument) {
+                //     const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
+                //     if (id === c.id.toString() && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx) {
+                //         void this._bodySaveDocument(p_textDocumentChange.document);
+                //         // fire body node refresh if opened!!
+                //         this._leoDetachedFileSystem.fireRefreshFile(utils.leoUriToStr(this._bodyDetachedTextDocument.uri));
 
-                    }
-                }
+                //     }
+                // }
 
             }
 
             // * If body changed a line with and '@' directive refresh body states
             let w_needsRefresh = false;
-            p_textDocumentChange.contentChanges.forEach(p_contentChange => {
-                if (p_contentChange.text.includes('@')) {
+            for (const p_change of p_textDocumentChange.contentChanges) {
+                if (p_change.text.includes('@')) {
                     // There may have been an @
                     w_needsRefresh = true;
+                    break;
                 }
-            });
+            }
 
             const w_textEditor = vscode.window.activeTextEditor;
-
             if (w_textEditor && p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
-                w_textEditor.selections.forEach(p_selection => {
+                for (const p_selection of w_textEditor.selections) {
                     // TRY TO DETECT IF LANGUAGE RESET NEEDED!
                     let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
                     if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                         w_needsRefresh = true;
+                        break;
                     }
-                });
+                }
             }
+
             if (w_needsRefresh) {
                 this.debouncedRefreshBodyStates(1);
             }

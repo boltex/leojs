@@ -108,7 +108,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
         const w_gnx = utils.leoUriToStr(p_resource);
 
-        // TODO : save a position instead!
         if (!this._watchedBodiesGnx.includes(w_gnx)) {
             this._watchedBodiesGnx.push(w_gnx); // add gnx
         }
