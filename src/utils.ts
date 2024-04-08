@@ -25,9 +25,8 @@ export async function closeLeoTextEditors(): Promise<unknown> {
 
             if (p_tab.input &&
                 (p_tab.input as vscode.TabInputText).uri &&
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                ((p_tab.input as vscode.TabInputText).uri.scheme).startsWith(Constants.URI_LEOJS_SCHEME) &&
                 !p_tab.isDirty
-
             ) {
                 w_foundTabs.push(p_tab);
             }

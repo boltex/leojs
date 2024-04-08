@@ -208,7 +208,6 @@
 <v t="felix.20220922000450.8"><vh>_hideDeleteBody</vh></v>
 <v t="felix.20220922000450.9"><vh>_checkPreviewMode</vh></v>
 <v t="felix.20220922000450.10"><vh>closeBody</vh></v>
-<v t="felix.20240401153751.1"><vh>closeBodyAside</vh></v>
 <v t="felix.20220922000450.11"><vh>cleanupBody</vh></v>
 <v t="felix.20220922000450.12"><vh>showBody</vh></v>
 <v t="felix.20230112203533.1"><vh>_row_col_pv_dict</vh></v>
@@ -9208,7 +9207,7 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean
 
     // * Save any 'detached' dirty panels to leo
     if (this._bodyDetachedTextDocument &amp;&amp; this._bodyDetachedTextDocument.isDirty) {
-        void this._bodySaveDocument(this._bodyDetachedTextDocument);
+        void this._bodySaveDocument(this._bodyDetachedTextDocument, p_forcedVsCodeSave);
     }
 
     // * Save body to Leo if a change has been made to the body 'document' so far
@@ -17105,9 +17104,8 @@ export async function closeLeoTextEditors(): Promise&lt;unknown&gt; {
 
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &amp;&amp;
+                ((p_tab.input as vscode.TabInputText).uri.scheme).startsWith(Constants.URI_LEOJS_SCHEME) &amp;&amp;
                 !p_tab.isDirty
-
             ) {
                 w_foundTabs.push(p_tab);
             }
@@ -17583,17 +17581,6 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20240401153751.1">/**
- * Closes specific body pane for an opened aside body.
- */
-public closeBodyAside(p_gnx: string): Thenable&lt;any&gt; {
-    //
-    console.log('TODO : closeBodyAside');
-    return Promise.resolve();
-
-}
-
-</t>
 <t tx="felix.20240401213604.1">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
@@ -17931,6 +17918,9 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 </t>
 <t tx="felix.20240405235538.1">private _refreshDetachedBodies() {
     //  Refresh detached bodies as needed IF SAME COMMANDER, AND CLOSE : 
+    if (!g.app.windowList.length) {
+        return;
+    }
     const w_commands = g.app.windowList.map(p_frame =&gt; p_frame.c);
     const c = g.app.windowList[this.frameIndex].c;
     const cId = g.app.windowList[this.frameIndex].c.id.toString();

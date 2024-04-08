@@ -1508,7 +1508,7 @@ export class LeoUI extends NullGui {
 
         // * Save any 'detached' dirty panels to leo
         if (this._bodyDetachedTextDocument && this._bodyDetachedTextDocument.isDirty) {
-            void this._bodySaveDocument(this._bodyDetachedTextDocument);
+            void this._bodySaveDocument(this._bodyDetachedTextDocument, p_forcedVsCodeSave);
         }
 
         // * Save body to Leo if a change has been made to the body 'document' so far
@@ -2042,6 +2042,9 @@ export class LeoUI extends NullGui {
 
     private _refreshDetachedBodies() {
         //  Refresh detached bodies as needed IF SAME COMMANDER, AND CLOSE : 
+        if (!g.app.windowList.length) {
+            return;
+        }
         const w_commands = g.app.windowList.map(p_frame => p_frame.c);
         const c = g.app.windowList[this.frameIndex].c;
         const cId = g.app.windowList[this.frameIndex].c.id.toString();
@@ -2738,16 +2741,6 @@ export class LeoUI extends NullGui {
         }
 
         return Promise.all([q_closedTabs, q_closedBody]);
-    }
-
-    /**
-     * Closes specific body pane for an opened aside body.
-     */
-    public closeBodyAside(p_gnx: string): Thenable<any> {
-        //
-        console.log('TODO : closeBodyAside');
-        return Promise.resolve();
-
     }
 
     /**
