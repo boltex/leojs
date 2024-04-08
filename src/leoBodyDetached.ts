@@ -79,7 +79,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
      * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
      */
     public fireRefreshFile(p_gnx: string): void {
-
+        console.log("fireRefreshFile called for gnx: ", p_gnx);
         if (!this._openedBodiesGnx.includes(p_gnx)) {
             console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
         }

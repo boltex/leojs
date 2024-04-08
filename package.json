@@ -3501,13 +3501,13 @@
       {
         "command": "leojs.showOutline",
         "key": "alt+t",
-        "when": "leojsEditHeadline || leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
+        "when": "leojsEditHeadline || leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/ || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
       },
       {
         "command": "leojs.showOutline",
         "key": "ctrl+t",
         "mac": "cmd+t",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.showBody",
@@ -3552,25 +3552,25 @@
         "command": "leojs.saveLeoFile",
         "key": "ctrl+s",
         "mac": "cmd+s",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.newLeoFile",
         "key": "ctrl+n",
         "mac": "cmd+n",
-        "when": "leojsEditHeadline || editorTextFocus && resourceScheme == leojs || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsEditHeadline || editorTextFocus && resourceScheme =~ /^leojs/ || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.openLeoFile",
         "key": "ctrl+o",
         "mac": "cmd+o",
-        "when": "leojsEditHeadline || editorTextFocus && resourceScheme == leojs || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsEditHeadline || editorTextFocus && resourceScheme =~ /^leojs/ || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.writeAtFileNodes",
         "key": "ctrl+shift+w",
         "mac": "cmd+shift+w",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.writeAtFileNodesFromOutline",
@@ -3582,7 +3582,7 @@
         "command": "leojs.writeDirtyAtFileNodes",
         "key": "ctrl+shift+q",
         "mac": "cmd+shift+q",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.writeDirtyAtFileNodesFromOutline",
@@ -3593,7 +3593,7 @@
       {
         "command": "leojs.contractAll",
         "key": "alt+-",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.contractAllFromOutline",

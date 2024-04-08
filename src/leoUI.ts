@@ -1843,9 +1843,7 @@ export class LeoUI extends NullGui {
      */
     public async _launchRefresh(): Promise<unknown> {
 
-        if (this._refreshType.body) {
-            this._refreshDetachedBodies();
-        }
+        this._refreshDetachedBodies();
 
         if (!this.refreshPreserveRange) {
             if (this.findFocusTree) {
@@ -2043,9 +2041,77 @@ export class LeoUI extends NullGui {
     }
 
     private _refreshDetachedBodies() {
-        //  Refresh detached bodies as needed IF SAME COMMANDER
-        //  For each tabgroup and tab, if its URI is in same commander, fire refresh
-        // TODO 
+        //  Refresh detached bodies as needed IF SAME COMMANDER, AND CLOSE : 
+        const w_commands = g.app.windowList.map(p_frame => p_frame.c);
+        const c = g.app.windowList[this.frameIndex].c;
+        const cId = g.app.windowList[this.frameIndex].c.id.toString();
+        const w_foundTabs: Set<vscode.Tab> = new Set();
+        const w_foundUri: Set<vscode.Uri> = new Set();
+        for (const p_tabGroup of vscode.window.tabGroups.all) {
+            for (const p_tab of p_tabGroup.tabs) {
+                if (p_tab.input &&
+                    (p_tab.input as vscode.TabInputText).uri &&
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+                ) {
+                    const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+
+
+                    // Refresh detached bodies if same commander  // ! ALSO FIRE REFRESH !
+                    if (this._refreshType.body && id === cId) {
+                        this._leoDetachedFileSystem.fireRefreshFile(`${id}/${gnx}`);
+                    }
+
+                    // if refresh tree is true, validate that opened detached of same commander still valid and close as needed.
+                    if (this._refreshType.tree && id === cId) {
+                        let found = false;
+                        for (const v of c.all_unique_nodes()) {
+                            if (v.gnx === gnx) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            // close !
+                            w_foundTabs.add(p_tab);
+                            w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                        }
+                    }
+
+                    // if refresh documents is true, validate each opened tabgroup/tab and close as needed.
+                    if (this._refreshType.documents) {
+                        let found = false;
+                        for (const w_c of w_commands) {
+                            for (const v of w_c.all_unique_nodes()) {
+                                if (v.gnx === gnx) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found) {
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            // close !
+                            w_foundTabs.add(p_tab);
+                            w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                        }
+
+                    }
+
+                }
+
+            }
+        }
+        if (w_foundTabs.size) {
+            void vscode.window.tabGroups.close([...w_foundTabs], true);
+            for (const w_uri of w_foundUri) {
+                void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
+            }
+        }
+
+
+
     }
 
     /**

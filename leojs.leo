@@ -6474,13 +6474,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 <t tx="felix.20201214205159.69">{
   "command": "leojs.showOutline",
   "key": "alt+t",
-  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/ || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
 },
 {
   "command": "leojs.showOutline",
   "key": "ctrl+t",
   "mac": "cmd+t",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/"
 },
 {
   "command": "leojs.showBody",
@@ -6526,25 +6526,25 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.saveLeoFile",
   "key": "ctrl+s",
   "mac": "cmd+s",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/"
 },
 {
   "command": "leojs.newLeoFile",
   "key": "ctrl+n",
   "mac": "cmd+n",
-  "when": "leojsEditHeadline || editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/ || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.openLeoFile",
   "key": "ctrl+o",
   "mac": "cmd+o",
-  "when": "leojsEditHeadline || editorTextFocus &amp;&amp; resourceScheme == leojs || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsEditHeadline || editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/ || leojsFindFocus || sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.writeAtFileNodes",
   "key": "ctrl+shift+w",
   "mac": "cmd+shift+w",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/"
 },
 {
   "command": "leojs.writeAtFileNodesFromOutline",
@@ -6556,7 +6556,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.writeDirtyAtFileNodes",
   "key": "ctrl+shift+q",
   "mac": "cmd+shift+q",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/"
 },
 {
   "command": "leojs.writeDirtyAtFileNodesFromOutline",
@@ -6568,7 +6568,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 <t tx="felix.20201214205159.71">{
   "command": "leojs.contractAll",
   "key": "alt+-",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/"
 },
 {
   "command": "leojs.contractAllFromOutline",
@@ -7594,9 +7594,7 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
  */
 public async _launchRefresh(): Promise&lt;unknown&gt; {
 
-    if (this._refreshType.body) {
-        this._refreshDetachedBodies();
-    }
+    this._refreshDetachedBodies();
 
     if (!this.refreshPreserveRange) {
         if (this.findFocusTree) {
@@ -17766,7 +17764,7 @@ private _setOpenedBodyTime(p_gnx: string): void {
  * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
  */
 public fireRefreshFile(p_gnx: string): void {
-
+    console.log("fireRefreshFile called for gnx: ", p_gnx);
     if (!this._openedBodiesGnx.includes(p_gnx)) {
         console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
     }
@@ -17932,9 +17930,77 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 
 </t>
 <t tx="felix.20240405235538.1">private _refreshDetachedBodies() {
-    //  Refresh detached bodies as needed IF SAME COMMANDER
-    //  For each tabgroup and tab, if its URI is in same commander, fire refresh
-    // TODO 
+    //  Refresh detached bodies as needed IF SAME COMMANDER, AND CLOSE : 
+    const w_commands = g.app.windowList.map(p_frame =&gt; p_frame.c);
+    const c = g.app.windowList[this.frameIndex].c;
+    const cId = g.app.windowList[this.frameIndex].c.id.toString();
+    const w_foundTabs: Set&lt;vscode.Tab&gt; = new Set();
+    const w_foundUri: Set&lt;vscode.Uri&gt; = new Set();
+    for (const p_tabGroup of vscode.window.tabGroups.all) {
+        for (const p_tab of p_tabGroup.tabs) {
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+            ) {
+                const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+
+
+                // Refresh detached bodies if same commander  // ! ALSO FIRE REFRESH !
+                if (this._refreshType.body &amp;&amp; id === cId) {
+                    this._leoDetachedFileSystem.fireRefreshFile(`${id}/${gnx}`);
+                }
+
+                // if refresh tree is true, validate that opened detached of same commander still valid and close as needed.
+                if (this._refreshType.tree &amp;&amp; id === cId) {
+                    let found = false;
+                    for (const v of c.all_unique_nodes()) {
+                        if (v.gnx === gnx) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        // close !
+                        w_foundTabs.add(p_tab);
+                        w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                    }
+                }
+
+                // if refresh documents is true, validate each opened tabgroup/tab and close as needed.
+                if (this._refreshType.documents) {
+                    let found = false;
+                    for (const w_c of w_commands) {
+                        for (const v of w_c.all_unique_nodes()) {
+                            if (v.gnx === gnx) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) {
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        // close !
+                        w_foundTabs.add(p_tab);
+                        w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                    }
+
+                }
+
+            }
+
+        }
+    }
+    if (w_foundTabs.size) {
+        void vscode.window.tabGroups.close([...w_foundTabs], true);
+        for (const w_uri of w_foundUri) {
+            void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
+        }
+    }
+
+
+
 }
 
 </t>
