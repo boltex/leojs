@@ -4932,7 +4932,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.openAside",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Open detached body to the Side"
+  "title": "Open to the Side"
 },
 {
   "command": "leojs.contractAll",
@@ -8111,7 +8111,7 @@ public incTreeId(): void {
       "scope": "application",
       "default": true,
       "type": "boolean",
-      "description": "Offer 'Open detached body pane to the Side' in nodes context menu"
+      "description": "Offer 'Open to the Side' in nodes context menu"
     },
     "leojs.showEditOnNodes": {
       "scope": "application",
