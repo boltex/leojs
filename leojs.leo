@@ -2074,7 +2074,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false, false)], // Select is NOT a Position!
+[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
 [CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.openAside(p_position)],
 
 [CMD.CONTRACT_ALL, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
@@ -4174,8 +4174,8 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 public async selectTreeNode(
     p_node: Position,
     p_internalCall?: boolean,
-    p_aside?: boolean
-    // p_reveal?: boolean, p_aside?: boolean
+    // p_aside?: boolean
+    // // p_reveal?: boolean, p_aside?: boolean
 ): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
@@ -4185,28 +4185,28 @@ public async selectTreeNode(
     g.doHook("headclick1", { c: c, p: p_node, v: p_node });
 
     // * check if used via context menu's "open-aside" on an unselected node: check if p_node is currently selected, if not select it
-    if (
-        p_aside &amp;&amp;
-        c.positionExists(p_node) &amp;&amp;
-        !p_node.__eq__(this.lastSelectedNode)
-    ) {
-        void this._revealNode(p_node, { select: true, focus: false }); // no need to set focus: tree selection is set to right-click position
-    }
+    // if (
+    //     p_aside &amp;&amp;
+    //     c.positionExists(p_node) &amp;&amp;
+    //     !p_node.__eq__(this.lastSelectedNode)
+    // ) {
+    //     void this._revealNode(p_node, { select: true, focus: false }); // no need to set focus: tree selection is set to right-click position
+    // }
 
     this.showBodyIfClosed = true;
 
     this.leoStates.setSelectedNodeFlags(p_node);
 
-    const w_showBodyKeepFocus = p_aside
-        ? this.config.treeKeepFocusWhenAside
-        : this.config.treeKeepFocus;
+    // const w_showBodyKeepFocus = p_aside
+    //     ? this.config.treeKeepFocusWhenAside
+    //     : this.config.treeKeepFocus;
 
     // * Check if having already this exact node position selected : Just show the body and exit
     // (other tree nodes with same gnx may have different syntax language coloring because of parents lineage)
     if (p_node.__eq__(this.lastSelectedNode)) {
         this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
         g.doHook("headclick2", { c: c, p: p_node, v: p_node });
-        return this.showBody(!!p_aside, w_showBodyKeepFocus).catch((p_error) =&gt; {
+        return this.showBody(false, this.config.treeKeepFocus).catch((p_error) =&gt; {
             return Promise.resolve(); // intercept cancellation as success: next one is going to replace anyways.
         });
         // Voluntary exit
@@ -4238,7 +4238,7 @@ public async selectTreeNode(
     }
     g.doHook("headclick2", { c: c, p: p_node, v: p_node });
     // * Apply the node to the body text without waiting for the selection promise to resolve
-    return this._tryApplyNodeToBody(p_node, !!p_aside, w_showBodyKeepFocus);
+    return this._tryApplyNodeToBody(p_node, false, this.config.treeKeepFocus);
 
 }
 
@@ -4932,7 +4932,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.openAside",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Open to the Side"
+  "title": "Open detached body to the Side"
 },
 {
   "command": "leojs.contractAll",
@@ -8081,7 +8081,7 @@ public incTreeId(): void {
       "scope": "application",
       "default": false,
       "type": "boolean",
-      "description": "Specifies whether to keep focus in the outline when opening a body pane on the side"
+      "description": "Specifies whether to keep focus in the outline when opening a detached body pane on the side"
     },
     "leojs.goAnywhereShortcut": {
       "scope": "application",
@@ -8111,7 +8111,7 @@ public incTreeId(): void {
       "scope": "application",
       "default": true,
       "type": "boolean",
-      "description": "Offer 'Open to the Side' in nodes context menu"
+      "description": "Offer 'Open detached body pane to the Side' in nodes context menu"
     },
     "leojs.showEditOnNodes": {
       "scope": "application",
@@ -17502,7 +17502,7 @@ set leoIdUnset(p_value: boolean) {
 
 </t>
 <t tx="felix.20240401145215.1">/**
- * * Opens aside, and set focus in a body pane locked to its commander/gnx. 
+ * * Opens a detached body aside, and set focus in a body pane locked to its commander/gnx. 
  * - Does not select the node in the outline.
  * - If already opened aside in the same targeted column, just reveal.
  * @param p is the position node to be opened aside
@@ -17513,9 +17513,7 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
 
     const c = g.app.windowList[this.frameIndex].c;
     const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
-    //
-    console.log("Open Aside path: " + detachedUri.path);
-    //
+
     // * Step 1 : Open the document
     this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
     this._bodyDetachedTextDocument = await vscode.workspace.openTextDocument(detachedUri);
@@ -17538,7 +17536,7 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
     const w_showOptions: vscode.TextDocumentShowOptions =
     {
         viewColumn: vscode.ViewColumn.Beside,
-        preserveFocus: false, // dont preserve focus, set it in the opened body
+        preserveFocus: this.config.treeKeepFocusWhenAside,
         preview: true, // should text document be in preview only? set false for fully opened
     };
     // * Actually Show the body pane document in a text editor
