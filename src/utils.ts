@@ -395,9 +395,8 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
  * @returns The string source that was used to build this Uri
  */
 export function leoUriToStr(p_uri: vscode.Uri): string {
-    // TODO : Use length of a constant or something other than 'fsPath'
-    // For now, just remove the '/' (or backslash on Windows) before the path string
-    return p_uri.fsPath.substring(1);
+    // For now, just remove the '/' before the path string
+    return p_uri.path.substring(1);
 }
 
 /**

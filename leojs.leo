@@ -1192,9 +1192,8 @@ export function strToLeoUri(p_str: string): vscode.Uri {
  * @returns The string source that was used to build this Uri
  */
 export function leoUriToStr(p_uri: vscode.Uri): string {
-    // TODO : Use length of a constant or something other than 'fsPath'
-    // For now, just remove the '/' (or backslash on Windows) before the path string
-    return p_uri.fsPath.substring(1);
+    // For now, just remove the '/' before the path string
+    return p_uri.path.substring(1);
 }
 
 </t>
@@ -17621,10 +17620,50 @@ import { VNode } from "./core/leoNodes";
 @others
 </t>
 <t tx="felix.20240401213604.10">public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
+
+
+    console.log("detached readDirectory called on uri path: ", p_uri.path);
+
+    const w_commanders: Set&lt;string&gt; = new Set();
+    const w_detached: Set&lt;string&gt; = new Set();
+    if (this._leoUi.leoStates.fileOpenedReady) {
+
+        for (const p_tabGroup of vscode.window.tabGroups.all) {
+            for (const p_tab of p_tabGroup.tabs) {
+                if (p_tab.input &amp;&amp;
+                    (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+                ) {
+                    // Found detached. 
+                    const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+                    w_commanders.add(id);
+                    w_detached.add((p_tab.input as vscode.TabInputText).uri.path);
+                }
+            }
+        }
+    }
+
     if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
         const w_directory: [string, vscode.FileType][] = [];
-        w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
+        // w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
+        for (const w_commander of [...w_commanders]) {
+            w_directory.push([w_commander, vscode.FileType.Directory]);
+        }
+        console.log("returned all visible c ids:", w_directory);
         return w_directory;
+    } else if (
+        p_uri.path.split('/').length
+    ) {
+        const w_directory: [string, vscode.FileType][] = [];
+        for (const w_file of [...w_detached]) {
+            if (w_file.split('/')[1] === p_uri.path.split('/')[1]) {
+                w_directory.push([w_file.split('/')[2], vscode.FileType.File]);
+            }
+        }
+        console.log(`returned all visible detached in ${p_uri.path} :`, w_directory);
+
+        return w_directory;
+
     } else {
         console.log('LEOJS Error: Asked to read Directory! uri path: ' + p_uri.path);
         throw vscode.FileSystemError.FileNotFound(p_uri);
@@ -17633,7 +17672,7 @@ import { VNode } from "./core/leoNodes";
 
 </t>
 <t tx="felix.20240401213604.11">public createDirectory(p_uri: vscode.Uri): void {
-    console.warn('Called createDirectory with ', p_uri.fsPath); // should not happen
+    console.warn('Called createDirectory with ', p_uri.path); // should not happen
     throw vscode.FileSystemError.NoPermissions();
 }
 
@@ -17654,7 +17693,7 @@ import { VNode } from "./core/leoNodes";
 
 </t>
 <t tx="felix.20240401213604.13">public rename(p_oldUri: vscode.Uri, p_newUri: vscode.Uri, p_options: { overwrite: boolean }): void {
-    console.warn('Called rename on ', p_oldUri.fsPath, p_newUri.fsPath); // should not happen
+    console.warn('Called rename on ', p_oldUri.path, p_newUri.path); // should not happen
     this._fireSoon(
         { type: vscode.FileChangeType.Deleted, uri: p_oldUri },
         { type: vscode.FileChangeType.Created, uri: p_newUri }
@@ -17683,7 +17722,7 @@ import { VNode } from "./core/leoNodes";
 
 </t>
 <t tx="felix.20240401213604.15">public copy(p_uri: vscode.Uri): void {
-    console.warn('Called copy on ', p_uri.fsPath); // should not happen
+    console.warn('Called copy on ', p_uri.path); // should not happen
     throw vscode.FileSystemError.NoPermissions();
 }
 
@@ -17710,7 +17749,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     private _errorRefreshFlag: boolean = false;
 
     // * Last file read data with the readFile method
-    private _lastGnx: string = ""; // gnx of last file read
     private _lastBodyData: string = ""; // body content of last file read
     private _lastBodyLength: number = 0; // length of last file read
 
@@ -17821,17 +17859,39 @@ public refreshPossibleGnxList(): string[] {
 
 </t>
 <t tx="felix.20240401213604.8">public stat(p_uri: vscode.Uri): vscode.FileStat {
+    console.log("detached stat called on uri path: ", p_uri.path);
     if (this._leoUi.leoStates.fileOpenedReady) {
         const w_gnx = utils.leoUriToStr(p_uri);
+
+        const w_commanders: Set&lt;string&gt; = new Set();
+        const w_detached: Set&lt;string&gt; = new Set(); // same whole gnx string as with setNewBodyUriTime
+
+        for (const p_tabGroup of vscode.window.tabGroups.all) {
+            for (const p_tab of p_tabGroup.tabs) {
+                if (p_tab.input &amp;&amp;
+                    (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+                ) {
+                    // Found detached. 
+                    const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+                    w_commanders.add(id);
+                    w_detached.add(utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri));
+                }
+            }
+        }
+
+        // w_commanders and w_detached are filled up!
         if (p_uri.fsPath.length === 1) {
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
-            return {
-                type: vscode.FileType.File,
-                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-                size: this._lastBodyLength
-            };
+        }
+
+
+        const [unused, id, gnx] = p_uri.path.split("/");
+        console.log(`detached stat:  unused ${unused}, id ${id}, gnx ${gnx} `);
+
+        if (id &amp;&amp; !gnx) {
+            console.log('was a commander dir');
+            return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
         } else if (this._openedBodiesGnx.includes(w_gnx)) {
             let c: Commands;
             let w_v: VNode | undefined;
@@ -17876,25 +17936,19 @@ public refreshPossibleGnxList(): string[] {
             }
             let c: Commands;
             let w_v: VNode | undefined;
-            const w_isAside = p_uri.path.match(Constants.DETACHED_REGEX);
-            if (w_isAside) {
-                const id = p_uri.path.split("/")[1];
-                for (const w_frame of g.app.windowList) {
-                    if (w_frame.c.id.toString() === id) {
-                        c = w_frame.c;
-                        w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
-                        break;
-                    }
+
+            const id = p_uri.path.split("/")[1];
+            for (const w_frame of g.app.windowList) {
+                if (w_frame.c.id.toString() === id) {
+                    c = w_frame.c;
+                    w_v = c.fileCommands.gnxDict[p_uri.path.split("/")[2]];
+                    break;
                 }
-            } else {
-                c = g.app.windowList[this._leoUi.frameIndex].c;
-                w_v = c.fileCommands.gnxDict[w_gnx];
             }
+
             if (w_v) {
                 this._errorRefreshFlag = false; // got body so reset possible flag!
-                if (!w_isAside) {
-                    this._lastGnx = w_gnx;
-                }
+
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                 this._lastBodyLength = w_buffer.byteLength;
@@ -17902,11 +17956,6 @@ public refreshPossibleGnxList(): string[] {
             } else {
                 if (!this._errorRefreshFlag) {
                     this._leoUi.fullRefresh();
-                }
-                if (this._lastGnx === w_gnx) {
-                    // was last gnx of closed file about to be switched to new document selected
-                    console.log('Passed in not found: ' + w_gnx);
-                    return Buffer.from(this._lastBodyData);
                 }
                 console.error("ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
                 return Buffer.from("");
