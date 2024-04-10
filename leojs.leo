@@ -4960,40 +4960,28 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "category": "Leojs",
   "title": "Prev",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoBack",
-  "icon": {
-    "light": "resources/light/prev.svg",
-    "dark": "resources/dark/prev.svg"
-  }
+  "icon": "$(leo-prev)"
 },
 {
   "command": "leojs.prevFromOutline",
   "category": "Leojs",
   "title": "Prev",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoBack",
-  "icon": {
-    "light": "resources/light/prev.svg",
-    "dark": "resources/dark/prev.svg"
-  }
+  "icon": "$(leo-prev)"
 },
 {
   "command": "leojs.next",
   "category": "Leojs",
   "title": "Next",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoNext",
-  "icon": {
-    "light": "resources/light/next.svg",
-    "dark": "resources/dark/next.svg"
-  }
+  "icon": "$(leo-next)"
 },
 {
   "command": "leojs.nextFromOutline",
   "category": "Leojs",
   "title": "Next",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanGoNext",
-  "icon": {
-    "light": "resources/light/next.svg",
-    "dark": "resources/dark/next.svg"
-  }
+  "icon": "$(leo-next)"
 },
 </t>
 <t tx="felix.20201214205159.12">{
@@ -5640,40 +5628,28 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "category": "Leojs",
   "title": "Undo",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanUndo",
-  "icon": {
-    "light": "resources/light/undo.svg",
-    "dark": "resources/dark/undo.svg"
-  }
+  "icon": "$(leo-undo)"
 },
 {
   "command": "leojs.undoFromOutline",
   "category": "Leojs",
   "title": "Undo",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanUndo",
-  "icon": {
-    "light": "resources/light/undo.svg",
-    "dark": "resources/dark/undo.svg"
-  }
+  "icon": "$(leo-undo)"
 },
 {
   "command": "leojs.redo",
   "category": "Leojs",
   "title": "Redo",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanRedo",
-  "icon": {
-    "light": "resources/light/redo.svg",
-    "dark": "resources/dark/redo.svg"
-  }
+  "icon": "$(leo-redo)"
 },
 {
   "command": "leojs.redoFromOutline",
   "category": "Leojs",
   "title": "Redo",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCanRedo",
-  "icon": {
-    "light": "resources/light/redo.svg",
-    "dark": "resources/dark/redo.svg"
-  }
+  "icon": "$(leo-redo)"
 },
 {
   "command": "leojs.revertToUndo",
@@ -18360,7 +18336,6 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
       "fontCharacter": "\\e922"
     }
   },
-  
   "leo-hoist": {
     "description": "Hoist",
     "default": {
@@ -18368,7 +18343,6 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
       "fontCharacter": "\\e923"
     }
   },
-  
   "leo-import": {
     "description": "Import",
     "default": {
@@ -18376,7 +18350,6 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
       "fontCharacter": "\\e924"
     }
   },
-  
   "leo-insert": {
     "description": "Insert",
     "default": {
@@ -18391,7 +18364,7 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
       "fontCharacter": "\\e926"
     }
   },
-    "leo-link": {
+  "leo-link": {
     "description": "Link",
     "default": {
       "fontPath": "resources/icoleo.woff",
