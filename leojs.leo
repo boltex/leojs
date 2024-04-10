@@ -486,6 +486,7 @@
 <v t="felix.20220918234147.1"><vh>grammars</vh></v>
 <v t="felix.20220918234152.1"><vh>snippets</vh></v>
 <v t="felix.20201214205159.5"><vh>viewsWelcome</vh></v>
+<v t="felix.20240409221347.1"><vh>icons</vh></v>
 <v t="felix.20201214205159.6"><vh>commands</vh>
 <v t="felix.20201214205159.9"><vh>Show UI Panes</vh></v>
 <v t="felix.20201214205159.8"><vh>Scripting &amp; @buttons</vh></v>
@@ -13567,6 +13568,52 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
         const w_selectedCId = g.app.windowList[this.frameIndex].c.id.toString();
         let w_alreadySaved = false;
+
+        // * If body changed a line with and '@' directive refresh body states
+        let w_needsRefresh = false;
+        for (const p_change of p_textDocumentChange.contentChanges) {
+            if (p_change.text.includes('@')) {
+                // There may have been an @
+                w_needsRefresh = true;
+                break;
+            }
+        }
+
+        const w_textEditor = vscode.window.activeTextEditor;
+        if (w_textEditor &amp;&amp; p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
+            for (const p_selection of w_textEditor.selections) {
+                // TRY TO DETECT IF LANGUAGE RESET NEEDED!
+                let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
+                if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
+                    w_needsRefresh = true;
+                    break;
+                }
+            }
+        }
+        if (w_needsRefresh) {
+
+            const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(p_textDocumentChange.document.uri)];
+
+            if (w_foundVnode) {
+
+                for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
+                    if (p.v) {
+                        let w_language = this._getBodyLanguage(p); // !! 
+                        // Set document language only if different
+                        if (w_language !== this._bodyDetachedTextDocument.languageId) {
+                            console.log('RE-setting detached language and wrap state!');
+                            void this._setBodyLanguage(this._bodyDetachedTextDocument, w_language);
+                        }
+                        break;
+                    }
+                }
+
+
+            } else {
+                console.log('DETACHED VNODE not found when resetting language');
+            }
+        }
+
         // Check if exact same node as currently selected body
         if (
             w_selectedCId === id &amp;&amp; this.lastSelectedNode &amp;&amp; gnx === this.lastSelectedNode.gnx
@@ -13576,7 +13623,9 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             w_alreadySaved = true;
             // fire body node refresh if opened!!
             this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
-
+            if (w_needsRefresh) {
+                this.debouncedRefreshBodyStates(50); // And maybe changed language!
+            }
         }
 
         // If same commander, and node icon changed (or whole document was unchanged)
@@ -18064,6 +18113,481 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 
 }
 
+</t>
+<t tx="felix.20240409221347.1">"icons": {
+  "leo-arrow-down": {
+    "description": "Arrow Down",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e900"
+    }
+  },
+  "leo-arrow-left": {
+    "description": "Arrow Left",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e901"
+    }
+  },
+  "leo-arrow-right": {
+    "description": "Arrow Right",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e902"
+    }
+  },
+  "leo-arrow-small-down": {
+    "description": "Small Arrow Down",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e903"
+    }
+  },
+  "leo-arrow-small-left": {
+    "description": "Small Arrow Left",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e904"
+    }
+  },
+  "leo-arrow-small-right": {
+    "description": "Small Arrow Right",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e905"
+    }
+  },
+  "leo-arrow-small-up": {
+    "description": "Small Arrow Up",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e906"
+    }
+  },
+  "leo-arrow-up": {
+    "description": "Arrow Up",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e907"
+    }
+  },
+  "leo-chapter-back": {
+    "description": "Chapter Back",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e908"
+    }
+  },
+  "leo-chapter-main": {
+    "description": "Chapter Main",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e909"
+    }
+  },
+  "leo-chapter-next": {
+    "description": "Chapter Next",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e90a"
+    }
+  },
+  "leo-chapter-select": {
+    "description": "Chapter Select",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e90b"
+    }
+  },
+  "leo-clear-files": {
+    "description": "Clear Files",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e90c"
+    }
+  },
+  "leo-clipboard": {
+    "description": "Clipboard",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e90d"
+    }
+  },
+  "leo-close": {
+    "description": "Close",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e90e"
+    }
+  },
+  "leo-close-server": {
+    "description": "Close Server",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e90f"
+    }
+  },
+  "leo-collapse": {
+    "description": "Collapse",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e910"
+    }
+  },
+  "leo-connect": {
+    "description": "Connect",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e911"
+    }
+  },
+  "leo-cut": {
+    "description": "Cut",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e912"
+    }
+  },
+  "leo-dehoist": {
+    "description": "Dehoist",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e913"
+    }
+  },
+  "leo-delete": {
+    "description": "Delete",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e914"
+    }
+  },
+  "leo-demote": {
+    "description": "Demote",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e915"
+    }
+  },
+  "leo-edit": {
+    "description": "Edit",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e916"
+    }
+  },
+  "leo-extract": {
+    "description": "Extract",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e917"
+    }
+  },
+  "leo-extract-name": {
+    "description": "Extract Name",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e918"
+    }
+  },
+  "leo-find-next": {
+    "description": "Find Next",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e919"
+    }
+  },
+  "leo-find-previous": {
+    "description": "Find Previous",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e91a"
+    }
+  },
+  "leo-find-quick": {
+    "description": "Find Quick",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e91b"
+    }
+  },
+  "leo-find-quick-changed": {
+    "description": "Find Quick Changed",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e91c"
+    }
+  },
+  "leo-find-quick-history": {
+    "description": "Find Quick History",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e91d"
+    }
+  },
+  "leo-find-quick-marked": {
+    "description": "Find Quick Marked",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e91e"
+    }
+  },
+  "leo-find-quick-selected": {
+    "description": "Find Quick Selected",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e91f"
+    }
+  },
+  "leo-find-quick-timeline": {
+    "description": "Find Quick Timeline",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e920"
+    }
+  },
+  "leo-folder": {
+    "description": "Folder",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e921"
+    }
+  },
+  "leo-gear": {
+    "description": "Gear",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e922"
+    }
+  },
+  
+  "leo-hoist": {
+    "description": "Hoist",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e923"
+    }
+  },
+  
+  "leo-import": {
+    "description": "Import",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e924"
+    }
+  },
+  
+  "leo-insert": {
+    "description": "Insert",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e925"
+    }
+  },
+  "leo-insert-child": {
+    "description": "Insert Child",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e926"
+    }
+  },
+    "leo-link": {
+    "description": "Link",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e927"
+    }
+  },
+  "leo-mark": {
+    "description": "Mark",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e928"
+    }
+  },
+  "leo-new-file": {
+    "description": "New File",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e929"
+    }
+  },
+  "leo-next": {
+    "description": "Next",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e92a"
+    }
+  },
+  "leo-node": {
+    "description": "Node",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e92b"
+    }
+  },
+  "leo-open-recent": {
+    "description": "Open Recent",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e92c"
+    }
+  },
+  "leo-parent": {
+    "description": "Parent",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e92d"
+    }
+  },
+  "leo-paste": {
+    "description": "Paste",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e92e"
+    }
+  },
+  "leo-paste-clone": {
+    "description": "Paste Clone",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e92f"
+    }
+  },
+  "leo-plus": {
+    "description": "Plus",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e930"
+    }
+  },
+  "leo-plus-small": {
+    "description": "Small Plus",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e931"
+    }
+  },
+  "leo-prev": {
+    "description": "Prev",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e932"
+    }
+  },
+  "leo-promote": {
+    "description": "Promote",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e933"
+    }
+  },
+  "leo-redo": {
+    "description": "Redo",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e934"
+    }
+  },
+  "leo-refresh": {
+    "description": "Refresh",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e935"
+    }
+  },
+  "leo-save": {
+    "description": "Save",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e936"
+    }
+  },
+  "leo-save-as": {
+    "description": "Save As",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e937"
+    }
+  },
+  "leo-save-as-leojs": {
+    "description": "Save As .leojs",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e938"
+    }
+  },
+  "leo-show-log": {
+    "description": "Show Log",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e939"
+    }
+  },
+  "leo-sort-children": {
+    "description": "Sort Children",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e93a"
+    }
+  },
+  "leo-sort-siblings": {
+    "description": "Sort Siblings",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e93b"
+    }
+  },
+  "leo-start-server": {
+    "description": "Start Server",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e93c"
+    }
+  },
+  "leo-switch": {
+    "description": "Switch",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e93d"
+    }
+  },
+  "leo-tag": {
+    "description": "Tag",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e93e"
+    }
+  },
+  "leo-undo": {
+    "description": "Undo",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e93f"
+    }
+  },
+  "leo-unmark": {
+    "description": "Unmark",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e940"
+    }
+  },
+  "leo-write-at-file-nodes": {
+    "description": "Write at-file Nodes",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e941"
+    }
+  },
+  "leo-write-dirty-at-file-nodes": {
+    "description": "Write Dirty at-file Nodes",
+    "default": {
+      "fontPath": "resources/icoleo.woff",
+      "fontCharacter": "\\e942"
+    }
+  }
+},
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

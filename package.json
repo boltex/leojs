@@ -1202,6 +1202,480 @@
         "when": "leojsReady && leojsTreeOpened"
       }
     ],
+    "icons": {
+      "leo-arrow-down": {
+        "description": "Arrow Down",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e900"
+        }
+      },
+      "leo-arrow-left": {
+        "description": "Arrow Left",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e901"
+        }
+      },
+      "leo-arrow-right": {
+        "description": "Arrow Right",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e902"
+        }
+      },
+      "leo-arrow-small-down": {
+        "description": "Small Arrow Down",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e903"
+        }
+      },
+      "leo-arrow-small-left": {
+        "description": "Small Arrow Left",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e904"
+        }
+      },
+      "leo-arrow-small-right": {
+        "description": "Small Arrow Right",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e905"
+        }
+      },
+      "leo-arrow-small-up": {
+        "description": "Small Arrow Up",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e906"
+        }
+      },
+      "leo-arrow-up": {
+        "description": "Arrow Up",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e907"
+        }
+      },
+      "leo-chapter-back": {
+        "description": "Chapter Back",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e908"
+        }
+      },
+      "leo-chapter-main": {
+        "description": "Chapter Main",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e909"
+        }
+      },
+      "leo-chapter-next": {
+        "description": "Chapter Next",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e90a"
+        }
+      },
+      "leo-chapter-select": {
+        "description": "Chapter Select",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e90b"
+        }
+      },
+      "leo-clear-files": {
+        "description": "Clear Files",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e90c"
+        }
+      },
+      "leo-clipboard": {
+        "description": "Clipboard",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e90d"
+        }
+      },
+      "leo-close": {
+        "description": "Close",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e90e"
+        }
+      },
+      "leo-close-server": {
+        "description": "Close Server",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e90f"
+        }
+      },
+      "leo-collapse": {
+        "description": "Collapse",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e910"
+        }
+      },
+      "leo-connect": {
+        "description": "Connect",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e911"
+        }
+      },
+      "leo-cut": {
+        "description": "Cut",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e912"
+        }
+      },
+      "leo-dehoist": {
+        "description": "Dehoist",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e913"
+        }
+      },
+      "leo-delete": {
+        "description": "Delete",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e914"
+        }
+      },
+      "leo-demote": {
+        "description": "Demote",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e915"
+        }
+      },
+      "leo-edit": {
+        "description": "Edit",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e916"
+        }
+      },
+      "leo-extract": {
+        "description": "Extract",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e917"
+        }
+      },
+      "leo-extract-name": {
+        "description": "Extract Name",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e918"
+        }
+      },
+      "leo-find-next": {
+        "description": "Find Next",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e919"
+        }
+      },
+      "leo-find-previous": {
+        "description": "Find Previous",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e91a"
+        }
+      },
+      "leo-find-quick": {
+        "description": "Find Quick",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e91b"
+        }
+      },
+      "leo-find-quick-changed": {
+        "description": "Find Quick Changed",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e91c"
+        }
+      },
+      "leo-find-quick-history": {
+        "description": "Find Quick History",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e91d"
+        }
+      },
+      "leo-find-quick-marked": {
+        "description": "Find Quick Marked",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e91e"
+        }
+      },
+      "leo-find-quick-selected": {
+        "description": "Find Quick Selected",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e91f"
+        }
+      },
+      "leo-find-quick-timeline": {
+        "description": "Find Quick Timeline",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e920"
+        }
+      },
+      "leo-folder": {
+        "description": "Folder",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e921"
+        }
+      },
+      "leo-gear": {
+        "description": "Gear",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e922"
+        }
+      },
+      
+      "leo-hoist": {
+        "description": "Hoist",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e923"
+        }
+      },
+      
+      "leo-import": {
+        "description": "Import",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e924"
+        }
+      },
+      
+      "leo-insert": {
+        "description": "Insert",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e925"
+        }
+      },
+      "leo-insert-child": {
+        "description": "Insert Child",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e926"
+        }
+      },
+        "leo-link": {
+        "description": "Link",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e927"
+        }
+      },
+      "leo-mark": {
+        "description": "Mark",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e928"
+        }
+      },
+      "leo-new-file": {
+        "description": "New File",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e929"
+        }
+      },
+      "leo-next": {
+        "description": "Next",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e92a"
+        }
+      },
+      "leo-node": {
+        "description": "Node",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e92b"
+        }
+      },
+      "leo-open-recent": {
+        "description": "Open Recent",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e92c"
+        }
+      },
+      "leo-parent": {
+        "description": "Parent",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e92d"
+        }
+      },
+      "leo-paste": {
+        "description": "Paste",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e92e"
+        }
+      },
+      "leo-paste-clone": {
+        "description": "Paste Clone",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e92f"
+        }
+      },
+      "leo-plus": {
+        "description": "Plus",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e930"
+        }
+      },
+      "leo-plus-small": {
+        "description": "Small Plus",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e931"
+        }
+      },
+      "leo-prev": {
+        "description": "Prev",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e932"
+        }
+      },
+      "leo-promote": {
+        "description": "Promote",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e933"
+        }
+      },
+      "leo-redo": {
+        "description": "Redo",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e934"
+        }
+      },
+      "leo-refresh": {
+        "description": "Refresh",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e935"
+        }
+      },
+      "leo-save": {
+        "description": "Save",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e936"
+        }
+      },
+      "leo-save-as": {
+        "description": "Save As",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e937"
+        }
+      },
+      "leo-save-as-leojs": {
+        "description": "Save As .leojs",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e938"
+        }
+      },
+      "leo-show-log": {
+        "description": "Show Log",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e939"
+        }
+      },
+      "leo-sort-children": {
+        "description": "Sort Children",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e93a"
+        }
+      },
+      "leo-sort-siblings": {
+        "description": "Sort Siblings",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e93b"
+        }
+      },
+      "leo-start-server": {
+        "description": "Start Server",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e93c"
+        }
+      },
+      "leo-switch": {
+        "description": "Switch",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e93d"
+        }
+      },
+      "leo-tag": {
+        "description": "Tag",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e93e"
+        }
+      },
+      "leo-undo": {
+        "description": "Undo",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e93f"
+        }
+      },
+      "leo-unmark": {
+        "description": "Unmark",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e940"
+        }
+      },
+      "leo-write-at-file-nodes": {
+        "description": "Write at-file Nodes",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e941"
+        }
+      },
+      "leo-write-dirty-at-file-nodes": {
+        "description": "Write Dirty at-file Nodes",
+        "default": {
+          "fontPath": "resources/icoleo.woff",
+          "fontCharacter": "\\e942"
+        }
+      }
+    },
     "commands": [
       {
         "command": "leojs.showSettingsPage",
