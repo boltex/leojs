@@ -211,7 +211,6 @@ export class LeoUI extends NullGui {
     private _bodyPreviewMode: boolean = true;
 
     private _editorTouched: boolean = false; // Flag for applying editor changes to body when 'icon' state change and 'undo' back to untouched
-    private _editorDetachedTouched: boolean = false; // Flag for applying editor changes to body when 'icon' state change and 'undo' back to untouched
 
     private _bodyStatesTimer: NodeJS.Timeout | undefined;
 
@@ -828,10 +827,32 @@ export class LeoUI extends NullGui {
      * * Setup UI for having no opened Leo documents
      */
     private _setupNoOpenedLeoDocument(): void {
+        // Close ALL detached bodies.
+        const w_foundTabs: Set<vscode.Tab> = new Set();
+        const w_foundUri: Set<vscode.Uri> = new Set();
+        for (const p_tabGroup of vscode.window.tabGroups.all) {
+            for (const p_tab of p_tabGroup.tabs) {
+                if (p_tab.input &&
+                    (p_tab.input as vscode.TabInputText).uri &&
+                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+                ) {
+                    w_foundTabs.add(p_tab);
+                    w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                }
+            }
+        }
+        if (w_foundTabs.size) {
+            void vscode.window.tabGroups.close([...w_foundTabs], true);
+            for (const w_uri of w_foundUri) {
+                void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
+            }
+        }
+
         void this.checkConfirmBeforeClose();
         this._leoStatusBar?.hide();
         this.leoStates.fileOpenedReady = false;
         this._bodyTextDocument = undefined;
+        this._bodyDetachedTextDocument = undefined;
         this.lastSelectedNode = undefined;
         this._refreshOutline(false, RevealType.NoReveal);
         this.refreshDocumentsPane();
@@ -1124,9 +1145,6 @@ export class LeoUI extends NullGui {
         p_editor: vscode.TextEditor | undefined,
         p_internalCall?: boolean
     ): void {
-        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
-            this._bodyDetachedTextDocument = p_editor.document;
-        }
         if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
             if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
                 void this._hideDeleteBody(p_editor);
@@ -1135,6 +1153,10 @@ export class LeoUI extends NullGui {
         }
         if (!p_internalCall) {
             void this.triggerBodySave(true, true); // Save in case edits were pending
+        }
+        // set _bodyDetachedTextDocument AFTER triggerBodySave, as focus may already have been in a dirty detached body.
+        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
+            this._bodyDetachedTextDocument = p_editor.document; // Next triggerBodySave will apply to this newly focused one.
         }
 
     }
@@ -1227,8 +1249,6 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
         ) {
             this._bodyDetachedTextDocument = p_textDocumentChange.document;
-            this._editorDetachedTouched = true;
-
             const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
             const w_bodyText = this._bodyDetachedTextDocument.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
@@ -1265,6 +1285,8 @@ export class LeoUI extends NullGui {
 
                     for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
                         if (p.v) {
+                            void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                            w_alreadySaved = true;
                             let w_language = this._getBodyLanguage(p); // !! 
                             // Set document language only if different
                             if (w_language !== this._bodyDetachedTextDocument.languageId) {
@@ -1274,7 +1296,6 @@ export class LeoUI extends NullGui {
                             break;
                         }
                     }
-
 
                 } else {
                     console.log('DETACHED VNODE not found when resetting language');
@@ -1286,8 +1307,10 @@ export class LeoUI extends NullGui {
                 w_selectedCId === id && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx
             ) {
                 // Same commander and gnx  !  
-                void this._bodySaveDocument(this._bodyDetachedTextDocument);
-                w_alreadySaved = true;
+                if (!w_alreadySaved) {
+                    void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                    w_alreadySaved = true;
+                }
                 // fire body node refresh if opened!!
                 this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
                 if (w_needsRefresh) {
@@ -2131,7 +2154,6 @@ export class LeoUI extends NullGui {
                 ) {
                     const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
 
-
                     // Refresh detached bodies if same commander  // ! ALSO FIRE REFRESH !
                     if (this._refreshType.body && id === cId) {
                         this._leoDetachedFileSystem.fireRefreshFile(`${id}/${gnx}`);
@@ -2185,8 +2207,6 @@ export class LeoUI extends NullGui {
                 void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
             }
         }
-
-
 
     }
 

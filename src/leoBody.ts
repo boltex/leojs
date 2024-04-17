@@ -19,9 +19,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _lastBodyData: string = ""; // body content of last file read
     private _lastBodyLength: number = 0; // length of last file read
 
-    // * List of currently opened body panes gnx (from 'watch' & 'dispose' methods)
-    private _watchedBodiesGnx: string[] = [];
-
     // * List of gnx that should be available (from more.selectNode and fs.delete)
     private _openedBodiesGnx: string[] = [];
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
@@ -98,15 +95,21 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
         const w_gnx = utils.leoUriToStr(p_resource);
-        if (!this._watchedBodiesGnx.includes(w_gnx)) {
-            this._watchedBodiesGnx.push(w_gnx); // add gnx
-        }
+
         // else already in list
         return new vscode.Disposable(() => {
-            const w_position = this._watchedBodiesGnx.indexOf(w_gnx); // find and remove it
-            if (w_position > -1) {
-                this._watchedBodiesGnx.splice(w_position, 1);
+            console.log('DISPOSED OF BODY gnx: ' + w_gnx);
+
+            if (this._openedBodiesGnx.includes(w_gnx)) {
+                this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
+                delete this._openedBodiesInfo[w_gnx];
+            } else {
+                // console.log("not deleted");
             }
+            // const w_position = this._watchedBodiesGnx.indexOf(w_gnx); // find and remove it
+            // if (w_position > -1) {
+            //     this._watchedBodiesGnx.splice(w_position, 1);
+            // }
         });
     }
 
@@ -218,6 +221,8 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     public delete(p_uri: vscode.Uri): void {
         const w_gnx = utils.leoUriToStr(p_uri);
+        console.log("delete body file " + w_gnx);
+
         if (this._openedBodiesGnx.includes(w_gnx)) {
             this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
             delete this._openedBodiesInfo[w_gnx];
