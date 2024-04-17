@@ -5500,7 +5500,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     {
       "id": "leojsView",
       "title": "Leojs",
-      "icon": "resources/icon.svg"
+      "icon": "$(leojs-icon-leo-fill)"
     }
   ]
 },
