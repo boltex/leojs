@@ -1243,17 +1243,18 @@ export class LeoUI extends NullGui {
      * @param p_textDocumentChange Text changed event passed by vscode
      */
     private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent): void {
-
         if (
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
         ) {
+
             this._bodyDetachedTextDocument = p_textDocumentChange.document;
             const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
             const w_bodyText = this._bodyDetachedTextDocument.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
 
             const w_selectedCId = g.app.windowList[this.frameIndex].c.id.toString();
+            const w_sameCommander = w_selectedCId === id;
             let w_alreadySaved = false;
 
             // * If body changed a line with and '@' directive refresh body states
@@ -1267,36 +1268,58 @@ export class LeoUI extends NullGui {
             }
 
             const w_textEditor = vscode.window.activeTextEditor;
-            if (w_textEditor && p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
+            if (
+                w_textEditor && w_textEditor.selections && w_textEditor.selections.length &&
+                !w_needsRefresh && p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath
+            ) {
                 for (const p_selection of w_textEditor.selections) {
-                    // TRY TO DETECT IF LANGUAGE RESET NEEDED!
-                    let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                    if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
-                        w_needsRefresh = true;
-                        break;
+                    if (p_selection.active.line < w_textEditor.document.lineCount) {
+                        // TRY TO DETECT IF LANGUAGE RESET NEEDED!
+                        let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
+                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
+                            w_needsRefresh = true;
+                            break;
+                        }
                     }
                 }
             }
+
+            // If same commander, and node icon changed (or whole document was unchanged)
+            if (w_sameCommander) {
+                const w_uriKey = utils.leoUriToStr(this._bodyDetachedTextDocument.uri);
+                const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
+                const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
+                if (!this.leoStates.leoChanged || w_detachedIconChanged) {
+                    if (!w_alreadySaved) {
+                        void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                        w_alreadySaved = true;
+                    }
+                    if (w_detachedIconChanged) {
+                        this.findFocusTree = false;
+                        // NOT incrementing this.treeID to keep ids intact
+                        // NoReveal since we're keeping the same id.
+                        this._refreshOutline(false, RevealType.NoReveal);
+                    }
+                }
+            }
+
             if (w_needsRefresh) {
-
                 const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(p_textDocumentChange.document.uri)];
-
                 if (w_foundVnode) {
-
                     for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
                         if (p.v) {
-                            void this._bodySaveDocument(this._bodyDetachedTextDocument);
-                            w_alreadySaved = true;
+                            if (!w_alreadySaved) {
+                                void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                                w_alreadySaved = true;
+                            }
                             let w_language = this._getBodyLanguage(p); // !! 
                             // Set document language only if different
                             if (w_language !== this._bodyDetachedTextDocument.languageId) {
-                                console.log('RE-setting detached language and wrap state!');
                                 void this._setBodyLanguage(this._bodyDetachedTextDocument, w_language);
                             }
                             break;
                         }
                     }
-
                 } else {
                     console.log('DETACHED VNODE not found when resetting language');
                 }
@@ -1304,7 +1327,7 @@ export class LeoUI extends NullGui {
 
             // Check if exact same node as currently selected body
             if (
-                w_selectedCId === id && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx
+                w_sameCommander && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx
             ) {
                 // Same commander and gnx  !  
                 if (!w_alreadySaved) {
@@ -1318,24 +1341,6 @@ export class LeoUI extends NullGui {
                 }
             }
 
-            // If same commander, and node icon changed (or whole document was unchanged)
-            if (w_selectedCId === id) {
-                const w_uriKey = utils.leoUriToStr(this._bodyDetachedTextDocument.uri);
-                const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
-                const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
-                if (!this.leoStates.leoChanged || w_detachedIconChanged) {
-                    if (!w_alreadySaved) {
-                        void this._bodySaveDocument(this._bodyDetachedTextDocument);
-                        if (w_detachedIconChanged) {
-                            this.findFocusTree = false;
-                            // NOT incrementing this.treeID to keep ids intact
-                            // NoReveal since we're keeping the same id.
-                            this._refreshOutline(false, RevealType.NoReveal);
-                        }
-                    }
-                }
-
-            }
         }
 
         const c = g.app.windowList[this.frameIndex].c;
@@ -1445,10 +1450,12 @@ export class LeoUI extends NullGui {
             if (w_textEditor && p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
                 for (const p_selection of w_textEditor.selections) {
                     // TRY TO DETECT IF LANGUAGE RESET NEEDED!
-                    let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                    if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
-                        w_needsRefresh = true;
-                        break;
+                    if (p_selection.active.line < w_textEditor.document.lineCount) {
+                        let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
+                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
+                            w_needsRefresh = true;
+                            break;
+                        }
                     }
                 }
             }

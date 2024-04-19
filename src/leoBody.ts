@@ -51,10 +51,10 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _setOpenedBodyTime(p_gnx: string): void {
         const w_now = new Date().getTime();
         let w_created = w_now;
-        if (!this._openedBodiesGnx.includes(p_gnx)) {
-            this._openedBodiesGnx.push(p_gnx);
-        } else {
+        if (this._openedBodiesGnx.includes(p_gnx)) {
             w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
+        } else {
+            this._openedBodiesGnx.push(p_gnx);
         }
         this._openedBodiesInfo[p_gnx] = {
             ctime: w_created, // w_now, // maybe kept.
@@ -69,7 +69,8 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     public fireRefreshFile(p_gnx: string): void {
 
         if (!this._openedBodiesGnx.includes(p_gnx)) {
-            console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+            console.error("ASKED DETACHED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+            return; // Exiting because that document's tab was closed
         }
 
         this._setOpenedBodyTime(p_gnx);
@@ -98,7 +99,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
         // else already in list
         return new vscode.Disposable(() => {
-            console.log('DISPOSED OF BODY gnx: ' + w_gnx);
 
             if (this._openedBodiesGnx.includes(w_gnx)) {
                 this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
@@ -154,9 +154,9 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                         '\n *** readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
                     );
                 }
-
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
                 const w_v = c.fileCommands.gnxDict[w_gnx];
+
                 if (w_v) {
                     this._errorRefreshFlag = false; // got body so reset possible flag!
                     this._lastGnx = w_gnx;
@@ -173,7 +173,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                         console.log('Passed in not found: ' + w_gnx);
                         return Buffer.from(this._lastBodyData);
                     }
-                    console.error("ERROR => readFile of unknown GNX"); // is possibleGnxList updated correctly?
+                    console.error("DETACHED ERROR => readFile of unknown GNX"); // is possibleGnxList updated correctly?
                     return Buffer.from("");
                 }
             }
@@ -198,10 +198,10 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     }
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
-        if (!this.preventSaveToLeo) {
-            void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
-        } else {
+        if (this.preventSaveToLeo) {
             this.preventSaveToLeo = false;
+        } else {
+            void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
         }
         const w_gnx = utils.leoUriToStr(p_uri);
         if (!this._openedBodiesGnx.includes(w_gnx)) {
@@ -221,7 +221,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     public delete(p_uri: vscode.Uri): void {
         const w_gnx = utils.leoUriToStr(p_uri);
-        console.log("delete body file " + w_gnx);
 
         if (this._openedBodiesGnx.includes(w_gnx)) {
             this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);

@@ -384,7 +384,6 @@ export class Undoer {
         if (bunch) {
             u.setRedoType(bunch.undoType);
         } else {
-            console.log('setting to cant redo');
             u.setRedoType("Can't Redo");
         }
         u.cutStack();

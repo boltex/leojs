@@ -18,6 +18,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     private _errorRefreshFlag: boolean = false;
 
     // * Last file read data with the readFile method
+    private _lastGnx: string = ""; // gnx of last file read
     private _lastBodyData: string = ""; // body content of last file read
     private _lastBodyLength: number = 0; // length of last file read
 
@@ -59,13 +60,13 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     private _setOpenedBodyTime(p_gnx: string): void {
         const w_now = new Date().getTime();
         let w_created = w_now;
-        if (!this._openedBodiesGnx.includes(p_gnx)) {
-            this._openedBodiesGnx.push(p_gnx);
-        } else {
+        if (this._openedBodiesGnx.includes(p_gnx)) {
             w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
+        } else {
+            this._openedBodiesGnx.push(p_gnx);
         }
         this._openedBodiesInfo[p_gnx] = {
-            ctime: w_created, // w_now, // maybe kept.
+            ctime: w_created,
             mtime: w_now // new 'modified' time for sure.
         };
     }
@@ -77,7 +78,8 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     public fireRefreshFile(p_gnx: string): void {
         // console.log("fireRefreshFile called for gnx: ", p_gnx);
         if (!this._openedBodiesGnx.includes(p_gnx)) {
-            console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+            console.error("DETACHED ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+            return; // Exiting because that document's tab was closed
         }
 
         this._setOpenedBodyTime(p_gnx);
@@ -104,12 +106,9 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
         const w_gnx = utils.leoUriToStr(p_resource);
 
-        console.log('WATCHING DETACHED: ' + w_gnx);
-
         // else already in list
         return new vscode.Disposable(() => {
 
-            console.log('DISPOSED OF DETACHED BODY gnx: ' + w_gnx);
             if (this._openedBodiesGnx.includes(w_gnx)) {
                 this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
                 delete this._openedBodiesInfo[w_gnx];
@@ -152,13 +151,20 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
             }
 
-
             const [unused, id, gnx] = p_uri.path.split("/");
-            console.log(`detached stat:  unused ${unused}, id ${id}, gnx ${gnx} `);
+            console.log(`detached stat:  id ${id}, gnx ${gnx} `);
 
             if (id && !gnx) {
-                console.log('was a commander dir');
+                console.log('DETACHED  was a commander dir');
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
+            } else if (w_gnx === this._lastGnx && this._openedBodiesGnx.includes(this._lastGnx)) {
+                console.log("was last gnx ", this._lastGnx);
+                return {
+                    type: vscode.FileType.File,
+                    ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                    mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                    size: this._lastBodyLength
+                };
             } else if (this._openedBodiesGnx.includes(w_gnx)) {
                 let c: Commands;
                 let w_v: VNode | undefined;
@@ -180,6 +186,8 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                 } else {
                     console.log('Leojs DETACHED BODY stat: not found!');
                 }
+            } else {
+                console.error('DETACHED asked for STAT about file NOT IN _openedBodiesGnx ');
             }
         }
         // throw vscode.FileSystemError.FileNotFound();
@@ -197,7 +205,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                 if (!this._openedBodiesGnx.includes(w_gnx)) {
                     console.log(
                         " _openedBodiesGnx length: ", this._openedBodiesGnx.length,
-                        '\n *** readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
+                        '\n *** readFile: ERROR DETACHED File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
                     );
                 }
                 let c: Commands;
@@ -214,7 +222,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
                 if (w_v) {
                     this._errorRefreshFlag = false; // got body so reset possible flag!
-
+                    this._lastGnx = w_gnx;
                     this._lastBodyData = w_v.b;
                     const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                     this._lastBodyLength = w_buffer.byteLength;
@@ -223,7 +231,12 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                     if (!this._errorRefreshFlag) {
                         this._leoUi.fullRefresh();
                     }
-                    console.error("ERROR => readFile of unknown GNX"); // is possibleGnxList updated correctly?
+                    if (this._lastGnx === w_gnx) {
+                        // was last gnx of closed file about to be switched to new document selected
+                        console.log('DETACHED Passed in not found: ' + w_gnx);
+                        return Buffer.from(this._lastBodyData);
+                    }
+                    console.error("ERROR => readFile DETACHED  of unknown GNX"); // is possibleGnxList updated correctly?
                     return Buffer.from("");
                 }
             }
@@ -234,8 +247,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
 
-
-        console.log("detached readDirectory called on uri path: ", p_uri.path);
+        console.log("DETACHED  readDirectory called on uri path: ", p_uri.path);
 
         const w_commanders: Set<string> = new Set();
         const w_detached: Set<string> = new Set();
@@ -262,7 +274,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             for (const w_commander of [...w_commanders]) {
                 w_directory.push([w_commander, vscode.FileType.Directory]);
             }
-            console.log("returned all visible c ids:", w_directory);
+            console.log("DETACHED  returned all visible c ids:", w_directory);
             return w_directory;
         } else if (
             p_uri.path.split('/').length
@@ -273,37 +285,37 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                     w_directory.push([w_file.split('/')[2], vscode.FileType.File]);
                 }
             }
-            console.log(`returned all visible detached in ${p_uri.path} :`, w_directory);
+            console.log(`DETACHED  returned all visible detached in ${p_uri.path} :`, w_directory);
 
             return w_directory;
 
         } else {
-            console.log('LEOJS Error: Asked to read Directory! uri path: ' + p_uri.path);
+            console.log('LEOJS Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
             throw vscode.FileSystemError.FileNotFound(p_uri);
         }
     }
 
     public createDirectory(p_uri: vscode.Uri): void {
-        console.warn('Called createDirectory with ', p_uri.path); // should not happen
+        console.warn('Called DETACHED  createDirectory with ', p_uri.path); // should not happen
         throw vscode.FileSystemError.NoPermissions();
     }
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
-        if (!this.preventSaveToLeo) {
-            void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
-        } else {
+        if (this.preventSaveToLeo) {
             this.preventSaveToLeo = false;
+        } else {
+            void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
         }
         const w_gnx = utils.leoUriToStr(p_uri);
         if (!this._openedBodiesGnx.includes(w_gnx)) {
-            console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
+            console.error("LeoJS: Tried to save DETACHED but not in _openedBodiesGnx. gnx :", w_gnx);
         }
         this._setOpenedBodyTime(w_gnx);
         this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
     }
 
     public rename(p_oldUri: vscode.Uri, p_newUri: vscode.Uri, p_options: { overwrite: boolean }): void {
-        console.warn('Called rename on ', p_oldUri.path, p_newUri.path); // should not happen
+        console.warn('Called DETACHED  rename on ', p_oldUri.path, p_newUri.path); // should not happen
         this._fireSoon(
             { type: vscode.FileChangeType.Deleted, uri: p_oldUri },
             { type: vscode.FileChangeType.Created, uri: p_newUri }
@@ -332,7 +344,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     }
 
     public copy(p_uri: vscode.Uri): void {
-        console.warn('Called copy on ', p_uri.path); // should not happen
+        console.warn('Called DETACHED  copy on ', p_uri.path); // should not happen
         throw vscode.FileSystemError.NoPermissions();
     }
 
