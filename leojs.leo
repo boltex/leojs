@@ -8478,6 +8478,7 @@ import * as g from './core/leoGlobals';
 
 </t>
 <t tx="felix.20211010192923.11">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+    console.log('writeFile lenght: ', p_content.byteLength);
     if (this.preventSaveToLeo) {
         this.preventSaveToLeo = false;
     } else {
@@ -8503,6 +8504,7 @@ import * as g from './core/leoGlobals';
 </t>
 <t tx="felix.20211010192923.13">public delete(p_uri: vscode.Uri): void {
     const w_gnx = utils.leoUriToStr(p_uri);
+    console.log("delete body file " + w_gnx);
 
     if (this._openedBodiesGnx.includes(w_gnx)) {
         this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
@@ -8589,7 +8591,7 @@ public setNewBodyUriTime(p_uri: vscode.Uri): void {
 public fireRefreshFile(p_gnx: string): void {
 
     if (!this._openedBodiesGnx.includes(p_gnx)) {
-        console.error("ASKED DETACHED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+        console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
         return; // Exiting because that document's tab was closed
     }
 
@@ -8655,7 +8657,7 @@ public refreshPossibleGnxList(): string[] {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[w_gnx].ctime,
                 mtime: this._openedBodiesInfo[w_gnx].mtime,
-                size: w_v.b.length
+                size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
             };
         }
     }
@@ -8697,7 +8699,7 @@ public refreshPossibleGnxList(): string[] {
                     console.log('Passed in not found: ' + w_gnx);
                     return Buffer.from(this._lastBodyData);
                 }
-                console.error("DETACHED ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
+                console.error("ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
                 return Buffer.from("");
             }
         }
@@ -17493,7 +17495,7 @@ import { VNode } from "./core/leoNodes";
         return w_directory;
 
     } else {
-        console.log('LEOJS Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
+        console.log('Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
         throw vscode.FileSystemError.FileNotFound(p_uri);
     }
 }
@@ -17506,6 +17508,8 @@ import { VNode } from "./core/leoNodes";
 
 </t>
 <t tx="felix.20240401213604.12">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+    console.log('DETACHED writeFile lenght: ', p_content.byteLength);
+
     if (this.preventSaveToLeo) {
         this.preventSaveToLeo = false;
     } else {
@@ -17694,7 +17698,7 @@ public refreshPossibleGnxList(): string[] {
 
 </t>
 <t tx="felix.20240401213604.8">public stat(p_uri: vscode.Uri): vscode.FileStat {
-    console.log("detached stat called on uri path: ", p_uri.path);
+    console.log("DETACHED stat called on uri path: ", p_uri.path);
     if (this._leoUi.leoStates.fileOpenedReady) {
         const w_gnx = utils.leoUriToStr(p_uri);
 
@@ -17721,13 +17725,18 @@ public refreshPossibleGnxList(): string[] {
         }
 
         const [unused, id, gnx] = p_uri.path.split("/");
-        console.log(`detached stat:  id ${id}, gnx ${gnx} `);
+        console.log(`DETACHED stat:  id ${id}, gnx ${gnx} `);
 
         if (id &amp;&amp; !gnx) {
             console.log('DETACHED  was a commander dir');
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
         } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
-            console.log("was last gnx ", this._lastGnx);
+            console.log("DETACHED was last gnx 1", this._lastGnx, {
+                type: vscode.FileType.File,
+                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                size: this._lastBodyLength
+            });
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -17746,14 +17755,20 @@ public refreshPossibleGnxList(): string[] {
                 }
             }
             if (w_v) {
+                console.log("DETACHED was new gnx 2", this._lastGnx, {
+                    type: vscode.FileType.File,
+                    ctime: this._openedBodiesInfo[w_gnx].ctime,
+                    mtime: this._openedBodiesInfo[w_gnx].mtime,
+                    size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
+                });
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[w_gnx].ctime,
                     mtime: this._openedBodiesInfo[w_gnx].mtime,
-                    size: w_v.b.length
+                    size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
                 };
             } else {
-                console.log('Leojs DETACHED BODY stat: not found!');
+                console.log('DETACHED BODY stat: not found!');
             }
         } else {
             console.error('DETACHED asked for STAT about file NOT IN _openedBodiesGnx ');

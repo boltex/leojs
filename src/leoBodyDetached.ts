@@ -125,7 +125,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     }
 
     public stat(p_uri: vscode.Uri): vscode.FileStat {
-        console.log("detached stat called on uri path: ", p_uri.path);
+        console.log("DETACHED stat called on uri path: ", p_uri.path);
         if (this._leoUi.leoStates.fileOpenedReady) {
             const w_gnx = utils.leoUriToStr(p_uri);
 
@@ -152,13 +152,18 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             }
 
             const [unused, id, gnx] = p_uri.path.split("/");
-            console.log(`detached stat:  id ${id}, gnx ${gnx} `);
+            console.log(`DETACHED stat:  id ${id}, gnx ${gnx} `);
 
             if (id && !gnx) {
                 console.log('DETACHED  was a commander dir');
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
             } else if (w_gnx === this._lastGnx && this._openedBodiesGnx.includes(this._lastGnx)) {
-                console.log("was last gnx ", this._lastGnx);
+                console.log("DETACHED was last gnx 1", this._lastGnx, {
+                    type: vscode.FileType.File,
+                    ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                    mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                    size: this._lastBodyLength
+                });
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -177,14 +182,20 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                     }
                 }
                 if (w_v) {
+                    console.log("DETACHED was new gnx 2", this._lastGnx, {
+                        type: vscode.FileType.File,
+                        ctime: this._openedBodiesInfo[w_gnx].ctime,
+                        mtime: this._openedBodiesInfo[w_gnx].mtime,
+                        size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
+                    });
                     return {
                         type: vscode.FileType.File,
                         ctime: this._openedBodiesInfo[w_gnx].ctime,
                         mtime: this._openedBodiesInfo[w_gnx].mtime,
-                        size: w_v.b.length
+                        size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
                     };
                 } else {
-                    console.log('Leojs DETACHED BODY stat: not found!');
+                    console.log('DETACHED BODY stat: not found!');
                 }
             } else {
                 console.error('DETACHED asked for STAT about file NOT IN _openedBodiesGnx ');
@@ -290,7 +301,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             return w_directory;
 
         } else {
-            console.log('LEOJS Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
+            console.log('Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
             throw vscode.FileSystemError.FileNotFound(p_uri);
         }
     }
@@ -301,6 +312,8 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     }
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+        console.log('DETACHED writeFile lenght: ', p_content.byteLength);
+
         if (this.preventSaveToLeo) {
             this.preventSaveToLeo = false;
         } else {

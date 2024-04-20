@@ -69,7 +69,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     public fireRefreshFile(p_gnx: string): void {
 
         if (!this._openedBodiesGnx.includes(p_gnx)) {
-            console.error("ASKED DETACHED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+            console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
             return; // Exiting because that document's tab was closed
         }
 
@@ -132,7 +132,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[w_gnx].ctime,
                     mtime: this._openedBodiesInfo[w_gnx].mtime,
-                    size: w_v.b.length
+                    size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
                 };
             }
         }
@@ -173,7 +173,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                         console.log('Passed in not found: ' + w_gnx);
                         return Buffer.from(this._lastBodyData);
                     }
-                    console.error("DETACHED ERROR => readFile of unknown GNX"); // is possibleGnxList updated correctly?
+                    console.error("ERROR => readFile of unknown GNX"); // is possibleGnxList updated correctly?
                     return Buffer.from("");
                 }
             }
@@ -198,6 +198,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     }
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+        console.log('writeFile lenght: ', p_content.byteLength);
         if (this.preventSaveToLeo) {
             this.preventSaveToLeo = false;
         } else {
@@ -221,6 +222,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     public delete(p_uri: vscode.Uri): void {
         const w_gnx = utils.leoUriToStr(p_uri);
+        console.log("delete body file " + w_gnx);
 
         if (this._openedBodiesGnx.includes(w_gnx)) {
             this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
