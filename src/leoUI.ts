@@ -197,13 +197,15 @@ export class LeoUI extends NullGui {
     private _lastLeoUndos: vscode.TreeView<LeoUndoNode> | undefined;
 
     // * Body pane
+    private _changedBodyWithMirrorDetached = false;
+    private _changedDetachedWithMirrorBody = false;
     private _bodyFileSystemStarted: boolean = false;
     private _detachedFileSystemStarted: boolean = false;
     private _bodyEnablePreview: boolean = true;
     private _leoFileSystem!: LeoBodyProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
     private _leoDetachedFileSystem!: LeoBodyDetachedProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
-    private _bodyDetachedTextDocument: vscode.TextDocument | undefined; // Last active detached body.
+    public bodyDetachedTextDocument: vscode.TextDocument | undefined; // Last active detached body.
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _languageFlagged: string[] = [];
@@ -852,7 +854,7 @@ export class LeoUI extends NullGui {
         this._leoStatusBar?.hide();
         this.leoStates.fileOpenedReady = false;
         this._bodyTextDocument = undefined;
-        this._bodyDetachedTextDocument = undefined;
+        this.bodyDetachedTextDocument = undefined;
         this.lastSelectedNode = undefined;
         this._refreshOutline(false, RevealType.NoReveal);
         this.refreshDocumentsPane();
@@ -1156,7 +1158,7 @@ export class LeoUI extends NullGui {
         }
         // set _bodyDetachedTextDocument AFTER triggerBodySave, as focus may already have been in a dirty detached body.
         if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
-            this._bodyDetachedTextDocument = p_editor.document; // Next triggerBodySave will apply to this newly focused one.
+            this.bodyDetachedTextDocument = p_editor.document; // Next triggerBodySave will apply to this newly focused one.
         }
 
     }
@@ -1247,10 +1249,10 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
         ) {
-
-            this._bodyDetachedTextDocument = p_textDocumentChange.document;
-            const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
-            const w_bodyText = this._bodyDetachedTextDocument.getText().replace(/\r\n/g, "\n");
+            console.log(' DETACHED ****  _onDocumentChanged');
+            this.bodyDetachedTextDocument = p_textDocumentChange.document;
+            const [unused, id, gnx] = this.bodyDetachedTextDocument.uri.path.split("/");
+            const w_bodyText = this.bodyDetachedTextDocument.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
 
             const w_selectedCId = g.app.windowList[this.frameIndex].c.id.toString();
@@ -1286,12 +1288,12 @@ export class LeoUI extends NullGui {
 
             // If same commander, and node icon changed (or whole document was unchanged)
             if (w_sameCommander) {
-                const w_uriKey = utils.leoUriToStr(this._bodyDetachedTextDocument.uri);
+                const w_uriKey = utils.leoUriToStr(this.bodyDetachedTextDocument.uri);
                 const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
                 const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
                 if (!this.leoStates.leoChanged || w_detachedIconChanged) {
                     if (!w_alreadySaved) {
-                        void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                        void this._bodySaveDocument(this.bodyDetachedTextDocument);
                         w_alreadySaved = true;
                     }
                     if (w_detachedIconChanged) {
@@ -1309,13 +1311,13 @@ export class LeoUI extends NullGui {
                     for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
                         if (p.v) {
                             if (!w_alreadySaved) {
-                                void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                                void this._bodySaveDocument(this.bodyDetachedTextDocument);
                                 w_alreadySaved = true;
                             }
                             let w_language = this._getBodyLanguage(p); // !! 
                             // Set document language only if different
-                            if (w_language !== this._bodyDetachedTextDocument.languageId) {
-                                void this._setBodyLanguage(this._bodyDetachedTextDocument, w_language);
+                            if (w_language !== this.bodyDetachedTextDocument.languageId) {
+                                void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language);
                             }
                             break;
                         }
@@ -1325,17 +1327,44 @@ export class LeoUI extends NullGui {
                 }
             }
 
+            let w_sameBodyTabOpened = false;
+            // CHECK FOR BODY THAT MATCHES! 
+            for (const p_tabGroup of vscode.window.tabGroups.all) {
+                for (const p_tab of p_tabGroup.tabs) {
+                    if (p_tab.input &&
+                        (p_tab.input as vscode.TabInputText).uri &&
+                        (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
+                    ) {
+                        if (gnx === utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri)) {
+                            w_sameBodyTabOpened = true;
+                            break;
+                        }
+                    }
+                }
+                if (w_sameBodyTabOpened) {
+                    break;
+                }
+            }
+
+
             // Check if exact same node as currently selected body
             if (
                 w_sameCommander && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx
             ) {
                 // Same commander and gnx  !  
                 if (!w_alreadySaved) {
-                    void this._bodySaveDocument(this._bodyDetachedTextDocument);
+                    void this._bodySaveDocument(this.bodyDetachedTextDocument);
                     w_alreadySaved = true;
                 }
-                // fire body node refresh if opened!!
-                this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
+                if (w_sameBodyTabOpened) {
+                    // fire body node refresh if opened!!
+                    if (this._changedBodyWithMirrorDetached) {
+                        this._changedBodyWithMirrorDetached = false;
+                    } else {
+                        this._changedDetachedWithMirrorBody = true;
+                        this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
+                    }
+                }
                 if (w_needsRefresh) {
                     this.debouncedRefreshBodyStates(50); // And maybe changed language!
                 }
@@ -1351,13 +1380,14 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
         ) {
+            console.log(' ------- ****  _onDocumentChanged');
 
             // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
             this._bodyLastChangedDocument = p_textDocumentChange.document;
             this._bodyLastChangedDocumentSaved = false;
             this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
             this._bodyPreviewMode = false;
-            let w_hasDetached = false;
+            let w_hasSameDetachedTab = false;
             const c_id = c.id.toString();
 
             // CHECK FOR DETACHED THAT MATCHES! 
@@ -1369,12 +1399,12 @@ export class LeoUI extends NullGui {
                     ) {
                         const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
                         if (id === c_id && gnx === this.lastSelectedNode.gnx) {
-                            w_hasDetached = true;
+                            w_hasSameDetachedTab = true;
                             break;
                         }
                     }
                 }
-                if (w_hasDetached) {
+                if (w_hasSameDetachedTab) {
                     break;
                 }
             }
@@ -1395,12 +1425,17 @@ export class LeoUI extends NullGui {
                     return;
                 }
 
-                if (!this.leoStates.leoChanged || w_iconChanged || w_hasDetached) {
+                if (!this.leoStates.leoChanged || w_iconChanged || w_hasSameDetachedTab) {
                     // Document pane icon needs refresh (changed) and/or outline icon changed
                     void this._bodySaveDocument(p_textDocumentChange.document).then(() => {
-                        if (w_hasDetached && this.lastSelectedNode) {
+                        if (w_hasSameDetachedTab && this.lastSelectedNode) {
                             // Ok to fire refresh now!
-                            this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${this.lastSelectedNode.gnx}`);
+                            if (this._changedDetachedWithMirrorBody) {
+                                this._changedDetachedWithMirrorBody = false;
+                            } else {
+                                this._changedBodyWithMirrorDetached = true;
+                                this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${this.lastSelectedNode.gnx}`);
+                            }
                         }
                         // todo : Really saved to node, no need to set dirty or hasbody -> Check & test to see if icon changes!
                         // if (this.lastSelectedNode) {
@@ -1610,8 +1645,8 @@ export class LeoUI extends NullGui {
         }
 
         // * Save any 'detached' dirty panels to leo
-        if (this._bodyDetachedTextDocument && this._bodyDetachedTextDocument.isDirty) {
-            void this._bodySaveDocument(this._bodyDetachedTextDocument, p_forcedVsCodeSave);
+        if (this.bodyDetachedTextDocument && !this.bodyDetachedTextDocument.isClosed && this.bodyDetachedTextDocument.isDirty) {
+            void this._bodySaveDocument(this.bodyDetachedTextDocument, p_forcedVsCodeSave);
         }
 
         // * Save body to Leo if a change has been made to the body 'document' so far
@@ -2734,6 +2769,11 @@ export class LeoUI extends NullGui {
         }
     }
 
+    public isUriTabOpened(p_uri: vscode.Uri): boolean {
+        //
+        return true;
+    }
+
     /**
      * * Checks if outline is visible
      * @returns true if either outline is visible
@@ -3454,7 +3494,7 @@ export class LeoUI extends NullGui {
 
         // * Step 1 : Open the document
         this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
-        this._bodyDetachedTextDocument = await vscode.workspace.openTextDocument(detachedUri);
+        this.bodyDetachedTextDocument = await vscode.workspace.openTextDocument(detachedUri);
         let w_bodySel: BodySelectionInfo | undefined;
         const w_language = this._getBodyLanguage(p);
         const insert = p.v.insertSpot;
@@ -3469,7 +3509,7 @@ export class LeoUI extends NullGui {
             "start": this._row_col_pv_dict(start, p.v.b),
             "end": this._row_col_pv_dict(end, p.v.b)
         };
-        void this._setBodyLanguage(this._bodyDetachedTextDocument, w_language);
+        void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language);
 
         const w_showOptions: vscode.TextDocumentShowOptions =
         {
@@ -3479,7 +3519,7 @@ export class LeoUI extends NullGui {
         };
         // * Actually Show the body pane document in a text editor
         const q_showTextDocument = vscode.window.showTextDocument(
-            this._bodyDetachedTextDocument,
+            this.bodyDetachedTextDocument,
             w_showOptions
         ).then(
             (p_textEditor: vscode.TextEditor) => {
