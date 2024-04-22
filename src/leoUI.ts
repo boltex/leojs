@@ -255,6 +255,9 @@ export class LeoUI extends NullGui {
     private _bodyLastChangedDocument: vscode.TextDocument | undefined; // Only set in _onDocumentChanged
     private _bodyLastChangedDocumentSaved: boolean = true; // don't use 'isDirty' of the document!
 
+    // * Debounced method used to check for closed detached/body tabs
+    public checkClosedTabs: (() => void);
+
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
     public getStates: (() => void);
 
@@ -311,6 +314,10 @@ export class LeoUI extends NullGui {
         this.gotoIcons = utils.buildGotoIconPaths(_context);
 
         // * Debounced refresh flags and UI parts, along with language & wrap, when operation(s) are done executing
+        this.checkClosedTabs = debounce(
+            this._checkClosedTabs,
+            Constants.CLEANUP_DEBOUNCE_DELAY
+        );
         this.getStates = debounce(
             this._triggerGetStates,
             Constants.STATES_DEBOUNCE_DELAY
@@ -1128,14 +1135,20 @@ export class LeoUI extends NullGui {
         }
     }
 
+    /**
+     * React to the closing of 'tabs' via
+     * events from vscode.window.tabGroups
+     */
     public _onTabGroupsChanged(p_event: vscode.TabGroupChangeEvent): void {
-        // console.log('_onTabGroupsChanged');
-        //
+        this.checkClosedTabs(); // debounced
     }
 
+    /**
+     * React to the closing of 'tabgroups' via
+     * events from vscode.window.tabGroups
+     */
     public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
-        // console.log('_onTabsChanged');
-        //
+        this.checkClosedTabs(); // debounced
     }
 
     /**
@@ -1361,7 +1374,9 @@ export class LeoUI extends NullGui {
                     if (this._changedBodyWithMirrorDetached) {
                         this._changedBodyWithMirrorDetached = false;
                     } else {
-                        this._changedDetachedWithMirrorBody = true;
+                        if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
+                            this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
+                        }
                         this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
                     }
                 }
@@ -1389,6 +1404,7 @@ export class LeoUI extends NullGui {
             this._bodyPreviewMode = false;
             let w_hasSameDetachedTab = false;
             const c_id = c.id.toString();
+            const w_lastSelNodeGnx = this.lastSelectedNode.gnx;
 
             // CHECK FOR DETACHED THAT MATCHES! 
             for (const p_tabGroup of vscode.window.tabGroups.all) {
@@ -1398,7 +1414,7 @@ export class LeoUI extends NullGui {
                         (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
                     ) {
                         const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
-                        if (id === c_id && gnx === this.lastSelectedNode.gnx) {
+                        if (id === c_id && gnx === w_lastSelNodeGnx) {
                             w_hasSameDetachedTab = true;
                             break;
                         }
@@ -1409,10 +1425,9 @@ export class LeoUI extends NullGui {
                 }
             }
 
-
             // * If icon should change then do it now (if there's no document edit pending)
             if (
-                utils.leoUriToStr(p_textDocumentChange.document.uri) === this.lastSelectedNode.gnx
+                utils.leoUriToStr(p_textDocumentChange.document.uri) === w_lastSelNodeGnx
             ) {
                 const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
                 const w_hasBody = !!w_bodyText.length;
@@ -1433,8 +1448,11 @@ export class LeoUI extends NullGui {
                             if (this._changedDetachedWithMirrorBody) {
                                 this._changedDetachedWithMirrorBody = false;
                             } else {
-                                this._changedBodyWithMirrorDetached = true;
-                                this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${this.lastSelectedNode.gnx}`);
+
+                                if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(w_lastSelNodeGnx)) {
+                                    this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
+                                }
+                                this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
                             }
                         }
                         // todo : Really saved to node, no need to set dirty or hasbody -> Check & test to see if icon changes!
@@ -1456,18 +1474,6 @@ export class LeoUI extends NullGui {
                     }
 
                 }
-
-                // ! WRONG ! FIX THIS! 
-                //IF SAME AS DETACHED update it!
-                // if (this._bodyDetachedTextDocument) {
-                //     const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
-                //     if (id === c.id.toString() && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx) {
-                //         void this._bodySaveDocument(p_textDocumentChange.document);
-                //         // fire body node refresh if opened!!
-                //         this._leoDetachedFileSystem.fireRefreshFile(utils.leoUriToStr(this._bodyDetachedTextDocument.uri));
-
-                //     }
-                // }
 
             }
 
@@ -2767,6 +2773,11 @@ export class LeoUI extends NullGui {
         } else {
             return false;
         }
+    }
+
+    private _checkClosedTabs(): void {
+        this._leoFileSystem.cleanupBodies();
+        this._leoDetachedFileSystem.cleanupDetachedBodies();
     }
 
     public isUriTabOpened(p_uri: vscode.Uri): boolean {

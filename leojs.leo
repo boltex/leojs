@@ -88,8 +88,8 @@
 <v t="felix.20211010192923.2"><vh>class LeoBodyProvider</vh>
 <v t="felix.20211010192923.3"><vh>setNewBodyUriTime</vh></v>
 <v t="felix.20221130233817.1"><vh>_setOpenedBodyTime</vh></v>
+<v t="felix.20240421175450.1"><vh>cleanupBodies</vh></v>
 <v t="felix.20211010192923.4"><vh>fireRefreshFile</vh></v>
-<v t="felix.20211010192923.5"><vh>refreshPossibleGnxList</vh></v>
 <v t="felix.20211010192923.6"><vh>watch</vh></v>
 <v t="felix.20211010192923.7"><vh>stat</vh></v>
 <v t="felix.20211010192923.8"><vh>readFile</vh></v>
@@ -106,8 +106,8 @@
 <v t="felix.20240401213604.2"><vh>class LeoBodyDetachedProvider</vh>
 <v t="felix.20240401213604.3"><vh>setNewBodyUriTime</vh></v>
 <v t="felix.20240401213604.4"><vh>_setOpenedBodyTime</vh></v>
+<v t="felix.20240421172320.1"><vh>cleanupDetachedBodies</vh></v>
 <v t="felix.20240401213604.5"><vh>fireRefreshFile</vh></v>
-<v t="felix.20240401213604.6"><vh>refreshPossibleGnxList</vh></v>
 <v t="felix.20240401213604.7"><vh>watch</vh></v>
 <v t="felix.20240401213604.8"><vh>stat</vh></v>
 <v t="felix.20240401213604.9"><vh>readFile</vh></v>
@@ -204,6 +204,7 @@
 <v t="felix.20220922000450.4"><vh>_locateOpenedBody</vh></v>
 <v t="felix.20220922000450.5"><vh>_isBodyVisible</vh></v>
 <v t="felix.20220922000450.6"><vh>_isBodyPreview</vh></v>
+<v t="felix.20240421175315.1"><vh>_checkClosedTabs</vh></v>
 <v t="felix.20240420222634.1"><vh>isUriTabOpened</vh></v>
 <v t="felix.20220922000450.7"><vh>isOutlineVisible</vh></v>
 <v t="felix.20220922000450.8"><vh>_hideDeleteBody</vh></v>
@@ -2544,6 +2545,7 @@ public static URI_HELP_FILENAME: string = "LeoJS Help";
 public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
+public static CLEANUP_DEBOUNCE_DELAY: number = 40;
 public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
 public static TITLE_DEBOUNCE_DELAY: number = 20;
@@ -3685,6 +3687,10 @@ import { Undoer } from "./core/leoUndo";
     this.gotoIcons = utils.buildGotoIconPaths(_context);
 
     // * Debounced refresh flags and UI parts, along with language &amp; wrap, when operation(s) are done executing
+    this.checkClosedTabs = debounce(
+        this._checkClosedTabs,
+        Constants.CLEANUP_DEBOUNCE_DELAY
+    );
     this.getStates = debounce(
         this._triggerGetStates,
         Constants.STATES_DEBOUNCE_DELAY
@@ -3963,6 +3969,9 @@ export class LeoUI extends NullGui {
     private _needLastSelectedRefresh = false; // USED IN showBody
     private _bodyLastChangedDocument: vscode.TextDocument | undefined; // Only set in _onDocumentChanged
     private _bodyLastChangedDocumentSaved: boolean = true; // don't use 'isDirty' of the document!
+
+    // * Debounced method used to check for closed detached/body tabs
+    public checkClosedTabs: (() =&gt; void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
     public getStates: (() =&gt; void);
@@ -8469,6 +8478,7 @@ import * as path from 'path';
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
+import { Constants } from "./constants";
 
 @language typescript
 @tabwidth -4
@@ -8490,7 +8500,7 @@ import * as g from './core/leoGlobals';
     const w_gnx = utils.leoUriToStr(p_uri);
     console.log('------ writeFile ', w_gnx, 'size: ', p_content.byteLength);
 
-    if (!this._openedBodiesGnx.includes(w_gnx)) {
+    if (!this._openedBodiesInfo[w_gnx]) {
         console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
     }
     this._setOpenedBodyTime(w_gnx);
@@ -8514,8 +8524,7 @@ import * as g from './core/leoGlobals';
     const w_gnx = utils.leoUriToStr(p_uri);
     console.log("delete body file " + w_gnx);
 
-    if (this._openedBodiesGnx.includes(w_gnx)) {
-        this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
+    if (this._openedBodiesInfo[w_gnx]) {
         delete this._openedBodiesInfo[w_gnx];
     } else {
         // console.log("not deleted");
@@ -8563,8 +8572,10 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _lastBodyData: string = ""; // body content of last file read
     private _lastBodyLength: number = 0; // length of last file read
 
-    // * List of gnx that should be available (from more.selectNode and fs.delete)
-    private _openedBodiesGnx: string[] = [];
+    // * List of currently opened body panes gnx (from 'watch' &amp; 'dispose' methods)
+    public watchedBodiesGnx: string[] = [];
+
+    // * List of gnx open in tab(s) (from tryApplyNodeToBody / switchBody and fs.delete)
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
@@ -8598,13 +8609,12 @@ public setNewBodyUriTime(p_uri: vscode.Uri): void {
  */
 public fireRefreshFile(p_gnx: string): void {
 
-    if (!this._openedBodiesGnx.includes(p_gnx)) {
-        console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
-        return; // Exiting because that document's tab was closed
-    }
-
     this._setOpenedBodyTime(p_gnx);
 
+    if (!this.watchedBodiesGnx.includes(p_gnx)) {
+        console.warn("ASKED TO REFRESH NOT EVEN IN WATCHED BODIES: ", p_gnx);
+        return; // Document is not being watched (closed tab or non-visible non-dirty tab)
+    }
 
     this._onDidChangeFileEmitter.fire([{
         type: vscode.FileChangeType.Changed,
@@ -8613,37 +8623,18 @@ public fireRefreshFile(p_gnx: string): void {
 }
 
 </t>
-<t tx="felix.20211010192923.5">/**
- * ? Maybe deprecated 
- * * Refreshes the '_possibleGnxList' list of all unique gnx from Leo
- * @returns a 'fresh' gnx string array
- */
-public refreshPossibleGnxList(): string[] {
-    // * Get updated list of possible gnx
-
-    // all_gnx = [p.v.gnx for p in c.all_unique_positions(copy=False)]
-    const c = g.app.windowList[this._leoUi.frameIndex].c;
-    return [...c.all_unique_positions(false)].map(p =&gt; p.v.gnx);
-}
-
-</t>
 <t tx="felix.20211010192923.6">public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
     const w_gnx = utils.leoUriToStr(p_resource);
-
+    if (!this.watchedBodiesGnx.includes(w_gnx)) {
+        this.watchedBodiesGnx.push(w_gnx); // add gnx
+    }
     // else already in list
     return new vscode.Disposable(() =&gt; {
-        console.log('###\n###\n### ----------- CLOSED :', w_gnx);
-
-        if (this._openedBodiesGnx.includes(w_gnx)) {
-            this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
-            delete this._openedBodiesInfo[w_gnx];
-        } else {
-            // console.log("not deleted");
+        console.log('--------- ### removed watched: ', w_gnx);
+        const w_position = this.watchedBodiesGnx.indexOf(w_gnx); // find and remove it
+        if (w_position &gt; -1) {
+            this.watchedBodiesGnx.splice(w_position, 1);
         }
-        // const w_position = this._watchedBodiesGnx.indexOf(w_gnx); // find and remove it
-        // if (w_position &gt; -1) {
-        //     this._watchedBodiesGnx.splice(w_position, 1);
-        // }
     });
 }
 
@@ -8655,7 +8646,7 @@ public refreshPossibleGnxList(): string[] {
             console.log("------ stat, path: ", p_uri.path, ' was a commander dir');
 
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
 
             console.log("------ stat, path: ", p_uri.path, "was last gnx", this._lastGnx, {
                 type: vscode.FileType.File,
@@ -8670,7 +8661,7 @@ public refreshPossibleGnxList(): string[] {
                 mtime: this._openedBodiesInfo[this._lastGnx].mtime,
                 size: this._lastBodyLength
             };
-        } else if (this._openedBodiesGnx.includes(w_gnx)) {
+        } else if (this._openedBodiesInfo[w_gnx]) {
             const c = g.app.windowList[this._leoUi.frameIndex].c;
             const w_v = c.fileCommands.gnxDict[w_gnx];
 
@@ -8703,10 +8694,9 @@ public refreshPossibleGnxList(): string[] {
         } else {
             const w_gnx = utils.leoUriToStr(p_uri);
 
-            if (!this._openedBodiesGnx.includes(w_gnx)) {
+            if (!this._openedBodiesInfo[w_gnx]) {
                 console.log(
-                    " _openedBodiesGnx length: ", this._openedBodiesGnx.length,
-                    '\n *** readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
+                    '*** readFile: ERROR File not in _openedBodiesInfo! readFile missing refreshes? gnx: ', w_gnx
                 );
             }
             const c = g.app.windowList[this._leoUi.frameIndex].c;
@@ -8744,7 +8734,6 @@ public refreshPossibleGnxList(): string[] {
 <t tx="felix.20211010192923.9">public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
 
     console.log("------ readDirectory called on uri path: ", p_uri.path);
-
 
     if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
         const w_directory: [string, vscode.FileType][] = [];
@@ -13533,7 +13522,9 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                 if (this._changedBodyWithMirrorDetached) {
                     this._changedBodyWithMirrorDetached = false;
                 } else {
-                    this._changedDetachedWithMirrorBody = true;
+                    if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
+                        this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
+                    }
                     this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
                 }
             }
@@ -13561,6 +13552,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         this._bodyPreviewMode = false;
         let w_hasSameDetachedTab = false;
         const c_id = c.id.toString();
+        const w_lastSelNodeGnx = this.lastSelectedNode.gnx;
 
         // CHECK FOR DETACHED THAT MATCHES! 
         for (const p_tabGroup of vscode.window.tabGroups.all) {
@@ -13570,7 +13562,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                     (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
                 ) {
                     const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
-                    if (id === c_id &amp;&amp; gnx === this.lastSelectedNode.gnx) {
+                    if (id === c_id &amp;&amp; gnx === w_lastSelNodeGnx) {
                         w_hasSameDetachedTab = true;
                         break;
                     }
@@ -13581,10 +13573,9 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             }
         }
 
-
         // * If icon should change then do it now (if there's no document edit pending)
         if (
-            utils.leoUriToStr(p_textDocumentChange.document.uri) === this.lastSelectedNode.gnx
+            utils.leoUriToStr(p_textDocumentChange.document.uri) === w_lastSelNodeGnx
         ) {
             const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
@@ -13605,8 +13596,11 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                         if (this._changedDetachedWithMirrorBody) {
                             this._changedDetachedWithMirrorBody = false;
                         } else {
-                            this._changedBodyWithMirrorDetached = true;
-                            this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${this.lastSelectedNode.gnx}`);
+
+                            if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(w_lastSelNodeGnx)) {
+                                this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
+                            }
+                            this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
                         }
                     }
                     // todo : Really saved to node, no need to set dirty or hasbody -&gt; Check &amp; test to see if icon changes!
@@ -13628,18 +13622,6 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                 }
 
             }
-
-            // ! WRONG ! FIX THIS! 
-            //IF SAME AS DETACHED update it!
-            // if (this._bodyDetachedTextDocument) {
-            //     const [unused, id, gnx] = this._bodyDetachedTextDocument.uri.path.split("/");
-            //     if (id === c.id.toString() &amp;&amp; this.lastSelectedNode &amp;&amp; gnx === this.lastSelectedNode.gnx) {
-            //         void this._bodySaveDocument(p_textDocumentChange.document);
-            //         // fire body node refresh if opened!!
-            //         this._leoDetachedFileSystem.fireRefreshFile(utils.leoUriToStr(this._bodyDetachedTextDocument.uri));
-
-            //     }
-            // }
 
         }
 
@@ -15070,18 +15052,11 @@ public get1Arg(
 private _setOpenedBodyTime(p_gnx: string): void {
     const w_now = new Date().getTime();
     let w_created = w_now;
-    if (this._openedBodiesGnx.includes(p_gnx)) {
+    if (this._openedBodiesInfo[p_gnx]) {
         w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
-    } else {
-        this._openedBodiesGnx.push(p_gnx);
     }
 
-    //console.log("------- SET BODY TIME ", p_gnx, ' AT  ', w_now);
-    // console.log("----- stack ", (new Error().stack?.split("at ")[1])?.trim());
-    // console.log("------ stack: ", (new Error().stack)?.trim());
     const w_stack = new Error().stack!;
-    // console.log(w_stack);
-
     const stackArray = w_stack.split("at ").slice(1, 5).map(s =&gt; {
         let index = s.indexOf('(');  // Find the index of the opening parenthesis
         if (index !== -1) {
@@ -15091,11 +15066,9 @@ private _setOpenedBodyTime(p_gnx: string): void {
     });
     console.log("-------- SET BODY TIME ", p_gnx, ' AT  ', w_now, "stack", stackArray.join(" "));
 
-
-
     this._openedBodiesInfo[p_gnx] = {
-        ctime: w_created, // w_now, // maybe kept.
-        mtime: w_now // new 'modified' time for sure.
+        ctime: w_created,
+        mtime: w_now // new 'modified' time.
     };
 }
 
@@ -17561,28 +17534,37 @@ import { VNode } from "./core/leoNodes";
     }
 
     if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
+
         const w_directory: [string, vscode.FileType][] = [];
-        // w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
+
         for (const w_commander of [...w_commanders]) {
             w_directory.push([w_commander, vscode.FileType.Directory]);
         }
+
         console.log("DETACHED  returned all visible c ids:", w_directory);
+
         return w_directory;
+
     } else if (
         p_uri.path.split('/').length
     ) {
+
         const w_directory: [string, vscode.FileType][] = [];
+
         for (const w_file of [...w_detached]) {
             if (w_file.split('/')[1] === p_uri.path.split('/')[1]) {
                 w_directory.push([w_file.split('/')[2], vscode.FileType.File]);
             }
         }
+
         console.log(`DETACHED  returned all visible detached in ${p_uri.path} :`, w_directory);
 
         return w_directory;
 
     } else {
+
         console.log('Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
+
         throw vscode.FileSystemError.FileNotFound(p_uri);
     }
 }
@@ -17604,7 +17586,7 @@ import { VNode } from "./core/leoNodes";
     const w_gnx = utils.leoUriToStr(p_uri);
     console.log('DETACHED writeFile ', w_gnx, 'size: ', p_content.byteLength);
 
-    if (!this._openedBodiesGnx.includes(w_gnx)) {
+    if (!this._openedBodiesInfo[w_gnx]) {
         console.error("LeoJS: Tried to save DETACHED but not in _openedBodiesGnx. gnx :", w_gnx);
     }
     this._setOpenedBodyTime(w_gnx);
@@ -17628,8 +17610,7 @@ import { VNode } from "./core/leoNodes";
     const w_gnx = utils.leoUriToStr(p_uri);
     console.log("delete body DETACHED file " + w_gnx);
 
-    if (this._openedBodiesGnx.includes(w_gnx)) {
-        this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
+    if (this._openedBodiesInfo[w_gnx]) {
         delete this._openedBodiesInfo[w_gnx];
         delete this.openedBodiesVNodes[w_gnx];
     } else {
@@ -17678,12 +17659,12 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     private _lastBodyData: string = ""; // body content of last file read
     private _lastBodyLength: number = 0; // length of last file read
 
-    // * List of gnx that should be available (from more.selectNode and fs.delete)
-    private _openedBodiesGnx: string[] = [];
+    // * List of currently opened body panes gnx (from 'watch' &amp; 'dispose' methods)
+    public watchedBodiesGnx: string[] = [];
+
+    // * List of gnx open in tab(s) (from tryApplyNodeToBody / switchBody and fs.delete)
     public openedBodiesVNodes: { [key: string]: VNode } = {};
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
-
-    private _lastBodyTimeGnx: string = "";
 
     // * An event to signal that a resource has been changed
     // * It should fire for resources that are being watched by clients of this provider
@@ -17703,11 +17684,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
  */
 public setNewBodyUriTime(p_uri: vscode.Uri, v: VNode): void {
     const w_gnx = utils.leoUriToStr(p_uri);
-    if (p_uri.path.match(Constants.DETACHED_REGEX)) {
-        // pass
-    } else {
-        this._lastBodyTimeGnx = w_gnx;
-    }
     this._setOpenedBodyTime(w_gnx);
     this.openedBodiesVNodes[w_gnx] = v;
 }
@@ -17720,15 +17696,11 @@ public setNewBodyUriTime(p_uri: vscode.Uri, v: VNode): void {
 private _setOpenedBodyTime(p_gnx: string): void {
     const w_now = new Date().getTime();
     let w_created = w_now;
-    if (this._openedBodiesGnx.includes(p_gnx)) {
+    if (this._openedBodiesInfo[p_gnx]) {
         w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
-    } else {
-        this._openedBodiesGnx.push(p_gnx);
     }
 
-    // console.log("DEBUG", (new Error().stack?.split("at ")[1])?.trim());
     const w_stack = new Error().stack!;
-    // console.log(w_stack);
     const stackArray = w_stack.split("at ").slice(1, 5).map(s =&gt; {
         let index = s.indexOf('(');  // Find the index of the opening parenthesis
         if (index !== -1) {
@@ -17738,14 +17710,9 @@ private _setOpenedBodyTime(p_gnx: string): void {
     });
     console.log("DETACHED SET BODY TIME ", p_gnx, ' AT  ', w_now, "stack", stackArray.join(" "));
 
-    // for (const w_entry of stackArray) {
-
-    // }
-    // console.log("DETACHED stack: ", (new Error().stack)?.trim());
-
     this._openedBodiesInfo[p_gnx] = {
         ctime: w_created,
-        mtime: w_now // new 'modified' time for sure.
+        mtime: w_now // new 'modified' time.
     };
 }
 
@@ -17755,13 +17722,13 @@ private _setOpenedBodyTime(p_gnx: string): void {
  * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
  */
 public fireRefreshFile(p_gnx: string): void {
-    // console.log("fireRefreshFile called for gnx: ", p_gnx);
-    if (!this._openedBodiesGnx.includes(p_gnx)) {
-        console.error("DETACHED ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
-        return; // Exiting because that document's tab was closed
-    }
 
     this._setOpenedBodyTime(p_gnx);
+
+    if (!this.watchedBodiesGnx.includes(p_gnx)) {
+        console.warn("DETACHED ASKED TO REFRESH NOT EVEN IN WATCHED BODY: ", p_gnx);
+        return; // Document is not being watched (closed tab or non-visible non-dirty tab)
+    }
 
     this._onDidChangeFileEmitter.fire([{
         type: vscode.FileChangeType.Changed,
@@ -17770,38 +17737,18 @@ public fireRefreshFile(p_gnx: string): void {
 }
 
 </t>
-<t tx="felix.20240401213604.6">/**
- * ? Maybe deprecated 
- * * Refreshes the '_possibleGnxList' list of all unique gnx from Leo
- * @returns a 'fresh' gnx string array
- */
-public refreshPossibleGnxList(): string[] {
-    // * Get updated list of possible gnx
-
-    // all_gnx = [p.v.gnx for p in c.all_unique_positions(copy=False)]
-    const c = g.app.windowList[this._leoUi.frameIndex].c;
-    return [...c.all_unique_positions(false)].map(p =&gt; p.v.gnx);
-}
-
-</t>
 <t tx="felix.20240401213604.7">public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
     const w_gnx = utils.leoUriToStr(p_resource);
+    if (!this.watchedBodiesGnx.includes(w_gnx)) {
+        this.watchedBodiesGnx.push(w_gnx); // add gnx
+    }
     // else already in list
     return new vscode.Disposable(() =&gt; {
-        console.log('###\n###\n### DETACHED CLOSED :', w_gnx);
-        this._leoUi.bodyDetachedTextDocument = undefined;
-        if (this._openedBodiesGnx.includes(w_gnx)) {
-            this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
-            delete this._openedBodiesInfo[w_gnx];
-            delete this.openedBodiesVNodes[w_gnx];
-        } else {
-            // console.log("not deleted");
+        console.log('DETACHED ### removed watched: ', w_gnx);
+        const w_position = this.watchedBodiesGnx.indexOf(w_gnx); // find and remove it
+        if (w_position &gt; -1) {
+            this.watchedBodiesGnx.splice(w_position, 1);
         }
-
-        // const w_position = this._watchedBodiesGnx.indexOf(w_gnx); // find and remove it
-        // if (w_position &gt; -1) {
-        //     this._watchedBodiesGnx.splice(w_position, 1);
-        // }
     });
 }
 
@@ -17838,7 +17785,7 @@ public refreshPossibleGnxList(): string[] {
         if (id &amp;&amp; !gnx) {
             console.log("DETACHED stat, path: ", p_uri.path, ' was a commander dir');
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
             console.log("DETACHED stat, path: ", p_uri.path, "was last gnx", this._lastGnx, {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -17851,7 +17798,7 @@ public refreshPossibleGnxList(): string[] {
                 mtime: this._openedBodiesInfo[this._lastGnx].mtime,
                 size: this._lastBodyLength
             };
-        } else if (this._openedBodiesGnx.includes(w_gnx)) {
+        } else if (this._openedBodiesInfo[w_gnx]) {
             let c: Commands;
             let w_v: VNode | undefined;
             const id = p_uri.path.split("/")[1];
@@ -17895,10 +17842,9 @@ public refreshPossibleGnxList(): string[] {
         } else {
             const w_gnx = utils.leoUriToStr(p_uri);
 
-            if (!this._openedBodiesGnx.includes(w_gnx)) {
+            if (!this._openedBodiesInfo[w_gnx]) {
                 console.log(
-                    " _openedBodiesGnx length: ", this._openedBodiesGnx.length,
-                    '\n *** readFile: ERROR DETACHED File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
+                    '*** readFile: ERROR DETACHED File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
                 );
             }
             let c: Commands;
@@ -17950,15 +17896,21 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 }
 
 </t>
-<t tx="felix.20240403174622.1">public _onTabGroupsChanged(p_event: vscode.TabGroupChangeEvent): void {
-    // console.log('_onTabGroupsChanged');
-    //
+<t tx="felix.20240403174622.1">/**
+ * React to the closing of 'tabs' via
+ * events from vscode.window.tabGroups
+ */
+public _onTabGroupsChanged(p_event: vscode.TabGroupChangeEvent): void {
+    this.checkClosedTabs(); // debounced
 }
 
 </t>
-<t tx="felix.20240403174627.1">public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
-    // console.log('_onTabsChanged');
-    //
+<t tx="felix.20240403174627.1">/**
+ * React to the closing of 'tabgroups' via
+ * events from vscode.window.tabGroups
+ */
+public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
+    this.checkClosedTabs(); // debounced
 }
 
 </t>
@@ -18526,6 +18478,65 @@ export function strToLeoDetachedUri(p_str: string): vscode.Uri {
 <t tx="felix.20240420222634.1">public isUriTabOpened(p_uri: vscode.Uri): boolean {
     //
     return true;
+}
+
+</t>
+<t tx="felix.20240421172320.1">public cleanupDetachedBodies(): void {
+    const w_foundGnx: string[] = [];
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+            ) {
+                w_foundGnx.push(utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri));
+            }
+        });
+    });
+    if (!w_foundGnx.length) {
+        return;
+    }
+    for (const openBody of Object.keys(this._openedBodiesInfo)) {
+        if (!w_foundGnx.includes(openBody)) {
+            // Not an opened tab! remove it!
+            console.log("cleanup DETACHED removing ", openBody.length);
+
+            delete this._openedBodiesInfo[openBody];
+            delete this.openedBodiesVNodes[openBody];
+        }
+    }
+}
+
+</t>
+<t tx="felix.20240421175315.1">private _checkClosedTabs(): void {
+    this._leoFileSystem.cleanupBodies();
+    this._leoDetachedFileSystem.cleanupDetachedBodies();
+}
+
+</t>
+<t tx="felix.20240421175450.1">public cleanupBodies(): void {
+    const w_foundGnx: string[] = [];
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
+            ) {
+                w_foundGnx.push(utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri));
+            }
+        });
+    });
+    if (!w_foundGnx.length) {
+        return;
+    }
+    for (const openBody of Object.keys(this._openedBodiesInfo)) {
+        if (!w_foundGnx.includes(openBody)) {
+            // Not an opened tab! remove it!
+            console.log("cleanup Bodies removing ", openBody.length);
+
+            delete this._openedBodiesInfo[openBody];
+        }
+    }
 }
 
 </t>

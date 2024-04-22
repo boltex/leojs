@@ -56,6 +56,7 @@ export class Constants {
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
+    public static CLEANUP_DEBOUNCE_DELAY: number = 40;
     public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
     public static TITLE_DEBOUNCE_DELAY: number = 20;
