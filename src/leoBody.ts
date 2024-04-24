@@ -57,7 +57,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         if (this._openedBodiesInfo[p_gnx]) {
             w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
         }
-
         const w_stack = new Error().stack!;
         const stackArray = w_stack.split("at ").slice(1, 4).map(s => {
             let index = s.indexOf('(');  // Find the index of the opening parenthesis
@@ -66,8 +65,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
             }
             return s;  // Return the original string if no parenthesis is found
         });
-        console.log("-------- SET BODY TIME ", p_gnx, ' AT ', w_now, stackArray.join(" "));
-
         this._openedBodiesInfo[p_gnx] = {
             ctime: w_created,
             mtime: w_now // new 'modified' time.
@@ -92,7 +89,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         for (const openBody of Object.keys(this._openedBodiesInfo)) {
             if (!w_foundGnx.includes(openBody)) {
                 // Not an opened tab! remove it!
-                console.log("cleanup Bodies removing ", openBody.length);
 
                 delete this._openedBodiesInfo[openBody];
             }
@@ -111,8 +107,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
             console.warn("------- ASKED TO REFRESH NOT EVEN IN WATCHED BODIES: ", p_gnx);
             return; // Document is not being watched (closed tab or non-visible non-dirty tab)
         }
-        console.log('--------- fire ------------------------');
-
         this._onDidChangeFileEmitter.fire([{
             type: vscode.FileChangeType.Changed,
             uri: utils.strToLeoUri(p_gnx)
@@ -126,7 +120,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         }
         // else already in list
         return new vscode.Disposable(() => {
-            console.log('--------- ### removed watched: ', w_gnx);
             const w_position = this.watchedBodiesGnx.indexOf(w_gnx); // find and remove it
             if (w_position > -1) {
                 this.watchedBodiesGnx.splice(w_position, 1);
@@ -138,18 +131,9 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         if (this._leoUi.leoStates.fileOpenedReady) {
             const w_gnx = utils.leoUriToStr(p_uri);
             if (p_uri.fsPath.length === 1) {
-                console.log("------ stat, path: ", p_uri.path, ' was a commander dir');
 
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
             } else if (w_gnx === this._lastGnx && this._openedBodiesInfo[this._lastGnx]) {
-
-                console.log("------ stat, path: ", p_uri.path, "was last gnx", this._lastGnx, {
-                    type: vscode.FileType.File,
-                    ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-                    mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-                    size: this._lastBodyLength
-                });
-
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -159,14 +143,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
             } else if (this._openedBodiesInfo[w_gnx]) {
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
                 const w_v = c.fileCommands.gnxDict[w_gnx];
-
-                console.log("------ stat", w_gnx, {
-                    type: vscode.FileType.File,
-                    ctime: this._openedBodiesInfo[w_gnx].ctime,
-                    mtime: this._openedBodiesInfo[w_gnx].mtime,
-                    size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
-                });
-
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[w_gnx].ctime,
@@ -177,7 +153,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         }
         // throw vscode.FileSystemError.FileNotFound();
         // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
-        console.log('----- stat not found ');
         return { type: vscode.FileType.File, ctime: 0, mtime: 0, size: 0 };
     }
 
@@ -189,9 +164,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                 const w_gnx = utils.leoUriToStr(p_uri);
 
                 if (!this._openedBodiesInfo[w_gnx]) {
-                    console.log(
-                        '*** readFile: ERROR File not in _openedBodiesInfo! readFile missing refreshes? gnx: ', w_gnx
-                    );
+                    console.warn('readFile: ERROR File not in _openedBodiesInfo! gnx: ', w_gnx);
                 }
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
                 const w_v = c.fileCommands.gnxDict[w_gnx];
@@ -202,9 +175,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                     this._lastBodyData = w_v.b;
                     const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                     this._lastBodyLength = w_buffer.byteLength;
-
-                    console.log('------ READ FILE: ', w_gnx, 'size: ', w_buffer.byteLength);
-
                     return w_buffer;
                 } else {
                     if (!this._errorRefreshFlag) {
@@ -212,7 +182,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                     }
                     if (this._lastGnx === w_gnx) {
                         // was last gnx of closed file about to be switched to new document selected
-                        console.log('----- Passed in not found: ' + w_gnx);
                         return Buffer.from(this._lastBodyData);
                     }
                     console.error("ERROR => readFile of unknown GNX"); // is possibleGnxList updated correctly?
@@ -247,8 +216,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         }
 
         const w_gnx = utils.leoUriToStr(p_uri);
-        console.log('------ writeFile ', w_gnx, 'size: ', p_content.byteLength);
-
         if (!this._openedBodiesInfo[w_gnx]) {
             console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
         }

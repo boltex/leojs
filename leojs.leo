@@ -2547,6 +2547,7 @@ public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
 public static CLEANUP_DEBOUNCE_DELAY: number = 40;
+public static DETACHED_LANGUAGE_DELAY: number = 350;
 public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
 public static TITLE_DEBOUNCE_DELAY: number = 20;
@@ -3692,6 +3693,10 @@ import { Undoer } from "./core/leoUndo";
         this._checkClosedTabs,
         Constants.CLEANUP_DEBOUNCE_DELAY
     );
+    this.refreshCommanderDetachedLanguage = debounce(
+        this._refreshCommanderDetachedLanguage,
+        Constants.DETACHED_LANGUAGE_DELAY
+    );
     this.getStates = debounce(
         this._triggerGetStates,
         Constants.STATES_DEBOUNCE_DELAY
@@ -3973,6 +3978,9 @@ export class LeoUI extends NullGui {
 
     // * Debounced method used to check for closed detached/body tabs
     public checkClosedTabs: (() =&gt; void);
+
+    // * Debounced method used to refresh language of this commander's detached bodies 
+    public refreshCommanderDetachedLanguage: (() =&gt; void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
     public getStates: (() =&gt; void);
@@ -4758,10 +4766,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "d87d4c0",
-  "gitBranch": "boltex/issue120",
-  "gitDate": "2024-04-22 00:01:58 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8502,8 +8507,6 @@ import { Constants } from "./constants";
     }
 
     const w_gnx = utils.leoUriToStr(p_uri);
-    console.log('------ writeFile ', w_gnx, 'size: ', p_content.byteLength);
-
     if (!this._openedBodiesInfo[w_gnx]) {
         console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
     }
@@ -8526,8 +8529,6 @@ import { Constants } from "./constants";
 </t>
 <t tx="felix.20211010192923.13">public delete(p_uri: vscode.Uri): void {
     const w_gnx = utils.leoUriToStr(p_uri);
-    console.log("delete body file " + w_gnx);
-
     if (this._openedBodiesInfo[w_gnx]) {
         delete this._openedBodiesInfo[w_gnx];
     } else {
@@ -8619,7 +8620,6 @@ public fireRefreshFile(p_gnx: string): void {
         console.warn("------- ASKED TO REFRESH NOT EVEN IN WATCHED BODIES: ", p_gnx);
         return; // Document is not being watched (closed tab or non-visible non-dirty tab)
     }
-
     this._onDidChangeFileEmitter.fire([{
         type: vscode.FileChangeType.Changed,
         uri: utils.strToLeoUri(p_gnx)
@@ -8634,7 +8634,6 @@ public fireRefreshFile(p_gnx: string): void {
     }
     // else already in list
     return new vscode.Disposable(() =&gt; {
-        console.log('--------- ### removed watched: ', w_gnx);
         const w_position = this.watchedBodiesGnx.indexOf(w_gnx); // find and remove it
         if (w_position &gt; -1) {
             this.watchedBodiesGnx.splice(w_position, 1);
@@ -8647,18 +8646,9 @@ public fireRefreshFile(p_gnx: string): void {
     if (this._leoUi.leoStates.fileOpenedReady) {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (p_uri.fsPath.length === 1) {
-            console.log("------ stat, path: ", p_uri.path, ' was a commander dir');
 
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
         } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
-
-            console.log("------ stat, path: ", p_uri.path, "was last gnx", this._lastGnx, {
-                type: vscode.FileType.File,
-                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-                size: this._lastBodyLength
-            });
-
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -8668,14 +8658,6 @@ public fireRefreshFile(p_gnx: string): void {
         } else if (this._openedBodiesInfo[w_gnx]) {
             const c = g.app.windowList[this._leoUi.frameIndex].c;
             const w_v = c.fileCommands.gnxDict[w_gnx];
-
-            console.log("------ stat", w_gnx, {
-                type: vscode.FileType.File,
-                ctime: this._openedBodiesInfo[w_gnx].ctime,
-                mtime: this._openedBodiesInfo[w_gnx].mtime,
-                size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
-            });
-
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[w_gnx].ctime,
@@ -8686,7 +8668,6 @@ public fireRefreshFile(p_gnx: string): void {
     }
     // throw vscode.FileSystemError.FileNotFound();
     // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
-    console.log('----- stat not found ');
     return { type: vscode.FileType.File, ctime: 0, mtime: 0, size: 0 };
 }
 
@@ -8699,9 +8680,7 @@ public fireRefreshFile(p_gnx: string): void {
             const w_gnx = utils.leoUriToStr(p_uri);
 
             if (!this._openedBodiesInfo[w_gnx]) {
-                console.log(
-                    '*** readFile: ERROR File not in _openedBodiesInfo! readFile missing refreshes? gnx: ', w_gnx
-                );
+                console.warn('readFile: ERROR File not in _openedBodiesInfo! gnx: ', w_gnx);
             }
             const c = g.app.windowList[this._leoUi.frameIndex].c;
             const w_v = c.fileCommands.gnxDict[w_gnx];
@@ -8712,9 +8691,6 @@ public fireRefreshFile(p_gnx: string): void {
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                 this._lastBodyLength = w_buffer.byteLength;
-
-                console.log('------ READ FILE: ', w_gnx, 'size: ', w_buffer.byteLength);
-
                 return w_buffer;
             } else {
                 if (!this._errorRefreshFlag) {
@@ -8722,7 +8698,6 @@ public fireRefreshFile(p_gnx: string): void {
                 }
                 if (this._lastGnx === w_gnx) {
                     // was last gnx of closed file about to be switched to new document selected
-                    console.log('----- Passed in not found: ' + w_gnx);
                     return Buffer.from(this._lastBodyData);
                 }
                 console.error("ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
@@ -8736,9 +8711,6 @@ public fireRefreshFile(p_gnx: string): void {
 
 </t>
 <t tx="felix.20211010192923.9">public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
-
-    console.log("------ readDirectory called on uri path: ", p_uri.path);
-
     if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
         const w_directory: [string, vscode.FileType][] = [];
         w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
@@ -9061,8 +9033,10 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean, p_fromFocusChange?: boolean
     }
 
     // * Save any 'detached' dirty panels to leo
-    if (this.bodyDetachedTextDocument &amp;&amp; !this.bodyDetachedTextDocument.isClosed &amp;&amp; this.bodyDetachedTextDocument.isDirty) {
-        void this._bodySaveDocument(this.bodyDetachedTextDocument, p_forcedVsCodeSave);
+    for (const doc of vscode.workspace.textDocuments) {
+        if (!doc.isClosed &amp;&amp; doc.isDirty &amp;&amp; doc.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
+            void this._bodySaveDocument(doc, p_forcedVsCodeSave);
+        }
     }
 
     // * Save body to Leo if a change has been made to the body 'document' so far
@@ -13315,10 +13289,10 @@ private _onActiveEditorChanged(
     if (!p_internalCall) {
         void this.triggerBodySave(true, true); // Save in case edits were pending
     }
-    // set _bodyDetachedTextDocument AFTER triggerBodySave, as focus may already have been in a dirty detached body.
-    if (p_editor &amp;&amp; p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
-        this.bodyDetachedTextDocument = p_editor.document; // Next triggerBodySave will apply to this newly focused one.
-    }
+    // // set _bodyDetachedTextDocument AFTER triggerBodySave, as focus may already have been in a dirty detached body.
+    // if (p_editor &amp;&amp; p_editor.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
+    //     this.bodyDetachedTextDocument = p_editor.document; // Next triggerBodySave will apply to this newly focused one.
+    // }
 
 }
 
@@ -13413,17 +13387,33 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
     if (
         p_textDocumentChange.contentChanges.length &amp;&amp;
-        p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
+        (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
     ) {
-        console.log(' DETACHED ****  _onDocumentChanged');
-        this.bodyDetachedTextDocument = p_textDocumentChange.document;
-        const [unused, id, gnx] = this.bodyDetachedTextDocument.uri.path.split("/");
-        const w_bodyText = this.bodyDetachedTextDocument.getText().replace(/\r\n/g, "\n");
+        const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
+        const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
         const w_hasBody = !!w_bodyText.length;
 
         const w_selectedCId = g.app.windowList[this.frameIndex].c.id.toString();
         const w_sameCommander = w_selectedCId === id;
         let w_alreadySaved = false;
+        let w_v: VNode | undefined;
+        let c: Commands | undefined;
+        for (const w_frame of g.app.windowList) {
+            if (w_frame.c.id.toString() === id) {
+                c = w_frame.c;
+                break;
+            }
+        }
+        if (c) {
+            w_v = c.fileCommands.gnxDict[gnx];
+            if (this._changedBodyWithMirrorDetached || (w_v &amp;&amp; (w_bodyText === w_v.b))) {
+                // WAS NOT A USER MODIFICATION?
+                this._changedBodyWithMirrorDetached = false;
+                return;
+            }
+        }
+
+        this.bodyDetachedTextDocument = p_textDocumentChange.document;
 
         // * If body changed a line with and '@' directive refresh body states
         let w_needsRefresh = false;
@@ -13472,6 +13462,11 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         }
 
         if (w_needsRefresh) {
+            if (!w_alreadySaved) {
+                void this._bodySaveDocument(this.bodyDetachedTextDocument);
+                w_alreadySaved = true;
+            }
+            // REFRESH LANGUAGE OF THIS DETACHED BODY
             const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(p_textDocumentChange.document.uri)];
             if (w_foundVnode) {
                 for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
@@ -13483,7 +13478,9 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                         let w_language = this._getBodyLanguage(p); // !! 
                         // Set document language only if different
                         if (w_language !== this.bodyDetachedTextDocument.languageId) {
-                            void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language);
+                            void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language).then((p_doc) =&gt; {
+                                this.bodyDetachedTextDocument = p_doc;
+                            });
                         }
                         break;
                     }
@@ -13491,6 +13488,8 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             } else {
                 console.log('DETACHED VNODE not found when resetting language');
             }
+            // REFRESH LANGUAGE OF OTHER DETACHED BODIES WITH DELAY
+            this.refreshCommanderDetachedLanguage();
         }
 
         let w_sameBodyTabOpened = false;
@@ -13499,7 +13498,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             for (const p_tab of p_tabGroup.tabs) {
                 if (p_tab.input &amp;&amp;
                     (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME
+                    ((p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME)
                 ) {
                     if (gnx === utils.leoUriToStr((p_tab.input as vscode.TabInputText).uri)) {
                         w_sameBodyTabOpened = true;
@@ -13521,21 +13520,14 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                     w_alreadySaved = true;
                 }
                 if (w_sameBodyTabOpened) {
-                    // fire body node refresh if opened!!
-                    if (this._changedBodyWithMirrorDetached) {
-                        this._changedBodyWithMirrorDetached = false;
-                    } else {
-                        if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
-                            console.log("PREVENT DOUBLE REFRESH of body");
-                            this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
-                        }
-                        this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
+                    if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
+                        this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
                     }
+                    this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
+
                 }
             }
-
             if (w_needsRefresh) {
-                console.log('regular body refresh language');
                 this.debouncedRefreshBodyStates(50); // And maybe changed in other node of same commander!
             }
 
@@ -13543,7 +13535,6 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
     }
 
-    const c = g.app.windowList[this.frameIndex].c;
 
     // ".length" check necessary, see https://github.com/microsoft/vscode/issues/50344
     if (
@@ -13551,7 +13542,8 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
     ) {
-        console.log(' ------- ****  _onDocumentChanged');
+        // this.bodyDetachedTextDocument = undefined;
+        const c = g.app.windowList[this.frameIndex].c;
 
         // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
         this._bodyLastChangedDocument = p_textDocumentChange.document;
@@ -13589,9 +13581,10 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             const w_hasBody = !!w_bodyText.length;
             const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody) || this.findFocusTree;
 
-            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; w_bodyText === c.p.b) {
+            if (this._changedDetachedWithMirrorBody || (c.p &amp;&amp; c.p.__bool__() &amp;&amp; w_bodyText === c.p.b)) {
                 // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                 // Set proper cursor insertion point and selection range.
+                this._changedDetachedWithMirrorBody = false;
                 void this.showBody(false, true, true);
                 return;
             }
@@ -13600,24 +13593,11 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                 // Document pane icon needs refresh (changed) and/or outline icon changed
                 void this._bodySaveDocument(p_textDocumentChange.document).then(() =&gt; {
                     if (w_hasSameDetachedTab &amp;&amp; this.lastSelectedNode) {
-                        // Ok to fire refresh now!
-                        if (this._changedDetachedWithMirrorBody) {
-                            this._changedDetachedWithMirrorBody = false;
-                        } else {
-
-                            if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(w_lastSelNodeGnx)) {
-                                console.log("PREVENT DOUBLE REFRESH of DETACHED");
-
-                                this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
-                            }
-                            this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
+                        if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(`${c.id}/${w_lastSelNodeGnx}`)) {
+                            this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
                         }
+                        this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
                     }
-                    // todo : Really saved to node, no need to set dirty or hasbody -&gt; Check &amp; test to see if icon changes!
-                    // if (this.lastSelectedNode) {
-                    //     this.lastSelectedNode.dirty = true;
-                    //     this.lastSelectedNode.hasBody = w_hasBody;
-                    // }
                     if (w_iconChanged) {
                         this.findFocusTree = false;
                         // NOT incrementing this.treeID to keep ids intact
@@ -13630,9 +13610,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                     // also refresh document panel (icon may be dirty now)
                     this.refreshDocumentsPane();
                 }
-
             }
-
         }
 
         // * If body changed a line with and '@' directive refresh body states
@@ -15066,17 +15044,14 @@ private _setOpenedBodyTime(p_gnx: string): void {
     if (this._openedBodiesInfo[p_gnx]) {
         w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
     }
-
     const w_stack = new Error().stack!;
-    const stackArray = w_stack.split("at ").slice(1, 5).map(s =&gt; {
+    const stackArray = w_stack.split("at ").slice(1, 4).map(s =&gt; {
         let index = s.indexOf('(');  // Find the index of the opening parenthesis
         if (index !== -1) {
             return s.substring(0, index);  // Cut the string up to the parenthesis
         }
         return s;  // Return the original string if no parenthesis is found
     });
-    console.log("-------- SET BODY TIME ", p_gnx, ' AT  ', w_now, "stack", stackArray.join(" "));
-
     this._openedBodiesInfo[p_gnx] = {
         ctime: w_created,
         mtime: w_now // new 'modified' time.
@@ -17523,9 +17498,6 @@ import { VNode } from "./core/leoNodes";
 @others
 </t>
 <t tx="felix.20240401213604.10">public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
-
-    console.log("DETACHED readDirectory called on uri path: ", p_uri.path);
-
     const w_commanders: Set&lt;string&gt; = new Set();
     const w_detached: Set&lt;string&gt; = new Set();
     if (this._leoUi.leoStates.fileOpenedReady) {
@@ -17552,9 +17524,6 @@ import { VNode } from "./core/leoNodes";
         for (const w_commander of [...w_commanders]) {
             w_directory.push([w_commander, vscode.FileType.Directory]);
         }
-
-        console.log("DETACHED  returned all visible c ids:", w_directory);
-
         return w_directory;
 
     } else if (
@@ -17562,41 +17531,32 @@ import { VNode } from "./core/leoNodes";
     ) {
 
         const w_directory: [string, vscode.FileType][] = [];
-
         for (const w_file of [...w_detached]) {
             if (w_file.split('/')[1] === p_uri.path.split('/')[1]) {
                 w_directory.push([w_file.split('/')[2], vscode.FileType.File]);
             }
         }
-
-        console.log(`DETACHED  returned all visible detached in ${p_uri.path} :`, w_directory);
-
         return w_directory;
 
     } else {
-
-        console.log('Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
-
         throw vscode.FileSystemError.FileNotFound(p_uri);
     }
 }
 
 </t>
 <t tx="felix.20240401213604.11">public createDirectory(p_uri: vscode.Uri): void {
-    console.warn('Called DETACHED  createDirectory with ', p_uri.path); // should not happen
+    console.warn('DETACHED Called createDirectory with ', p_uri.path); // should not happen
     throw vscode.FileSystemError.NoPermissions();
 }
 
 </t>
 <t tx="felix.20240401213604.12">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
-
     if (this.preventSaveToLeo) {
         this.preventSaveToLeo = false;
     } else {
         void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
     }
     const w_gnx = utils.leoUriToStr(p_uri);
-    console.log('DETACHED writeFile ', w_gnx, 'size: ', p_content.byteLength);
 
     if (!this._openedBodiesInfo[w_gnx]) {
         console.error("LeoJS: Tried to save DETACHED but not in _openedBodiesGnx. gnx :", w_gnx);
@@ -17610,7 +17570,7 @@ import { VNode } from "./core/leoNodes";
 
 </t>
 <t tx="felix.20240401213604.13">public rename(p_oldUri: vscode.Uri, p_newUri: vscode.Uri, p_options: { overwrite: boolean }): void {
-    console.warn('Called DETACHED  rename on ', p_oldUri.path, p_newUri.path); // should not happen
+    console.warn('DETACHED Called rename on ', p_oldUri.path, p_newUri.path); // should not happen
     this._fireSoon(
         { type: vscode.FileChangeType.Deleted, uri: p_oldUri },
         { type: vscode.FileChangeType.Created, uri: p_newUri }
@@ -17620,8 +17580,6 @@ import { VNode } from "./core/leoNodes";
 </t>
 <t tx="felix.20240401213604.14">public delete(p_uri: vscode.Uri): void {
     const w_gnx = utils.leoUriToStr(p_uri);
-    console.log("delete body DETACHED file " + w_gnx);
-
     if (this._openedBodiesInfo[w_gnx]) {
         delete this._openedBodiesInfo[w_gnx];
         delete this.openedBodiesVNodes[w_gnx];
@@ -17640,7 +17598,7 @@ import { VNode } from "./core/leoNodes";
 
 </t>
 <t tx="felix.20240401213604.15">public copy(p_uri: vscode.Uri): void {
-    console.warn('Called DETACHED  copy on ', p_uri.path); // should not happen
+    console.warn('DETACHED Called copy on ', p_uri.path); // should not happen
     throw vscode.FileSystemError.NoPermissions();
 }
 
@@ -17713,15 +17671,13 @@ private _setOpenedBodyTime(p_gnx: string): void {
     }
 
     const w_stack = new Error().stack!;
-    const stackArray = w_stack.split("at ").slice(1, 5).map(s =&gt; {
+    const stackArray = w_stack.split("at ").slice(1, 4).map(s =&gt; {
         let index = s.indexOf('(');  // Find the index of the opening parenthesis
         if (index !== -1) {
             return s.substring(0, index);  // Cut the string up to the parenthesis
         }
         return s;  // Return the original string if no parenthesis is found
     });
-    console.log("DETACHED SET BODY TIME ", p_gnx, ' AT  ', w_now, "stack", stackArray.join(" "));
-
     this._openedBodiesInfo[p_gnx] = {
         ctime: w_created,
         mtime: w_now // new 'modified' time.
@@ -17756,7 +17712,6 @@ public fireRefreshFile(p_gnx: string): void {
     }
     // else already in list
     return new vscode.Disposable(() =&gt; {
-        console.log('DETACHED ### removed watched: ', w_gnx);
         const w_position = this.watchedBodiesGnx.indexOf(w_gnx); // find and remove it
         if (w_position &gt; -1) {
             this.watchedBodiesGnx.splice(w_position, 1);
@@ -17788,22 +17743,15 @@ public fireRefreshFile(p_gnx: string): void {
 
         // w_commanders and w_detached are filled up!
         if (p_uri.fsPath.length === 1) {
-            console.log("DETACHED stat, path: ", p_uri.path, ' was a commander dir');
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
         }
 
         const [unused, id, gnx] = p_uri.path.split("/");
 
         if (id &amp;&amp; !gnx) {
-            console.log("DETACHED stat, path: ", p_uri.path, ' was a commander dir');
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
         } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
-            console.log("DETACHED stat, path: ", p_uri.path, "was last gnx", this._lastGnx, {
-                type: vscode.FileType.File,
-                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-                size: this._lastBodyLength
-            });
+
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -17822,12 +17770,6 @@ public fireRefreshFile(p_gnx: string): void {
                 }
             }
             if (w_v) {
-                console.log("DETACHED stat", w_gnx, {
-                    type: vscode.FileType.File,
-                    ctime: this._openedBodiesInfo[w_gnx].ctime,
-                    mtime: this._openedBodiesInfo[w_gnx].mtime,
-                    size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
-                });
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[w_gnx].ctime,
@@ -17835,7 +17777,7 @@ public fireRefreshFile(p_gnx: string): void {
                     size: Buffer.byteLength(w_v.b, 'utf8') // w_v.b.length
                 };
             } else {
-                console.log('DETACHED BODY stat: not found!');
+                console.warn('DETACHED BODY stat: not found!');
             }
         } else {
             console.error('DETACHED asked for STAT about file NOT IN _openedBodiesGnx ');
@@ -17855,9 +17797,7 @@ public fireRefreshFile(p_gnx: string): void {
             const w_gnx = utils.leoUriToStr(p_uri);
 
             if (!this._openedBodiesInfo[w_gnx]) {
-                console.log(
-                    '*** readFile: ERROR DETACHED File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
-                );
+                console.warn('DETACHED readFile: ERROR File not in _openedBodiesGnx! gnx: ', w_gnx);
             }
             let c: Commands;
             let w_v: VNode | undefined;
@@ -17877,7 +17817,6 @@ public fireRefreshFile(p_gnx: string): void {
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                 this._lastBodyLength = w_buffer.byteLength;
-                console.log('DETACHED READ FILE: ', w_gnx, 'size: ', w_buffer.byteLength);
                 return w_buffer;
             } else {
                 if (!this._errorRefreshFlag) {
@@ -17885,10 +17824,9 @@ public fireRefreshFile(p_gnx: string): void {
                 }
                 if (this._lastGnx === w_gnx) {
                     // was last gnx of closed file about to be switched to new document selected
-                    console.log('DETACHED Passed in not found: ' + w_gnx);
                     return Buffer.from(this._lastBodyData);
                 }
-                console.error("ERROR =&gt; readFile DETACHED  of unknown GNX"); // is possibleGnxList updated correctly?
+                console.error("DETACHED ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
                 return Buffer.from("");
             }
         }
@@ -18511,8 +18449,6 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
     for (const openBody of Object.keys(this._openedBodiesInfo)) {
         if (!w_foundGnx.includes(openBody)) {
             // Not an opened tab! remove it!
-            console.log("cleanup DETACHED removing ", openBody.length);
-
             delete this._openedBodiesInfo[openBody];
             delete this.openedBodiesVNodes[openBody];
         }
@@ -18544,7 +18480,6 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
     for (const openBody of Object.keys(this._openedBodiesInfo)) {
         if (!w_foundGnx.includes(openBody)) {
             // Not an opened tab! remove it!
-            console.log("cleanup Bodies removing ", openBody.length);
 
             delete this._openedBodiesInfo[openBody];
         }
@@ -18553,11 +18488,64 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
 
 </t>
 <t tx="felix.20240422231239.1">/**
- * Debounced refresh language for all detached bodies 
+ * Debounced refresh language for all detached bodies
  */
 private _refreshCommanderDetachedLanguage(): void {
-    //
-    //
+
+    const c = g.app.windowList[this.frameIndex].c;
+    const c_id = c.id.toString();
+    const w_documents: vscode.TextDocument[] = [];
+    const w_uris: string[] = [];
+
+    for (const p_tabGroup of vscode.window.tabGroups.all) {
+        for (const p_tab of p_tabGroup.tabs) {
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                ((p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
+            ) {
+                const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+                if (id === c_id) {
+                    // From same commander
+                    if (!w_uris.includes((p_tab.input as vscode.TabInputText).uri.toString())) {
+                        w_uris.push((p_tab.input as vscode.TabInputText).uri.toString());
+                    }
+
+                }
+            }
+        }
+    }
+
+    for (const w_doc of vscode.workspace.textDocuments) {
+        if (!w_doc.isClosed &amp;&amp; w_uris.includes(w_doc.uri.toString())) {
+            w_documents.push(w_doc);
+            // // Is a detached document, but not this.bodyDetachedTextDocument
+            // if (this.bodyDetachedTextDocument &amp;&amp; (w_doc.uri.toString() !== this.bodyDetachedTextDocument.uri.toString())) {
+            //     w_documents.push(w_doc);
+            // } else if (!this.bodyDetachedTextDocument) {
+            //     w_documents.push(w_doc);
+            // }
+        }
+    }
+
+    console.log('Qty of detached to recolorize by resetting language : ', w_documents.length);
+
+    for (const w_doc of w_documents) {
+        const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(w_doc.uri)];
+        if (w_foundVnode) {
+            for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
+                if (p.v) {
+                    let w_language = this._getBodyLanguage(p); // !! 
+                    // Set document language only if different
+                    if (w_language !== w_doc.languageId) {
+                        void this._setBodyLanguage(w_doc, w_language);
+                    }
+                    break;
+                }
+            }
+        } else {
+            console.log('DETACHED VNODE not found when resetting language');
+        }
+    }
 
 }
 
