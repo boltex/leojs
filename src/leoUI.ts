@@ -1270,7 +1270,7 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
         ) {
-            console.log(' DETACHED ****  _onDocumentChanged');
+            console.log(' D ****');
             this.bodyDetachedTextDocument = p_textDocumentChange.document;
             const [unused, id, gnx] = this.bodyDetachedTextDocument.uri.path.split("/");
             const w_bodyText = this.bodyDetachedTextDocument.getText().replace(/\r\n/g, "\n");
@@ -1280,12 +1280,10 @@ export class LeoUI extends NullGui {
             const w_sameCommander = w_selectedCId === id;
             let w_alreadySaved = false;
             let w_v: VNode | undefined;
-            // find commander
             let c: Commands | undefined;
             for (const w_frame of g.app.windowList) {
                 if (w_frame.c.id.toString() === id) {
                     c = w_frame.c;
-                    console.log('found c');
                     break;
                 }
             }
@@ -1293,7 +1291,7 @@ export class LeoUI extends NullGui {
                 w_v = c.fileCommands.gnxDict[gnx];
                 if (this._changedBodyWithMirrorDetached || (w_v && (w_bodyText === w_v.b))) {
                     // WAS NOT A USER MODIFICATION?
-                    console.log("DETACHED refresh PREVENTED : this._changedBodyWithMirrorDetached was " + this._changedBodyWithMirrorDetached + " same text was : " + (w_v && (w_bodyText === w_v.b)));
+                    console.log("DETACHED refresh PREVENTED : _changedBodyWithMirrorDetached " + this._changedBodyWithMirrorDetached + ", same-text  " + (w_v && (w_bodyText === w_v.b)));
                     this._changedBodyWithMirrorDetached = false;
                     return;
                 } else {
@@ -1352,7 +1350,7 @@ export class LeoUI extends NullGui {
             }
 
             if (w_needsRefresh) {
-                console.log('detached needs refresh states: \'@\' content changed !!');
+                console.log('detached -> \'@\' content changed !!');
 
                 if (!w_alreadySaved) {
                     void this._bodySaveDocument(this.bodyDetachedTextDocument);
@@ -1413,27 +1411,14 @@ export class LeoUI extends NullGui {
                         w_alreadySaved = true;
                     }
                     if (w_sameBodyTabOpened) {
-                        // fire body node refresh if opened!!
-                        // if (this._changedBodyWithMirrorDetached) {
-                        //     console.log("PREVENTED DOUBLE REFRESH of body");
-                        //     this._changedBodyWithMirrorDetached = false;
-                        // } else {
                         if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
-                            console.log("DETACHED change detected, body in watched so set _changedDetachedWithMirrorBody flag");
+                            console.log("DETACHED change detected, body in watched -> _changedDetachedWithMirrorBody");
                             this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
                         }
-                        //     console.log("GO AHEAD REFRESH of body");
-                        //     this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
-                        // }
-
-                        console.log("GO AHEAD REFRESH of body");
                         this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
-
-
 
                     }
                 }
-
                 if (w_needsRefresh) {
                     console.log('regular body refresh language');
                     this.debouncedRefreshBodyStates(50); // And maybe changed in other node of same commander!
@@ -1450,7 +1435,7 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
         ) {
-            console.log(' ------- ****  _onDocumentChanged');
+            console.log(' - ****');
             const c = g.app.windowList[this.frameIndex].c;
 
             // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
@@ -1477,7 +1462,7 @@ export class LeoUI extends NullGui {
                     }
                 }
                 if (w_hasSameDetachedTab) {
-                    console.log('------- **** w_hasSameDetachedTab');
+                    console.log('- **** w_hasSameDetachedTab');
                     break;
                 }
             }
@@ -1493,40 +1478,24 @@ export class LeoUI extends NullGui {
                 if (this._changedDetachedWithMirrorBody || (c.p && c.p.__bool__() && w_bodyText === c.p.b)) {
                     // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                     // Set proper cursor insertion point and selection range.
-                    console.log("------- refresh PREVENTED : this._changedDetachedWithMirrorBody was " + this._changedDetachedWithMirrorBody + " same body was : ", (c.p && c.p.__bool__() && w_bodyText === c.p.b));
+                    console.log("------- refresh PREVENTED : _changedDetachedWithMirrorBody " + this._changedDetachedWithMirrorBody + ", same-body ", (c.p && c.p.__bool__() && w_bodyText === c.p.b));
                     this._changedDetachedWithMirrorBody = false;
                     void this.showBody(false, true, true);
                     return;
                 }
 
+                console.log("------- was different ");
+
                 if (!this.leoStates.leoChanged || w_iconChanged || w_hasSameDetachedTab) {
                     // Document pane icon needs refresh (changed) and/or outline icon changed
                     void this._bodySaveDocument(p_textDocumentChange.document).then(() => {
                         if (w_hasSameDetachedTab && this.lastSelectedNode) {
-                            // Ok to fire refresh now!
-                            console.log('body changed -> hasSameDetachedTab detached should change!');
-                            // if (this._changedDetachedWithMirrorBody) {
-                            //     console.log("PREVENTED DOUBLE REFRESH of DETACHED");
-                            //     this._changedDetachedWithMirrorBody = false;
-                            // } else {
-
                             if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(`${c.id}/${w_lastSelNodeGnx}`)) {
-                                console.log("--------- change detected, DETACHED in watched so set _changedBodyWithMirrorDetached flag");
+                                console.log("--------- change detected, DETACHED in watched -> _changedBodyWithMirrorDetached");
                                 this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
                             }
-                            //     console.log("GO AHEAD REFRESH of DETACHED");
-                            //     this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
-                            // }
-
-
-                            console.log("GO AHEAD REFRESH of DETACHED");
                             this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
                         }
-                        // todo : Really saved to node, no need to set dirty or hasbody -> Check & test to see if icon changes!
-                        // if (this.lastSelectedNode) {
-                        //     this.lastSelectedNode.dirty = true;
-                        //     this.lastSelectedNode.hasBody = w_hasBody;
-                        // }
                         if (w_iconChanged) {
                             this.findFocusTree = false;
                             // NOT incrementing this.treeID to keep ids intact

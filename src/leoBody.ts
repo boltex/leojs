@@ -225,9 +225,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     }
 
     public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
-
-        console.log("------ readDirectory called on uri path: ", p_uri.path);
-
         if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
             const w_directory: [string, vscode.FileType][] = [];
             w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
@@ -272,8 +269,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     public delete(p_uri: vscode.Uri): void {
         const w_gnx = utils.leoUriToStr(p_uri);
-        console.log("delete body file " + w_gnx);
-
         if (this._openedBodiesInfo[w_gnx]) {
             delete this._openedBodiesInfo[w_gnx];
         } else {

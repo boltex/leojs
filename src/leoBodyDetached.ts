@@ -268,9 +268,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     }
 
     public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
-
-        console.log("DETACHED readDirectory called on uri path: ", p_uri.path);
-
         const w_commanders: Set<string> = new Set();
         const w_detached: Set<string> = new Set();
         if (this._leoUi.leoStates.fileOpenedReady) {
@@ -297,9 +294,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             for (const w_commander of [...w_commanders]) {
                 w_directory.push([w_commander, vscode.FileType.Directory]);
             }
-
-            console.log("DETACHED  returned all visible c ids:", w_directory);
-
             return w_directory;
 
         } else if (
@@ -307,32 +301,24 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
         ) {
 
             const w_directory: [string, vscode.FileType][] = [];
-
             for (const w_file of [...w_detached]) {
                 if (w_file.split('/')[1] === p_uri.path.split('/')[1]) {
                     w_directory.push([w_file.split('/')[2], vscode.FileType.File]);
                 }
             }
-
-            console.log(`DETACHED  returned all visible detached in ${p_uri.path} :`, w_directory);
-
             return w_directory;
 
         } else {
-
-            console.log('Error: DETACHED  Asked to read Directory! uri path: ' + p_uri.path);
-
             throw vscode.FileSystemError.FileNotFound(p_uri);
         }
     }
 
     public createDirectory(p_uri: vscode.Uri): void {
-        console.warn('Called DETACHED  createDirectory with ', p_uri.path); // should not happen
+        console.warn('DETACHED Called createDirectory with ', p_uri.path); // should not happen
         throw vscode.FileSystemError.NoPermissions();
     }
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
-
         if (this.preventSaveToLeo) {
             this.preventSaveToLeo = false;
         } else {
@@ -352,7 +338,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     }
 
     public rename(p_oldUri: vscode.Uri, p_newUri: vscode.Uri, p_options: { overwrite: boolean }): void {
-        console.warn('Called DETACHED  rename on ', p_oldUri.path, p_newUri.path); // should not happen
+        console.warn('DETACHED Called rename on ', p_oldUri.path, p_newUri.path); // should not happen
         this._fireSoon(
             { type: vscode.FileChangeType.Deleted, uri: p_oldUri },
             { type: vscode.FileChangeType.Created, uri: p_newUri }
@@ -361,8 +347,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     public delete(p_uri: vscode.Uri): void {
         const w_gnx = utils.leoUriToStr(p_uri);
-        console.log("delete body DETACHED file " + w_gnx);
-
         if (this._openedBodiesInfo[w_gnx]) {
             delete this._openedBodiesInfo[w_gnx];
             delete this.openedBodiesVNodes[w_gnx];
@@ -380,7 +364,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     }
 
     public copy(p_uri: vscode.Uri): void {
-        console.warn('Called DETACHED  copy on ', p_uri.path); // should not happen
+        console.warn('DETACHED Called copy on ', p_uri.path); // should not happen
         throw vscode.FileSystemError.NoPermissions();
     }
 
