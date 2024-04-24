@@ -60,14 +60,14 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
         }
 
         const w_stack = new Error().stack!;
-        const stackArray = w_stack.split("at ").slice(1, 5).map(s => {
+        const stackArray = w_stack.split("at ").slice(1, 4).map(s => {
             let index = s.indexOf('(');  // Find the index of the opening parenthesis
             if (index !== -1) {
                 return s.substring(0, index);  // Cut the string up to the parenthesis
             }
             return s;  // Return the original string if no parenthesis is found
         });
-        console.log("DETACHED SET BODY TIME ", p_gnx, ' AT  ', w_now, "stack", stackArray.join(" "));
+        console.log("DETACHED SET BODY TIME ", p_gnx, ' AT ', w_now, stackArray.join(" "));
 
         this._openedBodiesInfo[p_gnx] = {
             ctime: w_created,
@@ -113,6 +113,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             console.warn("DETACHED ASKED TO REFRESH NOT EVEN IN WATCHED BODY: ", p_gnx);
             return; // Document is not being watched (closed tab or non-visible non-dirty tab)
         }
+        console.log('DETACHED fire ------------------------');
 
         this._onDidChangeFileEmitter.fire([{
             type: vscode.FileChangeType.Changed,

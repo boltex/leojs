@@ -218,6 +218,7 @@
 <v t="felix.20220922000450.13"><vh>_setBodyLanguage</vh></v>
 <v t="felix.20220922000450.14"><vh>refreshBodyStates</vh></v>
 <v t="felix.20220922000450.15"><vh>debouncedRefreshBodyStates</vh></v>
+<v t="felix.20240422231239.1"><vh>_refreshCommanderDetachedLanguage</vh></v>
 </v>
 <v t="felix.20201214194144.6"><vh>Commands</vh>
 <v t="felix.20201214202749.1"><vh>selectTreeNode</vh></v>
@@ -4192,7 +4193,7 @@ public async selectTreeNode(
 
     await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
 
-    const c = g.app.windowList[this.frameIndex].c;
+    const c = p_node.v.context;
 
     g.doHook("headclick1", { c: c, p: p_node, v: p_node });
 
@@ -4757,7 +4758,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "d87d4c0",
+  "gitBranch": "boltex/issue120",
+  "gitDate": "2024-04-22 00:01:58 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8612,7 +8616,7 @@ public fireRefreshFile(p_gnx: string): void {
     this._setOpenedBodyTime(p_gnx);
 
     if (!this.watchedBodiesGnx.includes(p_gnx)) {
-        console.warn("ASKED TO REFRESH NOT EVEN IN WATCHED BODIES: ", p_gnx);
+        console.warn("------- ASKED TO REFRESH NOT EVEN IN WATCHED BODIES: ", p_gnx);
         return; // Document is not being watched (closed tab or non-visible non-dirty tab)
     }
 
@@ -13406,6 +13410,7 @@ private _onChangeEditorScroll(p_event: vscode.TextEditorVisibleRangesChangeEvent
  * @param p_textDocumentChange Text changed event passed by vscode
  */
 private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent): void {
+
     if (
         p_textDocumentChange.contentChanges.length &amp;&amp;
         p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
@@ -13507,30 +13512,33 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             }
         }
 
-
-        // Check if exact same node as currently selected body
-        if (
-            w_sameCommander &amp;&amp; this.lastSelectedNode &amp;&amp; gnx === this.lastSelectedNode.gnx
-        ) {
-            // Same commander and gnx  !  
-            if (!w_alreadySaved) {
-                void this._bodySaveDocument(this.bodyDetachedTextDocument);
-                w_alreadySaved = true;
-            }
-            if (w_sameBodyTabOpened) {
-                // fire body node refresh if opened!!
-                if (this._changedBodyWithMirrorDetached) {
-                    this._changedBodyWithMirrorDetached = false;
-                } else {
-                    if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
-                        this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
+        // Check if exact same commander as currently selected body
+        if (w_sameCommander) {
+            if (this.lastSelectedNode &amp;&amp; gnx === this.lastSelectedNode.gnx) {
+                // Same commander AND same gnx  !  
+                if (!w_alreadySaved) {
+                    void this._bodySaveDocument(this.bodyDetachedTextDocument);
+                    w_alreadySaved = true;
+                }
+                if (w_sameBodyTabOpened) {
+                    // fire body node refresh if opened!!
+                    if (this._changedBodyWithMirrorDetached) {
+                        this._changedBodyWithMirrorDetached = false;
+                    } else {
+                        if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
+                            console.log("PREVENT DOUBLE REFRESH of body");
+                            this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
+                        }
+                        this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
                     }
-                    this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
                 }
             }
+
             if (w_needsRefresh) {
-                this.debouncedRefreshBodyStates(50); // And maybe changed language!
+                console.log('regular body refresh language');
+                this.debouncedRefreshBodyStates(50); // And maybe changed in other node of same commander!
             }
+
         }
 
     }
@@ -13598,6 +13606,8 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                         } else {
 
                             if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(w_lastSelNodeGnx)) {
+                                console.log("PREVENT DOUBLE REFRESH of DETACHED");
+
                                 this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
                             }
                             this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
@@ -13651,6 +13661,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
         if (w_needsRefresh) {
             this.debouncedRefreshBodyStates(1);
+            this.refreshCommanderDetachedLanguage();
         }
 
     }
@@ -15161,7 +15172,7 @@ public async goAnywhere(): Promise&lt;unknown&gt; {
  * * Looks for given position's coloring language, taking account of '@killcolor', etc.
  */
 private _getBodyLanguage(p: Position): string {
-    const c = g.app.windowList[this.frameIndex].c;
+    const c = p.v.context;
     let w_language = "plain";
     const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
     if (g.useSyntaxColoring(p)) {
@@ -17403,8 +17414,9 @@ set leoIdUnset(p_value: boolean) {
 public async openAside(p: Position): Promise&lt;unknown&gt; {
     // Those 'body panes' opened aside, (other than the main body pane), 
     // stay opened until the node's gnx becomes invalid/deleted, or it's commander is closed.
+    await this.triggerBodySave(true);
 
-    const c = g.app.windowList[this.frameIndex].c;
+    const c = p.v.context;
     const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
 
     // * Step 1 : Open the document
@@ -18537,6 +18549,16 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
             delete this._openedBodiesInfo[openBody];
         }
     }
+}
+
+</t>
+<t tx="felix.20240422231239.1">/**
+ * Debounced refresh language for all detached bodies 
+ */
+private _refreshCommanderDetachedLanguage(): void {
+    //
+    //
+
 }
 
 </t>
