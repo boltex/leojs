@@ -22,7 +22,6 @@ export interface ConfigMembers {
     // statusBarColor: string;
 
     treeInExplorer: boolean;
-    showOpenAside: boolean;
     showEditOnNodes: boolean;
     // showArrowsOnNodes: boolean;
     showAddOnNodes: boolean;

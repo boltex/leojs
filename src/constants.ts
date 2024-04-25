@@ -290,7 +290,6 @@ export class Constants {
         TREE_KEEP_FOCUS: "treeKeepFocus",
         TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
         TREE_IN_EXPLORER: "treeInExplorer",
-        SHOW_OPEN_ASIDE: "showOpenAside",
         SHOW_EDIT: "showEditOnNodes",
         SHOW_ADD: "showAddOnNodes",
         SHOW_MARK: "showMarkOnNodes",
@@ -336,9 +335,7 @@ export class Constants {
         SHOW_UNL_ON_STATUSBAR: true,
 
         TREE_IN_EXPLORER: true,
-        SHOW_OPEN_ASIDE: true,
         SHOW_EDIT: true,
-        // SHOW_ARROWS: false,
         SHOW_ADD: false,
         SHOW_MARK: false,
         SHOW_CLONE: false,
@@ -444,9 +441,7 @@ export class Constants {
         // * PREFIXED WITH 'leojs' *
         LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
         TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
-        SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
         SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
-        // SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
         SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
         SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
         SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes

@@ -3578,12 +3578,15 @@ export class LeoUI extends NullGui {
      * - If already opened aside in the same targeted column, just reveal.
      * @param p is the position node to be opened aside
      */
-    public async openAside(p: Position): Promise<unknown> {
+    public async openAside(p?: Position): Promise<unknown> {
         // Those 'body panes' opened aside, (other than the main body pane), 
         // stay opened until the node's gnx becomes invalid/deleted, or it's commander is closed.
         await this.triggerBodySave(true);
 
-        const c = p.v.context;
+        const c = g.app.windowList[this.frameIndex].c;
+        if (!p) {
+            p = c.p;
+        }
         const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
 
         // * Step 1 : Open the document
@@ -3609,7 +3612,7 @@ export class LeoUI extends NullGui {
         {
             viewColumn: vscode.ViewColumn.Beside,
             preserveFocus: this.config.treeKeepFocusWhenAside,
-            preview: true, // should text document be in preview only? set false for fully opened
+            preview: false,
         };
         // * Actually Show the body pane document in a text editor
         const q_showTextDocument = vscode.window.showTextDocument(

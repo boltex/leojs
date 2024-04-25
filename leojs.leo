@@ -854,6 +854,7 @@ This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)**
 # Features
 
 -   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   **Detached Body Panes**, independent of the selected node can be opened with the 'Open Aside' command.
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
 -   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
@@ -2079,7 +2080,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
 [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
-[CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.openAside(p_position)],
+[CMD.OPEN_ASIDE, (p_position?: Position) =&gt; p_leoUI.openAside(p_position)],
 
 [CMD.CONTRACT_ALL, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.CONTRACT_ALL_FO, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
@@ -2812,9 +2813,7 @@ public static CONTEXT_FLAGS = {
     // * PREFIXED WITH 'leojs' *
     LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
     TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
-    SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
     SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
-    // SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
     SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
     SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
     SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
@@ -4766,10 +4765,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "72bb055",
-  "gitBranch": "boltex/issue120",
-  "gitDate": "2024-04-24 00:04:56 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4908,7 +4904,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.openAside",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Open to the Side"
+  "title": "Open Aside"
 },
 {
   "command": "leojs.contractAll",
@@ -5653,12 +5649,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 {
   "command": "leojs.writeDirtyAtFileNodesFromOutline",
-  "when": "false"
-},
 </t>
-<t tx="felix.20201214205159.45">{
-  "command": "leojs.openAside",
-  "when": "false"
+<t tx="felix.20201214205159.45">  "when": "false"
 },
 {
   "command": "leojs.contractAllFromOutline",
@@ -6209,7 +6201,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 </t>
 <t tx="felix.20201214205159.62">{
   "command": "leojs.openAside",
-  "when": "config.leojs.showOpenAside &amp;&amp; viewItem =~ /^leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext1@1"
 },
 </t>
@@ -7952,12 +7944,6 @@ public incTreeId(): void {
       "type": "boolean",
       "description": "Shows the outline tree in the explorer view"
     },
-    "leojs.showOpenAside": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Offer 'Open to the Side' in nodes context menu"
-    },
     "leojs.showEditOnNodes": {
       "scope": "application",
       "default": true,
@@ -8119,7 +8105,6 @@ public buildFromSavedSettings(): void {
         //     this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
         // }
         this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
-        this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
         this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
         this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
         this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
@@ -8166,13 +8151,9 @@ export class Config implements ConfigMembers {
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
     public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
-    // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
-    // public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
-    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
 
-    // public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
     public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
     public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
     public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
@@ -8230,12 +8211,8 @@ public getConfig(): ConfigMembers {
         goAnywhereShortcut: this.goAnywhereShortcut,
 
         showUnlOnStatusBar: this.showUnlOnStatusBar,
-        // statusBarString: this.statusBarString,
-        // statusBarColor: this.statusBarColor,
         treeInExplorer: this.treeInExplorer, // Used as Context Flag
-        showOpenAside: this.showOpenAside,  // Used as Context Flag
         showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
-        // showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
         showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
         showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
         showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
@@ -8326,7 +8303,6 @@ export interface ConfigMembers {
     // statusBarColor: string;
 
     treeInExplorer: boolean;
-    showOpenAside: boolean;
     showEditOnNodes: boolean;
     // showArrowsOnNodes: boolean;
     showAddOnNodes: boolean;
@@ -8370,7 +8346,6 @@ public static CONFIG_NAMES = {
     TREE_KEEP_FOCUS: "treeKeepFocus",
     TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
     TREE_IN_EXPLORER: "treeInExplorer",
-    SHOW_OPEN_ASIDE: "showOpenAside",
     SHOW_EDIT: "showEditOnNodes",
     SHOW_ADD: "showAddOnNodes",
     SHOW_MARK: "showMarkOnNodes",
@@ -8417,9 +8392,7 @@ public static CONFIG_DEFAULTS = {
     SHOW_UNL_ON_STATUSBAR: true,
 
     TREE_IN_EXPLORER: true,
-    SHOW_OPEN_ASIDE: true,
     SHOW_EDIT: true,
-    // SHOW_ARROWS: false,
     SHOW_ADD: false,
     SHOW_MARK: false,
     SHOW_CLONE: false,
@@ -17388,12 +17361,15 @@ set leoIdUnset(p_value: boolean) {
  * - If already opened aside in the same targeted column, just reveal.
  * @param p is the position node to be opened aside
  */
-public async openAside(p: Position): Promise&lt;unknown&gt; {
+public async openAside(p?: Position): Promise&lt;unknown&gt; {
     // Those 'body panes' opened aside, (other than the main body pane), 
     // stay opened until the node's gnx becomes invalid/deleted, or it's commander is closed.
     await this.triggerBodySave(true);
 
-    const c = p.v.context;
+    const c = g.app.windowList[this.frameIndex].c;
+    if (!p) {
+        p = c.p;
+    }
     const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
 
     // * Step 1 : Open the document
@@ -17419,7 +17395,7 @@ public async openAside(p: Position): Promise&lt;unknown&gt; {
     {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: this.config.treeKeepFocusWhenAside,
-        preview: true, // should text document be in preview only? set false for fully opened
+        preview: false,
     };
     // * Actually Show the body pane document in a text editor
     const q_showTextDocument = vscode.window.showTextDocument(
@@ -18559,6 +18535,7 @@ private _refreshCommanderDetachedLanguage(): void {
 </t>
 <t tx="foo.20240309205342.1"># 0.2.13
 
+- Added new videos to the readme: "Intro to Leo" and "LeoJS Features Demo".
 - Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
 - Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
 

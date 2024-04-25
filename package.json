@@ -124,12 +124,6 @@
           "type": "boolean",
           "description": "Shows the outline tree in the explorer view"
         },
-        "leojs.showOpenAside": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Offer 'Open to the Side' in nodes context menu"
-        },
         "leojs.showEditOnNodes": {
           "scope": "application",
           "default": true,
@@ -1946,7 +1940,7 @@
         "command": "leojs.openAside",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Open to the Side"
+        "title": "Open Aside"
       },
       {
         "command": "leojs.contractAll",
@@ -2966,10 +2960,6 @@
           "when": "false"
         },
         {
-          "command": "leojs.openAside",
-          "when": "false"
-        },
-        {
           "command": "leojs.contractAllFromOutline",
           "when": "false"
         },
@@ -3614,7 +3604,7 @@
         },
         {
           "command": "leojs.openAside",
-          "when": "config.leojs.showOpenAside && viewItem =~ /^leojsNode/",
+          "when": "viewItem =~ /^leojsNode/",
           "group": "leojsNodeContext1@1"
         },
         {
@@ -4497,8 +4487,5 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "uuid": "^9.0.1"
-  },
-  "gitCommit": "72bb055",
-  "gitBranch": "boltex/issue120",
-  "gitDate": "2024-04-24 00:04:56 -0400"
+  }
 }
