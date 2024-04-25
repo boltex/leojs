@@ -4497,5 +4497,8 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "uuid": "^9.0.1"
-  }
+  },
+  "gitCommit": "72bb055",
+  "gitBranch": "boltex/issue120",
+  "gitDate": "2024-04-24 00:04:56 -0400"
 }

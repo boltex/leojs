@@ -3979,7 +3979,7 @@ export class LeoUI extends NullGui {
     // * Debounced method used to check for closed detached/body tabs
     public checkClosedTabs: (() =&gt; void);
 
-    // * Debounced method used to refresh language of this commander's detached bodies 
+    // * Debounced method used to refresh language of the active commander's detached bodies 
     public refreshCommanderDetachedLanguage: (() =&gt; void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
@@ -4766,7 +4766,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "72bb055",
+  "gitBranch": "boltex/issue120",
+  "gitDate": "2024-04-24 00:04:56 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8617,7 +8620,6 @@ public fireRefreshFile(p_gnx: string): void {
     this._setOpenedBodyTime(p_gnx);
 
     if (!this.watchedBodiesGnx.includes(p_gnx)) {
-        console.warn("------- ASKED TO REFRESH NOT EVEN IN WATCHED BODIES: ", p_gnx);
         return; // Document is not being watched (closed tab or non-visible non-dirty tab)
     }
     this._onDidChangeFileEmitter.fire([{
@@ -17694,7 +17696,7 @@ public fireRefreshFile(p_gnx: string): void {
     this._setOpenedBodyTime(p_gnx);
 
     if (!this.watchedBodiesGnx.includes(p_gnx)) {
-        console.warn("DETACHED ASKED TO REFRESH NOT EVEN IN WATCHED BODY: ", p_gnx);
+        // * Can happen with detached bodies. 
         return; // Document is not being watched (closed tab or non-visible non-dirty tab)
     }
 
@@ -18488,7 +18490,7 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
 
 </t>
 <t tx="felix.20240422231239.1">/**
- * Debounced refresh language for all detached bodies
+ * Debounced refresh language for all detached bodies of active commander
  */
 private _refreshCommanderDetachedLanguage(): void {
 
@@ -18557,7 +18559,8 @@ private _refreshCommanderDetachedLanguage(): void {
 </t>
 <t tx="foo.20240309205342.1"># 0.2.13
 
-- Fixed ...
+- Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
+- Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
 
 </t>
 </tnodes>

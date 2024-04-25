@@ -258,7 +258,7 @@ export class LeoUI extends NullGui {
     // * Debounced method used to check for closed detached/body tabs
     public checkClosedTabs: (() => void);
 
-    // * Debounced method used to refresh language of this commander's detached bodies 
+    // * Debounced method used to refresh language of the active commander's detached bodies 
     public refreshCommanderDetachedLanguage: (() => void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
@@ -3433,7 +3433,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Debounced refresh language for all detached bodies
+     * Debounced refresh language for all detached bodies of active commander
      */
     private _refreshCommanderDetachedLanguage(): void {
 

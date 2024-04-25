@@ -104,7 +104,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         this._setOpenedBodyTime(p_gnx);
 
         if (!this.watchedBodiesGnx.includes(p_gnx)) {
-            console.warn("------- ASKED TO REFRESH NOT EVEN IN WATCHED BODIES: ", p_gnx);
             return; // Document is not being watched (closed tab or non-visible non-dirty tab)
         }
         this._onDidChangeFileEmitter.fire([{

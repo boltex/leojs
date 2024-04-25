@@ -106,7 +106,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
         this._setOpenedBodyTime(p_gnx);
 
         if (!this.watchedBodiesGnx.includes(p_gnx)) {
-            console.warn("DETACHED ASKED TO REFRESH NOT EVEN IN WATCHED BODY: ", p_gnx);
+            // * Can happen with detached bodies. 
             return; // Document is not being watched (closed tab or non-visible non-dirty tab)
         }
 
