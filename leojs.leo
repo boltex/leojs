@@ -18537,6 +18537,7 @@ private _refreshCommanderDetachedLanguage(): void {
 
 - Added new videos to the readme: "Intro to Leo" and "LeoJS Features Demo".
 - Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
+- Fixed undo/redo status flags
 - Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
 
 </t>
