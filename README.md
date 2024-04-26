@@ -29,6 +29,7 @@ This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)**
 # Features
 
 -   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   **Detached Body Panes**, independent of the selected node can be opened with the 'Open Aside' command.
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
 -   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API

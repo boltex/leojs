@@ -266,7 +266,7 @@ export class Commands {
         relativeFileName?: string
     ) {
         const c: Commands = this;
-        this.id = ++g.app.commanderIdCounter;
+        this.id = ++g.app.commanderIdCounter; // Incremented BEFORE use, so first one is 1.
 
         // From Official Ivars
         this.gui = gui || g.app.gui;
