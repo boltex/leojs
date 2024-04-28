@@ -6923,8 +6923,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
 "showdown": "^2.1.0",
-"stream": "^0.0.2",
-"uuid": "^9.0.1"
+"stream": "^0.0.2"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showSettingsPage",

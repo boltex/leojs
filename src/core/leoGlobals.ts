@@ -32,7 +32,10 @@ import { SqlJsStatic } from 'sql.js';
 import * as showdownObj from "showdown";
 import * as pakoObj from 'pako';
 import * as JSZipObj from 'jszip';
-
+import * as md5Obj from 'md5';
+const dayjsObj = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjsObj.extend(utc);
 
 /*
     import binascii
@@ -290,6 +293,8 @@ export let SQL: SqlJsStatic;
 export let pako: typeof pakoObj = pakoObj;
 export let showdown: typeof showdownObj = showdownObj;
 export let JSZip: typeof JSZipObj = JSZipObj;
+export let dayjs: typeof dayjsObj = dayjsObj;
+export let md5: typeof md5Obj = md5Obj;
 
 // The singleton Git extension exposed API
 export let gitAPI: GitAPI.API;
