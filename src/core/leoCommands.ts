@@ -49,6 +49,12 @@ import * as typescript from 'typescript';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
+if (g.isBrowser) {
+    // @ts-expect-error
+    crypto.randomUUID = globalThis.crypto.randomUUID;
+    // @ts-expect-error
+    crypto.getRandomValues = globalThis.crypto.getRandomValues;
+}
 
 //@-<< imports >>
 //@+others

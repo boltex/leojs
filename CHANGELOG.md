@@ -6,7 +6,18 @@
 - Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
 - Fixed undo/redo status flags
 - Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
-
+- Added common library objects to the scripting global scope:
+    - os
+    - path
+    - Buffer
+    - crypto
+    - process
+    - child_process
+- Added 'vscode' API to the scripting global scope. (while  keeping the g.vscode reference for compatibility with old scripts)
+- Made more external libraries accessible to scripts via the global 'g' object:
+    - dayjs
+    - md5
+    
 # 0.2.12
 
 - Help commands were changed from markdown preview panes to html webviews.

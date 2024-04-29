@@ -14,6 +14,7 @@ import { NullBody } from './leoFrame';
 import 'date-format-lite';
 import * as crypto from 'crypto';
 import KSUID = require('ksuid');
+
 //@-<< imports >>
 //@+others
 //@+node:felix.20210102014453.1: ** class NodeIndices
@@ -149,10 +150,13 @@ export class NodeIndices {
         //     so it and will allocate a new legacy gnx properly.
         let gnx;
         try {
-            if (uuid_kind === 'uuid')
-
-                gnx = crypto.randomUUID();
-            else if (KSUID && uuid_kind === 'ksuid') {
+            if (uuid_kind === 'uuid') {
+                if (g.isBrowser) {
+                    gnx = globalThis.crypto.randomUUID();
+                } else {
+                    gnx = crypto.randomUUID();
+                }
+            } else if (KSUID && uuid_kind === 'ksuid') {
                 gnx = KSUID.randomSync().string;
             }
         } catch (e) {
