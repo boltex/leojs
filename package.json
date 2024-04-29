@@ -2,7 +2,7 @@
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -16,7 +16,7 @@
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.86.0"
   },
   "keywords": [
     "leo",
@@ -98,7 +98,7 @@
           "scope": "application",
           "default": false,
           "type": "boolean",
-          "description": "Specifies whether to keep focus in the outline when opening a body pane on the side"
+          "description": "Specifies whether to keep focus in the outline when opening a detached body pane on the side"
         },
         "leojs.goAnywhereShortcut": {
           "scope": "application",
@@ -123,12 +123,6 @@
           "default": true,
           "type": "boolean",
           "description": "Shows the outline tree in the explorer view"
-        },
-        "leojs.showOpenAside": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Offer 'Open to the Side' in nodes context menu"
         },
         "leojs.showEditOnNodes": {
           "scope": "application",
@@ -187,7 +181,7 @@
         {
           "id": "leojsView",
           "title": "Leojs",
-          "icon": "resources/icon.svg"
+          "icon": "$(leojs-icon-leo-fill)"
         }
       ]
     },
@@ -1202,15 +1196,497 @@
         "when": "leojsReady && leojsTreeOpened"
       }
     ],
+    "icons": {
+      "leojs-arrow-down": {
+        "description": "Arrow Down",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f101"
+        }
+      },
+      "leojs-arrow-left": {
+        "description": "Arrow Left",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f102"
+        }
+      },
+      "leojs-arrow-right": {
+        "description": "Arrow Right",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f103"
+        }
+      },
+      "leojs-arrow-small-down": {
+        "description": "Small Arrow Down",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f104"
+        }
+      },
+      "leojs-arrow-small-left": {
+        "description": "Small Arrow Left",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f105"
+        }
+      },
+      "leojs-arrow-small-right": {
+        "description": "Small Arrow Right",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f106"
+        }
+      },
+      "leojs-arrow-small-up": {
+        "description": "Small Arrow Up",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f107"
+        }
+      },
+      "leojs-arrow-up": {
+        "description": "Arrow Up",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f108"
+        }
+      },
+      "leojs-chapter-back": {
+        "description": "Chapter Back",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f109"
+        }
+      },
+      "leojs-chapter-main": {
+        "description": "Chapter Main",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f10a"
+        }
+      },
+      "leojs-chapter-next": {
+        "description": "Chapter Next",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f10b"
+        }
+      },
+      "leojs-chapter-select": {
+        "description": "Chapter Select",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f10c"
+        }
+      },
+      "leojs-clear-files": {
+        "description": "Clear Files",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f10d"
+        }
+      },
+      "leojs-clipboard": {
+        "description": "Clipboard",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f10e"
+        }
+      },
+      "leojs-close": {
+        "description": "Close",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f10f"
+        }
+      },
+      "leojs-close-server": {
+        "description": "Close Server",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f110"
+        }
+      },
+      "leojs-collapse": {
+        "description": "Collapse",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f111"
+        }
+      },
+      "leojs-connect": {
+        "description": "Connect",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f112"
+        }
+      },
+      "leojs-cut": {
+        "description": "Cut",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f113"
+        }
+      },
+      "leojs-dehoist": {
+        "description": "Dehoist",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f114"
+        }
+      },
+      "leojs-delete": {
+        "description": "Delete",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f115"
+        }
+      },
+      "leojs-demote": {
+        "description": "Demote",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f116"
+        }
+      },
+      "leojs-edit": {
+        "description": "Edit",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f117"
+        }
+      },
+      "leojs-extract": {
+        "description": "Extract",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f118"
+        }
+      },
+      "leojs-extract-name": {
+        "description": "Extract Name",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f119"
+        }
+      },
+      "leojs-find-next": {
+        "description": "Find Next",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f11a"
+        }
+      },
+      "leojs-find-previous": {
+        "description": "Find Previous",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f11b"
+        }
+      },
+      "leojs-find-quick": {
+        "description": "Find Quick",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f11c"
+        }
+      },
+      "leojs-find-quick-changed": {
+        "description": "Find Quick Changed",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f11d"
+        }
+      },
+      "leojs-find-quick-history": {
+        "description": "Find Quick History",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f11e"
+        }
+      },
+      "leojs-find-quick-marked": {
+        "description": "Find Quick Marked",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f11f"
+        }
+      },
+      "leojs-find-quick-selected": {
+        "description": "Find Quick Selected",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f120"
+        }
+      },
+      "leojs-find-quick-timeline": {
+        "description": "Find Quick Timeline",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f121"
+        }
+      },
+      "leojs-folder": {
+        "description": "Folder",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f122"
+        }
+      },
+      "leojs-gear": {
+        "description": "Gear",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f123"
+        }
+      },
+      "leojs-hoist": {
+        "description": "Hoist",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f124"
+        }
+      },
+      "leojs-icon-leo-fill": {
+        "description": "Leo icon filled",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f125"
+        }
+      },
+      "leojs-icon-leo-outline": {
+        "description": "Leo icon outlined",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f126"
+        }
+      },
+      "leojs-import": {
+        "description": "Import",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f127"
+        }
+      },
+      "leojs-insert": {
+        "description": "Insert",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f128"
+        }
+      },
+      "leojs-insert-child": {
+        "description": "Insert Child",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f129"
+        }
+      },
+      "leojs-link": {
+        "description": "Link",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f12a"
+        }
+      },
+      "leojs-mark": {
+        "description": "Mark",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f12b"
+        }
+      },
+      "leojs-new-file": {
+        "description": "New File",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f12c"
+        }
+      },
+      "leojs-next": {
+        "description": "Next",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f12d"
+        }
+      },
+      "leojs-node": {
+        "description": "Node",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f12e"
+        }
+      },
+      "leojs-open-recent": {
+        "description": "Open Recent",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f12f"
+        }
+      },
+      "leojs-parent": {
+        "description": "Parent",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f130"
+        }
+      },
+      "leojs-paste": {
+        "description": "Paste",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f131"
+        }
+      },
+      "leojs-paste-clone": {
+        "description": "Paste Clone",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f132"
+        }
+      },
+      "leojs-plus": {
+        "description": "Plus",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f133"
+        }
+      },
+      "leojs-plus-small": {
+        "description": "Small Plus",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f134"
+        }
+      },
+      "leojs-prev": {
+        "description": "Prev",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f135"
+        }
+      },
+      "leojs-promote": {
+        "description": "Promote",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f136"
+        }
+      },
+      "leojs-redo": {
+        "description": "Redo",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f137"
+        }
+      },
+      "leojs-refresh": {
+        "description": "Refresh",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f138"
+        }
+      },
+      "leojs-save": {
+        "description": "Save",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f139"
+        }
+      },
+      "leojs-save-as": {
+        "description": "Save As",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f13a"
+        }
+      },
+      "leojs-save-as-leojs": {
+        "description": "Save As .leojs",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f13b"
+        }
+      },
+      "leojs-show-log": {
+        "description": "Show Log",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f13c"
+        }
+      },
+      "leojs-sort-children": {
+        "description": "Sort Children",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f13d"
+        }
+      },
+      "leojs-sort-siblings": {
+        "description": "Sort Siblings",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f13e"
+        }
+      },
+      "leojs-start-server": {
+        "description": "Start Server",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f13f"
+        }
+      },
+      "leojs-switch": {
+        "description": "Switch",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f140"
+        }
+      },
+      "leojs-tag": {
+        "description": "Tag",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f141"
+        }
+      },
+      "leojs-undo": {
+        "description": "Undo",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f142"
+        }
+      },
+      "leojs-unmark": {
+        "description": "Unmark",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f143"
+        }
+      },
+      "leojs-write-at-file-nodes": {
+        "description": "Write at-file Nodes",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f144"
+        }
+      },
+      "leojs-write-dirty-at-file-nodes": {
+        "description": "Write Dirty at-file Nodes",
+        "default": {
+          "fontPath": "resources/leoicons.woff2",
+          "fontCharacter": "\\f145"
+        }
+      }
+    },
     "commands": [
       {
         "command": "leojs.showSettingsPage",
         "title": "Open Leojs Settings",
         "category": "Leojs",
-        "icon": {
-          "light": "resources/light/gear.svg",
-          "dark": "resources/dark/gear.svg"
-        }
+        "icon": "$(leojs-gear)"
       },
       {
         "command": "leojs.showWelcomePage",
@@ -1240,10 +1716,7 @@
         "category": "Leojs",
         "title": "Show Log Pane",
         "enablement": "leojsReady",
-        "icon": {
-          "light": "resources/light/show-log.svg",
-          "dark": "resources/dark/show-log.svg"
-        }
+        "icon": "$(leojs-show-log)"
       },
       {
         "command": "leojs.executeScript",
@@ -1282,10 +1755,7 @@
         "title": "Open with LeoJS",
         "category": "Leojs",
         "enablement": "leojsReady",
-        "icon": {
-          "light": "resources/light/folder.svg",
-          "dark": "resources/dark/folder.svg"
-        }
+        "icon": "$(leojs-folder)"
       },
       {
         "command": "leojs.revert",
@@ -1299,150 +1769,105 @@
         "title": "Recent Files",
         "category": "Leojs",
         "enablement": "leojsReady",
-        "icon": {
-          "light": "resources/light/open-recent.svg",
-          "dark": "resources/dark/open-recent.svg"
-        }
+        "icon": "$(leojs-open-recent)"
       },
       {
         "command": "leojs.switchLeoFile",
         "title": "Switch Leo File",
         "category": "Leojs",
         "enablement": "leojsReady && leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/switch.svg",
-          "dark": "resources/dark/switch.svg"
-        }
+        "icon": "$(leojs-switch)"
       },
       {
         "command": "leojs.newLeoFile",
         "title": "New Leo File",
         "category": "Leojs",
         "enablement": "leojsReady",
-        "icon": {
-          "light": "resources/light/new-file.svg",
-          "dark": "resources/dark/new-file.svg"
-        }
+        "icon": "$(leojs-new-file)"
       },
       {
         "command": "leojs.closeLeoFile",
         "title": "Close Leo File",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/close.svg",
-          "dark": "resources/dark/close.svg"
-        }
+        "icon": "$(leojs-close)"
       },
       {
         "command": "leojs.saveLeoFile",
         "category": "Leojs",
         "title": "Save Leo File",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/save.svg",
-          "dark": "resources/dark/save.svg"
-        }
+        "icon": "$(leojs-save)"
       },
       {
         "command": "leojs.saveLeoFileFromOutline",
         "category": "Leojs",
         "title": "Save Leo File",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/save.svg",
-          "dark": "resources/dark/save.svg"
-        }
+        "icon": "$(leojs-save)"
       },
       {
         "command": "leojs.saveAsLeoFile",
         "category": "Leojs",
         "title": "Save Leo File as...",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/save-as.svg",
-          "dark": "resources/dark/save-as.svg"
-        }
+        "icon": "$(leojs-save-as)"
       },
       {
         "command": "leojs.saveAsLeoJsFile",
         "category": "Leojs",
         "title": "Save a copy as leojs File...",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/save-as-leojs.svg",
-          "dark": "resources/dark/save-as-leojs.svg"
-        }
+        "icon": "$(leojs-save-as-leojs)"
       },
       {
         "command": "leojs.refreshFromDisk",
         "category": "Leojs",
         "title": "Refresh from Disk",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
+        "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.refreshFromDiskSelection",
         "category": "Leojs",
         "title": "Refresh from Disk",
         "enablement": "leojsTreeOpened && LeojsAtFile",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
+        "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.refreshFromDiskSelectionFromOutline",
         "category": "Leojs",
         "title": "Refresh from Disk",
         "enablement": "leojsTreeOpened && LeojsAtFile",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
+        "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.writeAtFileNodes",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Write @<file> Nodes",
-        "icon": {
-          "light": "resources/light/write-at-file-nodes.svg",
-          "dark": "resources/dark/write-at-file-nodes.svg"
-        }
+        "icon": "$(leojs-write-at-file-nodes)"
       },
       {
         "command": "leojs.writeAtFileNodesFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Write @<file> Nodes",
-        "icon": {
-          "light": "resources/light/write-at-file-nodes.svg",
-          "dark": "resources/dark/write-at-file-nodes.svg"
-        }
+        "icon": "$(leojs-write-at-file-nodes)"
       },
       {
         "command": "leojs.writeDirtyAtFileNodes",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Write Dirty @<file> Nodes",
-        "icon": {
-          "light": "resources/light/write-dirty-at-file-nodes.svg",
-          "dark": "resources/dark/write-dirty-at-file-nodes.svg"
-        }
+        "icon": "$(leojs-write-dirty-at-file-nodes)"
       },
       {
         "command": "leojs.writeDirtyAtFileNodesFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Write Dirty @<file> Nodes",
-        "icon": {
-          "light": "resources/light/write-dirty-at-file-nodes.svg",
-          "dark": "resources/dark/write-dirty-at-file-nodes.svg"
-        }
+        "icon": "$(leojs-write-dirty-at-file-nodes)"
       },
       {
         "command": "leojs.gitDiff",
@@ -1461,10 +1886,7 @@
         "title": "Import File",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/import.svg",
-          "dark": "resources/dark/import.svg"
-        }
+        "icon": "$(leojs-import)"
       },
       {
         "command": "leojs.readFileIntoNode",
@@ -1518,77 +1940,56 @@
         "command": "leojs.openAside",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Open to the Side"
+        "title": "Open Aside"
       },
       {
         "command": "leojs.contractAll",
         "category": "Leojs",
         "title": "Contract All",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/collapse.svg",
-          "dark": "resources/dark/collapse.svg"
-        }
+        "icon": "$(leojs-collapse)"
       },
       {
         "command": "leojs.contractAllFromOutline",
         "category": "Leojs",
         "title": "Contract All",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/collapse.svg",
-          "dark": "resources/dark/collapse.svg"
-        }
+        "icon": "$(leojs-collapse)"
       },
       {
         "command": "leojs.prev",
         "category": "Leojs",
         "title": "Prev",
         "enablement": "leojsTreeOpened && leojsCanGoBack",
-        "icon": {
-          "light": "resources/light/prev.svg",
-          "dark": "resources/dark/prev.svg"
-        }
+        "icon": "$(leojs-prev)"
       },
       {
         "command": "leojs.prevFromOutline",
         "category": "Leojs",
         "title": "Prev",
         "enablement": "leojsTreeOpened && leojsCanGoBack",
-        "icon": {
-          "light": "resources/light/prev.svg",
-          "dark": "resources/dark/prev.svg"
-        }
+        "icon": "$(leojs-prev)"
       },
       {
         "command": "leojs.next",
         "category": "Leojs",
         "title": "Next",
         "enablement": "leojsTreeOpened && leojsCanGoNext",
-        "icon": {
-          "light": "resources/light/next.svg",
-          "dark": "resources/dark/next.svg"
-        }
+        "icon": "$(leojs-next)"
       },
       {
         "command": "leojs.nextFromOutline",
         "category": "Leojs",
         "title": "Next",
         "enablement": "leojsTreeOpened && leojsCanGoNext",
-        "icon": {
-          "light": "resources/light/next.svg",
-          "dark": "resources/dark/next.svg"
-        }
+        "icon": "$(leojs-next)"
       },
       {
         "command": "leojs.editHeadline",
         "category": "Leojs",
         "title": "Edit Headline",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/edit.svg",
-          "dark": "resources/dark/edit.svg"
-        }
+        "icon": "$(leojs-edit)"
       },
       {
         "command": "leojs.editSelectedHeadline",
@@ -1607,60 +2008,42 @@
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Mark",
-        "icon": {
-          "light": "resources/light/mark.svg",
-          "dark": "resources/dark/mark.svg"
-        }
+        "icon": "$(leojs-mark)"
       },
       {
         "command": "leojs.markSelection",
         "category": "Leojs",
         "title": "Mark",
         "enablement": "leojsTreeOpened && !leojsMarked",
-        "icon": {
-          "light": "resources/light/mark.svg",
-          "dark": "resources/dark/mark.svg"
-        }
+        "icon": "$(leojs-mark)"
       },
       {
         "command": "leojs.markSelectionFromOutline",
         "category": "Leojs",
         "title": "Mark",
         "enablement": "leojsTreeOpened && !leojsMarked",
-        "icon": {
-          "light": "resources/light/mark.svg",
-          "dark": "resources/dark/mark.svg"
-        }
+        "icon": "$(leojs-mark)"
       },
       {
         "command": "leojs.unmark",
         "category": "Leojs",
         "title": "Unmark",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/unmark.svg",
-          "dark": "resources/dark/unmark.svg"
-        }
+        "icon": "$(leojs-unmark)"
       },
       {
         "command": "leojs.unmarkSelection",
         "category": "Leojs",
         "title": "Unmark",
         "enablement": "leojsTreeOpened && leojsMarked",
-        "icon": {
-          "light": "resources/light/unmark.svg",
-          "dark": "resources/dark/unmark.svg"
-        }
+        "icon": "$(leojs-unmark)"
       },
       {
         "command": "leojs.unmarkSelectionFromOutline",
         "category": "Leojs",
         "title": "Unmark",
         "enablement": "leojsTreeOpened && leojsMarked",
-        "icon": {
-          "light": "resources/light/unmark.svg",
-          "dark": "resources/dark/unmark.svg"
-        }
+        "icon": "$(leojs-unmark)"
       },
       {
         "command": "leojs.unmarkAll",
@@ -1715,20 +2098,14 @@
         "category": "Leojs",
         "title": "Copy Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/clipboard.svg",
-          "dark": "resources/dark/clipboard.svg"
-        }
+        "icon": "$(leojs-clipboard)"
       },
       {
         "command": "leojs.copyNodeSelection",
         "category": "Leojs",
         "title": "Copy Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/clipboard.svg",
-          "dark": "resources/dark/clipboard.svg"
-        }
+        "icon": "$(leojs-clipboard)"
       },
       {
         "command": "leojs.cutNode",
@@ -1741,10 +2118,7 @@
         "category": "Leojs",
         "title": "Cut Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/cut.svg",
-          "dark": "resources/dark/cut.svg"
-        }
+        "icon": "$(leojs-cut)"
       },
       {
         "command": "leojs.cutNodeSelectionFromOutline",
@@ -1763,10 +2137,7 @@
         "category": "Leojs",
         "title": "Paste Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/paste.svg",
-          "dark": "resources/dark/paste.svg"
-        }
+        "icon": "$(leojs-paste)"
       },
       {
         "command": "leojs.pasteNodeAtSelectionFromOutline",
@@ -1785,10 +2156,7 @@
         "category": "Leojs",
         "title": "Paste Node as Clone",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/paste-clone.svg",
-          "dark": "resources/dark/paste-clone.svg"
-        }
+        "icon": "$(leojs-paste-clone)"
       },
       {
         "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
@@ -1801,20 +2169,14 @@
         "category": "Leojs",
         "title": "Delete",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/close.svg",
-          "dark": "resources/dark/close.svg"
-        }
+        "icon": "$(leojs-close)"
       },
       {
         "command": "leojs.deleteSelection",
         "category": "Leojs",
         "title": "Delete Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/delete.svg",
-          "dark": "resources/dark/delete.svg"
-        }
+        "icon": "$(leojs-delete)"
       },
       {
         "command": "leojs.deleteSelectionFromOutline",
@@ -1833,30 +2195,21 @@
         "category": "Leojs",
         "title": "Extract",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/extract.svg",
-          "dark": "resources/dark/extract.svg"
-        }
+        "icon": "$(leojs-extract)"
       },
       {
         "command": "leojs.extractNames",
         "category": "Leojs",
         "title": "Extract Names",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/extract-name.svg",
-          "dark": "resources/dark/extract-name.svg"
-        }
+        "icon": "$(leojs-extract-name)"
       },
       {
         "command": "leojs.moveOutlineDown",
         "category": "Leojs",
         "title": "Move Outline Down",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/arrow-down.svg",
-          "dark": "resources/dark/arrow-down.svg"
-        }
+        "icon": "$(leojs-arrow-down)"
       },
       {
         "command": "leojs.moveOutlineDownSelection",
@@ -1875,10 +2228,7 @@
         "category": "Leojs",
         "title": "Move Outline Left",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/arrow-left.svg",
-          "dark": "resources/dark/arrow-left.svg"
-        }
+        "icon": "$(leojs-arrow-left)"
       },
       {
         "command": "leojs.moveOutlineLeftSelection",
@@ -1897,10 +2247,7 @@
         "category": "Leojs",
         "title": "Move Outline Right",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/arrow-right.svg",
-          "dark": "resources/dark/arrow-right.svg"
-        }
+        "icon": "$(leojs-arrow-right)"
       },
       {
         "command": "leojs.moveOutlineRightSelection",
@@ -1919,10 +2266,7 @@
         "category": "Leojs",
         "title": "Move Outline Up",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/arrow-up.svg",
-          "dark": "resources/dark/arrow-up.svg"
-        }
+        "icon": "$(leojs-arrow-up)"
       },
       {
         "command": "leojs.moveOutlineUpSelection",
@@ -1941,190 +2285,133 @@
         "category": "Leojs",
         "title": "Insert Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/plus.svg",
-          "dark": "resources/dark/plus.svg"
-        }
+        "icon": "$(leojs-plus)"
       },
       {
         "command": "leojs.insertChildNode",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Insert Child",
-        "icon": {
-          "light": "resources/light/insert-child.svg",
-          "dark": "resources/dark/insert-child.svg"
-        }
+        "icon": "$(leojs-insert-child)"
       },
       {
         "command": "leojs.insertNodeSelection",
         "category": "Leojs",
         "title": "Insert Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/plus.svg",
-          "dark": "resources/dark/plus.svg"
-        }
+        "icon": "$(leojs-plus)"
       },
       {
         "command": "leojs.insertChildNodeSelection",
         "category": "Leojs",
         "title": "Insert Child",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/insert-child.svg",
-          "dark": "resources/dark/insert-child.svg"
-        }
+        "icon": "$(leojs-insert-child)"
       },
       {
         "command": "leojs.insertNodeSelectionFromOutline",
         "category": "Leojs",
         "title": "Insert Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/plus.svg",
-          "dark": "resources/dark/plus.svg"
-        }
+        "icon": "$(leojs-plus)"
       },
       {
         "command": "leojs.insertChildNodeSelectionFromOutline",
         "category": "Leojs",
         "title": "Insert Child",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/insert-child.svg",
-          "dark": "resources/dark/insert-child.svg"
-        }
+        "icon": "$(leojs-insert-child)"
       },
       {
         "command": "leojs.cloneNode",
         "category": "Leojs",
         "title": "Clone Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/link.svg",
-          "dark": "resources/dark/link.svg"
-        }
+        "icon": "$(leojs-link)"
       },
       {
         "command": "leojs.cloneNodeSelection",
         "category": "Leojs",
         "title": "Clone Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/link.svg",
-          "dark": "resources/dark/link.svg"
-        }
+        "icon": "$(leojs-link)"
       },
       {
         "command": "leojs.cloneNodeSelectionFromOutline",
         "category": "Leojs",
         "title": "Clone Node",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/link.svg",
-          "dark": "resources/dark/link.svg"
-        }
+        "icon": "$(leojs-link)"
       },
       {
         "command": "leojs.promote",
         "category": "Leojs",
         "title": "Promote Children",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/promote.svg",
-          "dark": "resources/dark/promote.svg"
-        }
+        "icon": "$(leojs-promote)"
       },
       {
         "command": "leojs.promoteSelection",
         "category": "Leojs",
         "title": "Promote Children",
         "enablement": "leojsTreeOpened && leojsCanPromote",
-        "icon": {
-          "light": "resources/light/promote.svg",
-          "dark": "resources/dark/promote.svg"
-        }
+        "icon": "$(leojs-promote)"
       },
       {
         "command": "leojs.promoteSelectionFromOutline",
         "category": "Leojs",
         "title": "Promote Children",
         "enablement": "leojsTreeOpened && leojsCanPromote",
-        "icon": {
-          "light": "resources/light/promote.svg",
-          "dark": "resources/dark/promote.svg"
-        }
+        "icon": "$(leojs-promote)"
       },
       {
         "command": "leojs.demote",
         "category": "Leojs",
         "title": "Demote Siblings",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/demote.svg",
-          "dark": "resources/dark/demote.svg"
-        }
+        "icon": "$(leojs-demote)"
       },
       {
         "command": "leojs.demoteSelection",
         "category": "Leojs",
         "title": "Demote Siblings",
         "enablement": "leojsTreeOpened && leojsCanDemote",
-        "icon": {
-          "light": "resources/light/demote.svg",
-          "dark": "resources/dark/demote.svg"
-        }
+        "icon": "$(leojs-demote)"
       },
       {
         "command": "leojs.demoteSelectionFromOutline",
         "category": "Leojs",
         "title": "Demote Siblings",
         "enablement": "leojsTreeOpened && leojsCanDemote",
-        "icon": {
-          "light": "resources/light/demote.svg",
-          "dark": "resources/dark/demote.svg"
-        }
+        "icon": "$(leojs-demote)"
       },
       {
         "command": "leojs.sortChildrenSelection",
         "category": "Leojs",
         "title": "Sort Children",
         "enablement": "leojsTreeOpened && leojsChild",
-        "icon": {
-          "light": "resources/light/sort-children.svg",
-          "dark": "resources/dark/sort-children.svg"
-        }
+        "icon": "$(leojs-sort-children)"
       },
       {
         "command": "leojs.sortChildrenSelectionFromOutline",
         "category": "Leojs",
         "title": "Sort Children",
         "enablement": "leojsTreeOpened && leojsChild",
-        "icon": {
-          "light": "resources/light/sort-children.svg",
-          "dark": "resources/dark/sort-children.svg"
-        }
+        "icon": "$(leojs-sort-children)"
       },
       {
         "command": "leojs.sortSiblingsSelection",
         "category": "Leojs",
         "title": "Sort Siblings",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/sort-siblings.svg",
-          "dark": "resources/dark/sort-siblings.svg"
-        }
+        "icon": "$(leojs-sort-siblings)"
       },
       {
         "command": "leojs.sortSiblingsSelectionFromOutline",
         "category": "Leojs",
         "title": "Sort Siblings",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/sort-siblings.svg",
-          "dark": "resources/dark/sort-siblings.svg"
-        }
+        "icon": "$(leojs-sort-siblings)"
       },
       {
         "command": "leojs.gotoFirstVisible",
@@ -2215,130 +2502,91 @@
         "category": "Leojs",
         "title": "Hoist",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/hoist.svg",
-          "dark": "resources/dark/hoist.svg"
-        }
+        "icon": "$(leojs-hoist)"
       },
       {
         "command": "leojs.hoistSelection",
         "category": "Leojs",
         "title": "Hoist",
         "enablement": "leojsTreeOpened && leojsCanHoist",
-        "icon": {
-          "light": "resources/light/hoist.svg",
-          "dark": "resources/dark/hoist.svg"
-        }
+        "icon": "$(leojs-hoist)"
       },
       {
         "command": "leojs.hoistSelectionFromOutline",
         "category": "Leojs",
         "title": "Hoist",
         "enablement": "leojsTreeOpened && leojsCanHoist",
-        "icon": {
-          "light": "resources/light/hoist.svg",
-          "dark": "resources/dark/hoist.svg"
-        }
+        "icon": "$(leojs-hoist)"
       },
       {
         "command": "leojs.deHoist",
         "category": "Leojs",
         "title": "De-Hoist",
         "enablement": "leojsTreeOpened && leojsCanDehoist",
-        "icon": {
-          "light": "resources/light/dehoist.svg",
-          "dark": "resources/dark/dehoist.svg"
-        }
+        "icon": "$(leojs-dehoist)"
       },
       {
         "command": "leojs.deHoistFromOutline",
         "category": "Leojs",
         "title": "De-Hoist",
         "enablement": "leojsTreeOpened && leojsCanDehoist && !leojsTopHoistChapter",
-        "icon": {
-          "light": "resources/light/dehoist.svg",
-          "dark": "resources/dark/dehoist.svg"
-        }
+        "icon": "$(leojs-dehoist)"
       },
       {
         "command": "leojs.chapterNext",
         "category": "Leojs",
         "title": "Chapter Next",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/chapter-next.svg",
-          "dark": "resources/dark/chapter-next.svg"
-        }
+        "icon": "$(leojs-chapter-next)"
       },
       {
         "command": "leojs.chapterBack",
         "category": "Leojs",
         "title": "Chapter Back",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/chapter-back.svg",
-          "dark": "resources/dark/chapter-back.svg"
-        }
+        "icon": "$(leojs-chapter-back)"
       },
       {
         "command": "leojs.chapterMain",
         "category": "Leojs",
         "title": "Chapter Main",
         "enablement": "leojsTreeOpened && leojsTopHoistChapter",
-        "icon": {
-          "light": "resources/light/chapter-main.svg",
-          "dark": "resources/dark/chapter-main.svg"
-        }
+        "icon": "$(leojs-chapter-main)"
       },
       {
         "command": "leojs.chapterSelect",
         "category": "Leojs",
         "title": "Chapter Select",
         "enablement": "leojsTreeOpened",
-        "icon": {
-          "light": "resources/light/chapter-select.svg",
-          "dark": "resources/dark/chapter-select.svg"
-        }
+        "icon": "$(leojs-chapter-select)"
       },
       {
         "command": "leojs.undo",
         "category": "Leojs",
         "title": "Undo",
         "enablement": "leojsTreeOpened && leojsCanUndo",
-        "icon": {
-          "light": "resources/light/undo.svg",
-          "dark": "resources/dark/undo.svg"
-        }
+        "icon": "$(leojs-undo)"
       },
       {
         "command": "leojs.undoFromOutline",
         "category": "Leojs",
         "title": "Undo",
         "enablement": "leojsTreeOpened && leojsCanUndo",
-        "icon": {
-          "light": "resources/light/undo.svg",
-          "dark": "resources/dark/undo.svg"
-        }
+        "icon": "$(leojs-undo)"
       },
       {
         "command": "leojs.redo",
         "category": "Leojs",
         "title": "Redo",
         "enablement": "leojsTreeOpened && leojsCanRedo",
-        "icon": {
-          "light": "resources/light/redo.svg",
-          "dark": "resources/dark/redo.svg"
-        }
+        "icon": "$(leojs-redo)"
       },
       {
         "command": "leojs.redoFromOutline",
         "category": "Leojs",
         "title": "Redo",
         "enablement": "leojsTreeOpened && leojsCanRedo",
-        "icon": {
-          "light": "resources/light/redo.svg",
-          "dark": "resources/dark/redo.svg"
-        }
+        "icon": "$(leojs-redo)"
       },
       {
         "command": "leojs.revertToUndo",
@@ -2399,10 +2647,7 @@
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Find Next",
-        "icon": {
-          "light": "resources/light/find-next.svg",
-          "dark": "resources/dark/find-next.svg"
-        }
+        "icon": "$(leojs-find-next)"
       },
       {
         "command": "leojs.findPrevious",
@@ -2415,10 +2660,7 @@
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Find Previous",
-        "icon": {
-          "light": "resources/light/find-previous.svg",
-          "dark": "resources/dark/find-previous.svg"
-        }
+        "icon": "$(leojs-find-previous)"
       },
       {
         "command": "leojs.findVar",
@@ -2652,50 +2894,35 @@
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Nav search with current selection",
-        "icon": {
-          "light": "resources/light/find-quick-selected.svg",
-          "dark": "resources/dark/find-quick-selected.svg"
-        }
+        "icon": "$(leojs-find-quick-selected)"
       },
       {
         "command": "leojs.findQuickTimeline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "List timeline of nodes in reverse gnx order",
-        "icon": {
-          "light": "resources/light/find-quick-timeline.svg",
-          "dark": "resources/dark/find-quick-timeline.svg"
-        }
+        "icon": "$(leojs-find-quick-timeline)"
       },
       {
         "command": "leojs.findQuickChanged",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "List all changed/dirty nodes",
-        "icon": {
-          "light": "resources/light/find-quick-changed.svg",
-          "dark": "resources/dark/find-quick-changed.svg"
-        }
+        "icon": "$(leojs-find-quick-changed)"
       },
       {
         "command": "leojs.history",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "List visited nodes from history",
-        "icon": {
-          "light": "resources/light/find-quick-history.svg",
-          "dark": "resources/dark/find-quick-history.svg"
-        }
+        "icon": "$(leojs-find-quick-history)"
       },
       {
         "command": "leojs.markedList",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "List all marked nodes",
-        "icon": {
-          "light": "resources/light/find-quick-marked.svg",
-          "dark": "resources/dark/find-quick-marked.svg"
-        }
+        "icon": "$(leojs-find-quick-marked)"
       }
     ],
     "menus": {
@@ -2730,10 +2957,6 @@
         },
         {
           "command": "leojs.writeDirtyAtFileNodesFromOutline",
-          "when": "false"
-        },
-        {
-          "command": "leojs.openAside",
           "when": "false"
         },
         {
@@ -3381,7 +3604,7 @@
         },
         {
           "command": "leojs.openAside",
-          "when": "config.leojs.showOpenAside && viewItem =~ /^leojsNode/",
+          "when": "viewItem =~ /^leojsNode/",
           "group": "leojsNodeContext1@1"
         },
         {
@@ -3501,13 +3724,13 @@
       {
         "command": "leojs.showOutline",
         "key": "alt+t",
-        "when": "leojsEditHeadline || leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
+        "when": "leojsEditHeadline || leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/ || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
       },
       {
         "command": "leojs.showOutline",
         "key": "ctrl+t",
         "mac": "cmd+t",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.showBody",
@@ -3552,25 +3775,25 @@
         "command": "leojs.saveLeoFile",
         "key": "ctrl+s",
         "mac": "cmd+s",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.newLeoFile",
         "key": "ctrl+n",
         "mac": "cmd+n",
-        "when": "leojsEditHeadline || editorTextFocus && resourceScheme == leojs || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsEditHeadline || editorTextFocus && resourceScheme =~ /^leojs/ || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.openLeoFile",
         "key": "ctrl+o",
         "mac": "cmd+o",
-        "when": "leojsEditHeadline || editorTextFocus && resourceScheme == leojs || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsEditHeadline || editorTextFocus && resourceScheme =~ /^leojs/ || leojsFindFocus || sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.writeAtFileNodes",
         "key": "ctrl+shift+w",
         "mac": "cmd+shift+w",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.writeAtFileNodesFromOutline",
@@ -3582,7 +3805,7 @@
         "command": "leojs.writeDirtyAtFileNodes",
         "key": "ctrl+shift+q",
         "mac": "cmd+shift+q",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.writeDirtyAtFileNodesFromOutline",
@@ -3593,7 +3816,7 @@
       {
         "command": "leojs.contractAll",
         "key": "alt+-",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.contractAllFromOutline",
@@ -4180,6 +4403,15 @@
           "workspaceSuffix": "",
           "workspaceTooltip": "LeoJS Body Pane"
         }
+      },
+      {
+        "scheme": "leojsDetached",
+        "formatting": {
+          "label": "LeoJS: Detached",
+          "separator": "/",
+          "workspaceSuffix": "",
+          "workspaceTooltip": "LeoJS Detached Body Pane"
+        }
       }
     ]
   },
@@ -4214,7 +4446,7 @@
     "@types/showdown": "^2.0.6",
     "@types/sql.js": "^1.4.4",
     "@types/uuid": "^9.0.7",
-    "@types/vscode": "^1.83.0",
+    "@types/vscode": "^1.86.0",
     "@types/webpack-env": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
     "@typescript-eslint/parser": "^5.16.0",
@@ -4253,7 +4485,6 @@
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
     "showdown": "^2.1.0",
-    "stream": "^0.0.2",
-    "uuid": "^9.0.1"
+    "stream": "^0.0.2"
   }
 }

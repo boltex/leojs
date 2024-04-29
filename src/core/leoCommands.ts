@@ -5,6 +5,9 @@
 import * as vscode from 'vscode';
 import { Utils as uriUtils } from 'vscode-uri';
 import * as path from 'path';
+import * as os from 'os';
+import * as crypto from 'crypto';
+import * as child_process from 'child_process';
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
 import { new_cmd_decorator } from './decorators';
@@ -46,6 +49,12 @@ import * as typescript from 'typescript';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
+if (g.isBrowser) {
+    // @ts-expect-error
+    crypto.randomUUID = globalThis.crypto.randomUUID;
+    // @ts-expect-error
+    crypto.getRandomValues = globalThis.crypto.getRandomValues;
+}
 
 //@-<< imports >>
 //@+others
@@ -266,7 +275,7 @@ export class Commands {
         relativeFileName?: string
     ) {
         const c: Commands = this;
-        this.id = ++g.app.commanderIdCounter;
+        this.id = ++g.app.commanderIdCounter; // Incremented BEFORE use, so first one is 1.
 
         // From Official Ivars
         this.gui = gui || g.app.gui;
@@ -614,6 +623,15 @@ export class Commands {
         const d: { [key: string]: any } = define_g
             ? { c: c, g: g, input: '', p: p }
             : {};
+
+        d['Buffer'] = Buffer;
+        d['vscode'] = vscode;
+        d['crypto'] = crypto;
+        d['os'] = os;
+        d['path'] = path;
+        d['process'] = process;
+        d['child_process'] = child_process;
+
 
         if (define_name) {
             d['__name__'] = define_name;

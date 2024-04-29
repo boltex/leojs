@@ -24,13 +24,9 @@ export class Config implements ConfigMembers {
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
     public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
-    // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
-    // public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
-    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
 
-    // public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
     public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
     public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
     public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
@@ -85,12 +81,8 @@ export class Config implements ConfigMembers {
             goAnywhereShortcut: this.goAnywhereShortcut,
 
             showUnlOnStatusBar: this.showUnlOnStatusBar,
-            // statusBarString: this.statusBarString,
-            // statusBarColor: this.statusBarColor,
             treeInExplorer: this.treeInExplorer, // Used as Context Flag
-            showOpenAside: this.showOpenAside,  // Used as Context Flag
             showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
-            // showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
             showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
             showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
             showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
@@ -324,7 +316,6 @@ export class Config implements ConfigMembers {
             //     this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
             // }
             this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
-            this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
             this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
             this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
             this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);

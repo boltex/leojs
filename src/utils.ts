@@ -25,9 +25,8 @@ export async function closeLeoTextEditors(): Promise<unknown> {
 
             if (p_tab.input &&
                 (p_tab.input as vscode.TabInputText).uri &&
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
+                ((p_tab.input as vscode.TabInputText).uri.scheme).startsWith(Constants.URI_LEOJS_SCHEME) &&
                 !p_tab.isDirty
-
             ) {
                 w_foundTabs.push(p_tab);
             }
@@ -382,14 +381,22 @@ export function strToLeoUri(p_str: string): vscode.Uri {
 }
 
 /**
+* Builds a 'Leo Detached Scheme' vscode.Uri from a gnx 
+* @param p_str leo node gnx strings are used to build Uri
+* @returns A vscode 'Uri' object
+*/
+export function strToLeoDetachedUri(p_str: string): vscode.Uri {
+    return vscode.Uri.parse(Constants.URI_SCHEME_DETACHED_HEADER + p_str);
+}
+
+/**
  * * Gets the gnx, (or another string like 'LEO BODY' or other), from a vscode.Uri object
  * @param p_uri Source uri to extract from
  * @returns The string source that was used to build this Uri
  */
 export function leoUriToStr(p_uri: vscode.Uri): string {
-    // TODO : Use length of a constant or something other than 'fsPath'
-    // For now, just remove the '/' (or backslash on Windows) before the path string
-    return p_uri.fsPath.substring(1);
+    // For now, just remove the '/' before the path string
+    return p_uri.path.substring(1);
 }
 
 /**

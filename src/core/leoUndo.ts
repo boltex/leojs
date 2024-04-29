@@ -282,7 +282,7 @@ export class Undoer {
     }
     //@+node:felix.20211026230613.15: *4* u.redoMenuName, undoMenuName
     public redoMenuName(name: string): string {
-        if (name.startsWith("Can't Undo")) {
+        if (name.startsWith("Can't Redo")) {
             return name;
         }
         return 'Redo ' + name;
@@ -1205,12 +1205,12 @@ export class Undoer {
 
     public canRedo(): boolean {
         const u: Undoer = this;
-        return u.redoMenuLabel !== "Can't Redo";
+        return !u.redoMenuLabel.startsWith("Can't Redo");
     }
 
     public canUndo(): boolean {
         const u: Undoer = this;
-        return u.undoMenuLabel !== "Can't Undo";
+        return !u.undoMenuLabel.startsWith("Can't Undo");
     }
     //@+node:felix.20230717215351.1: *4* u.clearAndWarn
     /**

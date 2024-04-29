@@ -12,8 +12,9 @@ import { Bead } from './leoUndo';
 import { FileCommands } from './leoFileCommands';
 import { NullBody } from './leoFrame';
 import 'date-format-lite';
+import * as crypto from 'crypto';
 import KSUID = require('ksuid');
-import { v4 as uuidv4 } from 'uuid';
+
 //@-<< imports >>
 //@+others
 //@+node:felix.20210102014453.1: ** class NodeIndices
@@ -145,13 +146,17 @@ export class NodeIndices {
         //     In other words, the gnx is everything up to the first colon.
         //     Neither UUIDs nor KSUIDs contain colons, so the read code will
         //     parse all forms of gnx properly.
-        //  2. NodeIndicds.compute_last_index ignores UUIDs and KSUIDs,
+        //  2. NodeIndices.compute_last_index ignores UUIDs and KSUIDs,
         //     so it and will allocate a new legacy gnx properly.
         let gnx;
         try {
-            if (uuid_kind === 'uuid')
-                gnx = uuidv4();
-            else if (KSUID && uuid_kind === 'ksuid') {
+            if (uuid_kind === 'uuid') {
+                if (g.isBrowser) {
+                    gnx = globalThis.crypto.randomUUID();
+                } else {
+                    gnx = crypto.randomUUID();
+                }
+            } else if (KSUID && uuid_kind === 'ksuid') {
                 gnx = KSUID.randomSync().string;
             }
         } catch (e) {
