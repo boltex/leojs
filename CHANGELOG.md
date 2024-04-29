@@ -1,5 +1,9 @@
 # Change Log
 
+# 0.2.14
+
+- ...
+
 # 0.2.13
 
 - Added new videos to the readme: "Intro to Leo" and "LeoJS Features Demo".

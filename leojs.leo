@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240428224613.1"><vh>0.2.14</vh></v>
 <v t="foo.20240309205342.1"><vh>0.2.13</vh></v>
 <v t="felix.20240122215450.1"><vh>0.2.12</vh></v>
 <v t="felix.20240113195919.1"><vh>0.2.11</vh></v>
@@ -4716,7 +4717,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4730,7 +4731,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.86.0"
   },
   "keywords": [
     "leo",
@@ -6885,7 +6886,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/showdown": "^2.0.6",
 "@types/sql.js": "^1.4.4",
 "@types/uuid": "^9.0.7",
-"@types/vscode": "^1.83.0",
+"@types/vscode": "^1.86.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
@@ -18525,6 +18526,11 @@ private _refreshCommanderDetachedLanguage(): void {
     }
 
 }
+
+</t>
+<t tx="felix.20240428224613.1"># 0.2.14
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
