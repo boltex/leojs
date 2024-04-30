@@ -5,6 +5,7 @@ import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
 import { Constants } from "./constants";
+import { VNode } from "./core/leoNodes";
 
 /**
  * * Body panes implementation as a file system using "leojs" as a scheme identifier
@@ -24,6 +25,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     public watchedBodiesGnx: string[] = [];
 
     // * List of gnx open in tab(s) (from tryApplyNodeToBody / switchBody and fs.delete)
+    public openedBodiesVNodes: { [key: string]: VNode } = {};
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
@@ -89,8 +91,8 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         for (const openBody of Object.keys(this._openedBodiesInfo)) {
             if (!w_foundGnx.includes(openBody)) {
                 // Not an opened tab! remove it!
-
                 delete this._openedBodiesInfo[openBody];
+                delete this.openedBodiesVNodes[openBody];
             }
         }
     }
@@ -237,6 +239,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (this._openedBodiesInfo[w_gnx]) {
             delete this._openedBodiesInfo[w_gnx];
+            delete this.openedBodiesVNodes[w_gnx];
         } else {
             // console.log("not deleted");
         }

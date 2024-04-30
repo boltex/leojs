@@ -49,6 +49,7 @@ import { HelpPanel } from "./helpPanel";
 import { UnlProvider } from "./unlProvider";
 import { LeoBodyDetachedProvider } from "./leoBodyDetached";
 import { Undoer } from "./core/leoUndo";
+import { LeoBodyDocumentSymbolProvider } from "./leoBodyDocumentSymbolProvider";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -201,6 +202,7 @@ export class LeoUI extends NullGui {
     private _changedDetachedWithMirrorBody = false;
     private _bodyFileSystemStarted: boolean = false;
     private _detachedFileSystemStarted: boolean = false;
+    private _leoBodyDocumentSymbolProvider!: LeoBodyDocumentSymbolProvider;
     private _bodyEnablePreview: boolean = true;
     private _leoFileSystem!: LeoBodyProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
     private _leoDetachedFileSystem!: LeoBodyDetachedProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
@@ -484,6 +486,20 @@ export class LeoUI extends NullGui {
         // * Create Body Pane
         this._leoFileSystem = new LeoBodyProvider(this);
         this._leoDetachedFileSystem = new LeoBodyDetachedProvider(this);
+
+        // Register document symbol provider for 'breadcrumbs'
+        this._leoBodyDocumentSymbolProvider = new LeoBodyDocumentSymbolProvider(
+            this._leoFileSystem,
+            this._leoDetachedFileSystem
+        );
+        this._context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider(
+                { scheme: Constants.URI_LEOJS_SCHEME }, this._leoBodyDocumentSymbolProvider)
+        );
+        this._context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider(
+                { scheme: Constants.URI_LEOJS_DETACHED_SCHEME }, this._leoBodyDocumentSymbolProvider)
+        );
 
         this._bodyMainSelectionColumn = 1;
 
@@ -2591,6 +2607,7 @@ export class LeoUI extends NullGui {
 
         // first time or no body opened
         this.bodyUri = utils.strToLeoUri(p_node.gnx);
+        this._leoFileSystem.openedBodiesVNodes[p_node.gnx] = p_node.v;
         if (this._isBodyVisible() === 0 && !this.showBodyIfClosed) {
             return Promise.resolve();
         }
@@ -2613,6 +2630,9 @@ export class LeoUI extends NullGui {
         const w_visibleCount = this._isBodyVisible();
 
         this.bodyUri = w_newUri; // New GLOBAL BODY URI
+        if (this.lastSelectedNode) {
+            this._leoFileSystem.openedBodiesVNodes[this.lastSelectedNode.gnx] = this.lastSelectedNode.v;
+        }
 
         if (w_visibleCount === 0 && !this.showBodyIfClosed) {
             return Promise.resolve();

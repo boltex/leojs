@@ -121,6 +121,7 @@
 <v t="felix.20240401213604.16"><vh>_fireSoon</vh></v>
 </v>
 </v>
+<v t="felix.20240429203450.1"><vh>@clean src/leoBodyDocumentSymbolProvider.ts</vh></v>
 <v t="felix.20201208223553.1"><vh>@clean src/leoOutline.ts</vh>
 <v t="felix.20201209011931.1"><vh>class LeoOutlineProvider</vh>
 <v t="felix.20201209011931.2"><vh>constructor</vh></v>
@@ -3652,6 +3653,7 @@ import { HelpPanel } from "./helpPanel";
 import { UnlProvider } from "./unlProvider";
 import { LeoBodyDetachedProvider } from "./leoBodyDetached";
 import { Undoer } from "./core/leoUndo";
+import { LeoBodyDocumentSymbolProvider } from "./leoBodyDocumentSymbolProvider";
 
 @language typescript
 @tabwidth -4
@@ -3922,6 +3924,7 @@ export class LeoUI extends NullGui {
     private _changedDetachedWithMirrorBody = false;
     private _bodyFileSystemStarted: boolean = false;
     private _detachedFileSystemStarted: boolean = false;
+    private _leoBodyDocumentSymbolProvider!: LeoBodyDocumentSymbolProvider;
     private _bodyEnablePreview: boolean = true;
     private _leoFileSystem!: LeoBodyProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
     private _leoDetachedFileSystem!: LeoBodyDetachedProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
@@ -8464,6 +8467,7 @@ import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
 import { Constants } from "./constants";
+import { VNode } from "./core/leoNodes";
 
 @language typescript
 @tabwidth -4
@@ -8507,6 +8511,7 @@ import { Constants } from "./constants";
     const w_gnx = utils.leoUriToStr(p_uri);
     if (this._openedBodiesInfo[w_gnx]) {
         delete this._openedBodiesInfo[w_gnx];
+        delete this.openedBodiesVNodes[w_gnx];
     } else {
         // console.log("not deleted");
     }
@@ -8557,6 +8562,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     public watchedBodiesGnx: string[] = [];
 
     // * List of gnx open in tab(s) (from tryApplyNodeToBody / switchBody and fs.delete)
+    public openedBodiesVNodes: { [key: string]: VNode } = {};
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
     private _lastBodyTimeGnx: string = "";
@@ -9704,6 +9710,20 @@ public finishStartup(): void {
     // * Create Body Pane
     this._leoFileSystem = new LeoBodyProvider(this);
     this._leoDetachedFileSystem = new LeoBodyDetachedProvider(this);
+
+    // Register document symbol provider for 'breadcrumbs'
+    this._leoBodyDocumentSymbolProvider = new LeoBodyDocumentSymbolProvider(
+        this._leoFileSystem,
+        this._leoDetachedFileSystem
+    );
+    this._context.subscriptions.push(
+        vscode.languages.registerDocumentSymbolProvider(
+            { scheme: Constants.URI_LEOJS_SCHEME }, this._leoBodyDocumentSymbolProvider)
+    );
+    this._context.subscriptions.push(
+        vscode.languages.registerDocumentSymbolProvider(
+            { scheme: Constants.URI_LEOJS_DETACHED_SCHEME }, this._leoBodyDocumentSymbolProvider)
+    );
 
     this._bodyMainSelectionColumn = 1;
 
@@ -12780,6 +12800,7 @@ private _tryApplyNodeToBody(
 
     // first time or no body opened
     this.bodyUri = utils.strToLeoUri(p_node.gnx);
+    this._leoFileSystem.openedBodiesVNodes[p_node.gnx] = p_node.v;
     if (this._isBodyVisible() === 0 &amp;&amp; !this.showBodyIfClosed) {
         return Promise.resolve();
     }
@@ -12803,6 +12824,9 @@ private _switchBody(
     const w_visibleCount = this._isBodyVisible();
 
     this.bodyUri = w_newUri; // New GLOBAL BODY URI
+    if (this.lastSelectedNode) {
+        this._leoFileSystem.openedBodiesVNodes[this.lastSelectedNode.gnx] = this.lastSelectedNode.v;
+    }
 
     if (w_visibleCount === 0 &amp;&amp; !this.showBodyIfClosed) {
         return Promise.resolve();
@@ -18458,8 +18482,8 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
     for (const openBody of Object.keys(this._openedBodiesInfo)) {
         if (!w_foundGnx.includes(openBody)) {
             // Not an opened tab! remove it!
-
             delete this._openedBodiesInfo[openBody];
+            delete this.openedBodiesVNodes[openBody];
         }
     }
 }
@@ -18532,6 +18556,62 @@ private _refreshCommanderDetachedLanguage(): void {
 
 - ...
 
+</t>
+<t tx="felix.20240429203450.1">import * as vscode from "vscode";
+import { Constants } from "./constants";
+import * as utils from "./utils";
+import { LeoBodyProvider } from "./leoBody";
+import { LeoBodyDetachedProvider } from "./leoBodyDetached";
+import { VNode } from "./core/leoNodes";
+
+export class LeoBodyDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+    constructor(
+        private _leoBody: LeoBodyProvider,
+        private _leoDetached: LeoBodyDetachedProvider
+    ) { }
+
+    public provideDocumentSymbols(
+        document: vscode.TextDocument, token: vscode.CancellationToken):
+        Thenable&lt;vscode.SymbolInformation[]&gt; {
+
+        const w_gnx = utils.leoUriToStr(document.uri);
+        let v: VNode | undefined;
+        let fileProvider;
+        if (
+            document.uri.scheme === Constants.URI_LEOJS_SCHEME
+        ) {
+            fileProvider = this._leoBody;
+        } else {
+            fileProvider = this._leoDetached;
+        }
+        v = fileProvider.openedBodiesVNodes[w_gnx];
+        if (v) {
+
+            const c = v.context;
+
+            // const filename = c.shortFileName() || 'untitled';
+            const headline = v.headString();
+
+            // Get the last line number &amp; last character index of the last line
+            const lastLineIndex = document.lineCount - 1;
+            const lastCharIndex = document.lineAt(lastLineIndex).text.length;
+            const loc = new vscode.Location(document.uri, new vscode.Range(0, 0, lastLineIndex, lastCharIndex));
+
+            const breadcrumbInfo = new vscode.SymbolInformation(
+
+                // * BOTH
+                // filename + " &gt; " + headline, vscode.SymbolKind.String, "", loc
+
+                // * HEADLINE ONLY
+                headline, vscode.SymbolKind.String, "", loc
+
+            );
+            return Promise.resolve([breadcrumbInfo]);
+        }
+        return Promise.resolve([]);
+
+    }
+}
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
