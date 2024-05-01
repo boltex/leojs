@@ -4843,21 +4843,21 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.refreshFromDisk",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsTreeTitled",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelection",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
+  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
+  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
   "icon": "$(leojs-refresh)"
 },
 {
@@ -4961,13 +4961,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.editSelectedHeadline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Edit Headline"
+  "title": "Edit Headline",
+  "icon": "$(leojs-edit)"
 },
 {
   "command": "leojs.editSelectedHeadlineFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Edit Headline"
+  "title": "Edit Headline",
+  "icon": "$(leojs-edit)"
 },
 </t>
 <t tx="felix.20201214205159.13">{
@@ -5079,7 +5081,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.cutNode",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Cut Node"
+  "title": "Cut Node",
+  "icon": "$(leojs-cut)"
 },
 {
   "command": "leojs.cutNodeSelection",
@@ -5092,13 +5095,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.cutNodeSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Cut Node"
+  "title": "Cut Node",
+  "icon": "$(leojs-cut)"
 },
 {
   "command": "leojs.pasteNode",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Paste Node"
+  "title": "Paste Node",
+  "icon": "$(leojs-paste)"
 },
 {
   "command": "leojs.pasteNodeAtSelection",
@@ -5111,13 +5116,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.pasteNodeAtSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Paste Node"
+  "title": "Paste Node",
+  "icon": "$(leojs-paste)"
 },
 {
   "command": "leojs.pasteNodeAsClone",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Paste Node as Clone"
+  "title": "Paste Node as Clone",
+  "icon": "$(leojs-paste-clone)"
 },
 {
   "command": "leojs.pasteNodeAsCloneAtSelection",
@@ -5130,7 +5137,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Paste Node as Clone"
+  "title": "Paste Node as Clone",
+  "icon": "$(leojs-paste-clone)"
 },
 {
   "command": "leojs.delete",
@@ -5150,7 +5158,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.deleteSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Delete Node"
+  "title": "Delete Node",
+  "icon": "$(leojs-delete)"
 },
 {
   "command": "leojs.setUa",
@@ -5185,13 +5194,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineDownSelection",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Down"
+  "title": "Move Outline Down",
+  "icon": "$(leojs-arrow-down)"
 },
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Down"
+  "title": "Move Outline Down",
+  "icon": "$(leojs-arrow-down)"
 },
 {
   "command": "leojs.moveOutlineLeft",
@@ -5204,13 +5215,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineLeftSelection",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Left"
+  "title": "Move Outline Left",
+  "icon": "$(leojs-arrow-left)"
 },
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Left"
+  "title": "Move Outline Left",
+  "icon": "$(leojs-arrow-left)"
 },
 {
   "command": "leojs.moveOutlineRight",
@@ -5223,13 +5236,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineRightSelection",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Right"
+  "title": "Move Outline Right",
+  "icon": "$(leojs-arrow-right)"
 },
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Right"
+  "title": "Move Outline Right",
+  "icon": "$(leojs-arrow-right)"
 },
 {
   "command": "leojs.moveOutlineUp",
@@ -5242,13 +5257,15 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.moveOutlineUpSelection",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Up"
+  "title": "Move Outline Up",
+  "icon": "$(leojs-arrow-up)"
 },
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Move Outline Up"
+  "title": "Move Outline Up",
+  "icon": "$(leojs-arrow-up)"
 },
 </t>
 <t tx="felix.20201214205159.17">{

@@ -1824,21 +1824,21 @@
         "command": "leojs.refreshFromDisk",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened",
+        "enablement": "leojsTreeOpened && leojsTreeTitled",
         "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.refreshFromDiskSelection",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened && LeojsAtFile",
+        "enablement": "leojsTreeOpened && LeojsAtFile && leojsTreeTitled",
         "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.refreshFromDiskSelectionFromOutline",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened && LeojsAtFile",
+        "enablement": "leojsTreeOpened && LeojsAtFile && leojsTreeTitled",
         "icon": "$(leojs-refresh)"
       },
       {
@@ -1995,13 +1995,15 @@
         "command": "leojs.editSelectedHeadline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Edit Headline"
+        "title": "Edit Headline",
+        "icon": "$(leojs-edit)"
       },
       {
         "command": "leojs.editSelectedHeadlineFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Edit Headline"
+        "title": "Edit Headline",
+        "icon": "$(leojs-edit)"
       },
       {
         "command": "leojs.mark",
@@ -2111,7 +2113,8 @@
         "command": "leojs.cutNode",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Cut Node"
+        "title": "Cut Node",
+        "icon": "$(leojs-cut)"
       },
       {
         "command": "leojs.cutNodeSelection",
@@ -2124,13 +2127,15 @@
         "command": "leojs.cutNodeSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Cut Node"
+        "title": "Cut Node",
+        "icon": "$(leojs-cut)"
       },
       {
         "command": "leojs.pasteNode",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node"
+        "title": "Paste Node",
+        "icon": "$(leojs-paste)"
       },
       {
         "command": "leojs.pasteNodeAtSelection",
@@ -2143,13 +2148,15 @@
         "command": "leojs.pasteNodeAtSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node"
+        "title": "Paste Node",
+        "icon": "$(leojs-paste)"
       },
       {
         "command": "leojs.pasteNodeAsClone",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node as Clone"
+        "title": "Paste Node as Clone",
+        "icon": "$(leojs-paste-clone)"
       },
       {
         "command": "leojs.pasteNodeAsCloneAtSelection",
@@ -2162,7 +2169,8 @@
         "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node as Clone"
+        "title": "Paste Node as Clone",
+        "icon": "$(leojs-paste-clone)"
       },
       {
         "command": "leojs.delete",
@@ -2182,7 +2190,8 @@
         "command": "leojs.deleteSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Delete Node"
+        "title": "Delete Node",
+        "icon": "$(leojs-delete)"
       },
       {
         "command": "leojs.setUa",
@@ -2215,13 +2224,15 @@
         "command": "leojs.moveOutlineDownSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Down"
+        "title": "Move Outline Down",
+        "icon": "$(leojs-arrow-down)"
       },
       {
         "command": "leojs.moveOutlineDownSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Down"
+        "title": "Move Outline Down",
+        "icon": "$(leojs-arrow-down)"
       },
       {
         "command": "leojs.moveOutlineLeft",
@@ -2234,13 +2245,15 @@
         "command": "leojs.moveOutlineLeftSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Left"
+        "title": "Move Outline Left",
+        "icon": "$(leojs-arrow-left)"
       },
       {
         "command": "leojs.moveOutlineLeftSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Left"
+        "title": "Move Outline Left",
+        "icon": "$(leojs-arrow-left)"
       },
       {
         "command": "leojs.moveOutlineRight",
@@ -2253,13 +2266,15 @@
         "command": "leojs.moveOutlineRightSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Right"
+        "title": "Move Outline Right",
+        "icon": "$(leojs-arrow-right)"
       },
       {
         "command": "leojs.moveOutlineRightSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Right"
+        "title": "Move Outline Right",
+        "icon": "$(leojs-arrow-right)"
       },
       {
         "command": "leojs.moveOutlineUp",
@@ -2272,13 +2287,15 @@
         "command": "leojs.moveOutlineUpSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Up"
+        "title": "Move Outline Up",
+        "icon": "$(leojs-arrow-up)"
       },
       {
         "command": "leojs.moveOutlineUpSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Up"
+        "title": "Move Outline Up",
+        "icon": "$(leojs-arrow-up)"
       },
       {
         "command": "leojs.insertNode",
