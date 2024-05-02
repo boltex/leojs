@@ -59,14 +59,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
         }
 
-        const w_stack = new Error().stack!;
-        const stackArray = w_stack.split("at ").slice(1, 4).map(s => {
-            let index = s.indexOf('(');  // Find the index of the opening parenthesis
-            if (index !== -1) {
-                return s.substring(0, index);  // Cut the string up to the parenthesis
-            }
-            return s;  // Return the original string if no parenthesis is found
-        });
         this._openedBodiesInfo[p_gnx] = {
             ctime: w_created,
             mtime: w_now // new 'modified' time.
