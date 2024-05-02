@@ -135,7 +135,7 @@ export class Constants {
         SVG_SHEME: "data",
         SVG_OPEN: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">',
         SVG_CLOSE: "</svg>",
-        STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
+        STATUSBAR_INDICATOR: "$(link) ", // WITH TRAILING SPACE!
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
         TREEVIEW_TITLE: "OUTLINE",
