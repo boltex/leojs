@@ -2605,7 +2605,7 @@ public static GUI = {
     SVG_SHEME: "data",
     SVG_OPEN: 'image/svg+xml;utf8,&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;',
     SVG_CLOSE: "&lt;/svg&gt;",
-    STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
+    STATUSBAR_INDICATOR: "$(link) ", // WITH TRAILING SPACE!
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
     EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
     TREEVIEW_TITLE: "OUTLINE",
@@ -15036,14 +15036,6 @@ private _setOpenedBodyTime(p_gnx: string): void {
     if (this._openedBodiesInfo[p_gnx]) {
         w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
     }
-    const w_stack = new Error().stack!;
-    const stackArray = w_stack.split("at ").slice(1, 4).map(s =&gt; {
-        let index = s.indexOf('(');  // Find the index of the opening parenthesis
-        if (index !== -1) {
-            return s.substring(0, index);  // Cut the string up to the parenthesis
-        }
-        return s;  // Return the original string if no parenthesis is found
-    });
     this._openedBodiesInfo[p_gnx] = {
         ctime: w_created,
         mtime: w_now // new 'modified' time.
