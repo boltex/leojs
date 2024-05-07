@@ -1829,7 +1829,7 @@ export class LeoUI extends NullGui {
             let w_gnx: string | undefined;
             let w_v: VNode | undefined;
 
-            if (p_document.uri.path.match(Constants.DETACHED_REGEX)) {
+            if (p_document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
                 // detached body
                 id = p_document.uri.path.split("/")[1];
                 // find commander
@@ -3458,12 +3458,6 @@ export class LeoUI extends NullGui {
         for (const w_doc of vscode.workspace.textDocuments) {
             if (!w_doc.isClosed && w_uris.includes(w_doc.uri.toString())) {
                 w_documents.push(w_doc);
-                // // Is a detached document, but not this.bodyDetachedTextDocument
-                // if (this.bodyDetachedTextDocument && (w_doc.uri.toString() !== this.bodyDetachedTextDocument.uri.toString())) {
-                //     w_documents.push(w_doc);
-                // } else if (!this.bodyDetachedTextDocument) {
-                //     w_documents.push(w_doc);
-                // }
             }
         }
 

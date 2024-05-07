@@ -71,7 +71,7 @@ export class Constants {
     public static CONFIG_NAME: string = "leojs";
     public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
     public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
-    public static DETACHED_REGEX: RegExp = /^\/(\d+)\//;
+
     /**
      * Supported Languages
      */

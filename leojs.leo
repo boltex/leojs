@@ -2562,7 +2562,7 @@ public static BODY_STATES_DEBOUNCE_DELAY: number = 120;
 public static CONFIG_NAME: string = "leojs";
 public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
 public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
-public static DETACHED_REGEX: RegExp = /^\/(\d+)\//;
+
 </t>
 <t tx="felix.20201214151326.4">/**
  * Strings used in the workbench interface panels (not for messages or dialogs)
@@ -9186,7 +9186,7 @@ private _bodySaveDocument(
         let w_gnx: string | undefined;
         let w_v: VNode | undefined;
 
-        if (p_document.uri.path.match(Constants.DETACHED_REGEX)) {
+        if (p_document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
             // detached body
             id = p_document.uri.path.split("/")[1];
             // find commander
@@ -18490,12 +18490,6 @@ private _refreshCommanderDetachedLanguage(): void {
     for (const w_doc of vscode.workspace.textDocuments) {
         if (!w_doc.isClosed &amp;&amp; w_uris.includes(w_doc.uri.toString())) {
             w_documents.push(w_doc);
-            // // Is a detached document, but not this.bodyDetachedTextDocument
-            // if (this.bodyDetachedTextDocument &amp;&amp; (w_doc.uri.toString() !== this.bodyDetachedTextDocument.uri.toString())) {
-            //     w_documents.push(w_doc);
-            // } else if (!this.bodyDetachedTextDocument) {
-            //     w_documents.push(w_doc);
-            // }
         }
     }
 
