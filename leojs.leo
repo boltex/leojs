@@ -206,7 +206,6 @@
 <v t="felix.20220922000450.5"><vh>_isBodyVisible</vh></v>
 <v t="felix.20220922000450.6"><vh>_isBodyPreview</vh></v>
 <v t="felix.20240421175315.1"><vh>_checkClosedTabs</vh></v>
-<v t="felix.20240420222634.1"><vh>isUriTabOpened</vh></v>
 <v t="felix.20220922000450.7"><vh>isOutlineVisible</vh></v>
 <v t="felix.20220922000450.8"><vh>_hideDeleteBody</vh></v>
 <v t="felix.20220922000450.9"><vh>_checkPreviewMode</vh></v>
@@ -17657,14 +17656,6 @@ private _setOpenedBodyTime(p_gnx: string): void {
         w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
     }
 
-    const w_stack = new Error().stack!;
-    const stackArray = w_stack.split("at ").slice(1, 4).map(s =&gt; {
-        let index = s.indexOf('(');  // Find the index of the opening parenthesis
-        if (index !== -1) {
-            return s.substring(0, index);  // Cut the string up to the parenthesis
-        }
-        return s;  // Return the original string if no parenthesis is found
-    });
     this._openedBodiesInfo[p_gnx] = {
         ctime: w_created,
         mtime: w_now // new 'modified' time.
@@ -18411,12 +18402,6 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
     }
   }
 },
-</t>
-<t tx="felix.20240420222634.1">public isUriTabOpened(p_uri: vscode.Uri): boolean {
-    //
-    return true;
-}
-
 </t>
 <t tx="felix.20240421172320.1">public cleanupDetachedBodies(): void {
     const w_foundGnx: string[] = [];

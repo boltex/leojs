@@ -2800,11 +2800,6 @@ export class LeoUI extends NullGui {
         this._leoDetachedFileSystem.cleanupDetachedBodies();
     }
 
-    public isUriTabOpened(p_uri: vscode.Uri): boolean {
-        //
-        return true;
-    }
-
     /**
      * * Checks if outline is visible
      * @returns true if either outline is visible
