@@ -6350,7 +6350,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.tabCycleNext",
   "key": "ctrl+tab",
   "mac": "cmd+tab",
-  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/"
 },
 {
   "command": "leojs.saveLeoFileFromOutline",
@@ -8556,7 +8556,7 @@ import { Constants } from "./constants";
 
 </t>
 <t tx="felix.20211010192923.2">/**
- * * Body panes implementation as a file system using "leojs" as a scheme identifier
+ * * Body panes implementation as a file system using "leojsDetached" as a scheme identifier
  */
 export class LeoBodyProvider implements vscode.FileSystemProvider {
 

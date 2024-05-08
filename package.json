@@ -3780,7 +3780,7 @@
         "command": "leojs.tabCycleNext",
         "key": "ctrl+tab",
         "mac": "cmd+tab",
-        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.saveLeoFileFromOutline",

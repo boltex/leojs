@@ -7,7 +7,7 @@ import * as g from './core/leoGlobals';
 import { Constants } from "./constants";
 
 /**
- * * Body panes implementation as a file system using "leojs" as a scheme identifier
+ * * Body panes implementation as a file system using "leojsDetached" as a scheme identifier
  */
 export class LeoBodyProvider implements vscode.FileSystemProvider {
 
