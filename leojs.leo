@@ -864,6 +864,11 @@ This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)**
 -   **Goto Anywhere panel** to navigate directly from list of nodes, such as the results of Nav or Tag searches
 -   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
 
+# Demo videos
+
+-   [📺 Introduction](https://www.youtube.com/watch?v=j0eo7SlnnSY)
+-   [📺 Features](https://www.youtube.com/watch?v=M_mKXSbVGdE)
+
 ## Leo Commands
 
 ![Menus](https://raw.githubusercontent.com/boltex/leojs/master/resources/context-hover-menus.png)
@@ -903,24 +908,28 @@ Listed here are the most useful commands and their keyboard shortcuts.
 | Move Outline Left  | `Ctrl + L` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Shift [+ Alt] + Left`  |
 | Move Outline Right | `Ctrl + R` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Shift [+ Alt] + Right` |
 
-_Move-Outline commands need the 'Alt' key modifier only when focus is on body pane._
+_Move-Outline commands need the `Alt` key modifier only when focus is on body pane._
 
-| Common Operations   |                                                                                                                           |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------ |
-| Toggle Outline/Body | `Ctrl + T`                                                                                                                |
-| Focus on Body       | `Tab` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Enter` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Alt + D` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Ctrl + G` |
-| Focus on Outline    | `Alt + T`                                                                                                                 |
-| Contract All        | `Alt + -`                                                                                                                 |
-| Sort Siblings       | `Alt + A`                                                                                                                 |
-| Start Search        | `Ctrl + F`                                                                                                                |
-| Find Next           | `F3`                                                                                                                      |
-| Find Previous       | `F2`                                                                                                                      |
-| Replace             | `Ctrl + =`                                                                                                                |
-| Replace then Find   | `Ctrl + -`                                                                                                                |
-| Extract             | `Ctrl + Shift + D`                                                                                                        |
-| Extract Names       | `Ctrl + Shift + N`                                                                                                        |
-| Execute Script      | `Ctrl + B`                                                                                                                |
-| Minibuffer Palette  | `Alt + X`                                                                                                                 |
+| Changing Focus                  |                                                   |
+| :------------------------------ | :------------------------------------------------ |
+| Toggle Outline/Body             | `Ctrl + T`                                        |
+| Focus on Outline                | `Alt + T`                                         |
+| Focus on Body (in any pane)     | `Alt + D` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Ctrl + G` |
+| Focus on Body (in Outline pane) | `Tab` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Enter`        |
+
+| Common Operations  |                    |
+| :----------------- | :----------------- |
+| Contract All       | `Alt + -`          |
+| Sort Siblings      | `Alt + A`          |
+| Start Search       | `Ctrl + F`         |
+| Find Next          | `F3`               |
+| Find Previous      | `F2`               |
+| Replace            | `Ctrl + =`         |
+| Replace then Find  | `Ctrl + -`         |
+| Extract            | `Ctrl + Shift + D` |
+| Extract Names      | `Ctrl + Shift + N` |
+| Execute Script     | `Ctrl + B`         |
+| Minibuffer Palette | `Alt + X`          |
 
 | Tree Navigation          |                                                              |
 | :----------------------- | :----------------------------------------------------------- |
@@ -933,7 +942,7 @@ _Move-Outline commands need the 'Alt' key modifier only when focus is on body pa
 | Browse Tree              | `Arrow Keys` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Alt + Arrow Keys` |
 | Go To Global Line        | `Alt + G`                                                    |
 
-_With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, end, pageUp/Down keys will change the outline's selection directly._
+_With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, end, pageUp/Down keys will change the outline's selection directly. Using tree navigation shortcuts from the body pane (with the `Alt` key modifier) will place focus in the outline._
 
 | File Commands       |                    |
 | :------------------ | :----------------- |

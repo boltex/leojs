@@ -41,8 +41,8 @@ This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)**
 
 # Demo videos
 
-- [📺 Introduction](https://www.youtube.com/watch?v=j0eo7SlnnSY)
-- [📺 Features](https://www.youtube.com/watch?v=M_mKXSbVGdE)
+-   [📺 Introduction](https://www.youtube.com/watch?v=j0eo7SlnnSY)
+-   [📺 Features](https://www.youtube.com/watch?v=M_mKXSbVGdE)
 
 ## Leo Commands
 
@@ -83,9 +83,7 @@ Listed here are the most useful commands and their keyboard shortcuts.
 | Move Outline Left  | `Ctrl + L` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift [+ Alt] + Left`  |
 | Move Outline Right | `Ctrl + R` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift [+ Alt] + Right` |
 
-_Move-Outline commands need the 'Alt' key modifier only when focus is on body pane._
-
-_With the **'Leo Tree Browsing'** setting enabled by default, the arrows keys put focus in the outline pane._
+_Move-Outline commands need the `Alt` key modifier only when focus is on body pane._
 
 | Changing Focus                  |                                                   |
 | :------------------------------ | :------------------------------------------------ |
@@ -94,19 +92,19 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows keys pu
 | Focus on Body (in any pane)     | `Alt + D` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Ctrl + G` |
 | Focus on Body (in Outline pane) | `Tab` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Enter`        |
 
-| Common Operations   |                        |
-| :------------------ | :--------------------- |
-| Contract All        | `Alt + -`              |
-| Sort Siblings       | `Alt + A`              |
-| Start Search        | `Ctrl + F`             |
-| Find Next           | `F3`                   |
-| Find Previous       | `F2`                   |
-| Replace             | `Ctrl + =`             |
-| Replace then Find   | `Ctrl + -`             |
-| Extract             | `Ctrl + Shift + D`     |
-| Extract Names       | `Ctrl + Shift + N`     |
-| Execute Script      | `Ctrl + B`             |
-| Minibuffer Palette  | `Alt + X`              |
+| Common Operations  |                    |
+| :----------------- | :----------------- |
+| Contract All       | `Alt + -`          |
+| Sort Siblings      | `Alt + A`          |
+| Start Search       | `Ctrl + F`         |
+| Find Next          | `F3`               |
+| Find Previous      | `F2`               |
+| Replace            | `Ctrl + =`         |
+| Replace then Find  | `Ctrl + -`         |
+| Extract            | `Ctrl + Shift + D` |
+| Extract Names      | `Ctrl + Shift + N` |
+| Execute Script     | `Ctrl + B`         |
+| Minibuffer Palette | `Alt + X`          |
 
 | Tree Navigation          |                                                              |
 | :----------------------- | :----------------------------------------------------------- |
@@ -119,7 +117,7 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows keys pu
 | Browse Tree              | `Arrow Keys` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Alt + Arrow Keys` |
 | Go To Global Line        | `Alt + G`                                                    |
 
-_With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, end, pageUp/Down keys will change the outline's selection directly._
+_With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, end, pageUp/Down keys will change the outline's selection directly. Using tree navigation shortcuts from the body pane (with the `Alt` key modifier) will place focus in the outline._
 
 | File Commands       |                    |
 | :------------------ | :----------------- |
