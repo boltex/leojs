@@ -15,12 +15,10 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
     // * Flag normally false
     public preventSaveToLeo: boolean = false;
-    private _errorRefreshFlag: boolean = false;
 
     // * Last file read data with the readFile method
     private _lastGnx: string = ""; // gnx of last file read
     private _lastBodyData: string = ""; // body content of last file read
-    private _lastBodyLength: number = 0; // length of last file read
 
     // * List of currently opened body panes gnx (from 'watch' & 'dispose' methods)
     public watchedBodiesGnx: string[] = [];
@@ -152,14 +150,15 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
             if (id && !gnx) {
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-            } else if (w_gnx === this._lastGnx && this._openedBodiesInfo[this._lastGnx]) {
 
-                return {
-                    type: vscode.FileType.File,
-                    ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-                    mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-                    size: this._lastBodyLength
-                };
+                // } else if (w_gnx === this._lastGnx && this._openedBodiesInfo[this._lastGnx]) {
+                //     return {
+                //         type: vscode.FileType.File,
+                //         ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                //         mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                //         size: this._lastBodyLength
+                //     };
+
             } else if (this._openedBodiesInfo[w_gnx]) {
                 let c: Commands;
                 let w_v: VNode | undefined;
@@ -213,16 +212,12 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                 }
 
                 if (w_v) {
-                    this._errorRefreshFlag = false; // got body so reset possible flag!
                     this._lastGnx = w_gnx;
                     this._lastBodyData = w_v.b;
                     const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
-                    this._lastBodyLength = w_buffer.byteLength;
                     return w_buffer;
                 } else {
-                    if (!this._errorRefreshFlag) {
-                        this._leoUi.fullRefresh();
-                    }
+                    this._leoUi.fullRefresh();
                     if (this._lastGnx === w_gnx) {
                         // was last gnx of closed file about to be switched to new document selected
                         return Buffer.from(this._lastBodyData);
@@ -299,9 +294,6 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             console.error("LeoJS: Tried to save DETACHED but not in _openedBodiesGnx. gnx :", w_gnx);
         }
         this._setOpenedBodyTime(w_gnx);
-        if (w_gnx === this._lastGnx) {
-            this._lastBodyLength = p_content.byteLength;
-        }
         this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
     }
 

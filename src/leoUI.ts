@@ -197,8 +197,8 @@ export class LeoUI extends NullGui {
     private _lastLeoUndos: vscode.TreeView<LeoUndoNode> | undefined;
 
     // * Body pane
-    private _changedBodyWithMirrorDetached = false;
-    private _changedDetachedWithMirrorBody = false;
+    private _changedBodyWithMirrorDetached: string | undefined = undefined; // "id/gnx" string as true
+    private _changedDetachedWithMirrorBody: string | undefined = undefined; // "id/gnx" string as true
     private _bodyFileSystemStarted: boolean = false;
     private _detachedFileSystemStarted: boolean = false;
     private _bodyEnablePreview: boolean = true;
@@ -1270,6 +1270,7 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
         ) {
+
             const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
             const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
@@ -1278,6 +1279,7 @@ export class LeoUI extends NullGui {
             const w_sameCommander = w_selectedCId === id;
             let w_alreadySaved = false;
             let w_v: VNode | undefined;
+
             let c: Commands | undefined;
             for (const w_frame of g.app.windowList) {
                 if (w_frame.c.id.toString() === id) {
@@ -1289,7 +1291,7 @@ export class LeoUI extends NullGui {
                 w_v = c.fileCommands.gnxDict[gnx];
                 if (this._changedBodyWithMirrorDetached || (w_v && (w_bodyText === w_v.b))) {
                     // WAS NOT A USER MODIFICATION?
-                    this._changedBodyWithMirrorDetached = false;
+                    this._changedBodyWithMirrorDetached = undefined;
                     return;
                 }
             }
@@ -1306,6 +1308,7 @@ export class LeoUI extends NullGui {
                 }
             }
 
+            // * Detect in active editor if current cursor line is language related, set w_needsRefresh if so.
             const w_textEditor = vscode.window.activeTextEditor;
             if (
                 w_textEditor && w_textEditor.selections && w_textEditor.selections.length &&
@@ -1323,11 +1326,12 @@ export class LeoUI extends NullGui {
                 }
             }
 
+            const w_uriKey = utils.leoUriToStr(this.bodyDetachedTextDocument.uri);
+            const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
+            const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
+
             // If same commander, and node icon changed (or whole document was unchanged)
             if (w_sameCommander) {
-                const w_uriKey = utils.leoUriToStr(this.bodyDetachedTextDocument.uri);
-                const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
-                const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
                 if (!this.leoStates.leoChanged || w_detachedIconChanged) {
                     if (!w_alreadySaved) {
                         void this._bodySaveDocument(this.bodyDetachedTextDocument);
@@ -1373,8 +1377,8 @@ export class LeoUI extends NullGui {
                 this.refreshCommanderDetachedLanguage();
             }
 
+            // * CHECK FOR BODY THAT MATCHES! set w_sameBodyTabOpened if so.
             let w_sameBodyTabOpened = false;
-            // CHECK FOR BODY THAT MATCHES! 
             for (const p_tabGroup of vscode.window.tabGroups.all) {
                 for (const p_tab of p_tabGroup.tabs) {
                     if (p_tab.input &&
@@ -1392,30 +1396,35 @@ export class LeoUI extends NullGui {
                 }
             }
 
-            // Check if exact same commander as currently selected body
+            // Check if exact same commander AND same gnx: BOTH THE SAME so refresh the body!
             if (w_sameCommander) {
-                if (this.lastSelectedNode && gnx === this.lastSelectedNode.gnx) {
+                if (w_sameBodyTabOpened && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx) {
                     // Same commander AND same gnx  !  
                     if (!w_alreadySaved) {
+                        // console.log('bodySAVE DETACHED because same tab opened');
                         void this._bodySaveDocument(this.bodyDetachedTextDocument);
                         w_alreadySaved = true;
                     }
-                    if (w_sameBodyTabOpened) {
-                        if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
-                            this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
-                        }
-                        this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
+                    if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
+                        // console.log("setting changedDetachedWithMirrorBody");
 
+                        this._changedDetachedWithMirrorBody = `${id}/${gnx}`; // PREVENT DOUBLE REFRESH
                     }
+                    // console.log('fire refresh of body');
+                    this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
                 }
                 if (w_needsRefresh) {
                     this.debouncedRefreshBodyStates(50); // And maybe changed in other node of same commander!
                 }
 
             }
+            if (!this.leoStates.leoChanged) {
+                // also refresh document panel (icon may be dirty now)
+                this.leoStates.leoChanged = true;
+                this.refreshDocumentsPane();
+            }
 
         }
-
 
         // ".length" check necessary, see https://github.com/microsoft/vscode/issues/50344
         if (
@@ -1465,7 +1474,7 @@ export class LeoUI extends NullGui {
                 if (this._changedDetachedWithMirrorBody || (c.p && c.p.__bool__() && w_bodyText === c.p.b)) {
                     // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                     // Set proper cursor insertion point and selection range.
-                    this._changedDetachedWithMirrorBody = false;
+                    this._changedDetachedWithMirrorBody = undefined;
                     void this.showBody(false, true, true);
                     return;
                 }
@@ -1474,10 +1483,11 @@ export class LeoUI extends NullGui {
                     // Document pane icon needs refresh (changed) and/or outline icon changed
                     void this._bodySaveDocument(p_textDocumentChange.document).then(() => {
                         if (w_hasSameDetachedTab && this.lastSelectedNode) {
-                            if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(`${c.id}/${w_lastSelNodeGnx}`)) {
-                                this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
+                            const gnxString = `${c.id}/${w_lastSelNodeGnx}`;
+                            if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(gnxString)) {
+                                this._changedBodyWithMirrorDetached = gnxString; // PREVENT DOUBLE REFRESH
                             }
-                            this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
+                            this._leoDetachedFileSystem.fireRefreshFile(gnxString);
                         }
                         if (w_iconChanged) {
                             this.findFocusTree = false;
@@ -1489,6 +1499,7 @@ export class LeoUI extends NullGui {
 
                     if (!this.leoStates.leoChanged) {
                         // also refresh document panel (icon may be dirty now)
+                        this.leoStates.leoChanged = true;
                         this.refreshDocumentsPane();
                     }
                 }
@@ -1505,6 +1516,7 @@ export class LeoUI extends NullGui {
             }
 
             const w_textEditor = vscode.window.activeTextEditor;
+
             if (w_textEditor && p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
                 for (const p_selection of w_textEditor.selections) {
                     // TRY TO DETECT IF LANGUAGE RESET NEEDED!
@@ -1517,7 +1529,6 @@ export class LeoUI extends NullGui {
                     }
                 }
             }
-
             if (w_needsRefresh) {
                 this.debouncedRefreshBodyStates(1);
                 this.refreshCommanderDetachedLanguage();
@@ -2207,28 +2218,33 @@ export class LeoUI extends NullGui {
     private _refreshDetachedBodies() {
         //  Refresh detached bodies as needed IF SAME COMMANDER, AND CLOSE : 
         if (!g.app.windowList.length) {
+            this._refreshType.excludeDetached = false;
             return;
         }
+
         const w_commands = g.app.windowList.map(p_frame => p_frame.c);
         const c = g.app.windowList[this.frameIndex].c;
         const cId = g.app.windowList[this.frameIndex].c.id.toString();
         const w_foundTabs: Set<vscode.Tab> = new Set();
         const w_foundUri: Set<vscode.Uri> = new Set();
+
         for (const p_tabGroup of vscode.window.tabGroups.all) {
             for (const p_tab of p_tabGroup.tabs) {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
                     (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
                 ) {
-                    const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+                    const w_uri = (p_tab.input as vscode.TabInputText).uri;
+                    const [unused, id, gnx] = w_uri.path.split("/");
 
                     // Refresh detached bodies if same commander  // ! ALSO FIRE REFRESH !
-                    if (this._refreshType.body && id === cId) {
+                    if (!this._refreshType.excludeDetached && this._refreshType.body && id === cId) {
+                        // console.log('fire refresh DETACHED in _refreshDetachedBodies');
                         this._leoDetachedFileSystem.fireRefreshFile(`${id}/${gnx}`);
                     }
 
                     // if refresh tree is true, validate that opened detached of same commander still valid and close as needed.
-                    if (this._refreshType.tree && id === cId) {
+                    if (this._refreshType.tree && id === cId && !this._refreshType.documents) {
                         let found = false;
                         for (const v of c.all_unique_nodes()) {
                             if (v.gnx === gnx) {
@@ -2239,12 +2255,9 @@ export class LeoUI extends NullGui {
                         if (!found) {
                             // close !
                             w_foundTabs.add(p_tab);
-                            w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                            w_foundUri.add(w_uri);
                         }
-                    }
-
-                    // if refresh documents is true, validate each opened tabgroup/tab and close as needed.
-                    if (this._refreshType.documents) {
+                    } else if (this._refreshType.documents) {
                         let found = false;
                         for (const w_c of w_commands) {
                             for (const v of w_c.all_unique_nodes()) {
@@ -2260,7 +2273,7 @@ export class LeoUI extends NullGui {
                         if (!found) {
                             // close !
                             w_foundTabs.add(p_tab);
-                            w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                            w_foundUri.add(w_uri);
                         }
 
                     }
@@ -2275,6 +2288,7 @@ export class LeoUI extends NullGui {
                 void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
             }
         }
+        this._refreshType.excludeDetached = false;
 
     }
 
@@ -2828,6 +2842,8 @@ export class LeoUI extends NullGui {
                 }
             });
         });
+
+        // TODO : Delete and/or REMOVE FROM DETACHED VNODES DICT!! 
 
         // * Make sure the closed/deleted body is not remembered as vscode's recent files!
         void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', p_textEditor.document.uri);
@@ -3525,6 +3541,9 @@ export class LeoUI extends NullGui {
         if (p_node.__eq__(this.lastSelectedNode)) {
             this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
             g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+            // MAYBE DETACHED BODY CHANGED THAT CONTENT!
+            this._leoFileSystem.setNewBodyUriTime(utils.strToLeoUri(p_node.gnx));
+
             return this.showBody(false, this.config.treeKeepFocus).catch((p_error) => {
                 return Promise.resolve(); // intercept cancellation as success: next one is going to replace anyways.
             });
@@ -3691,6 +3710,11 @@ export class LeoUI extends NullGui {
             this.showBodyIfClosed = true;
             // If alt+arrow is used to navigate: SHOW and leave focus on outline.
             this.showOutlineIfClosed = true;
+
+            if (p_options.refreshType.body) {
+                // If this is a navigation command, dont refresh DETACHED
+                p_options.refreshType.excludeDetached = true;
+            }
         }
 
         const c = g.app.windowList[this.frameIndex].c;
