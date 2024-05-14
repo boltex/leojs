@@ -3758,13 +3758,13 @@
       {
         "command": "leojs.showBody",
         "key": "alt+d",
-        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojsDetached || leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.showBody",
         "key": "ctrl+g",
         "mac": "cmd+g",
-        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojsDetached || leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.showBody",

@@ -6346,13 +6346,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.showBody",
   "key": "alt+d",
-  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojsDetached || leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.showBody",
   "key": "ctrl+g",
   "mac": "cmd+g",
-  "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojsDetached || leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojs/"
 },
 {
   "command": "leojs.showBody",
