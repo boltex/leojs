@@ -2557,7 +2557,7 @@ public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
 public static CLEANUP_DEBOUNCE_DELAY: number = 40;
-public static DETACHED_LANGUAGE_DELAY: number = 350;
+public static DETACHED_LANGUAGE_DELAY: number = 250;
 public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
 public static TITLE_DEBOUNCE_DELAY: number = 20;
@@ -12466,7 +12466,10 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                 // command stack last node is still valid
                 if (this.lastSelectedNode &amp;&amp; w_openedDocumentGnx === this.lastSelectedNode.gnx) {
                     // still same gnx as this.bodyUri
-                    void this._setBodyLanguage(w_openedDocument, w_language);
+                    if (w_language !== w_openedDocument.languageId) {
+                        void this._setBodyLanguage(w_openedDocument, w_language);
+                    }
+
                 } else {
                     // NOT SAME GNX!
                     w_debugMessage = "all good but not same GNX!?!";
@@ -17427,7 +17430,9 @@ public async openAside(p?: Position): Promise&lt;unknown&gt; {
         "start": this._row_col_pv_dict(start, p.v.b),
         "end": this._row_col_pv_dict(end, p.v.b)
     };
-    void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language);
+    if (w_language !== this.bodyDetachedTextDocument.languageId) {
+        void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language);
+    }
 
     const w_showOptions: vscode.TextDocumentShowOptions =
     {
@@ -17874,8 +17879,9 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
     const w_commands = g.app.windowList.map(p_frame =&gt; p_frame.c);
     const c = g.app.windowList[this.frameIndex].c;
     const cId = g.app.windowList[this.frameIndex].c.id.toString();
-    const w_foundTabs: Set&lt;vscode.Tab&gt; = new Set();
-    const w_foundUri: Set&lt;vscode.Uri&gt; = new Set();
+    const w_foundTabs: Set&lt;vscode.Tab&gt; = new Set(); // To be closed
+    const w_foundUri: Set&lt;vscode.Uri&gt; = new Set(); // To be removed from recently opened
+    let w_hasDetached = false;
 
     for (const p_tabGroup of vscode.window.tabGroups.all) {
         for (const p_tab of p_tabGroup.tabs) {
@@ -17890,6 +17896,7 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
                 if (!this._refreshType.excludeDetached &amp;&amp; this._refreshType.body &amp;&amp; id === cId) {
                     // console.log('fire refresh DETACHED in _refreshDetachedBodies');
                     this._leoDetachedFileSystem.fireRefreshFile(`${id}/${gnx}`);
+                    w_hasDetached = true;
                 }
 
                 // if refresh tree is true, validate that opened detached of same commander still valid and close as needed.
@@ -17930,6 +17937,9 @@ public _onTabsChanged(p_event: vscode.TabChangeEvent): void {
             }
 
         }
+    }
+    if (w_hasDetached &amp;&amp; this._refreshType.tree) {
+        this.refreshCommanderDetachedLanguage(); // May have moved outside of language specific outline
     }
     if (w_foundTabs.size) {
         void vscode.window.tabGroups.close([...w_foundTabs], true);
