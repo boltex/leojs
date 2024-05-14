@@ -1760,7 +1760,7 @@
       {
         "command": "leojs.revert",
         "category": "Leojs",
-        "enablement": "leojsReady && leojsTreeOpened",
+        "enablement": "leojsReady && leojsTreeOpened && leojsTreeTitled",
         "shortTitle": "Revert Leo outline to last saved contents",
         "title": "Revert"
       },
@@ -3588,6 +3588,11 @@
           "command": "leojs.closeLeoFile",
           "when": "viewItem =~ /^leojsDocumentSelected/",
           "group": "inline@2"
+        },
+        {
+          "command": "leojs.revert",
+          "when": "viewItem =~ /^leojsDocumentSelected/",
+          "group": "leojsDocumentContext1@1"
         },
         {
           "command": "leojs.editHeadline",

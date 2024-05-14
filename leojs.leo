@@ -4797,7 +4797,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.revert",
   "category": "Leojs",
-  "enablement": "leojsReady &amp;&amp; leojsTreeOpened",
+  "enablement": "leojsReady &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled",
   "shortTitle": "Revert Leo outline to last saved contents",
   "title": "Revert"
 },
@@ -11142,6 +11142,11 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
   "command": "leojs.closeLeoFile",
   "when": "viewItem =~ /^leojsDocumentSelected/",
   "group": "inline@2"
+},
+{
+  "command": "leojs.revert",
+  "when": "viewItem =~ /^leojsDocumentSelected/",
+  "group": "leojsDocumentContext1@1"
 },
 </t>
 <t tx="felix.20220517203332.1">{
