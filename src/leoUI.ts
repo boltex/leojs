@@ -1318,7 +1318,7 @@ export class LeoUI extends NullGui {
                     if (p_selection.active.line < w_textEditor.document.lineCount) {
                         // TRY TO DETECT IF LANGUAGE RESET NEEDED!
                         let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
+                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('wrap') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                             w_needsRefresh = true;
                             break;
                         }
@@ -1417,8 +1417,10 @@ export class LeoUI extends NullGui {
                     this.debouncedRefreshBodyStates(50); // And maybe changed in other node of same commander!
                 }
 
+            } else {
+                this.refreshDocumentsPane();
             }
-            if (!this.leoStates.leoChanged) {
+            if (!this.leoStates.leoChanged && w_sameCommander) {
                 // also refresh document panel (icon may be dirty now)
                 this.leoStates.leoChanged = true;
                 this.refreshDocumentsPane();
@@ -1441,6 +1443,7 @@ export class LeoUI extends NullGui {
             this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
             this._bodyPreviewMode = false;
             let w_hasSameDetachedTab = false;
+            let w_hasOtherDetachedTab = false;
             const c_id = c.id.toString();
             const w_lastSelNodeGnx = this.lastSelectedNode.gnx;
 
@@ -1454,12 +1457,10 @@ export class LeoUI extends NullGui {
                         const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
                         if (id === c_id && gnx === w_lastSelNodeGnx) {
                             w_hasSameDetachedTab = true;
-                            break;
+                        } else {
+                            w_hasOtherDetachedTab = true;
                         }
                     }
-                }
-                if (w_hasSameDetachedTab) {
-                    break;
                 }
             }
 
@@ -1522,12 +1523,15 @@ export class LeoUI extends NullGui {
                     // TRY TO DETECT IF LANGUAGE RESET NEEDED!
                     if (p_selection.active.line < w_textEditor.document.lineCount) {
                         let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
+                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('wrap') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                             w_needsRefresh = true;
                             break;
                         }
                     }
                 }
+            }
+            if (w_hasOtherDetachedTab) {
+                this.refreshDocumentsPane();
             }
             if (w_needsRefresh) {
                 this.debouncedRefreshBodyStates(1);
@@ -2237,12 +2241,14 @@ export class LeoUI extends NullGui {
                 ) {
                     const w_uri = (p_tab.input as vscode.TabInputText).uri;
                     const [unused, id, gnx] = w_uri.path.split("/");
+                    if (id === cId) {
+                        w_hasDetached = true;
+                    }
 
                     // Refresh detached bodies if same commander  // ! ALSO FIRE REFRESH !
                     if (!this._refreshType.excludeDetached && this._refreshType.body && id === cId) {
                         // console.log('fire refresh DETACHED in _refreshDetachedBodies');
                         this._leoDetachedFileSystem.fireRefreshFile(`${id}/${gnx}`);
-                        w_hasDetached = true;
                     }
 
                     // if refresh tree is true, validate that opened detached of same commander still valid and close as needed.
@@ -3490,8 +3496,10 @@ export class LeoUI extends NullGui {
         for (const w_doc of w_documents) {
             const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(w_doc.uri)];
             if (w_foundVnode) {
-                for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
-                    if (p.v) {
+                const gnx = w_foundVnode.gnx;
+
+                for (const p of w_foundVnode.context.all_unique_positions()) {
+                    if (p.v.gnx === gnx) {
                         let w_language = this._getBodyLanguage(p); // !! 
                         // Set document language only if different
                         if (w_language !== w_doc.languageId) {
@@ -3500,6 +3508,7 @@ export class LeoUI extends NullGui {
                         break;
                     }
                 }
+
             } else {
                 console.log('DETACHED VNODE not found when resetting language');
             }
