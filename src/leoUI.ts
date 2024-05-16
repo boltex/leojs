@@ -1354,8 +1354,11 @@ export class LeoUI extends NullGui {
                 // REFRESH LANGUAGE OF THIS DETACHED BODY
                 const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(p_textDocumentChange.document.uri)];
                 if (w_foundVnode) {
-                    for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
-                        if (p.v) {
+
+                    const gnx = w_foundVnode.gnx;
+
+                    for (const p of w_foundVnode.context.all_unique_positions()) {
+                        if (p.v.gnx === gnx) {
                             if (!w_alreadySaved) {
                                 void this._bodySaveDocument(this.bodyDetachedTextDocument);
                                 w_alreadySaved = true;
@@ -1370,6 +1373,8 @@ export class LeoUI extends NullGui {
                             break;
                         }
                     }
+
+
                 } else {
                     console.log('DETACHED VNODE not found when resetting language');
                 }
