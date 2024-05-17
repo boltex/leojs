@@ -2237,17 +2237,19 @@ export class Commands {
         return '';
     }
     //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLanguage
-    // def hasAmbiguousLanguage(self, p):
-    //     """Return True if p.b contains different @language directives."""
-    //     # c = self
-    //     languages, tag = set(), '@language'
-    //     for s in g.splitLines(p.b):
-    //         if g.match_word(s, 0, tag):
-    //             i = g.skip_ws(s, len(tag))
-    //             j = g.skip_id(s, i)
-    //             word = s[i:j]
-    //             languages.add(word)
-    //     return len(list(languages)) > 1
+    public hasAmbiguousLanguage(p: Position): boolean {
+        const languages = new Set<string>();
+        const tag = '@language';
+        for (const s of g.splitLines(p.b)) {
+            if (g.match_word(s, 0, tag)) {
+                const i = g.skip_ws(s, tag.length);
+                const j = g.skip_id(s, i);
+                const word = s.slice(i, j);
+                languages.add(word);
+            }
+        }
+        return Array.from(languages).length > 1;
+    }
     //@+node:felix.20211228212851.5: *4* c.scanAllDirectives
     /**
      * Scan p and ancestors for directives.
