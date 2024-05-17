@@ -1053,56 +1053,25 @@ export function get_directives_dict_list(
 export function getLanguageFromAncestorAtFileNode(
     p: Position
 ): string | undefined {
-    const v0: VNode = p.v;
+
+    const v0 = p.v;
+    let seen: Set<VNode>;
 
     // The same generator as in v.setAllAncestorAtFileNodesDirty.
     // Original idea by Виталије Милошевић (Vitalije Milosevic).
     // Modified by EKR.
-    let seen: VNode[] = [];
 
     function* v_and_parents(v: VNode): Generator<VNode> {
-        if (seen.indexOf(v) < 0) {
-            seen.push(v); // not found, add it
-        } else {
+        if (seen.has(v)) {
             return;
         }
+        seen.add(v);
         yield v;
-        for (let parent_v of v.parents) {
-            if (seen.indexOf(parent_v) < 0) {
-                yield* v_and_parents(parent_v); // was  not found
+        for (const parent_v of v.parents) {
+            if (!seen.has(parent_v)) {
+                yield* v_and_parents(parent_v);
             }
         }
-    }
-    /**
-     * A helper for all searches.
-     * Phase one searches only @<file> nodes.
-     */
-    function find_language(v: VNode, phase: number): string | undefined {
-        if (phase === 1 && !v.isAnyAtFileNode()) {
-            return undefined;
-        }
-        let w_language: string;
-        // #1693: Scan v.b for an *unambiguous* @language directive.
-        const languages: string[] = findAllValidLanguageDirectives(v.b);
-        if (languages.length === 1) {
-            // An unambiguous language
-            return languages[0];
-        }
-        let name: string;
-        let junk: string;
-        let ext: string;
-        if (v.isAnyAtFileNode()) {
-            // Use the file's extension.
-            name = v.anyAtFileNodeName();
-            [junk, ext] = os_path_splitext(name);
-            ext = ext.slice(1); // strip the leading period.
-            w_language = app.extension_dict[ext];
-
-            if (isValidLanguage(w_language)) {
-                return w_language;
-            }
-        }
-        return undefined;
     }
 
     // First, see if p contains any @language directive.
@@ -1110,26 +1079,140 @@ export function getLanguageFromAncestorAtFileNode(
     if (language) {
         return language;
     }
-    // Phase 1: search only @<file> nodes: #2308.
-    // Phase 2: search all nodes.
-    for (let phase of [1, 2]) {
-        // Search direct parents.
-        for (let p2 of p.self_and_parents(false)) {
-            language = find_language(p2.v, phase);
-            if (language) {
-                return language;
-            }
-        }
-        // Search all extended parents.
-        seen = [v0.context.hiddenRootNode];
-        for (let v of v_and_parents(v0)) {
-            language = find_language(v, phase);
-            if (language) {
-                return language;
-            }
+
+    // Passes 1 and 2: Search body text for unambiguous @language directives.
+
+    // Pass 1: Search body text in direct parents for unambiguous @language directives.
+    for (const p2 of p.self_and_parents(false)) {
+        const languages = findAllValidLanguageDirectives(p2.v.b);
+        if (languages.length === 1) {  // An unambiguous language
+            return languages[0];
         }
     }
-    return undefined;
+
+    // Pass 2: Search body text in extended parents for unambiguous @language directives.
+    seen = new Set([v0.context.hiddenRootNode]);
+    for (const v of v_and_parents(v0)) {
+        const languages = findAllValidLanguageDirectives(v.b);
+        if (languages.length === 1) {  // An unambiguous language
+            return languages[0];
+        }
+    }
+
+    // Passes 3 & 4: Use the file extension in @<file> nodes.
+
+    function get_language_from_headline(v: VNode): string | undefined {
+        /** Return the extension for @<file> nodes. */
+        if (v.isAnyAtFileNode()) {
+            const name = v.anyAtFileNodeName();
+            const [junk, ext] = os_path_splitext(name);
+            const extension = ext.slice(1);  // strip the leading period.
+            const language = app.extension_dict[extension];
+            if (isValidLanguage(language)) {
+                return language;
+            }
+        }
+        return undefined;
+    }
+
+    // Pass 3: Use file extension in headline of @<file> in direct parents.
+    for (const p2 of p.self_and_parents(false)) {
+        language = get_language_from_headline(p2.v);
+        if (language) {
+            return language;
+        }
+    }
+
+    // Pass 4: Use file extension in headline of @<file> nodes in extended parents.
+    seen = new Set([v0.context.hiddenRootNode]);
+    for (const v of v_and_parents(v0)) {
+        language = get_language_from_headline(v);
+        if (language) {
+            return language;
+        }
+    }
+
+    // Return the default language for the commander.
+    const c = p.v.context;
+    return c.target_language || 'python';
+
+    // const v0: VNode = p.v;
+
+    // // The same generator as in v.setAllAncestorAtFileNodesDirty.
+    // // Original idea by Виталије Милошевић (Vitalije Milosevic).
+    // // Modified by EKR.
+    // let seen: VNode[] = [];
+
+    // function* v_and_parents(v: VNode): Generator<VNode> {
+    //     if (seen.indexOf(v) < 0) {
+    //         seen.push(v); // not found, add it
+    //     } else {
+    //         return;
+    //     }
+    //     yield v;
+    //     for (let parent_v of v.parents) {
+    //         if (seen.indexOf(parent_v) < 0) {
+    //             yield* v_and_parents(parent_v); // was  not found
+    //         }
+    //     }
+    // }
+    // /**
+    //  * A helper for all searches.
+    //  * Phase one searches only @<file> nodes.
+    //  */
+    // function find_language(v: VNode, phase: number): string | undefined {
+    //     if (phase === 1 && !v.isAnyAtFileNode()) {
+    //         return undefined;
+    //     }
+    //     let w_language: string;
+    //     // #1693: Scan v.b for an *unambiguous* @language directive.
+    //     const languages: string[] = findAllValidLanguageDirectives(v.b);
+    //     if (languages.length === 1) {
+    //         // An unambiguous language
+    //         return languages[0];
+    //     }
+    //     let name: string;
+    //     let junk: string;
+    //     let ext: string;
+    //     if (v.isAnyAtFileNode()) {
+    //         // Use the file's extension.
+    //         name = v.anyAtFileNodeName();
+    //         [junk, ext] = os_path_splitext(name);
+    //         ext = ext.slice(1); // strip the leading period.
+    //         w_language = app.extension_dict[ext];
+
+    //         if (isValidLanguage(w_language)) {
+    //             return w_language;
+    //         }
+    //     }
+    //     return undefined;
+    // }
+
+    // // First, see if p contains any @language directive.
+    // let language = findFirstValidAtLanguageDirective(p.b);
+    // if (language) {
+    //     return language;
+    // }
+    // // Phase 1: search only @<file> nodes: #2308.
+    // // Phase 2: search all nodes.
+    // for (let phase of [1, 2]) {
+    //     // Search direct parents.
+    //     for (let p2 of p.self_and_parents(false)) {
+    //         language = find_language(p2.v, phase);
+    //         if (language) {
+    //             return language;
+    //         }
+    //     }
+    //     // Search all extended parents.
+    //     seen = [v0.context.hiddenRootNode];
+    //     for (let v of v_and_parents(v0)) {
+    //         language = find_language(v, phase);
+    //         if (language) {
+    //             return language;
+    //         }
+    //     }
+    // }
+    // return undefined;
 }
 //@+node:felix.20220110224044.1: *3* g.getLanguageFromPosition
 /**

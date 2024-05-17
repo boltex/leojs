@@ -3564,7 +3564,10 @@ export class LeoUI extends NullGui {
             this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
             g.doHook("headclick2", { c: c, p: p_node, v: p_node });
             // MAYBE DETACHED BODY CHANGED THAT CONTENT!
-            this._leoFileSystem.setNewBodyUriTime(utils.strToLeoUri(p_node.gnx));
+            // only if NOT watched (otherwise would have already been opened and altered by detached modification)
+            if (!this._leoFileSystem.watchedBodiesGnx.includes(p_node.gnx)) {
+                this._leoFileSystem.setNewBodyUriTime(utils.strToLeoUri(p_node.gnx));
+            }
 
             return this.showBody(false, this.config.treeKeepFocus).catch((p_error) => {
                 return Promise.resolve(); // intercept cancellation as success: next one is going to replace anyways.
@@ -3617,10 +3620,14 @@ export class LeoUI extends NullGui {
         if (!p) {
             p = c.p;
         }
-        const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
+
+        const detachedGnx = `${c.id}/${p.gnx}`;
+        const detachedUri = utils.strToLeoDetachedUri(detachedGnx);
 
         // * Step 1 : Open the document
-        this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
+        if (!this._leoDetachedFileSystem.watchedBodiesGnx.includes(detachedGnx)) {
+            this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
+        }
         this.bodyDetachedTextDocument = await vscode.workspace.openTextDocument(detachedUri);
         let w_bodySel: BodySelectionInfo | undefined;
         const w_language = this._getBodyLanguage(p);
