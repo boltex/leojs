@@ -4569,7 +4569,6 @@ export class Commands {
 //@-others
 //@@language typescript
 //@@tabwidth -4
-//@@pagewidth 70
 
 export interface Commands
     extends CommanderOutlineCommands,

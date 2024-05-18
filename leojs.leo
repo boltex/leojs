@@ -15179,14 +15179,19 @@ private _getBodyLanguage(p: Position): string {
     let w_language = "plain";
     const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
     if (g.useSyntaxColoring(p)) {
-        const aList = g.get_directives_dict_list(p);
-        const d = g.scanAtCommentAndAtLanguageDirectives(aList);
-        w_language =
-            (d &amp;&amp; d['language'])
-            || g.getLanguageFromAncestorAtFileNode(p)
-            || c.config.getLanguage('target-language')
-            || 'plain';
 
+        // DEPRECATED leojs old colorizer language detection--------
+        // const aList = g.get_directives_dict_list(p);
+        // const d = g.scanAtCommentAndAtLanguageDirectives(aList);
+        // w_language =
+        //     (d &amp;&amp; d['language'])
+        //     || g.getLanguageFromAncestorAtFileNode(p)
+        //     || c.config.getLanguage('target-language')
+        //     || 'plain';
+        // ---------------------------------------------------------
+
+        // * as per original Leo's leoColorizer.py
+        w_language = g.getLanguageFromAncestorAtFileNode(p) || c.config.getLanguage('target-language');
         w_language = w_language.toLowerCase();
     }
     // Replace language string if in 'exceptions' array
