@@ -18,7 +18,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _lastGnx: string = ""; // gnx of last file read
     private _lastBodyData: string = ""; // body content of last file read
 
-    // * List of currently opened body panes gnx (from 'watch' & 'dispose' methods)
+    // * List of currently VISIBLE opened body panes gnx (from 'watch' & 'dispose' methods)
     public watchedBodiesGnx: string[] = [];
 
     // * List of gnx open in tab(s) (from tryApplyNodeToBody / switchBody and fs.delete)
@@ -153,10 +153,10 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                 throw vscode.FileSystemError.FileIsADirectory();
             } else {
                 const w_gnx = utils.leoUriToStr(p_uri);
-
-                if (!this._openedBodiesInfo[w_gnx]) {
-                    console.warn('readFile: ERROR File not in _openedBodiesInfo! gnx: ', w_gnx);
-                }
+                // * should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
+                // if (!this._openedBodiesInfo[w_gnx]) {
+                //     console.warn('readFile: ERROR File not in _openedBodiesInfo! gnx: ', w_gnx);
+                // }
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
                 const w_v = c.fileCommands.gnxDict[w_gnx];
 

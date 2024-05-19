@@ -1167,11 +1167,8 @@ export class LeoUI extends NullGui {
         p_editor: vscode.TextEditor | undefined,
         p_internalCall?: boolean
     ): void {
-        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
-            if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
-                void this._hideDeleteBody(p_editor);
-            }
-            this._checkPreviewMode(p_editor);
+        if (p_editor) {
+            this._hideBodiesUnknownToFileSys([p_editor]);
         }
         if (!p_internalCall) {
             void this.triggerBodySave(true, true); // Save in case edits were pending
@@ -1203,14 +1200,7 @@ export class LeoUI extends NullGui {
     public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void {
         if (p_editors && p_editors.length) {
             // May be no changes - so check length
-            p_editors.forEach((p_textEditor) => {
-                if (p_textEditor && p_textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
-                    if (this.bodyUri.fsPath !== p_textEditor.document.uri.fsPath) {
-                        void this._hideDeleteBody(p_textEditor);
-                    }
-                    this._checkPreviewMode(p_textEditor);
-                }
-            });
+            this._hideBodiesUnknownToFileSys(p_editors);
         }
         void this.triggerBodySave(true, true);
     }
@@ -2234,8 +2224,8 @@ export class LeoUI extends NullGui {
         const w_commands = g.app.windowList.map(p_frame => p_frame.c);
         const c = g.app.windowList[this.frameIndex].c;
         const cId = g.app.windowList[this.frameIndex].c.id.toString();
-        const w_foundTabs: Set<vscode.Tab> = new Set(); // To be closed
-        const w_foundUri: Set<vscode.Uri> = new Set(); // To be removed from recently opened
+        const w_unfoundTabs: Set<vscode.Tab> = new Set(); // To be closed
+        const w_unfoundUri: Set<vscode.Uri> = new Set(); // To be removed from recently opened
         let w_hasDetached = false;
 
         for (const p_tabGroup of vscode.window.tabGroups.all) {
@@ -2267,8 +2257,8 @@ export class LeoUI extends NullGui {
                         }
                         if (!found) {
                             // close !
-                            w_foundTabs.add(p_tab);
-                            w_foundUri.add(w_uri);
+                            w_unfoundTabs.add(p_tab);
+                            w_unfoundUri.add(w_uri);
                         }
                     } else if (this._refreshType.documents) {
                         let found = false;
@@ -2285,8 +2275,8 @@ export class LeoUI extends NullGui {
                         }
                         if (!found) {
                             // close !
-                            w_foundTabs.add(p_tab);
-                            w_foundUri.add(w_uri);
+                            w_unfoundTabs.add(p_tab);
+                            w_unfoundUri.add(w_uri);
                         }
 
                     }
@@ -2298,9 +2288,9 @@ export class LeoUI extends NullGui {
         if (w_hasDetached && this._refreshType.tree) {
             this.refreshCommanderDetachedLanguage(); // May have moved outside of language specific outline
         }
-        if (w_foundTabs.size) {
-            void vscode.window.tabGroups.close([...w_foundTabs], true);
-            for (const w_uri of w_foundUri) {
+        if (w_unfoundTabs.size) {
+            void vscode.window.tabGroups.close([...w_unfoundTabs], true);
+            for (const w_uri of w_unfoundUri) {
                 void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
             }
         }
@@ -2839,6 +2829,39 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Close all tabs that are not part of their filesystems
+     * * This matches cleanupDetachedBodies from leoBodyDetached !
+     */
+    private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): void {
+        p_editors.forEach((p_editor) => {
+            if (p_editor) {
+                switch (p_editor.document.uri.scheme) {
+                    case Constants.URI_LEOJS_SCHEME:
+                        if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
+                            void this._hideDeleteBody(p_editor);
+                        }
+                        this._checkPreviewMode(p_editor);
+                        break;
+
+                    case Constants.URI_LEOJS_DETACHED_SCHEME:
+                        const w_gnx = utils.leoUriToStr(p_editor.document.uri);
+                        //if (!this._leoDetachedFileSystem.watchedBodiesGnx.includes(w_gnx)) {
+                        if (!this._leoDetachedFileSystem.openedBodiesVNodes[w_gnx]) {
+                            // unknown to the detached filesystem
+                            void this._hideDeleteBody(p_editor);
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
+            }
+
+        });
+    }
+
+    /**
      * * Closes non-existing text-editor body if it doesn't match bodyUri
      * @param p_textEditor the editor to close
      * @returns promise that resolves to true if it closed tabs, false if none were found
@@ -2850,16 +2873,13 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
-                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_editorFsPath &&
-                    this.bodyUri.fsPath !== w_editorFsPath // if BODY is now the same, dont hide!
+                    (p_tab.input as vscode.TabInputText).uri.scheme.startsWith(Constants.URI_LEOJS_SCHEME) &&
+                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_editorFsPath
                 ) {
                     w_foundTabs.push(p_tab);
                 }
             });
         });
-
-        // TODO : Delete and/or REMOVE FROM DETACHED VNODES DICT!! 
 
         // * Make sure the closed/deleted body is not remembered as vscode's recent files!
         void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', p_textEditor.document.uri);
@@ -4442,9 +4462,10 @@ export class LeoUI extends NullGui {
 
                     let w_description = p_position.gnx; // Defaults as gnx.
                     const w_gnxParts = w_description.split('.');
-                    if (w_gnxParts.length === 3 && w_gnxParts[1].length === 14) {
-                        // legit 3 part gnx
-                        const dateString = w_gnxParts[1];
+                    const dateString = w_gnxParts[1] ? w_gnxParts[1] : "";
+
+                    if (dateString && w_gnxParts.length === 3 && dateString.length === 14 && /^\d+$/.test(dateString)) {
+                        // legit 3 part numeric gnx, so build a string date
                         const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
                         const w_month = +dateString.substring(4, 6);
                         const w_day = +dateString.substring(6, 8);
