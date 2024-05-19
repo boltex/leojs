@@ -13400,10 +13400,12 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
         const w_selectedCId = g.app.windowList[this.frameIndex].c.id.toString();
         const w_sameCommander = w_selectedCId === id;
+        let w_needDocRefresh = false;
         let w_alreadySaved = false;
         let w_v: VNode | undefined;
 
-        let c: Commands | undefined;
+        let c: Commands | undefined; // The modified text document's body's commander.
+
         for (const w_frame of g.app.windowList) {
             if (w_frame.c.id.toString() === id) {
                 c = w_frame.c;
@@ -13465,6 +13467,14 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                     // NOT incrementing this.treeID to keep ids intact
                     // NoReveal since we're keeping the same id.
                     this._refreshOutline(false, RevealType.NoReveal);
+                }
+            }
+        } else {
+            if (c &amp;&amp; !c.isChanged()) {
+                w_needDocRefresh = true;
+                if (!w_alreadySaved) {
+                    void this._bodySaveDocument(this.bodyDetachedTextDocument);
+                    w_alreadySaved = true;
                 }
             }
         }
@@ -13545,7 +13555,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                 this.debouncedRefreshBodyStates(50); // And maybe changed in other node of same commander!
             }
 
-        } else {
+        } else if (w_needDocRefresh) {
             this.refreshDocumentsPane();
         }
         if (!this.leoStates.leoChanged &amp;&amp; w_sameCommander) {
@@ -18550,8 +18560,6 @@ private _refreshCommanderDetachedLanguage(): void {
             w_documents.push(w_doc);
         }
     }
-
-    console.log('Qty of detached to recolorize by resetting language : ', w_documents.length);
 
     for (const w_doc of w_documents) {
         const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(w_doc.uri)];
