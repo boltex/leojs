@@ -294,7 +294,6 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
     const w_types: { [name: string]: string[] } = {};
     p_filetypes.forEach(type => {
         w_types[type[0]] = type[1].split(" ").map((p_entry) => {
-
             return p_entry.startsWith("*.") ? p_entry.substring(2) : p_entry;
         });
     });

@@ -6445,7 +6445,6 @@ export class LeoUI extends NullGui {
                 });
             }
             if (multiple) {
-
                 return names.map((p_name) => {
                     let fileName = g.os_path_fix_drive(p_name);
                     fileName = g.os_path_normslashes(fileName);

@@ -162,9 +162,12 @@ export class CommanderFileCommands {
         }
         // New in Leo 4.9: choose the type of import based on the extension.
         c.init_error_dialogs();
-        const derived: string[] = names.filter((z) =>
-            c.looksLikeDerivedFile(z)
-        );
+        const derived: string[] = [];
+        for (const z of names) {
+            if (await c.looksLikeDerivedFile(z)) {
+                derived.push(z);
+            }
+        }
         const others: string[] = names.filter((z) => !derived.includes(z));
         if (derived && derived.length) {
             await ic.importDerivedFiles(c.p, derived);
