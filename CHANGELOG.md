@@ -2,7 +2,12 @@
 
 # 0.2.14
 
-- ...
+- Fixed import file error when using the 'import any' or other importers.
+- Improved 'detached' body panes behavior.
+- Fixed colorization of descendants of nodes with multiple 'language' directives.
+- Added context menu to document nodes making the 'revert' command available.
+- Fixed 'refresh-from-disk' command availability.
+- Improved some leyboard shortcuts and the related README documentation section.
 
 # 0.2.13
 
