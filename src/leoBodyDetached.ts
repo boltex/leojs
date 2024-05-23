@@ -158,15 +158,15 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
 
             if (id && !gnx) {
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-
-                // } else if (w_gnx === this._lastGnx && this._openedBodiesInfo[this._lastGnx]) {
-                //     return {
-                //         type: vscode.FileType.File,
-                //         ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-                //         mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-                //         size: this._lastBodyLength
-                //     };
-
+                // SPECIAL CASE -----------------------------------------------
+            } else if (w_gnx === this._lastGnx && this._openedBodiesInfo[this._lastGnx]) {
+                return {
+                    type: vscode.FileType.File,
+                    ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                    mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                    size: this._openedBodiesInfo[this._lastGnx].lastBodyLength!
+                };
+                // ------------------------------------------------------------
             } else if (this._openedBodiesInfo[w_gnx]) {
                 let c: Commands;
                 let w_v: VNode | undefined;
@@ -225,6 +225,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                     this._lastGnx = w_gnx;
                     this._lastBodyData = w_v.b;
                     const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                    this._openedBodiesInfo[this._lastGnx].lastBodyLength = w_buffer.byteLength;
                     return w_buffer;
                 } else {
                     this._leoUi.fullRefresh();
@@ -305,6 +306,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
             console.error("LeoJS: Tried to save DETACHED but not in _openedBodiesGnx. gnx :", w_gnx);
         }
         this._setOpenedBodyTime(w_gnx);
+        this._openedBodiesInfo[w_gnx].lastBodyLength = p_content.byteLength;
         this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
     }
 

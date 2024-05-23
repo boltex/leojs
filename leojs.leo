@@ -8526,6 +8526,9 @@ import { Constants } from "./constants";
         console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
     }
     this._setOpenedBodyTime(w_gnx);
+    if (w_gnx === this._lastGnx) {
+        this._lastBodyLength = p_content.byteLength;
+    }
     this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
 }
 
@@ -8586,7 +8589,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     // * Last file read data with the readFile method
     private _lastGnx: string = ""; // gnx of last file read
     private _lastBodyData: string = ""; // body content of last file read
-
+    private _lastBodyLength: number = 0; // length of last file read
     // * List of currently VISIBLE opened body panes gnx (from 'watch' &amp; 'dispose' methods)
     public watchedBodiesGnx: string[] = [];
 
@@ -8657,15 +8660,15 @@ public fireRefreshFile(p_gnx: string): void {
         if (p_uri.fsPath.length === 1) {
 
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-
-            // } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
-            //     return {
-            //         type: vscode.FileType.File,
-            //         ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-            //         mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-            //         size: this._lastBodyLength
-            //     };
-
+            // SPECIAL CASE -----------------------------------------------
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
+            return {
+                type: vscode.FileType.File,
+                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                size: this._lastBodyLength
+            };
+            // ------------------------------------------------------------
         } else if (this._openedBodiesInfo[w_gnx]) {
             const c = g.app.windowList[this._leoUi.frameIndex].c;
             const w_v = c.fileCommands.gnxDict[w_gnx];
@@ -8700,6 +8703,7 @@ public fireRefreshFile(p_gnx: string): void {
                 this._lastGnx = w_gnx;
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                this._lastBodyLength = w_buffer.byteLength;
                 return w_buffer;
             } else {
                 this._leoUi.fullRefresh();
@@ -8734,6 +8738,7 @@ public fireRefreshFile(p_gnx: string): void {
 export interface BodyTimeInfo {
     ctime: number;
     mtime: number;
+    lastBodyLength?: number;
 }
 
 </t>
@@ -17601,6 +17606,7 @@ import { VNode } from "./core/leoNodes";
         console.error("LeoJS: Tried to save DETACHED but not in _openedBodiesGnx. gnx :", w_gnx);
     }
     this._setOpenedBodyTime(w_gnx);
+    this._openedBodiesInfo[w_gnx].lastBodyLength = p_content.byteLength;
     this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
 }
 
@@ -17777,15 +17783,15 @@ public fireRefreshFile(p_gnx: string): void {
 
         if (id &amp;&amp; !gnx) {
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-
-            // } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
-            //     return {
-            //         type: vscode.FileType.File,
-            //         ctime: this._openedBodiesInfo[this._lastGnx].ctime,
-            //         mtime: this._openedBodiesInfo[this._lastGnx].mtime,
-            //         size: this._lastBodyLength
-            //     };
-
+            // SPECIAL CASE -----------------------------------------------
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesInfo[this._lastGnx]) {
+            return {
+                type: vscode.FileType.File,
+                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                size: this._openedBodiesInfo[this._lastGnx].lastBodyLength!
+            };
+            // ------------------------------------------------------------
         } else if (this._openedBodiesInfo[w_gnx]) {
             let c: Commands;
             let w_v: VNode | undefined;
@@ -17845,6 +17851,7 @@ public fireRefreshFile(p_gnx: string): void {
                 this._lastGnx = w_gnx;
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                this._openedBodiesInfo[this._lastGnx].lastBodyLength = w_buffer.byteLength;
                 return w_buffer;
             } else {
                 this._leoUi.fullRefresh();

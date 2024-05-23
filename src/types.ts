@@ -106,6 +106,7 @@ export interface CommandOptions {
 export interface BodyTimeInfo {
     ctime: number;
     mtime: number;
+    lastBodyLength?: number;
 }
 
 /**
