@@ -12776,14 +12776,14 @@ public debouncedRefreshBodyStates(p_delay?: number) {
     if (p_delay === 0) {
         if (this._bodyLastChangedDocument &amp;&amp; this.leoStates.fileOpenedReady) {
             void this._bodySaveDocument(this._bodyLastChangedDocument);
-            this.refreshBodyStates();
         }
+        this.refreshBodyStates();
     } else {
         this._bodyStatesTimer = setTimeout(() =&gt; {
             if (this._bodyLastChangedDocument &amp;&amp; this.leoStates.fileOpenedReady) {
                 void this._bodySaveDocument(this._bodyLastChangedDocument);
-                this.refreshBodyStates();
             }
+            this.refreshBodyStates();
         }, p_delay);
     }
 }

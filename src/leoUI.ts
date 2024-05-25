@@ -3485,14 +3485,14 @@ export class LeoUI extends NullGui {
         if (p_delay === 0) {
             if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
                 void this._bodySaveDocument(this._bodyLastChangedDocument);
-                this.refreshBodyStates();
             }
+            this.refreshBodyStates();
         } else {
             this._bodyStatesTimer = setTimeout(() => {
                 if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
                     void this._bodySaveDocument(this._bodyLastChangedDocument);
-                    this.refreshBodyStates();
                 }
+                this.refreshBodyStates();
             }, p_delay);
         }
     }
