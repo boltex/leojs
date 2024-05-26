@@ -2826,6 +2826,29 @@ export class LeoUI extends NullGui {
     }
 
     private _checkClosedTabs(): void {
+        // check if selected body still has opened textEditors
+        let bodyCount = 0;
+        for (const p_tabGroup of vscode.window.tabGroups.all) {
+            for (const p_tab of p_tabGroup.tabs) {
+                if (p_tab.input &&
+                    (p_tab.input as vscode.TabInputText).uri &&
+                    ((p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME)
+                ) {
+                    // a normal body (non detached found)
+                    bodyCount++;
+                    break;
+                }
+            }
+            if (bodyCount) {
+                break;
+            }
+
+        }
+        if (!bodyCount) {
+            // Make sure no more saving over possible detached with same gnx
+            this._bodyLastChangedDocument = undefined;
+            this._bodyLastChangedDocumentSaved = false;
+        }
         this._leoFileSystem.cleanupBodies();
         this._leoDetachedFileSystem.cleanupDetachedBodies();
     }
@@ -3071,6 +3094,8 @@ export class LeoUI extends NullGui {
 
         // * Step 1 : Open the document
         const w_openedDocument = await vscode.workspace.openTextDocument(this.bodyUri);
+        this._bodyLastChangedDocument = undefined;
+        this._bodyLastChangedDocumentSaved = false;
 
         this._bodyTextDocument = w_openedDocument;
         let w_bodySel: BodySelectionInfo | undefined;

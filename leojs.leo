@@ -12416,6 +12416,8 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
 
     // * Step 1 : Open the document
     const w_openedDocument = await vscode.workspace.openTextDocument(this.bodyUri);
+    this._bodyLastChangedDocument = undefined;
+    this._bodyLastChangedDocumentSaved = false;
 
     this._bodyTextDocument = w_openedDocument;
     let w_bodySel: BodySelectionInfo | undefined;
@@ -18502,6 +18504,29 @@ public cleanupDetachedBodies(): void {
 
 </t>
 <t tx="felix.20240421175315.1">private _checkClosedTabs(): void {
+    // check if selected body still has opened textEditors
+    let bodyCount = 0;
+    for (const p_tabGroup of vscode.window.tabGroups.all) {
+        for (const p_tab of p_tabGroup.tabs) {
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                ((p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME)
+            ) {
+                // a normal body (non detached found)
+                bodyCount++;
+                break;
+            }
+        }
+        if (bodyCount) {
+            break;
+        }
+
+    }
+    if (!bodyCount) {
+        // Make sure no more saving over possible detached with same gnx
+        this._bodyLastChangedDocument = undefined;
+        this._bodyLastChangedDocumentSaved = false;
+    }
     this._leoFileSystem.cleanupBodies();
     this._leoDetachedFileSystem.cleanupDetachedBodies();
 }
