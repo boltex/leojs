@@ -576,6 +576,7 @@ export class Constants {
         CUT: Constants.NAME + ".cutNode",
         PASTE: Constants.NAME + ".pasteNode",
         PASTE_CLONE: Constants.NAME + ".pasteNodeAsClone",
+        PASTE_AS_TEMPLATE: Constants.NAME + ".pasteAsTemplate",
         DELETE: Constants.NAME + ".delete",
         HEADLINE: Constants.NAME + ".editHeadline",
         MOVE_DOWN: Constants.NAME + ".moveOutlineDown",
@@ -819,6 +820,7 @@ export class Constants {
         CUT_PNODE: "cut-node",
         PASTE_PNODE: "async-paste-node",
         PASTE_CLONE_PNODE: "async-paste-retaining-clones",
+        PASTE_AS_TEMPLATE: "async-paste-as-template",
         // * Outline Editing
         DELETE_PNODE: "delete-node",
         MOVE_PNODE_DOWN: "move-outline-down",

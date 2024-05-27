@@ -2080,6 +2080,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CUT_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 [CMD.DELETE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.DELETE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.PASTE_AS_TEMPLATE, () =&gt; p_leoUI.command(LEOCMD.PASTE_AS_TEMPLATE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 [CMD.PASTE_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.PASTE_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 [CMD.PASTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
@@ -2228,6 +2229,7 @@ public static COMMANDS = {
     CUT: Constants.NAME + ".cutNode",
     PASTE: Constants.NAME + ".pasteNode",
     PASTE_CLONE: Constants.NAME + ".pasteNodeAsClone",
+    PASTE_AS_TEMPLATE: Constants.NAME + ".pasteAsTemplate",
     DELETE: Constants.NAME + ".delete",
     HEADLINE: Constants.NAME + ".editHeadline",
     MOVE_DOWN: Constants.NAME + ".moveOutlineDown",
@@ -2472,6 +2474,7 @@ public static LEO_COMMANDS = {
     CUT_PNODE: "cut-node",
     PASTE_PNODE: "async-paste-node",
     PASTE_CLONE_PNODE: "async-paste-retaining-clones",
+    PASTE_AS_TEMPLATE: "async-paste-as-template",
     // * Outline Editing
     DELETE_PNODE: "delete-node",
     MOVE_PNODE_DOWN: "move-outline-down",
@@ -5161,6 +5164,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "enablement": "leojsTreeOpened",
   "title": "Paste Node as Clone",
   "icon": "$(leojs-paste-clone)"
+},
+{
+  "command": "leojs.pasteAsTemplate",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Paste Node as template"
 },
 {
   "command": "leojs.delete",

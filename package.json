@@ -2173,6 +2173,12 @@
         "icon": "$(leojs-paste-clone)"
       },
       {
+        "command": "leojs.pasteAsTemplate",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Paste Node as template"
+      },
+      {
         "command": "leojs.delete",
         "category": "Leojs",
         "title": "Delete",

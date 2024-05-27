@@ -121,6 +121,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CUT_SELECTION_FO, () => p_leoUI.command(LEOCMD.CUT_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.DELETE_SELECTION, () => p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.DELETE_SELECTION_FO, () => p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+        [CMD.PASTE_AS_TEMPLATE, () => p_leoUI.command(LEOCMD.PASTE_AS_TEMPLATE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
         [CMD.PASTE_CLONE_SELECTION, () => p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.PASTE_CLONE_SELECTION_FO, () => p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.PASTE_SELECTION, () => p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
