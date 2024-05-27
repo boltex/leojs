@@ -1293,7 +1293,7 @@ export class LeoUI extends NullGui {
             // * If body changed a line with and '@' directive refresh body states
             let w_needsRefresh = false;
             for (const p_change of p_textDocumentChange.contentChanges) {
-                if (p_change.text.includes('@')) {
+                if (p_change.rangeLength || p_change.text.includes('@')) {
                     // There may have been an @
                     w_needsRefresh = true;
                     break;
@@ -1514,7 +1514,7 @@ export class LeoUI extends NullGui {
             // * If body changed a line with and '@' directive refresh body states
             let w_needsRefresh = false;
             for (const p_change of p_textDocumentChange.contentChanges) {
-                if (p_change.text.includes('@')) {
+                if (p_change.rangeLength || p_change.text.includes('@')) {
                     // There may have been an @
                     w_needsRefresh = true;
                     break;
