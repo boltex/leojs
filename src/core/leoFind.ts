@@ -169,10 +169,12 @@ export class LeoFind {
     public match_obj!: RegExpExecArray | undefined;
     public reverse: boolean = false;
     public root: Position | undefined; // The start of the search, especially for suboutline-only.
+    public total_links = 0;
     //
     // User settings.
     public minibuffer_mode!: boolean;
     public reverse_find_defs!: boolean;
+    public prefer_nav_pane!: boolean;
 
     //@+others
     //@+node:felix.20221012210736.1: *3* LeoFind.birth
@@ -264,6 +266,7 @@ export class LeoFind {
         const c = this.c;
         this.minibuffer_mode = c.config.getBool('minibuffer-find-mode', false);
         this.reverse_find_defs = c.config.getBool('reverse-find-defs', false);
+        this.prefer_nav_pane = c.config.getBool('prefer-nav-pane', true);
     }
     //@+node:felix.20221012233803.1: *3* find.batch_change (script helper) & helpers
 
@@ -2331,6 +2334,10 @@ export class LeoFind {
     private put_link(line: string, line_number: number, v: VNode): void {
         const c = this.c;
         // const log = c.frame.log // UNAVAILABLE IN LEOJS
+        this.total_links += 1;
+        if (this.total_links > 100) {
+            return;
+        }
         // Find the first position with the given vnode.
         let found;
         for (const p of c.all_unique_positions()) {
@@ -2580,6 +2587,58 @@ export class LeoFind {
     //     k.showStateAndMode()
     //     c.widgetWantsFocusNow(w)
     //     self.do_find_next(settings)
+    //@+node:felix.20240528003407.1: *4* find.summarize
+    @cmd(
+        'summarize',
+        'Prompt for a regex and list all matches in a new top-level node.' +
+
+        'This command shows *only* m.group(0).' +
+        'Append `.*` to the pattern to see the remainder of the line.'
+    )
+    public async summarize_command(): Promise<unknown> {
+
+        const pattern_s = await g.app.gui.get1Arg({
+            title: "Summarize regex",
+            placeHolder: "<regex>",
+            prompt: "Enter a regex",
+        });
+        const c = this.c;
+        // Get and check pattern.
+        if (!pattern_s || !pattern_s.trim()) {
+            g.es_print('no pattern');
+            return;
+        }
+        let re_pattern: RegExp;
+        try {
+            re_pattern = new RegExp(pattern_s);
+        } catch (e) {
+            g.es(`invalid regex: ${pattern_s}`);
+            return;
+        }
+        // Find all unique instances of pattern.
+        const results_set = new Set<string>();
+        for (const v of c.all_unique_nodes()) {
+            let match: RegExpExecArray | null;
+            while ((match = re_pattern.exec(v.b)) !== null) {
+                results_set.add(match[0]);
+            }
+        }
+        const results = Array.from(results_set).sort();
+        if (results.length > 0) {
+            // Create a top-level summary node.
+            const last = c.lastTopLevel();
+            const p = last.insertAfter();
+            p.h = `summarize: found ${results.length}: ${pattern_s}`;
+            const results_s = results.join('\n');
+            p.b = `// summarize: ${pattern_s}\n\n${results_s}\n`;
+            c.redraw();
+        } else {
+            // Report failure.
+            g.es(`summarize: not found: ${pattern_s}`);
+        }
+
+    }
+
     //@+node:felix.20230120221726.1: *4* find.tag-node
     @cmd('tag-node', 'Prompt for a tag for this node')
     public interactive_tag_node(): Thenable<unknown> {
