@@ -190,6 +190,7 @@
 <v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
 <v t="felix.20220923001725.1"><vh>fullRefresh</vh></v>
 <v t="felix.20240405235538.1"><vh>_refreshDetachedBodies</vh></v>
+<v t="felix.20240529234358.1"><vh>showNavResults</vh></v>
 <v t="felix.20220923001235.1"><vh>isTsStillValid</vh></v>
 <v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
 <v t="felix.20220922235942.1"><vh>_revealNode</vh></v>
@@ -10326,8 +10327,7 @@ public async navEnter(): Promise&lt;unknown&gt; {
         scon.qsc_search(inp);
     }
 
-    this._leoGotoProvider.refreshTreeRoot();
-    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+    return this.showNavResults();
 
 }
 
@@ -10348,8 +10348,7 @@ public async navTextChange(): Promise&lt;unknown&gt; {
         const exp = inp.replace(/ /g, '*');
         scon.qsc_background_search(exp);
     }
-    this._leoGotoProvider.refreshTreeRoot();
-    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+    return this.showNavResults();
 }
 
 </t>
@@ -18665,6 +18664,12 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
         }
 
     });
+}
+
+</t>
+<t tx="felix.20240529234358.1">public showNavResults(): Thenable&lt;unknown&gt; {
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
 }
 
 </t>

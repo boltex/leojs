@@ -15,6 +15,7 @@ import {
     StringRadioButton,
 } from './findTabManager';
 import { StringTextWrapper } from './leoFrame';
+import { QuickSearchController } from './quicksearch';
 //@-<< leoFind imports >>
 //@+<< Theory of operation of find/change >>
 //@+node:felix.20221012210057.1: ** << Theory of operation of find/change >>
@@ -777,8 +778,9 @@ export class LeoFind {
             }
         }
         // Put the first match in the Nav pane's edit widget and update.
-
-        // TODO : USE EQUIVALENT IN LEOJS !
+        const scon: QuickSearchController = c.quicksearchController;
+        scon.qsc_search(unique_matches[0]);
+        g.app.gui.showNavResults();
 
         // x.clear();
         // e.setText(unique_matches[0]);
@@ -786,25 +788,6 @@ export class LeoFind {
         // w.returnPressed();
     }
 
-
-    // def _load_quicksearch_entries(self, word: str, matches: list[tuple[int, Position, str]]) -> None:
-    //     """Put all matches in the Nav pane."""
-    //     c = self.c
-    //     x = c.quicksearch_controller
-    //     w = c.frame.nav
-    //     e = w.ui.lineEdit  # A QLineEdit.
-    //     # Filter out uniques matches.
-    //     unique_matches = list(set([s.strip() for (i, p, s) in matches if s.strip()]))
-    //     # The Nav pane can show only one match, so issue a warning.
-    //     if len(unique_matches) > 1:
-    //         g.es_print(f"Multiple matches for {word}", color='red')
-    //         for z in unique_matches[1:]:
-    //             g.es_print(z)
-    //     # Put the first match in the Nav pane's edit widget and update.
-    //     x.clear()
-    //     e.setText(unique_matches[0])
-    //     c.frame.log.selectTab('Nav')
-    //     w.returnPressed()
     //@+node:felix.20240529215415.1: *6* find._compute_find_def_word
     /**
      * Init the find-def command. Return the word to find or None.
@@ -921,41 +904,6 @@ export class LeoFind {
         }
         return results;
     }
-
-
-    // def _find_all_matches(self, patterns: list[re.Pattern]) -> list[tuple[int, Position, str]]:
-    //     """
-    //     Search all nodes for any of the given compiled regex patterns.
-
-    //     Return a list of tuples (starting-index, p, matching-string) describing the matches.
-    //     """
-    //     c = self.c
-    //     p = c.rootPosition()
-    //     results = []
-    //     seen = set()
-    //     while p:
-    //         if g.inAtNosearch(p):
-    //             p.moveToNodeAfterTree()
-    //             continue
-    //         if p.v in seen:
-    //             p.moveToThreadNext()
-    //             continue
-    //         seen.add(p.v)
-    //         b = p.b
-    //         i = 0  # The index within p.b of the start of s.
-    //         found = False  # Only report the first match within p.b.
-    //         for s in g.splitLines(b):
-    //             for pattern in patterns:
-    //                 m = pattern.search(s)
-    //                 if m:
-    //                     results.append((i + m.start(), p.copy(), m.group(0)))
-    //                     found = True
-    //                     break
-    //             if found:
-    //                 break
-    //             i += len(s)
-    //         p.moveToThreadNext()
-    //     return results
     //@+node:felix.20240529213126.6: *6* find._make_clones
     public _make_clones(word: string = "", matches: [number, Position, string][] = []): void {
         /*
@@ -990,39 +938,6 @@ export class LeoFind {
         found.expand();
         c.redraw(found);
     }
-
-
-    // def _make_clones(self, word: str, matches: list[tuple[int, Position, str]]) -> None:
-    //     """
-    //     Undoably create clones for all matches, similar to the clone-find commands.
-    //     """
-    //     c = self.c
-    //     ftm = self.ftm
-    //     u = c.undoer
-    //     undoData = u.beforeInsertNode(c.p)
-
-    //     # Create the found node.
-    //     found = c.lastTopLevel().insertAfter()
-    //     found.h = f"Found {len(matches)}: {word}"
-    //     found.b = f"@nosearch\n\n# found {len(matches)} nodes"
-    //     # Clone nodes as children of the found node.
-    //     clones = [p for i, p, s in matches]
-    //     for p in clones:
-    //         p2 = p.copy()
-    //         n = found.numberOfChildren()
-    //         p2._linkCopiedAsNthChild(found, n)
-    //     # Sort the clones in place, without undo.
-    //     found.v.children.sort(key=lambda v: v.h.lower())
-
-    //     # Set the search text. This is convenient and should not cause problems.
-    //     self.find_text = word
-    //     ftm.set_find_text(word)
-
-    //     # Set the undo data.
-    //     u.afterInsertNode(found, 'find-def', undoData)
-    //     c.setChanged()
-    //     found.expand()
-    //     c.redraw(found)
     //@+node:felix.20240529213126.7: *6* find._make_patterns
     public _make_patterns(word?: string): RegExp[] {
         /* Return a list of compiled regex patterns. */
@@ -1049,30 +964,6 @@ export class LeoFind {
         }
         return results;
     }
-
-
-    // bad_regex_patterns: list[str] = []
-
-    // def _make_patterns(self, word: str) -> list[re.Pattern]:
-    //     """Return a list of compiled regex patterns."""
-    //     results: list[re.Pattern] = []
-
-    //     def compile_pattern(pattern: str) -> None:
-    //         try:
-    //             results.append(re.compile(pattern))
-    //         except Exception:
-    //             if pattern not in self.bad_regex_patterns:
-    //                 self.bad_regex_patterns.append(pattern)
-    //                 g.es_print(f"bad regex pattern: {pattern}")
-
-    //     for pattern in (
-    //         fr"^\s*class\s+{word}\b",
-    //         fr"^\s*def\s+{word}\b",
-    //         fr"\b{word}\s*=",
-    //         fr"\b{word}:",
-    //     ):
-    //         compile_pattern(pattern)
-    //     return results
     //@+node:felix.20240529224134.1: *6* find._switch_style
     /**
      * Switch between camelCase and underscore_style function definitions.

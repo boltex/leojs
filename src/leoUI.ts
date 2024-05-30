@@ -2308,6 +2308,11 @@ export class LeoUI extends NullGui {
 
     }
 
+    public showNavResults(): Thenable<unknown> {
+        this._leoGotoProvider.refreshTreeRoot();
+        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+    }
+
     /**
      * * Checks timestamp only, if is still the latest lastReceivedNode
       * @param ts timestamp of last time
@@ -4775,8 +4780,7 @@ export class LeoUI extends NullGui {
             scon.qsc_search(inp);
         }
 
-        this._leoGotoProvider.refreshTreeRoot();
-        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+        return this.showNavResults();
 
     }
 
@@ -4796,8 +4800,7 @@ export class LeoUI extends NullGui {
             const exp = inp.replace(/ /g, '*');
             scon.qsc_background_search(exp);
         }
-        this._leoGotoProvider.refreshTreeRoot();
-        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+        return this.showNavResults();
     }
 
     /**
