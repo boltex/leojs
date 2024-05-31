@@ -102,6 +102,7 @@ suite('Test cases for leoFind.ts', () => {
             p2.h = `child ${n}`;
             p2.b = `def child${n}():\n` +
                 `    v${n} = 2\n` +
+                `    va${n}: int = 2\n` +
                 `    # node ${n} line 1: blabla second blabla bla second ble blu\n` +
                 `    # node ${n} line 2: blabla second blabla bla second ble blu`;
             return p2;
@@ -111,7 +112,8 @@ suite('Test cases for leoFind.ts', () => {
             const p = sib.insertAfter();
             p.h = `Node ${n}`;
             p.b = `def top${n}():\n` +
-                `    v${n} = 3\n`;
+                `    v${n} = 3\n` +
+                `    va${n}: int = 3\n`;
             return p;
         }
 
@@ -387,28 +389,13 @@ suite('Test cases for leoFind.ts', () => {
     });
     //@+node:felix.20221226222117.14: *4* TestFind.find-def
     test('test_find_def', () => {
-
         const x = self.x;
-        // Test 1: Test methods called by x.find_def.
-        x._save_before_find_def(x.c.rootPosition());  // Also tests _restore_after_find_def.
-
-        // Test 2:
-        for (const reverse of [true, false]) {
-            // Successful search.
-            x.reverse_find_defs = reverse;
-            let settings = x._compute_find_def_settings('def child5');
-            let p, pos, newpos;
-            [p, pos, newpos] = x.do_find_def(settings);
-            assert.ok(p && p.__bool__());
-            assert.strictEqual(p.h, 'child 5');
-            const s = p.b.substring(pos, newpos);
-            assert.strictEqual(s, 'def child5');
-            // Unsuccessful search.
-            settings = x._compute_find_def_settings('def xyzzy');
-            [p, pos, newpos] = x.do_find_def(settings);
-            assert.strictEqual(p, undefined, p ? p.gnx : 'undefined');
-        }
-
+        const matches = x.do_find_def('child5');
+        assert.ok(matches.length === 1);
+        const [i, p, s] = matches[0];
+        assert.ok(p.__bool__());
+        assert.strictEqual(p.h, 'child 5');
+        assert.strictEqual(s, 'def child5');
     });
     //@+node:felix.20221226222117.15: *4* TestFind.find-next
     test('test_find_next', () => {
@@ -503,13 +490,23 @@ suite('Test cases for leoFind.ts', () => {
     //@+node:felix.20221226222117.20: *4* TestFind.find-var
     test('test_find_var', () => {
         const x = self.x;
-        const settings = x._compute_find_def_settings('v5 =');
-        let p, pos, newpos;
-        [p, pos, newpos] = x.do_find_var(settings);
+
+        // Unannotated.
+        let matches = x.do_find_var('v5');
+        assert.ok(matches.length === 1);
+        let [i, p, s] = matches[0];
+
         assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, 'child 5');
-        const s = p.b.substring(pos, newpos);
         assert.strictEqual(s, 'v5 =');
+
+        // Annotated.
+        matches = x.do_find_var('va5');
+        assert.ok(matches.length === 1);
+        [i, p, s] = matches[0];
+        assert.ok(p && p.__bool__());
+        assert.strictEqual(p.h, 'child 5');
+        assert.strictEqual(s, 'va5:');
     });
     //@+node:felix.20221226222117.21: *4* TestFind.replace-then-find
     test('test_replace_then_find', () => {
