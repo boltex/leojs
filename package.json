@@ -4514,8 +4514,5 @@
     "path-browserify": "^1.0.1",
     "showdown": "^2.1.0",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "03ce2cb",
-  "gitBranch": "boltex/issue137",
-  "gitDate": "2024-05-29 23:51:45 -0400"
+  }
 }
