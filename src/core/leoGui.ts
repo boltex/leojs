@@ -149,12 +149,6 @@ export class LeoGui {
         this.oops();
     }
     /**
-     * Run Leo's findDef and findSymbol methods.
-     */
-    public findSymbol(p_def: boolean): any {
-        this.oops();
-    }
-    /**
      * Sets a specific Find panel setting.
      */
     public setSearchSetting(p_id: string) {
@@ -550,6 +544,7 @@ export class NullGui extends LeoGui {
 
     public launchRefresh(): void { }
     public fullRefresh(p_keepFocus?: boolean): void { }
+    public showNavResults(): void { }
 
     public replaceClipboardWith(s: string): Thenable<string> {
         this.clipboardContents = s; // also set immediate clipboard string

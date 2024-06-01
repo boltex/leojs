@@ -618,6 +618,10 @@
               "vh": "@bool reverse-find-defs = False"
             },
             {
+              "gnx": "felix.20240531201254.1",
+              "vh": "@bool prefer-nav-pane = True"
+            },
+            {
               "gnx": "ekr.20150618105435.1",
               "vh": "@bool use-find-dialog = False"
             },
@@ -1021,8 +1025,7 @@
             }
           ]
         }
-      ],
-      "status": 32
+      ]
     }
   ],
   "tnodes": {
@@ -1133,6 +1136,7 @@
     "tbrown.20151010094807.1": "Should find commands show their result in the status line?\nThis setting must be explicitly set to `False` to suppress\nthe status line output, just deleting it to get a value of `None`\nwon't work - this preserves the default `True` action in the\nabsence of this setting.",
     "ekr.20150710065036.1": "True: start-search (F3) automatically loads the Find Pattern.",
     "ekr.20210901110017.1": "True: search for definitions starting from the last node of the ouline.",
+    "felix.20240531201254.1": "This setting tells how to show *multiple* search results (find-def, control-clicks).\nLeo always shows a *single* search result by selecting the node and text.\n\nTrue: Show multiple search results in the Nav pane provided the quicksearch plugin is active.\nFalse: Always show multiple search results as the clone-find commands do.\n",
     "ekr.20150618105435.1": "@language rest\n\nThe @bool use-find-dialog and @bool minibuffer-find-mode settings comprise\na tri-state setting, as shown in this table:\n    \nminibuffer-find-mode    use-find-dialog     mode: Ctrl-F puts focus in\n--------------------    ---------------     --------------------------\n    True                    Ignored         minibuffer\n    False                   True            dialog\n    False                   False           Find tab in the log pane\n\n*All modes*\n\n- Start the search with Ctrl-F (start-search).\n- Enter the find pattern.\n- (Optional) Use <Tab> to enter the search pattern.\n- Use <Enter> to start the search.\n\n*dialog and find tab modes*\n\n- Non-functional \"buttons\" remind you of key bindings.\n\n*minibuffer mode*\n\n- Use Ctrl-G as always to leave the minibuffer.\n- The Find tab is not made visible, but the status area shows the settings.",
     "ekr.20041119050105.1": "The change string (without the quotes unless quotes are part of the string).\n\nN.B. Leo requires utf-8 encoding for any non-ascii characters.",
     "ekr.20041119050105.2": "The find string (without the quotes unless quotes are part of the string).\n\nN.B. Leo requires utf-8 encoding for any non-ascii characters.\n\n",

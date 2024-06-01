@@ -2308,6 +2308,11 @@ export class LeoUI extends NullGui {
 
     }
 
+    public showNavResults(): Thenable<unknown> {
+        this._leoGotoProvider.refreshTreeRoot();
+        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+    }
+
     /**
      * * Checks timestamp only, if is still the latest lastReceivedNode
       * @param ts timestamp of last time
@@ -4775,8 +4780,7 @@ export class LeoUI extends NullGui {
             scon.qsc_search(inp);
         }
 
-        this._leoGotoProvider.refreshTreeRoot();
-        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+        return this.showNavResults();
 
     }
 
@@ -4796,8 +4800,7 @@ export class LeoUI extends NullGui {
             const exp = inp.replace(/ /g, '*');
             scon.qsc_background_search(exp);
         }
-        this._leoGotoProvider.refreshTreeRoot();
-        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+        return this.showNavResults();
     }
 
     /**
@@ -4947,54 +4950,6 @@ export class LeoUI extends NullGui {
             );
             return this.launchRefresh();
         }
-    }
-
-    /**
-     * * find-var or find-def commands
-     * @param p_def find-def instead of find-var
-     * @returns Promise that resolves when the "launch refresh" is started
-     */
-    public async findSymbol(p_def: boolean): Promise<unknown> {
-
-        // This sets the selection on a word in the body pane. (needs selection on a symbol word in vscode word)
-        await this.triggerBodySave(true);
-
-        const c = g.app.windowList[this.frameIndex].c;
-        const fc = c.findCommands;
-
-        if (p_def) {
-            fc.find_def();
-        } else {
-            fc.find_var();
-        }
-
-        let found = true;
-
-        const focus = this._get_focus();
-
-        if (!found || !focus) {
-            return vscode.window.showInformationMessage('Not found');
-        } else {
-            let w_finalFocus = Focus.Body;
-            const w_focus = focus.toLowerCase();
-            if (w_focus.includes('tree') || w_focus.includes('head')) {
-                // tree
-                w_finalFocus = Focus.Outline;
-            }
-            this.loadSearchSettings();
-            this.setupRefresh(
-                w_finalFocus,
-                {
-                    tree: true,
-                    body: true,
-                    scroll: found && w_finalFocus === Focus.Body,
-                    // documents: false,
-                    // buttons: false,
-                    states: true,
-                });
-            return this.launchRefresh();
-        }
-
     }
 
     /**

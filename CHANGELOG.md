@@ -7,7 +7,9 @@
 - Fixed colorization of descendants of nodes with multiple 'language' directives.
 - Added context menu to document nodes making the 'revert' command available.
 - Fixed 'refresh-from-disk' command availability.
-- Improved some leyboard shortcuts and the related README documentation section.
+- Improved some keyboard shortcuts and the related README documentation section.
+- Fixed 'reload-setting' command so that it calls the reloadSettings method of subCommanders.
+- Implemented the new find-def command behavior along with the 'prefer-nav-pane' config setting support.
 
 # 0.2.13
 

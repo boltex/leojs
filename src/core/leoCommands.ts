@@ -98,6 +98,8 @@ export class Commands {
     private _currentPosition: Position | undefined;
     private _topPosition: Position | undefined;
 
+    public subCommanders: any[];
+    public configurables: any[];
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
     public atFileCommands: AtFile;
@@ -265,6 +267,7 @@ export class Commands {
     public vimCommands: any = undefined;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
+    public quicksearch_controller: QuickSearchController | undefined;
     public id: number; // Replaces python id function
 
     //@+node:felix.20210223002937.1: *3* constructor & helpers
@@ -313,9 +316,11 @@ export class Commands {
 
         this.initConfigSettings();
 
+        // Define subcommanders.
         this.chapterController = new ChapterController(c);
         this.shadowController = new ShadowController(c);
 
+        // Originally from plugins
         this.theTagController = new TagController(c);
         this.quicksearchController = new QuickSearchController(c);
 
@@ -325,6 +330,7 @@ export class Commands {
         this.importCommands = new LeoImportCommands(c);
         this.persistenceController = new PersistenceDataController(c);
 
+        // command handlers...
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
@@ -334,10 +340,45 @@ export class Commands {
 
         this.undoer = new Undoer(c);
 
+        // Create the list of subcommanders.
+        this.subCommanders = [
+            // this.abbrevCommands,
+            this.atFileCommands,
+            // this.bufferCommands,
+            this.chapterController,
+            // this.controlCommands,
+            // this.convertCommands,
+            // this.debugCommands,
+            this.editCommands,
+            this.editFileCommands,
+            this.fileCommands,
+            this.findCommands,
+            this.gotoCommands,
+            this.helpCommands,
+            this.importCommands,
+            // this.keyHandler,
+            // this.keyHandlerCommands,
+            // this.killBufferCommands,
+            this.persistenceController,
+            // this.printingController,
+            this.quicksearchController,
+            // this.rectangleCommands,
+            this.rstCommands,
+            this.shadowController,
+            // this.spellCommands,
+            this.theTagController,
+            // this.vimCommands,
+            this.undoer,
+        ];
+
+        this.configurables = [...c.subCommanders];
+
         // From finishCreate
         c.frame.finishCreate();
         c.createCommandNames();
+        c.findCommands.finishCreate();
 
+        c.undoer.clearUndoState();
         // equivalent of k.initCommandHistory
         c.commandHistory = c.config.getData('history-list') || [];
     }
@@ -471,6 +512,127 @@ export class Commands {
         c.vim_mode = getBool('vim-mode', false);
         c.write_script_file = getBool('write-script-file');
     }
+
+    //@+node:felix.20240531224459.1: *3* @cmd c.execute-general-script
+    @cmd('execute-general-script',
+        'Execute c.p and all its descendants as a script. Create a temp file if c.p is not an @<file> node.'
+    )
+    execute_general_script_command(): void {
+        /**
+         * Execute c.p and all its descendants as a script.
+         *
+         * Create a temp file if c.p is not an @<file> node.
+         *
+         * @data exec-script-commands associates commands with languages.
+         *
+         * @data exec-script-patterns provides patterns to create clickable
+         * links for error messages.
+         *
+         * Set the cwd before calling the command.
+         */
+        const c = this;
+        const p = this.p;
+        const tag = 'execute-general-script';
+
+        function get_setting_for_language(setting: string): string | null {
+            /**
+             * Return the setting from the given @data setting.
+             * The first colon ends each key.
+             */
+            const data = c.config.getData(setting) || [];
+            for (const s of data) {
+                const [key, val] = s.split(':', 2);
+                if (key.trim() === language) {
+                    return val.trim();
+                }
+            }
+            return null;
+        }
+
+        // Get the language and extension.
+        const d = c.scanAllDirectives(p);
+        const language: string = d['language'];
+        if (!language) {
+            console.log(`${tag}: No language in effect at ${p.h}`);
+            return;
+        }
+        const ext = g.app.language_extension_dict[language];
+        if (!ext) {
+            console.log(`${tag}: No extension for ${language}`);
+            return;
+        }
+        // Get the command.
+        const command = get_setting_for_language('exec-script-commands');
+        if (!command) {
+            console.log(`${tag}: No command for ${language} in @data exec-script-commands`);
+            return;
+        }
+        // Get the optional pattern.
+        const regex = get_setting_for_language('exec-script-patterns');
+        // Set the directory, if possible.
+        let directory: string | undefined;
+        if (p.isAnyAtFileNode()) {
+            const w_path = c.fullPath(p);
+            directory = w_path ? path.dirname(w_path) : undefined;
+        } else {
+            directory = undefined;
+        }
+        c.general_script_helper(command, ext, language, p, directory, regex,);
+    }
+
+
+    // @cmd('execute-general-script')
+    // def execute_general_script_command(self, event: LeoKeyEvent = None) -> None:
+    //     """
+    //     Execute c.p and all its descendants as a script.
+
+    //     Create a temp file if c.p is not an @<file> node.
+
+    //     @data exec-script-commands associates commands with languages.
+
+    //     @data exec-script-patterns provides patterns to create clickable
+    //     links for error messages.
+
+    //     Set the cwd before calling the command.
+    //     """
+    //     c, p, tag = self, self.p, 'execute-general-script'
+    //     def get_setting_for_language(setting: str) -> Optional[str]:
+    //         """
+    //         Return the setting from the given @data setting.
+    //         The first colon ends each key.
+    //         """
+    //         for s in c.config.getData(setting) or []:
+    //             key, val = s.split(':', 1)
+    //             if key.strip() == language:
+    //                 return val.strip()
+    //         return None
+
+    //     # Get the language and extension.
+    //     d = c.scanAllDirectives(p)
+    //     language: str = d.get('language')
+    //     if not language:
+    //         print(f"{tag}: No language in effect at {p.h}")
+    //         return
+    //     ext = g.app.language_extension_dict.get(language)
+    //     if not ext:
+    //         print(f"{tag}: No extension for {language}")
+    //         return
+    //     # Get the command.
+    //     command = get_setting_for_language('exec-script-commands')
+    //     if not command:
+    //         print(f"{tag}: No command for {language} in @data exec-script-commands")
+    //         return
+    //     # Get the optional pattern.
+    //     regex = get_setting_for_language('exec-script-patterns')
+    //     # Set the directory, if possible.
+    //     if p.isAnyAtFileNode():
+    //         path = c.fullPath(p)
+    //         directory = os.path.dirname(path)
+    //     else:
+    //         directory = None
+    //     c.general_script_helper(command, ext, language,
+    //         directory=directory, regex=regex, root=p)
+
 
     //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
     @cmd('execute-script', 'Execute a *Leo* script, written in javascript.')
@@ -2508,7 +2670,7 @@ export class Commands {
         command: string,
         ext: string,
         language: string,
-        root: any,
+        root: Position,
         directory: string | undefined,
         regex?: any
     ): void {
@@ -3909,15 +4071,6 @@ export class Commands {
     public canHoist(): boolean {
         // This is called at idle time, so minimizing positions is crucial!
         return true;
-
-        // c = self
-        // if c.hoistStack.length:
-        // p = c.hoistStack[c.hoistStack.length-1].p
-        // return p and not c.isCurrentPosition(p)
-        // elif c.currentPositionIsRootPosition():
-        // return c.currentPositionHasNext()
-        // else:
-        // return true
     }
 
     //@+node:felix.20211023195447.17: *6* c.canMoveOutlineDown
@@ -4510,17 +4663,60 @@ export class Commands {
             return [];
         }
     }
+    //@+node:felix.20240601145220.1: *4* c.undoableDeletePositions
+    /**
+     * Deletes all vnodes corresponding to the positions in aList,
+     * and make changes undoable.
+     */
+    public undoableDeletePositions(aList: Position[]): void {
+
+        const c = this;
+        const u = c.undoer;
+        const data = c.deletePositionsInList(aList);
+        const gnx2v = c.fileCommands.gnxDict;
+
+        function undo(): void {
+            const bead = u.getBead(u.bead);
+            if (!bead) { return; }
+            for (const [pgnx, i, chgnx] of bead.data.reverse()) {
+                const v = gnx2v[pgnx];
+                const ch = gnx2v[chgnx];
+                v.children.splice(i, 0, ch);
+                ch.parents.push(v);
+            }
+            if (!c.positionExists(c.p)) {
+                c.setCurrentPosition(c.rootPosition()!);
+            }
+        }
+
+        function redo(): void {
+            const bead = u.getBead(u.bead + 1);
+            if (!bead) { return; }
+            for (const [pgnx, i, _chgnx] of bead.data) {
+                const v = gnx2v[pgnx];
+                const ch = v.children.splice(i, 1)[0];
+                ch.parents = ch.parents.filter(parent => parent !== v);
+            }
+            if (!c.positionExists(c.p)) {
+                c.setCurrentPosition(c.rootPosition()!);
+            }
+        }
+
+        u.pushBead({
+            data: data,
+            undoType: 'delete nodes',
+            undoHelper: undo,
+            redoHelper: redo,
+        });
+    }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
     public registerReloadSettings(obj: any): void {
         const c: Commands = this;
-        console.log('TODO: ? NEEDED ? registerReloadSettings');
 
-        /* 
-        if (!c.configurables.includes(obj)){
+        if (!c.configurables.includes(obj)) {
             c.configurables.push(obj);
         }
-        */
     }
 
     //@+node:felix.20220605203342.3: *4* c.reloadConfigurableSettings
@@ -4529,38 +4725,49 @@ export class Commands {
      * other known classes.
      */
     public reloadConfigurableSettings(): void {
-        console.log('TODO : ? NEEDED ? reloadConfigurableSettings');
+        const c = this;
 
-        /* 
-        
-        const c: Commands = this;
+        // * LEOJS: some are non-existant
         const table = [
             g.app.gui,
             g.app.pluginsController,
-            c.k.autoCompleter,
-            c.frame, c.frame.body, c.frame.log, c.frame.tree,
-            c.frame.body.colorizer,
-            getattr(c.frame.body.colorizer, 'highlighter', None),
+            // c.k.autoCompleter,
+            c.frame,
+            c.frame.body,
+            // c.frame.log,
+            c.frame.tree,
+            // c.frame.body.colorizer,
+            // (c.frame.body.colorizer as any).highlighter || null,
         ];
-
-        for obj in table:
-            if obj:
-                c.registerReloadSettings(obj)
+        for (const obj of table) {
+            if (obj) {
+                c.registerReloadSettings(obj);
+            }
+        }
         // Useful now that instances add themselves to c.configurables.
-        c.configurables = list(set(c.configurables))
-        c.configurables.sort(key=lambda obj: obj.__class__.__name__.lower())
-        for obj in c.configurables:
-            func = getattr(obj, 'reloadSettings', None)
-            if func:
-                // pylint: disable=not-callable
-                try:
-                    func()
-                    g.doHook("after-reload-settings", c=c)
-                except e:
-                    g.es_exception(e)
-                    c.configurables.remove(obj)
+        c.configurables = Array.from(new Set(c.configurables));
+        c.configurables.sort((a, b) => a.constructor.name.toLowerCase().localeCompare(b.constructor.name.toLowerCase()));
 
-        */
+        for (const obj of c.configurables) {
+            if (obj == null) {
+                g.es_print('Undefined object in c.configurables');
+                continue;
+            }
+            const func = (
+                (obj as any).reloadSettings
+                || (obj as any).reload_settings  // An official alias.
+            );
+            if (func) {
+                try {
+                    func.bind(obj)();
+                    g.doHook("after-reload-settings", { c: c });
+                } catch (e) {
+                    g.es_exception(e);
+                    c.configurables = c.configurables.filter(item => item !== obj);
+                }
+            }
+        }
+
     }
 
     //@-others

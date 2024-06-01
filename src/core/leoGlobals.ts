@@ -6822,8 +6822,8 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
     if (!word) {
         return undefined;
     }
-    [p, pos, newpos] = c.findCommands.find_def();
-    if (p && p.__bool__()) {
+    const matches = c.findCommands.find_def();
+    if (matches && matches.length) {
         return undefined;
     }
     //@+<< look for filename or import>>

@@ -190,6 +190,7 @@
 <v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
 <v t="felix.20220923001725.1"><vh>fullRefresh</vh></v>
 <v t="felix.20240405235538.1"><vh>_refreshDetachedBodies</vh></v>
+<v t="felix.20240529234358.1"><vh>showNavResults</vh></v>
 <v t="felix.20220923001235.1"><vh>isTsStillValid</vh></v>
 <v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
 <v t="felix.20220922235942.1"><vh>_revealNode</vh></v>
@@ -260,7 +261,6 @@
 <v t="felix.20220505215924.4"><vh>startSearch</vh></v>
 <v t="felix.20220930222931.1"><vh>checkForceFindFocus</vh></v>
 <v t="felix.20220505215924.7"><vh>find</vh></v>
-<v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
@@ -2326,7 +2326,6 @@ public static COMMANDS = {
     FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
     FIND_PREVIOUS: Constants.NAME + ".findPrevious",
     FIND_PREVIOUS_FO: Constants.NAME + ".findPreviousFromOutline",
-    FIND_VAR: Constants.NAME + ".findVar",
     FIND_DEF: Constants.NAME + ".findDef",
     REPLACE: Constants.NAME + ".replace",
     REPLACE_FO: Constants.NAME + ".replaceFromOutline",
@@ -2395,7 +2394,6 @@ public static LEO_COMMANDS = {
     FIND_ALL: "find-all",
     // FIND_NEXT: "!find_next",
     // FIND_PREVIOUS: "!find_previous",
-    FIND_VAR: "find-var",
     FIND_DEF: "find-def",
     // REPLACE: "!replace",
     // REPLACE_THEN_FIND: "!replace_then_find",
@@ -10326,8 +10324,7 @@ public async navEnter(): Promise&lt;unknown&gt; {
         scon.qsc_search(inp);
     }
 
-    this._leoGotoProvider.refreshTreeRoot();
-    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+    return this.showNavResults();
 
 }
 
@@ -10348,8 +10345,7 @@ public async navTextChange(): Promise&lt;unknown&gt; {
         const exp = inp.replace(/ /g, '*');
         scon.qsc_background_search(exp);
     }
-    this._leoGotoProvider.refreshTreeRoot();
-    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+    return this.showNavResults();
 }
 
 </t>
@@ -10467,55 +10463,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
         );
         return this.launchRefresh();
     }
-}
-
-</t>
-<t tx="felix.20220505215924.8">/**
- * * find-var or find-def commands
- * @param p_def find-def instead of find-var
- * @returns Promise that resolves when the "launch refresh" is started
- */
-public async findSymbol(p_def: boolean): Promise&lt;unknown&gt; {
-
-    // This sets the selection on a word in the body pane. (needs selection on a symbol word in vscode word)
-    await this.triggerBodySave(true);
-
-    const c = g.app.windowList[this.frameIndex].c;
-    const fc = c.findCommands;
-
-    if (p_def) {
-        fc.find_def();
-    } else {
-        fc.find_var();
-    }
-
-    let found = true;
-
-    const focus = this._get_focus();
-
-    if (!found || !focus) {
-        return vscode.window.showInformationMessage('Not found');
-    } else {
-        let w_finalFocus = Focus.Body;
-        const w_focus = focus.toLowerCase();
-        if (w_focus.includes('tree') || w_focus.includes('head')) {
-            // tree
-            w_finalFocus = Focus.Outline;
-        }
-        this.loadSearchSettings();
-        this.setupRefresh(
-            w_finalFocus,
-            {
-                tree: true,
-                body: true,
-                scroll: found &amp;&amp; w_finalFocus === Focus.Body,
-                // documents: false,
-                // buttons: false,
-                states: true,
-            });
-        return this.launchRefresh();
-    }
-
 }
 
 </t>
@@ -14479,11 +14426,6 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
 </t>
 <t tx="felix.20221113165005.1">"editor/context": [
   {
-    "command": "leojs.findVar",
-    "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme == leojs &amp;&amp; leojsTreeOpened",
-    "group": "navigation@1"
-  },
-  {
     "command": "leojs.findDef",
     "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme == leojs &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
@@ -14578,17 +14520,10 @@ private _refreshGotoPane(): void {
   "icon": "$(leojs-find-previous)"
 },
 {
-  "command": "leojs.findVar",
-  "category": "Leojs",
-  "enablement": "leojsTreeOpened",
-  "title": "Find the var under the cursor"
-},
-{
   "command": "leojs.findDef",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "shortTitle": "Find Definition",
-  "title": "Find the def or class under the cursor"
+  "title": "Find def, class or var assignment"
 },
 {
   "command": "leojs.replace",
@@ -15469,8 +15404,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.FIND_PREVIOUS, () =&gt; p_leoUI.find(false, true)],
 [CMD.FIND_PREVIOUS_FO, () =&gt; p_leoUI.find(true, true)],
 
-[CMD.FIND_VAR, () =&gt; p_leoUI.command(LEOCMD.FIND_VAR, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-[CMD.FIND_DEF, () =&gt; p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.FIND_DEF, () =&gt; p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 [CMD.REPLACE, () =&gt; p_leoUI.replace(false, false)],
 [CMD.REPLACE_FO, () =&gt; p_leoUI.replace(true, false)],
@@ -18631,7 +18565,9 @@ private _refreshCommanderDetachedLanguage(): void {
 - Fixed colorization of descendants of nodes with multiple 'language' directives.
 - Added context menu to document nodes making the 'revert' command available.
 - Fixed 'refresh-from-disk' command availability.
-- Improved some leyboard shortcuts and the related README documentation section.
+- Improved some keyboard shortcuts and the related README documentation section.
+- Fixed 'reload-setting' command so that it calls the reloadSettings method of subCommanders.
+- Implemented the new find-def command behavior along with the 'prefer-nav-pane' config setting support.
 
 </t>
 <t tx="felix.20240518222453.1">/**
@@ -18665,6 +18601,12 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
         }
 
     });
+}
+
+</t>
+<t tx="felix.20240529234358.1">public showNavResults(): Thenable&lt;unknown&gt; {
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
 }
 
 </t>

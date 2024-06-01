@@ -36,6 +36,7 @@ export class QuickSearchController {
     //@+node:felix.20221105235156.1: *3* QuickSearchController.__init__
     constructor(c: Commands) {
         this.c = c;
+        c.quicksearch_controller = this;  // Leo 6.8.0.
         this.lw = []; // empty list
 
         // ! OLD ! Keys are id(w),values are either tuples in tuples (w (p,Position)) or tuples (w, f)

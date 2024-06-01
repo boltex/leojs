@@ -15,6 +15,7 @@ import {
     StringRadioButton,
 } from './findTabManager';
 import { StringTextWrapper } from './leoFrame';
+import { QuickSearchController } from './quicksearch';
 //@-<< leoFind imports >>
 //@+<< Theory of operation of find/change >>
 //@+node:felix.20221012210057.1: ** << Theory of operation of find/change >>
@@ -169,10 +170,13 @@ export class LeoFind {
     public match_obj!: RegExpExecArray | undefined;
     public reverse: boolean = false;
     public root: Position | undefined; // The start of the search, especially for suboutline-only.
+    public total_links = 0;
     //
     // User settings.
     public minibuffer_mode!: boolean;
     public reverse_find_defs!: boolean;
+    public prefer_nav_pane!: boolean;
+    public bad_regex_patterns: string[] = [];
 
     //@+others
     //@+node:felix.20221012210736.1: *3* LeoFind.birth
@@ -264,6 +268,12 @@ export class LeoFind {
         const c = this.c;
         this.minibuffer_mode = c.config.getBool('minibuffer-find-mode', false);
         this.reverse_find_defs = c.config.getBool('reverse-find-defs', false);
+        this.prefer_nav_pane = c.config.getBool('prefer-nav-pane', true);
+    }
+
+    // Necessary alias.
+    public reloadSettings(): void {
+        this.reload_settings();
     }
     //@+node:felix.20221012233803.1: *3* find.batch_change (script helper) & helpers
 
@@ -615,121 +625,171 @@ export class LeoFind {
 
         return true;
     }
-    //@+node:felix.20230212162733.1: *4* find.find-def, do_find_def & helpers
-    @cmd(
-        'find-def',
-        'Find the class, def or assignment to var of the word under the cursor.'
-    )
-    public find_def_command(): Promise<unknown> {
-        return g.app.gui.findSymbol(true);
+    //@+node:felix.20240529213126.1: *4* find.find-def/var & helper
+    @cmd('find-def', 'Find the class, def or assignment to var of the word under the cursor.')
+    @cmd('find-var', 'Find the class, def or assignment to var of the word under the cursor.')
+    public find_def(): [number, Position, string][] {
+        const word = this._compute_find_def_word();
+        return this.do_find_def(word);
     }
 
-    public find_def(): [
-        Position | undefined,
-        number | undefined,
-        number | undefined
-    ] {
-        // re searches are more accurate, but not enough to be worth changing the user's settings.
-        const ftm = this.ftm;
-        const p = this.c.p;
-        // Check.
-        const word = this._compute_find_def_word();
-        if (!word) {
-            return [undefined, undefined, undefined];
+    // Compatibility. 
+    // find_var = find_def
+    public find_var(): [number, Position, string][] {
+        return this.find_def();
+    }
+    //@+node:felix.20240529213126.2: *5* find.do_find_def & helpers
+    /*
+     * A helper for find_def's.
+     * It's a standalone method for unit tests.
+     */
+    public do_find_def(word?: string): [number, Position, string][] {
+
+        const c = this.c;
+        let patterns = this._make_patterns(word);
+        let matches = this._find_all_matches(patterns);
+        if (g.unitTesting) {
+            return matches;
         }
-        // Settings...
-        this._save_before_find_def(p); // Save previous settings.
-        g.assert(this.find_def_data);
-        // #3124. Try all possibilities, regardless of case.
-        const alt_word = this._switch_style(word);
-        //@+<< compute the search table >>
-        //@+node:felix.20230212162733.2: *5* << compute the search table >>
-        let table: [
-            string,
-            (
-                settings: ISettings
-            ) => [Position | undefined, number | undefined, number | undefined]
-        ][];
-        if (alt_word) {
-            table = [
-                [`class ${word}`, this.do_find_def],
-                // [ fr`^\s*class *{alt_word}\b`, this.do_find_def],
-                [`def ${word}`, this.do_find_def],
-                [`def ${alt_word}`, this.do_find_def],
-                [`${word} =`, this.do_find_var],
-                [`${alt_word} =`, this.do_find_var],
-            ];
-        } else {
-            table = [
-                [`class ${word}`, this.do_find_def],
-                [`def ${word}`, this.do_find_def],
-                [`${word} =`, this.do_find_var],
-            ];
+        // Look for alternate matches only if there are no exact matches.
+        if (!matches.length) {
+            const alt_word = this._switch_style(word);
+            patterns = this._make_patterns(alt_word);
+            matches = this._find_all_matches(patterns);
         }
-        //@-<< compute the search table >>
-        let find_pattern: string,
-            method: (
-                settings: ISettings
-            ) => [Position | undefined, number | undefined, number | undefined];
-        for ([find_pattern, method] of table) {
-            ftm.set_find_text(find_pattern);
-            this.init_vim_search(find_pattern);
-            this.update_change_list(this.change_text); // Optional. An edge case.
-            // Do the command!
-            const settings = this._compute_find_def_settings(find_pattern);
-            const result = method.bind(this)(settings);
-            if (result[0]) {
-                // Keep the settings that found the match.
-                ftm.set_widgets_from_dict(settings);
-                return result;
+        if (!matches.length) {
+            g.es(`not found: ${word}`, { color: 'red' });
+            return matches;
+        }
+        // Always update the Nav pane if it is enabled.
+        const use_nav_pane = this.prefer_nav_pane;
+        if (use_nav_pane) {
+            this._load_quicksearch_entries(word, matches);
+        }
+        // Carefully select the most convenient clone of p.
+        if (matches.length === 1) {
+            let [i, p, s] = matches[0];
+            if (p === c.p) {
+                // Do nothing
+            } else if (this.reverse_find_defs) {
+                let search_p = c.lastPosition();
+                while (search_p && search_p.__bool__()) {
+                    if (search_p.v === p.v) {
+                        p = search_p;
+                        break;
+                    } else {
+                        search_p.moveToThreadBack();
+                    }
+                }
+            } else {
+                // Start in the root position.
+                let search_p = c.rootPosition();
+                while (search_p && search_p.__bool__()) {
+                    if (search_p.v === p.v) {
+                        p = search_p;
+                        break;
+                    } else {
+                        search_p.moveToThreadNext();
+                    }
+                }
+            }
+            c.selectPosition(p);
+            const w = c.frame.body.wrapper;
+            if (w) {
+                w.setSelectionRange(i, i + s.length, i);
+            }
+        } else if (!use_nav_pane) {
+            // Show clones, but only if the Nav pane isn't available.
+            this._make_clones(word, matches);
+        }
+        return matches;
+    }
+
+
+    // def do_find_def(self, word: str) -> list[tuple[int, Position, str]]:
+    //     """
+    //     A helper for find_def's.
+    //     It's a standalone method for unit tests.
+    //     """
+    //     c = self.c
+    //     patterns = self._make_patterns(word)
+    //     matches = self._find_all_matches(patterns)
+    //     if g.unitTesting:
+    //         return matches
+    //     # Look for alternate matches only if there are no exact matches.
+    //     if not matches:
+    //         alt_word = self._switch_style(word)
+    //         patterns = self.make_patterns(alt_word)
+    //         matches = self._find_all_matches(patterns)
+    //     if not matches:
+    //         g.es(f"not found: {word!r}", color='red')
+    //         return matches
+    //     # Always update the Nav pane if it is enabled.
+    //     use_nav_pane = self.prefer_nav_pane and g.pluginIsLoaded('quicksearch.py')
+    //     g.trace(use_nav_pane)  ###
+    //     if use_nav_pane:
+    //         self._load_quicksearch_entries(word, matches)
+    //     # Carefully select the most convenient clone of p.
+    //     if len(matches) == 1:
+    //         i, p, s = matches[0]
+    //         if p == c.p:
+    //             pass
+    //         elif self.reverse_find_defs:
+    //             search_p = c.lastPosition()
+    //             while search_p:
+    //                 if search_p.v == p.v:
+    //                     p = search_p
+    //                     break
+    //                 else:
+    //                     search_p.moveToThreadBack()
+    //         else:
+    //             # Start in the root position.
+    //             search_p = c.rootPosition()
+    //             while search_p:
+    //                 if search_p.v == p.v:
+    //                     p = search_p
+    //                     break
+    //                 else:
+    //                     search_p.moveToThreadNext()
+    //         c.selectPosition(p)
+    //         w = c.frame.body.wrapper
+    //         if w:
+    //             w.setSelectionRange(i, i + len(s), insert=i)
+    //     elif not use_nav_pane:
+    //         # Show clones, but only if the Nav pane isn't available.
+    //         self._make_clones(word, matches)
+    //     return matches
+
+    // Compatibility.
+    // do_find_var = do_find_def
+    public do_find_var(word: string): [number, Position, string][] {
+        return this.do_find_def(word);
+    }
+    //@+node:felix.20240529213126.3: *6* find._load_quicksearch_entries
+    public _load_quicksearch_entries(word?: string, matches: [number, Position, string][] = []): void {
+        /* Put all matches in the Nav pane. */
+        const c = this.c;
+        const unique_matches = Array.from(new Set(matches.map(([i, p, s]) => s.trim()).filter(s => s)));
+        // The Nav pane can show only one match, so issue a warning.
+        if (unique_matches.length > 1) {
+            g.es_print(`Multiple matches for ${word}`);
+            for (const z of unique_matches.slice(1)) {
+                g.es_print(z);
             }
         }
-        // Restore the previous find settings!
-        this._restore_after_find_def();
-        return [undefined, undefined, undefined];
+        // Put the first match in the Nav pane's edit widget and update.
+        const scon: QuickSearchController = c.quicksearchController;
+        scon.navText = unique_matches[0];
+        scon.qsc_search(unique_matches[0]);
+        g.app.gui.showNavResults();
+        g.app.gui.loadSearchSettings();
     }
 
-    /**
-     * A standalone helper for unit tests.
-     */
-    public do_find_def(
-        settings: ISettings
-    ): [Position | undefined, number | undefined, number | undefined] {
-        return this._fd_helper(settings);
-    }
-    //@+node:felix.20230212162733.3: *5* find._compute_find_def_settings
-    private _compute_find_def_settings(find_pattern: string): ISettings {
-        const settings = this.default_settings();
-        const table: [ISettingsKey, boolean | string][] = [
-            ['change_text', ''],
-            ['find_text', find_pattern],
-            ['ignore_case', true],
-            ['pattern_match', false],
-            ['reverse', false],
-            ['search_body', true],
-            ['search_headline', false],
-            ['whole_word', true],
-        ];
-        let attr: ISettingsKey;
-        let val: boolean | string;
-        for (let [attr, val] of table) {
-            // Guard against renamings & misspellings.
-            // ? needed ?
-            // assert hasattr(this, attr), attr;
-            //assert attr in settings.__dict__, attr;
-
-            // Set the values.
-            // setattr(this, attr, val);
-            (settings as any)[attr] = val;
-        }
-        return settings;
-    }
-    //@+node:felix.20230212162733.4: *5* find._compute_find_def_word
+    //@+node:felix.20240529215415.1: *6* find._compute_find_def_word
     /**
      * Init the find-def command. Return the word to find or None.
      */
     private _compute_find_def_word(): string | undefined {
-        // pragma: no cover (cmd)
 
         const c = this.c;
         const w = c.frame.body.wrapper;
@@ -797,125 +857,116 @@ export class LeoFind {
         }
         return word;
     }
-    //@+node:felix.20230212162733.5: *5* find._fd_helper
-    /**
-     * Find the definition of the class, def or var under the cursor.
-     *
-     * return p, pos, newpos for unit tests.
-     */
-    private _fd_helper(
-        settings: ISettings
-    ): [Position | undefined, number | undefined, number | undefined] {
+    //@+node:felix.20240529213126.5: *6* find._find_all_matches
+    /*
+    * Search all nodes for any of the given compiled regex patterns.
+    * 
+    * Return a list of tuples (starting-index, p, matching-string) describing the matches.
+    */
+    public _find_all_matches(patterns: RegExp[]): [number, Position, string][] {
+
         const c = this.c;
-        this.find_text = settings.find_text;
-        //
-        // Just search body text.
-        this.search_headline = false;
-        this.search_body = true;
-        const w = c.frame.body.wrapper;
-        // Check.
-        if (!w) {
-            return [undefined, undefined, undefined];
-        }
-        const save_sel = w.getSelectionRange();
-        const ins = w.getInsertPoint();
-        const old_p = c.p;
-        let p: Position | undefined;
+        let p = c.rootPosition();
+        const results: [number, Position, string][] = [];
+        const seen = new Set();
 
-        if (this.reverse_find_defs) {
-            // #2161: start at the last position.
-            p = c.lastPosition();
-        } else {
-            // Start in the root position.
-            p = c.rootPosition()!;
-        }
-        // Required.
-        c.selectPosition(p);
-        c.redraw();
-        c.bodyWantsFocusNow();
-
-        // #1592.  Ignore hits under control of @nosearch
-        const old_reverse = this.reverse;
-
-        let pos;
-        let newpos;
-        let found = false;
-
-        try {
-            // #2161:
-            this.reverse = this.reverse_find_defs;
-            // # 2288:
-            this.work_s = p.b;
-            if (this.reverse_find_defs) {
-                this.work_sel = [p.b.length, p.b.length, p.b.length];
-            } else {
-                this.work_sel = [0, 0, 0];
+        while (p && p.__bool__()) {
+            if (g.inAtNosearch(p)) {
+                p.moveToNodeAfterTree();
+                continue;
             }
-            while (true) {
-                [p, pos, newpos] = this.find_next_match(p);
-                found = pos !== undefined;
-                if (found || !g.inAtNosearch(p)) {
-                    // do *not* use c.p.
+            if (seen.has(p.v)) {
+                p.moveToThreadNext();
+                continue;
+            }
+            seen.add(p.v);
+            const b = p.b;
+            let i = 0;  // The index within p.b of the start of s.
+            let found = false;  // Only report the first match within p.b.
+            for (const s of g.splitLines(b)) {
+                for (const pattern of patterns) {
+                    const m = pattern.exec(s);
+                    if (m) {
+                        results.push([i + m.index, p.copy(), m[0]]);
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
                     break;
                 }
+                i += s.length;
             }
-        } catch (e) {
-            //
-        } finally {
-            this.reverse = old_reverse;
+            p.moveToThreadNext();
         }
-        if (found) {
-            // Keep the find settings used to find the match.
-            c.redraw(p);
-            w.setSelectionRange(pos || 0, newpos || 0, newpos || 0);
-            c.bodyWantsFocusNow();
-            return [p, pos, newpos];
-        }
-        // find_def now calls _restore_after_find_def
-        let i;
-        let j;
-        [i, j] = save_sel;
-        c.redraw(old_p);
-        w.setSelectionRange(i, j, ins);
-        c.bodyWantsFocusNow();
-        return [undefined, undefined, undefined];
+        return results;
     }
+    //@+node:felix.20240529213126.6: *6* find._make_clones
+    public _make_clones(word: string = "", matches: [number, Position, string][] = []): void {
+        /*
+        * Undoably create clones for all matches, similar to the clone-find commands.
+        */
+        const c = this.c;
+        const ftm = this.ftm;
+        const u = c.undoer;
+        const undoData = u.beforeInsertNode(c.p);
 
-    //@+node:felix.20230212162733.6: *5* find._restore_after_find_def
-    /**
-     * Restore find settings in effect before a find-def command.
-     */
-    private _restore_after_find_def(): void {
-        const b = this.find_def_data; // A g.Bunch
-        if (b) {
-            this.ignore_case = b.ignore_case;
-            this.pattern_match = b.pattern_match;
-            this.search_body = b.search_body;
-            this.search_headline = b.search_headline;
-            this.whole_word = b.whole_word;
-            this.find_def_data = undefined;
+        // Create the found node.
+        const found = c.lastTopLevel().insertAfter();
+        found.h = `Found ${matches.length}: ${word}`;
+        found.b = `@nosearch\n\n# found ${matches.length} nodes`;
+        // Clone nodes as children of the found node.
+        const clones = matches.map(([i, p, s]) => p);
+        for (const p of clones) {
+            const p2 = p.copy();
+            const n = found.numberOfChildren();
+            p2._linkCopiedAsNthChild(found, n);
         }
+        // Sort the clones in place, without undo.
+        found.v.children.sort((v1, v2) => v1.h.toLowerCase().localeCompare(v2.h.toLowerCase()));
+
+        // Set the search text. This is convenient and should not cause problems.
+        this.find_text = word;
+        ftm.set_find_text(word);
+
+        // Set the undo data.
+        u.afterInsertNode(found, 'find-def', undoData);
+        c.setChanged();
+        found.expand();
+        c.redraw(found);
     }
-    //@+node:felix.20230212162733.7: *5* find._save_before_find_def
-    /**
-     * Save the find settings in effect before a find-def command.
-     */
-    private _save_before_find_def(p: Position): void {
-        this.find_def_data = {
-            ignore_case: this.ignore_case,
-            p: p.copy(),
-            pattern_match: this.pattern_match,
-            search_body: this.search_body,
-            search_headline: this.search_headline,
-            whole_word: this.whole_word,
+    //@+node:felix.20240529213126.7: *6* find._make_patterns
+    public _make_patterns(word?: string): RegExp[] {
+        /* Return a list of compiled regex patterns. */
+        const results: RegExp[] = [];
+
+        const compile_pattern = (pattern: string): void => {
+            try {
+                results.push(new RegExp(pattern));
+            } catch (e) {
+                if (!this.bad_regex_patterns.includes(pattern)) {
+                    this.bad_regex_patterns.push(pattern);
+                    g.es_print(`bad regex pattern: ${pattern}`);
+                }
+            }
         };
+
+        for (const pattern of [
+            `^\\s*class\\s+${word}\\b`,
+            `^\\s*def\\s+${word}\\b`,
+            `\\b${word}\\s*=`,
+            `\\b${word}:`,
+        ]) {
+            compile_pattern(pattern);
+        }
+        return results;
     }
-    //@+node:felix.20230212162733.8: *5* find._switch_style
+    //@+node:felix.20240529224134.1: *6* find._switch_style
     /**
      * Switch between camelCase and underscore_style function definitions.
      * Return undefined if there would be no change.
      */
-    private _switch_style(word: string): string | undefined {
+    private _switch_style(word?: string): string | undefined {
         let s = word;
         if (!s) {
             return undefined;
@@ -1092,47 +1143,6 @@ export class LeoFind {
         }
         this.show_status(found);
         return [p, pos, newpos];
-    }
-    //@+node:felix.20221013234514.18: *4* find.find-var & do_find_var
-    @cmd('find-var', 'Find the var under the cursor.')
-    public find_var_command(): Promise<unknown> {
-        return g.app.gui.findSymbol(false);
-    }
-
-    public find_var(): void {
-        const ftm = this.ftm;
-        const p = this.c.p;
-        // Check...
-        const word = this._compute_find_def_word();
-        if (!word) {
-            return;
-        }
-        // Settings...
-        const find_pattern = word + ' =';
-        // this.find_pattern = find_pattern; // ? NEEDED ?
-        ftm.set_find_text(find_pattern);
-        this._save_before_find_def(p); // Save previous settings.
-        this.init_vim_search(find_pattern);
-        this.update_change_list(this.change_text); // Optional. An edge case.
-        const settings = this._compute_find_def_settings(find_pattern);
-        // Do the command!
-        const result = this.do_find_var(settings);
-        if (result[0]) {
-            //  Keep the settings that found the match.
-            ftm.set_widgets_from_dict(settings);
-        } else {
-            //  Restore the previous find settings!
-            this._restore_after_find_def();
-        }
-    }
-
-    /**
-     * A standalone helper for unit tests.
-     */
-    public do_find_var(
-        settings: ISettings
-    ): [Position | undefined, number | undefined, number | undefined] {
-        return this._fd_helper(settings);
     }
     //@+node:felix.20221013234514.20: *4* find.replace
     @cmd('replace', 'Replace the selected text with the replacement text.')
@@ -2331,6 +2341,10 @@ export class LeoFind {
     private put_link(line: string, line_number: number, v: VNode): void {
         const c = this.c;
         // const log = c.frame.log // UNAVAILABLE IN LEOJS
+        this.total_links += 1;
+        if (this.total_links > 100) {
+            return;
+        }
         // Find the first position with the given vnode.
         let found;
         for (const p of c.all_unique_positions()) {
@@ -2580,6 +2594,58 @@ export class LeoFind {
     //     k.showStateAndMode()
     //     c.widgetWantsFocusNow(w)
     //     self.do_find_next(settings)
+    //@+node:felix.20240528003407.1: *4* find.summarize
+    @cmd(
+        'summarize',
+        'Prompt for a regex and list all matches in a new top-level node.' +
+
+        'This command shows *only* m.group(0).' +
+        'Append `.*` to the pattern to see the remainder of the line.'
+    )
+    public async summarize_command(): Promise<unknown> {
+
+        const pattern_s = await g.app.gui.get1Arg({
+            title: "Summarize regex",
+            placeHolder: "<regex>",
+            prompt: "Enter a regex",
+        });
+        const c = this.c;
+        // Get and check pattern.
+        if (!pattern_s || !pattern_s.trim()) {
+            g.es_print('no pattern');
+            return;
+        }
+        let re_pattern: RegExp;
+        try {
+            re_pattern = new RegExp(pattern_s);
+        } catch (e) {
+            g.es(`invalid regex: ${pattern_s}`);
+            return;
+        }
+        // Find all unique instances of pattern.
+        const results_set = new Set<string>();
+        for (const v of c.all_unique_nodes()) {
+            let match: RegExpExecArray | null;
+            while ((match = re_pattern.exec(v.b)) !== null) {
+                results_set.add(match[0]);
+            }
+        }
+        const results = Array.from(results_set).sort();
+        if (results.length > 0) {
+            // Create a top-level summary node.
+            const last = c.lastTopLevel();
+            const p = last.insertAfter();
+            p.h = `summarize: found ${results.length}: ${pattern_s}`;
+            const results_s = results.join('\n');
+            p.b = `// summarize: ${pattern_s}\n\n${results_s}\n`;
+            c.redraw();
+        } else {
+            // Report failure.
+            g.es(`summarize: not found: ${pattern_s}`);
+        }
+
+    }
+
     //@+node:felix.20230120221726.1: *4* find.tag-node
     @cmd('tag-node', 'Prompt for a tag for this node')
     public interactive_tag_node(): Thenable<unknown> {
@@ -2841,12 +2907,6 @@ export class LeoFind {
             g.assert(!p.__eq__(progress));
         }
 
-        this.ftm.set_radio_button('entire-outline');
-        // suboutline-only is a one-shot for batch commands.
-        this.suboutline_only = false;
-        this.node_only = false;
-        this.root = undefined;
-
         if (clones.length) {
             const undoData = u.beforeInsertNode(c.p);
             found = this._cfa_create_nodes(clones, false);
@@ -2860,6 +2920,12 @@ export class LeoFind {
             // Put the count in found.h.
             found.h = found.h.replace('Found:', `Found ${count}:`);
         }
+
+        this.ftm.set_radio_button('entire-outline');
+        // suboutline-only is a one-shot for batch commands.
+        this.suboutline_only = false;
+        this.node_only = false;
+        this.root = undefined;
         g.es(`found ${count}, matches for ${this.find_text}`);
         return count; // Might be useful for the gui update.
     }
@@ -2891,7 +2957,10 @@ export class LeoFind {
         status = status.trim();
 
         const flat = flattened ? 'flattened, ' : '';
-        found.b = `@nosearch\n\n# ${flat}${status}\n\n# found ${clones.length} nodes`;
+
+        const root = this.suboutline_only ? `\n\n# root: ${c.p.h}` : '';
+        found.b = `@nosearch\n\n# ${flat}${status}${root}\n\n# found ${clones.length} nodes`;
+
         // Clone nodes as children of the found node.
         for (let p of clones) {
             // Create the clone directly as a child of found.

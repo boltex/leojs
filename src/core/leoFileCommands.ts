@@ -11,6 +11,8 @@ import 'date-format-lite';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 import * as difflib from 'difflib';
+import * as JSZip from 'jszip';
+import * as path from 'path';
 import { Database } from 'sql.js';
 var binascii = require('binascii');
 var pickle = require('./jpicklejs');
@@ -1005,60 +1007,119 @@ export class FileCommands {
         const time = new Date(timestamp);
         const time_s = time.format('YYYY-MM-DD-hh-mm-ss');
 
+
         // Compute archive_name.
-        let archive_name = '';
-        // TODO
-        // try{
-        //     const directory = os.environ['LEO_ARCHIVE'];
-        //     // todo this should be a uri
-        //     try {
-        //         await vscode.workspace.fs.stat(directory);
-        //         // OK exists
+        let archive_name: string | null = null;
+        try {
+            const directory = process.env['LEO_ARCHIVE'];
+            if (directory) {
 
-        //     } catch {
-        //         // Does not exist !
-        //         g.es_print(`Not found: ${directory}`);
-        //         // TODO : TEST THIS WITH / WITHOUT ESCAPING SPECIAL CHARS
-        //         archive_name = `${directory}${os.sep}${g.shortFileName(leo_file)}-${time_s}.zip`;
-        //     }
+                try {
+                    const dirUri = g.makeVscodeUri(directory);
+                    await vscode.workspace.fs.stat(dirUri);
+                    // OK exists
 
-        // }catch (keyError){
-        //     // pass
-        // }
+                } catch {
+                    // Does not exist !
+                    g.es_print(`Not found: ${directory}`);
+                    // TODO : TEST THIS WITH / WITHOUT ESCAPING SPECIAL CHARS
+                    archive_name = `${directory}${path.sep}${g.shortFileName(leo_file)}-${time_s}.zip`;
+                }
+            }
+
+            // if (!directory || !fs.existsSync(directory)) {
+            //     g.es_print(`Not found: ${directory}`);
+            // } else {
+            //     archive_name = `${directory}${path.sep}${g.shortFileName(leo_file)}-${time_s}.zip`;
+            // }
+        } catch (error) {
+            // KeyError handling
+        }
         if (!archive_name) {
             archive_name = `${leo_file}-${time_s}.zip`;
         }
+
         // Write the archive.
         try {
-            let n = 1;
-            // TODO
-            await vscode.window.showInformationMessage(
-                'TODO : writeZipArchive for ' +
-                `${archive_name} containing ${n} file${g.plural(n)}`
-            );
 
-            // const f = new jszip ! TODO !
+            // TODO !
 
-            console.log(process.env);
-
-            // with (zipfile.ZipFile(archive_name, 'w') as f){
-            //     f.write(leo_file);
-            //     for (const p of c.all_unique_positions()){
-            //         if (p.isAnyAtFileNode()){
-            //             fn = c.fullPath(p);
-            //             if (os.path.exists(fn)){
-            //                 n += 1;
-            //                 f.write(fn);
-            //             }
+            // let n = 1;
+            // const zip = new JSZip();
+            // zip.file(leo_file, fs.readFileSync(leo_file));
+            // for (const p of c.all_unique_positions()) {
+            //     if (p.isAnyAtFileNode()) {
+            //         const fn = c.fullPath(p);
+            //         if (fs.existsSync(fn)) {
+            //             n += 1;
+            //             zip.file(fn, fs.readFileSync(fn));
             //         }
             //     }
             // }
+            // const content = await zip.generateAsync({ type: "nodebuffer" });
+            // fs.writeFileSync(archive_name, content);
+            // console.log(`Wrote ${archive_name} containing ${n} file${g.plural(n)}`);
 
-            g.es(`Wrote ${archive_name} containing ${n} file${g.plural(n)}`);
-        } catch (exception) {
+        } catch (error) {
             g.es_print(`Error writing ${archive_name}`);
-            g.es_exception(exception);
+            g.es_exception(error);
         }
+
+
+        // // Compute archive_name.
+        // let archive_name = '';
+        // // TODO
+        // // try{
+        // //     const directory = os.environ['LEO_ARCHIVE'];
+        // //     // todo this should be a uri
+        // //     try {
+        // //         await vscode.workspace.fs.stat(directory);
+        // //         // OK exists
+
+        // //     } catch {
+        // //         // Does not exist !
+        // //         g.es_print(`Not found: ${directory}`);
+        // //         // TODO : TEST THIS WITH / WITHOUT ESCAPING SPECIAL CHARS
+        // //         archive_name = `${directory}${os.sep}${g.shortFileName(leo_file)}-${time_s}.zip`;
+        // //     }
+
+        // // }catch (keyError){
+        // //     // pass
+        // // }
+        // if (!archive_name) {
+        //     archive_name = `${leo_file}-${time_s}.zip`;
+        // }
+        // // Write the archive.
+        // try {
+        //     let n = 1;
+        //     // TODO
+        //     await vscode.window.showInformationMessage(
+        //         'TODO : writeZipArchive for ' +
+        //         `${archive_name} containing ${n} file${g.plural(n)}`
+        //     );
+
+        //     // const f = new jszip ! TODO !
+
+        //     console.log(process.env);
+
+        //     // with (zipfile.ZipFile(archive_name, 'w') as f){
+        //     //     f.write(leo_file);
+        //     //     for (const p of c.all_unique_positions()){
+        //     //         if (p.isAnyAtFileNode()){
+        //     //             fn = c.fullPath(p);
+        //     //             if (os.path.exists(fn)){
+        //     //                 n += 1;
+        //     //                 f.write(fn);
+        //     //             }
+        //     //         }
+        //     //     }
+        //     // }
+
+        //     g.es(`Wrote ${archive_name} containing ${n} file${g.plural(n)}`);
+        // } catch (exception) {
+        //     g.es_print(`Error writing ${archive_name}`);
+        //     g.es_exception(exception);
+        // }
     }
     //@+node:felix.20211213224228.1: *3* fc: File Utils
     //@+node:felix.20211213224228.2: *4* fc.createBackupFile
