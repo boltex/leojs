@@ -98,6 +98,8 @@ export class Commands {
     private _currentPosition: Position | undefined;
     private _topPosition: Position | undefined;
 
+    public subCommanders: any[];
+    public configurables: any[];
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
     public atFileCommands: AtFile;
@@ -265,6 +267,7 @@ export class Commands {
     public vimCommands: any = undefined;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
+    public quicksearch_controller: QuickSearchController | undefined;
     public id: number; // Replaces python id function
 
     //@+node:felix.20210223002937.1: *3* constructor & helpers
@@ -313,9 +316,11 @@ export class Commands {
 
         this.initConfigSettings();
 
+        // Define subcommanders.
         this.chapterController = new ChapterController(c);
         this.shadowController = new ShadowController(c);
 
+        // Originally from plugins
         this.theTagController = new TagController(c);
         this.quicksearchController = new QuickSearchController(c);
 
@@ -325,6 +330,7 @@ export class Commands {
         this.importCommands = new LeoImportCommands(c);
         this.persistenceController = new PersistenceDataController(c);
 
+        // command handlers...
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
@@ -334,10 +340,45 @@ export class Commands {
 
         this.undoer = new Undoer(c);
 
+        // Create the list of subcommanders.
+        this.subCommanders = [
+            // this.abbrevCommands,
+            this.atFileCommands,
+            // this.bufferCommands,
+            this.chapterController,
+            // this.controlCommands,
+            // this.convertCommands,
+            // this.debugCommands,
+            this.editCommands,
+            this.editFileCommands,
+            this.fileCommands,
+            this.findCommands,
+            this.gotoCommands,
+            this.helpCommands,
+            this.importCommands,
+            // this.keyHandler,
+            // this.keyHandlerCommands,
+            // this.killBufferCommands,
+            this.persistenceController,
+            // this.printingController,
+            this.quicksearchController,
+            // this.rectangleCommands,
+            this.rstCommands,
+            this.shadowController,
+            // this.spellCommands,
+            this.theTagController,
+            // this.vimCommands,
+            this.undoer,
+        ];
+
+        this.configurables = [...c.subCommanders];
+
         // From finishCreate
         c.frame.finishCreate();
         c.createCommandNames();
+        c.findCommands.finishCreate();
 
+        c.undoer.clearUndoState();
         // equivalent of k.initCommandHistory
         c.commandHistory = c.config.getData('history-list') || [];
     }
@@ -4030,15 +4071,6 @@ export class Commands {
     public canHoist(): boolean {
         // This is called at idle time, so minimizing positions is crucial!
         return true;
-
-        // c = self
-        // if c.hoistStack.length:
-        // p = c.hoistStack[c.hoistStack.length-1].p
-        // return p and not c.isCurrentPosition(p)
-        // elif c.currentPositionIsRootPosition():
-        // return c.currentPositionHasNext()
-        // else:
-        // return true
     }
 
     //@+node:felix.20211023195447.17: *6* c.canMoveOutlineDown
@@ -4631,17 +4663,60 @@ export class Commands {
             return [];
         }
     }
+    //@+node:felix.20240601145220.1: *4* c.undoableDeletePositions
+    /**
+     * Deletes all vnodes corresponding to the positions in aList,
+     * and make changes undoable.
+     */
+    public undoableDeletePositions(aList: Position[]): void {
+
+        const c = this;
+        const u = c.undoer;
+        const data = c.deletePositionsInList(aList);
+        const gnx2v = c.fileCommands.gnxDict;
+
+        function undo(): void {
+            const bead = u.getBead(u.bead);
+            if (!bead) { return; }
+            for (const [pgnx, i, chgnx] of bead.data.reverse()) {
+                const v = gnx2v[pgnx];
+                const ch = gnx2v[chgnx];
+                v.children.splice(i, 0, ch);
+                ch.parents.push(v);
+            }
+            if (!c.positionExists(c.p)) {
+                c.setCurrentPosition(c.rootPosition()!);
+            }
+        }
+
+        function redo(): void {
+            const bead = u.getBead(u.bead + 1);
+            if (!bead) { return; }
+            for (const [pgnx, i, _chgnx] of bead.data) {
+                const v = gnx2v[pgnx];
+                const ch = v.children.splice(i, 1)[0];
+                ch.parents = ch.parents.filter(parent => parent !== v);
+            }
+            if (!c.positionExists(c.p)) {
+                c.setCurrentPosition(c.rootPosition()!);
+            }
+        }
+
+        u.pushBead({
+            data: data,
+            undoType: 'delete nodes',
+            undoHelper: undo,
+            redoHelper: redo,
+        });
+    }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
     public registerReloadSettings(obj: any): void {
         const c: Commands = this;
-        console.log('TODO: ? NEEDED ? registerReloadSettings');
 
-        /* 
-        if (!c.configurables.includes(obj)){
+        if (!c.configurables.includes(obj)) {
             c.configurables.push(obj);
         }
-        */
     }
 
     //@+node:felix.20220605203342.3: *4* c.reloadConfigurableSettings
@@ -4650,38 +4725,49 @@ export class Commands {
      * other known classes.
      */
     public reloadConfigurableSettings(): void {
-        console.log('TODO : ? NEEDED ? reloadConfigurableSettings');
+        const c = this;
 
-        /* 
-        
-        const c: Commands = this;
+        // * LEOJS: some are non-existant
         const table = [
             g.app.gui,
             g.app.pluginsController,
-            c.k.autoCompleter,
-            c.frame, c.frame.body, c.frame.log, c.frame.tree,
-            c.frame.body.colorizer,
-            getattr(c.frame.body.colorizer, 'highlighter', None),
+            // c.k.autoCompleter,
+            c.frame,
+            c.frame.body,
+            // c.frame.log,
+            c.frame.tree,
+            // c.frame.body.colorizer,
+            // (c.frame.body.colorizer as any).highlighter || null,
         ];
-
-        for obj in table:
-            if obj:
-                c.registerReloadSettings(obj)
+        for (const obj of table) {
+            if (obj) {
+                c.registerReloadSettings(obj);
+            }
+        }
         // Useful now that instances add themselves to c.configurables.
-        c.configurables = list(set(c.configurables))
-        c.configurables.sort(key=lambda obj: obj.__class__.__name__.lower())
-        for obj in c.configurables:
-            func = getattr(obj, 'reloadSettings', None)
-            if func:
-                // pylint: disable=not-callable
-                try:
-                    func()
-                    g.doHook("after-reload-settings", c=c)
-                except e:
-                    g.es_exception(e)
-                    c.configurables.remove(obj)
+        c.configurables = Array.from(new Set(c.configurables));
+        c.configurables.sort((a, b) => a.constructor.name.toLowerCase().localeCompare(b.constructor.name.toLowerCase()));
 
-        */
+        for (const obj of c.configurables) {
+            if (obj == null) {
+                g.es_print('Undefined object in c.configurables');
+                continue;
+            }
+            const func = (
+                (obj as any).reloadSettings
+                || (obj as any).reload_settings  // An official alias.
+            );
+            if (func) {
+                try {
+                    func.bind(obj)();
+                    g.doHook("after-reload-settings", { c: c });
+                } catch (e) {
+                    g.es_exception(e);
+                    c.configurables = c.configurables.filter(item => item !== obj);
+                }
+            }
+        }
+
     }
 
     //@-others

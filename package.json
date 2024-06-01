@@ -2689,7 +2689,7 @@
         "command": "leojs.findDef",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Find Definition"
+        "title": "Find def, class or var assignment"
       },
       {
         "command": "leojs.replace",

@@ -270,6 +270,11 @@ export class LeoFind {
         this.reverse_find_defs = c.config.getBool('reverse-find-defs', false);
         this.prefer_nav_pane = c.config.getBool('prefer-nav-pane', true);
     }
+
+    // Necessary alias.
+    public reloadSettings(): void {
+        this.reload_settings();
+    }
     //@+node:felix.20221012233803.1: *3* find.batch_change (script helper) & helpers
 
     public batch_change(
@@ -658,7 +663,6 @@ export class LeoFind {
         }
         // Always update the Nav pane if it is enabled.
         const use_nav_pane = this.prefer_nav_pane;
-        g.trace(use_nav_pane);  // ###
         if (use_nav_pane) {
             this._load_quicksearch_entries(word, matches);
         }
@@ -778,6 +782,7 @@ export class LeoFind {
         scon.navText = unique_matches[0];
         scon.qsc_search(unique_matches[0]);
         g.app.gui.showNavResults();
+        g.app.gui.loadSearchSettings();
     }
 
     //@+node:felix.20240529215415.1: *6* find._compute_find_def_word

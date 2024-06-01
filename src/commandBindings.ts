@@ -272,8 +272,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.FIND_PREVIOUS, () => p_leoUI.find(false, true)],
         [CMD.FIND_PREVIOUS_FO, () => p_leoUI.find(true, true)],
 
-        [CMD.FIND_VAR, () => p_leoUI.command(LEOCMD.FIND_VAR, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-        [CMD.FIND_DEF, () => p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.FIND_DEF, () => p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
         [CMD.REPLACE, () => p_leoUI.replace(false, false)],
         [CMD.REPLACE_FO, () => p_leoUI.replace(true, false)],

@@ -149,12 +149,6 @@ export class LeoGui {
         this.oops();
     }
     /**
-     * Run Leo's findDef and findSymbol methods.
-     */
-    public findSymbol(p_def: boolean): any {
-        this.oops();
-    }
-    /**
      * Sets a specific Find panel setting.
      */
     public setSearchSetting(p_id: string) {

@@ -261,7 +261,6 @@
 <v t="felix.20220505215924.4"><vh>startSearch</vh></v>
 <v t="felix.20220930222931.1"><vh>checkForceFindFocus</vh></v>
 <v t="felix.20220505215924.7"><vh>find</vh></v>
-<v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
@@ -2327,7 +2326,6 @@ public static COMMANDS = {
     FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
     FIND_PREVIOUS: Constants.NAME + ".findPrevious",
     FIND_PREVIOUS_FO: Constants.NAME + ".findPreviousFromOutline",
-    FIND_VAR: Constants.NAME + ".findVar",
     FIND_DEF: Constants.NAME + ".findDef",
     REPLACE: Constants.NAME + ".replace",
     REPLACE_FO: Constants.NAME + ".replaceFromOutline",
@@ -2396,7 +2394,6 @@ public static LEO_COMMANDS = {
     FIND_ALL: "find-all",
     // FIND_NEXT: "!find_next",
     // FIND_PREVIOUS: "!find_previous",
-    FIND_VAR: "find-var",
     FIND_DEF: "find-def",
     // REPLACE: "!replace",
     // REPLACE_THEN_FIND: "!replace_then_find",
@@ -10469,72 +10466,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
 }
 
 </t>
-<t tx="felix.20220505215924.8">/**
- * * find-var or find-def commands
- * @param p_def find-def instead of find-var
- * @returns Promise that resolves when the "launch refresh" is started
- */
-public async findSymbol(p_def: boolean): Promise&lt;unknown&gt; {
-
-    // This sets the selection on a word in the body pane. (needs selection on a symbol word in vscode word)
-    await this.triggerBodySave(true);
-
-    const c = g.app.windowList[this.frameIndex].c;
-    const fc = c.findCommands;
-
-    if (p_def) {
-        fc.find_def();
-    } else {
-        fc.find_var();
-    }
-
-    let found = true;
-
-    const focus = this._get_focus();
-
-    if (!found) {
-        return vscode.window.showInformationMessage('Not found');
-    } else {
-        if (fc.prefer_nav_pane) {
-
-            this._leoGotoProvider.refreshTreeRoot();
-            void this.showGotoPane({ preserveFocus: true }); // show but dont change focus
-
-            let w_finalFocus = Focus.Body;
-            const w_focus = focus.toLowerCase();
-            if (w_focus.includes('tree') || w_focus.includes('head')) {
-                // tree
-                w_finalFocus = Focus.Outline;
-            }
-            this.loadSearchSettings();
-            this.setupRefresh(
-                w_finalFocus,
-                {
-                    tree: true,
-                    body: true,
-                    scroll: found &amp;&amp; w_finalFocus === Focus.Body,
-                    // documents: false,
-                    // buttons: false,
-                    states: true,
-                });
-        } else {
-            // clones
-            this.setupRefresh(
-                Focus.NoChange,
-                {
-                    tree: true,
-                    body: true,
-                    // documents: false,
-                    // buttons: false,
-                    states: true,
-                });
-        }
-        return this.launchRefresh();
-    }
-
-}
-
-</t>
 <t tx="felix.20220505215924.9">/**
  * * Replace / Replace-Then-Find commands
  * @param p_fromOutline
@@ -14592,7 +14523,7 @@ private _refreshGotoPane(): void {
   "command": "leojs.findDef",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Find Definition"
+  "title": "Find def, class or var assignment"
 },
 {
   "command": "leojs.replace",
@@ -15473,8 +15404,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.FIND_PREVIOUS, () =&gt; p_leoUI.find(false, true)],
 [CMD.FIND_PREVIOUS_FO, () =&gt; p_leoUI.find(true, true)],
 
-[CMD.FIND_VAR, () =&gt; p_leoUI.command(LEOCMD.FIND_VAR, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-[CMD.FIND_DEF, () =&gt; p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.FIND_DEF, () =&gt; p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 [CMD.REPLACE, () =&gt; p_leoUI.replace(false, false)],
 [CMD.REPLACE_FO, () =&gt; p_leoUI.replace(true, false)],
