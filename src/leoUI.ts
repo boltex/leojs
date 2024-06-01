@@ -4975,26 +4975,43 @@ export class LeoUI extends NullGui {
 
         const focus = this._get_focus();
 
-        if (!found || !focus) {
+        if (!found) {
             return vscode.window.showInformationMessage('Not found');
         } else {
-            let w_finalFocus = Focus.Body;
-            const w_focus = focus.toLowerCase();
-            if (w_focus.includes('tree') || w_focus.includes('head')) {
-                // tree
-                w_finalFocus = Focus.Outline;
+            if (fc.prefer_nav_pane) {
+
+                this._leoGotoProvider.refreshTreeRoot();
+                void this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+
+                let w_finalFocus = Focus.Body;
+                const w_focus = focus.toLowerCase();
+                if (w_focus.includes('tree') || w_focus.includes('head')) {
+                    // tree
+                    w_finalFocus = Focus.Outline;
+                }
+                this.loadSearchSettings();
+                this.setupRefresh(
+                    w_finalFocus,
+                    {
+                        tree: true,
+                        body: true,
+                        scroll: found && w_finalFocus === Focus.Body,
+                        // documents: false,
+                        // buttons: false,
+                        states: true,
+                    });
+            } else {
+                // clones
+                this.setupRefresh(
+                    Focus.NoChange,
+                    {
+                        tree: true,
+                        body: true,
+                        // documents: false,
+                        // buttons: false,
+                        states: true,
+                    });
             }
-            this.loadSearchSettings();
-            this.setupRefresh(
-                w_finalFocus,
-                {
-                    tree: true,
-                    body: true,
-                    scroll: found && w_finalFocus === Focus.Body,
-                    // documents: false,
-                    // buttons: false,
-                    states: true,
-                });
             return this.launchRefresh();
         }
 

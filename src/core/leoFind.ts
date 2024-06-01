@@ -765,10 +765,6 @@ export class LeoFind {
     public _load_quicksearch_entries(word?: string, matches: [number, Position, string][] = []): void {
         /* Put all matches in the Nav pane. */
         const c = this.c;
-        // const x = c.quicksearch_controller;
-        // const w = c.frame.nav;
-        // const e = w.ui.lineEdit;  // A QLineEdit.
-        // Filter out unique matches.
         const unique_matches = Array.from(new Set(matches.map(([i, p, s]) => s.trim()).filter(s => s)));
         // The Nav pane can show only one match, so issue a warning.
         if (unique_matches.length > 1) {
@@ -779,13 +775,9 @@ export class LeoFind {
         }
         // Put the first match in the Nav pane's edit widget and update.
         const scon: QuickSearchController = c.quicksearchController;
+        scon.navText = unique_matches[0];
         scon.qsc_search(unique_matches[0]);
         g.app.gui.showNavResults();
-
-        // x.clear();
-        // e.setText(unique_matches[0]);
-        // c.frame.log.selectTab('Nav');
-        // w.returnPressed();
     }
 
     //@+node:felix.20240529215415.1: *6* find._compute_find_def_word
