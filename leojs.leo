@@ -14478,11 +14478,6 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
 </t>
 <t tx="felix.20221113165005.1">"editor/context": [
   {
-    "command": "leojs.findVar",
-    "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme == leojs &amp;&amp; leojsTreeOpened",
-    "group": "navigation@1"
-  },
-  {
     "command": "leojs.findDef",
     "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme == leojs &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
@@ -14577,17 +14572,10 @@ private _refreshGotoPane(): void {
   "icon": "$(leojs-find-previous)"
 },
 {
-  "command": "leojs.findVar",
-  "category": "Leojs",
-  "enablement": "leojsTreeOpened",
-  "title": "Find the var under the cursor"
-},
-{
   "command": "leojs.findDef",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "shortTitle": "Find Definition",
-  "title": "Find the def or class under the cursor"
+  "title": "Find Definition"
 },
 {
   "command": "leojs.replace",

@@ -772,7 +772,7 @@ export class LeoFind {
         const unique_matches = Array.from(new Set(matches.map(([i, p, s]) => s.trim()).filter(s => s)));
         // The Nav pane can show only one match, so issue a warning.
         if (unique_matches.length > 1) {
-            g.es_print(`Multiple matches for ${word}`, { color: 'red' });
+            g.es_print(`Multiple matches for ${word}`);
             for (const z of unique_matches.slice(1)) {
                 g.es_print(z);
             }

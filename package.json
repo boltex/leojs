@@ -2686,17 +2686,10 @@
         "icon": "$(leojs-find-previous)"
       },
       {
-        "command": "leojs.findVar",
-        "category": "Leojs",
-        "enablement": "leojsTreeOpened",
-        "title": "Find the var under the cursor"
-      },
-      {
         "command": "leojs.findDef",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "shortTitle": "Find Definition",
-        "title": "Find the def or class under the cursor"
+        "title": "Find Definition"
       },
       {
         "command": "leojs.replace",
@@ -3411,11 +3404,6 @@
         }
       ],
       "editor/context": [
-        {
-          "command": "leojs.findVar",
-          "when": "!editorHasMultipleSelections && resourceScheme == leojs && leojsTreeOpened",
-          "group": "navigation@1"
-        },
         {
           "command": "leojs.findDef",
           "when": "!editorHasMultipleSelections && resourceScheme == leojs && leojsTreeOpened",
