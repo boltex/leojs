@@ -472,6 +472,127 @@ export class Commands {
         c.write_script_file = getBool('write-script-file');
     }
 
+    //@+node:felix.20240531224459.1: *3* @cmd c.execute-general-script
+    @cmd('execute-general-script',
+        'Execute c.p and all its descendants as a script. Create a temp file if c.p is not an @<file> node.'
+    )
+    execute_general_script_command(): void {
+        /**
+         * Execute c.p and all its descendants as a script.
+         *
+         * Create a temp file if c.p is not an @<file> node.
+         *
+         * @data exec-script-commands associates commands with languages.
+         *
+         * @data exec-script-patterns provides patterns to create clickable
+         * links for error messages.
+         *
+         * Set the cwd before calling the command.
+         */
+        const c = this;
+        const p = this.p;
+        const tag = 'execute-general-script';
+
+        function get_setting_for_language(setting: string): string | null {
+            /**
+             * Return the setting from the given @data setting.
+             * The first colon ends each key.
+             */
+            const data = c.config.getData(setting) || [];
+            for (const s of data) {
+                const [key, val] = s.split(':', 2);
+                if (key.trim() === language) {
+                    return val.trim();
+                }
+            }
+            return null;
+        }
+
+        // Get the language and extension.
+        const d = c.scanAllDirectives(p);
+        const language: string = d['language'];
+        if (!language) {
+            console.log(`${tag}: No language in effect at ${p.h}`);
+            return;
+        }
+        const ext = g.app.language_extension_dict[language];
+        if (!ext) {
+            console.log(`${tag}: No extension for ${language}`);
+            return;
+        }
+        // Get the command.
+        const command = get_setting_for_language('exec-script-commands');
+        if (!command) {
+            console.log(`${tag}: No command for ${language} in @data exec-script-commands`);
+            return;
+        }
+        // Get the optional pattern.
+        const regex = get_setting_for_language('exec-script-patterns');
+        // Set the directory, if possible.
+        let directory: string | undefined;
+        if (p.isAnyAtFileNode()) {
+            const w_path = c.fullPath(p);
+            directory = w_path ? path.dirname(w_path) : undefined;
+        } else {
+            directory = undefined;
+        }
+        c.general_script_helper(command, ext, language, p, directory, regex,);
+    }
+
+
+    // @cmd('execute-general-script')
+    // def execute_general_script_command(self, event: LeoKeyEvent = None) -> None:
+    //     """
+    //     Execute c.p and all its descendants as a script.
+
+    //     Create a temp file if c.p is not an @<file> node.
+
+    //     @data exec-script-commands associates commands with languages.
+
+    //     @data exec-script-patterns provides patterns to create clickable
+    //     links for error messages.
+
+    //     Set the cwd before calling the command.
+    //     """
+    //     c, p, tag = self, self.p, 'execute-general-script'
+    //     def get_setting_for_language(setting: str) -> Optional[str]:
+    //         """
+    //         Return the setting from the given @data setting.
+    //         The first colon ends each key.
+    //         """
+    //         for s in c.config.getData(setting) or []:
+    //             key, val = s.split(':', 1)
+    //             if key.strip() == language:
+    //                 return val.strip()
+    //         return None
+
+    //     # Get the language and extension.
+    //     d = c.scanAllDirectives(p)
+    //     language: str = d.get('language')
+    //     if not language:
+    //         print(f"{tag}: No language in effect at {p.h}")
+    //         return
+    //     ext = g.app.language_extension_dict.get(language)
+    //     if not ext:
+    //         print(f"{tag}: No extension for {language}")
+    //         return
+    //     # Get the command.
+    //     command = get_setting_for_language('exec-script-commands')
+    //     if not command:
+    //         print(f"{tag}: No command for {language} in @data exec-script-commands")
+    //         return
+    //     # Get the optional pattern.
+    //     regex = get_setting_for_language('exec-script-patterns')
+    //     # Set the directory, if possible.
+    //     if p.isAnyAtFileNode():
+    //         path = c.fullPath(p)
+    //         directory = os.path.dirname(path)
+    //     else:
+    //         directory = None
+    //     c.general_script_helper(command, ext, language,
+    //         directory=directory, regex=regex, root=p)
+
+
     //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
     @cmd('execute-script', 'Execute a *Leo* script, written in javascript.')
     public async executeScript(
@@ -2508,7 +2629,7 @@ export class Commands {
         command: string,
         ext: string,
         language: string,
-        root: any,
+        root: Position,
         directory: string | undefined,
         regex?: any
     ): void {
