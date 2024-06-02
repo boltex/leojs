@@ -5680,6 +5680,53 @@ export function python_tokenize(s: string): [string, string, number][] {
 }
 
 //@+node:felix.20211104211229.1: ** g.Scripting
+//@+node:felix.20240602151912.1: *3* g.execute_shell_commands
+/**
+ * Execute each shell command in a separate process.
+ * Wait for each command to complete, except those starting with '&'
+ */
+export async function execute_shell_commands(commands: string | string[], p_trace: boolean = false): Promise<void> {
+    if (typeof commands === 'string') {
+        commands = [commands];
+    }
+
+    for (const command of commands) {
+
+        let wait = !command.startsWith('&');
+
+        if (p_trace) {
+            trace(`Trace: ${command}`);
+        }
+
+        let cmd = command;
+        if (command.startsWith('&')) {
+            cmd = command.substring(1).trim();
+        }
+
+        if (wait) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const proc = child.exec(cmd, {}, (error, stdout, stderr) => {
+                        if (error) {
+                            reject(`Command failed: ${stderr}`);
+                        } else {
+                            resolve(undefined);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error(`Command failed with error: ${error}`);
+            }
+        } else {
+            const proc = child.spawn(cmd, { shell: true, stdio: 'inherit' });
+            proc.on('error', (error) => {
+                console.error(`Command failed with error: ${error}`);
+            });
+        }
+
+
+    };
+}
 //@+node:felix.20221219205826.1: *3* g.getScript & helpers
 /**
  * Return the expansion of the selected text of node p.
