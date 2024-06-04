@@ -289,8 +289,8 @@ export class TopLevelEditCommands {
                 if (!seen.has(message)) {
                     seen.add(message);
 
-                    // TODO : CHECK THIS!
-                    g.es(`${message}\n${unl}::1`);
+                    // TODO : CHECK THIS !
+                    g.es(`${message}\n${unl}::1\n`);
 
                     // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
                 }
@@ -320,8 +320,8 @@ export class TopLevelEditCommands {
                 if (!seen.has(message)) {
                     seen.add(message);
 
-                    // TODO : CHECK THIS!
-                    g.es(`${message}\n${unl}::1`);
+                    // TODO : CHECK THIS !
+                    g.es(`${message}\n${unl}::1\n`);
 
                     // c.frame.log.put(`${message}\n`, { nodeLink: `${unl}::1` });
                 }

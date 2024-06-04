@@ -5724,7 +5724,6 @@ export async function execute_shell_commands(commands: string | string[], p_trac
             });
         }
 
-
     };
 }
 //@+node:felix.20221219205826.1: *3* g.getScript & helpers

@@ -2358,8 +2358,10 @@ export class LeoFind {
             return;
         }
         const unl = found.get_UNL();
-        // TODO : Send to GOTO PANE !
-        g.es(line.trim() + ` ${unl}::${line_number - 1}`);
+
+        // TODO : Maybe Send to GOTO PANE ?
+        // TODO Test this !
+        g.es(line.trim() + `\n ${unl}::${line_number - 1}`);
         // log.put(line.strip() + '\n', nodeLink=f"{unl}::{line_number - 1}")  // Local line.
     }
     //@+node:felix.20230212180757.8: *7* find.find_all_matches_in_string & helpers
