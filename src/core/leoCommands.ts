@@ -46,6 +46,7 @@ import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
 import * as typescript from 'typescript';
+import * as which from 'which';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -530,6 +531,11 @@ export class Commands {
          *
          * Set the cwd before calling the command.
          */
+        if (g.isBrowser) {
+            g.es('\'execute-general-script\' Command not available on the web');
+            return;
+        }
+
         const c = this;
         const p = this.p;
         const tag = 'execute-general-script';
@@ -578,6 +584,457 @@ export class Commands {
             directory = undefined;
         }
         await c.general_script_helper(command, ext, language, p, directory, regex,);
+    }
+    //@+node:felix.20240603233303.1: *3* @cmd c.execute-external-file
+    @cmd('execute-external-file', 'Run external files.')
+    public async execute_external_file(): Promise<void> {
+        /*
+        //@+<< docstring >>
+        //@+node:felix.20240603233303.2: *4* << docstring >>
+        Run external files.
+
+        If there is an @language directive in the top node of the file,
+        the external processor will be chosen based on it if known.
+        Otherwise, the processor will be chosen using the file's extension
+        if known.  Otherwise, on Linux a shebang line will be used if the
+        external file has one. The candidate processor will be verified
+        to be reachable by the shell.
+
+        On Windows, "@language batch" and "@language shell" both will cause
+        cmd.exe to be invoked as the file processor. On Linux, "@language
+        shell" will cause the system's shell to be invoked. By default, this
+        will be bash. If bash is not present, then the environmental variable
+        $SHELL will be invoked.
+
+        The processing programs and language file extensions can be
+        specified in an @data settings node with the name
+        "run-external-processor-map".
+
+        The data in the @data node body must have a PROCESSORS, an
+        EXTENSIONS section, and optionally a TERMINAL section,
+        looking like this example:
+
+            # A comment line
+            # Map file extensions to language names
+            EXTENSIONS
+            .lua: lua    # Trailing comments allowed
+            .rb: ruby
+
+            # Map language names to processor names or paths
+            PROCESSORS
+            lua: lua
+            ruby: C:\Ruby27-x64\bin\ruby.exe
+
+            # Optionally specify a Linux terminal here (e.g., konsole)
+            TERMINAL
+            # konsole
+
+        Blank lines and lines starting with a "#" are ignored.  If a
+        full path to the processor is included, that path will be used.
+        Otherwise, the processor must be findable by the shell: this
+        normally means it must be on the PATH.
+
+        Any output will be displayed in a newly-opened launching console.
+
+        //@-<< docstring >>
+        */
+
+        if (g.isBrowser) {
+            g.es('\'execute-external-file\' Command not available on the web');
+            return;
+        }
+
+        const c = this;
+        const MAP_SETTING_NODE = 'run-external-processor-map';
+        //@+others
+        //@+node:felix.20240603233303.3: *4* Declarations
+        const PREFERRED_TERMINALS = ['konsole', 'xfce4-terminal', 'mate-terminal', 'gnome-terminal', 'xterm'];
+        //@+node:felix.20240603233303.4: *4* SETTINGS_HELP
+        const SETTINGS_HELP = `The data in the @data node body must have a
+        PROCESSORS and an EXTENSIONS section, plus an optional TERMINAL
+        section, looking like this example:
+
+            # A comment line
+            # Map file extensions to language names
+            EXTENSIONS
+            .lua: lua   # Trailing comments are allowed
+            .rb: ruby
+
+            # Map language names to processor names or paths
+            PROCESSORS
+            lua: lua
+            ruby: C:\\Ruby27-x64\\bin\\ruby.exe
+
+            # Optionally specify a Linux terminal (e.g., konsole) on the
+            # line after the "TERMINAL" line.
+            TERMINAL
+
+        Blank lines and lines starting with a "#" are ignored.
+        `;
+        //@+node:felix.20240603233303.5: *4* extension map
+        let LANGUAGE_EXTENSION_MAP: Record<string, string> = {
+            '.cmd': 'batch',
+            '.bat': 'batch',  // We'll get confused if a Linux program uses a .bat extension
+            '.jl': 'julia',
+            '.lua': 'lua',
+            '.ps1': 'powershell',
+            '.py': 'python',
+            '.pyw': 'python',
+            'rb': 'ruby',
+        };
+        //@+node:felix.20240603233303.6: *4* processor map
+        let PROCESSORS: Record<string, string> = {
+            'batch': 'cmd.exe',
+            'julia': 'julia',
+            'lua': 'lua',
+            'powershell': 'powershell',
+            'ruby': 'ruby',
+            'shellscript': 'bash',
+        };
+        //@+node:felix.20240603233303.7: *4* get_external_maps
+        function get_external_maps(): [Record<string, string> | null, Record<string, string> | null, string] {
+            /*
+                Return processor, extension maps for @data node.
+
+                The data in the @data node body must have a PROCESSORS and an
+                EXTENSIONS section, looking like this example:
+
+                    # A comment line
+                    # Map file extensions to language names
+                    EXTENSIONS
+                    .lua: lua  # Trailing comments are allowed
+                    .rb: ruby
+
+                    # Map language names to processor names or paths
+                    PROCESSORS
+                    lua: lua
+                    ruby: C:\Ruby27-x64\bin\ruby.exe
+
+                    # Specify a particular Linux terminal to use
+                    # e.g, /usr/bin/konsole
+                    TERMINAL
+
+                Blank lines and lines starting with a "#" are ignored.  Trailing
+                in-line comments are allowed, delineated by "#".
+
+                RETURNS
+                a tuple (processor_map, extension_map, terminal)
+            */
+
+            const data: string[] = c.config.getData(MAP_SETTING_NODE, false);
+            if (!data) {
+                return [null, null, ''];
+            }
+
+            const processor_map: Record<string, string> = {};
+            const extension_map: Record<string, string> = {};
+            // let active_map = null;
+            let terminal: string = '';
+            let found_term = false;
+            const TERM = 'TERMINAL';
+
+            for (let line of data) {
+                if (!line || line.startsWith('#')) {
+                    continue;
+                }
+                line = line.split('#', 1)[0];  // Allow in-line trailing comments
+                if (line.includes('EXTENSIONS')) {
+                    // active_map = extension_map;
+                } else if (line.includes('PROCESSORS')) {
+                    // active_map = processor_map;
+                } else if (line.includes(TERM)) {
+                    // active_map = null;
+                    found_term = true;
+                } else if (found_term) {
+                    terminal = line;
+                    break;  // Don't process any lines after this
+                } else {
+                    const keyval = line.split(':', 1);
+                    const key = keyval[0].trim();
+                    const val = keyval[1].trim();
+                    // active_map[key] = val;
+                }
+            }
+            return [processor_map, extension_map, terminal];
+        }
+        //@+node:felix.20240603233303.8: *4* getExeKind
+        /**
+         * Return the executable kind of the external file.
+         *
+         * If there is a language directive in effect, return it,
+         * otherwise use the file extension.
+         *
+         * Returns a language.
+         */
+        function getExeKind(pos: Position, ext: string): string {
+            let language = g.getLanguageFromAncestorAtFileNode(c.p) || '';
+            if (!language) {
+                language = LANGUAGE_EXTENSION_MAP[ext] || '';
+            }
+            return language;
+        }
+        //@+node:felix.20240603233303.9: *4* getProcessor
+        async function getProcessor(language: string, path: string, extension: string): Promise<string> {
+            let processor = '';
+            if (language === 'python') {
+                processor = process.execPath;
+            } else {
+                if (process.platform === 'win32' && language === 'shell') {
+                    return 'cmd.exe';
+                }
+                processor = PROCESSORS[language] || '';
+                if (!processor && process.platform === 'win32') {
+                    const ftype = await get_win_assoc(extension);
+                    processor = await get_win_processor(ftype);
+                }
+            }
+            if (processor) {
+                const proc = await which(processor);
+                if (!proc) {
+                    processor = '';
+                }
+            }
+            return processor;
+        }
+        //@+node:felix.20240603233303.10: *4* Get Windows File Associations
+        /**
+         * Return Windows association for given file extension, or ''.
+         *
+         * The extension must include the dot.
+         */
+        function get_win_assoc(extension: string): Promise<string> {
+            const cmd = `assoc ${extension}`;
+            return new Promise((resolve, reject) => {
+                child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                    if (error) {
+                        return reject(stderr);
+                    }
+                    const filetype = stdout.split('=')[1] || '';
+                    resolve(filetype);
+                });
+            });
+        }
+
+        /**
+         * Get Windows' idea of the program to use for running this file type.
+         *
+         * Example return from ftype:
+         *     Lua.Script="C:\Program Files (x86)\Lua\5.1\lua.exe" "%1" %*
+         *
+         * ARGUMENT
+         * filetype -- a file type returned by the assoc command.
+         *
+         * RETURNS
+         * the processor or ''
+         */
+        function get_win_processor(filetype: string): Promise<string> {
+            if (!filetype) {
+                return Promise.resolve('');
+            }
+            const cmd = `ftype ${filetype}`;
+            return new Promise((resolve, reject) => {
+                child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                    if (error) {
+                        return reject(stderr);
+                    }
+                    const ftype_str = stdout || 'none';
+                    if (!ftype_str) {
+                        return resolve('');
+                    }
+                    const prog_str = ftype_str.split('=')[1];
+                    resolve(prog_str.split('"')[1]);
+                });
+            });
+        }
+        //@+node:felix.20240603233303.11: *4* getShell
+        async function getShell(): Promise<string> {
+            //  Prefer bash unless it is not present - we know its options' names
+            let shell = 'bash';
+            const has_bash = await which(shell);
+            if (!has_bash) {
+                // Need bare shell name, not whole path
+                let processShell = process.env.SHELL || "";
+                processShell = processShell.split('/').pop() || "";
+                shell = processShell;
+            }
+            return shell;
+        }
+        //@+node:felix.20240603233303.12: *4* getTerminal
+        //@+others
+        //@+node:felix.20240603233303.13: *5* getTerminalFromDirectory
+
+        function getTerminalFromDirectory(dir: string): string {
+            const BAD_NAMES = ['xdg-terminal', 'setterm', 'ppmtoterm', 'koi8rxterm', 'rofi-sensible-terminal', 'x-terminal-emulator'];
+            const TERM_STRINGS = ['*-terminal', '*term'];
+            for (let ts of TERM_STRINGS) {
+                const cmd = `find ${dir} -type f -name ${ts}`;
+                const proc = child_process.execSync(cmd, { encoding: 'utf-8' });
+                const terminals = proc.split('\n');
+                for (let t of terminals) {
+                    const bare_term = t.split('/').pop() || "";
+                    if (!BAD_NAMES.includes(bare_term)) {
+                        return t;
+                    }
+                }
+            }
+            return '';
+        }
+        //@+node:felix.20240603233303.14: *5* getCommonTerminal
+        async function getCommonTerminal(names: string | string[]): Promise<string> {
+            let term = '';
+            if (typeof names === 'string') {
+                names = [names];
+            }
+            for (let name of names) {
+                term = await which(name);
+                if (term) break;
+            }
+            return term;
+        }
+        //@-others
+
+        async function getTerminal(): Promise<string> {
+            const w_getCommonTerminal = await getCommonTerminal(PREFERRED_TERMINALS);
+            const w_getTerminalFromDirectory1 = await getTerminalFromDirectory('/usr/bin');
+            const w_getTerminalFromDirectory2 = await getTerminalFromDirectory('/bin');
+            return w_getCommonTerminal || w_getTerminalFromDirectory1 || w_getTerminalFromDirectory2;
+        }
+        //@+node:felix.20240603233303.15: *4* getTermExecuteCmd
+        /**
+         * Given a terminal's name, find the command line arg to launch a program.
+         *
+         * First, try "--help".  If that fails, see try "--help-all".  If neither
+         * has an argument or switch for "Execute", give up and assume the arg is "-x".
+         */
+        function getTermExecuteCmd(terminal: string): string {
+            const HELP_CMDS = ['-h', '--help', '--help-all'];
+            const EXECUTESTR = 'execute';
+
+            //@+others
+            //@+node:felix.20240603233303.16: *5* get_help_message
+            function get_help_message(terminal: string, help_cmd: string): string {
+                const cmd = `${terminal} ${help_cmd}`;
+                const proc = child_process.execSync(cmd, { encoding: 'utf-8' });
+                return proc;
+            }
+            //@+node:felix.20240603233303.17: *5* find_ex_arg
+            function find_ex_arg(help_msg: string): string {
+                for (let line of help_msg.split('\n')) {
+                    if (line.includes('--command')) return '--command';
+                    if (line.includes('-e')) return '-e';
+                    if (line.toLowerCase().includes(EXECUTESTR)) {
+                        const fields = line.trim().split(' ');
+                        const arg = fields[0].split(',')[0];
+                        return arg;
+                    }
+                }
+                return '';
+            }
+            //@-others
+
+            let arg = '';
+            for (let cmd of HELP_CMDS) {
+                const msg = get_help_message(terminal, cmd);
+                arg = find_ex_arg(msg);
+                if (arg) {
+                    if (arg.startsWith('--')) arg += '=';
+                    else arg += ' ';
+                    break;
+                }
+            }
+            if (!arg) {
+                arg = ' -x ';
+                if (terminal.includes('xterm')) arg = ' -e ';
+            }
+            return arg;
+        }
+        //@+node:felix.20240603233303.18: *4* checkShebang
+        async function checkShebang(filepath: string): Promise<boolean> {
+
+            const w_uri = g.makeVscodeUri(filepath);
+            let readData = await vscode.workspace.fs.readFile(w_uri);
+
+            // const file = fs.readFileSync(filepath, { encoding: 'utf-8' });
+            const file = Buffer.from(readData).toString('utf-8');
+            return file.startsWith('#!');
+        }
+        //@+node:felix.20240603233303.19: *4* runFile
+        async function runfile(fullpath: string, processor: string, terminal: string): Promise<void> {
+            const direc = os.homedir() + path.dirname(fullpath);
+            if (process.platform === 'win32') {
+                fullpath = fullpath.replace('/', '\\');
+                let cmd = '';
+                if (processor) {
+                    if (processor === 'cmd.exe') {
+                        cmd = `start ${processor} /k ${fullpath}`;
+                    } else {
+                        cmd = `start cmd.exe /k ${processor} ${fullpath}`;
+                    }
+                } else {
+                    g.es('Unknown processor', fullpath, { color: 'red' });
+                    return;
+                }
+                child_process.exec(cmd);
+            } else if (process.platform === 'darwin') {
+                g.es('Cannot launch external files on a Mac yet', { color: 'red' });
+            } else {
+                fullpath = fullpath.replace('\\', '/');
+                const w_gotTerminal = await getTerminal();
+                const term = terminal || w_gotTerminal;
+                if (!term) {
+                    g.es('Cannot find a terminal to launch the external file', { color: 'red' });
+                    g.es(`You can specify a terminal in an "@data ${MAP_SETTING_NODE}" setting node`);
+                    g.es('  ', SETTINGS_HELP);
+                    return;
+                }
+                const shell_name = getShell();
+                const execute_arg = getTermExecuteCmd(term);
+                let cmd = '';
+                const hasShebang = await checkShebang(fullpath);
+                if (!processor && hasShebang) {
+                    cmd = `${term} ${execute_arg}"${shell_name} -c 'cd ${direc}; ${fullpath} ;read'" `;
+                } else if (processor) {
+                    cmd = `${term} ${execute_arg}"${shell_name} -c 'cd ${direc};${processor} ${fullpath} ;read'" `;
+                } else {
+                    g.es(`No processor for ${fullpath}`, { color: 'red' });
+                    return;
+                }
+                child_process.exec(cmd);
+            }
+        }
+        //@-others
+
+        let root: Position | undefined;
+        let filepath: string | undefined;
+        [root, filepath] = c.gotoCommands.find_root(c.p);
+        if (root && filepath) {
+            let processor_map: Record<string, string> | null;
+            let extension_map: Record<string, string> | null;
+            let terminal: string | null;
+            [processor_map, extension_map, terminal] = get_external_maps();
+            if (extension_map) {
+                LANGUAGE_EXTENSION_MAP = { ...LANGUAGE_EXTENSION_MAP, ...extension_map };
+            }
+            if (processor_map) {
+                PROCESSORS = { ...PROCESSORS, ...processor_map };
+            }
+            const ext = path.extname(filepath);
+            const setting_terminal = terminal;
+            if (setting_terminal) {
+                terminal = await which(terminal);
+                if (!terminal) {
+                    g.es(`Cannot find terminal specified in setting: ${setting_terminal}`);
+                    g.es('Trying an alternative');
+                }
+            }
+            filepath = c.fullPath(root);
+            const language = getExeKind(root, ext);
+            const processor = await getProcessor(language, filepath, ext);
+            await runfile(filepath, processor, terminal);
+        } else {
+            g.es('Cannot find an @- file', { color: 'red' });
+        }
+
     }
     //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
     @cmd('execute-script', 'Execute a *Leo* script, written in javascript.')

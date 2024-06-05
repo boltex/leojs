@@ -6934,6 +6934,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/uuid": "^9.0.7",
 "@types/vscode": "^1.86.0",
 "@types/webpack-env": "^1.16.3",
+"@types/which": "^3.0.4",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
@@ -6970,7 +6971,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
 "showdown": "^2.1.0",
-"stream": "^0.0.2"
+"stream": "^0.0.2",
+"which": "^4.0.0"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showSettingsPage",

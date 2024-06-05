@@ -49,6 +49,7 @@ const webConfig = /** @type WebpackConfig */ {
       path: require.resolve('path-browserify'),
       process: require.resolve('process/browser'),
       url: require.resolve('url'),
+      which: false, // false: so compilation passes: WILL NOT BE USED IN WEB VERSION
       fs: false, // false: so compilation passes: WILL NOT BE USED IN WEB VERSION
     },
   },
