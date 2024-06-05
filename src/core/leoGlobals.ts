@@ -5686,6 +5686,12 @@ export function python_tokenize(s: string): [string, string, number][] {
  * Wait for each command to complete, except those starting with '&'
  */
 export async function execute_shell_commands(commands: string | string[], p_trace: boolean = false): Promise<void> {
+
+    if (isBrowser) {
+        es('\'g.execute_shell_commands\' Command not available on the web');
+        return;
+    }
+
     if (typeof commands === 'string') {
         commands = [commands];
     }
