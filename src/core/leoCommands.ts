@@ -708,7 +708,7 @@ export class Commands {
                     # Map language names to processor names or paths
                     PROCESSORS
                     lua: lua
-                    ruby: C:\Ruby27-x64\bin\ruby.exe
+                    ruby: C:\\Ruby27-x64\\bin\\ruby.exe
 
                     # Specify a particular Linux terminal to use
                     # e.g, /usr/bin/konsole
@@ -726,35 +726,45 @@ export class Commands {
                 return [null, null, ''];
             }
 
-            const processor_map: Record<string, string> = {};
-            const extension_map: Record<string, string> = {};
-            // let active_map = null;
-            let terminal: string = '';
-            let found_term = false;
-            const TERM = 'TERMINAL';
+            // Allow trailing comments:
+            const lines = data.map(z => z.split('#', 1)[0]);
 
-            for (let line of data) {
-                if (!line || line.startsWith('#')) {
-                    continue;
+            function scan_map(kind: string): Record<string, string> {
+                const d: Record<string, string> = {};
+                const other_kind = kind === 'EXTENSIONS' ? 'PROCESSORS' : 'EXTENSIONS';
+                let scanning = false;
+
+                for (const line of lines) {
+                    if (line.includes(kind)) {
+                        scanning = true;
+                    } else if (line.includes(other_kind)) {
+                        scanning = false;
+                    } else if (scanning) {
+                        // Line format: a: b
+                        const keyval = line.split(':', 1);
+                        if (keyval.length === 2) {
+                            const key = keyval[0].trim();
+                            const val = keyval[1].trim();
+                            d[key] = val;
+
+                        }
+                    }
                 }
-                line = line.split('#', 1)[0];  // Allow in-line trailing comments
-                if (line.includes('EXTENSIONS')) {
-                    // active_map = extension_map;
-                } else if (line.includes('PROCESSORS')) {
-                    // active_map = processor_map;
-                } else if (line.includes(TERM)) {
-                    // active_map = null;
-                    found_term = true;
-                } else if (found_term) {
+                return d;
+            }
+
+            // Set terminal value.
+            let terminal = '';
+            for (const line of lines) {
+                if (line.includes('Terminal')) {
                     terminal = line;
-                    break;  // Don't process any lines after this
-                } else {
-                    const keyval = line.split(':', 1);
-                    const key = keyval[0].trim();
-                    const val = keyval[1].trim();
-                    // active_map[key] = val;
+                    break;
                 }
             }
+
+            // Set the maps.
+            const processor_map = scan_map('PROCESSORS');
+            const extension_map = scan_map('EXTENSIONS');
             return [processor_map, extension_map, terminal];
         }
         //@+node:felix.20240603233303.8: *4* getExeKind
@@ -763,15 +773,9 @@ export class Commands {
          *
          * If there is a language directive in effect, return it,
          * otherwise use the file extension.
-         *
-         * Returns a language.
          */
-        function getExeKind(pos: Position, ext: string): string {
-            let language = g.getLanguageFromAncestorAtFileNode(c.p) || '';
-            if (!language) {
-                language = LANGUAGE_EXTENSION_MAP[ext] || '';
-            }
-            return language;
+        function getExeKind(ext: string): string {
+            return g.getLanguageFromAncestorAtFileNode(c.p) || LANGUAGE_EXTENSION_MAP[ext] || '';
         }
         //@+node:felix.20240603233303.9: *4* getProcessor
         async function getProcessor(language: string, path: string, extension: string): Promise<string> {
@@ -1028,7 +1032,7 @@ export class Commands {
                 }
             }
             filepath = c.fullPath(root);
-            const language = getExeKind(root, ext);
+            const language = getExeKind(ext);
             const processor = await getProcessor(language, filepath, ext);
             await runfile(filepath, processor, terminal);
         } else {
