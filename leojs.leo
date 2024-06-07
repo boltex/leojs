@@ -4789,10 +4789,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "98ebfb5",
-  "gitBranch": "boltex/issue134",
-  "gitDate": "2024-06-05 22:15:53 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{

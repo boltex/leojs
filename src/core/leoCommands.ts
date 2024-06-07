@@ -1289,7 +1289,7 @@ export class Commands {
 
         if (w_path && w_path !== curDir) {
             try {
-                process.chdir(w_path);
+                process.chdir?.(w_path);
             }
             catch (e) {
                 // pass
@@ -3195,7 +3195,7 @@ export class Commands {
         if (!directory) {
             directory = path.dirname(root_path);
         }
-        process.chdir(directory);
+        process.chdir?.(directory);
 
         try {
             const proc = child_process.spawn(final_command, {
@@ -3215,7 +3215,7 @@ export class Commands {
             if (use_temp && root_pathUri) {
                 await vscode.workspace.fs.delete(root_pathUri);
             }
-            process.chdir(old_dir);
+            process.chdir?.(old_dir);
         }
     }
     //@+node:felix.20211106224948.10: *4* c.setComplexCommand

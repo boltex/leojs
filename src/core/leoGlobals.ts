@@ -1755,7 +1755,7 @@ export async function chdir(p_path: string): Promise<void> {
     const w_exist = await os_path_exists(p_path);
 
     if (w_isDir && w_exist) {
-        process.chdir(p_path);
+        process.chdir?.(p_path);
     }
 }
 //@+node:felix.20230711213447.1: *3* g.mkdir
