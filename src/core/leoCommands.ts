@@ -1122,13 +1122,13 @@ export class Commands {
         }
 
         this.redirectScriptOutput();
-        // oldLog = g.app.log  // TODO : needed ?
+
         try {
-            // log = c.frame.log  // TODO : needed ?
-            // g.app.log = log // TODO : needed ?
+
             if (script.trim()) {
+                // ! IF NOT BROWSER : TODO 
                 // sys.path.insert(0, os.getcwd())
-                // sys.path.insert(0, g.os_path_dirname(c.fileName()))  // per SegundoBob // TODO : needed ?
+                // sys.path.insert(0, g.os_path_dirname(c.fileName()))  // per SegundoBob 
                 script += '\n'; // Make sure we end the script properly.
 
                 // Wrap script as an IIAFE to allow 'await' right out the box.
@@ -1157,17 +1157,16 @@ export class Commands {
                     }
                     g.handleScriptException(c, script_p, e);
                 } finally {
-                    // del sys.path[0]; // TODO : needed ?
-                    // del sys.path[0]; // TODO : needed ?
+                    // ! IF NOT BROWSER : TODO 
+                    // del sys.path[0]; // TODO 
+                    // del sys.path[0]; // TODO 
                 }
             } else {
-                // tabName = log and hasattr(log, 'tabName') and log.tabName or 'Log' // TODO : needed ?
                 g.warning('no script selected');
             }
         } catch (e) {
             // pass
         } finally {
-            // g.app.log = oldLog // TODO : needed ?
             this.unredirectScriptOutput();
         }
     }
@@ -1267,12 +1266,13 @@ export class Commands {
     //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
     public redirectScriptOutput(): void {
         const c: Commands = this;
+        console.log('TODO : redirectScriptOutput');
         if (
             c.exists &&
             c.config.getBool('redirect-execute-script-output-to-log-pane')
         ) {
-            // TODO
-            // ? needed ?
+            // ! TODO !
+
             // g.redirectStdout()  // Redirect stdout
             // g.redirectStderr()  // Redirect stderr
         }
@@ -1281,19 +1281,20 @@ export class Commands {
     public setCurrentDirectoryFromContext(p: Position): void {
         const c: Commands = this;
         const aList = g.get_directives_dict_list(p);
-        const path = c.scanAtPathDirectives(aList);
-        // const curDir = g.os_path_abspath(os.getcwd()); // TODO !
+        const w_path = c.scanAtPathDirectives(aList);
+        console.log('scanAtPathDirectives', w_path);
+        console.log('process.cwd()', process.cwd());
 
-        console.log('TODO : setCurrentDirectoryFromContext');
+        const curDir = g.os_path_abspath(process.cwd());
 
-        // if (path && path !== curDir){
-        //     try{
-        //         os.chdir(path)
-        //     }
-        //    catch (e) {
-        //         // pass
-        //    }
-        // }
+        if (w_path && w_path !== curDir) {
+            try {
+                process.chdir(w_path);
+            }
+            catch (e) {
+                // pass
+            }
+        }
     }
 
     //@+node:felix.20221010233956.5: *4* c.unredirectScriptOutput
@@ -3194,13 +3195,12 @@ export class Commands {
         if (!directory) {
             directory = path.dirname(root_path);
         }
-        const cwd = directory || path.dirname(root_path);
+        process.chdir(directory);
 
         try {
             const proc = child_process.spawn(final_command, {
                 shell: true,
-                stdio: ['pipe', 'pipe', 'pipe'],
-                cwd: cwd
+                stdio: ['pipe', 'pipe', 'pipe']
             });
             proc.stdout.on('data', (data) => {
                 console.log(data.toString());
@@ -3215,6 +3215,7 @@ export class Commands {
             if (use_temp && root_pathUri) {
                 await vscode.workspace.fs.delete(root_pathUri);
             }
+            process.chdir(old_dir);
         }
     }
     //@+node:felix.20211106224948.10: *4* c.setComplexCommand
