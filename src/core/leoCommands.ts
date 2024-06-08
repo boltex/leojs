@@ -1282,8 +1282,6 @@ export class Commands {
         const c: Commands = this;
         const aList = g.get_directives_dict_list(p);
         const w_path = c.scanAtPathDirectives(aList);
-        console.log('scanAtPathDirectives', w_path);
-        console.log('process.cwd()', process.cwd());
 
         const curDir = g.os_path_abspath(process.cwd());
 

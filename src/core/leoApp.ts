@@ -211,6 +211,7 @@ export class LeoApp {
 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
+    public initial_cwd: string = process.cwd(); // For restart-leo.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.
     public LeoIDWarningShown = false; // LEOJS : to prevent second warning. (Original would have exited before)
     public loadedThemes: any[] = []; // List of loaded theme.leo files.

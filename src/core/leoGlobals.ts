@@ -36,45 +36,9 @@ import * as md5Obj from 'md5';
 const dayjsObj = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjsObj.extend(utc);
-
-/*
-    import binascii
-    import codecs
-    from functools import reduce/
-    try:
-        import gc
-    catch ImportError:
-        gc = None
-    try:
-        import gettext
-    catch ImportError:  # does not exist in jython.
-        gettext = None
-    import glob
-    import io
-    StringIO = io.StringIO
-    import importlib
-    import inspect
-    import operator
-    import os
-    #
-    # Do NOT import pdb here!  We shall define pdb as a _function_ below.
-    # import pdb
-    import re
-    import shlex
-    import shutil
-    import string
-    import subprocess
-    import tempfile
-    import time
-    import traceback
-    import types
-    import unittest
-    import urllib
-    import urllib.parse as urlparse
-*/
-
 //@-<< imports >>
-
+//@+<< leoGlobals: global constants >>
+//@+node:felix.20240607225502.1: ** << leoGlobals: global constants >>
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
@@ -87,6 +51,18 @@ export let extensionUri: Uri;
 /** For accessing files in the current workspace */
 export let workspaceUri: Uri;
 
+export let SQL: SqlJsStatic;
+export let pako: typeof pakoObj = pakoObj;
+export let showdown: typeof showdownObj = showdownObj;
+export let JSZip: typeof JSZipObj = JSZipObj;
+export let dayjs: typeof dayjsObj = dayjsObj;
+export let md5: typeof md5Obj = md5Obj;
+
+// The singleton Git extension exposed API
+export let gitAPI: GitAPI.API;
+export let gitBaseAPI: GitBaseAPI.API;
+export let remoteHubAPI: RemoteHubApi;
+//@-<< leoGlobals: global constants >>
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
 // Visible externally so plugins may add to the list of directives.
@@ -259,7 +235,6 @@ export const color_directives_pat = new RegExp(
     'mg'
 );
 
-
 // New in Leo 6.6.4: gnxs must start with 'gnx:'
 // gnx_char = r"""[^.,"'\s]"""  // LeoApp.cleanLeoID() removes these characters.
 // gnx_id = fr"{gnx_char}{{3,}}"  // id's must have at least three characters.
@@ -268,11 +243,9 @@ export const gnx_char = "[^.,\"'\\s]";
 export const gnx_id = `${gnx_char}{3,}`;
 export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`);
 
-
 // Unls end with quotes.
 //unl_regex = re.compile(r"""\bunl:[^`'"]+""")
 export const unl_regex = /\bunl:[^`'"]+/;
-
 
 // Urls end at space or quotes.
 // url_leadins = 'fghmnptw'
@@ -289,17 +262,7 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
 
-export let SQL: SqlJsStatic;
-export let pako: typeof pakoObj = pakoObj;
-export let showdown: typeof showdownObj = showdownObj;
-export let JSZip: typeof JSZipObj = JSZipObj;
-export let dayjs: typeof dayjsObj = dayjsObj;
-export let md5: typeof md5Obj = md5Obj;
 
-// The singleton Git extension exposed API
-export let gitAPI: GitAPI.API;
-export let gitBaseAPI: GitBaseAPI.API;
-export let remoteHubAPI: RemoteHubApi;
 
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript

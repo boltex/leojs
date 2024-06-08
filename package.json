@@ -4504,5 +4504,8 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "which": "^4.0.0"
-  }
+  },
+  "gitCommit": "2681f76",
+  "gitBranch": "boltex/issue134",
+  "gitDate": "2024-06-06 23:38:55 -0400"
 }
