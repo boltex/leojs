@@ -455,6 +455,204 @@ export class GeneralSetting {
         return this.__repr__();
     };
 }
+//@+node:felix.20240608161949.1: *3* class g.RedirectClass & convenience functions
+/**
+ * A class to redirect stdout and stderr to Leo's log pane.
+ */
+class RedirectClass {
+
+    public old: any; // fs.WriteStream | null;
+    public encoding: string;
+
+    //@+<< RedirectClass methods >>
+    //@+node:felix.20240608161949.2: *4* << RedirectClass methods >>
+    //@+others
+    //@+node:felix.20240608161949.3: *5* RedirectClass.__init__
+    constructor() {
+        this.old = undefined;
+        this.encoding = 'utf-8';  // 2019/03/29 For pdb.
+    }
+    //@+node:felix.20240608161949.4: *5* isRedirected
+    public isRedirected(): boolean {
+        return this.old !== null;
+    }
+    //@+node:felix.20240608161949.5: *5* flush
+    //  For LeoN: just for compatibility.
+    public flush(...args: any[]): void {
+        return;
+    }
+    //@+node:felix.20240608161949.6: *5* rawPrint
+    public rawPrint(s: string): void {
+        if (this.old) {
+            this.old(s + '\n');
+            // this.old.write(s + '\n');
+        } else {
+            pr(s);
+        }
+    }
+    //@+node:felix.20240608161949.7: *5* redirect
+    public redirect(stdout: boolean = true): void {
+
+        // TODO : FIND A WAY TO OVERRIDE CONSOLE !
+        // TODO : see  redirectScriptOutput in leoCommands.ts.
+
+        if (app.batchMode) {
+            return;
+        }
+        if (!this.old) {
+            if (stdout) {
+                this.old = console.log;
+                console.log = this.write.bind(this);
+            } else {
+                this.old = console.error;
+                console.error = this.write.bind(this);
+            }
+        }
+        // if (true || isBrowser) {
+        //     if (!this.old) {
+        //         if (stdout) {
+        //             this.old = console.log;
+        //             console.log = this.write.bind(this);
+        //         } else {
+        //             this.old = console.error;
+        //             console.error = this.write.bind(this);
+        //         }
+        //     }
+        // } else {
+        //     if (!this.old) {
+        //         if (stdout) {
+        //             this.old = process.stdout;
+        //             (process.stdout as any).write = this.write.bind(this);
+        //         } else {
+        //             this.old = process.stderr;
+        //             (process.stderr as any).write = this.write.bind(this);
+        //         }
+        //     }
+        // }
+    }
+    //@+node:felix.20240608161949.8: *5* undirect
+    public undirect(stdout: boolean = true): void {
+        if (this.old) {
+            if (stdout) {
+                console.log = this.old;
+                this.old = null;
+            } else {
+                console.error = this.old;
+                this.old = null;
+            }
+        }
+        // if (true || isBrowser) {
+        //     if (this.old) {
+        //         if (stdout) {
+        //             console.log = this.old;
+        //             this.old = null;
+        //         } else {
+        //             console.error = this.old;
+        //             this.old = null;
+        //         }
+        //     }
+        // } else {
+        //     if (this.old) {
+        //         if (stdout) {
+        //             (process.stdout as any).write = this.old.write.bind(this.old);
+        //             this.old = null;
+        //         } else {
+        //             (process.stderr as any).write = this.old.write.bind(this.old);
+        //             this.old = null;
+        //         }
+        //     }
+        // }
+    }
+    //@+node:felix.20240608161949.9: *5* write
+    public write(...args: any[]): void {
+        const s = args.join(' '); // for browser use. (multiple arguments)
+
+        if (this.old) {
+            if (app && app.gui) {
+                app.gui.addLogPaneEntry(s);
+            } else {
+                this.old(s + '\n');
+            }
+        } else {
+            // Can happen when globalThis.batchMode is true
+            pr(s);
+        }
+        // if (true || isBrowser) {
+        //     console.log('write browser');
+        //     if (this.old) {
+        //         if (app && app.gui) {
+        //             app.gui.addLogPaneEntry(s);
+        //         } else {
+        //             this.old(s + '\n');
+        //         }
+        //     } else {
+        //         // Can happen when globalThis.batchMode is true
+        //         pr(s);
+        //     }
+        // } else {
+        //     console.log('write desktop');
+
+        //     if (this.old) {
+        //         if (app && app.gui) {
+        //             app.gui.addLogPaneEntry(s);
+        //         } else {
+        //             this.old.write(s + '\n');
+        //         }
+        //     } else {
+        //         // Can happen when globalThis.batchMode is true
+        //         pr(s);
+        //     }
+        // }
+    }
+    //@-others
+    //@-<< RedirectClass methods >>
+
+}
+
+// Create two redirection objects, one for each stream.
+
+const redirectStdErrObj = new RedirectClass();
+const redirectStdOutObj = new RedirectClass();
+
+//@+<< define convenience methods for redirecting streams >>
+//@+node:felix.20240608161949.10: *4* << define convenience methods for redirecting streams >>
+//@+others
+//@+node:felix.20240608161949.11: *5* redirectStderr & redirectStdout
+/**
+ * Redirect streams to the current log window.
+ */
+export function redirectStderr(): void {
+    redirectStdErrObj.redirect(false);
+}
+export function redirectStdout(): void {
+    redirectStdOutObj.redirect();
+}
+//@+node:felix.20240608161949.12: *5* restoreStderr & restoreStdout
+/**
+ * Restore standard streams.
+ */
+export function restoreStderr(): void {
+    redirectStdErrObj.undirect(false);
+}
+export function restoreStdout(): void {
+    redirectStdOutObj.undirect();
+}
+//@+node:felix.20240608161949.13: *5* stdErrIsRedirected & stdOutIsRedirected
+export function stdErrIsRedirected(): boolean {
+    return redirectStdErrObj.isRedirected();
+}
+export function stdOutIsRedirected(): boolean {
+    return redirectStdOutObj.isRedirected();
+};
+//@+node:felix.20240608161949.14: *5* rawPrint
+/**
+ * Send output to original stdout.
+ */
+export function rawPrint(s: string): void {
+    redirectStdOutObj.rawPrint(s);
+}
+//@-others
+//@-<< define convenience methods for redirecting streams >>
 //@+node:felix.20220213000510.1: *3* class g.SettingsDict
 /**
  * A subclass of dict providing settings-related methods.
@@ -4297,7 +4495,9 @@ export function internalError(...args: any[]): void {
 /**
  * Print all non-keyword args.
  */
-export const pr = console.log;
+export function pr(...args: any[]): void {
+    console.log(...args);
+}
 // TODO : Replace with output to proper 'Leo terminal output'
 // def pr(*args, **keys):
 //     """ Print all non-keyword args."""
@@ -4338,8 +4538,10 @@ export function print_exception(
 /**
  * Print a tracing message
  */
-export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
+export function trace(...args: any[]): void {
+    console.log(...args);
+}
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
 //@+node:felix.20240304235518.1: *3* g.IDDialog

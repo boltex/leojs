@@ -891,7 +891,9 @@ export class Commands {
             }
             for (let name of names) {
                 term = await which(name);
-                if (term) break;
+                if (term) {
+                    break;
+                }
             }
             return term;
         }
@@ -924,8 +926,12 @@ export class Commands {
             //@+node:felix.20240603233303.17: *5* find_ex_arg
             function find_ex_arg(help_msg: string): string {
                 for (let line of help_msg.split('\n')) {
-                    if (line.includes('--command')) return '--command';
-                    if (line.includes('-e')) return '-e';
+                    if (line.includes('--command')) {
+                        return '--command';
+                    }
+                    if (line.includes('-e')) {
+                        return '-e';
+                    }
                     if (line.toLowerCase().includes(EXECUTESTR)) {
                         const fields = line.trim().split(' ');
                         const arg = fields[0].split(',')[0];
@@ -941,14 +947,19 @@ export class Commands {
                 const msg = get_help_message(terminal, cmd);
                 arg = find_ex_arg(msg);
                 if (arg) {
-                    if (arg.startsWith('--')) arg += '=';
-                    else arg += ' ';
+                    if (arg.startsWith('--')) {
+                        arg += '=';
+                    } else {
+                        arg += ' ';
+                    }
                     break;
                 }
             }
             if (!arg) {
                 arg = ' -x ';
-                if (terminal.includes('xterm')) arg = ' -e ';
+                if (terminal.includes('xterm')) {
+                    arg = ' -e ';
+                }
             }
             return arg;
         }
@@ -1055,7 +1066,7 @@ export class Commands {
         runPyflakes: boolean = true
     ): Promise<void> {
         /*
-        Execute a *Leo* script, written in python.
+        Execute a *Leo* script, written in javascript.
         Keyword args:
         args=None               Not None: set script_args in the execution environment.
         p=None                  Get the script from p.b, unless script is given.
@@ -1066,7 +1077,7 @@ export class Commands {
         silent=False            No longer used.
         namespace=None          Not None: execute the script in this namespace.
         raiseFlag=False         True: reraise any exceptions.
-        runPyflakes=True        True: run pyflakes if allowed by setting.
+        runPyflakes=True        True: (Not used in LeoJS) run pyflakes if allowed by setting.
         */
         const c: Commands = this;
 
@@ -1126,7 +1137,7 @@ export class Commands {
         try {
 
             if (script.trim()) {
-                // ! IF NOT BROWSER : TODO 
+                // * Original python: will search for modules when the import statement is used.
                 // sys.path.insert(0, os.getcwd())
                 // sys.path.insert(0, g.os_path_dirname(c.fileName()))  // per SegundoBob 
                 script += '\n'; // Make sure we end the script properly.
@@ -1157,9 +1168,9 @@ export class Commands {
                     }
                     g.handleScriptException(c, script_p, e);
                 } finally {
-                    // ! IF NOT BROWSER : TODO 
-                    // del sys.path[0]; // TODO 
-                    // del sys.path[0]; // TODO 
+                    // * Original python: reverts addition to sys path for python module imports.
+                    // del sys.path[0];
+                    // del sys.path[0];
                 }
             } else {
                 g.warning('no script selected');
@@ -1198,7 +1209,6 @@ export class Commands {
         d['path'] = path;
         d['process'] = process;
         d['child_process'] = child_process;
-
 
         if (define_name) {
             d['__name__'] = define_name;
@@ -1266,15 +1276,15 @@ export class Commands {
     //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
     public redirectScriptOutput(): void {
         const c: Commands = this;
-        console.log('TODO : redirectScriptOutput');
         if (
             c.exists &&
             c.config.getBool('redirect-execute-script-output-to-log-pane')
         ) {
-            // ! TODO !
-
-            // g.redirectStdout()  // Redirect stdout
-            // g.redirectStderr()  // Redirect stderr
+            // TODO : FIND A WAY TO OVERRIDE CONSOLE !
+            g.es("LeoJS Warning: 'redirect-execute-script-output-to-log-pane' option is not yet supported.");
+            return;
+            g.redirectStdout();  // Redirect stdout
+            g.redirectStderr();  // Redirect stderr
         }
     }
     //@+node:felix.20221010233956.4: *4* c.setCurrentDirectoryFromContext
@@ -1282,9 +1292,7 @@ export class Commands {
         const c: Commands = this;
         const aList = g.get_directives_dict_list(p);
         const w_path = c.scanAtPathDirectives(aList);
-
         const curDir = g.os_path_abspath(process.cwd());
-
         if (w_path && w_path !== curDir) {
             try {
                 process.chdir?.(w_path);
@@ -1302,10 +1310,8 @@ export class Commands {
             c.exists &&
             c.config.getBool('redirect-execute-script-output-to-log-pane')
         ) {
-            // TODO
-            // ? needed ?
-            // g.restoreStderr()
-            // g.restoreStdout()
+            g.restoreStderr();
+            g.restoreStdout();
         }
     }
     //@+node:felix.20210215185050.1: *3* c.API

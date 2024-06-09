@@ -3025,9 +3025,6 @@ export class FileCommands {
         const w_windowInfo = c.frame.get_window_info();
         const [w, h, left, t] = w_windowInfo;
 
-        // TODO : FIX THIS!
-        console.log('putGlobals saving window geom to db : ', w_windowInfo);
-
         c.db['window_position'] = [t.toString(), left.toString(), h.toString(), w.toString()];
 
         if (trace) {
