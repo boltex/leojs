@@ -2704,17 +2704,6 @@ export class Commands {
         const aList = g.get_directives_dict_list(p);
         const w_path = c.scanAtPathDirectives(aList);
         return g.finalize_join(w_path, p.anyAtFileNodeName());
-        // for (let p of p_p.self_and_parents(false)) {
-        //     const aList: any[] = g.get_directives_dict_list(p);
-        //     const w_path: string = this.scanAtPathDirectives(aList);
-        //     let fn: string = simulate ? p.h : p.anyAtFileNodeName();
-        //     //fn = p.h if simulate else p.anyAtFileNodeName()
-        //     // Use p.h for unit tests.
-        //     if (fn) {
-        //         return g.finalize_join(w_path, fn);
-        //     }
-        // }
-        // return '';
     }
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
@@ -3315,56 +3304,6 @@ export class Commands {
         w_path = g.os_path_expanduser(w_path);
         w_path = g.os_path_expandvars(w_path);
         return w_path;
-
-        // ! OLD INSECURE IMPLEMENTATION !
-
-        // const c: Commands = this;
-
-        // if (!s) {
-        //     return '';
-        // }
-        // s = g.toUnicode(s);
-
-        // // find and replace repeated path expressions
-        // let previ: number = 0;
-        // const aList: string[] = [];
-
-        // while (previ < s.length) {
-        //     const i = s.indexOf('{{', previ);
-        //     const j = s.indexOf('}}', previ);
-        //     if (-1 < i && i < j) {
-        //         // Add anything from previous index up to '{{'
-        //         if (previ < i) {
-        //             aList.push(s.substring(previ, i));
-        //         }
-        //         // Get expression and find substitute
-        //         const exp: string = s.substring(i + 2, j).trim();
-        //         if (exp) {
-        //             try {
-        //                 const s2 = c.replace_path_expression(exp);
-        //                 aList.push(s2);
-        //             } catch (exception) {
-        //                 g.es(
-        //                     `Exception evaluating {{ ${exp} }} in ${s.trim()}`
-        //                 );
-        //                 g.es_exception(exception, c);
-        //             }
-        //         }
-        //         // Prepare to search again after the last '}}'
-        //         previ = j + 2;
-        //     } else {
-        //         // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
-        //         aList.push(s.substring(previ));
-        //         break;
-        //     }
-        // }
-
-        // let val: string = aList.join('');
-        // if (g.isWindows) {
-        //     val = val.split('\\').join('/');
-        // }
-
-        // return val;
     }
     //@+node:felix.20220102021736.2: *4* c.replace_path_expression
     /**
