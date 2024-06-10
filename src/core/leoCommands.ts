@@ -793,8 +793,6 @@ export class Commands {
             }
             if (processor) {
                 let proc = '';
-                const pathDelimiter = process.platform === 'win32' ? ';' : ':';
-                const directories = process.env.PATH?.split(pathDelimiter);
                 try {
                     // proc = await which(processor);
                     proc = await isExecutableInPath(processor);
@@ -893,19 +891,29 @@ export class Commands {
         //@+node:felix.20240603233303.12: *4* getTerminal
         //@+others
         //@+node:felix.20240603233303.13: *5* getTerminalFromDirectory
-
-        function getTerminalFromDirectory(dir: string): string {
+        async function getTerminalFromDirectory(dir: string): Promise<string> {
             const BAD_NAMES = ['xdg-terminal', 'setterm', 'ppmtoterm', 'koi8rxterm', 'rofi-sensible-terminal', 'x-terminal-emulator'];
             const TERM_STRINGS = ['*-terminal', '*term'];
+
             for (let ts of TERM_STRINGS) {
                 const cmd = `find ${dir} -type f -name ${ts}`;
-                const proc = child_process.execSync(cmd, { encoding: 'utf-8' });
-                const terminals = proc.split('\n');
-                for (let t of terminals) {
-                    const bare_term = t.split('/').pop() || "";
-                    if (!BAD_NAMES.includes(bare_term)) {
-                        return t;
+                try {
+                    const terminals = await new Promise<string>((resolve, reject) => {
+                        child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                            if (error) {
+                                return reject(stderr);
+                            }
+                            resolve(stdout);
+                        });
+                    });
+                    for (let t of terminals.split('\n')) {
+                        const bare_term = t.split('/').pop() || "";
+                        if (!BAD_NAMES.includes(bare_term)) {
+                            return t;
+                        }
                     }
+                } catch (error) {
+                    console.error(`Error executing command ${cmd}:`, error);
                 }
             }
             return '';
@@ -939,17 +947,25 @@ export class Commands {
          * First, try "--help".  If that fails, see try "--help-all".  If neither
          * has an argument or switch for "Execute", give up and assume the arg is "-x".
          */
-        function getTermExecuteCmd(terminal: string): string {
+        async function getTermExecuteCmd(terminal: string): Promise<string> {
             const HELP_CMDS = ['-h', '--help', '--help-all'];
             const EXECUTESTR = 'execute';
 
             //@+others
             //@+node:felix.20240603233303.16: *5* get_help_message
-            function get_help_message(terminal: string, help_cmd: string): string {
+            function get_help_message(terminal: string, help_cmd: string): Promise<string> {
                 const cmd = `${terminal} ${help_cmd}`;
-                const proc = child_process.execSync(cmd, { encoding: 'utf-8' });
-                return proc;
+                return new Promise((resolve, reject) => {
+                    child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                        if (error) {
+                            // return reject(stderr);
+                            resolve('');
+                        }
+                        resolve(stdout);
+                    });
+                });
             }
+
             //@+node:felix.20240603233303.17: *5* find_ex_arg
             function find_ex_arg(help_msg: string): string {
                 for (let line of help_msg.split('\n')) {
@@ -971,7 +987,7 @@ export class Commands {
 
             let arg = '';
             for (let cmd of HELP_CMDS) {
-                const msg = get_help_message(terminal, cmd);
+                const msg = await get_help_message(terminal, cmd);
                 arg = find_ex_arg(msg);
                 if (arg) {
                     if (arg.startsWith('--')) {
@@ -1002,7 +1018,13 @@ export class Commands {
         }
         //@+node:felix.20240603233303.19: *4* runFile
         async function runfile(fullpath: string, processor: string, terminal: string): Promise<void> {
-            const direc = os.homedir() + path.dirname(fullpath);
+            // direc: str = os.path.expanduser(os.path.dirname(fullpath))
+            let direc = path.dirname(fullpath);
+            let child;
+            if (direc.startsWith('~')) {
+                direc = path.join(os.homedir(), direc.slice(1));
+            }
+
             if (g.isWindows) {
                 fullpath = fullpath.replace('/', '\\');
                 let cmd = '';
@@ -1016,21 +1038,26 @@ export class Commands {
                     g.es('Unknown processor', fullpath);
                     return;
                 }
-                child_process.exec(cmd);
+                child = child_process.exec(cmd);
+                child.unref();
             } else if (g.isMac) {
                 g.es('Cannot launch external files on a Mac yet');
             } else {
                 fullpath = fullpath.replace('\\', '/');
-                const w_gotTerminal = await getTerminal();
-                const term = terminal || w_gotTerminal;
+                let term;
+                if (terminal) {
+                    term = terminal;
+                } else {
+                    term = await getTerminal();
+                }
                 if (!term) {
                     g.es('Cannot find a terminal to launch the external file');
                     g.es(`You can specify a terminal in an "@data ${MAP_SETTING_NODE}" setting node`);
                     g.es('  ', SETTINGS_HELP);
                     return;
                 }
-                const shell_name = getShell();
-                const execute_arg = getTermExecuteCmd(term);
+                const shell_name = await getShell();
+                const execute_arg = await getTermExecuteCmd(term);
                 let cmd = '';
                 const hasShebang = await checkShebang(fullpath);
                 if (!processor && hasShebang) {
@@ -1041,7 +1068,9 @@ export class Commands {
                     g.es(`No processor for ${fullpath}`);
                     return;
                 }
-                child_process.exec(cmd);
+
+                child = child_process.exec(cmd);
+                child.unref();
             }
         }
         //@-others
