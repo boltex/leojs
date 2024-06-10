@@ -36,45 +36,9 @@ import * as md5Obj from 'md5';
 const dayjsObj = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjsObj.extend(utc);
-
-/*
-    import binascii
-    import codecs
-    from functools import reduce/
-    try:
-        import gc
-    catch ImportError:
-        gc = None
-    try:
-        import gettext
-    catch ImportError:  # does not exist in jython.
-        gettext = None
-    import glob
-    import io
-    StringIO = io.StringIO
-    import importlib
-    import inspect
-    import operator
-    import os
-    #
-    # Do NOT import pdb here!  We shall define pdb as a _function_ below.
-    # import pdb
-    import re
-    import shlex
-    import shutil
-    import string
-    import subprocess
-    import tempfile
-    import time
-    import traceback
-    import types
-    import unittest
-    import urllib
-    import urllib.parse as urlparse
-*/
-
 //@-<< imports >>
-
+//@+<< leoGlobals: global constants >>
+//@+node:felix.20240607225502.1: ** << leoGlobals: global constants >>
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
@@ -87,6 +51,18 @@ export let extensionUri: Uri;
 /** For accessing files in the current workspace */
 export let workspaceUri: Uri;
 
+export let SQL: SqlJsStatic;
+export let pako: typeof pakoObj = pakoObj;
+export let showdown: typeof showdownObj = showdownObj;
+export let JSZip: typeof JSZipObj = JSZipObj;
+export let dayjs: typeof dayjsObj = dayjsObj;
+export let md5: typeof md5Obj = md5Obj;
+
+// The singleton Git extension exposed API
+export let gitAPI: GitAPI.API;
+export let gitBaseAPI: GitBaseAPI.API;
+export let remoteHubAPI: RemoteHubApi;
+//@-<< leoGlobals: global constants >>
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
 // Visible externally so plugins may add to the list of directives.
@@ -259,7 +235,6 @@ export const color_directives_pat = new RegExp(
     'mg'
 );
 
-
 // New in Leo 6.6.4: gnxs must start with 'gnx:'
 // gnx_char = r"""[^.,"'\s]"""  // LeoApp.cleanLeoID() removes these characters.
 // gnx_id = fr"{gnx_char}{{3,}}"  // id's must have at least three characters.
@@ -268,11 +243,9 @@ export const gnx_char = "[^.,\"'\\s]";
 export const gnx_id = `${gnx_char}{3,}`;
 export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`);
 
-
 // Unls end with quotes.
 //unl_regex = re.compile(r"""\bunl:[^`'"]+""")
 export const unl_regex = /\bunl:[^`'"]+/;
-
 
 // Urls end at space or quotes.
 // url_leadins = 'fghmnptw'
@@ -289,17 +262,7 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
 
-export let SQL: SqlJsStatic;
-export let pako: typeof pakoObj = pakoObj;
-export let showdown: typeof showdownObj = showdownObj;
-export let JSZip: typeof JSZipObj = JSZipObj;
-export let dayjs: typeof dayjsObj = dayjsObj;
-export let md5: typeof md5Obj = md5Obj;
 
-// The singleton Git extension exposed API
-export let gitAPI: GitAPI.API;
-export let gitBaseAPI: GitBaseAPI.API;
-export let remoteHubAPI: RemoteHubApi;
 
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript
@@ -492,6 +455,204 @@ export class GeneralSetting {
         return this.__repr__();
     };
 }
+//@+node:felix.20240608161949.1: *3* class g.RedirectClass & convenience functions
+/**
+ * A class to redirect stdout and stderr to Leo's log pane.
+ */
+class RedirectClass {
+
+    public old: any; // fs.WriteStream | null;
+    public encoding: string;
+
+    //@+<< RedirectClass methods >>
+    //@+node:felix.20240608161949.2: *4* << RedirectClass methods >>
+    //@+others
+    //@+node:felix.20240608161949.3: *5* RedirectClass.__init__
+    constructor() {
+        this.old = undefined;
+        this.encoding = 'utf-8';  // 2019/03/29 For pdb.
+    }
+    //@+node:felix.20240608161949.4: *5* isRedirected
+    public isRedirected(): boolean {
+        return this.old !== null;
+    }
+    //@+node:felix.20240608161949.5: *5* flush
+    //  For LeoN: just for compatibility.
+    public flush(...args: any[]): void {
+        return;
+    }
+    //@+node:felix.20240608161949.6: *5* rawPrint
+    public rawPrint(s: string): void {
+        if (this.old) {
+            this.old(s + '\n');
+            // this.old.write(s + '\n');
+        } else {
+            pr(s);
+        }
+    }
+    //@+node:felix.20240608161949.7: *5* redirect
+    public redirect(stdout: boolean = true): void {
+
+        // TODO : FIND A WAY TO OVERRIDE CONSOLE !
+        // TODO : see  redirectScriptOutput in leoCommands.ts.
+
+        if (app.batchMode) {
+            return;
+        }
+        if (!this.old) {
+            if (stdout) {
+                this.old = console.log;
+                console.log = this.write.bind(this);
+            } else {
+                this.old = console.error;
+                console.error = this.write.bind(this);
+            }
+        }
+        // if (true || isBrowser) {
+        //     if (!this.old) {
+        //         if (stdout) {
+        //             this.old = console.log;
+        //             console.log = this.write.bind(this);
+        //         } else {
+        //             this.old = console.error;
+        //             console.error = this.write.bind(this);
+        //         }
+        //     }
+        // } else {
+        //     if (!this.old) {
+        //         if (stdout) {
+        //             this.old = process.stdout;
+        //             (process.stdout as any).write = this.write.bind(this);
+        //         } else {
+        //             this.old = process.stderr;
+        //             (process.stderr as any).write = this.write.bind(this);
+        //         }
+        //     }
+        // }
+    }
+    //@+node:felix.20240608161949.8: *5* undirect
+    public undirect(stdout: boolean = true): void {
+        if (this.old) {
+            if (stdout) {
+                console.log = this.old;
+                this.old = null;
+            } else {
+                console.error = this.old;
+                this.old = null;
+            }
+        }
+        // if (true || isBrowser) {
+        //     if (this.old) {
+        //         if (stdout) {
+        //             console.log = this.old;
+        //             this.old = null;
+        //         } else {
+        //             console.error = this.old;
+        //             this.old = null;
+        //         }
+        //     }
+        // } else {
+        //     if (this.old) {
+        //         if (stdout) {
+        //             (process.stdout as any).write = this.old.write.bind(this.old);
+        //             this.old = null;
+        //         } else {
+        //             (process.stderr as any).write = this.old.write.bind(this.old);
+        //             this.old = null;
+        //         }
+        //     }
+        // }
+    }
+    //@+node:felix.20240608161949.9: *5* write
+    public write(...args: any[]): void {
+        const s = args.join(' '); // for browser use. (multiple arguments)
+
+        if (this.old) {
+            if (app && app.gui) {
+                app.gui.addLogPaneEntry(s);
+            } else {
+                this.old(s + '\n');
+            }
+        } else {
+            // Can happen when globalThis.batchMode is true
+            pr(s);
+        }
+        // if (true || isBrowser) {
+        //     console.log('write browser');
+        //     if (this.old) {
+        //         if (app && app.gui) {
+        //             app.gui.addLogPaneEntry(s);
+        //         } else {
+        //             this.old(s + '\n');
+        //         }
+        //     } else {
+        //         // Can happen when globalThis.batchMode is true
+        //         pr(s);
+        //     }
+        // } else {
+        //     console.log('write desktop');
+
+        //     if (this.old) {
+        //         if (app && app.gui) {
+        //             app.gui.addLogPaneEntry(s);
+        //         } else {
+        //             this.old.write(s + '\n');
+        //         }
+        //     } else {
+        //         // Can happen when globalThis.batchMode is true
+        //         pr(s);
+        //     }
+        // }
+    }
+    //@-others
+    //@-<< RedirectClass methods >>
+
+}
+
+// Create two redirection objects, one for each stream.
+
+const redirectStdErrObj = new RedirectClass();
+const redirectStdOutObj = new RedirectClass();
+
+//@+<< define convenience methods for redirecting streams >>
+//@+node:felix.20240608161949.10: *4* << define convenience methods for redirecting streams >>
+//@+others
+//@+node:felix.20240608161949.11: *5* redirectStderr & redirectStdout
+/**
+ * Redirect streams to the current log window.
+ */
+export function redirectStderr(): void {
+    redirectStdErrObj.redirect(false);
+}
+export function redirectStdout(): void {
+    redirectStdOutObj.redirect();
+}
+//@+node:felix.20240608161949.12: *5* restoreStderr & restoreStdout
+/**
+ * Restore standard streams.
+ */
+export function restoreStderr(): void {
+    redirectStdErrObj.undirect(false);
+}
+export function restoreStdout(): void {
+    redirectStdOutObj.undirect();
+}
+//@+node:felix.20240608161949.13: *5* stdErrIsRedirected & stdOutIsRedirected
+export function stdErrIsRedirected(): boolean {
+    return redirectStdErrObj.isRedirected();
+}
+export function stdOutIsRedirected(): boolean {
+    return redirectStdOutObj.isRedirected();
+};
+//@+node:felix.20240608161949.14: *5* rawPrint
+/**
+ * Send output to original stdout.
+ */
+export function rawPrint(s: string): void {
+    redirectStdOutObj.rawPrint(s);
+}
+//@-others
+//@-<< define convenience methods for redirecting streams >>
 //@+node:felix.20220213000510.1: *3* class g.SettingsDict
 /**
  * A subclass of dict providing settings-related methods.
@@ -1755,7 +1916,7 @@ export async function chdir(p_path: string): Promise<void> {
     const w_exist = await os_path_exists(p_path);
 
     if (w_isDir && w_exist) {
-        process.chdir(p_path);
+        process.chdir?.(p_path);
     }
 }
 //@+node:felix.20230711213447.1: *3* g.mkdir
@@ -4334,7 +4495,9 @@ export function internalError(...args: any[]): void {
 /**
  * Print all non-keyword args.
  */
-export const pr = console.log;
+export function pr(...args: any[]): void {
+    console.log(...args);
+}
 // TODO : Replace with output to proper 'Leo terminal output'
 // def pr(*args, **keys):
 //     """ Print all non-keyword args."""
@@ -4375,8 +4538,10 @@ export function print_exception(
 /**
  * Print a tracing message
  */
-export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
+export function trace(...args: any[]): void {
+    console.log(...args);
+}
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
 //@+node:felix.20240304235518.1: *3* g.IDDialog
@@ -4940,7 +5105,7 @@ export function os_path_dirname(p_path?: string): string {
  */
 export async function os_path_exists(
     p_path?: string
-): Promise<boolean | FileStat> {
+): Promise<false | FileStat> {
     if (!p_path) {
         return false;
     }
@@ -5680,6 +5845,58 @@ export function python_tokenize(s: string): [string, string, number][] {
 }
 
 //@+node:felix.20211104211229.1: ** g.Scripting
+//@+node:felix.20240602151912.1: *3* g.execute_shell_commands
+/**
+ * Execute each shell command in a separate process.
+ * Wait for each command to complete, except those starting with '&'
+ */
+export async function execute_shell_commands(commands: string | string[], p_trace: boolean = false): Promise<void> {
+
+    if (isBrowser) {
+        es('\'g.execute_shell_commands\' Command not available on the web');
+        return;
+    }
+
+    if (typeof commands === 'string') {
+        commands = [commands];
+    }
+
+    for (const command of commands) {
+
+        let wait = !command.startsWith('&');
+
+        if (p_trace) {
+            trace(`Trace: ${command}`);
+        }
+
+        let cmd = command;
+        if (command.startsWith('&')) {
+            cmd = command.substring(1).trim();
+        }
+
+        if (wait) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const proc = child.exec(cmd, {}, (error, stdout, stderr) => {
+                        if (error) {
+                            reject(`Command failed: ${stderr}`);
+                        } else {
+                            resolve(undefined);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error(`Command failed with error: ${error}`);
+            }
+        } else {
+            const proc = child.spawn(cmd, { shell: true, stdio: 'inherit' });
+            proc.on('error', (error) => {
+                console.error(`Command failed with error: ${error}`);
+            });
+        }
+
+    };
+}
 //@+node:felix.20221219205826.1: *3* g.getScript & helpers
 /**
  * Return the expansion of the selected text of node p.

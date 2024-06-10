@@ -18568,6 +18568,7 @@ private _refreshCommanderDetachedLanguage(): void {
 - Improved some keyboard shortcuts and the related README documentation section.
 - Fixed 'reload-setting' command so that it calls the reloadSettings method of subCommanders.
 - Implemented the new find-def command behavior along with the 'prefer-nav-pane' config setting support.
+- Implemented 'execute-general-script' and 'execute-external-file' commands.
 
 </t>
 <t tx="felix.20240518222453.1">/**
