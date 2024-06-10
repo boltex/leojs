@@ -5105,7 +5105,7 @@ export function os_path_dirname(p_path?: string): string {
  */
 export async function os_path_exists(
     p_path?: string
-): Promise<boolean | FileStat> {
+): Promise<false | FileStat> {
     if (!p_path) {
         return false;
     }

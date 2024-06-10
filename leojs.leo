@@ -4789,10 +4789,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "594597f",
-  "gitBranch": "boltex/issue134",
-  "gitDate": "2024-06-08 01:13:24 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6937,7 +6934,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/uuid": "^9.0.7",
 "@types/vscode": "^1.86.0",
 "@types/webpack-env": "^1.16.3",
-"@types/which": "^3.0.4",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
@@ -6974,8 +6970,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
 "showdown": "^2.1.0",
-"stream": "^0.0.2",
-"which": "^4.0.0"
+"stream": "^0.0.2"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showSettingsPage",
@@ -18573,6 +18568,7 @@ private _refreshCommanderDetachedLanguage(): void {
 - Improved some keyboard shortcuts and the related README documentation section.
 - Fixed 'reload-setting' command so that it calls the reloadSettings method of subCommanders.
 - Implemented the new find-def command behavior along with the 'prefer-nav-pane' config setting support.
+- Implemented 'execute-general-script' and 'execute-external-file' commands.
 
 </t>
 <t tx="felix.20240518222453.1">/**

@@ -46,7 +46,6 @@ import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
 import * as typescript from 'typescript';
-import * as which from 'which';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -778,27 +777,55 @@ export class Commands {
             return g.getLanguageFromAncestorAtFileNode(c.p) || LANGUAGE_EXTENSION_MAP[ext] || '';
         }
         //@+node:felix.20240603233303.9: *4* getProcessor
-        async function getProcessor(language: string, path: string, extension: string): Promise<string> {
+        async function getProcessor(language: string, p_path: string, extension: string): Promise<string> {
             let processor = '';
             if (language === 'python') {
                 processor = process.execPath;
             } else {
-                if (process.platform === 'win32' && language === 'shell') {
+                if (g.isWindows && language === 'shell') {
                     return 'cmd.exe';
                 }
                 processor = PROCESSORS[language] || '';
-                if (!processor && process.platform === 'win32') {
+                if (!processor && g.isWindows) {
                     const ftype = await get_win_assoc(extension);
                     processor = await get_win_processor(ftype);
                 }
             }
             if (processor) {
-                const proc = await which(processor);
+                let proc = '';
+                const pathDelimiter = process.platform === 'win32' ? ';' : ':';
+                const directories = process.env.PATH?.split(pathDelimiter);
+                try {
+                    // proc = await which(processor);
+                    proc = await isExecutableInPath(processor);
+                } catch (error: any) {
+                    console.error(`Error finding executable for processor: ${processor}.`, error);
+                    // Handle the error or rejection here, such as returning a default value or throwing a custom error
+                }
+
                 if (!proc) {
                     processor = '';
                 }
             }
             return processor;
+        }
+        //@+node:felix.20240609215950.1: *4* isExecutableInPath
+        async function isExecutableInPath(executableName: string): Promise<string> {
+
+            const pathDelimiter = g.isWindows ? ';' : ':';
+            const directories = process.env.PATH?.split(pathDelimiter) || [];
+            const fileExtensions = g.isWindows ? ['.exe', '.cmd', '.bat'] : [''];
+
+            for (const directory of directories) {
+                for (const extension of fileExtensions) {
+                    const fullPath = path.join(directory, `${executableName}${extension}`);
+                    const w_exists = await g.os_path_exists(fullPath);
+                    if (w_exists && w_exists.type !== vscode.FileType.Directory) {
+                        return fullPath;
+                    }
+                }
+            }
+            return '';
         }
         //@+node:felix.20240603233303.10: *4* Get Windows File Associations
         /**
@@ -811,7 +838,7 @@ export class Commands {
             return new Promise((resolve, reject) => {
                 child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
                     if (error) {
-                        return reject(stderr);
+                        resolve('');
                     }
                     const filetype = stdout.split('=')[1] || '';
                     resolve(filetype);
@@ -839,11 +866,11 @@ export class Commands {
             return new Promise((resolve, reject) => {
                 child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
                     if (error) {
-                        return reject(stderr);
+                        resolve('');
                     }
                     const ftype_str = stdout || 'none';
                     if (!ftype_str) {
-                        return resolve('');
+                        resolve('');
                     }
                     const prog_str = ftype_str.split('=')[1];
                     resolve(prog_str.split('"')[1]);
@@ -854,7 +881,7 @@ export class Commands {
         async function getShell(): Promise<string> {
             //  Prefer bash unless it is not present - we know its options' names
             let shell = 'bash';
-            const has_bash = await which(shell);
+            const has_bash = await isExecutableInPath(shell);
             if (!has_bash) {
                 // Need bare shell name, not whole path
                 let processShell = process.env.SHELL || "";
@@ -890,7 +917,7 @@ export class Commands {
                 names = [names];
             }
             for (let name of names) {
-                term = await which(name);
+                term = await isExecutableInPath(name);
                 if (term) {
                     break;
                 }
@@ -976,7 +1003,7 @@ export class Commands {
         //@+node:felix.20240603233303.19: *4* runFile
         async function runfile(fullpath: string, processor: string, terminal: string): Promise<void> {
             const direc = os.homedir() + path.dirname(fullpath);
-            if (process.platform === 'win32') {
+            if (g.isWindows) {
                 fullpath = fullpath.replace('/', '\\');
                 let cmd = '';
                 if (processor) {
@@ -986,18 +1013,18 @@ export class Commands {
                         cmd = `start cmd.exe /k ${processor} ${fullpath}`;
                     }
                 } else {
-                    g.es('Unknown processor', fullpath, { color: 'red' });
+                    g.es('Unknown processor', fullpath);
                     return;
                 }
                 child_process.exec(cmd);
-            } else if (process.platform === 'darwin') {
-                g.es('Cannot launch external files on a Mac yet', { color: 'red' });
+            } else if (g.isMac) {
+                g.es('Cannot launch external files on a Mac yet');
             } else {
                 fullpath = fullpath.replace('\\', '/');
                 const w_gotTerminal = await getTerminal();
                 const term = terminal || w_gotTerminal;
                 if (!term) {
-                    g.es('Cannot find a terminal to launch the external file', { color: 'red' });
+                    g.es('Cannot find a terminal to launch the external file');
                     g.es(`You can specify a terminal in an "@data ${MAP_SETTING_NODE}" setting node`);
                     g.es('  ', SETTINGS_HELP);
                     return;
@@ -1011,7 +1038,7 @@ export class Commands {
                 } else if (processor) {
                     cmd = `${term} ${execute_arg}"${shell_name} -c 'cd ${direc};${processor} ${fullpath} ;read'" `;
                 } else {
-                    g.es(`No processor for ${fullpath}`, { color: 'red' });
+                    g.es(`No processor for ${fullpath}`);
                     return;
                 }
                 child_process.exec(cmd);
@@ -1036,7 +1063,7 @@ export class Commands {
             const ext = path.extname(filepath);
             const setting_terminal = terminal;
             if (setting_terminal) {
-                terminal = await which(terminal);
+                terminal = await isExecutableInPath(terminal);
                 if (!terminal) {
                     g.es(`Cannot find terminal specified in setting: ${setting_terminal}`);
                     g.es('Trying an alternative');
@@ -1047,7 +1074,7 @@ export class Commands {
             const processor = await getProcessor(language, filepath, ext);
             await runfile(filepath, processor, terminal);
         } else {
-            g.es('Cannot find an @- file', { color: 'red' });
+            g.es('Cannot find an @- file');
         }
 
     }
@@ -2893,8 +2920,7 @@ export class Commands {
         if (fn) {
             absbase = g.os_path_dirname(fn);
         } else {
-            // TODO !
-            absbase = ""; //  g.os_getcwd(); // ! FIX THIS !
+            absbase = process.cwd();
         }
         // Look for @path directives.
         const w_paths: string[] = [];
