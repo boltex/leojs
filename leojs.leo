@@ -4739,7 +4739,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
-  "description": "LeoJS — The literate editor with outline javascript implementation",
+  "description": "LeoJS — The literate editor with outline javaScript implementation",
   "version": "0.2.14",
   "publisher": "boltex",
   "author": {
@@ -11390,6 +11390,96 @@ private _setTreeViewTitle(p_title?: string): void {
     "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
   },
   {
+    "id": "leojsbody.julia",
+    "aliases": [
+      "Leo Body Julia",
+      "leojsbody.julia"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.julia.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.julia.wrap",
+    "aliases": [
+      "Leo Body Julia",
+      "leojsbody.julia"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.julia.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.batch",
+    "aliases": [
+      "Leo Body Batch",
+      "leojsbody.batch"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.batch.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.batch.wrap",
+    "aliases": [
+      "Leo Body Batch",
+      "leojsbody.batch"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.batch.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.shell",
+    "aliases": [
+      "Leo Body Shell",
+      "leojsbody.shell"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.shell.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.shell.wrap",
+    "aliases": [
+      "Leo Body Shell",
+      "leojsbody.shell"
+    ],
+    "extensions": [
+      ""
+    ],
+    "icon": {
+      "light": "resources/light/body-pane.svg",
+      "dark": "resources/dark/body-pane.svg"
+    },
+    "configuration": "./language-configurations/leojsbody.shell.language-configuration.json"
+  },
+  {
     "id": "leojsbody.python",
     "aliases": [
       "Leo Body Python",
@@ -11883,6 +11973,36 @@ private _setTreeViewTitle(p_title?: string): void {
     "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
   },
   {
+    "language": "leojsbody.julia",
+    "scopeName": "source.leojsbody.julia",
+    "path": "./syntaxes/leojsbody.julia.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.julia.wrap",
+    "scopeName": "source.leojsbody.julia",
+    "path": "./syntaxes/leojsbody.julia.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.batch",
+    "scopeName": "source.leojsbody.batch",
+    "path": "./syntaxes/leojsbody.batch.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.batch.wrap",
+    "scopeName": "source.leojsbody.batch",
+    "path": "./syntaxes/leojsbody.batch.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.shell",
+    "scopeName": "source.leojsbody.shell",
+    "path": "./syntaxes/leojsbody.shell.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.shell.wrap",
+    "scopeName": "source.leojsbody.shell",
+    "path": "./syntaxes/leojsbody.shell.tmLanguage.json"
+  },
+  {
     "language": "leojsbody.python",
     "scopeName": "source.leojsbody.python",
     "path": "./syntaxes/leojsbody.python.tmLanguage.json"
@@ -12044,6 +12164,7 @@ private _setTreeViewTitle(p_title?: string): void {
   },
   {
     "injectTo": [
+      "source.leojsbody.batch",
       "source.leojsbody.c",
       "source.leojsbody.cpp",
       "source.leojsbody.css",
@@ -12053,14 +12174,17 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.java",
       "source.leojsbody.javascript",
       "source.leojsbody.json",
+      "source.leojsbody.julia",
       "source.leojsbody.markdown",
       "source.leojsbody.php",
       "source.leojsbody.plain",
       "source.leojsbody.python",
       "source.leojsbody.restructuredtext",
       "source.leojsbody.rust",
+      "source.leojsbody.shell",
       "source.leojsbody.typescript",
       "source.leojsbody.xml",
+      "source.leojsbody.batch.wrap",
       "source.leojsbody.c.wrap",
       "source.leojsbody.cpp.wrap",
       "source.leojsbody.css.wrap",
@@ -12070,12 +12194,14 @@ private _setTreeViewTitle(p_title?: string): void {
       "source.leojsbody.java.wrap",
       "source.leojsbody.javascript.wrap",
       "source.leojsbody.json.wrap",
+      "source.leojsbody.julia.wrap",
       "source.leojsbody.markdown.wrap",
       "source.leojsbody.php.wrap",
       "source.leojsbody.plain.wrap",
       "source.leojsbody.python.wrap",
       "source.leojsbody.restructuredtext.wrap",
       "source.leojsbody.rust.wrap",
+      "source.leojsbody.shell.wrap",
       "source.leojsbody.typescript.wrap",
       "source.leojsbody.xml.wrap"
     ],
@@ -16917,6 +17043,9 @@ public setWorkspaceSession(unls: string[]): Thenable&lt;void&gt; {
  */
 public static LANGUAGES = [
     "plain",
+    "julia",
+    "batch",
+    "shell",
     "python",
     "javascript",
     "typescript",
