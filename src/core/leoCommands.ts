@@ -816,7 +816,12 @@ export class Commands {
 
             for (const directory of directories) {
                 for (const extension of fileExtensions) {
-                    const fullPath = path.join(directory, `${executableName}${extension}`);
+                    let fullPath;
+                    if (g.isWindows && !executableName.endsWith(extension)) {
+                        fullPath = path.join(directory, `${executableName}${extension}`);
+                    } else {
+                        fullPath = path.join(directory, executableName); // Already ends with that extension.
+                    }
                     const w_exists = await g.os_path_exists(fullPath);
                     if (w_exists && w_exists.type !== vscode.FileType.Directory) {
                         return fullPath;
