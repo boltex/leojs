@@ -3849,6 +3849,12 @@
           "when": "leojsTreeOpened && viewItem =~ /^leojsUndoNode/",
           "group": "leojsUndosContext1@1"
         }
+      ],
+      "file/newFile": [
+        {
+          "command": "leojs.newLeoFile",
+          "group": "file"
+        }
       ]
     },
     "keybindings": [

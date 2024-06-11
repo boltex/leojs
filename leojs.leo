@@ -544,6 +544,7 @@
 <v t="felix.20220517203332.1"><vh>at buttons</vh></v>
 <v t="felix.20221213210705.1"><vh>undos</vh></v>
 </v>
+<v t="felix.20240610234327.1"><vh>file/newFile</vh></v>
 </v>
 <v t="felix.20201214205159.67"><vh>keybindings</vh>
 <v t="felix.20201214205159.68"><vh>Scripting &amp; @Buttons</vh></v>
@@ -6206,7 +6207,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 </t>
 <t tx="felix.20201214205159.56">"view/item/context": [
   @others
-]
+],
 </t>
 <t tx="felix.20201214205159.57">{
   "command": "leojs.editHeadline",
@@ -18739,6 +18740,13 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
     return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
 }
 
+</t>
+<t tx="felix.20240610234327.1">"file/newFile": [
+  {
+    "command": "leojs.newLeoFile",
+    "group": "file"
+  }
+]
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
