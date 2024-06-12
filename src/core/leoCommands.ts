@@ -126,6 +126,7 @@ export class Commands {
     //@+others
     //@+node:felix.20210223220756.1: *3* Commander IVars
     //@+node:felix.20211021003423.1: *4* c.initConfigSettings
+    public autoindent_in_nocolor: boolean | undefined;
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
     public collapse_nodes_after_move: boolean = false;
     public verbose_check_outline: boolean = false;
@@ -481,7 +482,7 @@ export class Commands {
         const getInt = c.config.getInt.bind(c.config);
         const getString = c.config.getString.bind(c.config);
 
-        // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
+        c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
         c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
         c.collapse_on_lt_arrow = getBool('collapse-on-lt-arrow', true);
         // c.contractVisitedNodes = getBool('contractVisitedNodes');

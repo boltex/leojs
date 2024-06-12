@@ -448,6 +448,104 @@ export class CommanderEditCommands {
         const c: Commands = this;
         c.nodeHistory.goPrev();
     }
+    //@+node:felix.20240611204157.1: *3* c_ec.alwaysIndentBody (always-indent-region)
+    @commander_command(
+        'always-indent-region',
+        'The always-indent-region command indents each line of the selected body text. The @tabwidth directive in effect determines amount of indentation.'
+    )
+    public alwaysIndentBody(this: Commands): void {
+
+        const c = this;
+        const p = this.p;
+        const u = this.undoer;
+        const w = this.frame.body.wrapper;
+
+        // #1801: Don't rely on bindings to ensure that we are editing the body.
+        // const event_w = event ? event.w : null;
+        // if (event_w !== w) {
+        //     c.insertCharFromEvent(event);
+        //     return;
+        // }
+
+        // "Before" snapshot.
+        const bunch = u.beforeChangeBody(p);
+
+        // Initial data.
+        const [sel_1, sel_2] = w.getSelectionRange();
+        const tab_width = c.getTabWidth(p) || 0;
+        const [head, lines, tail, oldSel, oldYview] = this.getBodyLines();
+
+        // Calculate the result.
+        let changed = false;
+        const result = lines.map(line => {
+            if (line.trim()) {
+                const [i, width] = g.skip_leading_ws_with_indent(line, 0, tab_width);
+                const s = g.computeLeadingWhitespace(width + Math.abs(tab_width), tab_width) + line.slice(i);
+                if (s !== line) {
+                    changed = true;
+                }
+                return s;
+            } else {
+                return '\n';  // #2418
+            }
+        });
+
+        if (!changed) {
+            return;
+        }
+
+        // Set p.b and w's text first.
+        const middle = result.join('');
+        const all = head + middle + tail;
+        p.b = all;  // Sets dirty and changed bits.
+        w.setAllText(all);
+
+        // Calculate the proper selection range (i, j, ins).
+        let i, j;
+        if (sel_1 === sel_2) {
+            const line = result[0];
+            const [iStart, width] = g.skip_leading_ws_with_indent(line, 0, tab_width);
+            i = j = head.length + iStart;
+        } else {
+            i = head.length;
+            j = head.length + middle.length;
+            if (middle.endsWith('\n')) {  // #1742.
+                j -= 1;
+            }
+        }
+
+        // Set the selection range and scroll position.
+        w.setSelectionRange(i, j, j);
+        w.setYScrollPosition(oldYview);
+
+        // "After" snapshot.
+        u.afterChangeBody(p, 'Indent Region', bunch);
+    }
+    //@+node:felix.20240611203816.1: *3* c_ec.indentBody (indent-region)
+    @commander_command('indent-region', 'Indents each line of the selected body text.')
+    public indentBody(this: Commands): void {
+        /**
+         * The indent-region command indents each line of the selected body text.
+         * Unlike the always-indent-region command, this command inserts a tab
+         * (soft or hard) when there is no selected text.
+         *
+         * The @tabwidth directive in effect determines amount of indentation.
+         */
+        const c = this;
+        const w = this.frame.body.wrapper;
+
+        // #1739. Special case for a *plain* tab bound to indent-region.
+        // const [sel_1, sel_2] = w.getSelectionRange();
+        // if (sel_1 === sel_2) {
+        //     const char = event ? event.char : null;
+        //     const stroke = event ? event.stroke : null;
+        //     if (char === '\t' && stroke && stroke.isPlainKey()) {
+        //         c.editCommands.selfInsertCommand(event);  // Handles undo.
+        //         return;
+        //     }
+        // }
+        c.alwaysIndentBody();
+    }
     //@+node:felix.20230221160446.1: *3* c_ec.insertBodyTime
     @commander_command(
         'insert-body-time',

@@ -1123,6 +1123,61 @@ export function findFirstValidAtLanguageDirective(
     }
     return undefined;
 }
+//@+node:felix.20240611202347.1: *3* g.findLanguageDirectives (must be fast)
+/**
+ * Return the language in effect at position p.
+ */
+export function findLanguageDirectives(c: Commands, p: Position): string | undefined {
+    if (!c || !p || !p.__bool__()) {
+        return undefined;  // c may be None for testing.
+    }
+
+    const v0 = p.v;
+
+    function find_language(p_or_v: Position | VNode): string | undefined {
+        for (const s of [p_or_v.h, p_or_v.b]) {
+            for (const m of s.matchAll(g_language_pat)) {
+                const language = m[1];
+                if (isValidLanguage(language)) {
+                    return language;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    // First, search up the tree.
+    for (const parent of p.self_and_parents(false)) {
+        const language = find_language(parent);
+        if (language) {
+            return language;
+        }
+    }
+
+    // #1625: Second, expand the search for cloned nodes.
+    const seen: VNode[] = [];  // vnodes that have already been searched.
+    const parents: VNode[] = [...v0.parents];  // vnodes whose ancestors are to be searched.
+    while (parents.length > 0) {
+        const parent_v = parents.pop()!; // Assertive because we just checked!
+        if (seen.includes(parent_v)) {
+            continue;
+        }
+        seen.push(parent_v);
+        const language = find_language(parent_v);
+        if (language) {
+            return language;
+        }
+        for (const grand_parent_v of parent_v.parents) {
+            if (!seen.includes(grand_parent_v)) {
+                parents.push(grand_parent_v);
+            }
+        }
+    }
+
+    // Finally, fall back to the defaults.
+    return c.target_language ? c.target_language.toLowerCase() : 'python';
+
+}
 //@+node:felix.20230423231138.1: *3* g.findReference
 /**
  * Return the position containing the section definition for name.
@@ -2610,6 +2665,7 @@ export function splitLines(s?: string): string[] {
         return [];
     }
 }
+export const splitlines = splitLines;
 
 //@+node:felix.20220410214855.1: *3* Scanners: no error messages
 //@+node:felix.20211104213154.1: *4* g.find_line_start
@@ -3994,20 +4050,22 @@ def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
     return w
  */
 //@+node:felix.20220410213527.4: *4* g.computeWidth
-/*
-# Returns the width of s, assuming s starts a line, with indicated tab_width.
-
-def computeWidth(s: str, tab_width: int) -> int:
-    w = 0
-    for ch in s:
-        if ch == '\t':
-            w += (abs(tab_width) - (w % abs(tab_width)))
-        elif ch == '\n':  # Bug fix: 2012/06/05.
-            break
-        else:
-            w += 1
-    return w
+/**
+ * Returns the width of s, assuming s starts a line, with indicated tab_width.
  */
+export function computeWidth(s: string, tab_width: number): number {
+    let w = 0;
+    for (const ch of s) {
+        if (ch === '\t') {
+            w += (Math.abs(tab_width) - (w % Math.abs(tab_width)));
+        } else if (ch === '\n') {  // Bug fix: 2012/06/05.
+            break;
+        } else {
+            w += 1;
+        }
+    }
+    return w;
+}
 //@+node:felix.20220410213527.5: *4* g.wrap_lines (newer)
 
 //@+at
