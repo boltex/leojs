@@ -1424,7 +1424,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const c = this.c;
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         const wname = c.widget_name(w);
         let ins = w.getInsertPoint();
@@ -1519,7 +1519,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
          */
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         const s = w.getAllText();
         const lines: string[] = [];
@@ -1639,7 +1639,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         /** Delete all whitespace surrounding the cursor. */
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         const undoType = insertspace ? 'insert-space' : 'delete-spaces';
         let s = w.getAllText();
@@ -1818,7 +1818,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             }
         }
         if (!changed) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
 
         // Set p.b and w's text first.
@@ -2206,7 +2206,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const c = this.c;
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         c.widgetWantsFocusNow(w);
         const s = w.getAllText();
@@ -2343,6 +2343,288 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         this.moveCol = col;
         this.moveSpotNode = p.v;
     }
+    //@+node:felix.20240611223239.1: *4* ec.backToHome/ExtendSelection
+    @cmd(
+        'back-to-home',
+        'Position the point at the first non-blank character on the line, or the start of the line.'
+    )
+    public backToHome(extend: boolean = false): void {
+        // Smart home:
+        // Position the point at the first non-blank character on the line,
+        // or the start of the line if already there.
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        if (s) {
+            let [i, j] = g.getLine(s, ins);
+            const i1 = i;
+            while (i < j && s[i] === ' ' || s[i] === '\t') {
+                i++;
+            }
+            if (i === ins) {
+                i = i1;
+            }
+            this.moveToHelper(i, extend);
+        }
+    }
+
+    @cmd('back-to-home-extend-selection',
+        'Position the point at the first non-blank character on the line, or the start of the line extending the selection.')
+    backToHomeExtendSelection(): void {
+        this.backToHome(true);
+    }
+    //@+node:felix.20240611223554.1: *4* ec.backToIndentation
+    @cmd('back-to-indentation', 'Position the point at the first non-blank character on the line.')
+    public backToIndentation(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        let [i, j] = g.getLine(s, ins);
+        while (i < j && (s[i] === ' ' || s[i] === '\t')) {
+            i++;
+        }
+        this.moveToHelper(i, false);
+    }
+    //@+node:felix.20240611225127.1: *4* ec.backward*/ExtendSelection
+    @cmd('back-word', 'Move the cursor to the previous word.')
+    public backwardWord(): void {
+        this.moveWordHelper(false, false);
+    }
+
+    @cmd('back-word-extend-selection', 'Extend the selection by moving the cursor to the previous word.')
+    public backwardWordExtendSelection(): void {
+        this.moveWordHelper(true, false);
+    }
+
+    @cmd('back-word-smart', 'Move the cursor to the beginning of the current or the end of the previous word.')
+    public backwardWordSmart(): void {
+        this.moveWordHelper(false, false, undefined, true);
+    }
+
+    @cmd('back-word-smart-extend-selection', 'Extend the selection by moving the cursor to the beginning of the current or the end of the previous word.')
+    public backwardWordSmartExtendSelection(): void {
+        this.moveWordHelper(true, false, undefined, true);
+    }
+    //@+node:felix.20240611225342.1: *4* ec.beginningOfLine/ExtendSelection
+    @cmd('beginning-of-line', 'Move the cursor to the first character of the line.')
+    beginningOfLine(): void {
+        this.moveWithinLineHelper('begin-line', false);
+    }
+
+    @cmd('beginning-of-line-extend-selection', 'Extend the selection by moving the cursor to the first character of the line.')
+    beginningOfLineExtendSelection(): void {
+        this.moveWithinLineHelper('begin-line', true);
+    }
+    //@+node:felix.20240611225948.1: *4* ec.between lines & helper
+    @cmd('next-line', 'Move the cursor down, extending the selection if in extend mode.')
+    public nextLine(): void {
+        this.moveUpOrDownHelper('down', false);
+    }
+    @cmd('next-line-extend-selection', 'Extend the selection by moving the cursor down.')
+    public nextLineExtendSelection(): void {
+        this.moveUpOrDownHelper('down', true);
+    }
+    @cmd('previous-line', 'Move the cursor up, extending the selection if in extend mode.')
+    public prevLine(): void {
+        this.moveUpOrDownHelper('up', false);
+    }
+    @cmd('previous-line-extend-selection', 'Extend the selection by moving the cursor up.')
+    public prevLineExtendSelection(): void {
+        this.moveUpOrDownHelper('up', true);
+    }
+    //@+node:felix.20240611225948.2: *5* ec.moveUpOrDownHelper
+    private moveUpOrDownHelper(direction: string, extend: boolean): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const ins = w.getInsertPoint();
+        const s = w.getAllText();
+        w.seeInsertPoint();
+
+        // Find the start of the next/prev line.
+        const [row, col] = g.convertPythonIndexToRowCol(s, ins);
+        const [i, j] = g.getLine(s, ins);
+        let i2, j2;
+        if (direction === 'down') {
+            [i2, j2] = g.getLine(s, j);
+        } else {
+            [i2, j2] = g.getLine(s, i - 1);
+        }
+        // The spot is the start of the line plus the column index.
+        const n = Math.max(0, j2 - i2 - 1);  // The length of the new line.
+        const col2 = Math.min(col, n);
+        const spot = i2 + col2;
+        this.extendHelper(w, extend, spot, true);
+
+    }
+    //@+node:felix.20240611231950.1: *4* ec.buffers & helper
+    @cmd('beginning-of-buffer', 'Move the cursor to the start of the body text.')
+    public beginningOfBuffer(): void {
+        this.moveToBufferHelper('home', false);
+    }
+    @cmd('beginning-of-buffer-extend-selection', 'Extend the text selection by moving the cursor to the start of the body text.')
+    public beginningOfBufferExtendSelection(): void {
+        this.moveToBufferHelper('home', true);
+    }
+    @cmd('end-of-buffer', 'Move the cursor to the end of the body text.')
+    public endOfBuffer(): void {
+        this.moveToBufferHelper('end', false);
+    }
+    @cmd('end-of-buffer-extend-selection', 'Extend the text selection by moving the cursor to the end of the body text.')
+    public endOfBufferExtendSelection(): void {
+        this.moveToBufferHelper('end', true);
+    }
+    //@+node:felix.20240611231950.2: *5* ec.moveToBufferHelper
+    private moveToBufferHelper(spot: string, extend: boolean): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        if (spot === 'home') {
+            this.moveToHelper(0, extend);
+        } else if (spot === 'end') {
+            const s = w.getAllText();
+            this.moveToHelper(s.length, extend);
+        } else {
+            g.trace('can not happen: bad spot', spot);
+        }
+    }
+    //@+node:felix.20240611232508.1: *4* ec.characters & helper
+    @cmd('back-char', 'Move the cursor back one character, extending the selection if in extend mode.')
+    backCharacter(): void {
+        this.moveToCharacterHelper('left', false);
+    }
+    @cmd('back-char-extend-selection', 'Extend the selection by moving the cursor back one character.')
+    backCharacterExtendSelection(): void {
+        this.moveToCharacterHelper('left', true);
+    }
+    @cmd('forward-char', 'Move the cursor forward one character, extending the selection if in extend mode.')
+    forwardCharacter(): void {
+        this.moveToCharacterHelper('right', false);
+    }
+    @cmd('forward-char-extend-selection', 'Extend the selection by moving the cursor forward one character.')
+    forwardCharacterExtendSelection(): void {
+        this.moveToCharacterHelper('right', true);
+    }
+    //@+node:felix.20240611232508.2: *5* ec.moveToCharacterHelper
+    private moveToCharacterHelper(spot: string, extend: boolean): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+
+        let i = w.getInsertPoint();
+        if (spot === 'left') {
+            i = Math.max(0, i - 1);
+            this.moveToHelper(i, extend);
+        } else if (spot === 'right') {
+            i = Math.min(i + 1, w.getLastIndex());
+            this.moveToHelper(i, extend);
+        } else {
+            g.trace(`can not happen: bad spot: ${spot}`);
+        }
+
+    }
+    //@+node:felix.20240611234833.1: *4* ec.clear/set/ToggleExtendMode
+    @cmd('clear-extend-mode', 'Turn off extend mode: cursor movement commands do not extend the selection.')
+    public clearExtendMode(): void {
+        this.extendModeHelper(false);
+    }
+    @cmd('set-extend-mode', 'Turn on extend mode: cursor movement commands do extend the selection.')
+    public setExtendMode(): void {
+        this.extendModeHelper(true);
+    }
+    @cmd('toggle-extend-mode', 'Toggle extend mode, i.e., toggle whether cursor movement commands extend the selections.')
+    public toggleExtendMode(): void {
+        this.extendModeHelper(!this.extendMode);
+    }
+
+    private extendModeHelper(val: boolean): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (w) {
+            this.extendMode = val;
+            if (!g.unitTesting) {
+                // g.red('extend mode','on' if val else 'off'))
+                c.k.showStateAndMode();
+            }
+            c.widgetWantsFocusNow(w);
+        }
+    }
+    //@+node:felix.20240611235026.1: *4* ec.endOfLine/ExtendSelection
+    @cmd('end-of-line', 'Move the cursor to the last character of the line.')
+    public endOfLine(): void {
+        this.moveWithinLineHelper('end-line', false);
+    }
+    @cmd('end-of-line-extend-selection', 'Extend the selection by moving the cursor to the last character of the line.')
+    public endOfLineExtendSelection(): void {
+        this.moveWithinLineHelper('end-line', true);
+    }
+    //@+node:felix.20240611235040.1: *4* ec.exchangePointMark
+    @cmd(
+        'exchange-point-mark',
+        'Exchange the point (insert point) with the mark (the other end of the selected text).'
+    )
+    public exchangePointMark(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        c.widgetWantsFocusNow(w);
+        let [i, j] = w.getSelectionRange(false);
+        if (i === j) {
+            return;
+        }
+        let ins = w.getInsertPoint();
+        ins = (ins === i) ? j : i;
+        w.setInsertPoint(ins);
+        w.setSelectionRange(i, j);
+    }
+    //@+node:felix.20240611235202.1: *4* ec.extend-to-line
+    @cmd('extend-to-line', 'Select the line at the cursor.')
+    public extendToLine(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const n = s.length;
+        let i = w.getInsertPoint();
+        while (0 <= i && i < n && s[i] !== '\n') {
+            i--;
+        }
+        i++;
+        const i1 = i;
+        while (0 <= i && i < n && s[i] !== '\n') {
+            i++;
+        }
+        w.setSelectionRange(i1, i);
+    }
+    //@+node:felix.20240611235414.1: *4* ec.extend-to-sentence
+    @cmd('extend-to-sentence', 'Select the line at the cursor.')
+    public extendToSentence(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;  // pragma: no cover (defensive)
+        }
+        const s = w.getAllText();
+        const n = s.length;
+        const i = w.getInsertPoint();
+        let i2 = 1 + s.indexOf('.', i);
+        if (i2 === 0) {
+            i2 = n;
+        }
+        const i1 = 1 + s.lastIndexOf('.', i2 - 1);
+        w.setSelectionRange(i1, i2);
+    }
     //@+node:felix.20221220002639.1: *4* ec.extend-to-word
     @cmd(
         'extend-to-word',
@@ -2400,6 +2682,122 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
 
         return [0, 0];
+    }
+    //@+node:felix.20240611235817.1: *4* ec.finishOfLine/ExtendSelection
+    @cmd('finish-of-line', 'Move the cursor to the last character of the line.')
+    finishOfLine(): void {
+        this.moveWithinLineHelper('finish-line', false);
+    }
+    @cmd('finish-of-line-extend-selection', 'Extend the selection by moving the cursor to the last character of the line.')
+    finishOfLineExtendSelection(): void {
+        this.moveWithinLineHelper('finish-line', true);
+    }
+    //@+node:felix.20240611235844.1: *4* ec.forward*/ExtendSelection
+    @cmd(
+        'forward-end-word',
+        'Move the cursor to the next word.'
+    )
+    public forwardEndWord(): void {
+        this.moveWordHelper(false, true, true);
+    }
+    @cmd(
+        'forward-end-word-extend-selection',
+        'Extend the selection by moving the cursor to the next word.'
+    )
+    public forwardEndWordExtendSelection(): void {
+        this.moveWordHelper(true, true, true);
+    }
+    @cmd(
+        'forward-word',
+        'Move the cursor to the next word.'
+    )
+    public forwardWord(): void {
+        this.moveWordHelper(false, true);
+    }
+    @cmd(
+        'forward-word-extend-selection',
+        'Extend the selection by moving the cursor to the end of the next word.'
+    )
+    public forwardWordExtendSelection(): void {
+        this.moveWordHelper(true, true);
+    }
+    @cmd(
+        'forward-word-smart',
+        'Move the cursor to the end of the current or the beginning of the next word.'
+    )
+    public forwardWordSmart(): void {
+        this.moveWordHelper(false, true, undefined, true);
+    }
+    @cmd(
+        'forward-word-smart-extend-selection',
+        'Extend the selection by moving the cursor to the end of the current or the beginning of the next word.'
+    )
+    public forwardWordSmartExtendSelection(): void {
+        this.moveWordHelper(true, true, undefined, true);
+    }
+    //@+node:felix.20240612000335.1: *4* ec.movePastClose & helper
+
+    @cmd('move-past-close', 'Move the cursor past the closing parenthesis.')
+    public movePastClose(): void {
+        this.movePastCloseHelper(false);
+    }
+    @cmd('move-past-close-extend-selection', 'Extend the selection by moving the cursor past the closing parenthesis.')
+    public movePastCloseExtendSelection(): void {
+        this.movePastCloseHelper(true);
+    }
+    //@+node:felix.20240612000335.2: *5* ec.movePastCloseHelper
+    private movePastCloseHelper(extend: boolean): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        c.widgetWantsFocusNow(w);
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        // Scan backwards for i,j.
+        let i = ins;
+        while (i >= 0 && s[i] !== '\n') {
+            if (s[i] === '(') {
+                break;
+            }
+            i--;
+        }
+        if (i < 0 || s[i] === '\n') {
+            return;
+        }
+        let j = ins;
+        while (j >= 0 && s[j] !== '\n') {
+            if (s[j] === '(') {
+                break;
+            }
+            j--;
+        }
+        if (i < j) {
+            return;
+        }
+        // Scan forward for i2,j2.
+        let i2 = ins;
+        while (i2 < s.length && s[i2] !== '\n') {
+            if (s[i2] === ')') {
+                break;
+            }
+            i2++;
+        }
+        if (i2 >= s.length || s[i2] === '\n') {
+            return;
+        }
+        let j2 = ins;
+        while (j2 < s.length && s[j2] !== '\n') {
+            if (s[j2] === ')') {
+                break;
+            }
+            j2++;
+        }
+        if (i2 > j2) {
+            return;
+        }
+        this.moveToHelper(i2 + 1, extend);
     }
     //@+node:felix.20220503225545.1: *3* ec: uA's
     //@+node:felix.20220503225545.2: *4* ec.clearNodeUas & clearAllUas
