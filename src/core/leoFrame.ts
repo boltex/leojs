@@ -375,56 +375,55 @@ export class NullBody {
     }
     //@+node:felix.20230312221628.1: *3* LeoBody.Text
     //@+node:felix.20230312221628.2: *4* LeoBody.getInsertLines
-    /*
-    def getInsertLines(self) -> Tuple[str, str, str]:
-        """
-        Return before,after where:
-
-        before is all the lines before the line containing the insert point.
-        sel is the line containing the insert point.
-        after is all the lines after the line containing the insert point.
-
-        All lines end in a newline, except possibly the last line.
-        """
-        body = self
-        w = body.wrapper
-        s = w.getAllText()
-        insert = w.getInsertPoint()
-        i, j = g.getLine(s, insert)
-        before = s[0:i]
-        ins = s[i:j]
-        after = s[j:]
-        before = g.checkUnicode(before)
-        ins = g.checkUnicode(ins)
-        after = g.checkUnicode(after)
-        return before, ins, after
-    */
+    /**
+     * Return before, after where:
+     * 
+     * before is all the lines before the line containing the insert point.
+     * sel is the line containing the insert point.
+     * after is all the lines after the line containing the insert point.
+     * 
+     * All lines end in a newline, except possibly the last line.
+     */
+    public getInsertLines(): [string, string, string] {
+        const body = this;
+        const w = body.wrapper;
+        const s = w.getAllText();
+        const insert = w.getInsertPoint();
+        const [i, j] = g.getLine(s, insert);
+        let before = s.substring(0, i);
+        let ins = s.substring(i, j);
+        let after = s.substring(j);
+        before = g.checkUnicode(before);
+        ins = g.checkUnicode(ins);
+        after = g.checkUnicode(after);
+        return [before, ins, after];
+    }
     //@+node:felix.20230312221628.3: *4* LeoBody.getSelectionAreas
-    /*
-    def getSelectionAreas(self) -> Tuple[str, str, str]:
-        """
-        Return before,sel,after where:
-
-        before is the text before the selected text
-        (or the text before the insert point if no selection)
-        sel is the selected text (or "" if no selection)
-        after is the text after the selected text
-        (or the text after the insert point if no selection)
-        """
-        body = self
-        w = body.wrapper
-        s = w.getAllText()
-        i, j = w.getSelectionRange()
-        if i == j:
-            j = i + 1
-        before = s[0:i]
-        sel = s[i:j]
-        after = s[j:]
-        before = g.checkUnicode(before)
-        sel = g.checkUnicode(sel)
-        after = g.checkUnicode(after)
-        return before, sel, after
-    */
+    /**
+     * Return before, sel, after where:
+     * 
+     * before is the text before the selected text
+     * (or the text before the insert point if no selection)
+     * sel is the selected text (or "" if no selection)
+     * after is the text after the selected text
+     * (or the text after the insert point if no selection)
+     */
+    public getSelectionAreas(): [string, string, string] {
+        const body = this;
+        const w = body.wrapper;
+        const s = w.getAllText();
+        let [i, j] = w.getSelectionRange();
+        if (i === j) {
+            j = i + 1;
+        }
+        let before = s.substring(0, i);
+        let sel = s.substring(i, j);
+        let after = s.substring(j);
+        before = g.checkUnicode(before);
+        sel = g.checkUnicode(sel);
+        after = g.checkUnicode(after);
+        return [before, sel, after];
+    }
     //@+node:felix.20230312221628.4: *4* LeoBody.getSelectionLines
     /**
      *         Return before,sel,after where:

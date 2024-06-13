@@ -611,6 +611,7 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20231224164322.1"><vh>@file src/commands/helpCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
+<v t="felix.20240612230730.1"><vh>@file src/commands/killBufferCommands.ts</vh></v>
 </v>
 <v t="felix.20221119204248.1"><vh>Gui base classes</vh>
 <v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>

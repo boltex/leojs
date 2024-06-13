@@ -361,15 +361,15 @@ export class TopLevelEditCommands {
 }
 //@+node:felix.20220503222535.1: ** class EditCommandsClass
 export class EditCommandsClass extends BaseEditCommandsClass {
-    private ccolumn = 0;  // For comment column functions.
-    private cursorStack: [number, number, number][] = [];  // Values are tuples, (i, j, ins)
-    private extendMode = false;  // True: all cursor move commands extend the selection.
-    private fillPrefix = '';  // For fill prefix functions.
+    public ccolumn = 0;  // For comment column functions.
+    public cursorStack: [Position, number, number, number][] = [];  // Values are tuples, (i, j, ins)
+    public extendMode = false;  // True: all cursor move commands extend the selection.
+    public fillPrefix = '';  // For fill prefix functions.
     // Set by the set-fill-column command.
-    private fillColumn = 0;  // For line centering. If zero, use @pagewidth value.
-    private moveSpotNode: VNode | undefined = undefined;  // A VNode.
-    private moveSpot: number | undefined = undefined;  // For retaining preferred column when moving up or down.
-    private moveCol: number | undefined = undefined;  // For retaining preferred column when moving up or down.
+    public fillColumn = 0;  // For line centering. If zero, use @pagewidth value.
+    public moveSpotNode: VNode | undefined = undefined;  // A VNode.
+    public moveSpot: number | undefined = undefined;  // For retaining preferred column when moving up or down.
+    public moveCol: number | undefined = undefined;  // For retaining preferred column when moving up or down.
     private _useRegex: boolean = false;  // For replace-string
 
     // Settings...
@@ -2050,6 +2050,51 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
         w.setSelectionRange(ins, ins, ins);
     }
+    //@+node:felix.20240612224828.1: *3* ec: lines
+    //@+node:felix.20240612224828.2: *4* ec.moveLinesToNextNode
+    @cmd('move-lines-to-next-node', 'Move one or *trailing* lines to the start of the next node.')
+    public moveLineToNextNode(): void {
+        const c = this.c;
+        if (!c.p.threadNext()) {
+            return;
+        }
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const [sel_1, sel_2] = w.getSelectionRange();
+        const [i, _junk] = g.getLine(s, sel_1);
+        const [i2, j] = g.getLine(s, sel_2);
+        const lines = s.substring(i, j);
+        if (!lines.trim()) {
+            return;
+        }
+        this.beginCommand(w, 'move-lines-to-next-node');
+        try {
+            const [next_i, next_j] = g.getLine(s, j);
+            w.delete(i, next_j);
+            c.p.b = w.getAllText().trimEnd() + '\n';
+            c.selectPosition(c.p.threadNext());
+            c.p.b = lines + '\n' + c.p.b;
+            c.recolor();
+        } finally {
+            this.endCommand(undefined, true, true);
+        }
+    }
+    //@+node:felix.20240612224828.3: *4* ec.splitLine
+    @cmd('split-line', 'Split a line at the cursor position.')
+    public splitLine(): void {
+        const w = this.editWidget();
+        if (w) {
+            this.beginCommand(w, 'split-line');
+            const s = w.getAllText();
+            const ins = w.getInsertPoint();
+            w.setAllText(s.slice(0, ins) + '\n' + s.slice(ins));
+            w.setInsertPoint(ins + 1);
+            this.endCommand(undefined, true, true);
+        }
+    }
     //@+node:felix.20221220002620.1: *3* ec: move cursor
     //@+node:felix.20240611210227.1: *4* ec. helpers
     //@+node:felix.20240611210227.2: *5* ec.extendHelper
@@ -2798,6 +2843,685 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
         this.moveToHelper(i2 + 1, extend);
+    }
+    //@+node:felix.20240612222106.1: *4* ec.pages & helper
+    @cmd('back-page', 'Move the cursor back one page, extending the selection if in extend mode.')
+    backPage(): void {
+        this.movePageHelper('back', false);
+    }
+    @cmd('back-page-extend-selection', 'Extend the selection by moving the cursor back one page.')
+    backPageExtendSelection(): void {
+        this.movePageHelper('back', true);
+    }
+    @cmd('forward-page', 'Move the cursor forward one page, extending the selection if in extend mode.')
+    forwardPage(): void {
+        this.movePageHelper('forward', false);
+    }
+    @cmd('forward-page-extend-selection', 'Extend the selection by moving the cursor forward one page.')
+    forwardPageExtendSelection(): void {
+        this.movePageHelper('forward', true);
+    }
+    //@+node:felix.20240612222106.2: *5* ec.movePageHelper
+    /**
+     * Move the cursor up/down one page, possibly extending the selection.
+     */
+    private movePageHelper(kind: string, extend: boolean): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const linesPerPage = 15;  // To do.
+        const ins = w.getInsertPoint();
+        const s = w.getAllText();
+        const lines = g.splitLines(s);
+        const [row, col] = g.convertPythonIndexToRowCol(s, ins);
+        let row2;
+        if (kind === 'back') {
+            row2 = Math.max(0, row - linesPerPage);
+        } else {
+            row2 = Math.min(row + linesPerPage, lines.length - 1);
+        }
+        if (row === row2) {
+            return;
+        }
+        const spot = g.convertRowColToPythonIndex(s, row2, col, lines);
+        this.extendHelper(w, extend, spot, true);
+    }
+    //@+node:felix.20240612222722.1: *4* ec.paragraphs & helpers
+    @cmd('back-paragraph', 'Move the cursor to the previous paragraph.')
+    public backwardParagraph(): void {
+        this.backwardParagraphHelper(false);
+    }
+    @cmd('back-paragraph-extend-selection', 'Extend the selection by moving the cursor to the previous public paragraph.')
+    backwardParagraphExtendSelection(): void {
+        this.backwardParagraphHelper(true);
+    }
+    @cmd('forward-paragraph', 'Move the cursor to the next paragraph.')
+    public forwardParagraph(): void {
+        this.forwardParagraphHelper(false);
+    }
+    @cmd('forward-paragraph-extend-selection', 'Extend the selection by moving the cursor to the next public paragraph.')
+    forwardParagraphExtendSelection(): void {
+        this.forwardParagraphHelper(true);
+    }
+    //@+node:felix.20240612222722.2: *5* ec.backwardParagraphHelper
+    private backwardParagraphHelper(extend: boolean): void {
+        const w = this.editWidget();
+        if (!w) {
+            return; // Defensive check
+        }
+        const s = w.getAllText();
+        let [i, j] = w.getSelectionRange();
+        [i, j] = g.getLine(s, j);
+        let line = s.slice(i, j);
+        if (line.trim()) {
+            // Find the start of the present paragraph.
+            while (i > 0) {
+                [i, j] = g.getLine(s, i - 1);
+                line = s.slice(i, j);
+                if (!line.trim()) {
+                    break;
+                }
+            }
+        }
+        // Find the end of the previous paragraph.
+        while (i > 0) {
+            [i, j] = g.getLine(s, i - 1);
+            line = s.slice(i, j);
+            if (line.trim()) {
+                i = j - 1;
+                break;
+            }
+        }
+        this.moveToHelper(i, extend);
+    }
+    //@+node:felix.20240612222722.3: *5* ec.forwardParagraphHelper
+    forwardParagraphHelper(extend: boolean): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        let [i, j] = g.getLine(s, ins);
+        let line = s.slice(i, j);
+        if (line.trim()) {  // Skip past the present paragraph.
+            this.selectParagraphHelper(w, i);
+            [i, j] = w.getSelectionRange();
+            j += 1;
+        }
+        // Skip to the next non-blank line.
+        i = j;
+        while (j < s.length) {
+            [i, j] = g.getLine(s, j);
+            line = s.slice(i, j);
+            if (line.trim()) {
+                break;
+            }
+        }
+        w.setInsertPoint(ins);  // Restore the original insert point.
+        this.moveToHelper(i, extend);
+    }
+    //@+node:felix.20240612223137.1: *4* ec.pushCursor and popCursor
+    @cmd('pop-cursor', 'Restore the node, selection range and insert point from the stack.')
+    public popCursor(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (w && this.cursorStack.length > 0) {
+            const [p, i, j, ins] = this.cursorStack.pop()!;
+            if (c.positionExists(p)) {
+                c.selectPosition(p);
+                c.redraw();
+                w.setSelectionRange(i, j, ins);
+                c.bodyWantsFocus();
+            } else {
+                g.es('invalid position', c.p.h);
+            }
+        } else if (!w) {
+            g.es('no stacked cursor');
+        }
+    }
+    @cmd('push-cursor', 'Push the selection range and insert point on the stack.')
+    public pushCursor(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (w) {
+            const p = c.p.copy();
+            const [i, j] = w.getSelectionRange();
+            const ins = w.getInsertPoint();
+            this.cursorStack.push([p, i, j, ins]);
+        } else {
+            g.es('cursor not pushed');
+        }
+    }
+    //@+node:felix.20240612223143.1: *4* ec.selectAllText
+    @cmd('select-all', 'Select all text.')
+    public selectAllText(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+    }
+    //@+node:felix.20240612223716.1: *4* ec.sentences & helpers
+    @cmd('back-sentence', 'Move the cursor to the previous sentence.')
+    public backSentence(): void {
+        this.backSentenceHelper(false);
+    }
+    @cmd('back-sentence-extend-selection', 'Extend the selection by moving the cursor to the previous sentence.')
+    public backSentenceExtendSelection(): void {
+        this.backSentenceHelper(true);
+    }
+    @cmd('forward-sentence', 'Move the cursor to the next sentence.')
+    public forwardSentence(): void {
+        this.forwardSentenceHelper(false);
+    }
+    @cmd('forward-sentence-extend-selection', 'Extend the selection by moving the cursor to the next sentence.')
+    public forwardSentenceExtendSelection(): void {
+        this.forwardSentenceHelper(true);
+    }
+    //@+node:felix.20240612223716.2: *5* ec.backSentenceHelper
+    private backSentenceHelper(extend: boolean): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;  // pragma: no cover (defensive)
+        }
+        c.widgetWantsFocusNow(w);
+        const s = w.getAllText();
+        let ins = w.getInsertPoint();
+        // Find the starting point of the scan.
+        let i = ins;
+        i -= 1;  // Ensure some progress.
+        if (i < 0 || i >= s.length) {
+            return;
+        }
+        // Tricky.
+        if (s[i] === '.') {
+            i -= 1;
+        }
+        while (i >= 0 && s[i] === ' ' || s[i] === '\n') {
+            i -= 1;
+        }
+        if (i >= ins) {
+            i -= 1;
+        }
+        if (i >= s.length) {
+            i -= 1;
+        }
+        if (i <= 0) {
+            return;
+        }
+        if (s[i] === '.') {
+            i -= 1;
+        }
+        // Scan backwards to the end of the paragraph.
+        // Stop at empty lines.
+        // Skip periods within words.
+        // Stop at sentences ending in non-periods.
+        let end = false;
+        while (!end && i >= 0) {
+            const progress = i;
+            if (s[i] === '.') {
+                // Skip periods surrounded by letters/numbers
+                if (i > 0 && s[i - 1].match(/[\w\d]/) && s[i + 1].match(/[\w\d]/)) {
+                    i -= 1;
+                } else {
+                    i += 1;
+                    while (i < s.length && (s[i] === ' ' || s[i] === '\n')) {
+                        i += 1;
+                    }
+                    i -= 1;
+                    break;
+                }
+            } else if (s[i] === '\n') {
+                let j = i - 1;
+                while (j >= 0) {
+                    if (s[j] === '\n') {
+                        // Don't include first newline.
+                        end = true;
+                        break;  // found blank line.
+                    } else if (s[j] === ' ') {
+                        j -= 1;
+                    } else {
+                        i -= 1;
+                        break;  // no blank line found.
+                    }
+                }
+                if (!end) {
+                    i -= 1;
+                }
+            } else {
+                i -= 1;
+            }
+            g.assert(end || progress > i);
+        }
+        i += 1;
+        if (i < ins) {
+            this.moveToHelper(i, extend);
+        }
+    }
+    //@+node:felix.20240612223716.3: *5* ec.forwardSentenceHelper
+    private forwardSentenceHelper(extend: boolean): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        c.widgetWantsFocusNow(w);
+        const s = w.getAllText();
+        let ins = w.getInsertPoint();
+        if (ins >= s.length) {
+            return;
+        }
+        // Find the starting point of the scan.
+        let i = ins;
+        if (i + 1 < s.length && s[i + 1] === '.') {
+            i += 1;
+        }
+        if (s[i] === '.') {
+            i += 1;
+        } else {
+            while (i < s.length && (s[i] === ' ' || s[i] === '\n')) {
+                i += 1;
+            }
+            i -= 1;
+        }
+        if (i <= ins) {
+            i += 1;
+        }
+        if (i >= s.length) {
+            return;
+        }
+        // Scan forward to the end of the paragraph.
+        // Stop at empty lines.
+        // Skip periods within words.
+        // Stop at sentences ending in non-periods.
+        let end = false;
+        while (!end && i < s.length) {
+            const progress = i;
+            if (s[i] === '.') {
+                // Skip periods surrounded by letters/numbers
+                if (i > 0 && s[i - 1].match(/[\w\d]/) && s[i + 1].match(/[\w\d]/)) {
+                    i += 1;
+                } else {
+                    i += 1;
+                    break;  // Include the paragraph.
+                }
+            } else if (s[i] === '\n') {
+                let j = i + 1;
+                while (j < s.length) {
+                    if (s[j] === '\n') {
+                        // Don't include first newline.
+                        end = true;
+                        break;  // found blank line.
+                    } else if (s[j] === ' ') {
+                        j += 1;
+                    } else {
+                        i += 1;
+                        break;  // no blank line found.
+                    }
+                }
+                if (!end) {
+                    i += 1;
+                }
+            } else {
+                i += 1;
+            }
+            g.assert(end || progress < i);
+        }
+        i = Math.min(i, s.length);
+        if (i > ins) {
+            this.moveToHelper(i, extend);
+        }
+    }
+    //@+node:felix.20240612223723.1: *4* ec.startOfLine/ExtendSelection
+    @cmd('start-of-line', 'Move the cursor to the first non-blank character of the line.')
+    public startOfLine(): void {
+        this.moveWithinLineHelper('start-line', false);
+    }
+
+    @cmd('start-of-line-extend-selection', 'Extend the selection by moving the cursor to the first non-blank character of the line.')
+    public startOfLineExtendSelection(): void {
+        this.moveWithinLineHelper('start-line', true);
+    }
+    //@+node:felix.20240612225351.1: *3* ec: paragraph
+    //@+node:felix.20240612225351.2: *4* ec.backwardKillParagraph
+    @cmd('backward-kill-paragraph', 'Kill the previous paragraph.')
+    public backwardKillParagraph(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        this.beginCommand(w, 'backward-kill-paragraph');
+        try {
+            this.backwardParagraphHelper(true);
+            let [i, j] = w.getSelectionRange();
+            if (i > 0) {
+                i = Math.min(i + 1, j);
+            }
+            c.killBufferCommands.killParagraphHelper(i, j);
+            w.setSelectionRange(i, i, i);
+        } finally {
+            this.endCommand(undefined, true, true);
+        }
+    }
+    //@+node:felix.20240612225351.3: *4* ec.fillRegion
+    @cmd('fill-region', 'Fill all paragraphs in the selected text.')
+    public fillRegion(): void {
+        const c = this.c;
+        const p = this.c.p;
+        const undoType = 'fill-region';
+        const w = this.editWidget();
+        const [i, j] = w.getSelectionRange();
+        c.undoer.beforeChangeGroup(p, undoType);
+
+        while (true) {
+            const progress = w.getInsertPoint();
+            c.reformatParagraph('reformat-paragraph');
+            const ins = w.getInsertPoint();
+            const s = w.getAllText();
+            w.setInsertPoint(ins);
+            if (progress >= ins || ins >= j || ins >= s.length) {
+                break;
+            }
+        }
+
+        c.undoer.afterChangeGroup(p, undoType);
+    }
+    //@+node:felix.20240612225351.4: *4* ec.fillRegionAsParagraph
+    @cmd('fill-region-as-paragraph', 'Fill the selected text.')
+    public fillRegionAsParagraph(): void {
+        const w = this.editWidget();
+        if (!w || !this._chckSel()) {
+            return;
+        }
+        this.beginCommand(w, 'fill-region-as-paragraph');
+        this.endCommand(undefined, true, true);
+    }
+    //@+node:felix.20240612225351.5: *4* ec.fillParagraph
+    @cmd('fill-paragraph', 'Fill the selected paragraph')
+    public fillParagraph(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;  // Defensive check
+        }
+        // Clear the selection range.
+        const [i, j] = w.getSelectionRange();
+        w.setSelectionRange(i, i, i);
+        this.c.reformatParagraph();
+    }
+    //@+node:felix.20240612225351.6: *4* ec.killParagraph
+    @cmd('kill-paragraph', 'Kill the present paragraph.')
+    public killParagraph(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        this.beginCommand(w, 'kill-paragraph');
+        try {
+            this.extendToParagraph();
+            const [i, j] = w.getSelectionRange();
+            c.killBufferCommands.killParagraphHelper(i, j);
+            w.setSelectionRange(i, i, i);
+        } finally {
+            this.endCommand(undefined, true, true);
+        }
+    }
+    //@+node:felix.20240612225351.7: *4* ec.extend-to-paragraph & helper
+    @cmd('extend-to-paragraph', 'Select the paragraph surrounding the cursor.')
+    public extendToParagraph(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        let ins = w.getInsertPoint();
+        let [i, j] = g.getLine(s, ins);
+        let line = s.slice(i, j);
+        // Find the start of the paragraph.
+        if (line.trim()) {  // Search backward.
+            while (i > 0) {
+                let [i2, j2] = g.getLine(s, i - 1);
+                line = s.slice(i2, j2);
+                if (line.trim()) {
+                    i = i2;
+                } else {
+                    break;  // Use the previous line.
+                }
+            }
+        } else {  // Search forward.
+            while (j < s.length) {
+                [i, j] = g.getLine(s, j);
+                line = s.slice(i, j);
+                if (line.trim()) {
+                    break;
+                }
+            }
+            if (!line.trim()) {
+                return;
+            }
+        }
+        // Select from i to the end of the paragraph.
+        this.selectParagraphHelper(w, i);
+    }
+    //@+node:felix.20240612225351.8: *5* ec.selectParagraphHelper
+    /**
+     * Select from start to the end of the paragraph.
+     */
+    private selectParagraphHelper(w: StringTextWrapper, start: number): void {
+        const s = w.getAllText();
+        let [i1, j] = g.getLine(s, start);
+        while (j < s.length) {
+            let [i, j2] = g.getLine(s, j);
+            const line = s.slice(i, j2);
+            if (line.trim()) {
+                j = j2;
+            } else {
+                break;
+            }
+        }
+        j = Math.max(start, j - 1);
+        w.setSelectionRange(i1, j, j);
+    }
+    //@+node:felix.20240613005114.1: *3* ec: region
+    //@+node:felix.20240613005114.2: *4* ec.tabIndentRegion (indent-rigidly)
+    @cmd('indent-rigidly', 'Insert a hard tab at the start of each line of the selected text.')
+    public tabIndentRegion(): void {
+        const w = this.editWidget();
+        if (!w || !this._chckSel()) {
+            return;
+        }
+        this.beginCommand(w, 'indent-rigidly');
+        let s = w.getAllText();
+        const [i1, j1] = w.getSelectionRange();
+        const [i, junk1] = g.getLine(s, i1);
+        const [junk2, j] = g.getLine(s, j1);
+        const lines = g.splitlines(s.substring(i, j));
+        const n = lines.length;
+        const lines_s = lines.map(line => '\t' + line).join('');
+        s = s.substring(0, i) + lines_s + s.substring(j);
+        w.setAllText(s);
+        // Retain original row/col selection.
+        w.setSelectionRange(i1, j1 + n, j1 + n);
+        this.endCommand(undefined, true, true);
+    }
+    //@+node:felix.20240613005114.3: *4* ec.countRegion
+    @cmd('count-region', 'Print the number of lines and characters in the selected text.')
+    public countRegion(): void {
+        /**  */
+        const w = this.editWidget();
+        if (!w) {
+            return;  // pragma: no cover (defensive)
+        }
+        const txt = w.getSelectedText();
+        let lines = 1;
+        let chars = 0;
+        for (const z of txt) {
+            if (z === '\n') {
+                lines += 1;
+            } else {
+                chars += 1;
+            }
+        }
+        g.es(
+            `Region has ${lines} lines, ` +
+            `${chars} character${g.plural(chars)}`
+        );
+    }
+    //@+node:felix.20240613005114.4: *4* ec.moveLinesDown
+    @cmd('move-lines-down', 'Move all lines containing any selected text down one line.')
+    public moveLinesDown(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        let s = w.getAllText();
+        const [sel_1, sel_2] = w.getSelectionRange();
+        const insert_pt = w.getInsertPoint();
+        const [i, junk1] = g.getLine(s, sel_1);
+        const [i2, j] = g.getLine(s, sel_2);
+        const lines = s.substring(i, j);
+        // Select from start of the first line to the *start* of the last line.
+        // This prevents selection creep.
+        this.beginCommand(w, 'move-lines-down');
+        try {
+            const [next_i, next_j] = g.getLine(s, j);  // 2011/04/01: was j+1
+            const next_line = s.substring(next_i, next_j);
+            let n2 = next_j - next_i;
+            if (j < s.length) {
+                w.delete(i, next_j);
+                let new_lines: string;
+                if (next_line.endsWith('\n')) {
+                    // Simply swap positions with next line
+                    new_lines = next_line + lines;
+                } else {
+                    // Last line of the body to be moved up doesn't end in a newline
+                    // while we have to remove the newline from the line above moving down.
+                    new_lines = next_line + '\n' + lines.slice(0, -1);
+                    n2 += 1;
+                }
+                w.insert(i, new_lines);
+                w.setSelectionRange(sel_1 + n2, sel_2 + n2, insert_pt + n2);
+            } else {
+                // Leo 5.6: insert a blank line before the selected lines.
+                w.insert(i, '\n');
+                w.setSelectionRange(sel_1 + 1, sel_2 + 1, insert_pt + 1);
+            }
+            // Fix bug 799695: colorizer bug after move-lines-up into a docstring
+            c.recolor();
+        } finally {
+            this.endCommand(undefined, true, true);
+        }
+    }
+    //@+node:felix.20240613005114.5: *4* ec.moveLinesUp
+    @cmd('move-lines-up', 'Move all lines containing any selected text up one line.')
+    public moveLinesUp(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;  // pragma: no cover (defensive)
+        }
+        let s = w.getAllText();
+        const [sel_1, sel_2] = w.getSelectionRange();
+        const insert_pt = w.getInsertPoint();  // 2011/04/01
+        const [i, junk1] = g.getLine(s, sel_1);
+        const [i2, j] = g.getLine(s, sel_2);
+        const lines = s.substring(i, j);
+        this.beginCommand(w, 'move-lines-up');
+        try {
+            const [prev_i, prev_j] = g.getLine(s, i - 1);
+            const prev_line = s.substring(prev_i, prev_j);
+            const n2 = prev_j - prev_i;
+            if (i > 0) {
+                w.delete(prev_i, j);
+                let new_lines: string;
+                if (lines.endsWith('\n')) {
+                    // Simply swap positions with next line
+                    new_lines = lines + prev_line;
+                } else {
+                    // Lines to be moved up don't end in a newline while the
+                    // previous line going down needs its newline taken off.
+                    new_lines = lines + '\n' + prev_line.slice(0, -1);
+                }
+                w.insert(prev_i, new_lines);
+                w.setSelectionRange(sel_1 - n2, sel_2 - n2, insert_pt - n2);
+            } else {
+                // Leo 5.6: Insert a blank line after the line.
+                w.insert(j, '\n');
+                w.setSelectionRange(sel_1, sel_2, sel_1);
+            }
+            // Fix bug 799695: colorizer bug after move-lines-up into a docstring
+            c.recolor();
+        } finally {
+            this.endCommand(undefined, true, true);
+        }
+    }
+    //@+node:felix.20240613005114.6: *4* ec.reverseRegion
+    @cmd('reverse-region', 'Reverse the order of lines in the selected text.')
+    public reverseRegion(): void {
+        const w = this.editWidget();
+        if (!w || !this._chckSel()) {
+            return;
+        }
+        this.beginCommand(w, 'reverse-region');
+        const s = w.getAllText();
+        const [i1, j1] = w.getSelectionRange();
+        const [i, junk1] = g.getLine(s, i1);
+        const [junk2, j] = g.getLine(s, j1);
+        const txt = s.substring(i, j);
+        let aList = txt.split('\n');
+        aList.reverse();
+        const newText = aList.join('\n') + '\n';
+        w.setAllText(s.substring(0, i1) + newText + s.substring(j1));
+        const ins = i1 + newText.length - 1;
+        w.setSelectionRange(ins, ins, ins);
+        this.endCommand(undefined, true, true);
+    }
+    //@+node:felix.20240613005114.7: *4* ec.up/downCaseRegion & helper
+    @cmd('downcase-region', 'Convert all characters in the selected text to lower case.')
+    public downCaseRegion(): void {
+        this.caseHelper('low', 'downcase-region');
+    }
+
+    @cmd('toggle-case-region', 'Toggle the case of all characters in the selected text.')
+    public toggleCaseRegion(): void {
+        this.caseHelper('toggle', 'toggle-case-region');
+    }
+
+    @cmd('upcase-region', 'Convert all characters in the selected text to UPPER CASE.')
+    public upCaseRegion(): void {
+        this.caseHelper('up', 'upcase-region');
+    }
+
+    private caseHelper(way: string, undoType: string): void {
+        const w = this.editWidget();
+        if (!w || !w.hasSelection()) {
+            return;  // pragma: no cover (defensive)
+        }
+        this.beginCommand(w, undoType);
+        const s = w.getAllText();
+        const [i, j] = w.getSelectionRange();
+        const ins = w.getInsertPoint();
+        let s2 = s.substring(i, j);
+        let sel: string;
+        if (way === 'low') {
+            sel = s2.toLowerCase();
+        } else if (way === 'up') {
+            sel = s2.toUpperCase();
+        } else {
+            console.assert(way === 'toggle');
+            sel = s2.split('').map(c => c === c.toLowerCase() ? c.toUpperCase() : c.toLowerCase()).join('');
+        }
+        const newText = s.substring(0, i) + sel + s.substring(j);
+        const changed = newText !== s;
+        if (changed) {
+            w.setAllText(newText);
+            w.setSelectionRange(i, j, ins);
+        }
+        this.endCommand(undefined, changed, true);
     }
     //@+node:felix.20220503225545.1: *3* ec: uA's
     //@+node:felix.20220503225545.2: *4* ec.clearNodeUas & clearAllUas
