@@ -59,6 +59,10 @@ if (g.isBrowser) {
 //@-<< imports >>
 //@+others
 //@+node:felix.20211017232128.1: ** applyMixins
+/**
+ * "Alternative Pattern" mixing of multiple classes. (combining simpler partial classes)
+ * From https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern
+ */
 function applyMixins(derivedCtor: any, constructors: any[]): void {
     constructors.forEach((baseCtor) => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {

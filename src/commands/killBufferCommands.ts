@@ -1,395 +1,500 @@
 //@+leo-ver=5-thin
 //@+node:felix.20240612230730.1: * @file src/commands/killBufferCommands.ts
-"""Leo's kill-buffer commands."""
+/**
+ * Leo's kill-buffer commands.
+ */
 //@+<< killBufferCommands imports & annotations >>
 //@+node:felix.20240612230730.2: ** << killBufferCommands imports & annotations >>
-from __future__ import annotations
-from collections.abc import Callable
-from typing import Any, Optional, TYPE_CHECKING
-from leo.core import leoGlobals as g
-from leo.commands.baseCommands import BaseEditCommandsClass
-
-if TYPE_CHECKING:  # pragma: no cover
-    from leo.core.leoCommands import Commands as Cmdr
-    from leo.core.leoGui import LeoKeyEvent
-    from leo.core.leoNodes import Position
-    from leo.plugins.qt_text import QTextEditWrapper as Wrapper
+import * as g from '../core/leoGlobals';
+import { new_cmd_decorator } from '../core/decorators';
+import { Commands } from '../core/leoCommands';
+import { Position } from '../core/leoNodes';
+import { BaseEditCommandsClass } from './baseCommands';
 //@-<< killBufferCommands imports & annotations >>
 
-def cmd(name: str) -> Callable:
-    """Command decorator for the KillBufferCommandsClass class."""
-    return g.new_cmd_decorator(name, ['c', 'killBufferCommands',])
+/**
+ * Command decorator for the KillBufferCommandsClass class.
+ */
+function cmd(p_name: string, p_doc: string) {
+    return new_cmd_decorator(p_name, p_doc, ['c', 'killBufferCommands']);
+}
 
 //@+others
+//@+node:felix.20240613222219.1: ** class KillBufferIterClass
+/**
+ * Returns a list of positions in a subtree, possibly including the root of the subtree.
+ */
+class KillBufferIterClass {
+
+    public c: Commands;
+    public index: number;
+
+    //@+others
+    //@+node:felix.20240613222219.2: *3* __init__ & __iter__ (iterateKillBuffer)
+    /**
+     * Ctor for KillBufferIterClass class. 
+     */
+    constructor(c: Commands) {
+        this.c = c;
+        this.index = 0; // The index of the next item to be returned.
+    }
+
+    [Symbol.iterator]() {
+        return this;
+    }
+    //@+node:felix.20240613222219.3: *3* __next__
+    next(): { value: string | null, done: boolean } {
+        const commands = this.c.killBufferCommands;
+        const aList = g.app.globalKillBuffer;
+
+        if (!aList) {
+            this.index = 0;
+            return { value: null, done: true };
+        }
+
+        let i: number;
+        if (commands.reset == null) {
+            i = this.index;
+        } else {
+            i = commands.reset;
+            commands.reset = null;
+        }
+
+        if (i < 0 || i >= aList.length) {
+            i = 0;
+        }
+
+        const val = aList[i];
+        this.index = i + 1;
+
+        return { value: val, done: false };
+    }
+    //@-others
+
+}
 //@+node:felix.20240612230730.3: ** class KillBufferCommandsClass
-class KillBufferCommandsClass(BaseEditCommandsClass):
-    """A class to manage the kill buffer."""
+/**
+ * A class to manage the kill buffer.
+ */
+export class KillBufferCommandsClass extends BaseEditCommandsClass {
+
+    public kbiterator: KillBufferIterClass; // Instance of KillBufferIterClass
+    public last_clipboard: string | null;
+    public lastYankP: Position | undefined; // Assuming 'Position' type as 'any'
+    public reset: number | null;
+    public addWsToKillRing: boolean | undefined;
+
     //@+others
     //@+node:felix.20240612230730.4: *3* kill.ctor & reloadSettings
-    def __init__(self, c: Cmdr) -> None:
-        """Ctor for KillBufferCommandsClass class."""
-        # pylint: disable=super-init-not-called
-        self.c = c
-        self.kbiterator = self.iterateKillBuffer()  # An instance of KillBufferIterClass.
-        # For interacting with system clipboard.
-        self.last_clipboard: str = None
-        # Position of the last item returned by iterateKillBuffer.
-        self.lastYankP: Position = None
-        # The index of the next item to be returned in
-        # g.app.globalKillBuffer by iterateKillBuffer.
-        self.reset: int = None
-        self.reloadSettings()
+    constructor(c: any) {
+        super(c); // Call the parent class constructor
+        this.c = c;
+        this.kbiterator = this.iterateKillBuffer(); // An instance of KillBufferIterClass.
+        // For interacting with system clipboard.
+        this.last_clipboard = null;
+        // Position of the last item returned by iterateKillBuffer.
+        this.lastYankP = undefined;
+        // The index of the next item to be returned in
+        // g.app.globalKillBuffer by iterateKillBuffer.
+        this.reset = null;
+        this.reloadSettings();
+    }
 
-    def reloadSettings(self) -> None:
-        """KillBufferCommandsClass.reloadSettings."""
-        c = self.c
-        self.addWsToKillRing = c.config.getBool('add-ws-to-kill-ring')
+    reloadSettings(): void {
+        /** KillBufferCommandsClass.reloadSettings. */
+        const c = this.c;
+        this.addWsToKillRing = c.config.getBool('add-ws-to-kill-ring');
+    }
     //@+node:felix.20240612230730.5: *3* addToKillBuffer
-    def addToKillBuffer(self, text: str) -> None:
-        """
-        Insert the text into the kill buffer if force is True or
-        the text contains something other than whitespace.
-        """
-        if self.addWsToKillRing or text.strip():
-            g.app.globalKillBuffer = [z for z in g.app.globalKillBuffer if z != text]
-            g.app.globalKillBuffer.insert(0, text)
+    /**
+     * Insert the text into the kill buffer if force is True or
+     * the text contains something other than whitespace.
+     */
+    addToKillBuffer(text: string): void {
+        if (this.addWsToKillRing || text.trim()) {
+            (global as any).g.app.globalKillBuffer = (global as any).g.app.globalKillBuffer.filter((z: string) => z !== text);
+            (global as any).g.app.globalKillBuffer.unshift(text);
+        }
+    }
     //@+node:felix.20240612230730.6: *3* backwardKillSentence
-    @cmd('backward-kill-sentence')
-    def backwardKillSentence(self, event: LeoKeyEvent) -> None:
-        """Kill the previous sentence."""
-        w = self.editWidget(event)
-        if not w:
-            return
-        s = w.getAllText()
-        ins = w.getInsertPoint()
-        i = s.rfind('.', ins)
-        if i == -1:
-            return
-        undoType = 'backward-kill-sentence'
-        self.beginCommand(w, undoType=undoType)
-        i2 = s.rfind('.', 0, i) + 1
-        self.killHelper(event, i2, i + 1, w, undoType=undoType)
-        w.setInsertPoint(i2)
-        self.endCommand(changed=True, setLabel=True)
+    @cmd('backward-kill-sentence', 'Kill the previous sentence.')
+    public backwardKillSentence(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        const i = s.lastIndexOf('.', ins);
+        if (i === -1) {
+            return;
+        }
+        const undoType = 'backward-kill-sentence';
+        this.beginCommand(w, undoType);
+        const i2 = s.lastIndexOf('.', i - 1) + 1;
+        this.killHelper(i2, i + 1, w, undoType);
+        w.setInsertPoint(i2);
+        this.endCommand(undefined, true, true);
+    }
     //@+node:felix.20240612230730.7: *3* backwardKillWord & killWord
-    @cmd('backward-kill-word')
-    def backwardKillWord(self, event: LeoKeyEvent) -> None:
-        """Kill the previous word."""
-        c = self.c
-        w = self.editWidget(event)
-        if w:
-            self.beginCommand(w, undoType='backward-kill-word')
-            c.editCommands.backwardWord(event)
-            self.killWordHelper(event)
+    @cmd('backward-kill-word', 'Kill the previous word.')
+    public backwardKillWord(): void {
+        const c = this.c;
+        const w = this.editWidget();
+        if (w) {
+            this.beginCommand(w, 'backward-kill-word');
+            c.editCommands.backwardWord();
+            this.killWordHelper();
+        }
+    }
+    @cmd('kill-word', 'Kill the word containing the cursor.')
+    public killWord(): void {
+        const w = this.editWidget();
+        if (w) {
+            this.beginCommand(w, 'kill-word');
+            this.killWordHelper();
+        }
+    }
 
-    @cmd('kill-word')
-    def killWord(self, event: LeoKeyEvent) -> None:
-        """Kill the word containing the cursor."""
-        w = self.editWidget(event)
-        if w:
-            self.beginCommand(w, undoType='kill-word')
-            self.killWordHelper(event)
-
-    def killWordHelper(self, event: LeoKeyEvent) -> None:
-        c = self.c
-        e = c.editCommands
-        w = e.editWidget(event)
-        if w:
-            # self.killWs(event)
-            e.extendToWord(event)
-            i, j = w.getSelectionRange()
-            self.killHelper(event, i, j, w)
-            self.endCommand(changed=True, setLabel=True)
+    private killWordHelper(): void {
+        const c = this.c;
+        const e = c.editCommands;
+        const w = e.editWidget();
+        if (w) {
+            // this.killWs();
+            e.extendToWord();
+            const [i, j] = w.getSelectionRange();
+            this.killHelper(i, j, w);
+            this.endCommand(undefined, true, true);
+        }
+    }
     //@+node:felix.20240612230730.8: *3* clearKillRing
-    @cmd('clear-kill-ring')
-    def clearKillRing(self, event: LeoKeyEvent = None) -> None:
-        """Clear the kill ring."""
-        g.app.globalKillbuffer = []
+    @cmd('clear-kill-ring', 'Clear the kill ring.')
+    public clearKillRing(): void {
+        g.app.globalKillBuffer = [];
+    }
     //@+node:felix.20240612230730.9: *3* getClipboard
-    def getClipboard(self) -> Optional[str]:
-        """Return the contents of the clipboard."""
-        try:
-            ctxt = g.app.gui.getTextFromClipboard()
-            if not g.app.globalKillBuffer or ctxt != self.last_clipboard:
-                self.last_clipboard = ctxt
-                if not g.app.globalKillBuffer or g.app.globalKillBuffer[0] != ctxt:
-                    return ctxt
-        except Exception:
-            g.es_exception()
-        return None
-    //@+node:felix.20240612230730.10: *3* class KillBufferIterClass
-    class KillBufferIterClass:
-        """Returns a list of positions in a subtree, possibly including the root of the subtree."""
-        //@+others
-        //@+node:felix.20240612230730.11: *4* __init__ & __iter__ (iterateKillBuffer)
-        def __init__(self, c: Cmdr) -> None:
-            """Ctor for KillBufferIterClass class."""
-            self.c = c
-            self.index = 0  # The index of the next item to be returned.
-
-        def __iter__(self) -> Any:
-            return self
-        //@+node:felix.20240612230730.12: *4* __next__
-        def __next__(self) -> str:
-            commands = self.c.killBufferCommands
-            aList = g.app.globalKillBuffer  # commands.killBuffer
-            if not aList:
-                self.index = 0
-                return None
-            if commands.reset is None:
-                i = self.index
-            else:
-                i = commands.reset
-                commands.reset = None
-            if i < 0 or i >= len(aList):
-                i = 0
-            val = aList[i]
-            self.index = i + 1
-            return val
-
-        //@-others
-
-    def iterateKillBuffer(self) -> KillBufferIterClass:
-        return self.KillBufferIterClass(self.c)
+    /**
+     * Return the contents of the clipboard. 
+     */
+    public async getClipboard(): Promise<string | null> {
+        try {
+            const ctxt = await g.app.gui.asyncGetTextFromClipboard();
+            if (!g.app.globalKillBuffer || ctxt !== this.last_clipboard) {
+                this.last_clipboard = ctxt;
+                if (!g.app.globalKillBuffer || g.app.globalKillBuffer[0] !== ctxt) {
+                    return ctxt;
+                }
+            }
+        } catch (e) {
+            g.es_exception();
+        }
+        return null;
+    }
+    //@+node:felix.20240613225718.1: *3* iterateKillBuffer
+    public iterateKillBuffer(): KillBufferIterClass {
+        return new KillBufferIterClass(this.c);
+    }
     //@+node:felix.20240612230730.13: *3* ec.killHelper
-    def killHelper(self,
-        event: LeoKeyEvent, frm: int, to: int, w: Wrapper, undoType: str = None,
-    ) -> None:
-        """
-        A helper method for all kill commands except kill-paragraph commands.
-        """
-        c = self.c
-        w = self.editWidget(event)
-        if not w:
-            return
-        # Extend (frm, to) if it spans a line.
-        i, j = w.getSelectionRange()
-        s = w.get(i, j)
-        if s.find('\n') > -1:
-            frm, to = i, j
-        s = w.get(frm, to)
-        if undoType:
-            self.beginCommand(w, undoType=undoType)
-        self.addToKillBuffer(s)
-        g.app.gui.replaceClipboardWith(s)
-        w.delete(frm, to)
-        w.setInsertPoint(frm)
-        if undoType:
-            self.endCommand(changed=True, setLabel=True)
-        g.app.gui.set_focus(c, w)  # 2607
+    /**
+     * A helper method for all kill commands except kill-paragraph commands.
+     */
+    public killHelper(
+        frm: number,
+        to: number,
+        w: any,
+        undoType?: string,
+    ): void {
+
+        const c = this.c;
+        w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        // Extend (frm, to) if it spans a line.
+        const [i, j] = w.getSelectionRange();
+        let s = w.get(i, j);
+        if (s.indexOf('\n') > -1) {
+            frm = i;
+            to = j;
+        }
+        s = w.get(frm, to);
+        if (undoType) {
+            this.beginCommand(w, undoType);
+        }
+        this.addToKillBuffer(s);
+        void g.app.gui.replaceClipboardWith(s);
+        w.delete(frm, to);
+        w.setInsertPoint(frm);
+        if (undoType) {
+            this.endCommand(undefined, true, true);
+        }
+        g.app.gui.set_focus(c, w);  // 2607
+    }
     //@+node:felix.20240612230730.14: *3* ec.killParagraphHelper
-    def killParagraphHelper(self,
-        event: LeoKeyEvent, frm: int, to: int, undoType: str = None,
-    ) -> None:
-        """A helper method for kill-paragraph commands."""
-        w = self.editWidget(event)
-        if not w:
-            return
-        s = w.get(frm, to)
-        if undoType:
-            self.beginCommand(w, undoType=undoType)
-        self.addToKillBuffer(s)
-        g.app.gui.replaceClipboardWith(s)
-        w.delete(frm, to)
-        w.setInsertPoint(frm)
-        if undoType:
-            self.endCommand(changed=True, setLabel=True)
+    /**
+     * A helper method for kill-paragraph commands. 
+     */
+    private killParagraphHelper(
+        frm: number,
+        to: number,
+        undoType?: string,
+    ): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.get(frm, to);
+        if (undoType) {
+            this.beginCommand(w, undoType);
+        }
+        this.addToKillBuffer(s);
+        void g.app.gui.replaceClipboardWith(s);
+        w.delete(frm, to);
+        w.setInsertPoint(frm);
+        if (undoType) {
+            this.endCommand(undefined, true, true);
+        }
+    }
     //@+node:felix.20240612230730.15: *3* ec.killToEndOfLine
-    @cmd('kill-to-end-of-line')
-    def killToEndOfLine(self, event: LeoKeyEvent) -> None:
-        """Kill from the cursor to end of the line."""
-        w = self.editWidget(event)
-        if not w:
-            return
-        s = w.getAllText()
-        ins = w.getInsertPoint()
-        i, j = g.getLine(s, ins)
-        if ins >= len(s) and g.match(s, j - 1, '\n'):
-            # Kill the trailing newline of the body text.
-            i = max(0, len(s) - 1)
-            j = len(s)
-        elif ins + 1 < j and s[ins : j - 1].strip() and g.match(s, j - 1, '\n'):
-            # Kill the line, but not the newline.
-            i, j = ins, j - 1
-        elif g.match(s, j - 1, '\n'):
-            i = ins  # Kill the newline in the present line.
-        else:
-            i = j
-        if i < j:
-            self.killHelper(event, i, j, w, undoType='kill-to-end-of-line')
+    @cmd('kill-to-end-of-line', 'Kill from the cursor to end of the line. ')
+    public killToEndOfLine(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        let [i, j] = g.getLine(s, ins);
+        if (ins >= s.length && g.match(s, j - 1, '\n')) {
+            // Kill the trailing newline of the body text.
+            i = Math.max(0, s.length - 1);
+            j = s.length;
+        } else if (ins + 1 < j && s.substring(ins, j - 1).trim() && g.match(s, j - 1, '\n')) {
+            // Kill the line, but not the newline.
+            [i, j] = [ins, j - 1];
+        } else if (g.match(s, j - 1, '\n')) {
+            i = ins;  // Kill the newline in the present line.
+        } else {
+            i = j;
+        }
+        if (i < j) {
+            this.killHelper(i, j, w, 'kill-to-end-of-line');
+        }
+    }
     //@+node:felix.20240612230730.16: *3* ec.killLine
-    @cmd('kill-line')
-    def killLine(self, event: LeoKeyEvent) -> None:
-        """Kill the line containing the cursor."""
-        w = self.editWidget(event)
-        if not w:
-            return
-        s = w.getAllText()
-        ins = w.getInsertPoint()
-        i, j = g.getLine(s, ins)
-        if ins >= len(s) and g.match(s, j - 1, '\n'):
-            # Kill the trailing newline of the body text.
-            i = max(0, len(s) - 1)
-            j = len(s)
-        elif j > i + 1 and g.match(s, j - 1, '\n'):
-            # Kill the line, but not the newline.
-            j -= 1
-        else:
-            pass  # Kill the newline in the present line.
-        self.killHelper(event, i, j, w, undoType='kill-line')
+    @cmd('kill-line', 'Kill the line containing the cursor.')
+    public killLine(): void {
+        /** Kill the line containing the cursor. */
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        let [i, j] = g.getLine(s, ins);
+        if (ins >= s.length && g.match(s, j - 1, '\n')) {
+            // Kill the trailing newline of the body text.
+            i = Math.max(0, s.length - 1);
+            j = s.length;
+        } else if (j > i + 1 && g.match(s, j - 1, '\n')) {
+            // Kill the line, but not the newline.
+            j -= 1;
+        } else {
+            // Kill the newline in the present line.
+        }
+        this.killHelper(i, j, w, 'kill-line');
+    }
     //@+node:felix.20240612230730.17: *3* killRegion & killRegionSave
-    @cmd('kill-region')
-    def killRegion(self, event: LeoKeyEvent) -> None:
-        """Kill the text selection."""
-        w = self.editWidget(event)
-        if not w:
-            return
-        i, j = w.getSelectionRange()
-        if i == j:
-            return
-        s = w.getSelectedText()
-        self.beginCommand(w, undoType='kill-region')
-        w.delete(i, j)
-        self.endCommand(changed=True, setLabel=True)
-        self.addToKillBuffer(s)
-        g.app.gui.replaceClipboardWith(s)
+    @cmd('kill-region', 'Kill the text selection.')
+    public killRegion(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const [i, j] = w.getSelectionRange();
+        if (i === j) {
+            return;
+        }
+        const s = w.getSelectedText();
+        this.beginCommand(w, 'kill-region');
+        w.delete(i, j);
+        this.endCommand(undefined, true, true);
+        this.addToKillBuffer(s);
+        void g.app.gui.replaceClipboardWith(s);
+    }
 
-    @cmd('kill-region-save')
-    def killRegionSave(self, event: LeoKeyEvent) -> None:
-        """Add the selected text to the kill ring, but do not delete it."""
-        w = self.editWidget(event)
-        if not w:
-            return
-        i, j = w.getSelectionRange()
-        if i == j:
-            return
-        s = w.getSelectedText()
-        self.addToKillBuffer(s)
-        g.app.gui.replaceClipboardWith(s)
+    @cmd(
+        'kill-region-save',
+        'Add the selected text to the kill ring, but do not delete it.'
+    )
+    public killRegionSave(): void {
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const [i, j] = w.getSelectionRange();
+        if (i === j) {
+            return;
+        }
+        const s = w.getSelectedText();
+        this.addToKillBuffer(s);
+        void g.app.gui.replaceClipboardWith(s);
+    }
     //@+node:felix.20240612230730.18: *3* ec.killSentence
-    @cmd('kill-sentence')
-    def killSentence(self, event: LeoKeyEvent) -> None:
-        """Kill the sentence containing the cursor."""
-        w = self.editWidget(event)
-        if not w:
-            return
-        s = w.getAllText()
-        ins = w.getInsertPoint()
-        i = s.find('.', ins)
-        if i == -1:
-            return
-        undoType = 'kill-sentence'
-        self.beginCommand(w, undoType=undoType)
-        i2 = s.rfind('.', 0, ins) + 1
-        self.killHelper(event, i2, i + 1, w, undoType=undoType)
-        w.setInsertPoint(i2)
-        self.endCommand(changed=True, setLabel=True)
+    @cmd('kill-sentence', 'Kill the sentence containing the cursor.')
+    public killSentence(): void {
+        /** Kill the sentence containing the cursor. */
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        const i = s.indexOf('.', ins);
+        if (i === -1) {
+            return;
+        }
+        const undoType = 'kill-sentence';
+        this.beginCommand(w, undoType);
+        const i2 = s.lastIndexOf('.', ins) + 1;
+        this.killHelper(i2, i + 1, w, undoType);
+        w.setInsertPoint(i2);
+        this.endCommand(undefined, true, true);
+    }
     //@+node:felix.20240612230730.19: *3* killWs
-    @cmd('kill-ws')
-    def killWs(self, event: LeoKeyEvent, undoType: str = 'kill-ws') -> None:
-        """Kill whitespace."""
-        ws = ''
-        w = self.editWidget(event)
-        if not w:
-            return
-        s = w.getAllText()
-        i = j = ins = w.getInsertPoint()
-        while i >= 0 and s[i] in (' ', '\t'):
-            i -= 1
-        if i < ins:
-            i += 1
-        while j < len(s) and s[j] in (' ', '\t'):
-            j += 1
-        if j > i:
-            ws = s[i:j]
-            w.delete(i, j)
-            if undoType:
-                self.beginCommand(w, undoType=undoType)
-            if self.addWsToKillRing:
-                self.addToKillBuffer(ws)
-            if undoType:
-                self.endCommand(changed=True, setLabel=True)
+    @cmd('kill-ws', 'Kill whitespace.')
+    public killWs(undoType: string = 'kill-ws'): void {
+        let ws = '';
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const s = w.getAllText();
+        let i = w.getInsertPoint();
+        let j = i;
+        const ins = i;
+
+        while (i >= 0 && (s[i] === ' ' || s[i] === '\t')) {
+            i -= 1;
+        }
+        if (i < ins) {
+            i += 1;
+        }
+        while (j < s.length && (s[j] === ' ' || s[j] === '\t')) {
+            j += 1;
+        }
+        if (j > i) {
+            ws = s.substring(i, j);
+            w.delete(i, j);
+            if (undoType) {
+                this.beginCommand(w, undoType);
+            }
+            if (this.addWsToKillRing) {
+                this.addToKillBuffer(ws);
+            }
+            if (undoType) {
+                this.endCommand(undefined, true, true);
+            }
+        }
+    }
     //@+node:felix.20240612230730.20: *3* yank & yankPop
-    @cmd('yank')
-    @cmd('yank')
-    def yank(self, event: LeoKeyEvent = None) -> None:
-        """Insert the next entry of the kill ring."""
-        self.yankHelper(event, pop=False)
+    @cmd('yank', 'Insert the next entry of the kill ring.')
+    public async yank(): Promise<void> {
+        /** Insert the next entry of the kill ring. */
+        await this.yankHelper(false);
+    }
 
-    @cmd('yank-pop')
-    def yankPop(self, event: LeoKeyEvent = None) -> None:
-        """Insert the first entry of the kill ring."""
-        self.yankHelper(event, pop=True)
+    @cmd('yank-pop', 'Insert the first entry of the kill ring.')
+    public async yankPop(): Promise<void> {
+        /** Insert the first entry of the kill ring. */
+        await this.yankHelper(true);
+    }
 
-    def yankHelper(self, event: LeoKeyEvent, pop: bool) -> None:
-        """
-        Helper for yank and yank-pop:
-        pop = False: insert the first entry of the kill ring.
-        pop = True:  insert the next entry of the kill ring.
-        """
-        c = self.c
-        w = self.editWidget(event)
-        if not w:
-            return
-        current = c.p
-        if not current:
-            return
-        text = w.getAllText()
-        i, j = w.getSelectionRange()
-        clip_text = self.getClipboard()
-        if not g.app.globalKillBuffer and not clip_text:
-            return
-        undoType = 'yank-pop' if pop else 'yank'
-        self.beginCommand(w, undoType=undoType)
-        try:
-            if not pop or self.lastYankP and self.lastYankP != current:
-                self.reset = 0
-            s = self.kbiterator.__next__()
-            if s is None:
-                s = clip_text or ''
-            if i != j:
-                w.deleteTextSelection()
-            if s != s.lstrip():  # s contains leading whitespace.
-                i2, j2 = g.getLine(text, i)
-                k = g.skip_ws(text, i2)
-                if i2 < i <= k:
-                    # Replace the line's leading whitespace by s's leading whitespace.
-                    w.delete(i2, k)
-                    i = i2
-            w.insert(i, s)
-            # Fix bug 1099035: Leo yank and kill behavior not quite the same as emacs.
-            # w.setSelectionRange(i,i+len(s),insert=i+len(s))
-            w.setInsertPoint(i + len(s))
-            self.lastYankP = current.copy()
-        finally:
-            self.endCommand(changed=True, setLabel=True)
+    private async yankHelper(pop: boolean): Promise<void> {
+        /**
+         * Helper for yank and yank-pop:
+         * pop = False: insert the first entry of the kill ring.
+         * pop = True:  insert the next entry of the kill ring.
+         */
+        const c = this.c;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const current: Position = c.p;
+        if (!current) {
+            return;
+        }
+        const text = w.getAllText();
+        let [i, j] = w.getSelectionRange();
+        const clip_text = await this.getClipboard();
+        if (!g.app.globalKillBuffer && !clip_text) {
+            return;
+        }
+        const undoType = pop ? 'yank-pop' : 'yank';
+        this.beginCommand(w, undoType);
+        try {
+            if (!pop || this.lastYankP && this.lastYankP !== current) {
+                this.reset = 0;
+            }
+            let s = this.kbiterator.next().value;
+            if (s == null) {
+                s = clip_text || '';
+            }
+            if (i !== j) {
+                w.deleteTextSelection();
+            }
+            if (s !== s.trimStart()) {  // s contains leading whitespace.
+                const [i2, j2] = g.getLine(text, i);
+                const k = g.skip_ws(text, i2);
+                if (i2 < i && i <= k) {
+                    // Replace the line's leading whitespace by s's leading whitespace.
+                    w.delete(i2, k);
+                    i = i2;
+                }
+            }
+            w.insert(i, s);
+            // Fix bug 1099035: Leo yank and kill behavior not quite the same as emacs.
+            // w.setSelectionRange(i,i+len(s),insert=i+len(s))
+            w.setInsertPoint(i + s.length);
+            this.lastYankP = current.copy();
+        } finally {
+            this.endCommand(undefined, true, true);
+        }
+    }
     //@+node:felix.20240612230730.21: *3* zapToCharacter
-    @cmd('zap-to-character')
-    def zapToCharacter(self, event: LeoKeyEvent) -> None:
-        """Kill characters from the insertion point to a given character."""
-        k = self.c.k
-        w = self.editWidget(event)
-        if not w:
-            return
-        state = k.getState('zap-to-char')
-        if state == 0:
-            k.setLabelBlue('Zap To Character: ')
-            k.setState('zap-to-char', 1, handler=self.zapToCharacter)
-        else:
-            ch = event.char if event else ' '
-            k.resetLabel()
-            k.clearState()
-            s = w.getAllText()
-            ins = w.getInsertPoint()
-            i = s.find(ch, ins)
-            if i == -1:
-                return
-            self.beginCommand(w, undoType='zap-to-char')
-            self.addToKillBuffer(s[ins:i])
-            g.app.gui.replaceClipboardWith(s[ins:i])  # Support for proper yank.
-            w.setAllText(s[:ins] + s[i:])
-            w.setInsertPoint(ins)
-            self.endCommand(changed=True, setLabel=True)
+    @cmd('zap-to-character', 'Kill characters from the insertion point to a given character.')
+    zapToCharacter(): void {
+        const k = this.c.k;
+        const w = this.editWidget();
+        if (!w) {
+            return;
+        }
+        const state = k.getState('zap-to-char');
+        if (state === 0) {
+            k.setLabelBlue('Zap To Character: ');
+            k.setState('zap-to-char', 1, this.zapToCharacter.bind(this));
+        } else {
+            const ch = ' ';
+            k.resetLabel();
+            k.clearState();
+            const s = w.getAllText();
+            const ins = w.getInsertPoint();
+            const i = s.indexOf(ch, ins);
+            if (i === -1) {
+                return;
+            }
+            this.beginCommand(w, 'zap-to-char');
+            this.addToKillBuffer(s.substring(ins, i));
+            void g.app.gui.replaceClipboardWith(s.substring(ins, i));  // Support for proper yank.
+            w.setAllText(s.substring(0, ins) + s.substring(i));
+            w.setInsertPoint(ins);
+            this.endCommand(undefined, true, true);
+        }
+    }
     //@-others
+
+}
 //@-others
 //@-leo

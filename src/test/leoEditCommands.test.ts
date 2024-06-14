@@ -32,26 +32,6 @@ suite('Test cases for editCommands.ts', () => {
     });
 
     //@+others
-    //@+node:felix.20230829234252.1: *3* setUp
-    /**
-     * setUp for TestFind class
-     */
-    function setUp() {
-
-        // super().setUp() // Done in suite init
-        const c = self.c;
-
-        // Create top-level parent node.
-        self.parent_p = self.root_p.insertAsLastChild();
-        // Create children of the parent node.
-        self.tempNode = self.parent_p.insertAsLastChild();
-        self.before_p = self.parent_p.insertAsLastChild();
-        self.after_p = self.parent_p.insertAsLastChild();
-        self.tempNode.h = 'tempNode';
-        self.before_p.h = 'before';
-        self.after_p.h = 'after';
-        c.selectPosition(self.tempNode);
-    }
     //@+node:felix.20230829231556.1: *3* run_test
     /**
      * A helper for many commands tests.
@@ -103,6 +83,26 @@ suite('Test cases for editCommands.ts', () => {
 
         assert.strictEqual(self.tempNode.b, self.after_p.b, command_name);
     };
+    //@+node:felix.20230829234252.1: *3* setUp
+    /**
+     * setUp for TestFind class
+     */
+    function setUp() {
+
+        // super().setUp() // Done in suite init
+        const c = self.c;
+
+        // Create top-level parent node.
+        self.parent_p = self.root_p.insertAsLastChild();
+        // Create children of the parent node.
+        self.tempNode = self.parent_p.insertAsLastChild();
+        self.before_p = self.parent_p.insertAsLastChild();
+        self.after_p = self.parent_p.insertAsLastChild();
+        self.tempNode.h = 'tempNode';
+        self.before_p.h = 'before';
+        self.after_p.h = 'after';
+        c.selectPosition(self.tempNode);
+    }
     //@+node:felix.20230715235308.1: *3* extend-to-word
     /**
      * Test case for extend-to-word

@@ -638,14 +638,14 @@ export class CommanderEditCommands {
          */
         const ends_paragraph = (s: string): boolean => {
             return !s.trim();
-        }
+        };
 
         /**
          * Return True if s is a single-line paragraph. 
          */
         const single_line_paragraph = (s: string): boolean => {
             return s.startsWith('@') || ['"""', "'''"].includes(s.trim());
-        }
+        };
         //@+node:felix.20240612234518.3: *4* function: find_bound_paragraph
         /**
          * Return the lines of a paragraph to be reformatted.
@@ -709,7 +709,7 @@ export class CommanderEditCommands {
             }
 
             return [undefined, undefined, undefined];
-        }
+        };
         //@+node:felix.20240612234518.4: *4* function: rp_get_args
         /**
          * Compute and return oldSel, oldYview, original, pageWidth, tabWidth. 
@@ -729,7 +729,7 @@ export class CommanderEditCommands {
             const oldSel = w.getSelectionRange();
             const oldYview = w.getYScrollPosition();
             return [oldSel, oldYview, original, pageWidth, tabWidth];
-        }
+        };
         //@+node:felix.20240612234518.5: *4* function: rp_get_leading_ws
         /**
          * Compute and return indents and leading_ws. 
@@ -749,7 +749,7 @@ export class CommanderEditCommands {
                 leading_ws[1] = leading_ws[0];
             }
             return [indents, leading_ws];
-        }
+        };
         //@+node:felix.20240612234518.6: *4* function: rp_reformat
         const rp_reformat = (
             c: Commands,
@@ -799,7 +799,7 @@ export class CommanderEditCommands {
             p.v.b = s;  // p.b would cause a redraw.
             u.afterChangeBody(p, undoType, bunch);
             w.setXScrollPosition(0);  // Never scroll horizontally.
-        }
+        };
         //@+node:felix.20240612234518.7: *4* function: rp_wrap_all_lines
         const rp_wrap_all_lines = (
             c: Commands,
@@ -859,7 +859,7 @@ export class CommanderEditCommands {
                 result += '\n';
             }
             return result;
-        }
+        };
         //@+node:felix.20240612234518.8: *4* function: startsParagraph
         /**
          * Return True if line s starts a paragraph. 
