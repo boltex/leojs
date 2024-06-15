@@ -133,32 +133,25 @@ export let global_commands_dict: {
     } & { __ivars__: string[] };
 };
 
+/**
+ * Keys are class names, values are attribute chains.
+ */
 export const cmd_instance_dict: { [key: string]: string[] } = {
-    // Keys are class names, values are attribute chains.
-    AbbrevCommandsClass: ['c', 'abbrevCommands'],
     AtFile: ['c', 'atFileCommands'],
-    AutoCompleterClass: ['c', 'k', 'autoCompleter'],
     ChapterController: ['c', 'chapterController'],
     Commands: ['c'],
-    ControlCommandsClass: ['c', 'controlCommands'],
-    DebugCommandsClass: ['c', 'debugCommands'],
     EditCommandsClass: ['c', 'editCommands'],
     EditFileCommandsClass: ['c', 'editFileCommands'],
     FileCommands: ['c', 'fileCommands'],
     HelpCommandsClass: ['c', 'helpCommands'],
     KeyHandlerClass: ['c', 'k'],
-    KeyHandlerCommandsClass: ['c', 'keyHandlerCommands'],
     KillBufferCommandsClass: ['c', 'killBufferCommands'],
     LeoApp: ['g', 'app'],
     LeoFind: ['c', 'findCommands'],
     LeoImportCommands: ['c', 'importCommands'],
-    // 'MacroCommandsClass': ['c', 'macroCommands'],
-    PrintingController: ['c', 'printingController'],
     RectangleCommandsClass: ['c', 'rectangleCommands'],
     RstCommands: ['c', 'rstCommands'],
-    SpellCommandsClass: ['c', 'spellCommands'],
     Undoer: ['c', 'undoer'],
-    VimCommands: ['c', 'vimCommands'],
 };
 
 //@-<< define global decorator dicts >>

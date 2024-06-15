@@ -46,6 +46,7 @@ import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
 import * as typescript from 'typescript';
+import { KillBufferCommandsClass } from '../commands/killBufferCommands';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -247,12 +248,8 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: any;// CommanderWrapper;//  Record<string, any>; // IS A DATABASE 
+    public db: any; // CommanderWrapper; //  Record<string, any>; // IS A DATABASE 
     public bufferCommands: any = undefined;
-    public chapterCommands: any = undefined;
-    public controlCommands: any = undefined;
-    public convertCommands: any = undefined;
-    public debugCommands: any = undefined;
     public editFileCommands: EditFileCommandsClass;
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
@@ -260,16 +257,8 @@ export class Commands {
     public helpCommands: HelpCommandsClass;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
-    public keyHandlerCommands: any = undefined;
-    public killBufferCommands: any = undefined;
-    public macroCommands: any = undefined;
-    public miniBufferWidget: any = undefined; // NOT USED IN LEOJS
-    public printingController: any = undefined;
-    public queryReplaceCommands: any = undefined;
+    public killBufferCommands: KillBufferCommandsClass;
     public rectangleCommands: any = undefined;
-    public searchCommands: any = undefined;
-    public spellCommands: any = undefined;
-    public vimCommands: any = undefined;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
     public quicksearch_controller: QuickSearchController | undefined;
@@ -340,7 +329,7 @@ export class Commands {
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
         this.helpCommands = new HelpCommandsClass(c);
-
+        this.killBufferCommands = new KillBufferCommandsClass(c);
         this.rstCommands = new RstCommands(c);
 
         this.undoer = new Undoer(c);
