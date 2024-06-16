@@ -603,6 +603,7 @@
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
 <v t="felix.20221220233857.1"><vh>@file src/commands/baseCommands.ts</vh></v>
+<v t="felix.20240615152154.1"><vh>@file src/commands/bufferCommands.ts</vh></v>
 <v t="felix.20220414231314.1"><vh>@file src/commands/commanderEditCommands.ts</vh></v>
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
 <v t="felix.20220612234816.1"><vh>@file src/commands/commanderHelpCommands.ts</vh></v>
@@ -612,6 +613,7 @@
 <v t="felix.20231224164322.1"><vh>@file src/commands/helpCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
 <v t="felix.20240612230730.1"><vh>@file src/commands/killBufferCommands.ts</vh></v>
+<v t="felix.20240615151733.1"><vh>@file src/commands/rectangleCommands.ts</vh></v>
 </v>
 <v t="felix.20221119204248.1"><vh>Gui base classes</vh>
 <v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>

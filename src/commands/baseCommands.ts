@@ -66,7 +66,7 @@ export class BaseEditCommandsClass {
      * Handles undo only if we are in the body pane.
      */
     public endCommand(
-        label: string | undefined,
+        label = "",
         changed = true,
         setLabel = true
     ): void {

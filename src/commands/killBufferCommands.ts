@@ -235,7 +235,7 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     /**
      * A helper method for kill-paragraph commands. 
      */
-    private killParagraphHelper(
+    public killParagraphHelper(
         frm: number,
         to: number,
         undoType?: string,
