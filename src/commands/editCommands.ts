@@ -2657,7 +2657,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public extendToSentence(): void {
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         const s = w.getAllText();
         const n = s.length;
@@ -3023,7 +3023,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const c = this.c;
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         c.widgetWantsFocusNow(w);
         const s = w.getAllText();
@@ -3352,7 +3352,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         /**  */
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         const txt = w.getSelectedText();
         let lines = 1;
@@ -3421,7 +3421,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const c = this.c;
         const w = this.editWidget();
         if (!w) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         let s = w.getAllText();
         const [sel_1, sel_2] = w.getSelectionRange();
@@ -3498,7 +3498,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     private caseHelper(way: string, undoType: string): void {
         const w = this.editWidget();
         if (!w || !w.hasSelection()) {
-            return;  // pragma: no cover (defensive)
+            return;
         }
         this.beginCommand(w, undoType);
         const s = w.getAllText();
@@ -3672,13 +3672,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240613205401.3: *4* ec.sortColumns
     @cmd('sort-columns', 'Sort lines of selected text using only lines in the given columns to do the comparison.')
     sortColumns(): void {
-        /**
-         * Sort lines of selected text using only lines in the given columns to do
-         * the comparison.
-         */
         const w = this.editWidget();
         if (!this._chckSel()) {
-            return; // pragma: no cover (defensive)
+            return;
         }
         const s = w.getAllText();
 
@@ -3689,19 +3685,27 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         this.beginCommand(w, 'sort-columns');
         try {
             const [sel_1, sel_2] = w.getSelectionRange();
-            const [sint1, sint2] = g.convertPythonIndexToRowCol(s, sel_1);
-            const [sint3, sint4] = g.convertPythonIndexToRowCol(s, sel_2);
-            const startLine = sint1 + 1;
-            const endLine = sint3 + 1;
-            const [i, _] = g.getLine(s, sel_1);
-            const [__, j] = g.getLine(s, sel_2);
-            const txt = s.substring(i, j);
-            const columns = Array.from({ length: endLine - startLine + 1 }, (_, z) =>
-                w.get(toInt(`${startLine + z}.${sint2}`), toInt(`${startLine + z}.${sint4}`))
+            let [sint1, sint2] = g.convertPythonIndexToRowCol(s, sel_1);
+            let [sint3, sint4] = g.convertPythonIndexToRowCol(s, sel_2);
+            sint1 += 1;
+            sint3 += 1;
+            const [i, junk1] = g.getLine(s, sel_1);
+            const [junk2, j] = g.getLine(s, sel_2);
+            const txt = s.slice(i, j);
+            const columns = Array.from(
+                { length: sint3 - sint1 + 1 },
+                (_, z) => w.get(toInt(`${z + sint1}.${sint2}`), toInt(`${z + sint1}.${sint4}`))
             );
             const aList = g.splitLines(txt);
             const zlist = columns.map((col, idx) => [col, aList[idx]] as [string, string]);
-            zlist.sort((a, b) => a[0].localeCompare(b[0]));
+            zlist.sort((a, b) => {
+                const colComparison = a[0].localeCompare(b[0]);
+                if (colComparison !== 0) {
+                    return colComparison;
+                } else {
+                    return a[1].localeCompare(b[1]);
+                }
+            });
             const sortedText = zlist.map(z => z[1]).join('');
             w.delete(i, j);
             w.insert(i, sortedText);
