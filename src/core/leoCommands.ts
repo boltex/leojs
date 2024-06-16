@@ -32,9 +32,10 @@ import {
     EditCommandsClass,
     TopLevelEditCommands,
 } from '../commands/editCommands';
+import { BufferCommandsClass } from '../commands/bufferCommands';
 import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
 import { TopLevelCompareCommands } from './leoCompare';
-import { GoToCommands } from '../commands/gotoCommands';
+import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
@@ -45,8 +46,9 @@ import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
-import * as typescript from 'typescript';
 import { KillBufferCommandsClass } from '../commands/killBufferCommands';
+import { RectangleCommandsClass } from '../commands/rectangleCommands';
+import * as typescript from 'typescript';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -246,10 +248,9 @@ export class Commands {
 
     //@+node:felix.20210223220814.8: *4* c.initObjectIvars
     // These ivars are set later by leoEditCommands.createEditCommanders
-    public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
     public db: any; // CommanderWrapper; //  Record<string, any>; // IS A DATABASE 
-    public bufferCommands: any = undefined;
+    public bufferCommands: BufferCommandsClass;
     public editFileCommands: EditFileCommandsClass;
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
@@ -258,7 +259,7 @@ export class Commands {
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
     public killBufferCommands: KillBufferCommandsClass;
-    public rectangleCommands: any = undefined;
+    public rectangleCommands: RectangleCommandsClass;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
     public quicksearch_controller: QuickSearchController | undefined;
@@ -325,24 +326,23 @@ export class Commands {
         this.persistenceController = new PersistenceDataController(c);
 
         // command handlers...
+        this.bufferCommands = new BufferCommandsClass(c);
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
         this.helpCommands = new HelpCommandsClass(c);
         this.killBufferCommands = new KillBufferCommandsClass(c);
+        this.rectangleCommands = new RectangleCommandsClass(c);
+
         this.rstCommands = new RstCommands(c);
 
         this.undoer = new Undoer(c);
 
         // Create the list of subcommanders.
         this.subCommanders = [
-            // this.abbrevCommands,
             this.atFileCommands,
-            // this.bufferCommands,
+            this.bufferCommands,
             this.chapterController,
-            // this.controlCommands,
-            // this.convertCommands,
-            // this.debugCommands,
             this.editCommands,
             this.editFileCommands,
             this.fileCommands,
@@ -350,18 +350,13 @@ export class Commands {
             this.gotoCommands,
             this.helpCommands,
             this.importCommands,
-            // this.keyHandler,
-            // this.keyHandlerCommands,
-            // this.killBufferCommands,
+            this.killBufferCommands,
             this.persistenceController,
-            // this.printingController,
             this.quicksearchController,
-            // this.rectangleCommands,
+            this.rectangleCommands,
             this.rstCommands,
             this.shadowController,
-            // this.spellCommands,
             this.theTagController,
-            // this.vimCommands,
             this.undoer,
         ];
 
@@ -5175,6 +5170,7 @@ export interface Commands
     CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelCompareCommands,
+    TopLevelGoToCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,
@@ -5212,6 +5208,7 @@ applyMixins(Commands, [
     CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelCompareCommands,
+    TopLevelGoToCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,

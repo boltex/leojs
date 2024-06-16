@@ -8,7 +8,6 @@
 import * as g from '../core/leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
 import { Commands } from '../core/leoCommands';
-import { Position } from '../core/leoNodes';
 import { BaseEditCommandsClass } from './baseCommands';
 //@-<< rectangleCommands imports & annotations >>
 
