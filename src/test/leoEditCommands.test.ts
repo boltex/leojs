@@ -121,6 +121,7 @@ suite('Test cases for editCommands.ts', () => {
      line b
     last line
     `;
+        console.log('IN UNIT TEST: ', g.unitTesting);
         run_test(
             before_b,
             after_b,

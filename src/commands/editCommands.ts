@@ -370,7 +370,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public moveSpotNode: VNode | undefined = undefined;  // A VNode.
     public moveSpot: number | undefined = undefined;  // For retaining preferred column when moving up or down.
     public moveCol: number | undefined = undefined;  // For retaining preferred column when moving up or down.
-    private _useRegex: boolean = false;  // For replace-string
 
     // Settings...
     private autocompleteBrackets: boolean;

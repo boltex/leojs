@@ -80,9 +80,12 @@ export class BaseEditCommandsClass {
                 bunch.undoType &&
                 g.capitalize(bunch.undoType) === 'Typing'
             ) {
-                // TODO : ? needed ?
-                console.log('TODO : LEOJS : "TYPING" SHOULD NOT OCCUR ! ');
+                // console.log('TODO : LEOJS : "TYPING" SHOULD NOT OCCUR ! ');
                 // u.doTyping(p, 'Typing', bunch.oldText, newText, bunch.oldSel);
+                // ! LEOJS : Some 'Typing' commands can be done via minibuffer & scripts !
+                // ! SAME AS IN ELSE !
+                p.v.b = newText; // p.b would cause a redraw.
+                u.afterChangeBody(p, bunch.undoType, bunch.undoer_bunch);
             } else {
                 p.v.b = newText; // p.b would cause a redraw.
                 u.afterChangeBody(p, bunch.undoType, bunch.undoer_bunch);

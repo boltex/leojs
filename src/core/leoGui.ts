@@ -578,6 +578,9 @@ export class NullGui extends LeoGui {
     }
 
     public widget_name(widget: any): string {
+        if (g.unitTesting) {
+            return 'body'; // ! LEOJS : Edit Commands Always happen in body.
+        }
         return '';
     }
     public set_focus(commander: Commands, widget: any): void {

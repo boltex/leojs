@@ -112,8 +112,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
      */
     addToKillBuffer(text: string): void {
         if (this.addWsToKillRing || text.trim()) {
-            (global as any).g.app.globalKillBuffer = (global as any).g.app.globalKillBuffer.filter((z: string) => z !== text);
-            (global as any).g.app.globalKillBuffer.unshift(text);
+            g.app.globalKillBuffer = g.app.globalKillBuffer.filter((z: string) => z !== text);
+            g.app.globalKillBuffer.unshift(text);
         }
     }
     //@+node:felix.20240612230730.6: *3* backwardKillSentence

@@ -1304,7 +1304,7 @@ export class StringTextWrapper {
      */
     public setSelectionRange(i: number, j: number, insert?: number): void {
         this.sel = [i, j];
-        this.ins = insert === undefined ? j : insert;
+        this.ins = insert == null ? j : insert;
     }
     //@+node:felix.20221102232754.21: *4* stw.toPythonIndexRowCol
     /**
