@@ -1489,8 +1489,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             for (const p of root.self_and_subtree()) {
                 let lines: string[] = [];
                 for (let line of g.splitLines(p.b)) {
-                    if (line.trimEnd()) {
-                        lines.push(line.trimEnd());
+                    if (g.rstrip(line)) {
+                        lines.push(g.rstrip(line));
                     }
                     if (line.endsWith('\n')) {
                         lines.push('\n');
@@ -1523,11 +1523,11 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const s = w.getAllText();
         const lines: string[] = [];
         for (let line of g.splitlines(s)) {
-            if (line.trimEnd()) {
-                lines.push(line.trimEnd());
+            if (g.rstrip(line)) {
+                lines.push(g.rstrip(line));
             }
             if (line.endsWith('\n')) {
-                lines.push('\n');
+                lines.push('\n'); // Had a newline.
             }
         }
         const result = lines.join('');

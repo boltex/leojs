@@ -4851,6 +4851,14 @@ export function rtrim(str: string, ch: string): string {
     }
     return str.substring(0, i + 1);
 }
+//@+node:felix.20240616212335.1: *3* g.rstrip
+export function rstrip(str: string, ch = " \t\n\r") {
+  let i = str.length;
+  while (i > 0 && ch.includes(str[i - 1])) {
+    i--;
+  }
+  return str.substring(0, i);
+}
 //@+node:felix.20211104222646.1: *3* g.plural (coreGlobals.py)
 /**
  * Return "s" or "" depending on n.

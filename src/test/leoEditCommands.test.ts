@@ -871,7 +871,7 @@ suite('Test cases for editCommands.ts', () => {
         // Add some trailing ws to before_b
         const i = 1 + before_b.indexOf('3');
         before_b = before_b.slice(0, i) + '  ' + before_b.slice(i);
-        assert.strictEqual(before_b, after_b);
+        assert.notEqual(before_b, after_b);
         run_test(
             before_b,
             after_b,
