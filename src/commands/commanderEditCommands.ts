@@ -616,6 +616,32 @@ export class CommanderEditCommands {
         c.redraw(p);
         c.bodyWantsFocus();
     }
+    //@+node:felix.20240616233556.1: *3* c_ec.reformatBody
+    @commander_command('reformat-body', 'Reformat all paragraphs in the body.')
+    public reformatBody(this: Commands): void {
+        /** Reformat all paragraphs in the body. **/
+        const c = this;
+        const p = this.p;
+        const undoType = 'reformat-body';
+        const w = c.frame.body.wrapper;
+
+        c.undoer.beforeChangeGroup(p, undoType);
+        w.setInsertPoint(0);
+
+        while (true) {
+            const progress = w.getInsertPoint();
+            c.reformatParagraph(undoType);
+            const ins = w.getInsertPoint();
+            const s = w.getAllText();
+            w.setInsertPoint(ins);
+
+            if (ins <= progress || ins >= s.length) {
+                break;
+            }
+        }
+
+        c.undoer.afterChangeGroup(p, undoType);
+    }
     //@+node:felix.20240612234518.1: *3* c_ec.reformatParagraph & helpers
     @commander_command('reformat-paragraph', 'Reformat a text paragraph')
     public reformatParagraph(this: Commands, undoType: string = 'Reformat Paragraph'): void {
@@ -630,264 +656,6 @@ export class CommanderEditCommands {
          * Paragraph is bound by start of body, end of body and blank lines. Paragraph is
          * selected by position of current insertion cursor.
          */
-
-        //@+others
-        //@+node:felix.20240612234518.2: *4* function: ends_paragraph & single_line_paragraph
-        /**
-         * Return True if s is a blank line. 
-         */
-        const ends_paragraph = (s: string): boolean => {
-            return !s.trim();
-        };
-
-        /**
-         * Return True if s is a single-line paragraph. 
-         */
-        const single_line_paragraph = (s: string): boolean => {
-            return s.startsWith('@') || ['"""', "'''"].includes(s.trim());
-        };
-        //@+node:felix.20240612234518.3: *4* function: find_bound_paragraph
-        /**
-         * Return the lines of a paragraph to be reformatted.
-         * This is a convenience method for the reformat-paragraph command.
-         */
-        const find_bound_paragraph = (c: Commands): [string, string[], string] | [undefined, undefined, undefined] => {
-            const [head, ins, tail] = c.frame.body.getInsertLines();
-            let head_lines = g.splitLines(head);
-            const tail_lines = g.splitLines(tail);
-            let result: string[] = [];
-            const insert_lines = g.splitLines(ins);
-            let para_lines = insert_lines.concat(tail_lines);
-
-            // If the present line doesn't start a paragraph,
-            // scan backward, adding trailing lines of head to ins.
-            if (insert_lines.length && !startsParagraph(insert_lines[0])) {
-                let n = 0;  // number of moved lines.
-                for (let s of head_lines.reverse()) {
-                    if (ends_paragraph(s) || single_line_paragraph(s)) {
-                        break;
-                    } else if (startsParagraph(s)) {
-                        n += 1;
-                        break;
-                    } else {
-                        n += 1;
-                    }
-                }
-                if (n > 0) {
-                    para_lines = head_lines.slice(-n).concat(para_lines);
-                    head_lines = head_lines.slice(0, -n);
-                }
-            }
-
-            let ended = false, started = false;
-            for (let i = 0; i < para_lines.length; i++) {
-                let s = para_lines[i];
-                if (started) {
-                    if (ends_paragraph(s) || startsParagraph(s)) {
-                        ended = true;
-                        break;
-                    } else {
-                        result.push(s);
-                    }
-                } else if (s.trim()) {
-                    result.push(s);
-                    started = true;
-                    if (ends_paragraph(s) || single_line_paragraph(s)) {
-                        i += 1;
-                        ended = true;
-                        break;
-                    }
-                } else {
-                    head_lines.push(s);
-                }
-            }
-
-            if (started) {
-                const head_str = head_lines.join('');
-                const tail_str = para_lines.slice(ended ? para_lines.indexOf(result[result.length - 1]) + 1 : 0).join('');
-                return [head_str, result, tail_str];
-            }
-
-            return [undefined, undefined, undefined];
-        };
-        //@+node:felix.20240612234518.4: *4* function: rp_get_args
-        /**
-         * Compute and return oldSel, oldYview, original, pageWidth, tabWidth. 
-         */
-        const rp_get_args = (c: Commands): [number[], number, string, number, number] => {
-            const body = c.frame.body;
-            const w = body.wrapper;
-            const d = c.scanAllDirectives(c.p);
-            let pageWidth: number;
-            if (c.editCommands.fillColumn > 0) {
-                pageWidth = c.editCommands.fillColumn;
-            } else {
-                pageWidth = d.get("pagewidth");
-            }
-            const tabWidth = d.get("tabwidth");
-            const original = w.getAllText();
-            const oldSel = w.getSelectionRange();
-            const oldYview = w.getYScrollPosition();
-            return [oldSel, oldYview, original, pageWidth, tabWidth];
-        };
-        //@+node:felix.20240612234518.5: *4* function: rp_get_leading_ws
-        /**
-         * Compute and return indents and leading_ws. 
-         */
-        const rp_get_leading_ws = (c: Commands, lines: string[], tabWidth: number): [number[], string[]] => {
-            let indents = [0, 0];
-            let leading_ws = ["", ""];
-            for (let i = 0; i < 2; i++) {
-                if (i < lines.length) {
-                    // Use the original, non-optimized leading whitespace.
-                    leading_ws[i] = g.get_leading_ws(lines[i]);
-                    indents[i] = g.computeWidth(leading_ws[i], tabWidth);
-                }
-            }
-            indents[1] = Math.max(...indents);
-            if (lines.length === 1) {
-                leading_ws[1] = leading_ws[0];
-            }
-            return [indents, leading_ws];
-        };
-        //@+node:felix.20240612234518.6: *4* function: rp_reformat
-        const rp_reformat = (
-            c: Commands,
-            head: string,
-            oldSel: any,
-            oldYview: any,
-            original: any,
-            result: string,
-            tail: string,
-            undoType: string
-        ): void => {
-            /** Reformat the body and update the selection. */
-            const p = c.p;
-            const u = c.undoer;
-            const w = c.frame.body.wrapper;
-            const s = head + result + tail;
-            const changed = original !== s;
-            const bunch = u.beforeChangeBody(p);
-            if (changed) {
-                w.setAllText(s);  // Destroys coloring.
-            }
-            // #1748: Always advance to the next paragraph.
-            let i = head.length;
-            let j = Math.max(i, head.length + result.length - 1);
-            let ins = j + 1;
-            while (ins < s.length) {
-                [i, j] = g.getLine(s, ins);
-                const line = s.slice(i, j);
-                // It's annoying, imo, to treat @ lines differently.
-                if (line.trim() === "") {
-                    ins = j + 1;
-                } else {
-                    ins = i;
-                    break;
-                }
-            }
-            ins = Math.min(ins, s.length);
-            w.setSelectionRange(ins, ins, ins);
-            // Show more lines, if they exist.
-            const k = g.see_more_lines(s, ins, 4);
-            p.v.insertSpot = ins;
-            w.see(k);  // New in 6.4. w.see works!
-            if (!changed) {
-                return;
-            }
-            // Finish.
-            p.v.b = s;  // p.b would cause a redraw.
-            u.afterChangeBody(p, undoType, bunch);
-            w.setXScrollPosition(0);  // Never scroll horizontally.
-        };
-        //@+node:felix.20240612234518.7: *4* function: rp_wrap_all_lines
-        const rp_wrap_all_lines = (
-            c: Commands,
-            indents: number[],
-            leading_ws: string[],
-            lines: string[],
-            pageWidth: number
-        ): string => {
-            /** Compute the result of wrapping all lines. */
-            const trailingNL = lines.length && lines[lines.length - 1].endsWith('\n');
-            lines = lines.map(z => z.endsWith('\n') ? z.slice(0, -1) : z);
-
-            if (lines.length) {  // Bug fix: 2013/12/22.
-                let s = lines[0];
-                if (startsParagraph(s)) {
-                    // Adjust indents[1]
-                    // Similar to code in startsParagraph(s)
-                    let i = 0;
-                    if (s[0].match(/\d/)) {
-                        while (i < s.length && s[i].match(/\d/)) {
-                            i += 1;
-                        }
-                        if (g.match(s, i, ')') || g.match(s, i, '.')) {
-                            i += 1;
-                        }
-                    } else if (s[0].match(/[a-zA-Z]/)) {
-                        if (g.match(s, 1, ')') || g.match(s, 1, '.')) {
-                            i = 2;
-                        }
-                    } else if (s[0] === '-') {
-                        i = 1;
-                    }
-                    // Never decrease indentation.
-                    i = g.skip_ws(s, i + 1);
-                    if (i > indents[1]) {
-                        indents[1] = i;
-                        leading_ws[1] = ' '.repeat(i);
-                    }
-                }
-            }
-
-            // Wrap the lines, decreasing the page width by indent.
-            const result_list = g.wrap_lines(lines,
-                pageWidth - indents[1],
-                pageWidth - indents[0]);
-
-            // Prefix with the leading whitespace, if any
-            const paddedResult = [];
-            paddedResult.push(leading_ws[0] + result_list[0]);
-            for (let line of result_list.slice(1)) {
-                paddedResult.push(leading_ws[1] + line);
-            }
-
-            // Convert the result to a string.
-            let result = paddedResult.join('\n');
-            if (trailingNL) {
-                result += '\n';
-            }
-            return result;
-        };
-        //@+node:felix.20240612234518.8: *4* function: startsParagraph
-        /**
-         * Return True if line s starts a paragraph. 
-         */
-        function startsParagraph(s: string): boolean {
-            if (!s.trim()) {
-                return false;
-            } else if (s.trim() === '"""' || s.trim() === "'''") {
-                return true;
-            } else if (s[0].match(/\d/)) {
-                let i = 0;
-                while (i < s.length && s[i].match(/\d/)) {
-                    i += 1;
-                }
-                return g.match(s, i, ')') || g.match(s, i, '.');
-            } else if (s[0].match(/[a-zA-Z]/)) {
-                // Careful: single characters only.
-                // This could cause problems in some situations.
-                return (
-                    (g.match(s, 1, ')') || g.match(s, 1, '.')) &&
-                    (s.length < 2 || ' \t\n'.includes(s[2]))
-                );
-            } else {
-                return s.startsWith('@') || s.startsWith('-');
-            }
-        }
-        //@-others
-
         const c = this;
         const w = this.frame.body.wrapper;
         if (g.app.batchMode) {
@@ -899,14 +667,520 @@ export class CommanderEditCommands {
             const [i, j] = w.getSelectionRange();
             w.setInsertPoint(i);
         }
-        const [head, lines, tail] = find_bound_paragraph(c);
+        const [head, lines, tail] = this.find_bound_paragraph(c);
         if (!lines) {
             return;
         }
-        const [oldSel, oldYview, original, pageWidth, tabWidth] = rp_get_args(c);
-        const [indents, leading_ws] = rp_get_leading_ws(c, lines, tabWidth);
-        const result = rp_wrap_all_lines(c, indents, leading_ws, lines, pageWidth);
-        rp_reformat(c, head, oldSel, oldYview, original, result, tail, undoType);
+        const [oldSel, oldYview, original, pageWidth, tabWidth] = this.rp_get_args(c);
+        const [indents, leading_ws] = this.rp_get_leading_ws(c, lines, tabWidth);
+        const result = this.rp_wrap_all_lines(c, indents, leading_ws, lines, pageWidth);
+        this.rp_reformat(c, head, oldSel, oldYview, original, result, tail, undoType);
+    }
+    //@+node:felix.20240612234518.2: *4* function: ends_paragraph & single_line_paragraph
+    /**
+     * Return True if s is a blank line. 
+     */
+    private ends_paragraph(s: string): boolean {
+        return !s.trim();
+    }
+
+    /**
+     * Return True if s is a single-line paragraph. 
+     */
+    private single_line_paragraph(s: string): boolean {
+        return s.startsWith('@') || ['"""', "'''"].includes(s.trim());
+    }
+    //@+node:felix.20240612234518.3: *4* function: find_bound_paragraph
+    /**
+     * Return the lines of a paragraph to be reformatted.
+     * This is a convenience method for the reformat-paragraph command.
+     */
+    private find_bound_paragraph(c: Commands): [string, string[], string] | [undefined, undefined, undefined] {
+        const [head, ins, tail] = c.frame.body.getInsertLines();
+        let head_lines = g.splitLines(head);
+        const tail_lines = g.splitLines(tail);
+        let result: string[] = [];
+        const insert_lines = g.splitLines(ins);
+        let para_lines = insert_lines.concat(tail_lines);
+
+        // If the present line doesn't start a paragraph,
+        // scan backward, adding trailing lines of head to ins.
+        if (insert_lines.length && !this.startsParagraph(insert_lines[0])) {
+            let n = 0;  // number of moved lines.
+            for (let s of head_lines.reverse()) {
+                if (this.ends_paragraph(s) || this.single_line_paragraph(s)) {
+                    break;
+                } else if (this.startsParagraph(s)) {
+                    n += 1;
+                    break;
+                } else {
+                    n += 1;
+                }
+            }
+            if (n > 0) {
+                para_lines = head_lines.slice(-n).concat(para_lines);
+                head_lines = head_lines.slice(0, -n);
+            }
+        }
+
+        let ended = false, started = false;
+        for (let i = 0; i < para_lines.length; i++) {
+            let s = para_lines[i];
+            if (started) {
+                if (this.ends_paragraph(s) || this.startsParagraph(s)) {
+                    ended = true;
+                    break;
+                } else {
+                    result.push(s);
+                }
+            } else if (s.trim()) {
+                result.push(s);
+                started = true;
+                if (this.ends_paragraph(s) || this.single_line_paragraph(s)) {
+                    i += 1;
+                    ended = true;
+                    break;
+                }
+            } else {
+                head_lines.push(s);
+            }
+        }
+
+        if (started) {
+            const head_str = head_lines.join('');
+            const tail_str = para_lines.slice(ended ? para_lines.indexOf(result[result.length - 1]) + 1 : 0).join('');
+            return [head_str, result, tail_str];
+        }
+
+        return [undefined, undefined, undefined];
+    }
+    //@+node:felix.20240612234518.4: *4* function: rp_get_args
+    /**
+     * Compute and return oldSel, oldYview, original, pageWidth, tabWidth. 
+     */
+    private rp_get_args(c: Commands): [number[], number, string, number, number] {
+        const body = c.frame.body;
+        const w = body.wrapper;
+        const d = c.scanAllDirectives(c.p);
+        let pageWidth: number;
+        if (c.editCommands.fillColumn > 0) {
+            pageWidth = c.editCommands.fillColumn;
+        } else {
+            pageWidth = d.get("pagewidth");
+        }
+        const tabWidth = d.get("tabwidth");
+        const original = w.getAllText();
+        const oldSel = w.getSelectionRange();
+        const oldYview = w.getYScrollPosition();
+        return [oldSel, oldYview, original, pageWidth, tabWidth];
+    }
+    //@+node:felix.20240612234518.5: *4* function: rp_get_leading_ws
+    /**
+     * Compute and return indents and leading_ws. 
+     */
+    private rp_get_leading_ws(c: Commands, lines: string[], tabWidth: number): [number[], string[]] {
+        let indents = [0, 0];
+        let leading_ws = ["", ""];
+        for (let i = 0; i < 2; i++) {
+            if (i < lines.length) {
+                // Use the original, non-optimized leading whitespace.
+                leading_ws[i] = g.get_leading_ws(lines[i]);
+                indents[i] = g.computeWidth(leading_ws[i], tabWidth);
+            }
+        }
+        indents[1] = Math.max(...indents);
+        if (lines.length === 1) {
+            leading_ws[1] = leading_ws[0];
+        }
+        return [indents, leading_ws];
+    }
+    //@+node:felix.20240612234518.6: *4* function: rp_reformat
+    private rp_reformat(
+        c: Commands,
+        head: string,
+        oldSel: any,
+        oldYview: any,
+        original: any,
+        result: string,
+        tail: string,
+        undoType: string
+    ): void {
+        /** Reformat the body and update the selection. */
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        const s = head + result + tail;
+        const changed = original !== s;
+        const bunch = u.beforeChangeBody(p);
+        if (changed) {
+            w.setAllText(s);  // Destroys coloring.
+        }
+        // #1748: Always advance to the next paragraph.
+        let i = head.length;
+        let j = Math.max(i, head.length + result.length - 1);
+        let ins = j + 1;
+        while (ins < s.length) {
+            [i, j] = g.getLine(s, ins);
+            const line = s.slice(i, j);
+            // It's annoying, imo, to treat @ lines differently.
+            if (line.trim() === "") {
+                ins = j + 1;
+            } else {
+                ins = i;
+                break;
+            }
+        }
+        ins = Math.min(ins, s.length);
+        w.setSelectionRange(ins, ins, ins);
+        // Show more lines, if they exist.
+        const k = g.see_more_lines(s, ins, 4);
+        p.v.insertSpot = ins;
+        w.see(k);  // New in 6.4. w.see works!
+        if (!changed) {
+            return;
+        }
+        // Finish.
+        p.v.b = s;  // p.b would cause a redraw.
+        u.afterChangeBody(p, undoType, bunch);
+        w.setXScrollPosition(0);  // Never scroll horizontally.
+    }
+    //@+node:felix.20240612234518.7: *4* function: rp_wrap_all_lines
+    private rp_wrap_all_lines(
+        c: Commands,
+        indents: number[],
+        leading_ws: string[],
+        lines: string[],
+        pageWidth: number
+    ): string {
+        /** Compute the result of wrapping all lines. */
+        const trailingNL = lines.length && lines[lines.length - 1].endsWith('\n');
+        lines = lines.map(z => z.endsWith('\n') ? z.slice(0, -1) : z);
+
+        if (lines.length) {  // Bug fix: 2013/12/22.
+            let s = lines[0];
+            if (this.startsParagraph(s)) {
+                // Adjust indents[1]
+                // Similar to code in startsParagraph(s)
+                let i = 0;
+                if (s[0].match(/\d/)) {
+                    while (i < s.length && s[i].match(/\d/)) {
+                        i += 1;
+                    }
+                    if (g.match(s, i, ')') || g.match(s, i, '.')) {
+                        i += 1;
+                    }
+                } else if (s[0].match(/[a-zA-Z]/)) {
+                    if (g.match(s, 1, ')') || g.match(s, 1, '.')) {
+                        i = 2;
+                    }
+                } else if (s[0] === '-') {
+                    i = 1;
+                }
+                // Never decrease indentation.
+                i = g.skip_ws(s, i + 1);
+                if (i > indents[1]) {
+                    indents[1] = i;
+                    leading_ws[1] = ' '.repeat(i);
+                }
+            }
+        }
+
+        // Wrap the lines, decreasing the page width by indent.
+        const result_list = g.wrap_lines(lines,
+            pageWidth - indents[1],
+            pageWidth - indents[0]);
+
+        // Prefix with the leading whitespace, if any
+        const paddedResult = [];
+        paddedResult.push(leading_ws[0] + result_list[0]);
+        for (let line of result_list.slice(1)) {
+            paddedResult.push(leading_ws[1] + line);
+        }
+
+        // Convert the result to a string.
+        let result = paddedResult.join('\n');
+        if (trailingNL) {
+            result += '\n';
+        }
+        return result;
+    }
+    //@+node:felix.20240612234518.8: *4* function: startsParagraph
+    /**
+     * Return True if line s starts a paragraph. 
+     */
+    private startsParagraph(s: string): boolean {
+        if (!s.trim()) {
+            return false;
+        } else if (s.trim() === '"""' || s.trim() === "'''") {
+            return true;
+        } else if (s[0].match(/\d/)) {
+            let i = 0;
+            while (i < s.length && s[i].match(/\d/)) {
+                i += 1;
+            }
+            return g.match(s, i, ')') || g.match(s, i, '.');
+        } else if (s[0].match(/[a-zA-Z]/)) {
+            // Careful: single characters only.
+            // This could cause problems in some situations.
+            return (
+                (g.match(s, 1, ')') || g.match(s, 1, '.')) &&
+                (s.length < 2 || ' \t\n'.includes(s[2]))
+            );
+        } else {
+            return s.startsWith('@') || s.startsWith('-');
+        }
+    }
+    //@+node:felix.20240616233603.1: *3* c_ec.reformatSelection
+    @commander_command(
+        'reformat-selection',
+        'Reformat the selected text, as in reformat-paragraph, but without expanding the selection past the selected lines.'
+    )
+    public reformatSelection(this: Commands, undoType: string = 'Reformat Paragraph'): void {
+        const c = this;
+        undoType = 'reformat-selection';
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+
+        if (g.app.batchMode) {
+            c.notValidInBatchMode(undoType);
+            return;
+        }
+
+        const bunch = u.beforeChangeBody(p);
+        const [oldSel, oldYview, original, pageWidth, tabWidth] = this.rp_get_args(c);
+        const [head, middle, tail] = c.frame.body.getSelectionLines();
+        const lines = g.splitLines(middle);
+
+        if (!lines.length) {
+            return;
+        }
+
+        const [indents, leading_ws] = this.rp_get_leading_ws(c, lines, tabWidth);
+        const result = this.rp_wrap_all_lines(c, indents, leading_ws, lines, pageWidth);
+        const s = head + result + tail;
+
+        if (s === original) {
+            return;
+        }
+
+        // Update the text and the selection.
+        w.setAllText(s);  // Destroys coloring.
+        const i = head.length;
+        let j = Math.max(i, head.length + result.length - 1);
+        j = Math.min(j, s.length);
+        w.setSelectionRange(i, j, j);
+
+        // Finish.
+        p.v.b = s;  // p.b would cause a redraw.
+        u.afterChangeBody(p, undoType, bunch);
+        w.setXScrollPosition(0);  // Never scroll horizontally.
+    }
+    //@+node:felix.20240616233633.1: *3* c_ec.toggleAngleBrackets
+    @commander_command(
+        'toggle-angle-brackets',
+        '"Add or remove double angle brackets from the headline of the selected node.'
+    )
+    public toggleAngleBrackets(this: Commands): void {
+        /** Add or remove double angle brackets from the headline of the selected node. **/
+        const c = this;
+        const p = this.p;
+        const command = 'toggle-angle-brackets';
+
+        if (g.app.batchMode) {
+            c.notValidInBatchMode("Toggle Angle Brackets");
+            return;
+        }
+
+        c.endEditing();
+        let s = p.h.trim();
+        const oldHead = s;
+        const lt = "<<";
+        const rt = ">>";
+
+        if (s.startsWith(lt) || s.endsWith(rt)) {
+            if (s.startsWith(lt)) {
+                s = s.slice(2);
+            }
+            if (s.endsWith(rt)) {
+                s = s.slice(0, -2);
+            }
+            s = s.trim();
+        } else {
+            s = g.angleBrackets(` ${s} `);
+        }
+        if (s !== oldHead) {
+            const u = c.undoer;
+            const data = u.beforeChangeHeadline(p);
+
+            p.setHeadString(s);
+            p.setDirty();  // #1449.
+            c.setChanged();  // #1449.
+            u.afterChangeHeadline(p, command, data);
+            // c.redrawAndEdit(p, true);
+
+        }
+    }
+    //@+node:felix.20240616233651.1: *3* c_ec.unformatParagraph & helper
+    @commander_command('unformat-paragraph', 'Unformat a text paragraph. Removes all extra whitespace in a paragraph.')
+    public unformatParagraph(this: Commands, undoType: string = 'Unformat Paragraph'): void {
+        /**
+         * Unformat a text paragraph. Removes all extra whitespace in a paragraph.
+         *
+         * Paragraph is bound by start of body, end of body and blank lines. Paragraph is
+         * selected by position of current insertion cursor.
+         **/
+
+        const c = this;
+        const body = c.frame.body;
+        const w = body.wrapper;
+
+        if (g.app.batchMode) {
+            c.notValidInBatchMode("unformat-paragraph");
+            return;
+        }
+
+        if (w.hasSelection()) {
+            const [i, j] = w.getSelectionRange();
+            w.setInsertPoint(i);
+        }
+
+        const [oldSel, oldYview, original, pageWidth, tabWidth] = this.rp_get_args(c);
+        const [head, lines, tail] = this.find_bound_paragraph(c);
+
+        if (lines && lines.length) {
+            const result = lines.map(line => line.trim()).join(' ') + '\n';
+            this.unreformat(c, head, oldSel, oldYview, original, result, tail, undoType);
+        }
+    }
+    //@+node:felix.20240616233651.2: *4* function: unreformat
+    /** 
+     * Unformat the body and update the selection.
+     */
+    private unreformat(
+        c: Commands,
+        head: string,
+        oldSel: any,
+        oldYview: any,
+        original: string,
+        result: string,
+        tail: string,
+        undoType: string
+    ): void {
+
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        const s = head + result + tail;
+        let ins = Math.max(head.length, head.length + result.length - 1);
+        const bunch = u.beforeChangeBody(p);
+        w.setAllText(s);  // Destroys coloring.
+        const changed = original !== s;
+
+        if (changed) {
+            p.v.b = w.getAllText();
+            u.afterChangeBody(p, undoType, bunch);
+        }
+
+        // Advance to the next paragraph.
+        ins += 1;  // Move past the selection.
+        while (ins < s.length) {
+            const [i, j] = g.getLine(s, ins);
+            const line = s.substring(i, j);
+            if (line.trim() === "") {
+                ins = j + 1;
+            } else {
+                ins = i;
+                break;
+            }
+        }
+
+        c.recolor();  // Required.
+        w.setSelectionRange(ins, ins, ins);
+        w.see(ins);
+        // Make sure we never scroll horizontally.
+        w.setXScrollPosition(0);
+    }
+    //@+node:felix.20240617000519.1: *3* c_ec: insert-jupyter-toc & insert-markdown-toc
+    @commander_command('insert-jupyter-toc', 'Insert a Jupyter table of contents at the cursor, replacing any selected text.')
+    public insertJupyterTOC(this: Commands): void {
+        this.insert_toc(this, 'jupyter')
+    }
+
+    @commander_command('insert-markdown-toc', 'Insert a Markdown table of contents at the cursor, replacing any selected text.')
+    public insertMarkdownTOC(this: Commands): void {
+        this.insert_toc(this, 'markdown')
+    }
+    //@+node:felix.20240617000519.2: *4* insert_toc
+    /**
+     * Insert a table of contents at the cursor.
+     */
+    private insert_toc(c: Commands, kind: string): void {
+
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        const undoType = `Insert ${kind.charAt(0).toUpperCase() + kind.slice(1)} TOC`;
+
+        if (g.app.batchMode) {
+            c.notValidInBatchMode(undoType);
+            return;
+        }
+
+        const bunch = u.beforeChangeBody(p);
+        w.deleteTextSelection();
+        const s = this.make_toc(c, kind, c.p);
+        const i = w.getInsertPoint();
+        w.insert(i, s);
+        p.v.b = w.getAllText();
+        u.afterChangeBody(p, undoType, bunch);
+    }
+    //@+node:felix.20240617000519.3: *4* make_toc
+    /**
+     * Return the toc for root.b as a list of lines.
+     */
+    private make_toc(c: Commands, kind: string, root: Position): string {
+
+        function cell_type(p: Position): string {
+            const language = g.getLanguageAtPosition(c, p);
+            return language === 'jupyter' || language === 'markdown' ? 'markdown' : 'python';
+        }
+
+        function clean_headline(s: string): string {
+            // Surprisingly tricky. This could remove too much, but better to be safe.
+            const aList = Array.from(s).filter(ch => ch === '-' || ch === ':' || ch === ' ' || ch.match(/^[a-z0-9]+$/i));
+            return aList.join('').replace(/-+$/, '').trim();
+        }
+
+        const result: string[] = [];
+        let stack: number[] = [];
+
+        for (let p of root.subtree()) {
+            if (cell_type(p) === 'markdown') {
+                const level = p.level() - root.level();
+                if (stack.length < level) {
+                    stack.push(1);
+                } else {
+                    stack = stack.slice(0, level);
+                }
+                const n = stack[stack.length - 1];
+                stack[stack.length - 1] = n + 1;
+
+                const title = clean_headline(p.h);
+                let url = clean_headline(p.h.replace(/ /g, '-'));
+                if (kind === 'markdown') {
+                    url = url.toLowerCase();
+                }
+                const line = `${' '.repeat(4 * (level - 1))}- [${title}](#${url})\n`;
+                result.push(line);
+            }
+        }
+
+        if (result.length) {
+            result.push('\n');
+        }
+
+        return result.join('');
     }
     //@-others
 }
