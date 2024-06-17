@@ -125,10 +125,12 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
         }
         const s = w.getAllText();
         const ins = w.getInsertPoint();
-        const i = s.lastIndexOf('.', ins);
+        // Adjust the string to mimic Python's rfind with the 'start' parameter by slicing the string.
+        let i = s.slice(ins).lastIndexOf('.');
         if (i === -1) {
             return;
         }
+        i += ins;  // Add the offset back.
         const undoType = 'backward-kill-sentence';
         this.beginCommand(w, undoType);
         const i2 = s.lastIndexOf('.', i - 1) + 1;
