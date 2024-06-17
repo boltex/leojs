@@ -2588,7 +2588,7 @@ suite('Test cases for editCommands.ts', () => {
             '    line a\n',
             '        line b\n',
             'line c\n',
-            'last line\n'
+            'last line' // NO NEWLINE BECAUSE OF FAKE 'prep' TRANSLATION
         ].join('');
         run_test(
             before_b,
