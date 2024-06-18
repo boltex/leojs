@@ -3523,105 +3523,51 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         this.endCommand(undefined, changed, true);
     }
     //@+node:felix.20240613205401.1: *3* ec: sort
-    //@+at
-    // XEmacs provides several commands for sorting text in a buffer.  All
-    // operate on the contents of the region (the text between point and the
-    // mark).  They divide the text of the region into many "sort records",
-    // identify a "sort key" for each record, and then reorder the records
-    // using the order determined by the sort keys.  The records are ordered so
-    // that their keys are in alphabetical order, or, for numerical sorting, in
-    // numerical order.  In alphabetical sorting, all upper-case letters `A'
-    // through `Z' come before lower-case `a', in accordance with the ASCII
-    // character sequence.
-    //
-    //    The sort commands differ in how they divide the text into sort
-    // records and in which part of each record they use as the sort key.
-    // Most of the commands make each line a separate sort record, but some
-    // commands use paragraphs or pages as sort records.  Most of the sort
-    // commands use each entire sort record as its own sort key, but some use
-    // only a portion of the record as the sort key.
-    //
-    // `M-x sort-lines'
-    //      Divide the region into lines and sort by comparing the entire text
-    //      of a line.  A prefix argument means sort in descending order.
-    //
-    // `M-x sort-paragraphs'
-    //      Divide the region into paragraphs and sort by comparing the entire
-    //      text of a paragraph (except for leading blank lines).  A prefix
-    //      argument means sort in descending order.
-    //
-    // `M-x sort-pages'
-    //      Divide the region into pages and sort by comparing the entire text
-    //      of a page (except for leading blank lines).  A prefix argument
-    //      means sort in descending order.
-    //
-    // `M-x sort-fields'
-    //      Divide the region into lines and sort by comparing the contents of
-    //      one field in each line.  Fields are defined as separated by
-    //      whitespace, so the first run of consecutive non-whitespace
-    //      characters in a line constitutes field 1, the second such run
-    //      constitutes field 2, etc.
-    //
-    //      You specify which field to sort by with a numeric argument: 1 to
-    //      sort by field 1, etc.  A negative argument means sort in descending
-    //      order.  Thus, minus 2 means sort by field 2 in reverse-alphabetical
-    //      order.
-    //
-    // `M-x sort-numeric-fields'
-    //      Like `M-x sort-fields', except the specified field is converted to
-    //      a number for each line and the numbers are compared.  `10' comes
-    //      before `2' when considered as text, but after it when considered
-    //      as a number.
-    //
-    // `M-x sort-columns'
-    //      Like `M-x sort-fields', except that the text within each line used
-    //      for comparison comes from a fixed range of columns.  An explanation
-    //      is given below.
-    //
-    //    For example, if the buffer contains:
-    //
-    //      On systems where clash detection (locking of files being edited) is
-    //      implemented, XEmacs also checks the first time you modify a buffer
-    //      whether the file has changed on disk since it was last visited or
-    //      saved.  If it has, you are asked to confirm that you want to change
-    //      the buffer.
-    //
-    // then if you apply `M-x sort-lines' to the entire buffer you get:
-    //
-    //      On systems where clash detection (locking of files being edited) is
-    //      implemented, XEmacs also checks the first time you modify a buffer
-    //      saved.  If it has, you are asked to confirm that you want to change
-    //      the buffer.
-    //      whether the file has changed on disk since it was last visited or
-    //
-    // where the upper case `O' comes before all lower case letters.  If you
-    // apply instead `C-u 2 M-x sort-fields' you get:
-    //
-    //      saved.  If it has, you are asked to confirm that you want to change
-    //      implemented, XEmacs also checks the first time you modify a buffer
-    //      the buffer.
-    //      On systems where clash detection (locking of files being edited) is
-    //      whether the file has changed on disk since it was last visited or
-    //
-    // where the sort keys were `If', `XEmacs', `buffer', `systems', and `the'.
-    //
-    //    `M-x sort-columns' requires more explanation.  You specify the
-    // columns by putting point at one of the columns and the mark at the other
-    // column.  Because this means you cannot put point or the mark at the
-    // beginning of the first line to sort, this command uses an unusual
-    // definition of `region': all of the line point is in is considered part
-    // of the region, and so is all of the line the mark is in.
-    //
-    //    For example, to sort a table by information found in columns 10 to
-    // 15, you could put the mark on column 10 in the first line of the table,
-    // and point on column 15 in the last line of the table, and then use this
-    // command.  Or you could put the mark on column 15 in the first line and
-    // point on column 10 in the last line.
-    //
-    //    This can be thought of as sorting the rectangle specified by point
-    // and the mark, except that the text on each line to the left or right of
-    // the rectangle moves along with the text inside the rectangle.  *Note
-    // Rectangles::.
+    //@+node:felix.20240613205401.3: *4* ec.sortColumns
+    @cmd('sort-columns', 'Sort lines of selected text using only lines in the given columns to do the comparison.')
+    sortColumns(): void {
+        const w = this.editWidget();
+        if (!this._chckSel()) {
+            return;
+        }
+        const s = w.getAllText();
+
+        const toInt = (index: string): number => {
+            return g.toPythonIndex(s, index);
+        };
+
+        this.beginCommand(w, 'sort-columns');
+        try {
+            const [sel_1, sel_2] = w.getSelectionRange();
+            let [sint1, sint2] = g.convertPythonIndexToRowCol(s, sel_1);
+            let [sint3, sint4] = g.convertPythonIndexToRowCol(s, sel_2);
+            sint1 += 1;
+            sint3 += 1;
+            const [i, junk1] = g.getLine(s, sel_1);
+            const [junk2, j] = g.getLine(s, sel_2);
+            const txt = s.slice(i, j);
+            const columns = Array.from(
+                { length: sint3 - sint1 + 1 },
+                (_, z) => w.get(toInt(`${z + sint1}.${sint2}`), toInt(`${z + sint1}.${sint4}`))
+            );
+            const aList = g.splitLines(txt);
+            const zlist = columns.map((col, idx) => [col, aList[idx]] as [string, string]);
+            zlist.sort((a, b) => {
+                const colComparison = a[0].localeCompare(b[0]);
+                if (colComparison !== 0) {
+                    return colComparison;
+                } else {
+                    return a[1].localeCompare(b[1]);
+                }
+            });
+            const sortedText = zlist.map(z => z[1]).join('');
+            w.delete(i, j);
+            w.insert(i, sortedText);
+            w.setSelectionRange(sel_1, sel_1 + sortedText.length, sel_1 + sortedText.length);
+        } finally {
+            this.endCommand(undefined, true, true);
+        }
+    }
     //@+node:felix.20240613205401.2: *4* ec.sortLines commands
     @cmd('reverse-sort-lines-ignoring-case', 'Sort the selected lines in reverse order, ignoring case.')
     public reverseSortLinesIgnoringCase(): void {
@@ -3668,107 +3614,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         } finally {
             this.endCommand(undefined, true, true);
         }
-    }
-    //@+node:felix.20240613205401.3: *4* ec.sortColumns
-    @cmd('sort-columns', 'Sort lines of selected text using only lines in the given columns to do the comparison.')
-    sortColumns(): void {
-        const w = this.editWidget();
-        if (!this._chckSel()) {
-            return;
-        }
-        const s = w.getAllText();
-
-        const toInt = (index: string): number => {
-            return g.toPythonIndex(s, index);
-        };
-
-        this.beginCommand(w, 'sort-columns');
-        try {
-            const [sel_1, sel_2] = w.getSelectionRange();
-            let [sint1, sint2] = g.convertPythonIndexToRowCol(s, sel_1);
-            let [sint3, sint4] = g.convertPythonIndexToRowCol(s, sel_2);
-            sint1 += 1;
-            sint3 += 1;
-            const [i, junk1] = g.getLine(s, sel_1);
-            const [junk2, j] = g.getLine(s, sel_2);
-            const txt = s.slice(i, j);
-            const columns = Array.from(
-                { length: sint3 - sint1 + 1 },
-                (_, z) => w.get(toInt(`${z + sint1}.${sint2}`), toInt(`${z + sint1}.${sint4}`))
-            );
-            const aList = g.splitLines(txt);
-            const zlist = columns.map((col, idx) => [col, aList[idx]] as [string, string]);
-            zlist.sort((a, b) => {
-                const colComparison = a[0].localeCompare(b[0]);
-                if (colComparison !== 0) {
-                    return colComparison;
-                } else {
-                    return a[1].localeCompare(b[1]);
-                }
-            });
-            const sortedText = zlist.map(z => z[1]).join('');
-            w.delete(i, j);
-            w.insert(i, sortedText);
-            w.setSelectionRange(sel_1, sel_1 + sortedText.length, sel_1 + sortedText.length);
-        } finally {
-            this.endCommand(undefined, true, true);
-        }
-    }
-    //@+node:felix.20240613205401.4: *4* ec.sortFields
-    @cmd('sort-fields', 'Divide the selected text into lines and sort by comparing the contents of one field in each line.')
-    public sortFields(which: string | null = null): void {
-        /**
-         * Divide the selected text into lines and sort by comparing the contents
-         * of one field in each line. Fields are defined as separated by
-         * whitespace, so the first run of consecutive non-whitespace characters
-         * in a line constitutes field 1, the second such run constitutes field 2,
-         * etc.
-         * 
-         * You specify which field to sort by with a numeric argument: 1 to sort
-         * by field 1, etc. A negative argument means sort in descending order.
-         * Thus, minus 2 means sort by field 2 in reverse-alphabetical order.
-         */
-        const w = this.editWidget();
-        if (!w || !this._chckSel()) {
-            return;
-        }
-        this.beginCommand(w, 'sort-fields');
-        const s = w.getAllText();
-        const ins = w.getInsertPoint();
-        const [r1, r2, r3, r4] = this.getRectanglePoints(w);
-        const [i, _] = g.getLine(s, r1);
-        const [__, j] = g.getLine(s, r4);
-        let txt = s.substring(i, j);
-        const txtLines = txt.split('\n');
-        const fields: string[] = [];
-        const fn = '\\w+';
-        const frx = new RegExp(fn, 'g');
-        for (const line of txtLines) {
-            const f = line.match(frx);
-            if (!f) continue;
-            if (!which) {
-                fields.push(f[0]);
-            } else {
-                let index = parseInt(which, 10);
-                if (Math.abs(index) > f.length) {
-                    return;
-                }
-                index = index > 0 ? index - 1 : f.length + index;
-                fields.push(f[index]);
-            }
-        }
-        const nz = fields.map((field, idx) => [field, txtLines[idx]] as [string, string]);
-        nz.sort(([fieldA], [fieldB]) => which && which.startsWith('-') ? fieldB.localeCompare(fieldA) : fieldA.localeCompare(fieldB));
-        w.delete(i, j);
-        let int1 = i;
-        for (const [, line] of nz) {
-            // TODO : CHECK IF OK !
-            // w.insert(`${int1}.0`, `${line}\n`);
-            w.insert(int1, `${line}\n`);
-            int1 += 1;
-        }
-        w.setInsertPoint(ins);
-        this.endCommand(undefined, true, true);
     }
     //@+node:felix.20240613212929.1: *3* ec: swap/transpose
     //@+node:felix.20240613212929.2: *4* ec.transposeLines

@@ -233,38 +233,6 @@ export class BufferCommandsClass extends BaseEditCommandsClass {
         }
 
     }
-    //@+node:felix.20240615152154.12: *4* renameBuffer
-    @cmd(
-        'rename-buffer',
-        'Rename a buffer, i.e., change a node\'s headline.'
-    )
-    public async renameBuffer(): Promise<void> {
-
-        const fromName = await this.getBufferName('Rename buffer from: ');
-
-        if (!fromName) {
-            return;
-        }
-
-        const name = await this.getBufferName('Rename buffer from: {fromName} to: ');
-        if (!name) {
-            return;
-        }
-
-        const c = this.c;
-        const p = this.findBuffer(fromName);
-
-        if (p && p.__bool__()) {
-            const u = c.undoer;
-            const undoData = u.beforeChangeHeadline(p);
-            c.setHeadString(p, name);
-            if (!c.changed) {
-                c.setChanged();
-            }
-            u.afterChangeHeadline(p, 'Rename Buffer', undoData);
-        }
-
-    }
     //@+node:felix.20240615152154.13: *4* switchToBuffer
     @cmd(
         'buffer-switch-to',

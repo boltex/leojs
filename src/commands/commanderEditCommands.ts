@@ -935,9 +935,8 @@ export class CommanderEditCommands {
         'reformat-selection',
         'Reformat the selected text, as in reformat-paragraph, but without expanding the selection past the selected lines.'
     )
-    public reformatSelection(this: Commands, undoType: string = 'Reformat Paragraph'): void {
+    public reformatSelection(this: Commands, undoType: string = 'Reformat Selection'): void {
         const c = this;
-        undoType = 'reformat-selection';
         const p = c.p;
         const u = c.undoer;
         const w = c.frame.body.wrapper;
