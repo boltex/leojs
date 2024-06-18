@@ -23,6 +23,7 @@ export class LeoFrame {
     public iconBar: NullIconBarClass;
     public initComplete = false;
     public isNullFrame = false;
+    public toggle_unl_view = false;
 
     public ftm!: StringFindTabManager; // added in finishCreate
 
@@ -213,6 +214,41 @@ export class LeoFrame {
     public putStatusLine(s: string, bg?: string, fg?: string): void {
         // TODO !
         // console.log('TODO ? putStatusLine', s);
+    }
+    //@+node:felix.20240618001515.1: *3* QtStatusLineClass.computeStatusUnl
+    /**
+     * Compute the UNL part of the status line.
+     */
+    public computeStatusUnl(p: Position): string {
+        const c = this.c;
+        const kind = c.config.getString('unl-status-kind') || '';
+        const legacy = kind.toLowerCase() === 'legacy';
+        let method;
+        if (this.toggle_unl_view) {
+            // Show the UNL the opposite as indicated by settings.
+            method = legacy ? p.get_UNL.bind(p) : p.get_legacy_UNL.bind(p);
+        } else {
+            // Show the UNL per the settings.
+            method = legacy ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
+        }
+        const s = method();
+        return s;
+    }
+    //@+node:felix.20240618001521.1: *3* QtStatsuLineClass.toggleUnlView
+    /**
+     * Toggle view of UNLs.
+     */
+    public toggleUnlView(): void {
+        const c = this.c;
+        // Toggle the switch.
+        this.toggle_unl_view = !this.toggle_unl_view;
+
+        // Redraw
+        // ! LEOJS WILL REDRAW !    
+        // const s = this.computeStatusUnl(c.p);
+        // this.put(s);
+        // this.update();
+
     }
     //@-others
 }
@@ -933,17 +969,21 @@ export class NullTree {
     //@+node:felix.20221210193746.7: *5* 5. LeoTree.set_status_line
     /**
      * Update the status line.
+     * deprecated in LeoJS
      */
     public set_status_line(p: Position): void {
         const c = this.c;
+        // 
+        // ! LEOJS ! STATUS LINE IS UNL ONLY SET ON SELECTION BY leoUI.ts.
+        //
         // c.frame.body.assignPositionToEditor(p); // NOT USED IN LEOJS
         // c.frame.updateStatusLine();  // NOT USED IN LEOJS
         // c.frame.clearStatusLine(); // NOT USED IN LEOJS
-        if (p && p.__bool__() && p.v) {
-            const kind = c.config.getString('unl-status-kind') || '';
-            const method = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL : p.get_UNL;
-            c.frame.putStatusLine(method());
-        }
+        // if (p && p.__bool__() && p.v) {
+        //     const kind = c.config.getString('unl-status-kind') || '';
+        //     const method = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL : p.get_UNL;
+        //     c.frame.putStatusLine(method());
+        // }
     }
 
     //@+node:felix.20221102232749.3: *3* NullTree.edit_widget

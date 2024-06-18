@@ -432,12 +432,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const filetypes: [string, string][] = [
             ['All files', '*']
         ];
-        const fileName = (await g.app.gui.runOpenFileDialog(
+        const fileName = await g.app.gui.runOpenFileDialog(
             c,
             'Insert File Name',
             filetypes,
             ''
-        )) as string;
+        );
 
         const i = w.getSelectionRange()[0];
         const p = c.p;

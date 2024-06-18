@@ -84,7 +84,7 @@ export class BufferCommandsClass extends BaseEditCommandsClass {
     )
     public async copyToBuffer(): Promise<void> {
 
-        const w = this.editWidget()
+        const w = this.editWidget();
         if (!w) {
             return;
         }
@@ -114,7 +114,7 @@ export class BufferCommandsClass extends BaseEditCommandsClass {
     )
     public async insertToBuffer(): Promise<void> {
 
-        const w = this.editWidget()
+        const w = this.editWidget();
         if (!w) {
             return;
         }
@@ -144,7 +144,7 @@ export class BufferCommandsClass extends BaseEditCommandsClass {
     )
     public async killBuffer(): Promise<void> {
 
-        const w = this.editWidget()
+        const w = this.editWidget();
         if (!w) {
             return;
         }

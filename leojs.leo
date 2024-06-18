@@ -310,6 +310,7 @@
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
 <v t="felix.20220516005841.1"><vh>runAskYesNoCancelDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
+<v t="felix.20240617225911.1"><vh>runOpenFilesDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 <v t="felix.20231120232158.1"><vh>destroySelf</vh></v>
 </v>
@@ -4037,9 +4038,8 @@ private _triggerGetStates(): void {
         this._refreshType.states = false;
         const p = c.p;
         if (this._leoStatusBar &amp;&amp; p &amp;&amp; p.v) {
-            const kind: string = c.config.getString('unl-status-kind') || '';
-            const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
-            this._leoStatusBar.setString(method());
+            const unl = c.frame.computeStatusUnl(p);
+            this._leoStatusBar.setString(unl);
             this._leoStatusBar.setTooltip(p.h);
         }
         let w_canHoist = true;
@@ -7174,8 +7174,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                     ["All files", "*"]
                 ],
                 g.defaultLeoFileExtension(),
-                false
-            ) as string;
+            );
         }
         if (fileName &amp;&amp; g.app.loadManager) {
             await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
@@ -9395,15 +9394,14 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     title: string,
     filetypes: [string, string][],
     defaultExtension: string,
-    multiple?: boolean,
-    startpath?: string // TODO
-): Thenable&lt;string[] | string&gt; {
+    startpath?: string
+): Thenable&lt;string&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
     return vscode.window.showOpenDialog(
         {
             title: title,
-            canSelectMany: !!multiple,
+            canSelectMany: false,
             filters: types
         }
     ).then((p_uris) =&gt; {
@@ -9413,18 +9411,9 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
                 names.push(w_uri.fsPath);
             });
         }
-        if (multiple) {
-            return names.map((p_name) =&gt; {
-                let fileName = g.os_path_fix_drive(p_name);
-                fileName = g.os_path_normslashes(fileName);
-                return fileName;
-            });
-        } else {
-            // Not multiple: return as string!
-            let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
-            fileName = g.os_path_normslashes(fileName);
-            return fileName;
-        }
+        let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+        fileName = g.os_path_normslashes(fileName);
+        return fileName;
     });
 }
 
@@ -17260,9 +17249,7 @@ public unlToClipboard(unlType?: UnlType): Thenable&lt;string&gt; {
                 break;
         }
     } else {
-        const kind: string = c.config.getString('unl-status-kind') || '';
-        const method: () =&gt; string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
-        unl = method();
+        unl = c.frame.computeStatusUnl(p);
     }
     return this.replaceClipboardWith(unl);
 }
@@ -18750,6 +18737,37 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
     "group": "file"
   }
 ]
+</t>
+<t tx="felix.20240617225911.1">public runOpenFilesDialog(
+    c: Commands | undefined,
+    title: string,
+    filetypes: [string, string][],
+    defaultExtension: string,
+    startpath?: string
+): Thenable&lt;string[]&gt; {
+    // convert to { [name: string]: string[] } typing
+    const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+    return vscode.window.showOpenDialog(
+        {
+            title: title,
+            canSelectMany: true,
+            filters: types
+        }
+    ).then((p_uris) =&gt; {
+        const names: string[] = [];
+        if (p_uris &amp;&amp; p_uris.length) {
+            p_uris.forEach(w_uri =&gt; {
+                names.push(w_uri.fsPath);
+            });
+        }
+        return names.map((p_name) =&gt; {
+            let fileName = g.os_path_fix_drive(p_name);
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
+        });
+    });
+}
+
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

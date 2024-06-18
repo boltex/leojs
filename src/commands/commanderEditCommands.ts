@@ -1103,12 +1103,12 @@ export class CommanderEditCommands {
     //@+node:felix.20240617000519.1: *3* c_ec: insert-jupyter-toc & insert-markdown-toc
     @commander_command('insert-jupyter-toc', 'Insert a Jupyter table of contents at the cursor, replacing any selected text.')
     public insertJupyterTOC(this: Commands): void {
-        this.insert_toc(this, 'jupyter')
+        this.insert_toc(this, 'jupyter');
     }
 
     @commander_command('insert-markdown-toc', 'Insert a Markdown table of contents at the cursor, replacing any selected text.')
     public insertMarkdownTOC(this: Commands): void {
-        this.insert_toc(this, 'markdown')
+        this.insert_toc(this, 'markdown');
     }
     //@+node:felix.20240617000519.2: *4* insert_toc
     /**

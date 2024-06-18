@@ -278,10 +278,19 @@ export class LeoGui {
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        multiple?: boolean,
         startpath?: string
-    ): Thenable<string[] | string> {
-        // Return type depends on the evil multiple keyword.
+    ): Thenable<string> {
+        this.oops();
+        return Promise.resolve('no');
+    }
+
+    public runOpenFilesDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        startpath?: string
+    ): Thenable<string[]> {
         this.oops();
         return Promise.resolve(['no']);
     }
@@ -613,8 +622,16 @@ export class NullGui extends LeoGui {
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        multiple?: boolean
-    ): Thenable<string[] | string> {
+    ): Thenable<string> {
+        return Promise.resolve('');
+    }
+
+    public runOpenFilesDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+    ): Thenable<string[]> {
         return Promise.resolve([]);
     }
 

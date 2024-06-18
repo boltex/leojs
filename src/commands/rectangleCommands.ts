@@ -44,7 +44,7 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
             // 'r': ('copy-rectangle-to-register', this.copyRectangleToRegister),
             't': ['string-rectangle', this.stringRectangle],
             'y': ['yank-rectangle', this.yankRectangle],
-        }
+        };
 
     }
     //@+node:felix.20240615151733.5: *3* check

@@ -783,9 +783,8 @@ export class LeoUI extends NullGui {
             this._refreshType.states = false;
             const p = c.p;
             if (this._leoStatusBar && p && p.v) {
-                const kind: string = c.config.getString('unl-status-kind') || '';
-                const method: () => string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
-                this._leoStatusBar.setString(method());
+                const unl = c.frame.computeStatusUnl(p);
+                this._leoStatusBar.setString(unl);
                 this._leoStatusBar.setTooltip(p.h);
             }
             let w_canHoist = true;
@@ -4475,9 +4474,7 @@ export class LeoUI extends NullGui {
                     break;
             }
         } else {
-            const kind: string = c.config.getString('unl-status-kind') || '';
-            const method: () => string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
-            unl = method();
+            unl = c.frame.computeStatusUnl(p);
         }
         return this.replaceClipboardWith(unl);
     }
@@ -5535,8 +5532,7 @@ export class LeoUI extends NullGui {
                         ["All files", "*"]
                     ],
                     g.defaultLeoFileExtension(),
-                    false
-                ) as string;
+                );
             }
             if (fileName && g.app.loadManager) {
                 await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
@@ -6406,15 +6402,14 @@ export class LeoUI extends NullGui {
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        multiple?: boolean,
-        startpath?: string // TODO
-    ): Thenable<string[] | string> {
+        startpath?: string
+    ): Thenable<string> {
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
         return vscode.window.showOpenDialog(
             {
                 title: title,
-                canSelectMany: !!multiple,
+                canSelectMany: false,
                 filters: types
             }
         ).then((p_uris) => {
@@ -6424,18 +6419,39 @@ export class LeoUI extends NullGui {
                     names.push(w_uri.fsPath);
                 });
             }
-            if (multiple) {
-                return names.map((p_name) => {
-                    let fileName = g.os_path_fix_drive(p_name);
-                    fileName = g.os_path_normslashes(fileName);
-                    return fileName;
+            let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
+        });
+    }
+
+    public runOpenFilesDialog(
+        c: Commands | undefined,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        startpath?: string
+    ): Thenable<string[]> {
+        // convert to { [name: string]: string[] } typing
+        const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+        return vscode.window.showOpenDialog(
+            {
+                title: title,
+                canSelectMany: true,
+                filters: types
+            }
+        ).then((p_uris) => {
+            const names: string[] = [];
+            if (p_uris && p_uris.length) {
+                p_uris.forEach(w_uri => {
+                    names.push(w_uri.fsPath);
                 });
-            } else {
-                // Not multiple: return as string!
-                let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+            }
+            return names.map((p_name) => {
+                let fileName = g.os_path_fix_drive(p_name);
                 fileName = g.os_path_normslashes(fileName);
                 return fileName;
-            }
+            });
         });
     }
 

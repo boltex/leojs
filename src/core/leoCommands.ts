@@ -1364,6 +1364,15 @@ export class Commands {
             g.restoreStdout();
         }
     }
+    //@+node:felix.20240618002443.1: *3* @cmd toggleUnlView
+    @cmd('toggle-unl-view', 'Toggles the status-bar UNL display setting.')
+    public toggleUnlView(): void {
+        const c: Commands = this;
+        if (c && c.frame) {
+            // This is not a convenience method.
+            c.frame.toggleUnlView();
+        }
+    }
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
@@ -1483,7 +1492,6 @@ export class Commands {
     ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
-            // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
@@ -1536,7 +1544,6 @@ export class Commands {
     ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
-            // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
@@ -1807,7 +1814,6 @@ export class Commands {
      */
     public nullPosition(): void {
         g.trace('This method is deprecated. Instead, just use None.');
-        // pylint complains if we return None.
     }
 
     //@+node:felix.20210131011420.14: *5* c.positionExists
@@ -2260,8 +2266,8 @@ export class Commands {
      */
     public checkGnxs(): number {
         const c: Commands = this;
-        const d: { [key: string]: VNode[] } = {};
-        // Keys are gnx's; values are sets of vnodes with that gnx.
+        // Keys are gnx's; values are lists vnodes with that gnx.
+        const vnode_d: { [key: string]: VNode[] } = {};
         const ni: NodeIndices = g.app.nodeIndices!;
         const t1: [number, number] = process.hrtime();
 
@@ -2273,21 +2279,21 @@ export class Commands {
             let gnx: string = v.fileIndex;
             if (gnx) {
                 // gnx must be a string.
-                const aSet: VNode[] = d[gnx] || []; // new if none yet
+                const aSet: VNode[] = vnode_d[gnx] || []; // new if none yet
                 if (aSet.indexOf(v) === -1) {
                     // Fake a set by checking before pushing
                     aSet.push(v);
                 }
-                d[gnx] = aSet;
+                vnode_d[gnx] = aSet;
             } else {
                 gnx_errors += 1;
                 v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`);
             }
         }
-        for (let gnx of Object.keys(d).sort()) {
-            const aList: VNode[] = d[gnx];
-            if (aList.length !== 1) {
+        for (let gnx of Object.keys(vnode_d).sort()) {
+            const aList: VNode[] = vnode_d[gnx];
+            if (aList.length > 1) {
                 console.log('\nc.checkGnxs...');
                 // g.es_print(`multiple vnodes with gnx: ${gnx}`, 'red');
                 g.es_print(`multiple vnodes with gnx: ${gnx}`);
@@ -3449,7 +3455,6 @@ export class Commands {
         }
 
         if (w_path) {
-            // pylint: disable=no-member
             // Defined in commanderFileCommands.py.
             await c.saveTo(w_path, silent);
             // Issues saved message.
@@ -3541,7 +3546,6 @@ export class Commands {
         } else {
             prefix = '@killcolor\n\n';
         }
-        // pylint: disable=no-member
         // Defined in commanderOutlineCommands.py
         let p2: Position;
         p2 = c.insertHeadline('Open File', false)!;

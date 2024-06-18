@@ -1143,12 +1143,11 @@ export async function diff_leo_files_helper(
         ['Leo files', '*.leo *.leojs *.db'],
         ['All files', '*'],
     ];
-    const w_paths = await g.app.gui.runOpenFileDialog(
+    const w_paths = await g.app.gui.runOpenFilesDialog(
         c,
         title,
         types,
         '.leo',
-        true
     ) as string[];
 
     if (!w_paths || !w_paths.length) {
@@ -1162,29 +1161,15 @@ export async function diff_leo_files_helper(
             title,
             types,
             ".leo",
-            true,
-        ) as string[];
+        );
 
         if (!paths2 || !paths2.length) {
             return;
         }
-        w_paths.push(...paths2);
+        w_paths.push(paths2);
     }
 
-
     c.bringToFront();
-
-    // w_paths = [z for z in w_paths if g.os_path_exists(z)]
-    // if (w_paths.length > 1) {
-    //     await new CompareLeoOutlines(c).diff_list_of_files(
-    //         w_paths as string[],
-    //         visible
-    //     );
-    // } else if (w_paths.length === 1) {
-    //     g.es_print('Please pick two or more .leo files');
-    // }
-
-    // g.assert( w_paths.length > 1);
 
     if (!w_paths || w_paths.length < 2) {
         g.es_print('Please pick two or more .leo files');
@@ -1192,7 +1177,6 @@ export async function diff_leo_files_helper(
     }
 
     await new CompareLeoOutlines(c).diff_list_of_files(w_paths as string[], visible);
-
 
 }
 //@-others
