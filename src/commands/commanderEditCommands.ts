@@ -707,7 +707,9 @@ export class CommanderEditCommands {
         // scan backward, adding trailing lines of head to ins.
         if (insert_lines.length && !this.startsParagraph(insert_lines[0])) {
             let n = 0;  // number of moved lines.
-            for (let s of head_lines.reverse()) {
+            // Create a reversed copy of the array for iteration, preserving the original array.
+            const reversedHeadLines = [...head_lines].reverse();
+            for (let s of reversedHeadLines) {
                 if (this.ends_paragraph(s) || this.single_line_paragraph(s)) {
                     break;
                 } else if (this.startsParagraph(s)) {
@@ -766,9 +768,9 @@ export class CommanderEditCommands {
         if (c.editCommands.fillColumn > 0) {
             pageWidth = c.editCommands.fillColumn;
         } else {
-            pageWidth = d.get("pagewidth");
+            pageWidth = d["pagewidth"];
         }
-        const tabWidth = d.get("tabwidth");
+        const tabWidth = d["tabwidth"];
         const original = w.getAllText();
         const oldSel = w.getSelectionRange();
         const oldYview = w.getYScrollPosition();

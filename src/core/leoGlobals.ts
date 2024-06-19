@@ -4094,36 +4094,35 @@ export function wrap_lines(lines: string[], pageWidth: number, firstLineWidth?: 
     // Sentence spacing
     // This should be determined by some setting, and can only be either 1 or 2
     const sentenceSpacingWidth = 1;
-    console.assert(0 < sentenceSpacingWidth && sentenceSpacingWidth < 3);
+    assert(0 < sentenceSpacingWidth && sentenceSpacingWidth < 3);
     const result: string[] = [];  // The lines of the result.
     let line = "";  // The line being formed. It never ends in whitespace.
     for (const s of lines) {
         let i = 0;
         while (i < s.length) {
-            console.assert(line.length <= outputLineWidth);  // DTHEIN 18-JAN-2004
+            assert(line.length <= outputLineWidth);  // DTHEIN 18-JAN-2004
             const j = skip_ws(s, i);
             const k = skip_non_ws(s, j);
             const word = s.substring(j, k);
-            console.assert(k > i);
+            assert(k > i);
             i = k;
             // DTHEIN 18-JAN-2004: wrap at exactly the text width,
             // not one character less
-            const wordLen = word.length;
+            let wordLen = word.length;
             let space = ' ';
             if (line.endsWith('.') || line.endsWith('?') || line.endsWith('!')) {
                 space = ' '.repeat(sentenceSpacingWidth);
             }
-            let adjustedWordLen = wordLen;
             if (line && wordLen > 0) {
-                adjustedWordLen += space.length;
+                wordLen += space.length;
             }
-            if (adjustedWordLen + line.length <= outputLineWidth) {
+            if (wordLen + line.length <= outputLineWidth) {
                 if (wordLen > 0) {
                     //@+<< place blank and word on the present line >>
                     //@+node:felix.20220410213527.6: *5* << place blank and word on the present line >>
                     if (line) {
                         // Add the word, preceded by a blank.
-                        line = space + line + word;
+                        line = line + space + word;
                     } else {
                         // Just add the word to the start of the line.
                         line = word;
@@ -4853,11 +4852,11 @@ export function rtrim(str: string, ch: string): string {
 }
 //@+node:felix.20240616212335.1: *3* g.rstrip
 export function rstrip(str: string, ch = " \t\n\r") {
-  let i = str.length;
-  while (i > 0 && ch.includes(str[i - 1])) {
-    i--;
-  }
-  return str.substring(0, i);
+    let i = str.length;
+    while (i > 0 && ch.includes(str[i - 1])) {
+        i--;
+    }
+    return str.substring(0, i);
 }
 //@+node:felix.20211104222646.1: *3* g.plural (coreGlobals.py)
 /**
