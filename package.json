@@ -4307,6 +4307,12 @@
         "when": "leojsEditHeadline || leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
+        "command": "leojs.findQuick",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f",
+        "when": "leojsEditHeadline || leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+      },
+      {
         "command": "leojs.findNextFromOutline",
         "key": "f3",
         "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && !editorTextFocus && focusedView =~ /^leojs/"

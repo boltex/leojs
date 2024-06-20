@@ -14977,6 +14977,12 @@ private _refreshGotoPane(): void {
   "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
+  "command": "leojs.findQuick",
+  "key": "ctrl+shift+f",
+  "mac": "cmd+shift+f",
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
   "command": "leojs.findNextFromOutline",
   "key": "f3",
   "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/"
@@ -16076,6 +16082,13 @@ set leoEditHeadline(p_value: boolean) {
             p_event.preventDefault();
             p_event.stopPropagation();
             focusOnField('findText');
+            return;
+        }
+        // Detect CTRL+SHIFT+F
+        if (p_event.ctrlKey &amp;&amp; p_event.shiftKey &amp;&amp; p_event.keyCode === 70) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            focusOnField('navText');
             return;
         }
 
