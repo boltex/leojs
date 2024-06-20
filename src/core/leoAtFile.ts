@@ -4274,7 +4274,7 @@ export class FastAtRead {
         lines: string[]
     ): [[string, string | undefined], string[], number] | undefined {
         const first_lines: string[] = [];
-        let i = 0; // To keep some versions of pylint happy.
+        let i = 0;
         let delims: [string, string | undefined];
         for (const [i, line] of lines.entries()) {
             const m = this.header_pattern.exec(line);
@@ -4314,7 +4314,6 @@ export class FastAtRead {
         let indent = 0; // The current indentation.
         let level_stack: [VNode, VNode | undefined][] = [];
         let n_last_lines = 0; // The number of @@last directives seen.
-        let root_gnx_adjusted = false; // True: suppress final checks.
         // #1065 so reads will not create spurious child nodes.
         let root_seen = false; // false: The next +@node sentinel denotes the root, regardless of gnx.
         let section_delim1 = '<<';
@@ -4328,7 +4327,6 @@ export class FastAtRead {
         //
         // Init the parent vnode.
         //
-        const root_gnx = this.root!.gnx;
         let gnx = this.root!.gnx;
         const context = this.c;
         let parent_v = this.root!.v;
@@ -4338,7 +4336,7 @@ export class FastAtRead {
         // Init the gnx dict last.
         //
         let gnx2vnode = this.gnx2vnode; // Keys are gnx's, values are vnodes.
-        const gnx2body: { [key: string]: string[] } = {}; // Keys are gnxs, values are list of body lines.
+        const gnx2body: Record<string, string[]> = {}; // Keys are gnxs, values are list of body lines.
         gnx2vnode[gnx] = parent_v; // Add gnx to the keys
         // Add gnx to the keys.
         // Body is the list of lines presently being accumulated.
@@ -4352,7 +4350,7 @@ export class FastAtRead {
         let m: RegExpExecArray | null;
         //@-<< init scan_lines >>
         let w_break = false;
-        let i: number = 0; // To keep pylint happy.
+        let i: number = 0;
         for (let [w_i, line] of lines.slice(start).entries()) {
             i = w_i;
             // Strip the line only once.
@@ -4477,30 +4475,28 @@ export class FastAtRead {
                 // m[3] is the level number, m[4] is the number of stars.
                 level = m[3] ? Number(m[3]) : 1 + m[4].length;
                 let v = gnx2vnode[gnx];
-                //
                 // Case 1: The root @file node. Don't change the headline.
-                if (!root_seen && !v && !g.unitTesting) {
-                    // Don't warn about a gnx mismatch in the root.
-                    root_gnx_adjusted = true;
-                }
+                //         #3931: Always use root_v, but use the gnx from external file!
                 if (!root_seen) {
-                    // Fix //1064: The node represents the root, regardless of the gnx!
                     root_seen = true;
                     clone_v = undefined;
-                    body = [];
-                    gnx2body[gnx] = body;
-                    // This case can happen, but not in unit tests.
-                    if (!v) {
-                        // Fix //1064.
-                        v = root_v;
-                        // This message is annoying when using git-diff.
-                        // if gnx != root_gnx:
-                        // g.es_print("using gnx from external file: %s" % (v.h), color='blue')
-                        gnx2vnode[gnx] = v;
-                        v.fileIndex = gnx;
+                    v = root_v;
+                    if (root_v.gnx !== gnx) {
+                        // Delete all traces of root_v.gnx.
+                        if (gnx2body[root_v.gnx]) {
+                            delete gnx2body[root_v.gnx];
+                        }
+                        if (gnx2vnode[root_v.gnx]) {
+                            delete gnx2vnode[root_v.gnx];
+                        }
+                        // `refresh-from-disk` issues this messages, but 'git-diff' should not.
+                        // g.trace(f"Changing gnx! old: {root_v.gnx} new: {gnx} in {head}")
+                        root_v.fileIndex = gnx;
                     }
+                    gnx2vnode[gnx] = root_v;
+                    gnx2body[gnx] = body = [];
                     v.children = [];
-                    continue;
+                    continue;  // End of case 1.
                 }
                 //
                 // Case 2: We are scanning the descendants of a clone.
@@ -4516,9 +4512,9 @@ export class FastAtRead {
                     // Always clear the children!
                     v.children = [];
                     parent_v.children.push(v);
-                    continue;
+                    continue;  // End of case 2.
                 }
-                //
+
                 // Case 3: we are not already scanning the descendants of a clone.
                 if (v) {
                     // The *start* of a clone tree. Reset the children.
@@ -4528,17 +4524,14 @@ export class FastAtRead {
                     // Make a new vnode.
                     v = new VNode(context, gnx);
                 }
-                //
                 // The last version of the body and headline wins.
                 gnx2vnode[gnx] = v;
                 body = [];
                 gnx2body[gnx] = body; // TODO : Check if this is ok - or should be new array instance too?
                 v._headString = head;
-                //
                 // Update the stack.
                 level_stack = level_stack.slice(0, level - 1);
                 level_stack.push([v, clone_v]);
-                //
                 // Update the links.
                 g.assert(v !== root_v);
                 parent_v.children.push(v);
@@ -4628,7 +4621,6 @@ export class FastAtRead {
             //@+node:felix.20230413222859.17: *4* << handle @first and @last >>
             m = this.first_pat!.exec(line);
             if (m && m.length) {
-                // pylint: disable=no-else-continue
                 if (0 <= first_i && first_i < first_lines.length) {
                     body.push('@first ' + first_lines[first_i]);
                     first_i += 1;
@@ -4831,19 +4823,10 @@ export class FastAtRead {
         //@+<< final checks >>
         //@+node:felix.20230413222859.24: *4* << final checks >>
         if (g.unitTesting) {
-            // Unit tests must use the proper value for root.gnx.
-            g.assert(!root_gnx_adjusted);
             g.assert(!stack.length, stack.toString());
-            // Allow gnx mismatch.
-            // g.assert(root_gnx === gnx, [root_gnx, gnx].toString());
-        } else if (root_gnx_adjusted) {
-            // pass  // Don't check!
         } else if (stack && stack.length) {
             g.error('scan_lines: Stack should be empty');
             g.printObj(stack, 'stack');
-        } else if (root_gnx !== gnx) {
-            g.error('scan_lines: gnx error');
-            g.es_print(`root_gnx: ${root_gnx} != gnx: ${gnx}`);
         }
         //@-<< final checks >>
         //@+<< insert @last lines >>

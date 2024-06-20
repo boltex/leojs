@@ -57,7 +57,7 @@ class CommandChainDispatcher {
                 return ret;
             } catch (exc: any) {
                 if (exc.args) {
-                    args = exc.args
+                    args = exc.args;
                 }
             }
         }
@@ -240,7 +240,7 @@ export class LeoPluginsController {
         try {
             moduleName = this.loadingModuleNameStack[this.loadingModuleNameStack.length - 1];
         } catch (e) {
-            moduleName = '<no module>'
+            moduleName = '<no module>';
         }
         // print(f"{g.unitTesting:6} {moduleName:15} {tag:25} {fn.__name__}")
         if (g.unitTesting) {

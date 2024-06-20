@@ -32,9 +32,10 @@ import {
     EditCommandsClass,
     TopLevelEditCommands,
 } from '../commands/editCommands';
+import { BufferCommandsClass } from '../commands/bufferCommands';
 import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
 import { TopLevelCompareCommands } from './leoCompare';
-import { GoToCommands } from '../commands/gotoCommands';
+import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
@@ -45,6 +46,8 @@ import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
+import { KillBufferCommandsClass } from '../commands/killBufferCommands';
+import { RectangleCommandsClass } from '../commands/rectangleCommands';
 import * as typescript from 'typescript';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -59,6 +62,10 @@ if (g.isBrowser) {
 //@-<< imports >>
 //@+others
 //@+node:felix.20211017232128.1: ** applyMixins
+/**
+ * "Alternative Pattern" mixing of multiple classes. (combining simpler partial classes)
+ * From https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern
+ */
 function applyMixins(derivedCtor: any, constructors: any[]): void {
     constructors.forEach((baseCtor) => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
@@ -126,6 +133,7 @@ export class Commands {
     //@+others
     //@+node:felix.20210223220756.1: *3* Commander IVars
     //@+node:felix.20211021003423.1: *4* c.initConfigSettings
+    public autoindent_in_nocolor: boolean | undefined;
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
     public collapse_nodes_after_move: boolean = false;
     public verbose_check_outline: boolean = false;
@@ -240,14 +248,9 @@ export class Commands {
 
     //@+node:felix.20210223220814.8: *4* c.initObjectIvars
     // These ivars are set later by leoEditCommands.createEditCommanders
-    public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: any;// CommanderWrapper;//  Record<string, any>; // IS A DATABASE 
-    public bufferCommands: any = undefined;
-    public chapterCommands: any = undefined;
-    public controlCommands: any = undefined;
-    public convertCommands: any = undefined;
-    public debugCommands: any = undefined;
+    public db: any; // CommanderWrapper; //  Record<string, any>; // IS A DATABASE 
+    public bufferCommands: BufferCommandsClass;
     public editFileCommands: EditFileCommandsClass;
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
@@ -255,16 +258,8 @@ export class Commands {
     public helpCommands: HelpCommandsClass;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
-    public keyHandlerCommands: any = undefined;
-    public killBufferCommands: any = undefined;
-    public macroCommands: any = undefined;
-    public miniBufferWidget: any = undefined; // NOT USED IN LEOJS
-    public printingController: any = undefined;
-    public queryReplaceCommands: any = undefined;
-    public rectangleCommands: any = undefined;
-    public searchCommands: any = undefined;
-    public spellCommands: any = undefined;
-    public vimCommands: any = undefined;
+    public killBufferCommands: KillBufferCommandsClass;
+    public rectangleCommands: RectangleCommandsClass;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
     public quicksearch_controller: QuickSearchController | undefined;
@@ -331,10 +326,13 @@ export class Commands {
         this.persistenceController = new PersistenceDataController(c);
 
         // command handlers...
+        this.bufferCommands = new BufferCommandsClass(c);
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
         this.helpCommands = new HelpCommandsClass(c);
+        this.killBufferCommands = new KillBufferCommandsClass(c);
+        this.rectangleCommands = new RectangleCommandsClass(c);
 
         this.rstCommands = new RstCommands(c);
 
@@ -342,13 +340,9 @@ export class Commands {
 
         // Create the list of subcommanders.
         this.subCommanders = [
-            // this.abbrevCommands,
             this.atFileCommands,
-            // this.bufferCommands,
+            this.bufferCommands,
             this.chapterController,
-            // this.controlCommands,
-            // this.convertCommands,
-            // this.debugCommands,
             this.editCommands,
             this.editFileCommands,
             this.fileCommands,
@@ -356,18 +350,13 @@ export class Commands {
             this.gotoCommands,
             this.helpCommands,
             this.importCommands,
-            // this.keyHandler,
-            // this.keyHandlerCommands,
-            // this.killBufferCommands,
+            this.killBufferCommands,
             this.persistenceController,
-            // this.printingController,
             this.quicksearchController,
-            // this.rectangleCommands,
+            this.rectangleCommands,
             this.rstCommands,
             this.shadowController,
-            // this.spellCommands,
             this.theTagController,
-            // this.vimCommands,
             this.undoer,
         ];
 
@@ -481,7 +470,7 @@ export class Commands {
         const getInt = c.config.getInt.bind(c.config);
         const getString = c.config.getString.bind(c.config);
 
-        // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
+        c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
         c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
         c.collapse_on_lt_arrow = getBool('collapse-on-lt-arrow', true);
         // c.contractVisitedNodes = getBool('contractVisitedNodes');
@@ -1375,6 +1364,15 @@ export class Commands {
             g.restoreStdout();
         }
     }
+    //@+node:felix.20240618002443.1: *3* @cmd toggleUnlView
+    @cmd('toggle-unl-view', 'Toggles the status-bar UNL display setting.')
+    public toggleUnlView(): void {
+        const c: Commands = this;
+        if (c && c.frame) {
+            // This is not a convenience method.
+            c.frame.toggleUnlView();
+        }
+    }
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
@@ -1494,7 +1492,6 @@ export class Commands {
     ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
-            // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
@@ -1547,7 +1544,6 @@ export class Commands {
     ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
-            // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
@@ -1818,7 +1814,6 @@ export class Commands {
      */
     public nullPosition(): void {
         g.trace('This method is deprecated. Instead, just use None.');
-        // pylint complains if we return None.
     }
 
     //@+node:felix.20210131011420.14: *5* c.positionExists
@@ -2271,8 +2266,8 @@ export class Commands {
      */
     public checkGnxs(): number {
         const c: Commands = this;
-        const d: { [key: string]: VNode[] } = {};
-        // Keys are gnx's; values are sets of vnodes with that gnx.
+        // Keys are gnx's; values are lists vnodes with that gnx.
+        const vnode_d: { [key: string]: VNode[] } = {};
         const ni: NodeIndices = g.app.nodeIndices!;
         const t1: [number, number] = process.hrtime();
 
@@ -2284,21 +2279,21 @@ export class Commands {
             let gnx: string = v.fileIndex;
             if (gnx) {
                 // gnx must be a string.
-                const aSet: VNode[] = d[gnx] || []; // new if none yet
+                const aSet: VNode[] = vnode_d[gnx] || []; // new if none yet
                 if (aSet.indexOf(v) === -1) {
                     // Fake a set by checking before pushing
                     aSet.push(v);
                 }
-                d[gnx] = aSet;
+                vnode_d[gnx] = aSet;
             } else {
                 gnx_errors += 1;
                 v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`);
             }
         }
-        for (let gnx of Object.keys(d).sort()) {
-            const aList: VNode[] = d[gnx];
-            if (aList.length !== 1) {
+        for (let gnx of Object.keys(vnode_d).sort()) {
+            const aList: VNode[] = vnode_d[gnx];
+            if (aList.length > 1) {
                 console.log('\nc.checkGnxs...');
                 // g.es_print(`multiple vnodes with gnx: ${gnx}`, 'red');
                 g.es_print(`multiple vnodes with gnx: ${gnx}`);
@@ -3460,7 +3455,6 @@ export class Commands {
         }
 
         if (w_path) {
-            // pylint: disable=no-member
             // Defined in commanderFileCommands.py.
             await c.saveTo(w_path, silent);
             // Issues saved message.
@@ -3552,7 +3546,6 @@ export class Commands {
         } else {
             prefix = '@killcolor\n\n';
         }
-        // pylint: disable=no-member
         // Defined in commanderOutlineCommands.py
         let p2: Position;
         p2 = c.insertHeadline('Open File', false)!;
@@ -5181,6 +5174,7 @@ export interface Commands
     CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelCompareCommands,
+    TopLevelGoToCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,
@@ -5218,6 +5212,7 @@ applyMixins(Commands, [
     CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelCompareCommands,
+    TopLevelGoToCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,

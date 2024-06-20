@@ -133,32 +133,25 @@ export let global_commands_dict: {
     } & { __ivars__: string[] };
 };
 
+/**
+ * Keys are class names, values are attribute chains.
+ */
 export const cmd_instance_dict: { [key: string]: string[] } = {
-    // Keys are class names, values are attribute chains.
-    AbbrevCommandsClass: ['c', 'abbrevCommands'],
     AtFile: ['c', 'atFileCommands'],
-    AutoCompleterClass: ['c', 'k', 'autoCompleter'],
     ChapterController: ['c', 'chapterController'],
     Commands: ['c'],
-    ControlCommandsClass: ['c', 'controlCommands'],
-    DebugCommandsClass: ['c', 'debugCommands'],
     EditCommandsClass: ['c', 'editCommands'],
     EditFileCommandsClass: ['c', 'editFileCommands'],
     FileCommands: ['c', 'fileCommands'],
     HelpCommandsClass: ['c', 'helpCommands'],
     KeyHandlerClass: ['c', 'k'],
-    KeyHandlerCommandsClass: ['c', 'keyHandlerCommands'],
     KillBufferCommandsClass: ['c', 'killBufferCommands'],
     LeoApp: ['g', 'app'],
     LeoFind: ['c', 'findCommands'],
     LeoImportCommands: ['c', 'importCommands'],
-    // 'MacroCommandsClass': ['c', 'macroCommands'],
-    PrintingController: ['c', 'printingController'],
     RectangleCommandsClass: ['c', 'rectangleCommands'],
     RstCommands: ['c', 'rstCommands'],
-    SpellCommandsClass: ['c', 'spellCommands'],
     Undoer: ['c', 'undoer'],
-    VimCommands: ['c', 'vimCommands'],
 };
 
 //@-<< define global decorator dicts >>
@@ -1122,6 +1115,61 @@ export function findFirstValidAtLanguageDirective(
         }
     }
     return undefined;
+}
+//@+node:felix.20240611202347.1: *3* g.findLanguageDirectives (must be fast)
+/**
+ * Return the language in effect at position p.
+ */
+export function findLanguageDirectives(c: Commands, p: Position): string | undefined {
+    if (!c || !p || !p.__bool__()) {
+        return undefined;  // c may be None for testing.
+    }
+
+    const v0 = p.v;
+
+    function find_language(p_or_v: Position | VNode): string | undefined {
+        for (const s of [p_or_v.h, p_or_v.b]) {
+            for (const m of s.matchAll(g_language_pat)) {
+                const language = m[1];
+                if (isValidLanguage(language)) {
+                    return language;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    // First, search up the tree.
+    for (const parent of p.self_and_parents(false)) {
+        const language = find_language(parent);
+        if (language) {
+            return language;
+        }
+    }
+
+    // #1625: Second, expand the search for cloned nodes.
+    const seen: VNode[] = [];  // vnodes that have already been searched.
+    const parents: VNode[] = [...v0.parents];  // vnodes whose ancestors are to be searched.
+    while (parents.length > 0) {
+        const parent_v = parents.pop()!; // Assertive because we just checked!
+        if (seen.includes(parent_v)) {
+            continue;
+        }
+        seen.push(parent_v);
+        const language = find_language(parent_v);
+        if (language) {
+            return language;
+        }
+        for (const grand_parent_v of parent_v.parents) {
+            if (!seen.includes(grand_parent_v)) {
+                parents.push(grand_parent_v);
+            }
+        }
+    }
+
+    // Finally, fall back to the defaults.
+    return c.target_language ? c.target_language.toLowerCase() : 'python';
+
 }
 //@+node:felix.20230423231138.1: *3* g.findReference
 /**
@@ -2610,6 +2658,7 @@ export function splitLines(s?: string): string[] {
         return [];
     }
 }
+export const splitlines = splitLines;
 
 //@+node:felix.20220410214855.1: *3* Scanners: no error messages
 //@+node:felix.20211104213154.1: *4* g.find_line_start
@@ -2966,6 +3015,14 @@ export function skip_nl(s: string, i: number): number {
     return i;
 }
 
+//@+node:felix.20240613003629.1: *4* g.skip_non_ws
+export function skip_non_ws(s: string, i: number): number {
+    const n = s.length;
+    while (i < n && !is_ws(s[i])) {
+        i += 1;
+    }
+    return i;
+}
 //@+node:felix.20220411231219.1: *4* g.skip_python_string
 export function skip_python_string(s: string, i: number): number {
     if (match(s, i, "'''") || match(s, i, '"""')) {
@@ -3994,20 +4051,22 @@ def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
     return w
  */
 //@+node:felix.20220410213527.4: *4* g.computeWidth
-/*
-# Returns the width of s, assuming s starts a line, with indicated tab_width.
-
-def computeWidth(s: str, tab_width: int) -> int:
-    w = 0
-    for ch in s:
-        if ch == '\t':
-            w += (abs(tab_width) - (w % abs(tab_width)))
-        elif ch == '\n':  # Bug fix: 2012/06/05.
-            break
-        else:
-            w += 1
-    return w
+/**
+ * Returns the width of s, assuming s starts a line, with indicated tab_width.
  */
+export function computeWidth(s: string, tab_width: number): number {
+    let w = 0;
+    for (const ch of s) {
+        if (ch === '\t') {
+            w += (Math.abs(tab_width) - (w % Math.abs(tab_width)));
+        } else if (ch === '\n') {  // Bug fix: 2012/06/05.
+            break;
+        } else {
+            w += 1;
+        }
+    }
+    return w;
+}
 //@+node:felix.20220410213527.5: *4* g.wrap_lines (newer)
 
 //@+at
@@ -4019,73 +4078,82 @@ def computeWidth(s: str, tab_width: int) -> int:
 //
 // The key to this code is the invarient that line never ends in whitespace.
 //@@c
-/*
-def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> List[str]:
-    """Returns a list of lines, consisting of the input lines wrapped to the given pageWidth."""
-    if pageWidth < 10:
-        pageWidth = 10
-    # First line is special
-    if not firstLineWidth:
-        firstLineWidth = pageWidth
-    if firstLineWidth < 10:
-        firstLineWidth = 10
-    outputLineWidth = firstLineWidth
-    # Sentence spacing
-    # This should be determined by some setting, and can only be either 1 or 2
-    sentenceSpacingWidth = 1
-    assert 0 < sentenceSpacingWidth < 3
-    result = []  # The lines of the result.
-    line = ""  # The line being formed.  It never ends in whitespace.
-    for s in lines:
-        i = 0
-        while i < len(s):
-            assert len(line) <= outputLineWidth  # DTHEIN 18-JAN-2004
-            j = g.skip_ws(s, i)
-            k = g.skip_non_ws(s, j)
-            word = s[j:k]
-            assert k > i
-            i = k
-            # DTHEIN 18-JAN-2004: wrap at exactly the text width,
-            # not one character less
-            #
-            wordLen = len(word)
-            if line.endswith('.') or line.endswith('?') or line.endswith('!'):
-                space = ' ' * sentenceSpacingWidth
-            else:
-                space = ' '
-            if line and wordLen > 0:
-                wordLen += len(space)
-            if wordLen + len(line) <= outputLineWidth:
-                if wordLen > 0:
+export function wrap_lines(lines: string[], pageWidth: number, firstLineWidth?: number): string[] {
+    /** Returns a list of lines, consisting of the input lines wrapped to the given pageWidth. */
+    if (pageWidth < 10) {
+        pageWidth = 10;
+    }
+    // First line is special
+    if (firstLineWidth == null) {
+        firstLineWidth = pageWidth;
+    }
+    if (firstLineWidth < 10) {
+        firstLineWidth = 10;
+    }
+    let outputLineWidth = firstLineWidth;
+    // Sentence spacing
+    // This should be determined by some setting, and can only be either 1 or 2
+    const sentenceSpacingWidth = 1;
+    assert(0 < sentenceSpacingWidth && sentenceSpacingWidth < 3);
+    const result: string[] = [];  // The lines of the result.
+    let line = "";  // The line being formed. It never ends in whitespace.
+    for (const s of lines) {
+        let i = 0;
+        while (i < s.length) {
+            assert(line.length <= outputLineWidth);  // DTHEIN 18-JAN-2004
+            const j = skip_ws(s, i);
+            const k = skip_non_ws(s, j);
+            const word = s.substring(j, k);
+            assert(k > i);
+            i = k;
+            // DTHEIN 18-JAN-2004: wrap at exactly the text width,
+            // not one character less
+            let wordLen = word.length;
+            let space = ' ';
+            if (line.endsWith('.') || line.endsWith('?') || line.endsWith('!')) {
+                space = ' '.repeat(sentenceSpacingWidth);
+            }
+            if (line && wordLen > 0) {
+                wordLen += space.length;
+            }
+            if (wordLen + line.length <= outputLineWidth) {
+                if (wordLen > 0) {
                     //@+<< place blank and word on the present line >>
                     //@+node:felix.20220410213527.6: *5* << place blank and word on the present line >>
-                    if line:
-                        # Add the word, preceeded by a blank.
-                        line = space.join((line, word))
-                    else:
-                        # Just add the word to the start of the line.
-                        line = word
+                    if (line) {
+                        // Add the word, preceded by a blank.
+                        line = line + space + word;
+                    } else {
+                        // Just add the word to the start of the line.
+                        line = word;
+                    }
                     //@-<< place blank and word on the present line >>
-                else: pass  # discard the trailing whitespace.
-            else:
+                }
+            } else {
                 //@+<< place word on a new line >>
                 //@+node:felix.20220410213527.7: *5* << place word on a new line >>
-                # End the previous line.
-                if line:
-                    result.append(line)
-                    outputLineWidth = pageWidth  # DTHEIN 3-NOV-2002: width for remaining lines
-                # Discard the whitespace and put the word on a new line.
-                line = word
-                # Careful: the word may be longer than pageWidth.
-                if len(line) > pageWidth:  # DTHEIN 18-JAN-2004: line can equal pagewidth
-                    result.append(line)
-                    outputLineWidth = pageWidth  # DTHEIN 3-NOV-2002: width for remaining lines
-                    line = ""
+                // End the previous line.
+                if (line) {
+                    result.push(line);
+                    outputLineWidth = pageWidth;  // DTHEIN 3-NOV-2002: width for remaining lines
+                }
+                // Discard the whitespace and put the word on a new line.
+                line = word;
+                // Careful: the word may be longer than pageWidth.
+                if (line.length > pageWidth) {  // DTHEIN 18-JAN-2004: line can equal pagewidth
+                    result.push(line);
+                    outputLineWidth = pageWidth;  // DTHEIN 3-NOV-2002: width for remaining lines
+                    line = "";
+                }
                 //@-<< place word on a new line >>
-    if line:
-        result.append(line)
-    return result
- */
+            }
+        }
+    }
+    if (line) {
+        result.push(line);
+    }
+    return result;
+}
 //@+node:felix.20220410213527.8: *4* g.get_leading_ws
 export function get_leading_ws(s: string): string {
     let i = 0;
@@ -4781,6 +4849,14 @@ export function rtrim(str: string, ch: string): string {
         // pass, the i-- expression is doing the job
     }
     return str.substring(0, i + 1);
+}
+//@+node:felix.20240616212335.1: *3* g.rstrip
+export function rstrip(str: string, ch = " \t\n\r") {
+    let i = str.length;
+    while (i > 0 && ch.includes(str[i - 1])) {
+        i--;
+    }
+    return str.substring(0, i);
 }
 //@+node:felix.20211104222646.1: *3* g.plural (coreGlobals.py)
 /**

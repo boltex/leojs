@@ -139,13 +139,12 @@ export class CommanderFileCommands {
             ['Python files', '*.py'],
             ['Text files', '*.txt'],
         ];
-        let names: string[] = (await g.app.gui.runOpenFileDialog(
+        let names: string[] = await g.app.gui.runOpenFilesDialog(
             c,
             'Import File',
             types,
             '.py',
-            true
-        )) as string[]; // Has multiple flag when calling runOpenFileDialog
+        );
         c.bringToFront();
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -408,13 +407,12 @@ export class CommanderFileCommands {
             return open_completer(c, closeFlag, fileName);
         }
         // Equivalent to legacy code.
-        fileName = (await g.app.gui.runOpenFileDialog(
+        fileName = await g.app.gui.runOpenFileDialog(
             c,
             'Open',
             table,
             g.defaultLeoFileExtension(c),
-            false
-        )) as string;
+        );
 
         return open_completer(c, closeFlag, fileName);
     }
@@ -443,6 +441,7 @@ export class CommanderFileCommands {
         const at = c.atFileCommands;
         c.nodeConflictList = [];
         c.recreateGnxDict();
+        const old_gnx = p.v.gnx;
         if (p.isAtAutoNode() || p.isAtAutoRstNode()) {
             p.v._deleteAllChildren();
             p = await at.readOneAtAutoNode(p);  // Changes p!
@@ -463,89 +462,19 @@ export class CommanderFileCommands {
             g.es_print(`Unknown @<file> node: ${p.h}`);
             return;
         }
+        if (p.v.gnx !== old_gnx && !g.unitTesting) {
+            g.es_print(`refresh-from-disk changed the gnx for '${p.h}'`);
+            g.es_print(`from '${old_gnx}' to: '${p.v.gnx}'`);
+        }
         c.selectPosition(p);
         // Create the 'Recovered Nodes' tree.
         c.fileCommands.handleNodeConflicts();
         c.redraw();
         c.undoer.clearAndWarn('refresh-from-disk');
-
-        /*
-        // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.openDirectory) {
-            void g.warnNoOpenDirectory();
-        }
-        c.nodeConflictList = [];
-        const fn: string = p.anyAtFileNodeName();
-        const shouldDelete: boolean = c.sqlite_connection === undefined;
-        if (!fn) {
-            g.warning(`not an @<file> node: ${p.h}`);
-            return;
-        }
-        // #1603.
-        const w_isDir = await g.os_path_isdir(fn);
-        if (w_isDir) {
-            g.warning(`not a file: ${fn}`);
-            return;
-        }
-        const b: Bead = u.beforeChangeTree(p);
-        let redraw_flag: boolean = true;
-        const at: AtFile = c.atFileCommands;
-        c.recreateGnxDict();
-        // Fix bug 1090950 refresh from disk: cut node resurrection.
-        const i: number = g.skip_id(p.h, 0, '@');
-        const word = p.h.substring(0, i);
-        if (word === '@auto') {
-            // This includes @auto-*
-            if (shouldDelete) {
-                p.v._deleteAllChildren();
-            }
-            // Fix #451: refresh-from-disk selects wrong node.
-            p = await at.readOneAtAutoNode(p);
-        } else if (['@thin', '@file'].includes(word)) {
-            if (shouldDelete) {
-                p.v._deleteAllChildren();
-            }
-            await at.read(p);
-        } else if (word === '@clean') {
-            // Wishlist 148: use @auto parser if the node is empty.
-            if (p.b.trim() || p.hasChildren()) {
-                await at.readOneAtCleanNode(p);
-            } else {
-                // Fix #451: refresh-from-disk selects wrong node.
-                p = await at.readOneAtAutoNode(p);
-            }
-        } else if (word === '@shadow') {
-            if (shouldDelete) {
-                p.v._deleteAllChildren();
-            }
-            await at.read(p);
-        } else if (word === '@edit') {
-            await at.readOneAtEditNode(fn, p);
-            // Always deletes children.
-        } else if (word === '@asis') {
-            // Fix #1067.
-            await at.readOneAtAsisNode(fn, p);
-            // Always deletes children.
-        } else {
-            g.es_print(`can not refresh from disk\n${p.h}`);
-            redraw_flag = false;
-        }
-        if (redraw_flag) {
-            // Fix #451: refresh-from-disk selects wrong node.
-            c.selectPosition(p);
-            u.afterChangeTree(p, 'refresh-from-disk', b);
-            // Create the 'Recovered Nodes' tree.;
-            c.fileCommands.handleNodeConflicts();
-            c.redraw();
-        }
-        return;
-        */
-
     }
     //@+node:felix.20220105210716.13: *4* c_file.pwd
     @commander_command('pwd', 'Prints the current working directory')
     public pwd_command(this: Commands): void {
-        // TODO : GET WORKING DIR OF THE WORKSPACE !
         g.es_print('pwd:', process.cwd());
     }
     //@+node:felix.20220105210716.14: *4* c_file.save
@@ -1065,17 +994,16 @@ export class CommanderFileCommands {
             ['Python files', '*.py'],
         ];
 
-        const names = await g.app.gui.runOpenFileDialog(
+        const names = await g.app.gui.runOpenFilesDialog(
             c,
             'Remove Sentinels',
             types,
             '.py',
-            true
         );
         c.bringToFront();
         if (names && names.length) {
             await g.chdir(names[0]);
-            return c.importCommands.removeSentinelsCommand(names as string[]);
+            return c.importCommands.removeSentinelsCommand(names);
         }
     }
     //@+node:felix.20220105210716.29: *4* c_file.weave
@@ -1180,14 +1108,17 @@ export class CommanderFileCommands {
             ['Python files', '*.py'],
             ['Leo files', '*.leo *.leojs'],
         ];
-        const fileName = (await g.app.gui.runOpenFileDialog(
+        let fileName = await g.app.gui.runOpenFileDialog(
             c,
             'Read File Into Node',
             filetypes,
             ''
-        )) as string;
+        );
         if (!fileName) {
             return;
+        }
+        if (Array.isArray(fileName)) {
+            fileName = fileName[0];
         }
         let s: string | undefined;
         let e: string | undefined;
@@ -1354,78 +1285,6 @@ export class CommanderFileCommands {
         await g.app.recentFilesManager.writeEditedRecentFiles(c);
     }
     //     g.app.recentFilesManager.writeEditedRecentFiles(c)
-    //@+node:felix.20220105210716.44: *3* Reference outline commands
-    //@+node:felix.20220105210716.45: *4* c_file.updateRefLeoFile
-    // ! removed ! 
-    // @commander_command(
-    //     'update-ref-file',
-    //     'Saves only the **public part** of this outline to the reference Leo\n' +
-    //     'file. The public part consists of all nodes above the **special\n' +
-    //     'separator node**, a top-level node whose headline is\n' +
-    //     '`---begin-private-area---`.\n' +
-    //     '\n' +
-    //     'Below this special node is **private area** where one can freely make\n' +
-    //     'changes that should not be copied (published) to the reference Leo file.\n' +
-    //     '\n' +
-    //     '**Note**: Use the set-reference-file command to create the separator node.\n'
-    // )
-    // public updateRefLeoFile(this: Commands): Promise<unknown> {
-    //     const c: Commands = this;
-    //     return c.fileCommands.save_ref();
-    // }
-    //@+node:felix.20220105210716.46: *4* c_file.readRefLeoFile
-    // ! removed ! 
-    // @commander_command(
-    //     'read-ref-file',
-    //     'This command *completely replaces* the **public part** of this outline\n' +
-    //     'with the contents of the reference Leo file. The public part consists\n' +
-    //     'of all nodes above the top-level node whose headline is\n' +
-    //     '`---begin-private-area---`.\n' +
-    //     '\n' +
-    //     'Below this special node is **private area** where one can freely make\n' +
-    //     'changes that should not be copied (published) to the reference Leo file.\n' +
-    //     '\n' +
-    //     '**Note**: Use the set-reference-file command to create the separator node.\n'
-    // )
-    // public readRefLeoFile(this: Commands): Promise<unknown> {
-    //     const c: Commands = this;
-    //     return c.fileCommands.updateFromRefFile();
-    // }
-    //@+node:felix.20220105210716.47: *4* c_file.setReferenceFile
-    // ! removed ! 
-    // @commander_command(
-    //     'set-reference-file',
-    //     'test'
-    //     // "Shows a file open dialog allowing you to select a **reference** Leo\n" +
-    //     // "document to which this outline will be connected.\n" +
-    //     // "\n" +
-    //     // "This command creates a **special separator node**, a top-level node\n" +
-    //     // "whose headline is `---begin-private-area---` and whose body is the path\n" +
-    //     // "to reference Leo file.\n" +
-    //     // "\n" +
-    //     // "The separator node splits the outline into two parts. The **public\n" +
-    //     // "part** consists of all nodes above the separator node. The **private\n" +
-    //     // "part** consists of all nodes below the separator node.\n" +
-    //     // "\n" +
-    //     // "The update-ref-file and read-ref-file commands operate on the **public\n" +
-    //     // "part** of the outline. The update-ref-file command saves *only* the\n" +
-    //     // "public part of the outline to reference Leo file. The read-ref-file\n" +
-    //     // "command *completely replaces* the public part of the outline with the\n" +
-    //     // "contents of reference Leo file.\n"
-    // )
-    // public async setReferenceFile(this: Commands): Promise<unknown> {
-    //     const c: Commands = this;
-    //     const fileName = (await g.app.gui.runOpenFileDialog(
-    //         c,
-    //         'Select reference Leo file',
-    //         [['Leo files', '*.leo *.leojs *.db']],
-    //         g.defaultLeoFileExtension(c)
-    //     )) as string;
-    //     if (!fileName) {
-    //         return;
-    //     }
-    //     return c.fileCommands.setReferenceFile(fileName);
-    // }
     //@-others
 }
 //@-others

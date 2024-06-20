@@ -209,7 +209,7 @@ export class LeoApp {
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
-    public globalKillBuffer: any[] = []; // The global kill buffer.
+    public globalKillBuffer: string[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
     public initial_cwd: string = process.cwd(); // For restart-leo.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.

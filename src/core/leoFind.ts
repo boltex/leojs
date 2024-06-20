@@ -3834,9 +3834,9 @@ export class LeoFind {
             const k = g.see_more_lines(w.getAllText(), insert, 4);
             w.see(k); // #78: find-next match not always scrolled into view.
             c.outerUpdate(); // Set the focus immediately.
-            if (c.vim_mode && c.vimCommands) {
-                c.vimCommands.update_selection_after_search();
-            }
+            // if (c.vim_mode && c.vimCommands) {
+            //     c.vimCommands.update_selection_after_search();
+            // }
         }
 
         // // Support for the console gui.
@@ -3909,9 +3909,9 @@ export class LeoFind {
      */
     public init_vim_search(pattern: string): void {
         const c = this.c;
-        if (c.vim_mode && c.vimCommands) {
-            c.vimCommands.update_dot_before_search(pattern, undefined); // A flag.
-        }
+        // if (c.vim_mode && c.vimCommands) {
+        //     c.vimCommands.update_dot_before_search(pattern, undefined); // A flag.
+        // }
     }
     //@+node:felix.20221022201804.7: *4* find.preload_find_pattern
     /**

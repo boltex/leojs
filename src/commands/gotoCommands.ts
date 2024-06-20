@@ -691,7 +691,12 @@ export class GoToCommands {
         c.bodyWantsFocus();
         w.seeInsertPoint();
     }
-    //@+node:felix.20221218143503.1: *3* show-file-line
+    //@-others
+}
+//@+node:felix.20240615222253.1: ** class TopLevelGoToCommands
+export class TopLevelGoToCommands {
+    //@+others
+    //@+node:felix.20240615222631.1: *3* show-file-line
     @command(
         'show-file-line',
         'Print the external file line number that corresponds to the line containing the cursor.' +
