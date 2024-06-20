@@ -696,9 +696,9 @@ export class CommanderEditCommands {
      * This is a convenience method for the reformat-paragraph command.
      */
     private find_bound_paragraph(c: Commands): [string, string[], string] | [undefined, undefined, undefined] {
-        const [head, ins, tail] = c.frame.body.getInsertLines();
+        let [head, ins, tail] = c.frame.body.getInsertLines();
         let head_lines = g.splitLines(head);
-        const tail_lines = g.splitLines(tail);
+        let tail_lines = g.splitLines(tail);
         let result: string[] = [];
         const insert_lines = g.splitLines(ins);
         let para_lines = insert_lines.concat(tail_lines);
@@ -749,9 +749,10 @@ export class CommanderEditCommands {
         }
 
         if (started) {
-            const head_str = head_lines.join('');
-            const tail_str = para_lines.slice(ended ? para_lines.indexOf(result[result.length - 1]) + 1 : 0).join('');
-            return [head_str, result, tail_str];
+            head = head_lines.join('');
+            tail_lines = ended ? para_lines.slice(result.length) : [];
+            tail = tail_lines.join('');
+            return [head, result, tail];
         }
 
         return [undefined, undefined, undefined];
