@@ -4,17 +4,17 @@
 
 - Fixed import file error when using the 'import any' or other importers.
 - Improved 'detached' body panes behavior.
-- Fixed colorization of descendants of nodes with multiple 'language' directives.
-- Added context menu to document nodes making the 'revert' command available.
-- Fixed 'refresh-from-disk' command availability.
+- Fixed the colorization of descendants for nodes with multiple 'language' directives.
+- Added context menu to document pane nodes, offering the 'revert' command.
+- Fixed the 'refresh-from-disk' command availability.
 - Improved some keyboard shortcuts and the related README documentation section.
-- Fixed 'reload-setting' command so that it calls the reloadSettings method of subCommanders.
+- Fixed 'reload-setting' command so that it calls the 'reloadSettings' method of subCommanders.
 - Implemented the 'write-zip-archive' command.
-- Implemented the new find-def command behavior along with the 'prefer-nav-pane' config setting support.
+- Implemented the new find-def command behavior, along with the 'prefer-nav-pane' config setting support.
 - Implemented 'execute-general-script' and 'execute-external-file' commands.
 - Added language coloring and syntax support for julia, batch and shell languages.
 - Implemented most 'edit commands'. (Accessible as 'commands' in the minibuffer or in scripts, etc.)
-- Implemented the 'toggle-unl-view' command to switch the status bar UNL type show for the currently selected node.
+- Implemented the 'toggle-unl-view' command (Switches the status bar UNL type)
 
 # 0.2.13
 
