@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240622195331.1"><vh>0.2.15</vh></v>
 <v t="felix.20240428224613.1"><vh>0.2.14</vh></v>
 <v t="foo.20240309205342.1"><vh>0.2.13</vh></v>
 <v t="felix.20240122215450.1"><vh>0.2.12</vh></v>
@@ -4744,7 +4745,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -18784,6 +18785,11 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
         });
     });
 }
+
+</t>
+<t tx="felix.20240622195331.1"># 0.2.15
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
