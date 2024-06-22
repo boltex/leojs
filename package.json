@@ -1,8 +1,8 @@
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
-  "description": "LeoJS — The literate editor with outline javascript implementation",
-  "version": "0.2.13",
+  "description": "LeoJS — The literate editor with outline javaScript implementation",
+  "version": "0.2.14",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -308,6 +308,96 @@
           "dark": "resources/dark/body-pane.svg"
         },
         "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.julia",
+        "aliases": [
+          "Leo Body Julia",
+          "leojsbody.julia"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.julia.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.julia.wrap",
+        "aliases": [
+          "Leo Body Julia",
+          "leojsbody.julia"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.julia.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.batch",
+        "aliases": [
+          "Leo Body Batch",
+          "leojsbody.batch"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.batch.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.batch.wrap",
+        "aliases": [
+          "Leo Body Batch",
+          "leojsbody.batch"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.batch.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.shell",
+        "aliases": [
+          "Leo Body Shell",
+          "leojsbody.shell"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.shell.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.shell.wrap",
+        "aliases": [
+          "Leo Body Shell",
+          "leojsbody.shell"
+        ],
+        "extensions": [
+          ""
+        ],
+        "icon": {
+          "light": "resources/light/body-pane.svg",
+          "dark": "resources/dark/body-pane.svg"
+        },
+        "configuration": "./language-configurations/leojsbody.shell.language-configuration.json"
       },
       {
         "id": "leojsbody.python",
@@ -802,6 +892,36 @@
         "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
       },
       {
+        "language": "leojsbody.julia",
+        "scopeName": "source.leojsbody.julia",
+        "path": "./syntaxes/leojsbody.julia.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.julia.wrap",
+        "scopeName": "source.leojsbody.julia",
+        "path": "./syntaxes/leojsbody.julia.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.batch",
+        "scopeName": "source.leojsbody.batch",
+        "path": "./syntaxes/leojsbody.batch.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.batch.wrap",
+        "scopeName": "source.leojsbody.batch",
+        "path": "./syntaxes/leojsbody.batch.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.shell",
+        "scopeName": "source.leojsbody.shell",
+        "path": "./syntaxes/leojsbody.shell.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.shell.wrap",
+        "scopeName": "source.leojsbody.shell",
+        "path": "./syntaxes/leojsbody.shell.tmLanguage.json"
+      },
+      {
         "language": "leojsbody.python",
         "scopeName": "source.leojsbody.python",
         "path": "./syntaxes/leojsbody.python.tmLanguage.json"
@@ -963,6 +1083,7 @@
       },
       {
         "injectTo": [
+          "source.leojsbody.batch",
           "source.leojsbody.c",
           "source.leojsbody.cpp",
           "source.leojsbody.css",
@@ -972,14 +1093,17 @@
           "source.leojsbody.java",
           "source.leojsbody.javascript",
           "source.leojsbody.json",
+          "source.leojsbody.julia",
           "source.leojsbody.markdown",
           "source.leojsbody.php",
           "source.leojsbody.plain",
           "source.leojsbody.python",
           "source.leojsbody.restructuredtext",
           "source.leojsbody.rust",
+          "source.leojsbody.shell",
           "source.leojsbody.typescript",
           "source.leojsbody.xml",
+          "source.leojsbody.batch.wrap",
           "source.leojsbody.c.wrap",
           "source.leojsbody.cpp.wrap",
           "source.leojsbody.css.wrap",
@@ -989,12 +1113,14 @@
           "source.leojsbody.java.wrap",
           "source.leojsbody.javascript.wrap",
           "source.leojsbody.json.wrap",
+          "source.leojsbody.julia.wrap",
           "source.leojsbody.markdown.wrap",
           "source.leojsbody.php.wrap",
           "source.leojsbody.plain.wrap",
           "source.leojsbody.python.wrap",
           "source.leojsbody.restructuredtext.wrap",
           "source.leojsbody.rust.wrap",
+          "source.leojsbody.shell.wrap",
           "source.leojsbody.typescript.wrap",
           "source.leojsbody.xml.wrap"
         ],
@@ -1760,7 +1886,7 @@
       {
         "command": "leojs.revert",
         "category": "Leojs",
-        "enablement": "leojsReady && leojsTreeOpened",
+        "enablement": "leojsReady && leojsTreeOpened && leojsTreeTitled",
         "shortTitle": "Revert Leo outline to last saved contents",
         "title": "Revert"
       },
@@ -1824,21 +1950,21 @@
         "command": "leojs.refreshFromDisk",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened",
+        "enablement": "leojsTreeOpened && leojsTreeTitled",
         "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.refreshFromDiskSelection",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened && LeojsAtFile",
+        "enablement": "leojsTreeOpened && LeojsAtFile && leojsTreeTitled",
         "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.refreshFromDiskSelectionFromOutline",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened && LeojsAtFile",
+        "enablement": "leojsTreeOpened && LeojsAtFile && leojsTreeTitled",
         "icon": "$(leojs-refresh)"
       },
       {
@@ -1995,13 +2121,15 @@
         "command": "leojs.editSelectedHeadline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Edit Headline"
+        "title": "Edit Headline",
+        "icon": "$(leojs-edit)"
       },
       {
         "command": "leojs.editSelectedHeadlineFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Edit Headline"
+        "title": "Edit Headline",
+        "icon": "$(leojs-edit)"
       },
       {
         "command": "leojs.mark",
@@ -2111,7 +2239,8 @@
         "command": "leojs.cutNode",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Cut Node"
+        "title": "Cut Node",
+        "icon": "$(leojs-cut)"
       },
       {
         "command": "leojs.cutNodeSelection",
@@ -2124,13 +2253,15 @@
         "command": "leojs.cutNodeSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Cut Node"
+        "title": "Cut Node",
+        "icon": "$(leojs-cut)"
       },
       {
         "command": "leojs.pasteNode",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node"
+        "title": "Paste Node",
+        "icon": "$(leojs-paste)"
       },
       {
         "command": "leojs.pasteNodeAtSelection",
@@ -2143,13 +2274,15 @@
         "command": "leojs.pasteNodeAtSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node"
+        "title": "Paste Node",
+        "icon": "$(leojs-paste)"
       },
       {
         "command": "leojs.pasteNodeAsClone",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node as Clone"
+        "title": "Paste Node as Clone",
+        "icon": "$(leojs-paste-clone)"
       },
       {
         "command": "leojs.pasteNodeAsCloneAtSelection",
@@ -2162,7 +2295,14 @@
         "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Paste Node as Clone"
+        "title": "Paste Node as Clone",
+        "icon": "$(leojs-paste-clone)"
+      },
+      {
+        "command": "leojs.pasteAsTemplate",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Paste Node as template"
       },
       {
         "command": "leojs.delete",
@@ -2182,7 +2322,8 @@
         "command": "leojs.deleteSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Delete Node"
+        "title": "Delete Node",
+        "icon": "$(leojs-delete)"
       },
       {
         "command": "leojs.setUa",
@@ -2215,13 +2356,15 @@
         "command": "leojs.moveOutlineDownSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Down"
+        "title": "Move Outline Down",
+        "icon": "$(leojs-arrow-down)"
       },
       {
         "command": "leojs.moveOutlineDownSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Down"
+        "title": "Move Outline Down",
+        "icon": "$(leojs-arrow-down)"
       },
       {
         "command": "leojs.moveOutlineLeft",
@@ -2234,13 +2377,15 @@
         "command": "leojs.moveOutlineLeftSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Left"
+        "title": "Move Outline Left",
+        "icon": "$(leojs-arrow-left)"
       },
       {
         "command": "leojs.moveOutlineLeftSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Left"
+        "title": "Move Outline Left",
+        "icon": "$(leojs-arrow-left)"
       },
       {
         "command": "leojs.moveOutlineRight",
@@ -2253,13 +2398,15 @@
         "command": "leojs.moveOutlineRightSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Right"
+        "title": "Move Outline Right",
+        "icon": "$(leojs-arrow-right)"
       },
       {
         "command": "leojs.moveOutlineRightSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Right"
+        "title": "Move Outline Right",
+        "icon": "$(leojs-arrow-right)"
       },
       {
         "command": "leojs.moveOutlineUp",
@@ -2272,13 +2419,15 @@
         "command": "leojs.moveOutlineUpSelection",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Up"
+        "title": "Move Outline Up",
+        "icon": "$(leojs-arrow-up)"
       },
       {
         "command": "leojs.moveOutlineUpSelectionFromOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Move Outline Up"
+        "title": "Move Outline Up",
+        "icon": "$(leojs-arrow-up)"
       },
       {
         "command": "leojs.insertNode",
@@ -2663,17 +2812,10 @@
         "icon": "$(leojs-find-previous)"
       },
       {
-        "command": "leojs.findVar",
-        "category": "Leojs",
-        "enablement": "leojsTreeOpened",
-        "title": "Find the var under the cursor"
-      },
-      {
         "command": "leojs.findDef",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "shortTitle": "Find Definition",
-        "title": "Find the def or class under the cursor"
+        "title": "Find def, class or var assignment"
       },
       {
         "command": "leojs.replace",
@@ -2900,7 +3042,7 @@
         "command": "leojs.findQuickTimeline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "List timeline of nodes in reverse gnx order",
+        "title": "List nodes in reverse gnx order",
         "icon": "$(leojs-find-quick-timeline)"
       },
       {
@@ -3389,11 +3531,6 @@
       ],
       "editor/context": [
         {
-          "command": "leojs.findVar",
-          "when": "!editorHasMultipleSelections && resourceScheme == leojs && leojsTreeOpened",
-          "group": "navigation@1"
-        },
-        {
           "command": "leojs.findDef",
           "when": "!editorHasMultipleSelections && resourceScheme == leojs && leojsTreeOpened",
           "group": "navigation@1"
@@ -3573,6 +3710,11 @@
           "group": "inline@2"
         },
         {
+          "command": "leojs.revert",
+          "when": "viewItem =~ /^leojsDocumentSelected/",
+          "group": "leojsDocumentContext1@1"
+        },
+        {
           "command": "leojs.editHeadline",
           "when": "config.leojs.showEditOnNodes && viewItem =~ /^leojsNode/",
           "group": "inline@1"
@@ -3707,6 +3849,12 @@
           "when": "leojsTreeOpened && viewItem =~ /^leojsUndoNode/",
           "group": "leojsUndosContext1@1"
         }
+      ],
+      "file/newFile": [
+        {
+          "command": "leojs.newLeoFile",
+          "group": "file"
+        }
       ]
     },
     "keybindings": [
@@ -3741,13 +3889,13 @@
       {
         "command": "leojs.showBody",
         "key": "alt+d",
-        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojsDetached || leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.showBody",
         "key": "ctrl+g",
         "mac": "cmd+g",
-        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojsDetached || leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/"
       },
       {
         "command": "leojs.showBody",
@@ -3763,7 +3911,7 @@
         "command": "leojs.tabCycleNext",
         "key": "ctrl+tab",
         "mac": "cmd+tab",
-        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsEditHeadline || leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme =~ /^leojs/"
       },
       {
         "command": "leojs.saveLeoFileFromOutline",
@@ -4156,6 +4304,12 @@
         "command": "leojs.startSearch",
         "key": "ctrl+f",
         "mac": "cmd+f",
+        "when": "leojsEditHeadline || leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+      },
+      {
+        "command": "leojs.findQuick",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f",
         "when": "leojsEditHeadline || leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {

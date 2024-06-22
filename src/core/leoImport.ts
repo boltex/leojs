@@ -140,16 +140,12 @@ export class FreeMindImporter {
             ['FreeMind files', '*.mm.html'],
             ['All files', '*'],
         ];
-        const names = (await g.app.gui.runOpenFileDialog(
+        const names = await g.app.gui.runOpenFilesDialog(
             c,
             'Import FreeMind File',
             types,
             '.html',
-            true
-        )) as string[];
-
-        // c.bringToFront();
-
+        );
         if (names && names.length) {
             await g.chdir(names[0]);
             await this.import_files(names);
@@ -1767,14 +1763,12 @@ export class MindMapImporter {
             ['MindJet files', '*.csv'],
             ['All files', '*'],
         ];
-        const names = (await g.app.gui.runOpenFileDialog(
+        const names = await g.app.gui.runOpenFilesDialog(
             c,
             'Import MindJet File',
             types,
             '.csv',
-            true
-        )) as string[];
-        // c.bringToFront();
+        );
         if (names && names.length) {
             await g.chdir(names[0]);
             await this.import_files(names);
@@ -1892,14 +1886,12 @@ export class MORE_Importer {
         const c = this.c;
         const types: [string, string][] = [['All files', '*']];
 
-        const names = (await g.app.gui.runOpenFileDialog(
+        const names = await g.app.gui.runOpenFilesDialog(
             c,
             'Import MORE Files',
             types,
             '', //  ".txt",
-            true
-        )) as string[];
-        // c.bringToFront()
+        );
         if (names && names.length) {
             await g.chdir(names[0]);
             await this.import_files(names);
@@ -2830,15 +2822,12 @@ export class TabImporter {
         const c = this.c;
         const types: [string, string][] = [['All files', '*']];
 
-        const names = (await g.app.gui.runOpenFileDialog(
+        const names = await g.app.gui.runOpenFilesDialog(
             c,
             'Import Tabbed File',
             types,
             '.html',
-            true
-        )) as string[];
-
-        // c.bringToFront();
+        );
         if (names && names.length) {
             await g.chdir(names[0]);
             await this.import_files(names);
@@ -3115,16 +3104,12 @@ export class ToDoImporter {
             ['Text files', '*.txt'],
             ['All files', '*'],
         ];
-        const names = (await g.app.gui.runOpenFileDialog(
+        const names = await g.app.gui.runOpenFilesDialog(
             c,
             'Import todo.txt File',
             types,
             '.txt',
-            true
-        )) as string[];
-
-        // c.bringToFront() ;
-
+        );
         if (!names || !names.length) {
             return {};
         }
@@ -3664,16 +3649,12 @@ export class LegacyExternalFileImporter {
             ['All files', '*'],
         ];
 
-        const paths = (await g.app.gui.runOpenFileDialog(
+        const paths = await g.app.gui.runOpenFilesDialog(
             c,
             'Import Legacy External Files',
             types,
             '.py',
-            true
-        )) as string[];
-
-        // c.bringToFront()
-
+        );
         if (paths && paths.length) {
             await g.chdir(paths[0]);
             await this.import_files(paths);

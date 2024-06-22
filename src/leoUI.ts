@@ -197,8 +197,8 @@ export class LeoUI extends NullGui {
     private _lastLeoUndos: vscode.TreeView<LeoUndoNode> | undefined;
 
     // * Body pane
-    private _changedBodyWithMirrorDetached = false;
-    private _changedDetachedWithMirrorBody = false;
+    private _changedBodyWithMirrorDetached: string | undefined = undefined; // "id/gnx" string as true
+    private _changedDetachedWithMirrorBody: string | undefined = undefined; // "id/gnx" string as true
     private _bodyFileSystemStarted: boolean = false;
     private _detachedFileSystemStarted: boolean = false;
     private _bodyEnablePreview: boolean = true;
@@ -783,9 +783,8 @@ export class LeoUI extends NullGui {
             this._refreshType.states = false;
             const p = c.p;
             if (this._leoStatusBar && p && p.v) {
-                const kind: string = c.config.getString('unl-status-kind') || '';
-                const method: () => string = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
-                this._leoStatusBar.setString(method());
+                const unl = c.frame.computeStatusUnl(p);
+                this._leoStatusBar.setString(unl);
                 this._leoStatusBar.setTooltip(p.h);
             }
             let w_canHoist = true;
@@ -1167,11 +1166,8 @@ export class LeoUI extends NullGui {
         p_editor: vscode.TextEditor | undefined,
         p_internalCall?: boolean
     ): void {
-        if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
-            if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
-                void this._hideDeleteBody(p_editor);
-            }
-            this._checkPreviewMode(p_editor);
+        if (p_editor) {
+            this._hideBodiesUnknownToFileSys([p_editor]);
         }
         if (!p_internalCall) {
             void this.triggerBodySave(true, true); // Save in case edits were pending
@@ -1203,14 +1199,7 @@ export class LeoUI extends NullGui {
     public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void {
         if (p_editors && p_editors.length) {
             // May be no changes - so check length
-            p_editors.forEach((p_textEditor) => {
-                if (p_textEditor && p_textEditor.document.uri.scheme === Constants.URI_LEOJS_SCHEME) {
-                    if (this.bodyUri.fsPath !== p_textEditor.document.uri.fsPath) {
-                        void this._hideDeleteBody(p_textEditor);
-                    }
-                    this._checkPreviewMode(p_textEditor);
-                }
-            });
+            this._hideBodiesUnknownToFileSys(p_editors);
         }
         void this.triggerBodySave(true, true);
     }
@@ -1270,15 +1259,19 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
         ) {
+
             const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
             const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
 
             const w_selectedCId = g.app.windowList[this.frameIndex].c.id.toString();
             const w_sameCommander = w_selectedCId === id;
+            let w_needDocRefresh = false;
             let w_alreadySaved = false;
             let w_v: VNode | undefined;
-            let c: Commands | undefined;
+
+            let c: Commands | undefined; // The modified text document's body's commander.
+
             for (const w_frame of g.app.windowList) {
                 if (w_frame.c.id.toString() === id) {
                     c = w_frame.c;
@@ -1289,7 +1282,7 @@ export class LeoUI extends NullGui {
                 w_v = c.fileCommands.gnxDict[gnx];
                 if (this._changedBodyWithMirrorDetached || (w_v && (w_bodyText === w_v.b))) {
                     // WAS NOT A USER MODIFICATION?
-                    this._changedBodyWithMirrorDetached = false;
+                    this._changedBodyWithMirrorDetached = undefined;
                     return;
                 }
             }
@@ -1299,13 +1292,14 @@ export class LeoUI extends NullGui {
             // * If body changed a line with and '@' directive refresh body states
             let w_needsRefresh = false;
             for (const p_change of p_textDocumentChange.contentChanges) {
-                if (p_change.text.includes('@')) {
+                if (p_change.rangeLength || p_change.text.includes('@')) {
                     // There may have been an @
                     w_needsRefresh = true;
                     break;
                 }
             }
 
+            // * Detect in active editor if current cursor line is language related, set w_needsRefresh if so.
             const w_textEditor = vscode.window.activeTextEditor;
             if (
                 w_textEditor && w_textEditor.selections && w_textEditor.selections.length &&
@@ -1315,7 +1309,7 @@ export class LeoUI extends NullGui {
                     if (p_selection.active.line < w_textEditor.document.lineCount) {
                         // TRY TO DETECT IF LANGUAGE RESET NEEDED!
                         let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
+                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('wrap') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                             w_needsRefresh = true;
                             break;
                         }
@@ -1323,11 +1317,12 @@ export class LeoUI extends NullGui {
                 }
             }
 
+            const w_uriKey = utils.leoUriToStr(this.bodyDetachedTextDocument.uri);
+            const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
+            const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
+
             // If same commander, and node icon changed (or whole document was unchanged)
             if (w_sameCommander) {
-                const w_uriKey = utils.leoUriToStr(this.bodyDetachedTextDocument.uri);
-                const w_node = this._leoDetachedFileSystem.openedBodiesVNodes[w_uriKey];
-                const w_detachedIconChanged = !w_node.isDirty() || (!!w_node.bodyString().length === !w_hasBody);
                 if (!this.leoStates.leoChanged || w_detachedIconChanged) {
                     if (!w_alreadySaved) {
                         void this._bodySaveDocument(this.bodyDetachedTextDocument);
@@ -1340,6 +1335,14 @@ export class LeoUI extends NullGui {
                         this._refreshOutline(false, RevealType.NoReveal);
                     }
                 }
+            } else {
+                if (c && !c.isChanged()) {
+                    w_needDocRefresh = true;
+                    if (!w_alreadySaved) {
+                        void this._bodySaveDocument(this.bodyDetachedTextDocument);
+                        w_alreadySaved = true;
+                    }
+                }
             }
 
             if (w_needsRefresh) {
@@ -1350,8 +1353,11 @@ export class LeoUI extends NullGui {
                 // REFRESH LANGUAGE OF THIS DETACHED BODY
                 const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(p_textDocumentChange.document.uri)];
                 if (w_foundVnode) {
-                    for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
-                        if (p.v) {
+
+                    const gnx = w_foundVnode.gnx;
+
+                    for (const p of w_foundVnode.context.all_unique_positions()) {
+                        if (p.v.gnx === gnx) {
                             if (!w_alreadySaved) {
                                 void this._bodySaveDocument(this.bodyDetachedTextDocument);
                                 w_alreadySaved = true;
@@ -1366,6 +1372,8 @@ export class LeoUI extends NullGui {
                             break;
                         }
                     }
+
+
                 } else {
                     console.log('DETACHED VNODE not found when resetting language');
                 }
@@ -1373,8 +1381,8 @@ export class LeoUI extends NullGui {
                 this.refreshCommanderDetachedLanguage();
             }
 
+            // * CHECK FOR BODY THAT MATCHES! set w_sameBodyTabOpened if so.
             let w_sameBodyTabOpened = false;
-            // CHECK FOR BODY THAT MATCHES! 
             for (const p_tabGroup of vscode.window.tabGroups.all) {
                 for (const p_tab of p_tabGroup.tabs) {
                     if (p_tab.input &&
@@ -1392,30 +1400,37 @@ export class LeoUI extends NullGui {
                 }
             }
 
-            // Check if exact same commander as currently selected body
+            // Check if exact same commander AND same gnx: BOTH THE SAME so refresh the body!
             if (w_sameCommander) {
-                if (this.lastSelectedNode && gnx === this.lastSelectedNode.gnx) {
+                if (w_sameBodyTabOpened && this.lastSelectedNode && gnx === this.lastSelectedNode.gnx) {
                     // Same commander AND same gnx  !  
                     if (!w_alreadySaved) {
+                        // console.log('bodySAVE DETACHED because same tab opened');
                         void this._bodySaveDocument(this.bodyDetachedTextDocument);
                         w_alreadySaved = true;
                     }
-                    if (w_sameBodyTabOpened) {
-                        if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
-                            this._changedDetachedWithMirrorBody = true; // PREVENT DOUBLE REFRESH
-                        }
-                        this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
+                    if (this._leoFileSystem.watchedBodiesGnx.includes(gnx)) {
+                        // console.log("setting changedDetachedWithMirrorBody");
 
+                        this._changedDetachedWithMirrorBody = `${id}/${gnx}`; // PREVENT DOUBLE REFRESH
                     }
+                    // console.log('fire refresh of body');
+                    this._leoFileSystem.fireRefreshFile(this.lastSelectedNode.gnx);
                 }
                 if (w_needsRefresh) {
                     this.debouncedRefreshBodyStates(50); // And maybe changed in other node of same commander!
                 }
 
+            } else if (w_needDocRefresh) {
+                this.refreshDocumentsPane();
+            }
+            if (!this.leoStates.leoChanged && w_sameCommander) {
+                // also refresh document panel (icon may be dirty now)
+                this.leoStates.leoChanged = true;
+                this.refreshDocumentsPane();
             }
 
         }
-
 
         // ".length" check necessary, see https://github.com/microsoft/vscode/issues/50344
         if (
@@ -1432,6 +1447,7 @@ export class LeoUI extends NullGui {
             this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
             this._bodyPreviewMode = false;
             let w_hasSameDetachedTab = false;
+            let w_hasOtherDetachedTab = false;
             const c_id = c.id.toString();
             const w_lastSelNodeGnx = this.lastSelectedNode.gnx;
 
@@ -1445,12 +1461,10 @@ export class LeoUI extends NullGui {
                         const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
                         if (id === c_id && gnx === w_lastSelNodeGnx) {
                             w_hasSameDetachedTab = true;
-                            break;
+                        } else {
+                            w_hasOtherDetachedTab = true;
                         }
                     }
-                }
-                if (w_hasSameDetachedTab) {
-                    break;
                 }
             }
 
@@ -1465,7 +1479,7 @@ export class LeoUI extends NullGui {
                 if (this._changedDetachedWithMirrorBody || (c.p && c.p.__bool__() && w_bodyText === c.p.b)) {
                     // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                     // Set proper cursor insertion point and selection range.
-                    this._changedDetachedWithMirrorBody = false;
+                    this._changedDetachedWithMirrorBody = undefined;
                     void this.showBody(false, true, true);
                     return;
                 }
@@ -1474,10 +1488,11 @@ export class LeoUI extends NullGui {
                     // Document pane icon needs refresh (changed) and/or outline icon changed
                     void this._bodySaveDocument(p_textDocumentChange.document).then(() => {
                         if (w_hasSameDetachedTab && this.lastSelectedNode) {
-                            if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(`${c.id}/${w_lastSelNodeGnx}`)) {
-                                this._changedBodyWithMirrorDetached = true; // PREVENT DOUBLE REFRESH
+                            const gnxString = `${c.id}/${w_lastSelNodeGnx}`;
+                            if (this._leoDetachedFileSystem.watchedBodiesGnx.includes(gnxString)) {
+                                this._changedBodyWithMirrorDetached = gnxString; // PREVENT DOUBLE REFRESH
                             }
-                            this._leoDetachedFileSystem.fireRefreshFile(`${c.id}/${w_lastSelNodeGnx}`);
+                            this._leoDetachedFileSystem.fireRefreshFile(gnxString);
                         }
                         if (w_iconChanged) {
                             this.findFocusTree = false;
@@ -1489,6 +1504,7 @@ export class LeoUI extends NullGui {
 
                     if (!this.leoStates.leoChanged) {
                         // also refresh document panel (icon may be dirty now)
+                        this.leoStates.leoChanged = true;
                         this.refreshDocumentsPane();
                     }
                 }
@@ -1497,7 +1513,7 @@ export class LeoUI extends NullGui {
             // * If body changed a line with and '@' directive refresh body states
             let w_needsRefresh = false;
             for (const p_change of p_textDocumentChange.contentChanges) {
-                if (p_change.text.includes('@')) {
+                if (p_change.rangeLength || p_change.text.includes('@')) {
                     // There may have been an @
                     w_needsRefresh = true;
                     break;
@@ -1505,19 +1521,22 @@ export class LeoUI extends NullGui {
             }
 
             const w_textEditor = vscode.window.activeTextEditor;
+
             if (w_textEditor && p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
                 for (const p_selection of w_textEditor.selections) {
                     // TRY TO DETECT IF LANGUAGE RESET NEEDED!
                     if (p_selection.active.line < w_textEditor.document.lineCount) {
                         let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
+                        if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('wrap') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                             w_needsRefresh = true;
                             break;
                         }
                     }
                 }
             }
-
+            if (w_hasOtherDetachedTab) {
+                this.refreshDocumentsPane();
+            }
             if (w_needsRefresh) {
                 this.debouncedRefreshBodyStates(1);
                 this.refreshCommanderDetachedLanguage();
@@ -1829,7 +1848,7 @@ export class LeoUI extends NullGui {
             let w_gnx: string | undefined;
             let w_v: VNode | undefined;
 
-            if (p_document.uri.path.match(Constants.DETACHED_REGEX)) {
+            if (p_document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME) {
                 // detached body
                 id = p_document.uri.path.split("/")[1];
                 // find commander
@@ -2207,28 +2226,37 @@ export class LeoUI extends NullGui {
     private _refreshDetachedBodies() {
         //  Refresh detached bodies as needed IF SAME COMMANDER, AND CLOSE : 
         if (!g.app.windowList.length) {
+            this._refreshType.excludeDetached = false;
             return;
         }
+
         const w_commands = g.app.windowList.map(p_frame => p_frame.c);
         const c = g.app.windowList[this.frameIndex].c;
         const cId = g.app.windowList[this.frameIndex].c.id.toString();
-        const w_foundTabs: Set<vscode.Tab> = new Set();
-        const w_foundUri: Set<vscode.Uri> = new Set();
+        const w_unfoundTabs: Set<vscode.Tab> = new Set(); // To be closed
+        const w_unfoundUri: Set<vscode.Uri> = new Set(); // To be removed from recently opened
+        let w_hasDetached = false;
+
         for (const p_tabGroup of vscode.window.tabGroups.all) {
             for (const p_tab of p_tabGroup.tabs) {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
                     (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME
                 ) {
-                    const [unused, id, gnx] = (p_tab.input as vscode.TabInputText).uri.path.split("/");
+                    const w_uri = (p_tab.input as vscode.TabInputText).uri;
+                    const [unused, id, gnx] = w_uri.path.split("/");
+                    if (id === cId) {
+                        w_hasDetached = true;
+                    }
 
                     // Refresh detached bodies if same commander  // ! ALSO FIRE REFRESH !
-                    if (this._refreshType.body && id === cId) {
+                    if (!this._refreshType.excludeDetached && this._refreshType.body && id === cId) {
+                        // console.log('fire refresh DETACHED in _refreshDetachedBodies');
                         this._leoDetachedFileSystem.fireRefreshFile(`${id}/${gnx}`);
                     }
 
                     // if refresh tree is true, validate that opened detached of same commander still valid and close as needed.
-                    if (this._refreshType.tree && id === cId) {
+                    if (this._refreshType.tree && id === cId && !this._refreshType.documents) {
                         let found = false;
                         for (const v of c.all_unique_nodes()) {
                             if (v.gnx === gnx) {
@@ -2238,13 +2266,10 @@ export class LeoUI extends NullGui {
                         }
                         if (!found) {
                             // close !
-                            w_foundTabs.add(p_tab);
-                            w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                            w_unfoundTabs.add(p_tab);
+                            w_unfoundUri.add(w_uri);
                         }
-                    }
-
-                    // if refresh documents is true, validate each opened tabgroup/tab and close as needed.
-                    if (this._refreshType.documents) {
+                    } else if (this._refreshType.documents) {
                         let found = false;
                         for (const w_c of w_commands) {
                             for (const v of w_c.all_unique_nodes()) {
@@ -2259,8 +2284,8 @@ export class LeoUI extends NullGui {
                         }
                         if (!found) {
                             // close !
-                            w_foundTabs.add(p_tab);
-                            w_foundUri.add((p_tab.input as vscode.TabInputText).uri);
+                            w_unfoundTabs.add(p_tab);
+                            w_unfoundUri.add(w_uri);
                         }
 
                     }
@@ -2269,13 +2294,22 @@ export class LeoUI extends NullGui {
 
             }
         }
-        if (w_foundTabs.size) {
-            void vscode.window.tabGroups.close([...w_foundTabs], true);
-            for (const w_uri of w_foundUri) {
+        if (w_hasDetached && this._refreshType.tree) {
+            this.refreshCommanderDetachedLanguage(); // May have moved outside of language specific outline
+        }
+        if (w_unfoundTabs.size) {
+            void vscode.window.tabGroups.close([...w_unfoundTabs], true);
+            for (const w_uri of w_unfoundUri) {
                 void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
             }
         }
+        this._refreshType.excludeDetached = false;
 
+    }
+
+    public showNavResults(): Thenable<unknown> {
+        this._leoGotoProvider.refreshTreeRoot();
+        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
     }
 
     /**
@@ -2796,13 +2830,31 @@ export class LeoUI extends NullGui {
     }
 
     private _checkClosedTabs(): void {
+        // check if selected body still has opened textEditors
+        let bodyCount = 0;
+        for (const p_tabGroup of vscode.window.tabGroups.all) {
+            for (const p_tab of p_tabGroup.tabs) {
+                if (p_tab.input &&
+                    (p_tab.input as vscode.TabInputText).uri &&
+                    ((p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME)
+                ) {
+                    // a normal body (non detached found)
+                    bodyCount++;
+                    break;
+                }
+            }
+            if (bodyCount) {
+                break;
+            }
+
+        }
+        if (!bodyCount) {
+            // Make sure no more saving over possible detached with same gnx
+            this._bodyLastChangedDocument = undefined;
+            this._bodyLastChangedDocumentSaved = false;
+        }
         this._leoFileSystem.cleanupBodies();
         this._leoDetachedFileSystem.cleanupDetachedBodies();
-    }
-
-    public isUriTabOpened(p_uri: vscode.Uri): boolean {
-        //
-        return true;
     }
 
     /**
@@ -2811,6 +2863,39 @@ export class LeoUI extends NullGui {
      */
     public isOutlineVisible(): boolean {
         return this._leoTreeExView.visible || this._leoTreeView.visible;
+    }
+
+    /**
+     * Close all tabs that are not part of their filesystems
+     * * This matches cleanupDetachedBodies from leoBodyDetached !
+     */
+    private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): void {
+        p_editors.forEach((p_editor) => {
+            if (p_editor) {
+                switch (p_editor.document.uri.scheme) {
+                    case Constants.URI_LEOJS_SCHEME:
+                        if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
+                            void this._hideDeleteBody(p_editor);
+                        }
+                        this._checkPreviewMode(p_editor);
+                        break;
+
+                    case Constants.URI_LEOJS_DETACHED_SCHEME:
+                        const w_gnx = utils.leoUriToStr(p_editor.document.uri);
+                        //if (!this._leoDetachedFileSystem.watchedBodiesGnx.includes(w_gnx)) {
+                        if (!this._leoDetachedFileSystem.openedBodiesVNodes[w_gnx]) {
+                            // unknown to the detached filesystem
+                            void this._hideDeleteBody(p_editor);
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
+            }
+
+        });
     }
 
     /**
@@ -2825,9 +2910,8 @@ export class LeoUI extends NullGui {
             p_tabGroup.tabs.forEach((p_tab) => {
                 if (p_tab.input &&
                     (p_tab.input as vscode.TabInputText).uri &&
-                    (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEOJS_SCHEME &&
-                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_editorFsPath &&
-                    this.bodyUri.fsPath !== w_editorFsPath // if BODY is now the same, dont hide!
+                    (p_tab.input as vscode.TabInputText).uri.scheme.startsWith(Constants.URI_LEOJS_SCHEME) &&
+                    (p_tab.input as vscode.TabInputText).uri.fsPath === w_editorFsPath
                 ) {
                     w_foundTabs.push(p_tab);
                 }
@@ -3014,6 +3098,8 @@ export class LeoUI extends NullGui {
 
         // * Step 1 : Open the document
         const w_openedDocument = await vscode.workspace.openTextDocument(this.bodyUri);
+        this._bodyLastChangedDocument = undefined;
+        this._bodyLastChangedDocumentSaved = false;
 
         this._bodyTextDocument = w_openedDocument;
         let w_bodySel: BodySelectionInfo | undefined;
@@ -3071,7 +3157,10 @@ export class LeoUI extends NullGui {
                     // command stack last node is still valid
                     if (this.lastSelectedNode && w_openedDocumentGnx === this.lastSelectedNode.gnx) {
                         // still same gnx as this.bodyUri
-                        void this._setBodyLanguage(w_openedDocument, w_language);
+                        if (w_language !== w_openedDocument.languageId) {
+                            void this._setBodyLanguage(w_openedDocument, w_language);
+                        }
+
                     } else {
                         // NOT SAME GNX!
                         w_debugMessage = "all good but not same GNX!?!";
@@ -3320,14 +3409,19 @@ export class LeoUI extends NullGui {
         let w_language = "plain";
         const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
         if (g.useSyntaxColoring(p)) {
-            const aList = g.get_directives_dict_list(p);
-            const d = g.scanAtCommentAndAtLanguageDirectives(aList);
-            w_language =
-                (d && d['language'])
-                || g.getLanguageFromAncestorAtFileNode(p)
-                || c.config.getLanguage('target-language')
-                || 'plain';
 
+            // DEPRECATED leojs old colorizer language detection--------
+            // const aList = g.get_directives_dict_list(p);
+            // const d = g.scanAtCommentAndAtLanguageDirectives(aList);
+            // w_language =
+            //     (d && d['language'])
+            //     || g.getLanguageFromAncestorAtFileNode(p)
+            //     || c.config.getLanguage('target-language')
+            //     || 'plain';
+            // ---------------------------------------------------------
+
+            // * as per original Leo's leoColorizer.py
+            w_language = g.getLanguageFromAncestorAtFileNode(p) || c.config.getLanguage('target-language');
             w_language = w_language.toLowerCase();
         }
         // Replace language string if in 'exceptions' array
@@ -3420,14 +3514,14 @@ export class LeoUI extends NullGui {
         if (p_delay === 0) {
             if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
                 void this._bodySaveDocument(this._bodyLastChangedDocument);
-                this.refreshBodyStates();
             }
+            this.refreshBodyStates();
         } else {
             this._bodyStatesTimer = setTimeout(() => {
                 if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
                     void this._bodySaveDocument(this._bodyLastChangedDocument);
-                    this.refreshBodyStates();
                 }
+                this.refreshBodyStates();
             }, p_delay);
         }
     }
@@ -3463,22 +3557,16 @@ export class LeoUI extends NullGui {
         for (const w_doc of vscode.workspace.textDocuments) {
             if (!w_doc.isClosed && w_uris.includes(w_doc.uri.toString())) {
                 w_documents.push(w_doc);
-                // // Is a detached document, but not this.bodyDetachedTextDocument
-                // if (this.bodyDetachedTextDocument && (w_doc.uri.toString() !== this.bodyDetachedTextDocument.uri.toString())) {
-                //     w_documents.push(w_doc);
-                // } else if (!this.bodyDetachedTextDocument) {
-                //     w_documents.push(w_doc);
-                // }
             }
         }
-
-        console.log('Qty of detached to recolorize by resetting language : ', w_documents.length);
 
         for (const w_doc of w_documents) {
             const w_foundVnode = this._leoDetachedFileSystem.openedBodiesVNodes[utils.leoUriToStr(w_doc.uri)];
             if (w_foundVnode) {
-                for (const p of w_foundVnode.context.all_positions_for_v(w_foundVnode)) {
-                    if (p.v) {
+                const gnx = w_foundVnode.gnx;
+
+                for (const p of w_foundVnode.context.all_unique_positions()) {
+                    if (p.v.gnx === gnx) {
                         let w_language = this._getBodyLanguage(p); // !! 
                         // Set document language only if different
                         if (w_language !== w_doc.languageId) {
@@ -3487,6 +3575,7 @@ export class LeoUI extends NullGui {
                         break;
                     }
                 }
+
             } else {
                 console.log('DETACHED VNODE not found when resetting language');
             }
@@ -3536,6 +3625,12 @@ export class LeoUI extends NullGui {
         if (p_node.__eq__(this.lastSelectedNode)) {
             this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
             g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+            // MAYBE DETACHED BODY CHANGED THAT CONTENT!
+            // only if NOT watched (otherwise would have already been opened and altered by detached modification)
+            if (!this._leoFileSystem.watchedBodiesGnx.includes(p_node.gnx)) {
+                this._leoFileSystem.setNewBodyUriTime(utils.strToLeoUri(p_node.gnx));
+            }
+
             return this.showBody(false, this.config.treeKeepFocus).catch((p_error) => {
                 return Promise.resolve(); // intercept cancellation as success: next one is going to replace anyways.
             });
@@ -3587,10 +3682,14 @@ export class LeoUI extends NullGui {
         if (!p) {
             p = c.p;
         }
-        const detachedUri = utils.strToLeoDetachedUri(`${c.id}/${p.gnx}`);
+
+        const detachedGnx = `${c.id}/${p.gnx}`;
+        const detachedUri = utils.strToLeoDetachedUri(detachedGnx);
 
         // * Step 1 : Open the document
-        this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
+        if (!this._leoDetachedFileSystem.watchedBodiesGnx.includes(detachedGnx)) {
+            this._leoDetachedFileSystem.setNewBodyUriTime(detachedUri, p.v);
+        }
         this.bodyDetachedTextDocument = await vscode.workspace.openTextDocument(detachedUri);
         let w_bodySel: BodySelectionInfo | undefined;
         const w_language = this._getBodyLanguage(p);
@@ -3606,7 +3705,9 @@ export class LeoUI extends NullGui {
             "start": this._row_col_pv_dict(start, p.v.b),
             "end": this._row_col_pv_dict(end, p.v.b)
         };
-        void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language);
+        if (w_language !== this.bodyDetachedTextDocument.languageId) {
+            void this._setBodyLanguage(this.bodyDetachedTextDocument, w_language);
+        }
 
         const w_showOptions: vscode.TextDocumentShowOptions =
         {
@@ -3702,6 +3803,11 @@ export class LeoUI extends NullGui {
             this.showBodyIfClosed = true;
             // If alt+arrow is used to navigate: SHOW and leave focus on outline.
             this.showOutlineIfClosed = true;
+
+            if (p_options.refreshType.body) {
+                // If this is a navigation command, dont refresh DETACHED
+                p_options.refreshType.excludeDetached = true;
+            }
         }
 
         const c = g.app.windowList[this.frameIndex].c;
@@ -4368,9 +4474,7 @@ export class LeoUI extends NullGui {
                     break;
             }
         } else {
-            const kind: string = c.config.getString('unl-status-kind') || '';
-            const method: () => string = kind.toLowerCase() === 'legacy' ? c.p.get_legacy_UNL.bind(c.p) : c.p.get_UNL.bind(c.p);
-            unl = method();
+            unl = c.frame.computeStatusUnl(p);
         }
         return this.replaceClipboardWith(unl);
     }
@@ -4393,9 +4497,10 @@ export class LeoUI extends NullGui {
 
                     let w_description = p_position.gnx; // Defaults as gnx.
                     const w_gnxParts = w_description.split('.');
-                    if (w_gnxParts.length === 3 && w_gnxParts[1].length === 14) {
-                        // legit 3 part gnx
-                        const dateString = w_gnxParts[1];
+                    const dateString = w_gnxParts[1] ? w_gnxParts[1] : "";
+
+                    if (dateString && w_gnxParts.length === 3 && dateString.length === 14 && /^\d+$/.test(dateString)) {
+                        // legit 3 part numeric gnx, so build a string date
                         const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
                         const w_month = +dateString.substring(4, 6);
                         const w_day = +dateString.substring(6, 8);
@@ -4672,8 +4777,7 @@ export class LeoUI extends NullGui {
             scon.qsc_search(inp);
         }
 
-        this._leoGotoProvider.refreshTreeRoot();
-        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+        return this.showNavResults();
 
     }
 
@@ -4693,8 +4797,7 @@ export class LeoUI extends NullGui {
             const exp = inp.replace(/ /g, '*');
             scon.qsc_background_search(exp);
         }
-        this._leoGotoProvider.refreshTreeRoot();
-        return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+        return this.showNavResults();
     }
 
     /**
@@ -4844,54 +4947,6 @@ export class LeoUI extends NullGui {
             );
             return this.launchRefresh();
         }
-    }
-
-    /**
-     * * find-var or find-def commands
-     * @param p_def find-def instead of find-var
-     * @returns Promise that resolves when the "launch refresh" is started
-     */
-    public async findSymbol(p_def: boolean): Promise<unknown> {
-
-        // This sets the selection on a word in the body pane. (needs selection on a symbol word in vscode word)
-        await this.triggerBodySave(true);
-
-        const c = g.app.windowList[this.frameIndex].c;
-        const fc = c.findCommands;
-
-        if (p_def) {
-            fc.find_def();
-        } else {
-            fc.find_var();
-        }
-
-        let found = true;
-
-        const focus = this._get_focus();
-
-        if (!found || !focus) {
-            return vscode.window.showInformationMessage('Not found');
-        } else {
-            let w_finalFocus = Focus.Body;
-            const w_focus = focus.toLowerCase();
-            if (w_focus.includes('tree') || w_focus.includes('head')) {
-                // tree
-                w_finalFocus = Focus.Outline;
-            }
-            this.loadSearchSettings();
-            this.setupRefresh(
-                w_finalFocus,
-                {
-                    tree: true,
-                    body: true,
-                    scroll: found && w_finalFocus === Focus.Body,
-                    // documents: false,
-                    // buttons: false,
-                    states: true,
-                });
-            return this.launchRefresh();
-        }
-
     }
 
     /**
@@ -5477,8 +5532,7 @@ export class LeoUI extends NullGui {
                         ["All files", "*"]
                     ],
                     g.defaultLeoFileExtension(),
-                    false
-                ) as string;
+                );
             }
             if (fileName && g.app.loadManager) {
                 await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
@@ -6348,15 +6402,14 @@ export class LeoUI extends NullGui {
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        multiple?: boolean,
-        startpath?: string // TODO
-    ): Thenable<string[] | string> {
+        startpath?: string
+    ): Thenable<string> {
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
         return vscode.window.showOpenDialog(
             {
                 title: title,
-                canSelectMany: !!multiple,
+                canSelectMany: false,
                 filters: types
             }
         ).then((p_uris) => {
@@ -6366,19 +6419,39 @@ export class LeoUI extends NullGui {
                     names.push(w_uri.fsPath);
                 });
             }
-            if (multiple) {
+            let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+            fileName = g.os_path_normslashes(fileName);
+            return fileName;
+        });
+    }
 
-                return names.map((p_name) => {
-                    let fileName = g.os_path_fix_drive(p_name);
-                    fileName = g.os_path_normslashes(fileName);
-                    return fileName;
+    public runOpenFilesDialog(
+        c: Commands | undefined,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        startpath?: string
+    ): Thenable<string[]> {
+        // convert to { [name: string]: string[] } typing
+        const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+        return vscode.window.showOpenDialog(
+            {
+                title: title,
+                canSelectMany: true,
+                filters: types
+            }
+        ).then((p_uris) => {
+            const names: string[] = [];
+            if (p_uris && p_uris.length) {
+                p_uris.forEach(w_uri => {
+                    names.push(w_uri.fsPath);
                 });
-            } else {
-                // Not multiple: return as string!
-                let fileName = g.os_path_fix_drive(names.length ? names[0] : "");
+            }
+            return names.map((p_name) => {
+                let fileName = g.os_path_fix_drive(p_name);
                 fileName = g.os_path_normslashes(fileName);
                 return fileName;
-            }
+            });
         });
     }
 

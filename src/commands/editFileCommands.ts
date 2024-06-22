@@ -456,12 +456,12 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 ['Leo files', '*.leo *.leojs *.db'],
                 ['All files', '*'],
             ];
-            const fileName = (await g.app.gui.runOpenFileDialog(
+            const fileName = await g.app.gui.runOpenFileDialog(
                 c,
                 'Compare Leo Files',
                 filetypes,
                 '.leo'
-            )) as string;
+            );
             if (!fileName) {
                 return;
             }
@@ -692,7 +692,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
      */
     public async getReadableTextFile(): Promise<string> {
         const c = this.c;
-        const fn = (await g.app.gui.runOpenFileDialog(
+        const fn = await g.app.gui.runOpenFileDialog(
             c,
             'Open Text File',
             [
@@ -700,7 +700,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 ['All files', '*'],
             ],
             '.txt'
-        )) as string;
+        );
         return fn;
     }
     //@+node:felix.20230709010427.21: *3* efc.gitDiff (gd & git-diff)

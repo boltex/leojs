@@ -36,45 +36,9 @@ import * as md5Obj from 'md5';
 const dayjsObj = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjsObj.extend(utc);
-
-/*
-    import binascii
-    import codecs
-    from functools import reduce/
-    try:
-        import gc
-    catch ImportError:
-        gc = None
-    try:
-        import gettext
-    catch ImportError:  # does not exist in jython.
-        gettext = None
-    import glob
-    import io
-    StringIO = io.StringIO
-    import importlib
-    import inspect
-    import operator
-    import os
-    #
-    # Do NOT import pdb here!  We shall define pdb as a _function_ below.
-    # import pdb
-    import re
-    import shlex
-    import shutil
-    import string
-    import subprocess
-    import tempfile
-    import time
-    import traceback
-    import types
-    import unittest
-    import urllib
-    import urllib.parse as urlparse
-*/
-
 //@-<< imports >>
-
+//@+<< leoGlobals: global constants >>
+//@+node:felix.20240607225502.1: ** << leoGlobals: global constants >>
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
@@ -87,6 +51,18 @@ export let extensionUri: Uri;
 /** For accessing files in the current workspace */
 export let workspaceUri: Uri;
 
+export let SQL: SqlJsStatic;
+export let pako: typeof pakoObj = pakoObj;
+export let showdown: typeof showdownObj = showdownObj;
+export let JSZip: typeof JSZipObj = JSZipObj;
+export let dayjs: typeof dayjsObj = dayjsObj;
+export let md5: typeof md5Obj = md5Obj;
+
+// The singleton Git extension exposed API
+export let gitAPI: GitAPI.API;
+export let gitBaseAPI: GitBaseAPI.API;
+export let remoteHubAPI: RemoteHubApi;
+//@-<< leoGlobals: global constants >>
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
 // Visible externally so plugins may add to the list of directives.
@@ -157,32 +133,25 @@ export let global_commands_dict: {
     } & { __ivars__: string[] };
 };
 
+/**
+ * Keys are class names, values are attribute chains.
+ */
 export const cmd_instance_dict: { [key: string]: string[] } = {
-    // Keys are class names, values are attribute chains.
-    AbbrevCommandsClass: ['c', 'abbrevCommands'],
     AtFile: ['c', 'atFileCommands'],
-    AutoCompleterClass: ['c', 'k', 'autoCompleter'],
     ChapterController: ['c', 'chapterController'],
     Commands: ['c'],
-    ControlCommandsClass: ['c', 'controlCommands'],
-    DebugCommandsClass: ['c', 'debugCommands'],
     EditCommandsClass: ['c', 'editCommands'],
     EditFileCommandsClass: ['c', 'editFileCommands'],
     FileCommands: ['c', 'fileCommands'],
     HelpCommandsClass: ['c', 'helpCommands'],
     KeyHandlerClass: ['c', 'k'],
-    KeyHandlerCommandsClass: ['c', 'keyHandlerCommands'],
     KillBufferCommandsClass: ['c', 'killBufferCommands'],
     LeoApp: ['g', 'app'],
     LeoFind: ['c', 'findCommands'],
     LeoImportCommands: ['c', 'importCommands'],
-    // 'MacroCommandsClass': ['c', 'macroCommands'],
-    PrintingController: ['c', 'printingController'],
     RectangleCommandsClass: ['c', 'rectangleCommands'],
     RstCommands: ['c', 'rstCommands'],
-    SpellCommandsClass: ['c', 'spellCommands'],
     Undoer: ['c', 'undoer'],
-    VimCommands: ['c', 'vimCommands'],
 };
 
 //@-<< define global decorator dicts >>
@@ -259,7 +228,6 @@ export const color_directives_pat = new RegExp(
     'mg'
 );
 
-
 // New in Leo 6.6.4: gnxs must start with 'gnx:'
 // gnx_char = r"""[^.,"'\s]"""  // LeoApp.cleanLeoID() removes these characters.
 // gnx_id = fr"{gnx_char}{{3,}}"  // id's must have at least three characters.
@@ -268,11 +236,9 @@ export const gnx_char = "[^.,\"'\\s]";
 export const gnx_id = `${gnx_char}{3,}`;
 export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`);
 
-
 // Unls end with quotes.
 //unl_regex = re.compile(r"""\bunl:[^`'"]+""")
 export const unl_regex = /\bunl:[^`'"]+/;
-
 
 // Urls end at space or quotes.
 // url_leadins = 'fghmnptw'
@@ -289,17 +255,7 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
 
-export let SQL: SqlJsStatic;
-export let pako: typeof pakoObj = pakoObj;
-export let showdown: typeof showdownObj = showdownObj;
-export let JSZip: typeof JSZipObj = JSZipObj;
-export let dayjs: typeof dayjsObj = dayjsObj;
-export let md5: typeof md5Obj = md5Obj;
 
-// The singleton Git extension exposed API
-export let gitAPI: GitAPI.API;
-export let gitBaseAPI: GitBaseAPI.API;
-export let remoteHubAPI: RemoteHubApi;
 
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript
@@ -492,6 +448,204 @@ export class GeneralSetting {
         return this.__repr__();
     };
 }
+//@+node:felix.20240608161949.1: *3* class g.RedirectClass & convenience functions
+/**
+ * A class to redirect stdout and stderr to Leo's log pane.
+ */
+class RedirectClass {
+
+    public old: any; // fs.WriteStream | null;
+    public encoding: string;
+
+    //@+<< RedirectClass methods >>
+    //@+node:felix.20240608161949.2: *4* << RedirectClass methods >>
+    //@+others
+    //@+node:felix.20240608161949.3: *5* RedirectClass.__init__
+    constructor() {
+        this.old = undefined;
+        this.encoding = 'utf-8';  // 2019/03/29 For pdb.
+    }
+    //@+node:felix.20240608161949.4: *5* isRedirected
+    public isRedirected(): boolean {
+        return this.old !== null;
+    }
+    //@+node:felix.20240608161949.5: *5* flush
+    //  For LeoN: just for compatibility.
+    public flush(...args: any[]): void {
+        return;
+    }
+    //@+node:felix.20240608161949.6: *5* rawPrint
+    public rawPrint(s: string): void {
+        if (this.old) {
+            this.old(s + '\n');
+            // this.old.write(s + '\n');
+        } else {
+            pr(s);
+        }
+    }
+    //@+node:felix.20240608161949.7: *5* redirect
+    public redirect(stdout: boolean = true): void {
+
+        // TODO : FIND A WAY TO OVERRIDE CONSOLE !
+        // TODO : see  redirectScriptOutput in leoCommands.ts.
+
+        if (app.batchMode) {
+            return;
+        }
+        if (!this.old) {
+            if (stdout) {
+                this.old = console.log;
+                console.log = this.write.bind(this);
+            } else {
+                this.old = console.error;
+                console.error = this.write.bind(this);
+            }
+        }
+        // if (true || isBrowser) {
+        //     if (!this.old) {
+        //         if (stdout) {
+        //             this.old = console.log;
+        //             console.log = this.write.bind(this);
+        //         } else {
+        //             this.old = console.error;
+        //             console.error = this.write.bind(this);
+        //         }
+        //     }
+        // } else {
+        //     if (!this.old) {
+        //         if (stdout) {
+        //             this.old = process.stdout;
+        //             (process.stdout as any).write = this.write.bind(this);
+        //         } else {
+        //             this.old = process.stderr;
+        //             (process.stderr as any).write = this.write.bind(this);
+        //         }
+        //     }
+        // }
+    }
+    //@+node:felix.20240608161949.8: *5* undirect
+    public undirect(stdout: boolean = true): void {
+        if (this.old) {
+            if (stdout) {
+                console.log = this.old;
+                this.old = null;
+            } else {
+                console.error = this.old;
+                this.old = null;
+            }
+        }
+        // if (true || isBrowser) {
+        //     if (this.old) {
+        //         if (stdout) {
+        //             console.log = this.old;
+        //             this.old = null;
+        //         } else {
+        //             console.error = this.old;
+        //             this.old = null;
+        //         }
+        //     }
+        // } else {
+        //     if (this.old) {
+        //         if (stdout) {
+        //             (process.stdout as any).write = this.old.write.bind(this.old);
+        //             this.old = null;
+        //         } else {
+        //             (process.stderr as any).write = this.old.write.bind(this.old);
+        //             this.old = null;
+        //         }
+        //     }
+        // }
+    }
+    //@+node:felix.20240608161949.9: *5* write
+    public write(...args: any[]): void {
+        const s = args.join(' '); // for browser use. (multiple arguments)
+
+        if (this.old) {
+            if (app && app.gui) {
+                app.gui.addLogPaneEntry(s);
+            } else {
+                this.old(s + '\n');
+            }
+        } else {
+            // Can happen when globalThis.batchMode is true
+            pr(s);
+        }
+        // if (true || isBrowser) {
+        //     console.log('write browser');
+        //     if (this.old) {
+        //         if (app && app.gui) {
+        //             app.gui.addLogPaneEntry(s);
+        //         } else {
+        //             this.old(s + '\n');
+        //         }
+        //     } else {
+        //         // Can happen when globalThis.batchMode is true
+        //         pr(s);
+        //     }
+        // } else {
+        //     console.log('write desktop');
+
+        //     if (this.old) {
+        //         if (app && app.gui) {
+        //             app.gui.addLogPaneEntry(s);
+        //         } else {
+        //             this.old.write(s + '\n');
+        //         }
+        //     } else {
+        //         // Can happen when globalThis.batchMode is true
+        //         pr(s);
+        //     }
+        // }
+    }
+    //@-others
+    //@-<< RedirectClass methods >>
+
+}
+
+// Create two redirection objects, one for each stream.
+
+const redirectStdErrObj = new RedirectClass();
+const redirectStdOutObj = new RedirectClass();
+
+//@+<< define convenience methods for redirecting streams >>
+//@+node:felix.20240608161949.10: *4* << define convenience methods for redirecting streams >>
+//@+others
+//@+node:felix.20240608161949.11: *5* redirectStderr & redirectStdout
+/**
+ * Redirect streams to the current log window.
+ */
+export function redirectStderr(): void {
+    redirectStdErrObj.redirect(false);
+}
+export function redirectStdout(): void {
+    redirectStdOutObj.redirect();
+}
+//@+node:felix.20240608161949.12: *5* restoreStderr & restoreStdout
+/**
+ * Restore standard streams.
+ */
+export function restoreStderr(): void {
+    redirectStdErrObj.undirect(false);
+}
+export function restoreStdout(): void {
+    redirectStdOutObj.undirect();
+}
+//@+node:felix.20240608161949.13: *5* stdErrIsRedirected & stdOutIsRedirected
+export function stdErrIsRedirected(): boolean {
+    return redirectStdErrObj.isRedirected();
+}
+export function stdOutIsRedirected(): boolean {
+    return redirectStdOutObj.isRedirected();
+};
+//@+node:felix.20240608161949.14: *5* rawPrint
+/**
+ * Send output to original stdout.
+ */
+export function rawPrint(s: string): void {
+    redirectStdOutObj.rawPrint(s);
+}
+//@-others
+//@-<< define convenience methods for redirecting streams >>
 //@+node:felix.20220213000510.1: *3* class g.SettingsDict
 /**
  * A subclass of dict providing settings-related methods.
@@ -962,6 +1116,61 @@ export function findFirstValidAtLanguageDirective(
     }
     return undefined;
 }
+//@+node:felix.20240611202347.1: *3* g.findLanguageDirectives (must be fast)
+/**
+ * Return the language in effect at position p.
+ */
+export function findLanguageDirectives(c: Commands, p: Position): string | undefined {
+    if (!c || !p || !p.__bool__()) {
+        return undefined;  // c may be None for testing.
+    }
+
+    const v0 = p.v;
+
+    function find_language(p_or_v: Position | VNode): string | undefined {
+        for (const s of [p_or_v.h, p_or_v.b]) {
+            for (const m of s.matchAll(g_language_pat)) {
+                const language = m[1];
+                if (isValidLanguage(language)) {
+                    return language;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    // First, search up the tree.
+    for (const parent of p.self_and_parents(false)) {
+        const language = find_language(parent);
+        if (language) {
+            return language;
+        }
+    }
+
+    // #1625: Second, expand the search for cloned nodes.
+    const seen: VNode[] = [];  // vnodes that have already been searched.
+    const parents: VNode[] = [...v0.parents];  // vnodes whose ancestors are to be searched.
+    while (parents.length > 0) {
+        const parent_v = parents.pop()!; // Assertive because we just checked!
+        if (seen.includes(parent_v)) {
+            continue;
+        }
+        seen.push(parent_v);
+        const language = find_language(parent_v);
+        if (language) {
+            return language;
+        }
+        for (const grand_parent_v of parent_v.parents) {
+            if (!seen.includes(grand_parent_v)) {
+                parents.push(grand_parent_v);
+            }
+        }
+    }
+
+    // Finally, fall back to the defaults.
+    return c.target_language ? c.target_language.toLowerCase() : 'python';
+
+}
 //@+node:felix.20230423231138.1: *3* g.findReference
 /**
  * Return the position containing the section definition for name.
@@ -1053,56 +1262,25 @@ export function get_directives_dict_list(
 export function getLanguageFromAncestorAtFileNode(
     p: Position
 ): string | undefined {
-    const v0: VNode = p.v;
+
+    const v0 = p.v;
+    let seen: Set<VNode>;
 
     // The same generator as in v.setAllAncestorAtFileNodesDirty.
     // Original idea by Виталије Милошевић (Vitalije Milosevic).
     // Modified by EKR.
-    let seen: VNode[] = [];
 
     function* v_and_parents(v: VNode): Generator<VNode> {
-        if (seen.indexOf(v) < 0) {
-            seen.push(v); // not found, add it
-        } else {
+        if (seen.has(v)) {
             return;
         }
+        seen.add(v);
         yield v;
-        for (let parent_v of v.parents) {
-            if (seen.indexOf(parent_v) < 0) {
-                yield* v_and_parents(parent_v); // was  not found
+        for (const parent_v of v.parents) {
+            if (!seen.has(parent_v)) {
+                yield* v_and_parents(parent_v);
             }
         }
-    }
-    /**
-     * A helper for all searches.
-     * Phase one searches only @<file> nodes.
-     */
-    function find_language(v: VNode, phase: number): string | undefined {
-        if (phase === 1 && !v.isAnyAtFileNode()) {
-            return undefined;
-        }
-        let w_language: string;
-        // #1693: Scan v.b for an *unambiguous* @language directive.
-        const languages: string[] = findAllValidLanguageDirectives(v.b);
-        if (languages.length === 1) {
-            // An unambiguous language
-            return languages[0];
-        }
-        let name: string;
-        let junk: string;
-        let ext: string;
-        if (v.isAnyAtFileNode()) {
-            // Use the file's extension.
-            name = v.anyAtFileNodeName();
-            [junk, ext] = os_path_splitext(name);
-            ext = ext.slice(1); // strip the leading period.
-            w_language = app.extension_dict[ext];
-
-            if (isValidLanguage(w_language)) {
-                return w_language;
-            }
-        }
-        return undefined;
     }
 
     // First, see if p contains any @language directive.
@@ -1110,26 +1288,140 @@ export function getLanguageFromAncestorAtFileNode(
     if (language) {
         return language;
     }
-    // Phase 1: search only @<file> nodes: #2308.
-    // Phase 2: search all nodes.
-    for (let phase of [1, 2]) {
-        // Search direct parents.
-        for (let p2 of p.self_and_parents(false)) {
-            language = find_language(p2.v, phase);
-            if (language) {
-                return language;
-            }
-        }
-        // Search all extended parents.
-        seen = [v0.context.hiddenRootNode];
-        for (let v of v_and_parents(v0)) {
-            language = find_language(v, phase);
-            if (language) {
-                return language;
-            }
+
+    // Passes 1 and 2: Search body text for unambiguous @language directives.
+
+    // Pass 1: Search body text in direct parents for unambiguous @language directives.
+    for (const p2 of p.self_and_parents(false)) {
+        const languages = findAllValidLanguageDirectives(p2.v.b);
+        if (languages.length === 1) {  // An unambiguous language
+            return languages[0];
         }
     }
-    return undefined;
+
+    // Pass 2: Search body text in extended parents for unambiguous @language directives.
+    seen = new Set([v0.context.hiddenRootNode]);
+    for (const v of v_and_parents(v0)) {
+        const languages = findAllValidLanguageDirectives(v.b);
+        if (languages.length === 1) {  // An unambiguous language
+            return languages[0];
+        }
+    }
+
+    // Passes 3 & 4: Use the file extension in @<file> nodes.
+
+    function get_language_from_headline(v: VNode): string | undefined {
+        /** Return the extension for @<file> nodes. */
+        if (v.isAnyAtFileNode()) {
+            const name = v.anyAtFileNodeName();
+            const [junk, ext] = os_path_splitext(name);
+            const extension = ext.slice(1);  // strip the leading period.
+            const language = app.extension_dict[extension];
+            if (isValidLanguage(language)) {
+                return language;
+            }
+        }
+        return undefined;
+    }
+
+    // Pass 3: Use file extension in headline of @<file> in direct parents.
+    for (const p2 of p.self_and_parents(false)) {
+        language = get_language_from_headline(p2.v);
+        if (language) {
+            return language;
+        }
+    }
+
+    // Pass 4: Use file extension in headline of @<file> nodes in extended parents.
+    seen = new Set([v0.context.hiddenRootNode]);
+    for (const v of v_and_parents(v0)) {
+        language = get_language_from_headline(v);
+        if (language) {
+            return language;
+        }
+    }
+
+    // Return the default language for the commander.
+    const c = p.v.context;
+    return c.target_language || 'python';
+
+    // const v0: VNode = p.v;
+
+    // // The same generator as in v.setAllAncestorAtFileNodesDirty.
+    // // Original idea by Виталије Милошевић (Vitalije Milosevic).
+    // // Modified by EKR.
+    // let seen: VNode[] = [];
+
+    // function* v_and_parents(v: VNode): Generator<VNode> {
+    //     if (seen.indexOf(v) < 0) {
+    //         seen.push(v); // not found, add it
+    //     } else {
+    //         return;
+    //     }
+    //     yield v;
+    //     for (let parent_v of v.parents) {
+    //         if (seen.indexOf(parent_v) < 0) {
+    //             yield* v_and_parents(parent_v); // was  not found
+    //         }
+    //     }
+    // }
+    // /**
+    //  * A helper for all searches.
+    //  * Phase one searches only @<file> nodes.
+    //  */
+    // function find_language(v: VNode, phase: number): string | undefined {
+    //     if (phase === 1 && !v.isAnyAtFileNode()) {
+    //         return undefined;
+    //     }
+    //     let w_language: string;
+    //     // #1693: Scan v.b for an *unambiguous* @language directive.
+    //     const languages: string[] = findAllValidLanguageDirectives(v.b);
+    //     if (languages.length === 1) {
+    //         // An unambiguous language
+    //         return languages[0];
+    //     }
+    //     let name: string;
+    //     let junk: string;
+    //     let ext: string;
+    //     if (v.isAnyAtFileNode()) {
+    //         // Use the file's extension.
+    //         name = v.anyAtFileNodeName();
+    //         [junk, ext] = os_path_splitext(name);
+    //         ext = ext.slice(1); // strip the leading period.
+    //         w_language = app.extension_dict[ext];
+
+    //         if (isValidLanguage(w_language)) {
+    //             return w_language;
+    //         }
+    //     }
+    //     return undefined;
+    // }
+
+    // // First, see if p contains any @language directive.
+    // let language = findFirstValidAtLanguageDirective(p.b);
+    // if (language) {
+    //     return language;
+    // }
+    // // Phase 1: search only @<file> nodes: #2308.
+    // // Phase 2: search all nodes.
+    // for (let phase of [1, 2]) {
+    //     // Search direct parents.
+    //     for (let p2 of p.self_and_parents(false)) {
+    //         language = find_language(p2.v, phase);
+    //         if (language) {
+    //             return language;
+    //         }
+    //     }
+    //     // Search all extended parents.
+    //     seen = [v0.context.hiddenRootNode];
+    //     for (let v of v_and_parents(v0)) {
+    //         language = find_language(v, phase);
+    //         if (language) {
+    //             return language;
+    //         }
+    //     }
+    // }
+    // return undefined;
 }
 //@+node:felix.20220110224044.1: *3* g.getLanguageFromPosition
 /**
@@ -1672,7 +1964,7 @@ export async function chdir(p_path: string): Promise<void> {
     const w_exist = await os_path_exists(p_path);
 
     if (w_isDir && w_exist) {
-        process.chdir(p_path);
+        process.chdir?.(p_path);
     }
 }
 //@+node:felix.20230711213447.1: *3* g.mkdir
@@ -2366,6 +2658,7 @@ export function splitLines(s?: string): string[] {
         return [];
     }
 }
+export const splitlines = splitLines;
 
 //@+node:felix.20220410214855.1: *3* Scanners: no error messages
 //@+node:felix.20211104213154.1: *4* g.find_line_start
@@ -2722,6 +3015,14 @@ export function skip_nl(s: string, i: number): number {
     return i;
 }
 
+//@+node:felix.20240613003629.1: *4* g.skip_non_ws
+export function skip_non_ws(s: string, i: number): number {
+    const n = s.length;
+    while (i < n && !is_ws(s[i])) {
+        i += 1;
+    }
+    return i;
+}
 //@+node:felix.20220411231219.1: *4* g.skip_python_string
 export function skip_python_string(s: string, i: number): number {
     if (match(s, i, "'''") || match(s, i, '"""')) {
@@ -3750,20 +4051,22 @@ def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
     return w
  */
 //@+node:felix.20220410213527.4: *4* g.computeWidth
-/*
-# Returns the width of s, assuming s starts a line, with indicated tab_width.
-
-def computeWidth(s: str, tab_width: int) -> int:
-    w = 0
-    for ch in s:
-        if ch == '\t':
-            w += (abs(tab_width) - (w % abs(tab_width)))
-        elif ch == '\n':  # Bug fix: 2012/06/05.
-            break
-        else:
-            w += 1
-    return w
+/**
+ * Returns the width of s, assuming s starts a line, with indicated tab_width.
  */
+export function computeWidth(s: string, tab_width: number): number {
+    let w = 0;
+    for (const ch of s) {
+        if (ch === '\t') {
+            w += (Math.abs(tab_width) - (w % Math.abs(tab_width)));
+        } else if (ch === '\n') {  // Bug fix: 2012/06/05.
+            break;
+        } else {
+            w += 1;
+        }
+    }
+    return w;
+}
 //@+node:felix.20220410213527.5: *4* g.wrap_lines (newer)
 
 //@+at
@@ -3775,73 +4078,82 @@ def computeWidth(s: str, tab_width: int) -> int:
 //
 // The key to this code is the invarient that line never ends in whitespace.
 //@@c
-/*
-def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> List[str]:
-    """Returns a list of lines, consisting of the input lines wrapped to the given pageWidth."""
-    if pageWidth < 10:
-        pageWidth = 10
-    # First line is special
-    if not firstLineWidth:
-        firstLineWidth = pageWidth
-    if firstLineWidth < 10:
-        firstLineWidth = 10
-    outputLineWidth = firstLineWidth
-    # Sentence spacing
-    # This should be determined by some setting, and can only be either 1 or 2
-    sentenceSpacingWidth = 1
-    assert 0 < sentenceSpacingWidth < 3
-    result = []  # The lines of the result.
-    line = ""  # The line being formed.  It never ends in whitespace.
-    for s in lines:
-        i = 0
-        while i < len(s):
-            assert len(line) <= outputLineWidth  # DTHEIN 18-JAN-2004
-            j = g.skip_ws(s, i)
-            k = g.skip_non_ws(s, j)
-            word = s[j:k]
-            assert k > i
-            i = k
-            # DTHEIN 18-JAN-2004: wrap at exactly the text width,
-            # not one character less
-            #
-            wordLen = len(word)
-            if line.endswith('.') or line.endswith('?') or line.endswith('!'):
-                space = ' ' * sentenceSpacingWidth
-            else:
-                space = ' '
-            if line and wordLen > 0:
-                wordLen += len(space)
-            if wordLen + len(line) <= outputLineWidth:
-                if wordLen > 0:
+export function wrap_lines(lines: string[], pageWidth: number, firstLineWidth?: number): string[] {
+    /** Returns a list of lines, consisting of the input lines wrapped to the given pageWidth. */
+    if (pageWidth < 10) {
+        pageWidth = 10;
+    }
+    // First line is special
+    if (firstLineWidth == null) {
+        firstLineWidth = pageWidth;
+    }
+    if (firstLineWidth < 10) {
+        firstLineWidth = 10;
+    }
+    let outputLineWidth = firstLineWidth;
+    // Sentence spacing
+    // This should be determined by some setting, and can only be either 1 or 2
+    const sentenceSpacingWidth = 1;
+    assert(0 < sentenceSpacingWidth && sentenceSpacingWidth < 3);
+    const result: string[] = [];  // The lines of the result.
+    let line = "";  // The line being formed. It never ends in whitespace.
+    for (const s of lines) {
+        let i = 0;
+        while (i < s.length) {
+            assert(line.length <= outputLineWidth);  // DTHEIN 18-JAN-2004
+            const j = skip_ws(s, i);
+            const k = skip_non_ws(s, j);
+            const word = s.substring(j, k);
+            assert(k > i);
+            i = k;
+            // DTHEIN 18-JAN-2004: wrap at exactly the text width,
+            // not one character less
+            let wordLen = word.length;
+            let space = ' ';
+            if (line.endsWith('.') || line.endsWith('?') || line.endsWith('!')) {
+                space = ' '.repeat(sentenceSpacingWidth);
+            }
+            if (line && wordLen > 0) {
+                wordLen += space.length;
+            }
+            if (wordLen + line.length <= outputLineWidth) {
+                if (wordLen > 0) {
                     //@+<< place blank and word on the present line >>
                     //@+node:felix.20220410213527.6: *5* << place blank and word on the present line >>
-                    if line:
-                        # Add the word, preceeded by a blank.
-                        line = space.join((line, word))
-                    else:
-                        # Just add the word to the start of the line.
-                        line = word
+                    if (line) {
+                        // Add the word, preceded by a blank.
+                        line = line + space + word;
+                    } else {
+                        // Just add the word to the start of the line.
+                        line = word;
+                    }
                     //@-<< place blank and word on the present line >>
-                else: pass  # discard the trailing whitespace.
-            else:
+                }
+            } else {
                 //@+<< place word on a new line >>
                 //@+node:felix.20220410213527.7: *5* << place word on a new line >>
-                # End the previous line.
-                if line:
-                    result.append(line)
-                    outputLineWidth = pageWidth  # DTHEIN 3-NOV-2002: width for remaining lines
-                # Discard the whitespace and put the word on a new line.
-                line = word
-                # Careful: the word may be longer than pageWidth.
-                if len(line) > pageWidth:  # DTHEIN 18-JAN-2004: line can equal pagewidth
-                    result.append(line)
-                    outputLineWidth = pageWidth  # DTHEIN 3-NOV-2002: width for remaining lines
-                    line = ""
+                // End the previous line.
+                if (line) {
+                    result.push(line);
+                    outputLineWidth = pageWidth;  // DTHEIN 3-NOV-2002: width for remaining lines
+                }
+                // Discard the whitespace and put the word on a new line.
+                line = word;
+                // Careful: the word may be longer than pageWidth.
+                if (line.length > pageWidth) {  // DTHEIN 18-JAN-2004: line can equal pagewidth
+                    result.push(line);
+                    outputLineWidth = pageWidth;  // DTHEIN 3-NOV-2002: width for remaining lines
+                    line = "";
+                }
                 //@-<< place word on a new line >>
-    if line:
-        result.append(line)
-    return result
- */
+            }
+        }
+    }
+    if (line) {
+        result.push(line);
+    }
+    return result;
+}
 //@+node:felix.20220410213527.8: *4* g.get_leading_ws
 export function get_leading_ws(s: string): string {
     let i = 0;
@@ -4251,7 +4563,9 @@ export function internalError(...args: any[]): void {
 /**
  * Print all non-keyword args.
  */
-export const pr = console.log;
+export function pr(...args: any[]): void {
+    console.log(...args);
+}
 // TODO : Replace with output to proper 'Leo terminal output'
 // def pr(*args, **keys):
 //     """ Print all non-keyword args."""
@@ -4292,8 +4606,10 @@ export function print_exception(
 /**
  * Print a tracing message
  */
-export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
+export function trace(...args: any[]): void {
+    console.log(...args);
+}
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
 //@+node:felix.20240304235518.1: *3* g.IDDialog
@@ -4533,6 +4849,14 @@ export function rtrim(str: string, ch: string): string {
         // pass, the i-- expression is doing the job
     }
     return str.substring(0, i + 1);
+}
+//@+node:felix.20240616212335.1: *3* g.rstrip
+export function rstrip(str: string, ch = " \t\n\r") {
+    let i = str.length;
+    while (i > 0 && ch.includes(str[i - 1])) {
+        i--;
+    }
+    return str.substring(0, i);
 }
 //@+node:felix.20211104222646.1: *3* g.plural (coreGlobals.py)
 /**
@@ -4857,7 +5181,7 @@ export function os_path_dirname(p_path?: string): string {
  */
 export async function os_path_exists(
     p_path?: string
-): Promise<boolean | FileStat> {
+): Promise<false | FileStat> {
     if (!p_path) {
         return false;
     }
@@ -5597,6 +5921,58 @@ export function python_tokenize(s: string): [string, string, number][] {
 }
 
 //@+node:felix.20211104211229.1: ** g.Scripting
+//@+node:felix.20240602151912.1: *3* g.execute_shell_commands
+/**
+ * Execute each shell command in a separate process.
+ * Wait for each command to complete, except those starting with '&'
+ */
+export async function execute_shell_commands(commands: string | string[], p_trace: boolean = false): Promise<void> {
+
+    if (isBrowser) {
+        es('\'g.execute_shell_commands\' Command not available on the web');
+        return;
+    }
+
+    if (typeof commands === 'string') {
+        commands = [commands];
+    }
+
+    for (const command of commands) {
+
+        let wait = !command.startsWith('&');
+
+        if (p_trace) {
+            trace(`Trace: ${command}`);
+        }
+
+        let cmd = command;
+        if (command.startsWith('&')) {
+            cmd = command.substring(1).trim();
+        }
+
+        if (wait) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const proc = child.exec(cmd, {}, (error, stdout, stderr) => {
+                        if (error) {
+                            reject(`Command failed: ${stderr}`);
+                        } else {
+                            resolve(undefined);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error(`Command failed with error: ${error}`);
+            }
+        } else {
+            const proc = child.spawn(cmd, { shell: true, stdio: 'inherit' });
+            proc.on('error', (error) => {
+                console.error(`Command failed with error: ${error}`);
+            });
+        }
+
+    };
+}
 //@+node:felix.20221219205826.1: *3* g.getScript & helpers
 /**
  * Return the expansion of the selected text of node p.
@@ -6739,8 +7115,8 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
     if (!word) {
         return undefined;
     }
-    [p, pos, newpos] = c.findCommands.find_def();
-    if (p && p.__bool__()) {
+    const matches = c.findCommands.find_def();
+    if (matches && matches.length) {
         return undefined;
     }
     //@+<< look for filename or import>>

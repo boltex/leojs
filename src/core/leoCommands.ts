@@ -32,9 +32,10 @@ import {
     EditCommandsClass,
     TopLevelEditCommands,
 } from '../commands/editCommands';
+import { BufferCommandsClass } from '../commands/bufferCommands';
 import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
 import { TopLevelCompareCommands } from './leoCompare';
-import { GoToCommands } from '../commands/gotoCommands';
+import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
@@ -45,6 +46,8 @@ import { RstCommands } from './leoRst';
 import { TopLevelSessionsCommands } from './leoSessions';
 import { CommanderWrapper } from './leoCache';
 import { HelpCommandsClass } from '../commands/helpCommands';
+import { KillBufferCommandsClass } from '../commands/killBufferCommands';
+import { RectangleCommandsClass } from '../commands/rectangleCommands';
 import * as typescript from 'typescript';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
@@ -59,6 +62,10 @@ if (g.isBrowser) {
 //@-<< imports >>
 //@+others
 //@+node:felix.20211017232128.1: ** applyMixins
+/**
+ * "Alternative Pattern" mixing of multiple classes. (combining simpler partial classes)
+ * From https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern
+ */
 function applyMixins(derivedCtor: any, constructors: any[]): void {
     constructors.forEach((baseCtor) => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
@@ -98,6 +105,8 @@ export class Commands {
     private _currentPosition: Position | undefined;
     private _topPosition: Position | undefined;
 
+    public subCommanders: any[];
+    public configurables: any[];
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
     public atFileCommands: AtFile;
@@ -124,6 +133,7 @@ export class Commands {
     //@+others
     //@+node:felix.20210223220756.1: *3* Commander IVars
     //@+node:felix.20211021003423.1: *4* c.initConfigSettings
+    public autoindent_in_nocolor: boolean | undefined;
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
     public collapse_nodes_after_move: boolean = false;
     public verbose_check_outline: boolean = false;
@@ -238,14 +248,9 @@ export class Commands {
 
     //@+node:felix.20210223220814.8: *4* c.initObjectIvars
     // These ivars are set later by leoEditCommands.createEditCommanders
-    public abbrevCommands: any = undefined;
     public editCommands: EditCommandsClass;
-    public db: any;// CommanderWrapper;//  Record<string, any>; // IS A DATABASE 
-    public bufferCommands: any = undefined;
-    public chapterCommands: any = undefined;
-    public controlCommands: any = undefined;
-    public convertCommands: any = undefined;
-    public debugCommands: any = undefined;
+    public db: any; // CommanderWrapper; //  Record<string, any>; // IS A DATABASE 
+    public bufferCommands: BufferCommandsClass;
     public editFileCommands: EditFileCommandsClass;
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
@@ -253,18 +258,11 @@ export class Commands {
     public helpCommands: HelpCommandsClass;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
-    public keyHandlerCommands: any = undefined;
-    public killBufferCommands: any = undefined;
-    public macroCommands: any = undefined;
-    public miniBufferWidget: any = undefined; // NOT USED IN LEOJS
-    public printingController: any = undefined;
-    public queryReplaceCommands: any = undefined;
-    public rectangleCommands: any = undefined;
-    public searchCommands: any = undefined;
-    public spellCommands: any = undefined;
-    public vimCommands: any = undefined;
+    public killBufferCommands: KillBufferCommandsClass;
+    public rectangleCommands: RectangleCommandsClass;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
+    public quicksearch_controller: QuickSearchController | undefined;
     public id: number; // Replaces python id function
 
     //@+node:felix.20210223002937.1: *3* constructor & helpers
@@ -313,9 +311,11 @@ export class Commands {
 
         this.initConfigSettings();
 
+        // Define subcommanders.
         this.chapterController = new ChapterController(c);
         this.shadowController = new ShadowController(c);
 
+        // Originally from plugins
         this.theTagController = new TagController(c);
         this.quicksearchController = new QuickSearchController(c);
 
@@ -325,19 +325,49 @@ export class Commands {
         this.importCommands = new LeoImportCommands(c);
         this.persistenceController = new PersistenceDataController(c);
 
+        // command handlers...
+        this.bufferCommands = new BufferCommandsClass(c);
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
         this.helpCommands = new HelpCommandsClass(c);
+        this.killBufferCommands = new KillBufferCommandsClass(c);
+        this.rectangleCommands = new RectangleCommandsClass(c);
 
         this.rstCommands = new RstCommands(c);
 
         this.undoer = new Undoer(c);
 
+        // Create the list of subcommanders.
+        this.subCommanders = [
+            this.atFileCommands,
+            this.bufferCommands,
+            this.chapterController,
+            this.editCommands,
+            this.editFileCommands,
+            this.fileCommands,
+            this.findCommands,
+            this.gotoCommands,
+            this.helpCommands,
+            this.importCommands,
+            this.killBufferCommands,
+            this.persistenceController,
+            this.quicksearchController,
+            this.rectangleCommands,
+            this.rstCommands,
+            this.shadowController,
+            this.theTagController,
+            this.undoer,
+        ];
+
+        this.configurables = [...c.subCommanders];
+
         // From finishCreate
         c.frame.finishCreate();
         c.createCommandNames();
+        c.findCommands.finishCreate();
 
+        c.undoer.clearUndoState();
         // equivalent of k.initCommandHistory
         c.commandHistory = c.config.getData('history-list') || [];
     }
@@ -440,7 +470,7 @@ export class Commands {
         const getInt = c.config.getInt.bind(c.config);
         const getString = c.config.getString.bind(c.config);
 
-        // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
+        c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
         c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
         c.collapse_on_lt_arrow = getBool('collapse-on-lt-arrow', true);
         // c.contractVisitedNodes = getBool('contractVisitedNodes');
@@ -472,6 +502,605 @@ export class Commands {
         c.write_script_file = getBool('write-script-file');
     }
 
+    //@+node:felix.20240531224459.1: *3* @cmd c.execute-general-script
+    @cmd('execute-general-script',
+        'Execute c.p and all its descendants as a script. Create a temp file if c.p is not an @<file> node.'
+    )
+    public async execute_general_script_command(): Promise<void> {
+        /**
+         * Execute c.p and all its descendants as a script.
+         *
+         * Create a temp file if c.p is not an @<file> node.
+         *
+         * @data exec-script-commands associates commands with languages.
+         *
+         * @data exec-script-patterns provides patterns to create clickable
+         * links for error messages.
+         *
+         * Set the cwd before calling the command.
+         */
+        if (g.isBrowser) {
+            g.es('\'execute-general-script\' Command not available on the web');
+            return;
+        }
+
+        const c = this;
+        const p = this.p;
+        const tag = 'execute-general-script';
+
+        function get_setting_for_language(setting: string): string | undefined {
+            /**
+             * Return the setting from the given @data setting.
+             * The first colon ends each key.
+             */
+            const data = c.config.getData(setting) || [];
+            for (const s of data) {
+                const [key, val] = s.split(':', 2);
+                if (key.trim() === language) {
+                    return val.trim();
+                }
+            }
+            return undefined;
+        }
+
+        // Get the language and extension.
+        const d = c.scanAllDirectives(p);
+        const language: string = d['language'];
+        if (!language) {
+            console.log(`${tag}: No language in effect at ${p.h}`);
+            return;
+        }
+        const ext = g.app.language_extension_dict[language];
+        if (!ext) {
+            console.log(`${tag}: No extension for ${language}`);
+            return;
+        }
+        // Get the command.
+        const command = get_setting_for_language('exec-script-commands');
+        if (!command) {
+            console.log(`${tag}: No command for ${language} in @data exec-script-commands`);
+            return;
+        }
+        // Get the optional pattern.
+        const regex = get_setting_for_language('exec-script-patterns');
+        // Set the directory, if possible.
+        let directory: string | undefined;
+        if (p.isAnyAtFileNode()) {
+            const w_path = c.fullPath(p);
+            directory = w_path ? path.dirname(w_path) : undefined;
+        } else {
+            directory = undefined;
+        }
+        await c.general_script_helper(command, ext, language, p, directory, regex,);
+    }
+    //@+node:felix.20240603233303.1: *3* @cmd c.execute-external-file
+    @cmd('execute-external-file', 'Run external files.')
+    public async execute_external_file(): Promise<void> {
+        /*
+        //@+<< docstring >>
+        //@+node:felix.20240603233303.2: *4* << docstring >>
+        Run external files.
+
+        If there is an @language directive in the top node of the file,
+        the external processor will be chosen based on it if known.
+        Otherwise, the processor will be chosen using the file's extension
+        if known.  Otherwise, on Linux a shebang line will be used if the
+        external file has one. The candidate processor will be verified
+        to be reachable by the shell.
+
+        On Windows, "@language batch" and "@language shell" both will cause
+        cmd.exe to be invoked as the file processor. On Linux, "@language
+        shell" will cause the system's shell to be invoked. By default, this
+        will be bash. If bash is not present, then the environmental variable
+        $SHELL will be invoked.
+
+        The processing programs and language file extensions can be
+        specified in an @data settings node with the name
+        "run-external-processor-map".
+
+        The data in the @data node body must have a PROCESSORS, an
+        EXTENSIONS section, and optionally a TERMINAL section,
+        looking like this example:
+
+            # A comment line
+            # Map file extensions to language names
+            EXTENSIONS
+            .lua: lua    # Trailing comments allowed
+            .rb: ruby
+
+            # Map language names to processor names or paths
+            PROCESSORS
+            lua: lua
+            ruby: C:\Ruby27-x64\bin\ruby.exe
+
+            # Optionally specify a Linux terminal here (e.g., konsole)
+            TERMINAL
+            # konsole
+
+        Blank lines and lines starting with a "#" are ignored.  If a
+        full path to the processor is included, that path will be used.
+        Otherwise, the processor must be findable by the shell: this
+        normally means it must be on the PATH.
+
+        Any output will be displayed in a newly-opened launching console.
+
+        //@-<< docstring >>
+        */
+
+        if (g.isBrowser) {
+            g.es('\'execute-external-file\' Command not available on the web');
+            return;
+        }
+
+        const c = this;
+        const MAP_SETTING_NODE = 'run-external-processor-map';
+        //@+others
+        //@+node:felix.20240603233303.3: *4* Declarations
+        const PREFERRED_TERMINALS = ['konsole', 'xfce4-terminal', 'mate-terminal', 'gnome-terminal', 'xterm'];
+        //@+node:felix.20240603233303.4: *4* SETTINGS_HELP
+        const SETTINGS_HELP = `The data in the @data node body must have a
+        PROCESSORS and an EXTENSIONS section, plus an optional TERMINAL
+        section, looking like this example:
+
+            # A comment line
+            # Map file extensions to language names
+            EXTENSIONS
+            .lua: lua   # Trailing comments are allowed
+            .rb: ruby
+
+            # Map language names to processor names or paths
+            PROCESSORS
+            lua: lua
+            ruby: C:\\Ruby27-x64\\bin\\ruby.exe
+
+            # Optionally specify a Linux terminal (e.g., konsole) on the
+            # line after the "TERMINAL" line.
+            TERMINAL
+
+        Blank lines and lines starting with a "#" are ignored.
+        `;
+        //@+node:felix.20240603233303.5: *4* extension map
+        let LANGUAGE_EXTENSION_MAP: Record<string, string> = {
+            '.cmd': 'batch',
+            '.bat': 'batch',  // We'll get confused if a Linux program uses a .bat extension
+            '.jl': 'julia',
+            '.lua': 'lua',
+            '.ps1': 'powershell',
+            '.py': 'python',
+            '.pyw': 'python',
+            'rb': 'ruby',
+        };
+        //@+node:felix.20240603233303.6: *4* processor map
+        let PROCESSORS: Record<string, string> = {
+            'batch': 'cmd.exe',
+            'julia': 'julia',
+            'lua': 'lua',
+            'powershell': 'powershell',
+            'ruby': 'ruby',
+            'shellscript': 'bash',
+        };
+        //@+node:felix.20240603233303.7: *4* get_external_maps
+        function get_external_maps(): [Record<string, string> | null, Record<string, string> | null, string] {
+            /*
+                Return processor, extension maps for @data node.
+
+                The data in the @data node body must have a PROCESSORS and an
+                EXTENSIONS section, looking like this example:
+
+                    # A comment line
+                    # Map file extensions to language names
+                    EXTENSIONS
+                    .lua: lua  # Trailing comments are allowed
+                    .rb: ruby
+
+                    # Map language names to processor names or paths
+                    PROCESSORS
+                    lua: lua
+                    ruby: C:\\Ruby27-x64\\bin\\ruby.exe
+
+                    # Specify a particular Linux terminal to use
+                    # e.g, /usr/bin/konsole
+                    TERMINAL
+
+                Blank lines and lines starting with a "#" are ignored.  Trailing
+                in-line comments are allowed, delineated by "#".
+
+                RETURNS
+                a tuple (processor_map, extension_map, terminal)
+            */
+
+            const data: string[] = c.config.getData(MAP_SETTING_NODE, false);
+            if (!data) {
+                return [null, null, ''];
+            }
+
+            // Allow trailing comments:
+            const lines = data.map(z => z.split('#', 1)[0]);
+
+            function scan_map(kind: string): Record<string, string> {
+                const d: Record<string, string> = {};
+                const other_kind = kind === 'EXTENSIONS' ? 'PROCESSORS' : 'EXTENSIONS';
+                let scanning = false;
+
+                for (const line of lines) {
+                    if (line.includes(kind)) {
+                        scanning = true;
+                    } else if (line.includes(other_kind)) {
+                        scanning = false;
+                    } else if (scanning) {
+                        // Line format: a: b
+                        const keyval = line.split(':', 1);
+                        if (keyval.length === 2) {
+                            const key = keyval[0].trim();
+                            const val = keyval[1].trim();
+                            d[key] = val;
+
+                        }
+                    }
+                }
+                return d;
+            }
+
+            // Set terminal value.
+            let terminal = '';
+            for (const line of lines) {
+                if (line.includes('Terminal')) {
+                    terminal = line;
+                    break;
+                }
+            }
+
+            // Set the maps.
+            const processor_map = scan_map('PROCESSORS');
+            const extension_map = scan_map('EXTENSIONS');
+            return [processor_map, extension_map, terminal];
+        }
+        //@+node:felix.20240603233303.8: *4* getExeKind
+        /**
+         * Return the executable kind of the external file.
+         *
+         * If there is a language directive in effect, return it,
+         * otherwise use the file extension.
+         */
+        function getExeKind(ext: string): string {
+            return g.getLanguageFromAncestorAtFileNode(c.p) || LANGUAGE_EXTENSION_MAP[ext] || '';
+        }
+        //@+node:felix.20240603233303.9: *4* getProcessor
+        async function getProcessor(language: string, p_path: string, extension: string): Promise<string> {
+            let processor = '';
+            if (language === 'python') {
+                processor = process.execPath;
+            } else {
+                if (g.isWindows && language === 'shell') {
+                    return 'cmd.exe';
+                }
+                processor = PROCESSORS[language] || '';
+                if (!processor && g.isWindows) {
+                    const ftype = await get_win_assoc(extension);
+                    processor = await get_win_processor(ftype);
+                }
+            }
+            if (processor) {
+                let proc = '';
+                try {
+                    // proc = await which(processor);
+                    proc = await isExecutableInPath(processor);
+                } catch (error: any) {
+                    console.error(`Error finding executable for processor: ${processor}.`, error);
+                    // Handle the error or rejection here, such as returning a default value or throwing a custom error
+                }
+
+                if (!proc) {
+                    processor = '';
+                }
+            }
+            return processor;
+        }
+        //@+node:felix.20240609215950.1: *4* isExecutableInPath
+        async function isExecutableInPath(executableName: string): Promise<string> {
+
+            const pathDelimiter = g.isWindows ? ';' : ':';
+            const directories = process.env.PATH?.split(pathDelimiter) || [];
+            const fileExtensions = g.isWindows ? ['.exe', '.cmd', '.bat'] : [''];
+
+            for (const directory of directories) {
+                for (const extension of fileExtensions) {
+                    let fullPath;
+                    if (g.isWindows && !executableName.endsWith(extension)) {
+                        fullPath = path.join(directory, `${executableName}${extension}`);
+                    } else {
+                        fullPath = path.join(directory, executableName); // Already ends with that extension.
+                    }
+                    const w_exists = await g.os_path_exists(fullPath);
+                    if (w_exists && w_exists.type !== vscode.FileType.Directory) {
+                        return fullPath;
+                    }
+                }
+            }
+            return '';
+        }
+        //@+node:felix.20240603233303.10: *4* Get Windows File Associations
+        /**
+         * Return Windows association for given file extension, or ''.
+         *
+         * The extension must include the dot.
+         */
+        function get_win_assoc(extension: string): Promise<string> {
+            const cmd = `assoc ${extension}`;
+            return new Promise((resolve, reject) => {
+                child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                    if (error) {
+                        resolve('');
+                    }
+                    const filetype = stdout.split('=')[1] || '';
+                    resolve(filetype);
+                });
+            });
+        }
+
+        /**
+         * Get Windows' idea of the program to use for running this file type.
+         *
+         * Example return from ftype:
+         *     Lua.Script="C:\Program Files (x86)\Lua\5.1\lua.exe" "%1" %*
+         *
+         * ARGUMENT
+         * filetype -- a file type returned by the assoc command.
+         *
+         * RETURNS
+         * the processor or ''
+         */
+        function get_win_processor(filetype: string): Promise<string> {
+            if (!filetype) {
+                return Promise.resolve('');
+            }
+            const cmd = `ftype ${filetype}`;
+            return new Promise((resolve, reject) => {
+                child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                    if (error) {
+                        resolve('');
+                    }
+                    const ftype_str = stdout || 'none';
+                    if (!ftype_str) {
+                        resolve('');
+                    }
+                    const prog_str = ftype_str.split('=')[1];
+                    resolve(prog_str.split('"')[1]);
+                });
+            });
+        }
+        //@+node:felix.20240603233303.11: *4* getShell
+        async function getShell(): Promise<string> {
+            //  Prefer bash unless it is not present - we know its options' names
+            let shell = 'bash';
+            const has_bash = await isExecutableInPath(shell);
+            if (!has_bash) {
+                // Need bare shell name, not whole path
+                let processShell = process.env.SHELL || "";
+                processShell = processShell.split('/').pop() || "";
+                shell = processShell;
+            }
+            return shell;
+        }
+        //@+node:felix.20240603233303.12: *4* getTerminal
+        //@+others
+        //@+node:felix.20240603233303.13: *5* getTerminalFromDirectory
+        async function getTerminalFromDirectory(dir: string): Promise<string> {
+            const BAD_NAMES = ['xdg-terminal', 'setterm', 'ppmtoterm', 'koi8rxterm', 'rofi-sensible-terminal', 'x-terminal-emulator'];
+            const TERM_STRINGS = ['*-terminal', '*term'];
+
+            for (let ts of TERM_STRINGS) {
+                const cmd = `find ${dir} -type f -name ${ts}`;
+                try {
+                    const terminals = await new Promise<string>((resolve, reject) => {
+                        child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                            if (error) {
+                                return reject(stderr);
+                            }
+                            resolve(stdout);
+                        });
+                    });
+                    for (let t of terminals.split('\n')) {
+                        const bare_term = t.split('/').pop() || "";
+                        if (!BAD_NAMES.includes(bare_term)) {
+                            return t;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error executing command ${cmd}:`, error);
+                }
+            }
+            return '';
+        }
+        //@+node:felix.20240603233303.14: *5* getCommonTerminal
+        async function getCommonTerminal(names: string | string[]): Promise<string> {
+            let term = '';
+            if (typeof names === 'string') {
+                names = [names];
+            }
+            for (let name of names) {
+                term = await isExecutableInPath(name);
+                if (term) {
+                    break;
+                }
+            }
+            return term;
+        }
+        //@-others
+
+        async function getTerminal(): Promise<string> {
+            const w_getCommonTerminal = await getCommonTerminal(PREFERRED_TERMINALS);
+            const w_getTerminalFromDirectory1 = await getTerminalFromDirectory('/usr/bin');
+            const w_getTerminalFromDirectory2 = await getTerminalFromDirectory('/bin');
+            return w_getCommonTerminal || w_getTerminalFromDirectory1 || w_getTerminalFromDirectory2;
+        }
+        //@+node:felix.20240603233303.15: *4* getTermExecuteCmd
+        /**
+         * Given a terminal's name, find the command line arg to launch a program.
+         *
+         * First, try "--help".  If that fails, see try "--help-all".  If neither
+         * has an argument or switch for "Execute", give up and assume the arg is "-x".
+         */
+        async function getTermExecuteCmd(terminal: string): Promise<string> {
+            const HELP_CMDS = ['-h', '--help', '--help-all'];
+            const EXECUTESTR = 'execute';
+
+            //@+others
+            //@+node:felix.20240603233303.16: *5* get_help_message
+            function get_help_message(terminal: string, help_cmd: string): Promise<string> {
+                const cmd = `${terminal} ${help_cmd}`;
+                return new Promise((resolve, reject) => {
+                    child_process.exec(cmd, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+                        if (error) {
+                            // return reject(stderr);
+                            resolve('');
+                        }
+                        resolve(stdout);
+                    });
+                });
+            }
+
+            //@+node:felix.20240603233303.17: *5* find_ex_arg
+            function find_ex_arg(help_msg: string): string {
+                for (let line of help_msg.split('\n')) {
+                    if (line.includes('--command')) {
+                        return '--command';
+                    }
+                    if (line.includes('-e')) {
+                        return '-e';
+                    }
+                    if (line.toLowerCase().includes(EXECUTESTR)) {
+                        const fields = line.trim().split(' ');
+                        const arg = fields[0].split(',')[0];
+                        return arg;
+                    }
+                }
+                return '';
+            }
+            //@-others
+
+            let arg = '';
+            for (let cmd of HELP_CMDS) {
+                const msg = await get_help_message(terminal, cmd);
+                arg = find_ex_arg(msg);
+                if (arg) {
+                    if (arg.startsWith('--')) {
+                        arg += '=';
+                    } else {
+                        arg += ' ';
+                    }
+                    break;
+                }
+            }
+            if (!arg) {
+                arg = ' -x ';
+                if (terminal.includes('xterm')) {
+                    arg = ' -e ';
+                }
+            }
+            return arg;
+        }
+        //@+node:felix.20240603233303.18: *4* checkShebang
+        async function checkShebang(filepath: string): Promise<boolean> {
+
+            const w_uri = g.makeVscodeUri(filepath);
+            let readData = await vscode.workspace.fs.readFile(w_uri);
+
+            // const file = fs.readFileSync(filepath, { encoding: 'utf-8' });
+            const file = Buffer.from(readData).toString('utf-8');
+            return file.startsWith('#!');
+        }
+        //@+node:felix.20240603233303.19: *4* runFile
+        async function runfile(fullpath: string, processor: string, terminal: string): Promise<void> {
+            // direc: str = os.path.expanduser(os.path.dirname(fullpath))
+            let direc = path.dirname(fullpath);
+            let child;
+            if (direc.startsWith('~')) {
+                direc = path.join(os.homedir(), direc.slice(1));
+            }
+
+            if (g.isWindows) {
+                fullpath = fullpath.replace('/', '\\');
+                let cmd = '';
+                if (processor) {
+                    if (processor === 'cmd.exe') {
+                        cmd = `start ${processor} /k ${fullpath}`;
+                    } else {
+                        cmd = `start cmd.exe /k ${processor} ${fullpath}`;
+                    }
+                } else {
+                    g.es('Unknown processor', fullpath);
+                    return;
+                }
+                child = child_process.exec(cmd);
+                child.unref();
+            } else if (g.isMac) {
+                g.es('Cannot launch external files on a Mac yet');
+            } else {
+                fullpath = fullpath.replace('\\', '/');
+                let term;
+                if (terminal) {
+                    term = terminal;
+                } else {
+                    term = await getTerminal();
+                }
+                if (!term) {
+                    g.es('Cannot find a terminal to launch the external file');
+                    g.es(`You can specify a terminal in an "@data ${MAP_SETTING_NODE}" setting node`);
+                    g.es('  ', SETTINGS_HELP);
+                    return;
+                }
+                const shell_name = await getShell();
+                const execute_arg = await getTermExecuteCmd(term);
+                let cmd = '';
+                const hasShebang = await checkShebang(fullpath);
+                if (!processor && hasShebang) {
+                    cmd = `${term} ${execute_arg}"${shell_name} -c 'cd ${direc}; ${fullpath} ;read'" `;
+                } else if (processor) {
+                    cmd = `${term} ${execute_arg}"${shell_name} -c 'cd ${direc};${processor} ${fullpath} ;read'" `;
+                } else {
+                    g.es(`No processor for ${fullpath}`);
+                    return;
+                }
+
+                child = child_process.exec(cmd);
+                child.unref();
+            }
+        }
+        //@-others
+
+        let root: Position | undefined;
+        let filepath: string | undefined;
+        [root, filepath] = c.gotoCommands.find_root(c.p);
+        if (root && filepath) {
+            let processor_map: Record<string, string> | null;
+            let extension_map: Record<string, string> | null;
+            let terminal: string | null;
+            [processor_map, extension_map, terminal] = get_external_maps();
+            if (extension_map) {
+                LANGUAGE_EXTENSION_MAP = { ...LANGUAGE_EXTENSION_MAP, ...extension_map };
+            }
+            if (processor_map) {
+                PROCESSORS = { ...PROCESSORS, ...processor_map };
+            }
+            const ext = path.extname(filepath);
+            const setting_terminal = terminal;
+            if (setting_terminal) {
+                terminal = await isExecutableInPath(terminal);
+                if (!terminal) {
+                    g.es(`Cannot find terminal specified in setting: ${setting_terminal}`);
+                    g.es('Trying an alternative');
+                }
+            }
+            filepath = c.fullPath(root);
+            const language = getExeKind(ext);
+            const processor = await getProcessor(language, filepath, ext);
+            await runfile(filepath, processor, terminal);
+        } else {
+            g.es('Cannot find an @- file');
+        }
+
+    }
     //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
     @cmd('execute-script', 'Execute a *Leo* script, written in javascript.')
     public async executeScript(
@@ -487,7 +1116,7 @@ export class Commands {
         runPyflakes: boolean = true
     ): Promise<void> {
         /*
-        Execute a *Leo* script, written in python.
+        Execute a *Leo* script, written in javascript.
         Keyword args:
         args=None               Not None: set script_args in the execution environment.
         p=None                  Get the script from p.b, unless script is given.
@@ -498,7 +1127,7 @@ export class Commands {
         silent=False            No longer used.
         namespace=None          Not None: execute the script in this namespace.
         raiseFlag=False         True: reraise any exceptions.
-        runPyflakes=True        True: run pyflakes if allowed by setting.
+        runPyflakes=True        True: (Not used in LeoJS) run pyflakes if allowed by setting.
         */
         const c: Commands = this;
 
@@ -554,13 +1183,13 @@ export class Commands {
         }
 
         this.redirectScriptOutput();
-        // oldLog = g.app.log  // TODO : needed ?
+
         try {
-            // log = c.frame.log  // TODO : needed ?
-            // g.app.log = log // TODO : needed ?
+
             if (script.trim()) {
+                // * Original python: will search for modules when the import statement is used.
                 // sys.path.insert(0, os.getcwd())
-                // sys.path.insert(0, g.os_path_dirname(c.fileName()))  // per SegundoBob // TODO : needed ?
+                // sys.path.insert(0, g.os_path_dirname(c.fileName()))  // per SegundoBob 
                 script += '\n'; // Make sure we end the script properly.
 
                 // Wrap script as an IIAFE to allow 'await' right out the box.
@@ -589,17 +1218,16 @@ export class Commands {
                     }
                     g.handleScriptException(c, script_p, e);
                 } finally {
-                    // del sys.path[0]; // TODO : needed ?
-                    // del sys.path[0]; // TODO : needed ?
+                    // * Original python: reverts addition to sys path for python module imports.
+                    // del sys.path[0];
+                    // del sys.path[0];
                 }
             } else {
-                // tabName = log and hasattr(log, 'tabName') and log.tabName or 'Log' // TODO : needed ?
                 g.warning('no script selected');
             }
         } catch (e) {
             // pass
         } finally {
-            // g.app.log = oldLog // TODO : needed ?
             this.unredirectScriptOutput();
         }
     }
@@ -631,7 +1259,6 @@ export class Commands {
         d['path'] = path;
         d['process'] = process;
         d['child_process'] = child_process;
-
 
         if (define_name) {
             d['__name__'] = define_name;
@@ -703,29 +1330,27 @@ export class Commands {
             c.exists &&
             c.config.getBool('redirect-execute-script-output-to-log-pane')
         ) {
-            // TODO
-            // ? needed ?
-            // g.redirectStdout()  // Redirect stdout
-            // g.redirectStderr()  // Redirect stderr
+            // TODO : FIND A WAY TO OVERRIDE CONSOLE !
+            g.es("LeoJS Warning: 'redirect-execute-script-output-to-log-pane' option is not yet supported.");
+            return;
+            g.redirectStdout();  // Redirect stdout
+            g.redirectStderr();  // Redirect stderr
         }
     }
     //@+node:felix.20221010233956.4: *4* c.setCurrentDirectoryFromContext
     public setCurrentDirectoryFromContext(p: Position): void {
         const c: Commands = this;
         const aList = g.get_directives_dict_list(p);
-        const path = c.scanAtPathDirectives(aList);
-        // const curDir = g.os_path_abspath(os.getcwd()); // TODO !
-
-        console.log('TODO : setCurrentDirectoryFromContext');
-
-        // if (path && path !== curDir){
-        //     try{
-        //         os.chdir(path)
-        //     }
-        //    catch (e) {
-        //         // pass
-        //    }
-        // }
+        const w_path = c.scanAtPathDirectives(aList);
+        const curDir = g.os_path_abspath(process.cwd());
+        if (w_path && w_path !== curDir) {
+            try {
+                process.chdir?.(w_path);
+            }
+            catch (e) {
+                // pass
+            }
+        }
     }
 
     //@+node:felix.20221010233956.5: *4* c.unredirectScriptOutput
@@ -735,10 +1360,17 @@ export class Commands {
             c.exists &&
             c.config.getBool('redirect-execute-script-output-to-log-pane')
         ) {
-            // TODO
-            // ? needed ?
-            // g.restoreStderr()
-            // g.restoreStdout()
+            g.restoreStderr();
+            g.restoreStdout();
+        }
+    }
+    //@+node:felix.20240618002443.1: *3* @cmd toggleUnlView
+    @cmd('toggle-unl-view', 'Toggles the status-bar UNL display setting.')
+    public toggleUnlView(): void {
+        const c: Commands = this;
+        if (c && c.frame) {
+            // This is not a convenience method.
+            c.frame.toggleUnlView();
         }
     }
     //@+node:felix.20210215185050.1: *3* c.API
@@ -860,7 +1492,6 @@ export class Commands {
     ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
-            // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
@@ -913,7 +1544,6 @@ export class Commands {
     ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
-            // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
@@ -1184,7 +1814,6 @@ export class Commands {
      */
     public nullPosition(): void {
         g.trace('This method is deprecated. Instead, just use None.');
-        // pylint complains if we return None.
     }
 
     //@+node:felix.20210131011420.14: *5* c.positionExists
@@ -1637,8 +2266,8 @@ export class Commands {
      */
     public checkGnxs(): number {
         const c: Commands = this;
-        const d: { [key: string]: VNode[] } = {};
-        // Keys are gnx's; values are sets of vnodes with that gnx.
+        // Keys are gnx's; values are lists vnodes with that gnx.
+        const vnode_d: { [key: string]: VNode[] } = {};
         const ni: NodeIndices = g.app.nodeIndices!;
         const t1: [number, number] = process.hrtime();
 
@@ -1650,21 +2279,21 @@ export class Commands {
             let gnx: string = v.fileIndex;
             if (gnx) {
                 // gnx must be a string.
-                const aSet: VNode[] = d[gnx] || []; // new if none yet
+                const aSet: VNode[] = vnode_d[gnx] || []; // new if none yet
                 if (aSet.indexOf(v) === -1) {
                     // Fake a set by checking before pushing
                     aSet.push(v);
                 }
-                d[gnx] = aSet;
+                vnode_d[gnx] = aSet;
             } else {
                 gnx_errors += 1;
                 v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`);
             }
         }
-        for (let gnx of Object.keys(d).sort()) {
-            const aList: VNode[] = d[gnx];
-            if (aList.length !== 1) {
+        for (let gnx of Object.keys(vnode_d).sort()) {
+            const aList: VNode[] = vnode_d[gnx];
+            if (aList.length > 1) {
                 console.log('\nc.checkGnxs...');
                 // g.es_print(`multiple vnodes with gnx: ${gnx}`, 'red');
                 g.es_print(`multiple vnodes with gnx: ${gnx}`);
@@ -2104,17 +2733,6 @@ export class Commands {
         const aList = g.get_directives_dict_list(p);
         const w_path = c.scanAtPathDirectives(aList);
         return g.finalize_join(w_path, p.anyAtFileNodeName());
-        // for (let p of p_p.self_and_parents(false)) {
-        //     const aList: any[] = g.get_directives_dict_list(p);
-        //     const w_path: string = this.scanAtPathDirectives(aList);
-        //     let fn: string = simulate ? p.h : p.anyAtFileNodeName();
-        //     //fn = p.h if simulate else p.anyAtFileNodeName()
-        //     // Use p.h for unit tests.
-        //     if (fn) {
-        //         return g.finalize_join(w_path, fn);
-        //     }
-        // }
-        // return '';
     }
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
@@ -2237,17 +2855,19 @@ export class Commands {
         return '';
     }
     //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLanguage
-    // def hasAmbiguousLanguage(self, p):
-    //     """Return True if p.b contains different @language directives."""
-    //     # c = self
-    //     languages, tag = set(), '@language'
-    //     for s in g.splitLines(p.b):
-    //         if g.match_word(s, 0, tag):
-    //             i = g.skip_ws(s, len(tag))
-    //             j = g.skip_id(s, i)
-    //             word = s[i:j]
-    //             languages.add(word)
-    //     return len(list(languages)) > 1
+    public hasAmbiguousLanguage(p: Position): boolean {
+        const languages = new Set<string>();
+        const tag = '@language';
+        for (const s of g.splitLines(p.b)) {
+            if (g.match_word(s, 0, tag)) {
+                const i = g.skip_ws(s, tag.length);
+                const j = g.skip_id(s, i);
+                const word = s.slice(i, j);
+                languages.add(word);
+            }
+        }
+        return Array.from(languages).length > 1;
+    }
     //@+node:felix.20211228212851.5: *4* c.scanAllDirectives
     /**
      * Scan p and ancestors for directives.
@@ -2318,8 +2938,7 @@ export class Commands {
         if (fn) {
             absbase = g.os_path_dirname(fn);
         } else {
-            // TODO !
-            absbase = ""; //  g.os_getcwd(); // ! FIX THIS !
+            absbase = process.cwd();
         }
         // Look for @path directives.
         const w_paths: string[] = [];
@@ -2485,7 +3104,7 @@ export class Commands {
         c:          The Commander of the outline.
         command:    The os command to execute the script.
         directory:  Optional: Change to this directory before executing command.
-        ext:        The file extension for the tempory file.
+        ext:        The file extension for the temporary file.
         language:   The language name.
         regex:      Optional regular expression describing error messages.
                     If present, group(1) should evaluate to a line number.
@@ -2502,17 +3121,15 @@ export class Commands {
              This allows, for example, `go run .` to work as expected.
           3. Append the full path to the command.
      */
-    public general_script_helper(
+    public async general_script_helper(
         command: string,
         ext: string,
         language: string,
-        root: any,
-        directory: string | undefined,
-        regex?: any
-    ): void {
+        root: Position,
+        directory: string | undefined = undefined,
+        regex: string | RegExp | undefined = undefined
+    ): Promise<void> {
         const c: Commands = this;
-
-        // log = self.frame.log
 
         // Define helper functions
 
@@ -2522,142 +3139,132 @@ export class Commands {
          * Put the line, creating a clickable link if the regex matches.
          */
 
-        /*
-        public put_line(s): void{
-            // TODO
-            if not regex:
-                g.es_print(s)
-                return
-            // Get the line number.
-            m = regex.match(s)
-            if not m:
-                g.es_print(s)
-                return
-            // If present, the regex should define two groups.
-            try:
-                s1 = m.group(1)
-                s2 = m.group(2)
-            except IndexError:
-                g.es_print(f"Regex {regex.pattern()} must define two groups")
-                return
-            if s1.isdigit():
-                n = int(s1)
-                fn = s2
-            elif s2.isdigit():
-                n = int(s2)
-                fn = s1
-            else:
-                // No line number.
-                g.es_print(s)
-                return
-            s = s.replace(root_path, root.h)
-            // Print to the console.
-            print(s)
-            // Find the node and offset corresponding to line n.
-            p, n2 = find_line(fn, n)
-            // Create the link.
-            unl = p.get_UNL(with_proto=True, with_count=True)
-            if unl:
-                log.put(s + '\n', nodeLink=f"{unl},{n2}")
-            else:
-                log.put(s + '\n')
+        async function put_line(s: string): Promise<void> {
+            if (!regex) {
+                g.es_print(s);
+                return;
+            }
+            const m = (typeof regex === 'string' ? new RegExp(regex) : regex).exec(s);
+            if (!m) {
+                g.es_print(s);
+                return;
+            }
+            try {
+                const s1 = m[1];
+                const s2 = m[2];
+                if (s1 && s2) {
+                    const n = parseInt(s1, 10) || parseInt(s2, 10);
+                    const fn = isNaN(parseInt(s1, 10)) ? s1 : s2;
+                    if (!isNaN(n)) {
+                        s = s.replace(root_path, root.h);
+                        console.log(s);
+                        const [p, n2] = await find_line(fn, n);
+                        const unl = p && p.__bool__() && p.get_UNL();
+                        if (unl) {
+                            g.es(`${s}\n${unl}::${n2}\n`);
+                        } else {
+                            g.es(`${s}\n`);
+                        }
+                    } else {
+                        g.es_print(s);
+                    }
+                } else {
+                    g.es_print(s);
+                }
+            } catch (err) {
+                g.es_print(`Regex ${regex} must define two groups`);
+            }
         }
-        */
         //@+node:felix.20211106224948.8: *5* function: find_line
         /**
          * Return the node corresponding to line n of external file given by path.
          */
-        // TODO !
-        /*
-               public find_line(path, n): [] {
-
-
-           if path == root_path:
-               p, offset, found = c.gotoCommands.find_file_line(n, root)
-           else:
-               // Find an @<file> node with the given path.
-               found = False
-               for p in c.all_positions():
-                   if p.isAnyAtFileNode():
-                       norm_path = os.path.normpath(g.fullPath(c, p))
-                       if path == norm_path:
-                           p, offset, found = c.gotoCommands.find_file_line(n, p)
-                           break
-           if found:
-               return [p, offset];
-
-           return [root, n];
-
-               }
-               */
+        async function find_line(filePath: string, n: number): Promise<[Position | undefined, number]> {
+            if (filePath === root_path) {
+                return c.gotoCommands.find_file_line(n, root);
+            } else {
+                for (const p of c.all_positions()) {
+                    if (p.isAnyAtFileNode()) {
+                        const normPath = path.normalize(c.fullPath(p));
+                        if (filePath === normPath) {
+                            const [w_p, w_offset] = await c.gotoCommands.find_file_line(n, p);
+                            return (w_p && w_p.__bool__()) ? [w_p, w_offset] : [root, n];
+                        }
+                    }
+                }
+                return [root, n];
+            }
+        }
         //@-others
 
         // Compile and check the regex.
 
-        /*
-        if regex:
-            if isinstance(regex, str):
-                try:
-                    regex = re.compile(regex)
-                except Exception:
-                    g.trace(f"Bad regex: {regex!s}")
-                    return None
+        if (regex && typeof regex === 'string') {
+            try {
+                new RegExp(regex);
+            } catch (err) {
+                g.trace(`Bad regex: ${regex}`);
+                return;
+            }
+        }
 
+        const script = await g.getScript(c, root, false, false, true);
+        const use_temp = !root.isAnyAtFileNode();
+        let root_path: string;
+        let root_pathUri: vscode.Uri | undefined;
 
-        // Get the script.
-        script = g.getScript(c, root,
-            useSelectedText=False,
-            forcePythonSentinels=False,  // language=='python',
-            useSentinels=True,
-        )
-        // Create a temp file if root is not an @<file> node.
-        use_temp = not root.isAnyAtFileNode()
-        if use_temp:
-            fd, root_path = tempfile.mkstemp(suffix=ext, prefix="")
-            with os.fdopen(fd, 'w') as f:
-                f.write(script)
-        else:
-            root_path = g.fullPath(c, root)
+        if (use_temp) {
+            // USE this random string!
+            const randomString = crypto.randomBytes(3).toString('hex');
+            const tmpFile = `${os.tmpdir()}/leoScript-${randomString}`;
+            const tmpDirUri = g.makeVscodeUri(tmpFile);
+            await vscode.workspace.fs.createDirectory(tmpDirUri);
 
+            root_path = path.join(tmpFile, `temp.${ext}`);
+            root_pathUri = g.makeVscodeUri(root_path);
 
-        // Compute the final command.
-        if '<FILE>' in command:
-            final_command = command.replace('<FILE>', root_path)
-        elif '<NO-FILE>' in command:
-            final_command = command.replace('<NO-FILE>', '').replace(root_path, '')
-        else:
-            final_command = f"{command} {root_path}"
+            // fs.writeFileSync(root_path, script, 'utf-8');
+            await g.vscode.workspace.fs.writeFile(root_pathUri, Buffer.from(script, 'utf-8'));
 
+        } else {
+            root_path = c.fullPath(root);
+        }
 
-        // Change directory.
-        old_dir = os.path.abspath(os.path.curdir)
-        if not directory:
-            directory = os.path.dirname(root_path)
+        let final_command = command;
+        if (final_command.includes('<FILE>')) {
+            final_command = final_command.replace('<FILE>', root_path);
+        } else if (final_command.includes('<NO-FILE>')) {
+            final_command = final_command.replace('<NO-FILE>', '').replace(root_path, '');
+        } else {
+            final_command = `${final_command} ${root_path}`;
+        }
 
-        os.chdir(directory)
-        // Execute the final command.
-        try:
-            proc = subprocess.Popen(final_command,
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-            out, err = proc.communicate()
-            for s in g.splitLines(g.toUnicode(out)):
-                print(s.rstrip())
+        const old_dir = process.cwd();
+        if (!directory) {
+            directory = path.dirname(root_path);
+        }
+        process.chdir?.(directory);
 
-
-            print('')
-            for s in g.splitLines(g.toUnicode(err)):
-                put_line(s.rstrip())
-
-
-        finally:
-            if use_temp:
-                os.remove(root_path)
-
-            os.chdir(old_dir)
-
-        */
+        try {
+            const proc = child_process.spawn(final_command, {
+                shell: true,
+                stdio: ['pipe', 'pipe', 'pipe']
+            });
+            proc.stdout.on('data', (data) => {
+                console.log(data.toString());
+            });
+            proc.stderr.on('data', (data) => {
+                void put_line(data.toString());
+            });
+            await new Promise<void>((resolve) => {
+                proc.on('close', () => resolve());
+            });
+        } finally {
+            if (use_temp && root_pathUri) {
+                await vscode.workspace.fs.delete(root_pathUri);
+            }
+            process.chdir?.(old_dir);
+        }
     }
     //@+node:felix.20211106224948.10: *4* c.setComplexCommand
     /**
@@ -2726,56 +3333,6 @@ export class Commands {
         w_path = g.os_path_expanduser(w_path);
         w_path = g.os_path_expandvars(w_path);
         return w_path;
-
-        // ! OLD INSECURE IMPLEMENTATION !
-
-        // const c: Commands = this;
-
-        // if (!s) {
-        //     return '';
-        // }
-        // s = g.toUnicode(s);
-
-        // // find and replace repeated path expressions
-        // let previ: number = 0;
-        // const aList: string[] = [];
-
-        // while (previ < s.length) {
-        //     const i = s.indexOf('{{', previ);
-        //     const j = s.indexOf('}}', previ);
-        //     if (-1 < i && i < j) {
-        //         // Add anything from previous index up to '{{'
-        //         if (previ < i) {
-        //             aList.push(s.substring(previ, i));
-        //         }
-        //         // Get expression and find substitute
-        //         const exp: string = s.substring(i + 2, j).trim();
-        //         if (exp) {
-        //             try {
-        //                 const s2 = c.replace_path_expression(exp);
-        //                 aList.push(s2);
-        //             } catch (exception) {
-        //                 g.es(
-        //                     `Exception evaluating {{ ${exp} }} in ${s.trim()}`
-        //                 );
-        //                 g.es_exception(exception, c);
-        //             }
-        //         }
-        //         // Prepare to search again after the last '}}'
-        //         previ = j + 2;
-        //     } else {
-        //         // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
-        //         aList.push(s.substring(previ));
-        //         break;
-        //     }
-        // }
-
-        // let val: string = aList.join('');
-        // if (g.isWindows) {
-        //     val = val.split('\\').join('/');
-        // }
-
-        // return val;
     }
     //@+node:felix.20220102021736.2: *4* c.replace_path_expression
     /**
@@ -2898,7 +3455,6 @@ export class Commands {
         }
 
         if (w_path) {
-            // pylint: disable=no-member
             // Defined in commanderFileCommands.py.
             await c.saveTo(w_path, silent);
             // Issues saved message.
@@ -2990,7 +3546,6 @@ export class Commands {
         } else {
             prefix = '@killcolor\n\n';
         }
-        // pylint: disable=no-member
         // Defined in commanderOutlineCommands.py
         let p2: Position;
         p2 = c.insertHeadline('Open File', false)!;
@@ -3907,15 +4462,6 @@ export class Commands {
     public canHoist(): boolean {
         // This is called at idle time, so minimizing positions is crucial!
         return true;
-
-        // c = self
-        // if c.hoistStack.length:
-        // p = c.hoistStack[c.hoistStack.length-1].p
-        // return p and not c.isCurrentPosition(p)
-        // elif c.currentPositionIsRootPosition():
-        // return c.currentPositionHasNext()
-        // else:
-        // return true
     }
 
     //@+node:felix.20211023195447.17: *6* c.canMoveOutlineDown
@@ -4508,17 +5054,60 @@ export class Commands {
             return [];
         }
     }
+    //@+node:felix.20240601145220.1: *4* c.undoableDeletePositions
+    /**
+     * Deletes all vnodes corresponding to the positions in aList,
+     * and make changes undoable.
+     */
+    public undoableDeletePositions(aList: Position[]): void {
+
+        const c = this;
+        const u = c.undoer;
+        const data = c.deletePositionsInList(aList);
+        const gnx2v = c.fileCommands.gnxDict;
+
+        function undo(): void {
+            const bead = u.getBead(u.bead);
+            if (!bead) { return; }
+            for (const [pgnx, i, chgnx] of bead.data.reverse()) {
+                const v = gnx2v[pgnx];
+                const ch = gnx2v[chgnx];
+                v.children.splice(i, 0, ch);
+                ch.parents.push(v);
+            }
+            if (!c.positionExists(c.p)) {
+                c.setCurrentPosition(c.rootPosition()!);
+            }
+        }
+
+        function redo(): void {
+            const bead = u.getBead(u.bead + 1);
+            if (!bead) { return; }
+            for (const [pgnx, i, _chgnx] of bead.data) {
+                const v = gnx2v[pgnx];
+                const ch = v.children.splice(i, 1)[0];
+                ch.parents = ch.parents.filter(parent => parent !== v);
+            }
+            if (!c.positionExists(c.p)) {
+                c.setCurrentPosition(c.rootPosition()!);
+            }
+        }
+
+        u.pushBead({
+            data: data,
+            undoType: 'delete nodes',
+            undoHelper: undo,
+            redoHelper: redo,
+        });
+    }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
     public registerReloadSettings(obj: any): void {
         const c: Commands = this;
-        console.log('TODO: ? NEEDED ? registerReloadSettings');
 
-        /* 
-        if (!c.configurables.includes(obj)){
+        if (!c.configurables.includes(obj)) {
             c.configurables.push(obj);
         }
-        */
     }
 
     //@+node:felix.20220605203342.3: *4* c.reloadConfigurableSettings
@@ -4527,38 +5116,49 @@ export class Commands {
      * other known classes.
      */
     public reloadConfigurableSettings(): void {
-        console.log('TODO : ? NEEDED ? reloadConfigurableSettings');
+        const c = this;
 
-        /* 
-        
-        const c: Commands = this;
+        // * LEOJS: some are non-existant
         const table = [
             g.app.gui,
             g.app.pluginsController,
-            c.k.autoCompleter,
-            c.frame, c.frame.body, c.frame.log, c.frame.tree,
-            c.frame.body.colorizer,
-            getattr(c.frame.body.colorizer, 'highlighter', None),
+            // c.k.autoCompleter,
+            c.frame,
+            c.frame.body,
+            // c.frame.log,
+            c.frame.tree,
+            // c.frame.body.colorizer,
+            // (c.frame.body.colorizer as any).highlighter || null,
         ];
-
-        for obj in table:
-            if obj:
-                c.registerReloadSettings(obj)
+        for (const obj of table) {
+            if (obj) {
+                c.registerReloadSettings(obj);
+            }
+        }
         // Useful now that instances add themselves to c.configurables.
-        c.configurables = list(set(c.configurables))
-        c.configurables.sort(key=lambda obj: obj.__class__.__name__.lower())
-        for obj in c.configurables:
-            func = getattr(obj, 'reloadSettings', None)
-            if func:
-                // pylint: disable=not-callable
-                try:
-                    func()
-                    g.doHook("after-reload-settings", c=c)
-                except e:
-                    g.es_exception(e)
-                    c.configurables.remove(obj)
+        c.configurables = Array.from(new Set(c.configurables));
+        c.configurables.sort((a, b) => a.constructor.name.toLowerCase().localeCompare(b.constructor.name.toLowerCase()));
 
-        */
+        for (const obj of c.configurables) {
+            if (obj == null) {
+                g.es_print('Undefined object in c.configurables');
+                continue;
+            }
+            const func = (
+                (obj as any).reloadSettings
+                || (obj as any).reload_settings  // An official alias.
+            );
+            if (func) {
+                try {
+                    func.bind(obj)();
+                    g.doHook("after-reload-settings", { c: c });
+                } catch (e) {
+                    g.es_exception(e);
+                    c.configurables = c.configurables.filter(item => item !== obj);
+                }
+            }
+        }
+
     }
 
     //@-others
@@ -4567,7 +5167,6 @@ export class Commands {
 //@-others
 //@@language typescript
 //@@tabwidth -4
-//@@pagewidth 70
 
 export interface Commands
     extends CommanderOutlineCommands,
@@ -4575,6 +5174,7 @@ export interface Commands
     CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelCompareCommands,
+    TopLevelGoToCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,
@@ -4612,6 +5212,7 @@ applyMixins(Commands, [
     CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelCompareCommands,
+    TopLevelGoToCommands,
     TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,

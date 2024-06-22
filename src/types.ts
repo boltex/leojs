@@ -79,6 +79,8 @@ export interface ReqRefresh {
     node?: boolean; // Reveal received selected node (Navigation only, no tree change)
     tree?: boolean; // Tree needs refresh
     body?: boolean; // Body needs refresh
+    excludeDetached?: boolean; // Body needs refresh EXCLUDE DETACHED
+
     scroll?: boolean; // Body needs to set and reveal text selection
 
     states?: boolean; // Currently opened tree view states needs refresh:
@@ -104,6 +106,7 @@ export interface CommandOptions {
 export interface BodyTimeInfo {
     ctime: number;
     mtime: number;
+    lastBodyLength?: number;
 }
 
 /**

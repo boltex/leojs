@@ -121,6 +121,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CUT_SELECTION_FO, () => p_leoUI.command(LEOCMD.CUT_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.DELETE_SELECTION, () => p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.DELETE_SELECTION_FO, () => p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+        [CMD.PASTE_AS_TEMPLATE, () => p_leoUI.command(LEOCMD.PASTE_AS_TEMPLATE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
         [CMD.PASTE_CLONE_SELECTION, () => p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.PASTE_CLONE_SELECTION_FO, () => p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.PASTE_SELECTION, () => p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
@@ -271,8 +272,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.FIND_PREVIOUS, () => p_leoUI.find(false, true)],
         [CMD.FIND_PREVIOUS_FO, () => p_leoUI.find(true, true)],
 
-        [CMD.FIND_VAR, () => p_leoUI.command(LEOCMD.FIND_VAR, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-        [CMD.FIND_DEF, () => p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.FIND_DEF, () => p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
         [CMD.REPLACE, () => p_leoUI.replace(false, false)],
         [CMD.REPLACE_FO, () => p_leoUI.replace(true, false)],

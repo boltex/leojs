@@ -11,6 +11,8 @@ import 'date-format-lite';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 import * as difflib from 'difflib';
+import * as JSZip from 'jszip';
+import * as path from 'path';
 import { Database } from 'sql.js';
 var binascii = require('binascii');
 var pickle = require('./jpicklejs');
@@ -992,73 +994,76 @@ export class FileCommands {
             return;
         }
         // Compute the timestamp.
-
-        // var date = new Date(unix_timestamp * 1000);
-        // // Hours part from the timestamp
-        // var hours = date.getHours();
-        // // Minutes part from the timestamp
-        // var minutes = "0" + date.getMinutes();
-        // // Seconds part from the timestamp
-        // var seconds = "0" + date.getSeconds();
-
         const timestamp = new Date().getTime(); // datetime.now().timestamp();
         const time = new Date(timestamp);
         const time_s = time.format('YYYY-MM-DD-hh-mm-ss');
 
         // Compute archive_name.
-        let archive_name = '';
-        // TODO
-        // try{
-        //     const directory = os.environ['LEO_ARCHIVE'];
-        //     // todo this should be a uri
-        //     try {
-        //         await vscode.workspace.fs.stat(directory);
-        //         // OK exists
+        let archive_name: string | null = null;
+        try {
+            const directory = process.env['LEO_ARCHIVE'];
 
-        //     } catch {
-        //         // Does not exist !
-        //         g.es_print(`Not found: ${directory}`);
-        //         // TODO : TEST THIS WITH / WITHOUT ESCAPING SPECIAL CHARS
-        //         archive_name = `${directory}${os.sep}${g.shortFileName(leo_file)}-${time_s}.zip`;
-        //     }
+            if (directory) {
+                const dir_exists = await g.os_path_isdir(directory);
+                if (!dir_exists) {
+                    g.es_print(`Not found: ${directory}`);
+                } else {
+                    archive_name = `${directory}${path.sep}${g.shortFileName(leo_file)}-${time_s}.zip`;
+                }
+            }
 
-        // }catch (keyError){
-        //     // pass
-        // }
+        } catch (error) {
+            // KeyError handling
+        }
         if (!archive_name) {
             archive_name = `${leo_file}-${time_s}.zip`;
         }
+
         // Write the archive.
         try {
+
             let n = 1;
-            // TODO
-            await vscode.window.showInformationMessage(
-                'TODO : writeZipArchive for ' +
-                `${archive_name} containing ${n} file${g.plural(n)}`
-            );
+            const zip = new JSZip();
 
-            // const f = new jszip ! TODO !
+            const uri = g.makeVscodeUri(leo_file);
+            const data = await vscode.workspace.fs.readFile(uri);
 
-            console.log(process.env);
+            function preparePath(filePath: string) {
+                // Normalize the path to handle different slashes
+                const normalizedPath = path.normalize(filePath);
+                // Remove the drive letter if present (Windows-specific)
+                const withoutDrive = normalizedPath.replace(/^[a-zA-Z]:/, '');
+                // Remove leading slashes
+                const withoutLeadingSlashes = withoutDrive.replace(/^[/\\]+/, '');
+                // Replace backslashes with forward slashes
+                const unixStylePath = withoutLeadingSlashes.replace(/\\/g, '/');
+                return unixStylePath;
+            }
 
-            // with (zipfile.ZipFile(archive_name, 'w') as f){
-            //     f.write(leo_file);
-            //     for (const p of c.all_unique_positions()){
-            //         if (p.isAnyAtFileNode()){
-            //             fn = c.fullPath(p);
-            //             if (os.path.exists(fn)){
-            //                 n += 1;
-            //                 f.write(fn);
-            //             }
-            //         }
-            //     }
-            // }
+            zip.file(preparePath(leo_file), data);
 
-            g.es(`Wrote ${archive_name} containing ${n} file${g.plural(n)}`);
-        } catch (exception) {
+            for (const p of c.all_unique_positions()) {
+                if (p.isAnyAtFileNode()) {
+                    const fn = c.fullPath(p);
+                    const exists = await g.os_path_exists(fn);
+                    if (exists) {
+                        n += 1;
+                        const atFileUri = g.makeVscodeUri(fn);
+                        const atFiledata = await vscode.workspace.fs.readFile(atFileUri);
+                        zip.file(preparePath(fn), atFiledata);
+                    }
+                }
+            }
+            const content = await zip.generateAsync({ type: "uint8array" });
+            const zip_buffer = Buffer.from(content);
+            await vscode.workspace.fs.writeFile(g.makeVscodeUri(archive_name), zip_buffer);
+            g.es_print(`Wrote ${archive_name} containing ${n} file${g.plural(n)}`);
+
+        } catch (error) {
             g.es_print(`Error writing ${archive_name}`);
-            g.es_exception(exception);
+            g.es_exception(error);
         }
+
     }
     //@+node:felix.20211213224228.1: *3* fc: File Utils
     //@+node:felix.20211213224228.2: *4* fc.createBackupFile
@@ -3019,9 +3024,6 @@ export class FileCommands {
 
         const w_windowInfo = c.frame.get_window_info();
         const [w, h, left, t] = w_windowInfo;
-
-        // TODO : FIX THIS!
-        console.log('putGlobals saving window geom to db : ', w_windowInfo);
 
         c.db['window_position'] = [t.toString(), left.toString(), h.toString(), w.toString()];
 

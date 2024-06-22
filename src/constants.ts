@@ -57,7 +57,7 @@ export class Constants {
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
     public static CLEANUP_DEBOUNCE_DELAY: number = 40;
-    public static DETACHED_LANGUAGE_DELAY: number = 350;
+    public static DETACHED_LANGUAGE_DELAY: number = 250;
     public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
     public static TITLE_DEBOUNCE_DELAY: number = 20;
@@ -71,12 +71,15 @@ export class Constants {
     public static CONFIG_NAME: string = "leojs";
     public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
     public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
-    public static DETACHED_REGEX: RegExp = /^\/(\d+)\//;
+
     /**
      * Supported Languages
      */
     public static LANGUAGES = [
         "plain",
+        "julia",
+        "batch",
+        "shell",
         "python",
         "javascript",
         "typescript",
@@ -135,7 +138,7 @@ export class Constants {
         SVG_SHEME: "data",
         SVG_OPEN: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">',
         SVG_CLOSE: "</svg>",
-        STATUSBAR_INDICATOR: "$(link) ", //  "🦁", // "$(keyboard) ", // WITH TRAILING SPACE!
+        STATUSBAR_INDICATOR: "$(link) ", // WITH TRAILING SPACE!
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
         TREEVIEW_TITLE: "OUTLINE",
@@ -576,6 +579,7 @@ export class Constants {
         CUT: Constants.NAME + ".cutNode",
         PASTE: Constants.NAME + ".pasteNode",
         PASTE_CLONE: Constants.NAME + ".pasteNodeAsClone",
+        PASTE_AS_TEMPLATE: Constants.NAME + ".pasteAsTemplate",
         DELETE: Constants.NAME + ".delete",
         HEADLINE: Constants.NAME + ".editHeadline",
         MOVE_DOWN: Constants.NAME + ".moveOutlineDown",
@@ -672,7 +676,6 @@ export class Constants {
         FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
         FIND_PREVIOUS: Constants.NAME + ".findPrevious",
         FIND_PREVIOUS_FO: Constants.NAME + ".findPreviousFromOutline",
-        FIND_VAR: Constants.NAME + ".findVar",
         FIND_DEF: Constants.NAME + ".findDef",
         REPLACE: Constants.NAME + ".replace",
         REPLACE_FO: Constants.NAME + ".replaceFromOutline",
@@ -740,7 +743,6 @@ export class Constants {
         FIND_ALL: "find-all",
         // FIND_NEXT: "!find_next",
         // FIND_PREVIOUS: "!find_previous",
-        FIND_VAR: "find-var",
         FIND_DEF: "find-def",
         // REPLACE: "!replace",
         // REPLACE_THEN_FIND: "!replace_then_find",
@@ -819,6 +821,7 @@ export class Constants {
         CUT_PNODE: "cut-node",
         PASTE_PNODE: "async-paste-node",
         PASTE_CLONE_PNODE: "async-paste-retaining-clones",
+        PASTE_AS_TEMPLATE: "async-paste-as-template",
         // * Outline Editing
         DELETE_PNODE: "delete-node",
         MOVE_PNODE_DOWN: "move-outline-down",

@@ -149,12 +149,6 @@ export class LeoGui {
         this.oops();
     }
     /**
-     * Run Leo's findDef and findSymbol methods.
-     */
-    public findSymbol(p_def: boolean): any {
-        this.oops();
-    }
-    /**
      * Sets a specific Find panel setting.
      */
     public setSearchSetting(p_id: string) {
@@ -284,10 +278,19 @@ export class LeoGui {
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        multiple?: boolean,
         startpath?: string
-    ): Thenable<string[] | string> {
-        // Return type depends on the evil multiple keyword.
+    ): Thenable<string> {
+        this.oops();
+        return Promise.resolve('no');
+    }
+
+    public runOpenFilesDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        startpath?: string
+    ): Thenable<string[]> {
         this.oops();
         return Promise.resolve(['no']);
     }
@@ -550,6 +553,7 @@ export class NullGui extends LeoGui {
 
     public launchRefresh(): void { }
     public fullRefresh(p_keepFocus?: boolean): void { }
+    public showNavResults(): void { }
 
     public replaceClipboardWith(s: string): Thenable<string> {
         this.clipboardContents = s; // also set immediate clipboard string
@@ -583,6 +587,9 @@ export class NullGui extends LeoGui {
     }
 
     public widget_name(widget: any): string {
+        if (g.unitTesting) {
+            return 'body'; // ! LEOJS : Edit Commands Always happen in body.
+        }
         return '';
     }
     public set_focus(commander: Commands, widget: any): void {
@@ -615,8 +622,16 @@ export class NullGui extends LeoGui {
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        multiple?: boolean
-    ): Thenable<string[] | string> {
+    ): Thenable<string> {
+        return Promise.resolve('');
+    }
+
+    public runOpenFilesDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+    ): Thenable<string[]> {
         return Promise.resolve([]);
     }
 

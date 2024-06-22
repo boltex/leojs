@@ -23,6 +23,7 @@ export class LeoFrame {
     public iconBar: NullIconBarClass;
     public initComplete = false;
     public isNullFrame = false;
+    public toggle_unl_view = false;
 
     public ftm!: StringFindTabManager; // added in finishCreate
 
@@ -214,6 +215,41 @@ export class LeoFrame {
         // TODO !
         // console.log('TODO ? putStatusLine', s);
     }
+    //@+node:felix.20240618001515.1: *3* QtStatusLineClass.computeStatusUnl
+    /**
+     * Compute the UNL part of the status line.
+     */
+    public computeStatusUnl(p: Position): string {
+        const c = this.c;
+        const kind = c.config.getString('unl-status-kind') || '';
+        const legacy = kind.toLowerCase() === 'legacy';
+        let method;
+        if (this.toggle_unl_view) {
+            // Show the UNL the opposite as indicated by settings.
+            method = legacy ? p.get_UNL.bind(p) : p.get_legacy_UNL.bind(p);
+        } else {
+            // Show the UNL per the settings.
+            method = legacy ? p.get_legacy_UNL.bind(p) : p.get_UNL.bind(p);
+        }
+        const s = method();
+        return s;
+    }
+    //@+node:felix.20240618001521.1: *3* QtStatsuLineClass.toggleUnlView
+    /**
+     * Toggle view of UNLs.
+     */
+    public toggleUnlView(): void {
+        const c = this.c;
+        // Toggle the switch.
+        this.toggle_unl_view = !this.toggle_unl_view;
+
+        // Redraw
+        // ! LEOJS WILL REDRAW !    
+        // const s = this.computeStatusUnl(c.p);
+        // this.put(s);
+        // this.update();
+
+    }
     //@-others
 }
 //@+node:felix.20221102232737.1: ** class NullBody (LeoBody)
@@ -375,56 +411,55 @@ export class NullBody {
     }
     //@+node:felix.20230312221628.1: *3* LeoBody.Text
     //@+node:felix.20230312221628.2: *4* LeoBody.getInsertLines
-    /*
-    def getInsertLines(self) -> Tuple[str, str, str]:
-        """
-        Return before,after where:
-
-        before is all the lines before the line containing the insert point.
-        sel is the line containing the insert point.
-        after is all the lines after the line containing the insert point.
-
-        All lines end in a newline, except possibly the last line.
-        """
-        body = self
-        w = body.wrapper
-        s = w.getAllText()
-        insert = w.getInsertPoint()
-        i, j = g.getLine(s, insert)
-        before = s[0:i]
-        ins = s[i:j]
-        after = s[j:]
-        before = g.checkUnicode(before)
-        ins = g.checkUnicode(ins)
-        after = g.checkUnicode(after)
-        return before, ins, after
-    */
+    /**
+     * Return before, after where:
+     * 
+     * before is all the lines before the line containing the insert point.
+     * sel is the line containing the insert point.
+     * after is all the lines after the line containing the insert point.
+     * 
+     * All lines end in a newline, except possibly the last line.
+     */
+    public getInsertLines(): [string, string, string] {
+        const body = this;
+        const w = body.wrapper;
+        const s = w.getAllText();
+        const insert = w.getInsertPoint();
+        const [i, j] = g.getLine(s, insert);
+        let before = s.substring(0, i);
+        let ins = s.substring(i, j);
+        let after = s.substring(j);
+        before = g.checkUnicode(before);
+        ins = g.checkUnicode(ins);
+        after = g.checkUnicode(after);
+        return [before, ins, after];
+    }
     //@+node:felix.20230312221628.3: *4* LeoBody.getSelectionAreas
-    /*
-    def getSelectionAreas(self) -> Tuple[str, str, str]:
-        """
-        Return before,sel,after where:
-
-        before is the text before the selected text
-        (or the text before the insert point if no selection)
-        sel is the selected text (or "" if no selection)
-        after is the text after the selected text
-        (or the text after the insert point if no selection)
-        """
-        body = self
-        w = body.wrapper
-        s = w.getAllText()
-        i, j = w.getSelectionRange()
-        if i == j:
-            j = i + 1
-        before = s[0:i]
-        sel = s[i:j]
-        after = s[j:]
-        before = g.checkUnicode(before)
-        sel = g.checkUnicode(sel)
-        after = g.checkUnicode(after)
-        return before, sel, after
-    */
+    /**
+     * Return before, sel, after where:
+     * 
+     * before is the text before the selected text
+     * (or the text before the insert point if no selection)
+     * sel is the selected text (or "" if no selection)
+     * after is the text after the selected text
+     * (or the text after the insert point if no selection)
+     */
+    public getSelectionAreas(): [string, string, string] {
+        const body = this;
+        const w = body.wrapper;
+        const s = w.getAllText();
+        let [i, j] = w.getSelectionRange();
+        if (i === j) {
+            j = i + 1;
+        }
+        let before = s.substring(0, i);
+        let sel = s.substring(i, j);
+        let after = s.substring(j);
+        before = g.checkUnicode(before);
+        sel = g.checkUnicode(sel);
+        after = g.checkUnicode(after);
+        return [before, sel, after];
+    }
     //@+node:felix.20230312221628.4: *4* LeoBody.getSelectionLines
     /**
      *         Return before,sel,after where:
@@ -934,17 +969,21 @@ export class NullTree {
     //@+node:felix.20221210193746.7: *5* 5. LeoTree.set_status_line
     /**
      * Update the status line.
+     * deprecated in LeoJS
      */
     public set_status_line(p: Position): void {
         const c = this.c;
+        // 
+        // ! LEOJS ! STATUS LINE IS UNL ONLY SET ON SELECTION BY leoUI.ts.
+        //
         // c.frame.body.assignPositionToEditor(p); // NOT USED IN LEOJS
         // c.frame.updateStatusLine();  // NOT USED IN LEOJS
         // c.frame.clearStatusLine(); // NOT USED IN LEOJS
-        if (p && p.__bool__() && p.v) {
-            const kind = c.config.getString('unl-status-kind') || '';
-            const method = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL : p.get_UNL;
-            c.frame.putStatusLine(method());
-        }
+        // if (p && p.__bool__() && p.v) {
+        //     const kind = c.config.getString('unl-status-kind') || '';
+        //     const method = kind.toLowerCase() === 'legacy' ? p.get_legacy_UNL : p.get_UNL;
+        //     c.frame.putStatusLine(method());
+        // }
     }
 
     //@+node:felix.20221102232749.3: *3* NullTree.edit_widget
@@ -1305,7 +1344,7 @@ export class StringTextWrapper {
      */
     public setSelectionRange(i: number, j: number, insert?: number): void {
         this.sel = [i, j];
-        this.ins = insert === undefined ? j : insert;
+        this.ins = insert == null ? j : insert;
     }
     //@+node:felix.20221102232754.21: *4* stw.toPythonIndexRowCol
     /**

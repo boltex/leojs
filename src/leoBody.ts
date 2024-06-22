@@ -7,20 +7,18 @@ import * as g from './core/leoGlobals';
 import { Constants } from "./constants";
 
 /**
- * * Body panes implementation as a file system using "leojs" as a scheme identifier
+ * * Body panes implementation as a file system using "leojsDetached" as a scheme identifier
  */
 export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     // * Flag normally false
     public preventSaveToLeo: boolean = false;
-    private _errorRefreshFlag: boolean = false;
 
     // * Last file read data with the readFile method
     private _lastGnx: string = ""; // gnx of last file read
     private _lastBodyData: string = ""; // body content of last file read
     private _lastBodyLength: number = 0; // length of last file read
-
-    // * List of currently opened body panes gnx (from 'watch' & 'dispose' methods)
+    // * List of currently VISIBLE opened body panes gnx (from 'watch' & 'dispose' methods)
     public watchedBodiesGnx: string[] = [];
 
     // * List of gnx open in tab(s) (from tryApplyNodeToBody / switchBody and fs.delete)
@@ -57,14 +55,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         if (this._openedBodiesInfo[p_gnx]) {
             w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
         }
-        const w_stack = new Error().stack!;
-        const stackArray = w_stack.split("at ").slice(1, 4).map(s => {
-            let index = s.indexOf('(');  // Find the index of the opening parenthesis
-            if (index !== -1) {
-                return s.substring(0, index);  // Cut the string up to the parenthesis
-            }
-            return s;  // Return the original string if no parenthesis is found
-        });
         this._openedBodiesInfo[p_gnx] = {
             ctime: w_created,
             mtime: w_now // new 'modified' time.
@@ -132,6 +122,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
             if (p_uri.fsPath.length === 1) {
 
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
+                // SPECIAL CASE -----------------------------------------------
             } else if (w_gnx === this._lastGnx && this._openedBodiesInfo[this._lastGnx]) {
                 return {
                     type: vscode.FileType.File,
@@ -139,6 +130,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                     mtime: this._openedBodiesInfo[this._lastGnx].mtime,
                     size: this._lastBodyLength
                 };
+                // ------------------------------------------------------------
             } else if (this._openedBodiesInfo[w_gnx]) {
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
                 const w_v = c.fileCommands.gnxDict[w_gnx];
@@ -161,24 +153,21 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                 throw vscode.FileSystemError.FileIsADirectory();
             } else {
                 const w_gnx = utils.leoUriToStr(p_uri);
-
-                if (!this._openedBodiesInfo[w_gnx]) {
-                    console.warn('readFile: ERROR File not in _openedBodiesInfo! gnx: ', w_gnx);
-                }
+                // * should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
+                // if (!this._openedBodiesInfo[w_gnx]) {
+                //     console.warn('readFile: ERROR File not in _openedBodiesInfo! gnx: ', w_gnx);
+                // }
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
                 const w_v = c.fileCommands.gnxDict[w_gnx];
 
                 if (w_v) {
-                    this._errorRefreshFlag = false; // got body so reset possible flag!
                     this._lastGnx = w_gnx;
                     this._lastBodyData = w_v.b;
                     const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                     this._lastBodyLength = w_buffer.byteLength;
                     return w_buffer;
                 } else {
-                    if (!this._errorRefreshFlag) {
-                        this._leoUi.fullRefresh();
-                    }
+                    this._leoUi.fullRefresh();
                     if (this._lastGnx === w_gnx) {
                         // was last gnx of closed file about to be switched to new document selected
                         return Buffer.from(this._lastBodyData);

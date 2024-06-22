@@ -209,8 +209,9 @@ export class LeoApp {
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
-    public globalKillBuffer: any[] = []; // The global kill buffer.
+    public globalKillBuffer: string[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
+    public initial_cwd: string = process.cwd(); // For restart-leo.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.
     public LeoIDWarningShown = false; // LEOJS : to prevent second warning. (Original would have exited before)
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
@@ -389,157 +390,162 @@ export class LeoApp {
     public define_extension_dict(): void {
         // Keys are extensions, values are languages
         this.extension_dict = {
-            // "ada": "ada",
-            ada: 'ada95', // modes / ada95.py exists.
-            ahk: 'autohotkey',
-            aj: 'aspect_j',
-            apdl: 'apdl',
-            as: 'actionscript', // jason 2003-07 - 03
-            asp: 'asp',
-            awk: 'awk',
-            b: 'b',
-            bas: 'rapidq', // fil 2004-march - 11
-            bash: 'shellscript',
-            bat: 'batch',
-            bbj: 'bbj',
-            bcel: 'bcel',
-            bib: 'bibtex',
-            c: 'c',
-            'c++': 'cplusplus',
-            cc: "cplusplus",
-            cbl: 'cobol', // Only one extension is valid: .cob
-            cfg: 'config',
-            cfm: 'coldfusion',
-            clj: 'clojure', // 2013 / 09 / 25: Fix bug 879338.
-            cljs: 'clojure',
-            cljc: 'clojure',
+
+            // "ada":    "ada",
+            "ada": "ada95", // modes/ada95.py exists.
+            "ahk": "autohotkey",
+            "aj": "aspect_j",
+            "apdl": "apdl",
+            "as": "actionscript", // jason 2003-07-03
+            "asp": "asp",
+            "awk": "awk",
+            "b": "b",
+            "bas": "rapidq", // fil 2004-march-11
+            "bash": "shellscript",
+            "bat": "batch",
+            "bbj": "bbj",
+            "bcel": "bcel",
+            "bib": "bibtex",
+            "c": "c",
+            "c++": "cplusplus",
+            "cc": "cplusplus",
+            "cbl": "cobol", // Only one extension is valid: .cob
+            "cfg": "config",
+            "cfm": "coldfusion",
+            "clj": "clojure", // 2013/09/25: Fix bug 879338.
+            "cljs": "clojure",
+            "cljc": "clojure",
             "cmd": "batch",
             "codon": "codon",
-            ch: 'chill', // Other extensions, .c186,.c286
-            coffee: 'coffeescript',
-            conf: 'apacheconf',
-            cpp: 'cplusplus', // 2020 / 08 / 12: was cpp.
-            css: 'css',
-            d: 'd',
-            dart: 'dart',
-            e: 'eiffel',
-            el: 'elisp',
-            eml: 'mail',
-            erl: 'erlang',
-            ex: 'elixir',
-            f: 'fortran',
-            f90: 'fortran90',
-            factor: 'factor',
-            forth: 'forth',
-            g: 'antlr',
-            groovy: 'groovy',
-            h: 'c', // 2012 / 05 / 23.
+            "ch": "chill", // Other extensions, .c186,.c286
+            "coffee": "coffeescript",
+            "conf": "apacheconf",
+            "cpp": "cplusplus", // 2020/08/12: was cpp.
+            "css": "css",
+            "d": "d",
+            "dart": "dart",
+            "e": "eiffel",
+            "el": "elisp",
+            "eml": "mail",
+            "erl": "erlang",
+            "ex": "elixir",
+            "f": "fortran",
+            "f90": "fortran90",
+            "factor": "factor",
+            "forth": "forth",
+            "g": "antlr",
+            "go": "go",
+            "groovy": "groovy",
+            "h": "c", // 2012/05/23.
             "hh": "cplusplus",
-            handlebars: 'html', // McNab.
-            hbs: 'html', // McNab.
-            hs: 'haskell',
-            html: 'html',
-            hx: 'haxe',
-            i: 'swig',
-            i4gl: 'i4gl',
-            icn: 'icon',
-            idl: 'idl',
-            inf: 'inform',
-            info: 'texinfo',
-            ini: 'ini',
-            io: 'io',
-            ipynb: 'jupyter',
-            iss: 'inno_setup',
-            java: 'java',
-            jhtml: 'jhtml',
-            jmk: 'jmk',
-            js: 'javascript', // For javascript import test.
-            jsp: 'javaserverpage',
-            json: 'json',
-            // "jsp": "jsp",
-            ksh: 'kshell',
-            kv: 'kivy', // PeckJ 2014/05/05
-            latex: 'latex',
-            less: 'css', // McNab
-            lua: 'lua', // ddm 13/02/06
-            ly: 'lilypond',
-            m: 'matlab',
-            mak: 'makefile',
-            md: 'md', // PeckJ 2013/02/07
-            ml: 'ml',
-            mm: 'objective_c', // Only one extension is valid: .m
-            mod: 'modula3',
-            mpl: 'maple',
-            mqsc: 'mqsc',
-            nqc: 'nqc',
-            nsi: 'nsi', // EKR: 2010/10/27
-            // "nsi": "nsis2",
-            nw: 'noweb',
-            occ: 'occam',
-            otl: 'vimoutline', // TL 8/25/08 Vim's outline plugin
-            p: 'pascal',
-            // "p": "pop11", // Conflicts with pascal.
-            php: 'php',
-            pike: 'pike',
-            pl: 'perl',
-            pl1: 'pl1',
-            po: 'gettext',
-            pod: 'perlpod',
-            pov: 'povray',
-            prg: 'foxpro',
-            pro: 'prolog',
-            ps: 'postscript',
-            psp: 'psp',
-            ptl: 'ptl',
-            py: 'python',
-            pyx: 'cython', // Other extensions, .pyd,.pyi
-            // "pyx": "pyrex",
-            // "r": "r", # modes / r.py does not exist.
-            r: 'rebol', // jason 2003-07 - 03
-            rb: 'ruby', // thyrsus 2008-11 - 05
-            rest: 'rst',
-            rex: 'objectrexx',
-            rhtml: 'rhtml',
-            rib: 'rib',
-            rs: 'rust', // EKR: 2019/08/11
-            sas: 'sas',
-            scala: 'scala',
-            scm: 'scheme',
-            scpt: 'applescript',
-            sgml: 'sgml',
-            sh: 'shell', // DS 4/1/04.modes / shell.py exists.
-            shtml: 'shtml',
-            sm: 'smalltalk',
-            splus: 'splus',
-            sql: 'plsql', // qt02537 2005-05 - 27
-            sqr: 'sqr',
-            ss: 'ssharp',
-            ssi: 'shtml',
-            sty: 'latex',
-            tcl: 'tcl', // modes / tcl.py exists.
-            // "tcl": "tcltk",
-            tex: 'latex',
-            // "tex": "tex",
-            tpl: 'tpl',
-            ts: 'typescript',
-            txt: 'plain',
-            // "txt": "text",
-            // "txt": "unknown", # Set when @comment is seen.
-            uc: 'uscript',
-            v: 'verilog',
-            vbs: 'vbscript',
-            vhd: 'vhdl',
-            vhdl: 'vhdl',
-            vim: 'vim',
-            vtl: 'velocity',
-            w: 'cweb',
-            wiki: 'moin',
-            xml: 'xml',
-            xom: 'omnimark',
-            xsl: 'xsl',
-            yaml: 'yaml',
-            vue: 'javascript',
-            zpt: 'zpt',
+            "handlebars": "html", // McNab.
+            "hbs": "html", // McNab.
+            "hs": "haskell",
+            "html": "html",
+            "hx": "haxe",
+            "i": "swig",
+            "i4gl": "i4gl",
+            "icn": "icon",
+            "idl": "idl",
+            "inf": "inform",
+            "info": "texinfo",
+            "ini": "ini",
+            "io": "io",
+            // "ipynb":    "jupyter",
+            "iss": "inno_setup",
+            "java": "java",
+            "jhtml": "jhtml",
+            "jl": "julia",
+            "jmk": "jmk",
+            "js": "javascript", // For javascript import test.
+            "jsp": "javaserverpage",
+            "json": "json",
+            // "jsp":      "jsp",
+            "ksh": "kshell",
+            "kv": "kivy", // PeckJ 2014/05/05
+            "latex": "latex",
+            "less": "css", // McNab
+            "lua": "lua", // ddm 13/02/06
+            "ly": "lilypond",
+            "m": "matlab",
+            "mak": "makefile",
+            "md": "md",  // PeckJ 2013/02/07
+            "ml": "ml",  // Also ocaml.
+            "mm": "objective_c", // Only one extension is valid: .m
+            "mod": "modula3",
+            "mpl": "maple",
+            "mqsc": "mqsc",
+            "nqc": "nqc",
+            "nim": "nim",
+            "nsi": "nsi", // EKR: 2010/10/27
+            // "nsi":      "nsis2",
+            "nw": "noweb",
+            "occ": "occam",
+            "otl": "vimoutline", // TL 8/25/08 Vim's outline plugin
+            "p": "pascal",
+            // "p":      "pop11", // Conflicts with pascal.
+            "php": "php",
+            "pike": "pike",
+            "pl": "perl",
+            "pl1": "pl1",
+            "po": "gettext",
+            "pod": "perlpod",
+            "pov": "povray",
+            "prg": "foxpro",
+            "pro": "prolog",
+            "ps": "postscript",
+            "psp": "psp",
+            "ptl": "ptl",
+            "py": "python",
+            "pyx": "cython", // Other extensions, .pyd,.pyi
+            // "pyx":    "pyrex",
+            // "r":      "r", // modes/r.py does not exist.
+            "r": "rebol", // jason 2003-07-03
+            "rb": "ruby", // thyrsus 2008-11-05
+            "rest": "rst",
+            "rex": "objectrexx",
+            "rhtml": "rhtml",
+            "rib": "rib",
+            "rs": "rust", // EKR: 2019/08/11
+            "sas": "sas",
+            "scala": "scala",
+            "scm": "scheme",
+            "scpt": "applescript",
+            "sgml": "sgml",
+            "sh": "shell", // DS 4/1/04. modes/shell.py exists.
+            "shtml": "shtml",
+            "sm": "smalltalk",
+            "splus": "splus",
+            "sql": "plsql", // qt02537 2005-05-27
+            "sqr": "sqr",
+            "ss": "ssharp",
+            "ssi": "shtml",
+            "sty": "latex",
+            "tcl": "tcl", // modes/tcl.py exists.
+            // "tcl":    "tcltk",
+            "tex": "latex",
+            // "tex":      "tex",
+            "toml": "toml",
+            "tpl": "tpl",
+            "ts": "typescript",
+            "txt": "plain",
+            // "txt":      "text",
+            // "txt":      "unknown", // Set when @comment is seen.
+            "uc": "uscript",
+            "v": "verilog",
+            "vbs": "vbscript",
+            "vhd": "vhdl",
+            "vhdl": "vhdl",
+            "vim": "vim",
+            "vtl": "velocity",
+            "w": "cweb",
+            "wiki": "moin",
+            "xml": "xml",
+            "xom": "omnimark",
+            "xsl": "xsl",
+            "yaml": "yaml",
+            "vue": "javascript",
+            "zpt": "zpt",
         };
 
         /*
@@ -586,174 +592,178 @@ export class LeoApp {
         this.language_delims_dict = {
             // Internally, lower case is used for all language names.
             // Keys are languages, values are strings that contain 1, 2 or 3 delims separated by spaces.
-            actionscript: '// /* */', // jason 2003-07 - 03
-            ada: '--',
-            ada95: '--',
-            ahk: ';',
-            antlr: '// /* */',
-            apacheconf: '#',
-            apdl: '!',
-            applescript: '-- (* *)',
-            asp: '<!-- -->',
-            aspect_j: '// /* */',
-            assembly_macro32: ';',
-            assembly_mcs51: ';',
-            assembly_parrot: '#',
-            assembly_r2000: '#',
-            assembly_x86: ';',
-            autohotkey: '; /* */', // TL - AutoHotkey language
-            awk: '#',
-            b: '// /* */',
-            batch: 'REM_', // Use the REM hack.
-            bbj: '/* */',
-            bcel: '// /* */',
-            bibtex: '%',
-            c: '// /* */', // C, C++ or objective C.
-            chill: '/* */',
-            clojure: ';', // 2013 / 09 / 25: Fix bug 879338.
-            cobol: '*',
+            "actionscript": "// /* */", // jason 2003-07-03
+            "ada": "--",
+            "ada95": "--",
+            "ahk": ";",
+            "antlr": "// /* */",
+            "apacheconf": "#",
+            "apdl": "!",
+            "applescript": "-- (* *)",
+            "asp": "<!-- -->",
+            "aspect_j": "// /* */",
+            "assembly_6502": ";",
+            "assembly_macro32": ";",
+            "assembly_mcs51": ";",
+            "assembly_parrot": "#",
+            "assembly_r2000": "#",
+            "assembly_x86": ";",
+            "autohotkey": "; /* */", // TL - AutoHotkey language
+            "awk": "#",
+            "b": "// /* */",
+            "batch": "REM_", // Use the REM hack.
+            "bbj": "/* */",
+            "bcel": "// /* */",
+            "bibtex": "%",
+            "c": "// /* */", // C, C++ or objective C.
+            "chill": "/* */",
+            "clojure": ";", // 2013/09/25: Fix bug 879338.
+            "cobol": "*",
             "codon": "#",
-            coldfusion: '<!-- -->',
-            coffeescript: '#', // 2016 / 02 / 26.
-            config: '#', // Leo 4.5.1
-            cplusplus: '// /* */',
-            cpp: '// /* */', // C++.
-            csharp: '// /* */', // C#
-            css: '/* */', // 4 / 1 / 04
-            cweb: '@q@ @>', // Use the "cweb hack"
-            cython: '#',
-            d: '// /* */',
-            dart: '// /* */', // Leo 5.0.
-            doxygen: '#',
-            eiffel: '--',
-            elisp: ';',
-            erlang: '%',
-            elixir: '#',
-            factor: '!_ ( )', // Use the rem hack.
-            forth: '\\_ _(_ _)', // Use the "REM hack"
-            fortran: 'C',
-            fortran90: '!',
-            foxpro: '&&',
-            gettext: '# ',
+            "coldfusion": "<!-- -->",
+            "coffeescript": "#", // 2016/02/26.
+            "config": "#", // Leo 4.5.1
+            "cplusplus": "// /* */",
+            "cpp": "// /* */", // C++.
+            "csharp": "// /* */", // C#
+            "css": "/* */", // 4/1/04
+            "cweb": "@q@ @>", // Use the "cweb hack"
+            "cython": "#",
+            "d": "// /* */",
+            "dart": "// /* */", // Leo 5.0.
+            "doxygen": "#",
+            "eiffel": "--",
+            "elisp": ";",
+            "erlang": "%",
+            "elixir": "#",
+            "factor": "!_ ( )", // Use the rem hack.
+            "forth": "\\_ _(_ _)", // Use the "REM hack"
+            "fortran": "C",
+            "fortran90": "!",
+            "foxpro": "&&",
+            "gettext": "# ",
             "go": "//",
-            groovy: '// /* */',
-            handlebars: '<!-- -->', // McNab: delegate to html.
-            haskell: '--_ {-_ _-}',
-            haxe: '// /* */',
-            hbs: '<!-- -->', // McNab: delegate to html.
-            html: '<!-- -->',
-            i4gl: '-- { }',
-            icon: '#',
-            idl: '// /* */',
-            inform: '!',
-            ini: ';',
-            inno_setup: ';',
-            interlis: '/* */',
-            io: '// */',
-            java: '// /* */',
-            javascript: '// /* */', // EKR: 2011 / 11 / 12: For javascript import test.
-            javaserverpage: '<%-- --%>', // EKR: 2011 / 11 / 25(See also, jsp)
-            jhtml: '<!-- -->',
-            jmk: '#',
-            json: '#', // EKR: 2020 / 07 / 27: Json has no delims.This is a dummy entry.
-            jsp: '<%-- --%>',
-            jupyter: '<%-- --%>', // Default to markdown ?
-            kivy: '#', // PeckJ 2014 / 05 / 05
-            kshell: '#', // Leo 4.5.1.
-            latex: '%',
-            less: '/* */', // NcNab: delegate to css.
-            lilypond: '% %{ %}',
-            lisp: ';', // EKR: 2010 / 09 / 29
-            lotos: '(* *)',
-            lua: '--', // ddm 13 / 02 / 06
-            mail: '>',
-            makefile: '#',
-            maple: '//',
-            markdown: '<!-- -->', // EKR, 2018 / 03 / 03: html comments.
-            matlab: '%', // EKR: 2011 / 10 / 21
-            md: '<!-- -->', // PeckJ: 2013 / 02 / 08
-            ml: '(* *)',
-            modula3: '(* *)',
-            moin: '##',
-            mqsc: '*',
-            netrexx: '-- /* */',
-            noweb: '%', // EKR: 2009 - 01 - 30. Use Latex for doc chunks.
-            nqc: '// /* */',
-            nsi: ';', // EKR: 2010 / 10 / 27
-            nsis2: ';',
-            objective_c: '// /* */',
-            objectrexx: '-- /* */',
-            occam: '--',
+            "groovy": "// /* */",
+            "handlebars": "<!-- -->", // McNab: delegate to html.
+            "haskell": "--_ {-_ _-}",
+            "haxe": "// /* */",
+            "hbs": "<!-- -->", // McNab: delegate to html.
+            "html": "<!-- -->",
+            "i4gl": "-- { }",
+            "icon": "#",
+            "idl": "// /* */",
+            "inform": "!",
+            "ini": ";",
+            "inno_setup": ";",
+            "interlis": "/* */",
+            "io": "// */",
+            "java": "// /* */",
+            "javascript": "// /* */", // EKR: 2011/11/12: For javascript import test.
+            "javaserverpage": "<%-- --%>", // EKR: 2011/11/25 (See also, jsp)
+            "jhtml": "<!-- -->",
+            "jmk": "#",
+            "json": "#", // EKR: 2020/07/27: Json has no delims. This is a dummy entry.
+            "jsp": "<%-- --%>",
+            "julia": "#",
+            "jupyter": "<%-- --%>", // Default to markdown?
+            "kivy": "#", // PeckJ 2014/05/05
+            "kshell": "#", // Leo 4.5.1.
+            "latex": "%",
+            "less": "/* */", // NcNab: delegate to css.
+            "lilypond": "% %{ %}",
+            "lisp": ";", // EKR: 2010/09/29
+            "lotos": "(* *)",
+            "lua": "--", // ddm 13/02/06
+            "mail": ">",
+            "makefile": "#",
+            "maple": "//",
+            "markdown": "<!-- -->", // EKR, 2018/03/03: html comments.
+            "matlab": "%", // EKR: 2011/10/21
+            "md": "<!-- -->", // PeckJ: 2013/02/08
+            "ml": "(* *)",
+            "modula3": "(* *)",
+            "moin": "##",
+            "mqsc": "*",
+            "netrexx": "-- /* */",
+            "nim": "#",
+            "noweb": "%", // EKR: 2009-01-30. Use Latex for doc chunks.
+            "nqc": "// /* */",
+            "nsi": ";", // EKR: 2010/10/27
+            "nsis2": ";",
+            "objective_c": "// /* */",
+            "objectrexx": "-- /* */",
+            "occam": "--",
             "ocaml": "(* *)",
-            omnimark: ';',
-            pandoc: '<!-- -->',
-            pascal: '// { }',
-            perl: '#',
-            perlpod: '# __=pod__ __=cut__', // 9 / 25 / 02: The perlpod hack.
-            php: '// /* */', // 6 / 23 / 07: was "//",
-            pike: '// /* */',
-            pl1: '/* */',
-            plain: '#', // We must pick something.
-            plsql: '-- /* */', // SQL scripts qt02537 2005 - 05 - 27
-            pop11: ';;; /* */',
-            postscript: '%',
-            povray: '// /* */',
-            powerdynamo: '// <!-- -->',
-            prolog: '% /* */',
-            psp: '<!-- -->',
-            ptl: '#',
-            pvwave: ';',
-            pyrex: '#',
-            python: '#',
-            r: '#',
-            rapidq: "'", // fil 2004 - march - 11
-            rebol: ';', // jason 2003 - 07 - 03
-            redcode: ';',
-            rest: '.._',
-            rhtml: '<%# %>',
-            rib: '#',
-            rpmspec: '#',
-            rst: '.._',
-            rust: '// /* */',
-            ruby: '#', // thyrsus 2008 - 11 - 05
-            rview: '// /* */',
-            sas: '* /* */',
-            scala: '// /* */',
-            scheme: '; #| |#',
-            sdl_pr: '/* */',
-            sgml: '<!-- -->',
-            shell: '#', // shell scripts
-            shellscript: '#',
-            shtml: '<!-- -->',
-            smalltalk: '" "', // Comments are enclosed in double quotes(!!)
-            smi_mib: '--',
-            splus: '#',
-            sqr: '!',
-            squidconf: '#',
-            ssharp: '#',
-            swig: '// /* */',
-            tcl: '#',
-            tcltk: '#',
-            tex: '%', // Bug fix: 2008 - 1 - 30: Fixed Mark Edginton's bug.
-            text: '#', // We must pick something.
-            texinfo: '@c',
-            tpl: '<!-- -->',
-            tsql: '-- /* */',
-            typescript: '// /* */', // For typescript import test.
-            unknown: '#', // Set when @comment is seen.
-            unknown_language: '#--unknown-language--', // For unknown extensions in @shadow files.
-            uscript: '// /* */',
-            vbscript: "'",
-            velocity: '## #* *#',
-            verilog: '// /* */',
-            vhdl: '--',
-            vim: '"',
-            vimoutline: '#', // TL 8 / 25 / 08 Vim's outline plugin
-            xml: '<!-- -->',
-            xsl: '<!-- -->',
-            xslt: '<!-- -->',
-            yaml: '#',
-            zpt: '<!-- -->',
+            "omnimark": ";",
+            "pandoc": "<!-- -->",
+            "pascal": "// { }",
+            "perl": "#",
+            "perlpod": "# __=pod__ __=cut__", // 9/25/02: The perlpod hack.
+            "php": "// /* */", // 6/23/07: was "//",
+            "pike": "// /* */",
+            "pl1": "/* */",
+            "plain": "#", // We must pick something.
+            "plsql": "-- /* */", // SQL scripts qt02537 2005-05-27
+            "pop11": ";;; /* */",
+            "postscript": "%",
+            "povray": "// /* */",
+            "powerdynamo": "// <!-- -->",
+            "prolog": "% /* */",
+            "psp": "<!-- -->",
+            "ptl": "#",
+            "pvwave": ";",
+            "pyrex": "#",
+            "python": "#",
+            "r": "#",
+            "rapidq": "'", // fil 2004-march-11
+            "rebol": ";", // jason 2003-07-03
+            "redcode": ";",
+            "rest": ".._",
+            "rhtml": "<%# %>",
+            "rib": "#",
+            "rpmspec": "#",
+            "rst": ".._",
+            "rust": "// /* */",
+            "ruby": "#", // thyrsus 2008-11-05
+            "rview": "// /* */",
+            "sas": "* /* */",
+            "scala": "// /* */",
+            "scheme": "; #| |#",
+            "sdl_pr": "/* */",
+            "sgml": "<!-- -->",
+            "shell": "#",     // shell scripts
+            "shellscript": "#",
+            "shtml": "<!-- -->",
+            "smalltalk": '" "', // Comments are enclosed in double quotes(!!)
+            "smi_mib": "--",
+            "splus": "#",
+            "sqr": "!",
+            "squidconf": "#",
+            "ssharp": "#",
+            "swig": "// /* */",
+            "tcl": "#",
+            "tcltk": "#",
+            "tex": "%", // Bug fix: 2008-1-30: Fixed Mark Edginton's bug.
+            "text": "#", // We must pick something.
+            "texinfo": "@c",
+            "toml": "#",
+            "tpl": "<!-- -->",
+            "tsql": "-- /* */",
+            "typescript": "// /* */", // For typescript import test.
+            "unknown": "#", // Set when @comment is seen.
+            "unknown_language": '#--unknown-language--', // For unknown extensions in @shadow files.
+            "uscript": "// /* */",
+            "vbscript": "'",
+            "velocity": "## #* *#",
+            "verilog": "// /* */",
+            "vhdl": "--",
+            "vim": "\"",
+            "vimoutline": "#", // TL 8/25/08 Vim's outline plugin
+            "xml": "<!-- -->",
+            "xsl": "<!-- -->",
+            "xslt": "<!-- -->",
+            "yaml": "#",
+            "zpt": "<!-- -->",
 
             // These aren't real languages, or have no delims...
             // "cvs_commit"         : "",
@@ -778,147 +788,151 @@ export class LeoApp {
 
         // Keys are languages, values are extensions.
         this.language_extension_dict = {
-            actionscript: 'as', // jason 2003-07 - 03
-            ada: 'ada',
-            ada95: 'ada',
-            ahk: 'ahk',
-            antlr: 'g',
-            apacheconf: 'conf',
-            apdl: 'apdl',
-            applescript: 'scpt',
-            asp: 'asp',
-            aspect_j: 'aj',
-            autohotkey: 'ahk', // TL - AutoHotkey language
-            awk: 'awk',
-            b: 'b',
-            batch: 'bat', // Leo 4.5.1.
-            bbj: 'bbj',
-            bcel: 'bcel',
-            bibtex: 'bib',
-            c: 'c',
-            chill: 'ch', // Only one extension is valid: .c186, .c286
-            clojure: 'clj', // 2013 / 09 / 25: Fix bug 879338.
-            cobol: 'cbl', // Only one extension is valid: .cob
+            "actionscript": "as", // jason 2003-07-03
+            "ada": "ada",
+            "ada95": "ada",
+            "ahk": "ahk",
+            "antlr": "g",
+            "apacheconf": "conf",
+            "apdl": "apdl",
+            "applescript": "scpt",
+            "asp": "asp",
+            "aspect_j": "aj",
+            "autohotkey": "ahk", // TL - AutoHotkey language
+            "awk": "awk",
+            "b": "b",
+            "batch": "bat", // Leo 4.5.1.
+            "bbj": "bbj",
+            "bcel": "bcel",
+            "bibtex": "bib",
+            "c": "c",
+            "chill": "ch",  // Only one extension is valid: .c186, .c286
+            "clojure": "clj", // 2013/09/25: Fix bug 879338.
+            "cobol": "cbl", // Only one extension is valid: .cob
             "codon": "codon",
-            coldfusion: 'cfm',
-            coffeescript: 'coffee',
-            config: 'cfg',
-            cplusplus: 'c++',
-            cpp: 'cpp',
-            css: 'css', // 4 / 1 / 04
-            cweb: 'w',
-            cython: 'pyx', // Only one extension is valid at present: .pyi, .pyd.
-            d: 'd',
-            dart: 'dart',
-            eiffel: 'e',
-            elisp: 'el',
-            erlang: 'erl',
-            elixir: 'ex',
-            factor: 'factor',
-            forth: 'forth',
-            fortran: 'f',
-            fortran90: 'f90',
-            foxpro: 'prg',
-            gettext: 'po',
-            groovy: 'groovy',
-            haskell: 'hs',
-            haxe: 'hx',
-            html: 'html',
-            i4gl: 'i4gl',
-            icon: 'icn',
-            idl: 'idl',
-            inform: 'inf',
-            ini: 'ini',
-            inno_setup: 'iss',
-            io: 'io',
-            java: 'java',
-            javascript: 'js', // EKR: 2011/11/12: For javascript import test.
-            javaserverpage: 'jsp', // EKR: 2011/11/25
-            jhtml: 'jhtml',
-            jmk: 'jmk',
-            json: 'json',
-            jsp: 'jsp',
-            jupyter: 'ipynb',
-            kivy: 'kv', // PeckJ 2014/05/05
-            kshell: 'ksh', // Leo 4.5.1.
-            latex: 'tex', // 1 / 8 / 04
-            lilypond: 'ly',
-            lua: 'lua', // ddm 13/02/06
-            mail: 'eml',
-            makefile: 'mak',
-            maple: 'mpl',
-            matlab: 'm',
-            md: 'md', // PeckJ: 2013/02/07
-            ml: 'ml',
-            modula3: 'mod',
-            moin: 'wiki',
-            mqsc: 'mqsc',
-            noweb: 'nw',
-            nqc: 'nqc',
-            nsi: 'nsi', // EKR: 2010/10/27
-            nsis2: 'nsi',
-            objective_c: 'mm', // Only one extension is valid: .m
-            objectrexx: 'rex',
-            occam: 'occ',
+            "coldfusion": "cfm",
+            "coffeescript": "coffee",
+            "config": "cfg",
+            "cplusplus": "c++",
+            "cpp": "cpp",
+            "css": "css", // 4/1/04
+            "cweb": "w",
+            "cython": "pyx", // Only one extension is valid at present: .pyi, .pyd.
+            "d": "d",
+            "dart": "dart",
+            "eiffel": "e",
+            "elisp": "el",
+            "erlang": "erl",
+            "elixir": "ex",
+            "factor": "factor",
+            "forth": "forth",
+            "fortran": "f",
+            "fortran90": "f90",
+            "foxpro": "prg",
+            "gettext": "po",
+            "go": "go",
+            "groovy": "groovy",
+            "haskell": "hs",
+            "haxe": "hx",
+            "html": "html",
+            "i4gl": "i4gl",
+            "icon": "icn",
+            "idl": "idl",
+            "inform": "inf",
+            "ini": "ini",
+            "inno_setup": "iss",
+            "io": "io",
+            "java": "java",
+            "javascript": "js", // EKR: 2011/11/12: For javascript import test.
+            "javaserverpage": "jsp", // EKR: 2011/11/25
+            "jhtml": "jhtml",
+            "jmk": "jmk",
+            "json": "json",
+            "jsp": "jsp",
+            "julia": "jl",
+            // "jupyter"       : "ipynb",
+            "kivy": "kv", // PeckJ 2014/05/05
+            "kshell": "ksh", // Leo 4.5.1.
+            "latex": "tex", // 1/8/04
+            "lilypond": "ly",
+            "lua": "lua", // ddm 13/02/06
+            "mail": "eml",
+            "makefile": "mak",
+            "maple": "mpl",
+            "matlab": "m",
+            "md": "md", // PeckJ: 2013/02/07
+            "ml": "ml",  // Also ocaml.
+            "modula3": "mod",
+            "moin": "wiki",
+            "mqsc": "mqsc",
+            "nim": "nim",
+            "noweb": "nw",
+            "nqc": "nqc",
+            "nsi": "nsi", // EKR: 2010/10/27
+            "nsis2": "nsi",
+            "objective_c": "mm", // Only one extension is valid: .m
+            "objectrexx": "rex",
+            "occam": "occ",
             "ocaml": "ml",
-            omnimark: 'xom',
-            pascal: 'p',
-            perl: 'pl',
-            perlpod: 'pod',
-            php: 'php',
-            pike: 'pike',
-            pl1: 'pl1',
-            plain: 'txt',
-            plsql: 'sql', // qt02537 2005-05 - 27
+            "omnimark": "xom",
+            "pascal": "p",
+            "perl": "pl",
+            "perlpod": "pod",
+            "php": "php",
+            "pike": "pike",
+            "pl1": "pl1",
+            "plain": "txt",
+            "plsql": "sql", // qt02537 2005-05-27
             // "pop11"       : "p", // Conflicts with pascal.
-            postscript: 'ps',
-            povray: 'pov',
-            prolog: 'pro',
-            psp: 'psp',
-            ptl: 'ptl',
-            pyrex: 'pyx',
-            python: 'py',
-            r: 'r',
-            rapidq: 'bas', // fil 2004-march - 11
-            rebol: 'r', // jason 2003-07 - 03
-            rhtml: 'rhtml',
-            rib: 'rib',
-            rst: 'rest',
-            ruby: 'rb', // thyrsus 2008-11 - 05
-            rust: 'rs', // EKR: 2019/08/11
-            sas: 'sas',
-            scala: 'scala',
-            scheme: 'scm',
-            sgml: 'sgml',
-            shell: 'sh', // DS 4/1/04
-            shellscript: 'bash',
-            shtml: 'ssi', // Only one extension is valid: .shtml
-            smalltalk: 'sm',
-            splus: 'splus',
-            sqr: 'sqr',
-            ssharp: 'ss',
-            swig: 'i',
-            tcl: 'tcl',
-            tcltk: 'tcl',
-            tex: 'tex',
-            texinfo: 'info',
-            text: 'txt',
-            tpl: 'tpl',
-            tsql: 'sql', // A guess.
-            typescript: 'ts',
-            unknown: 'txt', // Set when @comment is seen.
-            uscript: 'uc',
-            vbscript: 'vbs',
-            velocity: 'vtl',
-            verilog: 'v',
-            vhdl: 'vhd', // Only one extension is valid: .vhdl
-            vim: 'vim',
-            vimoutline: 'otl', // TL 8 / 25 / 08 Vim's outline plugin
-            xml: 'xml',
-            xsl: 'xsl',
-            xslt: 'xsl',
-            yaml: 'yaml',
-            zpt: 'zpt',
+            "postscript": "ps",
+            "povray": "pov",
+            "prolog": "pro",
+            "psp": "psp",
+            "ptl": "ptl",
+            "pyrex": "pyx",
+            "python": "py",
+            "r": "r",
+            "rapidq": "bas", // fil 2004-march-11
+            "rebol": "r", // jason 2003-07-03
+            "rhtml": "rhtml",
+            "rib": "rib",
+            "rst": "rest",
+            "ruby": "rb", // thyrsus 2008-11-05
+            "rust": "rs", // EKR: 2019/08/11
+            "sas": "sas",
+            "scala": "scala",
+            "scheme": "scm",
+            "sgml": "sgml",
+            "shell": "sh", // DS 4/1/04
+            "shellscript": "bash",
+            "shtml": "ssi", // Only one extension is valid: .shtml
+            "smalltalk": "sm",
+            "splus": "splus",
+            "sqr": "sqr",
+            "ssharp": "ss",
+            "swig": "i",
+            "tcl": "tcl",
+            "tcltk": "tcl",
+            "tex": "tex",
+            "texinfo": "info",
+            "text": "txt",
+            "toml": "toml",
+            "tpl": "tpl",
+            "tsql": "sql", // A guess.
+            "typescript": "ts",
+            "unknown": "txt", // Set when @comment is seen.
+            "uscript": "uc",
+            "vbscript": "vbs",
+            "velocity": "vtl",
+            "verilog": "v",
+            "vhdl": "vhd", // Only one extension is valid: .vhdl
+            "vim": "vim",
+            "vimoutline": "otl", // TL 8/25/08 Vim's outline plugin
+            "xml": "xml",
+            "xsl": "xsl",
+            "xslt": "xsl",
+            "yaml": "yaml",
+            "zpt": "zpt",
         };
 
         /*
