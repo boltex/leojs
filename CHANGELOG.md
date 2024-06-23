@@ -2,7 +2,7 @@
 
 # 0.2.15
 
-- ...
+- Renamed 'save-file-as-zipped' to 'save-file-as-db'.
 
 # 0.2.14
 
