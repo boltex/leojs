@@ -512,17 +512,6 @@
         }
     });
 
-    const w_findTextsEl = document.getElementById('findText');
-    if (w_findTextsEl) {
-        w_findTextsEl.addEventListener('click', function () {
-            // @ts-expect-error
-            if (w_findTextsEl.value === "<find pattern here>") {
-                // @ts-expect-error
-                w_findTextsEl.select();
-            }
-        });
-    }
-
     document.onkeydown = checkKeyDown;
 
     document.addEventListener('focusin', (event) => {

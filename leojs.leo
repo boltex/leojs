@@ -4794,7 +4794,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "97b2a0f",
+  "gitBranch": "devel",
+  "gitDate": "2024-06-23 19:20:29 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -16348,17 +16351,6 @@ set leoEditHeadline(p_value: boolean) {
             });
         }
     });
-
-    const w_findTextsEl = document.getElementById('findText');
-    if (w_findTextsEl) {
-        w_findTextsEl.addEventListener('click', function () {
-            // @ts-expect-error
-            if (w_findTextsEl.value === "&lt;find pattern here&gt;") {
-                // @ts-expect-error
-                w_findTextsEl.select();
-            }
-        });
-    }
 
     document.onkeydown = checkKeyDown;
 
