@@ -18782,6 +18782,7 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
 <t tx="felix.20240622195331.1"># 0.2.15
 
 - Renamed 'save-file-as-zipped' to 'save-file-as-db'.
+- Simplified the find panel's input field placeholder.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

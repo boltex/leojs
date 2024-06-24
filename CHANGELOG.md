@@ -3,6 +3,7 @@
 # 0.2.15
 
 - Renamed 'save-file-as-zipped' to 'save-file-as-db'.
+- Simplified the find panel's input field placeholder.
 
 # 0.2.14
 
