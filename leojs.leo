@@ -1100,8 +1100,6 @@ import { RemoteHubApi } from './remote-hub';
 import { SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = false;
-
 @language typescript
 @tabwidth -4
 @others
@@ -1115,7 +1113,6 @@ const activateDebug = false;
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export async function deactivate(): Promise&lt;unknown&gt; {
     if (g.app) {
-
         for (const c of g.app.commanders()) {
             if (c.exists) {
                 await g.app.closeLeoWindow(c.frame, undefined, true);
@@ -1610,24 +1607,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
-    if (p_context.extensionUri &amp;&amp; activateDebug) {
-        console.log('STARTUP: context.extensionUri.fsPath: ', p_context.extensionUri.fsPath);
-        console.log('STARTUP: context.extensionUri.scheme: ', p_context.extensionUri.scheme,);
-    }
-
-    if (activateDebug) {
-        console.log('STARTUP:                 g.osBrowser: ', g.isBrowser);
-        console.log('STARTUP:                    path.sep: ', path.sep);
-        console.log('STARTUP:                  env scheme: ', vscode.env.uriScheme);
-        console.log('STARTUP:                 env appHost: ', vscode.env.appHost);
-        console.log('STARTUP:               process.cwd(): ', process.cwd());
-    }
-
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
-
     const w_previousVersion = p_context.globalState.get&lt;string&gt;(Constants.VERSION_STATE_KEY);
-    let SQL: SqlJsStatic;
 
     // * Close remaining Leo Bodies and help panels restored by vscode from last session.
     await utils.closeLeoTextEditors();
@@ -1647,9 +1629,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
-                if (activateDebug) {
-                    console.log("STARTUP:          GIT extension installed as g.gitAPI");
-                }
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -1662,12 +1641,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-
-                if (activateDebug) {
-                    console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
-                }
-
-            } catch (e) {
+              } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
         } else {
@@ -1684,10 +1658,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
-
-            if (activateDebug) {
-                console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
-            }
         }
 
         // console.log('SQL start');
@@ -1695,14 +1665,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
 
-        SQL = await initSqlJs(undefined, sqliteBits);
-
-        if (activateDebug) {
-            console.log("STARTUP:          SQLITE has started");
-        }
-
-        (g.SQL as SqlJsStatic) = SQL;
-
+        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);;
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
@@ -1729,14 +1692,13 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.workspaceUri.scheme !== 'file') {
-                if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
-                }
-
                 await runLeo(p_context);
             } else {
                 // Is local filesystem
-                void vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection =&gt; {
+                void vscode.window.showInformationMessage(
+                    "LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", 
+                    "More Info"
+                ).then(selection =&gt; {
                     if (selection === "More Info") {
                         vscode.env.openExternal(
                             vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project')
@@ -4643,10 +4605,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "97b2a0f",
-  "gitBranch": "devel",
-  "gitDate": "2024-06-23 19:20:29 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -11119,10 +11078,6 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.workspaceUri.scheme !== 'file') {
-                if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
-                }
-
                 void runLeo(p_context);
             } else {
                 // Is local filesystem
@@ -11144,7 +11099,6 @@ public async gotoScript(p_node: LeoButtonNode): Promise&lt;unknown&gt; {
         console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
         void setStartupDoneContext(true);
     }
-
 }
 
 </t>

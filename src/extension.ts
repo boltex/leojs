@@ -13,8 +13,6 @@ import { RemoteHubApi } from './remote-hub';
 import { SqlJsStatic } from 'sql.js';
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
-const activateDebug = false;
-
 /**
  * Entry point for Leo in Javascript. 
  * @returns Leo’s leo.core.leoGlobals containing many useful functions, including g.es.
@@ -32,24 +30,9 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
     (g.extensionContext as vscode.ExtensionContext) = p_context; // Useful for accessing workspace storage or other utilities.
     (g.extensionUri as vscode.Uri) = p_context.extensionUri; // Useful for accessing files in extension package itself.
 
-    if (p_context.extensionUri && activateDebug) {
-        console.log('STARTUP: context.extensionUri.fsPath: ', p_context.extensionUri.fsPath);
-        console.log('STARTUP: context.extensionUri.scheme: ', p_context.extensionUri.scheme,);
-    }
-
-    if (activateDebug) {
-        console.log('STARTUP:                 g.osBrowser: ', g.isBrowser);
-        console.log('STARTUP:                    path.sep: ', path.sep);
-        console.log('STARTUP:                  env scheme: ', vscode.env.uriScheme);
-        console.log('STARTUP:                 env appHost: ', vscode.env.appHost);
-        console.log('STARTUP:               process.cwd(): ', process.cwd());
-    }
-
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
-
     const w_previousVersion = p_context.globalState.get<string>(Constants.VERSION_STATE_KEY);
-    let SQL: SqlJsStatic;
 
     // * Close remaining Leo Bodies and help panels restored by vscode from last session.
     await utils.closeLeoTextEditors();
@@ -69,9 +52,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             await gitExtension.activate();
             try {
                 (g.gitAPI as GitAPI.API) = gitExtension.exports.getAPI(1);
-                if (activateDebug) {
-                    console.log("STARTUP:          GIT extension installed as g.gitAPI");
-                }
             } catch (e) {
                 console.log("LEOJS ERROR : GIT EXTENSION NOT INSTALLED !");
             }
@@ -84,12 +64,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-
-                if (activateDebug) {
-                    console.log("STARTUP:          GIT_BASE extension installed as g.gitBaseAPI");
-                }
-
-            } catch (e) {
+              } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
         } else {
@@ -106,10 +81,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
         if (extension) {
             const api = extension.isActive ? extension.exports : await extension.activate();
             (g.remoteHubAPI as RemoteHubApi) = api;
-
-            if (activateDebug) {
-                console.log("STARTUP:          GIT_REMOTE_HUB extension installed as g.remoteHubAPI");
-            }
         }
 
         // console.log('SQL start');
@@ -117,14 +88,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
 
-        SQL = await initSqlJs(undefined, sqliteBits);
-
-        if (activateDebug) {
-            console.log("STARTUP:          SQLITE has started");
-        }
-
-        (g.SQL as SqlJsStatic) = SQL;
-
+        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);;
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
@@ -151,14 +115,13 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.workspaceUri.scheme !== 'file') {
-                if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
-                }
-
                 await runLeo(p_context);
             } else {
                 // Is local filesystem
-                void vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection => {
+                void vscode.window.showInformationMessage(
+                    "LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", 
+                    "More Info"
+                ).then(selection => {
                     if (selection === "More Info") {
                         vscode.env.openExternal(
                             vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project')
@@ -196,10 +159,6 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
         if (!g.app.loadManager && g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.workspaceUri.scheme !== 'file') {
-                if (activateDebug) {
-                    console.log('STARTUP:           g.app.vscodeWorkspaceUri: ', g.workspaceUri);
-                }
-
                 void runLeo(p_context);
             } else {
                 // Is local filesystem
@@ -221,7 +180,6 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
         console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
         void setStartupDoneContext(true);
     }
-
 }
 
 async function runLeo(p_context: vscode.ExtensionContext) {
@@ -234,7 +192,6 @@ async function runLeo(p_context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export async function deactivate(): Promise<unknown> {
     if (g.app) {
-
         for (const c of g.app.commanders()) {
             if (c.exists) {
                 await g.app.closeLeoWindow(c.frame, undefined, true);
