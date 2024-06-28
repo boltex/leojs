@@ -64,6 +64,47 @@ body {
   font-family: var(--vscode-font-family);
 }
 
+/*
+    --vscode-scrollbarSlider-background: rgba(121, 121, 121, 0.4);
+    --vscode-scrollbarSlider-hoverBackground: rgba(100, 100, 100, 0.7);
+    --vscode-scrollbarSlider-activeBackground: 
+*/
+
+
+/* For WebKit browsers (Chrome, Safari) */
+body::-webkit-scrollbar {
+  width: 8px; /* Set the width of the scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent; /* Set the background of the track */
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background); /* Set the color of the thumb */
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background:  var(--scrollbarSlider-hoverBackground); /* Change color when hovered */
+}
+
+body::-webkit-scrollbar-button {
+  display: none; 
+  opacity: 0.0;
+}
+
+/* For Firefox */
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+/* Hide scrollbar buttons in Firefox */
+body ::-webkit-scrollbar-button {
+  opacity: 0.0;
+  display: none; 
+}
+
 body:hover {
   overflow-y: auto;
 } 
@@ -290,4 +331,41 @@ div.col-nav {
 .label-fix {
   vertical-align: top;
   line-height: 18px;
+}
+
+.tab-container {
+  width: 100%;
+}
+
+.tab-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 4px;
+  display: flex;
+  border-bottom: 1px solid var(--vscode-input-background);
+}
+
+.tab-item {
+  padding: 2px 4px;
+  cursor: pointer;
+  border-bottom: none;
+  color: var(--vscode-disabledForeground);
+  border-top-left-radius: 4px; /* Rounded corners on the top left */
+  border-top-right-radius: 4px; /* Rounded corners on the top right */
+}
+
+.tab-item.active {
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-foreground);
+}
+
+.tab-content {
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-content.active {
+  display: block;
 }

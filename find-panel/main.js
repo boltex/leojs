@@ -514,6 +514,37 @@
 
     document.onkeydown = checkKeyDown;
 
+    const tabs = document.querySelectorAll('.tab-item');
+    const contents = document.querySelectorAll('.tab-content');
+    let activeTab = 'tab1'; // Initial active tab
+
+    function activateTab(newTab) {
+        // Remove active class from all tabs and contents
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+
+        // Add active class to the new tab and content
+        // @ts-expect-error
+        document.querySelector(`[data-tab="${newTab}"]`).classList.add('active');
+        // @ts-expect-error
+        document.getElementById(newTab).classList.add('active');
+
+        // Update the active tab state
+        activeTab = newTab;
+    };
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // @ts-expect-error
+            const newTab = tab.dataset.tab;
+            if (newTab !== activeTab) {
+                activateTab(newTab);
+                // Additional logic for tab switch can go here
+                console.log(`Switched to ${newTab}`);
+            }
+        });
+    });
+
     document.addEventListener('focusin', (event) => {
         vscode.postMessage({ type: 'gotFocus' });
     });
