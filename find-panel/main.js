@@ -245,14 +245,18 @@
         if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
-            focusOnField('findText');
+            // focusOnField('findText');
+            activateTab('tab1');
+
             return;
         }
         // Detect CTRL+SHIFT+F
         if (p_event.ctrlKey && p_event.shiftKey && p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
-            focusOnField('navText');
+            // focusOnField('navText');
+            activateTab('tab2');
+
             return;
         }
 
@@ -518,7 +522,7 @@
     const contents = document.querySelectorAll('.tab-content');
     let activeTab = 'tab1'; // Initial active tab
 
-    function activateTab(newTab) {
+    function activateTab(newTab, replace) {
         // Remove active class from all tabs and contents
         tabs.forEach(t => t.classList.remove('active'));
         contents.forEach(c => c.classList.remove('active'));
@@ -531,16 +535,29 @@
 
         // Update the active tab state
         activeTab = newTab;
+        setTimeout(() => {
+            if (activeTab === 'tab1') {
+                if (replace) {
+                    focusOnField('replaceText');
+
+                } else {
+
+                    focusOnField('findText');
+                }
+            } else {
+                focusOnField('navText');
+            }
+        }, 0);
     };
 
     tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
+        tab.addEventListener('mousedown', (event) => {
             // @ts-expect-error
             const newTab = tab.dataset.tab;
             if (newTab !== activeTab) {
                 activateTab(newTab);
-                // Additional logic for tab switch can go here
-                console.log(`Switched to ${newTab}`);
+                event.preventDefault();
+                event.stopPropagation();
             }
         });
     });
@@ -552,6 +569,26 @@
         vscode.postMessage({ type: 'lostFocus' });
     });
 
+    const body = document.body;
+    const topShadow = document.getElementById("top-shadow");
+    let scrolled = false;
+    body.addEventListener('scroll', function (event) {
+        if (!topShadow) {
+            return;
+        }
+        if (body.scrollTop) {
+            if (!scrolled) {
+                topShadow.classList.add('scrolled');
+                scrolled = true;
+            }
+        } else {
+            if (scrolled) {
+                topShadow.classList.remove('scrolled');
+                scrolled = false;
+            }
+        }
+    });
+
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', (event) => {
         const message = event.data; // The json data that the extension sent
@@ -559,7 +596,9 @@
             // * Nav Tab Controls
             // Focus and select all text in 'nav' field
             case 'selectNav': {
-                focusOnField('navText');
+                // focusOnField('navText');
+                activateTab('tab2');
+
                 if (message.text || message.text === "") {
                     // @ts-expect-error
                     document.getElementById("navText").value = message.text;
@@ -574,12 +613,15 @@
             // * Find Tab Controls
             // Focus and select all text in 'find' field
             case 'selectFind': {
-                focusOnField('findText');
+                //focusOnField('findText');
+                activateTab('tab1');
+
                 break;
             }
             // Focus and select all text in 'replace' field
             case 'selectReplace': {
-                focusOnField('replaceText');
+                //focusOnField('replaceText');
+                activateTab('tab1', true);
                 break;
             }
             case 'getSettings': {

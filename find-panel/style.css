@@ -73,7 +73,7 @@ body {
 
 /* For WebKit browsers (Chrome, Safari) */
 body::-webkit-scrollbar {
-  width: 8px; /* Set the width of the scrollbar */
+  width: 4px; /* Set the width of the scrollbar */
 }
 
 body::-webkit-scrollbar-track {
@@ -88,21 +88,29 @@ body::-webkit-scrollbar-thumb:hover {
   background:  var(--scrollbarSlider-hoverBackground); /* Change color when hovered */
 }
 
-body::-webkit-scrollbar-button {
+body::-webkit-scrollbar-button, body::-moz-scrollbar-button {
   display: none; 
   opacity: 0.0;
+  height: 0;
+  width: 0
 }
 
 /* For Firefox */
 body {
   scrollbar-width: thin;
   scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
-}
-
-/* Hide scrollbar buttons in Firefox */
+  }
+  
+  /*
 body ::-webkit-scrollbar-button {
   opacity: 0.0;
   display: none; 
+}
+*/
+
+
+body.scrolled {
+  background-color: #312;
 }
 
 body:hover {
@@ -347,7 +355,8 @@ div.col-nav {
 }
 
 .tab-item {
-  padding: 2px 4px;
+  padding: 3px 14px;
+  margin-right:6px;
   cursor: pointer;
   border-bottom: none;
   color: var(--vscode-disabledForeground);
@@ -368,4 +377,17 @@ div.col-nav {
 
 .tab-content.active {
   display: block;
+}
+
+#top-shadow {
+    top: -4px;
+    height: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+}
+
+#top-shadow.scrolled{
+    box-shadow: var(--vscode-sideBarStickyScroll-shadow) 0 6px 6px -6px inset;
+    height: 3px;
 }
