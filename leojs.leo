@@ -15641,8 +15641,11 @@ set leoEditHeadline(p_value: boolean) {
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
-    let firstTabElId = 'searchOptions'; // The first tabbable element used to be 'findText' before nav inputs
-    let lastTabElId = 'searchBody';
+    let activeTab = 'tab1'; // Initial active tab
+    let firstFindTabElId = 'findText';
+    let lastFindTabElId = 'searchBody';
+    let firstNavTabElId = 'searchOptions';
+    let lastNavTabElId = 'navText';
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -15773,38 +15776,26 @@ set leoEditHeadline(p_value: boolean) {
     }
 
     function setSettings(p_settings) {
-        if (p_settings["navText"] || p_settings["navText"] === '') {
+        // Nav controls
+        // @ts-expect-error
+        document.getElementById("navText").value = p_settings["navText"];
+        searchSettings["navText"] = p_settings["navText"];
 
-            // Nav controls
-            // @ts-expect-error
-            document.getElementById("navText").value = p_settings["navText"];
-            searchSettings["navText"] = p_settings["navText"];
+        // showParents
+        // @ts-expect-error
+        document.getElementById("showParents").checked = p_settings["showParents"];
+        searchSettings["showParents"] = p_settings["showParents"];
 
-            // showParents
-            // @ts-expect-error
-            document.getElementById("showParents").checked = p_settings["showParents"];
-            searchSettings["showParents"] = p_settings["showParents"];
+        // isTag
+        // @ts-expect-error
+        document.getElementById("isTag").checked = p_settings["isTag"];
+        searchSettings["isTag"] = p_settings["isTag"];
+        handleIsTagSwitch(false);
 
-            // isTag
-            // @ts-expect-error
-            document.getElementById("isTag").checked = p_settings["isTag"];
-            searchSettings["isTag"] = p_settings["isTag"];
-            handleIsTagSwitch(false);
-
-            // searchOptions
-            // @ts-expect-error
-            document.getElementById("searchOptions").value = p_settings["searchOptions"];
-            searchSettings["searchOptions"] = p_settings["searchOptions"];
-        } else {
-            // ! Not at least Leo 6.6 final : hide top elements !
-            firstTabElId = 'findText';
-            var elements = document.getElementsByClassName("nav-element");
-
-            for (var i = 0; i &lt; elements.length; i++) {
-                // @ts-expect-error
-                elements[i].style.display = "none";
-            }
-        }
+        // searchOptions
+        // @ts-expect-error
+        document.getElementById("searchOptions").value = p_settings["searchOptions"];
+        searchSettings["searchOptions"] = p_settings["searchOptions"];
 
         // When opening a Leo document, set default values of fields
         findReplaceInputIds.forEach((p_inputId) =&gt; {
@@ -15874,14 +15865,18 @@ set leoEditHeadline(p_value: boolean) {
         if (p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
-            focusOnField('findText');
+            // focusOnField('findText');
+            activateTab('tab1');
+
             return;
         }
         // Detect CTRL+SHIFT+F
         if (p_event.ctrlKey &amp;&amp; p_event.shiftKey &amp;&amp; p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
-            focusOnField('navText');
+            // focusOnField('navText');
+            activateTab('tab2');
+
             return;
         }
 
@@ -15919,8 +15914,17 @@ set leoEditHeadline(p_value: boolean) {
 
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
-            var lastEl = document.getElementById(lastTabElId);
-            var firstEl = document.getElementById(firstTabElId);
+            var lastEl;
+            var firstEl;
+            if (activeTab === 'tab1') {
+                // find panel
+                lastEl = document.getElementById(lastFindTabElId);
+                firstEl = document.getElementById(firstFindTabElId);
+            } else {
+                // nav panel
+                lastEl = document.getElementById(lastNavTabElId);
+                firstEl = document.getElementById(firstNavTabElId);
+            }
 
             if (p_event.shiftKey) {
                 // shift + tab so if first got last
@@ -16143,11 +16147,73 @@ set leoEditHeadline(p_value: boolean) {
 
     document.onkeydown = checkKeyDown;
 
+    const tabs = document.querySelectorAll('.tab-item');
+    const contents = document.querySelectorAll('.tab-content');
+
+    function activateTab(newTab, replace) {
+        // Remove active class from all tabs and contents
+        tabs.forEach(t =&gt; t.classList.remove('active'));
+        contents.forEach(c =&gt; c.classList.remove('active'));
+
+        // Add active class to the new tab and content
+        // @ts-expect-error
+        document.querySelector(`[data-tab="${newTab}"]`).classList.add('active');
+        // @ts-expect-error
+        document.getElementById(newTab).classList.add('active');
+
+        // Update the active tab state
+        activeTab = newTab;
+        setTimeout(() =&gt; {
+            if (activeTab === 'tab1') {
+                if (replace) {
+                    focusOnField('replaceText');
+                } else {
+                    focusOnField('findText');
+                }
+            } else {
+                focusOnField('navText');
+            }
+        }, 0);
+    };
+
+    tabs.forEach(tab =&gt; {
+        tab.addEventListener('mousedown', (event) =&gt; {
+            // @ts-expect-error
+            const newTab = tab.dataset.tab;
+            if (newTab !== activeTab) {
+                activateTab(newTab);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    });
+
     document.addEventListener('focusin', (event) =&gt; {
         vscode.postMessage({ type: 'gotFocus' });
     });
+
     document.addEventListener('focusout', (event) =&gt; {
         vscode.postMessage({ type: 'lostFocus' });
+    });
+
+    const body = document.body;
+    const topShadow = document.getElementById("top-shadow");
+    let scrolled = false;
+    body.addEventListener('scroll', function (event) {
+        if (!topShadow) {
+            return;
+        }
+        if (body.scrollTop) {
+            if (!scrolled) {
+                topShadow.classList.add('scrolled');
+                scrolled = true;
+            }
+        } else {
+            if (scrolled) {
+                topShadow.classList.remove('scrolled');
+                scrolled = false;
+            }
+        }
     });
 
     // Handle messages sent from the extension to the webview
@@ -16157,7 +16223,9 @@ set leoEditHeadline(p_value: boolean) {
             // * Nav Tab Controls
             // Focus and select all text in 'nav' field
             case 'selectNav': {
-                focusOnField('navText');
+                // focusOnField('navText');
+                activateTab('tab2');
+
                 if (message.text || message.text === "") {
                     // @ts-expect-error
                     document.getElementById("navText").value = message.text;
@@ -16172,12 +16240,15 @@ set leoEditHeadline(p_value: boolean) {
             // * Find Tab Controls
             // Focus and select all text in 'find' field
             case 'selectFind': {
-                focusOnField('findText');
+                //focusOnField('findText');
+                activateTab('tab1');
+
                 break;
             }
             // Focus and select all text in 'replace' field
             case 'selectReplace': {
-                focusOnField('replaceText');
+                //focusOnField('replaceText');
+                activateTab('tab1', true);
                 break;
             }
             case 'getSettings': {
@@ -16262,6 +16333,55 @@ body {
   font-size: var(--vscode-font-size);
   font-weight: var(--vscode-font-weight);
   font-family: var(--vscode-font-family);
+}
+
+/*
+    --vscode-scrollbarSlider-background: rgba(121, 121, 121, 0.4);
+    --vscode-scrollbarSlider-hoverBackground: rgba(100, 100, 100, 0.7);
+    --vscode-scrollbarSlider-activeBackground: 
+*/
+
+
+/* For WebKit browsers (Chrome, Safari) */
+body::-webkit-scrollbar {
+  width: 4px; /* Set the width of the scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent; /* Set the background of the track */
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background); /* Set the color of the thumb */
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background:  var(--scrollbarSlider-hoverBackground); /* Change color when hovered */
+}
+
+body::-webkit-scrollbar-button, body::-moz-scrollbar-button {
+  display: none; 
+  opacity: 0.0;
+  height: 0;
+  width: 0
+}
+
+/* For Firefox */
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+  }
+  
+  /*
+body ::-webkit-scrollbar-button {
+  opacity: 0.0;
+  display: none; 
+}
+*/
+
+
+body.scrolled {
+  background-color: #312;
 }
 
 body:hover {
@@ -16490,6 +16610,57 @@ div.col-nav {
 .label-fix {
   vertical-align: top;
   line-height: 18px;
+}
+
+.tab-container {
+  width: 100%;
+}
+
+.tab-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 4px;
+  display: flex;
+  border-bottom: 1px solid var(--vscode-input-background);
+}
+
+.tab-item {
+  padding: 3px 14px;
+  margin-right:6px;
+  cursor: pointer;
+  border-bottom: none;
+  color: var(--vscode-disabledForeground);
+  border-top-left-radius: 4px; /* Rounded corners on the top left */
+  border-top-right-radius: 4px; /* Rounded corners on the top right */
+}
+
+.tab-item.active {
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-foreground);
+}
+
+.tab-content {
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+#top-shadow {
+    top: -4px;
+    height: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+}
+
+#top-shadow.scrolled{
+    box-shadow: var(--vscode-sideBarStickyScroll-shadow) 0 6px 6px -6px inset;
+    height: 3px;
 }
 </t>
 <t tx="felix.20231221231533.1">## 0.2.6

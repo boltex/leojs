@@ -12,8 +12,11 @@
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
-    let firstTabElId = 'searchOptions'; // The first tabbable element used to be 'findText' before nav inputs
-    let lastTabElId = 'searchBody';
+    let activeTab = 'tab1'; // Initial active tab
+    let firstFindTabElId = 'findText';
+    let lastFindTabElId = 'searchBody';
+    let firstNavTabElId = 'searchOptions';
+    let lastNavTabElId = 'navText';
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -144,38 +147,26 @@
     }
 
     function setSettings(p_settings) {
-        if (p_settings["navText"] || p_settings["navText"] === '') {
+        // Nav controls
+        // @ts-expect-error
+        document.getElementById("navText").value = p_settings["navText"];
+        searchSettings["navText"] = p_settings["navText"];
 
-            // Nav controls
-            // @ts-expect-error
-            document.getElementById("navText").value = p_settings["navText"];
-            searchSettings["navText"] = p_settings["navText"];
+        // showParents
+        // @ts-expect-error
+        document.getElementById("showParents").checked = p_settings["showParents"];
+        searchSettings["showParents"] = p_settings["showParents"];
 
-            // showParents
-            // @ts-expect-error
-            document.getElementById("showParents").checked = p_settings["showParents"];
-            searchSettings["showParents"] = p_settings["showParents"];
+        // isTag
+        // @ts-expect-error
+        document.getElementById("isTag").checked = p_settings["isTag"];
+        searchSettings["isTag"] = p_settings["isTag"];
+        handleIsTagSwitch(false);
 
-            // isTag
-            // @ts-expect-error
-            document.getElementById("isTag").checked = p_settings["isTag"];
-            searchSettings["isTag"] = p_settings["isTag"];
-            handleIsTagSwitch(false);
-
-            // searchOptions
-            // @ts-expect-error
-            document.getElementById("searchOptions").value = p_settings["searchOptions"];
-            searchSettings["searchOptions"] = p_settings["searchOptions"];
-        } else {
-            // ! Not at least Leo 6.6 final : hide top elements !
-            firstTabElId = 'findText';
-            var elements = document.getElementsByClassName("nav-element");
-
-            for (var i = 0; i < elements.length; i++) {
-                // @ts-expect-error
-                elements[i].style.display = "none";
-            }
-        }
+        // searchOptions
+        // @ts-expect-error
+        document.getElementById("searchOptions").value = p_settings["searchOptions"];
+        searchSettings["searchOptions"] = p_settings["searchOptions"];
 
         // When opening a Leo document, set default values of fields
         findReplaceInputIds.forEach((p_inputId) => {
@@ -294,8 +285,17 @@
 
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
-            var lastEl = document.getElementById(lastTabElId);
-            var firstEl = document.getElementById(firstTabElId);
+            var lastEl;
+            var firstEl;
+            if (activeTab === 'tab1') {
+                // find panel
+                lastEl = document.getElementById(lastFindTabElId);
+                firstEl = document.getElementById(firstFindTabElId);
+            } else {
+                // nav panel
+                lastEl = document.getElementById(lastNavTabElId);
+                firstEl = document.getElementById(firstNavTabElId);
+            }
 
             if (p_event.shiftKey) {
                 // shift + tab so if first got last
@@ -520,7 +520,6 @@
 
     const tabs = document.querySelectorAll('.tab-item');
     const contents = document.querySelectorAll('.tab-content');
-    let activeTab = 'tab1'; // Initial active tab
 
     function activateTab(newTab, replace) {
         // Remove active class from all tabs and contents
@@ -539,9 +538,7 @@
             if (activeTab === 'tab1') {
                 if (replace) {
                     focusOnField('replaceText');
-
                 } else {
-
                     focusOnField('findText');
                 }
             } else {
@@ -565,6 +562,7 @@
     document.addEventListener('focusin', (event) => {
         vscode.postMessage({ type: 'gotFocus' });
     });
+
     document.addEventListener('focusout', (event) => {
         vscode.postMessage({ type: 'lostFocus' });
     });
