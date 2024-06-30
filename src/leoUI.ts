@@ -180,6 +180,7 @@ export class LeoUI extends NullGui {
     private _leoGotoProvider!: LeoGotoProvider;
     private _leoGoto!: vscode.TreeView<LeoGotoNode>;
     private _leoGotoExplorer!: vscode.TreeView<LeoGotoNode>;
+    private _lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -5199,6 +5200,30 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Send the new content of the goto pane to the findPanel.
+     */
+    public setGotoContent(): void {
+        this._lastGotoContent = this._leoGotoProvider.getChildren();
+        const content = this._lastGotoContent.map(
+            (gotoNode) => {
+                return {
+                    "tooltip": gotoNode.tooltip,
+                    "key": gotoNode.key,
+                    "entryType": gotoNode.entryType,
+                    "description": gotoNode.description,
+                    "label": gotoNode.leoPaneLabel
+                };
+            }
+        );
+        if (this._findPanelWebviewExplorerView) {
+            void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
+        }
+        if (this._findPanelWebviewView) {
+            void this._findPanelWebviewView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
+        }
+    }
+
+    /**
      * * Gets the search settings from Leo, and applies them to the find panel webviews
      */
     public loadSearchSettings(): void {
@@ -5454,6 +5479,7 @@ export class LeoUI extends NullGui {
         this.setupRefresh(Focus.NoChange, {
             tree: true,
             body: true,
+            goto: true,
             documents: true,
             buttons: true,
             states: true
@@ -5487,6 +5513,7 @@ export class LeoUI extends NullGui {
         this.setupRefresh(Focus.Body, {
             tree: true,
             body: true,
+            goto: true,
             documents: true,
             buttons: true,
             states: true

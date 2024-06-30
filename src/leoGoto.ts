@@ -22,7 +22,11 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
 
     private _selectedNodeIndex: number = 0;
 
-    constructor(private _leoUI: LeoUI) { }
+    constructor(private _leoUI: LeoUI) {
+        this.onDidChangeTreeData(() => {
+            this._leoUI.setGotoContent();
+        }, this);
+    }
 
     public setLastGotoView(p_view: vscode.TreeView<LeoGotoNode>): void {
         this._lastGotoView = p_view;
@@ -174,6 +178,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     private _iconIndex: number; // default to tag
     private _leoUI: LeoUI;
     public key: number; // id from python
+    public leoPaneLabel: string;
 
     constructor(
         p_leoUI: LeoUI,
@@ -190,7 +195,10 @@ export class LeoGotoNode extends vscode.TreeItem {
             w_label = w_spacing + p_gotoEntry.h;
         }
         super(w_label);
-
+        this.leoPaneLabel = "";
+        if (["tag", "headline"].includes(p_gotoEntry.t)) {
+            this.leoPaneLabel = p_gotoEntry.h;
+        }
         // Setup this instance
         this._leoUI = p_leoUI;
         this._id = utils.getUniqueId();
@@ -206,12 +214,15 @@ export class LeoGotoNode extends vscode.TreeItem {
             } else {
                 this._description = "  " + this._headline;
             }
+            this.leoPaneLabel = this._headline;
         } else if (this.entryType === 'parent') {
             this._iconIndex = 0;
             this._description = this._headline.trim();
+            this.leoPaneLabel = this._description;
         } else if (this.entryType === 'generic') {
             this._iconIndex = 4;
             this._description = this._headline;
+            this.leoPaneLabel = this._description;
         } else if (this.entryType === 'headline') {
             this._iconIndex = 1;
         } else {

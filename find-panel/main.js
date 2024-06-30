@@ -126,6 +126,47 @@
 
     }
 
+    const selectableDiv = document.getElementById('gotopane');
+
+    document.body.addEventListener('mousedown', () => {
+        if (!selectableDiv) {
+            return;
+        }
+        // remove selected class first
+        for (const child of selectableDiv.children) {
+            child.classList.remove('selected');
+        }
+    });
+
+    function fillGotoPane(p_gotoContent) {
+        if (!selectableDiv) {
+            return;
+        }
+        let i = 0;
+        while (selectableDiv && selectableDiv.firstChild) {
+            selectableDiv.removeChild(selectableDiv.firstChild);
+        }
+        for (const gotoItem of p_gotoContent) {
+            const smallerDiv = document.createElement('div');
+            smallerDiv.dataset.order = i.toString();
+            smallerDiv.className = 'goto-item ' + gotoItem.entryType;
+            smallerDiv.textContent = gotoItem.label;
+            // smallerDiv.title = gotoItem.tooltip; // TOOLTIPS CANNOT BE STYLED!
+            smallerDiv.setAttribute('tabindex', '0');
+            smallerDiv.addEventListener('mousedown', (event) => {
+                // remove selected class first
+                for (const child of selectableDiv.children) {
+                    child.classList.remove('selected');
+                }
+                // @ts-expect-error
+                event.target.classList.add('selected');
+                event.stopPropagation();
+            });
+            selectableDiv.appendChild(smallerDiv);
+            i = i + 1;
+        }
+    }
+
     function setSearchSetting(p_id) {
         if (checkboxIds.includes(p_id)) {
             toggleCheckbox(p_id);
@@ -237,7 +278,7 @@
             p_event.preventDefault();
             p_event.stopPropagation();
             // focusOnField('findText');
-            activateTab('tab1');
+            activateTab('tab2');
 
             return;
         }
@@ -246,7 +287,7 @@
             p_event.preventDefault();
             p_event.stopPropagation();
             // focusOnField('navText');
-            activateTab('tab2');
+            activateTab('tab3');
 
             return;
         }
@@ -287,11 +328,11 @@
             var actEl = document.activeElement;
             var lastEl;
             var firstEl;
-            if (activeTab === 'tab1') {
+            if (activeTab === 'tab2') {
                 // find panel
                 lastEl = document.getElementById(lastFindTabElId);
                 firstEl = document.getElementById(firstFindTabElId);
-            } else {
+            } else if (activeTab === 'tab3') {
                 // nav panel
                 lastEl = document.getElementById(lastNavTabElId);
                 firstEl = document.getElementById(firstNavTabElId);
@@ -535,13 +576,13 @@
         // Update the active tab state
         activeTab = newTab;
         setTimeout(() => {
-            if (activeTab === 'tab1') {
+            if (activeTab === 'tab2') {
                 if (replace) {
                     focusOnField('replaceText');
                 } else {
                     focusOnField('findText');
                 }
-            } else {
+            } else if (activeTab === 'tab3') {
                 focusOnField('navText');
             }
         }, 0);
@@ -612,14 +653,13 @@
             // Focus and select all text in 'find' field
             case 'selectFind': {
                 //focusOnField('findText');
-                activateTab('tab1');
-
+                activateTab('tab2');
                 break;
             }
             // Focus and select all text in 'replace' field
             case 'selectReplace': {
                 //focusOnField('replaceText');
-                activateTab('tab1', true);
+                activateTab('tab3', true);
                 break;
             }
             case 'getSettings': {
@@ -632,6 +672,10 @@
             }
             case 'setSearchSetting': {
                 setSearchSetting(message.id);
+                break;
+            }
+            case 'refreshGoto': {
+                fillGotoPane(message.gotoContent);
                 break;
             }
         }

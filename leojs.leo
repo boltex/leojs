@@ -265,6 +265,7 @@
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
+<v t="felix.20240629151624.1"><vh>setGotoContent</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
 <v t="felix.20220505215924.14"><vh>saveSearchSettings</vh></v>
 </v>
@@ -3730,6 +3731,7 @@ export class LeoUI extends NullGui {
     private _leoGotoProvider!: LeoGotoProvider;
     private _leoGoto!: vscode.TreeView&lt;LeoGotoNode&gt;;
     private _leoGotoExplorer!: vscode.TreeView&lt;LeoGotoNode&gt;;
+    private _lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -6940,6 +6942,7 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
     this.setupRefresh(Focus.Body, {
         tree: true,
         body: true,
+        goto: true,
         documents: true,
         buttons: true,
         states: true
@@ -10503,7 +10506,11 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
 
     private _selectedNodeIndex: number = 0;
 
-    constructor(private _leoUI: LeoUI) { }
+    constructor(private _leoUI: LeoUI) {
+        this.onDidChangeTreeData(() =&gt; {
+            this._leoUI.setGotoContent();
+        }, this);
+    }
 
     public setLastGotoView(p_view: vscode.TreeView&lt;LeoGotoNode&gt;): void {
         this._lastGotoView = p_view;
@@ -10656,6 +10663,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     private _iconIndex: number; // default to tag
     private _leoUI: LeoUI;
     public key: number; // id from python
+    public leoPaneLabel: string;
 
     constructor(
         p_leoUI: LeoUI,
@@ -10672,7 +10680,10 @@ export class LeoGotoNode extends vscode.TreeItem {
             w_label = w_spacing + p_gotoEntry.h;
         }
         super(w_label);
-
+        this.leoPaneLabel = "";
+        if (["tag", "headline"].includes(p_gotoEntry.t)) {
+            this.leoPaneLabel = p_gotoEntry.h;
+        }
         // Setup this instance
         this._leoUI = p_leoUI;
         this._id = utils.getUniqueId();
@@ -10688,12 +10699,15 @@ export class LeoGotoNode extends vscode.TreeItem {
             } else {
                 this._description = "  " + this._headline;
             }
+            this.leoPaneLabel = this._headline;
         } else if (this.entryType === 'parent') {
             this._iconIndex = 0;
             this._description = this._headline.trim();
+            this.leoPaneLabel = this._description;
         } else if (this.entryType === 'generic') {
             this._iconIndex = 4;
             this._description = this._headline;
+            this.leoPaneLabel = this._description;
         } else if (this.entryType === 'headline') {
             this._iconIndex = 1;
         } else {
@@ -10868,6 +10882,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
     this.setupRefresh(Focus.NoChange, {
         tree: true,
         body: true,
+        goto: true,
         documents: true,
         buttons: true,
         states: true
@@ -15755,6 +15770,47 @@ set leoEditHeadline(p_value: boolean) {
 
     }
 
+    const selectableDiv = document.getElementById('gotopane');
+
+    document.body.addEventListener('mousedown', () =&gt; {
+        if (!selectableDiv) {
+            return;
+        }
+        // remove selected class first
+        for (const child of selectableDiv.children) {
+            child.classList.remove('selected');
+        }
+    });
+
+    function fillGotoPane(p_gotoContent) {
+        if (!selectableDiv) {
+            return;
+        }
+        let i = 0;
+        while (selectableDiv &amp;&amp; selectableDiv.firstChild) {
+            selectableDiv.removeChild(selectableDiv.firstChild);
+        }
+        for (const gotoItem of p_gotoContent) {
+            const smallerDiv = document.createElement('div');
+            smallerDiv.dataset.order = i.toString();
+            smallerDiv.className = 'goto-item ' + gotoItem.entryType;
+            smallerDiv.textContent = gotoItem.label;
+            // smallerDiv.title = gotoItem.tooltip; // TOOLTIPS CANNOT BE STYLED!
+            smallerDiv.setAttribute('tabindex', '0');
+            smallerDiv.addEventListener('mousedown', (event) =&gt; {
+                // remove selected class first
+                for (const child of selectableDiv.children) {
+                    child.classList.remove('selected');
+                }
+                // @ts-expect-error
+                event.target.classList.add('selected');
+                event.stopPropagation();
+            });
+            selectableDiv.appendChild(smallerDiv);
+            i = i + 1;
+        }
+    }
+
     function setSearchSetting(p_id) {
         if (checkboxIds.includes(p_id)) {
             toggleCheckbox(p_id);
@@ -15866,7 +15922,7 @@ set leoEditHeadline(p_value: boolean) {
             p_event.preventDefault();
             p_event.stopPropagation();
             // focusOnField('findText');
-            activateTab('tab1');
+            activateTab('tab2');
 
             return;
         }
@@ -15875,7 +15931,7 @@ set leoEditHeadline(p_value: boolean) {
             p_event.preventDefault();
             p_event.stopPropagation();
             // focusOnField('navText');
-            activateTab('tab2');
+            activateTab('tab3');
 
             return;
         }
@@ -15916,11 +15972,11 @@ set leoEditHeadline(p_value: boolean) {
             var actEl = document.activeElement;
             var lastEl;
             var firstEl;
-            if (activeTab === 'tab1') {
+            if (activeTab === 'tab2') {
                 // find panel
                 lastEl = document.getElementById(lastFindTabElId);
                 firstEl = document.getElementById(firstFindTabElId);
-            } else {
+            } else if (activeTab === 'tab3') {
                 // nav panel
                 lastEl = document.getElementById(lastNavTabElId);
                 firstEl = document.getElementById(firstNavTabElId);
@@ -16164,13 +16220,13 @@ set leoEditHeadline(p_value: boolean) {
         // Update the active tab state
         activeTab = newTab;
         setTimeout(() =&gt; {
-            if (activeTab === 'tab1') {
+            if (activeTab === 'tab2') {
                 if (replace) {
                     focusOnField('replaceText');
                 } else {
                     focusOnField('findText');
                 }
-            } else {
+            } else if (activeTab === 'tab3') {
                 focusOnField('navText');
             }
         }, 0);
@@ -16241,14 +16297,13 @@ set leoEditHeadline(p_value: boolean) {
             // Focus and select all text in 'find' field
             case 'selectFind': {
                 //focusOnField('findText');
-                activateTab('tab1');
-
+                activateTab('tab2');
                 break;
             }
             // Focus and select all text in 'replace' field
             case 'selectReplace': {
                 //focusOnField('replaceText');
-                activateTab('tab1', true);
+                activateTab('tab3', true);
                 break;
             }
             case 'getSettings': {
@@ -16263,6 +16318,10 @@ set leoEditHeadline(p_value: boolean) {
                 setSearchSetting(message.id);
                 break;
             }
+            case 'refreshGoto': {
+                fillGotoPane(message.gotoContent);
+                break;
+            }
         }
     });
 
@@ -16270,20 +16329,20 @@ set leoEditHeadline(p_value: boolean) {
 })();
 </t>
 <t tx="felix.20231219233431.1">html {
-  box-sizing: border-box;
-  font-size: 13px;
-  overflow: hidden;
-  --input-padding-vertical: 6px;
-  --input-padding-horizontal: 4px;
-  --input-margin-vertical: 4px;
-  --input-margin-horizontal: 0;
-  height: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+    overflow: hidden;
+    --input-padding-vertical: 6px;
+    --input-padding-horizontal: 4px;
+    --input-margin-vertical: 4px;
+    --input-margin-horizontal: 0;
+    height: 100%;
 }
 
 *,
 *:before,
 *:after {
-  box-sizing: inherit;
+    box-sizing: inherit;
 }
 
 body,
@@ -16296,43 +16355,43 @@ h6,
 p,
 ol,
 ul {
-  margin: 0;
-  padding: 0;
-  font-weight: normal;
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
 }
 
 img {
-  max-width: 100%;
-  height: auto;
+    max-width: 100%;
+    height: auto;
 }
 
 html:focus:after {
-  content:'';
-  position: fixed;
-  top:0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  outline: 1px solid;
-  outline-width: 1px;
-  outline-style: solid;
-  outline-offset: -1px;
-  outline-color: var(--vscode-focusBorder);
-  pointer-events: none;
+    content: '';
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    outline: 1px solid;
+    outline-width: 1px;
+    outline-style: solid;
+    outline-offset: -1px;
+    outline-color: var(--vscode-focusBorder);
+    pointer-events: none;
 }
 
 body {
-  height: 100%;
-  margin-left: 20px;
-  background-color: transparent;
-  padding: 0 var(--container-padding);
-  scrollbar-gutter: stable;
-  overflow:hidden;
-  padding-right: 4px;
-  color: var(--vscode-foreground);
-  font-size: var(--vscode-font-size);
-  font-weight: var(--vscode-font-weight);
-  font-family: var(--vscode-font-family);
+    height: 100%;
+    /* margin-left: 20px; */
+    background-color: transparent;
+    /* padding: 0 var(--container-padding); */
+    scrollbar-gutter: stable;
+    overflow: hidden;
+    /* padding-right: 4px; */
+    color: var(--vscode-foreground);
+    font-size: var(--vscode-font-size);
+    font-weight: var(--vscode-font-weight);
+    font-family: var(--vscode-font-family);
 }
 
 /*
@@ -16341,313 +16400,352 @@ body {
     --vscode-scrollbarSlider-activeBackground: 
 */
 
-
 /* For WebKit browsers (Chrome, Safari) */
 body::-webkit-scrollbar {
-  width: 4px; /* Set the width of the scrollbar */
+    width: 4px; /* Set the width of the scrollbar */
 }
 
 body::-webkit-scrollbar-track {
-  background: transparent; /* Set the background of the track */
+    background: transparent; /* Set the background of the track */
 }
 
 body::-webkit-scrollbar-thumb {
-  background: var(--vscode-scrollbarSlider-background); /* Set the color of the thumb */
+    background: var(
+        --vscode-scrollbarSlider-background
+    ); /* Set the color of the thumb */
 }
 
 body::-webkit-scrollbar-thumb:hover {
-  background:  var(--scrollbarSlider-hoverBackground); /* Change color when hovered */
+    background: var(
+        --scrollbarSlider-hoverBackground
+    ); /* Change color when hovered */
 }
 
-body::-webkit-scrollbar-button, body::-moz-scrollbar-button {
-  display: none; 
-  opacity: 0.0;
-  height: 0;
-  width: 0
+body::-webkit-scrollbar-button,
+body::-moz-scrollbar-button {
+    display: none;
+    opacity: 0;
+    height: 0;
+    width: 0;
 }
 
 /* For Firefox */
 body {
-  scrollbar-width: thin;
-  scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
-  }
-  
-  /*
+    /* scrollbar-width: thin; */
+    scrollbar-width: none;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+/*
 body ::-webkit-scrollbar-button {
   opacity: 0.0;
   display: none; 
 }
 */
 
-
 body.scrolled {
-  background-color: #312;
+    background-color: #312;
 }
 
 body:hover {
-  overflow-y: auto;
-} 
+    overflow-y: auto;
+}
 
 .row .col:nth-child(2) {
-  padding-right: 4px;
+    padding-right: 4px;
 }
 
 ol,
 ul {
-  padding-left: var(--container-padding);
+    padding-left: var(--container-padding);
 }
 
-body&gt;*,
-form&gt;* {
-  margin-block-start: var(--input-margin-vertical);
-  margin-block-end: var(--input-margin-vertical);
+body &gt; *,
+form &gt; * {
+    margin-block-start: var(--input-margin-vertical);
+    margin-block-end: var(--input-margin-vertical);
 }
 
 *:focus {
-  outline-color: var(--vscode-focusBorder);
+    outline-color: var(--vscode-focusBorder);
 }
 
 a {
-  color: var(--vscode-textLink-foreground);
+    color: var(--vscode-textLink-foreground);
 }
 
 a:hover,
 a:active {
-  color: var(--vscode-textLink-activeForeground);
+    color: var(--vscode-textLink-activeForeground);
 }
 
 code {
-  font-size: var(--vscode-editor-font-size);
-  font-family: var(--vscode-editor-font-family);
+    font-size: var(--vscode-editor-font-size);
+    font-family: var(--vscode-editor-font-family);
 }
 
 button {
-  border: none;
-  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
-  width: 100%;
-  text-align: center;
-  outline: 1px solid transparent;
-  outline-offset: 2px !important;
-  color: var(--vscode-button-foreground);
-  background: var(--vscode-button-background);
+    border: none;
+    padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+    width: 100%;
+    text-align: center;
+    outline: 1px solid transparent;
+    outline-offset: 2px !important;
+    color: var(--vscode-button-foreground);
+    background: var(--vscode-button-background);
 }
 
 button:hover {
-  cursor: pointer;
-  background: var(--vscode-button-hoverBackground);
+    cursor: pointer;
+    background: var(--vscode-button-hoverBackground);
 }
 
 button:focus {
-  outline-color: var(--vscode-focusBorder);
+    outline-color: var(--vscode-focusBorder);
 }
 
 button.secondary {
-  color: var(--vscode-button-secondaryForeground);
-  background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    background: var(--vscode-button-secondaryBackground);
 }
 
 button.secondary:hover {
-  background: var(--vscode-button-secondaryHoverBackground);
+    background: var(--vscode-button-secondaryHoverBackground);
 }
 
 select {
-  background: var(--vscode-dropdown-background);
-  color: var(--vscode-input-foreground);
-  border-color: var(--vscode-dropdown-border);
-  cursor: pointer;
-  width: 50px;
-  left: 15%;
-  position: relative;
-  border-radius: 2px;
+    background: var(--vscode-dropdown-background);
+    color: var(--vscode-input-foreground);
+    border-color: var(--vscode-dropdown-border);
+    cursor: pointer;
+    width: 50px;
+    left: 15%;
+    position: relative;
+    border-radius: 2px;
 }
 
 select:focus {
-  outline-color: var(--vscode-input-border);
+    outline-color: var(--vscode-input-border);
 }
 
 select:disabled {
-  opacity: 0.5;
-  cursor: default;
+    opacity: 0.5;
+    cursor: default;
 }
 
 select option {
-  background-color: var(--vscode-dropdown-listBackground);
+    background-color: var(--vscode-dropdown-listBackground);
 }
 
 select option:focus {
-  background-color: var(--vscode-input-background);
-  outline-color: var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
+    outline-color: var(--vscode-input-border);
 }
 
-input:not([type="radio"]):not([type="checkbox"]),
+input:not([type='radio']):not([type='checkbox']),
 textarea {
-  display: block;
-  margin-right: 20px;
-  width: 100%;
-  border: none;
-  font-family: var(--vscode-font-family);
-  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
-  padding: 3px var(--input-padding-horizontal);
-  border-radius: 2px;
-  color: var(--vscode-input-foreground);
-  outline-color: var(--vscode-input-border);
-  background-color: var(--vscode-input-background);
+    display: block;
+    margin-right: 20px;
+    width: 100%;
+    border: none;
+    font-family: var(--vscode-font-family);
+    padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+    padding: 3px var(--input-padding-horizontal);
+    border-radius: 2px;
+    color: var(--vscode-input-foreground);
+    outline-color: var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
 }
 
-input[type="checkbox"],
-input[type="radio"] {
-  cursor: pointer;
+input[type='checkbox'],
+input[type='radio'] {
+    cursor: pointer;
 }
 
-input[type="checkbox"]:focus+label {
-  border: 1px solid var(--vscode-button-background);
+input[type='checkbox']:focus + label {
+    border: 1px solid var(--vscode-button-background);
 }
 
-input[type="radio"]:focus+label {
-  border: 1px solid var(--vscode-button-background);
+input[type='radio']:focus + label {
+    border: 1px solid var(--vscode-button-background);
 }
 
 input:disabled {
-  opacity: 0.5;
-  cursor: default;
+    opacity: 0.5;
+    cursor: default;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--vscode-input-placeholderForeground);
+    color: var(--vscode-input-placeholderForeground);
 }
 
 u {
-  color: var(--vscode-editor-foreground);
-  text-decoration-color: var(--vscode-foreground);
-  text-underline-offset: 0.04em;
+    color: var(--vscode-editor-foreground);
+    text-decoration-color: var(--vscode-foreground);
+    text-underline-offset: 0.04em;
 }
 
-body&gt;div&gt;div&gt;label:focus,
-body&gt;div&gt;div&gt;label:active {
-  outline-color: none !important;
-  border: none !important;
+body &gt; div &gt; div &gt; label:focus,
+body &gt; div &gt; div &gt; label:active {
+    outline-color: none !important;
+    border: none !important;
 }
 
 #freeze {
-  cursor: default;
-  position: absolute;
-  right: 0.9em;
-  line-height: 1em;
-  top: 1.05em;
-  font-size: 1.8em;
-  color: #5c87ff80;
-  padding: 0;
-  margin: 0;
+    cursor: default;
+    position: absolute;
+    right: 1em;
+    line-height: 1em;
+    top: 0.9em;
+    font-size: 1.8em;
+    color: #5c87ff80;
+    padding: 0;
+    margin: 0;
 }
 
 .comment {
-  display: none;
+    display: none;
 }
 
 div.row {
-  overflow-x: hidden;
-  white-space: nowrap;
+    overflow-x: hidden;
+    white-space: nowrap;
 }
 
 div.col {
-  vertical-align: top;
-  width: 50%;
-  max-width: 9.5em;
-  display: inline-block;
-  text-overflow: ellipsis;
-  overflow: hidden;
+    vertical-align: top;
+    width: 50%;
+    max-width: 9.5em;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 div.col-nav {
-  width: 50%;
-  display: inline-block;
-  text-overflow: ellipsis;
-  overflow: hidden;
+    width: 50%;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .mt-0 {
-  margin-top: 0;
+    margin-top: 0;
 }
 
 .mt-4 {
-  margin-top: 4px;
+    margin-top: 4px;
 }
 
 .mb-0 {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .mb-4 {
-  margin-bottom: 4px;
+    margin-bottom: 4px;
 }
 
 .mb-6 {
-  margin-bottom: 6px;
+    margin-bottom: 6px;
 }
 
 .input-holder {
-  padding: 0;
-  margin-right: 6px;
+    padding: 0;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 .align-right {
-  text-align: right;
+    text-align: right;
 }
 
 .float-left {
-  float: left;
+    float: left;
 }
 
 .float-right {
-  float: right;
+    float: right;
 }
 
 .no-overflow {
-  text-overflow: unset !important;
+    text-overflow: unset !important;
 }
 
 .label-fix {
-  vertical-align: top;
-  line-height: 18px;
+    vertical-align: top;
+    line-height: 19px;
 }
 
 .tab-container {
-  width: 100%;
+    position: relative;
+    width: 100%;
 }
 
 .tab-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  margin-bottom: 4px;
-  display: flex;
-  border-bottom: 1px solid var(--vscode-input-background);
+    position: relative;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-bottom: 4px;
+    display: flex;
+    border-bottom: 1px solid var(--vscode-input-background);
 }
 
 .tab-item {
-  padding: 3px 14px;
-  margin-right:6px;
-  cursor: pointer;
-  border-bottom: none;
-  color: var(--vscode-disabledForeground);
-  border-top-left-radius: 4px; /* Rounded corners on the top left */
-  border-top-right-radius: 4px; /* Rounded corners on the top right */
+    padding: 3px 14px;
+    margin-left: 6px;
+    cursor: pointer;
+    border-bottom: none;
+    color: var(--vscode-disabledForeground);
+    border-top-left-radius: 4px; /* Rounded corners on the top left */
+    border-top-right-radius: 4px; /* Rounded corners on the top right */
 }
 
 .tab-item.active {
-  background-color: var(--vscode-input-background);
-  color: var(--vscode-foreground);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-foreground);
 }
 
 .tab-content {
-  display: none;
-  padding: 0;
-  margin: 0;
+    position: relative;
+    display: none;
+    padding: 0;
+    margin: 0;
 }
 
 .tab-content.active {
-  display: block;
+    display: block;
+}
+
+#gotopane {
+    width: 100%;
+}
+
+.goto-item {
+    width: 100%;
+    line-height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.goto-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.goto-item.selected,
+.goto-item.selected:hover {
+    background-color: var(--vscode-list-inactiveSelectionBackground);
+}
+
+.goto-item.selected:focus,
+.goto-item.selected:focus:hover {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    outline: 1px solid
+        var(
+            --vscode-list-focusAndSelectionOutline,
+            var(--vscode-contrastActiveBorder, var(--vscode-list-focusOutline))
+        );
+    outline-offset: -1px;
 }
 
 #top-shadow {
@@ -16658,7 +16756,7 @@ div.col-nav {
     width: 100%;
 }
 
-#top-shadow.scrolled{
+#top-shadow.scrolled {
     box-shadow: var(--vscode-sideBarStickyScroll-shadow) 0 6px 6px -6px inset;
     height: 3px;
 }
@@ -18743,6 +18841,31 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
 
 - Renamed 'save-file-as-zipped' to 'save-file-as-db'.
 - Simplified the find panel's input field placeholder.
+
+</t>
+<t tx="felix.20240629151624.1">/**
+ * Send the new content of the goto pane to the findPanel.
+ */
+public setGotoContent(): void {
+    this._lastGotoContent = this._leoGotoProvider.getChildren();
+    const content = this._lastGotoContent.map(
+        (gotoNode) =&gt; {
+            return {
+                "tooltip": gotoNode.tooltip,
+                "key": gotoNode.key,
+                "entryType": gotoNode.entryType,
+                "description": gotoNode.description,
+                "label": gotoNode.leoPaneLabel
+            };
+        }
+    );
+    if (this._findPanelWebviewExplorerView) {
+        void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
+    }
+    if (this._findPanelWebviewView) {
+        void this._findPanelWebviewView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
+    }
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

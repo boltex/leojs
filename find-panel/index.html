@@ -13,10 +13,16 @@
 <body>
     <div class="tab-container">
         <ul class="tab-list">
-            <li class="tab-item active" data-tab="tab1">Find</li>
-            <li class="tab-item" data-tab="tab2">Nav</li>
+            <!-- <li class="tab-item active" data-tab="tab1">Log</li> -->
+            <li class="tab-item active" data-tab="tab2">Find</li>
+            <li class="tab-item" data-tab="tab3">Nav</li>
         </ul>
-        <div class="tab-content active" id="tab1">
+        <!-- <div class="tab-content active" id="tab1">
+            <div class="log-pane" contenteditable="true">
+
+            </div>
+        </div> -->
+        <div class="tab-content active" id="tab2">
             <div class="input-holder mt-4 mb-4">
                 <input title="Enter or F3 to find and goto the next match&#013;F2 for the previous match" type="text"
                     id="findText" name="findText" placeholder="<find pattern here>">
@@ -25,7 +31,7 @@
                 <input title="Replace (Ctrl+=)&#013;Replace &amp; Find Next (Ctrl+-)" type="text" id="replaceText"
                     name="replaceText" placeholder="<replace pattern here>">
             </div>
-            <div class="row">
+            <div class="row input-holder">
                 <div class="col">
                     <input type="checkbox" id="wholeWord" name="wholeWord">
                     <label title="Match Whole Word (Ctrl+Alt+W)" class="label-fix" for="wholeWord">Whole
@@ -69,8 +75,8 @@
             </div>
         </div>
 
-        <div class="tab-content" id="tab2">
-            <div class="row mb-0 nav-element">
+        <div class="tab-content" id="tab3">
+            <div class="row input-holder mb-0 nav-element">
                 <div class="col no-overflow">
                     <label for="navText">Nav:</label>
                     <select name="searchOptions" id="searchOptions"
@@ -98,8 +104,8 @@
             </div>
             <div class="nav-element" id="freeze" title="Clear field to unfreeze">&#x2744;</div>
             <div class="row">
-                <div class="col" id="gotopane">
-                    this is the goto pane
+                <div id="gotopane">
+                    <!-- this is the goto pane -->
                 </div>
             </div>
 
