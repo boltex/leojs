@@ -188,8 +188,8 @@ select {
     color: var(--vscode-input-foreground);
     border-color: var(--vscode-dropdown-border);
     cursor: pointer;
-    width: 50px;
-    left: 15%;
+    /* width: 50px; */
+    /* left: 15%; */
     position: relative;
     border-radius: 2px;
 }
@@ -281,6 +281,13 @@ body > div > div > label:active {
 div.row {
     overflow-x: hidden;
     white-space: nowrap;
+}
+
+div.col-full {
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
 }
 
 div.col {

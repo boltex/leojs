@@ -134,7 +134,7 @@ export class LeoUI extends NullGui {
     private _findPanelWebviewView: vscode.WebviewView | undefined;
     private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
-    private _findNeedsFocus: boolean = false;
+    private _findNeedsFocus: number = 0; // 0 none, 1 find, 2 nav
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
@@ -1133,11 +1133,13 @@ export class LeoUI extends NullGui {
             if (this._findPanelWebviewExplorerView?.visible) {
                 this._lastFindView = this._findPanelWebviewExplorerView;
                 this.checkForceFindFocus(false);
+                this.setGotoContent();
             }
         } else {
             if (this._findPanelWebviewView?.visible) {
                 this._lastFindView = this._findPanelWebviewView;
                 this.checkForceFindFocus(false);
+                this.setGotoContent();
             }
         }
     }
@@ -1568,6 +1570,7 @@ export class LeoUI extends NullGui {
                     this._onFindViewVisibilityChanged(false)
                 ));
         }
+        this.setGotoContent();
         this.checkForceFindFocus(true);
     }
 
@@ -3353,14 +3356,21 @@ export class LeoUI extends NullGui {
                             // ! Compensate for reveal that steals the focus.
                             if (this._refreshType.goto) {
                                 this._refreshType.goto = false;
-                                let w_viewName: string;
-                                const gotoView = this.leoGotoProvider.getLastGotoView();
-                                if (gotoView && gotoView.title === "Goto") {
-                                    w_viewName = Constants.GOTO_ID;
+                                // let w_viewName: string;
+                                // const gotoView = this.leoGotoProvider.getLastGotoView();
+                                // if (gotoView && gotoView.title === "Goto") {
+                                //     w_viewName = Constants.GOTO_ID;
+                                // } else {
+                                //     w_viewName = Constants.GOTO_EXPLORER_ID;
+                                // }
+                                // void vscode.commands.executeCommand(w_viewName + ".focus");
+                                let w_panelID = '';
+                                if (this._lastTreeView === this._leoTreeExView) {
+                                    w_panelID = Constants.FIND_EXPLORER_ID;
                                 } else {
-                                    w_viewName = Constants.GOTO_EXPLORER_ID;
+                                    w_panelID = Constants.FIND_ID;
                                 }
-                                void vscode.commands.executeCommand(w_viewName + ".focus");
+                                void vscode.commands.executeCommand(w_panelID + '.focus');
                             }
                         }
 
@@ -4777,10 +4787,9 @@ export class LeoUI extends NullGui {
      * Reveals and selects the specific nav entry in the results of the nav pane.
      */
     public revealGotoNavEntry(p_index: number): void {
-        if (this._findPanelWebviewExplorerView) {
+        if (this._findPanelWebviewExplorerView && this._findPanelWebviewExplorerView.visible) {
             void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
-        }
-        if (this._findPanelWebviewView) {
+        } else if (this._findPanelWebviewView && this._findPanelWebviewView.visible) {
             void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
         }
     }
@@ -4868,12 +4877,12 @@ export class LeoUI extends NullGui {
 
         if (w_panel) {
             // ALREADY VISIBLE FIND PANEL
-            this._findNeedsFocus = false;
+            this._findNeedsFocus = 0;
             void w_panel.webview.postMessage({ type: 'selectFind' });
             return;
         }
 
-        this._findNeedsFocus = true;
+        this._findNeedsFocus = 1;
         let w_panelID = '';
         if (this._lastTreeView === this._leoTreeExView) {
             w_panelID = Constants.FIND_EXPLORER_ID;
@@ -4889,7 +4898,7 @@ export class LeoUI extends NullGui {
      */
     public checkForceFindFocus(p_fromInit: boolean): void {
         if (this._findNeedsFocus) {
-            this._findNeedsFocus = false; // Set false before timeout.
+            this._findNeedsFocus = 0; // Set false before timeout.
             setTimeout(() => {
                 let w_panel: vscode.WebviewView | undefined;
                 if (this._findPanelWebviewView && this._findPanelWebviewView.visible) {
@@ -4898,7 +4907,7 @@ export class LeoUI extends NullGui {
                     w_panel = this._findPanelWebviewExplorerView;
                 }
                 if (w_panel) {
-                    this._findNeedsFocus = false; // Set false ALSO AFTER !
+                    this._findNeedsFocus = 0; // Set false ALSO AFTER !
                     void w_panel.webview.postMessage({ type: 'selectFind' });
                 }
             }, 60);
@@ -5250,10 +5259,10 @@ export class LeoUI extends NullGui {
                 };
             }
         );
-        if (this._findPanelWebviewExplorerView) {
+        if (this._findPanelWebviewExplorerView && this._findPanelWebviewExplorerView.visible) {
             void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
         }
-        if (this._findPanelWebviewView) {
+        if (this._findPanelWebviewView && this._findPanelWebviewView.visible) {
             void this._findPanelWebviewView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
         }
     }

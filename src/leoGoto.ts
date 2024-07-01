@@ -24,7 +24,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
 
     constructor(private _leoUI: LeoUI) {
         this.onDidChangeTreeData(() => {
-            this.getChildren();
+            this.getChildren(); // THIS KEEPS THE DATA UP TO DATE
             this._leoUI.setGotoContent();
         }, this);
     }

@@ -77,9 +77,8 @@
 
         <div class="tab-content" id="tab3">
             <div class="row input-holder mb-0 nav-element">
-                <div class="col no-overflow">
-                    <label for="navText">Nav:</label>
-                    <select name="searchOptions" id="searchOptions"
+                <div class="col-full">
+                    <select class="no-overflow" name="searchOptions" id="searchOptions"
                         title="Confine search to:&#013; - All: regular search for all nodes&#013; - Subtree: current node and it's children&#013; - File: only search under a node with an @<file> directive&#013; - Chapter: only search under a node with an @chapter directer&#013; - Node: only search currently selected node">
                         <option value="0">All</option>
                         <option value="1">Subtree</option>
@@ -87,8 +86,7 @@
                         <option value="3">Chapter</option>
                         <option value="4">Node</option>
                     </select>
-                </div>
-                <div class="col-nav">
+
                     <input type="checkbox" id="isTag" name="isTag">
                     <label class="label-fix" for="isTag"
                         title="Search Tag attributes, set algebra is supported:&#013;&amp; both the given tags&#013;&vert; either of the given tags (or both)&#013;&#45; the first tag, but not the second tag&#013;&#94; either of the given tags (but *not* both)">Tag</label>
