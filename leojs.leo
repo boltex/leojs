@@ -252,6 +252,7 @@
 <v t="felix.20220505215916.7"><vh>findQuick_marked</vh></v>
 <v t="felix.20220505215916.8"><vh>showGotoPane</vh></v>
 <v t="felix.20220505215916.9"><vh>gotoNavEntry</vh></v>
+<v t="felix.20240630150534.1"><vh>revealGotoNavEntry</vh></v>
 <v t="felix.20221027155905.1"><vh>navigateNavEntry</vh></v>
 </v>
 <v t="felix.20220505215924.1"><vh>Search</vh>
@@ -3728,10 +3729,10 @@ export class LeoUI extends NullGui {
     private _lastLeoDocuments: vscode.TreeView&lt;LeoFrame&gt; | undefined;
 
     // * Goto nav panel
-    private _leoGotoProvider!: LeoGotoProvider;
-    private _leoGoto!: vscode.TreeView&lt;LeoGotoNode&gt;;
-    private _leoGotoExplorer!: vscode.TreeView&lt;LeoGotoNode&gt;;
-    private _lastGotoContent: LeoGotoNode[] = [];
+    public leoGotoProvider!: LeoGotoProvider;
+    // private _leoGoto!: vscode.TreeView&lt;LeoGotoNode&gt;;
+    // private _leoGotoExplorer!: vscode.TreeView&lt;LeoGotoNode&gt;;
+    // public lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -5408,13 +5409,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "visibility": "collapsed"
     },
     {
-      "id": "leojsGotoPanelExplorer",
-      "name": "Leojs Goto",
-      "contextualTitle": "Leojs",
-      "when": "config.leojs.treeInExplorer &amp;&amp; leojsTreeOpened",
-      "visibility": "collapsed"
-    },
-    {
       "id": "leojsDocumentsExplorer",
       "name": "Leojs Documents",
       "contextualTitle": "Leojs",
@@ -5449,13 +5443,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsFindPanel",
       "name": "Find",
       "title": "Find",
-      "when": "leojsTreeOpened",
-      "visibility": "collapsed"
-    },
-    {
-      "id": "leojsGotoPanel",
-      "contextualTitle": "Leojs",
-      "name": "Goto",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     },
@@ -5680,16 +5667,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
   },
   {
-    "view": "leojsGotoPanel",
-    "contents": "No Results",
-    "when": "leojsReady"
-  },
-  {
-    "view": "leojsGotoPanelExplorer",
-    "contents": "No Results",
-    "when": "leojsReady"
-  },
-  {
     "view": "leojsButtons",
     "contents": "There are no Leo files currently opened",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
@@ -5902,27 +5879,27 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.findQuickSelected",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.findQuickTimeline",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.findQuickChanged",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.history",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.markedList",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
@@ -5987,22 +5964,22 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.chapterBack",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@5"
   },
   {
     "command": "leojs.chapterNext",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@5"
   },
   {
     "command": "leojs.chapterSelect",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@5"
   },
   {
     "command": "leojs.chapterMain",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@6"
   },
   {
@@ -6158,7 +6135,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 <t tx="felix.20201214205159.69">{
   "command": "leojs.showOutline",
   "key": "alt+t",
-  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/ || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/ || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.showOutline",
@@ -6593,19 +6570,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
-  "command": "leojs.gotoNavFirst",
-  "key": "home",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
-},
-{
   "command": "leojs.gotoLastVisible",
   "key": "end",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.gotoNavLast",
-  "key": "end",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.pageUp",
@@ -6613,19 +6580,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
-  "command": "leojs.gotoNavFirst",
-  "key": "pageup",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
-},
-{
   "command": "leojs.pageDown",
   "key": "pagedown",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.gotoNavLast",
-  "key": "pagedown",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
@@ -6643,11 +6600,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
-  "command": "leojs.gotoNavNext",
-  "key": "down",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
-},
-{
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
   "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
@@ -6656,11 +6608,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.gotoPrevVisible",
   "key": "up",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.gotoNavPrev",
-  "key": "up",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.gotoPrevVisible",
@@ -9521,21 +9468,21 @@ public finishStartup(): void {
     this._lastLeoButtons = this._leoButtonsExplorer;
 
     // * Create goto Treeview Providers and tree views
-    this._leoGotoProvider = new LeoGotoProvider(this);
-    this._leoGoto = vscode.window.createTreeView(Constants.GOTO_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-    this._context.subscriptions.push(
-        this._leoGoto,
-        this._leoGoto.onDidChangeVisibility((p_event) =&gt;
-            this._onGotoTreeViewVisibilityChanged(p_event, false)
-        )
-    );
-    this._leoGotoExplorer = vscode.window.createTreeView(Constants.GOTO_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-    this._context.subscriptions.push(
-        this._leoGotoExplorer,
-        this._leoGotoExplorer.onDidChangeVisibility((p_event) =&gt;
-            this._onGotoTreeViewVisibilityChanged(p_event, true)
-        )
-    );
+    this.leoGotoProvider = new LeoGotoProvider(this);
+    // this._leoGoto = vscode.window.createTreeView(Constants.GOTO_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
+    // this._context.subscriptions.push(
+    //     this._leoGoto,
+    //     this._leoGoto.onDidChangeVisibility((p_event) =&gt;
+    //         this._onGotoTreeViewVisibilityChanged(p_event, false)
+    //     )
+    // );
+    // this._leoGotoExplorer = vscode.window.createTreeView(Constants.GOTO_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
+    // this._context.subscriptions.push(
+    //     this._leoGotoExplorer,
+    //     this._leoGotoExplorer.onDidChangeVisibility((p_event) =&gt;
+    //         this._onGotoTreeViewVisibilityChanged(p_event, true)
+    //     )
+    // );
 
     // * Create Undos Treeview Providers and tree views
     this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this, this.undoIcons);
@@ -9763,7 +9710,7 @@ public findQuickTimeline(): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_sort_by_gnx();
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
@@ -9775,7 +9722,7 @@ public findQuickChanged(): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_find_changed();
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
@@ -9787,7 +9734,7 @@ public findQuickHistory(): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_get_history();
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
@@ -9799,8 +9746,16 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_show_marked();
-    this._leoGotoProvider.refreshTreeRoot();
-    if (p_preserveFocus &amp;&amp; (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
+    this.leoGotoProvider.refreshTreeRoot();
+    // if (p_preserveFocus &amp;&amp; (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
+    //     return Promise.resolve();
+    // }
+    if (
+        p_preserveFocus &amp;&amp; (
+            (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) ||
+            (this._findPanelWebviewExplorerView &amp;&amp; this._findPanelWebviewExplorerView.visible)
+        )
+    ) {
         return Promise.resolve();
     }
     return this.showGotoPane(); // Finish by opening and focussing nav pane
@@ -9812,17 +9767,32 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
  */
 public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknown&gt; {
     void this.triggerBodySave(true);
-    let w_panel = "";
 
+    // if (this._lastTreeView === this._leoTreeExView) {
+    //     w_panel = Constants.GOTO_EXPLORER_ID;
+    // } else {
+    //     w_panel = Constants.GOTO_ID;
+    // }
+
+    // void vscode.commands.executeCommand(w_panel + '.focus', p_options);
+
+    let w_panelID = '';
+    let w_panel: vscode.WebviewView | undefined;
     if (this._lastTreeView === this._leoTreeExView) {
-        w_panel = Constants.GOTO_EXPLORER_ID;
+        w_panelID = Constants.FIND_EXPLORER_ID;
+        w_panel = this._findPanelWebviewExplorerView;
     } else {
-        w_panel = Constants.GOTO_ID;
+        w_panelID = Constants.FIND_ID;
+        w_panel = this._findPanelWebviewView;
     }
+    return vscode.commands.executeCommand(w_panelID + '.focus', p_options).then((p_result) =&gt; {
+        if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
+            w_panel.show(false);
+        }
+        const w_message: { [key: string]: string } = { type: 'showGoto' };
+        void w_panel?.webview.postMessage(w_message);
+    });
 
-    void vscode.commands.executeCommand(w_panel + '.focus', p_options);
-
-    return Promise.resolve();
 }
 
 </t>
@@ -9832,7 +9802,7 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
 public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
-    this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
+    this.leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
 
@@ -9875,7 +9845,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
             } else {
                 scon.qsc_search(inp);
             }
-            this._leoGotoProvider.refreshTreeRoot();
+            this.leoGotoProvider.refreshTreeRoot();
             void this.showGotoPane({ preserveFocus: true }); // show but dont change focus
         }, 10);
 
@@ -9922,6 +9892,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
     }
 
 }
+
 </t>
 <t tx="felix.20220505215924.1"></t>
 <t tx="felix.20220505215924.12">/**
@@ -10501,20 +10472,21 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
 
     private _lastGotoView: vscode.TreeView&lt;LeoGotoNode&gt; | undefined;
 
-    private _nodeList: LeoGotoNode[] = []; // Node list kept here.
+    public nodeList: LeoGotoNode[] = []; // Node list kept here.
     private _viewSwitch: boolean = false;
 
     private _selectedNodeIndex: number = 0;
 
     constructor(private _leoUI: LeoUI) {
         this.onDidChangeTreeData(() =&gt; {
+            this.getChildren();
             this._leoUI.setGotoContent();
         }, this);
     }
 
-    public setLastGotoView(p_view: vscode.TreeView&lt;LeoGotoNode&gt;): void {
-        this._lastGotoView = p_view;
-        if (this._nodeList &amp;&amp; this._nodeList.length) {
+    public setLastGotoView(): void {
+        // this._lastGotoView = p_view;
+        if (this.nodeList &amp;&amp; this.nodeList.length) {
             this._viewSwitch = true;
             this._onDidChangeTreeData.fire(undefined);
         }
@@ -10527,7 +10499,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     public resetSelectedNode(p_node?: LeoGotoNode): void {
         this._selectedNodeIndex = 0;
         if (p_node) {
-            const w_found = this._nodeList.indexOf(p_node);
+            const w_found = this.nodeList.indexOf(p_node);
             if (w_found &gt;= 0) {
                 this._selectedNodeIndex = w_found;
                 return;
@@ -10536,7 +10508,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public async navigateNavEntry(p_nav: LeoGotoNavKey): Promise&lt;void&gt; {
-        if (!this._nodeList.length) {
+        if (!this.nodeList.length) {
             return;
         }
         switch (p_nav.valueOf()) {
@@ -10545,11 +10517,11 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                 break;
 
             case LeoGotoNavKey.last:
-                this._selectedNodeIndex = this._nodeList.length - 1;
+                this._selectedNodeIndex = this.nodeList.length - 1;
                 break;
 
             case LeoGotoNavKey.next:
-                if (this._selectedNodeIndex &lt; this._nodeList.length - 1) {
+                if (this._selectedNodeIndex &lt; this.nodeList.length - 1) {
                     this._selectedNodeIndex += 1;
                 }
                 break;
@@ -10560,19 +10532,20 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                 }
                 break;
         }
-        const node = this._nodeList[this._selectedNodeIndex];
+        const node = this.nodeList[this._selectedNodeIndex];
         await this._leoUI.gotoNavEntry(node);
-        await this._lastGotoView?.reveal(node, {
-            select: true,
-            focus: true
-        });
+        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+        // await this._lastGotoView?.reveal(node, {
+        //     select: true,
+        //     focus: true
+        // });
     }
 
     /**
      * * Refresh the whole outline
      */
     public refreshTreeRoot(): void {
-        this._nodeList = [];
+        this.nodeList = [];
         this._selectedNodeIndex = 0;
         this._onDidChangeTreeData.fire(undefined);
     }
@@ -10582,24 +10555,28 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public getChildren(element?: LeoGotoNode): LeoGotoNode[] {
-
+        console.log('---------------------- GET CHILDREN !');
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady &amp;&amp; !element) {
 
             // WAS JUST A VIEW SWITCH:
             if (this._viewSwitch) {
                 this._viewSwitch = false;
+                console.log('WAS JUST A VIEW SWITCH ! !');
                 setTimeout(() =&gt; {
-                    if (this._nodeList.length &amp;&amp; (this._selectedNodeIndex + 1) &lt;= this._nodeList.length) {
-                        void this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
-                            select: true,
-                            focus: false
-                        }).then(() =&gt; { }, () =&gt; {
-                            console.log('Reveal failed for goto panel switching detected.');
-                        });
+                    if (this.nodeList.length &amp;&amp; (this._selectedNodeIndex + 1) &lt;= this.nodeList.length) {
+
+                        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+
+                        // void this._lastGotoView?.reveal(this.nodeList[this._selectedNodeIndex], {
+                        //     select: true,
+                        //     focus: false
+                        // }).then(() =&gt; { }, () =&gt; {
+                        //     console.log('Reveal failed for goto panel switching detected.');
+                        // });
                     }
                 }, 0);
-                return this._nodeList; // Make sure the nodes are valid (give back)
+                return this.nodeList; // Make sure the nodes are valid (give back)
             }
 
             const c = g.app.windowList[this._leoUI.frameIndex].c;
@@ -10623,17 +10600,17 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
             result["navText"] = scon.navText;
             result["navOptions"] = { "isTag": scon.isTag, "showParents": scon.showParents };
 
-            this._nodeList = [];
+            this.nodeList = [];
             if (result &amp;&amp; result.navList) {
 
                 const w_navList: LeoGoto[] = result.navList;
                 if (w_navList &amp;&amp; w_navList.length) {
                     w_navList.forEach((p_goto: LeoGoto) =&gt; {
                         const w_newNode = new LeoGotoNode(this._leoUI, p_goto, result.navOptions!);
-                        this._nodeList.push(w_newNode);
+                        this.nodeList.push(w_newNode);
                     });
                 }
-                return this._nodeList;
+                return this.nodeList;
             } else {
                 return [];
             }
@@ -12554,7 +12531,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                         if (this._refreshType.goto) {
                             this._refreshType.goto = false;
                             let w_viewName: string;
-                            const gotoView = this._leoGotoProvider.getLastGotoView();
+                            const gotoView = this.leoGotoProvider.getLastGotoView();
                             if (gotoView &amp;&amp; gotoView.title === "Goto") {
                                 w_viewName = Constants.GOTO_ID;
                             } else {
@@ -13148,7 +13125,7 @@ private _onGotoTreeViewVisibilityChanged(
 ): void {
     if (p_event.visible) {
         // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
-        this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
+        // this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
     }
 }
 
@@ -13947,7 +13924,7 @@ public static OLD_POS_OFFSETS = {
  * * Goto the next, previous, first or last nav entry via arrow keys in
  */
 public navigateNavEntry(p_nav: LeoGotoNavKey): void {
-    void this._leoGotoProvider.navigateNavEntry(p_nav);
+    void this.leoGotoProvider.navigateNavEntry(p_nav);
 }
 
 </t>
@@ -14374,7 +14351,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
  * Goto Panel May be refreshed by other services (states service, ...)
  */
 private _refreshGotoPane(): void {
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
 }
 
 </t>
@@ -15093,7 +15070,7 @@ public navTextClear(): void {
 
     scon.clear();
 
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
 }
 
 </t>
@@ -15656,11 +15633,12 @@ set leoEditHeadline(p_value: boolean) {
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
-    let activeTab = 'tab1'; // Initial active tab
+    let activeTab = 'tab2'; // Initial active tab
     let firstFindTabElId = 'findText';
     let lastFindTabElId = 'searchBody';
     let firstNavTabElId = 'searchOptions';
     let lastNavTabElId = 'navText';
+    let lastGotoContent = [];
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -15770,26 +15748,42 @@ set leoEditHeadline(p_value: boolean) {
 
     }
 
-    const selectableDiv = document.getElementById('gotopane');
+    const gotoPaneContainer = document.getElementById('gotopane');
 
     document.body.addEventListener('mousedown', () =&gt; {
-        if (!selectableDiv) {
+        if (!gotoPaneContainer) {
             return;
         }
         // remove selected class first
-        for (const child of selectableDiv.children) {
+        for (const child of gotoPaneContainer.children) {
             child.classList.remove('selected');
         }
     });
 
+    function clickedGotoItem(event) {
+        if (!gotoPaneContainer) {
+            return;
+        }
+        // remove selected class first
+        for (const child of gotoPaneContainer.children) {
+            child.classList.remove('selected');
+        }
+        event.target.classList.add('selected');
+        event.stopPropagation();
+        // CALL GOTO COMMAND!
+        vscode.postMessage({ type: 'gotoCommand', value: event.target.dataset.order });
+    }
+
     function fillGotoPane(p_gotoContent) {
-        if (!selectableDiv) {
+        lastGotoContent = p_gotoContent;
+        if (!gotoPaneContainer) {
             return;
         }
         let i = 0;
-        while (selectableDiv &amp;&amp; selectableDiv.firstChild) {
-            selectableDiv.removeChild(selectableDiv.firstChild);
+        while (gotoPaneContainer &amp;&amp; gotoPaneContainer.firstChild) {
+            gotoPaneContainer.removeChild(gotoPaneContainer.firstChild);
         }
+        let hasParent = false;
         for (const gotoItem of p_gotoContent) {
             const smallerDiv = document.createElement('div');
             smallerDiv.dataset.order = i.toString();
@@ -15797,17 +15791,16 @@ set leoEditHeadline(p_value: boolean) {
             smallerDiv.textContent = gotoItem.label;
             // smallerDiv.title = gotoItem.tooltip; // TOOLTIPS CANNOT BE STYLED!
             smallerDiv.setAttribute('tabindex', '0');
-            smallerDiv.addEventListener('mousedown', (event) =&gt; {
-                // remove selected class first
-                for (const child of selectableDiv.children) {
-                    child.classList.remove('selected');
-                }
-                // @ts-expect-error
-                event.target.classList.add('selected');
-                event.stopPropagation();
-            });
-            selectableDiv.appendChild(smallerDiv);
+            if (gotoItem.entryType === 'parent') {
+                hasParent = true;
+            }
+            smallerDiv.addEventListener('mousedown', clickedGotoItem);
+            gotoPaneContainer.appendChild(smallerDiv);
             i = i + 1;
+        }
+        gotoPaneContainer.classList.remove('show-parents');
+        if (hasParent) {
+            gotoPaneContainer.classList.add('show-parents');
         }
     }
 
@@ -15915,7 +15908,7 @@ set leoEditHeadline(p_value: boolean) {
         if (!p_event) {
             p_event = window.event;
         }
-        var keyCode = p_event.code || p_event.key;
+        const keyCode = p_event.code || p_event.key;
 
         // Detect CTRL+F
         if (p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 70) {
@@ -15969,20 +15962,60 @@ set leoEditHeadline(p_value: boolean) {
         */
 
         if (keyCode === 'Tab') {
-            var actEl = document.activeElement;
-            var lastEl;
-            var firstEl;
+            const actEl = document.activeElement;
+            let lastEl;
+            let firstEl;
+            let selectedNavEl;
             if (activeTab === 'tab2') {
                 // find panel
                 lastEl = document.getElementById(lastFindTabElId);
                 firstEl = document.getElementById(firstFindTabElId);
-            } else if (activeTab === 'tab3') {
-                // nav panel
+            } else if (activeTab === 'tab3' &amp;&amp; !lastGotoContent.length) {
+                // nav panel regular
                 lastEl = document.getElementById(lastNavTabElId);
                 firstEl = document.getElementById(firstNavTabElId);
+            } else if (activeTab === 'tab3' &amp;&amp; lastGotoContent.length &amp;&amp; gotoPaneContainer) {
+                // nav panel WITH nav results.
+                lastEl = document.getElementById(lastNavTabElId);
+                firstEl = document.getElementById(firstNavTabElId);
+                selectedNavEl = gotoPaneContainer?.children[0];
+
+                for (const gotoItem of gotoPaneContainer.children) {
+                    if (gotoItem.classList.contains('selected')) {
+                        selectedNavEl = gotoItem;
+                        break;
+                    }
+                }
+
+                if (actEl?.classList.contains('goto-item')) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (p_event.shiftKey) {
+                        lastEl = document.getElementById(lastNavTabElId);
+                        if (lastEl) {
+                            lastEl.focus();
+                        }
+                    } else {
+                        if (firstEl) {
+                            firstEl.focus();
+                        }
+                    }
+                    return;
+                }
+
             }
 
             if (p_event.shiftKey) {
+                if (selectedNavEl &amp;&amp; actEl === firstEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    // @ts-expect-error
+                    selectedNavEl.focus();
+                    selectedNavEl.classList.add('selected');
+                    return;
+                }
                 // shift + tab so if first got last
                 if (lastEl &amp;&amp; actEl === firstEl) {
                     p_event.preventDefault();
@@ -15992,6 +16025,15 @@ set leoEditHeadline(p_value: boolean) {
                     return;
                 }
             } else {
+                if (selectedNavEl &amp;&amp; actEl === lastEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    // @ts-expect-error
+                    selectedNavEl.focus();
+                    selectedNavEl.classList.add('selected');
+                    return;
+                }
                 // tab, so if last goto first
                 if (firstEl &amp;&amp; actEl === lastEl) {
                     p_event.preventDefault();
@@ -16001,6 +16043,76 @@ set leoEditHeadline(p_value: boolean) {
                     return;
                 }
             }
+        }
+
+        if (activeTab === 'tab3' &amp;&amp; lastGotoContent.length) {
+            navKeyHandler(p_event);
+        }
+
+    }
+
+    function navKeyHandler(p_event) {
+        // Handles up/down home/end pgUp/pgDown
+        // for GOTO PANE navigation under the nav input
+        // if(gotoPaneContainer){
+        //     gotoPaneContainer
+        // }
+        if (!p_event) {
+            p_event = window.event;
+        }
+        const keyCode = p_event.code || p_event.key;
+        console.log('navKeyHandler', keyCode);
+
+        let code = -1;
+        switch (keyCode) {
+            case 'ArrowUp':
+                code = 0;
+                break;
+            case 'ArrowDown':
+                code = 1;
+                break;
+            case 'PageUp':
+                code = 2;
+                break;
+            case 'PageDown':
+                code = 3;
+                break;
+            case 'Home':
+                code = 2;
+                break;
+            case 'End':
+                code = 3;
+                break;
+            case 'Enter':
+                const actEl = document.activeElement;
+                if (actEl &amp;&amp; actEl.classList.contains('goto-item')) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (!gotoPaneContainer) {
+                        return;
+                    }
+                    // remove selected class first
+                    for (const child of gotoPaneContainer.children) {
+                        child.classList.remove('selected');
+                    }
+                    actEl.classList.add('selected');
+                    // CALL GOTO COMMAND!
+                    console.log('ENTER ON A SELECTION!');
+                    // @ts-expect-error
+                    vscode.postMessage({ type: 'gotoCommand', value: actEl.dataset.order });
+                    return;
+                }
+                break;
+
+            default:
+                break;
+        }
+        if (code &gt;= 0) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            p_event.stopImmediatePropagation();
+            vscode.postMessage({ type: 'navigateNavEntry', value: code });
         }
     }
 
@@ -16072,7 +16184,7 @@ set leoEditHeadline(p_value: boolean) {
                 // @ts-expect-error
                 p_event = window.event;
             }
-            var keyCode = p_event.code || p_event.key;
+            const keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
                 if (searchSettings.navText.length === 0 &amp;&amp; searchSettings.isTag) {
                     setFrozen(false);
@@ -16157,7 +16269,7 @@ set leoEditHeadline(p_value: boolean) {
                     // @ts-expect-error
                     p_event = window.event;
                 }
-                var keyCode = p_event.code || p_event.key;
+                const keyCode = p_event.code || p_event.key;
                 if (keyCode === 'Enter') {
                     if (timer) {
                         clearTimeout(timer);
@@ -16206,7 +16318,7 @@ set leoEditHeadline(p_value: boolean) {
     const tabs = document.querySelectorAll('.tab-item');
     const contents = document.querySelectorAll('.tab-content');
 
-    function activateTab(newTab, replace) {
+    function showTab(newTab) {
         // Remove active class from all tabs and contents
         tabs.forEach(t =&gt; t.classList.remove('active'));
         contents.forEach(c =&gt; c.classList.remove('active'));
@@ -16219,6 +16331,10 @@ set leoEditHeadline(p_value: boolean) {
 
         // Update the active tab state
         activeTab = newTab;
+    }
+
+    function activateTab(newTab, replace) {
+        showTab(newTab);
         setTimeout(() =&gt; {
             if (activeTab === 'tab2') {
                 if (replace) {
@@ -16231,6 +16347,29 @@ set leoEditHeadline(p_value: boolean) {
             }
         }, 0);
     };
+
+    function revealNavEntry(p_index) {
+        showTab('tab3');
+        setTimeout(() =&gt; {
+            console.log('REVEAL NAV ENTRY INDEX:', p_index);
+            if (!gotoPaneContainer) {
+                return;
+            }
+            let i = 0;
+            for (const child of gotoPaneContainer.children) {
+                child.classList.remove('selected');
+                if (i === p_index) {
+                    child.classList.add('selected');
+                    console.log(document.visibilityState);
+                    // @ts-expect-error
+                    child.focus();
+                }
+                // also select
+                i = i + 1;
+            }
+
+        }, 0);
+    }
 
     tabs.forEach(tab =&gt; {
         tab.addEventListener('mousedown', (event) =&gt; {
@@ -16275,12 +16414,13 @@ set leoEditHeadline(p_value: boolean) {
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', (event) =&gt; {
         const message = event.data; // The json data that the extension sent
+        console.log('GOT message', message.type, message);
         switch (message.type) {
             // * Nav Tab Controls
             // Focus and select all text in 'nav' field
             case 'selectNav': {
                 // focusOnField('navText');
-                activateTab('tab2');
+                activateTab('tab3');
 
                 if (message.text || message.text === "") {
                     // @ts-expect-error
@@ -16293,6 +16433,14 @@ set leoEditHeadline(p_value: boolean) {
                 }
                 break;
             }
+            case 'showGoto': {
+                showTab('tab3');
+                break;
+            }
+            case 'revealNavEntry': {
+                revealNavEntry(message.value);
+                break;
+            }
             // * Find Tab Controls
             // Focus and select all text in 'find' field
             case 'selectFind': {
@@ -16303,7 +16451,7 @@ set leoEditHeadline(p_value: boolean) {
             // Focus and select all text in 'replace' field
             case 'selectReplace': {
                 //focusOnField('replaceText');
-                activateTab('tab3', true);
+                activateTab('tab2', true);
                 break;
             }
             case 'getSettings': {
@@ -16726,6 +16874,42 @@ div.col-nav {
     line-height: 22px;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.goto-item.generic {
+    padding-left: 20px;
+}
+.goto-item.parent {
+    padding-left: 20px;
+}
+.goto-item.headline {
+    font-weight: bold;
+    padding-left: 20px;
+}
+.goto-item.body {
+    padding-left: 30px;
+}
+.goto-item.tag {
+    font-weight: bold;
+    padding-left: 20px;
+}
+
+.show-parents .goto-item.generic {
+    padding-left: 20px;
+}
+.show-parents .goto-item.parent {
+    padding-left: 20px;
+}
+.show-parents .goto-item.headline {
+    font-weight: bold;
+    padding-left: 30px;
+}
+.show-parents .goto-item.body {
+    padding-left: 40px;
+}
+.show-parents .goto-item.tag {
+    font-weight: bold;
+    padding-left: 30px;
 }
 
 .goto-item:hover {
@@ -18794,7 +18978,7 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
 
 </t>
 <t tx="felix.20240529234358.1">public showNavResults(): Thenable&lt;unknown&gt; {
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
 }
 
@@ -18847,8 +19031,7 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
  * Send the new content of the goto pane to the findPanel.
  */
 public setGotoContent(): void {
-    this._lastGotoContent = this._leoGotoProvider.getChildren();
-    const content = this._lastGotoContent.map(
+    const content = this.leoGotoProvider.nodeList.map(
         (gotoNode) =&gt; {
             return {
                 "tooltip": gotoNode.tooltip,
@@ -18864,6 +19047,19 @@ public setGotoContent(): void {
     }
     if (this._findPanelWebviewView) {
         void this._findPanelWebviewView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
+    }
+}
+
+</t>
+<t tx="felix.20240630150534.1">/**
+ * Reveals and selects the specific nav entry in the results of the nav pane.
+ */
+public revealGotoNavEntry(p_index: number): void {
+    if (this._findPanelWebviewExplorerView) {
+        void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
+    }
+    if (this._findPanelWebviewView) {
+        void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
     }
 }
 

@@ -17,20 +17,21 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
 
     private _lastGotoView: vscode.TreeView<LeoGotoNode> | undefined;
 
-    private _nodeList: LeoGotoNode[] = []; // Node list kept here.
+    public nodeList: LeoGotoNode[] = []; // Node list kept here.
     private _viewSwitch: boolean = false;
 
     private _selectedNodeIndex: number = 0;
 
     constructor(private _leoUI: LeoUI) {
         this.onDidChangeTreeData(() => {
+            this.getChildren();
             this._leoUI.setGotoContent();
         }, this);
     }
 
-    public setLastGotoView(p_view: vscode.TreeView<LeoGotoNode>): void {
-        this._lastGotoView = p_view;
-        if (this._nodeList && this._nodeList.length) {
+    public setLastGotoView(): void {
+        // this._lastGotoView = p_view;
+        if (this.nodeList && this.nodeList.length) {
             this._viewSwitch = true;
             this._onDidChangeTreeData.fire(undefined);
         }
@@ -43,7 +44,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     public resetSelectedNode(p_node?: LeoGotoNode): void {
         this._selectedNodeIndex = 0;
         if (p_node) {
-            const w_found = this._nodeList.indexOf(p_node);
+            const w_found = this.nodeList.indexOf(p_node);
             if (w_found >= 0) {
                 this._selectedNodeIndex = w_found;
                 return;
@@ -52,7 +53,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     }
 
     public async navigateNavEntry(p_nav: LeoGotoNavKey): Promise<void> {
-        if (!this._nodeList.length) {
+        if (!this.nodeList.length) {
             return;
         }
         switch (p_nav.valueOf()) {
@@ -61,11 +62,11 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                 break;
 
             case LeoGotoNavKey.last:
-                this._selectedNodeIndex = this._nodeList.length - 1;
+                this._selectedNodeIndex = this.nodeList.length - 1;
                 break;
 
             case LeoGotoNavKey.next:
-                if (this._selectedNodeIndex < this._nodeList.length - 1) {
+                if (this._selectedNodeIndex < this.nodeList.length - 1) {
                     this._selectedNodeIndex += 1;
                 }
                 break;
@@ -76,19 +77,20 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                 }
                 break;
         }
-        const node = this._nodeList[this._selectedNodeIndex];
+        const node = this.nodeList[this._selectedNodeIndex];
         await this._leoUI.gotoNavEntry(node);
-        await this._lastGotoView?.reveal(node, {
-            select: true,
-            focus: true
-        });
+        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+        // await this._lastGotoView?.reveal(node, {
+        //     select: true,
+        //     focus: true
+        // });
     }
 
     /**
      * * Refresh the whole outline
      */
     public refreshTreeRoot(): void {
-        this._nodeList = [];
+        this.nodeList = [];
         this._selectedNodeIndex = 0;
         this._onDidChangeTreeData.fire(undefined);
     }
@@ -98,24 +100,28 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     }
 
     public getChildren(element?: LeoGotoNode): LeoGotoNode[] {
-
+        console.log('---------------------- GET CHILDREN !');
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady && !element) {
 
             // WAS JUST A VIEW SWITCH:
             if (this._viewSwitch) {
                 this._viewSwitch = false;
+                console.log('WAS JUST A VIEW SWITCH ! !');
                 setTimeout(() => {
-                    if (this._nodeList.length && (this._selectedNodeIndex + 1) <= this._nodeList.length) {
-                        void this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
-                            select: true,
-                            focus: false
-                        }).then(() => { }, () => {
-                            console.log('Reveal failed for goto panel switching detected.');
-                        });
+                    if (this.nodeList.length && (this._selectedNodeIndex + 1) <= this.nodeList.length) {
+
+                        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+
+                        // void this._lastGotoView?.reveal(this.nodeList[this._selectedNodeIndex], {
+                        //     select: true,
+                        //     focus: false
+                        // }).then(() => { }, () => {
+                        //     console.log('Reveal failed for goto panel switching detected.');
+                        // });
                     }
                 }, 0);
-                return this._nodeList; // Make sure the nodes are valid (give back)
+                return this.nodeList; // Make sure the nodes are valid (give back)
             }
 
             const c = g.app.windowList[this._leoUI.frameIndex].c;
@@ -139,17 +145,17 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
             result["navText"] = scon.navText;
             result["navOptions"] = { "isTag": scon.isTag, "showParents": scon.showParents };
 
-            this._nodeList = [];
+            this.nodeList = [];
             if (result && result.navList) {
 
                 const w_navList: LeoGoto[] = result.navList;
                 if (w_navList && w_navList.length) {
                     w_navList.forEach((p_goto: LeoGoto) => {
                         const w_newNode = new LeoGotoNode(this._leoUI, p_goto, result.navOptions!);
-                        this._nodeList.push(w_newNode);
+                        this.nodeList.push(w_newNode);
                     });
                 }
-                return this._nodeList;
+                return this.nodeList;
             } else {
                 return [];
             }

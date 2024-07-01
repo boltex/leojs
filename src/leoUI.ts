@@ -177,10 +177,10 @@ export class LeoUI extends NullGui {
     private _lastLeoDocuments: vscode.TreeView<LeoFrame> | undefined;
 
     // * Goto nav panel
-    private _leoGotoProvider!: LeoGotoProvider;
-    private _leoGoto!: vscode.TreeView<LeoGotoNode>;
-    private _leoGotoExplorer!: vscode.TreeView<LeoGotoNode>;
-    private _lastGotoContent: LeoGotoNode[] = [];
+    public leoGotoProvider!: LeoGotoProvider;
+    // private _leoGoto!: vscode.TreeView<LeoGotoNode>;
+    // private _leoGotoExplorer!: vscode.TreeView<LeoGotoNode>;
+    // public lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -452,21 +452,21 @@ export class LeoUI extends NullGui {
         this._lastLeoButtons = this._leoButtonsExplorer;
 
         // * Create goto Treeview Providers and tree views
-        this._leoGotoProvider = new LeoGotoProvider(this);
-        this._leoGoto = vscode.window.createTreeView(Constants.GOTO_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-        this._context.subscriptions.push(
-            this._leoGoto,
-            this._leoGoto.onDidChangeVisibility((p_event) =>
-                this._onGotoTreeViewVisibilityChanged(p_event, false)
-            )
-        );
-        this._leoGotoExplorer = vscode.window.createTreeView(Constants.GOTO_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-        this._context.subscriptions.push(
-            this._leoGotoExplorer,
-            this._leoGotoExplorer.onDidChangeVisibility((p_event) =>
-                this._onGotoTreeViewVisibilityChanged(p_event, true)
-            )
-        );
+        this.leoGotoProvider = new LeoGotoProvider(this);
+        // this._leoGoto = vscode.window.createTreeView(Constants.GOTO_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
+        // this._context.subscriptions.push(
+        //     this._leoGoto,
+        //     this._leoGoto.onDidChangeVisibility((p_event) =>
+        //         this._onGotoTreeViewVisibilityChanged(p_event, false)
+        //     )
+        // );
+        // this._leoGotoExplorer = vscode.window.createTreeView(Constants.GOTO_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
+        // this._context.subscriptions.push(
+        //     this._leoGotoExplorer,
+        //     this._leoGotoExplorer.onDidChangeVisibility((p_event) =>
+        //         this._onGotoTreeViewVisibilityChanged(p_event, true)
+        //     )
+        // );
 
         // * Create Undos Treeview Providers and tree views
         this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this, this.undoIcons);
@@ -1095,7 +1095,7 @@ export class LeoUI extends NullGui {
     ): void {
         if (p_event.visible) {
             // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
-            this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
+            // this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
         }
     }
 
@@ -2309,7 +2309,7 @@ export class LeoUI extends NullGui {
     }
 
     public showNavResults(): Thenable<unknown> {
-        this._leoGotoProvider.refreshTreeRoot();
+        this.leoGotoProvider.refreshTreeRoot();
         return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
     }
 
@@ -2582,7 +2582,7 @@ export class LeoUI extends NullGui {
      * Goto Panel May be refreshed by other services (states service, ...)
      */
     private _refreshGotoPane(): void {
-        this._leoGotoProvider.refreshTreeRoot();
+        this.leoGotoProvider.refreshTreeRoot();
     }
 
     /**
@@ -3354,7 +3354,7 @@ export class LeoUI extends NullGui {
                             if (this._refreshType.goto) {
                                 this._refreshType.goto = false;
                                 let w_viewName: string;
-                                const gotoView = this._leoGotoProvider.getLastGotoView();
+                                const gotoView = this.leoGotoProvider.getLastGotoView();
                                 if (gotoView && gotoView.title === "Goto") {
                                     w_viewName = Constants.GOTO_ID;
                                 } else {
@@ -4595,7 +4595,7 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
         scon.qsc_sort_by_gnx();
-        this._leoGotoProvider.refreshTreeRoot();
+        this.leoGotoProvider.refreshTreeRoot();
         return this.showGotoPane(); // Finish by opening and focussing nav pane
     }
 
@@ -4606,7 +4606,7 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
         scon.qsc_find_changed();
-        this._leoGotoProvider.refreshTreeRoot();
+        this.leoGotoProvider.refreshTreeRoot();
         return this.showGotoPane(); // Finish by opening and focussing nav pane
     }
 
@@ -4617,7 +4617,7 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
         scon.qsc_get_history();
-        this._leoGotoProvider.refreshTreeRoot();
+        this.leoGotoProvider.refreshTreeRoot();
         return this.showGotoPane(); // Finish by opening and focussing nav pane
     }
 
@@ -4628,8 +4628,16 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
         scon.qsc_show_marked();
-        this._leoGotoProvider.refreshTreeRoot();
-        if (p_preserveFocus && (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
+        this.leoGotoProvider.refreshTreeRoot();
+        // if (p_preserveFocus && (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
+        //     return Promise.resolve();
+        // }
+        if (
+            p_preserveFocus && (
+                (this._findPanelWebviewView && this._findPanelWebviewView.visible) ||
+                (this._findPanelWebviewExplorerView && this._findPanelWebviewExplorerView.visible)
+            )
+        ) {
             return Promise.resolve();
         }
         return this.showGotoPane(); // Finish by opening and focussing nav pane
@@ -4640,17 +4648,32 @@ export class LeoUI extends NullGui {
      */
     public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable<unknown> {
         void this.triggerBodySave(true);
-        let w_panel = "";
 
+        // if (this._lastTreeView === this._leoTreeExView) {
+        //     w_panel = Constants.GOTO_EXPLORER_ID;
+        // } else {
+        //     w_panel = Constants.GOTO_ID;
+        // }
+
+        // void vscode.commands.executeCommand(w_panel + '.focus', p_options);
+
+        let w_panelID = '';
+        let w_panel: vscode.WebviewView | undefined;
         if (this._lastTreeView === this._leoTreeExView) {
-            w_panel = Constants.GOTO_EXPLORER_ID;
+            w_panelID = Constants.FIND_EXPLORER_ID;
+            w_panel = this._findPanelWebviewExplorerView;
         } else {
-            w_panel = Constants.GOTO_ID;
+            w_panelID = Constants.FIND_ID;
+            w_panel = this._findPanelWebviewView;
         }
+        return vscode.commands.executeCommand(w_panelID + '.focus', p_options).then((p_result) => {
+            if (w_panel && w_panel.show && !w_panel.visible) {
+                w_panel.show(false);
+            }
+            const w_message: { [key: string]: string } = { type: 'showGoto' };
+            void w_panel?.webview.postMessage(w_message);
+        });
 
-        void vscode.commands.executeCommand(w_panel + '.focus', p_options);
-
-        return Promise.resolve();
     }
 
     /**
@@ -4659,7 +4682,7 @@ export class LeoUI extends NullGui {
     public async gotoNavEntry(p_node: LeoGotoNode): Promise<unknown> {
 
         await this.triggerBodySave(true);
-        this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
+        this.leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
 
@@ -4702,7 +4725,7 @@ export class LeoUI extends NullGui {
                 } else {
                     scon.qsc_search(inp);
                 }
-                this._leoGotoProvider.refreshTreeRoot();
+                this.leoGotoProvider.refreshTreeRoot();
                 void this.showGotoPane({ preserveFocus: true }); // show but dont change focus
             }, 10);
 
@@ -4749,11 +4772,24 @@ export class LeoUI extends NullGui {
         }
 
     }
+
+    /**
+     * Reveals and selects the specific nav entry in the results of the nav pane.
+     */
+    public revealGotoNavEntry(p_index: number): void {
+        if (this._findPanelWebviewExplorerView) {
+            void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
+        }
+        if (this._findPanelWebviewView) {
+            void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
+        }
+    }
+
     /**
      * * Goto the next, previous, first or last nav entry via arrow keys in
      */
     public navigateNavEntry(p_nav: LeoGotoNavKey): void {
-        void this._leoGotoProvider.navigateNavEntry(p_nav);
+        void this.leoGotoProvider.navigateNavEntry(p_nav);
     }
 
     private _get_focus(): string {
@@ -4811,7 +4847,7 @@ export class LeoUI extends NullGui {
 
         scon.clear();
 
-        this._leoGotoProvider.refreshTreeRoot();
+        this.leoGotoProvider.refreshTreeRoot();
     }
 
     /**
@@ -5203,8 +5239,7 @@ export class LeoUI extends NullGui {
      * Send the new content of the goto pane to the findPanel.
      */
     public setGotoContent(): void {
-        this._lastGotoContent = this._leoGotoProvider.getChildren();
-        const content = this._lastGotoContent.map(
+        const content = this.leoGotoProvider.nodeList.map(
             (gotoNode) => {
                 return {
                     "tooltip": gotoNode.tooltip,

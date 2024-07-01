@@ -398,6 +398,42 @@ div.col-nav {
     text-overflow: ellipsis;
 }
 
+.goto-item.generic {
+    padding-left: 20px;
+}
+.goto-item.parent {
+    padding-left: 20px;
+}
+.goto-item.headline {
+    font-weight: bold;
+    padding-left: 20px;
+}
+.goto-item.body {
+    padding-left: 30px;
+}
+.goto-item.tag {
+    font-weight: bold;
+    padding-left: 20px;
+}
+
+.show-parents .goto-item.generic {
+    padding-left: 20px;
+}
+.show-parents .goto-item.parent {
+    padding-left: 20px;
+}
+.show-parents .goto-item.headline {
+    font-weight: bold;
+    padding-left: 30px;
+}
+.show-parents .goto-item.body {
+    padding-left: 40px;
+}
+.show-parents .goto-item.tag {
+    font-weight: bold;
+    padding-left: 30px;
+}
+
 .goto-item:hover {
     background-color: var(--vscode-list-hoverBackground);
 }

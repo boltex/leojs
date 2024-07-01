@@ -12,11 +12,12 @@
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
-    let activeTab = 'tab1'; // Initial active tab
+    let activeTab = 'tab2'; // Initial active tab
     let firstFindTabElId = 'findText';
     let lastFindTabElId = 'searchBody';
     let firstNavTabElId = 'searchOptions';
     let lastNavTabElId = 'navText';
+    let lastGotoContent = [];
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -126,26 +127,42 @@
 
     }
 
-    const selectableDiv = document.getElementById('gotopane');
+    const gotoPaneContainer = document.getElementById('gotopane');
 
     document.body.addEventListener('mousedown', () => {
-        if (!selectableDiv) {
+        if (!gotoPaneContainer) {
             return;
         }
         // remove selected class first
-        for (const child of selectableDiv.children) {
+        for (const child of gotoPaneContainer.children) {
             child.classList.remove('selected');
         }
     });
 
+    function clickedGotoItem(event) {
+        if (!gotoPaneContainer) {
+            return;
+        }
+        // remove selected class first
+        for (const child of gotoPaneContainer.children) {
+            child.classList.remove('selected');
+        }
+        event.target.classList.add('selected');
+        event.stopPropagation();
+        // CALL GOTO COMMAND!
+        vscode.postMessage({ type: 'gotoCommand', value: event.target.dataset.order });
+    }
+
     function fillGotoPane(p_gotoContent) {
-        if (!selectableDiv) {
+        lastGotoContent = p_gotoContent;
+        if (!gotoPaneContainer) {
             return;
         }
         let i = 0;
-        while (selectableDiv && selectableDiv.firstChild) {
-            selectableDiv.removeChild(selectableDiv.firstChild);
+        while (gotoPaneContainer && gotoPaneContainer.firstChild) {
+            gotoPaneContainer.removeChild(gotoPaneContainer.firstChild);
         }
+        let hasParent = false;
         for (const gotoItem of p_gotoContent) {
             const smallerDiv = document.createElement('div');
             smallerDiv.dataset.order = i.toString();
@@ -153,17 +170,16 @@
             smallerDiv.textContent = gotoItem.label;
             // smallerDiv.title = gotoItem.tooltip; // TOOLTIPS CANNOT BE STYLED!
             smallerDiv.setAttribute('tabindex', '0');
-            smallerDiv.addEventListener('mousedown', (event) => {
-                // remove selected class first
-                for (const child of selectableDiv.children) {
-                    child.classList.remove('selected');
-                }
-                // @ts-expect-error
-                event.target.classList.add('selected');
-                event.stopPropagation();
-            });
-            selectableDiv.appendChild(smallerDiv);
+            if (gotoItem.entryType === 'parent') {
+                hasParent = true;
+            }
+            smallerDiv.addEventListener('mousedown', clickedGotoItem);
+            gotoPaneContainer.appendChild(smallerDiv);
             i = i + 1;
+        }
+        gotoPaneContainer.classList.remove('show-parents');
+        if (hasParent) {
+            gotoPaneContainer.classList.add('show-parents');
         }
     }
 
@@ -271,7 +287,7 @@
         if (!p_event) {
             p_event = window.event;
         }
-        var keyCode = p_event.code || p_event.key;
+        const keyCode = p_event.code || p_event.key;
 
         // Detect CTRL+F
         if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 70) {
@@ -325,20 +341,60 @@
         */
 
         if (keyCode === 'Tab') {
-            var actEl = document.activeElement;
-            var lastEl;
-            var firstEl;
+            const actEl = document.activeElement;
+            let lastEl;
+            let firstEl;
+            let selectedNavEl;
             if (activeTab === 'tab2') {
                 // find panel
                 lastEl = document.getElementById(lastFindTabElId);
                 firstEl = document.getElementById(firstFindTabElId);
-            } else if (activeTab === 'tab3') {
-                // nav panel
+            } else if (activeTab === 'tab3' && !lastGotoContent.length) {
+                // nav panel regular
                 lastEl = document.getElementById(lastNavTabElId);
                 firstEl = document.getElementById(firstNavTabElId);
+            } else if (activeTab === 'tab3' && lastGotoContent.length && gotoPaneContainer) {
+                // nav panel WITH nav results.
+                lastEl = document.getElementById(lastNavTabElId);
+                firstEl = document.getElementById(firstNavTabElId);
+                selectedNavEl = gotoPaneContainer?.children[0];
+
+                for (const gotoItem of gotoPaneContainer.children) {
+                    if (gotoItem.classList.contains('selected')) {
+                        selectedNavEl = gotoItem;
+                        break;
+                    }
+                }
+
+                if (actEl?.classList.contains('goto-item')) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (p_event.shiftKey) {
+                        lastEl = document.getElementById(lastNavTabElId);
+                        if (lastEl) {
+                            lastEl.focus();
+                        }
+                    } else {
+                        if (firstEl) {
+                            firstEl.focus();
+                        }
+                    }
+                    return;
+                }
+
             }
 
             if (p_event.shiftKey) {
+                if (selectedNavEl && actEl === firstEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    // @ts-expect-error
+                    selectedNavEl.focus();
+                    selectedNavEl.classList.add('selected');
+                    return;
+                }
                 // shift + tab so if first got last
                 if (lastEl && actEl === firstEl) {
                     p_event.preventDefault();
@@ -348,6 +404,15 @@
                     return;
                 }
             } else {
+                if (selectedNavEl && actEl === lastEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    // @ts-expect-error
+                    selectedNavEl.focus();
+                    selectedNavEl.classList.add('selected');
+                    return;
+                }
                 // tab, so if last goto first
                 if (firstEl && actEl === lastEl) {
                     p_event.preventDefault();
@@ -357,6 +422,76 @@
                     return;
                 }
             }
+        }
+
+        if (activeTab === 'tab3' && lastGotoContent.length) {
+            navKeyHandler(p_event);
+        }
+
+    }
+
+    function navKeyHandler(p_event) {
+        // Handles up/down home/end pgUp/pgDown
+        // for GOTO PANE navigation under the nav input
+        // if(gotoPaneContainer){
+        //     gotoPaneContainer
+        // }
+        if (!p_event) {
+            p_event = window.event;
+        }
+        const keyCode = p_event.code || p_event.key;
+        console.log('navKeyHandler', keyCode);
+
+        let code = -1;
+        switch (keyCode) {
+            case 'ArrowUp':
+                code = 0;
+                break;
+            case 'ArrowDown':
+                code = 1;
+                break;
+            case 'PageUp':
+                code = 2;
+                break;
+            case 'PageDown':
+                code = 3;
+                break;
+            case 'Home':
+                code = 2;
+                break;
+            case 'End':
+                code = 3;
+                break;
+            case 'Enter':
+                const actEl = document.activeElement;
+                if (actEl && actEl.classList.contains('goto-item')) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (!gotoPaneContainer) {
+                        return;
+                    }
+                    // remove selected class first
+                    for (const child of gotoPaneContainer.children) {
+                        child.classList.remove('selected');
+                    }
+                    actEl.classList.add('selected');
+                    // CALL GOTO COMMAND!
+                    console.log('ENTER ON A SELECTION!');
+                    // @ts-expect-error
+                    vscode.postMessage({ type: 'gotoCommand', value: actEl.dataset.order });
+                    return;
+                }
+                break;
+
+            default:
+                break;
+        }
+        if (code >= 0) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            p_event.stopImmediatePropagation();
+            vscode.postMessage({ type: 'navigateNavEntry', value: code });
         }
     }
 
@@ -428,7 +563,7 @@
                 // @ts-expect-error
                 p_event = window.event;
             }
-            var keyCode = p_event.code || p_event.key;
+            const keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
                 if (searchSettings.navText.length === 0 && searchSettings.isTag) {
                     setFrozen(false);
@@ -513,7 +648,7 @@
                     // @ts-expect-error
                     p_event = window.event;
                 }
-                var keyCode = p_event.code || p_event.key;
+                const keyCode = p_event.code || p_event.key;
                 if (keyCode === 'Enter') {
                     if (timer) {
                         clearTimeout(timer);
@@ -562,7 +697,7 @@
     const tabs = document.querySelectorAll('.tab-item');
     const contents = document.querySelectorAll('.tab-content');
 
-    function activateTab(newTab, replace) {
+    function showTab(newTab) {
         // Remove active class from all tabs and contents
         tabs.forEach(t => t.classList.remove('active'));
         contents.forEach(c => c.classList.remove('active'));
@@ -575,6 +710,10 @@
 
         // Update the active tab state
         activeTab = newTab;
+    }
+
+    function activateTab(newTab, replace) {
+        showTab(newTab);
         setTimeout(() => {
             if (activeTab === 'tab2') {
                 if (replace) {
@@ -587,6 +726,29 @@
             }
         }, 0);
     };
+
+    function revealNavEntry(p_index) {
+        showTab('tab3');
+        setTimeout(() => {
+            console.log('REVEAL NAV ENTRY INDEX:', p_index);
+            if (!gotoPaneContainer) {
+                return;
+            }
+            let i = 0;
+            for (const child of gotoPaneContainer.children) {
+                child.classList.remove('selected');
+                if (i === p_index) {
+                    child.classList.add('selected');
+                    console.log(document.visibilityState);
+                    // @ts-expect-error
+                    child.focus();
+                }
+                // also select
+                i = i + 1;
+            }
+
+        }, 0);
+    }
 
     tabs.forEach(tab => {
         tab.addEventListener('mousedown', (event) => {
@@ -631,12 +793,13 @@
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', (event) => {
         const message = event.data; // The json data that the extension sent
+        console.log('GOT message', message.type, message);
         switch (message.type) {
             // * Nav Tab Controls
             // Focus and select all text in 'nav' field
             case 'selectNav': {
                 // focusOnField('navText');
-                activateTab('tab2');
+                activateTab('tab3');
 
                 if (message.text || message.text === "") {
                     // @ts-expect-error
@@ -649,6 +812,14 @@
                 }
                 break;
             }
+            case 'showGoto': {
+                showTab('tab3');
+                break;
+            }
+            case 'revealNavEntry': {
+                revealNavEntry(message.value);
+                break;
+            }
             // * Find Tab Controls
             // Focus and select all text in 'find' field
             case 'selectFind': {
@@ -659,7 +830,7 @@
             // Focus and select all text in 'replace' field
             case 'selectReplace': {
                 //focusOnField('replaceText');
-                activateTab('tab3', true);
+                activateTab('tab2', true);
                 break;
             }
             case 'getSettings': {
