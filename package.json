@@ -4283,7 +4283,7 @@
         "when": "leojsEditHeadline || leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
-        "command": "leojs.findQuick",
+        "command": "leojs.findQuickSelected",
         "key": "ctrl+shift+f",
         "mac": "cmd+shift+f",
         "when": "leojsEditHeadline || leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojs/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"

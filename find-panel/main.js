@@ -340,8 +340,8 @@
         }
         */
 
+        const actEl = document.activeElement;
         if (keyCode === 'Tab') {
-            const actEl = document.activeElement;
             let lastEl;
             let firstEl;
             let selectedNavEl;
@@ -424,7 +424,7 @@
             }
         }
 
-        if (activeTab === 'tab3' && lastGotoContent.length) {
+        if (activeTab === 'tab3' && lastGotoContent.length && actEl && gotoPaneContainer && (actEl === gotoPaneContainer || gotoPaneContainer.contains(actEl))) {
             navKeyHandler(p_event);
         }
 
@@ -557,6 +557,31 @@
 
     // * Nav text input detection
     const w_navTextEl = document.getElementById('navText');
+    function navEnter() {
+        if (searchSettings.navText.length === 0 && searchSettings.isTag) {
+            setFrozen(false);
+            resetTagNav();
+        } else {
+            if (searchSettings.navText.length >= 3 || searchSettings.isTag) {
+                setFrozen(true);
+                if (navTextDirty) {
+                    navTextDirty = false;
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                    if (navSearchTimer) {
+                        clearTimeout(navSearchTimer);
+                    }
+                    sendSearchConfig();
+                }
+                vscode.postMessage({ type: 'leoNavEnter' });
+            }
+            if (searchSettings.navText.length === 0) {
+                vscode.postMessage({ type: 'leoNavClear' });
+            }
+        }
+    }
+
     if (w_navTextEl) {
         w_navTextEl.onkeypress = function (p_event) {
             if (!p_event) {
@@ -565,29 +590,7 @@
             }
             const keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
-                if (searchSettings.navText.length === 0 && searchSettings.isTag) {
-                    setFrozen(false);
-                    resetTagNav();
-                } else {
-                    if (searchSettings.navText.length >= 3 || searchSettings.isTag) {
-                        setFrozen(true);
-                        if (navTextDirty) {
-                            navTextDirty = false;
-                            if (timer) {
-                                clearTimeout(timer);
-                            }
-                            if (navSearchTimer) {
-                                clearTimeout(navSearchTimer);
-                            }
-                            sendSearchConfig();
-                        }
-                        vscode.postMessage({ type: 'leoNavEnter' });
-                    }
-                    if (searchSettings.navText.length === 0) {
-                        vscode.postMessage({ type: 'leoNavClear' });
-                    }
-                }
-
+                navEnter();
                 return false;
             }
         };
@@ -809,6 +812,9 @@
                         clearTimeout(timer);
                     }
                     sendSearchConfig();
+                }
+                if (message.forceEnter) {
+                    navEnter();
                 }
                 break;
             }

@@ -4560,7 +4560,7 @@ export class LeoUI extends NullGui {
     /**
      * Opens the Nav tab and focus on nav text input
      */
-    public findQuick(p_string?: string): Thenable<unknown> {
+    public findQuick(p_string?: string, p_forceEnter?: boolean): Thenable<unknown> {
         void this.triggerBodySave(true);
         let w_panelID = '';
         let w_panel: vscode.WebviewView | undefined;
@@ -4575,11 +4575,26 @@ export class LeoUI extends NullGui {
             if (w_panel && w_panel.show && !w_panel.visible) {
                 w_panel.show(false);
             }
-            const w_message: { [key: string]: string } = { type: 'selectNav' };
-            if (p_string && p_string?.trim()) {
+            const w_message: { [key: string]: string | boolean } = { type: 'selectNav' };
+            if (p_string && p_string.trim()) {
                 w_message["text"] = p_string.trim();
             }
-            void w_panel?.webview.postMessage(w_message);
+            if (p_forceEnter) {
+                w_message["forceEnter"] = true;
+            }
+            if (w_panel) {
+                void w_panel.webview.postMessage(w_message);
+            } else {
+                setTimeout(() => {
+                    let w_panel: vscode.WebviewView | undefined;
+                    if (this._lastTreeView === this._leoTreeExView) {
+                        w_panel = this._findPanelWebviewExplorerView;
+                    } else {
+                        w_panel = this._findPanelWebviewView;
+                    }
+                    void w_panel?.webview.postMessage(w_message);
+                }, 290);
+            }
         });
     }
 
@@ -4592,10 +4607,10 @@ export class LeoUI extends NullGui {
             const selection = editor.selection;
             if (!selection.isEmpty) {
                 const text = editor.document.getText(selection).replace(/\r\n/g, "\n");
-                return this.findQuick(text);
+                return this.findQuick(text, true);
             }
         }
-        return this.findQuick();
+        return this.findQuick("", true);
     }
 
     /**
@@ -4676,12 +4691,28 @@ export class LeoUI extends NullGui {
             w_panelID = Constants.FIND_ID;
             w_panel = this._findPanelWebviewView;
         }
+        // this._findNeedsFocus = 2;
+        // setTimeout(() => {
+        //     this._findNeedsFocus = 0;
+        // }, 250);
         return vscode.commands.executeCommand(w_panelID + '.focus', p_options).then((p_result) => {
             if (w_panel && w_panel.show && !w_panel.visible) {
                 w_panel.show(false);
             }
             const w_message: { [key: string]: string } = { type: 'showGoto' };
-            void w_panel?.webview.postMessage(w_message);
+            if (w_panel) {
+                void w_panel.webview.postMessage(w_message);
+            } else {
+                setTimeout(() => {
+                    let w_panel: vscode.WebviewView | undefined;
+                    if (this._lastTreeView === this._leoTreeExView) {
+                        w_panel = this._findPanelWebviewExplorerView;
+                    } else {
+                        w_panel = this._findPanelWebviewView;
+                    }
+                    void w_panel?.webview.postMessage(w_message);
+                }, 290);
+            }
         });
 
     }
@@ -4690,6 +4721,10 @@ export class LeoUI extends NullGui {
      * * Handles a click (selection) of a nav panel node: Sends 'goto' command to server.
      */
     public async gotoNavEntry(p_node: LeoGotoNode): Promise<unknown> {
+        if (!p_node) {
+            console.log('ERROR NO NODE TO SHOW IN GOTO PANE!');
+            return;
+        }
 
         await this.triggerBodySave(true);
         this.leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
@@ -4883,6 +4918,9 @@ export class LeoUI extends NullGui {
         }
 
         this._findNeedsFocus = 1;
+        setTimeout(() => {
+            this._findNeedsFocus = 0;
+        }, 250);
         let w_panelID = '';
         if (this._lastTreeView === this._leoTreeExView) {
             w_panelID = Constants.FIND_EXPLORER_ID;
@@ -4891,6 +4929,7 @@ export class LeoUI extends NullGui {
         }
         void vscode.commands.executeCommand(w_panelID + '.focus');
 
+
     }
 
     /**
@@ -4898,6 +4937,10 @@ export class LeoUI extends NullGui {
      */
     public checkForceFindFocus(p_fromInit: boolean): void {
         if (this._findNeedsFocus) {
+            let message = 'selectFind';
+            if (this._findNeedsFocus === 2) {
+                message = 'selectNav';
+            }
             this._findNeedsFocus = 0; // Set false before timeout.
             setTimeout(() => {
                 let w_panel: vscode.WebviewView | undefined;
@@ -4908,7 +4951,7 @@ export class LeoUI extends NullGui {
                 }
                 if (w_panel) {
                     this._findNeedsFocus = 0; // Set false ALSO AFTER !
-                    void w_panel.webview.postMessage({ type: 'selectFind' });
+                    void w_panel.webview.postMessage({ type: message });
                 }
             }, 60);
         }

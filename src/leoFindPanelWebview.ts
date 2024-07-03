@@ -89,7 +89,10 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                     }
                     case 'gotoCommand': {
                         try {
-                            void this._leoUI.gotoNavEntry(this._leoUI.leoGotoProvider.nodeList[Number(data.value)]);
+                            const w_index = Number(data.value);
+                            if (!isNaN(w_index) && this._leoUI.leoGotoProvider.nodeList[w_index]) {
+                            }
+                            void this._leoUI.gotoNavEntry(this._leoUI.leoGotoProvider.nodeList[w_index]);
                         } catch (e) {
                             console.log('goto nav entry failed for index: ', data.value);
                         }

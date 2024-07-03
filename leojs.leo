@@ -9663,7 +9663,7 @@ public makeAllBindings(): void {
 <t tx="felix.20220505215916.2">/**
  * Opens the Nav tab and focus on nav text input
  */
-public findQuick(p_string?: string): Thenable&lt;unknown&gt; {
+public findQuick(p_string?: string, p_forceEnter?: boolean): Thenable&lt;unknown&gt; {
     void this.triggerBodySave(true);
     let w_panelID = '';
     let w_panel: vscode.WebviewView | undefined;
@@ -9678,11 +9678,26 @@ public findQuick(p_string?: string): Thenable&lt;unknown&gt; {
         if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
             w_panel.show(false);
         }
-        const w_message: { [key: string]: string } = { type: 'selectNav' };
-        if (p_string &amp;&amp; p_string?.trim()) {
+        const w_message: { [key: string]: string | boolean } = { type: 'selectNav' };
+        if (p_string &amp;&amp; p_string.trim()) {
             w_message["text"] = p_string.trim();
         }
-        void w_panel?.webview.postMessage(w_message);
+        if (p_forceEnter) {
+            w_message["forceEnter"] = true;
+        }
+        if (w_panel) {
+            void w_panel.webview.postMessage(w_message);
+        } else {
+            setTimeout(() =&gt; {
+                let w_panel: vscode.WebviewView | undefined;
+                if (this._lastTreeView === this._leoTreeExView) {
+                    w_panel = this._findPanelWebviewExplorerView;
+                } else {
+                    w_panel = this._findPanelWebviewView;
+                }
+                void w_panel?.webview.postMessage(w_message);
+            }, 290);
+        }
     });
 }
 
@@ -9696,10 +9711,10 @@ public findQuickSelected(): Thenable&lt;unknown&gt; {
         const selection = editor.selection;
         if (!selection.isEmpty) {
             const text = editor.document.getText(selection).replace(/\r\n/g, "\n");
-            return this.findQuick(text);
+            return this.findQuick(text, true);
         }
     }
-    return this.findQuick();
+    return this.findQuick("", true);
 }
 
 </t>
@@ -9785,12 +9800,28 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
         w_panelID = Constants.FIND_ID;
         w_panel = this._findPanelWebviewView;
     }
+    // this._findNeedsFocus = 2;
+    // setTimeout(() =&gt; {
+    //     this._findNeedsFocus = 0;
+    // }, 250);
     return vscode.commands.executeCommand(w_panelID + '.focus', p_options).then((p_result) =&gt; {
         if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
             w_panel.show(false);
         }
         const w_message: { [key: string]: string } = { type: 'showGoto' };
-        void w_panel?.webview.postMessage(w_message);
+        if (w_panel) {
+            void w_panel.webview.postMessage(w_message);
+        } else {
+            setTimeout(() =&gt; {
+                let w_panel: vscode.WebviewView | undefined;
+                if (this._lastTreeView === this._leoTreeExView) {
+                    w_panel = this._findPanelWebviewExplorerView;
+                } else {
+                    w_panel = this._findPanelWebviewView;
+                }
+                void w_panel?.webview.postMessage(w_message);
+            }, 290);
+        }
     });
 
 }
@@ -9800,6 +9831,10 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
  * * Handles a click (selection) of a nav panel node: Sends 'goto' command to server.
  */
 public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
+    if (!p_node) {
+        console.log('ERROR NO NODE TO SHOW IN GOTO PANE!');
+        return;
+    }
 
     await this.triggerBodySave(true);
     this.leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
@@ -10152,6 +10187,9 @@ public startSearch(): void {
     }
 
     this._findNeedsFocus = 1;
+    setTimeout(() =&gt; {
+        this._findNeedsFocus = 0;
+    }, 250);
     let w_panelID = '';
     if (this._lastTreeView === this._leoTreeExView) {
         w_panelID = Constants.FIND_EXPLORER_ID;
@@ -10159,6 +10197,7 @@ public startSearch(): void {
         w_panelID = Constants.FIND_ID;
     }
     void vscode.commands.executeCommand(w_panelID + '.focus');
+
 
 }
 
@@ -10531,6 +10570,11 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                     this._selectedNodeIndex -= 1;
                 }
                 break;
+        }
+        // Check if array long enough!
+        if (!this.nodeList[this._selectedNodeIndex]) {
+            this._selectedNodeIndex = 0;
+            return; // Cancel
         }
         const node = this.nodeList[this._selectedNodeIndex];
         await this._leoUI.gotoNavEntry(node);
@@ -13689,6 +13733,10 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
  */
 public checkForceFindFocus(p_fromInit: boolean): void {
     if (this._findNeedsFocus) {
+        let message = 'selectFind';
+        if (this._findNeedsFocus === 2) {
+            message = 'selectNav';
+        }
         this._findNeedsFocus = 0; // Set false before timeout.
         setTimeout(() =&gt; {
             let w_panel: vscode.WebviewView | undefined;
@@ -13699,7 +13747,7 @@ public checkForceFindFocus(p_fromInit: boolean): void {
             }
             if (w_panel) {
                 this._findNeedsFocus = 0; // Set false ALSO AFTER !
-                void w_panel.webview.postMessage({ type: 'selectFind' });
+                void w_panel.webview.postMessage({ type: message });
             }
         }, 60);
     }
@@ -14772,7 +14820,7 @@ private _refreshGotoPane(): void {
   "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
-  "command": "leojs.findQuick",
+  "command": "leojs.findQuickSelected",
   "key": "ctrl+shift+f",
   "mac": "cmd+shift+f",
   "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
@@ -15423,6 +15471,15 @@ private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
             &lt;br&gt;
             Kevin Henderson
         &lt;/td&gt;
+        &lt;td align="center"&gt;
+                &lt;img src="data:image/svg+xml;charset=utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E"
+                     alt="Jon Nicoll"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;br&gt;
+            Jon Nicoll
+        &lt;/td&gt;
     &lt;/tr&gt;
 &lt;/table&gt;
 </t>
@@ -15971,8 +16028,8 @@ set leoEditHeadline(p_value: boolean) {
         }
         */
 
+        const actEl = document.activeElement;
         if (keyCode === 'Tab') {
-            const actEl = document.activeElement;
             let lastEl;
             let firstEl;
             let selectedNavEl;
@@ -16055,7 +16112,7 @@ set leoEditHeadline(p_value: boolean) {
             }
         }
 
-        if (activeTab === 'tab3' &amp;&amp; lastGotoContent.length) {
+        if (activeTab === 'tab3' &amp;&amp; lastGotoContent.length &amp;&amp; actEl &amp;&amp; gotoPaneContainer &amp;&amp; (actEl === gotoPaneContainer || gotoPaneContainer.contains(actEl))) {
             navKeyHandler(p_event);
         }
 
@@ -16188,6 +16245,31 @@ set leoEditHeadline(p_value: boolean) {
 
     // * Nav text input detection
     const w_navTextEl = document.getElementById('navText');
+    function navEnter() {
+        if (searchSettings.navText.length === 0 &amp;&amp; searchSettings.isTag) {
+            setFrozen(false);
+            resetTagNav();
+        } else {
+            if (searchSettings.navText.length &gt;= 3 || searchSettings.isTag) {
+                setFrozen(true);
+                if (navTextDirty) {
+                    navTextDirty = false;
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                    if (navSearchTimer) {
+                        clearTimeout(navSearchTimer);
+                    }
+                    sendSearchConfig();
+                }
+                vscode.postMessage({ type: 'leoNavEnter' });
+            }
+            if (searchSettings.navText.length === 0) {
+                vscode.postMessage({ type: 'leoNavClear' });
+            }
+        }
+    }
+
     if (w_navTextEl) {
         w_navTextEl.onkeypress = function (p_event) {
             if (!p_event) {
@@ -16196,29 +16278,7 @@ set leoEditHeadline(p_value: boolean) {
             }
             const keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
-                if (searchSettings.navText.length === 0 &amp;&amp; searchSettings.isTag) {
-                    setFrozen(false);
-                    resetTagNav();
-                } else {
-                    if (searchSettings.navText.length &gt;= 3 || searchSettings.isTag) {
-                        setFrozen(true);
-                        if (navTextDirty) {
-                            navTextDirty = false;
-                            if (timer) {
-                                clearTimeout(timer);
-                            }
-                            if (navSearchTimer) {
-                                clearTimeout(navSearchTimer);
-                            }
-                            sendSearchConfig();
-                        }
-                        vscode.postMessage({ type: 'leoNavEnter' });
-                    }
-                    if (searchSettings.navText.length === 0) {
-                        vscode.postMessage({ type: 'leoNavClear' });
-                    }
-                }
-
+                navEnter();
                 return false;
             }
         };
@@ -16440,6 +16500,9 @@ set leoEditHeadline(p_value: boolean) {
                         clearTimeout(timer);
                     }
                     sendSearchConfig();
+                }
+                if (message.forceEnter) {
+                    navEnter();
                 }
                 break;
             }
