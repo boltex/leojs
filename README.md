@@ -92,19 +92,20 @@ _Move-Outline commands need the `Alt` key modifier only when focus is on body pa
 | Focus on Body (in any pane)     | `Alt + D` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Ctrl + G` |
 | Focus on Body (in Outline pane) | `Tab` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Enter`        |
 
-| Common Operations  |                    |
-| :----------------- | :----------------- |
-| Contract All       | `Alt + -`          |
-| Sort Siblings      | `Alt + A`          |
-| Start Search       | `Ctrl + F`         |
-| Find Next          | `F3`               |
-| Find Previous      | `F2`               |
-| Replace            | `Ctrl + =`         |
-| Replace then Find  | `Ctrl + -`         |
-| Extract            | `Ctrl + Shift + D` |
-| Extract Names      | `Ctrl + Shift + N` |
-| Execute Script     | `Ctrl + B`         |
-| Minibuffer Palette | `Alt + X`          |
+| Common Operations   |                    |
+| :------------------ | :----------------- |
+| Contract All        | `Alt + -`          |
+| Sort Siblings       | `Alt + A`          |
+| Start Search        | `Ctrl + F`         |
+| Quick Find Selected | `Ctrl + Shift + F` |
+| Find Next           | `F3`               |
+| Find Previous       | `F2`               |
+| Replace             | `Ctrl + =`         |
+| Replace then Find   | `Ctrl + -`         |
+| Extract             | `Ctrl + Shift + D` |
+| Extract Names       | `Ctrl + Shift + N` |
+| Execute Script      | `Ctrl + B`         |
+| Minibuffer Palette  | `Alt + X`          |
 
 | Tree Navigation          |                                                              |
 | :----------------------- | :----------------------------------------------------------- |
@@ -171,7 +172,7 @@ Normally in vscode, the the **`Ctrl+P`** shortcut allows you to switch to any pr
 
 ![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
 
-### Find Commands
+### Find Panel
 
 With focus in Leo's outline or body pane, Hit **`Ctrl+F`** to open the _find panel_.
 
@@ -179,23 +180,11 @@ Enter your search pattern directly in the **\<find pattern here\>** field. Press
 
 Hitting **`F3`** repeatedly will find the subsequent matches. (**`F2`** for previous matches)
 
-![Find results](https://raw.githubusercontent.com/boltex/leojs/master/resources/find-in-headlines.gif)
-
-### Nav and the Goto Panel
-
-Type your search pattern in the **Nav** field instead to see all results show up below in leo's **Goto Pane**. This will show the headlines as you type.
+Type your search pattern in the **Nav** field instead to see all results show up below. This will show the headlines as you type.
 
 Press **`Enter`** to freeze the results and show results also found in **body text of any node**. This will add a snowflake icon ❄️ to the **Nav** field.
 
-From the **Goto Pane**, you can use the arrow keys, home/end, page up/down to cycle directly to any of those matches.
-
-![Goto pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-goto-pane.gif)
-
-### Using Tags
-
-If you check the **Tag** option, the **Nav** field and **Goto Pane** are then used to find nodes by their tag 🏷 _ua_ (user attribute).
-
-![Node tags](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-tags.gif)
+If you check the **Tag** option, the **Nav** field is then used to find nodes by their tag 🏷 _ua_ (user attribute).
 
 ## Undo Panel
 

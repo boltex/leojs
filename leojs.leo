@@ -926,19 +926,20 @@ _Move-Outline commands need the `Alt` key modifier only when focus is on body pa
 | Focus on Body (in any pane)     | `Alt + D` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Ctrl + G` |
 | Focus on Body (in Outline pane) | `Tab` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Enter`        |
 
-| Common Operations  |                    |
-| :----------------- | :----------------- |
-| Contract All       | `Alt + -`          |
-| Sort Siblings      | `Alt + A`          |
-| Start Search       | `Ctrl + F`         |
-| Find Next          | `F3`               |
-| Find Previous      | `F2`               |
-| Replace            | `Ctrl + =`         |
-| Replace then Find  | `Ctrl + -`         |
-| Extract            | `Ctrl + Shift + D` |
-| Extract Names      | `Ctrl + Shift + N` |
-| Execute Script     | `Ctrl + B`         |
-| Minibuffer Palette | `Alt + X`          |
+| Common Operations   |                    |
+| :------------------ | :----------------- |
+| Contract All        | `Alt + -`          |
+| Sort Siblings       | `Alt + A`          |
+| Start Search        | `Ctrl + F`         |
+| Quick Find Selected | `Ctrl + Shift + F` |
+| Find Next           | `F3`               |
+| Find Previous       | `F2`               |
+| Replace             | `Ctrl + =`         |
+| Replace then Find   | `Ctrl + -`         |
+| Extract             | `Ctrl + Shift + D` |
+| Extract Names       | `Ctrl + Shift + N` |
+| Execute Script      | `Ctrl + B`         |
+| Minibuffer Palette  | `Alt + X`          |
 
 | Tree Navigation          |                                                              |
 | :----------------------- | :----------------------------------------------------------- |
@@ -1005,7 +1006,7 @@ Normally in vscode, the the **`Ctrl+P`** shortcut allows you to switch to any pr
 
 ![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
 
-### Find Commands
+### Find Panel
 
 With focus in Leo's outline or body pane, Hit **`Ctrl+F`** to open the _find panel_.
 
@@ -1013,23 +1014,11 @@ Enter your search pattern directly in the **\&lt;find pattern here\&gt;** field.
 
 Hitting **`F3`** repeatedly will find the subsequent matches. (**`F2`** for previous matches)
 
-![Find results](https://raw.githubusercontent.com/boltex/leojs/master/resources/find-in-headlines.gif)
-
-### Nav and the Goto Panel
-
-Type your search pattern in the **Nav** field instead to see all results show up below in leo's **Goto Pane**. This will show the headlines as you type.
+Type your search pattern in the **Nav** field instead to see all results show up below. This will show the headlines as you type.
 
 Press **`Enter`** to freeze the results and show results also found in **body text of any node**. This will add a snowflake icon ❄️ to the **Nav** field.
 
-From the **Goto Pane**, you can use the arrow keys, home/end, page up/down to cycle directly to any of those matches.
-
-![Goto pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-goto-pane.gif)
-
-### Using Tags
-
-If you check the **Tag** option, the **Nav** field and **Goto Pane** are then used to find nodes by their tag 🏷 _ua_ (user attribute).
-
-![Node tags](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-tags.gif)
+If you check the **Tag** option, the **Nav** field is then used to find nodes by their tag 🏷 _ua_ (user attribute).
 
 ## Undo Panel
 
@@ -1726,16 +1715,10 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 <t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, false)],
 [CMD.INSERT_SELECTION, () =&gt; p_leoUI.insertNode(U, false, false)],
 [CMD.INSERT_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, false)],
-// Special command for when inserting rapidly more than one node without
-// even specifying a headline label, e.g. spamming CTRL+I rapidly.
-// [CMD.INSERT_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, false)],
 
 [CMD.INSERT_CHILD, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, true)],
 [CMD.INSERT_CHILD_SELECTION, () =&gt; p_leoUI.insertNode(U, false, true)],
 [CMD.INSERT_CHILD_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, true)],
-// Special command for when inserting rapidly more than one node without
-// even specifying a headline label, e.g. spamming CTRL+I rapidly.
-// [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, true)],
 
 [CMD.CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 [CMD.CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
@@ -1871,9 +1854,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; p_leoUI.selectOpenedLeoDocument(p_index, true)],
 
 [CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
-
 [CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
-
 [CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 [CMD.GIT_DIFF, () =&gt; p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
@@ -15706,6 +15687,7 @@ set leoEditHeadline(p_value: boolean) {
     let firstNavTabElId = 'searchOptions';
     let lastNavTabElId = 'navText';
     let lastGotoContent = [];
+    let lastSelectedGotoItem;
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -15817,25 +15799,28 @@ set leoEditHeadline(p_value: boolean) {
 
     const gotoPaneContainer = document.getElementById('gotopane');
 
-    document.body.addEventListener('mousedown', () =&gt; {
-        if (!gotoPaneContainer) {
-            return;
-        }
-        // remove selected class first
-        for (const child of gotoPaneContainer.children) {
-            child.classList.remove('selected');
-        }
-    });
+    // TODO CHECK IF NEEDED ?
+    // document.body.addEventListener('mousedown', () =&gt; {
+    //     if (!gotoPaneContainer) {
+    //         return;
+    //     }
+    //     // remove selected class
+    //     if (lastSelectedGotoItem) {
+    //         lastSelectedGotoItem.classList.remove('selected');
+    //         lastSelectedGotoItem = undefined;
+    //     }
+    // });
 
     function clickedGotoItem(event) {
         if (!gotoPaneContainer) {
             return;
         }
         // remove selected class first
-        for (const child of gotoPaneContainer.children) {
-            child.classList.remove('selected');
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
         }
         event.target.classList.add('selected');
+        lastSelectedGotoItem = event.target;
         event.stopPropagation();
         // CALL GOTO COMMAND!
         vscode.postMessage({ type: 'gotoCommand', value: event.target.dataset.order });
@@ -16045,13 +16030,10 @@ set leoEditHeadline(p_value: boolean) {
                 // nav panel WITH nav results.
                 lastEl = document.getElementById(lastNavTabElId);
                 firstEl = document.getElementById(firstNavTabElId);
-                selectedNavEl = gotoPaneContainer?.children[0];
+                selectedNavEl = gotoPaneContainer?.children[0]; // default
 
-                for (const gotoItem of gotoPaneContainer.children) {
-                    if (gotoItem.classList.contains('selected')) {
-                        selectedNavEl = gotoItem;
-                        break;
-                    }
+                if (lastSelectedGotoItem) {
+                    selectedNavEl = lastSelectedGotoItem;
                 }
 
                 if (actEl?.classList.contains('goto-item')) {
@@ -16078,9 +16060,12 @@ set leoEditHeadline(p_value: boolean) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    // @ts-expect-error
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
+                    }
                     selectedNavEl.focus();
                     selectedNavEl.classList.add('selected');
+                    lastSelectedGotoItem = selectedNavEl;
                     return;
                 }
                 // shift + tab so if first got last
@@ -16096,9 +16081,12 @@ set leoEditHeadline(p_value: boolean) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    // @ts-expect-error
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
+                    }
                     selectedNavEl.focus();
                     selectedNavEl.classList.add('selected');
+                    lastSelectedGotoItem = selectedNavEl;
                     return;
                 }
                 // tab, so if last goto first
@@ -16160,10 +16148,11 @@ set leoEditHeadline(p_value: boolean) {
                         return;
                     }
                     // remove selected class first
-                    for (const child of gotoPaneContainer.children) {
-                        child.classList.remove('selected');
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
                     }
                     actEl.classList.add('selected');
+                    lastSelectedGotoItem = actEl;
                     // CALL GOTO COMMAND!
                     console.log('ENTER ON A SELECTION!');
                     // @ts-expect-error
@@ -16182,6 +16171,38 @@ set leoEditHeadline(p_value: boolean) {
             vscode.postMessage({ type: 'navigateNavEntry', value: code });
         }
     }
+
+    function throttle(func, limit) {
+        let inThrottle;
+        let lastFunc;
+        let lastRan;
+        return function () {
+            const context = this;
+            const args = arguments;
+            if (!inThrottle) {
+                func.apply(context, args);
+                lastRan = Date.now();
+                inThrottle = true;
+                setTimeout(() =&gt; {
+                    inThrottle = false;
+                    if (lastFunc) {
+                        lastFunc.apply(context, args);
+                        lastRan = Date.now();
+                        lastFunc = null;
+                    }
+                }, limit);
+            } else {
+                lastFunc = func;
+            }
+        }
+    }
+
+    // TODO : USE THIS EXAMPLE INSTEAD OF CALLING LEOJS TO SWITCH RIGHT AWAY ! ! 
+    // Example usage
+    const throttledFunction = throttle(function () {
+        console.log('Function called!');
+    }, 1000); // The function will be called at most once every 1000ms (1 second)
+
 
     function focusOnField(p_id) {
         const inputField = document.querySelector('#' + p_id);
@@ -16418,26 +16439,27 @@ set leoEditHeadline(p_value: boolean) {
         }, 0);
     };
 
-    function revealNavEntry(p_index) {
+    function revealNavEntry(p_index, p_preserveFocus) {
         showTab('tab3');
         setTimeout(() =&gt; {
             console.log('REVEAL NAV ENTRY INDEX:', p_index);
             if (!gotoPaneContainer) {
                 return;
             }
-            let i = 0;
-            for (const child of gotoPaneContainer.children) {
-                child.classList.remove('selected');
-                if (i === p_index) {
-                    child.classList.add('selected');
-                    console.log(document.visibilityState);
-                    // @ts-expect-error
-                    child.focus();
-                }
-                // also select
-                i = i + 1;
+            if (lastSelectedGotoItem) {
+                lastSelectedGotoItem.classList.remove('selected');
+                lastSelectedGotoItem = undefined;
             }
-
+            const children = gotoPaneContainer.children;
+            if (children &amp;&amp; children.length &amp;&amp; children.length &gt; p_index) {
+                lastSelectedGotoItem = gotoPaneContainer.children[p_index];
+                lastSelectedGotoItem.classList.add('selected');
+                // @ts-expect-error
+                if (lastSelectedGotoItem &amp;&amp; lastSelectedGotoItem.focus &amp;&amp; !p_preserveFocus) {
+                    // @ts-expect-error
+                    lastSelectedGotoItem.focus();
+                }
+            }
         }, 0);
     }
 
@@ -16511,7 +16533,7 @@ set leoEditHeadline(p_value: boolean) {
                 break;
             }
             case 'revealNavEntry': {
-                revealNavEntry(message.value);
+                revealNavEntry(message.value, message.preserveFocus);
                 break;
             }
             // * Find Tab Controls

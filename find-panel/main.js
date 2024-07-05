@@ -18,6 +18,7 @@
     let firstNavTabElId = 'searchOptions';
     let lastNavTabElId = 'navText';
     let lastGotoContent = [];
+    let lastSelectedGotoItem;
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -129,25 +130,28 @@
 
     const gotoPaneContainer = document.getElementById('gotopane');
 
-    document.body.addEventListener('mousedown', () => {
-        if (!gotoPaneContainer) {
-            return;
-        }
-        // remove selected class first
-        for (const child of gotoPaneContainer.children) {
-            child.classList.remove('selected');
-        }
-    });
+    // TODO CHECK IF NEEDED ?
+    // document.body.addEventListener('mousedown', () => {
+    //     if (!gotoPaneContainer) {
+    //         return;
+    //     }
+    //     // remove selected class
+    //     if (lastSelectedGotoItem) {
+    //         lastSelectedGotoItem.classList.remove('selected');
+    //         lastSelectedGotoItem = undefined;
+    //     }
+    // });
 
     function clickedGotoItem(event) {
         if (!gotoPaneContainer) {
             return;
         }
         // remove selected class first
-        for (const child of gotoPaneContainer.children) {
-            child.classList.remove('selected');
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
         }
         event.target.classList.add('selected');
+        lastSelectedGotoItem = event.target;
         event.stopPropagation();
         // CALL GOTO COMMAND!
         vscode.postMessage({ type: 'gotoCommand', value: event.target.dataset.order });
@@ -357,13 +361,10 @@
                 // nav panel WITH nav results.
                 lastEl = document.getElementById(lastNavTabElId);
                 firstEl = document.getElementById(firstNavTabElId);
-                selectedNavEl = gotoPaneContainer?.children[0];
+                selectedNavEl = gotoPaneContainer?.children[0]; // default
 
-                for (const gotoItem of gotoPaneContainer.children) {
-                    if (gotoItem.classList.contains('selected')) {
-                        selectedNavEl = gotoItem;
-                        break;
-                    }
+                if (lastSelectedGotoItem) {
+                    selectedNavEl = lastSelectedGotoItem;
                 }
 
                 if (actEl?.classList.contains('goto-item')) {
@@ -390,9 +391,12 @@
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    // @ts-expect-error
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
+                    }
                     selectedNavEl.focus();
                     selectedNavEl.classList.add('selected');
+                    lastSelectedGotoItem = selectedNavEl;
                     return;
                 }
                 // shift + tab so if first got last
@@ -408,9 +412,12 @@
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    // @ts-expect-error
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
+                    }
                     selectedNavEl.focus();
                     selectedNavEl.classList.add('selected');
+                    lastSelectedGotoItem = selectedNavEl;
                     return;
                 }
                 // tab, so if last goto first
@@ -472,10 +479,11 @@
                         return;
                     }
                     // remove selected class first
-                    for (const child of gotoPaneContainer.children) {
-                        child.classList.remove('selected');
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
                     }
                     actEl.classList.add('selected');
+                    lastSelectedGotoItem = actEl;
                     // CALL GOTO COMMAND!
                     console.log('ENTER ON A SELECTION!');
                     // @ts-expect-error
@@ -494,6 +502,38 @@
             vscode.postMessage({ type: 'navigateNavEntry', value: code });
         }
     }
+
+    function throttle(func, limit) {
+        let inThrottle;
+        let lastFunc;
+        let lastRan;
+        return function () {
+            const context = this;
+            const args = arguments;
+            if (!inThrottle) {
+                func.apply(context, args);
+                lastRan = Date.now();
+                inThrottle = true;
+                setTimeout(() => {
+                    inThrottle = false;
+                    if (lastFunc) {
+                        lastFunc.apply(context, args);
+                        lastRan = Date.now();
+                        lastFunc = null;
+                    }
+                }, limit);
+            } else {
+                lastFunc = func;
+            }
+        }
+    }
+
+    // TODO : USE THIS EXAMPLE INSTEAD OF CALLING LEOJS TO SWITCH RIGHT AWAY ! ! 
+    // Example usage
+    const throttledFunction = throttle(function () {
+        console.log('Function called!');
+    }, 1000); // The function will be called at most once every 1000ms (1 second)
+
 
     function focusOnField(p_id) {
         const inputField = document.querySelector('#' + p_id);
@@ -730,26 +770,27 @@
         }, 0);
     };
 
-    function revealNavEntry(p_index) {
+    function revealNavEntry(p_index, p_preserveFocus) {
         showTab('tab3');
         setTimeout(() => {
             console.log('REVEAL NAV ENTRY INDEX:', p_index);
             if (!gotoPaneContainer) {
                 return;
             }
-            let i = 0;
-            for (const child of gotoPaneContainer.children) {
-                child.classList.remove('selected');
-                if (i === p_index) {
-                    child.classList.add('selected');
-                    console.log(document.visibilityState);
-                    // @ts-expect-error
-                    child.focus();
-                }
-                // also select
-                i = i + 1;
+            if (lastSelectedGotoItem) {
+                lastSelectedGotoItem.classList.remove('selected');
+                lastSelectedGotoItem = undefined;
             }
-
+            const children = gotoPaneContainer.children;
+            if (children && children.length && children.length > p_index) {
+                lastSelectedGotoItem = gotoPaneContainer.children[p_index];
+                lastSelectedGotoItem.classList.add('selected');
+                // @ts-expect-error
+                if (lastSelectedGotoItem && lastSelectedGotoItem.focus && !p_preserveFocus) {
+                    // @ts-expect-error
+                    lastSelectedGotoItem.focus();
+                }
+            }
         }, 0);
     }
 
@@ -823,7 +864,7 @@
                 break;
             }
             case 'revealNavEntry': {
-                revealNavEntry(message.value);
+                revealNavEntry(message.value, message.preserveFocus);
                 break;
             }
             // * Find Tab Controls
