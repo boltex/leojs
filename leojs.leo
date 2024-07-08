@@ -4589,7 +4589,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "2c894c9",
+  "gitBranch": "boltex/issue144",
+  "gitDate": "2024-07-04 22:36:52 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -16116,7 +16119,6 @@ set leoEditHeadline(p_value: boolean) {
             p_event = window.event;
         }
         const keyCode = p_event.code || p_event.key;
-        console.log('navKeyHandler', keyCode);
 
         let code = -1;
         switch (keyCode) {
@@ -16154,7 +16156,6 @@ set leoEditHeadline(p_value: boolean) {
                     actEl.classList.add('selected');
                     lastSelectedGotoItem = actEl;
                     // CALL GOTO COMMAND!
-                    console.log('ENTER ON A SELECTION!');
                     // @ts-expect-error
                     vscode.postMessage({ type: 'gotoCommand', value: actEl.dataset.order });
                     return;
@@ -16442,7 +16443,6 @@ set leoEditHeadline(p_value: boolean) {
     function revealNavEntry(p_index, p_preserveFocus) {
         showTab('tab3');
         setTimeout(() =&gt; {
-            console.log('REVEAL NAV ENTRY INDEX:', p_index);
             if (!gotoPaneContainer) {
                 return;
             }
@@ -16506,7 +16506,6 @@ set leoEditHeadline(p_value: boolean) {
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', (event) =&gt; {
         const message = event.data; // The json data that the extension sent
-        console.log('GOT message', message.type, message);
         switch (message.type) {
             // * Nav Tab Controls
             // Focus and select all text in 'nav' field
@@ -16582,6 +16581,12 @@ set leoEditHeadline(p_value: boolean) {
     height: 100%;
 }
 
+@supports selector(::-webkit-scrollbar) {
+    html {
+        scrollbar-color: unset;
+    }
+}
+
 *,
 *:before,
 *:after {
@@ -16628,7 +16633,7 @@ body {
     /* margin-left: 20px; */
     background-color: transparent;
     /* padding: 0 var(--container-padding); */
-    scrollbar-gutter: stable;
+    /* scrollbar-gutter: stable; */
     overflow: hidden;
     /* padding-right: 4px; */
     color: var(--vscode-foreground);
@@ -16637,62 +16642,9 @@ body {
     font-family: var(--vscode-font-family);
 }
 
-/*
-    --vscode-scrollbarSlider-background: rgba(121, 121, 121, 0.4);
-    --vscode-scrollbarSlider-hoverBackground: rgba(100, 100, 100, 0.7);
-    --vscode-scrollbarSlider-activeBackground: 
-*/
-
-/* For WebKit browsers (Chrome, Safari) */
-body::-webkit-scrollbar {
-    width: 4px; /* Set the width of the scrollbar */
-}
-
-body::-webkit-scrollbar-track {
-    background: transparent; /* Set the background of the track */
-}
-
-body::-webkit-scrollbar-thumb {
-    background: var(
-        --vscode-scrollbarSlider-background
-    ); /* Set the color of the thumb */
-}
-
-body::-webkit-scrollbar-thumb:hover {
-    background: var(
-        --scrollbarSlider-hoverBackground
-    ); /* Change color when hovered */
-}
-
-body::-webkit-scrollbar-button,
-body::-moz-scrollbar-button {
-    display: none;
-    opacity: 0;
-    height: 0;
-    width: 0;
-}
-
-/* For Firefox */
-body {
-    /* scrollbar-width: thin; */
-    scrollbar-width: none;
-    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
-}
-
-/*
-body ::-webkit-scrollbar-button {
-  opacity: 0.0;
-  display: none; 
-}
-*/
-
-body.scrolled {
-    background-color: #312;
-}
-
-body:hover {
+/* body:hover {
     overflow-y: auto;
-}
+} */
 
 .row .col:nth-child(2) {
     padding-right: 4px;
@@ -16703,11 +16655,11 @@ ul {
     padding-left: var(--container-padding);
 }
 
-body &gt; *,
+/* body &gt; *,
 form &gt; * {
     margin-block-start: var(--input-margin-vertical);
     margin-block-end: var(--input-margin-vertical);
-}
+} */
 
 *:focus {
     outline-color: var(--vscode-focusBorder);
@@ -16800,9 +16752,22 @@ textarea {
     background-color: var(--vscode-input-background);
 }
 
+input[type='text'] {
+    height: 24px;
+}
+
 input[type='checkbox'],
 input[type='radio'] {
     cursor: pointer;
+}
+
+input[type='checkbox'] {
+    vertical-align: text-top;
+}
+
+.label-nav {
+    vertical-align: baseline;
+    line-height: 19px;
 }
 
 input[type='checkbox']:focus + label {
@@ -16838,9 +16803,9 @@ body &gt; div &gt; div &gt; label:active {
 #freeze {
     cursor: default;
     position: absolute;
-    right: 1em;
+    right: 0.3em;
     line-height: 1em;
-    top: 0.9em;
+    top: 1.555em;
     font-size: 1.8em;
     color: #5c87ff80;
     padding: 0;
@@ -16861,6 +16826,8 @@ div.col-full {
     text-overflow: ellipsis;
     overflow: hidden;
     width: 100%;
+    margin-top: 6px;
+    margin-bottom: 3px;
 }
 
 div.col {
@@ -16882,27 +16849,67 @@ div.col-nav {
 .mt-0 {
     margin-top: 0;
 }
-
+.mt-1 {
+    margin-top: 1px;
+}
+.mt-2 {
+    margin-top: 2px;
+}
+.mt-3 {
+    margin-top: 3px;
+}
 .mt-4 {
     margin-top: 4px;
+}
+.mt-5 {
+    margin-top: 5px;
+}
+.mt-6 {
+    margin-top: 6px;
+}
+.mt-7 {
+    margin-top: 7px;
+}
+.mt-8 {
+    margin-top: 8px;
 }
 
 .mb-0 {
     margin-bottom: 0;
 }
-
+.mb-1 {
+    margin-bottom: 1px;
+}
+.mb-2 {
+    margin-bottom: 2px;
+}
+.mb-3 {
+    margin-bottom: 3px;
+}
 .mb-4 {
     margin-bottom: 4px;
 }
-
+.mb-5 {
+    margin-bottom: 5px;
+}
 .mb-6 {
     margin-bottom: 6px;
+}
+.mb-7 {
+    margin-bottom: 7px;
+}
+.mb-8 {
+    margin-bottom: 8px;
 }
 
 .input-holder {
     padding: 0;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+#searchOptions {
+    height: 24px;
 }
 
 .align-right {
@@ -16929,14 +16936,17 @@ div.col-nav {
 .tab-container {
     position: relative;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .tab-list {
     position: relative;
     list-style: none;
     padding: 0;
+    padding-top: 4px;
     margin: 0;
-    margin-bottom: 4px;
     display: flex;
     border-bottom: 1px solid var(--vscode-input-background);
 }
@@ -16947,8 +16957,8 @@ div.col-nav {
     cursor: pointer;
     border-bottom: none;
     color: var(--vscode-disabledForeground);
-    border-top-left-radius: 4px; /* Rounded corners on the top left */
-    border-top-right-radius: 4px; /* Rounded corners on the top right */
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
 }
 
 .tab-item.active {
@@ -16957,18 +16967,32 @@ div.col-nav {
 }
 
 .tab-content {
+    flex-grow: 1;
+    min-height: 0;
+    flex-direction: column;
     position: relative;
     display: none;
     padding: 0;
     margin: 0;
 }
 
-.tab-content.active {
-    display: block;
+.nav-top-section {
+    flex-shrink: 0;
 }
 
-#gotopane {
-    width: 100%;
+.tab-content.active {
+    display: flex;
+}
+
+.bottom-scroll {
+    overflow-y: hidden;
+    min-height: 0;
+    flex-grow: 1;
+    padding-bottom: 4px;
+}
+
+.bottom-scroll:hover {
+    overflow-y: auto;
 }
 
 .goto-item {

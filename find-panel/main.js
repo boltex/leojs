@@ -447,7 +447,6 @@
             p_event = window.event;
         }
         const keyCode = p_event.code || p_event.key;
-        console.log('navKeyHandler', keyCode);
 
         let code = -1;
         switch (keyCode) {
@@ -485,7 +484,6 @@
                     actEl.classList.add('selected');
                     lastSelectedGotoItem = actEl;
                     // CALL GOTO COMMAND!
-                    console.log('ENTER ON A SELECTION!');
                     // @ts-expect-error
                     vscode.postMessage({ type: 'gotoCommand', value: actEl.dataset.order });
                     return;
@@ -773,7 +771,6 @@
     function revealNavEntry(p_index, p_preserveFocus) {
         showTab('tab3');
         setTimeout(() => {
-            console.log('REVEAL NAV ENTRY INDEX:', p_index);
             if (!gotoPaneContainer) {
                 return;
             }
@@ -837,7 +834,6 @@
     // Handle messages sent from the extension to the webview
     window.addEventListener('message', (event) => {
         const message = event.data; // The json data that the extension sent
-        console.log('GOT message', message.type, message);
         switch (message.type) {
             // * Nav Tab Controls
             // Focus and select all text in 'nav' field
