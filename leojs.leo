@@ -4589,10 +4589,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "2c894c9",
-  "gitBranch": "boltex/issue144",
-  "gitDate": "2024-07-04 22:36:52 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -16513,7 +16510,7 @@ set leoEditHeadline(p_value: boolean) {
                 // focusOnField('navText');
                 activateTab('tab3');
 
-                if (message.text || message.text === "") {
+                if (message.text) {
                     // @ts-expect-error
                     document.getElementById("navText").value = message.text;
                     searchSettings["navText"] = message.text;
@@ -16521,9 +16518,9 @@ set leoEditHeadline(p_value: boolean) {
                         clearTimeout(timer);
                     }
                     sendSearchConfig();
-                }
-                if (message.forceEnter) {
-                    navEnter();
+                    if (message.forceEnter) {
+                        navEnter();
+                    }
                 }
                 break;
             }
@@ -19151,6 +19148,8 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
 
 - Renamed 'save-file-as-zipped' to 'save-file-as-db'.
 - Simplified the find panel's input field placeholder.
+- Fixed find panel scrollbars as per VSCode issue #213045.
+- Deprecated the 'Goto Panel' by adding tabs to the find panel to separate 'find' and 'nav/tag' search inputs.
 
 </t>
 <t tx="felix.20240629151624.1">/**

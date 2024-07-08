@@ -4,6 +4,8 @@
 
 - Renamed 'save-file-as-zipped' to 'save-file-as-db'.
 - Simplified the find panel's input field placeholder.
+- Fixed find panel scrollbars as per VSCode issue #213045.
+- Deprecated the 'Goto Panel' by adding tabs to the find panel to separate 'find' and 'nav/tag' search inputs.
 
 # 0.2.14
 

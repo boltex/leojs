@@ -841,7 +841,7 @@
                 // focusOnField('navText');
                 activateTab('tab3');
 
-                if (message.text || message.text === "") {
+                if (message.text) {
                     // @ts-expect-error
                     document.getElementById("navText").value = message.text;
                     searchSettings["navText"] = message.text;
@@ -849,9 +849,9 @@
                         clearTimeout(timer);
                     }
                     sendSearchConfig();
-                }
-                if (message.forceEnter) {
-                    navEnter();
+                    if (message.forceEnter) {
+                        navEnter();
+                    }
                 }
                 break;
             }
