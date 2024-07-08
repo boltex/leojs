@@ -163,6 +163,10 @@
             return;
         }
         let i = 0;
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
+            lastSelectedGotoItem = undefined;
+        }
         while (gotoPaneContainer && gotoPaneContainer.firstChild) {
             gotoPaneContainer.removeChild(gotoPaneContainer.firstChild);
         }

@@ -10480,7 +10480,8 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     public nodeList: LeoGotoNode[] = []; // Node list kept here.
     private _viewSwitch: boolean = false;
 
-    private _selectedNodeIndex: number = 0;
+    public selectedNodeIndex: number = 0;
+    public isSelected = false;
 
     constructor(private _leoUI: LeoUI) {
         this.onDidChangeTreeData(() =&gt; {
@@ -10502,11 +10503,13 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public resetSelectedNode(p_node?: LeoGotoNode): void {
-        this._selectedNodeIndex = 0;
+        this.selectedNodeIndex = 0;
+        this.isSelected = false;
         if (p_node) {
             const w_found = this.nodeList.indexOf(p_node);
             if (w_found &gt;= 0) {
-                this._selectedNodeIndex = w_found;
+                this.selectedNodeIndex = w_found;
+                this.isSelected = true;
                 return;
             }
         }
@@ -10514,37 +10517,44 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
 
     public async navigateNavEntry(p_nav: LeoGotoNavKey): Promise&lt;void&gt; {
         if (!this.nodeList.length) {
+            this.selectedNodeIndex = 0;
+            this.isSelected = false;
             return;
         }
         switch (p_nav.valueOf()) {
             case LeoGotoNavKey.first:
-                this._selectedNodeIndex = 0;
+                this.selectedNodeIndex = 0;
+                this.isSelected = true;
                 break;
 
             case LeoGotoNavKey.last:
-                this._selectedNodeIndex = this.nodeList.length - 1;
+                this.selectedNodeIndex = this.nodeList.length - 1;
+                this.isSelected = true;
                 break;
 
             case LeoGotoNavKey.next:
-                if (this._selectedNodeIndex &lt; this.nodeList.length - 1) {
-                    this._selectedNodeIndex += 1;
+                if (this.selectedNodeIndex &lt; this.nodeList.length - 1) {
+                    this.selectedNodeIndex += 1;
+                    this.isSelected = true;
                 }
                 break;
 
             case LeoGotoNavKey.prev:
-                if (this._selectedNodeIndex &gt; 0) {
-                    this._selectedNodeIndex -= 1;
+                if (this.selectedNodeIndex &gt; 0) {
+                    this.selectedNodeIndex -= 1;
+                    this.isSelected = true;
                 }
                 break;
         }
         // Check if array long enough!
-        if (!this.nodeList[this._selectedNodeIndex]) {
-            this._selectedNodeIndex = 0;
+        if (!this.nodeList[this.selectedNodeIndex]) {
+            this.selectedNodeIndex = 0;
+            this.isSelected = true;
             return; // Cancel
         }
-        const node = this.nodeList[this._selectedNodeIndex];
+        const node = this.nodeList[this.selectedNodeIndex];
         await this._leoUI.gotoNavEntry(node);
-        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+        this._leoUI.revealGotoNavEntry(this.selectedNodeIndex);
         // await this._lastGotoView?.reveal(node, {
         //     select: true,
         //     focus: true
@@ -10556,7 +10566,8 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
      */
     public refreshTreeRoot(): void {
         this.nodeList = [];
-        this._selectedNodeIndex = 0;
+        this.selectedNodeIndex = 0;
+        this.isSelected = false;
         this._onDidChangeTreeData.fire(undefined);
     }
 
@@ -10565,7 +10576,6 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public getChildren(element?: LeoGotoNode): LeoGotoNode[] {
-        console.log('---------------------- GET CHILDREN !');
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady &amp;&amp; !element) {
 
@@ -10574,9 +10584,9 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                 this._viewSwitch = false;
                 console.log('WAS JUST A VIEW SWITCH ! !');
                 setTimeout(() =&gt; {
-                    if (this.nodeList.length &amp;&amp; (this._selectedNodeIndex + 1) &lt;= this.nodeList.length) {
+                    if (this.nodeList.length &amp;&amp; (this.selectedNodeIndex + 1) &lt;= this.nodeList.length) {
 
-                        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+                        this._leoUI.revealGotoNavEntry(this.selectedNodeIndex, true);
 
                         // void this._lastGotoView?.reveal(this.nodeList[this._selectedNodeIndex], {
                         //     select: true,
@@ -13142,12 +13152,18 @@ private _onFindViewVisibilityChanged(p_explorerView: boolean): void {
             this._lastFindView = this._findPanelWebviewExplorerView;
             this.checkForceFindFocus(false);
             this.setGotoContent();
+            if (this.leoGotoProvider.isSelected) {
+                this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
+            }
         }
     } else {
         if (this._findPanelWebviewView?.visible) {
             this._lastFindView = this._findPanelWebviewView;
             this.checkForceFindFocus(false);
             this.setGotoContent();
+            if (this.leoGotoProvider.isSelected) {
+                this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
+            }
         }
     }
 }
@@ -13553,6 +13569,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
  * @param p_panel The panel (usually that got the latest onDidReceiveMessage)
  */
 public setFindPanel(p_panel: vscode.WebviewView): void {
+    console.log('p_panel.viewType', p_panel.viewType);
     if (p_panel.viewType === Constants.FIND_EXPLORER_ID) {
         // Explorer find panel
         this._lastFindView = this._findPanelWebviewExplorerView;
@@ -13563,6 +13580,7 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
             ));
     } else {
         // Leo Pane find panel
+        console.log('OTHER PABNEL ! ', p_panel);
         this._findPanelWebviewView = p_panel;
         this._lastFindView = this._findPanelWebviewView;
         this._context.subscriptions.push(
@@ -13999,51 +14017,6 @@ public refreshDesc(): void {
     if (this._leoTreeExView) {
         this._leoTreeExView.description = titleDesc;
     }
-
-    // * FROM LEO SERVER this is used to make _titleDesc
-    // fileName = c.fileName()
-    // branch, commit = g.gitInfoForFile(fileName)
-
-
-    // * FROM LEOINTEG:
-
-    // if (this.leoStates.fileOpenedReady) {
-
-    //     if (this.config.showBranchInOutlineTitle) {
-    //         this.sendAction(
-    //             Constants.LEOBRIDGE.GET_BRANCH
-    //         ).then(
-    //             (p_result: LeoBridgePackage) =&gt; {
-    //                 let w_branch = "";
-    //                 if (p_result &amp;&amp; p_result.branch) {
-    //                     w_branch = p_result.branch + ": ";
-    //                 }
-
-    //                 if (this._leoTreeView) {
-    //                     this._leoTreeView.description = w_branch + this._titleDesc;
-    //                 }
-    //                 if (this._leoTreeExView) {
-    //                     this._leoTreeExView.description = w_branch + this._titleDesc;
-    //                 }
-    //             }
-    //         );
-    //     } else {
-    //         if (this._leoTreeView) {
-    //             this._leoTreeView.description = this._titleDesc;
-    //         }
-    //         if (this._leoTreeExView) {
-    //             this._leoTreeExView.description = this._titleDesc;
-    //         }
-    //     }
-
-    // } else {
-    //     if (this._leoTreeView) {
-    //         this._leoTreeView.description = "";
-    //     }
-    //     if (this._leoTreeExView) {
-    //         this._leoTreeExView.description = "";
-    //     }
-    // }
 
 }
 
@@ -15801,6 +15774,10 @@ set leoEditHeadline(p_value: boolean) {
             return;
         }
         let i = 0;
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
+            lastSelectedGotoItem = undefined;
+        }
         while (gotoPaneContainer &amp;&amp; gotoPaneContainer.firstChild) {
             gotoPaneContainer.removeChild(gotoPaneContainer.firstChild);
         }
@@ -16407,19 +16384,23 @@ set leoEditHeadline(p_value: boolean) {
     };
 
     function revealNavEntry(p_index, p_preserveFocus) {
-        showTab('tab3');
+        if (!p_preserveFocus) {
+            showTab('tab3');
+        }
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
+            lastSelectedGotoItem = undefined;
+        }
         setTimeout(() =&gt; {
             if (!gotoPaneContainer) {
                 return;
-            }
-            if (lastSelectedGotoItem) {
-                lastSelectedGotoItem.classList.remove('selected');
-                lastSelectedGotoItem = undefined;
             }
             const children = gotoPaneContainer.children;
             if (children &amp;&amp; children.length &amp;&amp; children.length &gt; p_index) {
                 lastSelectedGotoItem = gotoPaneContainer.children[p_index];
                 lastSelectedGotoItem.classList.add('selected');
+                // Will have effect only if visible
+                lastSelectedGotoItem.scrollIntoView({ behavior: "instant", block: "nearest" });
                 // @ts-expect-error
                 if (lastSelectedGotoItem &amp;&amp; lastSelectedGotoItem.focus &amp;&amp; !p_preserveFocus) {
                     // @ts-expect-error
@@ -19148,11 +19129,11 @@ public setGotoContent(): void {
 <t tx="felix.20240630150534.1">/**
  * Reveals and selects the specific nav entry in the results of the nav pane.
  */
-public revealGotoNavEntry(p_index: number): void {
+public revealGotoNavEntry(p_index: number, p_preserveFocus?: boolean): void {
     if (this._findPanelWebviewExplorerView &amp;&amp; this._findPanelWebviewExplorerView.visible) {
-        void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
+        void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
     } else if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
-        void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
+        void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
     }
 }
 
