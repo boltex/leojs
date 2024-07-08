@@ -20,7 +20,8 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     public nodeList: LeoGotoNode[] = []; // Node list kept here.
     private _viewSwitch: boolean = false;
 
-    private _selectedNodeIndex: number = 0;
+    public selectedNodeIndex: number = 0;
+    public isSelected = false;
 
     constructor(private _leoUI: LeoUI) {
         this.onDidChangeTreeData(() => {
@@ -42,11 +43,13 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     }
 
     public resetSelectedNode(p_node?: LeoGotoNode): void {
-        this._selectedNodeIndex = 0;
+        this.selectedNodeIndex = 0;
+        this.isSelected = false;
         if (p_node) {
             const w_found = this.nodeList.indexOf(p_node);
             if (w_found >= 0) {
-                this._selectedNodeIndex = w_found;
+                this.selectedNodeIndex = w_found;
+                this.isSelected = true;
                 return;
             }
         }
@@ -54,37 +57,44 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
 
     public async navigateNavEntry(p_nav: LeoGotoNavKey): Promise<void> {
         if (!this.nodeList.length) {
+            this.selectedNodeIndex = 0;
+            this.isSelected = false;
             return;
         }
         switch (p_nav.valueOf()) {
             case LeoGotoNavKey.first:
-                this._selectedNodeIndex = 0;
+                this.selectedNodeIndex = 0;
+                this.isSelected = true;
                 break;
 
             case LeoGotoNavKey.last:
-                this._selectedNodeIndex = this.nodeList.length - 1;
+                this.selectedNodeIndex = this.nodeList.length - 1;
+                this.isSelected = true;
                 break;
 
             case LeoGotoNavKey.next:
-                if (this._selectedNodeIndex < this.nodeList.length - 1) {
-                    this._selectedNodeIndex += 1;
+                if (this.selectedNodeIndex < this.nodeList.length - 1) {
+                    this.selectedNodeIndex += 1;
+                    this.isSelected = true;
                 }
                 break;
 
             case LeoGotoNavKey.prev:
-                if (this._selectedNodeIndex > 0) {
-                    this._selectedNodeIndex -= 1;
+                if (this.selectedNodeIndex > 0) {
+                    this.selectedNodeIndex -= 1;
+                    this.isSelected = true;
                 }
                 break;
         }
         // Check if array long enough!
-        if (!this.nodeList[this._selectedNodeIndex]) {
-            this._selectedNodeIndex = 0;
+        if (!this.nodeList[this.selectedNodeIndex]) {
+            this.selectedNodeIndex = 0;
+            this.isSelected = true;
             return; // Cancel
         }
-        const node = this.nodeList[this._selectedNodeIndex];
+        const node = this.nodeList[this.selectedNodeIndex];
         await this._leoUI.gotoNavEntry(node);
-        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+        this._leoUI.revealGotoNavEntry(this.selectedNodeIndex);
         // await this._lastGotoView?.reveal(node, {
         //     select: true,
         //     focus: true
@@ -96,7 +106,8 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
      */
     public refreshTreeRoot(): void {
         this.nodeList = [];
-        this._selectedNodeIndex = 0;
+        this.selectedNodeIndex = 0;
+        this.isSelected = false;
         this._onDidChangeTreeData.fire(undefined);
     }
 
@@ -105,7 +116,6 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     }
 
     public getChildren(element?: LeoGotoNode): LeoGotoNode[] {
-        console.log('---------------------- GET CHILDREN !');
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady && !element) {
 
@@ -114,9 +124,9 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                 this._viewSwitch = false;
                 console.log('WAS JUST A VIEW SWITCH ! !');
                 setTimeout(() => {
-                    if (this.nodeList.length && (this._selectedNodeIndex + 1) <= this.nodeList.length) {
+                    if (this.nodeList.length && (this.selectedNodeIndex + 1) <= this.nodeList.length) {
 
-                        this._leoUI.revealGotoNavEntry(this._selectedNodeIndex);
+                        this._leoUI.revealGotoNavEntry(this.selectedNodeIndex, true);
 
                         // void this._lastGotoView?.reveal(this.nodeList[this._selectedNodeIndex], {
                         //     select: true,

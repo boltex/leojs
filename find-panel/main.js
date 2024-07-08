@@ -769,19 +769,23 @@
     };
 
     function revealNavEntry(p_index, p_preserveFocus) {
-        showTab('tab3');
+        if (!p_preserveFocus) {
+            showTab('tab3');
+        }
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
+            lastSelectedGotoItem = undefined;
+        }
         setTimeout(() => {
             if (!gotoPaneContainer) {
                 return;
-            }
-            if (lastSelectedGotoItem) {
-                lastSelectedGotoItem.classList.remove('selected');
-                lastSelectedGotoItem = undefined;
             }
             const children = gotoPaneContainer.children;
             if (children && children.length && children.length > p_index) {
                 lastSelectedGotoItem = gotoPaneContainer.children[p_index];
                 lastSelectedGotoItem.classList.add('selected');
+                // Will have effect only if visible
+                lastSelectedGotoItem.scrollIntoView({ behavior: "instant", block: "nearest" });
                 // @ts-expect-error
                 if (lastSelectedGotoItem && lastSelectedGotoItem.focus && !p_preserveFocus) {
                     // @ts-expect-error

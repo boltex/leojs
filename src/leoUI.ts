@@ -453,20 +453,6 @@ export class LeoUI extends NullGui {
 
         // * Create goto Treeview Providers and tree views
         this.leoGotoProvider = new LeoGotoProvider(this);
-        // this._leoGoto = vscode.window.createTreeView(Constants.GOTO_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-        // this._context.subscriptions.push(
-        //     this._leoGoto,
-        //     this._leoGoto.onDidChangeVisibility((p_event) =>
-        //         this._onGotoTreeViewVisibilityChanged(p_event, false)
-        //     )
-        // );
-        // this._leoGotoExplorer = vscode.window.createTreeView(Constants.GOTO_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-        // this._context.subscriptions.push(
-        //     this._leoGotoExplorer,
-        //     this._leoGotoExplorer.onDidChangeVisibility((p_event) =>
-        //         this._onGotoTreeViewVisibilityChanged(p_event, true)
-        //     )
-        // );
 
         // * Create Undos Treeview Providers and tree views
         this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this, this.undoIcons);
@@ -1085,21 +1071,6 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Handle the change of visibility of either goto treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onGotoTreeViewVisibilityChanged(
-        p_event: vscode.TreeViewVisibilityChangeEvent,
-        p_explorerView: boolean
-    ): void {
-        if (p_event.visible) {
-            // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
-            // this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
-        }
-    }
-
-    /**
      * * Handle the change of visibility of either outline treeview and refresh it if its visible
      * @param p_event The treeview-visibility-changed event passed by vscode
      * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
@@ -1134,12 +1105,18 @@ export class LeoUI extends NullGui {
                 this._lastFindView = this._findPanelWebviewExplorerView;
                 this.checkForceFindFocus(false);
                 this.setGotoContent();
+                if (this.leoGotoProvider.isSelected) {
+                    this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
+                }
             }
         } else {
             if (this._findPanelWebviewView?.visible) {
                 this._lastFindView = this._findPanelWebviewView;
                 this.checkForceFindFocus(false);
                 this.setGotoContent();
+                if (this.leoGotoProvider.isSelected) {
+                    this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
+                }
             }
         }
     }
@@ -1553,6 +1530,7 @@ export class LeoUI extends NullGui {
      * @param p_panel The panel (usually that got the latest onDidReceiveMessage)
      */
     public setFindPanel(p_panel: vscode.WebviewView): void {
+        console.log('p_panel.viewType', p_panel.viewType);
         if (p_panel.viewType === Constants.FIND_EXPLORER_ID) {
             // Explorer find panel
             this._lastFindView = this._findPanelWebviewExplorerView;
@@ -1563,6 +1541,7 @@ export class LeoUI extends NullGui {
                 ));
         } else {
             // Leo Pane find panel
+            console.log('OTHER PABNEL ! ', p_panel);
             this._findPanelWebviewView = p_panel;
             this._lastFindView = this._findPanelWebviewView;
             this._context.subscriptions.push(
@@ -1610,51 +1589,6 @@ export class LeoUI extends NullGui {
         if (this._leoTreeExView) {
             this._leoTreeExView.description = titleDesc;
         }
-
-        // * FROM LEO SERVER this is used to make _titleDesc
-        // fileName = c.fileName()
-        // branch, commit = g.gitInfoForFile(fileName)
-
-
-        // * FROM LEOINTEG:
-
-        // if (this.leoStates.fileOpenedReady) {
-
-        //     if (this.config.showBranchInOutlineTitle) {
-        //         this.sendAction(
-        //             Constants.LEOBRIDGE.GET_BRANCH
-        //         ).then(
-        //             (p_result: LeoBridgePackage) => {
-        //                 let w_branch = "";
-        //                 if (p_result && p_result.branch) {
-        //                     w_branch = p_result.branch + ": ";
-        //                 }
-
-        //                 if (this._leoTreeView) {
-        //                     this._leoTreeView.description = w_branch + this._titleDesc;
-        //                 }
-        //                 if (this._leoTreeExView) {
-        //                     this._leoTreeExView.description = w_branch + this._titleDesc;
-        //                 }
-        //             }
-        //         );
-        //     } else {
-        //         if (this._leoTreeView) {
-        //             this._leoTreeView.description = this._titleDesc;
-        //         }
-        //         if (this._leoTreeExView) {
-        //             this._leoTreeExView.description = this._titleDesc;
-        //         }
-        //     }
-
-        // } else {
-        //     if (this._leoTreeView) {
-        //         this._leoTreeView.description = "";
-        //     }
-        //     if (this._leoTreeExView) {
-        //         this._leoTreeExView.description = "";
-        //     }
-        // }
 
     }
 
@@ -4821,11 +4755,11 @@ export class LeoUI extends NullGui {
     /**
      * Reveals and selects the specific nav entry in the results of the nav pane.
      */
-    public revealGotoNavEntry(p_index: number): void {
+    public revealGotoNavEntry(p_index: number, p_preserveFocus?: boolean): void {
         if (this._findPanelWebviewExplorerView && this._findPanelWebviewExplorerView.visible) {
-            void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
+            void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
         } else if (this._findPanelWebviewView && this._findPanelWebviewView.visible) {
-            void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index });
+            void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
         }
     }
 

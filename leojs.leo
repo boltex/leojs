@@ -161,7 +161,6 @@
 <v t="felix.20201214202627.1"><vh>_onTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202631.1"><vh>_onDocTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202634.1"><vh>_onButtonsTreeViewVisibilityChanged</vh></v>
-<v t="felix.20220930214434.1"><vh>_onGotoTreeViewVisibilityChanged</vh></v>
 <v t="felix.20211122230343.1"><vh>_onUndosTreeViewVisibilityChanged</vh></v>
 <v t="felix.20220930214530.1"><vh>_onFindViewVisibilityChanged</vh></v>
 <v t="felix.20240403174622.1"><vh>_onTabGroupsChanged</vh></v>
@@ -9450,20 +9449,6 @@ public finishStartup(): void {
 
     // * Create goto Treeview Providers and tree views
     this.leoGotoProvider = new LeoGotoProvider(this);
-    // this._leoGoto = vscode.window.createTreeView(Constants.GOTO_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-    // this._context.subscriptions.push(
-    //     this._leoGoto,
-    //     this._leoGoto.onDidChangeVisibility((p_event) =&gt;
-    //         this._onGotoTreeViewVisibilityChanged(p_event, false)
-    //     )
-    // );
-    // this._leoGotoExplorer = vscode.window.createTreeView(Constants.GOTO_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-    // this._context.subscriptions.push(
-    //     this._leoGotoExplorer,
-    //     this._leoGotoExplorer.onDidChangeVisibility((p_event) =&gt;
-    //         this._onGotoTreeViewVisibilityChanged(p_event, true)
-    //     )
-    // );
 
     // * Create Undos Treeview Providers and tree views
     this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this, this.undoIcons);
@@ -13142,22 +13127,6 @@ private _onDidOpenTextDocument(p_document: vscode.TextDocument): void {
             void vscode.window.showInformationMessage(Constants.USER_MESSAGES.RIGHT_CLICK_TO_OPEN);
             this._hasShownContextOpenMessage = true;
         }
-    }
-}
-
-</t>
-<t tx="felix.20220930214434.1">/**
- * * Handle the change of visibility of either goto treeview and refresh it if its visible
- * @param p_event The treeview-visibility-changed event passed by vscode
- * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
- */
-private _onGotoTreeViewVisibilityChanged(
-    p_event: vscode.TreeViewVisibilityChangeEvent,
-    p_explorerView: boolean
-): void {
-    if (p_event.visible) {
-        // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
-        // this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
     }
 }
 

@@ -7,7 +7,6 @@ import * as utils from './utils';
  * Leo Find Panel provider
  */
 export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
-    private _view?: vscode.WebviewView;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -20,7 +19,6 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
         context: vscode.WebviewViewResolveContext,
         _token: vscode.CancellationToken
     ): Promise<void> {
-        this._view = webviewView;
 
         webviewView.webview.options = {
             // Allow scripts in the webview
@@ -102,7 +100,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
             })
         );
         webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
-        this._leoUI.setFindPanel(this._view);
+        this._leoUI.setFindPanel(webviewView);
     }
 
     private async _getHtmlForWebview(webview: vscode.Webview): Promise<string> {
