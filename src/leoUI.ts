@@ -115,6 +115,14 @@ export class LeoUI extends NullGui {
     private _leoTreeView!: vscode.TreeView<Position>; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView!: vscode.TreeView<Position>; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView!: vscode.TreeView<Position>; // Last visible treeview
+    private _pendingReveal: Thenable<void> | undefined;
+    private _nextRevealParams: {
+        tree: vscode.TreeView<Position>, element: Position, options?: {
+            select?: boolean;
+            focus?: boolean;
+            expand?: boolean | number;
+        }
+    } | undefined;
 
     private _revealNodeRetriedRefreshOutline: boolean = false; // USED IN _refreshOutline and _revealNode
 
@@ -849,7 +857,7 @@ export class LeoUI extends NullGui {
                 void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
             }
         }
-
+        this._nextRevealParams = undefined;
         void this.checkConfirmBeforeClose();
         this._leoStatusBar?.hide();
         this.leoStates.fileOpenedReady = false;
@@ -1894,6 +1902,53 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Reveal that queues a follow up to prevent revealing before the last one finished.
+     */
+    public safeReveal(tree: vscode.TreeView<Position>, element: Position, options?: {
+        select?: boolean;
+        focus?: boolean;
+        expand?: boolean | number;
+    }): Thenable<void> {
+        if (!this._pendingReveal) {
+            // No reveal is currently pending, start the reveal
+            this._pendingReveal = this._performReveal(tree, element, options);
+            return this._pendingReveal;
+        } else {
+            // A reveal is already pending, store the parameters for the next reveal
+            this._nextRevealParams = { tree, element, options };
+            return this._pendingReveal;
+        }
+    }
+
+    private _performReveal(tree: vscode.TreeView<Position>, element: Position, options?: {
+        select?: boolean;
+        focus?: boolean;
+        expand?: boolean | number;
+    }): Thenable<void> {
+        return tree.reveal(element, options).then(
+            () => this._handleRevealCompletion(),
+            (error) => this._handleRevealCompletion(error)
+        );
+    }
+
+    private _handleRevealCompletion(error?: any): Thenable<void> | void {
+        if (this._nextRevealParams) {
+            // If there are queued reveal parameters, start the next reveal
+            const { tree, element, options } = this._nextRevealParams;
+            this._nextRevealParams = undefined;
+            this._pendingReveal = this._performReveal(tree, element, options);
+            return this._pendingReveal;
+        } else {
+            // No more reveals are queued, clear the pending reveal
+            this._pendingReveal = undefined;
+            if (error) {
+                // Propagate the error if there was one
+                throw error;
+            }
+        }
+    }
+
+    /**
      * * Sets the outline pane top bar string message or refreshes with existing title if no title passed
      * @param p_title new string to replace the current title
      */
@@ -1920,7 +1975,7 @@ export class LeoUI extends NullGui {
      */
     public showOutline(p_focusOutline?: boolean): void {
         const c = g.app.windowList[this.frameIndex].c;
-        this._lastTreeView.reveal(c.p, {
+        this.safeReveal(this._lastTreeView, c.p, {
             select: true,
             focus: !!p_focusOutline
         }).then(
@@ -2332,7 +2387,7 @@ export class LeoUI extends NullGui {
     private _revealNode(
         p_leoNode: Position,
         p_options?: { select?: boolean; focus?: boolean; expand?: boolean | number }
-    ): Thenable<void> {
+    ): void {
         let w_treeview: vscode.TreeView<Position> | undefined;
         if (this._leoTreeView.visible) {
             w_treeview = this._leoTreeView;
@@ -2354,7 +2409,7 @@ export class LeoUI extends NullGui {
         }
         try {
             if (w_treeview) {
-                return w_treeview.reveal(p_leoNode, p_options).then(
+                this.safeReveal(w_treeview, p_leoNode, p_options).then(
                     () => {
                         // ok
                         this._revealNodeRetriedRefreshOutline = false;
@@ -2380,7 +2435,6 @@ export class LeoUI extends NullGui {
                 this._refreshOutline(true, RevealType.RevealSelect);
             }
         }
-        return Promise.resolve(); // Defaults to resolving even if both are hidden
     }
 
     /**
@@ -2401,7 +2455,7 @@ export class LeoUI extends NullGui {
             this._lastTreeView.visible
 
         ) {
-            void this._lastTreeView.reveal(p_node, {
+            this.safeReveal(this._lastTreeView, p_node, {
                 select: true,
                 focus: false
             }).then(
@@ -2428,7 +2482,7 @@ export class LeoUI extends NullGui {
                     clearTimeout(this._gotSelectedNodeRevealTimer);
                 }
                 this._gotSelectedNodeRevealTimer = setTimeout(() => {
-                    this._lastTreeView.reveal(p_node, {
+                    this.safeReveal(this._lastTreeView, p_node, {
                         select: true,
                         focus: w_focusTree
                     }).then(() => {
@@ -5456,6 +5510,7 @@ export class LeoUI extends NullGui {
                             this._documentPaneReveal = undefined;
                         },
                         (p_reason) => {
+                            this._documentPaneReveal = undefined;
                             console.log('shown doc error on reveal: ', p_reason);
                         }
                     );
@@ -6081,6 +6136,7 @@ export class LeoUI extends NullGui {
                     this._undoPaneReveal = undefined;
                 },
                 (p_error) => {
+                    this._undoPaneReveal = undefined;
                     console.log('setUndoSelection could not reveal');
                 }
             );

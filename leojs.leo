@@ -183,6 +183,9 @@
 <v t="felix.20211204144931.5"><vh>_bodySaveDeactivate</vh></v>
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
+<v t="felix.20240708214046.1"><vh>safeReveal</vh></v>
+<v t="felix.20240708225108.1"><vh>_performReveal</vh></v>
+<v t="felix.20240708225127.1"><vh>_handleRevealCompletion</vh></v>
 <v t="felix.20220725004247.1"><vh>_setTreeViewTitle</vh></v>
 <v t="felix.20201214202118.1"><vh>showOutline</vh></v>
 <v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
@@ -3647,6 +3650,14 @@ export class LeoUI extends NullGui {
     private _leoTreeView!: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView!: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView!: vscode.TreeView&lt;Position&gt;; // Last visible treeview
+    private _pendingReveal: Thenable&lt;void&gt; | undefined;
+    private _nextRevealParams: {
+        tree: vscode.TreeView&lt;Position&gt;, element: Position, options?: {
+            select?: boolean;
+            focus?: boolean;
+            expand?: boolean | number;
+        }
+    } | undefined;
 
     private _revealNodeRetriedRefreshOutline: boolean = false; // USED IN _refreshOutline and _revealNode
 
@@ -3895,7 +3906,7 @@ private _triggerGetStates(): void {
  */
 public showOutline(p_focusOutline?: boolean): void {
     const c = g.app.windowList[this.frameIndex].c;
-    this._lastTreeView.reveal(c.p, {
+    this.safeReveal(this._lastTreeView, c.p, {
         select: true,
         focus: !!p_focusOutline
     }).then(
@@ -7420,7 +7431,7 @@ private _setupNoOpenedLeoDocument(): void {
             void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
         }
     }
-
+    this._nextRevealParams = undefined;
     void this.checkConfirmBeforeClose();
     this._leoStatusBar?.hide();
     this.leoStates.fileOpenedReady = false;
@@ -7514,7 +7525,7 @@ public gotSelectedNode(p_node: Position): void {
         this._lastTreeView.visible
 
     ) {
-        void this._lastTreeView.reveal(p_node, {
+        this.safeReveal(this._lastTreeView, p_node, {
             select: true,
             focus: false
         }).then(
@@ -7541,7 +7552,7 @@ public gotSelectedNode(p_node: Position): void {
                 clearTimeout(this._gotSelectedNodeRevealTimer);
             }
             this._gotSelectedNodeRevealTimer = setTimeout(() =&gt; {
-                this._lastTreeView.reveal(p_node, {
+                this.safeReveal(this._lastTreeView, p_node, {
                     select: true,
                     focus: w_focusTree
                 }).then(() =&gt; {
@@ -12998,7 +13009,7 @@ export const enum Focus {
 private _revealNode(
     p_leoNode: Position,
     p_options?: { select?: boolean; focus?: boolean; expand?: boolean | number }
-): Thenable&lt;void&gt; {
+): void {
     let w_treeview: vscode.TreeView&lt;Position&gt; | undefined;
     if (this._leoTreeView.visible) {
         w_treeview = this._leoTreeView;
@@ -13020,7 +13031,7 @@ private _revealNode(
     }
     try {
         if (w_treeview) {
-            return w_treeview.reveal(p_leoNode, p_options).then(
+            this.safeReveal(w_treeview, p_leoNode, p_options).then(
                 () =&gt; {
                     // ok
                     this._revealNodeRetriedRefreshOutline = false;
@@ -13046,7 +13057,6 @@ private _revealNode(
             this._refreshOutline(true, RevealType.RevealSelect);
         }
     }
-    return Promise.resolve(); // Defaults to resolving even if both are hidden
 }
 
 </t>
@@ -13628,6 +13638,7 @@ public setDocumentSelection(p_frame: LeoFrame): void {
                         this._documentPaneReveal = undefined;
                     },
                     (p_reason) =&gt; {
+                        this._documentPaneReveal = undefined;
                         console.log('shown doc error on reveal: ', p_reason);
                     }
                 );
@@ -13648,6 +13659,7 @@ private _setUndoSelection(p_undoNode: LeoUndoNode): void {
                 this._undoPaneReveal = undefined;
             },
             (p_error) =&gt; {
+                this._undoPaneReveal = undefined;
                 console.log('setUndoSelection could not reveal');
             }
         );
@@ -19134,6 +19146,56 @@ public revealGotoNavEntry(p_index: number, p_preserveFocus?: boolean): void {
         void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
     } else if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
         void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
+    }
+}
+
+</t>
+<t tx="felix.20240708214046.1">/**
+ * Reveal that queues a follow up to prevent revealing before the last one finished.
+ */
+public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, options?: {
+    select?: boolean;
+    focus?: boolean;
+    expand?: boolean | number;
+}): Thenable&lt;void&gt; {
+    if (!this._pendingReveal) {
+        // No reveal is currently pending, start the reveal
+        this._pendingReveal = this._performReveal(tree, element, options);
+        return this._pendingReveal;
+    } else {
+        // A reveal is already pending, store the parameters for the next reveal
+        this._nextRevealParams = { tree, element, options };
+        return this._pendingReveal;
+    }
+}
+
+</t>
+<t tx="felix.20240708225108.1">private _performReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, options?: {
+    select?: boolean;
+    focus?: boolean;
+    expand?: boolean | number;
+}): Thenable&lt;void&gt; {
+    return tree.reveal(element, options).then(
+        () =&gt; this._handleRevealCompletion(),
+        (error) =&gt; this._handleRevealCompletion(error)
+    );
+}
+
+</t>
+<t tx="felix.20240708225127.1">private _handleRevealCompletion(error?: any): Thenable&lt;void&gt; | void {
+    if (this._nextRevealParams) {
+        // If there are queued reveal parameters, start the next reveal
+        const { tree, element, options } = this._nextRevealParams;
+        this._nextRevealParams = undefined;
+        this._pendingReveal = this._performReveal(tree, element, options);
+        return this._pendingReveal;
+    } else {
+        // No more reveals are queued, clear the pending reveal
+        this._pendingReveal = undefined;
+        if (error) {
+            // Propagate the error if there was one
+            throw error;
+        }
     }
 }
 

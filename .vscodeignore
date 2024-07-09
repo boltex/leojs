@@ -21,7 +21,14 @@ dummy-child-process.js
 prepare.js
 cleanup.js
 resources/animated-screenshot.gif
+resources/derived-file.gif
+resources/goto-anywhere.gif
+resources/undo-pane.gif
+resources/find-in-headlines.gif
+resources/nav-goto-pane.gif
+resources/nav-tags.gif
 resources/run-extension.png
+resources/welcome-settings.png
 test*.db
 scripts.txt
 dummy*.js
