@@ -1538,7 +1538,6 @@ export class LeoUI extends NullGui {
      * @param p_panel The panel (usually that got the latest onDidReceiveMessage)
      */
     public setFindPanel(p_panel: vscode.WebviewView): void {
-        console.log('p_panel.viewType', p_panel.viewType);
         if (p_panel.viewType === Constants.FIND_EXPLORER_ID) {
             // Explorer find panel
             this._lastFindView = this._findPanelWebviewExplorerView;
@@ -1549,7 +1548,6 @@ export class LeoUI extends NullGui {
                 ));
         } else {
             // Leo Pane find panel
-            console.log('OTHER PABNEL ! ', p_panel);
             this._findPanelWebviewView = p_panel;
             this._lastFindView = this._findPanelWebviewView;
             this._context.subscriptions.push(
