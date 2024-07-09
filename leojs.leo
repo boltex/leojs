@@ -31,8 +31,9 @@
 </v>
 <v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
 <v t="felix.20231219233411.1"><vh>Find Panel Webview</vh>
-<v t="felix.20231219233427.1"><vh>@clean find-panel/main.js</vh></v>
+<v t="fil.20240709150317.1"><vh>@clean find-panel/index.html</vh></v>
 <v t="felix.20231219233431.1"><vh>@clean find-panel/style.css</vh></v>
+<v t="felix.20231219233427.1"><vh>@clean find-panel/main.js</vh></v>
 </v>
 <v t="felix.20240224165738.1"><vh>Help Panel Webview</vh>
 <v t="felix.20240224200656.1"><vh>@clean help-panel/index.html</vh></v>
@@ -161,7 +162,6 @@
 <v t="felix.20201214202627.1"><vh>_onTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202631.1"><vh>_onDocTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202634.1"><vh>_onButtonsTreeViewVisibilityChanged</vh></v>
-<v t="felix.20220930214434.1"><vh>_onGotoTreeViewVisibilityChanged</vh></v>
 <v t="felix.20211122230343.1"><vh>_onUndosTreeViewVisibilityChanged</vh></v>
 <v t="felix.20220930214530.1"><vh>_onFindViewVisibilityChanged</vh></v>
 <v t="felix.20240403174622.1"><vh>_onTabGroupsChanged</vh></v>
@@ -184,6 +184,9 @@
 <v t="felix.20211204144931.5"><vh>_bodySaveDeactivate</vh></v>
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
+<v t="felix.20240708214046.1"><vh>safeReveal</vh></v>
+<v t="felix.20240708225108.1"><vh>_performReveal</vh></v>
+<v t="felix.20240708225127.1"><vh>_handleRevealCompletion</vh></v>
 <v t="felix.20220725004247.1"><vh>_setTreeViewTitle</vh></v>
 <v t="felix.20201214202118.1"><vh>showOutline</vh></v>
 <v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
@@ -252,6 +255,7 @@
 <v t="felix.20220505215916.7"><vh>findQuick_marked</vh></v>
 <v t="felix.20220505215916.8"><vh>showGotoPane</vh></v>
 <v t="felix.20220505215916.9"><vh>gotoNavEntry</vh></v>
+<v t="felix.20240630150534.1"><vh>revealGotoNavEntry</vh></v>
 <v t="felix.20221027155905.1"><vh>navigateNavEntry</vh></v>
 </v>
 <v t="felix.20220505215924.1"><vh>Search</vh>
@@ -265,6 +269,7 @@
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
+<v t="felix.20240629151624.1"><vh>setGotoContent</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
 <v t="felix.20220505215924.14"><vh>saveSearchSettings</vh></v>
 </v>
@@ -841,56 +846,51 @@ _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.githu
 ### Break down your code into a structured outline that generates or parses back your source files
 
 &gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.  
-&gt; [📺 Introduction Video](https://www.youtube.com/watch?v=j0eo7SlnnSY)
-
-See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
-or on [github](https://github.com/leo-editor/leo-editor).
-
-![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
+&gt; **[📺 Introduction Video](https://www.youtube.com/watch?v=j0eo7SlnnSY)**
 
 # Web-Based Development
 
-LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents directly inside online repositories such as on GitHub and Azure Repos.
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents, _.leo, .leojs and .db_, and work with your files directly inside online repositories such as on GitHub and Azure Repos.
 
-To access this browser-based editor, you can go to your repo on github.com and press . (period key)
+## Press the '.' period key from your github repository
 
-This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)** shows many use-cases about working in an online repository with LeoJS and VSCode for the web.
+To access this browser-based editor, you can go to your repo on github.com and press the _period_&amp;nbsp;&amp;nbsp;"**.**"&amp;nbsp;&amp;nbsp;key.
+
+This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)** demonstrates this feature and many use-cases about working in an online repository with LeoJS and VSCode for the web.
 
 &gt; The web extension version of LeoJS cannot open local files: Use the regular desktop LeoJS version to edit local Leo files and projects.
 
 # Features
 
 -   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
--   **Detached Body Panes**, independent of the selected node can be opened with the 'Open Aside' command.
+-   **Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command.
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
 -   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
 -   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
 -   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
--   **Nav and Tag panel** controls are integrated in the Find panel
+-   **Nav and Tag panel** search controls are integrated in the Find panel
 -   **Goto Anywhere panel** to navigate directly from list of nodes, such as the results of Nav or Tag searches
 -   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
 
-# Demo videos
+## Demo videos
 
--   [📺 Introduction](https://www.youtube.com/watch?v=j0eo7SlnnSY)
--   [📺 Features](https://www.youtube.com/watch?v=M_mKXSbVGdE)
+-   **[📺 Introduction](https://www.youtube.com/watch?v=j0eo7SlnnSY)**
+-   **[📺 Features](https://www.youtube.com/watch?v=M_mKXSbVGdE)**
 
-## Leo Commands
-
-![Menus](https://raw.githubusercontent.com/boltex/leojs/master/resources/context-hover-menus.png)
+# Leo Commands
 
 LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette. (accessible through F1 or Ctrl+Shift+P)
 
-### Context-Aware Keybindings
+## Context-Aware Keybindings
 
 The keybinding architecture is designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence. Shift your focus outside these panes, and Visual Studio Code's native keybindings resume control.
 
-### The Minibuffer
+## The Minibuffer
 
 For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the complete set of Leo's commands!
 
-## Keybindings
+# Keybindings
 
 Listed here are the most useful commands and their keyboard shortcuts.
 
@@ -924,19 +924,20 @@ _Move-Outline commands need the `Alt` key modifier only when focus is on body pa
 | Focus on Body (in any pane)     | `Alt + D` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Ctrl + G` |
 | Focus on Body (in Outline pane) | `Tab` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Enter`        |
 
-| Common Operations  |                    |
-| :----------------- | :----------------- |
-| Contract All       | `Alt + -`          |
-| Sort Siblings      | `Alt + A`          |
-| Start Search       | `Ctrl + F`         |
-| Find Next          | `F3`               |
-| Find Previous      | `F2`               |
-| Replace            | `Ctrl + =`         |
-| Replace then Find  | `Ctrl + -`         |
-| Extract            | `Ctrl + Shift + D` |
-| Extract Names      | `Ctrl + Shift + N` |
-| Execute Script     | `Ctrl + B`         |
-| Minibuffer Palette | `Alt + X`          |
+| Common Operations   |                    |
+| :------------------ | :----------------- |
+| Contract All        | `Alt + -`          |
+| Sort Siblings       | `Alt + A`          |
+| Start Search        | `Ctrl + F`         |
+| Quick Find Selected | `Ctrl + Shift + F` |
+| Find Next           | `F3`               |
+| Find Previous       | `F2`               |
+| Replace             | `Ctrl + =`         |
+| Replace then Find   | `Ctrl + -`         |
+| Extract             | `Ctrl + Shift + D` |
+| Extract Names       | `Ctrl + Shift + N` |
+| Execute Script      | `Ctrl + B`         |
+| Minibuffer Palette  | `Alt + X`          |
 
 | Tree Navigation          |                                                              |
 | :----------------------- | :----------------------------------------------------------- |
@@ -962,7 +963,7 @@ _With the **'Leo Tree Browsing'** setting enabled by default, the arrows, home, 
 
 ---
 
-## External Files
+# External Files
 
 Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty Files** commands to derive external files for any type of **@file** nodes.
 
@@ -979,59 +980,52 @@ Leo will detect external file changes, and will ask to either **refresh from dis
 
 ![Derive files](https://raw.githubusercontent.com/boltex/leojs/master/resources/derived-file.gif)
 
-## Extension Settings
+# Extension Settings
 
-### Open the command palette `Ctrl+Shift+P` and start typing `LeoJS settings` to access LeoJS's welcome/settings screen
+### Open the command palette `Ctrl+Shift+P` and start typing `LeoJS settings` to access its _welcome &amp; settings_ screen
 
 &gt; _(Changes are auto-saved to the user's profile after 0.5 seconds)_
 
 -   Control the visibility of the outline pane in the explorer view.
--   Decide how and when to refresh and synchronize content when derived (external) file are modified.
+-   Decide how and when to refresh and synchronize content when external files are modified.
 -   Show additional icons on outline nodes (Move, delete, mark, copy, paste...)
 -   Choose to either focus on the body pane, or keep focus in the outline when a node is selected.
--   Hide or show the "Open on the side" command in the context menu to open a node beside the active editor
 
 ![Settings](https://raw.githubusercontent.com/boltex/leojs/master/resources/welcome-settings.png)
 
-## Navigating a Leo Document
+# Navigating a Leo Document
 
-Arrow keys, home/end, page up/down are used for basic navigation. But in order to **find and goto specific nodes directly**, use the methods described below.
+Arrow keys, home/end, page up/down are used for basic navigation. But in order to **find and goto specific nodes directly**, use the methods described below:
 
 ### Goto Anywhere Command
 
-Normally in vscode, the the **`Ctrl+P`** shortcut allows you to switch to any project file, but when the focus is in one of Leo's panels, the **`Ctrl+P`** keybinding allows you to switch to a node directly by typing (part of) it's headline.
+In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to a node directly by typing (part of) it's headline.
 
 ![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
 
-### Find Commands
+## Find Panel
 
-With focus in Leo's outline or body pane, Hit **`Ctrl+F`** to open the _find panel_.
+With the focus in Leo's outline or body pane, Hit **`Ctrl+F`** to open the Find tab of the _find panel_.
+
+![Find Panel](https://raw.githubusercontent.com/boltex/leojs/master/resources/new-find-panel.png)
 
 Enter your search pattern directly in the **\&lt;find pattern here\&gt;** field. Press **`Enter`** to find the first match starting from your current position.
 
 Hitting **`F3`** repeatedly will find the subsequent matches. (**`F2`** for previous matches)
 
-![Find results](https://raw.githubusercontent.com/boltex/leojs/master/resources/find-in-headlines.gif)
+Using the Nav tab of the _find panel_, (**`Ctrl+Shift+F`** to accesss directly) you can type your search pattern in the **Nav** field instead to see all results appear below. This will show the headlines as you type. 
 
-### Nav and the Goto Panel
-
-Type your search pattern in the **Nav** field instead to see all results show up below in leo's **Goto Pane**. This will show the headlines as you type.
+![Find Panel](https://raw.githubusercontent.com/boltex/leojs/master/resources/new-nav-panel-2.png)
 
 Press **`Enter`** to freeze the results and show results also found in **body text of any node**. This will add a snowflake icon ❄️ to the **Nav** field.
 
-From the **Goto Pane**, you can use the arrow keys, home/end, page up/down to cycle directly to any of those matches.
+![Find Panel](https://raw.githubusercontent.com/boltex/leojs/master/resources/new-nav-panel-3.png)
 
-![Goto pane](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-goto-pane.gif)
+If you check the **Tag** option, the **Nav** field is then used to find nodes by their tag 🏷 _ua_ (user attribute).
 
-### Using Tags
+# Undo Panel
 
-If you check the **Tag** option, the **Nav** field and **Goto Pane** are then used to find nodes by their tag 🏷 _ua_ (user attribute).
-
-![Node tags](https://raw.githubusercontent.com/boltex/leojs/master/resources/nav-tags.gif)
-
-## Undo Panel
-
-&gt; In LeoJS, the undo functionality is a multi-tiered system that segregates structural outline changes from text changes within the body pane. The Undo Panel captures outline alterations as individual 'Undo Beads', independent from VS Code's native text undo states. When focus resides in the body pane, the Undo keybinding triggers VS Code's text-specific undo action. However, once the focus shifts or a new node is selected, all concurrent text changes coalesce into a single 'Undo Bead' within the Undo Panel. These 'Undo Beads' can then be manipulated either through the Undo Panel or by keybindings, provided the focus is explicitly set on the outline pane. This dual-layer undo architecture enables precise control over both code and structural modifications.
+&gt; In LeoJS, the undo functionality is a multi-tiered system that segregates structural outline changes from text changes within the body pane. The Undo Panel captures outline alterations as individual 'Undo Beads', independent from VS Code's native text undo states. When focus resides in the body pane, the Undo keybinding triggers VS Code's text-specific undo action. However, once the focus shifts, or a new node is selected, all concurrent text changes coalesce into a single 'Undo Bead' within the Undo Panel. These 'Undo Beads' can then be manipulated either through the Undo Panel or by keybindings, provided the focus is explicitly set on the outline pane. This dual-layer undo architecture enables precise control over both code and structural modifications.
 
 Use the undo / redo icons above the outline or above the undo pane itself. You can also right-click on an undo step to directly switch to that specific state!
 
@@ -1068,6 +1062,9 @@ So select at least one character to use the previously assigned original keyboar
 If you would like to modify and build this project yourself, see [CONTRIBUTING.md](./CONTRIBUTING.md) for how to get started.
 
 # Acknowledgments
+
+See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
+or on [github](https://github.com/leo-editor/leo-editor).
 
 ### _Thanks to_
 
@@ -1724,16 +1721,10 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 <t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, false)],
 [CMD.INSERT_SELECTION, () =&gt; p_leoUI.insertNode(U, false, false)],
 [CMD.INSERT_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, false)],
-// Special command for when inserting rapidly more than one node without
-// even specifying a headline label, e.g. spamming CTRL+I rapidly.
-// [CMD.INSERT_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, false)],
 
 [CMD.INSERT_CHILD, (p_node: Position) =&gt; p_leoUI.insertNode(p_node, true, true)],
 [CMD.INSERT_CHILD_SELECTION, () =&gt; p_leoUI.insertNode(U, false, true)],
 [CMD.INSERT_CHILD_SELECTION_FO, () =&gt; p_leoUI.insertNode(U, true, true)],
-// Special command for when inserting rapidly more than one node without
-// even specifying a headline label, e.g. spamming CTRL+I rapidly.
-// [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, true)],
 
 [CMD.CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 [CMD.CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
@@ -1869,9 +1860,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; p_leoUI.selectOpenedLeoDocument(p_index, true)],
 
 [CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
-
 [CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
-
 [CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 [CMD.GIT_DIFF, () =&gt; p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
@@ -3665,6 +3654,14 @@ export class LeoUI extends NullGui {
     private _leoTreeView!: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView!: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView!: vscode.TreeView&lt;Position&gt;; // Last visible treeview
+    private _pendingReveal: Thenable&lt;void&gt; | undefined;
+    private _nextRevealParams: {
+        tree: vscode.TreeView&lt;Position&gt;, element: Position, options?: {
+            select?: boolean;
+            focus?: boolean;
+            expand?: boolean | number;
+        }
+    } | undefined;
 
     private _revealNodeRetriedRefreshOutline: boolean = false; // USED IN _refreshOutline and _revealNode
 
@@ -3684,7 +3681,7 @@ export class LeoUI extends NullGui {
     private _findPanelWebviewView: vscode.WebviewView | undefined;
     private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
-    private _findNeedsFocus: boolean = false;
+    private _findNeedsFocus: number = 0; // 0 none, 1 find, 2 nav
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
@@ -3727,9 +3724,10 @@ export class LeoUI extends NullGui {
     private _lastLeoDocuments: vscode.TreeView&lt;LeoFrame&gt; | undefined;
 
     // * Goto nav panel
-    private _leoGotoProvider!: LeoGotoProvider;
-    private _leoGoto!: vscode.TreeView&lt;LeoGotoNode&gt;;
-    private _leoGotoExplorer!: vscode.TreeView&lt;LeoGotoNode&gt;;
+    public leoGotoProvider!: LeoGotoProvider;
+    // private _leoGoto!: vscode.TreeView&lt;LeoGotoNode&gt;;
+    // private _leoGotoExplorer!: vscode.TreeView&lt;LeoGotoNode&gt;;
+    // public lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -3912,7 +3910,7 @@ private _triggerGetStates(): void {
  */
 public showOutline(p_focusOutline?: boolean): void {
     const c = g.app.windowList[this.frameIndex].c;
-    this._lastTreeView.reveal(c.p, {
+    this.safeReveal(this._lastTreeView, c.p, {
         select: true,
         focus: !!p_focusOutline
     }).then(
@@ -5406,13 +5404,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "visibility": "collapsed"
     },
     {
-      "id": "leojsGotoPanelExplorer",
-      "name": "Leojs Goto",
-      "contextualTitle": "Leojs",
-      "when": "config.leojs.treeInExplorer &amp;&amp; leojsTreeOpened",
-      "visibility": "collapsed"
-    },
-    {
       "id": "leojsDocumentsExplorer",
       "name": "Leojs Documents",
       "contextualTitle": "Leojs",
@@ -5447,13 +5438,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsFindPanel",
       "name": "Find",
       "title": "Find",
-      "when": "leojsTreeOpened",
-      "visibility": "collapsed"
-    },
-    {
-      "id": "leojsGotoPanel",
-      "contextualTitle": "Leojs",
-      "name": "Goto",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     },
@@ -5678,16 +5662,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
   },
   {
-    "view": "leojsGotoPanel",
-    "contents": "No Results",
-    "when": "leojsReady"
-  },
-  {
-    "view": "leojsGotoPanelExplorer",
-    "contents": "No Results",
-    "when": "leojsReady"
-  },
-  {
     "view": "leojsButtons",
     "contents": "There are no Leo files currently opened",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
@@ -5900,27 +5874,27 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.findQuickSelected",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.findQuickTimeline",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.findQuickChanged",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.history",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leojs.markedList",
-    "when": "view =~ /^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
@@ -5985,22 +5959,22 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.chapterBack",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@5"
   },
   {
     "command": "leojs.chapterNext",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@5"
   },
   {
     "command": "leojs.chapterSelect",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@5"
   },
   {
     "command": "leojs.chapterMain",
-    "when": "view =~ /^leojsFindPanel|^leojsGotoPanel/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@6"
   },
   {
@@ -6156,7 +6130,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 <t tx="felix.20201214205159.69">{
   "command": "leojs.showOutline",
   "key": "alt+t",
-  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/ || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
+  "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme =~ /^leojs/ || leojsFindFocus || focusedView =~ /^leojsUndos|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.showOutline",
@@ -6591,19 +6565,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
-  "command": "leojs.gotoNavFirst",
-  "key": "home",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
-},
-{
   "command": "leojs.gotoLastVisible",
   "key": "end",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.gotoNavLast",
-  "key": "end",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.pageUp",
@@ -6611,19 +6575,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
-  "command": "leojs.gotoNavFirst",
-  "key": "pageup",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
-},
-{
   "command": "leojs.pageDown",
   "key": "pagedown",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.gotoNavLast",
-  "key": "pagedown",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
@@ -6641,11 +6595,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
-  "command": "leojs.gotoNavNext",
-  "key": "down",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
-},
-{
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
   "when": "leojsTreeOpened &amp;&amp; leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
@@ -6654,11 +6603,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.gotoPrevVisible",
   "key": "up",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsEditHeadline || config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.gotoNavPrev",
-  "key": "up",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.gotoPrevVisible",
@@ -6940,6 +6884,7 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
     this.setupRefresh(Focus.Body, {
         tree: true,
         body: true,
+        goto: true,
         documents: true,
         buttons: true,
         states: true
@@ -7490,7 +7435,7 @@ private _setupNoOpenedLeoDocument(): void {
             void vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', w_uri);
         }
     }
-
+    this._nextRevealParams = undefined;
     void this.checkConfirmBeforeClose();
     this._leoStatusBar?.hide();
     this.leoStates.fileOpenedReady = false;
@@ -7584,7 +7529,7 @@ public gotSelectedNode(p_node: Position): void {
         this._lastTreeView.visible
 
     ) {
-        void this._lastTreeView.reveal(p_node, {
+        this.safeReveal(this._lastTreeView, p_node, {
             select: true,
             focus: false
         }).then(
@@ -7611,7 +7556,7 @@ public gotSelectedNode(p_node: Position): void {
                 clearTimeout(this._gotSelectedNodeRevealTimer);
             }
             this._gotSelectedNodeRevealTimer = setTimeout(() =&gt; {
-                this._lastTreeView.reveal(p_node, {
+                this.safeReveal(this._lastTreeView, p_node, {
                     select: true,
                     focus: w_focusTree
                 }).then(() =&gt; {
@@ -9518,21 +9463,7 @@ public finishStartup(): void {
     this._lastLeoButtons = this._leoButtonsExplorer;
 
     // * Create goto Treeview Providers and tree views
-    this._leoGotoProvider = new LeoGotoProvider(this);
-    this._leoGoto = vscode.window.createTreeView(Constants.GOTO_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-    this._context.subscriptions.push(
-        this._leoGoto,
-        this._leoGoto.onDidChangeVisibility((p_event) =&gt;
-            this._onGotoTreeViewVisibilityChanged(p_event, false)
-        )
-    );
-    this._leoGotoExplorer = vscode.window.createTreeView(Constants.GOTO_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoGotoProvider });
-    this._context.subscriptions.push(
-        this._leoGotoExplorer,
-        this._leoGotoExplorer.onDidChangeVisibility((p_event) =&gt;
-            this._onGotoTreeViewVisibilityChanged(p_event, true)
-        )
-    );
+    this.leoGotoProvider = new LeoGotoProvider(this);
 
     // * Create Undos Treeview Providers and tree views
     this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this, this.undoIcons);
@@ -9713,7 +9644,7 @@ public makeAllBindings(): void {
 <t tx="felix.20220505215916.2">/**
  * Opens the Nav tab and focus on nav text input
  */
-public findQuick(p_string?: string): Thenable&lt;unknown&gt; {
+public findQuick(p_string?: string, p_forceEnter?: boolean): Thenable&lt;unknown&gt; {
     void this.triggerBodySave(true);
     let w_panelID = '';
     let w_panel: vscode.WebviewView | undefined;
@@ -9728,11 +9659,26 @@ public findQuick(p_string?: string): Thenable&lt;unknown&gt; {
         if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
             w_panel.show(false);
         }
-        const w_message: { [key: string]: string } = { type: 'selectNav' };
-        if (p_string &amp;&amp; p_string?.trim()) {
+        const w_message: { [key: string]: string | boolean } = { type: 'selectNav' };
+        if (p_string &amp;&amp; p_string.trim()) {
             w_message["text"] = p_string.trim();
         }
-        void w_panel?.webview.postMessage(w_message);
+        if (p_forceEnter) {
+            w_message["forceEnter"] = true;
+        }
+        if (w_panel) {
+            void w_panel.webview.postMessage(w_message);
+        } else {
+            setTimeout(() =&gt; {
+                let w_panel: vscode.WebviewView | undefined;
+                if (this._lastTreeView === this._leoTreeExView) {
+                    w_panel = this._findPanelWebviewExplorerView;
+                } else {
+                    w_panel = this._findPanelWebviewView;
+                }
+                void w_panel?.webview.postMessage(w_message);
+            }, 290);
+        }
     });
 }
 
@@ -9746,10 +9692,10 @@ public findQuickSelected(): Thenable&lt;unknown&gt; {
         const selection = editor.selection;
         if (!selection.isEmpty) {
             const text = editor.document.getText(selection).replace(/\r\n/g, "\n");
-            return this.findQuick(text);
+            return this.findQuick(text, true);
         }
     }
-    return this.findQuick();
+    return this.findQuick("", true);
 }
 
 </t>
@@ -9760,7 +9706,7 @@ public findQuickTimeline(): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_sort_by_gnx();
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
@@ -9772,7 +9718,7 @@ public findQuickChanged(): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_find_changed();
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
@@ -9784,7 +9730,7 @@ public findQuickHistory(): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_get_history();
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
@@ -9796,8 +9742,16 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_show_marked();
-    this._leoGotoProvider.refreshTreeRoot();
-    if (p_preserveFocus &amp;&amp; (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
+    this.leoGotoProvider.refreshTreeRoot();
+    // if (p_preserveFocus &amp;&amp; (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
+    //     return Promise.resolve();
+    // }
+    if (
+        p_preserveFocus &amp;&amp; (
+            (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) ||
+            (this._findPanelWebviewExplorerView &amp;&amp; this._findPanelWebviewExplorerView.visible)
+        )
+    ) {
         return Promise.resolve();
     }
     return this.showGotoPane(); // Finish by opening and focussing nav pane
@@ -9809,17 +9763,48 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
  */
 public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknown&gt; {
     void this.triggerBodySave(true);
-    let w_panel = "";
 
+    // if (this._lastTreeView === this._leoTreeExView) {
+    //     w_panel = Constants.GOTO_EXPLORER_ID;
+    // } else {
+    //     w_panel = Constants.GOTO_ID;
+    // }
+
+    // void vscode.commands.executeCommand(w_panel + '.focus', p_options);
+
+    let w_panelID = '';
+    let w_panel: vscode.WebviewView | undefined;
     if (this._lastTreeView === this._leoTreeExView) {
-        w_panel = Constants.GOTO_EXPLORER_ID;
+        w_panelID = Constants.FIND_EXPLORER_ID;
+        w_panel = this._findPanelWebviewExplorerView;
     } else {
-        w_panel = Constants.GOTO_ID;
+        w_panelID = Constants.FIND_ID;
+        w_panel = this._findPanelWebviewView;
     }
+    // this._findNeedsFocus = 2;
+    // setTimeout(() =&gt; {
+    //     this._findNeedsFocus = 0;
+    // }, 250);
+    return vscode.commands.executeCommand(w_panelID + '.focus', p_options).then((p_result) =&gt; {
+        if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
+            w_panel.show(false);
+        }
+        const w_message: { [key: string]: string } = { type: 'showGoto' };
+        if (w_panel) {
+            void w_panel.webview.postMessage(w_message);
+        } else {
+            setTimeout(() =&gt; {
+                let w_panel: vscode.WebviewView | undefined;
+                if (this._lastTreeView === this._leoTreeExView) {
+                    w_panel = this._findPanelWebviewExplorerView;
+                } else {
+                    w_panel = this._findPanelWebviewView;
+                }
+                void w_panel?.webview.postMessage(w_message);
+            }, 290);
+        }
+    });
 
-    void vscode.commands.executeCommand(w_panel + '.focus', p_options);
-
-    return Promise.resolve();
 }
 
 </t>
@@ -9827,9 +9812,13 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
  * * Handles a click (selection) of a nav panel node: Sends 'goto' command to server.
  */
 public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
+    if (!p_node) {
+        console.log('ERROR NO NODE TO SHOW IN GOTO PANE!');
+        return;
+    }
 
     await this.triggerBodySave(true);
-    this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
+    this.leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
 
@@ -9872,7 +9861,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
             } else {
                 scon.qsc_search(inp);
             }
-            this._leoGotoProvider.refreshTreeRoot();
+            this.leoGotoProvider.refreshTreeRoot();
             void this.showGotoPane({ preserveFocus: true }); // show but dont change focus
         }, 10);
 
@@ -9919,6 +9908,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
     }
 
 }
+
 </t>
 <t tx="felix.20220505215924.1"></t>
 <t tx="felix.20220505215924.12">/**
@@ -10172,12 +10162,15 @@ public startSearch(): void {
 
     if (w_panel) {
         // ALREADY VISIBLE FIND PANEL
-        this._findNeedsFocus = false;
+        this._findNeedsFocus = 0;
         void w_panel.webview.postMessage({ type: 'selectFind' });
         return;
     }
 
-    this._findNeedsFocus = true;
+    this._findNeedsFocus = 1;
+    setTimeout(() =&gt; {
+        this._findNeedsFocus = 0;
+    }, 250);
     let w_panelID = '';
     if (this._lastTreeView === this._leoTreeExView) {
         w_panelID = Constants.FIND_EXPLORER_ID;
@@ -10185,6 +10178,7 @@ public startSearch(): void {
         w_panelID = Constants.FIND_ID;
     }
     void vscode.commands.executeCommand(w_panelID + '.focus');
+
 
 }
 
@@ -10498,16 +10492,22 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
 
     private _lastGotoView: vscode.TreeView&lt;LeoGotoNode&gt; | undefined;
 
-    private _nodeList: LeoGotoNode[] = []; // Node list kept here.
+    public nodeList: LeoGotoNode[] = []; // Node list kept here.
     private _viewSwitch: boolean = false;
 
-    private _selectedNodeIndex: number = 0;
+    public selectedNodeIndex: number = 0;
+    public isSelected = false;
 
-    constructor(private _leoUI: LeoUI) { }
+    constructor(private _leoUI: LeoUI) {
+        this.onDidChangeTreeData(() =&gt; {
+            this.getChildren(); // THIS KEEPS THE DATA UP TO DATE
+            this._leoUI.setGotoContent();
+        }, this);
+    }
 
-    public setLastGotoView(p_view: vscode.TreeView&lt;LeoGotoNode&gt;): void {
-        this._lastGotoView = p_view;
-        if (this._nodeList &amp;&amp; this._nodeList.length) {
+    public setLastGotoView(): void {
+        // this._lastGotoView = p_view;
+        if (this.nodeList &amp;&amp; this.nodeList.length) {
             this._viewSwitch = true;
             this._onDidChangeTreeData.fire(undefined);
         }
@@ -10518,55 +10518,71 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public resetSelectedNode(p_node?: LeoGotoNode): void {
-        this._selectedNodeIndex = 0;
+        this.selectedNodeIndex = 0;
+        this.isSelected = false;
         if (p_node) {
-            const w_found = this._nodeList.indexOf(p_node);
+            const w_found = this.nodeList.indexOf(p_node);
             if (w_found &gt;= 0) {
-                this._selectedNodeIndex = w_found;
+                this.selectedNodeIndex = w_found;
+                this.isSelected = true;
                 return;
             }
         }
     }
 
     public async navigateNavEntry(p_nav: LeoGotoNavKey): Promise&lt;void&gt; {
-        if (!this._nodeList.length) {
+        if (!this.nodeList.length) {
+            this.selectedNodeIndex = 0;
+            this.isSelected = false;
             return;
         }
         switch (p_nav.valueOf()) {
             case LeoGotoNavKey.first:
-                this._selectedNodeIndex = 0;
+                this.selectedNodeIndex = 0;
+                this.isSelected = true;
                 break;
 
             case LeoGotoNavKey.last:
-                this._selectedNodeIndex = this._nodeList.length - 1;
+                this.selectedNodeIndex = this.nodeList.length - 1;
+                this.isSelected = true;
                 break;
 
             case LeoGotoNavKey.next:
-                if (this._selectedNodeIndex &lt; this._nodeList.length - 1) {
-                    this._selectedNodeIndex += 1;
+                if (this.selectedNodeIndex &lt; this.nodeList.length - 1) {
+                    this.selectedNodeIndex += 1;
+                    this.isSelected = true;
                 }
                 break;
 
             case LeoGotoNavKey.prev:
-                if (this._selectedNodeIndex &gt; 0) {
-                    this._selectedNodeIndex -= 1;
+                if (this.selectedNodeIndex &gt; 0) {
+                    this.selectedNodeIndex -= 1;
+                    this.isSelected = true;
                 }
                 break;
         }
-        const node = this._nodeList[this._selectedNodeIndex];
+        // Check if array long enough!
+        if (!this.nodeList[this.selectedNodeIndex]) {
+            this.selectedNodeIndex = 0;
+            this.isSelected = true;
+            return; // Cancel
+        }
+        const node = this.nodeList[this.selectedNodeIndex];
         await this._leoUI.gotoNavEntry(node);
-        await this._lastGotoView?.reveal(node, {
-            select: true,
-            focus: true
-        });
+        this._leoUI.revealGotoNavEntry(this.selectedNodeIndex);
+        // await this._lastGotoView?.reveal(node, {
+        //     select: true,
+        //     focus: true
+        // });
     }
 
     /**
      * * Refresh the whole outline
      */
     public refreshTreeRoot(): void {
-        this._nodeList = [];
-        this._selectedNodeIndex = 0;
+        this.nodeList = [];
+        this.selectedNodeIndex = 0;
+        this.isSelected = false;
         this._onDidChangeTreeData.fire(undefined);
     }
 
@@ -10575,24 +10591,27 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public getChildren(element?: LeoGotoNode): LeoGotoNode[] {
-
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady &amp;&amp; !element) {
 
             // WAS JUST A VIEW SWITCH:
             if (this._viewSwitch) {
                 this._viewSwitch = false;
+                console.log('WAS JUST A VIEW SWITCH ! !');
                 setTimeout(() =&gt; {
-                    if (this._nodeList.length &amp;&amp; (this._selectedNodeIndex + 1) &lt;= this._nodeList.length) {
-                        void this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
-                            select: true,
-                            focus: false
-                        }).then(() =&gt; { }, () =&gt; {
-                            console.log('Reveal failed for goto panel switching detected.');
-                        });
+                    if (this.nodeList.length &amp;&amp; (this.selectedNodeIndex + 1) &lt;= this.nodeList.length) {
+
+                        this._leoUI.revealGotoNavEntry(this.selectedNodeIndex, true);
+
+                        // void this._lastGotoView?.reveal(this.nodeList[this._selectedNodeIndex], {
+                        //     select: true,
+                        //     focus: false
+                        // }).then(() =&gt; { }, () =&gt; {
+                        //     console.log('Reveal failed for goto panel switching detected.');
+                        // });
                     }
                 }, 0);
-                return this._nodeList; // Make sure the nodes are valid (give back)
+                return this.nodeList; // Make sure the nodes are valid (give back)
             }
 
             const c = g.app.windowList[this._leoUI.frameIndex].c;
@@ -10616,17 +10635,17 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
             result["navText"] = scon.navText;
             result["navOptions"] = { "isTag": scon.isTag, "showParents": scon.showParents };
 
-            this._nodeList = [];
+            this.nodeList = [];
             if (result &amp;&amp; result.navList) {
 
                 const w_navList: LeoGoto[] = result.navList;
                 if (w_navList &amp;&amp; w_navList.length) {
                     w_navList.forEach((p_goto: LeoGoto) =&gt; {
                         const w_newNode = new LeoGotoNode(this._leoUI, p_goto, result.navOptions!);
-                        this._nodeList.push(w_newNode);
+                        this.nodeList.push(w_newNode);
                     });
                 }
-                return this._nodeList;
+                return this.nodeList;
             } else {
                 return [];
             }
@@ -10656,6 +10675,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     private _iconIndex: number; // default to tag
     private _leoUI: LeoUI;
     public key: number; // id from python
+    public leoPaneLabel: string;
 
     constructor(
         p_leoUI: LeoUI,
@@ -10672,7 +10692,10 @@ export class LeoGotoNode extends vscode.TreeItem {
             w_label = w_spacing + p_gotoEntry.h;
         }
         super(w_label);
-
+        this.leoPaneLabel = "";
+        if (["tag", "headline"].includes(p_gotoEntry.t)) {
+            this.leoPaneLabel = p_gotoEntry.h;
+        }
         // Setup this instance
         this._leoUI = p_leoUI;
         this._id = utils.getUniqueId();
@@ -10688,12 +10711,15 @@ export class LeoGotoNode extends vscode.TreeItem {
             } else {
                 this._description = "  " + this._headline;
             }
+            this.leoPaneLabel = this._headline;
         } else if (this.entryType === 'parent') {
             this._iconIndex = 0;
             this._description = this._headline.trim();
+            this.leoPaneLabel = this._description;
         } else if (this.entryType === 'generic') {
             this._iconIndex = 4;
             this._description = this._headline;
+            this.leoPaneLabel = this._description;
         } else if (this.entryType === 'headline') {
             this._iconIndex = 1;
         } else {
@@ -10868,6 +10894,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
     this.setupRefresh(Focus.NoChange, {
         tree: true,
         body: true,
+        goto: true,
         documents: true,
         buttons: true,
         states: true
@@ -12538,14 +12565,21 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                         // ! Compensate for reveal that steals the focus.
                         if (this._refreshType.goto) {
                             this._refreshType.goto = false;
-                            let w_viewName: string;
-                            const gotoView = this._leoGotoProvider.getLastGotoView();
-                            if (gotoView &amp;&amp; gotoView.title === "Goto") {
-                                w_viewName = Constants.GOTO_ID;
+                            // let w_viewName: string;
+                            // const gotoView = this.leoGotoProvider.getLastGotoView();
+                            // if (gotoView &amp;&amp; gotoView.title === "Goto") {
+                            //     w_viewName = Constants.GOTO_ID;
+                            // } else {
+                            //     w_viewName = Constants.GOTO_EXPLORER_ID;
+                            // }
+                            // void vscode.commands.executeCommand(w_viewName + ".focus");
+                            let w_panelID = '';
+                            if (this._lastTreeView === this._leoTreeExView) {
+                                w_panelID = Constants.FIND_EXPLORER_ID;
                             } else {
-                                w_viewName = Constants.GOTO_EXPLORER_ID;
+                                w_panelID = Constants.FIND_ID;
                             }
-                            void vscode.commands.executeCommand(w_viewName + ".focus");
+                            void vscode.commands.executeCommand(w_panelID + '.focus');
                         }
                     }
 
@@ -12979,7 +13013,7 @@ export const enum Focus {
 private _revealNode(
     p_leoNode: Position,
     p_options?: { select?: boolean; focus?: boolean; expand?: boolean | number }
-): Thenable&lt;void&gt; {
+): void {
     let w_treeview: vscode.TreeView&lt;Position&gt; | undefined;
     if (this._leoTreeView.visible) {
         w_treeview = this._leoTreeView;
@@ -13001,7 +13035,7 @@ private _revealNode(
     }
     try {
         if (w_treeview) {
-            return w_treeview.reveal(p_leoNode, p_options).then(
+            this.safeReveal(w_treeview, p_leoNode, p_options).then(
                 () =&gt; {
                     // ok
                     this._revealNodeRetriedRefreshOutline = false;
@@ -13027,7 +13061,6 @@ private _revealNode(
             this._refreshOutline(true, RevealType.RevealSelect);
         }
     }
-    return Promise.resolve(); // Defaults to resolving even if both are hidden
 }
 
 </t>
@@ -13122,22 +13155,6 @@ private _onDidOpenTextDocument(p_document: vscode.TextDocument): void {
 }
 
 </t>
-<t tx="felix.20220930214434.1">/**
- * * Handle the change of visibility of either goto treeview and refresh it if its visible
- * @param p_event The treeview-visibility-changed event passed by vscode
- * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
- */
-private _onGotoTreeViewVisibilityChanged(
-    p_event: vscode.TreeViewVisibilityChangeEvent,
-    p_explorerView: boolean
-): void {
-    if (p_event.visible) {
-        // console.log("_onGotoTreeViewVisibilityChanged is visible. explorer?: ", p_explorerView);
-        this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
-    }
-}
-
-</t>
 <t tx="felix.20220930214530.1">/**
  * * Handle the change of visibility of either find panel
  * @param p_event The visibility-changed event passed by vscode
@@ -13148,11 +13165,19 @@ private _onFindViewVisibilityChanged(p_explorerView: boolean): void {
         if (this._findPanelWebviewExplorerView?.visible) {
             this._lastFindView = this._findPanelWebviewExplorerView;
             this.checkForceFindFocus(false);
+            this.setGotoContent();
+            if (this.leoGotoProvider.isSelected) {
+                this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
+            }
         }
     } else {
         if (this._findPanelWebviewView?.visible) {
             this._lastFindView = this._findPanelWebviewView;
             this.checkForceFindFocus(false);
+            this.setGotoContent();
+            if (this.leoGotoProvider.isSelected) {
+                this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
+            }
         }
     }
 }
@@ -13575,6 +13600,7 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
                 this._onFindViewVisibilityChanged(false)
             ));
     }
+    this.setGotoContent();
     this.checkForceFindFocus(true);
 }
 
@@ -13614,6 +13640,7 @@ public setDocumentSelection(p_frame: LeoFrame): void {
                         this._documentPaneReveal = undefined;
                     },
                     (p_reason) =&gt; {
+                        this._documentPaneReveal = undefined;
                         console.log('shown doc error on reveal: ', p_reason);
                     }
                 );
@@ -13634,6 +13661,7 @@ private _setUndoSelection(p_undoNode: LeoUndoNode): void {
                 this._undoPaneReveal = undefined;
             },
             (p_error) =&gt; {
+                this._undoPaneReveal = undefined;
                 console.log('setUndoSelection could not reveal');
             }
         );
@@ -13687,7 +13715,11 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
  */
 public checkForceFindFocus(p_fromInit: boolean): void {
     if (this._findNeedsFocus) {
-        this._findNeedsFocus = false; // Set false before timeout.
+        let message = 'selectFind';
+        if (this._findNeedsFocus === 2) {
+            message = 'selectNav';
+        }
+        this._findNeedsFocus = 0; // Set false before timeout.
         setTimeout(() =&gt; {
             let w_panel: vscode.WebviewView | undefined;
             if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
@@ -13696,8 +13728,8 @@ public checkForceFindFocus(p_fromInit: boolean): void {
                 w_panel = this._findPanelWebviewExplorerView;
             }
             if (w_panel) {
-                this._findNeedsFocus = false; // Set false ALSO AFTER !
-                void w_panel.webview.postMessage({ type: 'selectFind' });
+                this._findNeedsFocus = 0; // Set false ALSO AFTER !
+                void w_panel.webview.postMessage({ type: message });
             }
         }, 60);
     }
@@ -13932,7 +13964,7 @@ public static OLD_POS_OFFSETS = {
  * * Goto the next, previous, first or last nav entry via arrow keys in
  */
 public navigateNavEntry(p_nav: LeoGotoNavKey): void {
-    void this._leoGotoProvider.navigateNavEntry(p_nav);
+    void this.leoGotoProvider.navigateNavEntry(p_nav);
 }
 
 </t>
@@ -13999,51 +14031,6 @@ public refreshDesc(): void {
     if (this._leoTreeExView) {
         this._leoTreeExView.description = titleDesc;
     }
-
-    // * FROM LEO SERVER this is used to make _titleDesc
-    // fileName = c.fileName()
-    // branch, commit = g.gitInfoForFile(fileName)
-
-
-    // * FROM LEOINTEG:
-
-    // if (this.leoStates.fileOpenedReady) {
-
-    //     if (this.config.showBranchInOutlineTitle) {
-    //         this.sendAction(
-    //             Constants.LEOBRIDGE.GET_BRANCH
-    //         ).then(
-    //             (p_result: LeoBridgePackage) =&gt; {
-    //                 let w_branch = "";
-    //                 if (p_result &amp;&amp; p_result.branch) {
-    //                     w_branch = p_result.branch + ": ";
-    //                 }
-
-    //                 if (this._leoTreeView) {
-    //                     this._leoTreeView.description = w_branch + this._titleDesc;
-    //                 }
-    //                 if (this._leoTreeExView) {
-    //                     this._leoTreeExView.description = w_branch + this._titleDesc;
-    //                 }
-    //             }
-    //         );
-    //     } else {
-    //         if (this._leoTreeView) {
-    //             this._leoTreeView.description = this._titleDesc;
-    //         }
-    //         if (this._leoTreeExView) {
-    //             this._leoTreeExView.description = this._titleDesc;
-    //         }
-    //     }
-
-    // } else {
-    //     if (this._leoTreeView) {
-    //         this._leoTreeView.description = "";
-    //     }
-    //     if (this._leoTreeExView) {
-    //         this._leoTreeExView.description = "";
-    //     }
-    // }
 
 }
 
@@ -14359,7 +14346,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
  * Goto Panel May be refreshed by other services (states service, ...)
  */
 private _refreshGotoPane(): void {
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
 }
 
 </t>
@@ -14770,7 +14757,7 @@ private _refreshGotoPane(): void {
   "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
-  "command": "leojs.findQuick",
+  "command": "leojs.findQuickSelected",
   "key": "ctrl+shift+f",
   "mac": "cmd+shift+f",
   "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojs/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
@@ -15078,7 +15065,7 @@ public navTextClear(): void {
 
     scon.clear();
 
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
 }
 
 </t>
@@ -15421,6 +15408,15 @@ private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
             &lt;br&gt;
             Kevin Henderson
         &lt;/td&gt;
+        &lt;td align="center"&gt;
+                &lt;img src="data:image/svg+xml;charset=utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E"
+                     alt="Jon Nicoll"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;br&gt;
+            Jon Nicoll
+        &lt;/td&gt;
     &lt;/tr&gt;
 &lt;/table&gt;
 </t>
@@ -15641,8 +15637,13 @@ set leoEditHeadline(p_value: boolean) {
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
-    let firstTabElId = 'searchOptions'; // The first tabbable element used to be 'findText' before nav inputs
-    let lastTabElId = 'searchBody';
+    let activeTab = 'tab2'; // Initial active tab
+    let firstFindTabElId = 'findText';
+    let lastFindTabElId = 'searchBody';
+    let firstNavTabElId = 'searchOptions';
+    let lastNavTabElId = 'navText';
+    let lastGotoContent = [];
+    let lastSelectedGotoItem;
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -15752,6 +15753,69 @@ set leoEditHeadline(p_value: boolean) {
 
     }
 
+    const gotoPaneContainer = document.getElementById('gotopane');
+
+    // TODO CHECK IF NEEDED ?
+    // document.body.addEventListener('mousedown', () =&gt; {
+    //     if (!gotoPaneContainer) {
+    //         return;
+    //     }
+    //     // remove selected class
+    //     if (lastSelectedGotoItem) {
+    //         lastSelectedGotoItem.classList.remove('selected');
+    //         lastSelectedGotoItem = undefined;
+    //     }
+    // });
+
+    function clickedGotoItem(event) {
+        if (!gotoPaneContainer) {
+            return;
+        }
+        // remove selected class first
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
+        }
+        event.target.classList.add('selected');
+        lastSelectedGotoItem = event.target;
+        event.stopPropagation();
+        // CALL GOTO COMMAND!
+        vscode.postMessage({ type: 'gotoCommand', value: event.target.dataset.order });
+    }
+
+    function fillGotoPane(p_gotoContent) {
+        lastGotoContent = p_gotoContent;
+        if (!gotoPaneContainer) {
+            return;
+        }
+        let i = 0;
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
+            lastSelectedGotoItem = undefined;
+        }
+        while (gotoPaneContainer &amp;&amp; gotoPaneContainer.firstChild) {
+            gotoPaneContainer.removeChild(gotoPaneContainer.firstChild);
+        }
+        let hasParent = false;
+        for (const gotoItem of p_gotoContent) {
+            const smallerDiv = document.createElement('div');
+            smallerDiv.dataset.order = i.toString();
+            smallerDiv.className = 'goto-item ' + gotoItem.entryType;
+            smallerDiv.textContent = gotoItem.label;
+            // smallerDiv.title = gotoItem.tooltip; // TOOLTIPS CANNOT BE STYLED!
+            smallerDiv.setAttribute('tabindex', '0');
+            if (gotoItem.entryType === 'parent') {
+                hasParent = true;
+            }
+            smallerDiv.addEventListener('mousedown', clickedGotoItem);
+            gotoPaneContainer.appendChild(smallerDiv);
+            i = i + 1;
+        }
+        gotoPaneContainer.classList.remove('show-parents');
+        if (hasParent) {
+            gotoPaneContainer.classList.add('show-parents');
+        }
+    }
+
     function setSearchSetting(p_id) {
         if (checkboxIds.includes(p_id)) {
             toggleCheckbox(p_id);
@@ -15773,38 +15837,26 @@ set leoEditHeadline(p_value: boolean) {
     }
 
     function setSettings(p_settings) {
-        if (p_settings["navText"] || p_settings["navText"] === '') {
+        // Nav controls
+        // @ts-expect-error
+        document.getElementById("navText").value = p_settings["navText"];
+        searchSettings["navText"] = p_settings["navText"];
 
-            // Nav controls
-            // @ts-expect-error
-            document.getElementById("navText").value = p_settings["navText"];
-            searchSettings["navText"] = p_settings["navText"];
+        // showParents
+        // @ts-expect-error
+        document.getElementById("showParents").checked = p_settings["showParents"];
+        searchSettings["showParents"] = p_settings["showParents"];
 
-            // showParents
-            // @ts-expect-error
-            document.getElementById("showParents").checked = p_settings["showParents"];
-            searchSettings["showParents"] = p_settings["showParents"];
+        // isTag
+        // @ts-expect-error
+        document.getElementById("isTag").checked = p_settings["isTag"];
+        searchSettings["isTag"] = p_settings["isTag"];
+        handleIsTagSwitch(false);
 
-            // isTag
-            // @ts-expect-error
-            document.getElementById("isTag").checked = p_settings["isTag"];
-            searchSettings["isTag"] = p_settings["isTag"];
-            handleIsTagSwitch(false);
-
-            // searchOptions
-            // @ts-expect-error
-            document.getElementById("searchOptions").value = p_settings["searchOptions"];
-            searchSettings["searchOptions"] = p_settings["searchOptions"];
-        } else {
-            // ! Not at least Leo 6.6 final : hide top elements !
-            firstTabElId = 'findText';
-            var elements = document.getElementsByClassName("nav-element");
-
-            for (var i = 0; i &lt; elements.length; i++) {
-                // @ts-expect-error
-                elements[i].style.display = "none";
-            }
-        }
+        // searchOptions
+        // @ts-expect-error
+        document.getElementById("searchOptions").value = p_settings["searchOptions"];
+        searchSettings["searchOptions"] = p_settings["searchOptions"];
 
         // When opening a Leo document, set default values of fields
         findReplaceInputIds.forEach((p_inputId) =&gt; {
@@ -15868,20 +15920,24 @@ set leoEditHeadline(p_value: boolean) {
         if (!p_event) {
             p_event = window.event;
         }
-        var keyCode = p_event.code || p_event.key;
+        const keyCode = p_event.code || p_event.key;
 
         // Detect CTRL+F
         if (p_event.ctrlKey &amp;&amp; !p_event.shiftKey &amp;&amp; p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
-            focusOnField('findText');
+            // focusOnField('findText');
+            activateTab('tab2');
+
             return;
         }
         // Detect CTRL+SHIFT+F
         if (p_event.ctrlKey &amp;&amp; p_event.shiftKey &amp;&amp; p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
-            focusOnField('navText');
+            // focusOnField('navText');
+            activateTab('tab3');
+
             return;
         }
 
@@ -15917,12 +15973,61 @@ set leoEditHeadline(p_value: boolean) {
         }
         */
 
+        const actEl = document.activeElement;
         if (keyCode === 'Tab') {
-            var actEl = document.activeElement;
-            var lastEl = document.getElementById(lastTabElId);
-            var firstEl = document.getElementById(firstTabElId);
+            let lastEl;
+            let firstEl;
+            let selectedNavEl;
+            if (activeTab === 'tab2') {
+                // find panel
+                lastEl = document.getElementById(lastFindTabElId);
+                firstEl = document.getElementById(firstFindTabElId);
+            } else if (activeTab === 'tab3' &amp;&amp; !lastGotoContent.length) {
+                // nav panel regular
+                lastEl = document.getElementById(lastNavTabElId);
+                firstEl = document.getElementById(firstNavTabElId);
+            } else if (activeTab === 'tab3' &amp;&amp; lastGotoContent.length &amp;&amp; gotoPaneContainer) {
+                // nav panel WITH nav results.
+                lastEl = document.getElementById(lastNavTabElId);
+                firstEl = document.getElementById(firstNavTabElId);
+                selectedNavEl = gotoPaneContainer?.children[0]; // default
+
+                if (lastSelectedGotoItem) {
+                    selectedNavEl = lastSelectedGotoItem;
+                }
+
+                if (actEl?.classList.contains('goto-item')) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (p_event.shiftKey) {
+                        lastEl = document.getElementById(lastNavTabElId);
+                        if (lastEl) {
+                            lastEl.focus();
+                        }
+                    } else {
+                        if (firstEl) {
+                            firstEl.focus();
+                        }
+                    }
+                    return;
+                }
+
+            }
 
             if (p_event.shiftKey) {
+                if (selectedNavEl &amp;&amp; actEl === firstEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
+                    }
+                    selectedNavEl.focus();
+                    selectedNavEl.classList.add('selected');
+                    lastSelectedGotoItem = selectedNavEl;
+                    return;
+                }
                 // shift + tab so if first got last
                 if (lastEl &amp;&amp; actEl === firstEl) {
                     p_event.preventDefault();
@@ -15932,6 +16037,18 @@ set leoEditHeadline(p_value: boolean) {
                     return;
                 }
             } else {
+                if (selectedNavEl &amp;&amp; actEl === lastEl) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
+                    }
+                    selectedNavEl.focus();
+                    selectedNavEl.classList.add('selected');
+                    lastSelectedGotoItem = selectedNavEl;
+                    return;
+                }
                 // tab, so if last goto first
                 if (firstEl &amp;&amp; actEl === lastEl) {
                     p_event.preventDefault();
@@ -15942,7 +16059,108 @@ set leoEditHeadline(p_value: boolean) {
                 }
             }
         }
+
+        if (activeTab === 'tab3' &amp;&amp; lastGotoContent.length &amp;&amp; actEl &amp;&amp; gotoPaneContainer &amp;&amp; (actEl === gotoPaneContainer || gotoPaneContainer.contains(actEl))) {
+            navKeyHandler(p_event);
+        }
+
     }
+
+    function navKeyHandler(p_event) {
+        // Handles up/down home/end pgUp/pgDown
+        // for GOTO PANE navigation under the nav input
+        // if(gotoPaneContainer){
+        //     gotoPaneContainer
+        // }
+        if (!p_event) {
+            p_event = window.event;
+        }
+        const keyCode = p_event.code || p_event.key;
+
+        let code = -1;
+        switch (keyCode) {
+            case 'ArrowUp':
+                code = 0;
+                break;
+            case 'ArrowDown':
+                code = 1;
+                break;
+            case 'PageUp':
+                code = 2;
+                break;
+            case 'PageDown':
+                code = 3;
+                break;
+            case 'Home':
+                code = 2;
+                break;
+            case 'End':
+                code = 3;
+                break;
+            case 'Enter':
+                const actEl = document.activeElement;
+                if (actEl &amp;&amp; actEl.classList.contains('goto-item')) {
+                    p_event.preventDefault();
+                    p_event.stopPropagation();
+                    p_event.stopImmediatePropagation();
+                    if (!gotoPaneContainer) {
+                        return;
+                    }
+                    // remove selected class first
+                    if (lastSelectedGotoItem) {
+                        lastSelectedGotoItem.classList.remove('selected');
+                    }
+                    actEl.classList.add('selected');
+                    lastSelectedGotoItem = actEl;
+                    // CALL GOTO COMMAND!
+                    // @ts-expect-error
+                    vscode.postMessage({ type: 'gotoCommand', value: actEl.dataset.order });
+                    return;
+                }
+                break;
+
+            default:
+                break;
+        }
+        if (code &gt;= 0) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            p_event.stopImmediatePropagation();
+            vscode.postMessage({ type: 'navigateNavEntry', value: code });
+        }
+    }
+
+    function throttle(func, limit) {
+        let inThrottle;
+        let lastFunc;
+        let lastRan;
+        return function () {
+            const context = this;
+            const args = arguments;
+            if (!inThrottle) {
+                func.apply(context, args);
+                lastRan = Date.now();
+                inThrottle = true;
+                setTimeout(() =&gt; {
+                    inThrottle = false;
+                    if (lastFunc) {
+                        lastFunc.apply(context, args);
+                        lastRan = Date.now();
+                        lastFunc = null;
+                    }
+                }, limit);
+            } else {
+                lastFunc = func;
+            }
+        }
+    }
+
+    // TODO : USE THIS EXAMPLE INSTEAD OF CALLING LEOJS TO SWITCH RIGHT AWAY ! ! 
+    // Example usage
+    const throttledFunction = throttle(function () {
+        console.log('Function called!');
+    }, 1000); // The function will be called at most once every 1000ms (1 second)
+
 
     function focusOnField(p_id) {
         const inputField = document.querySelector('#' + p_id);
@@ -16006,37 +16224,40 @@ set leoEditHeadline(p_value: boolean) {
 
     // * Nav text input detection
     const w_navTextEl = document.getElementById('navText');
+    function navEnter() {
+        if (searchSettings.navText.length === 0 &amp;&amp; searchSettings.isTag) {
+            setFrozen(false);
+            resetTagNav();
+        } else {
+            if (searchSettings.navText.length &gt;= 3 || searchSettings.isTag) {
+                setFrozen(true);
+                if (navTextDirty) {
+                    navTextDirty = false;
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                    if (navSearchTimer) {
+                        clearTimeout(navSearchTimer);
+                    }
+                    sendSearchConfig();
+                }
+                vscode.postMessage({ type: 'leoNavEnter' });
+            }
+            if (searchSettings.navText.length === 0) {
+                vscode.postMessage({ type: 'leoNavClear' });
+            }
+        }
+    }
+
     if (w_navTextEl) {
         w_navTextEl.onkeypress = function (p_event) {
             if (!p_event) {
                 // @ts-expect-error
                 p_event = window.event;
             }
-            var keyCode = p_event.code || p_event.key;
+            const keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
-                if (searchSettings.navText.length === 0 &amp;&amp; searchSettings.isTag) {
-                    setFrozen(false);
-                    resetTagNav();
-                } else {
-                    if (searchSettings.navText.length &gt;= 3 || searchSettings.isTag) {
-                        setFrozen(true);
-                        if (navTextDirty) {
-                            navTextDirty = false;
-                            if (timer) {
-                                clearTimeout(timer);
-                            }
-                            if (navSearchTimer) {
-                                clearTimeout(navSearchTimer);
-                            }
-                            sendSearchConfig();
-                        }
-                        vscode.postMessage({ type: 'leoNavEnter' });
-                    }
-                    if (searchSettings.navText.length === 0) {
-                        vscode.postMessage({ type: 'leoNavClear' });
-                    }
-                }
-
+                navEnter();
                 return false;
             }
         };
@@ -16097,7 +16318,7 @@ set leoEditHeadline(p_value: boolean) {
                     // @ts-expect-error
                     p_event = window.event;
                 }
-                var keyCode = p_event.code || p_event.key;
+                const keyCode = p_event.code || p_event.key;
                 if (keyCode === 'Enter') {
                     if (timer) {
                         clearTimeout(timer);
@@ -16143,11 +16364,104 @@ set leoEditHeadline(p_value: boolean) {
 
     document.onkeydown = checkKeyDown;
 
+    const tabs = document.querySelectorAll('.tab-item');
+    const contents = document.querySelectorAll('.tab-content');
+
+    function showTab(newTab) {
+        // Remove active class from all tabs and contents
+        tabs.forEach(t =&gt; t.classList.remove('active'));
+        contents.forEach(c =&gt; c.classList.remove('active'));
+
+        // Add active class to the new tab and content
+        // @ts-expect-error
+        document.querySelector(`[data-tab="${newTab}"]`).classList.add('active');
+        // @ts-expect-error
+        document.getElementById(newTab).classList.add('active');
+
+        // Update the active tab state
+        activeTab = newTab;
+    }
+
+    function activateTab(newTab, replace) {
+        showTab(newTab);
+        setTimeout(() =&gt; {
+            if (activeTab === 'tab2') {
+                if (replace) {
+                    focusOnField('replaceText');
+                } else {
+                    focusOnField('findText');
+                }
+            } else if (activeTab === 'tab3') {
+                focusOnField('navText');
+            }
+        }, 0);
+    };
+
+    function revealNavEntry(p_index, p_preserveFocus) {
+        if (!p_preserveFocus) {
+            showTab('tab3');
+        }
+        if (lastSelectedGotoItem) {
+            lastSelectedGotoItem.classList.remove('selected');
+            lastSelectedGotoItem = undefined;
+        }
+        setTimeout(() =&gt; {
+            if (!gotoPaneContainer) {
+                return;
+            }
+            const children = gotoPaneContainer.children;
+            if (children &amp;&amp; children.length &amp;&amp; children.length &gt; p_index) {
+                lastSelectedGotoItem = gotoPaneContainer.children[p_index];
+                lastSelectedGotoItem.classList.add('selected');
+                // Will have effect only if visible
+                lastSelectedGotoItem.scrollIntoView({ behavior: "instant", block: "nearest" });
+                // @ts-expect-error
+                if (lastSelectedGotoItem &amp;&amp; lastSelectedGotoItem.focus &amp;&amp; !p_preserveFocus) {
+                    // @ts-expect-error
+                    lastSelectedGotoItem.focus();
+                }
+            }
+        }, 0);
+    }
+
+    tabs.forEach(tab =&gt; {
+        tab.addEventListener('mousedown', (event) =&gt; {
+            // @ts-expect-error
+            const newTab = tab.dataset.tab;
+            if (newTab !== activeTab) {
+                activateTab(newTab);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    });
+
     document.addEventListener('focusin', (event) =&gt; {
         vscode.postMessage({ type: 'gotFocus' });
     });
+
     document.addEventListener('focusout', (event) =&gt; {
         vscode.postMessage({ type: 'lostFocus' });
+    });
+
+    const body = document.body;
+    const topShadow = document.getElementById("top-shadow");
+    let scrolled = false;
+    body.addEventListener('scroll', function (event) {
+        if (!topShadow) {
+            return;
+        }
+        if (body.scrollTop) {
+            if (!scrolled) {
+                topShadow.classList.add('scrolled');
+                scrolled = true;
+            }
+        } else {
+            if (scrolled) {
+                topShadow.classList.remove('scrolled');
+                scrolled = false;
+            }
+        }
     });
 
     // Handle messages sent from the extension to the webview
@@ -16157,8 +16471,10 @@ set leoEditHeadline(p_value: boolean) {
             // * Nav Tab Controls
             // Focus and select all text in 'nav' field
             case 'selectNav': {
-                focusOnField('navText');
-                if (message.text || message.text === "") {
+                // focusOnField('navText');
+                activateTab('tab3');
+
+                if (message.text) {
                     // @ts-expect-error
                     document.getElementById("navText").value = message.text;
                     searchSettings["navText"] = message.text;
@@ -16166,18 +16482,31 @@ set leoEditHeadline(p_value: boolean) {
                         clearTimeout(timer);
                     }
                     sendSearchConfig();
+                    if (message.forceEnter) {
+                        navEnter();
+                    }
                 }
+                break;
+            }
+            case 'showGoto': {
+                showTab('tab3');
+                break;
+            }
+            case 'revealNavEntry': {
+                revealNavEntry(message.value, message.preserveFocus);
                 break;
             }
             // * Find Tab Controls
             // Focus and select all text in 'find' field
             case 'selectFind': {
-                focusOnField('findText');
+                //focusOnField('findText');
+                activateTab('tab2');
                 break;
             }
             // Focus and select all text in 'replace' field
             case 'selectReplace': {
-                focusOnField('replaceText');
+                //focusOnField('replaceText');
+                activateTab('tab2', true);
                 break;
             }
             case 'getSettings': {
@@ -16192,6 +16521,10 @@ set leoEditHeadline(p_value: boolean) {
                 setSearchSetting(message.id);
                 break;
             }
+            case 'refreshGoto': {
+                fillGotoPane(message.gotoContent);
+                break;
+            }
         }
     });
 
@@ -16199,20 +16532,26 @@ set leoEditHeadline(p_value: boolean) {
 })();
 </t>
 <t tx="felix.20231219233431.1">html {
-  box-sizing: border-box;
-  font-size: 13px;
-  overflow: hidden;
-  --input-padding-vertical: 6px;
-  --input-padding-horizontal: 4px;
-  --input-margin-vertical: 4px;
-  --input-margin-horizontal: 0;
-  height: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+    overflow: hidden;
+    --input-padding-vertical: 6px;
+    --input-padding-horizontal: 4px;
+    --input-margin-vertical: 4px;
+    --input-margin-horizontal: 0;
+    height: 100%;
+}
+
+@supports selector(::-webkit-scrollbar) {
+    html {
+        scrollbar-color: unset;
+    }
 }
 
 *,
 *:before,
 *:after {
-  box-sizing: inherit;
+    box-sizing: inherit;
 }
 
 body,
@@ -16225,271 +16564,472 @@ h6,
 p,
 ol,
 ul {
-  margin: 0;
-  padding: 0;
-  font-weight: normal;
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
 }
 
 img {
-  max-width: 100%;
-  height: auto;
+    max-width: 100%;
+    height: auto;
 }
 
 html:focus:after {
-  content:'';
-  position: fixed;
-  top:0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  outline: 1px solid;
-  outline-width: 1px;
-  outline-style: solid;
-  outline-offset: -1px;
-  outline-color: var(--vscode-focusBorder);
-  pointer-events: none;
+    content: '';
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    outline: 1px solid;
+    outline-width: 1px;
+    outline-style: solid;
+    outline-offset: -1px;
+    outline-color: var(--vscode-focusBorder);
+    pointer-events: none;
 }
 
 body {
-  height: 100%;
-  margin-left: 20px;
-  background-color: transparent;
-  padding: 0 var(--container-padding);
-  scrollbar-gutter: stable;
-  overflow:hidden;
-  padding-right: 4px;
-  color: var(--vscode-foreground);
-  font-size: var(--vscode-font-size);
-  font-weight: var(--vscode-font-weight);
-  font-family: var(--vscode-font-family);
+    height: 100%;
+    /* margin-left: 20px; */
+    background-color: transparent;
+    /* padding: 0 var(--container-padding); */
+    /* scrollbar-gutter: stable; */
+    overflow: hidden;
+    /* padding-right: 4px; */
+    color: var(--vscode-foreground);
+    font-size: var(--vscode-font-size);
+    font-weight: var(--vscode-font-weight);
+    font-family: var(--vscode-font-family);
 }
 
-body:hover {
-  overflow-y: auto;
-} 
+/* body:hover {
+    overflow-y: auto;
+} */
 
 .row .col:nth-child(2) {
-  padding-right: 4px;
+    padding-right: 4px;
 }
 
 ol,
 ul {
-  padding-left: var(--container-padding);
+    padding-left: var(--container-padding);
 }
 
-body&gt;*,
-form&gt;* {
-  margin-block-start: var(--input-margin-vertical);
-  margin-block-end: var(--input-margin-vertical);
-}
+/* body &gt; *,
+form &gt; * {
+    margin-block-start: var(--input-margin-vertical);
+    margin-block-end: var(--input-margin-vertical);
+} */
 
 *:focus {
-  outline-color: var(--vscode-focusBorder);
+    outline-color: var(--vscode-focusBorder);
 }
 
 a {
-  color: var(--vscode-textLink-foreground);
+    color: var(--vscode-textLink-foreground);
 }
 
 a:hover,
 a:active {
-  color: var(--vscode-textLink-activeForeground);
+    color: var(--vscode-textLink-activeForeground);
 }
 
 code {
-  font-size: var(--vscode-editor-font-size);
-  font-family: var(--vscode-editor-font-family);
+    font-size: var(--vscode-editor-font-size);
+    font-family: var(--vscode-editor-font-family);
 }
 
 button {
-  border: none;
-  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
-  width: 100%;
-  text-align: center;
-  outline: 1px solid transparent;
-  outline-offset: 2px !important;
-  color: var(--vscode-button-foreground);
-  background: var(--vscode-button-background);
+    border: none;
+    padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+    width: 100%;
+    text-align: center;
+    outline: 1px solid transparent;
+    outline-offset: 2px !important;
+    color: var(--vscode-button-foreground);
+    background: var(--vscode-button-background);
 }
 
 button:hover {
-  cursor: pointer;
-  background: var(--vscode-button-hoverBackground);
+    cursor: pointer;
+    background: var(--vscode-button-hoverBackground);
 }
 
 button:focus {
-  outline-color: var(--vscode-focusBorder);
+    outline-color: var(--vscode-focusBorder);
 }
 
 button.secondary {
-  color: var(--vscode-button-secondaryForeground);
-  background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    background: var(--vscode-button-secondaryBackground);
 }
 
 button.secondary:hover {
-  background: var(--vscode-button-secondaryHoverBackground);
+    background: var(--vscode-button-secondaryHoverBackground);
 }
 
 select {
-  background: var(--vscode-dropdown-background);
-  color: var(--vscode-input-foreground);
-  border-color: var(--vscode-dropdown-border);
-  cursor: pointer;
-  width: 50px;
-  left: 15%;
-  position: relative;
-  border-radius: 2px;
+    background: var(--vscode-dropdown-background);
+    color: var(--vscode-input-foreground);
+    border-color: var(--vscode-dropdown-border);
+    cursor: pointer;
+    /* width: 50px; */
+    /* left: 15%; */
+    position: relative;
+    border-radius: 2px;
 }
 
 select:focus {
-  outline-color: var(--vscode-input-border);
+    outline-color: var(--vscode-input-border);
 }
 
 select:disabled {
-  opacity: 0.5;
-  cursor: default;
+    opacity: 0.5;
+    cursor: default;
 }
 
 select option {
-  background-color: var(--vscode-dropdown-listBackground);
+    background-color: var(--vscode-dropdown-listBackground);
 }
 
 select option:focus {
-  background-color: var(--vscode-input-background);
-  outline-color: var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
+    outline-color: var(--vscode-input-border);
 }
 
-input:not([type="radio"]):not([type="checkbox"]),
+input:not([type='radio']):not([type='checkbox']),
 textarea {
-  display: block;
-  margin-right: 20px;
-  width: 100%;
-  border: none;
-  font-family: var(--vscode-font-family);
-  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
-  padding: 3px var(--input-padding-horizontal);
-  border-radius: 2px;
-  color: var(--vscode-input-foreground);
-  outline-color: var(--vscode-input-border);
-  background-color: var(--vscode-input-background);
+    display: block;
+    margin-right: 20px;
+    width: 100%;
+    border: none;
+    font-family: var(--vscode-font-family);
+    padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+    padding: 3px var(--input-padding-horizontal);
+    border-radius: 2px;
+    color: var(--vscode-input-foreground);
+    outline-color: var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
 }
 
-input[type="checkbox"],
-input[type="radio"] {
-  cursor: pointer;
+input[type='text'] {
+    height: 24px;
 }
 
-input[type="checkbox"]:focus+label {
-  border: 1px solid var(--vscode-button-background);
+input[type='checkbox'],
+input[type='radio'] {
+    cursor: pointer;
 }
 
-input[type="radio"]:focus+label {
-  border: 1px solid var(--vscode-button-background);
+input[type='checkbox'] {
+    vertical-align: text-top;
+}
+
+.label-nav {
+    vertical-align: baseline;
+    line-height: 19px;
+}
+
+input[type='checkbox']:focus + label {
+    border: 1px solid var(--vscode-button-background);
+}
+
+input[type='radio']:focus + label {
+    border: 1px solid var(--vscode-button-background);
 }
 
 input:disabled {
-  opacity: 0.5;
-  cursor: default;
+    opacity: 0.5;
+    cursor: default;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: var(--vscode-input-placeholderForeground);
+    color: var(--vscode-input-placeholderForeground);
 }
 
 u {
-  color: var(--vscode-editor-foreground);
-  text-decoration-color: var(--vscode-foreground);
-  text-underline-offset: 0.04em;
+    color: var(--vscode-editor-foreground);
+    text-decoration-color: var(--vscode-foreground);
+    text-underline-offset: 0.04em;
 }
 
-body&gt;div&gt;div&gt;label:focus,
-body&gt;div&gt;div&gt;label:active {
-  outline-color: none !important;
-  border: none !important;
+body &gt; div &gt; div &gt; label:focus,
+body &gt; div &gt; div &gt; label:active {
+    outline-color: none !important;
+    border: none !important;
 }
 
 #freeze {
-  cursor: default;
-  position: absolute;
-  right: 0.9em;
-  line-height: 1em;
-  top: 1.05em;
-  font-size: 1.8em;
-  color: #5c87ff80;
-  padding: 0;
-  margin: 0;
+    cursor: default;
+    position: absolute;
+    right: 0.3em;
+    line-height: 1em;
+    top: 1.555em;
+    font-size: 1.8em;
+    color: #5c87ff80;
+    padding: 0;
+    margin: 0;
 }
 
 .comment {
-  display: none;
+    display: none;
 }
 
 div.row {
-  overflow-x: hidden;
-  white-space: nowrap;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+div.col-full {
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 6px;
+    margin-bottom: 3px;
 }
 
 div.col {
-  vertical-align: top;
-  width: 50%;
-  max-width: 9.5em;
-  display: inline-block;
-  text-overflow: ellipsis;
-  overflow: hidden;
+    vertical-align: top;
+    width: 50%;
+    max-width: 9.5em;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 div.col-nav {
-  width: 50%;
-  display: inline-block;
-  text-overflow: ellipsis;
-  overflow: hidden;
+    width: 50%;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .mt-0 {
-  margin-top: 0;
+    margin-top: 0;
 }
-
+.mt-1 {
+    margin-top: 1px;
+}
+.mt-2 {
+    margin-top: 2px;
+}
+.mt-3 {
+    margin-top: 3px;
+}
 .mt-4 {
-  margin-top: 4px;
+    margin-top: 4px;
+}
+.mt-5 {
+    margin-top: 5px;
+}
+.mt-6 {
+    margin-top: 6px;
+}
+.mt-7 {
+    margin-top: 7px;
+}
+.mt-8 {
+    margin-top: 8px;
 }
 
 .mb-0 {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
-
+.mb-1 {
+    margin-bottom: 1px;
+}
+.mb-2 {
+    margin-bottom: 2px;
+}
+.mb-3 {
+    margin-bottom: 3px;
+}
 .mb-4 {
-  margin-bottom: 4px;
+    margin-bottom: 4px;
 }
-
+.mb-5 {
+    margin-bottom: 5px;
+}
 .mb-6 {
-  margin-bottom: 6px;
+    margin-bottom: 6px;
+}
+.mb-7 {
+    margin-bottom: 7px;
+}
+.mb-8 {
+    margin-bottom: 8px;
 }
 
 .input-holder {
-  padding: 0;
-  margin-right: 6px;
+    padding: 0;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+#searchOptions {
+    height: 24px;
 }
 
 .align-right {
-  text-align: right;
+    text-align: right;
 }
 
 .float-left {
-  float: left;
+    float: left;
 }
 
 .float-right {
-  float: right;
+    float: right;
 }
 
 .no-overflow {
-  text-overflow: unset !important;
+    text-overflow: unset !important;
 }
 
 .label-fix {
-  vertical-align: top;
-  line-height: 18px;
+    vertical-align: top;
+    line-height: 19px;
+}
+
+.tab-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tab-list {
+    position: relative;
+    list-style: none;
+    padding: 0;
+    padding-top: 4px;
+    margin: 0;
+    display: flex;
+    border-bottom: 1px solid var(--vscode-input-background);
+}
+
+.tab-item {
+    padding: 3px 14px;
+    margin-left: 6px;
+    cursor: pointer;
+    border-bottom: none;
+    color: var(--vscode-disabledForeground);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.tab-item.active {
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-foreground);
+}
+
+.tab-content {
+    flex-grow: 1;
+    min-height: 0;
+    flex-direction: column;
+    position: relative;
+    display: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-top-section {
+    flex-shrink: 0;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+.bottom-scroll {
+    overflow-y: hidden;
+    min-height: 0;
+    flex-grow: 1;
+    padding-bottom: 4px;
+}
+
+.bottom-scroll:hover {
+    overflow-y: auto;
+}
+
+.goto-item {
+    width: 100%;
+    line-height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.goto-item.generic {
+    padding-left: 20px;
+}
+.goto-item.parent {
+    padding-left: 20px;
+}
+.goto-item.headline {
+    font-weight: bold;
+    padding-left: 20px;
+}
+.goto-item.body {
+    padding-left: 30px;
+}
+.goto-item.tag {
+    font-weight: bold;
+    padding-left: 20px;
+}
+
+.show-parents .goto-item.generic {
+    padding-left: 20px;
+}
+.show-parents .goto-item.parent {
+    padding-left: 20px;
+}
+.show-parents .goto-item.headline {
+    font-weight: bold;
+    padding-left: 30px;
+}
+.show-parents .goto-item.body {
+    padding-left: 40px;
+}
+.show-parents .goto-item.tag {
+    font-weight: bold;
+    padding-left: 30px;
+}
+
+.goto-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.goto-item.selected,
+.goto-item.selected:hover {
+    background-color: var(--vscode-list-inactiveSelectionBackground);
+}
+
+.goto-item.selected:focus,
+.goto-item.selected:focus:hover {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    outline: 1px solid
+        var(
+            --vscode-list-focusAndSelectionOutline,
+            var(--vscode-contrastActiveBorder, var(--vscode-list-focusOutline))
+        );
+    outline-offset: -1px;
+}
+
+#top-shadow {
+    top: -4px;
+    height: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+}
+
+#top-shadow.scrolled {
+    box-shadow: var(--vscode-sideBarStickyScroll-shadow) 0 6px 6px -6px inset;
+    height: 3px;
 }
 </t>
 <t tx="felix.20231221231533.1">## 0.2.6
@@ -18525,7 +19065,7 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
 
 </t>
 <t tx="felix.20240529234358.1">public showNavResults(): Thenable&lt;unknown&gt; {
-    this._leoGotoProvider.refreshTreeRoot();
+    this.leoGotoProvider.refreshTreeRoot();
     return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
 }
 
@@ -18572,12 +19112,217 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
 
 - Renamed 'save-file-as-zipped' to 'save-file-as-db'.
 - Simplified the find panel's input field placeholder.
+- Fixed find panel scrollbars as per VSCode issue #213045.
+- Deprecated the 'Goto Panel' by adding tabs to the find panel to separate 'find' and 'nav/tag' search inputs.
+- Reworked the icons for the 'quick find' commands (dirty-nodes, marked-nodes, reverse-gnx-order, visited-nodes-history and quick-find with selected text) to be graphical symbols instead of latin letters.
+
+</t>
+<t tx="felix.20240629151624.1">/**
+ * Send the new content of the goto pane to the findPanel.
+ */
+public setGotoContent(): void {
+    const content = this.leoGotoProvider.nodeList.map(
+        (gotoNode) =&gt; {
+            return {
+                "tooltip": gotoNode.tooltip,
+                "key": gotoNode.key,
+                "entryType": gotoNode.entryType,
+                "description": gotoNode.description,
+                "label": gotoNode.leoPaneLabel
+            };
+        }
+    );
+    if (this._findPanelWebviewExplorerView &amp;&amp; this._findPanelWebviewExplorerView.visible) {
+        void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
+    }
+    if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
+        void this._findPanelWebviewView!.webview.postMessage({ type: 'refreshGoto', gotoContent: content });
+    }
+}
+
+</t>
+<t tx="felix.20240630150534.1">/**
+ * Reveals and selects the specific nav entry in the results of the nav pane.
+ */
+public revealGotoNavEntry(p_index: number, p_preserveFocus?: boolean): void {
+    if (this._findPanelWebviewExplorerView &amp;&amp; this._findPanelWebviewExplorerView.visible) {
+        void this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
+    } else if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
+        void this._findPanelWebviewView!.webview.postMessage({ type: 'revealNavEntry', value: p_index, preserveFocus: p_preserveFocus });
+    }
+}
+
+</t>
+<t tx="felix.20240708214046.1">/**
+ * Reveal that queues a follow up to prevent revealing before the last one finished.
+ */
+public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, options?: {
+    select?: boolean;
+    focus?: boolean;
+    expand?: boolean | number;
+}): Thenable&lt;void&gt; {
+    if (!this._pendingReveal) {
+        // No reveal is currently pending, start the reveal
+        this._pendingReveal = this._performReveal(tree, element, options);
+        return this._pendingReveal;
+    } else {
+        // A reveal is already pending, store the parameters for the next reveal
+        this._nextRevealParams = { tree, element, options };
+        return this._pendingReveal;
+    }
+}
+
+</t>
+<t tx="felix.20240708225108.1">private _performReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, options?: {
+    select?: boolean;
+    focus?: boolean;
+    expand?: boolean | number;
+}): Thenable&lt;void&gt; {
+    return tree.reveal(element, options).then(
+        () =&gt; this._handleRevealCompletion(),
+        (error) =&gt; this._handleRevealCompletion(error)
+    );
+}
+
+</t>
+<t tx="felix.20240708225127.1">private _handleRevealCompletion(error?: any): Thenable&lt;void&gt; | void {
+    if (this._nextRevealParams) {
+        // If there are queued reveal parameters, start the next reveal
+        const { tree, element, options } = this._nextRevealParams;
+        this._nextRevealParams = undefined;
+        this._pendingReveal = this._performReveal(tree, element, options);
+        return this._pendingReveal;
+    } else {
+        // No more reveals are queued, clear the pending reveal
+        this._pendingReveal = undefined;
+        if (error) {
+            // Propagate the error if there was one
+            throw error;
+        }
+    }
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
 
+</t>
+<t tx="fil.20240709150317.1">&lt;!DOCTYPE html&gt;
+&lt;html lang="en" tabindex="-1"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src #{webview.cspSource}; script-src 'nonce-#{nonce}';"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;link href="#{style}" rel="stylesheet"&gt;
+    &lt;title&gt;Leo Find Panel&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;div class="tab-container"&gt;
+        &lt;ul class="tab-list"&gt;
+            &lt;!-- &lt;li class="tab-item active" data-tab="tab1"&gt;Log&lt;/li&gt; --&gt;
+            &lt;li class="tab-item active" data-tab="tab2"&gt;Find&lt;/li&gt;
+            &lt;li class="tab-item" data-tab="tab3"&gt;Nav&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;!-- &lt;div class="tab-content active" id="tab1"&gt;
+            &lt;div class="log-pane" contenteditable="true"&gt;
+
+            &lt;/div&gt;
+        &lt;/div&gt; --&gt;
+        &lt;div class="tab-content active" id="tab2"&gt;
+            &lt;div class="input-holder mt-6 mb-6"&gt;
+                &lt;input title="Enter or F3 to find and goto the next match&amp;#013;F2 for the previous match" type="text"
+                    id="findText" name="findText" placeholder="&lt;find pattern here&gt;"&gt;
+            &lt;/div&gt;
+            &lt;div class="input-holder mb-6"&gt;
+                &lt;input title="Replace (Ctrl+=)&amp;#013;Replace &amp;amp; Find Next (Ctrl+-)" type="text" id="replaceText"
+                    name="replaceText" placeholder="&lt;replace pattern here&gt;"&gt;
+            &lt;/div&gt;
+            &lt;div class="row input-holder bottom-scroll"&gt;
+                &lt;div class="col"&gt;
+                    &lt;input type="checkbox" id="wholeWord" name="wholeWord"&gt;
+                    &lt;label title="Match Whole Word (Ctrl+Alt+W)" class="label-fix" for="wholeWord"&gt;Whole
+                        &lt;u&gt;w&lt;/u&gt;ord&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="checkbox" id="ignoreCase" name="ignoreCase"&gt;
+                    &lt;label title="Matches Ignore Case (Ctrl+Alt+I)" class="label-fix" for="ignoreCase"&gt;&lt;u&gt;I&lt;/u&gt;gnore
+                        case&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="checkbox" id="regExp" name="regExp"&gt;
+                    &lt;label title="Use Regular Expression (Ctrl+Alt+X)" class="label-fix"
+                        for="regExp"&gt;Rege&lt;u&gt;x&lt;/u&gt;p&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="checkbox" id="markFinds" name="markFinds"&gt;
+                    &lt;label title="Mark Found nodes (Ctrl+Alt+F)" class="label-fix" for="markFinds"&gt;Mark
+                        &lt;u&gt;f&lt;/u&gt;inds&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="checkbox" id="markChanges" name="markChanges"&gt;
+                    &lt;label title="Mark Changed nodes (Ctrl+Alt+C)" class="label-fix" for="markChanges"&gt;Mark
+                        &lt;u&gt;c&lt;/u&gt;hanges&lt;/label&gt;
+                &lt;/div&gt;
+                &lt;div class="col"&gt;
+                    &lt;!-- RADIOS --&gt;
+                    &lt;input type="radio" id="entireOutline" name="searchScope" value="0"&gt;
+                    &lt;label title="Search in Whole Outline (Ctrl+Alt+E)" class="label-fix"
+                        for="entireOutline"&gt;&lt;u&gt;E&lt;/u&gt;ntire
+                        outline&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="radio" id="subOutlineOnly" name="searchScope" value="1"&gt;
+                    &lt;label title="Limit to Selected Outline (Ctrl+Alt+S)" class="label-fix"
+                        for="subOutlineOnly"&gt;&lt;u&gt;S&lt;/u&gt;uboutline Only&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="radio" id="nodeOnly" name="searchScope" value="2"&gt;
+                    &lt;label title="Limit to Selected Node (Ctrl+Alt+N)" class="label-fix" for="nodeOnly"&gt;&lt;u&gt;N&lt;/u&gt;ode
+                        only&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="radio" id="fileOnly" name="searchScope" value="3"&gt;
+                    &lt;label title="Limit to External Files (Ctrl+Alt+L)" class="label-fix" for="fileOnly"&gt;Fi&lt;u&gt;l&lt;/u&gt;e
+                        only&lt;/label&gt;&lt;br&gt;
+                    &lt;!-- CHECKBOXES --&gt;
+                    &lt;input type="checkbox" id="searchHeadline" name="searchHeadline"&gt;
+                    &lt;label title="Search in Headlines (Ctrl+Alt+H)" class="label-fix" for="searchHeadline"&gt;Search
+                        &lt;u&gt;h&lt;/u&gt;eadline&lt;/label&gt;&lt;br&gt;
+                    &lt;input type="checkbox" id="searchBody" name="searchBody"&gt;
+                    &lt;label title="Search in Body Text (Ctrl+Alt+B)" class="label-fix" for="searchBody"&gt;Search
+                        &lt;u&gt;b&lt;/u&gt;ody&lt;/label&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="tab-content" id="tab3"&gt;
+            &lt;div class="row mb-0 nav-top-section"&gt;
+                &lt;div class="col-full input-holder"&gt;
+                    &lt;select class="no-overflow" name="searchOptions" id="searchOptions"
+                        title="Confine search to:&amp;#013; - All: regular search for all nodes&amp;#013; - Subtree: current node and it's children&amp;#013; - File: only search under a node with an @&lt;file&gt; directive&amp;#013; - Chapter: only search under a node with an @chapter directer&amp;#013; - Node: only search currently selected node"&gt;
+                        &lt;option value="0"&gt;All&lt;/option&gt;
+                        &lt;option value="1"&gt;Subtree&lt;/option&gt;
+                        &lt;option value="2"&gt;File&lt;/option&gt;
+                        &lt;option value="3"&gt;Chapter&lt;/option&gt;
+                        &lt;option value="4"&gt;Node&lt;/option&gt;
+                    &lt;/select&gt;
+
+                    &lt;input type="checkbox" id="isTag" name="isTag"&gt;
+                    &lt;label class="label-nav" id="label-isTag" for="isTag"
+                        title="Search Tag attributes, set algebra is supported:&amp;#013;&amp;amp; both the given tags&amp;#013;&amp;vert; either of the given tags (or both)&amp;#013;&amp;#45; the first tag, but not the second tag&amp;#013;&amp;#94; either of the given tags (but *not* both)"&gt;Tag&lt;/label&gt;
+
+                    &lt;input type="checkbox" id="showParents" name="showParents"&gt;
+                    &lt;label class="label-nav" id="label-show-parents" for="showParents"
+                        title="List parents of nodes in text searches"&gt;Show parents&lt;/label&gt;
+                &lt;/div&gt;
+                &lt;div class="input-holder mb-6"&gt;
+                    &lt;input
+                        title="Typing searches headlines interactively&amp;#013;Enter freezes input and searches body text"
+                        type="text" id="navText" name="navText" placeholder="&lt;nav pattern here&gt;"&gt;
+                    &lt;div id="freeze" title="Clear field to unfreeze"&gt;&amp;#x2744;&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="row bottom-scroll" id="gotopane"&gt;
+                &lt;!-- this is the goto pane --&gt;
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="top-shadow"&gt;&lt;/div&gt;
+    &lt;script nonce="#{nonce}" src="#{scriptUri}"&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
 </t>
 <t tx="foo.20240309205342.1"># 0.2.13
 

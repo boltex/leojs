@@ -289,7 +289,7 @@ export class Undoer {
     }
 
     public undoMenuName(name: string): string {
-        if (name === "Can't Undo") {
+        if (name.startsWith("Can't Undo")) {
             return name;
         }
         return 'Undo ' + name;
