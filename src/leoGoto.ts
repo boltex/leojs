@@ -30,14 +30,6 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
         }, this);
     }
 
-    public setLastGotoView(): void {
-        // this._lastGotoView = p_view;
-        if (this.nodeList && this.nodeList.length) {
-            this._viewSwitch = true;
-            this._onDidChangeTreeData.fire(undefined);
-        }
-    }
-
     public getLastGotoView(): vscode.TreeView<LeoGotoNode> | undefined {
         return this._lastGotoView;
     }

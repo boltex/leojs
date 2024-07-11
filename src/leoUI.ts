@@ -1084,20 +1084,19 @@ export class LeoUI extends NullGui {
      * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
      */
     private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
+            const lastLeoUndos = p_explorerView ? this._leoUndosExplorer : this._leoUndos;
+            const undosShown = p_explorerView ? this._leoUndosExplorerShown : this._leoUndosShown;
+
+            this._lastLeoUndos = lastLeoUndos;
+            if (undosShown) {
+                this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
+            }
+
             if (p_explorerView) {
-                this._lastLeoUndos = this._leoUndosExplorer;
-                if (this._leoUndosExplorerShown) {
-                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
-                }
-                this._leoUndosExplorerShown = true; // either way set it
+                this._leoUndosExplorerShown = true;
             } else {
-                this._lastLeoUndos = this._leoUndos;
-                if (this._leoUndosShown) {
-                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
-                }
-                this._leoUndosShown = true; // either way set it
+                this._leoUndosShown = true;
             }
         }
     }
@@ -1108,23 +1107,15 @@ export class LeoUI extends NullGui {
      * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
      */
     private _onFindViewVisibilityChanged(p_explorerView: boolean): void {
-        if (p_explorerView) {
-            if (this._findPanelWebviewExplorerView?.visible) {
-                this._lastFindView = this._findPanelWebviewExplorerView;
-                this.checkForceFindFocus(false);
-                this.setGotoContent();
-                if (this.leoGotoProvider.isSelected) {
-                    this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
-                }
-            }
-        } else {
-            if (this._findPanelWebviewView?.visible) {
-                this._lastFindView = this._findPanelWebviewView;
-                this.checkForceFindFocus(false);
-                this.setGotoContent();
-                if (this.leoGotoProvider.isSelected) {
-                    this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
-                }
+        const currentView = p_explorerView ? this._findPanelWebviewExplorerView : this._findPanelWebviewView;
+
+        if (currentView?.visible) {
+            this._lastFindView = currentView;
+            this.checkForceFindFocus(false);
+            this.setGotoContent();
+
+            if (this.leoGotoProvider.isSelected) {
+                this.revealGotoNavEntry(this.leoGotoProvider.selectedNodeIndex, true);
             }
         }
     }
