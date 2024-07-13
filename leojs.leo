@@ -13225,10 +13225,6 @@ public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void
 public _changedWindowState(p_windowState: vscode.WindowState): void {
     // no other action
     void this.triggerBodySave(true, true);
-    if (p_windowState.focused) {
-        // We are focused!
-        this.checkConfirmBeforeClose();
-    }
 }
 
 </t>

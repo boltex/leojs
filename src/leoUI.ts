@@ -1190,10 +1190,6 @@ export class LeoUI extends NullGui {
     public _changedWindowState(p_windowState: vscode.WindowState): void {
         // no other action
         void this.triggerBodySave(true, true);
-        if (p_windowState.focused) {
-            // We are focused!
-            this.checkConfirmBeforeClose();
-        }
     }
 
     /**
