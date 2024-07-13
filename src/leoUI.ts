@@ -397,8 +397,6 @@ export class LeoUI extends NullGui {
 
         // * Configuration / Welcome webview
         this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
-        // Set confirm on close to 'never' on startup 
-        void this.checkConfirmBeforeClose();
     }
 
     /**
