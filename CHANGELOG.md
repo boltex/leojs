@@ -1,5 +1,14 @@
 # Change Log
 
+# 0.2.15
+
+- Renamed 'save-file-as-zipped' to 'save-file-as-db'.
+- Simplified the find panel's input field placeholder.
+- Fixed find panel scrollbars as per VSCode issue #213045.
+- Deprecated the 'Goto Panel' by adding tabs to the find panel to separate 'find' and 'nav/tag' search inputs.
+- Fixed Ctrl+Shift+F to be quick-find with selected text instead of just focusing on the nav text input.
+- Reworked the icons for the 'quick find' commands (dirty-nodes, marked-nodes, reverse-gnx-order, visited-nodes-history and quick-find with selected text) to be graphical symbols instead of latin letters.
+
 # 0.2.14
 
 - Fixed import file error when using the 'import any' or other importers.

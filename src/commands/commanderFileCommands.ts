@@ -767,20 +767,20 @@ export class CommanderFileCommands {
     }
     //@+node:felix.20220105210716.20: *4* c_file.save-as-zipped
     @commander_command(
-        'file-save-as-zipped',
-        'Save a copy of the Leo outline as a zipped (.db) file with a new file name. ' +
+        'file-save-as-db',
+        'Save a copy of the Leo outline as a SQLite (.db) file with a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
-        'save-file-as-zipped',
-        'Save a copy of the Leo outline as a zipped (.db) file with a new file name. ' +
+        'save-file-as-db',
+        'Save a copy of the Leo outline as a SQLite (.db) file with a new file name. ' +
         'Leave the file name of the Leo outline unchanged.'
     )
-    public async save_as_zipped(this: Commands): Promise<unknown> {
+    public async save_as_db(this: Commands): Promise<unknown> {
         const c: Commands = this;
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
-            'Save As Zipped',
+            'Save As SQLite',
             [['Leo files', '*.db']],
             '.db'
         );

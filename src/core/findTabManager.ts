@@ -239,7 +239,7 @@ export class StringFindTabManager {
 
         // Find/change text boxes.
         const table1 = [
-            ['find_findbox', 'find_text', '<find pattern here>'],
+            ['find_findbox', 'find_text', ''], // '<find pattern here>' in original Leo
             ['find_replacebox', 'change_text', ''],
         ];
         for (let [widget_ivar, setting_name, default_val] of table1) {

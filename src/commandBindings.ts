@@ -84,9 +84,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.SET_OPENED_FILE, (p_index: number) => p_leoUI.selectOpenedLeoDocument(p_index, true)],
 
         [CMD.REFRESH_FROM_DISK, (p_node: Position) => p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
-
         [CMD.REFRESH_FROM_DISK_SELECTION, () => p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
-
         [CMD.REFRESH_FROM_DISK_SELECTION_FO, () => p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
         [CMD.GIT_DIFF, () => p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
@@ -168,16 +166,10 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.INSERT, (p_node: Position) => p_leoUI.insertNode(p_node, true, false)],
         [CMD.INSERT_SELECTION, () => p_leoUI.insertNode(U, false, false)],
         [CMD.INSERT_SELECTION_FO, () => p_leoUI.insertNode(U, true, false)],
-        // Special command for when inserting rapidly more than one node without
-        // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-        // [CMD.INSERT_SELECTION_INTERRUPT, () => p_leoUI.insertNode(U, false, true, false)],
 
         [CMD.INSERT_CHILD, (p_node: Position) => p_leoUI.insertNode(p_node, true, true)],
         [CMD.INSERT_CHILD_SELECTION, () => p_leoUI.insertNode(U, false, true)],
         [CMD.INSERT_CHILD_SELECTION_FO, () => p_leoUI.insertNode(U, true, true)],
-        // Special command for when inserting rapidly more than one node without
-        // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-        // [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () => p_leoUI.insertNode(U, false, true, true)],
 
         [CMD.CLONE, (p_node: Position) => p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
         [CMD.CLONE_SELECTION, () => p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
