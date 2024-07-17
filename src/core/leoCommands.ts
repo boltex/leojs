@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as os from 'os';
 import * as crypto from 'crypto';
 import * as child_process from 'child_process';
+import * as et from 'elementtree';
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
 import { new_cmd_decorator } from './decorators';
@@ -2720,6 +2721,55 @@ export class Commands {
     public validateOutline(): boolean {
         const c: Commands = this;
         return c.checkOutline() === 0;
+    }
+    //@+node:felix.20240716212144.1: *4* c.checkOutlineXML
+    /**
+     * Validate outline's xml.
+     */
+    public checkOutlineXML(dump = true): boolean {
+        const c = this;
+        //  #1510: https://en.wikipedia.org/wiki/Valid_characters_in_XML.
+
+        const translate_dict: { [key: number]: string | null } = {};
+        for (let z = 0; z < 20; z++) {
+            if (!'\t\r\n'.includes(String.fromCharCode(z))) {
+                translate_dict[z] = null;
+            }
+        }
+        const xml_contents = c.fileCommands.outline_to_xml_string();
+        const table = Object.keys(translate_dict).reduce((acc, key) => {
+            acc[String.fromCharCode(Number(key))] = '';
+            return acc;
+        }, {} as { [key: string]: string });
+        const translated_contents = xml_contents.replace(
+            new RegExp(Object.keys(table).join('|'), 'g'),
+            match => table[match]!
+        );
+        try {
+            const xroot = et.parse(translated_contents);
+            if (xroot) {
+                return true;
+            }
+        } catch (error) {
+            g.es_print('The outline is invalid!');
+            g.es_exception(error);
+            if (dump) {
+                // Write the invalid outline to the corresponding leo.txt file.
+                const filename = g.os_path_normpath(g.os_path_expanduser(`~/.leo/BAD-${c.shortFileName()}.txt`));
+                try {
+                    const w_uri = g.makeVscodeUri(filename);
+                    void vscode.workspace.fs.writeFile(w_uri, g.toEncodedString(translated_contents, 'utf-8', true));
+                    g.es_print('');
+                    g.es_print(`Wrote ${filename}`);
+                    g.es_print('');
+                } catch (err) {
+                    g.es_print(`Exception writing ${filename}`);
+                    g.es_exception(err);
+                }
+            }
+            return false;
+        }
+        return false;
     }
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
     //@+node:felix.20230423004652.1: *4* c.fullPath

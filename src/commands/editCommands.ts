@@ -3806,6 +3806,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 }
                 const bunch = u.beforeChangeUA(p);
                 p.v.u[w_name] = w_uaVal;
+                p.setDirty();
+                c.setChanged();
                 u.afterChangeUA(p, 'set-ua', bunch);
                 this.showNodeUas();
                 return Promise.resolve(true);

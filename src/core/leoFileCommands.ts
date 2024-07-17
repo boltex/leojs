@@ -70,6 +70,7 @@ class BadLeoFile extends Error {
 //@+node:felix.20211213223342.1: ** class FastRead
 export class FastRead {
     public c: Commands;
+    public bad_path_dict: Record<string, boolean> = {};
     public gnx2vnode: { [key: string]: VNode };
     // #1510: https://en.wikipedia.org/wiki/Valid_characters_in_XML.
 
@@ -205,9 +206,14 @@ export class FastRead {
             xroot = et.parse(contents.replace(/\r\n/g, '\n'));
         } catch (e) {
             let message: string;
+            if (p_path && this.bad_path_dict[p_path]) {
+                return [undefined, undefined];
+            }
             // #970: Report failure here.
             if (p_path && p_path.length) {
+                this.bad_path_dict[p_path] = true;
                 message = `bad .leo file: ${g.shortFileName(p_path)}`;
+                g.es_exception(e);
             } else {
                 message = 'The clipboard is not a valid .leo file';
             }
@@ -3276,7 +3282,7 @@ export class FileCommands {
         if (forceWrite || this.usingClipboard) {
             v.setWriteBit(); // 4.2: Indicate we wrote the body text.
         }
-        const attrs: string = fc.compute_attribute_bits(forceWrite, p);
+        const attrs: string = fc.compute_attribute_bits(p);
         //
         // Write the node.
         let v_head: string = `<v t="${gnx}"${attrs}>`;
@@ -3316,10 +3322,11 @@ export class FileCommands {
     /**
      * Return the initial values of v's attributes.
      */
-    public compute_attribute_bits(forceWrite: boolean, p: Position): string {
+    public compute_attribute_bits(p: Position): string {
         const attrs = [];
-        if (p.hasChildren() && !forceWrite && !this.usingClipboard) {
-            // Fix #526: do this for @auto nodes as well.
+        if (!this.usingClipboard) {
+            // #526: do this for @auto nodes.
+            // #3990: do this for @edit nodes.
             attrs.push(this.putDescendentVnodeUas(p));
             // Fix #1023: never put marked/expanded bits.
             // attrs.append(self.putDescendentAttributes(p))
