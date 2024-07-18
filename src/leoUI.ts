@@ -5622,7 +5622,11 @@ export class LeoUI extends NullGui {
             }
             if (fileName && g.app.loadManager) {
                 await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
-                await g.app.loadManager.loadLocalFile(fileName, this);
+                const commander = await g.app.loadManager.loadLocalFile(fileName, this);
+                if (!commander) {
+                    void vscode.window.showErrorMessage('can not open:' + '"' + fileName + '"');
+                    return Promise.resolve();
+                }
                 this.showBodyIfClosed = true;
                 this.showOutlineIfClosed = true;
                 this.setupRefresh(this.finalFocus, {

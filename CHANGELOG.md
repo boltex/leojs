@@ -2,7 +2,7 @@
 
 # 0.2.16
 
-- ...
+- LeoJS can now open older formats of .leo files which contained 'tnodelist' attributes.
 
 # 0.2.15
 

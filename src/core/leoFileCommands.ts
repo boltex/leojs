@@ -80,9 +80,8 @@ export class FastRead {
         'a',
         'descendentTnodeUnknownAttributes',
         'descendentVnodeUnknownAttributes',
-        'expanded',
-        'marks',
-        't',
+        'expanded', 'marks', 't',
+        'tnodeList',  // Removed in Leo 4.7.
     ];
 
     constructor(c: Commands, gnx2vnode: { [key: string]: VNode }) {
@@ -781,8 +780,6 @@ export class FastRead {
 export class FileCommands {
     public c: Commands;
     public frame: any;
-    public nativeTnodeAttributes: string[];
-    public nativeVnodeAttributes: string[];
 
     // Init ivars of the FileCommands class.
     // General...
@@ -816,16 +813,6 @@ export class FileCommands {
     constructor(c: Commands) {
         this.c = c;
         this.frame = c.frame;
-        this.nativeTnodeAttributes = ['tx'];
-        this.nativeVnodeAttributes = [
-            'a',
-            'descendentTnodeUnknownAttributes',
-            'descendentVnodeUnknownAttributes', // New in Leo 4.5.
-            'expanded',
-            'marks',
-            't',
-            // 'tnodeList',  // Removed in Leo 4.7.
-        ];
         this.initIvars();
     }
     //@+node:felix.20211222234753.1: *3* fc.initIvars
@@ -1526,6 +1513,7 @@ export class FileCommands {
                     g.trace(e);
                     g.error("can not open:", p_path);
                 }
+                // TODO : THROW INSTEAD OF RETURN UNDEFINED??
                 return undefined;
             }
             if (!v) {
@@ -1858,14 +1846,15 @@ export class FileCommands {
     public getDescendentUnknownAttributes(s: string, v?: VNode): any {
         let bin: string;
         let val: any;
-
         try {
             // Changed in version 3.2: Accept only bytestring or bytearray objects as input.
             const s_bytes = g.toEncodedString(s); // 2011/02/22
 
+            const string_val = g.toUnicode(s_bytes);
+
             // unhexlify is string to string
             // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
-            bin = binascii.unhexlify(s_bytes);
+            bin = binascii.unhexlify(string_val);
 
             // Throws a TypeError if val is not a hex string.
             val = pickle.loads(bin);

@@ -6933,7 +6933,11 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         }
         if (fileName &amp;&amp; g.app.loadManager) {
             await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
-            await g.app.loadManager.loadLocalFile(fileName, this);
+            const commander = await g.app.loadManager.loadLocalFile(fileName, this);
+            if (!commander) {
+                void vscode.window.showErrorMessage('can not open:' + '"' + fileName + '"');
+                return Promise.resolve();
+            }
             this.showBodyIfClosed = true;
             this.showOutlineIfClosed = true;
             this.setupRefresh(this.finalFocus, {
@@ -19182,7 +19186,7 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 </t>
 <t tx="felix.20240714135534.1"># 0.2.16
 
-- ...
+- LeoJS can now open older formats of .leo files which contained 'tnodelist' attributes.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

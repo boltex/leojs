@@ -704,7 +704,12 @@ export class PersistenceDataController {
         try {
             // Throws TypeError if s is not a hex string.
             const encodedString = g.toEncodedString(s);
-            const bin = binascii.unhexlify(encodedString);
+
+            const string_val = g.toUnicode(encodedString);
+
+            // unhexlify is string to string
+            // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
+            const bin = binascii.unhexlify(string_val);
             return pickle.loads(bin);
         } catch (exception) {
             g.es_exception(exception);
