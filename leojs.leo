@@ -3049,7 +3049,7 @@ export class LeoStates {
     this.leoDirty = p_node.isDirty();
     this.leoEmpty = !p_node.v.hasBody();
     this.leoChild = p_node.hasChildren();
-    this.leoAtFile = p_node.isAtFileNode();
+    this.leoAtFile = p_node.isAnyAtFileNode();
     this.leoRoot = p_node._isRoot;
 }
 
@@ -19187,6 +19187,7 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 <t tx="felix.20240714135534.1"># 0.2.16
 
 - LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
+- Fixed disabled/enabled state of 'Refresh from disk' command and icon in menu above body-editor.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

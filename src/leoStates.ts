@@ -282,7 +282,7 @@ export class LeoStates {
         this.leoDirty = p_node.isDirty();
         this.leoEmpty = !p_node.v.hasBody();
         this.leoChild = p_node.hasChildren();
-        this.leoAtFile = p_node.isAtFileNode();
+        this.leoAtFile = p_node.isAnyAtFileNode();
         this.leoRoot = p_node._isRoot;
     }
 
