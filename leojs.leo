@@ -19186,7 +19186,7 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 </t>
 <t tx="felix.20240714135534.1"># 0.2.16
 
-- LeoJS can now open older formats of .leo files which contained 'tnodelist' attributes.
+- LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
