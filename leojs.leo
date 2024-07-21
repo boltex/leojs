@@ -147,6 +147,7 @@
 <v t="felix.20240213205001.1"><vh>statusBar</vh></v>
 <v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
+<v t="felix.20240721135528.1"><vh>createLogPane</vh></v>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
 <v t="felix.20220920001018.3"><vh>showLogPane</vh></v>
 <v t="felix.20220920001202.1"><vh>hideLogPane</vh></v>
@@ -1638,7 +1639,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-              } catch (e) {
+            } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
         } else {
@@ -1693,7 +1694,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             } else {
                 // Is local filesystem
                 void vscode.window.showInformationMessage(
-                    "LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", 
+                    "LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ",
                     "More Info"
                 ).then(selection =&gt; {
                     if (selection === "More Info") {
@@ -3763,7 +3764,7 @@ export class LeoUI extends NullGui {
     public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
-    private _leoLogPane: vscode.OutputChannel | undefined;
+    protected _leoLogPane: vscode.OutputChannel | undefined;
 
     // * Status Bar
     private _leoStatusBar: LeoStatusBar | undefined;
@@ -9415,7 +9416,10 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
         // If LeoJS had finish its startup without valid LeoID, set ready flags!
         if (!this.leoStates.leoReady &amp;&amp; this.leoStates.leojsStartupDone &amp;&amp; this.leoStates.leoIdUnset) {
             if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
-                void this.showLogPane();
+                this.createLogPane();
+                if (g.isNewLeoJSVersion) {
+                    this.showLogPane();
+                }
                 this.leoStates.leoIdUnset = false;
                 this.leoStates.leoReady = true;
                 if (g.app.windowList.length) {
@@ -9670,7 +9674,10 @@ public finishStartup(): void {
     }
 
     if (g.app.leoID &amp;&amp; g.app.leoID !== 'None') {
-        void this.showLogPane();
+        this.createLogPane();
+        if (g.isNewLeoJSVersion) {
+            this.showLogPane();
+        }
         this.leoStates.leoIdUnset = false;
         this.leoStates.leoReady = true;
     } else {
@@ -12220,24 +12227,9 @@ public addLogPaneEntry(p_message: string): void {
 <t tx="felix.20220920001018.3">/**
  * * Reveals the log pane if not already visible
  */
-public showLogPane(p_focus?: boolean): Thenable&lt;unknown&gt; {
-    if (this._leoLogPane) {
-        this._leoLogPane.show(!p_focus); // use flag to preserve focus
-        return Promise.resolve(true);
-    } else {
-        // * Log pane instantiation
-        this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
-        this._context.subscriptions.push(this._leoLogPane);
-        if (g.logBuffer.length) {
-            const buffer = g.logBuffer;
-            while (buffer.length &gt; 0) {
-                // Pop the bottom one and append it
-                g.es_print(buffer.shift()!);
-            }
-        }
-        this._leoLogPane.show(!p_focus);
-        return Promise.resolve(undefined); // if cancelled
-    }
+public showLogPane(p_focus?: boolean): void {
+    this.createLogPane();
+    this._leoLogPane.show(!p_focus); // use flag to preserve focus
 }
 
 </t>
@@ -13859,6 +13851,7 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
         }
     }
     if (w_showWelcomeScreen) {
+        (g.isNewLeoJSVersion as boolean) = true;
         return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
     } else {
         return Promise.resolve();
@@ -19294,6 +19287,29 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 - LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
 - Fixed disabled/enabled state of 'Refresh from disk' command and icon in menu above body-editor.
 - Made command-icons above the outline pane customizable. They can also be set/unset in the LeoJS setting panel.
+
+</t>
+<t tx="felix.20240721135528.1">/**
+ * Creates the 'this._leoLogPane' log pane output panel instance
+ */
+public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
+    if (!this._leoLogPane) {
+        // * Log pane instantiation
+        this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+        this._context.subscriptions.push(this._leoLogPane);
+        if (g.logBuffer.length) {
+            const buffer = g.logBuffer;
+            while (buffer.length &gt; 0) {
+                // Pop the bottom one and append it
+                g.es_print(buffer.shift()!);
+            }
+        }
+    }
+    // should now exists
+    if (!this._leoLogPane) {
+        throw new Error('_leoLogPane cannot initialize');
+    }
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
