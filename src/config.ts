@@ -23,9 +23,19 @@ export class Config implements ConfigMembers {
     public activityViewShortcut: boolean = Constants.CONFIG_DEFAULTS.ACTIVITY_VIEW_SHORTCUT;
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
-    public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
+
+    public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
+
+    public showFileOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_FILE_ON_OUTLINE;
+    public showHoistDehoistOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_DEHOIST_ON_OUTLINE;
+    public showPrevNextOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_PREV_NEXT_ON_OUTLINE;
+    public showPromoteDemoteOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_DEMOTE_ON_OUTLINE;
+    public showRecentFilesOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_RECENT_FILES_ON_OUTLINE;
+    public showSettingsOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_SETTINGS_ON_OUTLINE;
+    public showShowLogOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_SHOW_LOG_ON_OUTLINE;
+    public showUndoRedoOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNDO_REDO_ON_OUTLINE;
 
     public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
     public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
@@ -80,7 +90,17 @@ export class Config implements ConfigMembers {
             activityViewShortcut: this.activityViewShortcut,
             goAnywhereShortcut: this.goAnywhereShortcut,
 
-            showUnlOnStatusBar: this.showUnlOnStatusBar,
+            showUnlOnStatusBar: this.showUnlOnStatusBar, // Used as Context Flag
+
+            showFileOnOutline: this.showFileOnOutline,
+            showHoistDehoistOnOutline: this.showHoistDehoistOnOutline,
+            showPrevNextOnOutline: this.showPrevNextOnOutline,
+            showPromoteDemoteOnOutline: this.showPromoteDemoteOnOutline,
+            showRecentFilesOnOutline: this.showRecentFilesOnOutline,
+            showSettingsOnOutline: this.showSettingsOnOutline,
+            showShowLogOnOutline: this.showShowLogOnOutline,
+            showUndoRedoOnOutline: this.showUndoRedoOnOutline,
+
             treeInExplorer: this.treeInExplorer, // Used as Context Flag
             showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
             showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
@@ -289,7 +309,6 @@ export class Config implements ConfigMembers {
         const NAME = Constants.CONFIG_NAME;
         const NAMES = Constants.CONFIG_NAMES;
         const DEFAULTS = Constants.CONFIG_DEFAULTS;
-        const FLAGS = Constants.CONTEXT_FLAGS;
 
         if (this._isBusySettingConfig) {
             // * Currently setting config, wait until its done all, and this will be called automatically
@@ -306,23 +325,24 @@ export class Config implements ConfigMembers {
             this.activityViewShortcut = GET(NAME).get(NAMES.ACTIVITY_VIEW_SHORTCUT, DEFAULTS.ACTIVITY_VIEW_SHORTCUT);
             this.goAnywhereShortcut = GET(NAME).get(NAMES.GO_ANYWHERE_SHORTCUT, DEFAULTS.GO_ANYWHERE_SHORTCUT);
 
-            this.showUnlOnStatusBar = GET(NAME).get(NAMES.SHOW_UNL_ON_STATUSBAR, DEFAULTS.SHOW_UNL_ON_STATUSBAR);
-            // this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
-            // if (this.statusBarString.length > 8) {
-            //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
-            // }
-            // this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
-            // if (!utils.isHexColor(this.statusBarColor)) {
-            //     this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
-            // }
             this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
+
+            this.showUnlOnStatusBar = GET(NAME).get(NAMES.SHOW_UNL_ON_STATUSBAR, DEFAULTS.SHOW_UNL_ON_STATUSBAR);
+
+            this.showFileOnOutline = GET(NAME).get(NAMES.SHOW_FILE_ON_OUTLINE, DEFAULTS.SHOW_FILE_ON_OUTLINE);
+            this.showHoistDehoistOnOutline = GET(NAME).get(NAMES.SHOW_HOIST_DEHOIST_ON_OUTLINE, DEFAULTS.SHOW_HOIST_DEHOIST_ON_OUTLINE);
+            this.showPrevNextOnOutline = GET(NAME).get(NAMES.SHOW_PREV_NEXT_ON_OUTLINE, DEFAULTS.SHOW_PREV_NEXT_ON_OUTLINE);
+            this.showPromoteDemoteOnOutline = GET(NAME).get(NAMES.SHOW_PROMOTE_DEMOTE_ON_OUTLINE, DEFAULTS.SHOW_PROMOTE_DEMOTE_ON_OUTLINE);
+            this.showRecentFilesOnOutline = GET(NAME).get(NAMES.SHOW_RECENT_FILES_ON_OUTLINE, DEFAULTS.SHOW_RECENT_FILES_ON_OUTLINE);
+            this.showSettingsOnOutline = GET(NAME).get(NAMES.SHOW_SETTINGS_ON_OUTLINE, DEFAULTS.SHOW_SETTINGS_ON_OUTLINE);
+            this.showShowLogOnOutline = GET(NAME).get(NAMES.SHOW_SHOW_LOG_ON_OUTLINE, DEFAULTS.SHOW_SHOW_LOG_ON_OUTLINE);
+            this.showUndoRedoOnOutline = GET(NAME).get(NAMES.SHOW_UNDO_REDO_ON_OUTLINE, DEFAULTS.SHOW_UNDO_REDO_ON_OUTLINE);
+
             this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
             this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
             this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
             this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
             this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
-
-            // this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
 
             // this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
             // this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);

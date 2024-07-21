@@ -2626,26 +2626,6 @@ public static CONTEXT_FLAGS = {
     // Flags for focus context
     FOCUS_FIND: "leojsFindFocus",
 
-    // Context flags that are mapped 'directly' onto leojs config settings
-    // * PREFIXED WITH 'leojs' *
-    LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
-    TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
-    SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
-    SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
-    SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
-    SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
-    SHOW_COPY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
-
-    // SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
-    // SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
-    // SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
-    // SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
-    // SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
-    // SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
-    // SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
-    // SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
-    // SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
-    // SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
 };
 
 </t>
@@ -5020,7 +5000,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.extractNames",
   "category": "Leojs",
   "title": "Extract Names",
-  "enablement": "leojsTreeOpened",
+  "enablement": "leojsTreeOpened &amp;&amp; editorHasSelection",
   "icon": "$(leojs-extract-name)"
 },
 </t>
@@ -5856,9 +5836,19 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "group": "navigation@9"
   },
   {
+    "command": "leojs.showSettingsPage",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showSettingsOnOutline",
+    "group": "navigation@11"
+  },
+  {
     "command": "leojs.showLogPane",
     "when": "view =~ /^leojsDocuments|^leojsButtons/ &amp;&amp; leojsReady",
     "group": "navigation@9"
+  },
+  {
+    "command": "leojs.showLogPane",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showShowLogOnOutline",
+    "group": "navigation@11"
   },
   {
     "command": "leojs.recentLeoFiles",
@@ -5867,8 +5857,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.recentLeoFiles",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsReady &amp;&amp; !leojsTreeOpened",
-    "group": "navigation@1"
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showRecentFilesOnOutline",
+    "group": "navigation@11"
   },
   {
     "command": "leojs.findQuickSelected",
@@ -5897,62 +5887,87 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.openLeoFile",
-    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
+    "group": "navigation@1"
+  },
+  {
+    "command": "leojs.openLeoFile",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showFileOnOutline",
     "group": "navigation@1"
   },
   {
     "command": "leojs.newLeoFile",
-    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
+    "group": "navigation@1"
+  },
+  {
+    "command": "leojs.newLeoFile",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showFileOnOutline",
     "group": "navigation@1"
   },
   {
     "command": "leojs.saveLeoFileFromOutline",
-    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled",
+    "group": "navigation@2"
+  },
+  {
+    "command": "leojs.saveLeoFileFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled &amp;&amp; showFileOnOutline",
     "group": "navigation@2"
   },
   {
     "command": "leojs.saveAsLeoFile",
-    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
     "group": "navigation@2"
   },
   {
-    "command": "leojs.saveAsLeoJsFile",
-    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
+    "command": "leojs.saveAsLeoFile",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled &amp;&amp; config.leojs.showFileOnOutline",
     "group": "navigation@2"
   },
   {
     "command": "leojs.prevFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showPrevNextOnOutline",
     "group": "navigation@3"
   },
   {
     "command": "leojs.nextFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showPrevNextOnOutline",
     "group": "navigation@4"
   },
   {
     "command": "leojs.undoFromOutline",
-    "when": "view =~ /^leojsOutline|^leojsUndo/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsUndo/ &amp;&amp; leojsTreeOpened",
+    "group": "navigation@5"
+  },
+  {
+    "command": "leojs.undoFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showUndoRedoOnOutline",
     "group": "navigation@5"
   },
   {
     "command": "leojs.redoFromOutline",
-    "when": "view =~ /^leojsOutline|^leojsUndo/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsUndo/ &amp;&amp; leojsTreeOpened",
+    "group": "navigation@6"
+  },
+  {
+    "command": "leojs.redoFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showUndoRedoOnOutline",
     "group": "navigation@6"
   },
   {
     "command": "leojs.deHoistFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTopHoistChapter",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTopHoistChapter &amp;&amp; config.leojs.showHoistDehoistOnOutline",
     "group": "navigation@7"
   },
   {
     "command": "leojs.chapterMain",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTopHoistChapter",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTopHoistChapter &amp;&amp; config.leojs.showHoistDehoistOnOutline",
     "group": "navigation@7"
   },
   {
     "command": "leojs.hoistSelectionFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showHoistDehoistOnOutline",
     "group": "navigation@8"
   },
   {
@@ -5971,24 +5986,19 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "group": "navigation@5"
   },
   {
-    "command": "leojs.chapterMain",
-    "when": "view =~ /^leojsFindPanel/ &amp;&amp; leojsTreeOpened",
-    "group": "navigation@6"
-  },
-  {
     "command": "leojs.promoteSelectionFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showPromoteDemoteOnOutline",
     "group": "navigation@9"
   },
   {
     "command": "leojs.demoteSelectionFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; config.leojs.showPromoteDemoteOnOutline",
     "group": "navigation@10"
   },
   {
     "command": "leojs.contractAllFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
-    "group": "navigation@11"
+    "group": "navigation@12"
   }
 ],
 </t>
@@ -7752,6 +7762,54 @@ public incTreeId(): void {
       "type": "boolean",
       "description": "Shows the outline tree in the explorer view"
     },
+    "leojs.showFileOnOutline": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'New', 'Open' and 'Save' buttons on the outline pane"
+    },
+    "leojs.showHoistDehoistOnOutline": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Hoist' and 'Dehoist' buttons on the outline pane"
+    },
+    "leojs.showPrevNextOnOutline": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Previous' and 'Next' visited node buttons on the outline pane"
+    },
+    "leojs.showPromoteDemoteOnOutline": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Promote' and 'Demote' buttons on the outline pane"
+    },
+    "leojs.showRecentFilesOnOutline": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'Recent Files' button on the outline pane"
+    },
+    "leojs.showSettingsOnOutline": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'LeoJS Settings' button on the outline pane"
+    },
+    "leojs.showShowLogOnOutline": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'Open Log Pane' button on the outline pane"
+    },
+    "leojs.showUndoRedoOnOutline": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Undo' and 'Redo' buttons on the outline pane"
+    },
     "leojs.showEditOnNodes": {
       "scope": "application",
       "default": true,
@@ -7886,7 +7944,6 @@ public buildFromSavedSettings(): void {
     const NAME = Constants.CONFIG_NAME;
     const NAMES = Constants.CONFIG_NAMES;
     const DEFAULTS = Constants.CONFIG_DEFAULTS;
-    const FLAGS = Constants.CONTEXT_FLAGS;
 
     if (this._isBusySettingConfig) {
         // * Currently setting config, wait until its done all, and this will be called automatically
@@ -7903,23 +7960,24 @@ public buildFromSavedSettings(): void {
         this.activityViewShortcut = GET(NAME).get(NAMES.ACTIVITY_VIEW_SHORTCUT, DEFAULTS.ACTIVITY_VIEW_SHORTCUT);
         this.goAnywhereShortcut = GET(NAME).get(NAMES.GO_ANYWHERE_SHORTCUT, DEFAULTS.GO_ANYWHERE_SHORTCUT);
 
-        this.showUnlOnStatusBar = GET(NAME).get(NAMES.SHOW_UNL_ON_STATUSBAR, DEFAULTS.SHOW_UNL_ON_STATUSBAR);
-        // this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
-        // if (this.statusBarString.length &gt; 8) {
-        //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
-        // }
-        // this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
-        // if (!utils.isHexColor(this.statusBarColor)) {
-        //     this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
-        // }
         this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
+
+        this.showUnlOnStatusBar = GET(NAME).get(NAMES.SHOW_UNL_ON_STATUSBAR, DEFAULTS.SHOW_UNL_ON_STATUSBAR);
+
+        this.showFileOnOutline = GET(NAME).get(NAMES.SHOW_FILE_ON_OUTLINE, DEFAULTS.SHOW_FILE_ON_OUTLINE);
+        this.showHoistDehoistOnOutline = GET(NAME).get(NAMES.SHOW_HOIST_DEHOIST_ON_OUTLINE, DEFAULTS.SHOW_HOIST_DEHOIST_ON_OUTLINE);
+        this.showPrevNextOnOutline = GET(NAME).get(NAMES.SHOW_PREV_NEXT_ON_OUTLINE, DEFAULTS.SHOW_PREV_NEXT_ON_OUTLINE);
+        this.showPromoteDemoteOnOutline = GET(NAME).get(NAMES.SHOW_PROMOTE_DEMOTE_ON_OUTLINE, DEFAULTS.SHOW_PROMOTE_DEMOTE_ON_OUTLINE);
+        this.showRecentFilesOnOutline = GET(NAME).get(NAMES.SHOW_RECENT_FILES_ON_OUTLINE, DEFAULTS.SHOW_RECENT_FILES_ON_OUTLINE);
+        this.showSettingsOnOutline = GET(NAME).get(NAMES.SHOW_SETTINGS_ON_OUTLINE, DEFAULTS.SHOW_SETTINGS_ON_OUTLINE);
+        this.showShowLogOnOutline = GET(NAME).get(NAMES.SHOW_SHOW_LOG_ON_OUTLINE, DEFAULTS.SHOW_SHOW_LOG_ON_OUTLINE);
+        this.showUndoRedoOnOutline = GET(NAME).get(NAMES.SHOW_UNDO_REDO_ON_OUTLINE, DEFAULTS.SHOW_UNDO_REDO_ON_OUTLINE);
+
         this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
         this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
         this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
         this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
         this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
-
-        // this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
 
         // this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
         // this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
@@ -7958,9 +8016,19 @@ export class Config implements ConfigMembers {
     public activityViewShortcut: boolean = Constants.CONFIG_DEFAULTS.ACTIVITY_VIEW_SHORTCUT;
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
-    public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
+
+    public showUnlOnStatusBar: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNL_ON_STATUSBAR;
+
+    public showFileOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_FILE_ON_OUTLINE;
+    public showHoistDehoistOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_DEHOIST_ON_OUTLINE;
+    public showPrevNextOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_PREV_NEXT_ON_OUTLINE;
+    public showPromoteDemoteOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_DEMOTE_ON_OUTLINE;
+    public showRecentFilesOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_RECENT_FILES_ON_OUTLINE;
+    public showSettingsOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_SETTINGS_ON_OUTLINE;
+    public showShowLogOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_SHOW_LOG_ON_OUTLINE;
+    public showUndoRedoOnOutline: boolean = Constants.CONFIG_DEFAULTS.SHOW_UNDO_REDO_ON_OUTLINE;
 
     public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
     public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
@@ -8018,7 +8086,17 @@ public getConfig(): ConfigMembers {
         activityViewShortcut: this.activityViewShortcut,
         goAnywhereShortcut: this.goAnywhereShortcut,
 
-        showUnlOnStatusBar: this.showUnlOnStatusBar,
+        showUnlOnStatusBar: this.showUnlOnStatusBar, // Used as Context Flag
+
+        showFileOnOutline: this.showFileOnOutline,
+        showHoistDehoistOnOutline: this.showHoistDehoistOnOutline,
+        showPrevNextOnOutline: this.showPrevNextOnOutline,
+        showPromoteDemoteOnOutline: this.showPromoteDemoteOnOutline,
+        showRecentFilesOnOutline: this.showRecentFilesOnOutline,
+        showSettingsOnOutline: this.showSettingsOnOutline,
+        showShowLogOnOutline: this.showShowLogOnOutline,
+        showUndoRedoOnOutline: this.showUndoRedoOnOutline,
+
         treeInExplorer: this.treeInExplorer, // Used as Context Flag
         showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
         showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
@@ -8107,12 +8185,19 @@ export interface ConfigMembers {
     goAnywhereShortcut: boolean;
 
     showUnlOnStatusBar: boolean,
-    // statusBarString: string;
-    // statusBarColor: string;
 
     treeInExplorer: boolean;
     showEditOnNodes: boolean;
-    // showArrowsOnNodes: boolean;
+
+    showFileOnOutline: boolean;
+    showHoistDehoistOnOutline: boolean;
+    showPrevNextOnOutline: boolean;
+    showPromoteDemoteOnOutline: boolean;
+    showRecentFilesOnOutline: boolean;
+    showSettingsOnOutline: boolean;
+    showShowLogOnOutline: boolean;
+    showUndoRedoOnOutline: boolean;
+
     showAddOnNodes: boolean;
     showMarkOnNodes: boolean;
     showCloneOnNodes: boolean;
@@ -8154,6 +8239,16 @@ public static CONFIG_NAMES = {
     TREE_KEEP_FOCUS: "treeKeepFocus",
     TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
     TREE_IN_EXPLORER: "treeInExplorer",
+
+    SHOW_FILE_ON_OUTLINE: "showFileOnOutline",
+    SHOW_HOIST_DEHOIST_ON_OUTLINE: "showHoistDehoistOnOutline",
+    SHOW_PREV_NEXT_ON_OUTLINE: "showPrevNextOnOutline",
+    SHOW_PROMOTE_DEMOTE_ON_OUTLINE: "showPromoteDemoteOnOutline",
+    SHOW_RECENT_FILES_ON_OUTLINE: "showRecentFilesOnOutline",
+    SHOW_SETTINGS_ON_OUTLINE: "showSettingsOnOutline",
+    SHOW_SHOW_LOG_ON_OUTLINE: "showShowLogOnOutline",
+    SHOW_UNDO_REDO_ON_OUTLINE: "showUndoRedoOnOutline",
+
     SHOW_EDIT: "showEditOnNodes",
     SHOW_ADD: "showAddOnNodes",
     SHOW_MARK: "showMarkOnNodes",
@@ -8200,6 +8295,16 @@ public static CONFIG_DEFAULTS = {
     SHOW_UNL_ON_STATUSBAR: true,
 
     TREE_IN_EXPLORER: true,
+
+    SHOW_FILE_ON_OUTLINE: true,
+    SHOW_HOIST_DEHOIST_ON_OUTLINE: true,
+    SHOW_PREV_NEXT_ON_OUTLINE: true,
+    SHOW_PROMOTE_DEMOTE_ON_OUTLINE: true,
+    SHOW_RECENT_FILES_ON_OUTLINE: false,
+    SHOW_SETTINGS_ON_OUTLINE: false,
+    SHOW_SHOW_LOG_ON_OUTLINE: false,
+    SHOW_UNDO_REDO_ON_OUTLINE: true,
+
     SHOW_EDIT: true,
     SHOW_ADD: false,
     SHOW_MARK: false,
