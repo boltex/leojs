@@ -5623,7 +5623,7 @@ export class LeoUI extends NullGui {
                     undefined,
                     "Open",
                     [
-                        ["Leo files", "*.leo *.leojs *.db"],
+                        ["Leo files", "*.leojs *.leo *.db"],
                         ["Python files", "*.py"],
                         ["All files", "*"]
                     ],

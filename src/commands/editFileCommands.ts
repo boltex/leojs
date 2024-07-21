@@ -453,7 +453,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         } else {
             // Prompt for the file to be compared with the present outline.
             const filetypes: [string, string][] = [
-                ['Leo files', '*.leo *.leojs *.db'],
+                ['Leo files', '*.leojs *.leo *.db'],
                 ['All files', '*'],
             ];
             const fileName = await g.app.gui.runOpenFileDialog(

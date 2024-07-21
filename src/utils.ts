@@ -281,7 +281,7 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
         from :
             [
                 ["", ""],
-                ["Leo files", "*.leo *.db"]
+                ["Leo files", "*.leojs *.leo *.db"]
             ],
 
         to :

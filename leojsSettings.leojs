@@ -551,7 +551,7 @@
                 },
                 {
                   "gnx": "vitalije.20170811125150.1",
-                  "vh": "@string default-leo-extension = .leo"
+                  "vh": "@string default-leo-extension = .leojs"
                 }
               ]
             },

@@ -6935,7 +6935,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 undefined,
                 "Open",
                 [
-                    ["Leo files", "*.leo *.leojs *.db"],
+                    ["Leo files", "*.leojs *.leo *.db"],
                     ["Python files", "*.py"],
                     ["All files", "*"]
                 ],
@@ -9331,7 +9331,7 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
         from :
             [
                 ["", ""],
-                ["Leo files", "*.leo *.db"]
+                ["Leo files", "*.leojs *.leo *.db"]
             ],
 
         to :
@@ -19288,6 +19288,7 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 - Fixed disabled/enabled state of 'Refresh from disk' and 'Extract Names' command-icons in menu above body-editor.
 - Made command-icons above the outline pane customizable. They can also be set/unset in the LeoJS setting panel.
 - The log pane is only forcefully shown at startup on first installation or on version updates.
+- Made the .leojs JSON file format the default instead of the .leo XML format when saving new untitled files.
 
 </t>
 <t tx="felix.20240721135528.1">/**
