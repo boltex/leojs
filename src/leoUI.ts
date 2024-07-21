@@ -246,7 +246,7 @@ export class LeoUI extends NullGui {
     public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
-    private _leoLogPane: vscode.OutputChannel | undefined;
+    protected _leoLogPane: vscode.OutputChannel | undefined;
 
     // * Status Bar
     private _leoStatusBar: LeoStatusBar | undefined;
@@ -559,7 +559,10 @@ export class LeoUI extends NullGui {
         }
 
         if (g.app.leoID && g.app.leoID !== 'None') {
-            void this.showLogPane();
+            this.createLogPane();
+            if (g.isNewLeoJSVersion) {
+                this.showLogPane();
+            }
             this.leoStates.leoIdUnset = false;
             this.leoStates.leoReady = true;
         } else {
@@ -722,6 +725,28 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Creates the 'this._leoLogPane' log pane output panel instance
+     */
+    public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
+        if (!this._leoLogPane) {
+            // * Log pane instantiation
+            this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+            this._context.subscriptions.push(this._leoLogPane);
+            if (g.logBuffer.length) {
+                const buffer = g.logBuffer;
+                while (buffer.length > 0) {
+                    // Pop the bottom one and append it
+                    g.es_print(buffer.shift()!);
+                }
+            }
+        }
+        // should now exists
+        if (!this._leoLogPane) {
+            throw new Error('_leoLogPane cannot initialize');
+        }
+    }
+
+    /**
      * * Adds a message string to LeoJS log pane.
      * @param p_message The string to be added in the log
      */
@@ -736,24 +761,9 @@ export class LeoUI extends NullGui {
     /**
      * * Reveals the log pane if not already visible
      */
-    public showLogPane(p_focus?: boolean): Thenable<unknown> {
-        if (this._leoLogPane) {
-            this._leoLogPane.show(!p_focus); // use flag to preserve focus
-            return Promise.resolve(true);
-        } else {
-            // * Log pane instantiation
-            this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
-            this._context.subscriptions.push(this._leoLogPane);
-            if (g.logBuffer.length) {
-                const buffer = g.logBuffer;
-                while (buffer.length > 0) {
-                    // Pop the bottom one and append it
-                    g.es_print(buffer.shift()!);
-                }
-            }
-            this._leoLogPane.show(!p_focus);
-            return Promise.resolve(undefined); // if cancelled
-        }
+    public showLogPane(p_focus?: boolean): void {
+        this.createLogPane();
+        this._leoLogPane.show(!p_focus); // use flag to preserve focus
     }
 
     /**
@@ -6243,7 +6253,10 @@ export class LeoUI extends NullGui {
             // If LeoJS had finish its startup without valid LeoID, set ready flags!
             if (!this.leoStates.leoReady && this.leoStates.leojsStartupDone && this.leoStates.leoIdUnset) {
                 if (g.app.leoID && g.app.leoID !== 'None') {
-                    void this.showLogPane();
+                    this.createLogPane();
+                    if (g.isNewLeoJSVersion) {
+                        this.showLogPane();
+                    }
                     this.leoStates.leoIdUnset = false;
                     this.leoStates.leoReady = true;
                     if (g.app.windowList.length) {
