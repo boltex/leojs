@@ -3,8 +3,9 @@
 # 0.2.16
 
 - LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
-- Fixed disabled/enabled state of 'Refresh from disk' command and icon in menu above body-editor.
+- Fixed disabled/enabled state of 'Refresh from disk' and 'Extract Names' command-icons in menu above body-editor.
 - Made command-icons above the outline pane customizable. They can also be set/unset in the LeoJS setting panel.
+- The log pane is only forcefully shown at startup on first installation or on version updates.
 
 # 0.2.15
 

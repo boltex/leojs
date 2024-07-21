@@ -19285,8 +19285,9 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 <t tx="felix.20240714135534.1"># 0.2.16
 
 - LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
-- Fixed disabled/enabled state of 'Refresh from disk' command and icon in menu above body-editor.
+- Fixed disabled/enabled state of 'Refresh from disk' and 'Extract Names' command-icons in menu above body-editor.
 - Made command-icons above the outline pane customizable. They can also be set/unset in the LeoJS setting panel.
+- The log pane is only forcefully shown at startup on first installation or on version updates.
 
 </t>
 <t tx="felix.20240721135528.1">/**
