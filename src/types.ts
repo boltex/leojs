@@ -20,7 +20,6 @@ export interface ConfigMembers {
     showUnlOnStatusBar: boolean,
 
     treeInExplorer: boolean;
-    showEditOnNodes: boolean;
 
     showFileOnOutline: boolean;
     showHoistDehoistOnOutline: boolean;
@@ -31,6 +30,7 @@ export interface ConfigMembers {
     showShowLogOnOutline: boolean;
     showUndoRedoOnOutline: boolean;
 
+    showEditOnNodes: boolean;
     showAddOnNodes: boolean;
     showMarkOnNodes: boolean;
     showCloneOnNodes: boolean;

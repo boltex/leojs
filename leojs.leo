@@ -5918,7 +5918,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.saveLeoFileFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled &amp;&amp; showFileOnOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled &amp;&amp; config.leojs.showFileOnOutline",
     "group": "navigation@2"
   },
   {
@@ -8193,7 +8193,6 @@ export interface ConfigMembers {
     showUnlOnStatusBar: boolean,
 
     treeInExplorer: boolean;
-    showEditOnNodes: boolean;
 
     showFileOnOutline: boolean;
     showHoistDehoistOnOutline: boolean;
@@ -8204,6 +8203,7 @@ export interface ConfigMembers {
     showShowLogOnOutline: boolean;
     showUndoRedoOnOutline: boolean;
 
+    showEditOnNodes: boolean;
     showAddOnNodes: boolean;
     showMarkOnNodes: boolean;
     showCloneOnNodes: boolean;
@@ -19680,9 +19680,6 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
               &lt;span class="setting__hint"&gt;Shows 'Undo' and 'Redo' on hover&lt;/span&gt;
             &lt;/div&gt;
 
-
-
-
           &lt;/div&gt;
         &lt;/div&gt;
       &lt;/section&gt;
@@ -19857,7 +19854,8 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
   #{endOfBody}
 &lt;/body&gt;
 
-&lt;/html&gt;</t>
+&lt;/html&gt;
+</t>
 <t tx="felix.20240722220751.1">// @ts-check
 
 // This script will be run within the webview itself

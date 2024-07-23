@@ -3653,7 +3653,7 @@
         },
         {
           "command": "leojs.saveLeoFileFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTreeTitled && showFileOnOutline",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTreeTitled && config.leojs.showFileOnOutline",
           "group": "navigation@2"
         },
         {
