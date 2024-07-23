@@ -14265,16 +14265,6 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
     "group": "navigation@7"
   },
   {
-    "command": "leojs.writeDirtyAtFileNodes",
-    "when": "resourceScheme == leojs &amp;&amp; leojsTreeOpened",
-    "group": "navigation@8"
-  },
-  {
-    "command": "leojs.refreshFromDiskSelection",
-    "when": "resourceScheme == leojs &amp;&amp; leojsTreeOpened",
-    "group": "navigation@9"
-  },
-  {
     "command": "leojs.showSettingsPage",
     "when": "resourceScheme == leojs",
     "group": "1_leojs@1"

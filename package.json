@@ -3418,16 +3418,6 @@
           "group": "navigation@7"
         },
         {
-          "command": "leojs.writeDirtyAtFileNodes",
-          "when": "resourceScheme == leojs && leojsTreeOpened",
-          "group": "navigation@8"
-        },
-        {
-          "command": "leojs.refreshFromDiskSelection",
-          "when": "resourceScheme == leojs && leojsTreeOpened",
-          "group": "navigation@9"
-        },
-        {
           "command": "leojs.showSettingsPage",
           "when": "resourceScheme == leojs",
           "group": "1_leojs@1"
