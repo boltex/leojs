@@ -41,6 +41,11 @@
 <v t="felix.20240224165750.1"><vh>@clean help-panel/style.css</vh></v>
 <v t="felix.20240224165747.1"><vh>@clean help-panel/main.js</vh></v>
 </v>
+<v t="felix.20240722220730.1"><vh>Settings Panel Webview</vh>
+<v t="felix.20240722220738.1"><vh>@clean settings-panel/index.html</vh></v>
+<v t="felix.20240722220751.1"><vh>@clean settings-panel/main.js</vh></v>
+<v t="felix.20240722220752.1"><vh>@clean settings-panel/style.css</vh></v>
+</v>
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
 <v t="felix.20211007213344.2"><vh>class Config</vh>
 <v t="felix.20211007213344.3"><vh>getConfig</vh></v>
@@ -19313,6 +19318,1986 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     }
 }
 
+</t>
+<t tx="felix.20240722220730.1"></t>
+<t tx="felix.20240722220738.1">&lt;!DOCTYPE html&gt;
+&lt;html lang="en" tabindex="-1"&gt;
+
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src #{webview.cspSource}; img-src #{webview.cspSource} https:; script-src 'nonce-#{nonce}';" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+  &lt;link href="#{style}" rel="stylesheet" /&gt;
+  &lt;title&gt;LeoJS&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body class="preload"&gt;
+  &lt;div class="container"&gt;
+    &lt;header&gt;
+      &lt;a class="header__link" title="Learn more about Leo Integration" href="https://github.com/boltex/leojs#leojs"&gt;
+        &lt;div class="header__logo"&gt;
+          &lt;img class="image__logo" src="#{root}/resources/leoapp128px.png" /&gt;
+          &lt;div&gt;
+            &lt;h1&gt;
+              Leo&lt;span class="header__logo--highlight"&gt;JS&lt;/span&gt;
+            &lt;/h1&gt;
+            &lt;p class="header__subtitle"&gt;Leo for VS Code&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/a&gt;
+      &lt;p class="header__blurb"&gt;
+        Use &lt;b&gt;Leo&lt;/b&gt;, the &lt;b&gt;Literate Editor with Outlines&lt;/b&gt;, to
+        program with &lt;b&gt;directed acyclic graphs&lt;/b&gt;, along with
+        &lt;b&gt;section-references&lt;/b&gt;, &lt;b&gt;@others&lt;/b&gt;, and
+        &lt;b&gt;clones&lt;/b&gt;.
+      &lt;/p&gt;
+    &lt;/header&gt;
+
+    &lt;div class="content__area"&gt;
+      &lt;section id="welcome" class="section--full mb-0"&gt;
+        &lt;h2 class="section__title section__title--primary"&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 0.2.16&lt;/span&gt;
+        &lt;/h2&gt;
+        &lt;div class="center mt-1"&gt;
+          &lt;a class="button button--flat is-sidebar-hidden"
+            title="LeoJS is built by the support of generous users like you!" href="https://boltex.github.io/"&gt;Sponsor
+            LeoJS
+            &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
+          &lt;/a&gt;
+          &lt;a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features"&gt;
+            See What's New in LeoJS 0.2.16
+          &lt;/a&gt;
+        &lt;/div&gt;
+        &lt;p class="blurb center ml-0 mr-0"&gt;
+          &lt;strong&gt;LeoJS&lt;/strong&gt;,
+          an open-source extension created by
+          &lt;a class="bold" title="My github user page" href="https://boltex.github.io/"&gt;Félix&lt;/a&gt;,
+          is a Javascript implementation of
+          &lt;a class="bold" title="Learn more about Leo" href="https://leo-editor.github.io/leo-editor/"&gt;Leo&lt;/a&gt;.&lt;br&gt;
+          &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY"&gt;📺&amp;nbsp;Introduction to Leo&lt;/a&gt;
+          &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE"&gt;📺&amp;nbsp;Features Demo&lt;/a&gt;
+        &lt;/p&gt;
+        &lt;h2 class="section__title section__title--break"&gt;&lt;/h2&gt;
+        &lt;p class="section__hint mt-0 center"&gt;
+          Automate auto-refresh for
+          &lt;a href="#external-files" title="Setup file-change detection"&gt;external files changes&lt;/a&gt;, or choose which
+          &lt;a href="#node-commands" title="Fine-tune interface"&gt;icons&lt;/a&gt;
+          are shown, and more!
+        &lt;/p&gt;
+      &lt;/section&gt;
+
+      &lt;section id="leo-id" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="settings"&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input mt-0"&gt;
+                &lt;label for="leoID" class="label-big"&gt;Leo ID&lt;/label&gt;
+                &lt;input id="leoID" name="leoID" type="text" minlength="3" maxlength="128" placeholder="Leo Id"
+                  data-setting /&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;
+                An id that identifies you uniquely.
+                &lt;strong&gt;Defaults to your current user
+                  name.&lt;/strong&gt;&lt;br /&gt;
+                &lt;em&gt;Letters and numbers only, at least 3
+                  characters.&lt;/em&gt;
+              &lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section id="external-files" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="section__header"&gt;
+            &lt;h2&gt;External Files Change Detection&lt;/h2&gt;
+          &lt;/div&gt;
+
+          &lt;div class="settings"&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;label for="checkForChangeExternalFiles"&gt;Check changes to external files&lt;/label&gt;
+                &lt;select id="checkForChangeExternalFiles" name="checkForChangeExternalFiles" data-setting&gt;
+                  &lt;option value="none"&gt;
+                    Default from Leo's config
+                  &lt;/option&gt;
+                  &lt;option value="force-check"&gt;
+                    Check for changes
+                  &lt;/option&gt;
+                  &lt;option value="force-ignore"&gt;
+                    Ignore all changes
+                  &lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Use Leo's defaults, or force either to
+                check changes or not&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;label for="defaultReloadIgnore"&gt;Force reload or ignore changes&lt;/label&gt;
+                &lt;select id="defaultReloadIgnore" name="defaultReloadIgnore" data-setting&gt;
+                  &lt;option value="none"&gt;
+                    Choose each time
+                  &lt;/option&gt;
+                  &lt;option value="yes-all"&gt;
+                    Reload All
+                  &lt;/option&gt;
+                  &lt;option value="no-all"&gt;
+                    Ignore All
+                  &lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Choose yourself, or set default to reload
+                or ignore changes&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section id="interface-behavior" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="section__header"&gt;
+            &lt;h2&gt;Interface Behavior&lt;/h2&gt;
+          &lt;/div&gt;
+
+          &lt;div class="settings"&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="sessionPerWorkspace" name="sessionPerWorkspace" type="checkbox" data-setting /&gt;
+                &lt;label for="sessionPerWorkspace"&gt;Keep one session per workspace&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Reopen the same set of files for
+                each workspace.&lt;br /&gt;
+                Disabling this will keep the same session for all Leo windows&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="leoTreeBrowse" name="leoTreeBrowse" type="checkbox" data-setting /&gt;
+                &lt;label for="leoTreeBrowse"&gt;Use Leo Tree Browsing&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Navigate Leo's outline with Leo's shortcuts
+                and behavior instead of the default vscode
+                method&lt;br /&gt;(Arrow keys move selection
+                instead of moving a cursor when focus is on
+                Leo's outline)&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="treeKeepFocus" name="treeKeepFocus" type="checkbox" data-setting /&gt;
+                &lt;label for="treeKeepFocus"&gt;Keep focus on Outline&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Keep focus in the outline when selecting a
+                node - overridden by "&lt;strong&gt;Leo Tree Browsing&lt;/strong&gt;"&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="treeKeepFocusWhenAside" name="treeKeepFocusWhenAside" type="checkbox" data-setting /&gt;
+                &lt;label for="treeKeepFocusWhenAside"&gt;Keep focus when opening on the
+                  side&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Keep focus in the outline when opening a
+                detached body pane on the side&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="break"&gt;&lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="goAnywhereShortcut" name="goAnywhereShortcut" type="checkbox" data-setting /&gt;
+                &lt;label for="goAnywhereShortcut"&gt;Replace 'Go to File' shortcut with 'Go
+                  Anywhere'&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;
+                Make &lt;strong&gt;[Ctrl+P]&lt;/strong&gt; call Leo's
+                &lt;strong&gt;Go Anywhere&lt;/strong&gt; instead of
+                VSCode's &lt;strong&gt;Go to File&lt;/strong&gt; when
+                focus in the body or outline&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="collapseAllShortcut" name="collapseAllShortcut" type="checkbox" data-setting /&gt;
+                &lt;label for="collapseAllShortcut"&gt;Enable collapse-all shortcut for
+                  explorer&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Allows the
+                &lt;strong&gt;[Alt+'-'] keyboard shortcut&lt;/strong&gt;
+                to collapse folders in the file
+                explorer&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="activityViewShortcut" name="activityViewShortcut" type="checkbox" data-setting /&gt;
+                &lt;label for="activityViewShortcut"&gt;Enable 'Show LeoJS view'
+                  shortcut&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Allows the
+                &lt;strong&gt;[Ctrl+Shift+L] keyboard
+                  shortcut&lt;/strong&gt;
+                to reveal the LeoJS Activity View&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section id="tree-in-explorer" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="section__header"&gt;
+            &lt;div class="setting__input setting__input--big"&gt;
+              &lt;input id="treeInExplorer" name="treeInExplorer" type="checkbox" data-setting /&gt;
+              &lt;label for="treeInExplorer"&gt;Show&amp;nbsp;Leo&amp;nbsp;Outline&amp;nbsp;in&amp;nbsp;Explorer&lt;/label&gt;
+            &lt;/div&gt;
+            &lt;p class="section__header-hint"&gt;
+              Adds an instance of the outline pane in the
+              explorer view
+            &lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="section__preview"&gt;
+          &lt;img class="image__preview" src="#{root}/resources/treeInExplorerDisabled.png" /&gt;
+          &lt;img class="image__preview--overlay hidden" src="#{root}/resources/treeInExplorerEnabled.png"
+            data-visibility="treeInExplorer" /&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section id="invert-contrast" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="section__header"&gt;
+            &lt;div class="setting__input setting__input--big"&gt;
+              &lt;input id="invertNodeContrast" name="invertNodeContrast" type="checkbox" data-setting /&gt;
+              &lt;label for="invertNodeContrast"&gt;Invert Node Contrast&lt;/label&gt;
+            &lt;/div&gt;
+            &lt;p class="section__header-hint"&gt;
+              Inverts the dirty/clean border appearance of
+              tree nodes
+            &lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="section__preview"&gt;
+          &lt;img class="image__preview" src="#{root}/resources/invertedDisabled.png" /&gt;
+          &lt;img class="image__preview--overlay hidden" src="#{root}/resources/invertedEnabled.png"
+            data-visibility="invertNodeContrast" /&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section id="outline-commands" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="section__header"&gt;
+            &lt;h2&gt;Outline Pane Commands&lt;/h2&gt;
+            &lt;p class="section__header-hint"&gt;
+              Hovering the outline pane displays command icons -
+              Choose which commands to display when hovering
+            &lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="section__preview"&gt;
+            &lt;img class="image__preview" src="#{root}/resources/outline-icons-empty.png" /&gt;
+
+            &lt;div class="image__preview--float-container float-container-no-padding"&gt;
+
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-show-log.png"
+                data-visibility="showShowLogOnOutline" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-recent-files.png"
+                data-visibility="showRecentFilesOnOutline" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-settings.png"
+                data-visibility="showSettingsOnOutline" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-promote-demote.png"
+                data-visibility="showPromoteDemoteOnOutline" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-hoist-dehoist.png"
+                data-visibility="showHoistDehoistOnOutline" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-undo-redo.png"
+                data-visibility="showUndoRedoOnOutline" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-prev-next.png"
+                data-visibility="showPrevNextOnOutline" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/outline-icons-file.png"
+                data-visibility="showFileOnOutline" /&gt;
+
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;div class="settings"&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showFileOnOutline" name="showFileOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showFileOnOutline"&gt;File&amp;nbsp;Commands&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'New, Open &amp; Save' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showHoistDehoistOnOutline" name="showHoistDehoistOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showHoistDehoistOnOutline"&gt;Hoist&amp;nbsp;/&amp;nbsp;Dehoist&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Hoist &amp; Dehoist' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showPrevNextOnOutline" name="showPrevNextOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showPrevNextOnOutline"&gt;Previous&amp;nbsp;/&amp;nbsp;Next Visited Nodes&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Previous &amp; Next' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showPromoteDemoteOnOutline" name="showPromoteDemoteOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showPromoteDemoteOnOutline"&gt;Promote&amp;nbsp;/&amp;nbsp;Demote&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Promote &amp; Demote' on hover&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showRecentFilesOnOutline" name="showRecentFilesOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showRecentFilesOnOutline"&gt;Recent&amp;nbsp;Files&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Recent Files' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showSettingsOnOutline" name="showSettingsOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showSettingsOnOutline"&gt;LeoJS&amp;nbsp;Settings&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'LeoJS Settings' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showShowLogOnOutline" name="showShowLogOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showShowLogOnOutline"&gt;Show&amp;nbsp;Log&amp;nbsp;Pane&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Open Log Pane' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showUndoRedoOnOutline" name="showUndoRedoOnOutline" type="checkbox" data-setting /&gt;
+                &lt;label for="showUndoRedoOnOutline"&gt;Undo&amp;nbsp;/&amp;nbsp;Redo&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Undo' and 'Redo' on hover&lt;/span&gt;
+            &lt;/div&gt;
+
+
+
+
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section id="node-commands" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="section__header"&gt;
+            &lt;h2&gt;Node Commands&lt;/h2&gt;
+            &lt;p class="section__header-hint"&gt;
+              Hovering tree nodes displays an edit icon -
+              Choose which commands to display when hovering
+            &lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="section__preview"&gt;
+            &lt;img class="image__preview" src="#{root}/resources/allIconsDisabled.png" /&gt;
+
+            &lt;div class="image__preview--float-container"&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/bookmark.png"
+                data-visibility="showMarkOnNodes" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/copy.png" data-visibility="showCopyOnNodes" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/clone.png" data-visibility="showCloneOnNodes" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/add.png" data-visibility="showAddOnNodes" /&gt;
+              &lt;img class="image__preview--float" src="#{root}/resources/editHeadline.png"
+                data-visibility="showEditOnNodes" /&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;div class="settings"&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showEditOnNodes" name="showEditOnNodes" type="checkbox" data-setting /&gt;
+                &lt;label for="showEditOnNodes"&gt;Edit&amp;nbsp;Headline&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Edit Headline' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showMarkOnNodes" name="showMarkOnNodes" type="checkbox" data-setting /&gt;
+                &lt;label for="showMarkOnNodes"&gt;Mark&amp;nbsp;/&amp;nbsp;Unmark&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Mark/Unmark' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showCopyOnNodes" name="showCopyOnNodes" type="checkbox" data-setting /&gt;
+                &lt;label for="showCopyOnNodes"&gt;Copy&amp;nbsp;Node&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Copy' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showCloneOnNodes" name="showCloneOnNodes" type="checkbox" data-setting /&gt;
+                &lt;label for="showCloneOnNodes"&gt;Clone&amp;nbsp;Node&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Clone' on hover&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showAddOnNodes" name="showAddOnNodes" type="checkbox" data-setting /&gt;
+                &lt;label for="showAddOnNodes"&gt;Add&amp;nbsp;Node&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Shows 'Insert' on hover&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      &lt;section id="status-bar" class="section--settings"&gt;
+        &lt;div class="section__content"&gt;
+          &lt;div class="section__header"&gt;
+            &lt;h2&gt;Status Bar Indicator&lt;/h2&gt;
+            &lt;p class="section__header-hint"&gt;
+              UNL is shown at the bottom in the status bar
+            &lt;/p&gt;
+          &lt;/div&gt;
+
+          &lt;div class="settings"&gt;
+            &lt;div class="setting"&gt;
+              &lt;div class="setting__input"&gt;
+                &lt;input id="showUnlOnStatusBar" name="showUnlOnStatusBar" type="checkbox" data-setting /&gt;
+                &lt;label for="showUnlOnStatusBar"&gt;Enable UNL in status bar&lt;/label&gt;
+              &lt;/div&gt;
+              &lt;span class="setting__hint"&gt;Click the indicator to copy the UNL to the clipboard&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="section__preview"&gt;
+          &lt;img class="image__preview" src="#{root}/resources/unl-off.png" /&gt;
+          &lt;img class="image__preview--overlay hidden" src="#{root}/resources/unl-on.png"
+            data-visibility="showUnlOnStatusBar" /&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+    &lt;/div&gt;
+
+    &lt;div class="sidebar"&gt;
+      &lt;div class="sidebar__group"&gt;
+        &lt;a class="button button--flat-primary" title="Support LeoJS Development"
+          href="https://boltex.github.io/"&gt;Sponsor LeoJS &amp;#x2764;&lt;/a&gt;
+        &lt;p&gt;
+          LeoJS is built by the support of generous users like
+          &lt;b&gt;you&lt;/b&gt;!
+        &lt;/p&gt;
+      &lt;/div&gt;
+
+      &lt;div class="sidebar__group"&gt;
+        &lt;h2&gt;Configuration&lt;/h2&gt;
+        &lt;ul&gt;
+          &lt;li&gt;
+            &lt;a href="#leo-id" title="Uniquely identifies you"&gt;Leo ID&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="#external-files" title="File change detection settings"&gt;External Files&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="#interface-behavior" title="Outline behavior settings"&gt;Interface Behavior&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="#tree-in-explorer" title="Outline visibility settings"&gt;Outline in Explorer&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="#invert-contrast" title="UI contrast settings"&gt;Invert Contrast&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="#outline-commands" title="Outline Pane settings"&gt;Outline Pane Commands&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="#node-commands" title="Outline nodes settings"&gt;Node Hover Commands&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="#status-bar" title="Status bar indicator"&gt;Status Bar Indicator&lt;/a&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+
+      &lt;div class="sidebar__group"&gt;
+        &lt;h2&gt;Videos&lt;/h2&gt;
+        &lt;ul&gt;
+          &lt;li&gt;
+            &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY" title="Introduction to LeoJS"&gt;Intro to Leo&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE" title="LeoJS Features Demo"&gt;Features Demo&lt;/a&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+
+      &lt;div class="sidebar__group"&gt;
+        &lt;h2&gt;About Leo&lt;/h2&gt;
+        &lt;ul&gt;
+          &lt;li&gt;
+            &lt;a href="https://leo-editor.github.io/leo-editor/" title="Leo's Home Page"&gt;Home Page&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="https://leo-editor.github.io/leo-editor/leo_toc.html"
+              title="Leo's Documentation Page"&gt;Documentation&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="https://groups.google.com/forum/#!forum/leo-editor" title="Leo Editor Forum"&gt;Forum&lt;/a&gt;
+            &lt;small&gt;
+              &amp;nbsp;&amp;nbsp;&amp;mdash;&amp;nbsp; #Google Group&lt;/small&gt;
+          &lt;/li&gt;
+          &lt;li&gt;
+            &lt;a href="https://github.com/leo-editor/leo-editor" title="Leo Editor on GitHub"&gt;Source&lt;/a&gt;
+            &lt;small&gt; &amp;nbsp;&amp;nbsp;&amp;mdash;&amp;nbsp; #GitHub&lt;/small&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="dirty-config-toast"&gt;Saving...&lt;/div&gt;
+  &lt;div id="saved-config-toast"&gt;Settings Saved&lt;/div&gt;
+  #{endOfBody}
+&lt;/body&gt;
+
+&lt;/html&gt;</t>
+<t tx="felix.20240722220751.1">// @ts-check
+
+// This script will be run within the webview itself
+// It cannot access the main VS Code APIs directly.
+// Send message to LeoJS with vscode.postMessage({ keyNameEx1: someValue, ... });
+// Receive messages from LeoJS with window.addEventListener('message', event =&gt; { ... });
+(function () {
+    const cssColorRegex = /^(?:(#?)([0-9a-f]{3}|[0-9a-f]{6})|((?:rgb|hsl)a?)\((-?\d+%?)[,\s]+(-?\d+%?)[,\s]+(-?\d+%?)[,\s]*(-?[\d.]+%?)?\))$/i;
+
+    // @ts-expect-error
+    const vscode = acquireVsCodeApi();
+
+    initializeAndWatchThemeColors();
+
+    const toast = document.getElementById("saved-config-toast");
+    const dirty = document.getElementById("dirty-config-toast");
+
+    const oldState = vscode.getState();
+    let currentCount = (oldState &amp;&amp; oldState.count) || 0;
+    if (currentCount) {
+        vscode.postMessage({
+            command: "getNewConfig"
+        });
+    }
+    currentCount = currentCount + 1;
+    vscode.setState({ count: currentCount });
+
+    // Global variable config
+    let frontConfig = {};
+    let vscodeConfig = {};
+
+    // @ts-expect-error
+    vscodeConfig = window.leoConfig; // PRE SET BY leoSettingsWebview
+    frontConfig = JSON.parse(JSON.stringify(vscodeConfig));
+
+    // Handle messages sent from the extension to the webview
+    window.addEventListener("message", event =&gt; {
+        const message = event.data; // The json data that the extension sent
+        if (message.command &amp;&amp; dirty &amp;&amp; toast) {
+            switch (message.command) {
+                case "test":
+                    break;
+                case "newConfig":
+                    vscodeConfig = message.config;
+                    frontConfig = JSON.parse(JSON.stringify(message.config));
+                    setControls();
+                    break;
+                case "vscodeConfig":
+                    dirty.className = dirty.className.replace("show", "");
+                    toast.className = "show";
+                    setTimeout(function () {
+                        toast.className = toast.className.replace("show", "");
+                    }, 1500);
+                    vscodeConfig = message.config; // next changes will be confronted to those settings
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            console.log('got object without command:', message);
+        }
+    });
+
+    function adjustLight(color, amount) {
+        const cc = color + amount;
+        const c = amount &lt; 0 ? (cc &lt; 0 ? 0 : cc) : cc &gt; 255 ? 255 : cc;
+
+        return Math.round(c);
+    }
+
+    function darken(color, percentage) {
+        return lighten(color, -percentage);
+    }
+
+    function lighten(color, percentage) {
+        const rgba = toRgba(color);
+        if (rgba == null) { return color; }
+
+        const [r, g, b, a] = rgba;
+        const amount = (255 * percentage) / 100;
+        return `rgba(${adjustLight(r, amount)}, ${adjustLight(g, amount)}, ${adjustLight(b, amount)}, ${a})`;
+    }
+
+    function opacity(color, percentage) {
+        const rgba = toRgba(color);
+        if (rgba == null) { return color; }
+
+        const [r, g, b, a] = rgba;
+        return `rgba(${r}, ${g}, ${b}, ${a * (percentage / 100)})`;
+    }
+
+    function toRgba(color) {
+        color = color.trim();
+
+        const result = cssColorRegex.exec(color);
+        if (result == null) { return null; }
+
+        if (result[1] === '#') {
+            const hex = result[2];
+            switch (hex.length) {
+                case 3:
+                    return [parseInt(hex[0] + hex[0], 16), parseInt(hex[1] + hex[1], 16), parseInt(hex[2] + hex[2], 16), 1];
+                case 6:
+                    return [
+                        parseInt(hex.substring(0, 2), 16),
+                        parseInt(hex.substring(2, 4), 16),
+                        parseInt(hex.substring(4, 6), 16),
+                        1
+                    ];
+            }
+
+            return null;
+        }
+
+        switch (result[3]) {
+            case 'rgb':
+                return [parseInt(result[4], 10), parseInt(result[5], 10), parseInt(result[6], 10), 1];
+            case 'rgba':
+                return [parseInt(result[4], 10), parseInt(result[5], 10), parseInt(result[6], 10), parseFloat(result[7])];
+            default:
+                return null;
+        }
+    }
+
+    function initializeAndWatchThemeColors() {
+        const onColorThemeChanged = () =&gt; {
+            const body = document.body;
+            const computedStyle = window.getComputedStyle(body);
+
+            const bodyStyle = body.style;
+
+            const font = computedStyle.getPropertyValue('--vscode-font-family').trim();
+            if (font) {
+                bodyStyle.setProperty('--font-family', font);
+                bodyStyle.setProperty('--font-size', computedStyle.getPropertyValue('--vscode-font-size').trim());
+                bodyStyle.setProperty('--font-weight', computedStyle.getPropertyValue('--vscode-font-weight').trim());
+            } else {
+                bodyStyle.setProperty(
+                    '--font-family',
+                    computedStyle.getPropertyValue('--vscode-editor-font-family').trim()
+                );
+                bodyStyle.setProperty('--font-size', computedStyle.getPropertyValue('--vscode-editor-font-size').trim());
+                bodyStyle.setProperty(
+                    '--font-weight',
+                    computedStyle.getPropertyValue('--vscode-editor-font-weight').trim()
+                );
+            }
+
+            let color = computedStyle.getPropertyValue('--vscode-editor-background').trim();
+            bodyStyle.setProperty('--color-background', color);
+            bodyStyle.setProperty('--color-background--lighten-05', lighten(color, 5));
+            bodyStyle.setProperty('--color-background--darken-05', darken(color, 5));
+            bodyStyle.setProperty('--color-background--lighten-075', lighten(color, 7.5));
+            bodyStyle.setProperty('--color-background--darken-075', darken(color, 7.5));
+            bodyStyle.setProperty('--color-background--lighten-15', lighten(color, 15));
+            bodyStyle.setProperty('--color-background--darken-15', darken(color, 15));
+            bodyStyle.setProperty('--color-background--lighten-30', lighten(color, 30));
+            bodyStyle.setProperty('--color-background--darken-30', darken(color, 30));
+            bodyStyle.setProperty('--color-background--lighten-50', lighten(color, 50));
+            bodyStyle.setProperty('--color-background--darken-50', darken(color, 50));
+
+            color = computedStyle.getPropertyValue('--vscode-button-background').trim();
+            bodyStyle.setProperty('--color-button-background', color);
+            bodyStyle.setProperty('--color-button-background--darken-30', darken(color, 30));
+
+            color = computedStyle.getPropertyValue('--vscode-button-foreground').trim();
+            bodyStyle.setProperty('--color-button-foreground', color);
+
+            color = computedStyle.getPropertyValue('--vscode-editor-foreground').trim();
+            if (!color) {
+                color = computedStyle.getPropertyValue('--vscode-foreground').trim();
+            }
+            bodyStyle.setProperty('--color-foreground', color);
+            bodyStyle.setProperty('--color-foreground--85', opacity(color, 85));
+            bodyStyle.setProperty('--color-foreground--75', opacity(color, 75));
+            bodyStyle.setProperty('--color-foreground--65', opacity(color, 65));
+            bodyStyle.setProperty('--color-foreground--50', opacity(color, 50));
+
+            color = computedStyle.getPropertyValue('--vscode-focusBorder').trim();
+            bodyStyle.setProperty('--color-focus-border', color);
+
+            color = computedStyle.getPropertyValue('--vscode-textLink-foreground').trim();
+            bodyStyle.setProperty('--color-link-foreground', color);
+            bodyStyle.setProperty('--color-link-foreground--darken-20', darken(color, 20));
+            bodyStyle.setProperty('--color-link-foreground--lighten-20', lighten(color, 20));
+        };
+
+        const observer = new MutationObserver(onColorThemeChanged);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        onColorThemeChanged();
+        return observer;
+    }
+
+    function listenAll(selector, name, listener) {
+        const els = (document.querySelectorAll(selector));
+        for (const el of els) {
+            el.addEventListener(name, listener, false);
+        }
+    }
+
+    function onBind() {
+        listenAll('input[type=checkbox][data-setting]', 'change', function (p_this) {
+            return onInputChecked(p_this.target);
+        });
+        listenAll('input[type=text][data-setting], input:not([type])[data-setting]', 'blur', function (
+            p_this
+        ) {
+            return onInputBlurred(p_this.target);
+        });
+        listenAll('input[type=text][data-setting], input:not([type])[data-setting]', 'focus', function (
+            p_this
+        ) {
+            return onInputFocused(p_this.target);
+        });
+        listenAll('input[type=text][data-setting], input[type=number][data-setting]', 'input', function (
+            p_this
+        ) {
+            return onInputChanged(p_this.target);
+        });
+        listenAll('select[data-setting]', 'change', function (p_this) {
+            return onDropdownChanged(p_this.target);
+        });
+    }
+    function showDirtyAndApplyChange() {
+        if (dirty) {
+            dirty.className = "show";
+        }
+        applyChanges();
+    }
+
+    function onDropdownChanged(element) {
+        if (element) {
+            const w_value = element.options[element.selectedIndex].value;
+            frontConfig[element.id] = w_value;
+        }
+        showDirtyAndApplyChange();
+    }
+
+    function onInputChecked(element) {
+        frontConfig[element.id] = element.checked;
+        setVisibility(frontConfig);
+        showDirtyAndApplyChange();
+    }
+    function onInputBlurred(element) {
+        // console.log('onInputBlurred', element);
+    }
+    function onInputFocused(element) {
+        // console.log('onInputFocused', element);
+    }
+
+    function onInputChanged(element) {
+        if (element.type === 'number' &amp;&amp; Number(element.value) &lt; Number(element.max) &amp;&amp; Number(element.value) &gt; Number(element.min)) {
+            frontConfig[element.id] = Number(element.value);
+            element.classList.remove("is-invalid");
+            showDirtyAndApplyChange();
+        } else if (element.type === 'number' &amp;&amp; (Number(element.value) &gt; Number(element.max) || Number(element.value) &lt; Number(element.min))) {
+            // make red
+            element.classList.add("is-invalid");
+        } else if (element.type === 'text' &amp;&amp; (element.value.length &gt; element.maxLength || (element.value.length &lt; element.minLength &amp;&amp; element.value.length !== 0))) {
+            element.classList.add("is-invalid");
+        } else if (element.type === 'text' &amp;&amp; element.value.length &lt;= element.maxLength) {
+            element.classList.remove("is-invalid");
+            frontConfig[element.id] = element.value;
+            showDirtyAndApplyChange();
+        }
+        if (element.id === "leoID") {
+            showDirtyAndApplyChange();
+        }
+    }
+
+    function setControls() {
+        // 1- Set leojs's own configuration settings
+        for (const key in frontConfig) {
+            if (frontConfig.hasOwnProperty(key)) {
+                const w_element = document.getElementById(key);
+                if (w_element &amp;&amp; w_element.getAttribute('type') === 'checkbox') {
+                    // @ts-expect-error
+                    w_element.checked = frontConfig[key];
+                } else if (w_element) {
+                    // @ts-expect-error
+                    w_element.value = frontConfig[key];
+                } else {
+                    console.log('ERROR : w_element', key, ' is ', w_element);
+                }
+            }
+        }
+    }
+
+    function setVisibility(state) {
+        for (const el of document.querySelectorAll('[data-visibility]')) {
+            // @ts-expect-error
+            el.classList.toggle('hidden', !evaluateStateExpression(el.dataset.visibility, state));
+        }
+    }
+    function parseStateExpression(expression) {
+        const [lhs, op, rhs] = expression.trim().split(/([=+!])/);
+        return [lhs.trim(), op !== undefined ? op.trim() : '=', rhs !== undefined ? rhs.trim() : rhs];
+    }
+
+    function evaluateStateExpression(expression, changes) {
+        let state = false;
+
+        for (const expr of expression.trim().split('&amp;')) {
+            const [lhs, op, rhs] = parseStateExpression(expr);
+
+            switch (op) {
+                case '=': {
+                    // Equals
+                    let value = changes[lhs];
+                    if (value === undefined) {
+                        value = getSettingValue(lhs) || false;
+                    }
+                    state = rhs !== undefined ? rhs === String(value) : Boolean(value);
+                    break;
+                }
+                case '!': {
+                    // Not equals
+                    let value = changes[lhs];
+                    if (value === undefined) {
+                        value = getSettingValue(lhs) || false;
+                    }
+                    state = rhs !== undefined ? rhs !== String(value) : !value;
+                    break;
+                }
+                case '+': {
+                    // Contains
+                    if (rhs !== undefined) {
+                        const setting = getSettingValue(lhs);
+                        state = setting !== undefined ? setting.includes(rhs.toString()) : false;
+                    }
+                    break;
+                }
+            }
+
+            if (!state) { break; }
+        }
+        return state;
+    }
+
+    function getSettingValue(p_setting) {
+        return frontConfig[p_setting];
+    }
+
+    function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) =&gt; {
+            clearTimeout(timer);
+            timer = setTimeout(() =&gt; { func.apply(this, args); }, timeout);
+        };
+    }
+
+    var applyChanges = debounce(
+        function () {
+            var w_changes = [];
+            if (frontConfig) {
+                for (var prop in frontConfig) {
+                    if (Object.prototype.hasOwnProperty.call(frontConfig, prop)) {
+                        if (frontConfig[prop] !== vscodeConfig[prop]) {
+                            w_changes.push({ code: prop, value: frontConfig[prop] });
+                        }
+                    }
+                }
+            }
+            if (w_changes.length) {
+                // ok replace!
+                vscodeConfig = frontConfig;
+                frontConfig = JSON.parse(JSON.stringify(frontConfig));
+                vscode.postMessage({
+                    command: "config",
+                    changes: w_changes
+                });
+            } else if (dirty) {
+                // Still have to remove 'modified' popup
+                dirty.className = dirty.className.replace("show", "");
+            }
+        },
+        1500
+    );
+
+    // START
+    setControls();
+    setVisibility(frontConfig);
+    onBind();
+
+})();
+
+</t>
+<t tx="felix.20240722220752.1">html {
+    height: 100%;
+    font-size: 62.5%;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-family);
+    height: 100%;
+    line-height: 1.4;
+    font-size: 100% !important;
+}
+
+body.vscode-light {
+    background-color: var(--color-background--darken-075);
+}
+
+a {
+    border: 0;
+    color: var(--color-link-foreground);
+    font-weight: 400;
+    outline: none;
+    text-decoration: none;
+}
+
+a:not([href]):not([tabindex]):focus,
+a:not([href]):not([tabindex]):hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:focus {
+    outline-color: var(--color-focus-border);
+}
+
+a:hover {
+    color: var(--color-link-foreground--lighten-20);
+}
+
+a,
+a:active,
+a:focus {
+    outline: none;
+}
+
+b {
+    font-weight: 600;
+}
+
+span.heart {
+    color: #8b3177;
+}
+
+code,
+.shortcut-key {
+    border-radius: 4px;
+    color: var(--color-foreground);
+    padding: 2px 6px 0 6px;
+    vertical-align: baseline;
+}
+
+.vscode-dark code,
+.vscode-dark .shortcut-key {
+    background-color: var(--color-background--lighten-15);
+    border-bottom: 2px solid var(--color-background--lighten-15);
+}
+
+.vscode-light code,
+.vscode-light .shortcut-key {
+    background-color: var(--color-background--darken-15);
+    border-bottom: 2px solid var(--color-background--darken-15);
+}
+
+h1 {
+    border: none;
+    font-size: 4rem;
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+h2 {
+    font-size: 2.2rem;
+    font-weight: 200;
+    line-height: normal;
+    margin: 1em 0 0.3em 0;
+    white-space: nowrap;
+}
+
+h3 {
+    font-size: 1.8rem;
+    font-weight: 200;
+    line-height: normal;
+    margin: 1em 0 0.3em 0;
+    white-space: nowrap;
+}
+
+h4 {
+    font-size: 1rem;
+    font-weight: 200;
+    line-height: normal;
+    margin: 1em 0 0.3em 0;
+    white-space: nowrap;
+}
+
+header {
+    grid-area: header;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+    grid-gap: 1em 3em;
+    align-items: center;
+    justify-items: center;
+    margin: 0 3em;
+}
+
+input,
+select,
+button {
+    font-family: var(--font-family);
+    font-size: inherit;
+    margin: 0;
+}
+
+input[type='checkbox'] {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin: 0;
+    padding: 0 10px;
+}
+
+input[type='checkbox']:focus {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    outline: none;
+}
+
+input[type='checkbox'][disabled] {
+    color: var(--color-foreground--75);
+    cursor: default;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+input[type='number'],
+input[type='text'],
+input:not([type]) {
+    background: none;
+    color: var(--color-foreground);
+    margin: 0 10px;
+    max-width: 300px;
+    padding: 4px;
+}
+
+.vscode-dark input[type='number'],
+.vscode-dark input[type='text'],
+.vscode-dark input:not([type]) {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.vscode-light input[type='number'],
+.vscode-light input[type='text'],
+.vscode-light input:not([type]) {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+input[type='number']:focus,
+input[type='text']:focus,
+input:not([type]):focus {
+    outline-color: var(--color-focus-border);
+}
+
+.vscode-light input[type='number']:focus,
+.vscode-light input[type='text']:focus,
+.vscode-light input:not([type]):focus {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark input[type='number']:focus,
+.vscode-dark input[type='text']:focus,
+.vscode-dark input:not([type]):focus {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+input[type='number'].is-invalid,
+input[type='text'].is-invalid,
+input:not([type]).is-invalid {
+    outline-color: red !important;
+    border-color: red !important;
+}
+
+input[type='number'][disabled],
+input[type='text'][disabled],
+input:not([type])[disabled] {
+    color: var(--color-foreground--75);
+    cursor: default;
+}
+
+input[type='number']::placeholder,
+input[type='text']::placeholder,
+input:not([type])::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+}
+
+label {
+    cursor: pointer;
+}
+
+.label-big {
+    font-size: 2.2rem;
+    font-weight: 200;
+}
+
+select {
+    background: none;
+    color: var(--color-foreground);
+    cursor: pointer;
+    margin: 0 0.75em;
+    padding: 2px;
+    min-width: 14em;
+}
+
+.vscode-light select {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.vscode-dark select {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+select:focus {
+    outline-color: var(--color-focus-border);
+}
+
+.vscode-light select:focus {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark select:focus {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+select[disabled] {
+    color: var(--color-foreground--75);
+    cursor: default;
+}
+
+.vscode-light select option {
+    background-color: var(--color-background--darken-05);
+}
+
+.vscode-dark select option {
+    background-color: var(--color-background--lighten-05);
+}
+
+select option:focus {
+    outline-color: var(--color-focus-border);
+}
+
+.vscode-light select option:focus {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark select option:focus {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.button {
+    background: none;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1.1rem;
+    letter-spacing: 0.25em;
+    margin: 1em 0.5em;
+    padding: 1em 1.75em;
+    text-decoration: none;
+    text-transform: uppercase;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.button:focus {
+    outline: none;
+}
+
+.button--big {
+    font-size: 1.5rem;
+}
+
+.button--flat {
+    transition: background-color 250ms, border-color 250ms, color 250ms;
+}
+
+.vscode-light .button--flat {
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    color: black;
+}
+
+.vscode-dark .button--flat {
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: white !important;
+}
+
+.vscode-light .button--flat:hover {
+    background-color: var(--color-button-background--darken-30);
+    border-color: var(--color-button-background--darken-30);
+    color: white !important;
+}
+
+.vscode-dark .button--flat:hover {
+    background-color: white;
+    border-color: white;
+    color: black !important;
+}
+
+.preload .button--flat {
+    transition-duration: 0s !important;
+}
+
+.button--flat-inverse {
+    background-color: white;
+    border: 1px solid white;
+    color: black !important;
+    font-weight: 600;
+    transition: background-color 250ms, border-color 250ms, color 250ms;
+}
+
+.button--flat-inverse:hover {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    color: white !important;
+}
+
+.preload .button--flat-inverse {
+    transition-duration: 0s !important;
+}
+
+.button--flat-primary {
+    background-color: var(--color-button-background);
+    border: 1px solid var(--color-button-background);
+    color: var(--color-button-foreground) !important;
+    font-weight: 600;
+    transition: background-color 250ms, border-color 250ms, color 250ms;
+}
+
+.vscode-dark .button--flat-primary:hover {
+    background-color: white;
+    border-color: white;
+    color: black !important;
+}
+
+.vscode-light .button--flat-primary:hover {
+    background-color: var(--color-button-background--darken-30);
+    border-color: var(--color-button-background--darken-30);
+    color: white !important;
+}
+
+.preload .button--flat-primary {
+    transition-duration: 0s !important;
+}
+
+.blurb {
+    font-size: 1.5rem;
+    font-weight: 200;
+    color: var(--color-foreground--65);
+    margin: 1em;
+}
+
+.blurb b {
+    color: var(--color-foreground--85);
+}
+
+.vscode-light .blurb {
+    color: var(--color-foreground--75);
+}
+
+.command {
+    font-weight: 600;
+    padding: 1px 3px;
+}
+
+.container {
+    display: grid;
+    grid-template-areas: 'header header' 'hero hero' 'content sidebar';
+    grid-template-columns: repeat(1, 1fr min-content);
+    margin: 1em auto;
+    grid-gap: 1em 3em;
+    max-width: 1200px;
+    min-width: 450px;
+}
+
+@media all and (max-width: 768px) {
+    .container {
+        grid-gap: 1em 0;
+    }
+}
+
+.content__area {
+    grid-area: content;
+    font-size: 1.4rem;
+}
+
+.vscode-dark .content__area {
+    background-color: var(--color-background--lighten-05);
+}
+
+.vscode-light .content__area {
+    background-color: var(--color-background);
+}
+
+@media all and (max-width: 768px) {
+    .content__area {
+        grid-column: span 1;
+    }
+}
+
+.content__area--full-scroll {
+    background-color: unset !important;
+    margin-bottom: 90vh;
+}
+
+.content__area--full-scroll .section--settings {
+    margin: 0 0 1em 0;
+}
+
+.header__blurb {
+    color: var(--color-foreground--75);
+    flex: 2 1 55%;
+    font-size: 1.5rem;
+    font-weight: 200;
+    margin: 0;
+    min-width: 345px;
+}
+
+@media all and (max-width: 880px) {
+    .header__blurb {
+        margin: 0 2em;
+    }
+}
+
+.header__link {
+    color: var(--color-foreground);
+    outline: none;
+}
+
+.header__link:hover,
+.header__link:active,
+.header__link:focus {
+    color: var(--color-foreground);
+    outline: none;
+}
+
+.header__logo {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.header__logo--highlight {
+    color: #c15b00;
+}
+
+.header__subtitle {
+    color: var(--color-foreground--65);
+    font-size: 2rem;
+    font-weight: 100;
+    margin: -0.2em 0 0 0;
+    white-space: nowrap;
+}
+
+.image__logo {
+    margin: 9px 1em 0 0;
+    max-height: 64px;
+    max-width: 64px;
+}
+
+.image__preview {
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.8),
+        0px 0px 12px 1px rgba(0, 0, 0, 0.5);
+    width: 600px;
+}
+
+.image__preview__body {
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.8),
+        0px 0px 12px 1px rgba(0, 0, 0, 0.5);
+    width: 680px;
+}
+
+.image__preview--overlay {
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.image__preview--float-container {
+    left: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    padding-right: 17%;
+}
+
+.float-container-no-padding {
+    padding-right: 5%;
+}
+
+.image__preview__body--float-container {
+    left: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    padding-right: 7px;
+    padding-left: 7px;
+    overflow: hidden;
+}
+
+.image__preview--float {
+    float: right;
+}
+
+section {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 1em;
+    padding: 1em;
+}
+
+section h2 {
+    flex: 1 0 auto;
+    display: flex;
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+.section--full {
+    flex-flow: column;
+}
+
+.section--settings {
+    flex: 0 1 auto;
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 8px;
+    margin: 1em;
+    padding: 1em 0 0.5em 1em;
+}
+
+.vscode-dark .section--settings {
+    background: var(--color-background--lighten-075);
+}
+
+.vscode-light .section--settings {
+    background: var(--color-background--darken-05);
+}
+
+.section__content {
+    flex: 1 1 100%;
+    display: flex;
+    flex-flow: column wrap;
+}
+
+.section__header {
+    display: flex;
+    align-items: baseline;
+    flex: 0 1 auto;
+    flex-flow: column;
+    margin-bottom: 1em;
+    margin-right: 1em;
+    position: relative;
+}
+
+.section__header h2 {
+    margin-bottom: 0;
+}
+
+.section__header .link__configure,
+.section__header .link__learn-more {
+    visibility: hidden;
+}
+
+.section__header:hover .link__configure,
+.section__header:hover .link__learn-more {
+    visibility: visible;
+}
+
+.section__header-hint {
+    color: var(--color-foreground--75);
+    font-weight: 200;
+    margin: 0.25em 0;
+}
+
+.section__hint {
+    flex: 0 0 auto;
+    color: var(--color-foreground--75);
+    font-weight: 200;
+    margin: 0;
+}
+
+.section__preview {
+    flex: 0 1 auto;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0.65rem;
+}
+
+.section__preview-hint {
+    color: var(--color-foreground--75);
+    font-weight: 200;
+    margin: 0.5em 0.5em 0 0.5em;
+    text-align: center;
+}
+
+.section__title {
+    flex: 1 0 auto;
+    margin: 0;
+}
+
+.section__title--primary {
+    font-size: 3rem;
+    margin: 0.3em 0;
+    justify-content: center;
+}
+
+.section__title--break {
+    margin: 0.3em 15% 0 15%;
+    padding-top: 1em;
+    justify-content: center;
+}
+
+.vscode-dark .section__title--break {
+    border-top: 1px solid var(--color-background--lighten-30);
+}
+
+.vscode-light .section__title--break {
+    border-top: 1px solid var(--color-background--darken-30);
+}
+
+.setting {
+    flex: 0 1 auto;
+    position: relative;
+    margin-right: 1em;
+    min-width: 15.5em;
+}
+
+.setting input[type='checkbox'] {
+    flex: 0 0 16px;
+    height: 16px;
+    margin: 0 10px 0 0;
+    position: relative;
+    top: 3px;
+    width: 16px;
+}
+
+.setting[disabled] label {
+    color: var(--color-foreground--75);
+    cursor: default;
+}
+
+#interface-behavior .setting {
+    min-width: 29em;
+}
+
+fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 1em;
+    padding-right: 0;
+    border-style: solid;
+    border-width: 1px;
+    background-color: #80000010;
+    border-color: #92473e;
+}
+
+fieldset p {
+    margin: 0;
+    padding-right: 1em;
+    width: 100%;
+    color: var(--color-foreground--65);
+}
+
+fieldset p span {
+    color: var(--color-foreground);
+}
+
+.setting__input {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    line-height: normal;
+    margin: 0.5em 0;
+}
+
+.setting__input input,
+.setting__input select {
+    flex-grow: 1;
+}
+
+.setting__input input + .link__configure,
+.setting__input input + .link__learn-more,
+.setting__input select + .link__configure,
+.setting__input select + .link__learn-more {
+    margin-left: 0;
+}
+
+.setting__input input[type='text'],
+.setting__input input:not([type]) {
+    min-width: 150px;
+}
+
+.setting__input label {
+    flex-grow: 0;
+}
+
+.setting__input label &gt; select {
+    margin-top: 0.25em;
+}
+
+.setting__input .link__learn-more,
+.setting__input .link__configure {
+    visibility: hidden;
+    max-height: 15px;
+}
+
+.setting__input .link__learn-more .icon,
+.setting__input .link__configure .icon {
+    display: block;
+    top: unset;
+}
+
+.setting__input:hover .link__learn-more,
+.setting__input:hover .link__configure {
+    visibility: visible;
+}
+
+.setting__input--big {
+    font-size: 2.2rem;
+    font-weight: 200;
+    margin: 0;
+}
+
+.setting__input--big input[type='checkbox'] {
+    flex: 0 0 1.5em;
+    height: 1em;
+    margin: 0;
+    position: relative;
+    top: 3px;
+    left: -5px;
+    width: 1em;
+}
+
+.setting__input--big label {
+    white-space: nowrap;
+}
+
+.setting__input--big .link__learn-more,
+.setting__input--big .link__configure {
+    max-height: 17px;
+}
+
+.setting__input--format {
+    display: flex;
+}
+
+.setting__input--format input[type='text'],
+.setting__input--format input:not([type]) {
+    max-width: unset;
+}
+
+.setting__hint {
+    color: var(--color-foreground--75);
+    display: block;
+    font-weight: 200;
+    font-size: 1.3rem;
+    margin: 0 1em 0.5em 1em;
+}
+
+.settings {
+    flex: 1 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.break {
+    flex-basis: 100%;
+    height: 0;
+}
+
+.settings--fixed {
+    display: block;
+}
+
+.sidebar {
+    grid-area: sidebar;
+    align-self: flex-start;
+    font-size: 1.3rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+@media all and (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+}
+
+.sidebar li {
+    white-space: nowrap;
+}
+
+.sidebar .button {
+    margin: 0;
+}
+
+.sidebar__group {
+    margin-top: 1em;
+}
+
+.sidebar__group h2 {
+    font-size: 2rem;
+}
+
+.sidebar__group p {
+    font-weight: 400;
+    opacity: 0.5;
+    text-align: center;
+}
+
+.sidebar__jump-link.active {
+    font-weight: 700;
+}
+
+.sidebar__jump-link.active:before {
+    content: ' ';
+    border-left: 4px solid var(--color-link-foreground--darken-20);
+    position: absolute;
+    left: -1em;
+    height: 1em;
+    padding-bottom: 4px;
+}
+
+.vscode-light .sidebar__jump-link.active:before {
+    border-left-color: var(--color-link-foreground--lighten-20);
+}
+
+.sponsor__image {
+    opacity: 0.8;
+    transition: opacity 250ms;
+    transform: scale(0.6);
+    margin: -2.5em 0;
+}
+
+.sponsor__image:hover {
+    opacity: 1;
+}
+
+.sponsor__tag {
+    font-size: 1.1rem;
+    margin: -1em 0.5em 0 0.5em;
+    opacity: 0.5;
+    text-align: center;
+}
+
+.bold {
+    font-weight: 600;
+}
+
+.center {
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.highlight {
+    background-color: #c96d18;
+    border-bottom: 2px solid #c96d18;
+    border-radius: 3px;
+    color: #f2f2f2;
+    margin: 0 0.25em;
+    padding: 2px 10px;
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.is-sidebar-hidden {
+    display: none;
+}
+
+@media all and (max-width: 768px) {
+    .is-sidebar-hidden {
+        display: initial;
+    }
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.ml-0 {
+    margin-left: 0 !important;
+}
+
+.mr-0 {
+    margin-right: 0 !important;
+}
+
+.mt-0 {
+    margin-top: 0 !important;
+}
+
+.mt-1 {
+    margin-top: 1em !important;
+}
+
+.nowrap {
+    white-space: nowrap !important;
+}
+
+.vscode-dark .light {
+    display: none;
+}
+
+.vscode-light .dark {
+    display: none;
+}
+
+::-webkit-scrollbar-corner {
+    background-color: transparent !important;
+}
+
+#saved-config-toast {
+    box-shadow: 0px 0px 28px 0 rgba(0, 0, 0, 0.5);
+    cursor: default;
+    display: block;
+    padding: 1em 0.5rem;
+    position: fixed;
+    text-align: center;
+    width: 60%;
+    top: 50px;
+    left: 50%;
+    border-radius: 12px;
+    margin-left: -30%;
+    visibility: hidden;
+    font-size: 2rem;
+    z-index: 100;
+}
+
+#saved-config-toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 1s;
+}
+
+.vscode-light #saved-config-toast:before {
+    border-bottom-color: var(--color-background--darken-075);
+}
+
+.vscode-dark #saved-config-toast:before {
+    border-bottom-color: var(--color-background--lighten-075);
+}
+
+.vscode-light #saved-config-toast {
+    background: var(--color-background--darken-075);
+}
+
+.vscode-dark #saved-config-toast {
+    background: var(--color-background--lighten-075);
+}
+
+#dirty-config-toast {
+    box-shadow: 0px 0px 28px 0 rgba(0, 0, 0, 0.5);
+    cursor: default;
+    display: block;
+    padding: 1em 0.5rem;
+    position: fixed;
+    text-align: center;
+    width: 60%;
+    top: 50px;
+    left: 50%;
+    border-radius: 12px;
+    margin-left: -30%;
+    visibility: hidden;
+    font-size: 2rem;
+    z-index: 100;
+}
+
+#dirty-config-toast.show {
+    visibility: visible;
+}
+
+.vscode-light #dirty-config-toast:before {
+    border-bottom-color: var(--color-background--darken-075);
+}
+
+.vscode-dark #dirty-config-toast:before {
+    border-bottom-color: var(--color-background--lighten-075);
+}
+
+.vscode-light #dirty-config-toast {
+    background-color: #cc5d1a;
+    color: #f2f2f2;
+}
+
+.vscode-dark #dirty-config-toast {
+    background-color: #cc5d1a;
+    color: #f2f2f2;
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0.8;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
