@@ -85,7 +85,7 @@ export class ExternalFilesController {
     public has_changed_d: Map<Commands, boolean>;
     public unchecked_commanders: Commands[];
     public unchecked_files: ExternalFile[];
-    public _time_d: { [key: string]: number };
+    public _time_d: { [key: string]: number }; // Keys are full paths, values are modification times.
     public yesno_all_answer: string | undefined; // answer, 'yes-all', or 'no-all'
     public on_idle_count = 0;
 
@@ -887,7 +887,7 @@ export class ExternalFilesController {
             // The modtime changed, but it's contents didn't.
             // Update the time, so we don't keep checking the checksums.
             // Return false so we don't prompt the user for an update.
-            await this.set_time(p_path, new_time);
+            await this.set_time(p_path, new_time, true);
             return false;
         }
         // The file has really changed.
@@ -926,14 +926,16 @@ export class ExternalFilesController {
      * probably not Leo's fault but an underlying Python issue.
      * Hence the need to call realpath() here.
      */
-    public async set_time(p_path: string, new_time?: number): Promise<void> {
+    public async set_time(p_path: string, new_time?: number, skip_checksum?: boolean): Promise<void> {
         let t = new_time;
         if (!t) {
             t = await this.get_mtime(p_path);
         }
         this._time_d[g.os_path_realpath(p_path)] = t;
-        // To prevent false positives when timestamp (not content) is modified by external program
-        this.checksum_d[p_path] = await this.checksum(p_path);
+        if (!skip_checksum) {
+            // To prevent false positives when timestamp (not content) is modified by external program
+            this.checksum_d[p_path] = await this.checksum(p_path);
+        }
     }
     //@+node:felix.20230503004807.31: *4* efc.warn
     /**
