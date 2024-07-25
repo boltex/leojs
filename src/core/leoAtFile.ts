@@ -2136,15 +2136,15 @@ export class AtFile {
             //
             // Write the public and private files to strings.
 
-            const put = async (sentinels: boolean): Promise<string> => {
+            const put = (sentinels: boolean): string => {
                 at.outputList = [];
                 at.sentinels = sentinels;
-                await at.putFile(root, undefined, sentinels);
+                at.putFile(root, undefined, sentinels);
                 return at.errors ? '' : at.outputList.join('');
             };
 
-            at.public_s = await put(false);
-            at.private_s = await put(true);
+            at.public_s = put(false);
+            at.private_s = put(true);
             at.warnAboutOrphandAndIgnoredNodes();
             if (g.unitTesting) {
                 const exceptions = [
