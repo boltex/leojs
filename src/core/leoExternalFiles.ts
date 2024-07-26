@@ -88,6 +88,9 @@ export class ExternalFilesController {
     public _time_d: { [key: string]: number }; // Keys are full paths, values are modification times.
     public yesno_all_answer: string | undefined; // answer, 'yes-all', or 'no-all'
     public on_idle_count = 0;
+    public files_busy = false; // If this flag is set, on_idle will be skiped.
+    public onIdlePromise: Promise<void>;
+    private resolveOnIdle!: () => void;
 
     //@+others
     //@+node:felix.20230503004807.2: *3* efc.ctor
@@ -114,6 +117,12 @@ export class ExternalFilesController {
         // get_time(path), see set_time() for notes.
         this._time_d = {};
         this.yesno_all_answer = undefined; // answer, 'yes-all', or 'no-all'
+        // Initialize the promise and its resolve function
+        this.onIdlePromise = new Promise((resolve) => {
+            this.resolveOnIdle = resolve;
+            this.resolveOnIdle(); // Starts Resolved!
+        });
+
         g.app.idleTimeManager.add_callback(this.on_idle.bind(this));
     }
     //@+node:felix.20230503004807.3: *3* efc.entries
@@ -184,10 +193,16 @@ export class ExternalFilesController {
         //
         // #1240: Note: The "asking" dialog prevents idle time.
         //
-        if (!g.app || g.app.killed || g.app.restarting) {
+        if (this.files_busy || !g.app || g.app.killed || g.app.restarting || g.app.reverting) {
             // #1240.
             return;
         }
+
+        // Start by replacing the onIdle Promise
+        this.onIdlePromise = new Promise((resolve) => {
+            this.resolveOnIdle = resolve;
+        });
+
         this.on_idle_count += 1;
         let c: Commands | undefined;
         // New in Leo 5.7: always handle delayed requests.
@@ -224,6 +239,7 @@ export class ExternalFilesController {
                 }
             }
         }
+        this.resolveOnIdle(); // Done!
     }
     //@+node:felix.20230503004807.8: *5* efc.idle_check_commander
     /**

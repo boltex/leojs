@@ -1215,6 +1215,10 @@ export class AtFile {
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (p.isAtAutoNode() && !p.isAtIgnoreNode()) {
                 const ok = await at.writeOneAtAutoNode(p);
@@ -1227,6 +1231,9 @@ export class AtFile {
             } else {
                 p.moveToThreadNext();
             }
+        }
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
         }
         if (g.unitTesting) {
             return;
@@ -1255,6 +1262,10 @@ export class AtFile {
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (p.isAtAutoNode() && !p.isAtIgnoreNode() && p.isDirty()) {
                 const ok = await at.writeOneAtAutoNode(p);
@@ -1267,6 +1278,9 @@ export class AtFile {
             } else {
                 p.moveToThreadNext();
             }
+        }
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
         }
         if (g.unitTesting) {
             return;
@@ -1295,6 +1309,10 @@ export class AtFile {
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (p.atShadowFileNodeName() && !p.isAtIgnoreNode()) {
                 const ok = await at.writeOneAtShadowNode(p);
@@ -1308,6 +1326,9 @@ export class AtFile {
             } else {
                 p.moveToThreadNext();
             }
+        }
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
         }
         if (g.unitTesting) {
             return found;
@@ -1337,6 +1358,10 @@ export class AtFile {
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (
                 p.atShadowFileNodeName() &&
@@ -1354,6 +1379,9 @@ export class AtFile {
             } else {
                 p.moveToThreadNext();
             }
+        }
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
         }
         if (g.unitTesting) {
             return found;
@@ -1724,6 +1752,10 @@ export class AtFile {
     }
     //@+node:felix.20230415162517.19: *6* at.writeMissing & helper
     public async writeMissing(p: Position): Promise<void> {
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         const at = this;
         const c = this.c;
         let writtenFiles = false;
@@ -1732,7 +1764,7 @@ export class AtFile {
         await at.initWriteIvars(p.copy());
         p = p.copy();
         let after = p.nodeAfterTree();
-        while (p && !p.__eq__(after)) {
+        while (p && p.__bool__() && !p.__eq__(after)) {
             // Don't use iterator.
             if (
                 p.isAtAsisFileNode() ||
@@ -1763,6 +1795,9 @@ export class AtFile {
             }
         }
         await c.raise_error_dialogs('write');
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
     }
     //@+node:felix.20230415162517.20: *7* at.writeMissingNode
     public async writeMissingNode(p: Position): Promise<void> {
@@ -2585,7 +2620,7 @@ export class AtFile {
         for (const child of p.children()) {
             const w_p = child.copy();
             const after = w_p.nodeAfterTree();
-            while (w_p && !w_p.__eq__(after)) {
+            while (w_p && w_p.__bool__() && !w_p.__eq__(after)) {
                 if (at.validInAtOthers(w_p)) {
                     at.putOpenNodeSentinel(w_p);
                     const at_others_flag = at.putBody(w_p);
