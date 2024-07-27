@@ -9,7 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
-<v t="felix.20240714135534.1"><vh>0.2.16</vh></v>
+<v t="felix.20240714135534.1"><vh>1.0.0</vh></v>
 <v t="felix.20240622195331.1"><vh>0.2.15</vh></v>
 <v t="felix.20240428224613.1"><vh>0.2.14</vh></v>
 <v t="foo.20240309205342.1"><vh>0.2.13</vh></v>
@@ -844,26 +844,29 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 @tabwidth -4
 # ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
-LeoJS is a javascript implementation of the Leo Editor.
+&gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.
 
-_If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')_
+[LeoJS](https://github.com/boltex/leojs) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/).
+
+_If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')._
 
 ## Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
 ### Break down your code into a structured outline that generates or parses back your source files
 
-&gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.  
-&gt; **[📺 Introduction Video](https://www.youtube.com/watch?v=j0eo7SlnnSY)**
+[![Introduction to LeoJS](https://raw.githubusercontent.com/boltex/leojs/master/resources/video-button-intro.png)](https://www.youtube.com/watch?v=j0eo7SlnnSY)
 
 # Web-Based Development
 
-LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents, _.leo, .leojs and .db_, and work with your files directly inside online repositories such as on GitHub and Azure Repos.
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents and work with your files directly inside online repositories such as on GitHub and Azure Repos.
 
 ## Press the '.' period key from your github repository
 
-To access this browser-based editor, you can go to your repo on github.com and press the _period_&amp;nbsp;&amp;nbsp;"**.**"&amp;nbsp;&amp;nbsp;key.
+To access this browser-based editor, you can go to one of your repo on github.com, and simply press the _period_&amp;nbsp;&amp;nbsp;"**.**"&amp;nbsp;&amp;nbsp;key.
 
-This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)** demonstrates this feature and many use-cases about working in an online repository with LeoJS and VSCode for the web.
+[![LeoJS Features Demo](https://raw.githubusercontent.com/boltex/leojs/master/resources/video-button-demo.png)](https://www.youtube.com/watch?v=M_mKXSbVGdE)
+
+This video demonstrates many use-cases about working in an online repository with LeoJS and VSCode for the web.
 
 &gt; The web extension version of LeoJS cannot open local files: Use the regular desktop LeoJS version to edit local Leo files and projects.
 
@@ -878,11 +881,6 @@ This **[📺 Demonstration Video](https://www.youtube.com/watch?v=M_mKXSbVGdE)**
 -   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
 -   **Nav and Tag panel** search controls are integrated in the Find panel
 -   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
-
-## Demo videos
-
--   **[📺 Introduction](https://www.youtube.com/watch?v=j0eo7SlnnSY)**
--   **[📺 Features](https://www.youtube.com/watch?v=M_mKXSbVGdE)**
 
 # Leo Commands
 
@@ -1085,6 +1083,12 @@ or on [github](https://github.com/leo-editor/leo-editor).
 -   [Ville M. Vainio](https://github.com/vivainio) for his Nav tab original concept
 -   [Jacob M. Peck](https://github.com/gatesphere) for his Tags tab original concept
 -   [Matt Wilkie](https://github.com/maphew) for his contributions and support
+
+### _Special Thanks to_
+
+All who have participated, no matter how small or big the contribution, to the creation of the original Leo Editor!
+
+See [Leo's original acknowledgements webpage](https://leo-editor.github.io/leo-editor/acknowledgements.html).
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
@@ -4538,7 +4542,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "0.2.16",
+  "version": "1.0.0",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4568,7 +4572,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "color": "#f7e6c6",
     "theme": "light"
   },
-  "preview": true,
+  "preview": false,
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -19277,7 +19281,7 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 }
 
 </t>
-<t tx="felix.20240714135534.1"># 0.2.16
+<t tx="felix.20240714135534.1"># 1.0.0
 
 - LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
 - Fixed disabled/enabled state of 'Refresh from disk' and 'Extract Names' command-icons in menu above body-editor.
@@ -19348,7 +19352,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 0.2.16&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.0&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -19357,7 +19361,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
           &lt;a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features"&gt;
-            See What's New in LeoJS 0.2.16
+            See What's New in LeoJS 1.0.0
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
