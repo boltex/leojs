@@ -936,7 +936,14 @@ export class FileCommands {
         const c: Commands = this.c;
         c.endEditing();
         c.init_error_dialogs();
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         await c.atFileCommands.writeAll(true);
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
         return c.raise_error_dialogs('write');
     }
     //@+node:felix.20211213224222.4: *4* writeDirtyAtFileNodes
@@ -945,7 +952,14 @@ export class FileCommands {
         const c: Commands = this.c;
         c.endEditing();
         c.init_error_dialogs();
-        await c.atFileCommands.writeAll(true);
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
+        await c.atFileCommands.writeAll(undefined, true);
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
         return c.raise_error_dialogs('write');
     }
     //@+node:felix.20211213224222.5: *4* writeMissingAtFileNodes
@@ -963,10 +977,18 @@ export class FileCommands {
         'write-outline-only',
         'Write the entire outline without writing any derived files.'
     )
-    public writeOutlineOnly(): Promise<unknown> {
+    public async writeOutlineOnly(): Promise<unknown> {
         const c: Commands = this.c;
         c.endEditing();
-        return this.writeOutline(this.mFileName);
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
+        const result = await this.writeOutline(this.mFileName);
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
+        return result;
     }
     //@+node:felix.20230406222218.1: *4* write-zip-archive
     /**
@@ -1387,7 +1409,10 @@ export class FileCommands {
         checkOpenFiles = true,
         readAtFileNodesFlag = true,
     ): Promise<VNode | undefined> {
-
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         const c = this.c;
         const fc = c.fileCommands;
         this.gnxDict = {};  // #1437
@@ -1403,6 +1428,9 @@ export class FileCommands {
             if (checkOpenFiles) {
                 await g.app.checkForOpenFile(c, p_path);
             }
+        }
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
         }
         return v;
 
@@ -1429,8 +1457,7 @@ export class FileCommands {
 
         // let conn;
         try {
-            c.loading = true;  // disable c.changed
-            // conn = sqlite3.connect(path)
+
             let v;
             const w_fromDb = await fc.retrieveVnodesFromDb(p_path);
             if (w_fromDb) {
@@ -1466,13 +1493,7 @@ export class FileCommands {
         } catch (e) {
 
         }
-        finally {
-            // Never put a return in a finally clause.
-            // if conn
-            //     conn.close();
 
-            c.loading = false;  // reenable c.changed
-        }
     }
     //@+node:felix.20231009182119.3: *6* fc._getLeoFileByName
     /**
@@ -1494,7 +1515,6 @@ export class FileCommands {
         let v: VNode | undefined;
 
         try {
-            c.loading = true;
 
             // Open, read and close the file.
             try {
@@ -1545,11 +1565,6 @@ export class FileCommands {
 
         } catch (e) {
 
-        }
-        finally {
-
-            // Never put a return in a finally clause.
-            c.loading = false;  // reenable c.changed
         }
 
     }
@@ -2465,7 +2480,15 @@ export class FileCommands {
         const fc: FileCommands = this;
         await g.app.recentFilesManager.writeRecentFilesFile(c);
         await fc.writeAllAtFileNodes();
-        return fc.writeOutline(fileName); // Calls c.checkOutline.
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
+        const result = await fc.writeOutline(fileName); // Calls c.checkOutline.
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
+        return result;
     }
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
     /**

@@ -2857,13 +2857,13 @@ export class LoadManager {
     /**
      * This is Leo's main startup method.
      */
-    public async load(fileName?: string): Promise<unknown> {
+    public async load(): Promise<unknown> {
         const lm: LoadManager = this;
 
         const t1 = process.hrtime();
 
         // sets lm.options and lm.files
-        await lm.doPrePluginsInit(fileName);
+        await lm.doPrePluginsInit();
         g.app.printSignon();
         if (lm.options['version']) {
             return;
@@ -3061,7 +3061,7 @@ export class LoadManager {
     /**
      * Scan options, set directories and read settings.
      */
-    public async doPrePluginsInit(fileName?: string): Promise<void> {
+    public async doPrePluginsInit(): Promise<void> {
         const lm: LoadManager = this;
         await lm.computeStandardDirectories();
 

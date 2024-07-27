@@ -198,7 +198,6 @@ export class Commands {
     public vs: Record<string, any> = {};
 
     public in_qt_dialog = false; // True: in a qt dialog.
-    public loading = false; // True: we are loading a file: disables c.setChanged()
     public promptingForClose = false; // True: lock out additional closing dialogs.
     public suppressHeadChanged = false; // True: prevent setting c.changed when switching chapters.
     // Flags for c.outerUpdate...
@@ -2100,14 +2099,6 @@ export class Commands {
             v.clearDirty();
         }
         c.changed = false;
-        // * Old code.
-        // master = getattr(c.frame.top, 'leo_master', None)
-        // if master:
-        // master.setChanged(c, False)
-        // // LeoTabbedTopLevel.setChanged.
-        // s = c.frame.getTitle()
-        // if len(s) > 2 and s[0:2] == "* ":
-        // c.frame.setTitle(s[2:])
     }
 
     //@+node:felix.20210131011607.6: *5* c.clearMarked
