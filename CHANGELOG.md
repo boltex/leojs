@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.1
+
+- ...
+
 # 1.0.0
 
 - LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
