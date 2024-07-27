@@ -19284,6 +19284,7 @@ public safeReveal(tree: vscode.TreeView&lt;Position&gt;, element: Position, opti
 - Made command-icons above the outline pane customizable. They can also be set/unset in the LeoJS setting panel.
 - The log pane is only forcefully shown at startup on first installation or on version updates.
 - Made the .leojs JSON file format the default instead of the .leo XML format when saving new untitled files.
+- Fixed elusive bug where sometimes a false leo file change detection was triggered when saving.
 
 </t>
 <t tx="felix.20240721135528.1">/**
