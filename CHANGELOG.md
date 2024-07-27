@@ -1,6 +1,6 @@
 # Change Log
 
-# 0.2.16
+# 1.0.0
 
 - LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
 - Fixed disabled/enabled state of 'Refresh from disk' and 'Extract Names' command-icons in menu above body-editor.
