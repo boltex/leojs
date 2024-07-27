@@ -31,6 +31,8 @@ resources/new-*.png
 resources/context-hover-menus.png
 resources/run-extension.png
 resources/welcome-settings.png
+resources/video-button-intro.png
+resources/video-button-demo.png
 test*.db
 scripts.txt
 dummy*.js

@@ -1140,7 +1140,7 @@ export async function diff_leo_files_helper(
         return;
     }
     const types: [string, string][] = [
-        ['Leo files', '*.leo *.leojs *.db'],
+        ['Leo files', '*.leojs *.leo *.db'],
         ['All files', '*'],
     ];
     const w_paths = await g.app.gui.runOpenFilesDialog(

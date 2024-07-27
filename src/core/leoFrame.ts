@@ -189,7 +189,7 @@ export class LeoFrame {
             c.mFileName = await g.app.gui.runSaveFileDialog(
                 c,
                 'Save',
-                [['Leo files', '*.leo *.leojs *.db']],
+                [['Leo files', '*.leojs *.leo *.db']],
                 '.leo'
             );
 

@@ -92,7 +92,7 @@ class CommandChainDispatcher {
 export class LeoPluginsController {
 
     // Keys are tags, values are lists of bunches.
-    public handlers: Record<string, any[]> = {};
+    public handlers: Record<string, Record<string, any>[]> = {};
     // Keys are regularized module names, values are the names of .leo files
     // containing @enabled-plugins nodes that caused the plugin to be loaded
     public loadedModulesFilesDict: Record<string, string> = {};
@@ -250,7 +250,7 @@ export class LeoPluginsController {
             g.es(`*** Two exclusive handlers for '${tag}'`);
         } else {
             const bunch = { 'fn': fn, 'moduleName': moduleName, 'tag': 'handler' };
-            const aList = this.handlers[tag] || [];
+            const aList: Record<string, any>[] = this.handlers[tag] || [];
             aList.push(bunch);
             this.handlers[tag] = aList;
         }

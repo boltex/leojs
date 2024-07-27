@@ -85,9 +85,12 @@ export class ExternalFilesController {
     public has_changed_d: Map<Commands, boolean>;
     public unchecked_commanders: Commands[];
     public unchecked_files: ExternalFile[];
-    public _time_d: { [key: string]: number };
+    public _time_d: { [key: string]: number }; // Keys are full paths, values are modification times.
     public yesno_all_answer: string | undefined; // answer, 'yes-all', or 'no-all'
     public on_idle_count = 0;
+    public files_busy = false; // If this flag is set, on_idle will be skiped.
+    public onIdlePromise: Promise<void>;
+    private resolveOnIdle!: () => void;
 
     //@+others
     //@+node:felix.20230503004807.2: *3* efc.ctor
@@ -114,6 +117,12 @@ export class ExternalFilesController {
         // get_time(path), see set_time() for notes.
         this._time_d = {};
         this.yesno_all_answer = undefined; // answer, 'yes-all', or 'no-all'
+        // Initialize the promise and its resolve function
+        this.onIdlePromise = new Promise((resolve) => {
+            this.resolveOnIdle = resolve;
+            this.resolveOnIdle(); // Starts Resolved!
+        });
+
         g.app.idleTimeManager.add_callback(this.on_idle.bind(this));
     }
     //@+node:felix.20230503004807.3: *3* efc.entries
@@ -184,10 +193,16 @@ export class ExternalFilesController {
         //
         // #1240: Note: The "asking" dialog prevents idle time.
         //
-        if (!g.app || g.app.killed || g.app.restarting) {
+        if (this.files_busy || !g.app || g.app.killed || g.app.restarting || g.app.reverting) {
             // #1240.
             return;
         }
+
+        // Start by replacing the onIdle Promise
+        this.onIdlePromise = new Promise((resolve) => {
+            this.resolveOnIdle = resolve;
+        });
+
         this.on_idle_count += 1;
         let c: Commands | undefined;
         // New in Leo 5.7: always handle delayed requests.
@@ -224,6 +239,7 @@ export class ExternalFilesController {
                 }
             }
         }
+        this.resolveOnIdle(); // Done!
     }
     //@+node:felix.20230503004807.8: *5* efc.idle_check_commander
     /**
@@ -887,7 +903,7 @@ export class ExternalFilesController {
             // The modtime changed, but it's contents didn't.
             // Update the time, so we don't keep checking the checksums.
             // Return false so we don't prompt the user for an update.
-            await this.set_time(p_path, new_time);
+            await this.set_time(p_path, new_time, true);
             return false;
         }
         // The file has really changed.
@@ -926,14 +942,16 @@ export class ExternalFilesController {
      * probably not Leo's fault but an underlying Python issue.
      * Hence the need to call realpath() here.
      */
-    public async set_time(p_path: string, new_time?: number): Promise<void> {
+    public async set_time(p_path: string, new_time?: number, skip_checksum?: boolean): Promise<void> {
         let t = new_time;
         if (!t) {
             t = await this.get_mtime(p_path);
         }
         this._time_d[g.os_path_realpath(p_path)] = t;
-        // To prevent false positives when timestamp (not content) is modified by external program
-        this.checksum_d[p_path] = await this.checksum(p_path);
+        if (!skip_checksum) {
+            // To prevent false positives when timestamp (not content) is modified by external program
+            this.checksum_d[p_path] = await this.checksum(p_path);
+        }
     }
     //@+node:felix.20230503004807.31: *4* efc.warn
     /**

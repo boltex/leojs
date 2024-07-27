@@ -1,5 +1,14 @@
 # Change Log
 
+# 0.2.16
+
+- LeoJS can now open older formats of .leo files (from version 4.7 and before) which contained 'tnodelist' attributes.
+- Fixed disabled/enabled state of 'Refresh from disk' and 'Extract Names' command-icons in menu above body-editor.
+- Made command-icons above the outline pane customizable. They can also be set/unset in the LeoJS setting panel.
+- The log pane is only forcefully shown at startup on first installation or on version updates.
+- Made the .leojs JSON file format the default instead of the .leo XML format when saving new untitled files.
+- Fixed elusive bug where sometimes a false leo file change detection was triggered when saving.
+
 # 0.2.15
 
 - Renamed 'save-file-as-zipped' to 'save-file-as-db'.

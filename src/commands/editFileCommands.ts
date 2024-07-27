@@ -453,7 +453,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         } else {
             // Prompt for the file to be compared with the present outline.
             const filetypes: [string, string][] = [
-                ['Leo files', '*.leo *.leojs *.db'],
+                ['Leo files', '*.leojs *.leo *.db'],
                 ['All files', '*'],
             ];
             const fileName = await g.app.gui.runOpenFileDialog(
@@ -1774,9 +1774,27 @@ export class GitDiffController {
      */
     public finish(): void {
         const c = this.c;
-        c.selectPosition(this.root!);
-        this.root!.expand();
-        c.redraw(this.root);
+        // c.selectPosition(this.root!);
+        // this.root!.expand();
+        // c.redraw(this.root);
+        if (c.checkOutlineXML(true)) {
+            // All is well.
+            c.selectPosition(this.root!);
+            this.root!.expand();
+            c.redraw(this.root);
+        } else {
+            // Writing the outline would create an invalid outline.
+            g.es_print('Deleting the diff. It would create an invalid outline!');
+            c.selectPosition(this.root!);
+            c.deleteOutline();
+            const last = c.lastTopLevel();
+            c.redraw(last);
+            // Re-validate.
+            if (!c.checkOutlineXML(false)) {
+                g.es_print('The outline is *still* invalid!');
+                g.es_print('Do not save the outline!');
+            }
+        }
         c.treeWantsFocusNow();
     }
     //@+node:felix.20230709010434.17: *4* gdc.get_directory
@@ -1915,12 +1933,13 @@ export class GitDiffController {
         // z.strip() for z in g.execGitCommand(command, directory)
         //     if not z.strip().endswith(('.db', '.zip'))
         const w_gitDiff = await g.execGitCommand(command, directory);
+        const invalidExtensions = [
+            '.bmp', '.db', '.exe', '.gif', '.gz', '.inv', // Sphinx inventory file.
+            '.jpg', '.mov', '.mp4', '.pdf', '.png', '.tar', '.tif', '.whl', '.zip'
+        ];
         return w_gitDiff
-            .map((z: string) => z.trim())
-            .filter(
-                (z: string) =>
-                    !z.trim().endsWith('.db') && !z.trim().endsWith('.zip')
-            );
+            .map(z => z.trim())
+            .filter(z => !invalidExtensions.some(ext => z.endsWith(ext)));
 
         // g.gitAPI
         // g.gitBaseAPI

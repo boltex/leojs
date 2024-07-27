@@ -70,6 +70,7 @@ class BadLeoFile extends Error {
 //@+node:felix.20211213223342.1: ** class FastRead
 export class FastRead {
     public c: Commands;
+    public bad_path_dict: Record<string, boolean> = {};
     public gnx2vnode: { [key: string]: VNode };
     // #1510: https://en.wikipedia.org/wiki/Valid_characters_in_XML.
 
@@ -79,9 +80,8 @@ export class FastRead {
         'a',
         'descendentTnodeUnknownAttributes',
         'descendentVnodeUnknownAttributes',
-        'expanded',
-        'marks',
-        't',
+        'expanded', 'marks', 't',
+        'tnodeList',  // Removed in Leo 4.7.
     ];
 
     constructor(c: Commands, gnx2vnode: { [key: string]: VNode }) {
@@ -205,9 +205,14 @@ export class FastRead {
             xroot = et.parse(contents.replace(/\r\n/g, '\n'));
         } catch (e) {
             let message: string;
+            if (p_path && this.bad_path_dict[p_path]) {
+                return [undefined, undefined];
+            }
             // #970: Report failure here.
             if (p_path && p_path.length) {
+                this.bad_path_dict[p_path] = true;
                 message = `bad .leo file: ${g.shortFileName(p_path)}`;
+                g.es_exception(e);
             } else {
                 message = 'The clipboard is not a valid .leo file';
             }
@@ -775,8 +780,6 @@ export class FastRead {
 export class FileCommands {
     public c: Commands;
     public frame: any;
-    public nativeTnodeAttributes: string[];
-    public nativeVnodeAttributes: string[];
 
     // Init ivars of the FileCommands class.
     // General...
@@ -810,16 +813,6 @@ export class FileCommands {
     constructor(c: Commands) {
         this.c = c;
         this.frame = c.frame;
-        this.nativeTnodeAttributes = ['tx'];
-        this.nativeVnodeAttributes = [
-            'a',
-            'descendentTnodeUnknownAttributes',
-            'descendentVnodeUnknownAttributes', // New in Leo 4.5.
-            'expanded',
-            'marks',
-            't',
-            // 'tnodeList',  // Removed in Leo 4.7.
-        ];
         this.initIvars();
     }
     //@+node:felix.20211222234753.1: *3* fc.initIvars
@@ -943,7 +936,14 @@ export class FileCommands {
         const c: Commands = this.c;
         c.endEditing();
         c.init_error_dialogs();
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         await c.atFileCommands.writeAll(true);
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
         return c.raise_error_dialogs('write');
     }
     //@+node:felix.20211213224222.4: *4* writeDirtyAtFileNodes
@@ -952,7 +952,14 @@ export class FileCommands {
         const c: Commands = this.c;
         c.endEditing();
         c.init_error_dialogs();
-        await c.atFileCommands.writeAll(true);
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
+        await c.atFileCommands.writeAll(undefined, true);
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
         return c.raise_error_dialogs('write');
     }
     //@+node:felix.20211213224222.5: *4* writeMissingAtFileNodes
@@ -970,10 +977,18 @@ export class FileCommands {
         'write-outline-only',
         'Write the entire outline without writing any derived files.'
     )
-    public writeOutlineOnly(): Promise<unknown> {
+    public async writeOutlineOnly(): Promise<unknown> {
         const c: Commands = this.c;
         c.endEditing();
-        return this.writeOutline(this.mFileName);
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
+        const result = await this.writeOutline(this.mFileName);
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
+        return result;
     }
     //@+node:felix.20230406222218.1: *4* write-zip-archive
     /**
@@ -1394,7 +1409,10 @@ export class FileCommands {
         checkOpenFiles = true,
         readAtFileNodesFlag = true,
     ): Promise<VNode | undefined> {
-
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
         const c = this.c;
         const fc = c.fileCommands;
         this.gnxDict = {};  // #1437
@@ -1410,6 +1428,9 @@ export class FileCommands {
             if (checkOpenFiles) {
                 await g.app.checkForOpenFile(c, p_path);
             }
+        }
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
         }
         return v;
 
@@ -1436,8 +1457,7 @@ export class FileCommands {
 
         // let conn;
         try {
-            c.loading = true;  // disable c.changed
-            // conn = sqlite3.connect(path)
+
             let v;
             const w_fromDb = await fc.retrieveVnodesFromDb(p_path);
             if (w_fromDb) {
@@ -1473,13 +1493,7 @@ export class FileCommands {
         } catch (e) {
 
         }
-        finally {
-            // Never put a return in a finally clause.
-            // if conn
-            //     conn.close();
 
-            c.loading = false;  // reenable c.changed
-        }
     }
     //@+node:felix.20231009182119.3: *6* fc._getLeoFileByName
     /**
@@ -1501,7 +1515,6 @@ export class FileCommands {
         let v: VNode | undefined;
 
         try {
-            c.loading = true;
 
             // Open, read and close the file.
             try {
@@ -1520,6 +1533,7 @@ export class FileCommands {
                     g.trace(e);
                     g.error("can not open:", p_path);
                 }
+                // TODO : THROW INSTEAD OF RETURN UNDEFINED??
                 return undefined;
             }
             if (!v) {
@@ -1551,11 +1565,6 @@ export class FileCommands {
 
         } catch (e) {
 
-        }
-        finally {
-
-            // Never put a return in a finally clause.
-            c.loading = false;  // reenable c.changed
         }
 
     }
@@ -1852,14 +1861,15 @@ export class FileCommands {
     public getDescendentUnknownAttributes(s: string, v?: VNode): any {
         let bin: string;
         let val: any;
-
         try {
             // Changed in version 3.2: Accept only bytestring or bytearray objects as input.
             const s_bytes = g.toEncodedString(s); // 2011/02/22
 
+            const string_val = g.toUnicode(s_bytes);
+
             // unhexlify is string to string
             // eg.: console.log(ba.unhexlify('377abcaf271c')); // result: '7z¼¯'\u001c'
-            bin = binascii.unhexlify(s_bytes);
+            bin = binascii.unhexlify(string_val);
 
             // Throws a TypeError if val is not a hex string.
             val = pickle.loads(bin);
@@ -2470,7 +2480,15 @@ export class FileCommands {
         const fc: FileCommands = this;
         await g.app.recentFilesManager.writeRecentFilesFile(c);
         await fc.writeAllAtFileNodes();
-        return fc.writeOutline(fileName); // Calls c.checkOutline.
+        if (g.app.externalFilesController) {
+            await g.app.externalFilesController.onIdlePromise;
+            g.app.externalFilesController.files_busy = true;
+        }
+        const result = await fc.writeOutline(fileName); // Calls c.checkOutline.
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.files_busy = false;
+        }
+        return result;
     }
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
     /**
@@ -3276,7 +3294,7 @@ export class FileCommands {
         if (forceWrite || this.usingClipboard) {
             v.setWriteBit(); // 4.2: Indicate we wrote the body text.
         }
-        const attrs: string = fc.compute_attribute_bits(forceWrite, p);
+        const attrs: string = fc.compute_attribute_bits(p);
         //
         // Write the node.
         let v_head: string = `<v t="${gnx}"${attrs}>`;
@@ -3316,10 +3334,11 @@ export class FileCommands {
     /**
      * Return the initial values of v's attributes.
      */
-    public compute_attribute_bits(forceWrite: boolean, p: Position): string {
+    public compute_attribute_bits(p: Position): string {
         const attrs = [];
-        if (p.hasChildren() && !forceWrite && !this.usingClipboard) {
-            // Fix #526: do this for @auto nodes as well.
+        if (!this.usingClipboard) {
+            // #526: do this for @auto nodes.
+            // #3990: do this for @edit nodes.
             attrs.push(this.putDescendentVnodeUas(p));
             // Fix #1023: never put marked/expanded bits.
             // attrs.append(self.putDescendentAttributes(p))

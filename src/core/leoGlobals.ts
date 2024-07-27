@@ -39,6 +39,7 @@ dayjsObj.extend(utc);
 //@-<< imports >>
 //@+<< leoGlobals: global constants >>
 //@+node:felix.20240607225502.1: ** << leoGlobals: global constants >>
+export let isNewLeoJSVersion = false; // Used to show messages if first/new versions. Set by client-UI at startup.
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');

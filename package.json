@@ -2,7 +2,7 @@
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -123,6 +123,54 @@
           "default": true,
           "type": "boolean",
           "description": "Shows the outline tree in the explorer view"
+        },
+        "leojs.showFileOnOutline": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'New', 'Open' and 'Save' buttons on the outline pane"
+        },
+        "leojs.showHoistDehoistOnOutline": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'Hoist' and 'Dehoist' buttons on the outline pane"
+        },
+        "leojs.showPrevNextOnOutline": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'Previous' and 'Next' visited node buttons on the outline pane"
+        },
+        "leojs.showPromoteDemoteOnOutline": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'Promote' and 'Demote' buttons on the outline pane"
+        },
+        "leojs.showRecentFilesOnOutline": {
+          "scope": "application",
+          "default": false,
+          "type": "boolean",
+          "description": "Shows 'Recent Files' button on the outline pane"
+        },
+        "leojs.showSettingsOnOutline": {
+          "scope": "application",
+          "default": false,
+          "type": "boolean",
+          "description": "Shows 'LeoJS Settings' button on the outline pane"
+        },
+        "leojs.showShowLogOnOutline": {
+          "scope": "application",
+          "default": false,
+          "type": "boolean",
+          "description": "Shows 'Open Log Pane' button on the outline pane"
+        },
+        "leojs.showUndoRedoOnOutline": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'Undo' and 'Redo' buttons on the outline pane"
         },
         "leojs.showEditOnNodes": {
           "scope": "application",
@@ -2318,7 +2366,7 @@
         "command": "leojs.extractNames",
         "category": "Leojs",
         "title": "Extract Names",
-        "enablement": "leojsTreeOpened",
+        "enablement": "leojsTreeOpened && editorHasSelection",
         "icon": "$(leojs-extract-name)"
       },
       {
@@ -3370,16 +3418,6 @@
           "group": "navigation@7"
         },
         {
-          "command": "leojs.writeDirtyAtFileNodes",
-          "when": "resourceScheme == leojs && leojsTreeOpened",
-          "group": "navigation@8"
-        },
-        {
-          "command": "leojs.refreshFromDiskSelection",
-          "when": "resourceScheme == leojs && leojsTreeOpened",
-          "group": "navigation@9"
-        },
-        {
           "command": "leojs.showSettingsPage",
           "when": "resourceScheme == leojs",
           "group": "1_leojs@1"
@@ -3529,9 +3567,19 @@
           "group": "navigation@9"
         },
         {
+          "command": "leojs.showSettingsPage",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showSettingsOnOutline",
+          "group": "navigation@11"
+        },
+        {
           "command": "leojs.showLogPane",
           "when": "view =~ /^leojsDocuments|^leojsButtons/ && leojsReady",
           "group": "navigation@9"
+        },
+        {
+          "command": "leojs.showLogPane",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showShowLogOnOutline",
+          "group": "navigation@11"
         },
         {
           "command": "leojs.recentLeoFiles",
@@ -3540,8 +3588,8 @@
         },
         {
           "command": "leojs.recentLeoFiles",
-          "when": "view =~ /^leojsOutline/ && leojsReady && !leojsTreeOpened",
-          "group": "navigation@1"
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showRecentFilesOnOutline",
+          "group": "navigation@11"
         },
         {
           "command": "leojs.findQuickSelected",
@@ -3570,62 +3618,87 @@
         },
         {
           "command": "leojs.openLeoFile",
-          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsReady",
+          "when": "view =~ /^leojsDocuments/ && leojsReady",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.openLeoFile",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showFileOnOutline",
           "group": "navigation@1"
         },
         {
           "command": "leojs.newLeoFile",
-          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsReady",
+          "when": "view =~ /^leojsDocuments/ && leojsReady",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.newLeoFile",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showFileOnOutline",
           "group": "navigation@1"
         },
         {
           "command": "leojs.saveLeoFileFromOutline",
-          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsTreeOpened && leojsTreeTitled",
+          "when": "view =~ /^leojsDocuments/ && leojsTreeOpened && leojsTreeTitled",
+          "group": "navigation@2"
+        },
+        {
+          "command": "leojs.saveLeoFileFromOutline",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTreeTitled && config.leojs.showFileOnOutline",
           "group": "navigation@2"
         },
         {
           "command": "leojs.saveAsLeoFile",
-          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsTreeOpened && !leojsTreeTitled",
+          "when": "view =~ /^leojsDocuments/ && leojsTreeOpened && !leojsTreeTitled",
           "group": "navigation@2"
         },
         {
-          "command": "leojs.saveAsLeoJsFile",
-          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsTreeOpened && !leojsTreeTitled",
+          "command": "leojs.saveAsLeoFile",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsTreeTitled && config.leojs.showFileOnOutline",
           "group": "navigation@2"
         },
         {
           "command": "leojs.prevFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showPrevNextOnOutline",
           "group": "navigation@3"
         },
         {
           "command": "leojs.nextFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showPrevNextOnOutline",
           "group": "navigation@4"
         },
         {
           "command": "leojs.undoFromOutline",
-          "when": "view =~ /^leojsOutline|^leojsUndo/ && leojsTreeOpened",
+          "when": "view =~ /^leojsUndo/ && leojsTreeOpened",
+          "group": "navigation@5"
+        },
+        {
+          "command": "leojs.undoFromOutline",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showUndoRedoOnOutline",
           "group": "navigation@5"
         },
         {
           "command": "leojs.redoFromOutline",
-          "when": "view =~ /^leojsOutline|^leojsUndo/ && leojsTreeOpened",
+          "when": "view =~ /^leojsUndo/ && leojsTreeOpened",
+          "group": "navigation@6"
+        },
+        {
+          "command": "leojs.redoFromOutline",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showUndoRedoOnOutline",
           "group": "navigation@6"
         },
         {
           "command": "leojs.deHoistFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsTopHoistChapter",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsTopHoistChapter && config.leojs.showHoistDehoistOnOutline",
           "group": "navigation@7"
         },
         {
           "command": "leojs.chapterMain",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTopHoistChapter",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTopHoistChapter && config.leojs.showHoistDehoistOnOutline",
           "group": "navigation@7"
         },
         {
           "command": "leojs.hoistSelectionFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showHoistDehoistOnOutline",
           "group": "navigation@8"
         },
         {
@@ -3644,24 +3717,19 @@
           "group": "navigation@5"
         },
         {
-          "command": "leojs.chapterMain",
-          "when": "view =~ /^leojsFindPanel/ && leojsTreeOpened",
-          "group": "navigation@6"
-        },
-        {
           "command": "leojs.promoteSelectionFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showPromoteDemoteOnOutline",
           "group": "navigation@9"
         },
         {
           "command": "leojs.demoteSelectionFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && config.leojs.showPromoteDemoteOnOutline",
           "group": "navigation@10"
         },
         {
           "command": "leojs.contractAllFromOutline",
           "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
-          "group": "navigation@11"
+          "group": "navigation@12"
         }
       ],
       "view/item/context": [

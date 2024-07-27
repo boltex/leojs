@@ -64,7 +64,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             await gitBaseExtension.activate();
             try {
                 (g.gitBaseAPI as GitBaseAPI.API) = gitBaseExtension.exports.getAPI(1);
-              } catch (e) {
+            } catch (e) {
                 console.log("LEOJS ERROR : GIT_BASE EXTENSION NOT INSTALLED !");
             }
         } else {
@@ -119,7 +119,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             } else {
                 // Is local filesystem
                 void vscode.window.showInformationMessage(
-                    "LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", 
+                    "LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ",
                     "More Info"
                 ).then(selection => {
                     if (selection === "More Info") {
@@ -234,6 +234,7 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
         }
     }
     if (w_showWelcomeScreen) {
+        (g.isNewLeoJSVersion as boolean) = true;
         return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
     } else {
         return Promise.resolve();
