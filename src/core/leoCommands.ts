@@ -1252,13 +1252,34 @@ export class Commands {
             ? { c: c, g: g, input: '', p: p }
             : {};
 
-        d['Buffer'] = Buffer;
+        // * VSCode API
         d['vscode'] = vscode;
+
+        // * Default NODE Modules
+        d['Buffer'] = Buffer;
         d['crypto'] = crypto;
         d['os'] = os;
         d['path'] = path;
         d['process'] = process;
         d['child_process'] = child_process;
+
+        // * Imported Libraries
+        d['SQL'] = g.SQL;
+        d['pako'] = g.pako;
+        d['showdown'] = g.showdown;
+        d['JSZip'] = g.JSZip;
+        d['dayjs'] = g.dayjs;
+        d['md5'] = g.md5;
+        // csvtojson
+        // difflib
+        // et
+        // ksuid
+        // lodash
+        // stream
+
+        // * Internal Libraries
+        // binascii
+        // jpicklejs
 
         if (define_name) {
             d['__name__'] = define_name;
