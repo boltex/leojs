@@ -50,6 +50,10 @@ import { HelpCommandsClass } from '../commands/helpCommands';
 import { KillBufferCommandsClass } from '../commands/killBufferCommands';
 import { RectangleCommandsClass } from '../commands/rectangleCommands';
 import * as typescript from 'typescript';
+import * as difflib from 'difflib';
+import * as csv from 'csvtojson';
+import KSUID = require('ksuid');
+
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -1270,16 +1274,10 @@ export class Commands {
         d['JSZip'] = g.JSZip;
         d['dayjs'] = g.dayjs;
         d['md5'] = g.md5;
-        // csvtojson
-        // difflib
-        // et
-        // ksuid
-        // lodash
-        // stream
-
-        // * Internal Libraries
-        // binascii
-        // jpicklejs
+        d['csvtojson'] = csv;
+        d['difflib'] = difflib;
+        d['elementtree'] = et;
+        d['ksuid'] = KSUID;
 
         if (define_name) {
             d['__name__'] = define_name;
