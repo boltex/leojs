@@ -2,7 +2,8 @@
 
 ## 1.0.1
 
-- ...
+- Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
+difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
 
 # 1.0.0
 

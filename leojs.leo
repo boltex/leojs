@@ -21295,7 +21295,8 @@ fieldset p span {
 </t>
 <t tx="felix.20240727165746.1">## 1.0.1
 
-- ...
+- Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
+difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
