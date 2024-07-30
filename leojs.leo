@@ -6717,22 +6717,20 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
 "@vscode/test-web": "^0.0.50",
-"assert": "^2.0.0",
-"buffer": "^6.0.3",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
-"process": "^0.11.10",
 "terser-webpack-plugin": "^5.3.1",
 "ts-loader": "^9.2.6",
-"typescript": "^4.9.5",
 "webpack": "^5.70.0",
 "webpack-cli": "^4.9.2",
 "webpack-shell-plugin-next": "^2.2.2"
 </t>
-<t tx="felix.20201214205159.81">"binascii": "^0.0.2",
+<t tx="felix.20201214205159.81">"assert": "^2.0.0",
+"binascii": "^0.0.2",
 "bowser": "^2.11.0",
 "browser-process-hrtime": "^1.0.0",
+"buffer": "^6.0.3",
 "console-browserify": "^1.2.0",
 "crypto-browserify": "^3.12.0",
 "csvtojson": "^2.0.10",
@@ -6748,8 +6746,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
+"process": "^0.11.10",
 "showdown": "^2.1.0",
-"stream": "^0.0.2"
+"stream": "^0.0.2",
+"typescript": "^4.9.5"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showSettingsPage",
