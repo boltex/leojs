@@ -12,7 +12,6 @@ import { new_cmd_decorator } from './decorators';
 import { Position, VNode } from './leoNodes';
 import { FileCommands } from './leoFileCommands';
 import { Commands } from './leoCommands';
-import dayjs = require('dayjs');
 import { BaseWriter } from '../writers/basewriter';
 //@-<< imports >>
 //@+others
@@ -3546,7 +3545,7 @@ export class AtFile {
             for (let line of lines) {
                 line = line.replace(
                     '@date',
-                    dayjs(new Date()).format('ddd MMM DD HH:mm:ss YYYY')
+                    g.dayjs(new Date()).format('ddd MMM DD HH:mm:ss YYYY')
                 );
                 if (line) {
                     this.putSentinel('@comment ' + line);
@@ -3577,7 +3576,7 @@ export class AtFile {
         if (c.config.getBool('log-show-save-time', false)) {
             const format =
                 c.config.getString('log-timestamp-format') || 'HH:mm:ss';
-            timestamp = dayjs(new Date()).format(format) + ' ';
+            timestamp = g.dayjs(new Date()).format(format) + ' ';
         } else {
             timestamp = '';
         }

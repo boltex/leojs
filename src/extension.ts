@@ -5,7 +5,6 @@ import * as GitAPI from './git';
 import * as GitBaseAPI from './git-base';
 
 import { Constants } from './constants';
-import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp, LoadManager } from './core/leoApp';

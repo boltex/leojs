@@ -4,9 +4,7 @@
 //@+node:felix.20230510231730.1: ** << leoImport imports >>
 import * as vscode from 'vscode';
 import * as utils from '../utils';
-
 import * as csv from 'csvtojson';
-
 const lxml = false;
 
 // Leo imports...
@@ -84,7 +82,7 @@ export class FreeMindImporter {
         const c = this.c;
         const sfn = g.shortFileName(p_path);
         const w_exists = await g.os_path_exists(p_path);
-        if (w_exists) {
+        if (w_exists && lxml) {
             // TODO : Fix This
             const htmltree = (lxml as any).html.parse(p_path);
             const root = htmltree.getroot();

@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240727165746.1"><vh>1.0.1</vh></v>
 <v t="felix.20240714135534.1"><vh>1.0.0</vh></v>
 <v t="felix.20240622195331.1"><vh>0.2.15</vh></v>
 <v t="felix.20240428224613.1"><vh>0.2.14</vh></v>
@@ -1099,7 +1100,6 @@ import * as GitAPI from './git';
 import * as GitBaseAPI from './git-base';
 
 import { Constants } from './constants';
-import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp, LoadManager } from './core/leoApp';
@@ -4542,7 +4542,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4592,8 +4592,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
   }
-}
-</t>
+}</t>
 <t tx="felix.20201214205159.10">{
   "command": "leojs.openLeoFile",
   "title": "Open with LeoJS",
@@ -6716,22 +6715,20 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
 "@vscode/test-web": "^0.0.50",
-"assert": "^2.0.0",
-"buffer": "^6.0.3",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
-"process": "^0.11.10",
 "terser-webpack-plugin": "^5.3.1",
 "ts-loader": "^9.2.6",
-"typescript": "^4.9.5",
 "webpack": "^5.70.0",
 "webpack-cli": "^4.9.2",
 "webpack-shell-plugin-next": "^2.2.2"
 </t>
-<t tx="felix.20201214205159.81">"binascii": "^0.0.2",
+<t tx="felix.20201214205159.81">"assert": "^2.0.0",
+"binascii": "^0.0.2",
 "bowser": "^2.11.0",
 "browser-process-hrtime": "^1.0.0",
+"buffer": "^6.0.3",
 "console-browserify": "^1.2.0",
 "crypto-browserify": "^3.12.0",
 "csvtojson": "^2.0.10",
@@ -6747,8 +6744,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
+"process": "^0.11.10",
 "showdown": "^2.1.0",
-"stream": "^0.0.2"
+"stream": "^0.0.2",
+"typescript": "^4.9.5"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showSettingsPage",
@@ -19352,7 +19351,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.0&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.1&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -19361,7 +19360,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
           &lt;a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features"&gt;
-            See What's New in LeoJS 1.0.0
+            See What's New in LeoJS 1.0.1
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
@@ -21291,6 +21290,12 @@ fieldset p span {
         opacity: 0;
     }
 }
+</t>
+<t tx="felix.20240727165746.1">## 1.0.1
+
+- Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
+difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
+
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
