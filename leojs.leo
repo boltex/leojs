@@ -1100,7 +1100,6 @@ import * as GitAPI from './git';
 import * as GitBaseAPI from './git-base';
 
 import { Constants } from './constants';
-import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp, LoadManager } from './core/leoApp';
@@ -4593,8 +4592,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
   }
-}
-</t>
+}</t>
 <t tx="felix.20201214205159.10">{
   "command": "leojs.openLeoFile",
   "title": "Open with LeoJS",

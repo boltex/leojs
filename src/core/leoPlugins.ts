@@ -6,7 +6,6 @@
 //@+<< leoPlugins imports & annotations >>
 //@+node:felix.20240103232627.1: ** << leoPlugins imports & annotations >>
 import * as g from './leoGlobals';
-import { Commands } from './leoCommands';
 //@-<< leoPlugins imports & annotations >>
 //@+others
 //@+node:felix.20240103232148.1: ** Top-level functions (leoPlugins.py)

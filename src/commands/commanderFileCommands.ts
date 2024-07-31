@@ -4,18 +4,16 @@
  * File commands that used to be defined in leoCommands.py
  */
 import * as vscode from 'vscode';
-import { Utils as uriUtils } from 'vscode-uri';
 import * as utils from '../utils';
 import * as g from '../core/leoGlobals';
 import { commander_command } from '../core/decorators';
 import { Position } from '../core/leoNodes';
 import { Commands } from '../core/leoCommands';
 import { Bead, Undoer } from '../core/leoUndo';
-import { LoadManager, PreviousSettings } from '../core/leoApp';
+import { PreviousSettings } from '../core/leoApp';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
 import { ScriptingController } from '../core/mod_scripting';
-import { CommanderWrapper } from '../core/leoCache';
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file

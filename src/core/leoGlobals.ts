@@ -15,9 +15,6 @@ import {
     window, commands,
     FileStat, FileType
 } from 'vscode';
-// import { Utils as uriUtils } from "vscode-uri";
-
-// import * as Bowser from "bowser";
 import * as os from 'os';
 import * as child from 'child_process';
 import * as path from 'path';
@@ -36,6 +33,9 @@ import * as md5Obj from 'md5';
 const dayjsObj = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjsObj.extend(utc);
+const localizedFormat = require('dayjs/plugin/localizedFormat');
+dayjsObj.extend(localizedFormat);
+
 //@-<< imports >>
 //@+<< leoGlobals: global constants >>
 //@+node:felix.20240607225502.1: ** << leoGlobals: global constants >>

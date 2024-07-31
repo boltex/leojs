@@ -4,16 +4,12 @@
  * Help commands that used to be defined in leoCommands.py
  */
 import * as vscode from 'vscode';
-import { Utils as uriUtils } from 'vscode-uri';
-
 import * as g from '../core/leoGlobals';
 import { commander_command } from '../core/decorators';
 import { VNode } from '../core/leoNodes';
 import { FastRead } from '../core/leoFileCommands';
 import { Commands } from '../core/leoCommands';
 import { ScriptingController } from '../core/mod_scripting';
-
-const dayjs = require('dayjs');
 
 //@+others
 //@+node:felix.20220613000058.1: ** Class CommanderHelpCommands
@@ -28,7 +24,7 @@ export class CommanderHelpCommands {
         // Doing so would add unwanted leading tabs.
         const version = g.app.signon + '\n\n';
         const theCopyright =
-            `Copyright 1999-${dayjs().year()} by Edward K. Ream and Félix Malboeuf\n` +
+            `Copyright 1999-${g.dayjs().year()} by Edward K. Ream and Félix Malboeuf\n` +
             'All Rights Reserved\n' +
             'Leo and LeoJS are distributed under the MIT License';
         const url = 'https://leo-editor.github.io/leo-editor/'; // unused for now
@@ -269,7 +265,7 @@ export class CommanderHelpCommands {
             let nd = c2!.rootPosition()!;
             nd.h = 'Settings README';
             nd.b =
-                `myLeoSettings.leo personal settings file created ${dayjs().format(
+                `myLeoSettings.leo personal settings file created ${g.dayjs().format(
                     'llll'
                 )}\n\n` +
                 'Only nodes that are descendants of the @settings node are read.\n\n' +

@@ -3,7 +3,6 @@
 //@+<< imports >>
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
-import { Utils as uriUtils } from 'vscode-uri';
 import * as path from 'path';
 import * as os from 'os';
 import * as crypto from 'crypto';
@@ -54,9 +53,6 @@ import * as difflib from 'difflib';
 import * as csv from 'csvtojson';
 import KSUID = require('ksuid');
 
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
 if (g.isBrowser) {
     // @ts-expect-error
     crypto.randomUUID = globalThis.crypto.randomUUID;
@@ -1269,9 +1265,9 @@ export class Commands {
 
         // * Imported Libraries
         d['SQL'] = g.SQL;
+        d['JSZip'] = g.JSZip;
         d['pako'] = g.pako;
         d['showdown'] = g.showdown;
-        d['JSZip'] = g.JSZip;
         d['dayjs'] = g.dayjs;
         d['md5'] = g.md5;
         d['csvtojson'] = csv;
@@ -2821,13 +2817,13 @@ export class Commands {
             // see https://www.programiz.com/python-programming/datetime/strftime
             // and https://day.js.org/docs/en/display/format
             if (gmt) {
-                s = (dayjs as any).utc().format(format); //  time.strftime(format, time.gmtime());
+                s = (g.dayjs as any).utc().format(format); //  time.strftime(format, time.gmtime());
             } else {
-                s = dayjs().format(format); //  time.strftime(format, time.localtime());
+                s = g.dayjs().format(format); //  time.strftime(format, time.localtime());
             }
         } catch (exeption) {
             g.es_exception(exeption); // Probably a bad format string in leoSettings.leo.
-            s = dayjs().format(default_format); //  time.strftime(default_format, time.gmtime());
+            s = g.dayjs().format(default_format); //  time.strftime(default_format, time.gmtime());
         }
         return s;
     }
