@@ -17,6 +17,7 @@
 
 import { new_cmd_decorator } from './decorators';
 import * as utils from '../utils';
+import { RstToHtmlCompiler, RstToMdCompiler } from 'rst-compiler';
 
 // from __future__ import annotations
 // import io
@@ -37,7 +38,7 @@ import * as utils from '../utils';
 // Leo imports.
 // TODO : DOCUTILS
 //import * as docutils from "xxx"
-const docutils = false;
+const docutils = true; // ! TRUE TO EXPERIMENT WITH 'rst-compiler'!
 import * as g from './leoGlobals';
 
 // Aliases & traces.
@@ -546,7 +547,11 @@ export class RstCommands {
             return;
         }
 
-        if (!['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'].includes(ext)) {
+        // const availableExtensions = ['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'];
+        const availableExtensions = ['.htm', '.html'];
+
+        if (!availableExtensions.includes(ext)) {
+            g.es(`Extension ${ext} not yet supported`);
             // #1884: test now.
             return;
         }
@@ -709,10 +714,11 @@ export class RstCommands {
                 // noqa: writer_name used below.
                 ['.html', 'html'],
                 ['.htm', 'html'],
-                ['.tex', 'latex'],
-                ['.pdf', 'leo.plugins.leo_pdf'],
-                ['.s5', 's5'],
-                ['.odt', 'odt'],
+                // TODO : Add support for more extensions
+                // ['.tex', 'latex'],
+                // ['.pdf', 'leo.plugins.leo_pdf'],
+                // ['.s5', 's5'],
+                // ['.odt', 'odt'],
             ]) {
                 if (ext2 === ext) {
                     w_found = true;
@@ -776,6 +782,24 @@ export class RstCommands {
             result = '';
             // TODO !
             console.log('TODO : SUPPORT DOCUTILS IN leoRst.ts');
+
+            const htmlCompiler = new RstToHtmlCompiler();
+            const parserOutput = htmlCompiler.parse(s, {
+                disableWarnings: true
+            });
+            const outputHtml = htmlCompiler.compile(parserOutput);
+
+            result = g.dedent(`\
+                <html>
+                <head>
+                    <title></title>
+                    ${outputHtml.header}
+                </head>
+                <body>
+                    ${outputHtml.body}
+                </body>
+                </html>
+            `);
             // result = docutils.core.publish_string(source=s,
             //         reader_name='standalone',
             //         parser_name='restructuredtext',

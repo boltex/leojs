@@ -4593,7 +4593,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
   }
-}</t>
+}
+</t>
 <t tx="felix.20201214205159.10">{
   "command": "leojs.openLeoFile",
   "title": "Open with LeoJS",
@@ -6746,6 +6747,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
 "process": "^0.11.10",
+"rst-compiler": "^0.2.10",
 "showdown": "^2.1.0",
 "stream": "^0.0.2",
 "typescript": "^4.9.5"
