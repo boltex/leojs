@@ -2170,6 +2170,29 @@ export function is_binary_string(s: Uint8Array): boolean {
     }
     return false; // No binary bytes found
 }
+//@+node:felix.20240802220312.1: *3* g.isExecutableInPath
+export async function isExecutableInPath(executableName: string): Promise<string> {
+
+    const pathDelimiter = isWindows ? ';' : ':';
+    const directories = process.env.PATH?.split(pathDelimiter) || [];
+    const fileExtensions = isWindows ? ['.exe', '.cmd', '.bat'] : [''];
+
+    for (const directory of directories) {
+        for (const extension of fileExtensions) {
+            let fullPath;
+            if (g.isWindows && !executableName.endsWith(extension)) {
+                fullPath = path.join(directory, `${executableName}${extension}`);
+            } else {
+                fullPath = path.join(directory, executableName); // Already ends with that extension.
+            }
+            const w_exists = await os_path_exists(fullPath);
+            if (w_exists && w_exists.type !== vscode.FileType.Directory) {
+                return fullPath;
+            }
+        }
+    }
+    return '';
+}
 //@+node:felix.20230413202326.1: *3* g.makeAllNonExistentDirectories
 /**
  * A wrapper from os.makedirs.

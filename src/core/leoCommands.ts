@@ -784,7 +784,7 @@ export class Commands {
                 let proc = '';
                 try {
                     // proc = await which(processor);
-                    proc = await isExecutableInPath(processor);
+                    proc = await g.isExecutableInPath(processor);
                 } catch (error: any) {
                     console.error(`Error finding executable for processor: ${processor}.`, error);
                     // Handle the error or rejection here, such as returning a default value or throwing a custom error
@@ -795,29 +795,6 @@ export class Commands {
                 }
             }
             return processor;
-        }
-        //@+node:felix.20240609215950.1: *4* isExecutableInPath
-        async function isExecutableInPath(executableName: string): Promise<string> {
-
-            const pathDelimiter = g.isWindows ? ';' : ':';
-            const directories = process.env.PATH?.split(pathDelimiter) || [];
-            const fileExtensions = g.isWindows ? ['.exe', '.cmd', '.bat'] : [''];
-
-            for (const directory of directories) {
-                for (const extension of fileExtensions) {
-                    let fullPath;
-                    if (g.isWindows && !executableName.endsWith(extension)) {
-                        fullPath = path.join(directory, `${executableName}${extension}`);
-                    } else {
-                        fullPath = path.join(directory, executableName); // Already ends with that extension.
-                    }
-                    const w_exists = await g.os_path_exists(fullPath);
-                    if (w_exists && w_exists.type !== vscode.FileType.Directory) {
-                        return fullPath;
-                    }
-                }
-            }
-            return '';
         }
         //@+node:felix.20240603233303.10: *4* Get Windows File Associations
         /**
@@ -873,7 +850,7 @@ export class Commands {
         async function getShell(): Promise<string> {
             //  Prefer bash unless it is not present - we know its options' names
             let shell = 'bash';
-            const has_bash = await isExecutableInPath(shell);
+            const has_bash = await g.isExecutableInPath(shell);
             if (!has_bash) {
                 // Need bare shell name, not whole path
                 let processShell = process.env.SHELL || "";
@@ -919,7 +896,7 @@ export class Commands {
                 names = [names];
             }
             for (let name of names) {
-                term = await isExecutableInPath(name);
+                term = await g.isExecutableInPath(name);
                 if (term) {
                     break;
                 }
@@ -1086,7 +1063,7 @@ export class Commands {
             const ext = path.extname(filepath);
             const setting_terminal = terminal;
             if (setting_terminal) {
-                terminal = await isExecutableInPath(terminal);
+                terminal = await g.isExecutableInPath(terminal);
                 if (!terminal) {
                     g.es(`Cannot find terminal specified in setting: ${setting_terminal}`);
                     g.es('Trying an alternative');
