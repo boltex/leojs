@@ -17,6 +17,11 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 type File_List = string[] | undefined;
 //@-<< leoMarkup imports & annotations >>
 
+export let asciidoctor_exec = "";
+export let asciidoc3_exec = "";
+export let pandoc_exec = "";
+export let sphinx_build = "";
+export let globalMarkupInitPromise: Promise<unknown> | undefined;
 //@+others
 //@+node:ekr.20191006153522.1: ** class TopLevelMarkupCommands
 export class TopLevelMarkupCommands {
@@ -259,11 +264,8 @@ export class MarkupCommands {
     public adoc_pattern = /^@(adoc|asciidoctor)/;
     public adoc_title_pat = /^= /;
     public pandoc_title_pat = /^= /;
-    public asciidoctor_exec: string = "";
-    public asciidoc3_exec: string = "";
-    public pandoc_exec: string = "";
-    public sphinx_build: string = "";
     public output_file: string = "";
+    public markupInitPromise: Promise<unknown>;
 
     constructor(c: Commands) {
         this.c = c;
@@ -271,10 +273,17 @@ export class MarkupCommands {
         this.level_offset = 0;
         this.root_level = 0;
         this.reload_settings();
-        void g.isExecutableInPath('asciidoctor').then((p_path) => { this.asciidoctor_exec = p_path; });
-        void g.isExecutableInPath('asciidoc3').then((p_path) => { this.asciidoc3_exec = p_path; });
-        void g.isExecutableInPath('pandoc').then((p_path) => { this.pandoc_exec = p_path; });
-        void g.isExecutableInPath('sphinx-build').then((p_path) => { this.sphinx_build = p_path; });
+        if (globalMarkupInitPromise == null) {
+            globalMarkupInitPromise = Promise.all([
+                g.isExecutableInPath('asciidoctor').then((p_path) => { asciidoctor_exec = p_path; }),
+                g.isExecutableInPath('asciidoc3').then((p_path) => { asciidoc3_exec = p_path; }),
+                g.isExecutableInPath('pandoc').then((p_path) => { pandoc_exec = p_path; }),
+                g.isExecutableInPath('sphinx-build').then((p_path) => { sphinx_build = p_path; })
+            ]);
+            this.markupInitPromise = globalMarkupInitPromise;
+        } else {
+            this.markupInitPromise = globalMarkupInitPromise;
+        }
     }
 
     public reload_settings(): void {
@@ -424,9 +433,9 @@ export class MarkupCommands {
         // assert asciidoctor_exec or asciidoc3_exec, g.callers()
         // Call the external program to write the output file.
         // The -e option deletes css.
-
-        if (this.asciidoctor_exec || this.asciidoc3_exec) {
-            const prog = this.asciidoctor_exec ? 'asciidoctor' : 'asciidoc3';
+        await this.markupInitPromise;
+        if (asciidoctor_exec || asciidoc3_exec) {
+            const prog = asciidoctor_exec ? 'asciidoctor' : 'asciidoc3';
             const command = `${prog} ${i_path} -o ${o_path} -b html5`;
             await g.execute_shell_commands(command);
         } else {
@@ -443,7 +452,8 @@ export class MarkupCommands {
         // assert pandoc_exec, g.callers()
         // Call pandoc to write the output file.
         // --quiet does no harm.
-        if (this.pandoc_exec) {
+        await this.markupInitPromise;
+        if (pandoc_exec) {
             const command = `pandoc ${i_path} -t html5 -o ${o_path}`;
             await g.execute_shell_commands(command);
         } else {
@@ -616,8 +626,9 @@ export class MarkupCommands {
         return result.join('');
     }
     //@+node:ekr.20191006155051.1: *3* markup.commands
-    public adoc_command(preview = false, verbose = true,): Promise<File_List> {
-        if (this.asciidoctor_exec || this.asciidoc3_exec) {
+    public async adoc_command(preview = false, verbose = true,): Promise<File_List> {
+        await this.markupInitPromise;
+        if (asciidoctor_exec || asciidoc3_exec) {
             return this.command_helper('adoc', preview, verbose);
         }
         const name = preview ? 'adoc-with-preview' : 'adoc';
@@ -625,8 +636,9 @@ export class MarkupCommands {
         return Promise.resolve([]);
     }
 
-    public pandoc_command(preview = false, verbose = true,): Promise<File_List> {
-        if (this.pandoc_exec) {
+    public async pandoc_command(preview = false, verbose = true,): Promise<File_List> {
+        await this.markupInitPromise;
+        if (pandoc_exec) {
             return this.command_helper('pandoc', preview, verbose);
         }
         const name = preview ? 'pandoc-with-preview' : 'pandoc';
@@ -634,8 +646,9 @@ export class MarkupCommands {
         return Promise.resolve([]);
     }
 
-    public sphinx_command(preview = false, verbose = true,): Promise<File_List> {
-        if (this.sphinx_build) {
+    public async sphinx_command(preview = false, verbose = true,): Promise<File_List> {
+        await this.markupInitPromise;
+        if (sphinx_build) {
             return this.command_helper('sphinx', preview, verbose);
         }
         const name = preview ? 'sphinx-with-preview' : 'sphinx';
