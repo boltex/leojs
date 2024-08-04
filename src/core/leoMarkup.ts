@@ -279,7 +279,7 @@ export class MarkupCommands {
 
     public reload_settings(): void {
         const c = this.c;
-        const getString = c.config.getString;
+        const getString = c.config.getString.bind(c.config);
         this.sphinx_command_dir = getString('sphinx-command-directory');
         this.sphinx_default_command = getString('sphinx-default-command');
         this.sphinx_input_dir = getString('sphinx-input-directory');
