@@ -606,6 +606,7 @@
 <v t="felix.20210102012410.1"><vh>@file src/core/leoGlobals.ts</vh></v>
 <v t="felix.20211021231651.1"><vh>@file src/core/leoHistory.ts</vh></v>
 <v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
+<v t="ekr.20190515070742.1"><vh>@file src/core/leoMarkup.ts</vh></v>
 <v t="felix.20210102012632.1"><vh>@file src/core/leoNodes.ts</vh></v>
 <v t="felix.20230420210348.1"><vh>@file src/core/leoPersistence.ts</vh></v>
 <v t="felix.20240103231120.1"><vh>@file src/core/leoPlugins.ts</vh></v>

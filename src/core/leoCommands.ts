@@ -25,6 +25,10 @@ import { LeoFind } from './leoFind';
 import { LeoImportCommands, TopLevelImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import {
+    MarkupCommands,
+    TopLevelMarkupCommands,
+} from './leoMarkup';
+import {
     PersistenceDataController,
     TopLevelPersistanceCommands,
 } from './leoPersistence';
@@ -113,6 +117,7 @@ export class Commands {
     public atFileCommands: AtFile;
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
+    public markupCommands: MarkupCommands;
     public persistenceController: PersistenceDataController;
 
     // 
@@ -323,6 +328,7 @@ export class Commands {
         this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
         this.importCommands = new LeoImportCommands(c);
+        this.markupCommands = new MarkupCommands(c);
         this.persistenceController = new PersistenceDataController(c);
 
         // command handlers...
@@ -3358,7 +3364,7 @@ export class Commands {
      *
      * Do *not* call os.path.abspath, os.path.normpath, or g.os_path_normslashes.
      */
-    public expand_path_expression(s: string): string {
+    public expand_path_expression(s?: string): string {
         if (!s) {
             return '';
         }
@@ -5209,6 +5215,7 @@ export interface Commands
     TopLevelCompareCommands,
     TopLevelGoToCommands,
     TopLevelImportCommands,
+    TopLevelMarkupCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,
     TopLevelEditCommands {
@@ -5247,6 +5254,7 @@ applyMixins(Commands, [
     TopLevelCompareCommands,
     TopLevelGoToCommands,
     TopLevelImportCommands,
+    TopLevelMarkupCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,
     TopLevelEditCommands,

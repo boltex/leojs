@@ -2180,7 +2180,7 @@ export async function isExecutableInPath(executableName: string): Promise<string
     for (const directory of directories) {
         for (const extension of fileExtensions) {
             let fullPath;
-            if (g.isWindows && !executableName.endsWith(extension)) {
+            if (isWindows && !executableName.endsWith(extension)) {
                 fullPath = path.join(directory, `${executableName}${extension}`);
             } else {
                 fullPath = path.join(directory, executableName); // Already ends with that extension.
