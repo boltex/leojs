@@ -63,6 +63,12 @@ const webConfig = /** @type WebpackConfig */ {
           },
         ],
       },
+      {
+        test: /\.mjs/, // This regex matches .mjs files.
+        resolve: {
+          fullySpecified: false // This option allows importing modules without the full path specification.
+        }
+      },
     ],
   },
   plugins: [
@@ -139,6 +145,12 @@ const nodeConfig = /** @type WebpackConfig */ {
           },
         ],
       },
+      {
+        test: /\.mjs/, // This regex matches .mjs files.
+        resolve: {
+          fullySpecified: false // This option allows importing modules without the full path specification.
+        }
+      }
     ],
   },
   plugins: [],

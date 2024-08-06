@@ -17,7 +17,7 @@
 
 import { new_cmd_decorator } from './decorators';
 import * as utils from '../utils';
-// import { RstToHtmlCompiler } from 'rst-compiler';
+import { RstToHtmlCompiler } from 'rst-compiler';
 
 // from __future__ import annotations
 // import io
@@ -781,26 +781,26 @@ export class RstCommands {
         try {
             result = '';
             // TODO !
-            console.log('TODO : SUPPORT DOCUTILS IN leoRst.ts');
 
             // * WITH rst-compiler *
-            // const htmlCompiler = new RstToHtmlCompiler();
-            // const parserOutput = htmlCompiler.parse(s, {
-            //     disableWarnings: true
-            // });
-            // const outputHtml = htmlCompiler.compile(parserOutput);
+            const htmlCompiler = new RstToHtmlCompiler();
+            const parserOutput = htmlCompiler.parse(s, {
+                disableWarnings: true
+            });
+            const outputHtml = htmlCompiler.compile(parserOutput);
 
-            // result = g.dedent(`\
-            //     <html>
-            //     <head>
-            //         <title></title>
-            //         ${outputHtml.header}
-            //     </head>
-            //     <body>
-            //         ${outputHtml.body}
-            //     </body>
-            //     </html>
-            // `);
+            result = g.dedent(`\
+                <html>
+                <head>
+                    <title></title>
+                    %{outputHtml.header}
+                </head>
+                <body>
+                    %{outputHtml.body}
+                </body>
+                </html>
+            `
+            ).replace('%{outputHtml.header}', outputHtml.header).replace('%{outputHtml.body}', outputHtml.body);
 
             // * ORIGINAL *
             // result = docutils.core.publish_string(source=s,
