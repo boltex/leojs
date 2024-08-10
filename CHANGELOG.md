@@ -2,7 +2,9 @@
 
 ## 1.0.2
 
-- ...
+- Added leoMarkup.py to typescript to add its commands to LeoJS
+- Added missing 'leoSettings' configurations for leoMarkup commands.
+- Fixed g.chdir function.
 
 ## 1.0.1
 
