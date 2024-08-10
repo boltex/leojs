@@ -1957,7 +1957,7 @@ export async function chdir(p_path: string): Promise<void> {
         return; // Don't change the global environment in unit tests!
     }
     let w_isDir = await os_path_isdir(p_path);
-    if (w_isDir) {
+    if (!w_isDir) {
         p_path = os_path_dirname(p_path);
     }
 
