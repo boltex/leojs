@@ -17,6 +17,7 @@
 
 import { new_cmd_decorator } from './decorators';
 import * as utils from '../utils';
+import * as vscode from 'vscode'; // TODO : Remove once docutils fixed!
 // import { RstToHtmlCompiler } from 'rst-compiler';
 
 // from __future__ import annotations
@@ -545,7 +546,15 @@ export class RstCommands {
         // Should we call docutils?
         if (!this.call_docutils) {
             return;
+        } else {
+            // TODO : FIX THIS !
+            g.es("LeoJS : docutils not available, only the intermediate file was written.");
+            void vscode.window.showWarningMessage("LeoJS: docutils not available, only the intermediate file was written.");
+            return;
         }
+
+        // TODO : FIX THIS !
+        /*
 
         // const availableExtensions = ['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'];
         const availableExtensions = ['.htm', '.html'];
@@ -575,6 +584,9 @@ export class RstCommands {
                 this.changed_vnodes.push(this.root!.v);
             }
         }
+
+        */
+
     }
     //@+node:felix.20230427003032.24: *5* rst.addTitleToHtml
     /**
