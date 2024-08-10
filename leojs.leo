@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240810180724.1"><vh>1.0.3</vh></v>
 <v t="felix.20240730230141.1"><vh>1.0.2</vh></v>
 <v t="felix.20240727165746.1"><vh>1.0.1</vh></v>
 <v t="felix.20240714135534.1"><vh>1.0.0</vh></v>
@@ -4544,7 +4545,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -21306,6 +21307,11 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Added missing 'leoSettings' configurations for leoMarkup commands.
 - Fixed g.chdir function.
 - Added warning in rst3 command about generating intermediary files only for lack of 3rd party 'docutils' library.
+
+</t>
+<t tx="felix.20240810180724.1">## 1.0.3
+
+- Cleaned up vsix compilation
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

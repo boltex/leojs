@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.3
+
+- Cleaned up vsix compilation
+
 ## 1.0.2
 
 - Added leoMarkup.py to typescript to add its commands to LeoJS
