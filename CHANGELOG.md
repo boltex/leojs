@@ -5,6 +5,7 @@
 - Added leoMarkup.py to typescript to add its commands to LeoJS
 - Added missing 'leoSettings' configurations for leoMarkup commands.
 - Fixed g.chdir function.
+- Added warning in rst3 command about generating intermediary files only for lack of 3rd party 'docutils' library.
 
 ## 1.0.1
 

@@ -21305,6 +21305,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Added leoMarkup.py to typescript to add its commands to LeoJS
 - Added missing 'leoSettings' configurations for leoMarkup commands.
 - Fixed g.chdir function.
+- Added warning in rst3 command about generating intermediary files only for lack of 3rd party 'docutils' library.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
