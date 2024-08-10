@@ -820,6 +820,28 @@
                   "vh": "@int scripting-max-button-size = 18"
                 }
               ]
+            },
+            {
+              "gnx": "felix.20240809011610.1",
+              "vh": "sphinx settings",
+              "children": [
+                {
+                  "gnx": "felix.20240809011610.2",
+                  "vh": "@string sphinx-command-directory = None"
+                },
+                {
+                  "gnx": "felix.20240809011610.3",
+                  "vh": "@string sphinx-default-command = make html"
+                },
+                {
+                  "gnx": "felix.20240809011610.4",
+                  "vh": "@string sphinx-input-directory = None"
+                },
+                {
+                  "gnx": "felix.20240809011610.5",
+                  "vh": "@string sphinx-output-directory = None"
+                }
+              ]
             }
           ]
         },
@@ -1170,6 +1192,10 @@
     "felix.20230927161926.8": "True: create Run Script button.\n\nNote: The plugin creates the press-run-script-button command regardless of this setting.",
     "felix.20230927161926.9": "True: create Script Button button in icon area.\n\nNote: The plugin creates the press-script-button-button regardless of this setting.",
     "felix.20230927161926.10": "The maximum length of button names.\n",
+    "felix.20240809011610.2": "If given, the sphinx command will cd to this directory.\n\nOtherwise, the sphinx command will cd to the directory containing the input file.",
+    "felix.20240809011610.3": "If given, *only* this command will be executed after the cd command.",
+    "felix.20240809011610.4": "Used only if the default command is *not* given.\n\nThe input_dir directory specified in the command:\n\nsphinx-build {input_dir} {output_dir} {i_path}",
+    "felix.20240809011610.5": "Used only if the default command is *not* given.\n\nThe output_dir directory specified in the command:\n\nsphinx-build {input_dir} {output_dir} {i_path}",
     "ekr.20060930085532": "True: (Recommended) The find commands collapse all nodes that are not ancestors of the node containing the match.\nFalse: The find command expands nodes needed to show the match, but does not collapse any nodes.",
     "ekr.20080315083057.7": "True: (Recommended) The spell commands collapse all nodes that are not ancestors of the node containing the match.\nFalse: The spell commands do not collapse any nodes.",
     "felix.20220506230435.1": "True: (Legacy) The goto-first-visible-node and goto-first-visible-node commands collapse all nodes that are not ancestors of the target node that is selected.\n\nFalse: (Recommended) The commands act as simple navigation commands, and do not change the outline state.",

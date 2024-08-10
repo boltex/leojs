@@ -9,6 +9,8 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240810180724.1"><vh>1.0.3</vh></v>
+<v t="felix.20240730230141.1"><vh>1.0.2</vh></v>
 <v t="felix.20240727165746.1"><vh>1.0.1</vh></v>
 <v t="felix.20240714135534.1"><vh>1.0.0</vh></v>
 <v t="felix.20240622195331.1"><vh>0.2.15</vh></v>
@@ -605,6 +607,7 @@
 <v t="felix.20210102012410.1"><vh>@file src/core/leoGlobals.ts</vh></v>
 <v t="felix.20211021231651.1"><vh>@file src/core/leoHistory.ts</vh></v>
 <v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
+<v t="ekr.20190515070742.1"><vh>@file src/core/leoMarkup.ts</vh></v>
 <v t="felix.20210102012632.1"><vh>@file src/core/leoNodes.ts</vh></v>
 <v t="felix.20230420210348.1"><vh>@file src/core/leoPersistence.ts</vh></v>
 <v t="felix.20240103231120.1"><vh>@file src/core/leoPlugins.ts</vh></v>
@@ -4542,7 +4545,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4592,7 +4595,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
   }
-}</t>
+}
+</t>
 <t tx="felix.20201214205159.10">{
   "command": "leojs.openLeoFile",
   "title": "Open with LeoJS",
@@ -19351,7 +19355,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.1&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.2&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -19360,7 +19364,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
           &lt;a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features"&gt;
-            See What's New in LeoJS 1.0.1
+            See What's New in LeoJS 1.0.2
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
@@ -21295,6 +21299,19 @@ fieldset p span {
 
 - Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
 difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
+
+</t>
+<t tx="felix.20240730230141.1">## 1.0.2
+
+- Added leoMarkup.py to typescript to add its commands to LeoJS
+- Added missing 'leoSettings' configurations for leoMarkup commands.
+- Fixed g.chdir function.
+- Added warning in rst3 command about generating intermediary files only for lack of 3rd party 'docutils' library.
+
+</t>
+<t tx="felix.20240810180724.1">## 1.0.3
+
+- Cleaned up vsix compilation
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
