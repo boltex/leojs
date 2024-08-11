@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240810200831.1"><vh>1.0.5</vh></v>
 <v t="felix.20240810181235.1"><vh>1.0.4</vh></v>
 <v t="felix.20240810180724.1"><vh>1.0.3</vh></v>
 <v t="felix.20240730230141.1"><vh>1.0.2</vh></v>
@@ -4546,7 +4547,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -19356,7 +19357,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.4&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.5&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -19365,7 +19366,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
           &lt;a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features"&gt;
-            See What's New in LeoJS 1.0.4
+            See What's New in LeoJS 1.0.5
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
@@ -21318,6 +21319,11 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 <t tx="felix.20240810181235.1">## 1.0.4
  
 - Prevent calling process.chdir when running on the web.
+
+</t>
+<t tx="felix.20240810200831.1">## 1.0.5
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
