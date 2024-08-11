@@ -1964,7 +1964,7 @@ export async function chdir(p_path: string): Promise<void> {
     w_isDir = await os_path_isdir(p_path);
     const w_exist = await os_path_exists(p_path);
 
-    if (w_isDir && w_exist) {
+    if (!isBrowser && w_isDir && w_exist) {
         process.chdir?.(p_path);
     }
 }

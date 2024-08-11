@@ -1341,7 +1341,7 @@ export class Commands {
         const aList = g.get_directives_dict_list(p);
         const w_path = c.scanAtPathDirectives(aList);
         const curDir = g.os_path_abspath(process.cwd());
-        if (w_path && w_path !== curDir) {
+        if (!g.isBrowser && w_path && w_path !== curDir) {
             try {
                 process.chdir?.(w_path);
             }
@@ -3282,7 +3282,9 @@ export class Commands {
         if (!directory) {
             directory = path.dirname(root_path);
         }
-        process.chdir?.(directory);
+        if (!g.isBrowser) {
+            process.chdir?.(directory);
+        }
 
         try {
             const proc = child_process.spawn(final_command, {
@@ -3302,7 +3304,9 @@ export class Commands {
             if (use_temp && root_pathUri) {
                 await vscode.workspace.fs.delete(root_pathUri);
             }
-            process.chdir?.(old_dir);
+            if (!g.isBrowser) {
+                process.chdir?.(old_dir);
+            }
         }
     }
     //@+node:felix.20211106224948.10: *4* c.setComplexCommand

@@ -2,7 +2,7 @@
 
 ## 1.0.4
  
-- ...
+- Prevent calling process.chdir when running on the web.
 
 ## 1.0.3
 

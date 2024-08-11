@@ -21317,7 +21317,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 </t>
 <t tx="felix.20240810181235.1">## 1.0.4
  
-- ...
+- Prevent calling process.chdir when running on the web.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
