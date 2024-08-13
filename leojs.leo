@@ -1079,7 +1079,7 @@ or on [github](https://github.com/leo-editor/leo-editor).
 ### _Thanks to_
 
 -   [Edward K. Ream](https://github.com/edreamleo) creator of the [Leo Editor](https://leo-editor.github.io/leo-editor/)
--   [Eric Amodio](https://github.com/eamodio) for the [welcome screen templates](https://github.com/eamodio/vscode-gitlens/tree/master/src/webviews)
+-   [Eric Amodio](https://github.com/eamodio) for the welcome screen templates
 -   [Vitalije Milošević](https://github.com/vitalije) for his contributions and support
 -   [Arjan Mossel](https://github.com/ar-jan) for his suggestions and ideas
 -   [Thomas Passin](https://github.com/tbpassin) for his contributions and support
