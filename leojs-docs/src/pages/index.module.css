@@ -10,6 +10,15 @@
   overflow: hidden;
 }
 
+.customHero {
+  background-image: url('/img/banner-leojs-trans-1600.png');
+  /* background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/img/banner-leojs-trans-1600.png'); */
+  /* background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/img/banner-leojs-trans-1600.png'); */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.3)), url('/img/banner-leojs-trans-1600.png');
+  background-size: cover;
+  background-position: center;
+}
+
 @media screen and (max-width: 996px) {
   .heroBanner {
     padding: 2rem;
