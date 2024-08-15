@@ -5,8 +5,9 @@
  */
 
 /* You can override the default Infima variables here. */
+/* --ifm-footer-background-color: #dfd7ce; */
 :root {
-  --ifm-footer-background-color: #dfd7ce;
+  --ifm-footer-background-color: #ffddc7;
   --ifm-color-primary: #c26b2e;
   --ifm-color-primary-dark: #af6029;
   --ifm-color-primary-darker: #a55b27;
@@ -19,8 +20,9 @@
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
+/* --ifm-footer-background-color: #141210; */
 [data-theme="dark"] {
-  --ifm-footer-background-color: #141210;
+  --ifm-footer-background-color: #181513;
   --ifm-color-primary: #963b1d;
   --ifm-color-primary-dark: #87351a;
   --ifm-color-primary-darker: #803219;
