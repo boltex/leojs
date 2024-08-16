@@ -92,43 +92,43 @@ const config = {
           },
         ],
       },
-      footer: {
-        style: "dark", // Comment off for customized styles from custom.css
-        links: [
-          {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Tutorial',
-                to: '/docs/intro',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'Leo\'s Forum',
-                href: 'https://groups.google.com/g/leo-editor',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              // {
-              //   label: 'Blog',
-              //   to: '/blog',
-              // },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/boltex/leojs',
-              },
-            ],
-          },
-        ],
-        copyright: `Copyright © 1997-${new Date().getFullYear()} Edward K. Ream and Félix Malboeuf.`,
-      },
+      // footer: {
+      //   style: "dark", // Comment off for customized styles from custom.css
+      //   links: [
+      //     {
+      //       title: 'Docs',
+      //       items: [
+      //         {
+      //           label: 'Tutorial',
+      //           to: '/docs/intro',
+      //         },
+      //       ],
+      //     },
+      //     {
+      //       title: 'Community',
+      //       items: [
+      //         {
+      //           label: 'Leo\'s Forum',
+      //           href: 'https://groups.google.com/g/leo-editor',
+      //         },
+      //       ],
+      //     },
+      //     {
+      //       title: 'More',
+      //       items: [
+      //         // {
+      //         //   label: 'Blog',
+      //         //   to: '/blog',
+      //         // },
+      //         {
+      //           label: 'GitHub',
+      //           href: 'https://github.com/boltex/leojs',
+      //         },
+      //       ],
+      //     },
+      //   ],
+      //   copyright: `Copyright © 1997-${new Date().getFullYear()} Edward K. Ream and Félix Malboeuf.`,
+      // },
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
