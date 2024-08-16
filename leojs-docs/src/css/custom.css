@@ -3,6 +3,28 @@
  * bundles Infima by default. Infima is a CSS framework designed to
  * work well for content-centric websites.
  */
+ 
+ #__docusaurus {
+   [class^='docMainContainer_'] {
+     max-width: initial;
+ 
+     > .container {
+       max-width: initial;
+ 
+       > .row {
+         flex-wrap: nowrap;
+       }
+     }
+   }
+ 
+   [class^='docRoot_'] {
+     > div {
+       flex-grow: 1;
+       min-width: 0;
+     }
+   }
+ }
+ 
 
 /* You can override the default Infima variables here. */
 /* --ifm-footer-background-color: #dfd7ce; */
@@ -15,20 +37,31 @@
   --ifm-color-primary-light: #d07738;
   --ifm-color-primary-lighter: #d27d42;
   --ifm-color-primary-lightest: #d9915f;
+
+  --ifm-color-secondary: #f0efeb;
+  --ifm-color-secondary-dark: #dcd9d0;
+  --ifm-color-secondary-darker: #d1cec2;
+  --ifm-color-secondary-darkest: #b3ae9a;
+  --ifm-color-secondary-light: #ffffff;
+  --ifm-color-secondary-lighter: #ffffff;
+  --ifm-color-secondary-lightest: #ffffff;
+
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --custom-hero-bg: linear-gradient(45deg, rgba(194, 107, 46, 0.5), rgba(150, 59, 29, 0.9)), url('/img/banner-leojs-trans-1600.png');
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 /* --ifm-footer-background-color: #141210; */
 [data-theme="dark"] {
   --ifm-footer-background-color: #181513;
-  --ifm-color-primary: #963b1d;
-  --ifm-color-primary-dark: #87351a;
-  --ifm-color-primary-darker: #803219;
-  --ifm-color-primary-darkest: #692914;
-  --ifm-color-primary-light: #a54120;
-  --ifm-color-primary-lighter: #ad4421;
-  --ifm-color-primary-lightest: #c34d26;
+  --ifm-color-primary: #b15435;
+  --ifm-color-primary-dark: #9f4c30;
+  --ifm-color-primary-darker: #96472d;
+  --ifm-color-primary-darkest: #7c3b25;
+  --ifm-color-primary-light: #c35c3a;
+  --ifm-color-primary-lighter: #c66342;
+  --ifm-color-primary-lightest: #ce795d;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --custom-hero-bg: linear-gradient(45deg, rgba(136, 64, 25, 0.3), rgba(122, 38, 21, 0.4)), url('/img/banner-leojs-trans-1600.png');
 }

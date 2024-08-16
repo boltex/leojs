@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"jsx": "react",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"module": "commonjs",
@@ -23,7 +24,6 @@
 		"node_modules",
 		"types",
 		// "src/test", /* UNCOMMENT FOR TYPES GENERATION! */
-
 		/*
 
 		  Example Command: 
