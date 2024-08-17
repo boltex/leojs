@@ -1,3 +1,7 @@
+//@+leo-ver=5-thin
+//@+node:felix.20240816230707.2: * @file leojs-docs/src/components/HomepageFeatures/index.js
+//@+others
+//@+node:felix.20240816230707.3: ** function Feature
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
@@ -48,7 +52,7 @@ function Feature({Svg, title, description}) {
     </div>
   );
 }
-
+//@-others
 export default function HomepageFeatures() {
   return (
     <section className={styles.features}>
@@ -62,3 +66,6 @@ export default function HomepageFeatures() {
     </section>
   );
 }
+//@@language javascript
+//@@tabwidth -4
+//@-leo
