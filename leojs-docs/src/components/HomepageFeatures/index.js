@@ -8,38 +8,36 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Directed Acyclic Graphs',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Break down your code into a structured outline that generates or parses back your source files.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Web-Based Development',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        LeoJS can be run as a web extension on VSCode for the web. It works directly inside GitHub and Azure Repos.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Scriptable in JavaScript',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Scriptable in Javascript and Typescript, all commands and scripts have access to outline structure.
       </>
     ),
   },
+
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({ Svg, title, description }) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">

@@ -34,10 +34,13 @@ export default function Home() {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`Leo Editor for VSCode`}
+      description="The literate editor with outline javaScript implementation">
       <HomepageHeader />
       <main>
+        <h3 className={clsx(styles.subtitle)}>
+          <i>‟Leo is a fundamentally different way of organizing data, programs and scripts.”</i><br></br>LeoJS is a JavaScript implementation designed as an extension for VSCode.
+        </h3>
         <HomepageFeatures />
       </main>
     </Layout>

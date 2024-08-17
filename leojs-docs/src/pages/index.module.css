@@ -13,12 +13,6 @@
 }
 
 .customHero {
-  /* background-image: url('/img/banner-leojs-trans-1600.png'); */
-  /* background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/img/banner-leojs-trans-1600.png'); */
-  /* background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/img/banner-leojs-trans-1600.png'); */
-  /* c26b2e  194, 107, 46 */
-  /* 963b1d   150, 59, 29 */
-  /* background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.3)), url('/img/banner-leojs-trans-1600.png'); */
   background-image: var(--custom-hero-bg);
   background-size: cover;
   background-position: center;
@@ -35,5 +29,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 1.5rem;
+  margin-bottom: 0;
+  line-height: 1.5;
 }
 /*@-leo*/

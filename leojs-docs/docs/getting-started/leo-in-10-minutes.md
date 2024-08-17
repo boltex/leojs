@@ -1,22 +1,20 @@
 # Leo in 10 Minutes
 
-An introduction to the interface and its most important features and terminology.
+An introduction to the interface, its most important features and terminology.
 
 ## User Interface
 
-Leo stores all data in nodes. Nodes have headlines (shown in the outline pane) and body text. The body pane shows the body text of the presently selected node, the node whose headline is selected in the outline pane. Headlines have an icon box indicating a node’s status. For example, the icon box has a red border when the node has been changed.
+Leo stores all data in nodes. Nodes have headlines (shown in the outline pane) and body text. The body pane shows the body text of the presently selected node, the node whose headline is selected in the outline pane. Headlines have an icon box indicating a node’s status. For example, a grayed-out border around the icon box signifies that the node has been modified.
 
 A **Leo Outline** tree view is placed in the explorer view, and in a standalone sidebar.
 
 The **body pane** is a text editor which changes to match the selected node of the Leo outline.
 
+> **Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command.
+
 The **opened documents selector** ...
 
 The **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel) ...
-
-## Detached body panes
-
-**Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command.
 
 ## Find Panel
 
