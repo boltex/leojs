@@ -66,6 +66,8 @@
 
 .customQuote {
   color: #4c5262;
+  margin-bottom: 2rem;;
+  line-height: 2.2;
   font-style: italic;
   font-weight: 500;
   list-style-type: none;
@@ -74,6 +76,7 @@
   font-style: normal;
   font-weight: normal;
   color: #615e5b;
+  white-space: nowrap;
 }
 
 /*@-leo*/
