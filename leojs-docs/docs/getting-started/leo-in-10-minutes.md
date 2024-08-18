@@ -10,6 +10,7 @@ A **Leo Outline** tree view is placed in the explorer view, and in a standalone 
 
 The **body pane** is a text editor which changes to match the selected node of the Leo outline.
 
+> 💡 **TIP**\
 > **Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command.
 
 The **opened documents selector** ...

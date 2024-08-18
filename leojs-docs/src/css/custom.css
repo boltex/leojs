@@ -67,6 +67,7 @@
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
   --custom-hero-bg: linear-gradient(45deg, rgba(194, 107, 46, 0.5), rgba(150, 59, 29, 0.9)), url('/img/banner-leojs-trans-1600.png');
+  --custom-hero-bg-hover: url('/img/banner-leojs-trans-1600.png');
   --custom-body-bg: #fdf4f5;
   --custom-sidebar-bg: #ffffe0;
 }

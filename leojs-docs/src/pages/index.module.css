@@ -16,7 +16,9 @@
   background-image: var(--custom-hero-bg);
   background-size: cover;
   background-position: center;
-
+}
+.customHero:hover {
+  background-image: var(--custom-hero-bg-hover);
 }
 
 @media screen and (max-width: 996px) {
@@ -37,4 +39,14 @@
   margin-bottom: 0;
   line-height: 1.5;
 }
+
+.bulletsHolder {
+  text-align: center;
+}
+
+.bullets {
+  display: inline-block;
+  text-align: left;
+}
+
 /*@-leo*/
