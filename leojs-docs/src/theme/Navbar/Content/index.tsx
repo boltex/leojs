@@ -11,7 +11,7 @@ import SearchBar from '@theme/SearchBar';
 import NavbarMobileSidebarToggle from '@theme/Navbar/MobileSidebar/Toggle';
 import NavbarLogo from '@theme/Navbar/Logo';
 import NavbarSearch from '@theme/Navbar/Search';
-
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from './styles.module.css';
 
 function useNavbarItems() {
@@ -62,13 +62,14 @@ export default function NavbarContent(): JSX.Element {
 
   const searchBarItem = items.find((item) => item.type === 'search');
   const location = useLocation(); // Get the current URL pathname
-
+  const { siteConfig } = useDocusaurusContext();
+  
   return (
     <NavbarContentLayout
       left={
         <>
           {!mobileSidebar.disabled && <NavbarMobileSidebarToggle />}
-          {location.pathname === '/' && <NavbarLogo />} {/* Conditionally render Logo */}
+          {location.pathname === siteConfig.baseUrl && <NavbarLogo />} {/* Conditionally render Logo */}
           <NavbarItems items={leftItems} />
         </>
       }

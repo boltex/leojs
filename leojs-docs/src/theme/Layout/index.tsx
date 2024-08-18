@@ -20,6 +20,7 @@ import ErrorPageContent from '@theme/ErrorPageContent';
 import type { Props } from '@theme/Layout';
 import Navbar from '@theme/Navbar'; // Ensure Navbar is imported
 import styles from '@docusaurus/theme-classic/src/theme/Layout/styles.module.css';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 export default function Layout(props: Props): JSX.Element {
   const {
@@ -31,6 +32,7 @@ export default function Layout(props: Props): JSX.Element {
     description,
   } = props;
   useKeyboardNavigation();
+    const { siteConfig } = useDocusaurusContext();
   const location = useLocation(); // Get the current URL pathname
   return (
     <LayoutProvider>
@@ -40,7 +42,7 @@ export default function Layout(props: Props): JSX.Element {
 
       <AnnouncementBar />
 
-      {location.pathname === '/' && <Navbar />} {/* Conditionally render Navbar */}
+      {location.pathname === siteConfig.baseUrl && <Navbar />} {/* Conditionally render Navbar */}
 
       <div
         id={SkipToContentFallbackId}

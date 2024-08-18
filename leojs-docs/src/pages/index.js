@@ -75,7 +75,7 @@ const QuotesList = [
     author: 'Travers A. Hough'
   },
   {
-    quote: '“I feel addicted to programming again…in fact [Leo] has resurrected a dead project of mine :) The Outline has proven most liberating in terms of testing ideas out.',
+    quote: 'I feel addicted to programming again…in fact [Leo] has resurrected a dead project of mine :) The Outline has proven most liberating in terms of testing ideas out.',
     author: 'Anon'
   },
   {
@@ -89,10 +89,6 @@ const QuotesList = [
   {
     quote: 'Leo has simplified updating and creating new scripts and .bats keeping similar information in the same place. there is almost an addictive withdrawal effect when I can complete an operation in so much less time with Leo & python than I had become used to.',
     author: 'Anon'
-  },
-  {
-    quote: 'Leo is my Favorites Mind Capsule ;-)',
-    author: '周琦'
   },
   {
     quote: 'Leo should either replace or greatly augment the development tools that I use.',
@@ -234,5 +230,6 @@ export default function Home() {
     </Layout>
   );
 }
+//@@last
 //@-leo
 
