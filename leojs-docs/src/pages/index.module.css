@@ -65,8 +65,8 @@
 }
 
 .customQuote {
-  color: #4c5262;
-  margin-bottom: 2rem;;
+  color: var(--custom-home-quote-color);
+  margin-bottom: 2rem;
   line-height: 2.2;
   font-style: italic;
   font-weight: 500;
@@ -75,7 +75,7 @@
 .customQuote>span {
   font-style: normal;
   font-weight: normal;
-  color: #615e5b;
+  color: var(--custom-home-author-color);
   white-space: nowrap;
 }
 

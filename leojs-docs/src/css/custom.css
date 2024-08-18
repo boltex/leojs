@@ -47,7 +47,11 @@
   --ifm-blockquote-padding-vertical: 0;
   --ifm-blockquote-padding-horizontal: 1rem;
 
-  --ifm-footer-background-color: #ffddc7;
+  --ifm-footer-background-color: #a55420;
+  --ifm-footer-link-color: #fff;
+  --ifm-footer-title-color: #fff;
+  --ifm-footer-color: #fff;
+
   --ifm-color-primary: #c26b2e;
   --ifm-color-primary-dark: #af6029;
   --ifm-color-primary-darker: #a55b27;
@@ -72,6 +76,10 @@
   
   --custom-body-bg: #fdf4f5;
   --custom-sidebar-bg: #ffffe0;
+
+  --custom-home-quote-color: #3d6195; 
+  --custom-home-author-color: #555;
+
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -80,7 +88,8 @@
   --ifm-blockquote-border-color: #c27d22;
   --ifm-blockquote-color: #f0e4be;
 
-  --ifm-footer-background-color: #181513;
+  --ifm-footer-background-color: #552e16;
+
   --ifm-color-primary: #b15435;
   --ifm-color-primary-dark: #9f4c30;
   --ifm-color-primary-darker: #96472d;
@@ -94,6 +103,10 @@
 
   --custom-body-bg: #1d1b1b;
   --custom-sidebar-bg: #24201c;
+
+  --custom-home-quote-color: #879db4;
+  --custom-home-author-color: #dcdcdc;
+  
 }
 
 blockquote {
