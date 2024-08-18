@@ -67,6 +67,18 @@ export default function Home() {
             <li>@button scripts apply scripts to outline data.</li>
           </ul>
         </p>
+        <h3 className={clsx(styles.subtitle)}>
+          What People are Saying about Leo
+        </h3>
+        <div className="container">
+          <p className={clsx(styles.bulletsHolder)}>
+            <ul className={clsx(styles.bullets)}>
+              <li className={clsx(styles.customQuote)}>Test block quote blabla blabla The best of its kind blablabla blabla bla. Bla bla bla <span>Joe Blow</span></li>
+              <li className={clsx(styles.customQuote)}>Test block quote blabla blabla The best of its kind blablabla blabla bla. Bla bla bla <span>Joe Blow</span></li>
+              <li className={clsx(styles.customQuote)}>Test block quote blabla blabla The best of its kind blablabla blabla bla. Bla bla bla <span>Joe Blow</span></li>
+            </ul>
+          </p>
+        </div>
       </main>
     </Layout>
   );
