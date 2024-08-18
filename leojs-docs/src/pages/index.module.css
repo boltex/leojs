@@ -16,9 +16,24 @@
   background-image: var(--custom-hero-bg);
   background-size: cover;
   background-position: center;
+  z-index: 1;
 }
-.customHero:hover {
-  background-image: var(--custom-hero-bg-hover);
+
+.customHero:before {
+  content: '';    
+  opacity: 1;
+  background-image: var(--custom-hero-bg-before);
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  z-index : -1;
+  transition: opacity 0.3s ease-out;
+}
+
+.customHero:hover:before {
+  opacity: 0.5;
 }
 
 @media screen and (max-width: 996px) {
