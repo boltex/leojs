@@ -38,6 +38,7 @@
 
 /* You can override the default Infima variables here. */
 /* --ifm-footer-background-color: #dfd7ce; */
+/* --ifm-footer-background-color: #a55420; */
 :root {
   --ifm-blockquote-shadow: none;
   --ifm-blockquote-border-left-width: 3px;
@@ -47,7 +48,7 @@
   --ifm-blockquote-padding-vertical: 0;
   --ifm-blockquote-padding-horizontal: 1rem;
 
-  --ifm-footer-background-color: #a55420;
+  --ifm-footer-background-color: #828282;
   --ifm-footer-link-color: #fff;
   --ifm-footer-title-color: #fff;
   --ifm-footer-color: #fff;
@@ -77,18 +78,22 @@
   --custom-body-bg: #fdf4f5;
   --custom-sidebar-bg: #ffffe0;
 
-  --custom-home-quote-color: #3d6195; 
+  --custom-home-quote-color: #195f8a; 
   --custom-home-author-color: #555;
+
+  --custom-player-after-color: #00000000;
+
 
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 /* --ifm-footer-background-color: #141210; */
+/* --ifm-footer-background-color: #552e16; */
 [data-theme="dark"] {
   --ifm-blockquote-border-color: #c27d22;
   --ifm-blockquote-color: #f0e4be;
 
-  --ifm-footer-background-color: #552e16;
+  --ifm-footer-background-color: #161616;
 
   --ifm-color-primary: #b15435;
   --ifm-color-primary-dark: #9f4c30;
@@ -99,14 +104,16 @@
   --ifm-color-primary-lightest: #ce795d;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 
-  --custom-hero-bg-before: linear-gradient(45deg, rgba(136, 64, 25, 0.3), rgba(122, 38, 21, 0.4));
+  --custom-hero-bg-before: linear-gradient(45deg, rgba(255, 164, 116, 0.9), rgba(122, 38, 21, 0.4));
 
   --custom-body-bg: #1d1b1b;
   --custom-sidebar-bg: #24201c;
 
-  --custom-home-quote-color: #879db4;
+  --custom-home-quote-color: #48b7f1;
   --custom-home-author-color: #dcdcdc;
   
+  --custom-player-after-color: #00000030;
+
 }
 
 blockquote {
@@ -119,3 +126,47 @@ blockquote {
 /* .theme-doc-sidebar-container {
   background-color: var(--custom-sidebar-bg);
 } */
+
+
+.customPlayer1, .customPlayer2 {
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  margin: auto;
+}
+
+.react-player__preview:before {
+  content: "";
+  position: absolute;
+  background-color: var( --custom-player-after-color);
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  text-align: center;
+}
+
+.customPlayer2 {
+  margin-top: 1rem;
+}
+
+.customPlayer1 .react-player__preview:after {
+  content: "Introduction to Leo ";
+  top: 8px;
+}
+.customPlayer2 .react-player__preview:after {
+  content: "Features Demo ";
+  top: 8px;
+}
+
+.react-player__preview:after {
+  position: absolute;
+  color: rgb(28, 30, 33);
+  font-size: 1.25rem;
+  font-weight: 700;
+  left: 10px;
+  right: 0;
+  height: 40px;
+  text-align: center;
+}

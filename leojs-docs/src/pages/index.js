@@ -53,32 +53,52 @@ export default function Home() {
           <i>‟Leo is a fundamentally different way of organizing data, programs and scripts.”</i><br></br>LeoJS is a JavaScript implementation designed as an extension for VSCode.
         </h3>
         <HomepageFeatures />
-        <h3 className={clsx(styles.subtitle)}>
-          Leo is:
-        </h3>
-        <div className={clsx(styles.bulletsHolder)}>
-          <ReactPlayer url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
-          <ul className={clsx(styles.bullets)}>
-            <li>An outliner. Everything in Leo is an outline.</li>
-            <li>A data manager, and personal information manager.</li>
-            <li>A powerful scripting environment.</li>
-            <li>A tool for organizing and studying computer code.</li>
-            <li>Extensible via a simple plugin architecture.</li>
-          </ul>
+        <div className="container">
+          <div className="row">
+            <div className={clsx('col col--6')}>
+              <h3 className={clsx(styles.subtitle)}>
+                Leo is:
+              </h3>
+              <div className={clsx(styles.bulletsHolder)}>
+                <ul className={clsx(styles.bullets)}>
+                  <li>An outliner. Everything in Leo is an outline.</li>
+                  <li>A data manager, and personal information manager.</li>
+                  <li>A powerful scripting environment.</li>
+                  <li>A tool for organizing and studying computer code.</li>
+                  <li>Extensible via a simple plugin architecture.</li>
+                </ul>
+              </div>
+            </div>
+            <div className={clsx('col col--6')}>
+              <ReactPlayer className="customPlayer1" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
+            </div>
+
+          </div>
         </div>
-        <h3 className={clsx(styles.subtitle)}>
-          Leo’s unique features
-        </h3>
-        <div className={clsx(styles.bulletsHolder)}>
-          <ul className={clsx(styles.bullets)}>
-            <li>Leo completely integrates JavaScript and outlines.</li>
-            <li>Scripts have full access to Leo’s sources and VSCode’s API.</li>
-            <li>Clones create multiple views of an outline.</li>
-            <li>Leo’s clone-find commands enable the Leonine way to refactor.</li>
-            <li>Scripts and programs can be composed from outlines.</li>
-            <li>Importers convert flat text into outlines.</li>
-            <li>@button scripts apply scripts to outline data.</li>
-          </ul>
+        <div className="container">
+          <div className="row">
+            <div className={clsx('col col--6')}>
+              <ReactPlayer className="customPlayer2" previewTabIndex="1" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
+            </div>
+            <div className={clsx('col col--6')}>
+              <h3 className={clsx(styles.subtitle)}>
+                Leo’s unique features
+              </h3>
+              <div className={clsx(styles.bulletsHolder)}>
+                <ul className={clsx(styles.bullets)}>
+                  <li>Leo completely integrates JavaScript and outlines.</li>
+                  <li>Scripts have full access to Leo’s sources and VSCode’s API.</li>
+                  <li>Clones create multiple views of an outline.</li>
+                  <li>Leo’s clone-find commands enable the Leonine way to refactor.</li>
+                  <li>Scripts and programs can be composed from outlines.</li>
+                  <li>Importers convert flat text into outlines.</li>
+                  <li>@button scripts apply scripts to outline data.</li>
+                </ul>
+              </div>
+            </div>
+
+
+          </div>
         </div>
         <h3 className={clsx(styles.subtitle)}>
           What People are Saying about Leo
