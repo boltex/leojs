@@ -13,10 +13,23 @@
 }
 
 .customHero {
+  z-index: 1;
+}
+
+.customHero:after {
+  filter: blur(11px);
   background-image: var(--custom-hero-bg);
   background-size: cover;
   background-position: center;
-  z-index: 1;
+  content: '';    
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  z-index : -100;
+  transition: filter 0.9s ease-out;
+
 }
 
 .customHero:before {
@@ -29,11 +42,14 @@
   top: 0; left: 0;
   width: 100%;
   z-index : -1;
-  transition: opacity 0.3s ease-out;
+  transition: opacity 0.2s ease-out;
 }
 
 .customHero:hover:before {
   opacity: 0.5;
+}
+.customHero:hover:after {
+  filter: blur(0px);
 }
 
 @media screen and (max-width: 996px) {
