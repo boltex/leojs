@@ -35,7 +35,8 @@ If you check the **Tag** option, the **Nav** field is then used to find nodes by
 
 There are undo and redo icons above the Leo outline and above the undo pane itself. You can also right-click on an undo step to directly switch to that specific state.
 
-> The undo functionality is a multi-tiered system that segregates structural outline changes from text changes within the body pane. 
+> 📌 **NOTE**\
+> The undo functionality is a multi-tiered system that separates structural outline changes from text changes within the body pane. 
 
 The Undo Panel captures outline alterations as individual 'Undo Beads', independent from VS Code's native text undo states. When focus resides in the body pane, the Undo keybinding triggers VS Code's text-specific undo action. However, once the focus shifts, or a new node is selected, all concurrent text changes coalesce into a single 'Undo Bead' within the Undo Panel. 
 
