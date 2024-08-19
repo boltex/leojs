@@ -130,6 +130,7 @@ blockquote {
 
 .customPlayer1, .customPlayer2 {
   border-radius: 20px;
+  box-shadow: 1px 1px 3px 3px #00000030;
   overflow: hidden;
   position: relative;
   margin: auto;
