@@ -39,8 +39,8 @@ export class MarkdownWriter extends BaseWriter {
             } else {
                 this.write_headline(p);
                 // Ensure that every section ends with exactly two newlines.
-                if (p.b.trim().length > 0) {
-                    let s = p.b.trim() + (lastFlag ? '\n' : '\n\n');
+                if (p.b.trimEnd().length > 0) {
+                    let s = p.b.trimEnd() + (lastFlag ? '\n' : '\n\n');
                     const lines = s.split(/\r?\n/);
                     if (lines.length && lines[lines.length - 1] === '') {
                         lines.pop();
