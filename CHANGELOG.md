@@ -2,7 +2,7 @@
 
 ## 1.0.5
 
-- ...
+- Fixed @auto files generation for markdown (.md) files.
 
 ## 1.0.4
  

@@ -21323,7 +21323,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 </t>
 <t tx="felix.20240810200831.1">## 1.0.5
 
-- ...
+- Fixed @auto files generation for markdown (.md) files.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
