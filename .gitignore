@@ -6,3 +6,4 @@ node_modules
 .vscode-test-web/
 *.vsix
 myLeojs.leo
+docs
