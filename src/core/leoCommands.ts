@@ -25,6 +25,10 @@ import { LeoFind } from './leoFind';
 import { LeoImportCommands, TopLevelImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import {
+    MarkupCommands,
+    TopLevelMarkupCommands,
+} from './leoMarkup';
+import {
     PersistenceDataController,
     TopLevelPersistanceCommands,
 } from './leoPersistence';
@@ -113,6 +117,7 @@ export class Commands {
     public atFileCommands: AtFile;
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
+    public markupCommands: MarkupCommands;
     public persistenceController: PersistenceDataController;
 
     // 
@@ -323,6 +328,7 @@ export class Commands {
         this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
         this.importCommands = new LeoImportCommands(c);
+        this.markupCommands = new MarkupCommands(c);
         this.persistenceController = new PersistenceDataController(c);
 
         // command handlers...
@@ -784,7 +790,7 @@ export class Commands {
                 let proc = '';
                 try {
                     // proc = await which(processor);
-                    proc = await isExecutableInPath(processor);
+                    proc = await g.isExecutableInPath(processor);
                 } catch (error: any) {
                     console.error(`Error finding executable for processor: ${processor}.`, error);
                     // Handle the error or rejection here, such as returning a default value or throwing a custom error
@@ -795,29 +801,6 @@ export class Commands {
                 }
             }
             return processor;
-        }
-        //@+node:felix.20240609215950.1: *4* isExecutableInPath
-        async function isExecutableInPath(executableName: string): Promise<string> {
-
-            const pathDelimiter = g.isWindows ? ';' : ':';
-            const directories = process.env.PATH?.split(pathDelimiter) || [];
-            const fileExtensions = g.isWindows ? ['.exe', '.cmd', '.bat'] : [''];
-
-            for (const directory of directories) {
-                for (const extension of fileExtensions) {
-                    let fullPath;
-                    if (g.isWindows && !executableName.endsWith(extension)) {
-                        fullPath = path.join(directory, `${executableName}${extension}`);
-                    } else {
-                        fullPath = path.join(directory, executableName); // Already ends with that extension.
-                    }
-                    const w_exists = await g.os_path_exists(fullPath);
-                    if (w_exists && w_exists.type !== vscode.FileType.Directory) {
-                        return fullPath;
-                    }
-                }
-            }
-            return '';
         }
         //@+node:felix.20240603233303.10: *4* Get Windows File Associations
         /**
@@ -873,7 +856,7 @@ export class Commands {
         async function getShell(): Promise<string> {
             //  Prefer bash unless it is not present - we know its options' names
             let shell = 'bash';
-            const has_bash = await isExecutableInPath(shell);
+            const has_bash = await g.isExecutableInPath(shell);
             if (!has_bash) {
                 // Need bare shell name, not whole path
                 let processShell = process.env.SHELL || "";
@@ -919,7 +902,7 @@ export class Commands {
                 names = [names];
             }
             for (let name of names) {
-                term = await isExecutableInPath(name);
+                term = await g.isExecutableInPath(name);
                 if (term) {
                     break;
                 }
@@ -1086,7 +1069,7 @@ export class Commands {
             const ext = path.extname(filepath);
             const setting_terminal = terminal;
             if (setting_terminal) {
-                terminal = await isExecutableInPath(terminal);
+                terminal = await g.isExecutableInPath(terminal);
                 if (!terminal) {
                     g.es(`Cannot find terminal specified in setting: ${setting_terminal}`);
                     g.es('Trying an alternative');
@@ -1358,7 +1341,7 @@ export class Commands {
         const aList = g.get_directives_dict_list(p);
         const w_path = c.scanAtPathDirectives(aList);
         const curDir = g.os_path_abspath(process.cwd());
-        if (w_path && w_path !== curDir) {
+        if (!g.isBrowser && w_path && w_path !== curDir) {
             try {
                 process.chdir?.(w_path);
             }
@@ -3299,7 +3282,9 @@ export class Commands {
         if (!directory) {
             directory = path.dirname(root_path);
         }
-        process.chdir?.(directory);
+        if (!g.isBrowser) {
+            process.chdir?.(directory);
+        }
 
         try {
             const proc = child_process.spawn(final_command, {
@@ -3319,7 +3304,9 @@ export class Commands {
             if (use_temp && root_pathUri) {
                 await vscode.workspace.fs.delete(root_pathUri);
             }
-            process.chdir?.(old_dir);
+            if (!g.isBrowser) {
+                process.chdir?.(old_dir);
+            }
         }
     }
     //@+node:felix.20211106224948.10: *4* c.setComplexCommand
@@ -3381,7 +3368,7 @@ export class Commands {
      *
      * Do *not* call os.path.abspath, os.path.normpath, or g.os_path_normslashes.
      */
-    public expand_path_expression(s: string): string {
+    public expand_path_expression(s?: string): string {
         if (!s) {
             return '';
         }
@@ -5232,6 +5219,7 @@ export interface Commands
     TopLevelCompareCommands,
     TopLevelGoToCommands,
     TopLevelImportCommands,
+    TopLevelMarkupCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,
     TopLevelEditCommands {
@@ -5270,6 +5258,7 @@ applyMixins(Commands, [
     TopLevelCompareCommands,
     TopLevelGoToCommands,
     TopLevelImportCommands,
+    TopLevelMarkupCommands,
     TopLevelPersistanceCommands,
     TopLevelSessionsCommands,
     TopLevelEditCommands,

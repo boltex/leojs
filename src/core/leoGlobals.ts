@@ -1957,14 +1957,14 @@ export async function chdir(p_path: string): Promise<void> {
         return; // Don't change the global environment in unit tests!
     }
     let w_isDir = await os_path_isdir(p_path);
-    if (w_isDir) {
+    if (!w_isDir) {
         p_path = os_path_dirname(p_path);
     }
 
     w_isDir = await os_path_isdir(p_path);
     const w_exist = await os_path_exists(p_path);
 
-    if (w_isDir && w_exist) {
+    if (!isBrowser && w_isDir && w_exist) {
         process.chdir?.(p_path);
     }
 }
@@ -2169,6 +2169,29 @@ export function is_binary_string(s: Uint8Array): boolean {
         }
     }
     return false; // No binary bytes found
+}
+//@+node:felix.20240802220312.1: *3* g.isExecutableInPath
+export async function isExecutableInPath(executableName: string): Promise<string> {
+
+    const pathDelimiter = isWindows ? ';' : ':';
+    const directories = process.env.PATH?.split(pathDelimiter) || [];
+    const fileExtensions = isWindows ? ['.exe', '.cmd', '.bat'] : [''];
+
+    for (const directory of directories) {
+        for (const extension of fileExtensions) {
+            let fullPath;
+            if (isWindows && !executableName.endsWith(extension)) {
+                fullPath = path.join(directory, `${executableName}${extension}`);
+            } else {
+                fullPath = path.join(directory, executableName); // Already ends with that extension.
+            }
+            const w_exists = await os_path_exists(fullPath);
+            if (w_exists && w_exists.type !== vscode.FileType.Directory) {
+                return fullPath;
+            }
+        }
+    }
+    return '';
 }
 //@+node:felix.20230413202326.1: *3* g.makeAllNonExistentDirectories
 /**

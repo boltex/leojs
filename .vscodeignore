@@ -5,6 +5,7 @@ types/**
 out/**
 src/**
 node_modules/**
+docs/**
 .gitignore
 vsc-extension-quickstart.md
 webpack.config.js

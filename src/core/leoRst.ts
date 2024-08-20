@@ -17,6 +17,8 @@
 
 import { new_cmd_decorator } from './decorators';
 import * as utils from '../utils';
+import * as vscode from 'vscode'; // TODO : Remove once docutils fixed!
+// import { RstToHtmlCompiler } from 'rst-compiler';
 
 // from __future__ import annotations
 // import io
@@ -37,7 +39,7 @@ import * as utils from '../utils';
 // Leo imports.
 // TODO : DOCUTILS
 //import * as docutils from "xxx"
-const docutils = false;
+const docutils = true; // ! TRUE TO EXPERIMENT WITH 'rst-compiler'!
 import * as g from './leoGlobals';
 
 // Aliases & traces.
@@ -544,9 +546,21 @@ export class RstCommands {
         // Should we call docutils?
         if (!this.call_docutils) {
             return;
+        } else {
+            // TODO : FIX THIS !
+            g.es("LeoJS : docutils not available, only the intermediate file was written.");
+            void vscode.window.showWarningMessage("LeoJS: docutils not available, only the intermediate file was written.");
+            return;
         }
 
-        if (!['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'].includes(ext)) {
+        // TODO : FIX THIS !
+        /*
+
+        // const availableExtensions = ['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'];
+        const availableExtensions = ['.htm', '.html'];
+
+        if (!availableExtensions.includes(ext)) {
+            g.es(`Extension ${ext} not yet supported`);
             // #1884: test now.
             return;
         }
@@ -570,6 +584,9 @@ export class RstCommands {
                 this.changed_vnodes.push(this.root!.v);
             }
         }
+
+        */
+
     }
     //@+node:felix.20230427003032.24: *5* rst.addTitleToHtml
     /**
@@ -709,10 +726,11 @@ export class RstCommands {
                 // noqa: writer_name used below.
                 ['.html', 'html'],
                 ['.htm', 'html'],
-                ['.tex', 'latex'],
-                ['.pdf', 'leo.plugins.leo_pdf'],
-                ['.s5', 's5'],
-                ['.odt', 'odt'],
+                // TODO : Add support for more extensions
+                // ['.tex', 'latex'],
+                // ['.pdf', 'leo.plugins.leo_pdf'],
+                // ['.s5', 's5'],
+                // ['.odt', 'odt'],
             ]) {
                 if (ext2 === ext) {
                     w_found = true;
@@ -776,6 +794,27 @@ export class RstCommands {
             result = '';
             // TODO !
             console.log('TODO : SUPPORT DOCUTILS IN leoRst.ts');
+
+            // * WITH rst-compiler *
+            // const htmlCompiler = new RstToHtmlCompiler();
+            // const parserOutput = htmlCompiler.parse(s, {
+            //     disableWarnings: true
+            // });
+            // const outputHtml = htmlCompiler.compile(parserOutput);
+
+            // result = g.dedent(`\
+            //     <html>
+            //     <head>
+            //         <title></title>
+            //         ${outputHtml.header}
+            //     </head>
+            //     <body>
+            //         ${outputHtml.body}
+            //     </body>
+            //     </html>
+            // `);
+
+            // * ORIGINAL *
             // result = docutils.core.publish_string(source=s,
             //         reader_name='standalone',
             //         parser_name='restructuredtext',
