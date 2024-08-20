@@ -42,14 +42,59 @@
       "vh": "Leo's Documentation",
       "children": [
         {
-          "gnx": "felix.20240819235322.1",
-          "vh": "@auto docs/getting-started/installation.md"
+          "gnx": "felix.20240820012043.1",
+          "vh": "Getting Started",
+          "children": [
+            {
+              "gnx": "felix.20240819235322.1",
+              "vh": "@auto docs/getting-started/installation.md"
+            },
+            {
+              "gnx": "felix.20240820012442.1",
+              "vh": "@auto docs/getting-started/leo-in-10-minutes.md"
+            },
+            {
+              "gnx": "felix.20240820012444.1",
+              "vh": "@auto docs/getting-started/using-as-pim.md"
+            },
+            {
+              "gnx": "felix.20240820012448.1",
+              "vh": "@auto docs/getting-started/writing-scripts.md"
+            }
+          ]
+        },
+        {
+          "gnx": "felix.20240820012726.1",
+          "vh": "User's Guide",
+          "children": [
+            {
+              "gnx": "felix.20240820012843.1",
+              "vh": "@auto docs/users-guide/markup-language.md"
+            },
+            {
+              "gnx": "felix.20240820012904.1",
+              "vh": "@auto docs/users-guide/customizing-leo.md"
+            },
+            {
+              "gnx": "felix.20240820012905.1",
+              "vh": "@auto docs/users-guide/cheat-sheet.md"
+            }
+          ]
+        },
+        {
+          "gnx": "felix.20240820013126.1",
+          "vh": "Advanced Topics"
+        },
+        {
+          "gnx": "felix.20240820013130.1",
+          "vh": "Appendices"
         }
       ]
     }
   ],
   "tnodes": {
     "felix.20240816225702.1": "This section contains files used to generate the LeoJS web site.",
-    "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd docs`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n"
+    "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd docs`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n",
+    "felix.20240820012843.1": "@language md\n@tabwidth -4\n"
   }
 }

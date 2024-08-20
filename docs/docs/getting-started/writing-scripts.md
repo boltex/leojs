@@ -100,7 +100,7 @@ Because of clones, the *same* node may appear at *multiple positions* in the out
 
 .. _`user attributes`: customizing.html#adding-extensible-attributes-to-nodes-and-leo-files
 
-For any position p, **p.b** is the node's body text, **p.h** is the node's headline and **p.u** is the node's `user attributes`_, and **p.v** is the position's vnode. Similarly, for any vnode v, **v.b** is the node's body text, **v.h** is the node's headline and **v.u** is the node's user attributes. 
+For any position p, **p.b** is the node's body text, **p.h** is the node's headline and **p.u** is the node's `user attributes`_, and **p.v** is the position's vnode. Similarly, for any vnode v, **v.b** is the node's body text, **v.h** is the node's headline and **v.u** is the node's user attributes.
 
 ## Generators
 
