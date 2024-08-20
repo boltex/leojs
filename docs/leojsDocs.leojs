@@ -13,11 +13,11 @@
           "children": [
             {
               "gnx": "felix.20240816231257.1",
-              "vh": "@file  docs/src/pages/index.js"
+              "vh": "@file  src/pages/index.js"
             },
             {
               "gnx": "felix.20240816231349.1",
-              "vh": "@file  docs/src/pages/index.module.css"
+              "vh": "@file  src/pages/index.module.css"
             }
           ]
         },
@@ -27,11 +27,11 @@
           "children": [
             {
               "gnx": "felix.20240816230707.2",
-              "vh": "@file docs/src/components/HomepageFeatures/index.js"
+              "vh": "@file src/components/HomepageFeatures/index.js"
             },
             {
               "gnx": "felix.20240816231006.1",
-              "vh": "@file docs/src/components/HomepageFeatures/styles.module.css"
+              "vh": "@file src/components/HomepageFeatures/styles.module.css"
             }
           ]
         }
@@ -39,7 +39,13 @@
     },
     {
       "gnx": "felix.20240816220939.1",
-      "vh": "Leo's Documentation"
+      "vh": "Leo's Documentation",
+      "children": [
+        {
+          "gnx": "felix.20240819235322.1",
+          "vh": "@auto docs/getting-started/installation.md"
+        }
+      ]
     }
   ],
   "tnodes": {

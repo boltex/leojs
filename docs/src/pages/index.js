@@ -1,5 +1,5 @@
 //@+leo-ver=5-thin
-//@+node:felix.20240816231257.1: * @file  docs/src/pages/index.js
+//@+node:felix.20240816231257.1: * @file  src/pages/index.js
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
