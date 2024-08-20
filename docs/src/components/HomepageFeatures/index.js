@@ -1,5 +1,5 @@
 //@+leo-ver=5-thin
-//@+node:felix.20240816230707.2: * @file leojs-docs/src/components/HomepageFeatures/index.js
+//@+node:felix.20240816230707.2: * @file docs/src/components/HomepageFeatures/index.js
 //@+others
 //@+node:felix.20240816230707.3: ** function Feature
 import clsx from 'clsx';
