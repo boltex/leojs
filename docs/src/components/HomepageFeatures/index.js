@@ -9,7 +9,7 @@ import styles from './styles.module.css';
 const FeatureList = [
   {
     title: 'Directed Acyclic Graphs',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('@site/static/img/acyclic-graph.svg').default,
     description: (
       <>
         Break down your code into a structured outline that generates or parses back your source files.
