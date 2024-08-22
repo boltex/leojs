@@ -68,7 +68,7 @@ const config = {
         hideOnScroll: true,
         logo: {
           alt: 'LeoJS Logo',
-          src: 'img/logo.svg',
+          src: 'img/leoapp256px.png',
         },
         items: [
           // {

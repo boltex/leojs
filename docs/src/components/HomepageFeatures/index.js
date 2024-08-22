@@ -18,7 +18,7 @@ const FeatureList = [
   },
   {
     title: 'Web-Based Development',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/web-graph.svg').default,
     description: (
       <>
         LeoJS can be run as a web extension on VSCode for the web. It works directly inside GitHub and Azure Repos.
@@ -27,7 +27,7 @@ const FeatureList = [
   },
   {
     title: 'Scriptable in JavaScript',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('@site/static/img/js-ts-graph.svg').default,
     description: (
       <>
         Scriptable in Javascript and Typescript, all commands and scripts have access to outline structure.

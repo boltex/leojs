@@ -78,7 +78,7 @@ export default function Home() {
         <div className="container">
           <div className="row">
             <div className={clsx('col col--6')}>
-              <ReactPlayer className="customPlayer2" previewTabIndex="1" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
+              <ReactPlayer className="customPlayer2" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
             </div>
             <div className={clsx('col col--6')}>
               <h3 className={clsx(styles.subtitle)}>
