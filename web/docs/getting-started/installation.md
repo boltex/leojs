@@ -11,3 +11,8 @@ The easiest way to install LeoJS is to open the **Extension View** `Ctrl+Shift+X
 _The Extension View showing the LeoJS extension_
 
 Alternatively, you can also download the .vsix extension file independantly, directly at the [Microsoft Marketplace](https://marketplace.visualstudio.com/items?itemName=boltex.leojs) or the [Open VSX Registry](https://open-vsx.org/extension/boltex/leojs), and install the LeoJS extension manually with the `Extension: Install from VSIX` command in VSCode.
+
+After LeoJS installs for the first time, the Welcome page and the Leo Log Window should then become visible:
+
+![Extension View](./img/welcome-pane-montage.png)\
+_LeoJS showing its welcome page after starting up for the first time_

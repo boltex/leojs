@@ -78,6 +78,10 @@
             {
               "gnx": "felix.20240820012905.1",
               "vh": "@auto docs/users-guide/cheat-sheet.md"
+            },
+            {
+              "gnx": "felix.20240824232648.1",
+              "vh": "@auto docs/users-guide/commands-reference.md"
             }
           ]
         },
@@ -94,6 +98,8 @@
   ],
   "tnodes": {
     "felix.20240816225702.1": "This section contains files used to generate the LeoJS web site.",
-    "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd docs`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n"
+    "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd docs`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n",
+    "felix.20240820012905.1": "@language md\n@tabwidth -4\n",
+    "felix.20240824131051.17": "\nContent ..."
   }
 }
