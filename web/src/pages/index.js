@@ -86,7 +86,6 @@ export default function Home() {
               </h3>
               <div className={clsx(styles.bulletsHolder)}>
                 <ul className={clsx(styles.bullets)}>
-                  <li>Leo completely integrates JavaScript and outlines.</li>
                   <li>Scripts have full access to Leo’s sources and VSCode’s API.</li>
                   <li>Clones create multiple views of an outline.</li>
                   <li>Leo’s clone-find commands enable the Leonine way to refactor.</li>
@@ -96,8 +95,6 @@ export default function Home() {
                 </ul>
               </div>
             </div>
-
-
           </div>
         </div>
         <h3 className={clsx(styles.subtitle)}>

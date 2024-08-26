@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Installation
 
 LeoJS is implemented as a Visual Studio Code (_VSCode_ or _VSCodium_) extension, and uses its UI expose all of Leo's fundamental functionality. So head over to [code.visualstudio.com](https://code.visualstudio.com/) or [vscodium.com](https://vscodium.com/) first to download either of those if not already present on your system.

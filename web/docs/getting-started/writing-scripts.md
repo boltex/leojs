@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Writing Leo scripts
 
 This chapter tells how to write **Leo scripts**, JavaScript (or TypeScript) scripts that can run from any Leo node.
@@ -69,17 +73,18 @@ This script creates a node containing today's date in the body text:
 
 ## Generate an output file from nodes
 
-The script writes the body text of the presently selected node to ~/leo_output_file.txt and then prints it to the log pane:
+The script writes the body text of the presently selected node to ~/leo_output_file.txt and then reads and prints it to the log pane:
 
 ```javascript
-    const fn = g.os_path_finalize_join(g.app.homeDir, 'leo_output_file.txt');
+const fn = g.os_path_finalize_join(g.app.homeDir, 'leo_output_file.txt');
+const fileUri = g.makeVscodeUri(fn);
+const fileContent = Buffer.from(c.p.b, 'utf-8');
 
-    with open(fn, 'w') as f:
-        f.write(c.p.b)
+await vscode.workspace.fs.writeFile(fileUri, fileContent);
 
-    with open(fn, 'r') as f:
-        for line in f.readlines():
-            g.es(line.rstrip())
+const data = await vscode.workspace.fs.readFile(fileUri);
+
+g.es(Buffer.from(data).toString('utf-8'))
 ```
 
 ## Predefined symbols: c, g, and p

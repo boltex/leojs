@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Using Leo as a PIM
 
 This chapter tells how you can use Leo as a *Personal Information Manager*. It introduces **clones**: one of Leo's most unusual and powerful features for organizing data.
