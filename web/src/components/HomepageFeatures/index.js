@@ -21,7 +21,7 @@ const FeatureList = [
     Svg: require('@site/static/img/web-graph.svg').default,
     description: (
       <>
-        LeoJS can be run as a web extension on VSCode for the web. It works directly inside GitHub and Azure Repos.
+        LeoJS can also run as a web extension on VSCode for the web. It works directly inside GitHub and Azure Repos.
       </>
     ),
   },

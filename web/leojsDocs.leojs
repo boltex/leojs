@@ -80,16 +80,16 @@
               "vh": "@auto docs/users-guide/customizing-leo.md"
             },
             {
-              "gnx": "felix.20240820012905.1",
-              "vh": "@auto docs/users-guide/cheat-sheet.md"
-            },
-            {
               "gnx": "felix.20240824232648.1",
               "vh": "@auto docs/users-guide/commands-reference.md"
             },
             {
               "gnx": "felix.20240825182433.1",
               "vh": "@auto docs/users-guide/directives-reference.md"
+            },
+            {
+              "gnx": "felix.20240820012905.1",
+              "vh": "@auto docs/users-guide/cheat-sheet.md"
             }
           ]
         },
@@ -118,6 +118,10 @@
             {
               "gnx": "felix.20240825213057.1",
               "vh": "@auto docs/appendices/format-of-leo-files.md"
+            },
+            {
+              "gnx": "felix.20240826021115.1",
+              "vh": "@auto docs/appendices/glossary.md"
             }
           ]
         }
@@ -127,6 +131,7 @@
   "tnodes": {
     "felix.20240816225702.1": "This section contains files used to generate the LeoJS web site.",
     "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd docs`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n",
+    "felix.20240826012024.1": "---\nsidebar_position: 1\n---\n\n",
     "felix.20240824232648.1": "@language md\n@tabwidth -4\n",
     "felix.20240825132427.3": "\nContent ...\n",
     "felix.20240825182433.1": "@language md\n@tabwidth -4\n",
@@ -135,6 +140,8 @@
     "felix.20240825210732.1": "@language md\n@tabwidth -4\n",
     "felix.20240825210918.1": "\nWriting Plugins Content ...\n",
     "felix.20240825212944.1": "@language md\n@tabwidth -4\n",
-    "felix.20240825212944.2": "\nFormat of External Files Content ...\n"
+    "felix.20240825212944.2": "\nFormat of External Files Content ...\n",
+    "felix.20240825213057.1": "@language md\n@tabwidth -4\n",
+    "felix.20240825213057.2": "\nFormat of Leo Files Content ...\n"
   }
 }
