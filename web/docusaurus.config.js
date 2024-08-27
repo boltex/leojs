@@ -102,12 +102,12 @@ const config = {
             label: 'Appendices',
           },
           // { to: '/blog', label: 'Blog', position: 'left' },
-          {
-            type: 'doc',
-            docId: 'appendices/glossary',
-            label: 'Glossary',
-            position: 'right',
-          },
+          // {
+          //   type: 'doc',
+          //   docId: 'appendices/glossary',
+          //   label: 'Glossary',
+          //   position: 'right',
+          // },
           {
             href: 'https://github.com/boltex/leojs',
             label: 'GitHub',

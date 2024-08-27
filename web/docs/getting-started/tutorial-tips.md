@@ -10,25 +10,25 @@ sidebar_position: 5
 
 To execute a command, type `Alt-X`, followed by the first few characters of the command name.
 
-For more details, see the [commands tutorial](leo-in-10-minutes.md#commands).
+For more details, see the [commands tutorial](tutorial-basics.md#commands).
 
 ### Learn to use clones
 
 Clones are "live" copies of the node itself and all its descendants.
-See the [clones tutorial](using-as-pim.md#clones) for more details.
+See the [clones tutorial](tutorial-pim.md#clones) for more details.
 
 ## Learning to use Leo
 
 ### Move clones to the last top-level node
 
-Focus your attention on the task at hand by [cloning nodes](using-as-pim.md#clones), including
+Focus your attention on the task at hand by [cloning nodes](tutorial-pim.md#clones), including
 \@file nodes, then moving those clones so they are the last top-level nodes
 in the outline. This organization allows you to work on nodes scattered
 throughout an outline without altering the structure of @file nodes.
 
 ### Put personal settings myLeoSettings.leo
 
-Put your [personal settings](../users-guide/customizing-leo.md#specifying-settings) in myLeoSettings.leo, not leoSettings.leo.
+Put your [personal settings](../users-guide/customizing.md#specifying-settings) in myLeoSettings.leo, not leoSettings.leo.
 
 - The leo-settings command opens leoSettings.leo.
 - The my-leo-settings command opens myLeoSettings.leo.
@@ -76,7 +76,7 @@ example:
 
 ### Use @button nodes
 
-[@button nodes](leo-in-10-minutes.md#button-and-command-nodes) create commands. For example, `@button my-command` creates
+[@button nodes](tutorial-basics.md#button-and-command-nodes) create commands. For example, `@button my-command` creates
 the _my-command_ button and the _my-command_ command. Within `@button`
 scripts, c.p is the presently selected outline node.
 **@button nodes bring scripts to data**.

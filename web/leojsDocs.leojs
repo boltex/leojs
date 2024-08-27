@@ -47,19 +47,19 @@
           "children": [
             {
               "gnx": "felix.20240819235322.1",
-              "vh": "@auto docs/getting-started/installation.md"
+              "vh": "@auto docs/getting-started/installing.md"
             },
             {
               "gnx": "felix.20240820012442.1",
-              "vh": "@auto docs/getting-started/leo-in-10-minutes.md"
+              "vh": "@auto docs/getting-started/tutorial-basics.md"
             },
             {
               "gnx": "felix.20240820012444.1",
-              "vh": "@auto docs/getting-started/using-as-pim.md"
+              "vh": "@auto docs/getting-started/tutorial-pim.md"
             },
             {
               "gnx": "felix.20240820012448.1",
-              "vh": "@auto docs/getting-started/writing-scripts.md"
+              "vh": "@auto docs/getting-started/tutorial-scripting.md"
             },
             {
               "gnx": "felix.20240825232513.1",
@@ -73,23 +73,23 @@
           "children": [
             {
               "gnx": "felix.20240820012843.1",
-              "vh": "@auto docs/users-guide/markup-language.md"
+              "vh": "@auto docs/users-guide/leomarkup.md"
             },
             {
               "gnx": "felix.20240820012904.1",
-              "vh": "@auto docs/users-guide/customizing-leo.md"
+              "vh": "@auto docs/users-guide/customizing.md"
             },
             {
               "gnx": "felix.20240824232648.1",
-              "vh": "@auto docs/users-guide/commands-reference.md"
+              "vh": "@auto docs/users-guide/commands.md"
             },
             {
               "gnx": "felix.20240825182433.1",
-              "vh": "@auto docs/users-guide/directives-reference.md"
+              "vh": "@auto docs/users-guide/directives.md"
             },
             {
               "gnx": "felix.20240820012905.1",
-              "vh": "@auto docs/users-guide/cheat-sheet.md"
+              "vh": "@auto docs/users-guide/cheatsheet.md"
             }
           ]
         },
@@ -99,11 +99,19 @@
           "children": [
             {
               "gnx": "felix.20240825212400.1",
-              "vh": "@auto docs/advanced-topics/leo-scripting-guide.md"
+              "vh": "@auto docs/advanced-topics/scripting-guide.md"
             },
             {
               "gnx": "felix.20240825210732.1",
               "vh": "@auto docs/advanced-topics/writing-plugins.md"
+            },
+            {
+              "gnx": "felix.20240827000501.1",
+              "vh": "@auto docs/advanced-topics/faq.md"
+            },
+            {
+              "gnx": "felix.20240827000650.1",
+              "vh": "@auto docs/advanced-topics/leonine-refactor.md"
             }
           ]
         },
@@ -112,12 +120,20 @@
           "vh": "Appendices",
           "children": [
             {
+              "gnx": "felix.20240825213057.1",
+              "vh": "@auto docs/appendices/format-of-leo-files.md"
+            },
+            {
               "gnx": "felix.20240825212944.1",
               "vh": "@auto docs/appendices/format-of-external-files.md"
             },
             {
-              "gnx": "felix.20240825213057.1",
-              "vh": "@auto docs/appendices/format-of-leo-files.md"
+              "gnx": "felix.20240827001223.1",
+              "vh": "@auto docs/appendices/mulder-ream.md"
+            },
+            {
+              "gnx": "felix.20240827001226.1",
+              "vh": "@auto docs/appendices/history.md"
             },
             {
               "gnx": "felix.20240826021115.1",
@@ -131,17 +147,13 @@
   "tnodes": {
     "felix.20240816225702.1": "This section contains files used to generate the LeoJS web site.",
     "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd docs`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n",
-    "felix.20240826012024.1": "---\nsidebar_position: 1\n---\n\n",
-    "felix.20240824232648.1": "@language md\n@tabwidth -4\n",
-    "felix.20240825132427.3": "\nContent ...\n",
-    "felix.20240825182433.1": "@language md\n@tabwidth -4\n",
-    "felix.20240825182433.2": "\nContent ...\n",
-    "felix.20240825212558.1": "\nLeo Scripting Guide content ...\n",
+    "felix.20240826190458.64": "---\nsidebar_position: 1\n---\n\n",
+    "felix.20240826190458.66": "---\nsidebar_position: 2\n---\n\n",
     "felix.20240825210732.1": "@language md\n@tabwidth -4\n",
-    "felix.20240825210918.1": "\nWriting Plugins Content ...\n",
-    "felix.20240825212944.1": "@language md\n@tabwidth -4\n",
-    "felix.20240825212944.2": "\nFormat of External Files Content ...\n",
-    "felix.20240825213057.1": "@language md\n@tabwidth -4\n",
-    "felix.20240825213057.2": "\nFormat of Leo Files Content ...\n"
+    "felix.20240826190458.75": "\nWriting Plugins Content ...\n",
+    "felix.20240827000501.1": "@language md\n@tabwidth -4\n",
+    "felix.20240827000501.2": "\nFAQ Content ...\n",
+    "felix.20240826021115.1": "@language md\n@tabwidth -4\n",
+    "felix.20240826190458.78": "\nGlossary Content ...\n"
   }
 }

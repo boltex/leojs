@@ -11,7 +11,7 @@ Three predefined symbols, **c**, **g**, and **p** give Leo scripts easy access t
 **Positions** and **vnodes** are the foundation of Leo scripting. leo/core/leoNodes.ts defines the corresponding Position and VNode classes. These classes provide access to all outline data and allow Leo scripts to create and change outlines.
 
 > 🔍 **Further study**\
-> The [scripting portion](...) of [Leo's cheat sheet](...) contains more information about scripting.
+> The [scripting portion](../users-guide/cheatsheet.md#scripting) of [Leo's cheat sheet](../users-guide/cheatsheet.md) contains more information about scripting.
 
 ## Hello World
 
@@ -103,13 +103,11 @@ A **position** represents an outline node at a *specific position* in the outlin
 
 Because of clones, the *same* node may appear at *multiple positions* in the outline. A **vnode** represents the node's data, which is shared by all positions referring to that node.
 
-.. _`user attributes`: customizing.html#adding-extensible-attributes-to-nodes-and-leo-files
-
-For any position p, **p.b** is the node's body text, **p.h** is the node's headline and **p.u** is the node's `user attributes`_, and **p.v** is the position's vnode. Similarly, for any vnode v, **v.b** is the node's body text, **v.h** is the node's headline and **v.u** is the node's user attributes.
+For any position p, **p.b** is the node's body text, **p.h** is the node's headline and **p.u** is the node's [user attributes](../users-guide/customizing.md#adding-extensible-attributes-to-nodes-and-leo-files), and **p.v** is the position's vnode. Similarly, for any vnode v, **v.b** is the node's body text, **v.h** is the node's headline and **v.u** is the node's user attributes.
 
 ## Generators
 
-Commanders and positions define several `Python generators <https://wiki.python.org/moin/Generators>`_ to traverse (step through) an outline. The `scripting portion`_ of `Leo's cheat sheet`_ lists all of Leo's generators. For example, c.all_positions() traverses the outline in outline order.  The following prints a properly-indented list of all headlines:
+Commanders and positions define several [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_generators#generator_functions) to traverse (step through) an outline. The [scripting portion](../users-guide/cheatsheet.md#scripting) of [Leo's cheat sheet](../users-guide/cheatsheet.md) lists all of Leo's generators. For example, c.all_positions() traverses the outline in outline order.  The following prints a properly-indented list of all headlines:
 
 ```javascript
     for (const p of c.all_positions()){
@@ -136,4 +134,4 @@ All generators now yield *copies* of positions.
 - Generators visit all or parts of the outline, in a specified order.
 
 > 🔍 **Further study**\
-> Consult [Leo's cheat sheet](...) and [Leo's scripting miscellany](...).
+> Consult [Leo's cheat sheet](../users-guide/cheatsheet.md) and [Leo's scripting guide](../advanced-topics/leo-scripting-guide.md).
