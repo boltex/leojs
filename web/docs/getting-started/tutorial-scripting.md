@@ -37,38 +37,38 @@ p.b and p.h are python properties, so you can assign to p.b and p.h.
 This script creates an outline node as the last top-level node:
 
 ```javascript
-    const p = c.lastTopLevel().insertAfter();
-    p.h = 'my new node';
-    c.redraw(p); // Selects the new node.
+const p = c.lastTopLevel().insertAfter();
+p.h = 'my new node';
+c.redraw(p); // Selects the new node.
 ```
 
 This script creates multiple nodes, with different headlines:
 
 ```javascript
-    const parent = c.lastTopLevel().insertAfter();
-    parent.h = 'New nodes';
-    const table = [
-        ['First node', 'Body text for first node'],
-        ['Node 2', 'Body text for node 2'],
-        ['Last Node', 'Body text for last node\nLine 2'],
-    ];
-    for (const [headline, body] of table) {
-        let child = parent.insertAsLastChild();
-        child.b = body.trimEnd() + '\n'; // Ensure exactly one trailing newline.
-        child.h = headline;
-    }
+const parent = c.lastTopLevel().insertAfter();
+parent.h = 'New nodes';
+const table = [
+    ['First node', 'Body text for first node'],
+    ['Node 2', 'Body text for node 2'],
+    ['Last Node', 'Body text for last node\nLine 2'],
+];
+for (const [headline, body] of table) {
+    let child = parent.insertAsLastChild();
+    child.b = body.trimEnd() + '\n'; // Ensure exactly one trailing newline.
+    child.h = headline;
+}
 
-    c.selectPosition(parent); // Another way to select nodes.
-    c.redraw();
+c.selectPosition(parent); // Another way to select nodes.
+c.redraw();
 ```
 
 This script creates a node containing today's date in the body text:
 
 ```javascript
-    const p = c.lastTopLevel().insertAfter();
-    p.h = "Today's date";
-    p.b = new Date().toDateString();
-    c.redraw(p);
+const p = c.lastTopLevel().insertAfter();
+p.h = "Today's date";
+p.b = new Date().toDateString();
+c.redraw(p);
 ```
 
 ## Generate an output file from nodes
