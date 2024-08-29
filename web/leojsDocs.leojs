@@ -99,15 +99,729 @@
           "children": [
             {
               "gnx": "felix.20240825212400.1",
-              "vh": "@auto docs/advanced-topics/scripting-guide.md"
+              "vh": "@@auto docs/advanced-topics/scripting-guide.md",
+              "children": [
+                {
+                  "gnx": "felix.20240828195006.93",
+                  "vh": "!Declarations"
+                },
+                {
+                  "gnx": "felix.20240829001454.2",
+                  "vh": "Leo Scripting Guide",
+                  "children": [
+                    {
+                      "gnx": "felix.20240829001454.3",
+                      "vh": "\\@button example"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.4",
+                      "vh": "Comparing two similar outlines"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.5",
+                      "vh": "Converting Body Text To Title Case"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.6",
+                      "vh": "Creating minimal outlines"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.7",
+                      "vh": "Creating Qt Windows from Leo scripts"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.8",
+                      "vh": "Cutting and pasting text"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.9",
+                      "vh": "g.app.gui.run* methods run dialogs"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.10",
+                      "vh": "Getting commander preferences"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.11",
+                      "vh": "Getting configuration settings"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.12",
+                      "vh": "Getting interactive input in scripts and commands"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.13",
+                      "vh": "Inserting and deleting icons"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.14",
+                      "vh": "Invoking commands from scripts"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.15",
+                      "vh": "Making operations undoable"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.16",
+                      "vh": "Modifying plugins with @script scripts"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.17",
+                      "vh": "Modifying the body pane directly"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.18",
+                      "vh": "Recovering vnodes"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.19",
+                      "vh": "Recursive import script"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.20",
+                      "vh": "Retaining pointers to Qt windows"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.21",
+                      "vh": "Running code at idle time"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.22",
+                      "vh": "Running code in separate processes",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001454.23",
+                          "vh": "Using subprocess.popen",
+                          "children": [
+                            {
+                              "gnx": "felix.20240829001454.24",
+                              "vh": "Call subprocess.popen directly"
+                            },
+                            {
+                              "gnx": "felix.20240829001454.25",
+                              "vh": "Call g.execute_shell_commands"
+                            },
+                            {
+                              "gnx": "felix.20240829001454.26",
+                              "vh": "Call g.execute_shell_commands_with_options"
+                            }
+                          ]
+                        },
+                        {
+                          "gnx": "felix.20240829001454.27",
+                          "vh": "Using g.app.backgroundProcessManager"
+                        },
+                        {
+                          "gnx": "felix.20240829001454.28",
+                          "vh": "Using g.execute_shell_commands"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001454.29",
+                      "vh": "Running Leo in batch mode"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.30",
+                      "vh": "Using @pyplot and matplotlib",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001454.31",
+                          "vh": "Overview"
+                        },
+                        {
+                          "gnx": "felix.20240829001454.32",
+                          "vh": "Displaying images externally"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001454.33",
+                      "vh": "Working with directives and paths"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.34",
+                      "vh": "Writing g.es output to other tabs"
+                    },
+                    {
+                      "gnx": "felix.20240829001454.35",
+                      "vh": "Writing clickable links to the Log tab"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "gnx": "felix.20240825210732.1",
-              "vh": "@auto docs/advanced-topics/writing-plugins.md"
+              "vh": "@@auto docs/advanced-topics/writing-plugins.md",
+              "children": [
+                {
+                  "gnx": "felix.20240828195006.95",
+                  "vh": "!Declarations"
+                },
+                {
+                  "gnx": "felix.20240829001657.1",
+                  "vh": "Writing Plugins",
+                  "children": [
+                    {
+                      "gnx": "felix.20240829001657.2",
+                      "vh": "Writing Plugins"
+                    },
+                    {
+                      "gnx": "felix.20240829001657.3",
+                      "vh": "Important security warnings"
+                    },
+                    {
+                      "gnx": "felix.20240829001657.4",
+                      "vh": "Documenting plugins"
+                    },
+                    {
+                      "gnx": "felix.20240829001657.5",
+                      "vh": "c ivars & properties"
+                    },
+                    {
+                      "gnx": "felix.20240829001657.6",
+                      "vh": "Handling events",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001657.7",
+                          "vh": "Summary of event handlers"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001657.8",
+                      "vh": "Support for unit testing"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "gnx": "felix.20240827000501.1",
-              "vh": "@auto docs/advanced-topics/faq.md"
+              "vh": "@@auto docs/advanced-topics/faq.md",
+              "children": [
+                {
+                  "gnx": "felix.20240828195006.97",
+                  "vh": "!Declarations"
+                },
+                {
+                  "gnx": "felix.20240829001804.1",
+                  "vh": "FAQ",
+                  "children": [
+                    {
+                      "gnx": "felix.20240829001804.2",
+                      "vh": "@rst-no-head Links (FAQ)"
+                    },
+                    {
+                      "gnx": "felix.20240829001804.3",
+                      "vh": "Learning to use Leo",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.4",
+                          "vh": "How can I learn Leo, or python, or anything"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.5",
+                          "vh": "What's the best way to learn to use Leo?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.6",
+                          "vh": "When is using a section better than using a method?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.7",
+                      "vh": "Abbreviations",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.8",
+                          "vh": "What are some useful abbreviations?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.9",
+                      "vh": "Clones",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.10",
+                          "vh": "How can I customize the clone-find-all commands?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.11",
+                          "vh": "How can I eliminate clone wars?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.12",
+                          "vh": "How can I use clones to reorganize an outline?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.13",
+                          "vh": "How does EKR use clones?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.14",
+                          "vh": "How does Leo handle clone conflicts?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.15",
+                          "vh": "When is deleting a node dangerous?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.16",
+                          "vh": "When may I delete clones safely?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.17",
+                          "vh": "Why doesn't Leo support cross-outline clones?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.18",
+                          "vh": "Why is Alt-N (goto-next-clone) important?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.19",
+                          "vh": "Why should I use clones?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.20",
+                      "vh": "Customizing Leo",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.21",
+                          "vh": "How can I create a pane for matplotlib charts?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.22",
+                          "vh": "How can I customize settings for a particular external file?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.23",
+                          "vh": "How can I enable and disable support for psyco?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.24",
+                          "vh": "How can I modify an existing theme?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.25",
+                          "vh": "How can I put background images in the body pane?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.26",
+                          "vh": "How can I run code at startup?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.27",
+                          "vh": "How can I sync settings across .leo files?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.28",
+                          "vh": "How do I enable a theme .leo file?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.29",
+                          "vh": "How can I use Leo's legacy key bindings?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.30",
+                          "vh": "How do I add a new menu item from a plugin?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.31",
+                          "vh": "How do I set selection colors and fonts?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.32",
+                          "vh": "How do I submit a plugin?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.33",
+                      "vh": "Excel",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.34",
+                          "vh": "How can I show Leo files with Excel?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.35",
+                      "vh": "Files",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.36",
+                          "vh": "Can @file trees contain material not in the external file?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.37",
+                          "vh": "How can I avoid getting long lines in external files?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.38",
+                          "vh": "How can I create a template .leo file?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.39",
+                          "vh": "How can I create Javascript comments?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.40",
+                          "vh": "How can I disable PHP comments?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.41",
+                          "vh": "How can I open special .leo files easily?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.42",
+                          "vh": "How can I specify the root directory of a thumb drive?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.43",
+                          "vh": "How can I use Leo with older C compilers"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.44",
+                          "vh": "How can I use Leo with unsupported languages?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.45",
+                          "vh": "How do I inhibit sentinels in external files?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.46",
+                          "vh": "How do I make external files start with a shebang line?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.47",
+                          "vh": "How do I prevent Leo from expanding sections?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.48",
+                          "vh": "Why can't I use @ignore directives in @file trees?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.49",
+                      "vh": "Git",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.50",
+                          "vh": "How can I use git to check Leo's importers?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.51",
+                          "vh": "How can I use Leo with git?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.52",
+                          "vh": "How should I use Leo with git, etc.?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.53",
+                          "vh": "What is a reference .leo file?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.54",
+                          "vh": "Why do files sometimes change when switching branches?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.55",
+                      "vh": "Graphics",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.56",
+                          "vh": "How can I display graphics in Leo?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.57",
+                          "vh": "How can I make a screencast?",
+                          "children": [
+                            {
+                              "gnx": "felix.20240829001804.58",
+                              "vh": "Use a script to open your app"
+                            },
+                            {
+                              "gnx": "felix.20240829001804.59",
+                              "vh": "Debug your workflow with short videos"
+                            },
+                            {
+                              "gnx": "felix.20240829001804.60",
+                              "vh": "Emulate the screencast.com tutorials"
+                            },
+                            {
+                              "gnx": "felix.20240829001804.61",
+                              "vh": "Record your first real take"
+                            },
+                            {
+                              "gnx": "felix.20240829001804.62",
+                              "vh": "Edit your raw take"
+                            },
+                            {
+                              "gnx": "felix.20240829001804.63",
+                              "vh": "Summary"
+                            },
+                            {
+                              "gnx": "felix.20240829001804.64",
+                              "vh": "Additional tips"
+                            },
+                            {
+                              "gnx": "felix.20240829001804.65",
+                              "vh": "Tips for improving audio"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.66",
+                      "vh": "Importing files",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.67",
+                          "vh": "How can I import many files at once?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.68",
+                      "vh": "LaTeX",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.69",
+                          "vh": "How can I produce PDF output from LaTex input?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.70",
+                          "vh": "How can I use BibTeX citations from Leo?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.71",
+                      "vh": "Markdown & Sphinx",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.72",
+                          "vh": "How can I create markdown files?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.73",
+                          "vh": "How can I create a markdown table of contents?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.74",
+                          "vh": "How can I use Markdown with Sphinx?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.75",
+                      "vh": "Scripting & Testing",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.76",
+                          "vh": "How can I create buttons with dropdown menus?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.77",
+                          "vh": "How can I make commonly-used scripts widely accessible?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.78",
+                          "vh": "How can I organize large docstrings?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.79",
+                          "vh": "How can I run code in an external process?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.80",
+                          "vh": "How can I run scripts in languages other than python?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.81",
+                          "vh": "How can I run pylint outside of Leo?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.82",
+                          "vh": "How can I test settings easily?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.83",
+                          "vh": "How can I use setuptools instead of .bat files?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.84",
+                          "vh": "How can scripts call functions from Leo's core?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.85",
+                          "vh": "How do I choose between @others and section references?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.86",
+                          "vh": "How to use leo to make mathematical notes?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.87",
+                          "vh": "What is an easy way to profile code?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.88",
+                      "vh": "Trouble shooting",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.89",
+                          "vh": "Error messages from the rst3 plugin aren't helpful. What can I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.90",
+                          "vh": "How can I move Leo's window back on screen?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.91",
+                          "vh": "How can I run Leo from a console window?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.92",
+                          "vh": "How can I use Python's pdb debugger with Leo?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.93",
+                          "vh": "How do I get help?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.94",
+                          "vh": "How do I make Ctrl-Shift-0 work on Windows 8 or 10?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.95",
+                          "vh": "How do I report bugs?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.96",
+                          "vh": "I am having trouble installing Leo on MacOS. What should I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.97",
+                          "vh": "I can't run the LeoBridge module outside of leo/core.  What should I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.98",
+                          "vh": "I can't write Imported files.  What's going on?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.99",
+                          "vh": "My old .leo files won't load using Leo 4.5 or later. What should I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.100",
+                          "vh": "Nothing (or almost nothing) happens when I start Leo.  What should I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.101",
+                          "vh": "Running Python setup.py install from the leo directory doesn't work.  Why not?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.102",
+                          "vh": "The new Python decorator syntax causes problems.  What can I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.103",
+                          "vh": "Themes aren't working for me. What should I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.104",
+                          "vh": "Why didn't Leo update my @clean outline as expected?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.105",
+                          "vh": "Why do Qt windows disappear in my scripts?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.106",
+                          "vh": "Why isn't the Spell tab showing?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.107",
+                      "vh": "Unicode",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.108",
+                          "vh": "I can not enter non-ascii characters.  What can I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.109",
+                          "vh": "Some characters in external files look funny. What can I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.110",
+                          "vh": "I get weird results when defining unicode strings in scripts.  What is going on?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.111",
+                          "vh": "Some characters are garbled when importing files. What can I do?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.112",
+                          "vh": "Python's print statement shows 'byte hash' for unicode characters.  What can I do?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.113",
+                      "vh": "Vim",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.114",
+                          "vh": "How can I use Leo's bridge in vim?"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20240829001804.115",
+                      "vh": "Work flow",
+                      "children": [
+                        {
+                          "gnx": "felix.20240829001804.116",
+                          "vh": "How can I organize data so I can find stuff later?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.117",
+                          "vh": "How can I restore focus without using the mouse"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.118",
+                          "vh": "How can I see two nodes at once?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.119",
+                          "vh": "How can I use Leo cooperatively without sentinels?"
+                        },
+                        {
+                          "gnx": "felix.20240829001804.120",
+                          "vh": "How can I use the GTD workflow in Leo?"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             },
             {
               "gnx": "felix.20240827000650.1",
@@ -201,6 +915,272 @@
     "felix.20240827235735.84": "\n`cascade-windows`\n    Cascades all Leo windows.\n`equal-sized-panes`\n    Adjusts the sizes of the outline and body panes so that they are the same height.\n`minimize-all`\n    Minimizes (hides) all Leo windows.\n`show-colors`\n    Opens a tab in the log pane showing various color pickers.\n    (Not implemented in Qt)\n`show-fonts`\n    Open a tab in the log pane showing a font picker.\n`suspend`\n    Minimizes the present Leo window.\n`toggle-split-direction`\n    Switches between vertical and horizontal orientations of the Leo window.\n\n    In the vertical orientation, the body pane appears below the pane containing the outline and log panes. In the horizontal orientation, the body pane appears to the left the pane containing the outline and log panes. By default, the ratio of pane outline pane to the body pane is 0.5 in the vertical orientation and 0.3 in the horizontal orientation. These two ratios may be changed using settings.\n\n`zoom-in`\n    Increases text size by 1 pt.\n`zoom-out`.\n    Decrease text size by 1 pt.\n",
     "felix.20240827235735.87": "\nWhen focus is in the outline pane:\n\n    Right-arrow (expand-and-go-right)\n    Left-arrow (contract-or-go-left)\n    Up-arrow (goto-prev-visible) \n    Down-arrow (goto-next-visible)\n\nRegardless of focus:\n\n    Alt-Home (goto-first-visible-node) \n    Alt-End (goto-last-visible-node)\n    Alt-Right-arrow (expand-and-go-right)\n    Alt-Left-arrow (contract-or-go-left)\n    Alt-Up-arrow (goto-prev-visible) \n    Alt-Down-arrow (goto-next-visible)\n",
     "felix.20240827235735.88": "\nWhen focus is in the outline:\n\n    Shift-Down-arrow (move-outline-down) \n    Shift-Left-arrow (move-outline-left) \n    Shift-Right-arrow (move-outline-right) \n    Shift-Up-arrow (move-outline-up)\n\nRegardless of focus:\n\n    Alt-Shift-Down-arrow (move-outline-down) \n    Alt-Shift-Left-arrow (move-outline-left) \n    Alt-Shift-Right-arrow (move-outline-right) \n    Alt-Shift-Up-arrow (move-outline-up)\n    Ctrl-D (move-outline-down)\n    Ctrl-L (move-outline-left) \n    Ctrl-R (move-outline-right)\n    Ctrl-U (move-outline-up)\n",
-    "felix.20240827235735.89": "\nWhen focus is in any of Leo's text panes (body pane, log pane, headlines):\n\n    Arrows            move one character\n    Ctrl-LeftArrow    back one word\n    Ctrl-RightArrow   forward one word\n    Home              beginning of line\n    End               end of line\n    Ctrl-Home         beginning of the body\n    Ctrl-End          end of body\n    PageDown          down one page\n    PageUp            up one page\n\n**Shift keys**: Adding the Shift key modifier to any of the keys above moves the cursor and extends the selected text.\n"
+    "felix.20240827235735.89": "\nWhen focus is in any of Leo's text panes (body pane, log pane, headlines):\n\n    Arrows            move one character\n    Ctrl-LeftArrow    back one word\n    Ctrl-RightArrow   forward one word\n    Home              beginning of line\n    End               end of line\n    Ctrl-Home         beginning of the body\n    Ctrl-End          end of body\n    PageDown          down one page\n    PageUp            up one page\n\n**Shift keys**: Adding the Shift key modifier to any of the keys above moves the cursor and extends the selected text.\n",
+    "felix.20240825212400.1": "@language md\n@tabwidth -4\n",
+    "felix.20240828195006.93": "---\nsidebar_position: 1\n---\n\n",
+    "felix.20240829001454.2": "\nThis chapter covers miscellaneous topics related to Leo scripts.\n\nYou might call this a FAQ for scripts...\n",
+    "felix.20240829001454.3": "The .leo files in Leo's distribution contain many @button nodes (many disabled), that do repetitive chores. Here is one, @button promote-child-bodies, from LeoDocs.leo::\n\n    '''Copy the body text of all children to the parent's body text.'''\n\n    # Great for creating what's new nodes.\n    result = [p.b]\n    b = c.undoer.beforeChangeNodeContents(p)\n    for child in p.children():\n        if child.b:\n            result.append('\\n- %s\\n\\n%s\\n' % (child.h,child.b))\n        else:\n            result.append('\\n- %s\\n\\n' % (child.h))\n    p.b = ''.join(result)\n    c.undoer.afterChangeNodeContents(p,'promote-child-bodies',b)\n\nThis creates a fully undoable promote-child-bodies command.",
+    "felix.20240829001454.4": "efc.compareTrees does most of the work of comparing two similar outlines.\nFor example, here is \"@button compare vr-controller\" in leoPyRef.leo::\n\n    p1 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr)')\n    p2 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr2)')\n    assert p1 and p2\n    tag = 'compare vr1 & vr2'\n    c.editFileCommands.compareTrees(p1, p2, tag)\n\nThis script will compare the trees whose roots are p1 and p2 and show the results like \"Recovered nodes\".  That is, the script creates a node called \"compare vr1 & vr2\".  This top-level node contains one child node for every node that is different.  Each child node contains a diff of the node.  The grand children are one or two clones of the changed or inserted node.\n",
+    "felix.20240829001454.5": "Title case means that all words start with capital letters.  The\nfollowing script converts the selected body text to title case.  If\nnothing has been selected, the entire current node is converted. The\nconversion is undoable::\n\n    \"\"\"Undoably convert selection or body to title case.\"\"\"\n    w = c.frame.body.wrapper\n    p = c.p\n    s = p.b\n    u = c.undoer\n\n    start, end = w.getSelectionRange()\n    use_entire = start == end  # no selection, convert entire body\n\n    undoType = 'title-case-body-selection'\n    undoData = u.beforeChangeNodeContents(p)\n\n    if use_entire:\n        p.b = s.title()\n    else:\n        sel = s[start:end]\n        head, tail = s[:start], s[end:]\n        p.b = head + sel.title() + tail\n\n    c.setChanged()\n    p.setDirty()\n    u.afterChangeNodeContents(p, undoType, undoData)\n    c.redraw()\n\n[Contributed by T. B. Passin]",
+    "felix.20240829001454.6": "The following script will create a minimal Leo outline::\n\n    if 1:\n        # Create a visible frame.\n        c2 = g.app.newCommander(fileName=None)\n    else:\n        # Create an invisible frame.\n        c2 = g.app.newCommander(fileName=None,gui=g.app.nullGui)\n\n    c2.frame.createFirstTreeNode()\n    c2.redraw()\n\n    # Test that the script works.\n    for p in c2.all_positions():\n        g.es(p.h)\n",
+    "felix.20240829001454.7": "The following puts up a test window when run as a Leo script::\n\n    from PyQt5 import QtGui\n    w = QtGui.QWidget()\n    w.resize(250, 150)\n    w.move(300, 300)\n    w.setWindowTitle('Simple test')\n    w.show()\n    c.my_test = w # <-- Keep a reference to the window!\n\n**Important**: Something like the last line is essential. Without it, the window would immediately disappear after being created.  The assignment::\n\n    c.my_test = w\n\ncreates a permanent reference to the window so the window won't be garbage collected after the Leo script exits.\n\n",
+    "felix.20240829001454.8": "The following shows how to cut and paste text to the clipboard::\n\n    g.app.gui.replaceClipboardWith('hi')\n    print(g.app.gui.getTextFromClipboard())\n",
+    "felix.20240829001454.9": "Scripts can invoke various dialogs using the following methods of the g.app.gui object.\n\nHere is a partial list. Use typing completion to get the full list::\n\n    g.app.gui.runAskOkCancelNumberDialog(c,title,message)\n    g.app.gui.runAskOkCancelStringDialog(c,title,message)\n    g.app.gui.runAskOkDialog(c,title,message=None,text='Ok')\n    g.app.gui.runAskYesNoCancelDialog(c,title,message=None,\n        yesMessage='Yes',noMessage='No',defaultButton='Yes')\n    g.app.gui.runAskYesNoDialog(c,title,message=None)\n\nThe values returned are in ('ok','yes','no','cancel'), as indicated by the method names. Some dialogs also return strings or numbers, again as indicated by their names.\n\nScripts can run File Open and Save dialogs with these methods::\n\n    g.app.gui.runOpenFileDialog(title,filetypes,defaultextension,multiple=False)\n    g.app.gui.runSaveFileDialog(initialfile,title,filetypes,defaultextension)\n\nFor details about how to use these file dialogs, look for examples in Leo's own source code. The runOpenFileDialog returns a list of file names.\n",
+    "felix.20240829001454.10": "Each commander sets ivars corresponding to settings.\n\nScripts can get the following ivars of the Commands class::\n\n    ivars = (\n        'output_doc_flag',\n        'page_width',\n        'page_width',\n        'tab_width',\n        'target_language',\n        'use_header_flag',\n    )\n    print(\"Prefs ivars...\\n\",color=\"purple\")\n    for ivar in ivars:\n        print(getattr(c,ivar))\n\nIf your script sets c.tab_width it should call f.setTabWidth to redraw the screen::\n\n    c.tab_width = -4    # Change this and see what happens.\n    c.frame.setTabWidth(c.tab_width)\n",
+    "felix.20240829001454.11": "Settings may be different for each commander.\n\nThe c.config class has the following getters.\n\n- c.config.getBool(settingName,default=None)\n- c.config.getColor(settingName)\n- c.config.getDirectory(settingName)\n- c.config.getFloat(settingName)\n- c.config.getInt(settingName)\n- c.config.getLanguage(settingName)\n- c.config.getRatio(settingName)\n- c.config.getShortcut(settingName)\n- c.config.getString(settingName)\n\nThese methods return None if no setting exists.\n\nThe getBool 'default' argument to getBool specifies the value to be returned if the setting does not exist.\n",
+    "felix.20240829001454.12": "k.get1Arg handles the next character the user types when accumulating a user argument from the minibuffer.  k.get1Arg handles details such as tab completion, backspacing, Ctrl-G etc.\n\nCommands should use k.get1Arg to get the first minibuffer argument and k.getNextArg to get all other arguments.\n\nk.get1Arg is a state machine. It has to be because it's almost always waiting for the user to type the next character. The handle keyword arg specifies the next state in the machine.\n\nThe following examples will work in any class having a 'c' ivar bound to a commander.\n\nExample 1: get one argument from the user::\n\n    @cmd('my-command')\n    def myCommand(self, event):\n        \"\"\"State 0\"\"\"\n        k = self.c.k\n        k.setLabelBlue('prompt: ')\n        k.get1Arg(event, handler=self.myCommand1)\n\n    def myCommand1(self, event):\n        \"\"\"State 1\"\"\"\n        k = self.c.k\n        # ----> k.arg contains the argument.\n        # Finish the command.\n        ...\n        # Reset the minibuffer.\n        k.clearState()\n        k.resetLabel()\n        k.showStateAndMode()\n\nExample 2: get two arguments from the user::\n\n    @cmd('my-command')\n    def myCommand(self, event):\n        \"\"\"State 0\"\"\"\n        k = self.c.k\n        k.setLabelBlue('first prompt: ')\n        k.get1Arg(event, handler=self.myCommand1)\n\n    def myCommand1(self, event):\n        \"\"\"State 1\"\"\"\n        k = self.c.k\n        self.arg1 = k.arg\n        k.setLabelBlue('second prompt: ')\n        k.getNextArg(handler=self.myCommand2)\n\n    def myCommand2(self, event):\n        \"\"\"State 2\"\"\"\n        k = self.c.k\n        # -----> k.arg contains second argument.\n        # Finish the command, using self.arg1 and k.arg.\n        ...\n        # Reset the minibuffer.\n        k.clearState()\n        k.resetLabel()\n        k.showStateAndMode()\n\n**Summary**\n\n- The handler keyword argument to k.get1Arg and k.getNextArg specifies the next state in the state machine.\n\n- k.get1Arg contains many optional keyword arguments. See its docstring for details.\n",
+    "felix.20240829001454.13": "You can add an icon to the presently selected node with c.editCommands.insertIconFromFile(path). path is an absolute path or a path relative to the leo/Icons folder. A relative path is recommended if you plan to use the icons on machines with different directory structures.\n\nFor example::\n\n    path = 'rt_arrow_disabled.gif' \n    c.editCommands.insertIconFromFile(path) \n\nScripts can delete icons from the presently selected node using the following methods::\n\n    c.editCommands.deleteFirstIcon() \n    c.editCommands.deleteLastIcon() \n    c.editCommands.deleteNodeIcons() \n",
+    "felix.20240829001454.14": "You can invoke minibuffer commands by name.  For example::\n\n    c.executeMinibufferCommand('open-outline')\n\nc.keyHandler.funcReturn contains the value returned from the command. In many cases, as above, this value is simply 'break'.\n",
+    "felix.20240829001454.15": "Plugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed. **Note**: u is shorthand for c.undoer. Most u.beforeX methods return undoData that the client code merely passes to the corresponding u.afterX method. This data contains the 'before' snapshot. The u.afterX methods then create a bead containing both the 'before' and 'after' snapshots.\n\nu.beforeChangeGroup and u.afterChangeGroup allow multiple calls to u.beforeX and u.afterX methods to be treated as a single undoable entry. See the code for the Replace All, Sort, Promote and Demote commands for examples. The u.beforeChangeGroup and u.afterChangeGroup methods substantially reduce the number of u.beforeX and afterX methods needed.\n\nPlugins and scripts may define their own u.beforeX and afterX methods. Indeed, u.afterX merely needs to set the bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo the operation. See the code for the various u.beforeX and afterX methods for guidance.\n\nSee the section << How Leo implements unlimited undo >> in leoUndo.py for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.\n",
+    "felix.20240829001454.16": "The mod_scripting plugin runs @scripts before plugin initiation is complete. Thus, such scripts can not directly modify plugins. Instead, a script can create an event handler for the after-create-leo-frame that will modify the plugin.\n\nFor example, the following modifies the cleo.py plugin after Leo has completed loading it::\n\n    def prikey(self, v):\n        try:\n            pa = int(self.getat(v, 'priority'))\n        except ValueError:\n            pa = -1\n\n        if pa == 24:\n            pa = -1\n        if pa == 10:\n            pa = -2\n\n        return pa\n\n    import types\n    from leo.core import leoPlugins\n\n    def on_create(tag, keywords):\n        c.cleo.prikey = types.MethodType(prikey, c.cleo, c.cleo.__class__)\n\n    leoPlugins.registerHandler(\"after-create-leo-frame\",on_create)\n\nAttempting to modify c.cleo.prikey immediately in the @script gives an AttributeError as c has no .cleo when the @script is executed. Deferring it by using registerHandler() avoids the problem.\n",
+    "felix.20240829001454.17": "**Important**: The changes you make below **will not persist** unless your script calls c.frame.body.onBodyChanged after making those changes. This method has the following signature::\n\n    def onBodyChanged (self,undoType,oldSel=None,oldText=None,oldYview=None):\n\nLet::\n\n    w = c.frame.body.wrapper # Leo's body pane.\n\nScripts can get or change the context of the body as follows::\n\n    w.appendText(s)                     # Append s to end of body text.\n    w.delete(i,j=None)                  # Delete characters from i to j.\n    w.deleteTextSelection()             # Delete the selected text, if any.\n    s = w.get(i,j=None)                 # Return the text from i to j.\n    s = w.getAllText                    # Return the entire body text.\n    i = w.getInsertPoint()              # Return the location of the cursor.\n    s = w.getSelectedText()             # Return the selected text, if any.\n    i,j = w.getSelectionRange (sort=True) # Return the range of selected text.\n    w.setAllText(s)                     # Set the entire body text to s.\n    w.setSelectionRange(i,j,insert=None) # Select the text.\n\n**Notes**:\n\n- These are only the most commonly-used methods. For more information, consult Leo's source code.\n\n- i and j are zero-based indices into the the text. When j is not specified, it defaults to i. When the sort parameter is in effect, getSelectionRange ensures i <= j.\n\n- color is a Tk color name, even when using the Gt gui.\n",
+    "felix.20240829001454.18": "Positions become invalid whenever the outline changes. \n\nThis script finds a position p2 having the same vnode as an invalid position p::\n\n    if not c.positionExists(p):\n        for p2 in c.all_positions():\n            if p2.v == p.v: # found\n                c.selectPosition(p2)\n        else:\n            print('position no longer exists')\n",
+    "felix.20240829001454.19": "The following script imports files from a given directory and all subdirectories::\n\n    c.recursiveImport(\n        dir_ = 'path to file or directory',\n        kind = '@clean',        # or '@file' or '@auto'\n        one_file = False,       # True: import only one file.\n        safe_at_file = False,   # True: generate @@clean nodes.\n        theTypes = None,        # Same as ['.py']\n    )\n",
+    "felix.20240829001454.20": "@pagewidth 75\n\nThe following script won't work as intended:\n\n    from PyQt5 import QtGui\n    w = QtGui.QWidget()\n    w.resize(250, 150)\n    w.move(300, 300)\n    w.setWindowTitle('Simple test')\n    w.show()\n\nWhen the script exits the sole reference to the window, w, ceases to exist, so the window is destroyed (garbage collected). To keep the window open, add the following code as the last line to keep the reference alive::\n\n    g.app.scriptsDict['my-script_w'] = w\n\nNote that this reference will persist until the next time you run the execute-script. If you want something even more permanent, you can do something like::\n\n    g.app.my_script_w = w\n",
+    "felix.20240829001454.21": "Scripts and plugins can call g.app.idleTimeManager.add_callback(callback) to cause\nthe callback to be called at idle time forever. This should suffice for most purposes::\n\n    def print_hi():\n        print('hi')\n\n    g.app.idleTimeManager.add_callback(print_hi)\n\nFor greater control, g.IdleTime is a thin wrapper for the Leo's IdleTime class. The IdleTime class executes a handler with a given delay at idle time. The handler takes a single argument, the IdleTime instance::\n\n    def handler(it):\n        \"\"\"IdleTime handler.  it is an IdleTime instance.\"\"\"\n        delta_t = it.time-it.starting_time\n        g.trace(it.count,it.c.shortFileName(),'%2.4f' % (delta_t))\n        if it.count >= 5:\n            g.trace('done')\n            it.stop()\n\n    # Execute handler every 500 msec. at idle time.\n    it = g.IdleTime(handler,delay=500)\n    if it: it.start()\n\nThe code creates an instance of the IdleTime class that calls the given handler at idle time, and no more than once every 500 msec.  Here is the output::\n\n    handler 1 ekr.leo 0.5100\n    handler 2 ekr.leo 1.0300\n    handler 3 ekr.leo 1.5400\n    handler 4 ekr.leo 2.0500\n    handler 5 ekr.leo 2.5610\n    handler done\n\nTimer instances are completely independent::\n\n    def handler1(it):\n        delta_t = it.time-it.starting_time\n        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))\n        if it.count >= 5:\n            g.trace('done')\n            it.stop()\n\n    def handler2(it):\n        delta_t = it.time-it.starting_time\n        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))\n        if it.count >= 10:\n            g.trace('done')\n            it.stop()\n\n    it1 = g.IdleTime(handler1,delay=500)\n    it2 = g.IdleTime(handler2,delay=1000)\n    if it1 and it2:\n        it1.start()\n        it2.start()\n\nHere is the output::\n\n    handler1  1 ekr.leo 0.5200\n    handler2  1 ekr.leo 1.0100\n    handler1  2 ekr.leo 1.0300\n    handler1  3 ekr.leo 1.5400\n    handler2  2 ekr.leo 2.0300\n    handler1  4 ekr.leo 2.0600\n    handler1  5 ekr.leo 2.5600\n    handler1 done\n    handler2  3 ekr.leo 3.0400\n    handler2  4 ekr.leo 4.0600\n    handler2  5 ekr.leo 5.0700\n    handler2  6 ekr.leo 6.0800\n    handler2  7 ekr.leo 7.1000\n    handler2  8 ekr.leo 8.1100\n    handler2  9 ekr.leo 9.1300\n    handler2 10 ekr.leo 10.1400\n    handler2 done\n\n**Recycling timers**\n\nThe g.app.idle_timers list retrains references to all timers so they *won't* be recycled after being stopped.  This allows timers to be restarted safely.\n\nThere is seldom a need to recycle a timer, but if you must, you can call its destroySelf method. This removes the reference to the timer in g.app.idle_timers. **Warning**: Accessing a timer after calling its destroySelf method can lead to a hard crash.\n",
+    "felix.20240829001454.22": "It is dead easy for scripts, including @button scripts, plugins, etc., to drive any external processes, including compilers and interpreters, from within Leo.\n\n- The first section discusses three ways of calling subprocess.popen directly or via Leo helper functions.\n\n- The second section discusses the BackgroundProcessManager class.  Leo's pylint command uses this class to run pylint commands sequentially *without blocking Leo*. Running processes sequentially prevents unwanted interleaving of output.\n\n- The last two sections discuss using g.execute_shell_commands and g.execute_shell_commands_with_options. ",
+    "felix.20240829001454.23": "The first section discusses three *easy* ways to run code in a separate process by calling subprocess.popen either directly or via Leo helper functions.",
+    "felix.20240829001454.24": "Calling subprocess.popen is often simple and good. For example, the following executes the 'npm run dev' command in a given directory.  Leo continues, without waiting for the command to return::\n\n    os.chdir(base_dir)\n    subprocess.Popen('npm run dev', shell=True)\n\nThe following hangs Leo until the command completes::\n\n    os.chdir(base_dir)\n    proc = subprocess.Popen(command, shell=True)\n    proc.communicate()\n\n**Note**: 'cd directory' does not seem to work when run using subprocess.popen on Windows 10.\n",
+    "felix.20240829001454.25": "Use g.execute_shell_commands is a thin wrapper around subprocess.popen.  It calls subprocess.popen once for every command in a list.  This function waits for commands that start with '&'. Here it is::\n\n    def execute_shell_commands(commands, trace=False):\n        if g.isString(commands): commands = [commands]\n        for command in commands:\n            wait = not command.startswith('&')\n            if command.startswith('&'): command = command[1:].strip()\n            if trace: print('\\n>%s%s\\n' % ('' if wait else '&', command))\n            proc = subprocess.Popen(command, shell=True)\n            if wait: proc.communicate()\n\nFor example::\n\n    os.chdir(base_dir)\n    g.execute_shell_commands(['&npm run dev',])\n",
+    "felix.20240829001454.26": "g.execute_shell_commands_with_options is more flexible.  It allows scripts to get both the starting directory and the commands themselves from Leo's settings. Its signature is:\n\ndef execute_shell_commands_with_options(\n    base_dir = None,\n    c = None,\n    command_setting = None,\n    commands = None,\n    path_setting = None,\n    warning = None,\n):\n    '''\n    A helper for prototype commands or any other code that\n    runs programs in a separate process.\n\n    base_dir:           Base directory to use if no path_setting is given.\n    commands:           A list of commands, for g.execute_shell_commands.\n    commands_setting:   Name of @data setting for commands.\n    path_setting:       Name of @string setting for the base directory.\n    warning:            A warning to be printed before executing the commands.\n    '''\n\nFor example, put this in myLeoSettings.leo::\n\n    @data my-npm-commands\n    yarn dev\n\n    @string my-npm-base = /npmtest\n\nAnd then run::\n\n    g.execute_shell_commands_with_options(\n        c = c,\n        command_setting = 'my-npm-commands',\n        path_setting= 'my-npm-base',\n    )\n",
+    "felix.20240829001454.27": "g.app.backgroundProcessManager is the singleton instance of the BackgroundProcessManager (BPM) class. This class runs background processes, *without blocking Leo*. The BPM manages a queue of processes, and runs them *one at a time* so that their output remains separate.\n\nBPM.start_process(c, command, kind, fn=None, shell=False) adds a process to the queue that will run the given command::\n\n    bpm = g.app.backgroundProcessManager\n    bpm.start_process(c, command='ls', kind='ls', shell=True)\n\nBM.kill(kind=None) kills all process with the given kind. If kind is None or 'all', all processes are killed.\n\nYou can add processes to the queue at any time. For example, you can rerun the 'pylint' command while a background process is running.\n\nThe BackgroundProcessManager is completely safe: all of its code runs in the main process.\n\n**Running multiple processes simultaneously**\n\nOnly one process at a time should be producing output. All processes that *do* produce output should be managed by the singleton BPM instance.\n\nTo run processes that *don't* produce output, just call subprocess.Popen::\n\n    import subprocess\n    subprocess.Popen('ls', shell=True)\n\nYou can run as many of these process as you like, without involving the BPM in any way\n",
+    "felix.20240829001454.28": "g.execute_shell_command tales a single argument, which may be either a string or a list of strings. Each string represents one command. g.execute_shell_command executes each command in order.  Commands starting with '&' are executed without waiting. Commands that do not start with '&' finish before running later commands. Examples::\n\n    # Run the qml app in a separate process:\n    g.execute_shell_commands('qmlscene /test/qml_test.qml')\n\n    # List the contents of a directory:\n    g.execute_shell_commands([\n        'cd ~/test',\n        'ls -a',\n    ])\n\n    # Run a python test in a separate process.\n    g.execute_shell_commands('python /test/qt_test.py')\n\ng.execute_shell_commands_with_options inits an environment and then calls g.execute_shell_commands.  See Leo's source code for details.\n",
+    "felix.20240829001454.29": "On startup, Leo looks for two arguments of the form::\n\n    --script scriptFile\n\nIf found, Leo enters batch mode. In batch mode Leo does not show any windows. Leo assumes the scriptFile contains a Python script and executes the contents of that file using Leo's Execute Script command. By default, Leo sends all output to the console window. Scripts in the scriptFile may disable or enable this output by calling app.log.disable or app.log.enable\n\nScripts in the scriptFile may execute any of Leo's commands except the Edit Body and Edit Headline commands. Those commands require interaction with the user. For example, the following batch script reads a Leo file and prints all the headlines in that file::\n\n    path = g.os_path_finalize_join(g.app.loadDir,'..','test','test.leo')\n    assert g.os_path_exists(path),path\n\n    g.app.log.disable() # disable reading messages while opening the file\n    c2 = g.openWithFileName(path)\n    g.app.log.enable() # re-enable the log.\n\n    for p in c2.all_positions():\n        g.es(g.toEncodedString(p.h,\"utf-8\"))\n",
+    "felix.20240829001454.30": "\n\n\n\n",
+    "felix.20240829001454.31": "Leo's @pyplot nodes support\n`matplotlib <https://matplotlib.org/users/index.html>`_.\n\\@pyplot nodes start with @pyplot in the headline.  The rest of the headline is comments. These nodes should contain matplotlib scripts that create figures or animations.  Like this::\n\n    fig2 = plt.figure()\n    x = np.arange(-9, 10)\n    y = np.arange(-9, 10).reshape(-1, 1)\n    base = np.hypot(x, y)\n    images = []\n    for add in np.arange(15):\n        images.append((\n            plt.pcolor(x, y, base+add, norm=plt.Normalize(0, 30)),\n        ))\n    animation = animation.ArtistAnimation(fig2, images,\n        interval=50, repeat_delay=3000, blit=True)\n    g.app.permanentScriptDict['animations'] = animation\n        # Keep a python reference to the animation, so it will complete.\n\n**Notes**\n\n1. If the viewrendered (VR) pane is open, Leo will display the animation in the VR pane whenever the user selects the @pyplot node.  This has been tested only with the viewrendered.py, not the viewrendered2.py plugin.\n\n2. In addition to c, g, and p, the VR code predefines several other vars.  The VR code does the following imports::\n\n    import matplotlib\n    import matplotlib.pyplot as plt\n    import numpy as np\n    import matplotlib.animation as animation\n\nand then predefines the animation, matplotlib, np, numpy and plt vars in the @pyplot script. numpy is also predefined as an alias for np.",
+    "felix.20240829001454.32": "To display images and animations in an external window, *don't* put the script in an @pyplot node. Instead, put the script in a regular node, with the following modifications:\n\n1. Add the required imports::\n\n    import numpy as np\n    import matplotlib.pyplot as plt\n    import matplotlib.animation as animation\n\n2. Place the following at the end of the script::\n\n    plt.ion()\n        # sets interactive mode. Prevents this message:\n        # QCoreApplication::exec: The event loop is already running\n    plt.show()\n\n**Bugs**\n\n1. Once you use the VR pane to display an image, you can't (at present) display an image externally.\n\n2. The VR plugin will refuse to close the VR pane if it ever displays an @pyplot image or animation. This prevents Leo from hard crashing in the pyplot code. As a workaround, you can  resize the VR pane so it is effectively hidden.",
+    "felix.20240829001454.33": "Scripts can easily determine what directives are in effect at a particular position in an outline. c.scanAllDirectives(p) returns a Python dictionary whose keys are directive names and whose values are the value in effect at position p. For example::\n\n    d = c.scanAllDirectives(p) g.es(g.dictToString(d))\n\nIn particular, d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file::\n\n    path = d.get('path')\n    name = p.anyAtFileNodeName()\n    if name:\n       name = g.os_path_finalize_join(path,name)\n       g.es(name)\n",
+    "felix.20240829001454.34": "g.es can send it's output to tabs other than the log tab::\n\n    c.frame.log.selectTab('Test')\n        # Create Test or make it visible.\n\n    g.es('Test',color='blue',tabName='Test')\n        # Write to the test tab.\n\n.. Fix Leo Issue #1101: https://github.com/leo-editor/leo-editor/issues/1101\n\nPlugins and scripts may call c.frame.log.createTab to create non-text widgets in the log pane::\n\n    from leo.core.leoQt import QtWidgets\n    log = c.frame.log\n    w = log.createTab('My Tab', createText=False, widget=QtWidgets.QFrame())\n    log.selectTab('My Tab')\n",
+    "felix.20240829001454.35": "g.es_clickable_link(c, p, line_number, message) writes a clickable\nmessage to the Log pane.\n\nClicking it selects the given line number of p.b.",
+    "felix.20240825210732.1": "@language md\n@tabwidth -4\n",
+    "felix.20240828195006.95": "---\nsidebar_position: 2\n---\n\n",
+    "felix.20240829001657.1": "###############\nWriting Plugins\n###############\n\n.. _`Scripting Leo with Python`: tutorial-scripting.html\n\nPlugins modify how Leo works. With plugins you can give Leo new commands,\nmodify how existing commands work, or change any other aspect of Leo's look\nand feel.\n\nleoPyRef.leo contains all of Leo's official plugins. Studying this file is\na good way to learn how to write plugins.\n\nWriting plugins is like writing any other Leo script.  See\n`Scripting Leo with Python`_. In particular:\n\n1. Plugins can use any of Leo's source code simply by importing any module\n   defined in leoPy.leo.\n\n2. Plugins can register event handlers just like any other Leo script. For full\n   details, see the section called `Handling Events`_ later in this chapter.\n\nThe rest of this chapters discusses topics related specifically to plugins.\n\n.. contents:: Contents\n    :depth: 3\n    :local:\n\n",
+    "felix.20240829001657.2": "A plugin is a Python file in Leo's plugins folder.\n\nEvery plugin should have a top-level init function that returns True if the plugin has been initialized properly. The init function typically:\n\n1. Registers an onCreate event handler, called when Leo creates a new window.\n2. Calls g.plugin_signon(__name__)\n\nFor example::\n\n    def init():\n        if << all imports successful >>:\n            g.registerHandler('after-create-leo-frame',onCreate)\n            g.plugin_signon(__name__)\n            return True\n        else:\n            return False\n\nPlugins do *not* have automatic access to c, g and p.\n\nPlugins define g by importing it::\n\n    import leo.core.leoGlobals as g\n\nPlugins gain access to c using event handlers::\n\n    controllers = {}\n\n    def init():\n        g.registerHandler('after-create-leo-frame',onCreate)\n        return True\n\n    def onCreate (tag, keys):\n        global controllers\n        c = keys.get('c')\n        if c:\n            hash = c.hash()\n            if hash not in controllers.keys():\n                controllers(hash) = PluginController(c)\n\n    def eventHander(tag,keys):\n        global controllers\n        c = keys.get('c')\n        if c:\n            controller = controllers.get(c.hash())\n            controller.handleEvent()\n\nSome plugins inject ivars into the Commands class rather than using a global controllers dict::\n\n    def onCreate (tag, keys):\n        c = keys.get('c')\n        if c:\n            c.my_plugin_controller = ControllerClass(c)\n\n    def eventHander(tag,keys):\n        c = keys.get('c')\n        if c:\n            c.my_plugin_controller.handleEvent()\n\nOnce c is determined, the presently selected position is simply c.p.\n",
+    "felix.20240829001657.3": "Naively using plugins can expose you and your .leo files to malicious attacks. The fundamental principles are::\n\n    Scripts and plugins must never blindly execute code from untrusted sources.\n\nand::\n\n    .leo files obtained from other people may potentially contain hostile code.\n\nStephen Schaefer summarizes the danger this way::\n\n    I foresee a future in which the majority of leo projects come from\n    marginally trusted sources...a world of leo documents sent hither\n    and yon - resumes, project proposals, textbooks, magazines,\n    contracts - and as a race of Pandora's, we cannot resist wanting\n    to see \"What's in the box?\" And are we going to fire up a text\n    editor to make a detailed examination of the ASCII XML? Never!\n    We're going to double click on the cute leo file icon, and leo\n    will fire up in all its raging glory. Just like Word (and its\n    macros) or Excel (and its macros).\n\nIn other words::\n\n    When we share \"our\" .leo files we can NOT assume that we know what\n    is in our \"own\" documents!\n\nNot all environments are untrustworthy. Code in a commercial cvs repository is probably trustworthy: employees might be terminated for posting malicious code. Still, the potential for abuse exists anywhere.\n\nIn Python it is very easy to write a script that will blindly execute other scripts::\n\n    # Warning: extremely dangerous code\n\n    # Execute the body text of all nodes that start with ``@script``.\n    def onLoadFile():\n        for p in c.all_positions():\n            h = p.h.lower()\n            if g.match_word(h,0,\"@script\"):\n                s = p.b\n                if s and len(s) > 0:\n                    try: # SECURITY BREACH: s may be malicious!\n                        exec(s + '\\n')\n                    except:\n                        es_exception()\n\nExecuting this kind of code is typically an intolerable security risk. **Important**: rexec provides *no protection whatever*. Leo is a repository of source code, so any text operation is potentially malicious. For example, consider the following script, which is valid in rexec mode::\n\n    badNode = c.p\n    for p in c.all_positions():\n        << change `rexec` to `exec` in p's body >>\n    << delete badNode >>\n    << clear the undo stack >>\n\nThis script will introduce a security hole the .leo file without doing anything prohibited by rexec, and without leaving any traces of the perpetrating script behind. The damage will become permanent *outside* this script when the user saves the .leo file.\n",
+    "felix.20240829001657.4": "Documenting new plugins is important for users to be able understand and use the features they add. To that effect, there are a few documentation steps that should not be overlooked.\n\n- Document the plugin thoroughly in the plugin's docstring. This allows the documentation to be accessed from the Plugins menu.\n\n- Document any new commands with a proper docstring. This allows the minibuffer command `help-for-command` to provide help for the command.\n\n- In ``leo/doc/sphinx-docs/sphinxDocs.leo``, to the node ``@file leo.plugins.rst``, add the following snippet (preferably in alphabetical order), with the name of the plugin modified to the name of your plugin (here `ipython`). This allows the API docs to be automatically updated::\n\n    :mod:`ipython` Module\n    ---------------------\n\n    .. automodule:: leo.plugins.ipython\n        :members:\n        :undoc-members:\n        :show-inheritance:\n",
+    "felix.20240829001657.5": ".. in writingPlugins.html\n\nFor any commander c:\n\n+------------------------------+--------------------------------------------+\n| **Property**                 | **Value**                                  |\n+------------------------------+--------------------------------------------+\n| c.p                          | the presently selected position            |\n+------------------------------+--------------------------------------------+\n| **Ivar**                     | **Value**                                  |\n+------------------------------+--------------------------------------------+\n| c.frame                      | the leoFrame representing the main window. |\n+------------------------------+--------------------------------------------+\n| c.frame.body                 | the leoBody representing the body pane.    |\n+------------------------------+--------------------------------------------+\n| c.frame.body.wrapper         | a leoQTextEditWidget.                      |\n+------------------------------+--------------------------------------------+\n| c.frame.body.wrapper.widget  | a LeoQTextBrowser (a QTextBrowser)         |\n+------------------------------+--------------------------------------------+\n| c.frame.tree                 | a leoQtTree, representing the tree pane    |\n+------------------------------+--------------------------------------------+\n| c.frame.tree.treeWidget      | a LeoQTreeWidget (a QTreeWidget)           |\n+------------------------------+--------------------------------------------+\n| c.user_dict                  | a Python dictionary for use by scripts and |\n|                              | plugins. Does not persist when Leo exists. |\n+------------------------------+--------------------------------------------+",
+    "felix.20240829001657.6": "Plugins and other scripts can register event handlers (also known as hooks)::\n\n    leoPlugins.registerHandler(\"after-create-leo-frame\",onCreate)\n    leoPlugins.registerHandler(\"idle\", on_idle) \n    leoPlugins.registerHandler((\"start2\",\"open2\",\"command2\"), create_open_with_menu) \n\nAs shown above, a plugin may register one or more event handlers with a single call to leoPlugins.registerHandler. Once a hook is registered, Leo will call the registered function' at the named **hook time**. For example::\n\n    leoPlugins.registerHandler(\"idle\", on_idle)\n\ncauses Leo to call on_idle at \"idle\" time.\n\nEvent handlers must have the following signature::\n\n    def myHook (tag, keywords):\n        whatever\n\n- tag is the name of the hook (a string).\n- keywords is a Python dictionary containing additional information. The following section describes the contents of the keywords dictionary in detail.\n\n**Important**: hooks should get the proper commander this way::\n\n    c = keywords.get('c')\n",
+    "felix.20240829001657.7": "The following table tells about each event handler: its name, when it is called,\nand the additional arguments passed to the hook in the keywords dictionary.\nFor some kind of hooks, Leo will skip its own normal processing if the hook\nreturns anything *other* than None. The table indicates such hooks with 'yes' in\nthe 'Stop?' column.\n\n**Note**:\n\n- The `v`, `old_v` and `new_v` keys below are *deprecated*. They contain *positions*, not vnodes.\n- The `new_c` key is also *deprecated*. Use the `c` key instead.\n\n============================== ======== =================================== =============================\nEvent name (tag argument)      Stop?    When called                         Keys in keywords dict\n============================== ======== =================================== =============================\n'after-auto'                            after each @auto file loaded        c,p (note 13)\n'after-create-leo-frame'                after creating any frame            c\n'after-redraw-outline'                  end of tree.redraw                  c (note 6)\n'after-reading-external-file'           after reading each external file    c,p\n'after-reload-settings'                 after 'reload-settings' command     c\n'before-create-leo-frame'               before frame.finishCreate           c\n'before-writing-external-file'          before writing each external file   c,p\n'bodyclick1'                    yes     before normal click in body         c,p,v,event\n'bodyclick2'                            after normal click in body          c,p,v,event\n'bodydclick1'                   yes     before double click in body         c,p,v,event\n'bodydclick2'                           after  double click in body         c,p,v,event\n'bodykey1'                      yes     before body keystrokes              c,p,v,ch,oldSel,undoType\n'bodykey2'                              after  body keystrokes              c,p,v,ch,oldSel,undoType\n'bodyrclick1'                   yes     before right click in body          c,p,v,event\n'bodyrclick2'                           after  right click in body          c,p,v,event\n'boxclick1'                     yes     before click in +- box              c,p,v,event\n'boxclick2'                             after  click in +- box              c,p,v,event\n'clear-all-marks'                       after clear-all-marks command       c,p,v\n'clear-mark'                            when mark is set                    c,p,v\n'close-frame'                           in app.closeLeoWindow               c\n'color-optional-markup'         yes *   (note 7)                            colorer,p,v,s,i,j,colortag (note 7)\n'command1'                      yes     before each command                 c,p,v,label (note 2)\n'command2'                              after  each command                 c,p,v,label (note 2)\n'create-optional-menus'                 (note 8)                            c (note 8)\n'create-popup-menu-items'               in tree.OnPopup                     c,p,v,event (new)\n'draw-outline-box'              yes     when drawing +- box                 tree,p,v,x,y\n'draw-outline-icon'             yes     when drawing icon                   tree,p,v,x,y\n'draw-outline-node'             yes     when drawing node                   tree,p,v,x,y\n'draw-outline-text-box'         yes     when drawing headline               tree,p,v,x,y\n'drag1'                         yes     before start of drag                c,p,v,event\n'drag2'                                 after  start of drag                c,p,v,event\n'dragging1'                     yes     before continuing to drag           c,p,v,event\n'dragging2'                             after  continuing to drag           c,p,v,event\n'enable-popup-menu-items'               in tree.OnPopup                     c,p,v,event\n'end1'                                  start of app.quit()                 None\n'enddrag1'                      yes     before end of drag                  c,p,v,event\n'enddrag2'                              after  end of drag                  c,p,v,event\n'headclick1'                    yes     before normal click in headline     c,p,v,event\n'headclick2'                            after  normal click in headline     c,p,v,event\n'headrclick1'                   yes     before right click in headline      c,p,v,event\n'headrclick2'                           after  right click in headline      c,p,v,event\n'headkey1'                      yes     before headline keystrokes          c,p,v,ch (note 12)\n'headkey2'                              after  headline keystrokes          c,p,v,ch (note 12)\n'hoist-changed'                         whenever the hoist stack changes    c\n'iconclick1'                    yes     before single click in icon box     c,p,v,event (note 15)\n'iconclick2'                            after  single click in icon box     c,p,v,event (note 15)\n'iconrclick1'                   yes     before right click in icon box      c,p,v,event (note 15)\n'iconrclick2'                           after  right click in icon box      c,p,v,event (note 15)\n'icondclick1'                   yes     before double click in icon box     c,p,v,event (note 15)\n'icondclick2'                           after  double click in icon box     c,p,v,event (note 15)\n'idle'                                  periodically (at idle time)         c\n'init-color-markup'                     (note 7)                            colorer,p,v (note 7)\n'menu1'                         yes     before creating menus               c,p,v (note 3)\n'menu2'                         yes     during creating menus               c,p,v (note 3)\n'menu-update'                   yes     before updating menus               c,p,v\n'new'                                   start of New command                c,old_c,new_c (note 9)\n'open1'                         yes     before opening any file             c,old_c,new_c,fileName (note 4)\n'open2'                                 after  opening any file             c,old_c,new_c,fileName (note 4)\n'openwith1'                     yes     before Open With command            c,p,v,d (note 14)\n'openwith2'                             after  Open With command            c,p,v,(note 14)\n'recentfiles1'                  yes     before Recent Files command         c,p,v,fileName\n'recentfiles2'                          after  Recent Files command         c,p,v,fileName\n'redraw-entire-outline'         yes     start of tree.redraw                c (note 6)\n'save1'                         yes     before any Save command             c,p,v,fileName\n'save2'                                 after  any Save command             c,p,v,fileName\n'scan-directives'                       in scanDirectives                   c,p,v,s,old_dict,dict,pluginsList (note 10)\n'select1'                       yes     before selecting a position         c,new_p,old_p,new_v,old_v\n'select2'                               after  selecting a position         c,new_p,old_p,new_v,old_v\n'select3'                               after  selecting a position         c,new_p,old_p,new_v,old_v\n'set-mark'                              when a mark is set                  c,p,v\n'show-popup-menu'                       in tree.OnPopup                     c,p,v,event\n'start1'                                after app.finishCreate()            None\n'start2'                                after opening first Leo window      c,p,v,fileName\n'unselect1'                     yes     before unselecting a vnode          c,new_p,old_p,new_v,old_v\n'unselect2'                             after  unselecting a vnode          c,new_p,old_p,old_v,old_v\n'\\@url1'                        yes     before double-click @url node       c,p,v,url (note 5)\n'\\@url2'                                after  double-click @url node       c,p,v(note 5)\n============================== ======== =================================== =============================\n\n**Notes**:\n\n1.  'activate' and 'deactivate' hooks have been removed because they do not work as expected.\n\n2.  'commands' hooks: The label entry in the keywords dict contains the\n    'canonicalized' form of the command, that is, the lowercase name of the command\n    with all non-alphabetic characters removed.\n    Commands hooks now set the label for undo and redo commands 'undo' and 'redo'\n    rather than 'cantundo' and 'cantredo'.\n\n3.  'menu1' hook: Setting g.app.realMenuNameDict in this hook is an easy way of\n    translating menu names to other languages. **Note**: the 'new' names created this\n    way affect only the actual spelling of the menu items, they do *not* affect how\n    you specify shortcuts settings, nor do they affect the 'official'\n    command names passed in g.app.commandName. For example::\n\n        app().realMenuNameDict['Open...'] = 'Ouvre'.\n\n4.  'open1' and 'open2' hooks: These are called with a keywords dict containing the following entries:\n\n    - c:          The commander of the newly opened window.\n    - old_c:      The commander of the previously open window.\n    - new_c:      (deprecated: use 'c' instead) The commander of the newly opened window.\n    - fileName:   The name of the file being opened.\n\n    You can use old_c.p and c.p to get the current position in the old and new windows.\n    Leo calls the 'open1' and 'open2' hooks only if the file is not already open. Leo\n    will also call the 'open1' and 'open2' hooks if: a) a file is opened using the\n    Recent Files menu and b) the file is not already open.\n\n5.  '@url1' and '@url2' hooks are only executed if the 'icondclick1' hook returns None.\n\n6.  These hooks are useful for testing.\n\n7.  These hooks allow plugins to parse and handle markup within doc parts,\n    comments and Python ''' strings. Note that these hooks are *not* called in\n    Python ''' strings. See the color_markup plugin for a complete example of how to\n    use these hooks.\n\n8.  Leo calls the 'create-optional-menus' hook when creating menus. This hook need\n    only create new menus in the correct order, without worrying about the placement\n    of the menus in the menu bar. See the plugins_menu and scripts_menu plugins for\n    examples of how to use this hook.\n\n9.  The New command calls 'new'.\n    The 'new_c' key is deprecated.  Use the 'c' key instead.\n\n10. g.scanDirectives calls 'scan-directives' hook.\n    g.scanDirectives returns a dictionary, say d.\n    d.get('pluginsList') is an a list of tuples (d,v,s,k) where:\n\n    - d is the spelling of the @directive, without the leading @.\n    - v is the vnode containing the directive, _not_ the original vnode.\n    - s[k:] is a string containing whatever follows the @directive.\n      k has already been moved past any whitespace that follows the @directive.\n\n    See the add_directives plugins directive for a complete example of how to use\n    the 'scan-directives' hook.\n\n11. g.app.closeLeoWindow calls the 'close-frame' hook just before\n    removing the window from g.app.windowList. The hook code may remove the window\n    from app.windowList to prevent g.app.closeLeoWindow from destroying the window.\n\n12. New in Leo 6.4: Leo calls the 'headkey1' and 'headkey2' when the headline has *actually* changed.\n\n13. p is the new node (position) containing '@auto filename.ext'\n\n14. The d argument to the open-with event handlers is a python\n    dictionary whose keys are all the tags specified by the user in the body of the\n    @openwith node.\n\nThe following events can *only* be called be called by minibuffer commands:\n\n========================== ======== =====================\nEvent name (tag argument)  Stop?    Keys in keywords dict\n========================== ======== =====================\n'iconclick1'               yes      c,p,v,event (note 15)\n'iconrclick1'              yes      c,p,v,event (note 15)\n'iconrclick2'                       c,p,v,event (note 15)\n'icondclick1'              yes      c,p,v,event (note 15)\n'icondclick2'                       c,p,v,event (note 15)\n========================== ======== =====================\n\n15. The only way to trigger these event is with the following minibuffer commands::\n\n                click-icon-box\n                ctrl-click-icon\n                double-click-headline\n        Ctrl+F3 double-click-icon-box\n                right-click-headline\n                right-click-icon\n\n16. The following links are supported by plugins, not Leo itself:\n\n============================== ======== =================================== ===========\n'hypercclick1'                  yes     before control click in hyperlink   c,p,v,event\n'hypercclick2'                          after  control click in hyperlink   c,p,v,event\n'hyperenter1'                   yes     before entering hyperlink           c,p,v,event\n'hyperenter2'                           after  entering hyperlink           c,p,v,event\n'hyperleave1'                   yes     before leaving  hyperlink           c,p,v,event\n'hyperleave2'                           after  leaving  hyperlink           c,p,v,event\n============================== ======== =================================== ===========",
+    "felix.20240829001657.8": "If a plugin has a function at the outer (module) level called unitTest, Leo's unit tests will call that function.\n\nSo it would be good if writers of plugins would create such a unitTest function. To indicate a failure the unitTest can just throw an exception. Leo's plugins test suite takes care of the rest.\n",
+    "felix.20240827000501.1": "@language md\n@tabwidth -4\n",
+    "felix.20240828195006.97": "---\nsidebar_position: 3\n---\n\n",
+    "felix.20240829001804.1": "####\nFAQ\n####\n\nThis is Leo's Frequently Asked Questions document.\n\n.. index:: FAQ\n\n.. contents:: Contents\n    :depth: 4\n    :local:\n\n",
+    "felix.20240829001804.2": ".. Links used in this document...\n\n.. External links\n\n.. _docutils:           http://docutils.sourceforge.net/\n.. _`git repository`:   https://github.com/leo-editor/leo-editor\n.. _unicode:            http://www.unicode.org/\n\n.. Glossary\n.. _directive:              glossary.html#directive\n.. _directives:             glossary.html#directives\n.. _`external file`:        glossary.html#external-file\n.. _`external files`:       glossary.html#external-files\n.. _headline:               glossary.html#headline\n.. _headlines:              glossary.html#headlines\n.. _node:                   glossary.html#node\n.. _nodes:                  glossary.html#nodes\n.. _outliner:               glossary.html#outliner\n.. _sections:               glossary.html#sections\n.. _`section name`:         glossary.html#section-name\n.. _`section names`:        glossary.html#section-names\n.. _sentinels:              glossary.html#sentinels\n.. _`sentinel line`:        glossary.html#sentinel\n.. _`sentinel lines`:       glossary.html#sentinel\n.. _setting:                glossary.html#setting\n.. _settings:               glossary.html#settings\n\n.. FAQ\n.. _`How to install Leo on Windows`:    installing.html#installing-leo-on-windows\n.. _`run Leo in a console`:             running.html#running-leo-from-a-console-window\n\n.. Tutorial\n.. _`scripting tutorial`:   tutorial-scripting.html\n.. _`Leo's tutorials`:      tutorial.html\n.. _`Clones`:               tutorial-pim.html#clones\n.. _`Views`:                tutorial-pim.html#views\n\n.. Other local references\n.. _command:                commands.html\n.. _`History of Leo`:       appendices.html#history-of-leo\n.. _`Leo 4.0: Eliminating error 'recovery'`: appendices.html#leo-4-0-eliminating-error-recovery\n\n",
+    "felix.20240829001804.4": "Let us think of lessons not as explanations, but as puzzles to be solved by the student. The puzzles themselves need no lengthy explanations. They can even be cryptic. This attitude arises from two principles:\n\n1. The less said, the better.\n2. Invite people to learn for themselves.\n\n**Pick something that interests you**\n\nPick a real, worthy, programming task that you (the student) personally want/need to do in Leo. *This step is essential*! It is *useless* to try to learn in a vacuum.\n\nEKR's first python program was C2Py. leoAttic.txt contains the original version. Leo's c-to-python commands contained revised code.\n\n**Overcome fear of crashes and mistakes**\n\n- Run Leo from a console.\n- Single-step through your code with g.pdb()\n- Deliberately put a crasher in your code and see what happens.\n\nThe only way to hard crash Leo is to pass bad pointers to PyQt. Python should catch all other problems. If it doesn't, report a bug to the python people ;-)\n\n**Discover how Leo's code works**\n\n- Where is Leo's source code? Hint: look for leoPy.leo in LeoDocs.leo.\n- Look at Leo's demote command.\n  - What are three ways of finding the demote command?\n  - How does demote change the outline?\n  - How does demote handle undo?\n- Study any other Leo command that relates to your project.\n- Use the cff command to find all definitions of x.\n- Use the cff command to find all uses of x.\n\n**Start using Leo for real**\n\n- Add a new command using @button.\n- Create an external file containing your real-world project.\n  Execute it outside of Leo.\n- Write a Leo plugin.\n- Advanced: fix one of Leo's bugs.\n\n**Attitude**\n\nStudents should always feel free to ask for help, but struggle teaches us the most. **It doesn't matter how long it takes to learn something**. In our culture, we value quickness. But that is a trap. All learning builds momentum:\n\n- Put 10 units of effort in, get 1 unit of results out.\n- Put 1 in, get 1 out.\n- Put 1 in, get 10 out.\n\nThere is no other way! How many times have we given up just because things were not easy or clear at first?\n\n**That which we learn, we learn by doing**\n\nReading about (and thinking about) are useful, but not good enough. That is why students must have a project that is important to them.  The project will put them into action.",
+    "felix.20240829001804.5": "First, read `Leo's tutorials`_. This will be enough to get you started if you just want to use Leo as an outliner_. If you intend to use Leo for programming, read the `scripting tutorial`_, then look at Leo's source code in the file LeoPy.leo. Spend 5 or 10 minutes browsing through the outline. Don't worry about details; just look for the following common usage patterns:\n\n- The (Projects) tree shows how to use clones to represent tasks.\n\n- Study @file leoNodes.py. It shows how to define more than one class in single file.\n\n- Most other files show how to use a single @others directive to define one class.\n\n- Most methods are defined using @others, *not* section definition nodes.\n",
+    "felix.20240829001804.6": "Use methods for any code that is used (called or referenced) more than once.\n\nSections_ are convenient in the following circumstances:\n\n- When you want to refer to snippets of code the can not be turned into methods. For example, many plugins start with the code like this::\n\n    << docstring >>\n    << imports >>\n    << version history >>\n    << globals >>\n\n    None of these sections could be replaced by methods.\n\n- When you want to refer to a snippet of code that shares local variables with the enclosing code. This is surprisingly easy and safe to do, *provided* the section is used only in one place. `Section names`_ in such contexts can be clearer than method names.  For example::\n\n    << init ivars for writing >>\n\nIn short, I create sections when convenient, and convert them to functions or methods if they need to be used in several places.\n",
+    "felix.20240829001804.8": "Edward Ream::\n\n    alp;;=@language python\\n\n    alr;;=@language rest\\n@wrap\\n\n    date;;={|{import time;x=time.asctime()}|}\n    trace;;=trace = <|bool|> and not g.unitTesting\n\nJohn Lunzer::\n\n    hl;;={|{x=c.p.h}|}\n    es;;=g.es(contents,color='<|color|>')\n    ts;;={|{x=time.strftime(\"%Y%m%d%H%M%S\")}|}\n\nRob (Largo84)::\n\n    ol;;=<ol>\\n    <li><|item|></li>\\n</ol>\n    li;;=<li><|ITEM|></li>\n    link;;=<a href=\"<|URL|>\" target=\"_blank\"><|TEXT|></a>\n    enum;;=\\begin{enumerate}\\n    \\item <|item|>\\n\\end{enumerate}\n\nFor more examples, see LeoSettings.leo.\n\n",
+    "felix.20240829001804.10": "The c.cloneFindAllAtNode and c.cloneFindAllFlattenedAtNode methods start the clone-find-all and clone-find-all-flattened commands at a particular node. For example, here is the body of ``@button cfa-code @args add`` in leoPy.leo::\n\n    c.cloneFindAllFlattenedAtNode('Code',top_level=True)\n\nThe ``@args add`` part of the headline causes Leo to add the ``cfa-code`` command to Leo's history list, so there is no urgent need to use a separate key binding for this command.",
+    "felix.20240829001804.11": "Clone wars can be most annoying. The solution is simple::\n\n    **Keep clones only in the outline and in one other external file**\n\nIn particular, catchall files like leo/doc/leoProjects.txt or leo/doc/leoToDo.txt should never contain clones.\n",
+    "felix.20240829001804.12": "Clones make reorganizing an outline significantly easier and faster.  Simply make top-level clones of the nodes you keep encountering during the reorg. This makes moving a node a snap: just move it from one clone to another.\n",
+    "felix.20240829001804.13": ".. https://groups.google.com/d/msg/leo-editor/4s44H9cUJGY/ewRBDBSw-A8J\n\nFor the last several weeks I've used clones in a new, more effective way, inspired by git's stash/unstash commands. Here are the main ideas.\n\n1. [Most important] I avoid putting clones in two different *external* files.\n\nFor any task, I create a task node that resides in @file leoToDo.txt. I clone that node and put it in the outline, *never* in any other @file node. This instantly eliminates clone wars.\n\n2. I use top-level \"stashed\" nodes/trees in my local copy of leoPy.leo.\n\nThese clones are *not* written to any external file, so they would be lost if I lost leoPy.leo. But the risks are negligible because all stashed nodes are clones of nodes that *do* exist in external files.\n\n3. I have two main stashed trees: recent files and recent code.\n\nThe \"recent files\" tree contains clones of all the @file nodes I have worked on recently. This speeds up access to them. That happens surprisingly often--often enough to be well worth maintaining the tree. Furthermore, because Leo's new pylint command now works on trees, I can check all recently-changed files simply by running pylint on the \"recent files\" tree.\n\nThe \"recent code\" tree is even more valuable, for three reasons. The first is obvious--it speeds access to recently-changed nodes.\n\nSecond, the \"recent code\" tree allows me to work on multiple tasks without getting overwhelmed by details and loose nodes lying around. I add organizer nodes as needed to make accessing the nodes faster, and also to jog my memory about what I was doing when I changed those nodes ;-)\n\nThird, the \"recent code\" tree allows me *not* to put clones in the @file leoProjects.txt tree. This leads me to...\n\n4. I use clones in a stylized way when fixing and committing bugs.\n\nI always use clones when working on a project. A \"task\" node contains clones of all nodes related to the task. The task node typically remains in leoToDo.txt until the task is completely finished. While working on the bug, I create a clone of the task node, and move that clone to the bottom top-level node of the outline. Among other things, this makes it easy to limit searches without actually choosing \"suboutline only\" in the Find panel. This workflow is decades old.\n\nThe following is the heart of the new workflow. When a task is complete, I do the following:\n\nA. First, I create a **stashed-task** node, containing all the clones that were previously in the task node.\n\nThe *stashed-task* becomes pre-writing for the commit log. The *task* node instantly becomes pre-writing for the release notes, so if it needs to discuss any code in the clones that have just been moved to the stashed-task node, I write those words immediately, while all details are fresh in my mind.\n\nB. Now I move the cloned task node that is in leoToDo.txt to the appropriate place in leoProjects.txt.\n\nC. Next I do the commit.\n\nThe *other* clone of the task node, and the stashed task node are still within easy reach, and I typically use both nodes to create the commit log. The commit will typically consist of the changed leoToDo.txt and leoProjects.txt and whatever .py files the task itself changed. Happily, leoToDo.txt and leoProjects.txt are now up-to-date because of steps A and B.\n\nD. Finally, I clean up.\n\nI delete the top-level clone of the task node, and move the stashed-task\nnode to the \"recent code\" tree.\n\nE. Later, when it appears that activity has died down on various projects, I'll delete nodes from the \"recent files\" an \"recent code\" trees. This is a minor judgment call: I want to leave nodes in the trees while they are useful, but not significantly longer than that. I do *not* regard these trees as permanently useful. leoProjects.txt should contain *all* permanent notes about a project.\n\n===== Conclusions\n\nThis work flow may seem complicated. Believe me, it is not. It's easier to use than to describe.\n\nThis workflow has big advantages:\n\n1. Clone wars are gone for good.\n2. All recent data is easily available.\n3. Task nodes and stashed-task nodes provide natural places for proto-documentation.\n4. Banning clones from leoProjects.txt forces me to complete the first draft of the documentation before committing the fix.\n",
+    "felix.20240829001804.14": "Some people seem to think that it is difficult to understand how Leo handles \"clone wars\": differing values for a cloned nodes that appear in several external files. That's not true. The rule is::\n\n    **The last clone that Leo reads wins.**\n\nThat is, for any cloned node C, Leo takes the value of C.h and C.b to be the values specified by the last copy that Leo reads.\n\nThere is only one complication::\n\n    **Leo reads the entire outline before reading any external files.**\n\nThus, if C appears in x.leo, y.py and z.py, Leo will choose the value for C in x.py or y.py, depending on which @<file> node appears later in the outline.\n\n**Note**: Whenever Leo detects multiple values for C when opening an outline, Leo creates a \"Recovered nodes\" tree. This tree contains all the various values for C, nicely formatted so that it is easy to determine where the differences are.\n\n",
+    "felix.20240829001804.15": "A **dangerous** delete is a deletion of a node so that all the data in the node is deleted *everywhere* in an outline. The data is gone, to be retrieved only via undo or via backups. It may not be obvious which deletes are dangerous in an outline containing clones. Happily, there is a very simple rule of thumb::\n\n    Deleting a non-cloned node is *always* dangerous.\n    Deleting a cloned node is *never* dangerous.\n\nWe could also consider a delete to be dangerous **if it results in a node being omitted from an external file.** This can happen as follows. Suppose we have the following outline (As usual, A' indicates that A is marked with a clone mark)::\n\n    - @file spam.py\n        - A'\n            - B\n    - Projects\n        - A'\n            - B\n\nNow suppose we clone B, and move the clone so the tree looks like this::\n\n    - @file spam.py\n        - A'\n            - B'\n    - Projects\n        - A'\n            - B'\n        - B'\n\nIf (maybe much later), we eliminate B' as a child of A will get::\n\n    - @file spam.py\n        - A'\n    - Projects\n        - A'\n        - B\n\nB has not been destroyed, but B is gone from @file spam.py! So in this sense deleting a clone node can also be called dangerous.\n",
+    "felix.20240829001804.16": "Q: When can I delete a clone safely?\n\nA: Any time! The only time you can \"lose\" data is when you delete a non-cloned node, save your work and exit Leo.\n\nQ: What gets \"lost\" when I delete a non-cloned node?\n\nA: The node, and all it's non-cloned children. In addition, if the node contains all clones of a cloned node, all copies of the cloned node will also be \"lost\".\n\nQ: Anything else I should be careful about concerning clones?\n\nNot really.  If you move any node out \"underneath\" an @file (@clean, etc) node, the contents of that node disappears from the external file.\n\nI hope this encourages more people to use clones.  Leo's clone-find commands are something that every Leo programmers should be using every day.",
+    "felix.20240829001804.17": "Any outline (.leo file) may contain clones that appear in multiple external files defined *within* that outline. There is no problem with such **intra-outline clones**.\n\nIn contrast, **cross-outline clones** are clones that appear in more than one outline.  Leo's paste-retaining-clones command makes it possible for two outlines to contain nodes with the same gnx. Conceivably, both outlines could use those clones in the *same* external file!\n\nLeo will never encourage cross-outline clones, because such clones are inherently dangerous. Indeed, neither outline would have full responsibility for its own data. \n\nIndeed, the shared clones would be subject to the well-known multiple-update problem. Suppose the two outlines were open simultaneously, and each outline changed the shared clones in different ways. Whichever outline changed the data last would \"win.\" The changes in the other outline would be lost forever!\n\nIn short, Leo will never support features that encourage cross-outline clones.",
+    "felix.20240829001804.18": "clone-find-all-flattened often includes clones of nodes whose location is unclear.  No problem! Just select the mysterious node and do Alt-N (goto-next-clone). Leo will select the next clone of that node, wrapping the search as necessary.  One or two Alt-N takes me to the \"real\" node, the node having an ancestor @<file> node.\n\nIdeally, the meaning of all nodes would be clear from their headlines.  I typically use the following conventions. For section definitions, the headline should contain file or class name.  Examples::\n\n    << imports >> (leoCommands.py)\n    << docstring >> (LeoApp)\n\n",
+    "felix.20240829001804.19": "You will lose much of Leo's power if you don't use clones. See `Clones`_ and `Views`_ for full details.\n",
+    "felix.20240829001804.21": "I'm trying to create a interactive chart in a embedded in a new leo pane using matplotlib. However, I am not sure about the the best way to implement this. I would appreciate some guidance on this please? The questions I would like answered are:\n\n1. How do I create a new blank pane for embedding a chart as well as other QtWidgets.\n\n2. Can I do this in a script or do I need to work with leo source?\n\nI want to create a data processing and visualization tool kit in leo. Like Excel but using nodes instead of columns. Nodes will have data and I want to create new data nodes by applying python functions to data in existing nodes. The thing missing is the visualization within a leo pane (I can easily launch a chart in it's own window).\n\n**Terry Brown**\n\nYou can run this script from any body pane::\n\n    '''\n    A script that adds a MatPlotLib pane to Leo.\n\n    After running this script, right click on one of the pane dividers and\n    select Insert. A new pane with a button 'Action' appears. Click it, and\n    select \"Add matplot\" from the context menu.\n    '''\n\n    from leo.core.leoQt import QtWidgets\n\n    class MatplotPaneProvider:\n        def __init__(self, c):\n            self.c = c\n            if hasattr(c, 'free_layout'):\n                splitter = c.free_layout.get_top_splitter()\n                if splitter:\n                    splitter.register_provider(self)\n        def ns_provides(self):\n            return[('Add matplot', '_add_matplot_pane')]\n        def ns_provide(self, id_):\n            if id_ == '_add_matplot_pane':\n                c = self.c\n                w = QtWidgets.QSlider() ### w = myMatplotWidget()\n                return w\n        def ns_provider_id(self):\n            # used by register_provider() to unregister previously registered\n            # providers of the same service\n            # provider ID is not the same as the service id_ above\n            return \"completely unique value here\"\n\n    MatplotPaneProvider(c)\n\n**OP**\n\nI have managed to get a matplotlib graph embedded within a pane in leo as a widget. I now need some help with how to interact with the widget using scripts in leo. I am unsure about the following:\n\n*1/ How do I expose the widget within the leo environment?* \n\nIf you were only going to have one and you weren't going to destroy it, you could just do something simple like c._matplot = self in its constrictor (assuming c was passed to the constructor).\n\nIf you're going to have more than one and they may be destroyed, it might be simplest to let the free_layout / nested_splitter system manage them::\n\n    ts = c.free_layout.get_top_splitter()\n    matplotters = ts.findChildren(myMatplotWidget)\n\nshould return a list of the widgets of your class in the layout, but only if they're in the main window, widgets in extra windows opened from the \"Open window\" context menu item would be missed, I can add a find_children() method to complement the find_child() method the splitters already have to account for this.\n\nDetail: the above is just using Qt's QObject.findChildren(), the nested_splitter find_child() and (not yet written) find_children() versions search the extra windows as well.\n\nHere I have created a self.mat in your MatplotPaneProvider class to make the widget accessible but it doesn't feel like the correct way to do this::\n\n    mat = MatplotPaneProvider(c)\n    mat.mat.someMethod()\n    mat.mat.someOtherMethod()\n\n2. I would also like to make the widget accessible from any script within leo. What's the leo way of doing this?\n\nSee above\n\n3. If I create more than 1 pane containing these widgets. How do I switch between them in scripts?\n\nSee above\n\n4. Running this script more than once creates multiple items for Add Matplot when pressing the Action button. How do I stop this from happening? I have already tried returning a unique integer in * ns_provider_id *but that did not work.*\n\nThe value returned by ns_provider_id should be unique for the provider class, but constant. So it can just return something like \"matplotlib provider ver 1\"\n",
+    "felix.20240829001804.22": "How it is possible to specify settings in @file? As I understand every setting should be a single outline.\n\nVitalije:\n\nYou can use clones. For example::\n\n    --@settings\n    ----my-shared-settings\n    ------...\n    ----some-specific-settings-for-this-outline\n    ------....\n\n    --@file my-shared-settings-somewhere.txt\n    ----my-shared-settings\n\nwhere `my-shared-settings` node is cloned from the @file subtree.\n\nQuite often I use some script to combine some nodes, process them and generate some output file. And such script I put in a node with the following headline: ``@button n-save @key=Ctrl-s``. Then whenever I open this outline and whenever I hit Ctrl-s to save the outline, this script is executed. Of course I put in this script `c.save()` call and on every save my files are regenerated. \n\nWhen working for a web I often use Coffeescript, some html template generators like Pug, Sass for generating css files, ... Now all of these command line tools have watching mode where they watch folders for file changes and whenever source file is changed they regenerate the output file. But then you also need to run some packaging tool to bundle all generated files. Instead of watching for file changes, my script bound to Ctrl-s regenerate source files in memory and without saving them execute suitable tool only on changed sources and produced outputs bundle in the final file. This makes the whole process much faster.\n\nAttached to this message is a Leo file that I have extracted from one of my projects. I hope that I didn't miss anything that the script require. \n\nIn the outline you can find build server implemented in Coffeescript. You have to use npm or yarn to install necessary modules for this server to work. Once installed you start server by executing\n`coffee tools/build-server.coffee` and it will start listening on port 8011. The script bound to Ctrl-s will search outline for nodes with the headlines like: @vendor, @pug, @coffee, @bulma and for each found node, it checks if the content of this node and its subtree has changed since last time and if it is, this content is sent to build server which transforms the source and returns result that script writes to output file. \n\nThere is one more thing I use for sharing outlines. There are three commands `set-reference-file`, `update-ref-file` and `read-ref-file`. The first lets you choose a reference file for this outline, i.e. public shared outline. It adds a top level headline `---begin-private-area---` to the outline. In the body of this node is the path to the public Leo file. Everything below this node is private, and above is public. The public file should be added to version control (git, fossil,...) and the private file should be added to ignored files for version control tool. And then in the script bound to Ctrl-s you can add `c.fileCommands.save_ref()`, so every time you save your private Leo file, at the same time is updated the public Leo file. That way they never get out of sync.",
+    "felix.20240829001804.23": "Find the @file leoApp.py node in leoPy.leo. In the ctor for the LeoApp class set self.use_psyco to True or False. You will find this ctor in the node::\n\n    Code-->Core classes...-->@file leoApp.py-->app.__init__\n\nNote that this ivar can not be set using settings in leoSettings.leo because Leo uses g.app.use_psyco before processing configuration settings.\n",
+    "felix.20240829001804.24": "In the directory leo-editor/leo/themes are a number of theme files. These\ncan be loaded using the File, Open Outline menu option in Leo. Opening an\noutline automatically loads it. Keep opening outlines until you find one\nyou like.\n\nThen close all of the theme files.\n\nCopy the theme file you chose from leo-editor/leo/themes to ~/.leo/themes\n(you will have to create the themes folder here) and rename it something\nlike this: Original file is BreezeDarkTheme.leo rename to\nBreezeDarkThemeLocal.leo\n\nNow open your myLeoSettings.leo file.\n\nAdd the following to the headline of a new node as a child of your @settings node::\n\n    @string theme-name = BreezeDarkThemeLocal\n\nNow save the file and restart Leo.\n\nYou should now be using the theme of your choice. From here you need to\nopen the local theme file with Leo. The font sizing and colors are under\nTheme Settings in the tree.\n",
+    "felix.20240829001804.25": "Put the following in the style-sheet:\n\n    QTextEdit#richTextEdit { background-image: url('/home/tbrown/Desktop/cow2.jpg'); }\n\nIf you wanted node specific backgrounds Leo would have to start setting an attribute on the body widget, probably the gnx, so you could do::\n\n    QTextEdit#richTextEdit[leo_gnx='tbrown.20130430222443.19340'] { \n        background-image: url('/home/tbrown/Desktop/cow2.jpg'); \n    }\n",
+    "felix.20240829001804.26": "The following plugin, placed in ~/.leo/plugins, runs code at 'start1' time, that is, while other plugins are loading::\n\n    import leo.core.leoGlobals as g\n    print('===== local_plugin.py in ~/.leo/plugins/')\n\n    def hook(tag, keys):\n        g.trace(tag)\n\n    def init():\n        g.registerHandler('start1', hook)\n        return True\n\nAlternatively, the plugin could run code at 'start2' time, after all plugins have been loaded, or at any other time, as described `on this page <writingPlugins.html#handling-events>`_.",
+    "felix.20240829001804.27": "Organize your myLeoSettings.leo file like this::\n\n    @settings\n         -my settings <clone>\n              -@bool .... = True\n              -@data fldsdf\n\n    @file mysettings.txt\n          my settings <clone>\n\nSyncing mySettings.txt will synchronize your settings across your .leo files.\n\n**Note**: Changed settings will not be available in other open outlines until you reload settings. You can do this with the reload-all-settings command.",
+    "felix.20240829001804.28": "To enable a theme .leo file, put the following setting in myLeoSettings.leo::\n\n    @string theme-name = <theme file, without the .leo extension>\n\nDark themes::\n\n    @string theme-name = BreezeDarkTheme\n    @string theme-name = EKRDark\n    @string theme-name = LeoBlackSolarized\n    @string theme-name = ZephyrDarkTheme\n\nLight themes::\n\n    @string theme-name = DefaultTheme\n    @string theme-name = EKRLight\n    @string theme-name = PaperLightTheme\n\nYou can also define a theme directly in myLeoSettings.leo as follows:\n\n- *Remove* (or disable) any previous @theme tree in myLeoSettings.leo.\n- *Select* one of the @theme trees in leoSettings.leo.\n- *Copy* the entire @theme tree to myLeoSettings.leo.\n- *Move* the copied tree to the *end* of the @settings tree.\n- *Test* by restarting Leo.\n",
+    "felix.20240829001804.29": "You can 'revert' to old key bindings as follows:\n\n1. Open leoSettings.leo.\n\n2. Find the node 'Keyboard shortcuts'.\n\n3. Disable the old bindings by moving the node '@keys EKR bindings: Emacs keys + modes' so that it is a child of the node: '@ignore Unused key bindings'.\n\n4. Notice that there are two child nodes of the node '@ignore Unused key bindings' that refer to legacy key bindings:\n\n   - '@keys Legacy Leo shortcuts with important Emacs bindings'\n\n   - '@keys Legacy Leo bindings'.\n\n5. Move **one** of these two legacy nodes up one level so that it is a child of the node 'Keyboard shortcuts'. It should **not** be a child of the node '@ignore Unused key bindings'.\n",
+    "felix.20240829001804.30": "c.frame.menu.createMenuItemsFromTable will append items to the end of an existing menu. For example, the following script will add a new item at the end of the 'File' menu::\n\n    def callback(*args,**keys):\n        g.trace()\n\n    table = ((\"Test1\",None,callback),)\n\n    c.frame.menu.createMenuItemsFromTable('File',table)\n\nPlugins can do anything with menus using c.frame.menu.getMenu. For example, here is a script that adds a Test menu item after the 'Open With' menu item in the File menu::\n\n    def callback(*args,**keys):\n        g.trace()\n\n    fileMenu = c.frame.menu.getMenu('File')\n\n# 3 is the position in the menu.  Other kinds of indices are possible::\n\n    fileMenu.insert(3,'command',label='Test2',command=callback)\n",
+    "felix.20240829001804.31": "See the node ``@data qt-gui-plugin-style-sheet`` in your theme file or ``myLeoSettings.leo``.\n",
+    "felix.20240829001804.32": "You have two options: \n\n- Get git write access, and add the @file file to the plugins directory.\n\n- Just send the @file file to me at edreamleo@gmail.com.\n",
+    "felix.20240829001804.34": ".. From: http://sourceforge.net/forum/message.php?msg_id=3240374\n\nUsing Leo's File-Export-Flatten Outline commands creates a MORE style outline which places all Leo body sections on the left margin. The headlines_ are indented with tabs which Excel will read as a tab delimited format. Once inside Excel there are benefits.\n\n1. The most obvious benefit inside Excel is that the body sections (Excel first column) can be selected easily and highlighted with a different font color. This makes the MORE format very readable. Save a copy of your sheet as HTML and now you have a web page with the body sections highlighted.\n\n2. It is possible to hide columns in Excel. Hiding the first column leaves just the headlines showing.\n\n3. Formulas based on searching for a string can do calculations in Excel. For example if a heading \"Current Assets\" appears on level 4 then the body formula::\n\n        =INDEX(A:A,MATCH(\"Current Assets\",D:D,0)+1)\n\nwill retrieve it. The +1 after match looks down one row below the matched headline. The trick is to place all your headlines in quotes because Excel will see + \"Current Assets\" from the MORE outline. When Excel tries without the quotes it thinks it is a range name and displays a #N/A error instead of the headline. Also you must place a child node_ below to get the + sign instead of a - sign which would give a MORE headline of -\"Current assets\" , also is an error.\n\nI think there is some interesting possibility here because of the enforcement of Leo body text being always in the first column. The Leo outline provides additional reference to organizing the problem not typical of spreadsheet models. Beyond scripting in Python, Excel is good at doing interrelated calculations and detecting problems like circular references. In Excel Tools-Options-General is a setting for r1c1 format which then shows numbers instead of letters for column references. Using this would allow entries like this in the leo body::\n\n    1000\n    3500\n    =R[-1]C+R[-2]C\n\nIn Excel you would see 4500 below those two numbers. This is completely independent of where the block of three cells exists on the sheet.\n",
+    "felix.20240829001804.36": "No. Everything in an @file trees must be part of the external file: orphan and @ignore nodes are invalid in @file trees. This restriction should not be troublesome. For example, you can organize your outline like this::\n\n    + myClass\n    ..+ ignored stuff\n    ..+ @file myClass\n\n(As usual, + denotes a headline.) So you simply create a new node_, called myClass, that holds your @file trees and stuff you don't want in the @file trees.\n",
+    "felix.20240829001804.37": "**Question**: I must follow a coding standard when writing source code. It includes a maximum line length restriction. How can I know the length of a line when it gets written to the external file?\n\n**Answer**: If a node belongs to a external file hierarchy, its body might get indented when it is written to the external file. It happens when an @others directive or a section name appears indented in a higher-level node body. While (**line**, **col**) in status area show the line and column containing the body text's cursor, **fcol** shows the cursor coordinate relative to the external file, not to the current node. The relation **fcol >= col** is always true.\n",
+    "felix.20240829001804.38": "**Question**: It would be nice if Leo could open empty files. I tend to be \"document oriented\" rather than \"application oriented\" in my thinking and prefer \"create empty file at location -> open it with program\" to \"start program -> create new file -> save it at location\".\n\n**Answer** by Paul Paterson: If you are on Windows 98/2000/XP then the procedure is as follows...\n\n1. Start Leo\n2. Click New\n3. Click Save as...\n4. Save the file as \"c:\\\\windows\\\\shellnew\\\\leofile.leo\" (or c:\\\\winnt for 2000/XP)\n5. Open regedit \"start...run...regedit\"\n6. Open HKEY_CLASSES_ROOT and find the \".leo\" extension type\n7. Go New ... Key from the context menu \n8. Call the new key ShellNew \n9. Select the new key, right-click, choose New...String Value from the context menu\n10. Call it FileName \n11. Double-click on the string, and modify it to be the filename of the leofile.leo file you created, including the extension\n12. Exit the registry editor and restart Windows Explorer (you may need to reboot on Windows 98)\n\nNow you should have a New:Leo File option in Explorer. This creates a duplicate of the file you saved. This can be useful because you could make a template Leo file containing some standard nodes_ that you always have and then save this.\n",
+    "felix.20240829001804.39": "**Question**: I'm writing a Windows Script Component, which is an XML file with a CData section containing javascript. I can get the XML as I want it by using @language html, but how can I get the tangling comments inside the CData section to be java-style comments rather than html ones?\n\n**Answer**: In @file trees you use the @delims directive to change comment delimiters. For example::\n\n    @delims /* */ \n    Javascript stuff \n    @delims <-- --> \n    HTML stuff\n\n**Important**: Leo can not revert to previous delimiters automatically; you must change back to previous delimiters using another @delims directive_.\n",
+    "felix.20240829001804.40": "By Zvi Boshernitzan: I was having trouble disabling '<?php' with comments (and couldn't override the comment character for the start of the page). Finally, I found a solution that worked, using php's heredoc string syntax::\n\n    @first <?php\n    @first $comment = <<<EOD\n    EOD;\n\n    // php code goes here.\n    echo \"boogie\";\n\n    $comment2 = <<<EOD\n    @last EOD;\n    @last ?>\n\nor::\n\n    @first <?php\n    @first /*\n    */\n\n    echo \"hi\";\n\n    @delims /* */\n    @last ?>\n",
+    "felix.20240829001804.41": "You can open files such as CheatSheet.leo, quickstart.leo, leoSettings.leo, myLeoSettings.leo and scripts.leo with commands starting with 'leo-'.\n\n<Alt-X>leo-<tab> shows the complete list of commands::\n\n    leo-cheat-sheet\n    leo-dist-leo\n    leo-docs-leo\n    leo-plugins-leo\n    leo-py-leo\n    leo-quickstart-leo\n    leo-scripts-leo\n    leo-settings\n",
+    "felix.20240829001804.42": "Use the %~dp0 syntax.  Example::\n\n  %~dp0\\Python27\\python.exe %~dp0\\Leo-editor\\launchLeo.py\n\nhttp://ss64.com/nt/syntax-args.html\nhttp://stackoverflow.com/questions/5034076/what-does-dp0-mean-and-how-does-it-work\n\nFYI, this FAQ entry fixes the following bug: https://bugs.launchpad.net/leo-editor/+bug/613153 unable to describe root directory on thumb drive\n",
+    "felix.20240829001804.43": "By Rich Ries. Some older C compilers don't understand the \"//\" comment symbol, so using @language C won't work. Moreover, the following does not always work either::\n\n    @comment /* */\n\nThis generates the following sentinel line::\n\n    /*@@comment /* */*/\n\nin the output file, and not all C compilers allow nested comments, so the last \\*\\/ generates an error. The solution is to use::\n\n    #if 0\n    @comment /* */\n    #endif\n\nLeo is happy: it recognizes the @comment directive_. The C compiler is happy: the C preprocessor strips out the offending line before the C compiler gets it.\n",
+    "felix.20240829001804.44": "The @first directive_ is the key to output usable code in unsupported languages. For example, to use Leo with the Basic language, use the following::\n\n    @first $IFDEF LEOHEADER\n    @delims '\n    @c\n    $ENDIF\n\nSo this would enable a basic compiler to \"jump\" over the \"true\" Leo-header-lines. Like this::\n\n    $IFDEF LEOHEADER <-conditional compilation directive \n    #@+leo-ver=4 <-these lines not compiled\n    #@+node:@file QParser005.INC\n    #@@first\n    #@delims ' \n    '@@c\n    $ENDIF <-... Until here!\n    <rest of derived code file ... >\n\nThis changes the comment symbol the apostrophe, making comments parseable by a BASIC (or other language.)\n",
+    "felix.20240829001804.45": ".. _`Mulder/Ream update algorithm`: appendices.html#the-mulder-ream-update-algorithm\n\nUse @clean trees. Files derived from @clean trees contain no sentinels_. However, Leo can update @clean trees from changes made to the corresponding external file.  The `Mulder/Ream update algorithm`_ makes this magic happen.\n",
+    "felix.20240829001804.46": "Use the @first directive_ in @file or @clean trees. The @first directive puts lines at the very start of files derived from @file. For example, the body text of @file spam.py might be::\n\n    @first #! /usr/bin/env python\n\nThe body text of @file foo.pl might be::\n\n    @first #/usr/bin/perl\n\n\\@first directives must be the *very first* lines of @file nodes. More than one @first directive may exist, like this::\n\n    @first #! /usr/bin/env python\n    @first # more comments.\n",
+    "felix.20240829001804.47": "Use @asis trees. Files derived from @asis trees contain no sentinels. Leo creates the external file simply by writing all body text in outline order. Leo can't update the outline unless the external file contains sentinels, so Leo does not update @asis trees automatically when you change the external file in an external editor.\n",
+    "felix.20240829001804.48": "@ignore can only be used in the root node of @file trees.  It tells Leo to ignore the tree.\n\nThe @ignore directive can not be used elsewhere in @file trees because of the way Leo recreates outlines from external files. This is an absolutely crucial restriction and will never go away. For a few more details, see `Leo 4.0: Eliminating error 'recovery'`_ in `History of Leo`_.\n\nThere are several workaround, as shown in LeoPy.leo:\n\n- keep notes in the outline outside of any external file.\n\n- Use @all to gather notes in a external file, as in done in @file leoProjects.txt.\n",
+    "felix.20240829001804.50": "When I study a program, I like to import it into Leo. I have several scripts that do this: some create @auto nodes; others create @file nodes. Whatever the method used, the import process has the potential to change many files. Usually, I just change @auto and @file to @@auto or @@file, so that any changes I make while studying the code won't affect the originals.\n\nBut this \"safety first\" approach means that I can't actually use Leo to insert tracing statements (or for any other changes.) Happily, there is a way to import \"live\" code into Leo safely::\n\n   Create a git repository for the code before importing it\n\nThe Aha is to create the repository *wherever the code is*, including,\nsay, python/Lib/site-packages.\n\n- git diff ensures that import hasn't significantly altered the code,\n\nThis is exactly what I need:  I can make changes to important tools *safely* within Leo.\n",
+    "felix.20240829001804.51": "Imo, git rivals python as the greatest productivity tool ever devised for programmers.\n\nMy workflow on Ubuntu and Windows is essentially identical. Simple aliases (Ubuntu) and .bat files (Windows) support the following console commands::\n\n    gs  (expands to git status)\n    gd (git diff)  Uses an external diff program,\n                   but I'm starting to prefer text diffs.\n    ga . (git add .)\n    ga file (git add file)\n    gc (git commit: configured to open Scite to create a commit message)\n    gc -m \"a one-line commit message\"\n    push (git push)\n\nI use gitk on both platforms to review commits.\n\nAnd that's about it. I use \"git help\" and \"git help command\" as needed.\n",
+    "felix.20240829001804.52": ".. _`reference .leo files`: FAQ.html#what-is-a-reference-leo-file\n\nUse @clean or @auto unless everyone in your work group uses Leo.  In that case, using @file is best.  Use local copies of `reference .leo files`_ instead of the reference files themselves.\n",
+    "felix.20240829001804.53": "`leoeditor/leo/core` contains a **reference .leo file**: **LeoPyRef.leo**.\n\nThis file should change only when adding new external files to Leo.\n\nDevelopers should use a local copy of LeoPyRef.leo (conventionally called\n**leoPy.leo**) for their own work.",
+    "felix.20240829001804.54": "Private copies of LeoPyRef.leo, that is, leoPy.leo, are \"global\".  That is, they persist unchanged when switching branches.  In effect, they act like (sometimes) unwanted caches.\n\nIf you change the *structure* of @file nodes in leoPy.leo in one branch, such changes will \"propagate\" to other branches, even though the contents of each node has remained the same.\n\nYou can see such changes clearly using leo --diff.\n\nIn short, don't make unnecessary structural changes in leoPy.leo when in branches other than master.",
+    "felix.20240829001804.56": "One way is to link directly to the media file from a Leo node_ (with @url) and write a script button to wrap all URL-nodes under the current node_ in a single HTML page. Then, you can view your media in two ways:\n\n- Individually. You can directly click on the @url link to display the media in the browser (assuming you have your MIME/filetype associations set up correctly for your browser).\n\n- In a group. You can click on a script button (you have to code this yourself, very simple) which should collect all @url nodes_ under the current node_ and dynamically generate a HTML page displaying either links to or embedded versions of the media (using the HTML trick described above to invoke the browser). This way, you can create collections of @url nodes under a single node_ (like a bookmark folder), and press a single button to view the @url collection as a single entity in the browser (with all browser capabilities like displaying the media).\n\nYou could probably generalize this idea of \"collect all @url nodes under current node_ and display as HTML in browser\" into a general-purpose plugin. However, the plugin would have to be somewhat smart in mapping a link to its corresponding HTML code (e.g. an image link gets mapped to an <img> HTML tag, a link to a Flash file gets mapped to an <embed> tag, etc).\n",
+    "felix.20240829001804.57": "Making screencasts is a lot easier than you probably think. Here are some tips to get you started quickly.\n\n\n\n\n\n\n\n",
+    "felix.20240829001804.58": "The primary purpose of this script is to open your app at a fixed, unchanging size. This is surprisingly important:\n\n- It ensures that the window will always render to pixels in the same way.\n- It makes it easier to splice in new video to an existing video.\n- It makes it easier to plan your video to ensure everything will appear as you expect.\n- It provides continuity when making a series of videos.\n\nHere is a script that I use when making Leo's screencasts::\n\n    python launchLeo.py --gui=qttabs\n    --window-size=682x1264 <list of .leo files> %*​\n\nThis *particular* --window-size causes Camtasia to create a window whose actual size is 720x1280, the nominal 720p resolution. It may prevent text blur. Or not. I do know that Leo's screencasts look great at 720p.\n",
+    "felix.20240829001804.59": "Make sure that you can actually upload *excellent quality* videos before doing anything else. This step is crucial. If you skip this step, all of your initial recording an post-production work could be utterly wasted.\n\nUse *short* (10-second) test videos at this step. Their primary purpose verify that you can can get to the *end* of the production process successfully. You *are* going to make lots of mistakes here: using short videos helps you make these mistakes quickly.\n\nDon't even *think* about making longer videos until the answers to all the following questions are clearly \"yes\":\n\n- Is your camera working?\n- Is your microphone working?\n- Do you know how to record your voice and screen?\n- Can you log into YouTube or screencast.com?\n- Can you upload to YouTube or screencast.com?\n- Is the sound in your *uploaded* video great?\n- Do the pixels in your *uploaded* look great?\n\nThis last item is particularly important. Just because pixels look good in your video editor is no guarantee that they will look good when uploaded.\n\nYou are ready to try your first \"real\" take *only* when you can upload a video that looks and sounds great.\n",
+    "felix.20240829001804.60": "Before rushing right out and making your first video, I recommend watching the tutorial screencasts at screencast.com: http://www.techsmith.com/tutorial-camtasia-8.html\n\nWatch the tutorials to see how the presentations themselves are organized. Watch them until it feels natural to emulate their style.\n\nIf you will be using Camtasia, you will also want to watch the tutorials to learn how Camtasia works.\n",
+    "felix.20240829001804.61": "Now it's time to go beyond test videos. Even now, though, I recommend keeping your first efforts short: one minute or so. Again, this saves time. You'll ending up throwing away two or three anyway ;-)\n\nBring up your app using you demo script and run through your presentation.\n\nHere's the **most important tip**: As you narrate your video, audio flubs are inevitable, but they don't matter at all *provided* that you *realize* that you have just flubbed a word or phrase.\n\nWhen you flub a line, don't panic! Just *pause*, regroup, and repeat the phrase until you get it right. *Pausing is essential*: it simplifies inserting and deleting sound bites during post production.\n\nYou'll relax once you realize that flubs don't matter and that pausing makes post-production easier. Once you relax, getting a good take will suddenly become easier.\n\nCorrecting flubs *as soon as they happen* is absolutely essential. Don't even *think* about fixing audio flubs in post-production. It simply can't be done. Instead of spending 20 minutes trying (and failing) to correct a flub in post production, it is much faster and better to take 20 seconds during your take to correct the flub.\n\nSimilar remarks apply to video, but in my experience it's much easier to get the video right. If you do flub the video, it will be much easier if you just do a complete retake. With Camtasia, you can separate the audio and video tracks, but usually that won't work, especially if there is audio of key clicks.\n\nBy retaking audio flubs as they happen, I find it easy to work without a script. It feels more natural to me than reading a script. YMMV. When I get stuck, I just pause. Or just start over. Otoh, it wouldn't be that hard to read a script. Just *pause* before and after each phrase. Never rush your audio!\n\nIn short, the key Aha is: insert (audio) pauses *everywhere* as needed. It's easy to edit them out. It's virtually impossible to edit in the middle of words, even with the world's best audio editor.\n",
+    "felix.20240829001804.62": "Post production should be easy provided that you have corrected all audio flubs as they happen. This keeps the audio and video in sync. Just edit out flubs and reduce overly-long pauses.\n\nI won't discuss production details here because they depend on the editor you are using.\n\nDo a new take if you don't have clean audio. Depending on the complexity of your video, it may be possible to splice a partial take in the middle or end of your video. Similarly, it may be possible to splice in a new take to add material you didn't cover in your first take.\n\nOne final word of advice. When editing your video, settle for \"good enough\". Perfectionism is not your friend.\n",
+    "felix.20240829001804.63": "Making a screencast is a lot easier than you think :-)\n\n- Create a script that will open your app at a fixed, optimal, size.\n\n- Emulate the style and form of screencast.com tutorials.\n\n- Verify the *entire* production process with short test videos.\n\n  Before making longer videos, make *sure* that the test videos look and sound great *when they have been uploaded*.\n\n- When doing a take, flubs don't matter, *provided* you correct them *during the take*.  Use pauses.  Make haste slowly!\n\n- Splice in new takes during post-production to fix flubs and add new material.\n",
+    "felix.20240829001804.64": "Here are some more tips I've learned from experience:\n\n1. Redo audio tests and video tests every time you start a new session. It's amazing how hum can creep into recordings.\n\n2. The most important step in post production is to get the pacing so it feels right. Beware of editing out pauses. Make sure you give your viewers time to see what you are doing, and to see what you have done.\n\n3. Don't waste time on callouts or captions until the audio and video work together at a relaxed pace. It's almost as hard to correct pacing mistakes as it is to correct audio flubs.\n",
+    "felix.20240829001804.65": "1. Enable volume leveling and noise removal in Camtasia. This tip, all by itself, makes a big difference.\n\n2. Use a better microphone, preferably one with about a 1-inch diaphragm. This is the kind of microphone that Andrew Price uses. The Audio-technica AT2020 USB is relatively inexpensive.\n\n3. Use \"pop filter\" with the microphone. This is a cloth or (better) a metal screen that is placed in front of the microphone. It smooths the sound.\n\n4. Adjust the sound level for maximum volume without distortion: With the microphone about a foot from your mouth, turn the volume as loud as possible, then turn down until no red is visible in the meter.\n",
+    "felix.20240829001804.67": "The Import Files dialog allows you to select multiple files provided you are running Python 2.3 or above. There is also an importFiles script in LeoPy.leo.  You can use that script as follows::\n\n    import leo.core.leoImport as leoImport\n    leoImport.importFiles(aDirectory, \".py\")\n\nThis will import all .py files from aDirectory, which should be a full path to a particular directory. You could use \".c\" to import all .c files, etc.\n",
+    "felix.20240829001804.69": ".. _`long discussion`: https://groups.google.com/d/msg/leo-editor/83avo6mgHXY/nIKOpztyAAAJ\n\nFrom this `long discussion`_ on leo-editor:\n\nFrom Rob Keeney:\n\n**Typical Use case**\n\nI teach a variety of classes in a business environment and need handouts,\nteaching aids, worksheets and training manuals that are specifically\ncustomized for each client. These documents are easier to manage, print and\nprotect using standard PDFs.\n\n**Workflow Overview**\n\n- Document content comes from a primary resource directory arranged by\n  topic (not client specific).\n- I have a Resources.leo file that helps me keep that directory organized.\n- All of the content files are written in LaTex (I use a .txi file\n  extension of my own invention to indicate the file is an 'input' file\n  only, not the main output file which uses .tex).\n- I have a Client.leo file for each client in their own directory to\n  organize work specific to each client.\n- For each document needed for a client project, I create a Document.tex\n  file from a standard template and change the document properties as\n  needed for the specific client, project and document.\n- The Document.tex file acts as the presentation 'shell' for the document\n  and I simply add \\input{\"\\ResourcePath Content.txi\"} after the\n  \\begin{document} statement (\\ResourcePath is a shortcut command to the\n  location of the content resource). This shell determines such things as\n  the document title, document type, client name, header/footer information\n  and revision date.\n- Since I work primarily in Windows, I use TeXNicCenter to process (typeset) the Document.tex file to create PDF output. (I do not use TeXNicCenter for editing, only file processing).\n\n**Workflow Notes and Shortcuts**\n\n- Years ago, I discovered the incredible exam class for LaTex and now\n  use it almost exclusively. It makes it much easier to create student\n  and teacher versions of the same content (for example, handouts for\n  students and training manual with speaking notes for the teacher).\n- I use \\@outline-data tree-abbreviations in Leo to create each new\n  Document.tex file from a template with variables (very cool!)\n- I created many @data abbreviations in Leo to speed up typing of standard\n  LaTex structures (would be happy to share them if anyone is interested).\n- All document content stays in the Resources directory and only 'shell'\n  documents are in the client directories.\n- These shell documents allow for client-specific information to be added\n  to the headers, footers and in some cases as variables inside the content\n  area itself (using \\theClient variable that I define).\n\n**Software Needed**\n\n- Leo, and its dependencies.\n- MiKTex for the LaTex distribution and package management (I have it set\n  to auto-update as needed).\n- TeXNicCenter for processing (typesetting) to PDF output.\n\n**Example Leo file**\n\n.. _`example Leo file`: https://github.com/leo-editor/snippets/tree/master/examples/workflow/latex-pdf\n\nSee this `example Leo file`_.\n\n**Questions**\n\nQ: Can you control TexNicCenter from Leo - or do you process the file and preview process manually?\n\nA: No, I run processing (typesetting) in TeXNicCenter manually. Typically,\nI create a blank project file and open however many files required for that\nproject. That way it's easier to clean up the extra files created during\nthe process steps. HTH. There might be a way to invoke the LaTex commands\nthrough Leo, but that's way above my pay grade.\n\nFrom Arjan Mossel:\n\nI'm using Leo to organize sections like \\chapter, \\section and \\subsection.\nSince I'm just writing latex in Leo, I need to keep track of the right\nhierarchies, so I can't freely move nodes around in the hierarchy or I end\nup with \\subsection at the same level as \\section, etc. It would be great\nto be able to let Leo handle this.\n\nMyProject\n  - @clean myproject/myproject.tex\n  - @clean myproject/references.bib\n  - Compile myproject.tex\n\nThe compile node has something like this::\n\n    import os\n    import subprocess\n    import sys\n\n    repository_dir = os.path.abspath(os.curdir)\n\n    # Run the system commands from the folder containing the tex, cls, clo, or bib files.\n    working_dir = os.path.join(repository_dir, 'myproject')\n    os.chdir(working_dir)\n\n    # The commands to run.\n    run_xelatex = 'xelatex ' + working_dir + os.sep + 'myproject.tex'\n    run_bibtex =  'bibtex ' + working_dir + os.sep + 'myproject'\n\n    g.es('Running XeLaTeX and BibTeX')\n    # os.system starts a new subshell\n    # @todo: is it possible to run the below commands in one subshell consecutively?\n    os.system(run_xelatex)\n    os.system(run_bibtex)\n    os.system(run_xelatex)\n\n    # Platform-independent file opening\n    def open_file(filename):\n        if sys.platform == \"win32\":\n            os.startfile(filename)\n        else:\n            opener =\"xdg-open\"\n            subprocess.call([opener, filename])\n\n    open_file('myproject.pdf')\n",
+    "felix.20240829001804.70": ".. _`this posting about BibTeX citations`: http://groups.google.com/group/leo-editor/browse_thread/thread/d36d76174dcd6786/9c2a298049f4f01c\n\n.. _`raw-data`: http://docutils.sourceforge.net/docs/ref/rst/directives.html#raw-data-pass-through\n\nWhen using LaTeX and BibTeX, I would like to use inside of Leo a kind of LaTeX-inline-markup, that after generation of the RsT file through Sphinx as well as after running of \"make latex\", generate a LaTeX file containing the citation call of the form \\cite{CITBook001} as described in a file \\*.bib. Is there a way to have Leo/Sphinx/RsT generate the inline raw latex syntax?\n\nUse the docutils `raw-data`_ syntax. Examples::\n\n    .. role:: raw-role(raw)\n      :format: html latex\n    .. raw:: latex\n      \\bibliographystyle{acm}\n      \\bibliography{myBibliography}\n\nFor more details, see `this posting about BibTeX citations`_.\n",
+    "felix.20240829001804.72": "Create your markdown files with @auto-md myfile.md.\n\nThis automatically converts headlines to section headings.\n\nOptional: change @language md to @language rest.\nAt present, syntax coloring for markdown is feeble.\n   ",
+    "felix.20240829001804.73": "The @button make-md-toc script in LeoDocs.leo writes a TOC to the console log.\n\nJust select the @auto-md node and execute the script.\n",
+    "felix.20240829001804.74": "An `open issue <https://github.com/leo-editor/leo-editor/issues/333>`_ discusses various possibilities.\n\n",
+    "felix.20240829001804.76": "The code that handles the rclick menu is in the QtIconBarClass class in qt_frame.py.\n\nShow that the  top-level button contains structure, do this::\n\n    @string mod_scripting_subtext = ▾\n\nAn alternative: ▼ U=25BC: Black Down-Pointing Triangle.\n\nIt's reasonable to have the top-level button just be a placeholder for subsidiary @rclick nodes. To do that without getting a warning when clicking the top-level button, set its script to \"empty string\".\n",
+    "felix.20240829001804.77": "Put @command nodes as children of an @commands node in myLeoSettings.leo. This makes the @command nodes available to all opened .leo files.\n\nUsing @command rather than @button means that there is never any need to disable scripts. There is no need for @button. To see the list of your @command nodes, type::\n\n    <alt-x>@c<tab>\n\nSimilarly to see the list of your @button nodes, type::\n\n    <alt-x>@b<tab>\n",
+    "felix.20240829001804.78": "Start your file with::\n\n    '''\n    << docstring >>\n    '''\n\nThe << docstring >> section can just contain::\n\n    @language rest # or md\n    @wrap\n    @others\n\nThis allows the \"interior\" of the docstring to be colored using rST (or markdown).\nThe children of the << docstring >> node form the actual docstring. No section names are required!\n\nThis pattern organizes large docstrings in a Leonine way. The only drawback is that the actual external file contains sentinel lines separating the parts of the docstring. In practice, it's no big deal, especially if each child starts with a blank line.\n",
+    "felix.20240829001804.79": "g.execute_shell_commands executes one or more commands in a separate process using subprocess.popen. Commands *not* preceded by '&' run to completion before the next command is run.\nSee the scripting miscellany for more details.\n",
+    "felix.20240829001804.80": "The execute-general-script command invokes an external language processor on an **script file** as follows:\n\n- If c.p is any kind of @<file> node, the script file is the corresponding external file.\n  Otherwise, the script file is a temp file.\n\n- The ``@data exec-script-commands`` setting tells how to invoke the appropriate language processor.\n  See the setting for more details.\n\n- The ``@data exec-script-patterns`` settings describes error messages so that Leo can create\n  clickable links to errors.  See the setting for more details.\n\n- This command is a thin wrapper around the c.general_script_helper method.\n  Scripts can call this method directly if desired.\n",
+    "felix.20240829001804.81": "Leo's pylint command hangs Leo while it is running. The top-level leo-editor folder contains pylint-leo.py and pylint-leo-rc.txt. To run pylint outside of Leo, create a .bat or .sh file to run leo-editor/pylint-leo.py. On Windows, I use this pylint.bat file::\n\n    python2 c:\\leo.repo\\leo-editor\\pylint-leo.py ^\n    rc=c:\\leo.repo\\leo-editor\\leo\\test\\pylint-leo-rc.txt %*\n\nThe -h option produces this::\n\n    Usage: pylint-leo.py [options]\n\n    Options:\n      -h, --help   show this help message and exit\n      -a           all\n      -c           core\n      -e           external\n      -f FILENAME  filename, relative to leo folder\n      -g           gui plugins\n      -m           modes\n      -p           plugins\n      -s           silent\n      -u           user commands\n      -v           report pylint version\n\nMy typical usage is pylint -a -s\n",
+    "felix.20240829001804.82": "Use .leo files to test settings rather than to contain data. These files would typically contain just an @settings tree, and one or two nodes illustrating their effect. Opening such files limits the effects of experimental/non-standard/risky settings. This is a great tip to know.\n\nFor example, the files leo10pt.leo, leo12pt.leo, leo14-12pt.leo and leo14pt.leo in the leo/config folder make it easy to compare different font settings.\n\nAs another example, when starting the vim-mode project I created a .leo file containing @bool vim-mode = True. By opening this file I test vim mode without interfering with my normal work flow.\n",
+    "felix.20240829001804.83": "File under things-I-didn't-know-but-should-have:\n\nInstead of creating batch files all over the place to fire up python programs, and then having to cope with annoying \"Terminate batch job (Y/N)?\" with Ctrl-C/Break you can ask python setuptools to create an .exe in the Python\\Scripts folder.\n\nin same folder as foo.py create setup.py, populate like so::\n\n    from setuptools import setup\n\n    setup(\n        name='Foo for you',\n        version='0.3',\n        py_modules=['foo'],\n        entry_points='''\n            [console_scripts]\n            foo = foo\n            '''\n        )\n\nThen run \"pip --editable install . \" in the same folder. Foo.exe will be created in C:\\pythonxx\\Scripts. As long as that folder is in path you can use foo like any other command line program. Furthermore the \"editable\" parameter means we can continue to edit and change foo.py and the changes are always live.\n\nYeah! No more \"pushd ..\\path\\to\\data\\folder && python ..\\path\\to\\code\\foo.py\n--do-stuff-here ...\" for me. :)\n\n.. Works for Leo too -- with the existing setup.py. It creates leo.exe and leoc.exe for Windowed mode (no log messages to console) and console mode respectively.\n",
+    "felix.20240829001804.84": ".. in FAQ\n\nLeo executes scripts with c and g predefined.\n\ng is the leo.core.leoGlobal. Use g to access any function or class in leo/core/leoGlobals.py::\n\n    g.app                   A LeoApp instance.\n    g.app.gui               A LeoGui instance. \n    g.app.pluginsController A LeoPluginsController instance.\n    g.app.*                 Leo's global variables.\n\nc is the Commander object for the present outline. Commander objects define **subcommanders** corresponding to files in leo/core and leo/commands::\n\n    # in leo/core...\n    c.atFileCommands\n    c.chapterController\n    c.fileCommands\n    c.findCommands\n    c.importCommands\n    c.keyHandler = c.k\n    c.persistenceController\n    c.printingController\n    c.rstCommands\n    c.shadowController\n    c.tangleCommands\n    c.testManager\n    c.vimCommands\n\n    # In leo/commands...\n    c.abbrevCommands\n    c.controlCommands\n    c.convertCommands\n    c.debugCommands\n    c.editCommands\n    c.editFileCommands\n    c.gotoCommands\n    c.helpCommands\n    c.keyHandlerCommands\n    c.killBufferCommands\n    c.rectangleCommands\n    c.spellCommands\n\nScripts can gain access to all of the code in these files via these subcommanders. For example, c.k is an instance of the LeoKeys class in leo/core/leoKeys.py.",
+    "felix.20240829001804.85": "Use @others unless the contents of a node must appear in a certain spot, or in a certain order. For examples, most of Leo's source files start like this::\n\n    @first # -*- coding: utf-8 -*-\n    << imports >>\n    @others\n\nThe << imports >> section reference ensures that imports appear first. Another example::\n\n    @first # -*- coding: utf-8 -*-\n    << imports >>\n    << base classes >>\n    @others\n\nThis ensures that base classes are defined before their subclasses.\n",
+    "felix.20240829001804.86": "If I want to use leo to make mathematical notes, how can I type in some special mathematical symbols? Or is there a good way to make mathematical notes using leo?\n\n===== Terry\n\nI use itex2MML with reStructuredText.  So within Leo you're looking at LaTeX math markup, and you get outputs in PDF and XHTML, with MathML in the latter.\n\n===== Jose\n\nI've been doing this for about a year now.  I use the math docutils directive.  A custom .XCompose file (for example: https://github.com/kragen/xcompose)  also helps.\n\n===== Terry\n\nI think math was added to docutils after I started using itex2mml, neater to use docutils built in math now I think.\n\nAlthough having said that, playing with docutils math a bit suggests itex2mml gives more complete support for both MathML and perhaps LaTeX math (with the PDF target).\n\n===== Jose\n\nTerry, your setup is probably more flexible, but I haven't had any problems with docutils math. It seems to support all the syntax that I've found necessary.\n\nI forgot to mention that the viewrendered plug-in doesn't display math correctly.  I'm not sure what the problem is, I remember trying to figure it out a while back, but I never got anywhere.  It's not really a big problem though, I have scripts to compile nodes to html/pdfs and open them in firefox/pdf reader; math works fine that way.\n\n===== Offray\n\nIs not properly Leo, but is python related, tailored for math and with a web interface and has leo bindings, check IPython: http://ipython.org/\n\nI'm using it for all my math related writing and I think that point the future of interactive writing in Python. I dream of a body pane on leo with the features of the python qt console.\n",
+    "felix.20240829001804.87": "I had a need to figure out why a part of some python code I had written was taking too long. I pulled the code into Leo and the relevant part of the outline looked something like this::\n\n    + Main module\n    -- Generate cryptographic key\n    -- Hashing algorithm\n\netc. So I cloned just the segment I wanted to profile and pulled it under a new section::\n\n    + Main module\n    -- [clone] Generate cryptographic key\n    -- Hashing algorithm\n\n    + Profiling Experiment\n    -- [clone] Generate cryptographic key\n\nAnd in the body of the \"Profiling experiment\", I used this code::\n\n    code_under_here = \"\"\"\n    @others\n    \"\"\"\n\n    from timeit import Timer\n    t = Timer(\"print my_key_generator()\", code_under_here)\n    print t.timeit(number = 10)\n\nAnd then I hit Control-B to execute the Profiling Experiment body. This let me make adjustments to the code in the clone body and keep hitting Control-B to execute the code with the timeit module to see immediately if what I had done was making a difference.\n\nThe great thing about this was that I just used the Leo @others construct to create a wrapper around the code and did not need to litter my code with debug or profiling statements.---Kayvan\n",
+    "felix.20240829001804.89": "For the most part, docutils_ does a good job of reporting errors. docutils_ prints a message to the console and inserts an unmistakable error message in the generated .html file. **Important**: On Windows it is helpful to `run Leo in a console`_.\n\nHowever, in some cases, docutils_ crashes instead of properly reporting the problem. There are several workarounds:\n\n1.  The crashes I have seen arise from the following bug in docutils. **Hyperlinks in image:: markup must be lower case**.  This will work::\n\n        .. .. |back| image:: arrow_lt.gif\n            :target: faq_\n\n    This will **crash**::\n\n        .. .. |back| image:: arrow_lt.gif\n            :target: FAQ_\n\n    So avoid this crash by making sure to use lower case targets in ':target:' markup.\n\n2.  You can change the docutils_ source slightly so that it prints a traceback when it crashes. (The rst3 plugin should be able to do this, but I haven't figured out how yet.) It's easy enough to do this:\n\n- Find the file core.py in top-level docutils folder. Typically this folder will be in Python's site-packages folder.\n\n- Open core.py in some editor other than Leo.\n\n- Find the method called report_Exceptions.\n\n- Insert the following lines at the very start of this method::\n\n        print 'EKR: added traceback'\n        import traceback ; traceback.print_exc()\n\nThis will cause a traceback whenever docutils_ crashes. I have found that such tracebacks are generally enough to locate the general area of the problem. **Note**: These tracebacks go to the console window, so you should `run Leo in a console`_.\n\n3.  As a last resort, you can isolate syntax errors by reducing your input files until they work again, then adding sections until you get a crash. This is easy enough to do (when using the rst3 plugin) by change a headline 'x' to @rst-ignore-tree x.\n",
+    "felix.20240829001804.90": "Leo is starting on one of the external monitors and I have no way to\nmove it back to my laptop screen.\n\nThis has happened to me on Windows for as long as I can remember, mid\n1990s and Windows 3. It's rare, but I don't think a year has gone by\nwhere it hasn't occurred to me. At any rate, the most reliable and\nportable solution I've come across is:\n\n- Press [Alt]-[Tab] until the invisible program has focus.\n- Press [Alt]-[spacebar] to bring up window controls (Move, Size, Min, Max, Close).\n- Press [M] to activate Move.\n  A dotted or thin gray outline of window shape should appear.\n- Press arrow cursor keys to move the outline centrally on active screen.\n  (usually right- and down-arrow)\n- Press [enter] when it's moved on-screen enough to nab the Title bar with the mouse cursor.",
+    "felix.20240829001804.91": "Leo (and other programs) often send more detailed error messages to stderr, the output stream that goes to the console window. In Linux and MacOS environments, python programs normally execute with the console window visible. On Windows, can run Leo with the console window visible by associating .leo files with python.exe *not* pythonw.exe.\n",
+    "felix.20240829001804.92": "Just `run Leo in a console`_. At the point you want to drop into the debugger, execute this line::\n\n    g.pdb()\n\nAll output from pdb goes to stdout, which is the console window. It would be good to create a subclass of pdb.Pdb that uses Leo's log pane rather than a console window, but I haven't done that. It could be done easily enough in a plugin...\n\n**Important**: I recommend using g.trace instead of pdb.  For example::\n\n    g.trace(x)\n\nprints the name of the function or method containing the trace, and the value of\nx. g.callers is often useful in combination with g.trace. g.callers(5)\nreturns the last 5 entries of the call stack. For example::\n\n    g.trace(x,g.callers(5))\n\nUsed this way, g.trace shows you patterns that will be invisible using pdb.\n",
+    "felix.20240829001804.93": "All questions are welcome at http://groups.google.com/group/leo-editor\n",
+    "felix.20240829001804.94": "This key is normally bound to delete-comments. It is annoying not to have it work.\n\nThe only sure workaround is make other key bindings for add-comments and delete-comments.  I suggest Ctrl-[ and Ctrl-].\n\nAt one time I thought the following might work, but it appears that it doesn't:\n\n1. In the control panel, click Language.\n   This brings up the \"Language\" panel.\n\n2. Choose \"Advanced Settings\" in the left area.\n   This brings up the \"Advanced Settings\" panel.\n\n3. Choose \"Change language bar hot keys\" in the left area.\n   This brings up the \"Text Services & Input Language\" panel.\n\n4. You will see Shift-Ctrl-0 as the binding for \"Between input languages\".\n    Select that item and click the \"Change Key Sequence\" button.\n    This brings up the \"Change Key Sequence\" panel.\n\n5. Set both radio buttons to \"Not Assigned\" and click OK.",
+    "felix.20240829001804.95": "Please consider *asking for help* at http://groups.google.com/group/leo-editor before filing bug reports.\n\nPlease report bugs at http://bugs.launchpad.net/leo-editor\n\nWhen reporting a bug, please include *all* of the following:\n\n- The version of Leo used.\n- The version of Python used.\n- The platform or platforms used: Linux, Windows, MacOS.\n- A clear description of the problem.\n- Information sufficient to recreate the problem.\n\nIt's polite to make the bug report self contained, so that six weeks later somebody will be able to understand the report as it stands.\n",
+    "felix.20240829001804.96": "Installing PyQt on MacOS using::\n\n    brew install qt sip pyqt\n\nmay not always work.  In that case, you will see something like this when running Leo::\n\n    Traceback (most recent call last):\n    File \"launchLeo.py\", line 8, in\n    leo.core.runLeo.run()\n    [Snip]\n    File \"/Users/your-name/git/leo-editor/leo/plugins/qt_text.py\",\n    line 434, in class LeoLineTextWidget(QtWidgets.QFrame):\n    AttributeError: 'NoneType' object has no attribute 'QFrame'\n\nYou can verify that PyQt has not been installed by setting the trace switch to True in leoQt.py. This will trace the import commands related to Qt and tell you exactly what is happening.\n\nOne Leo user gives this advice:\n\nFor anyone with similar problem the homebrew instruction for adding PyQT to the import path are wrong. Instead edit ~/.bash_profile and add this line::\n\n    export PATH=\"/usr/local/lib/python3.9/site-packages:${PATH}\"\n\nAfter this leo editor will open with using the default python installation provided by MacOS.",
+    "felix.20240829001804.97": "Question and answer from plumloco.\n\nAdd the equivalent of::\n\n    import sys \n    leocore = \"path/to/leo/core\" \n    if leocore not in sys.path: sys.path.append(leocore) \n    import leo.core.leoBridge as leoBridge\n\nat the head of each file that uses leoBridge.\n\nThe problem is not importing leoBridge itself but (if I use 'from leo.core') the importing of plugins, who get a different leoGlobals from leoBridge, without g.app etc, and so do not work if they rely on dynamic values in g.etc.\n\n> Why can't you simply add leo/core to sys.path in sitecustomize.py?\n\nPutting leo/core on the python path as you suggest would put forty python modules in the global module namespace for all python programs when I want just one. Also, I have a safe working copy of leo and a cvs/testing version. I would wish to test any programs against the testing version while using the working version, but both /core directories can't be exposed at the same time.\n\n> Do you need plugins while running from the leoBridge? \n\nAfraid so, at least the rst3 plugin. The solution I am using now is to place::\n\n    sys.modules['leoGlobals'] = leoGlobals  \n\nin leoBridge after import leo.core.leoGlobals as leoGlobals\n\nThis allows my scripts to be portable over the several computers/platforms I need to use them on, and makes testing scripts against multiple leo versions easy. It does mean that my scripts are not portable to other leo users but that is not likely to be a problem.\n",
+    "felix.20240829001804.98": "The import commands insert @ignore directives_ in the top-level node_. Leo does this so that you won't accidentally overwrite your files after importing them. Change the filename following @file (or @file) as desired, then remove the @ignore directive_. Saving the outline will then create the external file.\n",
+    "felix.20240829001804.99": "In version 4.5, Leo changed to using a sax parser for .leo files. This can cause problems if your .leo file contains invalid characters. Bugs in previous versions of Leo permitted these bad characters to appear.\n\nThe sax parser complains that these characters are not valid in .xml files. Remove these invalid characters as follows:\n\n1. `run Leo in a console`_, and load the .leo file. Near the bottom of the error message you will see a line like::\n\n    SAXParseException: <unknown>:123:25: not well-formed (invalid token)\n\nThis line reports a bad character at character 25 of line 123.\n\n2. Open the .leo file in an external editor. The Scite editor, http://www.scintilla.org/SciTE.html, is a good choice because it clearly shows non-printing characters. Remove the invalid character, save the .leo file.\n\nRepeat steps 1 and 2 until all invalid characters are gone.\n",
+    "felix.20240829001804.100": "Missing modules can cause installation problems. If the installer doesn't work (or puts up a dialog containing no text), you may install Leo from the .zip file as described at `How to install Leo on Windows`_. However you are installing Leo, be sure to `run Leo in a console`_. because as a last resort Leo prints error messages to the console.\n",
+    "felix.20240829001804.101": "Leo's setup.py script is intended only to create source distributions. It can't be used to install Leo because Leo is not a Python package.\n",
+    "felix.20240829001804.102": "This syntax file hack works well enough to work with Leo '@' markup::\n\n    syn region leoComment start=\"^@\\\\s*\" end=\"^@c\\\\s*$\"\n    syn match   pythonDecorator\t\"@\\\\S\\\\S+\" display nextgroup=pythonFunction skipwhite\n",
+    "felix.20240829001804.103": "1. The directory leo-editor/leo/themes contains various theme files. You can load these files from the File:Open Outline menu.\n\nOpening a theme outline automatically loads the theme. Keep opening outlines until you find one you like.\n\n2. Close all of the theme files.\n\n3. Copy the theme file you chose from leo-editor/leo/themes to ~/.leo/themes (you will have to create the themes folder here) and rename it something like myTheme.leo.  Note that the folder is ~/.leo, not ~.\n\n4. Open your myLeoSettings.leo file.\n\nAdd the following to the headline of a new node as a child of your @settings node:\n@string theme-name = myTheme.leo\n\n5. Save the file and restart Leo.\n\nYou should now be using myTheme.leo. You can load myTheme.leo from Leo. The font sizing and colors are under Theme Settings in the tree.",
+    "felix.20240829001804.104": "The update algorithm guarantees *only* that writing an updated @clean outline will generate the updated **public** file.  **Ambiguous lines** could be placed either at the end of one node or the beginning of the following nodes. The update algorithm *guesses* that such lines should be placed at the end of the previous node.\n\nHappily, guesses are not serious. Once you move an ambiguous node and save the Leo file, the update algorithm will not have to guess where the line belongs the next time Leo reads the @clean files.\n",
+    "felix.20240829001804.105": "@pagewidth 75\n\nQ. When I run the following script I see a window appear and then immediately disappear::\n\n    from leo.core.leoQt import QtWidgets, QtCore\n    w = QtWidgets.QWidget()\n    w.resize(250, 150)\n    w.move(300, 300)\n    w.setWindowTitle('Simple test')\n    w.show()\n\nWhat's going on?\n\nA. When the script exits the sole reference to the window, w, ceases to exist, so the window is destroyed (garbage collected). To keep the window open, add the following code as the last line to keep the reference alive::\n\n    g.app.scriptsDict['my-script_w'] = w\n\nThis reference will persist until the next time you run the execute-script. If you want something even more permanent, you can do something like::\n\n    g.app.my_script_w = w\n",
+    "felix.20240829001804.106": "Leo will show the Spell tab if:\n\n1. The pyenchant spell checker has been installed or,\n\n2. Leo finds a main spelling dictionary at ~/.leo/main_spelling_dict.txt.\n   In this case, Leo uses a pure-python spell checker.\n\nSo if the Spell tab is not visible do the following:\n\n- Download main_spelling_dict.zip from\n  https://sourceforge.net/projects/leo/files/Miscellaneous/\n\n- Unzip this file to ~/.leo/main_spelling_dict.txt.\n\nThe show-spell-info command tells what spell checker is in effect and the location of the main and user spell dictionaries.\n",
+    "felix.20240829001804.108": "Set @bool ignore_unbound_non_ascii_keys = False in LeoSettings.leo or myLeoSettings.leo.\n",
+    "felix.20240829001804.109": "Internally, Leo represents all strings as unicode. Leo translates from a particular encoding to Unicode_ when reading .leo files or external files. Leo translates from Unicode_ to a particular encoding when writing external files. You may see strange looking characters if your text editor is expecting a different encoding. The encoding used in any external file is shown in the #@+leo sentinel line like this::\n\n    #@+leo-encoding=iso-8859-1.\n\n**Exception**: the encoding is UTF-8 if no -encoding= field exists. You can also use the @encoding directive_ to set the encoding for individual external files. If no @encoding directive_ is in effect, Leo uses the following settings_ to translate to and from unicode:\n\ndefault_derived_file_encoding\n    The encoding used for external files if no @encoding directive_ is in effect.\n    This setting also controls the encoding of files that Leo writes.\n    The default is UTF-8 (case not important).\n\nnew_leo_file_encoding\n    The encoding specified in the following line of new .leo files::\n\n        <?xml version=\"1.0\" encoding=\"UTF-8\">\n\n    The default is UTF-8 (upper case for compatibility for old versions of Leo).\n",
+    "felix.20240829001804.110": "Add the following as the *very first line* of your scripts::\n\n    @first # -*- coding: utf-8 -*-\n\nWithout this line, constructs such as::\n\n    u = u'a-(2 unicode characters here)-z'\n    u = 'a-(2 unicode characters here)-z'\n\nwill not work when executed with Leo's execute script command. Indeed, the Execute Script command creates the script by writing the tree containing the script to a string. This is done using Leo's write logic, and this logic converts the unicode input to a utf-8 encoded string. So *all non-ascii characters* get converted to their equivalent in the utf-8 encoding. Call these encoding <e1> and <e2>. In effect the script becomes::\n\n    u = u'a-<e1>-<e2>-z'\n    u = 'a-<e2>-<e>-z'\n\nwhich is certainly *not* what the script writer intended! Rather than defining strings using actual characters, Instead, one should use the equivalent escape sequences. For example::\n\n    u = u'a-\\\\u0233-\\\\u8ce2-z'\n    u = 'a-\\\\u0233-\\\\u8ce2-z'\n",
+    "felix.20240829001804.111": "The encoding used in the file being imported doesn't match the encoding in effect for Leo. Use the @encoding directive_ in an ancestor of the node_ selected when doing the Import command_ to specify the encoding of file to be imported.\n",
+    "felix.20240829001804.112": "First, you must change Python's default encoding to something other than 'ascii'.  To do this, put the following in your sitecustomize.py file in Python's Lib folder::\n\n    import sys \n    sys.setdefaultencoding('utf-8') # 'iso-8859-1' is another choice.\n\nYou must restart Python after doing this: sys.setdefaultencoding can not be called after Python starts up.\n\nLeo's g.es_print and g.pr functions attempts to convert incoming arguments to unicode using the default encoding. For example, the following Leo script shows various ways of printing La Peña properly::\n\n    @first # -*- coding: utf-8 -*-\n\n    import sys\n    e = sys.getdefaultencoding()\n    print 'encoding',e\n    table = (\n        'La Peña',\n        unicode('La Peña','utf-8'),\n        u'La Peña',\n        u'La Pe\\\\xf1a',\n    )\n\n    for s in table:\n        print type(s)\n        g.es_print('g.es_print',s)\n        if type(s) != type(u'a'):\n            s = unicode(s,e)\n        print 'print     ',s\n        print 'repr(s)   ',repr(s)\n\nFor still more details, see: http://www.diveintopython.org/xml_processing/unicode.html\n",
+    "felix.20240829001804.114": "This script appends the outline headlines, indented, to the current vim buffer::\n\n    import leo.core.leoBridge as leoBridge\n    import vim\n\n    controller = leoBridge.controller(\n        gui='nullGui',\n        loadPlugins=True,  # True: attempt to load plugins.\n        readSettings=True,  # True: read standard settings files.\n        silent=True,  # True: don't print signon messages.\n        verbose=False,  # True: print informational messages.\n    )\n    g = controller.globals()\n    c = controller.openLeoFile(\"/home/tbrown/.leo/del.leo\")\n\n    def dent(node, result, level=0):\n        result.append('  ' * level + node.h)\n        for child in node.children:\n            dent(child, result, level + 1)\n        return result\n\n    result = []\n    dent(c.hiddenRootNode, result)\n    vim.current.buffer[-1:] = result\n\nIt can be invoked with::\n\n    :py import leodent\n\nassuming it's in a file leodent.py and on the Python path.\n",
+    "felix.20240829001804.116": "When organizing data into nodes, **every item should clearly belong to exactly one top-level category**. In other words, avoid top-level *aggregate* categories.\n\nFor example, the following are poor top-level categories. They are poor because any item in them could be placed in a more explicit category:\n\n- Contrib\n- Developing Leo\n- Important\n- Maybe\n- Others\n- Prototype\n- Recent\n- Won't do/Can't do\n\nWe all have had bad experiences with the dreaded \"Others\" category. The Aha! is that all aggregate categories are just as bad as \"Others\".\n\n**Note**: I have been talking only about top-level categories.  Within a single category aggregate categories may be useful.  However, when possible I prefer to mark items rather than create subcategories. For example, ``*`` now marks all \"Important\" items in leoToDo.txt and scripts.leo.  This makes it easy to find important items in a particular category.  To find *all* important items one could do a regex search for ``^\\*`` in headlines.\n",
+    "felix.20240829001804.117": "It sometimes happens that the focus gets left in a Leo widget that doesn't support Leo's key bindings. You would think that you would have to use the mouse to click in, say, the body pane so that you can use Leo's key bindings again.\n\nBut you don't have to do that.  Instead, use Alt-tab once to change away from Leo, and then use Alt-tab again to change back to Leo.  When you do this, Leo puts focus in the body pane and you are all set.\n",
+    "felix.20240829001804.118": "By Rich Ries. I often rework C code that's already been \"Leo-ized\"--the first pass was quick and dirty to get it going. When I do subsequent passes, I wind up with subnodes that are out of order with the sequence found in the main node_. It's not a big deal, but I like 'em ordered. With just one editor pane, clicking on the node_ to move would switch focus to that node_. I'd then need to re-focus on the main node_. A minor nuisance, but it does slow you down.\n\nMy solution is to open a second editor with its focus on the main node_. Switch to the other editor, and, referring to the first editor pane, move the nodes as you like. The second editor's pane will change focus to the node_ you're moving, but the first editor will stay focused on the main node_. It's a lot easier to do than to describe!\n",
+    "felix.20240829001804.119": "Most people will find using @clean trees to be most useful. Use @auto-rst, @auto-vimoutline or @auto-org when using rST, vimoutline or Emacs org mode files.\n",
+    "felix.20240829001804.120": "GTD (Getting Things Done) http://www.amazon.com/Getting-Things-Done-Stress-Free-Productivity/dp/0142000280 is, by far, the best productivity book I have ever read. Many aspects of Leo are idea for putting GTD into practice.\n\nHere is a surprisingly useful workflow tip related to GTD.\n\nIdeas often \"intrude\" when I am busy with something else. When that happens, I create a top-level node of the form::\n\n    ** description of idea\n\nNow I can continue what I was doing! This is such a simple idea, but it's really really important: it means I never have to put off getting my ideas into Leo. The \"**\" draws my attention to the new to-do item. Later, when I am not fully immersed in the previous task, I can put the \"**\" node somewhere else.\n\nIt's super important to deal with new ideas *instantly* but *without* greatly interrupting the task at hand. Creating \"**\" nodes does that. This new workflow has been a big improvement to my GTD practice.\n"
+  },
+  "uas": {
+    "felix.20240829001454.10": {
+      "rst_http_attribute": [
+        "<a class=\"target\" id=\"http-node-marker-29\" name=\"http-node-marker-29\">",
+        "</a>",
+        [
+          "<div class=\"section\" id=\"invoking-commands-from-scripts\">",
+          "</div>",
+          [
+            "<div class=\"document\" id=\"chapter-7-scripting-leo-with-python\">",
+            "</div>",
+            [
+              "<body>",
+              "</body>",
+              [
+                "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
+                "</html>",
+                null
+              ]
+            ]
+          ]
+        ],
+        "</div>\n",
+        "<div class=\"section\" id=\"getting-and-setting-preferences\">\n",
+        "<h1><a class=\"toc-backref\" href=\"#id15\" name=\"getting-and-setting-preferences\">Getting and setting preferences</a></h1>\n"
+      ]
+    },
+    "felix.20240829001454.14": {
+      "rst_http_attribute": [
+        "<a class=\"target\" id=\"http-node-marker-27\" name=\"http-node-marker-27\">",
+        "</a>",
+        [
+          "<div class=\"section\" id=\"updating-the-screen\">",
+          "</div>",
+          [
+            "<div class=\"document\" id=\"chapter-7-scripting-leo-with-python\">",
+            "</div>",
+            [
+              "<body>",
+              "</body>",
+              [
+                "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
+                "</html>",
+                null
+              ]
+            ]
+          ]
+        ],
+        "</div>\n",
+        "<div class=\"section\" id=\"invoking-commands-from-scripts\">\n",
+        "<h1><a class=\"toc-backref\" href=\"#id14\" name=\"invoking-commands-from-scripts\">Invoking commands from scripts</a></h1>\n"
+      ]
+    },
+    "felix.20240829001454.29": {
+      "rst_http_attribute": [
+        "<a class=\"target\" id=\"http-node-marker-37\" name=\"http-node-marker-37\">",
+        "</a>",
+        [
+          "<div class=\"section\" id=\"g-refindall\">",
+          "</div>",
+          [
+            "<div class=\"section\" id=\"functions-for-finding-and-changing-text-from-scripts\">",
+            "</div>",
+            [
+              "<div class=\"document\" id=\"chapter-7-scripting-leo-with-python\">",
+              "</div>",
+              [
+                "<body>",
+                "</body>",
+                [
+                  "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
+                  "</html>",
+                  null
+                ]
+              ]
+            ]
+          ]
+        ],
+        "</div>\n",
+        "</div>\n",
+        "<div class=\"section\" id=\"running-leo-in-batch-mode\">\n",
+        "<h1><a class=\"toc-backref\" href=\"#id19\" name=\"running-leo-in-batch-mode\">Running Leo in batch mode</a></h1>\n"
+      ]
+    },
+    "felix.20240829001657.1": {
+      "str_atime": "1376414163.0"
+    },
+    "felix.20240829001657.3": {
+      "str_atime": "1376412038.0"
+    },
+    "felix.20240829001657.4": {
+      "str_atime": "1376414164.0",
+      "str_ctime": "1376412039.0",
+      "str_mtime": "1376412039.0"
+    },
+    "felix.20240829001657.8": {
+      "str_atime": "1376411987.0"
+    },
+    "felix.20240829001804.20": {
+      "str_atime": "1376412984.0"
+    },
+    "felix.20240829001804.30": {
+      "str_atime": "1376412842.0"
+    },
+    "felix.20240829001804.32": {
+      "str_atime": "1376412828.0"
+    },
+    "felix.20240829001804.88": {
+      "str_atime": "1376412985.0"
+    },
+    "felix.20240829001804.89": {
+      "str_atime": "1376412852.0"
+    }
   }
 }
