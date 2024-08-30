@@ -35,34 +35,40 @@ Put your [personal settings](../users-guide/customizing.md#specifying-settings) 
 - Copy the desired settings nodes from leoSettings.leo to myLeoSettings.leo.
 
 ### Search for settings in leoSettings.leo
+
 leojsSettings.leojs contains the defaults for all of LeoJS settings, with
 documentation for each.
 
 ## Useful commands and actions
 
 ### The find-quick-selected command
-The find-quick-selected (Ctrl-Shift-F) command finds all nodes containing the selected text.
+
+The find-quick-selected `Ctrl-Shift-F` command finds all nodes containing the selected text.
 
 ### The parse-body command
+
 The parse-body command parses p.b (the body text of the selected node) into separate nodes.
 
 ### The sort-siblings command
+
 The sort-siblings (Alt-A) command sorts all the child nodes of their parent, or all top-level nodes.
 
 ### Use Alt-N (goto-next-clone) to find "primary" clones
+
 Use Alt-N to cycle through the clones of the present cloned node.
 This command is a fast way of finding the clone whose ancestor is an @\<file\> node.
 
 ### Use cffm to gather outline nodes
+
 The cff command (aka clone-find-flattened-marked) clones all marked nodes
 as children of a new node, created as the last top-level node. Use this
 to gather nodes throughout an outline.
 
 ### Use Ctrl-P (Goto-Node) to navigate to any node
+
 Unlike the original Leo, in LeoJS, `Ctrl-P` opens an input box with a list of all nodes where you can start to type the headline of the node you want to select, it will restrict the choices as you type.
 
 ## Scripting tips
-.. _`launch Leo from a console window`: running.html#running-leo-from-a-console-window
 
 ### g.callers() returns a list of callers
 
@@ -71,7 +77,7 @@ method. The verbose option shows each caller on a separate line. For
 example:
 
 ```js
-    g.trace(g.callers());
+g.trace(g.callers());
 ```
 
 ### Use @button nodes
@@ -82,28 +88,32 @@ scripts, c.p is the presently selected outline node.
 **@button nodes bring scripts to data**.
 
 ### Use cff to gather nodes matching a pattern
+
 The **cff command** (aka clone-find-flattened) prompts for a search pattern,
 then clones all matching nodes so they are the children of a new last
 top-level node. This command is a great way to study code.
 
 ### Use g.trace to debug scripts
+
 The g.trace function prints all its arguments to the console. g.trace shows
 patterns in running code.
 
 ### Use section references sparingly
+
 Use section references only when the exact position of a section within a file matters. 
 
 Here is a common pattern for @file nodes for python files:
 
 ```js
-    <<imports>>
+<<imports>>
 ```
 
 ### Use g.handleUnl to select nodes
+
 Leo's status area shows the path from the root node to the selected node. We call such paths **UNLs** (Uniform Node Locators).  Given a UNL, g.handleUnl(unl, c) will select the referenced node.  For example:
 
 ```js
-    g.handleUnl('unl:gnx://leojsDocs.leojs#felix.20240825232344.32', c);
+g.handleUnl('unl:gnx://leojsDocs.leojs#felix.20240825232344.32', c);
 ```
 
 will select this node in LeojsDocs.leojs.

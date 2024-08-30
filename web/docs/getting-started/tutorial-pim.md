@@ -41,20 +41,20 @@ Used this way, **clones create views**: when you gather cloned nodes together fo
 
 Leo highlights URLs whenever syntax is coloring is enabled.
 
-``Alt-Left-Click`` or ``Ctrl-Left-Click`` (open-url-under-cursor)\
+`open-url-under-cursor` 🖱️ _Alt+Click_ or _Ctrl-Click_\
     Opens the URL under the cursor.
     
-``open-url``\
-    Opens a URL appearing either in the headline or the first line of body text. If a headline starts with ``@url``, the rest of the headline is taken to be a url.
+`open-url`\ 
+    Opens a URL appearing either in the headline or the first line of body text. If a headline starts with `@url`, the rest of the headline is taken to be a url.
 
 ## Using Chapters
 
-@chapter trees denote a **chapter**. You can **activate** a chapter from the icon area, or with chapter-select commands. Activating a chapter makes only those nodes in the chapter visible. The ``main`` chapter represents the entire outline. Activating the ``main`` chapter shows all outline nodes.
+@chapter trees denote a **chapter**. You can **activate** a chapter from the icon area, or with chapter-select commands. Activating a chapter makes only those nodes in the chapter visible. The `main` chapter represents the entire outline. Activating the `main ` chapter shows all outline nodes.
 
-``chapter-select-main``
+ `chapter-select-main`\
     Selects the main chapter.
 
-``chapter-select-<chapter-name>``
+ `chapter-select-<chapter-name>`\
     Selects a chapter by name.
 
 ## Summary
