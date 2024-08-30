@@ -77,12 +77,12 @@ Scripts can be assigned to reusable commands or buttons. Those are displayed in 
 
 Leo has hundreds of commands, described in [Leo's Command Reference](../users-guide/commands.md)
 
-The more common commands are accessible through the user interface — toolbar buttons, icon menus, and [key bindings](../users-guide/commands.md#key-reference). Those commands also discoverable via the VSCode Command Palette. (accessible through F1 or Ctrl+Shift+P)
+A curated set of common commands are accessible through the VSCode UI — toolbar buttons, icon menus, and [key bindings](../users-guide/commands.md#key-reference). Those commands are discoverable via the [VSCode Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette). (accessible through `F1` or `Ctrl+Shift+P`)
 
-The complete set of commands is discoverable in its entirety through Leo's own command palette: [Leo's minibuffer](../users-guide/commands.md#executing-commands-from-the-minibuffer) via `Alt+X`.
+With `Alt+X`, the complete set of commands is discoverable in its entirety through Leo's own command palette: [Leo's minibuffer](../users-guide/commands.md#executing-commands-from-the-minibuffer).
 
 ![Leo's Minibuffer](./img/minibuffer-list.png)\
-_The minibuffer showing all available commands _
+_The minibuffer showing all available commands_
 
 > 💡 **TIP**\
 > **There is no need to remember the exact names of Leo’s commands.** Instead, you only need to remember a few common command prefixes.
