@@ -15,11 +15,11 @@ Leo stores options in **@settings trees**, outlines whose headline is `@settings
 - Per-folder settings.
 - Per-file settings.
 
-There are four kinds of settings files:
+There are two kinds of settings files:
 
 1. **Default settings files**, named **leoSettings.leo**. Although they can be used in other ways, they typically contain default settings.
 
-2. **Personal settings files**, named **myLeoSettings.leo**. They provide a way of ensuring that your customized settings are not altered when updating Leo from git or while installing a new version of Leo. The `myLeoSettings.leo` file acts much like Python's `site-customize.py` file. `myLeoSettings.leo` will never be part of any Leo distribution, and it will never exist in Leo's repository. This solution is *much* better than trying to update `leojsSettings.leojs` with scripts.
+2. **Personal settings files**, named **myLeoSettings.leo**. They provide a way of ensuring that your customized settings are not altered when updating Leo from git or while installing a new version of Leo. `myLeoSettings.leo` will never be part of any Leo distribution, and it will never exist in Leo's repository. This solution is *much* better than trying to update `leoSettings.leo`.
 
 The following sections describe the kinds of nodes in `@settings` trees.
 
@@ -41,23 +41,21 @@ Leo reports in the Log pane window on startup and when opening .leo files what H
 
 When reading a .leo file, Leo looks for settings in default settings files first, then settings in personal settings files, and finally settings in local settings files.  The exact search order is:
 
-.. Can't mix list and literal blocks.
-
 **First**: Default settings files:
 
 ```
-   configDir/leoSettings.leo
-   homeDir/leoSettings.leo
-   localDir/leoSettings.leo
+configDir/leoSettings.leo
+homeDir/leoSettings.leo
+localDir/leoSettings.leo
 ```
 
 **Second**: Personal settings files:
 
 ```
-   configDir/myLeoSettings.leo
-   homeDir/myLeoSettings.leo
-   homeDir/<machine-name>LeoSettings.leo (note capitalization)
-   localDir/myLeoSettings.leo
+configDir/myLeoSettings.leo
+homeDir/myLeoSettings.leo
+homeDir/<machine-name>LeoSettings.leo (note capitalization)
+localDir/myLeoSettings.leo
 ```
 
 **Last**: Local settings files: the file being loaded.
@@ -76,8 +74,9 @@ Settings that appear later in this list override settings that appear earlier in
 
 You should use special care when placing default or personal settings files in **local** directories, that is, directories other than homeDir, configDir or machineDir. In particular, the value of localDir can change when Leo reads additional files. This can result in Leo finding new default and personal settings files. The values of these newly-read settings files will, as always, override any previously-read settings.
 
-Let us say that a setting is **volatile** if it is different from a default setting. Let us say that settings file A.leo **covers** settings file if B.leo if all volatile settings in B.leo occur in A.leo. With these definitions, the **safe rule** for placing settings files in local directories is:
+Let us say that a setting is **volatile** if it is different from a default setting. Let us say that settings file A.leo **covers** settings file if B.leo if all volatile settings in B.leo occur in A.leo. 
 
+>  💡 **TIP**\
 >   Settings files in local directories should
 >   cover all other settings files.
 
@@ -106,36 +105,29 @@ You can use several other kinds of nodes to cause Leo to ignore parts of an `@se
 Simple settings nodes have headlines of the form `@<type> name = val`.
 These settings set the value of name to val, with the indicated type:
 
-    | \<type\>          | Valid values                                                                                 |
-    |:----------------|:-----------------------------------------------------------------------------------------------------------------------|
-    | @bool           | True, False, 0, 1       |
-    | @color          | A Qt color name or value, such as 'red' or 'xf2fddff' (without the quotes)       |
-    | @directory      | A path to a directory       |
-    | @float          | A floating point number of the form nn.ff.       |
-    | @int            | An integer       |
-    | @ints[list]     | An integer (must be one of the ints in the list). Example: @ints meaningOfLife[0,42,666]=42       |
-    | @path           | A path to a directory or file       |
-    | @ratio          | A floating point number between 0.0 and 1.0, inclusive.       |
-    | @string         | A string       |
-    | @strings[list]  | A string (must be one of the strings in the list). Example: @strings tk_relief['flat','groove','raised']='groove'       |
+| \<type\>          | Valid values                                                                                 |
+|:----------------|:-----------------------------------------------------------------------------------------------------------------------|
+| **@bool**           | True, False, 0, 1       |
+| **@directory**      | A path to a directory       |
+| **@float**          | A floating point number of the form nn.ff.       |
+| **@int**            | An integer       |
+| **@ints[list]**     | An integer (must be one of the ints in the list).<br></br> Example: @ints meaningOfLife[0,42,666]=42       |
+| **@path**           | A path to a directory or file       |
+| **@ratio**          | A floating point number between 0.0 and 1.0, inclusive.       |
+| **@string**         | A string       |
+| **@strings[list]**  | A string (must be one of the strings in the list).<br></br> Example: @strings tk_relief['flat','groove','raised']='groove'       |
 
 ### Complex settings nodes
 
 Complex settings nodes have headlines of the form `@<type> description`:
 
-| @\<type\>              Valid values                                                        |
-|---------------------:-------------------------------------------------------------------:|
-| @buttons           | Child @button nodes create global buttons.                          |
-| @commands          | Child @command nodes create global buttons.                         |
-| @command-history   | Body is a list of commands pre-loaded into history list.            |
-| @data              | Body is a list of strings, one per line.                            |
-| @enabled-plugins   | Body is a list of enabled plugins.                                  |
-| @font              | Body is a font description.                                         |
-| @menus             | Child @menu and @item nodes create menus and menu items.            |
-| @menuat            | Child @menu and @item nodes modify menu trees created by menus.     |
-| @mode [name]       | Body is a list of shortcut specifiers.                              |
-| @recentfiles       | Body is a list of file paths.                                       |
-| @shortcuts         | Body is a list of shortcut specifies.                               |
+| @\<type\>          |   Valid values                                                      |
+|:-------------------|:--------------------------------------------------------------------|
+| **@buttons**           | Child @button nodes create global buttons.                          |
+| **@commands**          | Child @command nodes create global buttons.                         |
+| **@command-history**   | Body is a list of commands pre-loaded into history list.            |
+| **@data**              | Body is a list of strings, one per line.                            |
+| **@recentfiles**       | Body is a list of file paths.                                       |
 
 Complex nodes specify settings in their body text.
 See the following sections for details.
@@ -149,12 +141,15 @@ An `@buttons` tree in a settings file defines global buttons that are created in
 An `@commands` tree in a settings file defines global commands. All `@command` nodes in the `@commands` tree create global commands. All `@command` nodes outside the `@commands` tree create commands local to the settings file.
 
 #### \@command-history
+
 The body text contains a list of commands, one per line, to be preloaded into Leo's command history. You access command history using the up and down arrow keys in Leo's minibuffer.
 
 #### \@data
+
 The body text contains a list of strings, one per line. Lines starting with `#` are ignored.
 
 #### \@rclick
+
 For each `@button` node, Leo adds right-click menu items for:
 
 - `@rclick` nodes directly *following* the `@button`.
@@ -170,15 +165,8 @@ addition to these two standard right-click menu items.
 The headline of the `@rclick` node gives the menu title. The body contains a
 Leo script to execute when the user selects the menu item.
 
-**Related Setting**:
-
-`@string mod_scripting_subtext = ▼`
-
-This setting specifies **indicator text** that indicates that an `@button` button has right-click menu items created by `@rclick` nodes.
-
-Unicode chars like `▼`, `▾` and `…` are typical choices for this text.
-
 #### \@recentfiles
+
 The body text contains a list of paths of recently opened files, one path per line. Leo writes the list of recent files to `.leoRecentFiles.txt` in Leo's config directory, again one file per line.
 
 ## Customizing the rst3 command
@@ -193,7 +181,7 @@ or [Sphinx](https://www.sphinx-doc.org/en/master/) markup to an **intermediate s
 options, `rst3` will:
 
 - write the intermediate string to an **intermediate file**.
-- **NOT AVAILABLE IN LEOJS** ⚠️ send the intermediate string to [docutils](https://docutils.sourceforge.io) for conversion to HTML, PDF,
+- ⚠️ **NOT AVAILABLE IN LEOJS:** send the intermediate string to [docutils](https://docutils.sourceforge.io) for conversion to HTML, PDF,
   [LaTeX](https://www.latex-project.org/), etc.
 
 **User filters**
@@ -204,15 +192,16 @@ Plugins or scripts may define two functions: a **headline filter** and a
 - `rst3` calls the body filter for all nodes except descendants of
   `@rst-ignore` or `@rst-ignore-tree` nodes.
 
-- `rst3` calls the headline filter for all nodes except::
+- `rst3` calls the headline filter for all nodes except:
+    - rst-no-head nodes
+    - descendants of @rst-ignore or @rst-ignore-tree nodes.
 
-    rst-no-head nodes or
-    descendants of @rst-ignore or @rst-ignore-tree nodes.
-
-- plugins or scripts register filters as follows::
-
-    c.rstCommands.register_body_filter(body_filter)
-    c.rstCommands.register_headline_filter(headline_filter)
+- plugins or scripts register filters as follows:
+    
+```js
+c.rstCommands.register_body_filter(body_filter);
+c.rstCommands.register_headline_filter(headline_filter);
+```
 
 - The signature of all filters is `filter-name (c, p)` where c and p are
   defined as usual.
@@ -221,43 +210,51 @@ Plugins or scripts may define two functions: a **headline filter** and a
 
 Do-nothing filters would be defined like this:
 
-```python
-def body_filter(c, p):
-    return p.b
-
-def headline_filter(c, p):
-    return p.h
+```js
+function body_filter(c, p) {
+    return p.b;
+}
+function headline_filter(c, p) {
+    return p.h;
+}
 ```
 
 The following filters would simulate the frequently-requested "half clone" feature.
 That is, within any `@rst` tree, the following filters would skip the children of all clones:
 
-```python
-def has_cloned_parent(c, p):
-    """Return True if p has a cloned parent within the @rst tree."""
-    root = c.rstCommands.root  # The @rst node.
-    p = p.parent()
-    while p and p != root:
-        if p.isCloned():
-            return True
-        p.moveToParent()
-    return False
+```js
+/**
+ * Return True if p has a cloned parent within the @rst tree.
+ */
+function has_cloned_parent(c, p) {
+    const root = c.rstCommands.root;  // The @rst node.
+    const p = p.parent();
+    while(p.v && !p.__eq__(root)){
+        if(p.isCloned()){
+            return true;
+        }
+        p.moveToParent();
+    }
+    return false;
+}
 
-def body_filter(c, p):
-    return '' if has_cloned_parent(c, p) else p.b
+function body_filter(c, p) {
+    return has_cloned_parent(c, p) ? '' : p.b;
+}
 
-def headline_filter(c, p):
-    return '' if has_cloned_parent(c, p) else p.h
+function headline_filter(c, p) {
+    return has_cloned_parent(c, p) ? '' : p.h;
+}
 ```
 
-Folks, this might send a shiver down your spine. Both filters ignore all
+Both filters ignore all
 descendants of clones in the `@rst` tree. We have the effect of half clones,
 with no changes to Leo's core!
 
 Note: `has_cloned_parent` stops the scan at the `@rst` node itself, ensuring
 that the `rst3` command includes "top-level" clones themselves.
 
-See `leo/plugins/example_rst_filter.py` for a complete example.
+See [leo/plugins/example_rst_filter.py](https://github.com/leo-editor/leo-editor/blob/devel/leo/plugins/example_rst_filter.py) for a complete example.
 
 **Filters can do practically anything**
 
@@ -277,7 +274,7 @@ Moreover, filters can define special conventions, including:
 
 Plugins and scripts can define headline and body filters that alter the intermediate string.
 
-The `leo/plugins/example_rst_filter.py` plugin shows how to set up plugins that define custom filters.
+The `[leo/plugins/example_rst_filter.py](https://github.com/leo-editor/leo-editor/blob/devel/leo/plugins/example_rst_filter.py) plugin shows how to set up plugins that define custom filters.
 
 Filters have easy access to all data within the outline, including:
 
@@ -339,137 +336,3 @@ Here is how Leo associates uA's with `<v>` elements in `.leo` files:
 - When writing a `.leo` file, Leo will write foreign xml attributes in `<v>` elements if the corresponding vnode contains an unknownAttributes ivar.
 
 - Leo performs the usual xml escapes on these strings when reading or writing the unknownAttributes ivars.
-
-## Decluttering headlines
-
-**Decluttering** replaces controls custom formatting of headlines, including:
-
-- Hiding or changing headline text,
-- Adding icons to headlines,
-- Changing the styling of headlines.
-
-Decluttering is *inactive* when you are editing a headline.
-
-Decluttering is *completely optional*. To enable decluttering, use:
-
-```
-@bool tree-declutter = True
-```
-
-Decluttering is controlled by **decluttering rulesets**.
-You specify decluttering rulesets in the body text of:
-
-```
-@data tree-declutter-patterns
-```
-
-As usual with `@data` nodes:
-
-- Blank lines and lines starting with `#` are ignored.
-- You may organize the text of the `@data` node using child nodes.
-
-Each ruleset consists of a list of lines:
-
-- The first line is a **rule line**, containing a **find pattern**.
-- The second line is a **replacement line**.
-- The ruleset ends with zero or more **style lines**.
-
-Find patterns are [regular expressions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions).
-Decluttering affects only those headlines that match a rule pattern. 
-
-The following section shows some example rulesets. Later sections discuss decluttering commands, patterns and styles in more detail.
-
-### Examples
-
-Here are some examples of decluttering rulesets:
-
-```
-# Hide org-mode tags and bold the headline.
-RULE :([\w_@]+:)+\s*$
-REPLACE-HEAD
-WEIGHT Bold
-
-# Replace @clean with an icon
-RULE ^@clean (.*)
-REPLACE \1
-ICON file_icons/file_clean.png
-
-# Show the last part of long filenames
-RULE ^.{1,1000}([/\\])(.{25})
-REPLACE …\1\2
-```
-
-### Rule & replacement lines
-All rulesets start with a **rule line** of the form:
-
-```
-RULE <regular expression>
-```
-
-The ruleset matches a headline if and only if the regular expression matches. Matches can start anywhere in the headline. Leo first attempts to a match using re.match. If that doesn't work, Leo tries re.search.
-
-A **replacement line** must follow the rule line. Here are the valid forms::
-
-```
-REPLACE <substitution expression>
-REPLACE-HEAD
-REPLACE-TAIL
-REPLACE-REST
-```
-
-- `REPLACE` replaces the headline by the value of the substitution expression.  For example:
-
-```
-REPLACE \1
-```
-
-  matches replaces the headline by the first matched regex group.
-
-- `REPLACE-HEAD` replaces replace the headline by the text that precedes the matched text.
-
-- `REPLACE-TAIL` replaces the headline by the text that follows the matched text.
-
-- `REPLACE-REST` replaces the headline by everything except the matched text.
-
-### Style lines
-
-Leo applies style lines only if they appear in a ruleset that matches a headline. Style lines do the following...
-
-Add an icon to the headline:
-
-```
-    ICON path/to/icon
-```
-
-Set the background or foreground color to a color number or names:
-
-```
-    BG #FF8800
-    FG @solarized-magenta
-```
-
-Set the font to a given font name:
-
-```
-    Font Times
-```
-
-Set the font size in pixels (PX) or points (PT):
-
-```
-    PX 40
-    PT 16
-```
-
-Enable or disable italics:
-
-```
-    ITALIC 0
-    ITALIC 1
-```
-
-Set the font weight to one of Light, Normal, DemiBold, Bold, Black:
-
-```
-    WEIGHT DemiBold
-```
