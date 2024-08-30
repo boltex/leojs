@@ -14,7 +14,7 @@ A **clone** is a node that appears in more than one place in a Leo outline. A sm
 - Inserting, moving, or deleting any child of a clone will change all other clones on the screen.
 
 `` Ctrl-` ``  (clone-node)\
-Clones a node. The shortcut uses back-tick, *not* a single quote.  This character is often on the same keyboard key as the tilde `~` character.
+Clones a node. The shortcut uses [backtick (grave accent)](https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows), *not* a single quote.  This character is often on the same keyboard key as the tilde `~` character.
 
 > 🧪 **Please take a few moments to experiment with clones:**
 > - Create a node whose headline is A.

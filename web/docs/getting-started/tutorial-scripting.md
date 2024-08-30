@@ -4,14 +4,17 @@ sidebar_position: 4
 
 # Writing Leo scripts
 
-This chapter tells how to write **Leo scripts**, JavaScript (or TypeScript) scripts that can run from any Leo node.
+This chapter tells how to write **Leo scripts**, JavaScript (or TypeScript) code that can run from any Leo node.
 
-Three predefined symbols, **c**, **g**, and **p** give Leo scripts easy access to all the data in the outline. These symbols also allow Leo scripts to execute any code in Leo's own codebase.
+Predefined symbols, **c**, **g**, and **p** give Leo scripts easy access to all the data in the outline. These symbols also allow Leo scripts to execute any code in Leo's own codebase.
+
+In LeoJS, the _VSCode API_ is also available as **vscode**. Other common modules such as _crypto, os, path, process and child_process_ are also available, along with the following libraries: _SQL, JSZip, pako, showdown, dayjs, md5, csvtojson, difflib, elementtree and ksuid_.
 
 **Positions** and **vnodes** are the foundation of Leo scripting. leo/core/leoNodes.ts defines the corresponding Position and VNode classes. These classes provide access to all outline data and allow Leo scripts to create and change outlines.
 
 > 🔍 **Further study**\
-> The [scripting portion](../users-guide/cheatsheet.md#scripting) of [Leo's cheat sheet](../users-guide/cheatsheet.md) contains more information about scripting.
+> The [scripting portion](../users-guide/cheatsheet.md#scripting) of [Leo's cheat sheet](../users-guide/cheatsheet.md) contains more information about scripting.\
+> For UI interaction in LeoJS examples, see the [scripting samples repository](https://github.com/boltex/scripting-samples-leojs), along with the [LeoJS features video](https://www.youtube.com/watch?v=M_mKXSbVGdE) to see how to try them directly in your browser.
 
 ## Hello World
 
@@ -99,7 +102,7 @@ p is the **position** of the presently selected node. Positions represent nodes 
 
 ## Positions and vnodes
 
-A **position** represents an outline node at a *specific position* in the outline. Positions provide methods to insert, delete and move outline nodes. The `scripting portion`_ of `Leo's cheat sheet`_ lists the most important methods of the position class.
+A **position** represents an outline node at a *specific position* in the outline. Positions provide methods to insert, delete and move outline nodes. The [scripting portion](../users-guide/cheatsheet.md#scripting) of [Leo's cheat sheet](../users-guide/cheatsheet.md) lists the most important methods of the position class.
 
 Because of clones, the *same* node may appear at *multiple positions* in the outline. A **vnode** represents the node's data, which is shared by all positions referring to that node.
 
