@@ -440,8 +440,6 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
             Ctrl-minus (replace-then-find)
             F3 (find-next)
             F2 (find-previous)
-            Ctrl-G (keyboard-quit)
-            anything else :-)
 
         You can Leo\'s commands toggle check boxes and radio buttons. These
         commands are listed in the Search menu.

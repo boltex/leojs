@@ -11,41 +11,41 @@ This Cheat Sheet contains a summary of many of Leo's important features.
 
 ### Selecting outline nodes
 
-When focus is in the outline pane:
+**When focus is in the outline pane:**
 
-    Right-arrow (expand-and-go-right)
-    Left-arrow (contract-or-go-left)
-    Up-arrow (goto-prev-visible) 
-    Down-arrow (goto-next-visible)
+    - `Right-arrow` expand-and-go-right
+    - `Left-arrow` contract-or-go-left
+    - `Up-arrow` goto-prev-visible
+    - `Down-arrow` goto-next-visible
 
-Regardless of focus:
+**Regardless of focus:**
 
-    Alt-Home (goto-first-visible-node) 
-    Alt-End (goto-last-visible-node)
-    Alt-Right-arrow (expand-and-go-right)
-    Alt-Left-arrow (contract-or-go-left)
-    Alt-Up-arrow (goto-prev-visible) 
-    Alt-Down-arrow (goto-next-visible)
+    - `Alt-Home` goto-first-visible-node
+    - `Alt-End` goto-last-visible-node
+    - `Alt-Right-arrow` expand-and-go-right
+    - `Alt-Left-arrow` contract-or-go-left
+    - `Alt-Up-arrow` goto-prev-visible
+    - `Alt-Down-arrow` goto-next-visible
 
 ### Moving outline nodes
 
-When focus is in the outline:
+**When focus is in the outline:**
 
-    Shift-Down-arrow (move-outline-down) 
-    Shift-Left-arrow (move-outline-left) 
-    Shift-Right-arrow (move-outline-right) 
-    Shift-Up-arrow (move-outline-up)
+    - `Shift-Down-arrow` move-outline-down
+    - `Shift-Left-arrow` move-outline-left
+    - `Shift-Right-arrow` move-outline-right
+    - `Shift-Up-arrow` move-outline-up
 
-Regardless of focus:
+**Regardless of focus:**
 
-    Alt-Shift-Down-arrow (move-outline-down) 
-    Alt-Shift-Left-arrow (move-outline-left) 
-    Alt-Shift-Right-arrow (move-outline-right) 
-    Alt-Shift-Up-arrow (move-outline-up)
-    Ctrl-D (move-outline-down)
-    Ctrl-L (move-outline-left) 
-    Ctrl-R (move-outline-right)
-    Ctrl-U (move-outline-up)
+    - `Ctrl-D` move-outline-down
+    - `Ctrl-L` move-outline-left
+    - `Ctrl-R` move-outline-right
+    - `Ctrl-U` move-outline-up
+    - `Alt-Shift-Down-arrow` move-outline-down
+    - `Alt-Shift-Left-arrow` move-outline-left
+    - `Alt-Shift-Right-arrow` move-outline-right
+    - `Alt-Shift-Up-arrow` move-outline-up
 
 ### Moving the cursor
 
@@ -53,15 +53,15 @@ When focus is in any of Leo's text panes (body pane, log pane, headlines):
     
     | Key           | Move Cursor       |
     |:------------------|:----------------------|
-    | Arrow keys        | one character         |
-    | Ctrl-LeftArrow    | back one word         |
-    | Ctrl-RightArrow   | forward one word      |
-    | Home              | beginning of line     |
-    | End               | end of line           |
-    | Ctrl-Home         | beginning of the body |
-    | Ctrl-End          | end of body           |
-    | PageDown          | down one page         |
-    | PageUp            | up one page           |
+    | **Arrow keys**        | one character         |
+    | **Ctrl-LeftArrow**    | back one word         |
+    | **Ctrl-RightArrow**   | forward one word      |
+    | **Home**              | beginning of line     |
+    | **End**               | end of line           |
+    | **Ctrl-Home**         | beginning of the body |
+    | **Ctrl-End**          | end of body           |
+    | **PageDown**          | down one page         |
+    | **PageUp**            | up one page           |
 
 Adding the Shift key modifier to any of the keys above moves the cursor and extends the selected text.
 
@@ -91,6 +91,7 @@ The body text of an @data history-list *setting node* preloads commands into the
     contract-log-pane
 
 ## Frequently used commands
+
 For much more information, see the [Commands Reference](commands.md).
 
 Copy/Paste (text):

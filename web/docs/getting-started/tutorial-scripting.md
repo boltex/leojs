@@ -21,7 +21,7 @@ In LeoJS, the _VSCode API_ is also available as **vscode**. Other common modules
 Here is the obligatory "Hello World!" script:
 
 ```javascript
-    g.es('Hello World!'); // g.es prints all its arguments to the log pane.
+g.es('Hello World!'); // g.es prints all its arguments to the log pane.
 ```
 
 In more detail:
@@ -113,15 +113,15 @@ For any position p, **p.b** is the node's body text, **p.h** is the node's headl
 Commanders and positions define several [generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_generators#generator_functions) to traverse (step through) an outline. The [scripting portion](../users-guide/cheatsheet.md#scripting) of [Leo's cheat sheet](../users-guide/cheatsheet.md) lists all of Leo's generators. For example, c.all_positions() traverses the outline in outline order.  The following prints a properly-indented list of all headlines:
 
 ```javascript
-    for (const p of c.all_positions()){
-        g.es(' '.repeat(p.level()) + p.h);
-    }
+for (const p of c.all_positions()){
+    g.es(' '.repeat(p.level()) + p.h);
+}
 ```
 
 Scripts may capture positions like this:
 
 ```javascript
-    const aList = [...c.all_positions()];
+const aList = [...c.all_positions()];
 ```
 **Warning**: stored positions become invalid when outline changes. **c.positionExists(p)** is True if p is valid in c's outline.
 

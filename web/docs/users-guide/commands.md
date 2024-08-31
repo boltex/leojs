@@ -14,17 +14,18 @@ Every Leo command has a **command name**. In this document, keystrokes that invo
 
 **Very Important**: Leo has hundreds of commands, but because of tab completion you do not have to remember, or even *know about* any of them.  Feel free to ignore commands that you don't use. The following prefixes help find commands by name:
 
-   |:------------|:-----------------------------|
-   | clone-find  | clone-find commands          |
-   | file-       | file commands                |
-   | find-       | find commands                |
-   | isearch-    | incremental search commands  |
-   | leo-        | open .leo files              |
-   | open-       | open files or url's          |
-   | print-      | print commands               |
-   | rectangle-  | rectangle commands           |
-   | sort-       | sort commands                |
-   | toggle-     | toggle settings commands     |
+| Prefix      | Category                     |
+|:------------|:-----------------------------|
+| **clone-find**  | clone-find commands          |
+| **file-**       | file commands                |
+| **find-**       | find commands                |
+| **isearch-**    | incremental search commands  |
+| **leo-**        | open .leo files              |
+| **open-**       | open files or url's          |
+| **print-**      | print commands               |
+| **rectangle-**  | rectangle commands           |
+| **sort-**       | sort commands                |
+| **toggle-**     | toggle settings commands     |
 
 ## Most important commands
 
@@ -51,8 +52,8 @@ Here's how to switch focus without using the mouse:
     Toggles focus between the outline and body panes.
 `Ctrl-Tab (tab-cycle-next)`
     Switches between outline tabs. You may open multiple Leo outlines in different tabs within the same main window.
-`Ctrl-G (keyboard-quit)`
-    Puts focus in the body pane. More effective than hitting Alt-Tab twice.
+`Ctrl-G (focus-to-body)`
+    Puts focus in the body pane.
 
 ### Outline commands
 
@@ -930,7 +931,7 @@ The following check boxes options appear in the Find pane:
 
     `Alt+Ctrl+A (toggle-find-wrap-around-option)` toggles this checkbox.
 
-#### Radio buttons and their commands 
+#### Radio buttons and their commands
 
 The following radio buttons appear in the Find pane:
 

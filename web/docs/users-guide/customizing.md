@@ -274,7 +274,7 @@ Moreover, filters can define special conventions, including:
 
 Plugins and scripts can define headline and body filters that alter the intermediate string.
 
-The `[leo/plugins/example_rst_filter.py](https://github.com/leo-editor/leo-editor/blob/devel/leo/plugins/example_rst_filter.py) plugin shows how to set up plugins that define custom filters.
+The [leo/plugins/example_rst_filter.py](https://github.com/leo-editor/leo-editor/blob/devel/leo/plugins/example_rst_filter.py) plugin shows how to set up plugins that define custom filters.
 
 Filters have easy access to all data within the outline, including:
 
@@ -286,44 +286,12 @@ The example filters shown above simulate the often-requested "half clone" featur
 
 ## uA's: extensible attribues of nodes
 
-Leo's .leo file format is extensible. The basis for extending .leo files are the v.unknownAttributes ivars of vnodes, also know as **user attributes**, uA's for short. Leo translates between uA's and xml attributes in the corresponding \<v\> elements in .leo files. Plugins may also use v.tempAttributes ivars to hold temporary information that will *not* be written to the .leo file. These two ivars are called **attribute ivars**.
+Leo's .leo file format is extensible. The basis for extending .leo files are the v.unknownAttributes ivars of vnodes, also know as **user attributes**, uA's for short. Leo translates between uA's and xml attributes in the corresponding \<v\> elements in .leo files. 
 
-Attribute ivars must be Python dictionaries, whose keys are names of plugins and whose values are *other* dictionaries, called **inner dictionaries**, for exclusive use of each plugin.
+> 📝 **NOTE**\
+>For the .leoJS JSON file format, the uA's are saved as JSON strings in a uA dictionary, where the keys are the vnode's GNX.
 
-The v.u Python property allows plugins to get and set v.unknownAttributes easily:
-
-```python
-d = v.u # gets uA (the outer dict) for v
-v.u = d # sets uA (the outer dict) for v
-```
-
-For example:
-
-```python
-plugin_name = 'xyzzy'
-d = v.u # Get the outer dict.
-inner_d = d.get(plugin_name,{}) # Get the inner dict.
-inner_d ['duration']= 5
-inner_d ['notes'] "This is a note."
-d [plugin_name] = inner_d
-v.u = d
-```
-
-No corresponding Python properties exist for v.tempAttributes, so the corresponding example would be::
-
-```python
-plugin_name = 'xyzzy'
-# Get the outer dict.
-if hasattr(p.v,'tempAttributes'): d = p.v.tempAttributes
-else: d = {}
-inner_d = d.get(plugin_name,{}) # Get the inner dict.
-inner_d ['duration'] = 5
-inner_d ['notes'] = "This is a note."
-d [plugin_name] = inner_d
-p.v.tempAttributes = d
-```
-
-**Important**: All members of inner dictionaries should be picklable: Leo uses Python's Pickle module to encode all values in these dictionaries. Leo will discard any attributes that can not be pickled. This should not be a major problem to plugins. For example, instead of putting a tnode into these dictionaries, a plugin could put the tnode's gnx (a string) in the dictionary.
+**Important**: All members of inner dictionaries should be picklable: LeoJS uses Python's Pickle module emulation to encode all values in these dictionaries. It will discard any attributes that can not be pickled. This should not be a major problem to plugins. For example, instead of putting a tnode into these dictionaries, a plugin could put the tnode's gnx (a string) in the dictionary.
 
 **Note**: Leo does *not* pickle members of inner dictionaries whose name (key) starts with str\_. The values of such members should be a Python string. This convention allows strings to appear in .leo files in a more readable format.
 
