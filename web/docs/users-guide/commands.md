@@ -33,83 +33,87 @@ Every Leo command has a **command name**. In this document, keystrokes that invo
 
 Here are Leo's basic file commands:
 
-`Ctrl-N (new)`
+`Ctrl-N (new)`\
     Creates a new outline in a new tab.
-`Ctrl-O (open-outline)`
-    Opens an existing .leo file.
-`Ctrl-S (save-file)`
-    Saves the outline.
 
-A **session** specifies a list of .leo files that Leo opens automatically when Leo first starts.  Leo will reload the last session provided that command-line arguments *don't* contain any file names.
+`Ctrl-O (open-outline)`\
+    Opens an existing .leo file.
+
+`Ctrl-S (save-file)`\
+    Saves the outline.
 
 ### Switching focus
 
 Here's how to switch focus without using the mouse:
 
-`Alt-T (focus-to-tree)`
+`Alt-T (focus-to-tree)`\
     Puts focus in the outline pane, regardless of focus.
-`Ctrl-T (toggle-active-pane)`
+
+`Ctrl-T (toggle-active-pane)`\
     Toggles focus between the outline and body panes.
-`Ctrl-Tab (tab-cycle-next)`
-    Switches between outline tabs. You may open multiple Leo outlines in different tabs within the same main window.
-`Ctrl-G (focus-to-body)`
+
+`Ctrl-Tab (tab-cycle-next)`\
+    Switches between outline tabs. You may open multiple Leo outlines in 
+    different tabs within the same main window.
+
+`Ctrl-G (focus-to-body)`\
     Puts focus in the body pane.
 
 ### Outline commands
 
-`Ctrl-I or Insert (insert-node)`
+`Ctrl-I or Insert (insert-node)`\
     Inserts a new node into the outline.
-`Ctrl-H (edit-headline)`
+
+`Ctrl-H (edit-headline)`\
     Begins editing the headline of the selected node.
-`Return`
-    When focus is in the outline pane, `<Return>` ends editing `(end-edit-headline)` or switches focus to the body pane.
-`Ctrl-Shift-C (copy-node)`
+
+`Return`\
+    When focus is in the outline pane, _Return_ switches focus to the body pane.
+
+`Ctrl-Shift-C (copy-node)`\
     Copies the outline and all it's descendants, placing the node on the clipboard.
-`Ctrl-Shift-X (cut-node)`
+
+`Ctrl-Shift-X (cut-node)`\
     Cuts the outline and all its descendants, placing the node on the clipboard.
-`Ctrl-Shift-V (paste-node)`
+
+`Ctrl-Shift-V (paste-node)`\
     Pastes a node (and its descendants) from the clipboard after the presently selected node.
-`Ctrl-M (mark)`
+
+`Ctrl-M (mark)`\
     Toggles the mark on a node. Marked nodes have a vertical red bar in their icon area.
-`Ctrl-} (demote)`
+
+`Ctrl-} (demote)`\
     Makes all following siblings of a node children of the node. Use `demote` to "gather" nodes so they can all be moved with their parent.
-`Ctrl-{ (promote)`
+
+`Ctrl-{ (promote)`\
     Makes all the children of a node siblings of the node. Use `demote` to "scatter" the nodes after moving their parent.
 
 ### Selecting outline nodes
 
 You may select, expand and contract outline nodes with the mouse as usual, but using arrow keys is *highly recommended*. When focus is in the outline pane, *plain* arrows keys change the selected node:
 
-`Right-arrow (expand-and-go-right)`
+`Right-arrow (expand-and-go-right)`\
     Expands a node or selects its first child.
-`Left-arrow (contract-or-go-left)`
+
+`Left-arrow (contract-or-go-left)`\
     Contracts a node if its children are visible, and selects the node's parent otherwise.
-`Up-arrow (goto-prev-visible)`
+
+`Up-arrow (goto-prev-visible)`\
     Selects the previous *visible* outline node.
-`Down-arrow (goto-next-visible)`
+
+`Down-arrow (goto-next-visible)`\
     Selects the next *visible* outline node.
 
 Regardless of focus, `Alt-arrow` select outline nodes:
 
-`Alt-Home (goto-first-visible-node)`
+`Alt-Home (goto-first-visible-node)`\
     Selects the first outline node and collapses all nodes.
-`Alt-End (goto-last-visible-node)`
+
+`Alt-End (goto-last-visible-node)`\
     Selects the last *visible* outline node and collapses all nodes except the node and its ancestors.
-`Alt-arrow keys`
+
+`Alt-arrow keys`\
     Select the outline pane, and then act just like the plain arrow keys when the outline pane has focus.
-
-### Moving the cursor
-
-When focus is in any of Leo's text panes (body pane, log pane, headlines), Leo works like most text editors:
-
-- `Plain arrow` keys move the cursor up, down, left or right.
-- `Ctrl-LeftArrow` and `Ctrl-RightArrow` move the cursor by words.
-- `Home` and `End` move the cursor to the beginning or end of a line.
-- `Ctrl-Home` moves the cursor to the beginning of the body text.
-- `Ctrl-End` moves the cursor to the end of the body text.
-- `PageDown` and `PageUp` move the cursor up or down one page.
-
-**Note**: As usual, adding the `Shift` key modifier to any of the keys above moves the cursor and extends the selected text.
 
 ### Finding & replacing text
 
@@ -135,23 +139,23 @@ You may now type any command.  The following are most useful:
 - `Ctrl-minus (replace-then-find)` replaces the selected text.
 - `F3 (find-next)` continues searching without making a replacement.
 - `F2 (find-previous)` continues the search in reverse.
-- `Ctrl-G (keyboard-quit)` ends the search.
 
 ### Formatting text
 
-`rst3`
+`rst3`\
     Converts `@rst` nodes to restructured text. This command automatically creates underlining for rST sections. To reorganize a document, just reorganize the corresponding Leo outline: you don't have to change markup by hand. Search or "rst" in `leoSettings.leo` to see the pertinent settings.
 
-`adoc`
+`adoc`\
      Converts `@adoc` nodes to asciidoc text. This command automatically creates markup for asciidoctor sections. To reorganize a document, just reorganize the corresponding Leo outline: you don't have to change markup by hand.
 
 ### Undoing and redoing changes
 
 Leo has undo and redo commands -- Leo remembers changes you make to outline structure or the contents of any node since you restarted Leo or made a non-undoable operation.
 
-`Ctrl-Z (undo)`
+`Ctrl-Z (undo)`\
     Undoes the last change. Another `Ctrl-Z` undoes the previous change, etc.
-`Ctrl-Shift-Z (redo)`
+
+`Ctrl-Shift-Z (redo)`\
     Undoes the effect of the last undo, etc.
 
 The first two entries of the `Edit` menu show what the next undo or redo operation will be.
@@ -160,12 +164,14 @@ The first two entries of the `Edit` menu show what the next undo or redo operati
 
 The **clone find** commands, cfa and cff are extraordinarily useful. These commands move clones of all nodes matching the search pattern under a single **organizer node**, created as the last top-level node. **Flattened** searches put all nodes as direct children of the organizer node:
 
+| Short| Full Name                    |
 |:-----|:------------------------------
 | cfa  |   clone-find-all             |
 | cff  |   clone-find-all-flattened   |
 
 The **clone-marked** commands move clones of all marked nodes under an organizer node. Especially useful for gathering nodes by hand:
 
+| Short| Full Name                    |
 |:-----|:------------------------------
 | cfam |   clone-find-marked          |
 | cffm |   clone-find-flattened-marked|
@@ -194,8 +200,8 @@ needed attention.
   dubious. The defaults ignore unit tests:
 
 ```
-    .*test_
-    .*Test
+.*test_
+.*Test
 ```
 
 - `@data check-nodes-ok-prefixes`
@@ -205,10 +211,10 @@ needed attention.
   The defaults ignore top-level @\<file\> nodes and marker nodes:
 
 ```
-    @
-    **
-    ==
-    --
+ @
+ **
+ ==
+ --
 ```
 
 - `@data check-nodes-suppressions`
@@ -219,45 +225,20 @@ needed attention.
 
 ### Help commands
 
-`(help-for-command)`
+`help-for-command`\
     Shows the documentation for any Leo command. This prompts for the name of a Leo command. Use tab completion to see the list of all commands that start with a given prefix.
 
-These commands clarify which settings are in effect, and where they came from:
-
-   |:---------------|
-   | print-bindings |
-   | print-settings |
+`show-settings`\
+This command clarify which settings are in effect, and where they came from.
 
 These commands discuss special topics:
 
-    |:---------------------------------|
-    | help-for-command                 |
-    | help-for-settings                |
-    | help-for-keystroke               |
-    | help-for-scripting               |
-    | help-for-minibuffer              |
-    | help-for-find-commands           |
-    | help-for-creating-external-files |
-
-### Operations on reference .leo files
-
-See [https://groups.google.com/g/leo-editor/c/yAtfcG6AL70](https://groups.google.com/g/leo-editor/c/yAtfcG6AL70)
-
-These commands make it easier to use Leo's [reference .leo files](../advanced-topics/faq.md##what-is-a-reference-leo-file). From time to time, developers needs to open reference Leo file and copy its content to and from their personal file. These commands use a **separation node**, a top-level node whose headline is:
-
-```
----begin-private-area---
-```
-
-The body of the separation node contains the **.leo reference**, a path to the reference .leo file. Everything above this node is the **public part** of the outline.  Everything below this node is the **private part** of the outline.
-
-**set-reference-file** selects the reference .leo file corresponding to the local .leo file. It creates the separation node if it doesn't exists, changing the .leo reference as needed.
-
-**read-ref-file** reads the public part of this outline from the reference .leo file given in the separation node. **Warning**: This command **deletes all nodes above separation node**, recreating them from the reference file.
-
-**update-ref-file** saves public part of this outline to reference .leo file.
-
-Developers will typically execute the `read-ref-file` command after any git pull that changes any reference .leo file.  Similarly, devs will typically execute the `update-ref-file` command before doing a git commit that changes a reference .leo file.
+- `help-for-settings`
+- `help-for-keystroke`
+- `help-for-scripting`
+- `help-for-minibuffer`
+- `help-for-find-commands`
+- `help-for-creating-external-files`
 
 ## All other commands
 
@@ -265,33 +246,43 @@ Developers will typically execute the `read-ref-file` command after any git pull
 
 The **clone find** commands, cfa and cff,  move clones of all nodes matching the search pattern under a single **organizer node**, created as the last top-level node. **Flattened** searches put all nodes as direct children of the organizer node:
 
-    cfa     clone-find-all
-    cff     clone-find-all-flattened
+| Short| Full Name                    |
+|:-----|:------------------------------
+| cfa  |   clone-find-all             |
+| cff  |   clone-find-all-flattened   |
 
-The **clone-marked** commands move clones of all marked nodes under an organizer node. Especially useful for gathering nodes by hand:
+The **clone-marked** commands move clones of all marked nodes under an organizer node.
+The **clone-find-tag** aka 'cft' command creates clones of all nodes having a given tag.
+_Especially useful for gathering nodes by hand._
 
-    cfam    clone-find-marked 
-    cffm    clone-find-flattened-marked
+| Short| Full Name                    |
+|:-----|:------------------------------
+| cfam |   clone-find-marked          |
+| cffm |   clone-find-flattened-marked|
+| cft |   clone-find-tag |
 
-The _clone-find-parents_ command creates clones of all parent nodes of c.p.
+`clone-find-parents`\
+    Creates clones of all parent nodes of c.p.
 
-The _clone-find-tag_ aka `(cft)` command creates clones of all nodes having a given tag.
-
-The _tag-children_ applies a given tag to all the children of the selected node.
+`tag-children`\ 
+    Applies a given tag to all the children of the selected node.
 
 ### Edit commands
 
 #### Cutting, pasting and selecting text
 
-`cut-text (Ctrl-X)`
+`cut-text (Ctrl-X)`\
     Cut the selected text and put it to the clipboard.
-`copy-text (Ctrl-C)`
-    Copy the selected text to the clipboard.
-`paste-text (Ctrl-V)`
-    Paste test from the clipboard.
-`select-all (Ctrl-A)`
-    Select all text in the text pane.
 
+`copy-text (Ctrl-C)`\
+    Copy the selected text to the clipboard.
+
+`paste-text (Ctrl-V)`\
+    Paste test from the clipboard.
+
+`select-all (Ctrl-A)`\
+    Select all text in the text pane.
+    
 These commands work with either headline or body text.
 
 #### Indenting body text
@@ -303,16 +294,6 @@ These commands work with either headline or body text.
 `unindent-region (Shift-Tab)`
     Shifts selected lines left one tab position. Deletes one unit of indentation if no text is selected.
 
-**Notes**:
-
-- These commands shift the entire line if any characters in that line are selected. If no text is selected.
-
-- The `@tabwidth` directive determines which characters these commands insert or delete.
-
-- Leo auto indents unless `@nocolor` is in effect.  Typing a newline automatically inserts the same leading whitespace present on the previous line.
-
-- If Python is the present language, Leo inserts an additional tab if the previous line ends with a colon.  When the `smart_auto_indent setting` is True, Leo uses Emacs-style auto-indentation instead.  This style of auto-indent aligns newly created lines with unmatched `( [{` brackets in the previous line.
-
 #### Moving the cursor
 
 `goto-global-line (Alt-G)`
@@ -320,25 +301,30 @@ These commands work with either headline or body text.
 
 #### Text formatting commands
 
-`clean-lines`
+`clean-lines`\
     Removes trailing whitespace from all lines, preserving newlines.
-`clear-selected-text`
+
+`clear-selected-text`\
     Delete the selected text.
-`convert-tabs`
+
+`convert-tabs`\
     Converts leading tabs to blanks in a single node.
-`convert-blanks`
+
+`convert-blanks`\
     Converts blanks to tabs in a single node.
-`convert-all-tabs`
+
+`convert-all-tabs`\
     Converts leading tabs to blanks throughout the selected tree.
-`convert-all-blanks`
+
+`convert-all-blanks`\
     Converts leading blanks to tabs throughout the selected tree.
 
 **@tabwidth**: The `convert-*` commands convert between tabs and blanks using the `@tabwidth` setting presently in effect.
 
-`insert-body-time` and `insert-headline-time`
+`insert-body-time` and `insert-headline-time`\
     Insert formatted time and date into body or headline text. You must be editing a headline to be able to insert the time/date into the headline. The body_time_format_string and headline_time_format_string settings specify the format of the inserted text. These settings are the format string passed to time.strftime.
 
-`reformat-paragraph`
+`reformat-paragraph`\
     Rearranges the words in a text paragraph to fill each line as full as possible, up to the `@pagewidth` setting. A paragraph is delimited by blank lines, Leo directives, and (of course) start and end of text in a node. The width of the line used by the reformatting operation is governed by `@pagewidth` and the indentation that would be applied to the node when Leo writes the file.
 
 The command operates on the paragraph containing the insert cursor. If the insert cursor is on a blank line or directive, nothing happens. If the cursor is on a line containing text, then the paragraph containing that text line is reformatted and the insert cursor is moved to the next paragraph.
@@ -353,30 +339,36 @@ The command operates on the paragraph containing the insert cursor. If the inser
      and it too has a hanging indentation.
 ```
 
-`replace-current-character`
+`replace-current-character`\
      Replace the selected character with the next character typed.
-`toggle-angle-brackets`
+
+`toggle-angle-brackets`\
     Adds or removes double angle brackets from the headline of the selected node.
-`unformat-paragraph`
+
+`unformat-paragraph`\
     Removes all extra whitespace from a paragraph, including leading whitespace.  This command is useful when `@wrap` is in effect.
 
 #### Creating nodes from body text
 
-`extract (Ctrl-Shift-D)`
+`extract (Ctrl-Shift-D)`\
     Creates a new node whose headline is the first line of selected body text and whose body is all other lines of selected text. Previously selected text is deleted from the original body text.
-`extract-names (Ctrl-Shift-N)`
+    
+`extract-names (Ctrl-Shift-N)`\
     Creates one or more child nodes, one for each section name in the selected body text. The headline of each created node is the section name.
-`line-to-headline`
+
+`line-to-headline`\
     Creates a new node whose headline is the selected body line.
 
 #### Executing scripts in body text
 
-`execute-script (Ctrl-B)`
+`execute-script (Ctrl-B)`\
     Executes body text as JavaScript or TypeScript. Leo execute the selected text, or the entire body text if no text is selected. The Execute Script command pre-defines the values c, g and p as follows:
 
 - c is the commander of the outline containing the script.
 - g is the leoGlobals modules.
 - p is c.p, that is, c.currentPosition().
+
+In LeoJS, the _VSCode API_ is also available as **vscode**. Other common modules such as _crypto, os, path, process and child_process_ are also available, along with the following libraries: _SQL, JSZip, pako, showdown, dayjs, md5, csvtojson, difflib, elementtree and ksuid_.
 
 **Important**: Body text may contain Leo directives and section references. You can use all of Leo's features to organize scripts that you execute interactively. Section definitions must appear in the node containing the script or in descendant nodes.
 
@@ -384,450 +376,494 @@ Leo preprocesses all scripts by simulating the writing of a external file to a s
 
 #### Multiple body editors
 
-`open-aside`
+`open-aside`\
     Detached Body Panes, independent of the selected node, can be opened with the 'Open Aside' command.
 
 #### Undoing changes
 
-Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-Shift-Z) commands. Think of actions that may be undone or redone as a string of beads. A "bead pointer" points to the present bead. Performing an operation creates a new bead after the present bead and removes all following beads. Undoing an operation moves the bead pointer backwards; redoing an operation moves the bead pointer forwards. The `undo` command is disabled when the bead pointer moves in front of the first bead; the `redo` command is disabled when the bead pointer points to the last bead.
+Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-Shift-Z) commands. (Some commands are not undoable and clear the undo history) Think of actions that may be undone or redone as a string of beads. A "bead pointer" points to the present bead. Performing an operation creates a new bead after the present bead and removes all following beads. Undoing an operation moves the bead pointer backwards; redoing an operation moves the bead pointer forwards. The `undo` command is disabled when the bead pointer moves in front of the first bead; the `redo` command is disabled when the bead pointer points to the last bead.
+
+> 📌 **NOTE**\
+> In LeoJS, the undo functionality is a multi-tiered system that separates structural outline changes from text changes within the body pane.
 
 ### File commands
 
 #### Loading, saving & reverting files
 
-`file-open-by-name`
+`file-open-by-name`\
     Gets the name of a Leo outline from the minibuffer and opens it. File name completion is supported.
-`new (Ctrl-N)`
+
+`new (Ctrl-N)`\
     Creates a new Leo main window.
-`open-outline (Ctrl-O)`
+
+`open-outline (Ctrl-O)`\
     Opens an existing .leo file. Selecting a non-.leo file loads the file into an `@edit` node in the present outline.
-`open-outline-by-name`
+
+`open-outline-by-name`\
     Opens the file given by typing the filename in the minibuffer. Supports filename completion.
-`read-outline-only`
+
+`read-outline-only`\
     Reads only the .leo file, not any external files.
-`revert`
+
+`revert`\
     Reloads the outline, discarding any changes made since it was last saved.
-`save-all`
+
+`save-all`\
     Saves all open tabs windows/tabs. 
-`save-buffers-kill-leo`
+
+`save-buffers-kill-leo`\
     Quits Leo, prompting to save any unsaved files first. 
-`save-file or file-save (Ctrl-S)`
+
+`save-file or file-save (Ctrl-S)`\
     Saves the Leo window to a file.
-`save-file-as`
+
+`save-file-as`\
     Saves a copy of the Leo outline, changing outline's file name.
-`save-file-to`
+
+`save-file-to`\
     Saves a copy of the Leo outline, without changing the outline's file name
 
 **Opening specific files**:
 
-`open-cheat-sheet-leo`
+`open-cheat-sheet-leo`\
     Opens CheatSheet.leo in a new tab or window.
-`open-leoDocs-leo`
+
+`open-leoDocs-leo`\
     Opens LeoDocs.leo in a new tab or window.
-`open-scripts-leo`
+
+`open-scripts-leo`\
     Opens scripts.leo in a new tab or window.
-`open-leoSettings-leo`
+
+`open-leoSettings-leo`\
     Opens `leoSettings.leo` in a new tab or window.
 
 **Writing external files without saving the outline**:
 
-`write-at-auto-nodes`
+`write-at-auto-nodes`\
     Writes all `@auto` nodes in the selected tree.
-`write-outline-only`
+
+`write-outline-only`\
     Saves the outline without writing any @\<file\> trees.
-`write-at-file-nodes`
+
+`write-at-file-nodes`\
     Writes all @\<file\> trees.
-`write-at-shadow-nodes`
+
+`write-at-shadow-nodes`\
     Writes all `@shadow` nodes in the selected tree.
-`write-dirty-at-file-nodes`
+
+`write-dirty-at-file-nodes`\
     Writes all modified @\<file\> trees.
-`write-dirty-at-shadow-nodes`
+
+`write-dirty-at-shadow-nodes`\
     Writes all modified `@shadow` trees.
-`write-missing-at-file-nodes`
+
+`write-missing-at-file-nodes`\
     Write all @\<file\> nodes for which the corresponding external file does not exist.
 
 #### Importing & exporting files
 
-`export-headlines`
+`export-headlines`\
     Exports all headlines to an external file.
-`file-insert`
+
+`file-insert`\
     Prompts for the name of a file and put the selected text into it.
-`flatten-outline`
+
+`flatten-outline`\
     Creates a text file in MORE format from the selected outline.
-`import-file`
+
+`import-file`\
     Import a file into an `@file` node. This command handles files regardless of whether they contain sentinels. This command can also read files in MORE outline format.
-`import-MORE-file`
+
+`import-MORE-file`\
     Import one or MORE files into `@file` nodes.
-`import-tabbed-files`
+
+`import-tabbed-files`\
     Import one or more tab-or-space-delimited files into `@file` nodes.
-`import-zim-folder`
-    Imports a zim folder, http://zim-wiki.org/, as the last top-level node of the outline. This command uses the following Leo settings::
 
-        @int rst_level = 0
-        @string rst_type
-        @string zim_node_name
-        @string path_to_zim
+`import-zim-folder`\
+    Imports a zim folder, [zim-wiki.org](https://zim-wiki.org/) , as the last top-level node of the outline. This command uses the following Leo settings:
 
-`outline-to-cweb`
+```
+@int rst_level = 0
+@string rst_type
+@string zim_node_name
+@string path_to_zim
+```
+
+`outline-to-cweb`\
     Creates a [CWEB](https://www-cs-faculty.stanford.edu/~knuth/cweb.html) file from the selected outline.
-`outline-to-noweb`
+
+`outline-to-noweb`\
     Creates a [noweb](https://www.cs.tufts.edu/~nr/noweb/) file from the selected outline.
-`read-at-auto-nodes`
+
+`read-at-auto-nodes`\
     Reads all `@auto` nodes in the presently selected outline. 
-`read-at-shadow-nodes`
+
+`read-at-shadow-nodes`\
     Reads all `@shadow` nodes in the presently selected outline.
-`read-at-file-nodes`
+
+`read-at-file-nodes`\
     Updates all @\<file\> nodes in an outline.
-`read-file-into-node`
+
+`read-file-into-node`\
     Prompts for a filename, creates a new node and puts the contents of the file into its body text.
-`refresh-from-disk`
+
+`refresh-from-disk`\
     Refreshes an @\<file\> node from disk. 
-`remove-sentinels`
+
+`remove-sentinels`\
     Removes all sentinel lines from a file derived from an `@file` node.
-`weave`
+
+`weave`\
     Formats the selected text and writes it to a file. 
-`write-file-from-node`
+
+`write-file-from-node`\
     Writes the body text of the selected node to a file. The command prompts for a file name if the node is not an @\<file\> node.
 
 #### Using sessions
 
-`session-clear`
+`session-clear`\
     Closes all tabs except the presently selected tab. 
-`session-create`
+
+`session-create`\
     Creates a new `@session` node. 
-`session-refresh`
+
+`session-refresh`\
     Refreshes the current `@session` node. 
-`session-restore`
+
+`session-restore`\
     Opens a tab for each item the selected `@session` node.
-`session-snapshot-load`
+
+`session-snapshot-load`\
     Loads a snapshot of a session from the leo.session file. 
-`session-snapshot-save`
+
+`session-snapshot-save`\
     Saves a snapshot of the present session to the leo.session file.
 
 A **session** specifies a list of .leo files that Leo opens automatically when Leo first starts.  Leo will reload the last session provided that command-line arguments *don't* contain any file names.
 
 #### Creating & deleting directories & files
 
-`directory-make`
+`directory-make`\
     Prompts for the name of a directory and creates it.
-`directory-remove`
+
+`directory-remove`\
     Prompts for the name of a directory and deletes it.
-`file-delete`
+
+`file-delete`\
     Prompts for the name of a file and delete it.
 
 #### Managing recent files
 
-`clean-recent-files`
+`clean-recent-files`\
     Removes duplicate entries from entries in the Recent Files menu.
-`clear-recent-files`
+
+`clear-recent-files`\
     Deletes all entries in the Recent Files except the most recent file. The files themselves are not affected.
-`sort-recent-files`
+
+`sort-recent-files`\
     Sorts the recent files list in the File menu.
 
 ### Help commands
 
-`about-leo`
+`about-leo`\
     Puts up a dialog box showing the version of Leo.
-`help`
+
+`help`\
     Shows an introduction to Leo's help system.
-`help-for-command`
+
+`help-for-command`\
     Prompts for a Leo command name in the minibuffer (tab completion is allowed) and shows the docstring for the command.
-`help-for-<topic>`
+
+`help-for-<topic>`\
     Opens a discussion of a topic:
 
-        help-for-abbreviations
-        help-for-autocompletion
-        help-for-bindings
-        help-for-creating-external-files    
-        help-for-debugging-commands
-        help-for-drag-and-drop
-        help-for-dynamic-abbreviations
-        help-for-find-commands
-        help-for-minibuffer
-        help-for-regular-expressions
-        help-for-scripting
+- `help-for-settings`
+- `help-for-keystroke`
+- `help-for-scripting`
+- `help-for-minibuffer`
+- `help-for-find-commands`
+- `help-for-creating-external-files`
 
-`open-online-home`
+`open-online-home`\
     Opens Leo's home page at https://leo-editor.github.io/leo-editor/.
-`open-online-toc`
+
+`open-online-toc`\
     Opens Leo's table of contents at https://leo-editor.github.io/leo-editor/leo_toc.html.
-`open-online-tutorials`
+
+`open-online-tutorials`\
     Opens Leo's tutorials page at https://leo-editor.github.io/leo-editor/tutorial.html.
-`open-online-videos`
+
+`open-online-videos`\
     Opens Leo's video page at https://leo-editor.github.io/leo-editor/screencasts.html.
-`open-quickstart-leo`
+
+`open-quickstart-leo`\
     Opens Leo's quickstart guide in a new tab or window.
-`open-users-guide`
+
+`open-users-guide`\
     Opens Leo's Users Guide at https://leo-editor.github.io/leo-editor/usersguide.html.
 
 ### Minibuffer commands
 
-`full-command (Alt-X)`
+`full-command (Alt-X)`\
     Opens the minibuffer input box to execute a command by name.
-`repeat-complex-command`
+
+`repeat-complex-command`\
     Execute the last command entered from the minibuffer.
-
-### Miscellaneous commands
-```
-    at-file-to-at-auto
-    clean-persistence
-    cls
-    join-leo-irc
-    open-python-window  
-    script-button
-
-    # Auto-completion
-    - show-calltips
-    - show-calltips-force
-
-    # Fonts.
-    set-font
-    show-fonts
-
-    # Icons.
-    insert-icon
-    delete-first-icon
-    delete-last-icon
-    delete-node-icons
-
-    # Layout.
-    free-layout-context-menu
-    free-layout-load
-    free-layout-load-alternate
-    free-layout-load-detached-body
-    free-layout-load-no-log
-    free-layout-load-standard
-    free-layout-restore
-    free-layout-zoom
-
-    # Modes.
-    enter-quick-command-mode
-    exit-named-mode
-
-    # uA's.
-    clear-all-uas
-    clear-node-uas
-    show-all-uas
-    show-node-uas
-    set-ua
-```
 
 ### Outline commands
 
 #### Creating, cloning & destroying nodes
 
-``clone-node (Ctrl-`)`` (Back-tick, not a single quote)
-    Creates a clone as the immediate sibling of a selected node.
-`clone-node-to-last-node`
+``clone-node (Ctrl-`)``\
+    Creates a clone as the immediate sibling of a selected node. The shortcut uses [backtick (grave accent)](https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows), *not* a single quote.  
+
+`clone-node-to-last-node`\
     Creates a clone as the last top-level node of the outline.
-`insert-node (Ctrl-I or Insert)`
+
+`insert-node (Ctrl-I or Insert)`\
     Inserts a new node into the outline.  The new node becomes the first child of the present node if the present node is expanded.  Otherwise, the new node becomes the next sibling of the present node.
-`insert-node-before`
+
+`insert-node-before`\
     Inserts a node before the presently selected node.
-`delete-node`
+
+`delete-node`\
     Deletes a node and all its descendants.
 
 #### Expanding & contracting nodes
 
-`contract-all (Alt-hyphen)`
+`contract-all (Alt-hyphen)`\
     Contracts every node in the outline.
-`contract-all-other-nodes`
+    
+`contract-all-other-nodes`\
     Contract all nodes except the parents of the selected node.
-`contract-node`
+    
+`contract-node`\
     Contracts a node.
-`contract-or-go-left (Alt-Left)`
+    
+`contract-or-go-left (Alt-Left)`\
     Contract the node if it is expanded.  Otherwise, select the node's parent.
-`contract-parent`
+    
+`contract-parent`\
     Select the parent of the selected node and contract it.
-`expand-all`
+    
+`expand-all`\
     Expands every node in the outline.
-`expand-node`
+    
+`expand-node`\
     Expands a node.
-`expand-and-go-right (Alt-Right)`
+    
+`expand-and-go-right (Alt-Right)`\
     Expands a node if not expanded.  Otherwise, selects the first child if there is one.
-`expand-all-subheads`
+    
+`expand-all-subheads`\
     Expand all the direct children of the selected node.
-`expand-ancestors-only`
+    
+`expand-ancestors-only`\
     Expand all the ancestors of the selected node.
+    
 
 These commands expand all descendants of the selected nodes:
 
-    expand-next-level
-    expand-prev-level (reverses expand-next-level)
-    expand-to-level-1
-    expand-to-level-2
-    expand-to-level-3
-    expand-to-level-4
-    expand-to-level-5
-    expand-to-level-6
-    expand-to-level-7
-    expand-to-level-8
-    expand-to-level-9
+- `expand-next-level`
+- `expand-prev-level` (reverses expand-next-level)
+- `expand-to-level-1`
+- `expand-to-level-2`
+- `expand-to-level-3`
+- `expand-to-level-4`
+- `expand-to-level-5`
+- `expand-to-level-6`
+- `expand-to-level-7`
+- `expand-to-level-8`
+- `expand-to-level-9`
 
 #### Editing headlines
 
-`edit-headline`
+`edit-headline`\
     Begins editing of the headline of the presently-selected node.
 
 #### Selecting nodes
 
 **Arrow keys**: When focus is in the outline pane, you can move about the outline using *plain* arrow keys. Regardless of focus, Alt-Arrow keys select nodes in the outline pane.
 
-`goto-first-sibling`
+`goto-first-sibling`\
     Select the first sibling of the selected node.
-`goto-last-sibling`
+
+`goto-last-sibling`\
     Select the last sibling of the selected node.
 
 Similarly, these commands select various nodes in the outline:
 
-    go-back
-    go-forward
-    goto-char
-    goto-first-node
-    goto-first-visible-node
-    goto-last-node
-    goto-last-visible-node
-    goto-line
-    goto-next-changed
-    goto-next-clone
-    goto-next-history-node
-    goto-next-node
-    goto-next-sibling
-    goto-next-visible
-    goto-parent
-    goto-prev-history-node
-    goto-prev-node
-    goto-prev-sibling
-    goto-prev-visible
+- `go-back`
+- `go-forward`
+- `goto-char`
+- `goto-first-node`
+- `goto-first-visible-node`
+- `goto-last-node`
+- `goto-last-visible-node`
+- `goto-line`
+- `goto-next-changed`
+- `goto-next-clone`
+- `goto-next-history-node`
+- `goto-next-node`
+- `goto-next-sibling`
+- `goto-next-visible`
+- `goto-parent`
+- `goto-prev-history-node`
+- `goto-prev-node`
+- `goto-prev-sibling`
+- `goto-prev-visible`
 
 #### Cutting, pasting & deleting nodes
 
-`copy-node (Ctrl-Shift-C)`
+`copy-node (Ctrl-Shift-C)`\
     Copies a node and all its descendants to the clipboard
-`cut-node (Ctrl-Shift-X)`
+
+`cut-node (Ctrl-Shift-X)`\
     Copies a node and all its descendants to the clipboard and then delete them.
-`delete-node`
+
+`delete-node`\
     Deletes a node and all its descendants.
-`paste-node (Ctrl-Shift-V)`
+
+`paste-node (Ctrl-Shift-V)`\
     Pastes a node and its descendants from the outline. This commands creates *copies* of nodes, not clones.
-`past-retaining-clones`
+
+`past-retaining-clones`\
     Pastes a node and its descendants from the outline.  This command preserves the identify (gnx's) of the pasted nodes, thereby preserving any clone links. This command ensures that no newly-pasted node is an ancestor of itself.
 
 **Outline representation**: When cutting or copying an outline to the clipboard, Leo writes the outline in the same xml (text) format used in .leo files. You may copy this text representation into a body pane (or into any other text editor) using `Ctrl-V`.
 
 #### Moving & reorganizing nodes
 
-`move-outline-down (Ctrl-D or Shift-Down or Alt-Shift-Down)`
+`move-outline-down (Ctrl-D or Shift-Down or Alt-Shift-Down)`\
     Move the selected node down, if possible.
-`move-outline-left (Ctrl-L or Shift-Left or Alt-Shift-Left)`
+
+`move-outline-left (Ctrl-L or Shift-Left or Alt-Shift-Left)`\
     Move the selected node left, if possible.
-`move-outline-right (Ctrl-R or Shift-Right or Alt-Shift-Right)` 
+
+`move-outline-right (Ctrl-R or Shift-Right or Alt-Shift-Right)`\
     Move the selected node right, if possible.
-`move-outline-up (Ctrl-U or Shift-Up Alt-Shift-Up)`
+
+`move-outline-up (Ctrl-U or Shift-Up Alt-Shift-Up)`\
     Move the selected node up, if possible.
 
 **Alt Modifiers not needed in the outline pane**: When focus is in the outline pane, you can move nodes without adding the Alt modifier. Shift-Up moves the select node up, etc.
 
 **Important**: The following commands reorganize groups of nodes:
 
-`de-hoist`
+`de-hoist`\
     Undoes the effect of the previous `hoist` command.
-`demote (Ctrl-])`
+
+`demote (Ctrl-])`\
     Makes all following siblings of a node children of the node.
-`hoist`
+
+`hoist`\
     Redraws the screen so presently selected tree becomes the only visible part of the outline. You may hoist an outline as many times as you wish.
-`promote (Ctrl-[)`
+
+`promote (Ctrl-[)`\
     Makes all the children of a node siblings of the node.
-`sort-children`
+
+`sort-children`\
     Sort all children of the children of the present node by their headlines.
-`sort-siblings (Alt-A)`
+
+`sort-siblings (Alt-A)`\
     Sort the present node and all its siblings by their headlines.
 
 #### Converting between outlines and text
 
-`code-to-rst`
+`code-to-rst`\
     Format the presently selected node as computer code.
-`flatten-outline-to-node`
+
+`flatten-outline-to-node`\
     Appends the headline and body text of all descendants of the selected node to the body text of the selected node.
-`parse-body`
-    Parse p.b as source code, creating a tree of descendant nodes.
-    This is essentially an import of p.b.
+
+`parse-body`\
+    Parse p.b as source code, creating a tree of descendant nodes. This is essentially an import of p.b.
 
 #### Marking nodes
 
-`copy-marked`
+`copy-marked`\
     Copies all marked nodes as children of a new node. 
-`diff-marked-nodes`
+
+`diff-marked-nodes`\
     When exactly two nodes are marked, this command creates a diff node as the last top-level node whose children are clones of the marked nodes.
-`goto-next-marked`
+
+`goto-next-marked`\
     Selects the next marked node.
-`mark (Ctrl-M)`
+
+`mark (Ctrl-M)`\
     Marks node if it is unmarked, and unmarks the node if it is already marked.
-`mark-changed-items`
+
+`mark-changed-items`\
     Marks all nodes whose headline or body text has been changed since the file was last saved.
-`mark-subheads`
+
+`mark-subheads`\
     Marks all children of the presently selected node.
-`marked-list`
+
+`marked-list`\
     Lists all marked nodes in the Nav pane.
-`unmark-all`
+
+`unmark-all`\
     Unmarks all marked nodes in the outline.
 
 **Marking groups of nodes**: Leo's find and change commands mark nodes if the "Mark Changes" and "Mark Finds" checkboxes are checked. You can change these checkboxes with the `toggle-find-mark-changes-option` and `toggle-find-mark-finds-option` commands.
 
 #### Operations on marked nodes
 
-`clone-marked-nodes`
+`clone-marked-nodes`\
     Makes clones of all marked nodes and moves them to be children of the present position.
-`delete-marked-nodes`
+
+`delete-marked-nodes`\
     Deletes all marked nodes.
-`move-marked-nodes`
+
+`move-marked-nodes`\
     Moves all nodes to be children of the present position.
 
 #### Comparing outlines
 
-`file-compare-leo-files`
+`file-compare-leo-files`\
     Prompts for another (presumably similar) .leo file that will be compared with the presently selected outline file (main window). It then creates clones of all inserted, deleted and changed nodes.
-`file-diff-files`
+
+`file-diff-files`\
     Creates a node and puts the diff between 2 files into it.
 
 #### Using Chapters
 
 @chapter trees define chapters. Selecting a chapter makes only those nodes in the chapter visible, much like a hoist. The `main` chapter represents the entire outline. Selecting the `main` chapter shows all outline nodes.
 
-`chapter-select-main`
+`chapter-select-main`\
     Selects the main chapter.
 
-`chapter-select-<chapter-name>`
+`chapter-select-<chapter-name>`\
     Each `@chapter` node in the outline creates a corresponding `chapter-select` command.
 
-`chapter-next`
+`chapter-next`\
     Selects the next chapter.
 
-`chapter-back`
+`chapter-back`\
     Selects the previous chapter.
 
 Associated settings:
 
-`@bool use_chapters`
+`@bool use_chapters`\
     True: chapters are enabled.
 
 ### Plugins commands
 
-`act-on-node`
+`act-on-node`\
     Executes node-specific action, typically defined in a plugins as follows:
 
-```python
-        import leo.core.leoPlugins
-
-        def act_print_upcase(c,p,event):
-            if not p.h.startswith('@up'):
-                raise leo.core.leoPlugins.TryNext
-            p.h = p.h.upper()
-
-        g.act_on_node.add(act_print_upcase)
+```js
+function act_print_upcase(c, p) {
+    if (!p.h.startsWith('@up')){
+        throw new Error('Try Next');
+    }
+    p.h = p.h.toUpperCase();
+}
+g.act_on_node.add(act_print_upcase);
 ```
 
-    This will upcase the headline when it starts with `@up`.
+This will upcase the headline when it starts with `@up`.
 
 ### Search & spell commands
 
@@ -987,6 +1023,23 @@ The following commands refer to the Spell Tab:
     Select the `@settings` node in the present file, if any.
 `open-myLeoSettings-leo`
     Open `myLeoSettings.leo` in a new window.
+
+### User Attributes (uA's)
+
+`clear-all-uas`\
+    command description
+
+`clear-node-uas`\
+    command description
+
+`show-all-uas`\
+    command description
+
+`show-node-uas`\
+    command description
+
+`set-ua`\
+    command description
 
 ### Window-related commands
 

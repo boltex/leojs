@@ -117,15 +117,6 @@ Focus:
     Ctrl-T (toggle-active-pane)
     Ctrl-Tab (tab-cycle-next)
 
-Help:
-
-    Alt-0 (vr-toggle)
-    F1 (help) 
-    F11 (help-for-command) 
-    F12 (help-for-python)
-    print-settings
-    help-for-...
-
 Find/Replace:
 
     Ctrl-F (search-with-present-options) 
