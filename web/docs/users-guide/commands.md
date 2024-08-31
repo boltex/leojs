@@ -662,7 +662,6 @@ A **session** specifies a list of .leo files that Leo opens automatically when L
 `expand-ancestors-only`\
     Expand all the ancestors of the selected node.
     
-
 These commands expand all descendants of the selected nodes:
 
 - `expand-next-level`
@@ -869,100 +868,108 @@ This will upcase the headline when it starts with `@up`.
 
 #### Basic searches
 
-Basic searches:
-
-`start-search (Ctrl-F)`
+`start-search (Ctrl-F)`\
     Prompts for a search string. Typing the `Return` key puts the search string in the Find tab and executes a search based on all the settings in the Find tab. Type `Tab` to enter replacement text.
-`find-next (F3)`
+
+`find-next (F3)`\
     Continues a search started with `Ctrl-F`.
-`find-previous (F2)`
+
+`find-previous (F2)`\
     Searches backwards using the present search options.
-`replace (Ctrl-=)`
+
+`replace (Ctrl-=)`\
     Replaces the selected text with the 'change' text in the Find tab.
-`replace-then-find (Ctrl--)`
+
+`replace-then-find (Ctrl--)`\
     Replaces the selected text with the 'change' text in the Find tab, then executes the find command again.
 
-Batch searches:
+#### Searches creating clones
 
-`find-all`
-    Prints all matches in the log pane.
-`replace-all`
-    Changes all occurrences of the 'find' text with the 'change' text.
-
-Searches creating clones:
-
-`clone-find-all-flattened` aka `(cfaf)`
+`clone-find-all-flattened` aka `(cfaf)`\
     Prompts for a find, then creates clones of all found nodes in an organizer node.
-`clone-find-all` aka `(cfa)`
+
+`clone-find-all` aka `(cfa)`\
     Same as `clone-find-all-flattened`, but does not create duplicate cloned nodes. If a node is a descendant of another found node, no duplicate top-level node (in the organizer) is created.
-`clone-find-marked` aka `(cfm)` and `clone-find-marked-flattened` aka `(cfmf)`
+
+`clone-find-marked` aka `(cfm)` and `clone-find-marked-flattened` aka `(cfmf)`\
     Creates clones of all marked nodes.
-`clone-find-parents`
+
+`clone-find-parents`\
     Creates an organizer node containing clones of all the parents of the selected node.
+
+#### Batch searches
+
+`find-all`\
+    Prints all matches in the log pane.
+    
+`replace-all`\
+    Changes all occurrences of the 'find' text with the 'change' text.
 
 #### Word search and regex search commands
 
 The following commands work like `F3 (start-search)` with various options set:
 
-`search-backward`
+`search-backward`\
     Searches in the reverse direction.
-`word-search-backward` and `word-search-forward`
+
+`word-search-backward` and `word-search-forward`\
     Sets 'Whole Word' checkbox to True.
-`re-search-forward` and `re-search-backward`
+
+`re-search-forward` and `re-search-backward`\
     Set the 'Regexp' checkbox to True.
 
 #### Check boxes and their commands
 
 The following check boxes options appear in the Find pane:
 
-`Ignore Case`
+`Ignore Case`\
     When checked, the Find and Change commands ignore the case of alphabetic characters when determining matches.
 
     `Alt+Ctrl+I (toggle-find-ignore-case-option)` toggles this checkbox.
 
-`Mark Changes`
+`Mark Changes`\
     When checked, the Change command marks all headlines whose headline or body text are changed by the command.
 
     `Alt+Ctrl+C (toggle-find-mark-changes-option)` toggles this checkbox.
 
-`Mark Matches`
+`Mark Matches`\
     When checked, the Find and Change commands mark all headlines in which a match is found with the pattern.
 
     `Alt+Ctrl+F (toggle-find-mark-finds-option)` toggles this checkbox.
 
-`Pattern Match`
+`Pattern Match`\
     When checked, the Find and Change commands treat several characters specially in the find pattern.
 
     `Alt+Ctrl+X (toggle-find-regex-option)` toggles this checkbox.
 
-    '*'  matches any sequence of zero or more characters.
-    '.'  matches any single character.
-    '^'  matches a newline at the start of a pattern.
-    '$'  matches a newline at the end of a pattern.
+- '*'  matches any sequence of zero or more characters.
+- '.'  matches any single character.
+- '^'  matches a newline at the start of a pattern.
+- '$'  matches a newline at the end of a pattern.
 
-    Examples::
+Examples:
 
-    "^abc$" matches lines that only contain "abc".
-    "^a" matches any line starting with "A".
-    "a$" matches any line ending with "a".
-    "^*$" matches any line at all.
+- "^abc$" matches lines that only contain "abc".
+- "^a" matches any line starting with "A".
+- "a$" matches any line ending with "a".
+- "^*$" matches any line at all.
 
-`Search Body Text`
+`Search Body Text`\
     When checked, the Find and Change commands search body text.
 
     `Alt+Ctrl+B (toggle-find-in-body-option)` toggles this checkbox.
 
-`Search Headline Text`
+`Search Headline Text`\
     When checked, the Find and Change commands search headline text.
 
     `Alt+Ctrl+H (toggle-find-in-headline-option)` toggles this checkbox.
 
-`Whole Word`
+`Whole Word`\
     When selected, the find pattern must match an entire word. Words consist of an alphabetic character or underscore, followed by zero or more alphabetic characters, numbers or underscores.
 
     `Alt+Ctrl+W (toggle-find-word-option)` toggles this checkbox.
 
-`Wrap Around`
+`Wrap Around`\
     When checked, the Find and Change commands continues at the top of the file when the command reaches the bottom of the file. For reverse searches, the find or change command continues at the bottom of the file when the command reaches the top of the file.
 
     `Alt+Ctrl+A (toggle-find-wrap-around-option)` toggles this checkbox.
@@ -971,57 +978,28 @@ The following check boxes options appear in the Find pane:
 
 The following radio buttons appear in the Find pane:
 
-`Entire Outline`
+`Entire Outline`\
     When selected, Find commands search the entire outline.
 
     `Alt+Ctrl+E (set-find-everywhere)` sets this radio button.
 
-`Node Only`
+`Node Only`\
     When selected, Find commands search only the selected node.
 
     `Alt+Ctrl+N (set-find-node-only)` sets this radio button
 
-`Suboutline Only`
+`Suboutline Only`\
     When selected, the Find and Change commands search only the currently
     selected headline and its offspring.
 
     `Alt+Ctrl+S (set-find-suboutline-only)` sets this radio button.
 
-#### Spell commands
-
-The following commands refer to spell-as-you-type mode:
-
-`spell-as-you-type-next`
-    Cycle the word behind (left of, for ltr languages) the cursor through the full list of suggestions.
-`spell-as-you-type-toggle`
-    Toggle spell as you type mode.  When enabled, word ending keystrokes will put a short list of suggestions in the log window, if the word is unknown to the speller.  Only shows the first 5 suggestions, even if there are more.
-`spell-as-you-type-undo`
-    Undo the last spelling correction.
-`spell-as-you-type-wrap`
-    Toggle wrapping in spell-as-you-type mode.
-
-The following commands refer to the Spell Tab:
-
-`focus-to-spell-tab`
-    Put focus in the Spell tab.
-`spell-change`
-    Same as clicking the "Change" button in the Spell Tab.
-`spell-change-then-find`
-    Same as clicking the "Change, Find" button in the Spell Tab.
-`spell-find`
-    Same as clicking the "Find" button in the Spell Tab.
-`spell-ignore`
-    Same as clicking the "Ignore" button in the Spell Tab.
-`spell-tab-hide`
-    Hide the Spell tab.
-`spell-tab-open`
-    Show the Spell tab.
-
 ### Settings commands
 
-`open-local-settings`
+`open-local-settings`\
     Select the `@settings` node in the present file, if any.
-`open-myLeoSettings-leo`
+
+`open-myLeoSettings-leo`\
     Open `myLeoSettings.leo` in a new window.
 
 ### User Attributes (uA's)
@@ -1041,83 +1019,42 @@ The following commands refer to the Spell Tab:
 `set-ua`\
     command description
 
-### Window-related commands
-
-`cascade-windows`
-    Cascades all Leo windows.
-`equal-sized-panes`
-    Adjusts the sizes of the outline and body panes so that they are the same height.
-`minimize-all`
-    Minimizes (hides) all Leo windows.
-`show-colors`
-    Opens a tab in the log pane showing various color pickers.
-    (Not implemented in Qt)
-`show-fonts`
-    Open a tab in the log pane showing a font picker.
-`suspend`
-    Minimizes the present Leo window.
-`toggle-split-direction`
-    Switches between vertical and horizontal orientations of the Leo window.
-
-    In the vertical orientation, the body pane appears below the pane containing the outline and log panes. In the horizontal orientation, the body pane appears to the left the pane containing the outline and log panes. By default, the ratio of pane outline pane to the body pane is 0.5 in the vertical orientation and 0.3 in the horizontal orientation. These two ratios may be changed using settings.
-
-`zoom-in`
-    Increases text size by 1 pt.
-`zoom-out`.
-    Decrease text size by 1 pt.
-
 ## Key Reference
 
 ### Selecting outline nodes
 
 When focus is in the outline pane:
 
-    Right-arrow (expand-and-go-right)
-    Left-arrow (contract-or-go-left)
-    Up-arrow (goto-prev-visible) 
-    Down-arrow (goto-next-visible)
+- Right-arrow (expand-and-go-right)
+- Left-arrow (contract-or-go-left)
+- Up-arrow (goto-prev-visible) 
+- Down-arrow (goto-next-visible)
 
 Regardless of focus:
 
-    Alt-Home (goto-first-visible-node) 
-    Alt-End (goto-last-visible-node)
-    Alt-Right-arrow (expand-and-go-right)
-    Alt-Left-arrow (contract-or-go-left)
-    Alt-Up-arrow (goto-prev-visible) 
-    Alt-Down-arrow (goto-next-visible)
+- Alt-Home (goto-first-visible-node) 
+- Alt-End (goto-last-visible-node)
+- Alt-Right-arrow (expand-and-go-right)
+- Alt-Left-arrow (contract-or-go-left)
+- Alt-Up-arrow (goto-prev-visible) 
+- Alt-Down-arrow (goto-next-visible)
 
 ### Moving outline nodes
 
 When focus is in the outline:
 
-    Shift-Down-arrow (move-outline-down) 
-    Shift-Left-arrow (move-outline-left) 
-    Shift-Right-arrow (move-outline-right) 
-    Shift-Up-arrow (move-outline-up)
+- Shift-Down-arrow (move-outline-down) 
+- Shift-Left-arrow (move-outline-left) 
+- Shift-Right-arrow (move-outline-right) 
+- Shift-Up-arrow (move-outline-up)
 
 Regardless of focus:
 
-    Alt-Shift-Down-arrow (move-outline-down) 
-    Alt-Shift-Left-arrow (move-outline-left) 
-    Alt-Shift-Right-arrow (move-outline-right) 
-    Alt-Shift-Up-arrow (move-outline-up)
-    Ctrl-D (move-outline-down)
-    Ctrl-L (move-outline-left) 
-    Ctrl-R (move-outline-right)
-    Ctrl-U (move-outline-up)
-
-### Moving the cursor
-
-When focus is in any of Leo's text panes (body pane, log pane, headlines):
-
-    Arrows            move one character
-    Ctrl-LeftArrow    back one word
-    Ctrl-RightArrow   forward one word
-    Home              beginning of line
-    End               end of line
-    Ctrl-Home         beginning of the body
-    Ctrl-End          end of body
-    PageDown          down one page
-    PageUp            up one page
-
-**Shift keys**: Adding the Shift key modifier to any of the keys above moves the cursor and extends the selected text.
+- Alt-Shift-Down-arrow (move-outline-down) 
+- Alt-Shift-Left-arrow (move-outline-left) 
+- Alt-Shift-Right-arrow (move-outline-right) 
+- Alt-Shift-Up-arrow (move-outline-up)
+- Ctrl-D (move-outline-down)
+- Ctrl-L (move-outline-left) 
+- Ctrl-R (move-outline-right)
+- Ctrl-U (move-outline-up)
