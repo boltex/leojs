@@ -34,7 +34,7 @@ The following table compares the various ways of creating external files. Later 
 | @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
 
 > 📌 **NOTE**\
-> `@auto` nodes read files using language-specific importers.
+> @auto nodes read files using language-specific importers.
 
 By default, the file's extension determines the importer:
 
@@ -72,7 +72,8 @@ You can also specify importers *explicitly* as follows:
 |   @auto-vim-outline |  vimoutline       |
 |   @auto-rst         |  reStructuredText |
 
-**Important**: The importers/exporters for markdown, org-mode, reStructuredText and vimoutline files automatically generate section heading of the appropriate level. Body text of the top-level `@auto` node is ignored.
+> 🚨 **IMPORTANT**\
+> The importers/exporters for markdown, org-mode, reStructuredText and vimoutline files automatically generate section heading of the appropriate level. Body text of the top-level @auto node is ignored.
 
 ### \@asis \<path>
 

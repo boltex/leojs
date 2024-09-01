@@ -8,7 +8,7 @@ This chapter tells how to write **Leo scripts**, JavaScript (or TypeScript) code
 
 Predefined symbols, **c**, **g**, and **p** give Leo scripts easy access to all the data in the outline. These symbols also allow Leo scripts to execute any code in Leo's own codebase.
 
-In LeoJS, the _VSCode API_ is also available as **vscode**. Other common modules such as _crypto, os, path, process and child_process_ are also available, along with the following libraries: _SQL, JSZip, pako, showdown, dayjs, md5, csvtojson, difflib, elementtree and ksuid_.
+In LeoJS, the _VSCode API_ is also available as **vscode**. Other common modules such as _crypto, os, path, process and child\_process_ are also available, along with the following libraries: _SQL, JSZip, pako, showdown, dayjs, md5, csvtojson, difflib, elementtree and ksuid_.
 
 **Positions** and **vnodes** are the foundation of Leo scripting. leo/core/leoNodes.ts defines the corresponding Position and VNode classes. These classes provide access to all outline data and allow Leo scripts to create and change outlines.
 

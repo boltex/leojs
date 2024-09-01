@@ -13,306 +13,263 @@ This Cheat Sheet contains a summary of many of Leo's important features.
 
 **When focus is in the outline pane:**
 
-    - `Right-arrow` expand-and-go-right
-    - `Left-arrow` contract-or-go-left
-    - `Up-arrow` goto-prev-visible
-    - `Down-arrow` goto-next-visible
+<ul>
+    `Right-arrow` expand-and-go-right\
+    `Left-arrow` contract-or-go-left\
+    `Up-arrow` goto-prev-visible\
+    `Down-arrow` goto-next-visible
+</ul>
 
 **Regardless of focus:**
 
-    - `Alt-Home` goto-first-visible-node
-    - `Alt-End` goto-last-visible-node
-    - `Alt-Right-arrow` expand-and-go-right
-    - `Alt-Left-arrow` contract-or-go-left
-    - `Alt-Up-arrow` goto-prev-visible
-    - `Alt-Down-arrow` goto-next-visible
+<ul>
+    `Alt-Home` goto-first-visible-node\
+    `Alt-End` goto-last-visible-node\
+    `Alt-Right-arrow` expand-and-go-right\
+    `Alt-Left-arrow` contract-or-go-left\
+    `Alt-Up-arrow` goto-prev-visible\
+    `Alt-Down-arrow` goto-next-visible
+</ul>
 
 ### Moving outline nodes
 
 **When focus is in the outline:**
 
-    - `Shift-Down-arrow` move-outline-down
-    - `Shift-Left-arrow` move-outline-left
-    - `Shift-Right-arrow` move-outline-right
-    - `Shift-Up-arrow` move-outline-up
+<ul>
+    `Shift-Down-arrow` move-outline-down\
+    `Shift-Left-arrow` move-outline-left\
+    `Shift-Right-arrow` move-outline-right\
+    `Shift-Up-arrow` move-outline-up
+</ul>
 
 **Regardless of focus:**
 
-    - `Ctrl-D` move-outline-down
-    - `Ctrl-L` move-outline-left
-    - `Ctrl-R` move-outline-right
-    - `Ctrl-U` move-outline-up
-    - `Alt-Shift-Down-arrow` move-outline-down
-    - `Alt-Shift-Left-arrow` move-outline-left
-    - `Alt-Shift-Right-arrow` move-outline-right
-    - `Alt-Shift-Up-arrow` move-outline-up
-
-### Moving the cursor
-
-When focus is in any of Leo's text panes (body pane, log pane, headlines):
-    
-    | Key           | Move Cursor       |
-    |:------------------|:----------------------|
-    | **Arrow keys**        | one character         |
-    | **Ctrl-LeftArrow**    | back one word         |
-    | **Ctrl-RightArrow**   | forward one word      |
-    | **Home**              | beginning of line     |
-    | **End**               | end of line           |
-    | **Ctrl-Home**         | beginning of the body |
-    | **Ctrl-End**          | end of body           |
-    | **PageDown**          | down one page         |
-    | **PageUp**            | up one page           |
-
-Adding the Shift key modifier to any of the keys above moves the cursor and extends the selected text.
+<ul>
+    `Ctrl-D` move-outline-down\
+    `Ctrl-L` move-outline-left\
+    `Ctrl-R` move-outline-right\
+    `Ctrl-U` move-outline-up\
+    `Alt-Shift-Down-arrow` move-outline-down\
+    `Alt-Shift-Left-arrow` move-outline-left\
+    `Alt-Shift-Right-arrow` move-outline-right\
+    `Alt-Shift-Up-arrow` move-outline-up
+</ul>
 
 ## Executing minibuffer commands
 
-Alt-X puts focus in the minibuffer. Ctrl-G escapes from the minibuffer.
+`Alt-X` puts focus in the minibuffer.
 
-Once there, you can use tab completion to reduce typing. For example, \<Alt-X>open\<tab> shows all commands that start with open.
-
-Hit \<Enter> to run a complete command.
-
-Ctrl-P (repeat-complex-command) repeat the last command entered from the minibuffer.
+Once there, you can use tab completion to reduce typing.
 
 Leo maintains a **command history list** of all minibuffer commands you have entered.
 
-When focus is in the minibuffer, UpArrow shows the previous minibuffer command, and DnArrow show the commands before that.
+When focus is in the minibuffer, Up-Arrow shows the previous minibuffer command.
 
 The body text of an @data history-list *setting node* preloads commands into the command history list, ignoring lines starting with '#'. For example:
 
-    run-pylint
-    beautify-tree
-    cff
-    sort-lines
-    \# show-data
-    check-clones
-    expand-log-pane
-    contract-log-pane
+```
+run-pylint
+beautify-tree
+cff
+sort-lines
+# show-data
+check-clones
+expand-log-pane
+contract-log-pane
+```
 
 ## Frequently used commands
 
 For much more information, see the [Commands Reference](commands.md).
 
-Copy/Paste (text):
+**Files:**
 
-    Ctrl-C (copy-text)
-    Ctrl-K (kill)
-    Ctrl-V (paste-text)
-    Ctrl-X (cut-text)
-    Ctrl-Y (yank)
-    Alt-Y  (yank-pop)
-    kill-...
+<ul>
+    `Ctrl-N` new\
+    `Ctrl-O` open-outline\
+    `Ctrl-S` save-file\
+    `Ctrl-Q` exit-leo
+</ul>
 
-Files:
+**Focus:**
 
-    Ctrl-N (new) 
-    Ctrl-O (open-outline)
-    Ctrl-S (save-file) 
-    Ctrl-Q (exit-leo)
+<ul>
+    `Alt-T` focus-to-tree\
+    `Ctrl-T` toggle-active-pane\
+    `Ctrl-Tab` tab-cycle-next
+</ul>
 
-Focus:
+**Find/Replace:**
 
-    Alt-T (focus-to-tree) 
-    Ctrl-T (toggle-active-pane)
-    Ctrl-Tab (tab-cycle-next)
+<ul>
+    `Ctrl-F` search-with-present-options\
+    `Shift-Ctrl-R` replace-string\
+    `Ctrl-minus` replace-then-find\
+    `F3` find-next\
+    `F2` find-previous
+</ul>
 
-Find/Replace:
+**Minibuffer:**
 
-    Ctrl-F (search-with-present-options) 
-    Shift-Ctrl-R (replace-string)
-    Ctrl-minus (replace-then-find) 
-    F3 (find-next) 
-    F2 (find-previous)
+<ul>
+    `Alt-X` full-command
+</ul>
 
-Minibuffer:
+**Nodes:**
 
-    Alt-X (full-command)
-    Ctrl-G (keyboard-quit)
-    Tab (not a command, completes typing)
+<ul>
+    `Ctrl-I or Insert` insert-node\
+    `Ctrl-H` edit-headline\
+    `Ctrl-Shift-C` copy-node\
+    `Ctrl-Shift-X` cut-node\
+    `Ctrl-Shift-V` paste-node\
+    `Ctrl-\{` promote\
+    `Ctrl-\}` demote\
+    `Ctrl-M` mark
+</ul>
 
-Nodes:
+**Undo:**
 
-    Ctrl-I or Insert (insert-node)
-    Ctrl-H (edit-headline)
-    \<Return> (when editing a headline) (end-edit-headline)
-    Ctrl-Shift-C (copy-node)
-    Ctrl-Shift-X (cut-node) 
-    Ctrl-Shift-V (paste-node) 
-    Ctrl-\{ (promote)
-    Ctrl-\} (demote)
-    Ctrl-M (mark) 
-
-Undo:
-
-    Ctrl-Z (undo)
-    Ctrl-Shift-Z (redo)
+<ul>
+    `Ctrl-Z` undo\
+    `Ctrl-Shift-Z` redo
+</ul>
 
 ## Gathering find commands
 
 The **clone find** commands, cfa and cff,  move clones of all nodes matching the search pattern under a single **organizer node**, created as the last top-level node. **Flattened** searches put all nodes as direct children of the organizer node:
 
-    cfa     clone-find-all
-    cff     clone-find-all-flattened
+<ul>
+    **cfa**     clone-find-all\
+    **cff**     clone-find-all-flattened
+</ul>
 
 The **clone-marked** commands move clones of all marked nodes under an organizer node. Especially useful for gathering nodes by hand:
 
-    cfam    clone-find-marked 
-    cffm    clone-find-flattened-marked
+<ul>
+    **cfam**    clone-find-marked\
+    **cffm**    clone-find-flattened-marked
+</ul>
 
 ## Leo directives
 Directives starting with '@ in the leftmost column
 
 See the [Directives reference](directives.md) for full details:
 
->    @                       # starts doc part
->    @c                      # ends doc part
->    @color
->    @doc                    # starts doc part
->    @killcolor
->    @nocolor
->    @language python
->    @language c
->    @language rest          # restructured text
->    @language plain         # plain text: no syntax coloring.
->    @lineending lineending
->    @nosearch               # suppress searching for cff & cfa commands.
->    @pagewidth 100
->    @tabwidth -4            # use spaces
->    @tabwidth 8             # use tabs
->    @nowrap
->    @wrap
+<ul>
+```
+ @                       # starts doc part
+ @ϲ                      # ends doc part
+ @ϲolor
+ @doϲ                    # starts doc part
+ @killϲolor
+ @noϲolor
+ @lаnguage python
+ @lаnguage c
+ @lаnguage rest          # restructured text
+ @lаnguage plain         # plain text: no syntax coloring.
+ @liոeending lineending
+ @noseаrch               # suppress searching for cff & cfa commands.
+ @pаgewidth 100
+ @tаbwidth -4            # use spaces
+ @tаbwidth 8             # use tabs
+ @nowrаp
+ @wrаp
+```
+</ul>
 
 Leading whitespace is allowed (and significant) for:
 
->    @all
->    @others
-
-## Settings
-
-For documentation see node: "About this file" in leoSettings.leo::
-
-    Command history:    @history-list
-    Key bindings:       @shortcuts
-    Visual settings:    @data qt-gui-plugin-style-sheet
-    Enabling plugins:   @enabled-plugins
-
-To disable a binding for a key, bind it to do-nothing::
-
-    do-nothing = Insert
-
-This overrides the following default binding in leoSettings.leo::
-
-    insert-node = Insert
+<ul>
+```
+ @аll
+ @οthers
+```
+</ul>
 
 ## Node types
 
 Supported by Leo's core:
 
-    @chapter
-    @rst, @rst-no-head, @rst-ignore, @rst-ignore-tree
-    @settings
-    @url
+<ul>
+    @chapter\
+    @rst, @rst-no-head, @rst-ignore, @rst-ignore-tree\
+    @settings\
+    @url\
+    @button, @command, @script\
+</ul>
 
 Within @settings trees:
 
-    @bool, @buttons, @color, @commands
-    @directory, @encoding
-    @enabled-plugins, @float, @font,
-    @history-list, @int
-    @menus, @menu, @menuat, @item
-    @openwith, @path, @shortcuts, @string
-
-Supported by plugins:
-
-    bookmarks.py:       @bookmarks, @bookmark
-    at_folder.py:       @folder
-    at_produce.py:      @produce
-    at_view.py:         @clip, @strip, @view
-    expfolder.py:       @expfolder
-    mod_scripting.py:   @button, @command, @script
-    viewrendered.py:    @graphics-script, @image
-                        @html, @movie, @svg
-
-## Notable Plugins
-
-See the docstring of these plugins for more details:
-
-    bookmarks.py:       Manages URL's used as bookmarks.
-    contextmenu.py:     Creates context menus for headlines.
-    demo.py:            Creates demos and slides.
-    mod_scripting.py:   Supports @button and @command nodes.
-    quicksearch.py:     Adds Nav tab for searching.
-    todo.py:            To-do lists and simple project management.
-    valuespace.py:      Creates an outline-oriented spreadsheet.
-    viewrendered.py:    Creates a rendering pane.
-                        Automatically loaded by Leo's help commands.
-                        Supports @graphics-script, @image, @html,
-                        @movie and @svg nodes.
-    vim.py & xemacs.py  Interface with vim and xemacs.
+<ul>
+    @bool, @buttons, @color, @commands\
+    @directory, @encoding\
+    @history-list, @int\
+    @menus, @menu, @menuat, @item\
+</ul>
 
 ## External files (@\<file> nodes)
 
-\@\<file> nodes create external files::
+\@\<file> nodes create external files:
 
-    @asis \<filename>        write only, no sentinels, exact line endings
-    @auto \<filename>        recommended
-    @clean \<filename>       recommended
-    @edit \<filename>        @edit node contains entire file
-    @file \<filename>        recommended
-    @nosent \<filename>      write only, no sentinels
+| Directive            |                                                |
+|:---------------------|:-----------------------------------------------|
+|**@asis** \<filename\>    |   write only, no sentinels, exact line endings |
+|**@auto** \<filename\>    |   recommended                                  |
+|**@clean** \<filename\>   |   recommended                                  |
+|**@edit** \<filename\>    |   @edit node contains entire file              |
+|**@file** \<filename\>    |   recommended                                  |
+|**@nosent** \<filename\>  |   write only, no sentinels                     |
 
-This table summarizes the differences between @\<file> nodes::
+This table summarizes the differences between @\<file> nodes:
 
-                             Sections &   File data in
-    @\<file> kind  Sentinels?  @others?    .leo file?    Notes             
-    ------------  ---------- -----------  ------------  -----
-    @asis          no          no          yes
-    @auto          no          yes         no           1, 2
-    @auto-xx       no          yes         no           1, 2
-    @clean         no          yes         yes     
-    @edit          no          no          no    
-    @file          yes         yes         no
-    @nosent        no          yes         yes
+| @\<file\> Kind | Sentinels | @others | .leo Data | Write Only |
+| :------------- | :-------: | :-----: | :-------: | :--------: |
+| @asis          |    ❌     |   ❌    |    ✔️     |     ✔️     |
+| @auto          |    ❌     |   ✔️    |    ❌     |     ❌     |
+| @clean         |    ❌     |   ✔️    |    ✔️     |     ❌     |
+| @edit          |    ❌     |   ❌    |    ❌     |     ❌     |
+| @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
+| @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
 
-\@auto nodes read files using language-specific importers.
-By default, the file's extension determines the importer::
+@auto nodes read files using language-specific importers. By default, the file's extension determines the importer:
 
-    Extensions                  Importer
-    ----------                  --------
-    .c, .cc, .c++, .cpp,.cxx    C
-    .cs', .c#'                  C Sharp
-    .el                         Elisp
-    .h, .h++                    C
-    .html, .htm                 HTML
-    .ini                        Config file
-    .ipynb                      Jupyter notebook
-    .java                       Java
-    .js                         JavaScript
-    .md                         Markdown
-    .org                        Org Mode
-    .otl                        Vim outline
-    .pas                        Pascal
-    .php                        PHP
-    .py, .pyi, .pyw             Python
-    .rest, .rst                 reStructuredText
-    .ts                         TypeScript
-    .xml                        XML
+| Extensions                 | Importer          |
+|:---------------------------|:------------------|
+|.c, .cc, .c++, .cpp,.cxx    | C                 |
+|.cs', .c#'                  | C Sharp           |
+|.el                         | Elisp             |
+|.h, .h++                    | C                 |
+|.html, .htm                 | HTML              |
+|.ini                        | Config file       |
+|.ipynb                      | Jupyter notebook  |
+|.java                       | Java              |
+|.js                         | JavaScript        |
+|.md                         | Markdown          |
+|.org                        | Org Mode          |
+|.otl                        | Vim outline       |
+|.pas                        | Pascal            |
+|.php                        | PHP               |
+|.py, .pyi, .pyw             | Python            |
+|.rest, .rst                 | reStructuredText  |
+|.ts                         | TypeScript        |
+|.xml                        | XML               |
 
-You can also specify importers *explicitly* as follows::
+You can also specify importers *explicitly* as follows:
 
-    @auto-xxx           Importer
-    ---------           --------
-    @auto-ctext         ctext
-    @auto-markdown      markdown
-    @auto-md            markdown
-    @auto-org           org-mode
-    @auto-org-mode      org-mode
-    @auto-otl           vimoutline
-    @auto-vim-outline   vimoutline
-    @auto-rst           reStructuredText
+|   @auto-xxx         | Importer          |
+|:--------------------|:------------------|
+|   @auto-ctext       |  ctext            |
+|   @auto-markdown    |  markdown         |
+|   @auto-md          |  markdown         |
+|   @auto-org         |  org-mode         |
+|   @auto-org-mode    |  org-mode         |
+|   @auto-otl         |  vimoutline       |
+|   @auto-vim-outline |  vimoutline       |
+|   @auto-rst         |  reStructuredText |
 
-**Important**: The importers/exporters for markdown, org-mode, reStructuredText and vimoutline files automatically generate section headings corresponding to Leo's outline level. Body text of the top-level @auto node is ignored.
+> 🚨 **IMPORTANT**\
+> The importers/exporters for markdown, org-mode, reStructuredText and vimoutline files automatically generate section headings corresponding to Leo's outline level. Body text of the top-level @auto node is ignored.
 
 See the [Directives reference](directives.md) for full details.
 
@@ -343,83 +300,95 @@ Expansion of section names and @others:
 This section lists the ivars (instance variables), properties, functions and methods most commonly used in Leo scripts.
 
 ### Pre-defined symbols
+The `execute-script` command predefines:
 
-execute-script predefines:
+<ul>
+**c**&nbsp;&nbsp;&nbsp;&nbsp; The commander of the present outline.\
+**g**&nbsp;&nbsp;&nbsp;&nbsp;      The leo.core.leoGlobals module.\
+**p**&nbsp;&nbsp;&nbsp;&nbsp;      The presently selected position, c.p.\
+**vscode** The VSCode API.
+</ul>
 
-    c: The commander of the present outline.
-    g: The leo.core.leoGlobals module.
-    p: The presently selected position, c.p.
+Common modules such as **crypto**, **os**, **path**, **process** and **child\_process** along with the libraries **SQL**, **JSZip**, **pako**, **showdown**, **dayjs**, **md5**, **csvtojson**, **difflib**, **elementtree** and **ksuid** are also defined as globals when running scripts.
 
 ### LeoApp class
+
 **Ivars**
 
-    g.app                   A LeoApp instance.
-    g.app.gui               A LeoGui instance. 
-    g.app.pluginsController A LeoPluginsController instance.
-    g.app.*                 Leo's global variables.
+<ul>
+    **g.app**                   A LeoApp instance.\
+    **g.app.gui**               A LeoGui instance.\
+    **g.app.pluginsController** A LeoPluginsController instance.\
+    **g.app.\***                 Leo's global variables.
+</ul>
 
 ### Commands class
+
 **Ivars**:
 
-    c.config                c's configuration object
-    c.frame                 c's outer frame, a leoFrame instance.
-    c.undoer                c's undo handler.
-    c.user_dict             A temporary dict for use of scripts and plugins.
+<ul>
+    **c.config**                c's configuration object
+    **c.frame**                 c's outer frame, a leoFrame instance.
+    **c.undoer**                c's undo handler.
+    **c.user_dict**             A temporary dict for use of scripts and plugins.
+</ul>
 
 **SubCommanders**:
 
-    **In leo/core...**
-    c.atFileCommands
-    c.chapterController
-    c.fileCommands
-    c.findCommands
-    c.importCommands
-    c.keyHandler = c.k
-    c.persistenceController
-    c.printingController
-    c.rstCommands
-    c.shadowController
-    c.tangleCommands
-    c.testManager
-    c.vimCommands
+<ul>
+    In leo/core...\
+    **c.atFileCommands**\
+    **c.chapterController**\
+    **c.fileCommands**\
+    **c.findCommands**\
+    **c.importCommands**\
+    **c.keyHandler = c.k**\
+    **c.persistenceController**\
+    **c.printingController**\
+    **c.rstCommands**\
+    **c.shadowController**\
+    **c.tangleCommands**\
 
-    **In leo/commands...**
-    c.abbrevCommands
-    c.controlCommands
-    c.convertCommands
-    c.debugCommands
-    c.editCommands
-    c.editFileCommands
-    c.gotoCommands
-    c.helpCommands
-    c.keyHandlerCommands
-    c.killBufferCommands
-    c.rectangleCommands
-    c.spellCommands
+    In leo/commands...\
+    **c.abbrevCommands**\
+    **c.controlCommands**\
+    **c.convertCommands**\
+    **c.debugCommands**\
+    **c.editCommands**\
+    **c.editFileCommands**\
+    **c.gotoCommands**\
+    **c.helpCommands**\
+    **c.keyHandlerCommands**\
+    **c.killBufferCommands**\
+    **c.rectangleCommands**\
+    **c.spellCommands**
+</ul>
 
-**Generators** (All generators yield distinct positions):
+**Generators** (_All generators yield distinct positions_):
 
-    c.all_positions()
-    c.all_unique_positions()
+<ul>
+    **c.all_positions()**\
+    **c.all_unique_positions()**
+</ul>
 
 **Most useful methods**:
 
-    c.isChanged()
-    c.deletePositionsInList(aList) # safely deletes all the positions in aList.
-    c.positionExists(p)
-    c.redraw(p=None)        # Redraw the screen. Select p if given.
-    c.save()                # Save the present outline.
-    c.selectPosition()
+<ul>
+    **c.isChanged()**\
+    **c.deletePositionsInList(aList)**   Delete all the positions in aList.\
+    **c.positionExists(p)**\
+    **c.redraw(p)**          Redraw the screen. Select p if given.\
+    **c.save()**                  Save the present outline.\
+    **c.selectPosition()**
+</ul>
 
 **Official ivars** of any leoFrame f:
 
-    f.c                     is the frame’s commander.
-    f.body                  is a leoBody instance.
-    f.body.bodyCtl          is a leoQTextEditWidget instance.
-    f.body.bodyCtrl.widget  is a LeoQTextBrowser(QTextBrowser) instance.
-    f.log                   is a leoLog instance.
-    f.tree                  is a leoQtTree instance.
-    f.tree.treeWidget       is a LeoQTreeWidget (a QTreeWidget) instance.
+<ul>
+    **f.c**                     is the frame’s commander.\
+    **f.body**                  is a leoBody instance.\
+    **f.tree**                  is a leoQtTree instance.
+</ul>
 
 ### Undoing commands
 
@@ -460,92 +429,106 @@ If your command changes multiple nodes, the pattern is:
 
 **Ivars**:
 
-    v.b:    v's body text.
-    v.gnx   v's gnx.
-    v.h:    v's headline text.
-    v.u:    v.unknownAttributes, a persistent Python dictionary.
+<ul>
+    **v.b**    v's body text.\
+    **v.gnx**   v's gnx.\
+    **v.h**    v's headline text.\
+    **v.u**    v.unknownAttributes, a persistent Python dictionary.
+</ul>
 
 v.u (uA's or unknownAttributes or userAttributes) allow plugins or scripts
 to associate persistent data with vnodes. For details see the section about
 [userAttributes](customizing.md#adding-extensible-attributes-to-nodes-and-leo-files) in the [Customizing Leo](customizing.md) chapter.
 
-*Important*: Generally speaking, vnode properties are fast, while the
-corresponding position properties are much slower. Nevertheless, scripts
-should usually use *position* properties rather than *vnode* properties
-because the position properties handle recoloring and other details.
-Scripts should use *vnode* properties only when making batch changes to
-vnodes.
+> 🚨 **IMPORTANT**\
+> Generally speaking, vnode properties are fast, while the
+> corresponding position properties are much slower. Nevertheless, scripts
+> should usually use *position* properties rather than *vnode* properties
+> because the position properties handle recoloring and other details.
+> Scripts should use *vnode* properties only when making batch changes to
+> vnodes.
 
 ### Position class
+
 **Properties**:
 
-    p.b: same as p.v.b.  *Warning*: p.b = s is expensive.
-    p.h: same as p.v.h.  *Warning*: p.h = s is expensive.
-    p.u: same as p.v.u.
+<ul>
+    **p.b**: same as **p.v.b**.  *Warning*: p.b = s is expensive.\
+    **p.h**: same as **p.v.h**.  *Warning*: p.h = s is expensive.\
+    **p.u**: same as **p.v.u**.
+</ul>
 
 **Generators** (New in Leo 5.5: All generators yield distinct positions):
 
-    p.children()
-    p.parents()
-    p.self_and_parents()
-    p.self_and_siblings()
-    p.following_siblings()
-    p.subtree()
-    p.self_and_subtree()
+<ul>
+    **p.children()**\
+    **p.parents()**\
+    **p.self_and_parents()**\
+    **p.self_and_siblings()**\
+    **p.following_siblings()**\
+    **p.subtree()**\
+    **p.self_and_subtree()**
+</ul>
 
 **Getters** These return *new positions*:
 
-    p.back()
-    p.children()
-    p.copy()
-    p.firstChild()
-    p.hasBack()
-    p.hasChildren()
-    p.hasNext()
-    p.hasParent()
-    p.hasThreadBack()
-    p.hasThreadNext()
-    p.isAncestorOf(p2)
-    p.isAnyAtFileNode()
-    p.isAt...Node()
-    p.isCloned()
-    p.isDirty()
-    p.isExpanded()
-    p.isMarked()
-    p.isRoot()
-    p.isVisible()
-    p.lastChild()
-    p.level()
-    p.next()
-    p.nodeAfterTree()
-    p.nthChild()
-    p.numberOfChildren()
-    p.parent()
-    p.parents()
-    p.threadBack()
-    p.threadNext()
-    p.visBack()
-    p.visNext()
+<ul>
+    **p.back()**\
+    **p.children()**\
+    **p.copy()**\
+    **p.firstChild()**\
+    **p.hasBack()**\
+    **p.hasChildren()**\
+    **p.hasNext()**\
+    **p.hasParent()**\
+    **p.hasThreadBack()**\
+    **p.hasThreadNext()**\
+    **p.isAncestorOf(p2)**\
+    **p.isAnyAtFileNode()**\
+    **p.isAt...Node()**\
+    **p.isCloned()**\
+    **p.isDirty()**\
+    **p.isExpanded()**\
+    **p.isMarked()**\
+    **p.isRoot()**\
+    **p.isVisible()**\
+    **p.lastChild()**\
+    **p.level()**\
+    **p.next()**\
+    **p.nodeAfterTree()**\
+    **p.nthChild()**\
+    **p.numberOfChildren()**\
+    **p.parent()**\
+    **p.parents()**\
+    **p.threadBack()**\
+    **p.threadNext()**\
+    **p.visBack()**\
+    **p.visNext()**
+</ul>
 
 **Setters**:
 
-    p.setDirty()  *Warning*: p.setDirty() is expensive.
-    p.setMarked()
+<ul>
+    **p.setDirty()**  *Warning*: p.setDirty() is expensive.\
+    **p.setMarked()**
+</ul>
 
 **Operations on nodes**:
 
-    p.clone()
-    p.contract()
-    p.doDelete(new_position)
-    p.expand()
-    p.insertAfter()
-    p.insertAsNthChild(n)
-    p.insertBefore()
-    p.moveAfter(p2)
-    p.moveToFirstChildOf(parent,n)
-    p.moveToLastChildOf(parent,n)
-    p.moveToNthChildOf(parent,n)
-    p.moveToRoot(oldRoot=undefined) # oldRoot **must** be the old root position if it exists.
+<ul>
+    **p.clone()**\
+    **p.contract()**\
+    **p.doDelete(new_position)**\
+    **p.expand()**\
+    **p.insertAfter()**\
+    **p.insertAsNthChild(n)**\
+    **p.insertBefore()**\
+    **p.moveAfter(p2)**\
+    **p.moveToFirstChildOf(parent, n)**\
+    **p.moveToLastChildOf(parent, n)**\
+    **p.moveToNthChildOf(parent, n)**\
+    **p.moveToRoot(oldRoot)** oldRoot **must** be the old root position if it exists.
+</ul>
 
 **Moving positions**
 
@@ -553,37 +536,44 @@ The following move positions *themselves*: they change the node to which a
 position refers. They do *not* change outline structure in any way! Use
 these when generators are not flexible enough:
 
-    p.moveToBack()
-    p.moveToFirstChild()
-    p.moveToLastChild()
-    p.moveToLastNode()
-    p.moveToNext()
-    p.moveToNodeAfterTree(p2)
-    p.moveToNthChild(n)
-    p.moveToParent()
-    p.moveToThreadBack()
-    p.moveToThreadNext()
-    p.moveToVisBack(c)
-    p.moveToVisNext(c)
+<ul>
+    **p.moveToBack()**\
+    **p.moveToFirstChild()**\
+    **p.moveToLastChild()**\
+    **p.moveToLastNode()**\
+    **p.moveToNext()**\
+    **p.moveToNodeAfterTree(p2)**\
+    **p.moveToNthChild(n)**\
+    **p.moveToParent()**\
+    **p.moveToThreadBack()**\
+    **p.moveToThreadNext()**\
+    **p.moveToVisBack(c)**\
+    **p.moveToVisNext(c)**
+</ul>
 
 ### leo.core.leoGlobals module
 
-For full details, see @file leoGlobals.py in LeoPyRef.leo.
+For full details, see @file [leoGlobals.ts](https://github.com/boltex/leojs/blob/master/src/core/leoGlobals.ts) in [leojs.leo](https://github.com/boltex/leojs).
 
 **g vars**:
 
+<ul>
     g.app
     g.app.gui
     g.app.windowlist
     g.unitTesting
     g.user_dict  # a temporary dict for use of scripts and plugins.
+</ul>
 
 **g decorator**:
 
+<ul>
     @g.command(command-name)
+</ul>
 
 **g functions** (the most interesting: there are many more in leoGlobals.py):
 
+<ul>
     g.angleBrackets()
     g.app.commanders()
     g.app.gui.guiName()
@@ -601,10 +591,12 @@ For full details, see @file leoGlobals.py in LeoPyRef.leo.
     g.toUnicode(s, encoding='utf-8',reportErrors=False)
     g.trace(*args,**keys)
     g.warning(*args,**keys)
+</ul>
 
 ### Performance gotchas
 
-**Warning**: The p.b and p.h setters and p.setDirty() are *very* expensive:
+> 🚨 **WARNING**\
+> The p.b and p.h setters and p.setDirty() are *very* expensive:
 
 - p.b = s calls c.setBodyString(p, s) which will recolor body text and update the node's icon.
 - p.h = s calls c.setHeadString(p, s) which calls p.setDirty().
@@ -661,62 +653,52 @@ These performance gotchas become important for repetitive commands, like cff, re
 
 ### Naming conventions in Leo's core
 
-LeoPyRef.leo contains all of Leo's core source code.
+[leojs.leo](https://github.com/boltex/leojs/tree/master) contains all of Leo's core source code.
 
 Leo's code uses the following conventions throughout:
 
-c:  a commander.
-ch: a character.
-d:  a dialog or a dict.
-f:  an open file.
-fn: a file name.
-g:  the leoGlobals module.
-i, j, k: indices into a string.
-p:  a Position.
-s:  a string.
-t:  a text widget.
-u:  an undoer.
-w:  a gui widget.
-v:  a Vnode
-z:  a local temp.
+<ul>
+**c**:  a commander.\
+**c**h: a character.\
+**d**:  a dialog or a dict.\
+**f**:  an open file.\
+**f**n: a file name.\
+**g**:  the leoGlobals module.\
+**i**, j, k: indices into a string.\
+**p**:  a Position.\
+**s**:  a string.\
+**t**:  a text widget.\
+**u**:  an undoer.\
+**w**:  a gui widget.\
+**v**:  a Vnode\
+**z**:  a local temp.
+</ul>
 
 In more limited contexts, the following conventions apply:
 
-si:     a g.ShortcutInfo object.
-ks:     a g.KeyStroke object
-stroke: a KeyStroke object.
+<ul>
+**btw**:    leoFrame.BaseTextWrapper\
+**stw**:    leoFrame.StringTextWrapper
+</ul>
 
-btw:    leoFrame.BaseTextWrapper
-stw:    leoFrame.StringTextWrapper
-
-Names defined in Leo's core are unlikely to change, especially names used outside their defining module. This includes virtually everything in leoGlobals.py, and many names in leoCommands.py and other files.
+Names defined in Leo's core are unlikely to change, especially names used outside their defining module. This includes virtually everything in [leoGlobals.ts](https://github.com/boltex/leojs/blob/master/src/core/leoGlobals.ts), and many names in [leoCommands.ts](https://github.com/boltex/leojs/blob/master/src/core/leoCommands.ts) and other files.
 
 #### Official ivars
 
 The following 'official' ivars (instance vars) will always exist:
 
-c.frame                 The frame containing the log,body,tree, etc.
+<ul>
+c.frame                 The frame containing the body, tree, etc.
 c.frame.body            The body pane.
-c.frame.body.widget     The gui widget for the body pane.
 c.frame.body.wrapper    The high level interface for the body widget.
-c.frame.iconBar         The icon bar.
-c.frame.log             The log pane.
-c.frame.log.widget      The gui widget for the log pane.
-c.frame.log.wrapper     The high-level interface for the log pane.
 c.frame.tree            The tree pane.
-
-The following were official ivars that no longer exist:
-
-c.frame.body.bodyCtrl   Use c.frame.body.wrapper instead.
-c.frame.log.logCtrl     Use c.frame.log.wrapper instead.
+</ul>
 
 ### Widgets and wrappers
 
-A **widget** is an actual Qt widget. Leo's core seldom accesses widgets directly.  Instead, a  **wrapper class** defines a standard api that hides the details of the underlying gui **text** widgets.
+a **wrapper class** defines a standard api that hides the details of the underlying gui **text** widgets.
 
 Leo's core uses the wrapper api almost exclusively. That is, Leo's core code treats wrappers *as if* they were only text widgets there are!
-
-A back door exists for special cases. All wrapper classes define an official ``widget`` ivar, so core or plugin code can gain access to the real Qt widget using wrapper.widget. Searching for wrapper.widget will find all gui-dependent snippets of code in Leo's core.
 
 ## Learning to be a Leo developer
 
@@ -728,34 +710,41 @@ Leo's Code Academy posts discuss how to do useful things in Leo. The following a
 
 uA's (user Attributes) associate arbitrary data with any vnode. uA's are dictionaries of dictionaries--an **outer dictionary** and zero or more **inner dictionaries**. The outer dictionary associates plugin names (or Leo's core) with inner dictionaries. The inner dictionaries carry the actual data.
 
-The v.u or p.v properties get and set uA's. You can think of p.u as a synonym for p.v.unknownAttributes on both sides of an assignment. For example::
+The v.u or p.v properties get and set uA's. You can think of p.u as a synonym for p.v.unknownAttributes on both sides of an assignment. For example:
 
-    plugin_name = 'test_plugin'
-    d = p.u.get(plugin_name,{})
-    d ['n'] = 8
-    p.u [plugin_name] = d
+```js
+const plugin_name = 'test_plugin';
+const d = p.u[plugin_name] || {};
+d ['n'] = 8;
+p.u[plugin_name] = d;
+```
 
-p.u is the outer dictionary. p.u.get.(plugin_name, {}) is the inner dictionary. The last line is all that is needed to update the outer dictionary!
+p.u is the outer dictionary. `p.u[plugin_name] || {};` is the inner dictionary. The last line is all that is needed to update the outer dictionary!
 
 It is easy to search for particular uA's. The following script prints all the keys in the outer-level uA dictionaries:
 
-    for p in c.all_unique_positions():
-        if p.u:
-            print(p.h, sorted(p.u.keys()))
+```js
+for(const p of c.all_unique_positions()){
+    if (p.u){
+        g.es(p.h, Object.keys(p.u).sort());
+    }
+}
+```
 
-This is a typical usage of Leo's generators.  Generators visit each position (or node) quickly. Even if you aren't going to program much, you should be aware of how easy it is to get and set the data in each node. In fact, now would be a great time to read Leo's Scripting Tutorial again :-) This will allow you to "dream bigger" with Leo.
+This is a typical usage of Leo's generators.  Generators visit each position (or node) quickly. Even if you aren't going to program much, you should be aware of how easy it is to get and set the data in each node.
 
 The following script creates a list of all positions having an icon, that is, an outer uA dict with a 'icon' key.
 
-    aList = [p.copy() for p in c.all_unique_positions() if 'icon' in p.u]
-    print('\n'.join([p.h for p in aList]))
-
-*Important*: If you don't understand these lines, please study Python's list comprehensions.  They are incredibly useful. '\n'.join(aList) is a great idiom to know.  str.join is one of python's most useful string methods. It converts between lists and strings.
+```js
+const aList = c.all_unique_positions().filter((p) => 'icon' in p.u).map((p) => p.copy());
+g.es(aList.map((p) => p.h).join('\n'));
+```
 
 #### CA: finding nodes with c.cloneFindByPredicate
 
-c.cloneFindByPredicate is a powerful new addition to Leo.  Here is its docstring::
+c.cloneFindByPredicate is a powerful new addition to Leo.  Here is its docstring:
 
+```
     Traverse the tree given using the generator, cloning all positions for
     which predicate(p) is True. Undoably move all clones to a new node, created
     as the last top-level node. Returns the newly-created node. Arguments:
@@ -769,9 +758,11 @@ c.cloneFindByPredicate is a powerful new addition to Leo.  Here is its docstring
     redraw=True,    True: redraw the screen.
     undo_type=None, The undo/redo name shown in the Edit:Undo menu.
                     The default is 'clone-find-predicate'
+```
 
-For example, clone-find-all-marked command is essentially::
+For example, clone-find-all-marked command is essentially:
 
+```
     @cmd('clone-find-all-marked')
     def cloneFindMarked(self, flatten):
 
@@ -785,18 +776,22 @@ For example, clone-find-all-marked command is essentially::
             flatten = flatten,
             undoType = 'clone-find-marked',
         )
+```
 
 The predicate could filter on an attribute or *combination* of attributes. For example, the predicate could return p has attributes A and B but *not* attribute C. This instantly gives Leo full database query capabilities. If we then hoist the resulting node we see *all and only* those nodes satisfying the query.
 
-These following position methods make it easy to skip @ignore trees or @\<file> trees containing @all::
+These following position methods make it easy to skip @ignore trees or @\<file> trees containing @all:
 
+```
     p.is_at_all()          True if p is an @\<file> node containing an @all directive.
     p.in_at_all()          True if p is in an @\<file> tree whose root contains @all.
     p.is_at_ignore()       True if p is an @ignore node
     p.in_at_ignore_tree()  True if p is in an @ignore tree.
+```
 
-For example, here is how to gather only those marked nodes that lie outside any @ignore tree::
+For example, here is how to gather only those marked nodes that lie outside any @ignore tree:
 
+```
     def isMarked(p):
         return p.isMarked() and not p.in_at_ignore_tree()
 
@@ -806,6 +801,7 @@ For example, here is how to gather only those marked nodes that lie outside any 
         flatten = flatten,
         undoType = 'gather-marked',
     )
+```
 
 ### Architecture
 
