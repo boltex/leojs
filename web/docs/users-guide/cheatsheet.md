@@ -123,8 +123,8 @@ For much more information, see the [Commands Reference](commands.md).
     `Ctrl-Shift-C` copy-node\
     `Ctrl-Shift-X` cut-node\
     `Ctrl-Shift-V` paste-node\
-    `Ctrl-\{` promote\
-    `Ctrl-\}` demote\
+    `Ctrl-{` promote\
+    `Ctrl-}` demote\
     `Ctrl-M` mark
 </ul>
 
@@ -196,7 +196,7 @@ Supported by Leo's core:
     @rst, @rst-no-head, @rst-ignore, @rst-ignore-tree\
     @settings\
     @url\
-    @button, @command, @script\
+    @button, @command, @script
 </ul>
 
 Within @settings trees:
@@ -205,7 +205,7 @@ Within @settings trees:
     @bool, @buttons, @color, @commands\
     @directory, @encoding\
     @history-list, @int\
-    @menus, @menu, @menuat, @item\
+    @menus, @menu, @menuat, @item
 </ul>
 
 ## External files (@\<file> nodes)
@@ -291,7 +291,6 @@ Expansion of section names and @others:
 
 - Leo replaces section names in body text by the *expanded*
   text of the corresponding section definition node.
-
 - Leo replaces @others with the *expanded* text of all nodes
   that *aren't* section-definition nodes.
 
@@ -303,9 +302,9 @@ This section lists the ivars (instance variables), properties, functions and met
 The `execute-script` command predefines:
 
 <ul>
-**c**&nbsp;&nbsp;&nbsp;&nbsp; The commander of the present outline.\
-**g**&nbsp;&nbsp;&nbsp;&nbsp;      The leo.core.leoGlobals module.\
-**p**&nbsp;&nbsp;&nbsp;&nbsp;      The presently selected position, c.p.\
+**c**      The commander of the present outline.\
+**g**      The leo.core.leoGlobals module.\
+**p**      The presently selected position, c.p.\
 **vscode** The VSCode API.
 </ul>
 
@@ -327,9 +326,9 @@ Common modules such as **crypto**, **os**, **path**, **process** and **child\_pr
 **Ivars**:
 
 <ul>
-    **c.config**                c's configuration object
-    **c.frame**                 c's outer frame, a leoFrame instance.
-    **c.undoer**                c's undo handler.
+    **c.config**                c's configuration object\
+    **c.frame**                 c's outer frame, a leoFrame instance.\
+    **c.undoer**                c's undo handler.\
     **c.user_dict**             A temporary dict for use of scripts and plugins.
 </ul>
 
@@ -347,7 +346,7 @@ Common modules such as **crypto**, **os**, **path**, **process** and **child\_pr
     **c.printingController**\
     **c.rstCommands**\
     **c.shadowController**\
-    **c.tangleCommands**\
+    **c.tangleCommands**
 
     In leo/commands...\
     **c.abbrevCommands**\
@@ -527,7 +526,7 @@ to associate persistent data with vnodes. For details see the section about
     **p.moveToFirstChildOf(parent, n)**\
     **p.moveToLastChildOf(parent, n)**\
     **p.moveToNthChildOf(parent, n)**\
-    **p.moveToRoot(oldRoot)** oldRoot **must** be the old root position if it exists.
+    **p.moveToRoot(oldRoot)** oldRoot _must_ be the old root position if it exists.
 </ul>
 
 **Moving positions**
@@ -558,39 +557,27 @@ For full details, see @file [leoGlobals.ts](https://github.com/boltex/leojs/blob
 **g vars**:
 
 <ul>
-    g.app
-    g.app.gui
-    g.app.windowlist
-    g.unitTesting
-    g.user_dict  # a temporary dict for use of scripts and plugins.
+    **g.app**\
+    **g.app.gui**\
+    **g.app.windowlist**\
+    **g.unitTesting**\
+    **g.user_dict** a temporary dict for use of scripts and plugins.
 </ul>
 
-**g decorator**:
+**g functions**: _(there are many more in leoGlobals.ts)_
 
 <ul>
-    @g.command(command-name)
-</ul>
-
-**g functions** (the most interesting: there are many more in leoGlobals.py):
-
-<ul>
-    g.angleBrackets()
-    g.app.commanders()
-    g.app.gui.guiName()
-    g.es(*args,**keys)
-    g.es_print(*args,**keys)
-    g.es_exception()
-    g.getScript(c,p,
-        useSelectedText=True,
-        forcePythonSentinels=True,
-        useSentinels=True)
-    g.openWithFileName(fileName,old_c=None,gui=None)
-    g.os_path_... # Wrappers for os.path methods.
-    g.pdb(message='')
-    g.toEncodedString(s,encoding='utf-8',reportErrors=False)
-    g.toUnicode(s, encoding='utf-8',reportErrors=False)
-    g.trace(*args,**keys)
-    g.warning(*args,**keys)
+    **g.angleBrackets()**\
+    **g.app.commanders()**\
+    **g.app.gui.guiName()**\
+    **g.es(...args)**\
+    **g.es_print(...args)**\
+    **g.es_exception(e)**\
+    **g.getScript(c, p, useSelectedText, forceJavascriptSentinels, useSentinels)**\
+    **g.openWithFileName(fileName, old_c, gui)**\
+    **g.os_path_...**  Wrappers for os.path methods.\
+    **g.toEncodedString(s, encoding, reportErrors)**\
+    **g.toUnicode(s, encoding, reportErrors)**
 </ul>
 
 ### Performance gotchas
@@ -610,46 +597,17 @@ These performance gotchas become important for repetitive commands, like cff, re
 
 ### Prompting for command arguments
 
-#### Example 1: Prompt for one arg
+Here's how to ask for an input from the user:
 
-    @g.command('i1')
-    def i1_command(event):
-        c = event.get('c')
-        if not c: return
-
-        def callback(args, c, event):
-            g.trace(args)
-            c.bodyWantsFocus()
-
-        c.interactive(callback, event, prompts=['Prompt: '])
-
-#### Example 2: Prompt for 2 args
-
-    @g.command('i2')
-    def i2_command(event):
-        c = event.get('c')
-        if not c: return
-
-        def callback(args, c, event):
-            g.trace(args)
-            c.bodyWantsFocus()
-
-        c.interactive(callback, event,
-            prompts=['Find: ', ' Replace: '])
-
-#### Example 3: Prompt for 3 args
-
-    @g.command('i3')
-    def i3_command(event):
-        c = event.get('c')
-        if not c: return
-
-        def callback(args, c, event):
-            g.trace(args)
-            c.bodyWantsFocus()
-
-        c.interactive(callback, event,
-            prompts=['One: ', ' Two: ', ' Three: '])
+```ts
+const arg = await g.app.gui.get1Arg(
+    {
+        title: 'User Name',
+        prompt: 'Please type in your full name',
+        placeHolder: 'John Doe'
+    }
+);
+```
 
 ### Naming conventions in Leo's core
 
@@ -659,12 +617,12 @@ Leo's code uses the following conventions throughout:
 
 <ul>
 **c**:  a commander.\
-**c**h: a character.\
+**ch**: a character.\
 **d**:  a dialog or a dict.\
 **f**:  an open file.\
-**f**n: a file name.\
+**fn**: a file name.\
 **g**:  the leoGlobals module.\
-**i**, j, k: indices into a string.\
+**i, j, k**: indices into a string.\
 **p**:  a Position.\
 **s**:  a string.\
 **t**:  a text widget.\
@@ -700,13 +658,7 @@ a **wrapper class** defines a standard api that hides the details of the underly
 
 Leo's core uses the wrapper api almost exclusively. That is, Leo's core code treats wrappers *as if* they were only text widgets there are!
 
-## Learning to be a Leo developer
-
-### Code academy
-
-Leo's Code Academy posts discuss how to do useful things in Leo. The following are distilled from online discussions about Leo's scripting.
-
-#### CA: uA's
+## uA's
 
 uA's (user Attributes) associate arbitrary data with any vnode. uA's are dictionaries of dictionaries--an **outer dictionary** and zero or more **inner dictionaries**. The outer dictionary associates plugin names (or Leo's core) with inner dictionaries. The inner dictionaries carry the actual data.
 
@@ -740,80 +692,82 @@ const aList = c.all_unique_positions().filter((p) => 'icon' in p.u).map((p) => p
 g.es(aList.map((p) => p.h).join('\n'));
 ```
 
-#### CA: finding nodes with c.cloneFindByPredicate
+## Finding nodes with cloneFindByPredicate
 
 c.cloneFindByPredicate is a powerful new addition to Leo.  Here is its docstring:
 
 ```
-    Traverse the tree given using the generator, cloning all positions for
-    which predicate(p) is True. Undoably move all clones to a new node, created
-    as the last top-level node. Returns the newly-created node. Arguments:
+Traverse the tree given using the generator, cloning all positions for
+which predicate(p) is True. Undoably move all clones to a new node, created
+as the last top-level node. Returns the newly-created node. Arguments:
 
-    generator,      The generator used to traverse the tree.
-    predicate,      A function of one argument p returning true if 
-                    p should be included.
-    failMsg=None,   Message given if nothing found. Default is no message.
-    flatten=False,  True: Move all node to be parents of the root node.
-    iconPath=None,  Full path to icon to attach to all matches.
-    redraw=True,    True: redraw the screen.
-    undo_type=None, The undo/redo name shown in the Edit:Undo menu.
-                    The default is 'clone-find-predicate'
+generator,      The generator used to traverse the tree.
+predicate,      A function of one argument p returning true if 
+                p should be included.
+failMsg=None,   Message given if nothing found. Default is no message.
+flatten=False,  True: Move all node to be parents of the root node.
+iconPath=None,  Full path to icon to attach to all matches.
+undo_type=None, The undo/redo name shown in the Edit:Undo menu.
+                The default is 'clone-find-predicate'
 ```
 
-For example, clone-find-all-marked command is essentially:
+For example, clone-find-all-marked command (_from core/leoFind.ts_) is essentially:
 
-```
-    @cmd('clone-find-all-marked')
-    def cloneFindMarked(self, flatten):
+```ts
+public cloneFindMarked(flatten: boolean) {
+    const c = this.c;
 
-        def isMarked(p):
-            return p.isMarked()
+    function isMarked(p: Position): boolean {
+        return p.isMarked();
+    }
 
-        self.cloneFindByPredicate(
-            generator = self.all_unique_positions,
-            predicate = isMarked,
-            failMsg = 'nothing found',
-            flatten = flatten,
-            undoType = 'clone-find-marked',
-        )
+    c.cloneFindByPredicate(
+        c.all_unique_positions.bind(c),
+        isMarked,
+        'nothing found',
+        flatten,
+        undefined,
+        'clone-find-marked',
+    );
+}
 ```
 
 The predicate could filter on an attribute or *combination* of attributes. For example, the predicate could return p has attributes A and B but *not* attribute C. This instantly gives Leo full database query capabilities. If we then hoist the resulting node we see *all and only* those nodes satisfying the query.
 
 These following position methods make it easy to skip @ignore trees or @\<file> trees containing @all:
 
-```
-    p.is_at_all()          True if p is an @\<file> node containing an @all directive.
-    p.in_at_all()          True if p is in an @\<file> tree whose root contains @all.
-    p.is_at_ignore()       True if p is an @ignore node
-    p.in_at_ignore_tree()  True if p is in an @ignore tree.
-```
+| Position Method       |  Verifies that...                                           |
+|:----------------------|:------------------------------------------------------------|
+| p.is_at_all()         | True if p is an @\<file> node containing an @all directive. |
+| p.in_at_all()         | True if p is in an @\<file> tree whose root contains @all.  |
+| p.is_at_ignore()      | True if p is an @ignore node.                               |
+| p.in_at_ignore_tree() | True if p is in an @ignore tree.                            |
 
 For example, here is how to gather only those marked nodes that lie outside any @ignore tree:
 
-```
-    def isMarked(p):
-        return p.isMarked() and not p.in_at_ignore_tree()
-
+```ts
+    function isMarked(p: Position): boolean {
+        return p.isMarked() && !p.in_at_ignore_tree();
+    }
     c.cloneFindByPredicate(
-        generator = self.all_unique_positions,
-        predicate = isMarked,
-        flatten = flatten,
-        undoType = 'gather-marked',
+        c.all_unique_positions.bind(c),
+        isMarked,
+        'nothing found',
+        flatten,
+        undefined,
+        'gather-marked',
     )
 ```
 
-### Architecture
+## Architecture
 
 Leo uses a model/view/controller architecture.
 
-- Controller: The Commands class and its helpers in leoCommands.py and leoEditCommands.py.
+- Controller: The Commands class and its helpers in leoCommands.ta and leoEditCommands.ts.
 
-- Model: The VNode and Position classes in leoNodes.py.
+- Model: The VNode and Position classes in leoNodes.ts.
 
-- View: The gui-independent base classes are in the node "Gui Base Classes". The Qt-Specific subclasses are in the node "Qt gui".
-
-**Important**: The general organization of these classes have changed hardly at all in Leo's 20+ year history.  The reason is that what each class does is fairly obvious.  How the gets the job done may have changed drastically, but *that's an internal implementation detail of the class itself*.  This is the crucial design principle that allows Leo's code to remain stable.  *Classes do not know or meddle in the internal details of other classes*.  As a result, nobody, including EKR, needs to remember internal details.
+- View: The gui-independent base classes are in the node "Gui Base Classes". The VSCode-Specific subclasses are in src/leoUI.ts.
 
 ## Clickable links
 
@@ -823,13 +777,5 @@ Leo's home page: https://leo-editor.github.io/leo-editor/
 
 The status area shows the UNL (*Universal Node Locator*) for each node.
 
-Control-clicking a UNL will take you to its target node, even if the target is in another Leo file!
-gnx-based UNLs won't break even if you move or rename the target node.
-
-Try these examples!
-
-The "Key bindings" node in this file:
-unl:gnx://CheatSheet.leo#ekr.20131019184243.16685
-
-The "6.7.5 release notes" node in LeoDocs.leo.
-unl:gnx://LeoDocs.leo#ekr.20230703101804.1
+Alt-clicking or Control-clicking a UNL will take you to its target node, even if the target is in another Leo file!
+Gnx-based UNLs won't break even if you move or rename the target node.
