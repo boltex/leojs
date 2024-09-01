@@ -83,10 +83,10 @@ Here's how to switch focus without using the mouse:
     Toggles the mark on a node. Marked nodes have a vertical red bar in their icon area.
 
 `Ctrl-} (demote)`\
-    Makes all following siblings of a node children of the node. Use `demote` to "gather" nodes so they can all be moved with their parent.
+    Makes all following siblings of a node children of the node. Use _demote_ to "gather" nodes so they can all be moved with their parent.
 
 `Ctrl-{ (promote)`\
-    Makes all the children of a node siblings of the node. Use `demote` to "scatter" the nodes after moving their parent.
+    Makes all the children of a node siblings of the node. Use _promote_ to "scatter" the nodes after moving their parent.
 
 ### Selecting outline nodes
 
@@ -118,21 +118,24 @@ Regardless of focus, `Alt-arrow` select outline nodes:
 ### Finding & replacing text
 
 This section explains how to use Leo's standard search/replace commands.
-**Note**: you can also use the Nav Tab (in the Log pane) to search for text.
 
-`Ctrl-F (start-search)` shows the Find Tab and puts the focus in the text box labeled `Find:`.
+> 📌 **NOTE**\
+> you can also use the Nav Tab (in the Log pane) to search for text.
 
-**Aside**: You can select radio buttons and toggle check boxes in the Find Tab with `Ctrl-Alt keys`. The capitalized words of the radio buttons or check boxes indicate which key to use.  For example, `Ctrl-Alt-X (toggle-find-regex-option)` toggles the `regeXp` checkbox.
+`Ctrl-F (start-search)` shows the Find Tab and puts the focus in the text box labeled _Find:_.
 
-After typing `Ctrl-F`, type the search string, say `def`, in the text box.
+> 💡 **TIP**\
+> You can select radio buttons and toggle check boxes in the Find Tab with `Ctrl-Alt keys`. The underlined letter of the radio buttons or check boxes indicate which key to use.  For example, `Ctrl-Alt-X (toggle-find-regex-option)` toggles the _rege<u>x</u>p_ checkbox.
+
+After typing `Ctrl-F`, type the search string, say _def_, in the text box.
 
 Start the find command by typing `<Return>`.
 
-But suppose you want to replace `def` with `foo`, instead of just finding `def`.
+But suppose you want to replace _def_ with _foo_, instead of just finding _def_.
 
-Just type `<Tab>` before typing `<Return>`. Focus shifts to the text box labeled `Replace:`.
+Just type `<Tab>` before typing `<Return>`. Focus shifts to the text box labeled _Replace:_.
 
-Finally, type `<Return>` to start the `find-next` command. When Leo finds the next instance of `def`, it will select it.
+Finally, type `<Return>` to start the **find-next** command. When Leo finds the next instance of _def_, it will select it.
 
 You may now type any command.  The following are most useful:
 
@@ -143,10 +146,10 @@ You may now type any command.  The following are most useful:
 ### Formatting text
 
 `rst3`\
-    Converts `@rst` nodes to restructured text. This command automatically creates underlining for rST sections. To reorganize a document, just reorganize the corresponding Leo outline: you don't have to change markup by hand. Search or "rst" in `leoSettings.leo` to see the pertinent settings.
+    Converts _@rst_ nodes to restructured text. This command automatically creates underlining for rST sections. To reorganize a document, just reorganize the corresponding Leo outline: you don't have to change markup by hand. Search or "rst" in _leoSettings.leo_ to see the pertinent settings.
 
 `adoc`\
-     Converts `@adoc` nodes to asciidoc text. This command automatically creates markup for asciidoctor sections. To reorganize a document, just reorganize the corresponding Leo outline: you don't have to change markup by hand.
+     Converts _@adoc_ nodes to asciidoc text. This command automatically creates markup for asciidoctor sections. To reorganize a document, just reorganize the corresponding Leo outline: you don't have to change markup by hand.
 
 ### Undoing and redoing changes
 
@@ -157,8 +160,6 @@ Leo has undo and redo commands -- Leo remembers changes you make to outline stru
 
 `Ctrl-Shift-Z (redo)`\
     Undoes the effect of the last undo, etc.
-
-The first two entries of the `Edit` menu show what the next undo or redo operation will be.
 
 ### Clone-find commands
 
@@ -192,9 +193,10 @@ needed attention.
 
 **Settings**: You can customize the behavior of this command with `@data` nodes:
 
-- `@data check-nodes-ok-patterns`
+- **@data** check-nodes-ok-patterns
 
-  The body of the `@data` node contains a list of regexes (strings), one per
+<ul>
+  The body of the _@data_ node contains a list of regexes (strings), one per
   line. This command compiles each regex as if it were a raw string.
   Headlines matching any of these compiled regexes are not considered
   dubious. The defaults ignore unit tests:
@@ -203,10 +205,12 @@ needed attention.
 .*test_
 .*Test
 ```
+</ul>
 
-- `@data check-nodes-ok-prefixes`
+- **@data** check-nodes-ok-prefixes
 
-  The body of the `@data` node contains a list of strings, one per line.
+<ul>
+  The body of the _@data_ node contains a list of strings, one per line.
   Headlines starting with any of these strings are not considered dubious.
   The defaults ignore top-level @\<file\> nodes and marker nodes:
 
@@ -216,12 +220,15 @@ needed attention.
  ==
  --
 ```
+</ul>
 
-- `@data check-nodes-suppressions`
+- **@data** check-nodes-suppressions
 
-  The body of the `@data` node contains a list of strings, one per line.
+<ul>
+  The body of the _@data_ node contains a list of strings, one per line.
   Headlines that match these suppressions *exactly* are not considered
   dubious. Default: None.
+</ul>
 
 ### Help commands
 
@@ -264,7 +271,7 @@ _Especially useful for gathering nodes by hand._
 `clone-find-parents`\
     Creates clones of all parent nodes of c.p.
 
-`tag-children`\ 
+`tag-children`\
     Applies a given tag to all the children of the selected node.
 
 ### Edit commands
@@ -287,11 +294,13 @@ These commands work with either headline or body text.
 
 #### Indenting body text
 
-`always-indent-region`
+`always-indent-region`\
      Shift selected lines right one tab position. Inserts one unit of indentation if no text is selected.
-`indent-region (Tab)` 
+
+`indent-region (Tab)`\
     Shift selected lines right one tab position. Inserts a tab (or spaces) if no text is selected.
-`unindent-region (Shift-Tab)`
+
+`unindent-region (Shift-Tab)`\
     Shifts selected lines left one tab position. Deletes one unit of indentation if no text is selected.
 
 #### Moving the cursor
@@ -329,15 +338,16 @@ These commands work with either headline or body text.
 
 The command operates on the paragraph containing the insert cursor. If the insert cursor is on a blank line or directive, nothing happens. If the cursor is on a line containing text, then the paragraph containing that text line is reformatted and the insert cursor is moved to the next paragraph.
 
-**Note**: Hanging indentation is preserved. This is most useful for bulleted or numbered lists, such as:
-
-```
-  1. This is the first paragraph,
-     and it has a hanging indentation.
-
-  2. This is the second paragraph,
-     and it too has a hanging indentation.
-```
+> 📌 **NOTE**\
+> Hanging indentation is preserved. This is most useful for bulleted or numbered lists, such as:
+>
+>```
+>  1. This is the first paragraph,
+>     and it has a hanging indentation.
+>
+>  2. This is the second paragraph,
+>     and it too has a hanging indentation.
+>```
 
 `replace-current-character`\
      Replace the selected character with the next character typed.
@@ -397,7 +407,7 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
     Creates a new Leo main window.
 
 `open-outline (Ctrl-O)`\
-    Opens an existing .leo file. Selecting a non-.leo file loads the file into an `@edit` node in the present outline.
+    Opens an existing .leo file. Selecting a non-.leo file loads the file into an _@edit_ node in the present outline.
 
 `open-outline-by-name`\
     Opens the file given by typing the filename in the minibuffer. Supports filename completion.
@@ -435,12 +445,12 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
     Opens scripts.leo in a new tab or window.
 
 `open-leoSettings-leo`\
-    Opens `leoSettings.leo` in a new tab or window.
+    Opens _leoSettings.leo_ in a new tab or window.
 
 **Writing external files without saving the outline**:
 
 `write-at-auto-nodes`\
-    Writes all `@auto` nodes in the selected tree.
+    Writes all _@auto_ nodes in the selected tree.
 
 `write-outline-only`\
     Saves the outline without writing any @\<file\> trees.
@@ -449,13 +459,13 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
     Writes all @\<file\> trees.
 
 `write-at-shadow-nodes`\
-    Writes all `@shadow` nodes in the selected tree.
+    Writes all _@shadow_ nodes in the selected tree.
 
 `write-dirty-at-file-nodes`\
     Writes all modified @\<file\> trees.
 
 `write-dirty-at-shadow-nodes`\
-    Writes all modified `@shadow` trees.
+    Writes all modified _@shadow_ trees.
 
 `write-missing-at-file-nodes`\
     Write all @\<file\> nodes for which the corresponding external file does not exist.
@@ -472,13 +482,13 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
     Creates a text file in MORE format from the selected outline.
 
 `import-file`\
-    Import a file into an `@file` node. This command handles files regardless of whether they contain sentinels. This command can also read files in MORE outline format.
+    Import a file into an _@file_ node. This command handles files regardless of whether they contain sentinels. This command can also read files in MORE outline format.
 
 `import-MORE-file`\
-    Import one or MORE files into `@file` nodes.
+    Import one or MORE files into _@file_ nodes.
 
 `import-tabbed-files`\
-    Import one or more tab-or-space-delimited files into `@file` nodes.
+    Import one or more tab-or-space-delimited files into _@file_ nodes.
 
 `import-zim-folder`\
     Imports a zim folder, [zim-wiki.org](https://zim-wiki.org/) , as the last top-level node of the outline. This command uses the following Leo settings:
@@ -497,10 +507,10 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
     Creates a [noweb](https://www.cs.tufts.edu/~nr/noweb/) file from the selected outline.
 
 `read-at-auto-nodes`\
-    Reads all `@auto` nodes in the presently selected outline. 
+    Reads all _@auto_ nodes in the presently selected outline. 
 
 `read-at-shadow-nodes`\
-    Reads all `@shadow` nodes in the presently selected outline.
+    Reads all _@shadow_ nodes in the presently selected outline.
 
 `read-at-file-nodes`\
     Updates all @\<file\> nodes in an outline.
@@ -512,7 +522,7 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
     Refreshes an @\<file\> node from disk. 
 
 `remove-sentinels`\
-    Removes all sentinel lines from a file derived from an `@file` node.
+    Removes all sentinel lines from a file derived from an _@file_ node.
 
 `weave`\
     Formats the selected text and writes it to a file. 
@@ -526,13 +536,13 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
     Closes all tabs except the presently selected tab. 
 
 `session-create`\
-    Creates a new `@session` node. 
+    Creates a new _@session_ node. 
 
 `session-refresh`\
-    Refreshes the current `@session` node. 
+    Refreshes the current _@session_ node. 
 
 `session-restore`\
-    Opens a tab for each item the selected `@session` node.
+    Opens a tab for each item the selected _@session_ node.
 
 `session-snapshot-load`\
     Loads a snapshot of a session from the leo.session file. 
@@ -573,7 +583,7 @@ A **session** specifies a list of .leo files that Leo opens automatically when L
     Shows an introduction to Leo's help system.
 
 `help-for-command`\
-    Prompts for a Leo command name in the minibuffer (tab completion is allowed) and shows the docstring for the command.
+    Prompts for a Leo command name (with auto-completion) and shows the docstring for the command.
 
 `help-for-<topic>`\
     Opens a discussion of a topic:
@@ -664,17 +674,19 @@ A **session** specifies a list of .leo files that Leo opens automatically when L
     
 These commands expand all descendants of the selected nodes:
 
-- `expand-next-level`
-- `expand-prev-level` (reverses expand-next-level)
-- `expand-to-level-1`
-- `expand-to-level-2`
-- `expand-to-level-3`
-- `expand-to-level-4`
-- `expand-to-level-5`
-- `expand-to-level-6`
-- `expand-to-level-7`
-- `expand-to-level-8`
-- `expand-to-level-9`
+<ul>
+`expand-next-level`\
+`expand-prev-level` (reverses expand-next-level)\
+`expand-to-level-1`\
+`expand-to-level-2`\
+`expand-to-level-3`\
+`expand-to-level-4`\
+`expand-to-level-5`\
+`expand-to-level-6`\
+`expand-to-level-7`\
+`expand-to-level-8`\
+`expand-to-level-9`
+</ul>
 
 #### Editing headlines
 
@@ -693,25 +705,27 @@ These commands expand all descendants of the selected nodes:
 
 Similarly, these commands select various nodes in the outline:
 
-- `go-back`
-- `go-forward`
-- `goto-char`
-- `goto-first-node`
-- `goto-first-visible-node`
-- `goto-last-node`
-- `goto-last-visible-node`
-- `goto-line`
-- `goto-next-changed`
-- `goto-next-clone`
-- `goto-next-history-node`
-- `goto-next-node`
-- `goto-next-sibling`
-- `goto-next-visible`
-- `goto-parent`
-- `goto-prev-history-node`
-- `goto-prev-node`
-- `goto-prev-sibling`
-- `goto-prev-visible`
+<ul>
+`go-back`\
+`go-forward`\
+`goto-char`\
+`goto-first-node`\
+`goto-first-visible-node`\
+`goto-last-node`\
+`goto-last-visible-node`\
+`goto-line`\
+`goto-next-changed`\
+`goto-next-clone`\
+`goto-next-history-node`\
+`goto-next-node`\
+`goto-next-sibling`\
+`goto-next-visible`\
+`goto-parent`\
+`goto-prev-history-node`\
+`goto-prev-node`\
+`goto-prev-sibling`\
+`goto-prev-visible`
+</ul>
 
 #### Cutting, pasting & deleting nodes
 
@@ -751,7 +765,7 @@ Similarly, these commands select various nodes in the outline:
 **Important**: The following commands reorganize groups of nodes:
 
 `de-hoist`\
-    Undoes the effect of the previous `hoist` command.
+    Undoes the effect of the previous _hoist_ command.
 
 `demote (Ctrl-])`\
     Makes all following siblings of a node children of the node.
@@ -828,13 +842,13 @@ Similarly, these commands select various nodes in the outline:
 
 #### Using Chapters
 
-@chapter trees define chapters. Selecting a chapter makes only those nodes in the chapter visible, much like a hoist. The `main` chapter represents the entire outline. Selecting the `main` chapter shows all outline nodes.
+@chapter trees define chapters. Selecting a chapter makes only those nodes in the chapter visible, much like a hoist. The _main_ chapter represents the entire outline. Selecting the _main_ chapter shows all outline nodes.
 
 `chapter-select-main`\
     Selects the main chapter.
 
 `chapter-select-<chapter-name>`\
-    Each `@chapter` node in the outline creates a corresponding `chapter-select` command.
+    Each _@chapter_ node in the outline creates a corresponding _chapter-select_ command.
 
 `chapter-next`\
     Selects the next chapter.
@@ -843,9 +857,10 @@ Similarly, these commands select various nodes in the outline:
     Selects the previous chapter.
 
 Associated settings:
-
+<ul>
 `@bool use_chapters`\
     True: chapters are enabled.
+</ul>
 
 ### Plugins commands
 
@@ -869,10 +884,10 @@ This will upcase the headline when it starts with `@up`.
 #### Basic searches
 
 `start-search (Ctrl-F)`\
-    Prompts for a search string. Typing the `Return` key puts the search string in the Find tab and executes a search based on all the settings in the Find tab. Type `Tab` to enter replacement text.
+    Prompts for a search string. Typing the _Return_ key puts the search string in the Find tab and executes a search based on all the settings in the Find tab. Type _Tab_ to enter replacement text.
 
 `find-next (F3)`\
-    Continues a search started with `Ctrl-F`.
+    Continues a search started with _Ctrl-F_.
 
 `find-previous (F2)`\
     Searches backwards using the present search options.
@@ -889,9 +904,10 @@ This will upcase the headline when it starts with `@up`.
     Prompts for a find, then creates clones of all found nodes in an organizer node.
 
 `clone-find-all` aka `(cfa)`\
-    Same as `clone-find-all-flattened`, but does not create duplicate cloned nodes. If a node is a descendant of another found node, no duplicate top-level node (in the organizer) is created.
+    Same as _clone-find-all-flattened_, but does not create duplicate cloned nodes. If a node is a descendant of another found node, no duplicate top-level node (in the organizer) is created.
 
-`clone-find-marked` aka `(cfm)` and `clone-find-marked-flattened` aka `(cfmf)`\
+`clone-find-marked` aka `(cfm)` and\
+`clone-find-marked-flattened` aka `(cfmf)`\
     Creates clones of all marked nodes.
 
 `clone-find-parents`\
@@ -997,10 +1013,10 @@ The following radio buttons appear in the Find pane:
 ### Settings commands
 
 `open-local-settings`\
-    Select the `@settings` node in the present file, if any.
+    Select the _@settings_ node in the present file, if any.
 
 `open-myLeoSettings-leo`\
-    Open `myLeoSettings.leo` in a new window.
+    Open _myLeoSettings.leo_ in a new window.
 
 ### User Attributes (uA's)
 

@@ -6,70 +6,71 @@ sidebar_position: 4
 
 ## \@\<file> and \@path directives
 
-This section discusses the @\<file\> directives. These directives create or import external files.
+This section discusses the @\<file\> directives. They are used as node headlines: These directives create or import external files.
 
-`@<file>` nodes create external files:
+`@<file>` nodes directive that appear in headlines create external files:
 
-    @asis \<filename\>        write only, no sentinels, exact line endings
-    @auto \<filename\>        recommended
-    @clean \<filename\>       recommended
-    @edit \<filename\>        @edit node contains entire file
-    @file \<filename\>        recommended
-    @nosent \<filename\>      write only, no sentinels
+| Directive            |                                                |
+|:---------------------|:-----------------------------------------------|
+|**@asis** \<filename\>    |   write only, no sentinels, exact line endings |
+|**@auto** \<filename\>    |   recommended                                  |
+|**@clean** \<filename\>   |   recommended                                  |
+|**@edit** \<filename\>    |   @edit node contains entire file              |
+|**@file** \<filename\>    |   recommended                                  |
+|**@nosent** \<filename\>  |   write only, no sentinels                     |
 
-**Note**: `@file`, `@clean` and `@auto` are the recommended ways of creating external files. `@asis` and `@nosent` are for special occasions.
-
-**Note**: All these directive must appear in headlines.
+> 📌 **NOTE**\
+> `@file`, `@clean` and `@auto` are the recommended ways of creating external files. `@asis` and `@nosent` are for special occasions.
 
 The following table compares the various ways of creating external files. Later sections provide more details:
 
-                             Sections &   File data in
-    @\<file\> kind  Sentinels?  @others?    .leo file?    Notes             
-    ------------  ---------- -----------  ------------  -----
-    @asis            no         no           yes
-    @auto            no         yes          no         1, 2
-    @auto-xx         no         yes          no         1, 2
-    @clean           no         yes          yes     
-    @edit            no         no           no    
-    @file            yes        yes          no
-    @nosent          no         yes          yes
+| @\<file\> Kind | Sentinels | @others | .leo Data | Write Only |
+| :------------- | :-------: | :-----: | :-------: | :--------: |
+| @asis          |    ❌     |   ❌    |    ✔️     |     ✔️     |
+| @auto          |    ❌     |   ✔️    |    ❌     |     ❌     |
+| @clean         |    ❌     |   ✔️    |    ✔️     |     ❌     |
+| @edit          |    ❌     |   ❌    |    ❌     |     ❌     |
+| @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
+| @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
 
-**Note 1**: `@auto` nodes read files using language-specific importers.
+> 📌 **NOTE**\
+> `@auto` nodes read files using language-specific importers.
+
 By default, the file's extension determines the importer:
 
-    Extensions                  Importer
-    ----------                  --------
-    .c, .cc, .c++, .cpp,.cxx    C
-    .cs', .c#'                  C Sharp
-    .el                         Elisp
-    .h, .h++                    C
-    .html, .htm                 HTML
-    .ini                        Config file
-    .ipynb                      Jupyter notebook
-    .java                       Java
-    .js                         JavaScript
-    .md                         Markdown
-    .org                        Org Mode
-    .otl                        Vim outline
-    .pas                        Pascal
-    .php                        PHP
-    .py, .pyi, .pyw             Python
-    .rest, .rst                 reStructuredText
-    .ts                         TypeScript
-    .xml                        XML
+| Extensions                 | Importer          |
+|:---------------------------|:------------------|
+|.c, .cc, .c++, .cpp,.cxx    | C                 |
+|.cs', .c#'                  | C Sharp           |
+|.el                         | Elisp             |
+|.h, .h++                    | C                 |
+|.html, .htm                 | HTML              |
+|.ini                        | Config file       |
+|.ipynb                      | Jupyter notebook  |
+|.java                       | Java              |
+|.js                         | JavaScript        |
+|.md                         | Markdown          |
+|.org                        | Org Mode          |
+|.otl                        | Vim outline       |
+|.pas                        | Pascal            |
+|.php                        | PHP               |
+|.py, .pyi, .pyw             | Python            |
+|.rest, .rst                 | reStructuredText  |
+|.ts                         | TypeScript        |
+|.xml                        | XML               |
 
-**Note 2**: You can also specify importers *explicitly* as follows:
+You can also specify importers *explicitly* as follows:
 
-    @auto-xxx           Importer
-    ---------           --------
-    @auto-ctext         ctext
-    @auto-markdown      markdown
-    @auto-md            markdown
-    @auto-org           org-mode
-    @auto-org-mode      org-mode
-    @auto-otl           vimoutline
-    @auto-vim-outline   vimoutline      
-    @auto-rst           reStructuredText
+|   @auto-xxx         | Importer          |
+|:--------------------|:------------------|
+|   @auto-ctext       |  ctext            |
+|   @auto-markdown    |  markdown         |
+|   @auto-md          |  markdown         |
+|   @auto-org         |  org-mode         |
+|   @auto-org-mode    |  org-mode         |
+|   @auto-otl         |  vimoutline       |
+|   @auto-vim-outline |  vimoutline       |
+|   @auto-rst         |  reStructuredText |
 
 **Important**: The importers/exporters for markdown, org-mode, reStructuredText and vimoutline files automatically generate section heading of the appropriate level. Body text of the top-level `@auto` node is ignored.
 
@@ -81,9 +82,7 @@ Use this directive only when you must have complete control over every character
 
 **The @@ convention**: Within `@asis` trees only, if a headline starts with @@, Leo writes everything in the headline following the @@ just before the corresponding body text.
 
-Files created from `@asis` trees contain *nothing* not contained in body text (or
-@@ headlines). In particular, if body text does not end in a newline, the first
-line from the next node will concatenated to the last line of the preceding node.
+Files created from `@asis` trees contain *nothing* not contained in body text (or @@ headlines). In particular, if body text does not end in a newline, the first line from the next node will concatenated to the last line of the preceding node.
 
 Within `@asis` trees, Leo writes no sentinels to the external file, so Leo can not update the outline using changes to the external file. When reading .leo files, Leo does *not* read external files created from `@asis` nodes. Instead, all data in an `@asis` tree is stored in the .leo file.
 
@@ -97,44 +96,44 @@ The `@auto` directive imports an external file into a tree of nodes.
 
 `@auto` trees allow people to use Leo in collaborative environments without using sentinels in external files. Even without sentinels, `@auto` trees can change when the corresponding external file changes outside of Leo.
 
-`@auto` nodes read files using language-specific importers.
-By default, the file's extension determines the importer::
+`@auto` nodes read files using language-specific importers. By default, the file's extension determines the importer:
 
-    Extensions                  Importer
-    ----------                  --------
-    .c, .cc, .c++, .cpp,.cxx    C
-    .cs', .c#'                  C Sharp
-    .el                         Elisp
-    .h, .h++                    C
-    .html, .htm                 HTML
-    .ini                        Config file
-    .ipynb                      Jupyter notebook
-    .java                       Java
-    .js                         JavaScript
-    .md                         Markdown
-    .org                        Org Mode
-    .otl                        Vim outline
-    .pas                        Pascal
-    .php                        PHP
-    .py, .pyi, .pyw             Python
-    .rest, .rst                 reStructuredText
-    .ts                         TypeScript
-    .xml                        XML
+| Extensions                  | Importer           |
+|:----------------------------|:-------------------|
+| .c, .cc, .c++, .cpp,.cxx    | C                  |
+| .cs', .c#'                  | C Sharp            |
+| .el                         | Elisp              |
+| .h, .h++                    | C                  |
+| .html, .htm                 | HTML               |
+| .ini                        | Config file        |
+| .ipynb                      | Jupyter notebook   |
+| .java                       | Java               |
+| .js                         | JavaScript         |
+| .md                         | Markdown           |
+| .org                        | Org Mode           |
+| .otl                        | Vim outline        |
+| .pas                        | Pascal             |
+| .php                        | PHP                |
+| .py, .pyi, .pyw             | Python             |
+| .rest, .rst                 | reStructuredText   |
+| .ts                         | TypeScript         |
+| .xml                        | XML                |
 
 You can also specify importers *explicitly* as follows::
 
-    @auto-xxx           Importer            Notes
-    ---------           --------            -----
-    @auto-ctext         ctext           
-    @auto-markdown      markdown            1, 2
-    @auto-md            markdown            1, 2
-    @auto-org           org-mode            1, 3
-    @auto-org-mode      org-mode            1, 3
-    @auto-otl           vimoutline          1, 4
-    @auto-vim-outline   vimoutline          1, 4      
-    @auto-rst           reStructuredText    1, 5
+| @auto-xxx          | Importer         |
+|:-------------------|:-----------------|
+| @auto-ctext        | ctext            |
+| @auto-markdown     | markdown         |
+| @auto-md           | markdown         |
+| @auto-org          | org-mode         |
+| @auto-org-mode     | org-mode         |
+| @auto-otl          | vimoutline       |
+| @auto-vim-outline  | vimoutline       |
+| @auto-rst          | reStructuredText |
 
-**Note**: The importers/exporters for [markdown](https://en.wikipedia.org/wiki/Markdown), [org-mode](https://en.wikipedia.org/wiki/Org-mode), [reStructuredText](https://docutils.sourceforge.io/rst.html) and [vimoutline](https://www.vim.org/scripts/script.php?script_id=3515) files automatically generate section heading of the appropriate level. Body text of the top-level `@auto` node is ignored.
+> 📌 **NOTE**\
+> The importers/exporters for [markdown](https://en.wikipedia.org/wiki/Markdown), [org-mode](https://en.wikipedia.org/wiki/Org-mode), [reStructuredText](https://docutils.sourceforge.io/rst.html) and [vimoutline](https://www.vim.org/scripts/script.php?script_id=3515) files automatically generate section heading of the appropriate level. Body text of the top-level `@auto` node is ignored.
 
 #### \@auto sanity checks
 
@@ -154,31 +153,27 @@ An **underindented line** is a line of body text that is indented less then the 
 
 ### \@clean \<path>
 
-The `@clean <filename>` creates an external file without sentinel lines.
-`@clean` trees will probably be the most convenient way of creating and
-accessing external files for most people.
+The `@clean <filename>` creates an external file without sentinel lines. `@clean` trees will probably be the most convenient way of creating and accessing external files for most people.
 
 When writing an `@clean` tree, Leo expands section references, `@all` and
 
-When reading an `@clean` tree, Leo propagates changes from the external file
-to the `@clean` tree using the [Mulder/Ream update algorithm](../appendices/mulder-ream.md).
+When reading an `@clean` tree, Leo propagates changes from the external file to the `@clean` tree using the [Mulder/Ream update algorithm](../appendices/mulder-ream.md).
 
-**Note**: The `@bool force_newlines_in_at_nosent_bodies` setting controls whether
-Leo writes a trailing newline if non-empty body text does not end in a newline.
-The default is True.
+> 📌 **NOTE**\
+> The `@bool force_newlines_in_at_nosent_bodies` setting controls whether Leo writes a trailing newline if non-empty body text does not end in a newline. The default is True.
 
-**Note**: The [check-nodes](commands.md#syncing-clean-files) command helps sync `@clean` trees when
-collaborating with others.
+> 💡 **TIP**\
+> The [check-nodes](commands.md#syncing-clean-files) command helps sync `@clean` trees when collaborating with others.
 
 ### \@edit \<path>
 
 The `@edit` directive imports an external file into a single node.
 
-When reading `@edit` nodes, Leo reads the entire file into the `@edit` node. Lines
-that look like sentinels will be read just as they are.
+When reading `@edit` nodes, Leo reads the entire file into the 
+`@edit` node. Lines that look like sentinels will be read just as they are.
 
-When writing `@edit` nodes, `@edit` nodes must not have children and section
-references and `@others` are not allowed.
+When writing `@edit` nodes, `@edit` nodes must not have children
+and section references and `@others` are not allowed.
 
 ### \@file \<path> (aka @thin)
 
@@ -202,11 +197,15 @@ The `@thin` directive is a synonym for `@file`.
 ### \@nosent \<path>
 
 The `@nosent` directive creates an external file **without** sentinels. When writing
-`@nosent` trees, Leo expands section references and `@all` and `@others` directives. **Warning**: Because the external file contains no sentinels, `@nosent` trees can not be updated from changes made outside of Leo. If you want this capability, use `@clean` instead.
+`@nosent` trees, Leo expands section references and `@all` and `@others` directives.
+
+> 🚨 **WARNING**\
+Because the external file contains no sentinels, `@nosent` trees can not be updated from changes made outside of Leo. If you want this capability, use `@clean` instead.
 
 ### \@shadow \<path> (deprecated)
 
-**Important**: As of Leo 5.1, `@shadow` is **deprecated** Use `@clean` instead. `@clean` is faster than `@shadow` and requires no hidden files.
+> ❌ **DEPRECATED**\
+> `@shadow` is **deprecated**. Use `@clean` instead. `@clean` is faster than `@shadow` and requires no hidden files.
 
 The `@shadow` directive creates *two* external files, a **public** file without sentinels, and a **private** file containing sentinels.
 
@@ -233,7 +232,8 @@ If no `@path` directives are in effect, the default path prefix is the directory
 These control how Leo places text when writing external files. They are two of the most important directives in Leo.
 
 `@all`
-
+ 
+<ul>
     Copies *all* descendant nodes to the external file. Use `@all` to place
     unrelated data in an external file.
 
@@ -246,9 +246,11 @@ These control how Leo places text when writing external files. They are two of t
     todo.txt or notes.txt or whatever. Such files are assumed to
     contain a random collection of nodes, so there is no language in
     effect and no real comment delimiters.
+</ul>
 
 `@others`
-
+ 
+<ul>
     Writes the body text of all unnamed descendant into the external file, in
     outline order.
 
@@ -257,6 +259,7 @@ These control how Leo places text when writing external files. They are two of t
 
     A single node may contain only one `@others` directive, but descendant nodes
     may have other `@others` directives.
+</ul>
 
 ## Syntax coloring directives
 
@@ -266,23 +269,31 @@ Leo colors text in the body pane.
 These directives typically affect the node in which they appear and all descendant nodes. Exception: an **ambiguous node**, a node containing both `@color` and `@nocolor` directives, has no effect on how Leo colors text in descendant nodes.
 
 `@color`
-
+ 
+<ul>
     Enables syntax coloring until the next `@nocolor` directive.
+</ul>
 
 `@killcolor`
-
+ 
+<ul>
     Disables syntax coloring in a node, overriding all `@color`, `@nocolor` or
     `@nocolor-node` directives in the same node.
+</ul>
 
 `@nocolor`
-
+ 
+<ul>
     Disables syntax coloring until the next `@nocolor` directive.
+</ul>
 
 `@nocolor-node`
-
+ 
+<ul>
     Disables coloring for only the node containing it. The `@nocolor-node`
     directive overrides the `@color` and `@nocolor` directives within the same
     node.
+</ul>
 
 ## Dangerous directives
 
@@ -291,7 +302,8 @@ These directives alter how Leo represents data in external files. They are **dan
 Nevertheless, these sentinels can be useful in special situations.
 
 `@comment <1, 2 or three comment delims>`
-
+ 
+<ul>
     Sets the comment delimiters in `@file` and `@shadow` files.
     **Important**: Use `@comment` for unusual situations only. In most cases, you
     should use the `@language` directive to set comment delimiters.
@@ -306,8 +318,10 @@ Nevertheless, these sentinels can be useful in special situations.
     Within these delimiters, underscores represent a significant space, and
     double underscores represent a newline. Examples:
 
-        `@comment REM_`\
-        `@comment __=pod__ __=cut__`
+```
+@ϲomment REM_
+@ϲomment __=pod__ __=cut__
+```
 
     The second line sets PerlPod comment delimiters.
 
@@ -331,17 +345,23 @@ Nevertheless, these sentinels can be useful in special situations.
 
     Example:
 
-        `@comment @0x3c212d2d2120 @0x202d2d3e`
+```
+@ϲomment @0x3c212d2d2120 @0x202d2d3e
+```
 
     for GenshiXML is the same definition as 
 
-        `@comment <!--!_ _-->`
+```
+@ϲomment <!--!_ _-->
+```
 
     to create comments that will be removed from the output by Genshi. But the latter would 
     cause XML parsing error on the `@comment` line.
+</ul>
 
 `@delims <1 or 2 comment delims>`
-
+ 
+<ul>
     Sets comment delimiters in external files containing sentinel lines.
 
     The `@delims` directive requires one or two delimiters, separated by
@@ -352,10 +372,10 @@ Nevertheless, these sentinels can be useful in special situations.
     files. Like this:
 
 ```
-        @ԁelims /* */
-        Javascript stuff
-        @ԁelims <-- -->
-        HTML stuff
+@ԁelims /* */
+Javascript stuff
+@ԁelims <-- -->
+HTML stuff
 ```
 
     **Warning**: you **must** change back to previous delimiters using another
@@ -369,6 +389,7 @@ Nevertheless, these sentinels can be useful in special situations.
     **Note**: The `@delims` directive can not be used to change the comment
     strings at the start of the external file, that is, the comment strings for
     the `@+leo sentinel` and the initial `@+body` and `@+node` sentinels.
+</ul>
 
 ## All other directives
 
@@ -378,56 +399,77 @@ Unless otherwise noted, all directives listed are valid only in body text, and t
 
 `@ and @doc`
 
-    These directives start a doc part. `@doc` is a synonym for `@`. Doc parts
-    continue until an `@c` directive or the end of the body text. For example::
+<ul>
+These directives start a doc part. `@doc` is a synonym for `@`. Doc parts
+continue until an `@c` directive or the end of the body text. For example:
 
-        @ This is a comment in a doc part.
-        Doc parts can span multiple lines.
-        The next line ends the doc part
+```
+ @ This is a comment in a doc part.
+ Doc parts can span multiple lines.
+ The next line ends the doc part
+ @ϲ
+```
+When writing external files, Leo writes doc parts as comments.
 
-    When writing external files, Leo writes doc parts as comments.
-
-    Leo does not recognize `@` or `@doc` in `@asis` trees or when the `@all` or
-    `@delims` directives are in effect.
+Leo does not recognize `@` or `@doc` in `@asis` trees or when the `@all`
+ or `@delims` directives are in effect.
+</ul>
 
 `@c and @code`
 
+<ul>
     Ends any doc part and starts a code part.
 
     `@code` is a deprecated synonym for `@c`.
 
     Leo does not recognize this directive in `@asis` trees.
+</ul>
 
  `@chapter`
 
+<ul>
     An `@chapter` tree represents a chapter. For full details, see [Using Chapters](commands.md#using-chapters).
 
     These directives must appear in the node's headline.
+</ul>
 
 `@encoding <encoding>`
-
+ 
+<ul>
     Specifies the Unicode encoding for an external file. For example::
 
         `@encoding iso-8859-1`
 
     When reading external files, the encoding given must match the encoding
     actually used in the external file or "byte hash" will result.
-
+</ul>
 
 `@first <text>`
-
+ 
+<ul>
     Places lines at the very start of an external file, before any Leo
     sentinels. `@first` lines must be the *very first* lines in an `@<file>` node.
     More then one `@first` lines may appear.
 
     This creates two first lines, a shebang line and a Python encoding line::
 
+```
+@firѕt #! /usr/bin/env python
+@firѕt # -*- coding: utf-8 -*-
+```
 
     Here is a perl example::
 
+```
+@firѕt #!/bin/sh -- # perl, to stop looping
+@firѕt eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
+@firѕt     if 0;
+```
+</ul>
 
 `@ignore`
-
+ 
+<ul>
     Tells Leo to ignore the subtree in which it appears.
 
     In the body text of most top-level @\<file> nodes, the `@ignore` directive
@@ -438,9 +480,11 @@ Unless otherwise noted, all directives listed are valid only in body text, and t
     example, Leo's unit testing commands will ignore trees containing `@ignore`.
     In such cases, the `@ignore` directive may appear in the headline or body
     text.
+</ul>
 
 `@language <language name>`
-
+ 
+<ul>
     Specifies the language in effect, including comment delimiters.
     If no `@language` directive is in effect, Leo uses the defaults specified
     by the `@string target-language` setting.
@@ -452,86 +496,100 @@ Unless otherwise noted, all directives listed are valid only in body text, and t
     **Note**: Shell files have comments that start with #.
 
     Case is ignored in the language names. For example, the following are
-    equivalent::
+    equivalent:
 
-        `@language html`
-        `@language HTML`
+```
+@lаnguage html
+@lаnguage HTML
+```
 
     The `@language` directive also controls syntax coloring. For language x, the
     file leo/modes/x.py describes how to colorize the language. To see the
     languages presently supported, look in the leo/modes directory. There are
     over 100 such languages.
+</ul>
 
 `@last <text>`
-
+ 
+<ul>
     Places lines at the very end of external files.
 
     This directive must occur at the *very end* of top-level @\<file> nodes. More
     than one `@last` directive may exist. For example:
 
-```
-        @firѕt <?php
-        ...
-        @laѕt ?>
+```php
+@firѕt <?php
+...
+@laѕt ?>
 ```
 
     Leo does not recognize `@last` directive in `@asis` trees.
+</ul>
 
 `@lineending cr/lf/nl/crlf`
-
+ 
+<ul>
     Sets the line endings for external files.
     This directive overrides the `@string output_newline` setting.
 
     The valid forms of the `@lineending` directive are:
 
-    ========================   ======================================================
-    \@lineending nl            The default, Linux.
-    ------------------------   ------------------------------------------------------
-    \@lineending cr            Mac
-    ------------------------   ------------------------------------------------------
-    \@lineending crlf          Windows
-    ------------------------   ------------------------------------------------------
-    \@lineending lf            Same as 'nl', not recommended
-    ------------------------   ------------------------------------------------------
-    \@lineending platform      Same as platform value for output_newline setting.
-    ========================   ======================================================
-
+| Line Ending         | Platform                                               |
+|:--------------------|:-------------------------------------------------------|
+|@lineending nl       |    The default, Linux.                                 |
+|@lineending cr       |    Mac                                                 |
+|@lineending crlf     |    Windows                                             |
+|@lineending lf       |    Same as 'nl', not recommended                       |
+|@lineending platform |    Same as platform value for output_newline setting.  |
+</ul>
 
 `@nowrap`
-
+ 
+<ul>
     Disables line wrapping the Leo's body pane.
 
     Only the first `@wrap` or `@nowrap` directive in a node has any effect.
 
     `@nowrap` may appear in either headlines or body text.
+</ul>
 
 `@pagewidth <n>`
-
+ 
+<ul>
    Sets the page width used by the `reformat-paragraph` command.
    This directive also controls how `@doc` parts are broken into lines.
-   \<n> should be a positive integer.  For example::
+   \<n> should be a positive integer.  For example:
 
-     `@pagewidth 100`
+```
+@pаgewidth 100`
+```
 
   The `@pagewidth` directive overrides the `@int page_width` setting.
+</ul>
 
 `@persistence`
+ 
+<ul>
+    With `@clean` and `@file`, Leo can store **persistent data** in nodes. This information consists of the node's **gnx** (Global Node Index) and the node's **uA**, (User Attributes). The gnx gives each node a unique, immutable identity. Gnx's make clones possible. The uA allows scripts and plugins to associate arbitrarily much additional data with each node.
 
-With `@clean` and `@file`, Leo can store **persistent data** in nodes. This information consists of the node's **gnx** (Global Node Index) and the node's **uA**, (User Attributes). The gnx gives each node a unique, immutable identity. Gnx's make clones possible. The uA allows scripts and plugins to associate arbitrarily much additional data with each node.
+    By default, Leo's importers preserve neither gnx's nor uA's. This makes imported `@auto` trees second class citizens. To remedy this, if an outline contains an `@persistence` node, Leo will save data in the `@persistence` tree that allows Leo to recover gnx's and uA's when re-reading `@auto` files later. This allows clone links and uA's to persist.
 
-By default, Leo's importers preserve neither gnx's nor uA's. This makes imported `@auto` trees second class citizens. To remedy this, if an outline contains an `@persistence` node, Leo will save data in the `@persistence` tree that allows Leo to recover gnx's and uA's when re-reading `@auto` files later. This allows clone links and uA's to persist.
-
-@persistence is an optional feature. The stored data is akin to bookmarks. The data can "break" (become inaccessible) if the structure (including class/method/function names) changes. However, the data will typically break infrequently. To disable this feature, just delete an existing `@persistence` node or change `@persistence` to `@@persistence`.
+    @persistence is an optional feature. The stored data is akin to bookmarks. The data can "break" (become inaccessible) if the structure (including class/method/function names) changes. However, the data will typically break infrequently. To disable this feature, just delete an existing `@persistence` node or change `@persistence` to `@@persistence`.
+</ul>
 
 `@tabwidth <n>`
-
+ 
+<ul>
   Sets the width of tabs.
   Negative tab widths cause Leo to convert tabs to spaces.
+</ul>
 
 `@wrap`
-
+ 
+<ul>
     Enables line wrapping in Leo's body pane.
 
     Only the first `@wrap` or `@nowrap` directive in a node has any effect.
 
     `@wrap` may appear in either headlines or body text.
+</ul>
