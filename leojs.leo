@@ -21330,6 +21330,8 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 
 - Fixed goto-global-line command.
 - Implemented c.recursiveImport. 
+- implemented g.execute_shell_commands_with_options.
+- Fixed IdleTime class handler call arguments.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

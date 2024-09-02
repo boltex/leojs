@@ -53,7 +53,7 @@ export class IdleTime {
     public tag: string; // An arbitrary string/object for use during debugging.
     public delay: number;
     public enabled: boolean; // True: run the timer continuously.
-    public handler: () => any; // The user-provided idle-time handler.
+    public handler: (it: IdleTime) => any; // The user-provided idle-time handler.
     public waiting_for_idle: boolean; // True if we have already waited for the minimum delay.
     public timer: NodeJS.Timeout | undefined; // for setTimeout or setInterval instead of QtCore.QTimer();
 
@@ -62,7 +62,7 @@ export class IdleTime {
     /**
      * ctor for IdleTime class.
      */
-    constructor(handler: () => any, delay = 500, tag = '') {
+    constructor(handler: (it: IdleTime) => any, delay = 500, tag = '') {
         // For use by handlers...
         this.count = 0; // The number of times handler has been called.
         this.starting_time = undefined; // Time that the timer started.
@@ -140,7 +140,7 @@ export class IdleTime {
         try {
             this.count += 1;
             this.time = Date.now();
-            this.handler();
+            this.handler(this);
         } catch (exception) {
             g.es_exception(exception);
             this.stop();

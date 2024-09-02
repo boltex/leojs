@@ -22,6 +22,7 @@ import * as GitAPI from '../git';
 import * as GitBaseAPI from '../git-base';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
+import { IdleTime as IdleTimeClass } from "./idle_time";
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
 import { RemoteHubApi } from '../remote-hub';
@@ -3541,7 +3542,7 @@ export function enableIdleTimeHook(...args: any): void {
  *           timer1.start()
  *           timer2.start()
  */
-export function IdleTime(handler: any, delay = 500, tag?: string): any {
+export function IdleTime(handler: (it: IdleTimeClass) => any, delay = 500, tag?: string): any {
     try {
         return new app.gui.idleTimeClass(handler, delay, tag);
     } catch (exception) {
@@ -5997,6 +5998,104 @@ export async function execute_shell_commands(commands: string | string[], p_trac
         }
 
     };
+}
+//@+node:felix.20240902144459.1: *3* g.execute_shell_commands_with_options & helpers
+/**
+ * A helper for prototype commands or any other code that
+ * runs programs in a separate process.
+ *
+ * base_dir:           Base directory to use if no config path given.
+ * commands:           A list of commands, for g.execute_shell_commands.
+ * commands_setting:   Name of @data setting for commands.
+ * path_setting:       Name of @string setting for the base directory.
+ * warning:            A warning to be printed before executing the commands.
+ */
+export async function execute_shell_commands_with_options(
+    base_dir: string,
+    c: Commands,
+    command_setting: string,
+    commands: string[],
+    path_setting: string,
+    trace?: boolean,
+    warning?: string,
+): Promise<void> {
+
+    const w_base_dir = await computeBaseDir(c, base_dir, path_setting);
+    if (!w_base_dir) {
+        return;
+    }
+    commands = computeCommands(c, commands, command_setting);
+
+    if (!commands) {
+        return;
+    }
+    if (warning) {
+        es_print(warning);
+    }
+    await chdir(w_base_dir);  // Can't do this in the commands list.
+    return execute_shell_commands(commands, trace);
+}
+//@+node:felix.20240902144459.2: *4* g.computeBaseDir
+/**
+ * Compute a base_directory.
+ * If given, @string path_setting takes precedence.
+ */
+export async function computeBaseDir(c: Commands | null, base_dir: string, path_setting: string): Promise<string | undefined> {
+    // Prefer the path setting to the base_dir argument.
+    if (path_setting) {
+        if (!c) {
+            es_print('@string path_setting requires valid c arg');
+            return undefined;
+        }
+        // It's not an error for the setting to be empty.
+        let base_dir2 = c.config.getString(path_setting);
+        if (base_dir2) {
+            base_dir2 = base_dir2.replace(/\\/g, '/');
+
+            const w_base_dir2_exist = await os_path_exists(base_dir2);
+            if (w_base_dir2_exist) {
+                return base_dir2;
+            }
+            es_print(`@string ${path_setting} not found: ${base_dir2}`);
+            return undefined;
+        }
+    }
+    // Fall back to given base_dir.
+    if (base_dir) {
+        base_dir = base_dir.replace(/\\/g, '/');
+
+        const w_base_dir_exist = await os_path_exists(base_dir);
+        if (w_base_dir_exist) {
+            return base_dir;
+        }
+        es_print(`base_dir not found: ${base_dir}`);
+        return undefined;
+    }
+    es_print(`Please use @string ${path_setting}`);
+    return undefined;
+}
+//@+node:felix.20240902144459.3: *4* g.computeCommands
+/**
+ * Get the list of commands.
+ * If given, @data command_setting takes precedence.
+ */
+export function computeCommands(c: Commands | undefined, commands: string[], command_setting: string): string[] {
+    if (commands.length === 0 && !command_setting) {
+        es_print('Please use commands, command_setting or both');
+        return [];
+    }
+    // Prefer the setting to the static commands.
+    if (command_setting) {
+        if (c) {
+            const aList = c.config.getData(command_setting);
+            // It's not an error for the setting to be empty.
+            // Fall back to the commands.
+            return aList.length > 0 ? aList : commands;
+        }
+        es_print('@data command_setting requires valid c arg');
+        return [];
+    }
+    return commands;
 }
 //@+node:felix.20221219205826.1: *3* g.getScript & helpers
 /**
