@@ -2,7 +2,8 @@
 
 ## 1.0.6
 
-...
+- Fixed goto-global-line command.
+- Implemented c.recursiveImport. 
 
 ## 1.0.5
 

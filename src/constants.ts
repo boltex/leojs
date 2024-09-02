@@ -723,7 +723,7 @@ export class Constants {
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
         REVERT: 'revert',
         // * More Commands
-        GOTO_GLOBAL_LINE: "!goto_global_line", // USE LEOJS INSTEAD OF UI
+        GOTO_GLOBAL_LINE: "goto-global-line",
         SET_UA: 'set-ua',
 
         // * Import Export

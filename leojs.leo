@@ -2196,7 +2196,7 @@ public static LEO_COMMANDS = {
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
     REVERT: 'revert',
     // * More Commands
-    GOTO_GLOBAL_LINE: "!goto_global_line", // USE LEOJS INSTEAD OF UI
+    GOTO_GLOBAL_LINE: "goto-global-line",
     SET_UA: 'set-ua',
 
     // * Import Export
@@ -4302,7 +4302,7 @@ public async minibuffer(): Promise&lt;unknown&gt; {
             }),
             quickPick.onDidAccept(accepted =&gt; {
                 if (/^\d+$/.test(quickPick.value)) {
-                    // * Was an integer
+                    // * Was an integer EASTER EGG
                     this.setupRefresh(Focus.Body,
                         {
                             tree: true,
@@ -9370,8 +9370,7 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
     title: string,
     message: string,
     yes_all = false,
-    no_all = false,
-
+    no_all = false
 ): Thenable&lt;string&gt; {
     const w_choices = [
         Constants.USER_MESSAGES.YES,
@@ -21329,7 +21328,8 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 </t>
 <t tx="felix.20240819221941.1">## 1.0.6
 
-...
+- Fixed goto-global-line command.
+- Implemented c.recursiveImport. 
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
