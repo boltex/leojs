@@ -22,7 +22,7 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
-import { LeoImportCommands, TopLevelImportCommands } from './leoImport';
+import { LeoImportCommands, TopLevelImportCommands, RecursiveImportController } from './leoImport';
 import { ChapterController } from './leoChapters';
 import {
     MarkupCommands,
@@ -3914,7 +3914,6 @@ export class Commands {
     }
 
     //@+node:felix.20211022202201.1: *4* c.Drawing
-
     //@+node:felix.20211120225325.1: *5* c.bringToFront
     public bringToFront(c2?: Commands): void {
         const c: Commands = this;
@@ -4808,6 +4807,64 @@ export class Commands {
         c.treeFocusHelper(); // This is essential.
     }
 
+    //@+node:felix.20240901222145.1: *3* c.recursiveImport
+    public async recursiveImport(
+        dir_: string,  // A directory or file name.
+        ignore_pattern: RegExp | undefined = undefined,  // Ignore files matching this regex pattern.
+        kind: string,
+        recursive: boolean = true,
+        safe_at_file: boolean = true,
+        theTypes: string[] | undefined = undefined,
+        verbose: boolean = true
+    ): Promise<void> {
+        //@+<< docstring >>
+        //@+node:felix.20240901222145.2: *4* << docstring >>
+        /*
+        Recursively import all python files in a directory and clean the results.
+
+        Parameters::
+            dir_              The path to a directory or file.
+                              Relative paths must exist relative to the outline's directory.
+            kind              One of ('@clean','@edit','@file','@nosent').
+            recursive=True    True: recurse into subdirectories.
+            safe_at_file=True True: produce @@file nodes instead of @file nodes.
+            theTypes=None     A list of file extensions to import.
+                              None is equivalent to ['.py']
+            verbose=False     True: report imported directories.
+
+        This method cleans imported files as follows:
+
+        - Replace backslashes with forward slashes in headlines.
+        - Remove empty nodes.
+        - Add @path directives that reduce the needed path specifiers in descendant nodes.
+        - Add @file to nodes or replace @file with @@file.
+        */
+        //@-<< docstring >>
+        const c = this;
+
+        if(!dir_ || !kind){
+            g.es("'Dir' and 'kind' arguments needed for 'recursiveImport'");
+            return;
+        }
+
+        // Import all files in dir_ after c.p.
+        try {
+            const cc = new RecursiveImportController(c,
+                dir_,
+                ignore_pattern,
+                kind,
+                recursive,
+                safe_at_file,
+                theTypes ? theTypes : ['.py'],
+                verbose,
+            );
+            await cc.run(dir_);
+        } catch (e) {
+            g.es_exception(e);
+        } finally {
+            c.redraw();
+        }
+    }
     //@+node:felix.20220210211453.1: *3* c.Scripting utils
     //@+node:felix.20230403205855.1: *4* c.registerCommand
     /**
