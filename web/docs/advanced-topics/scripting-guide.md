@@ -147,10 +147,10 @@ g.app.gui.runAskYesNoCancelDialog(
     c: Commands,
     title: string,
     message: string,
-    yesMessage = 'Yes,
+    yesMessage = 'Yes',
     noMessage = 'No',
     yesToAllMessage = "",
-    defaultButton = 'Yes,
+    defaultButton = 'Yes',
     cancelMessage = ""
 )
 g.app.gui.runAskYesNoDialog(        
@@ -309,7 +309,7 @@ These are only the most commonly-used methods. For more information, consult Leo
 ```js
 const w = c.frame.body.wrapper; // Leo's body pane.
 
-//Scripts can get or change the context of the body as follows:
+// Scripts can get or change the context of the body as follows:
 
 w.appendText(s)                     // Append s to end of body text.
 w.delete(i,j=None)                  // Delete characters from i to j.
@@ -318,7 +318,7 @@ s = w.get(i,j=None)                 // Return the text from i to j.
 s = w.getAllText                    // Return the entire body text.
 i = w.getInsertPoint()              // Return the location of the cursor.
 s = w.getSelectedText()             // Return the selected text, if any.
-i,j = w.getSelectionRange(sort=True)// Return the range of selected text.
+[i,j] = w.getSelectionRange(sort=True)// Return the range of selected text.
 w.setAllText(s)                     // Set the entire body text to s.
 w.setSelectionRange(i,j,insert=None) // Select the text.
 ```
@@ -378,20 +378,24 @@ g.app.idleTimeManager.add_callback(print_hi);
 For greater control, g.IdleTime is a thin wrapper for the Leo's IdleTime class. The IdleTime class executes a handler with a given delay at idle time. The handler takes a single argument, the IdleTime instance:
 
 ```ts
-    def handler(it):
-        """IdleTime handler.  it is an IdleTime instance."""
-        delta_t = it.time-it.starting_time
-        g.trace(it.count,it.c.shortFileName(),'%2.4f' % (delta_t))
-        if it.count >= 5:
-            g.trace('done')
-            it.stop()
+function handler(it: IdleTime): void {
+    const delta_t = it.time - it.starting_time;
+    g.es_print(it.count, it.c.shortFileName(), delta_t.toFixed(4));
+     
+    if (it.count >= 5) {
+        g.es_print('done');
+        it.stop();
+    }
+}
 
-    # Execute handler every 500 msec. at idle time.
-    it = g.IdleTime(handler,delay=500)
-    if it: it.start()
+// Execute handler every 500 msec. at idle time.
+const it = new g.IdleTime(handler, 500);
+if (it) {
+    it.start();
+}
 ```
 
-The code creates an instance of the IdleTime class that calls the given handler at idle time, and no more than once every 500 msec.  Here is the output::
+The code creates an instance of the IdleTime class that calls the given handler at idle time, and no more than once every 500 msec.  Here is the output:
 
 <ul>
     handler 1 ekr.leo 0.5100\
@@ -402,28 +406,36 @@ The code creates an instance of the IdleTime class that calls the given handler 
     handler done
 </ul>
 
-Timer instances are completely independent::
+Timer instances are completely independent:
 
 ```ts
-    def handler1(it):
-        delta_t = it.time-it.starting_time
-        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))
-        if it.count >= 5:
-            g.trace('done')
-            it.stop()
+function handler1(it: IdleTime): void {
+    const delta_t = it.time - it.starting_time;
+    g.es_print(it.count.toString().padStart(2, ' '), it.c.shortFileName(), delta_t.toFixed(4));
+    
+    if (it.count >= 5) {
+        g.es_print('done');
+        it.stop();
+    }
+}
 
-    def handler2(it):
-        delta_t = it.time-it.starting_time
-        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))
-        if it.count >= 10:
-            g.trace('done')
-            it.stop()
+function handler2(it: IdleTime): void {
+    const delta_t = it.time - it.starting_time;
+    g.es_print(it.count.toString().padStart(2, ' '), it.c.shortFileName(), delta_t.toFixed(4));
+    
+    if (it.count >= 10) {
+        g.es_print('done');
+        it.stop();
+    }
+}
 
-    it1 = g.IdleTime(handler1,delay=500)
-    it2 = g.IdleTime(handler2,delay=1000)
-    if it1 and it2:
-        it1.start()
-        it2.start()
+const it1 = new g.IdleTime(handler1, 500);
+const it2 = new g.IdleTime(handler2, 1000);
+
+if (it1 && it2) {
+    it1.start();
+    it2.start();
+}        
 ```
 
 Here is the output:
