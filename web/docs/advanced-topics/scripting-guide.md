@@ -300,7 +300,7 @@ u.beforeChangeGroup and u.afterChangeGroup allow multiple calls to u.beforeX and
 
 Plugins and scripts may define their own u.beforeX and afterX methods. Indeed, u.afterX merely needs to set the bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo the operation. See the code for the various u.beforeX and afterX methods for guidance.
 
-See the section << How Leo implements unlimited undo >> in leoUndo.ts for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.
+See the section \<\< How Leo implements unlimited undo >> in leoUndo.ts for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.
 
 ## Modifying the body pane directly
 
@@ -324,7 +324,7 @@ w.setSelectionRange(i,j,insert=None) // Select the text.
 ```
 
 > 📌 **NOTE**\
-> i and j are zero-based indices into the the text. When j is not specified, it defaults to i. When the sort parameter is in effect, getSelectionRange ensures i <= j.
+> i and j are zero-based indices into the the text. When j is not specified, it defaults to i. When the sort parameter is in effect, getSelectionRange ensures i \<= j.
 
 ## Recovering vnodes
 
