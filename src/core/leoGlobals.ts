@@ -22,6 +22,7 @@ import * as GitAPI from '../git';
 import * as GitBaseAPI from '../git-base';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
+import { IdleTime as IdleTimeClass } from "./idle_time";
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
 import { RemoteHubApi } from '../remote-hub';
@@ -3540,7 +3541,7 @@ export function enableIdleTimeHook(...args: any): void {
  *           timer1.start()
  *           timer2.start()
  */
-export function IdleTime(handler: any, delay = 500, tag?: string): any {
+export function IdleTime(handler: (it: IdleTimeClass) => any, delay = 500, tag?: string): any {
     try {
         return new app.gui.idleTimeClass(handler, delay, tag);
     } catch (exception) {
