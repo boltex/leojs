@@ -1025,6 +1025,7 @@ export function objToString(obj: any, tag?: string): string {
 }
 
 export const listToString = objToString;
+export const dictToString = objToString;
 
 //@+node:felix.20211104221444.1: *3* g.printObj        (coreGlobals.py)
 /**

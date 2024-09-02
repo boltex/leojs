@@ -4,4 +4,583 @@ sidebar_position: 1
 
 # Leo Scripting Guide
 
-Leo Scripting Guide content ...
+This chapter covers miscellaneous topics related to Leo scripts.
+
+You might call this a FAQ for scripts...
+
+## \@button example
+
+Here is an example, @button promote-child-bodies:
+
+```ts
+/**
+ * Copy the body text of all children to the parent's body text.
+ */
+
+// Great for creating what's new nodes.
+const result: string[] = [p.b];
+const b = c.undoer.beforeChangeNodeContents(p);
+
+for (const child of p.children()) {
+    if (child.b) {
+        result.push(`\n- ${child.h}\n\n${child.b}\n`);
+    } else {
+        result.push(`\n- ${child.h}\n\n`);
+    }
+}
+
+p.b = result.join('');
+c.undoer.afterChangeNodeContents(p, 'promote-child-bodies', b);
+```
+
+This creates a fully undoable promote-child-bodies command.
+
+## Comparing two similar outlines
+
+efc.compareTrees does most of the work of comparing two similar outlines.
+For example, here is "@button compare vr-controller" in leoPyRef.leo:
+
+```ts
+const p1 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr)');
+const p2 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr2)');
+g.assert(p1.v && p2.v);
+const tag = 'compare vr1 & vr2';
+c.editFileCommands.compareTrees(p1, p2, tag);
+```
+
+This script will compare the trees whose roots are p1 and p2 and show the results like "Recovered nodes".  That is, the script creates a node called "compare vr1 & vr2".  This top-level node contains one child node for every node that is different.  Each child node contains a diff of the node.  The grand children are one or two clones of the changed or inserted node.
+
+## Converting Body Text To Title Case
+
+Title case means that all words start with capital letters.  The
+following script converts the selected body text to title case.  If
+nothing has been selected, the entire current node is converted. The
+conversion is undoable:
+
+```ts
+const w = c.frame.body.wrapper;
+const p = c.p;
+let s = p.b;
+const u = c.undoer;
+
+const [start, end] = w.getSelectionRange();
+const use_entire = start === end; // no selection, convert entire body
+
+const undoType = 'title-case-body-selection';
+const undoData = u.beforeChangeNodeContents(p);
+
+function toTitleCase(str: string): string {
+    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+}
+
+if (use_entire) {
+    p.b = toTitleCase(s);
+} else {
+    const sel = s.slice(start, end);
+    const head = s.slice(0, start);
+    const tail = s.slice(end);
+    p.b = head + toTitleCase(sel) + tail;
+}
+
+c.setChanged();
+p.setDirty();
+u.afterChangeNodeContents(p, undoType, undoData);
+c.redraw();
+```
+
+<ul>
+    _Contributed by T. B. Passin_
+</ul>
+
+## Creating minimal outlines
+The following script will create a minimal Leo outline:
+
+```ts
+let c2: Commands;
+
+if (true) {
+    // Create a visible frame.
+    c2 = g.app.newCommander('');
+} else {
+    // Create an invisible frame.
+    c2 = g.app.newCommander('', g.app.nullGui);
+}
+
+c2.frame.createFirstTreeNode();
+c2.redraw();
+
+// Test that the script works.
+for (const p of c2.all_positions()) {
+    g.es(p.h);
+}
+```
+
+## Cutting and pasting text
+
+The following shows how to cut and paste text to the clipboard:
+
+```ts
+await g.app.gui.replaceClipboardWith('hi');
+g.es(g.app.gui.getTextFromClipboard());
+```
+
+## g.app.gui.run* methods run dialogs
+
+Scripts can invoke various dialogs using the following methods of the g.app.gui object.
+
+```ts
+//  VSCode Wrapper for showInputBox, or, for showQuickPick if tabList is given:
+g.app.get1Arg(
+    options?: vscode.InputBoxOptions | vscode.QuickPickOptions,
+    token?: vscode.CancellationToken,
+    tabList?: string[]
+)
+
+// Utility dialogs:
+g.app.gui.runAskOkDialog(
+    c: Commands,
+    title: string,
+    message: string,
+    text = "Ok"
+)
+g.app.gui.runAskYesNoCancelDialog(
+    c: Commands,
+    title: string,
+    message: string,
+    yesMessage = 'Yes,
+    noMessage = 'No',
+    yesToAllMessage = "",
+    defaultButton = 'Yes,
+    cancelMessage = ""
+)
+g.app.gui.runAskYesNoDialog(        
+    c: Commands,
+    title: string,
+    message: string,
+    yes_all = false,
+    no_all = false
+)
+```
+
+The values returned are in ('ok','yes','no','cancel'), as indicated by the method names. Some dialogs also return strings or numbers, again as indicated by their names.
+
+Scripts can run File Open and Save dialogs with these methods:
+
+```ts
+// Single select dialog
+g.app.gui.runOpenFileDialog(
+    c: Commands,
+    title: string,
+    filetypes: [string, string][],
+)
+// Multiple select dialog
+g.app.gui.runOpenFilesDialog(
+    c: Commands,
+    title: string,
+    filetypes: [string, string][],
+)
+
+// Save as... dialog
+g.app.gui.runSaveFileDialog(
+    c: Commands,
+    title: string,
+    filetypes: [string, string][],   
+)
+```
+
+For details about how to use these file dialogs, look for examples in Leo's own source code.
+
+## Getting commander preferences
+
+Each commander sets ivars corresponding to settings.
+
+Scripts can get the following ivars of the Commands class:
+
+```ts
+const ivars = [
+    'output_doc_flag',
+    'page_width',
+    'tab_width',
+    'target_language',
+    'use_header_flag',
+];
+
+g.es("Prefs ivars...\n");
+
+for (const ivar of ivars) {
+    g.es((c as any)[ivar]);
+}
+```
+
+## Getting configuration settings
+
+Settings may be different for each commander.
+
+The c.config class has the following getters:
+
+- c.config.getBool(settingName,default=None)
+- c.config.getColor(settingName)
+- c.config.getDirectory(settingName)
+- c.config.getFloat(settingName)
+- c.config.getInt(settingName)
+- c.config.getLanguage(settingName)
+- c.config.getRatio(settingName)
+- c.config.getString(settingName)
+
+These methods return undefined if no setting exists.
+
+The getBool 'default' argument to getBool specifies the value to be returned if the setting does not exist.
+
+## Getting interactive input
+
+The **g.app.gui.get1Arg** method is a Wrapper for VSCode's showInputBox, or, for showQuickPick if tabList is given.
+
+Example 1: get one argument from the user:
+
+```ts
+@cmd('my-command', 'My Command Description')
+public async myCommand(): Promise<unknown> {
+
+    const arg = await g.app.gui.get1Arg({
+        title: 'User Name',
+        prompt: 'Please enter your name',
+        placeHolder: 'John Doe',
+    });
+
+    // Finish the command.
+    // ...
+
+}
+```
+
+Example 2: get two arguments from the user:
+
+```ts
+@cmd('my-command', 'My Command Description')
+public async myCommand(): Promise<unknown> {
+    
+    const arg1 = await g.app.gui.get1Arg({
+        title: 'User Name',
+        prompt: 'Please enter your name',
+        placeHolder: 'John Doe',
+    });
+
+    const arg2 = await g.app.gui.get1Arg({
+        title: 'User Age',
+        prompt: 'Please enter your age',
+        placeHolder: '21',
+    });
+
+    // Finish the command.
+    // ...
+
+}
+```
+
+## Invoking commands from scripts
+
+You can invoke minibuffer commands by name.  For example:
+
+```js
+result = c.doCommandByName('open-outline');
+
+// or
+
+result = c.executeMinibufferCommand('open-outline');
+```
+
+## Making operations undoable
+
+Plugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed. 
+
+> 📌 **NOTE**\
+> u is shorthand for c.undoer. Most u.beforeX methods return undoData that the client code merely passes to the corresponding u.afterX method. This data contains the 'before' snapshot. The u.afterX methods then create a bead containing both the 'before' and 'after' snapshots.
+
+u.beforeChangeGroup and u.afterChangeGroup allow multiple calls to u.beforeX and u.afterX methods to be treated as a single undoable entry. See the code for the Replace All, Sort, Promote and Demote commands for examples. The u.beforeChangeGroup and u.afterChangeGroup methods substantially reduce the number of u.beforeX and afterX methods needed.
+
+Plugins and scripts may define their own u.beforeX and afterX methods. Indeed, u.afterX merely needs to set the bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo the operation. See the code for the various u.beforeX and afterX methods for guidance.
+
+See the section << How Leo implements unlimited undo >> in leoUndo.ts for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.
+
+## Modifying the body pane directly
+
+These are only the most commonly-used methods. For more information, consult Leo's source code.
+
+```js
+const w = c.frame.body.wrapper; // Leo's body pane.
+
+//Scripts can get or change the context of the body as follows:
+
+w.appendText(s)                     // Append s to end of body text.
+w.delete(i,j=None)                  // Delete characters from i to j.
+w.deleteTextSelection()             // Delete the selected text, if any.
+s = w.get(i,j=None)                 // Return the text from i to j.
+s = w.getAllText                    // Return the entire body text.
+i = w.getInsertPoint()              // Return the location of the cursor.
+s = w.getSelectedText()             // Return the selected text, if any.
+i,j = w.getSelectionRange(sort=True)// Return the range of selected text.
+w.setAllText(s)                     // Set the entire body text to s.
+w.setSelectionRange(i,j,insert=None) // Select the text.
+```
+
+> 📌 **NOTE**\
+> i and j are zero-based indices into the the text. When j is not specified, it defaults to i. When the sort parameter is in effect, getSelectionRange ensures i <= j.
+
+## Recovering vnodes
+
+Positions become invalid whenever the outline changes. 
+
+This script finds a position p2 having the same vnode as an invalid position p:
+
+```ts
+if (!c.positionExists(p)) {
+    let positionFound = false;
+    for (const p2 of c.all_positions()) {
+        if (p2.v === p.v) { // found
+            c.selectPosition(p2);
+            positionFound = true;
+            break;
+        }
+    }
+    if (!positionFound) {
+        g.es('position no longer exists');
+    }
+}
+```
+
+## Recursive import script
+
+The following script imports files from a given directory and all subdirectories:
+
+```ts
+    c.recursiveImport(
+        'path to file or directory', // dir
+        '@clean',        // kind like '@file' or '@auto'
+        false,       // True: import only one file.
+        false,   // True: generate @@clean nodes.
+        undefined        // theTypes: Same as ['.py']
+    );
+```
+
+## Running code at idle time
+
+Scripts and plugins can call g.app.idleTimeManager.add_callback(callback) to cause
+the callback to be called at idle time forever. This should suffice for most purposes:
+
+```ts
+function print_hi() {
+    g.es('hi');
+}
+
+g.app.idleTimeManager.add_callback(print_hi);
+```
+
+For greater control, g.IdleTime is a thin wrapper for the Leo's IdleTime class. The IdleTime class executes a handler with a given delay at idle time. The handler takes a single argument, the IdleTime instance:
+
+```ts
+    def handler(it):
+        """IdleTime handler.  it is an IdleTime instance."""
+        delta_t = it.time-it.starting_time
+        g.trace(it.count,it.c.shortFileName(),'%2.4f' % (delta_t))
+        if it.count >= 5:
+            g.trace('done')
+            it.stop()
+
+    # Execute handler every 500 msec. at idle time.
+    it = g.IdleTime(handler,delay=500)
+    if it: it.start()
+```
+
+The code creates an instance of the IdleTime class that calls the given handler at idle time, and no more than once every 500 msec.  Here is the output::
+
+<ul>
+    handler 1 ekr.leo 0.5100\
+    handler 2 ekr.leo 1.0300\
+    handler 3 ekr.leo 1.5400\
+    handler 4 ekr.leo 2.0500\
+    handler 5 ekr.leo 2.5610\
+    handler done
+</ul>
+
+Timer instances are completely independent::
+
+```ts
+    def handler1(it):
+        delta_t = it.time-it.starting_time
+        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))
+        if it.count >= 5:
+            g.trace('done')
+            it.stop()
+
+    def handler2(it):
+        delta_t = it.time-it.starting_time
+        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))
+        if it.count >= 10:
+            g.trace('done')
+            it.stop()
+
+    it1 = g.IdleTime(handler1,delay=500)
+    it2 = g.IdleTime(handler2,delay=1000)
+    if it1 and it2:
+        it1.start()
+        it2.start()
+```
+
+Here is the output:
+
+<ul>
+    handler1  1 ekr.leo 0.5200\
+    handler2  1 ekr.leo 1.0100\
+    handler1  2 ekr.leo 1.0300\
+    handler1  3 ekr.leo 1.5400\
+    handler2  2 ekr.leo 2.0300\
+    handler1  4 ekr.leo 2.0600\
+    handler1  5 ekr.leo 2.5600\
+    handler1 done\
+    handler2  3 ekr.leo 3.0400\
+    handler2  4 ekr.leo 4.0600\
+    handler2  5 ekr.leo 5.0700\
+    handler2  6 ekr.leo 6.0800\
+    handler2  7 ekr.leo 7.1000\
+    handler2  8 ekr.leo 8.1100\
+    handler2  9 ekr.leo 9.1300\
+    handler2 10 ekr.leo 10.1400\
+    handler2 done
+</ul>
+
+**Recycling timers**
+
+The g.app.idle_timers list retrains references to all timers so they *won't* be recycled after being stopped.  This allows timers to be restarted safely.
+
+There is seldom a need to recycle a timer, but if you must, you can call its destroySelf method. This removes the reference to the timer in g.app.idle_timers. 
+
+> ⚠️ **WARNING**\
+>  Accessing a timer after calling its destroySelf method can lead to a hard crash.
+
+## Running code in separate processes
+
+It is dead easy for scripts, including @button scripts, plugins, etc., to drive any external processes, including compilers and interpreters, from within Leo.
+
+- The first section discusses three ways of calling subprocess.popen directly or via Leo helper functions.
+
+- The second section discusses the BackgroundProcessManager class.  Leo's pylint command uses this class to run pylint commands sequentially *without blocking Leo*. Running processes sequentially prevents unwanted interleaving of output.
+
+- The last two sections discuss using g.execute_shell_commands and g.execute_shell_commands_with_options.
+
+### Using subprocess.popen
+
+The first section discusses three *easy* ways to run code in a separate process by calling subprocess.popen either directly or via Leo helper functions.
+
+#### Call subprocess.popen directly
+
+Calling subprocess.popen is often simple and good. For example, the following executes the 'npm run dev' command in a given directory.  Leo continues, without waiting for the command to return:
+
+    os.chdir(base_dir)
+    subprocess.Popen('npm run dev', shell=True)
+
+The following hangs Leo until the command completes:
+
+    os.chdir(base_dir)
+    proc = subprocess.Popen(command, shell=True)
+    proc.communicate()
+
+**Note**: 'cd directory' does not seem to work when run using subprocess.popen on Windows 10.
+
+#### Call g.execute_shell_commands
+
+Use g.execute_shell_commands is a thin wrapper around subprocess.popen.  It calls subprocess.popen once for every command in a list.  This function waits for commands that start with '&'. Here it is:
+
+    def execute_shell_commands(commands, trace=False):
+        if g.isString(commands): commands = [commands]
+        for command in commands:
+            wait = not command.startswith('&')
+            if command.startswith('&'): command = command[1:].strip()
+            if trace: print('\n>%s%s\n' % ('' if wait else '&', command))
+            proc = subprocess.Popen(command, shell=True)
+            if wait: proc.communicate()
+
+For example:
+
+    os.chdir(base_dir)
+    g.execute_shell_commands(['&npm run dev',])
+
+#### Call g.execute_shell_commands_with_options
+
+g.execute_shell_commands_with_options is more flexible.  It allows scripts to get both the starting directory and the commands themselves from Leo's settings. Its signature is:
+
+```ts
+def execute_shell_commands_with_options(
+    base_dir = None,
+    c = None,
+    command_setting = None,
+    commands = None,
+    path_setting = None,
+    warning = None,
+):
+    '''
+    A helper for prototype commands or any other code that
+    runs programs in a separate process.
+
+    base_dir:           Base directory to use if no path_setting is given.
+    commands:           A list of commands, for g.execute_shell_commands.
+    commands_setting:   Name of @data setting for commands.
+    path_setting:       Name of @string setting for the base directory.
+    warning:            A warning to be printed before executing the commands.
+    '''
+```
+
+For example, put this in myLeoSettings.leo:
+
+- **@data** my-npm-commands\
+    yarn dev
+- **@string** my-npm-base = /npmtest
+
+And then run:
+
+```ts
+g.execute_shell_commands_with_options(
+    c = c,
+    command_setting = 'my-npm-commands',
+    path_setting= 'my-npm-base',
+)
+```
+
+### Using g.execute_shell_commands
+
+g.execute_shell_command tales a single argument, which may be either a string or a list of strings. Each string represents one command. g.execute_shell_command executes each command in order.  Commands starting with '&' are executed without waiting. Commands that do not start with '&' finish before running later commands. Examples:
+
+```ts
+// Run the qml app in a separate process:
+g.execute_shell_commands('qmlscene /test/qml_test.qml')
+
+// List the contents of a directory:
+g.execute_shell_commands([
+    'cd ~/test',
+    'ls -a',
+])
+
+// Run a python test in a separate process.
+g.execute_shell_commands('python /test/qt_test.py')
+```
+
+g.execute_shell_commands_with_options inits an environment and then calls g.execute_shell_commands.  See Leo's source code for details.
+
+## Working with directives and paths
+
+Scripts can easily determine what directives are in effect at a particular position in an outline. c.scanAllDirectives(p) returns a Python dictionary whose keys are directive names and whose values are the value in effect at position p. For example:
+
+```ts
+    const d = c.scanAllDirectives(p);
+    g.es(g.objToString(d));
+```
+
+In particular, d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file::
+
+```ts
+const myPath = d['path'];
+let name = p.anyAtFileNodeName();
+if (name){
+    name = g.os_path_finalize_join(myPath, name);
+    g.es(name);
+}
+```
