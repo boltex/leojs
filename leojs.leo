@@ -21328,7 +21328,8 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 </t>
 <t tx="felix.20240819221941.1">## 1.0.6
 
-Fixed goto-global-line command.
+- Fixed goto-global-line command.
+- Implemented c.recursiveImport. 
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
