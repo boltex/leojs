@@ -4,6 +4,8 @@
 
 - Fixed goto-global-line command.
 - Implemented c.recursiveImport. 
+- implemented g.execute_shell_commands_with_options.
+- Fixed IdleTime class handler call arguments.
 
 ## 1.0.5
 
