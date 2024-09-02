@@ -126,10 +126,6 @@
                       "vh": "Creating minimal outlines"
                     },
                     {
-                      "gnx": "felix.20240829001454.7",
-                      "vh": "Creating Qt Windows from Leo scripts"
-                    },
-                    {
                       "gnx": "felix.20240829001454.8",
                       "vh": "Cutting and pasting text"
                     },
@@ -147,11 +143,7 @@
                     },
                     {
                       "gnx": "felix.20240829001454.12",
-                      "vh": "Getting interactive input in scripts and commands"
-                    },
-                    {
-                      "gnx": "felix.20240829001454.13",
-                      "vh": "Inserting and deleting icons"
+                      "vh": "Getting interactive input"
                     },
                     {
                       "gnx": "felix.20240829001454.14",
@@ -160,10 +152,6 @@
                     {
                       "gnx": "felix.20240829001454.15",
                       "vh": "Making operations undoable"
-                    },
-                    {
-                      "gnx": "felix.20240829001454.16",
-                      "vh": "Modifying plugins with @script scripts"
                     },
                     {
                       "gnx": "felix.20240829001454.17",
@@ -864,23 +852,20 @@
     "felix.20240825212400.1": "@language md\n@tabwidth -4\n",
     "felix.20240828195006.93": "---\nsidebar_position: 1\n---\n\n",
     "felix.20240829001454.2": "\nThis chapter covers miscellaneous topics related to Leo scripts.\n\nYou might call this a FAQ for scripts...\n",
-    "felix.20240829001454.3": "The .leo files in Leo's distribution contain many @button nodes (many disabled), that do repetitive chores. Here is one, @button promote-child-bodies, from LeoDocs.leo::\n\n    '''Copy the body text of all children to the parent's body text.'''\n\n    # Great for creating what's new nodes.\n    result = [p.b]\n    b = c.undoer.beforeChangeNodeContents(p)\n    for child in p.children():\n        if child.b:\n            result.append('\\n- %s\\n\\n%s\\n' % (child.h,child.b))\n        else:\n            result.append('\\n- %s\\n\\n' % (child.h))\n    p.b = ''.join(result)\n    c.undoer.afterChangeNodeContents(p,'promote-child-bodies',b)\n\nThis creates a fully undoable promote-child-bodies command.",
-    "felix.20240829001454.4": "efc.compareTrees does most of the work of comparing two similar outlines.\nFor example, here is \"@button compare vr-controller\" in leoPyRef.leo::\n\n    p1 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr)')\n    p2 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr2)')\n    assert p1 and p2\n    tag = 'compare vr1 & vr2'\n    c.editFileCommands.compareTrees(p1, p2, tag)\n\nThis script will compare the trees whose roots are p1 and p2 and show the results like \"Recovered nodes\".  That is, the script creates a node called \"compare vr1 & vr2\".  This top-level node contains one child node for every node that is different.  Each child node contains a diff of the node.  The grand children are one or two clones of the changed or inserted node.\n",
-    "felix.20240829001454.5": "Title case means that all words start with capital letters.  The\nfollowing script converts the selected body text to title case.  If\nnothing has been selected, the entire current node is converted. The\nconversion is undoable::\n\n    \"\"\"Undoably convert selection or body to title case.\"\"\"\n    w = c.frame.body.wrapper\n    p = c.p\n    s = p.b\n    u = c.undoer\n\n    start, end = w.getSelectionRange()\n    use_entire = start == end  # no selection, convert entire body\n\n    undoType = 'title-case-body-selection'\n    undoData = u.beforeChangeNodeContents(p)\n\n    if use_entire:\n        p.b = s.title()\n    else:\n        sel = s[start:end]\n        head, tail = s[:start], s[end:]\n        p.b = head + sel.title() + tail\n\n    c.setChanged()\n    p.setDirty()\n    u.afterChangeNodeContents(p, undoType, undoData)\n    c.redraw()\n\n[Contributed by T. B. Passin]",
-    "felix.20240829001454.6": "The following script will create a minimal Leo outline::\n\n    if 1:\n        # Create a visible frame.\n        c2 = g.app.newCommander(fileName=None)\n    else:\n        # Create an invisible frame.\n        c2 = g.app.newCommander(fileName=None,gui=g.app.nullGui)\n\n    c2.frame.createFirstTreeNode()\n    c2.redraw()\n\n    # Test that the script works.\n    for p in c2.all_positions():\n        g.es(p.h)\n",
-    "felix.20240829001454.7": "The following puts up a test window when run as a Leo script::\n\n    from PyQt5 import QtGui\n    w = QtGui.QWidget()\n    w.resize(250, 150)\n    w.move(300, 300)\n    w.setWindowTitle('Simple test')\n    w.show()\n    c.my_test = w # <-- Keep a reference to the window!\n\n**Important**: Something like the last line is essential. Without it, the window would immediately disappear after being created.  The assignment::\n\n    c.my_test = w\n\ncreates a permanent reference to the window so the window won't be garbage collected after the Leo script exits.\n\n",
-    "felix.20240829001454.8": "The following shows how to cut and paste text to the clipboard::\n\n    g.app.gui.replaceClipboardWith('hi')\n    print(g.app.gui.getTextFromClipboard())\n",
-    "felix.20240829001454.9": "Scripts can invoke various dialogs using the following methods of the g.app.gui object.\n\nHere is a partial list. Use typing completion to get the full list::\n\n    g.app.gui.runAskOkCancelNumberDialog(c,title,message)\n    g.app.gui.runAskOkCancelStringDialog(c,title,message)\n    g.app.gui.runAskOkDialog(c,title,message=None,text='Ok')\n    g.app.gui.runAskYesNoCancelDialog(c,title,message=None,\n        yesMessage='Yes',noMessage='No',defaultButton='Yes')\n    g.app.gui.runAskYesNoDialog(c,title,message=None)\n\nThe values returned are in ('ok','yes','no','cancel'), as indicated by the method names. Some dialogs also return strings or numbers, again as indicated by their names.\n\nScripts can run File Open and Save dialogs with these methods::\n\n    g.app.gui.runOpenFileDialog(title,filetypes,defaultextension,multiple=False)\n    g.app.gui.runSaveFileDialog(initialfile,title,filetypes,defaultextension)\n\nFor details about how to use these file dialogs, look for examples in Leo's own source code. The runOpenFileDialog returns a list of file names.\n",
-    "felix.20240829001454.10": "Each commander sets ivars corresponding to settings.\n\nScripts can get the following ivars of the Commands class::\n\n    ivars = (\n        'output_doc_flag',\n        'page_width',\n        'page_width',\n        'tab_width',\n        'target_language',\n        'use_header_flag',\n    )\n    print(\"Prefs ivars...\\n\",color=\"purple\")\n    for ivar in ivars:\n        print(getattr(c,ivar))\n\nIf your script sets c.tab_width it should call f.setTabWidth to redraw the screen::\n\n    c.tab_width = -4    # Change this and see what happens.\n    c.frame.setTabWidth(c.tab_width)\n",
-    "felix.20240829001454.11": "Settings may be different for each commander.\n\nThe c.config class has the following getters.\n\n- c.config.getBool(settingName,default=None)\n- c.config.getColor(settingName)\n- c.config.getDirectory(settingName)\n- c.config.getFloat(settingName)\n- c.config.getInt(settingName)\n- c.config.getLanguage(settingName)\n- c.config.getRatio(settingName)\n- c.config.getShortcut(settingName)\n- c.config.getString(settingName)\n\nThese methods return None if no setting exists.\n\nThe getBool 'default' argument to getBool specifies the value to be returned if the setting does not exist.\n",
-    "felix.20240829001454.12": "k.get1Arg handles the next character the user types when accumulating a user argument from the minibuffer.  k.get1Arg handles details such as tab completion, backspacing, Ctrl-G etc.\n\nCommands should use k.get1Arg to get the first minibuffer argument and k.getNextArg to get all other arguments.\n\nk.get1Arg is a state machine. It has to be because it's almost always waiting for the user to type the next character. The handle keyword arg specifies the next state in the machine.\n\nThe following examples will work in any class having a 'c' ivar bound to a commander.\n\nExample 1: get one argument from the user::\n\n    @cmd('my-command')\n    def myCommand(self, event):\n        \"\"\"State 0\"\"\"\n        k = self.c.k\n        k.setLabelBlue('prompt: ')\n        k.get1Arg(event, handler=self.myCommand1)\n\n    def myCommand1(self, event):\n        \"\"\"State 1\"\"\"\n        k = self.c.k\n        # ----> k.arg contains the argument.\n        # Finish the command.\n        ...\n        # Reset the minibuffer.\n        k.clearState()\n        k.resetLabel()\n        k.showStateAndMode()\n\nExample 2: get two arguments from the user::\n\n    @cmd('my-command')\n    def myCommand(self, event):\n        \"\"\"State 0\"\"\"\n        k = self.c.k\n        k.setLabelBlue('first prompt: ')\n        k.get1Arg(event, handler=self.myCommand1)\n\n    def myCommand1(self, event):\n        \"\"\"State 1\"\"\"\n        k = self.c.k\n        self.arg1 = k.arg\n        k.setLabelBlue('second prompt: ')\n        k.getNextArg(handler=self.myCommand2)\n\n    def myCommand2(self, event):\n        \"\"\"State 2\"\"\"\n        k = self.c.k\n        # -----> k.arg contains second argument.\n        # Finish the command, using self.arg1 and k.arg.\n        ...\n        # Reset the minibuffer.\n        k.clearState()\n        k.resetLabel()\n        k.showStateAndMode()\n\n**Summary**\n\n- The handler keyword argument to k.get1Arg and k.getNextArg specifies the next state in the state machine.\n\n- k.get1Arg contains many optional keyword arguments. See its docstring for details.\n",
-    "felix.20240829001454.13": "You can add an icon to the presently selected node with c.editCommands.insertIconFromFile(path). path is an absolute path or a path relative to the leo/Icons folder. A relative path is recommended if you plan to use the icons on machines with different directory structures.\n\nFor example::\n\n    path = 'rt_arrow_disabled.gif' \n    c.editCommands.insertIconFromFile(path) \n\nScripts can delete icons from the presently selected node using the following methods::\n\n    c.editCommands.deleteFirstIcon() \n    c.editCommands.deleteLastIcon() \n    c.editCommands.deleteNodeIcons() \n",
-    "felix.20240829001454.14": "You can invoke minibuffer commands by name.  For example::\n\n    c.executeMinibufferCommand('open-outline')\n\nc.keyHandler.funcReturn contains the value returned from the command. In many cases, as above, this value is simply 'break'.\n",
-    "felix.20240829001454.15": "Plugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed. **Note**: u is shorthand for c.undoer. Most u.beforeX methods return undoData that the client code merely passes to the corresponding u.afterX method. This data contains the 'before' snapshot. The u.afterX methods then create a bead containing both the 'before' and 'after' snapshots.\n\nu.beforeChangeGroup and u.afterChangeGroup allow multiple calls to u.beforeX and u.afterX methods to be treated as a single undoable entry. See the code for the Replace All, Sort, Promote and Demote commands for examples. The u.beforeChangeGroup and u.afterChangeGroup methods substantially reduce the number of u.beforeX and afterX methods needed.\n\nPlugins and scripts may define their own u.beforeX and afterX methods. Indeed, u.afterX merely needs to set the bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo the operation. See the code for the various u.beforeX and afterX methods for guidance.\n\nSee the section << How Leo implements unlimited undo >> in leoUndo.py for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.\n",
-    "felix.20240829001454.16": "The mod_scripting plugin runs @scripts before plugin initiation is complete. Thus, such scripts can not directly modify plugins. Instead, a script can create an event handler for the after-create-leo-frame that will modify the plugin.\n\nFor example, the following modifies the cleo.py plugin after Leo has completed loading it::\n\n    def prikey(self, v):\n        try:\n            pa = int(self.getat(v, 'priority'))\n        except ValueError:\n            pa = -1\n\n        if pa == 24:\n            pa = -1\n        if pa == 10:\n            pa = -2\n\n        return pa\n\n    import types\n    from leo.core import leoPlugins\n\n    def on_create(tag, keywords):\n        c.cleo.prikey = types.MethodType(prikey, c.cleo, c.cleo.__class__)\n\n    leoPlugins.registerHandler(\"after-create-leo-frame\",on_create)\n\nAttempting to modify c.cleo.prikey immediately in the @script gives an AttributeError as c has no .cleo when the @script is executed. Deferring it by using registerHandler() avoids the problem.\n",
-    "felix.20240829001454.17": "**Important**: The changes you make below **will not persist** unless your script calls c.frame.body.onBodyChanged after making those changes. This method has the following signature::\n\n    def onBodyChanged (self,undoType,oldSel=None,oldText=None,oldYview=None):\n\nLet::\n\n    w = c.frame.body.wrapper # Leo's body pane.\n\nScripts can get or change the context of the body as follows::\n\n    w.appendText(s)                     # Append s to end of body text.\n    w.delete(i,j=None)                  # Delete characters from i to j.\n    w.deleteTextSelection()             # Delete the selected text, if any.\n    s = w.get(i,j=None)                 # Return the text from i to j.\n    s = w.getAllText                    # Return the entire body text.\n    i = w.getInsertPoint()              # Return the location of the cursor.\n    s = w.getSelectedText()             # Return the selected text, if any.\n    i,j = w.getSelectionRange (sort=True) # Return the range of selected text.\n    w.setAllText(s)                     # Set the entire body text to s.\n    w.setSelectionRange(i,j,insert=None) # Select the text.\n\n**Notes**:\n\n- These are only the most commonly-used methods. For more information, consult Leo's source code.\n\n- i and j are zero-based indices into the the text. When j is not specified, it defaults to i. When the sort parameter is in effect, getSelectionRange ensures i <= j.\n\n- color is a Tk color name, even when using the Gt gui.\n",
-    "felix.20240829001454.18": "Positions become invalid whenever the outline changes. \n\nThis script finds a position p2 having the same vnode as an invalid position p::\n\n    if not c.positionExists(p):\n        for p2 in c.all_positions():\n            if p2.v == p.v: # found\n                c.selectPosition(p2)\n        else:\n            print('position no longer exists')\n",
-    "felix.20240829001454.19": "The following script imports files from a given directory and all subdirectories::\n\n    c.recursiveImport(\n        dir_ = 'path to file or directory',\n        kind = '@clean',        # or '@file' or '@auto'\n        one_file = False,       # True: import only one file.\n        safe_at_file = False,   # True: generate @@clean nodes.\n        theTypes = None,        # Same as ['.py']\n    )\n",
+    "felix.20240829001454.3": "\nHere is an example, @button promote-child-bodies:\n\n```ts\n/**\n * Copy the body text of all children to the parent's body text.\n */\n\n// Great for creating what's new nodes.\nconst result: string[] = [p.b];\nconst b = c.undoer.beforeChangeNodeContents(p);\n\nfor (const child of p.children()) {\n    if (child.b) {\n        result.push(`\\n- ${child.h}\\n\\n${child.b}\\n`);\n    } else {\n        result.push(`\\n- ${child.h}\\n\\n`);\n    }\n}\n\np.b = result.join('');\nc.undoer.afterChangeNodeContents(p, 'promote-child-bodies', b);\n```\n\nThis creates a fully undoable promote-child-bodies command.\n",
+    "felix.20240829001454.4": "\nefc.compareTrees does most of the work of comparing two similar outlines.\nFor example, here is \"@button compare vr-controller\" in leoPyRef.leo:\n\n```ts\nconst p1 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr)');\nconst p2 = g.findNodeAnywhere(c, 'class ViewRenderedController (QWidget) (vr2)');\ng.assert(p1.v && p2.v);\nconst tag = 'compare vr1 & vr2';\nc.editFileCommands.compareTrees(p1, p2, tag);\n```\n\nThis script will compare the trees whose roots are p1 and p2 and show the results like \"Recovered nodes\".  That is, the script creates a node called \"compare vr1 & vr2\".  This top-level node contains one child node for every node that is different.  Each child node contains a diff of the node.  The grand children are one or two clones of the changed or inserted node.\n",
+    "felix.20240829001454.5": "\nTitle case means that all words start with capital letters.  The\nfollowing script converts the selected body text to title case.  If\nnothing has been selected, the entire current node is converted. The\nconversion is undoable:\n\n```ts\nconst w = c.frame.body.wrapper;\nconst p = c.p;\nlet s = p.b;\nconst u = c.undoer;\n\nconst [start, end] = w.getSelectionRange();\nconst use_entire = start === end; // no selection, convert entire body\n\nconst undoType = 'title-case-body-selection';\nconst undoData = u.beforeChangeNodeContents(p);\n\nfunction toTitleCase(str: string): string {\n    return str.replace(/\\w\\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());\n}\n\nif (use_entire) {\n    p.b = toTitleCase(s);\n} else {\n    const sel = s.slice(start, end);\n    const head = s.slice(0, start);\n    const tail = s.slice(end);\n    p.b = head + toTitleCase(sel) + tail;\n}\n\nc.setChanged();\np.setDirty();\nu.afterChangeNodeContents(p, undoType, undoData);\nc.redraw();\n```\n\n<ul>\n    _Contributed by T. B. Passin_\n</ul>\n",
+    "felix.20240829001454.6": "The following script will create a minimal Leo outline:\n\n```ts\nlet c2: Commands;\n\nif (true) {\n    // Create a visible frame.\n    c2 = g.app.newCommander('');\n} else {\n    // Create an invisible frame.\n    c2 = g.app.newCommander('', g.app.nullGui);\n}\n\nc2.frame.createFirstTreeNode();\nc2.redraw();\n\n// Test that the script works.\nfor (const p of c2.all_positions()) {\n    g.es(p.h);\n}\n```\n",
+    "felix.20240829001454.8": "\nThe following shows how to cut and paste text to the clipboard:\n\n```ts\nawait g.app.gui.replaceClipboardWith('hi');\ng.es(g.app.gui.getTextFromClipboard());\n```\n",
+    "felix.20240829001454.9": "\nScripts can invoke various dialogs using the following methods of the g.app.gui object.\n\n```ts\n//  VSCode Wrapper for showInputBox, or, for showQuickPick if tabList is given:\ng.app.get1Arg(\n    options?: vscode.InputBoxOptions | vscode.QuickPickOptions,\n    token?: vscode.CancellationToken,\n    tabList?: string[]\n)\n\n// Utility dialogs:\ng.app.gui.runAskOkDialog(\n    c: Commands,\n    title: string,\n    message: string,\n    text = \"Ok\"\n)\ng.app.gui.runAskYesNoCancelDialog(\n    c: Commands,\n    title: string,\n    message: string,\n    yesMessage = 'Yes,\n    noMessage = 'No',\n    yesToAllMessage = \"\",\n    defaultButton = 'Yes,\n    cancelMessage = \"\"\n)\ng.app.gui.runAskYesNoDialog(        \n    c: Commands,\n    title: string,\n    message: string,\n    yes_all = false,\n    no_all = false\n)\n```\n\nThe values returned are in ('ok','yes','no','cancel'), as indicated by the method names. Some dialogs also return strings or numbers, again as indicated by their names.\n\nScripts can run File Open and Save dialogs with these methods:\n\n```ts\n// Single select dialog\ng.app.gui.runOpenFileDialog(\n    c: Commands,\n    title: string,\n    filetypes: [string, string][],\n)\n// Multiple select dialog\ng.app.gui.runOpenFilesDialog(\n    c: Commands,\n    title: string,\n    filetypes: [string, string][],\n)\n\n// Save as... dialog\ng.app.gui.runSaveFileDialog(\n    c: Commands,\n    title: string,\n    filetypes: [string, string][],   \n)\n```\n\nFor details about how to use these file dialogs, look for examples in Leo's own source code.\n",
+    "felix.20240829001454.10": "\nEach commander sets ivars corresponding to settings.\n\nScripts can get the following ivars of the Commands class:\n\n```ts\nconst ivars = [\n    'output_doc_flag',\n    'page_width',\n    'tab_width',\n    'target_language',\n    'use_header_flag',\n];\n\ng.es(\"Prefs ivars...\\n\");\n\nfor (const ivar of ivars) {\n    g.es((c as any)[ivar]);\n}\n```\n",
+    "felix.20240829001454.11": "\nSettings may be different for each commander.\n\nThe c.config class has the following getters:\n\n- c.config.getBool(settingName,default=None)\n- c.config.getColor(settingName)\n- c.config.getDirectory(settingName)\n- c.config.getFloat(settingName)\n- c.config.getInt(settingName)\n- c.config.getLanguage(settingName)\n- c.config.getRatio(settingName)\n- c.config.getString(settingName)\n\nThese methods return undefined if no setting exists.\n\nThe getBool 'default' argument to getBool specifies the value to be returned if the setting does not exist.\n",
+    "felix.20240829001454.12": "\nThe **g.app.gui.get1Arg** method is a Wrapper for VSCode's showInputBox, or, for showQuickPick if tabList is given.\n\nExample 1: get one argument from the user:\n\n```ts\n@cmd('my-command', 'My Command Description')\npublic async myCommand(): Promise<unknown> {\n\n    const arg = await g.app.gui.get1Arg({\n        title: 'User Name',\n        prompt: 'Please enter your name',\n        placeHolder: 'John Doe',\n    });\n\n    // Finish the command.\n    // ...\n\n}\n```\n\nExample 2: get two arguments from the user:\n\n```ts\n@cmd('my-command', 'My Command Description')\npublic async myCommand(): Promise<unknown> {\n    \n    const arg1 = await g.app.gui.get1Arg({\n        title: 'User Name',\n        prompt: 'Please enter your name',\n        placeHolder: 'John Doe',\n    });\n\n    const arg2 = await g.app.gui.get1Arg({\n        title: 'User Age',\n        prompt: 'Please enter your age',\n        placeHolder: '21',\n    });\n\n    // Finish the command.\n    // ...\n\n}\n```\n",
+    "felix.20240829001454.14": "\nYou can invoke minibuffer commands by name.  For example:\n\n```js\nresult = c.doCommandByName('open-outline');\n\n// or\n\nresult = c.executeMinibufferCommand('open-outline');\n```\n",
+    "felix.20240829001454.15": "\nPlugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed. \n\n> 📌 **NOTE**\\\n> u is shorthand for c.undoer. Most u.beforeX methods return undoData that the client code merely passes to the corresponding u.afterX method. This data contains the 'before' snapshot. The u.afterX methods then create a bead containing both the 'before' and 'after' snapshots.\n\nu.beforeChangeGroup and u.afterChangeGroup allow multiple calls to u.beforeX and u.afterX methods to be treated as a single undoable entry. See the code for the Replace All, Sort, Promote and Demote commands for examples. The u.beforeChangeGroup and u.afterChangeGroup methods substantially reduce the number of u.beforeX and afterX methods needed.\n\nPlugins and scripts may define their own u.beforeX and afterX methods. Indeed, u.afterX merely needs to set the bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo the operation. See the code for the various u.beforeX and afterX methods for guidance.\n\nSee the section << How Leo implements unlimited undo >> in leoUndo.ts for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.\n",
+    "felix.20240829001454.17": "\nThese are only the most commonly-used methods. For more information, consult Leo's source code.\n\n```js\nconst w = c.frame.body.wrapper; // Leo's body pane.\n\n//Scripts can get or change the context of the body as follows:\n\nw.appendText(s)                     // Append s to end of body text.\nw.delete(i,j=None)                  // Delete characters from i to j.\nw.deleteTextSelection()             // Delete the selected text, if any.\ns = w.get(i,j=None)                 // Return the text from i to j.\ns = w.getAllText                    // Return the entire body text.\ni = w.getInsertPoint()              // Return the location of the cursor.\ns = w.getSelectedText()             // Return the selected text, if any.\ni,j = w.getSelectionRange(sort=True)// Return the range of selected text.\nw.setAllText(s)                     // Set the entire body text to s.\nw.setSelectionRange(i,j,insert=None) // Select the text.\n```\n\n> 📌 **NOTE**\\\n> i and j are zero-based indices into the the text. When j is not specified, it defaults to i. When the sort parameter is in effect, getSelectionRange ensures i <= j.\n",
+    "felix.20240829001454.18": "\nPositions become invalid whenever the outline changes. \n\nThis script finds a position p2 having the same vnode as an invalid position p:\n\n```ts\nif (!c.positionExists(p)) {\n    let positionFound = false;\n    for (const p2 of c.all_positions()) {\n        if (p2.v === p.v) { // found\n            c.selectPosition(p2);\n            positionFound = true;\n            break;\n        }\n    }\n    if (!positionFound) {\n        g.es('position no longer exists');\n    }\n}\n```\n",
+    "felix.20240829001454.19": "\nThe following script imports files from a given directory and all subdirectories:\n\n    c.recursiveImport(\n        dir_ = 'path to file or directory',\n        kind = '@clean',        # or '@file' or '@auto'\n        one_file = False,       # True: import only one file.\n        safe_at_file = False,   # True: generate @@clean nodes.\n        theTypes = None,        # Same as ['.py']\n    )\n",
     "felix.20240829001454.20": "@pagewidth 75\n\nThe following script won't work as intended:\n\n    from PyQt5 import QtGui\n    w = QtGui.QWidget()\n    w.resize(250, 150)\n    w.move(300, 300)\n    w.setWindowTitle('Simple test')\n    w.show()\n\nWhen the script exits the sole reference to the window, w, ceases to exist, so the window is destroyed (garbage collected). To keep the window open, add the following code as the last line to keep the reference alive::\n\n    g.app.scriptsDict['my-script_w'] = w\n\nNote that this reference will persist until the next time you run the execute-script. If you want something even more permanent, you can do something like::\n\n    g.app.my_script_w = w\n",
     "felix.20240829001454.21": "Scripts and plugins can call g.app.idleTimeManager.add_callback(callback) to cause\nthe callback to be called at idle time forever. This should suffice for most purposes::\n\n    def print_hi():\n        print('hi')\n\n    g.app.idleTimeManager.add_callback(print_hi)\n\nFor greater control, g.IdleTime is a thin wrapper for the Leo's IdleTime class. The IdleTime class executes a handler with a given delay at idle time. The handler takes a single argument, the IdleTime instance::\n\n    def handler(it):\n        \"\"\"IdleTime handler.  it is an IdleTime instance.\"\"\"\n        delta_t = it.time-it.starting_time\n        g.trace(it.count,it.c.shortFileName(),'%2.4f' % (delta_t))\n        if it.count >= 5:\n            g.trace('done')\n            it.stop()\n\n    # Execute handler every 500 msec. at idle time.\n    it = g.IdleTime(handler,delay=500)\n    if it: it.start()\n\nThe code creates an instance of the IdleTime class that calls the given handler at idle time, and no more than once every 500 msec.  Here is the output::\n\n    handler 1 ekr.leo 0.5100\n    handler 2 ekr.leo 1.0300\n    handler 3 ekr.leo 1.5400\n    handler 4 ekr.leo 2.0500\n    handler 5 ekr.leo 2.5610\n    handler done\n\nTimer instances are completely independent::\n\n    def handler1(it):\n        delta_t = it.time-it.starting_time\n        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))\n        if it.count >= 5:\n            g.trace('done')\n            it.stop()\n\n    def handler2(it):\n        delta_t = it.time-it.starting_time\n        g.trace('%2s %s %2.4f' % (it.count,it.c.shortFileName(),delta_t))\n        if it.count >= 10:\n            g.trace('done')\n            it.stop()\n\n    it1 = g.IdleTime(handler1,delay=500)\n    it2 = g.IdleTime(handler2,delay=1000)\n    if it1 and it2:\n        it1.start()\n        it2.start()\n\nHere is the output::\n\n    handler1  1 ekr.leo 0.5200\n    handler2  1 ekr.leo 1.0100\n    handler1  2 ekr.leo 1.0300\n    handler1  3 ekr.leo 1.5400\n    handler2  2 ekr.leo 2.0300\n    handler1  4 ekr.leo 2.0600\n    handler1  5 ekr.leo 2.5600\n    handler1 done\n    handler2  3 ekr.leo 3.0400\n    handler2  4 ekr.leo 4.0600\n    handler2  5 ekr.leo 5.0700\n    handler2  6 ekr.leo 6.0800\n    handler2  7 ekr.leo 7.1000\n    handler2  8 ekr.leo 8.1100\n    handler2  9 ekr.leo 9.1300\n    handler2 10 ekr.leo 10.1400\n    handler2 done\n\n**Recycling timers**\n\nThe g.app.idle_timers list retrains references to all timers so they *won't* be recycled after being stopped.  This allows timers to be restarted safely.\n\nThere is seldom a need to recycle a timer, but if you must, you can call its destroySelf method. This removes the reference to the timer in g.app.idle_timers. **Warning**: Accessing a timer after calling its destroySelf method can lead to a hard crash.\n",
     "felix.20240829001454.22": "It is dead easy for scripts, including @button scripts, plugins, etc., to drive any external processes, including compilers and interpreters, from within Leo.\n\n- The first section discusses three ways of calling subprocess.popen directly or via Leo helper functions.\n\n- The second section discusses the BackgroundProcessManager class.  Leo's pylint command uses this class to run pylint commands sequentially *without blocking Leo*. Running processes sequentially prevents unwanted interleaving of output.\n\n- The last two sections discuss using g.execute_shell_commands and g.execute_shell_commands_with_options. ",
@@ -1013,119 +998,5 @@
     "felix.20240829001804.118": "By Rich Ries. I often rework C code that's already been \"Leo-ized\"--the first pass was quick and dirty to get it going. When I do subsequent passes, I wind up with subnodes that are out of order with the sequence found in the main node_. It's not a big deal, but I like 'em ordered. With just one editor pane, clicking on the node_ to move would switch focus to that node_. I'd then need to re-focus on the main node_. A minor nuisance, but it does slow you down.\n\nMy solution is to open a second editor with its focus on the main node_. Switch to the other editor, and, referring to the first editor pane, move the nodes as you like. The second editor's pane will change focus to the node_ you're moving, but the first editor will stay focused on the main node_. It's a lot easier to do than to describe!\n",
     "felix.20240829001804.119": "Most people will find using @clean trees to be most useful. Use @auto-rst, @auto-vimoutline or @auto-org when using rST, vimoutline or Emacs org mode files.\n",
     "felix.20240829001804.120": "GTD (Getting Things Done) http://www.amazon.com/Getting-Things-Done-Stress-Free-Productivity/dp/0142000280 is, by far, the best productivity book I have ever read. Many aspects of Leo are idea for putting GTD into practice.\n\nHere is a surprisingly useful workflow tip related to GTD.\n\nIdeas often \"intrude\" when I am busy with something else. When that happens, I create a top-level node of the form::\n\n    ** description of idea\n\nNow I can continue what I was doing! This is such a simple idea, but it's really really important: it means I never have to put off getting my ideas into Leo. The \"**\" draws my attention to the new to-do item. Later, when I am not fully immersed in the previous task, I can put the \"**\" node somewhere else.\n\nIt's super important to deal with new ideas *instantly* but *without* greatly interrupting the task at hand. Creating \"**\" nodes does that. This new workflow has been a big improvement to my GTD practice.\n"
-  },
-  "uas": {
-    "felix.20240829001454.10": {
-      "rst_http_attribute": [
-        "<a class=\"target\" id=\"http-node-marker-29\" name=\"http-node-marker-29\">",
-        "</a>",
-        [
-          "<div class=\"section\" id=\"invoking-commands-from-scripts\">",
-          "</div>",
-          [
-            "<div class=\"document\" id=\"chapter-7-scripting-leo-with-python\">",
-            "</div>",
-            [
-              "<body>",
-              "</body>",
-              [
-                "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
-                "</html>",
-                null
-              ]
-            ]
-          ]
-        ],
-        "</div>\n",
-        "<div class=\"section\" id=\"getting-and-setting-preferences\">\n",
-        "<h1><a class=\"toc-backref\" href=\"#id15\" name=\"getting-and-setting-preferences\">Getting and setting preferences</a></h1>\n"
-      ]
-    },
-    "felix.20240829001454.14": {
-      "rst_http_attribute": [
-        "<a class=\"target\" id=\"http-node-marker-27\" name=\"http-node-marker-27\">",
-        "</a>",
-        [
-          "<div class=\"section\" id=\"updating-the-screen\">",
-          "</div>",
-          [
-            "<div class=\"document\" id=\"chapter-7-scripting-leo-with-python\">",
-            "</div>",
-            [
-              "<body>",
-              "</body>",
-              [
-                "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
-                "</html>",
-                null
-              ]
-            ]
-          ]
-        ],
-        "</div>\n",
-        "<div class=\"section\" id=\"invoking-commands-from-scripts\">\n",
-        "<h1><a class=\"toc-backref\" href=\"#id14\" name=\"invoking-commands-from-scripts\">Invoking commands from scripts</a></h1>\n"
-      ]
-    },
-    "felix.20240829001454.29": {
-      "rst_http_attribute": [
-        "<a class=\"target\" id=\"http-node-marker-37\" name=\"http-node-marker-37\">",
-        "</a>",
-        [
-          "<div class=\"section\" id=\"g-refindall\">",
-          "</div>",
-          [
-            "<div class=\"section\" id=\"functions-for-finding-and-changing-text-from-scripts\">",
-            "</div>",
-            [
-              "<div class=\"document\" id=\"chapter-7-scripting-leo-with-python\">",
-              "</div>",
-              [
-                "<body>",
-                "</body>",
-                [
-                  "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">",
-                  "</html>",
-                  null
-                ]
-              ]
-            ]
-          ]
-        ],
-        "</div>\n",
-        "</div>\n",
-        "<div class=\"section\" id=\"running-leo-in-batch-mode\">\n",
-        "<h1><a class=\"toc-backref\" href=\"#id19\" name=\"running-leo-in-batch-mode\">Running Leo in batch mode</a></h1>\n"
-      ]
-    },
-    "felix.20240829001657.1": {
-      "str_atime": "1376414163.0"
-    },
-    "felix.20240829001657.3": {
-      "str_atime": "1376412038.0"
-    },
-    "felix.20240829001657.4": {
-      "str_atime": "1376414164.0",
-      "str_ctime": "1376412039.0",
-      "str_mtime": "1376412039.0"
-    },
-    "felix.20240829001657.8": {
-      "str_atime": "1376411987.0"
-    },
-    "felix.20240829001804.20": {
-      "str_atime": "1376412984.0"
-    },
-    "felix.20240829001804.30": {
-      "str_atime": "1376412842.0"
-    },
-    "felix.20240829001804.32": {
-      "str_atime": "1376412828.0"
-    },
-    "felix.20240829001804.88": {
-      "str_atime": "1376412985.0"
-    },
-    "felix.20240829001804.89": {
-      "str_atime": "1376412852.0"
-    }
   }
 }
