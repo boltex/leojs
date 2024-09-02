@@ -3981,7 +3981,7 @@ export class LeoUI extends NullGui {
                 }),
                 quickPick.onDidAccept(accepted => {
                     if (/^\d+$/.test(quickPick.value)) {
-                        // * Was an integer
+                        // * Was an integer EASTER EGG
                         this.setupRefresh(Focus.Body,
                             {
                                 tree: true,
@@ -6417,8 +6417,7 @@ export class LeoUI extends NullGui {
         title: string,
         message: string,
         yes_all = false,
-        no_all = false,
-
+        no_all = false
     ): Thenable<string> {
         const w_choices = [
             Constants.USER_MESSAGES.YES,
