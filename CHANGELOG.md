@@ -2,7 +2,7 @@
 
 ## 1.0.6
 
-...
+Fixed goto-global-line command.
 
 ## 1.0.5
 
