@@ -257,8 +257,6 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 // The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
 
-
-
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript
 export let unitTesting: boolean = false; // A synonym for app.unitTesting.
@@ -6011,11 +6009,11 @@ export async function execute_shell_commands(commands: string | string[], p_trac
  * warning:            A warning to be printed before executing the commands.
  */
 export async function execute_shell_commands_with_options(
-    base_dir: string,
-    c: Commands,
-    command_setting: string,
-    commands: string[],
-    path_setting: string,
+    base_dir?: string,
+    c?: Commands,
+    command_setting?: string,
+    commands?: string[],
+    path_setting?: string,
     trace?: boolean,
     warning?: string,
 ): Promise<void> {
@@ -6026,7 +6024,7 @@ export async function execute_shell_commands_with_options(
     }
     commands = computeCommands(c, commands, command_setting);
 
-    if (!commands) {
+    if (!commands || !commands.length) {
         return;
     }
     if (warning) {
@@ -6040,7 +6038,7 @@ export async function execute_shell_commands_with_options(
  * Compute a base_directory.
  * If given, @string path_setting takes precedence.
  */
-export async function computeBaseDir(c: Commands | null, base_dir: string, path_setting: string): Promise<string | undefined> {
+export async function computeBaseDir(c?: Commands, base_dir?: string, path_setting?: string): Promise<string | undefined> {
     // Prefer the path setting to the base_dir argument.
     if (path_setting) {
         if (!c) {
@@ -6079,8 +6077,8 @@ export async function computeBaseDir(c: Commands | null, base_dir: string, path_
  * Get the list of commands.
  * If given, @data command_setting takes precedence.
  */
-export function computeCommands(c: Commands | undefined, commands: string[], command_setting: string): string[] {
-    if (commands.length === 0 && !command_setting) {
+export function computeCommands(c?: Commands, commands?: string[], command_setting?: string): string[] | undefined {
+    if ((!commands || commands.length === 0) && !command_setting) {
         es_print('Please use commands, command_setting or both');
         return [];
     }
