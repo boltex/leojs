@@ -158,7 +158,9 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © 1997-${new Date().getFullYear()} Edward K. Ream and Félix Malboeuf.`,
+        copyright: `Copyright © 1997-${new Date().getFullYear()} <a class="footer__link-item" href="https://github.com/edreamleo/" target="_blank" title="Edward K. Ream on Github">Edward K. Ream</a>
+  and <a class="footer__link-item" href="https://github.com/boltex/" target="_blank" title="Félix Malboeuf on Github">Félix Malboeuf</a>
+.`,
       },
       prism: {
         theme: prismThemes.github,

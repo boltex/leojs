@@ -89,7 +89,7 @@ c.redraw();
 ```
 
 <ul>
-    _Contributed by T. B. Passin_
+    _Contributed by [T. B. Passin](https://github.com/tbpassin)_
 </ul>
 
 ## Creating minimal outlines
@@ -353,13 +353,13 @@ if (!c.positionExists(p)) {
 The following script imports files from a given directory and all subdirectories:
 
 ```ts
-    c.recursiveImport(
-        'path to file or directory', // dir
-        '@clean',        // kind like '@file' or '@auto'
-        false,       // True: import only one file.
-        false,   // True: generate @@clean nodes.
-        undefined        // theTypes: Same as ['.py']
-    );
+c.recursiveImport(
+    'path to file or directory', // dir
+    '@clean',        // kind like '@file' or '@auto'
+    false,       // True: import only one file.
+    false,   // True: generate @@clean nodes.
+    undefined        // theTypes: Same as ['.py']
+);
 ```
 
 ## Running code at idle time
@@ -471,17 +471,15 @@ There is seldom a need to recycle a timer, but if you must, you can call its des
 
 ## Running code in separate processes
 
-It is dead easy for scripts, including @button scripts, plugins, etc., to drive any external processes, including compilers and interpreters, from within Leo.
+It is easy for scripts, including @button scripts, plugins, etc., to drive any external processes, including compilers and interpreters, from within Leo.
 
-- The first section discusses three ways of calling subprocess.popen directly or via Leo helper functions.
+- The first section discusses using child_process directly or via Leo helper functions.
 
-- The second section discusses the BackgroundProcessManager class.  Leo's pylint command uses this class to run pylint commands sequentially *without blocking Leo*. Running processes sequentially prevents unwanted interleaving of output.
-
-- The last two sections discuss using g.execute_shell_commands and g.execute_shell_commands_with_options.
+- The other discusses using g.execute_shell_commands and g.execute_shell_commands_with_options.
 
 ### Using child_process.exec
 
-The first section discusses three *easy* ways to run code in a separate process by calling child_process.exec either directly or via Leo helper functions.
+This first section discusses three *easy* ways to run code in a separate process by calling child_process.exec either directly or via Leo helper functions.
 
 #### Call child_process.exec directly
 
@@ -636,8 +634,8 @@ g.execute_shell_commands_with_options inits an environment and then calls g.exec
 Scripts can easily determine what directives are in effect at a particular position in an outline. c.scanAllDirectives(p) returns a Python dictionary whose keys are directive names and whose values are the value in effect at position p. For example:
 
 ```ts
-    const d = c.scanAllDirectives(p);
-    g.es(g.objToString(d));
+const d = c.scanAllDirectives(p);
+g.es(g.objToString(d));
 ```
 
 In particular, d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file::
