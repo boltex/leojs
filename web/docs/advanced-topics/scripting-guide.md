@@ -380,7 +380,7 @@ For greater control, g.IdleTime is a thin wrapper for the Leo's IdleTime class. 
 ```ts
 function handler(it: IdleTime): void {
     const delta_t = it.time - it.starting_time;
-    g.es_print(it.count, it.c.shortFileName(), delta_t.toFixed(4));
+    g.es_print(it.count, delta_t);
      
     if (it.count >= 5) {
         g.es_print('done');
@@ -398,12 +398,12 @@ if (it) {
 The code creates an instance of the IdleTime class that calls the given handler at idle time, and no more than once every 500 msec.  Here is the output:
 
 <ul>
-    handler 1 ekr.leo 0.5100\
-    handler 2 ekr.leo 1.0300\
-    handler 3 ekr.leo 1.5400\
-    handler 4 ekr.leo 2.0500\
-    handler 5 ekr.leo 2.5610\
-    handler done
+1 0.5100\
+2 1.0300\
+3 1.5400\
+4 2.0500\
+5 2.5610\
+done
 </ul>
 
 Timer instances are completely independent:
@@ -411,7 +411,7 @@ Timer instances are completely independent:
 ```ts
 function handler1(it: IdleTime): void {
     const delta_t = it.time - it.starting_time;
-    g.es_print(it.count.toString().padStart(2, ' '), it.c.shortFileName(), delta_t.toFixed(4));
+    g.es_print(it.count, delta_t);
     
     if (it.count >= 5) {
         g.es_print('done');
@@ -421,7 +421,7 @@ function handler1(it: IdleTime): void {
 
 function handler2(it: IdleTime): void {
     const delta_t = it.time - it.starting_time;
-    g.es_print(it.count.toString().padStart(2, ' '), it.c.shortFileName(), delta_t.toFixed(4));
+    g.es_print(it.count, delta_t);
     
     if (it.count >= 10) {
         g.es_print('done');
@@ -435,29 +435,29 @@ const it2 = new g.IdleTime(handler2, 1000);
 if (it1 && it2) {
     it1.start();
     it2.start();
-}        
+}          
 ```
 
 Here is the output:
 
 <ul>
-    handler1  1 ekr.leo 0.5200\
-    handler2  1 ekr.leo 1.0100\
-    handler1  2 ekr.leo 1.0300\
-    handler1  3 ekr.leo 1.5400\
-    handler2  2 ekr.leo 2.0300\
-    handler1  4 ekr.leo 2.0600\
-    handler1  5 ekr.leo 2.5600\
-    handler1 done\
-    handler2  3 ekr.leo 3.0400\
-    handler2  4 ekr.leo 4.0600\
-    handler2  5 ekr.leo 5.0700\
-    handler2  6 ekr.leo 6.0800\
-    handler2  7 ekr.leo 7.1000\
-    handler2  8 ekr.leo 8.1100\
-    handler2  9 ekr.leo 9.1300\
-    handler2 10 ekr.leo 10.1400\
-    handler2 done
+1 0.5200\
+1 1.0100\
+2 1.0300\
+3 1.5400\
+2 2.0300\
+4 2.0600\
+5 2.5600\
+done\
+3 3.0400\
+4 4.0600\
+5 5.0700\
+6 6.0800\
+7 7.1000\
+8 8.1100\
+9 9.1300\
+10 10.1400\
+done
 </ul>
 
 **Recycling timers**
@@ -479,72 +479,120 @@ It is dead easy for scripts, including @button scripts, plugins, etc., to drive 
 
 - The last two sections discuss using g.execute_shell_commands and g.execute_shell_commands_with_options.
 
-### Using subprocess.popen
+### Using child_process.exec
 
-The first section discusses three *easy* ways to run code in a separate process by calling subprocess.popen either directly or via Leo helper functions.
+The first section discusses three *easy* ways to run code in a separate process by calling child_process.exec either directly or via Leo helper functions.
 
-#### Call subprocess.popen directly
+#### Call child_process.exec directly
 
-Calling subprocess.popen is often simple and good. For example, the following executes the 'npm run dev' command in a given directory.  Leo continues, without waiting for the command to return:
+Calling child_process.exec is often simple and good. For example, the following executes the 'npm run dev' command in a given directory.  Leo continues, without waiting for the command to return:
 
-    os.chdir(base_dir)
-    subprocess.Popen('npm run dev', shell=True)
+```ts
+g.chdir(base_dir)
 
-The following hangs Leo until the command completes:
+child_process.exec('npm run dev', (error, stdout, stderr) => {
+    if (error) {
+        g.es(`Execution error: ${error}`);
+        return;
+    }
+    g.es(`Output of child_process.exec: ${stdout}`);
+    if (stderr) {
+        g.es(`Command Error output: ${stderr}`);
+    }
+});
+```
 
-    os.chdir(base_dir)
-    proc = subprocess.Popen(command, shell=True)
-    proc.communicate()
+The following waits until the command completes:
 
-**Note**: 'cd directory' does not seem to work when run using subprocess.popen on Windows 10.
+```ts
+g.chdir(base_dir)
+
+const child = child_process.exec('python celulas.py');
+
+await new Promise( (resolve) => {
+    child.on('close', resolve)
+})
+```
 
 #### Call g.execute_shell_commands
 
-Use g.execute_shell_commands is a thin wrapper around subprocess.popen.  It calls subprocess.popen once for every command in a list.  This function waits for commands that start with '&'. Here it is:
+Use g.execute_shell_commands is a thin wrapper around child_process spawn and exex.  It calls child_process methods once for every command in a list.  It waits for each command to complete, except those starting with '&' Here it is:
 
-    def execute_shell_commands(commands, trace=False):
-        if g.isString(commands): commands = [commands]
-        for command in commands:
-            wait = not command.startswith('&')
-            if command.startswith('&'): command = command[1:].strip()
-            if trace: print('\n>%s%s\n' % ('' if wait else '&', command))
-            proc = subprocess.Popen(command, shell=True)
-            if wait: proc.communicate()
+```ts
+async function execute_shell_commands(commands: string | string[], p_trace?: boolean): Promise<void> {
+    if (typeof commands === 'string') {
+        commands = [commands];
+    }
+    for (const command of commands) {
+        let wait = !command.startsWith('&');
+        if (p_trace) {
+            trace(`Trace: ${command}`);
+        }
+        let cmd = command;
+        if (command.startsWith('&')) {
+            cmd = command.substring(1).trim();
+        }
+        if (wait) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const proc = child.exec(cmd, {}, (error, stdout, stderr) => {
+                        if (error) {
+                            reject(`Command failed: ${stderr}`);
+                        } else {
+                            resolve(undefined);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error(`Command failed with error: ${error}`);
+            }
+        } else {
+            const proc = child.spawn(cmd, { shell: true, stdio: 'inherit' });
+            proc.on('error', (error) => {
+                console.error(`Command failed with error: ${error}`);
+            });
+        }
+    }
+}
+```
 
 For example:
 
-    os.chdir(base_dir)
-    g.execute_shell_commands(['&npm run dev',])
+```ts
+g.chdir(base_dir);
+g.execute_shell_commands(['&npm run dev']);
+```
 
 #### Call g.execute_shell_commands_with_options
 
 g.execute_shell_commands_with_options is more flexible.  It allows scripts to get both the starting directory and the commands themselves from Leo's settings. Its signature is:
 
 ```ts
-def execute_shell_commands_with_options(
-    base_dir = None,
-    c = None,
-    command_setting = None,
-    commands = None,
-    path_setting = None,
-    warning = None,
-):
-    '''
-    A helper for prototype commands or any other code that
-    runs programs in a separate process.
-
-    base_dir:           Base directory to use if no path_setting is given.
-    commands:           A list of commands, for g.execute_shell_commands.
-    commands_setting:   Name of @data setting for commands.
-    path_setting:       Name of @string setting for the base directory.
-    warning:            A warning to be printed before executing the commands.
-    '''
+/**
+ * A helper for prototype commands or any other code that
+ * runs programs in a separate process.
+ *
+ * base_dir:           Base directory to use if no config path given.
+ * commands:           A list of commands, for g.execute_shell_commands.
+ * commands_setting:   Name of @data setting for commands.
+ * path_setting:       Name of @string setting for the base directory.
+ * warning:            A warning to be printed before executing the commands.
+ */
+async function execute_shell_commands_with_options(
+    base_dir: string,
+    c: Commands,
+    command_setting: string,
+    commands: string[],
+    path_setting: string,
+    trace?: boolean,
+    warning?: string,
+): Promise<void>
 ```
 
 For example, put this in myLeoSettings.leo:
 
 - **@data** my-npm-commands\
-    yarn dev
+&nbsp;&nbsp;&nbsp;&nbsp;yarn dev
 - **@string** my-npm-base = /npmtest
 
 And then run:
@@ -559,20 +607,26 @@ g.execute_shell_commands_with_options(
 
 ### Using g.execute_shell_commands
 
-g.execute_shell_command tales a single argument, which may be either a string or a list of strings. Each string represents one command. g.execute_shell_command executes each command in order.  Commands starting with '&' are executed without waiting. Commands that do not start with '&' finish before running later commands. Examples:
+g.execute_shell_command takes a single argument, which may be either a string or a list of strings. Each string represents one command. g.execute_shell_command executes each command in order.  Commands starting with '&' are executed without waiting. Commands that do not start with '&' finish before running later commands. Examples:
 
 ```ts
 // Run the qml app in a separate process:
-g.execute_shell_commands('qmlscene /test/qml_test.qml')
+g.execute_shell_commands('qmlscene /test/qml_test.qml');
 
 // List the contents of a directory:
 g.execute_shell_commands([
     'cd ~/test',
     'ls -a',
-])
+]);
+
+// Execute commands that creates files with some content
+g.execute_shell_commands([
+    'echo blabla > testfile1.txt',
+    'echo another text file > testfile2.txt']
+);
 
 // Run a python test in a separate process.
-g.execute_shell_commands('python /test/qt_test.py')
+g.execute_shell_commands('python /test/qt_test.py');
 ```
 
 g.execute_shell_commands_with_options inits an environment and then calls g.execute_shell_commands.  See Leo's source code for details.
