@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# The Mulder/Ream update algorithm
+# The Mulder/Ream algorithm
 
 This appendix documents the Mulder/Ream update algorithm in detail, with an informal proof of its correctness.
 
@@ -180,6 +180,3 @@ as it goes.
 The algorithm gets all needed data directly from opcode indices into
 x.sentinels and x.b. Using opcode indices requires neither reader
 classes nor auxiliary indices.
-
-The algorithm is simple enough to be understood at first reading. I'll
-remember its details for the rest of my life.
