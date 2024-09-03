@@ -20,7 +20,7 @@ Such clones are valuable, but not precious. They will eventually be discarded.
 
 This is the priceless, unique advantage of clones.  You don't understand clones if you don't get this.
 
-Example
+**Example:**
 
 1. While refactoring, it is essential to see all actual uses of a
    symbol (method, or ivar, whatever).
@@ -43,11 +43,3 @@ suboutline-only option to limit the matches created by cff.
 You can now rerun the search only on those cloned nodes to see all
 instances of the symbol that might be changed. This is a crucial
 double check on proposed changes.
-
-Summary
-
-I highly recommend that all Leonine programmers use the approach just
-described when refactoring code.
-
-Neither tags, nor filters, nor refactoring packages can emulate the
-Leonine way of refactoring.
