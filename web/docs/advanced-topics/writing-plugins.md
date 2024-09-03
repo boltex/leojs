@@ -75,9 +75,9 @@ The following table tells about each event handler: its name, when it is called,
 and the additional arguments passed to the hook in the keywords dictionary.
 
 > 📌 **NOTE**\
-> For some kind of hooks, Leo will skip its own normal processing if the hook
-returns anything *other* than None. The table indicates such hooks with 🛑 in
-the **Stop?** column.
+> For some kind of hooks, Leo will skip its own normal processing if the hook 
+> returns anything *other* than None. The table indicates such hooks with 🛑 in
+> the **Stop?** column.
 
 
 | Event name                     | Stop?  | When                               | Keys in keywords dict
