@@ -374,7 +374,7 @@ Root
     for @settings trees in the outline being opened and also in various
     leoSettings.leo files. @settings trees allow plugins to get options without
     any further support from Leo's core code. For a full discussion of @settings
-    trees, see [Customizing Leo](../users-guide/customizing-leo.md).
+    trees, see [Customizing Leo](../users-guide/customizing.md).
 
 - Sibling
 
