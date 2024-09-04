@@ -54,7 +54,7 @@ export default function Home() {
         </h3>
         <HomepageFeatures />
         <div className="container">
-          <div className="row">
+          <div className="row margin-bottom--md margin-top--md">
             <div className={clsx('col col--6')}>
               <h3 className={clsx(styles.subtitle)}>
                 Leo is:
@@ -76,7 +76,7 @@ export default function Home() {
           </div>
         </div>
         <div className="container">
-          <div className="row">
+          <div className="row margin-bottom--md">
             <div className={clsx('col col--6')}>
               <ReactPlayer className="customPlayer2" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
             </div>

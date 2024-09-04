@@ -94,5 +94,7 @@
   color: var(--custom-home-author-color);
   white-space: nowrap;
 }
-
+.row {
+  margin-bottom:1rem;
+}
 /*@-leo*/
