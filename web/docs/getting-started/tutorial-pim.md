@@ -16,7 +16,7 @@ A **clone** is a node that appears in more than one place in a Leo outline. A sm
 `` Ctrl-` ``  (clone-node)\
 Clones a node. The shortcut uses [backtick (grave accent)](https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows), *not* a single quote.  This character is often on the same keyboard key as the tilde `~` character.
 
-> 🧪 **Please take a few moments to experiment with clones:**
+> 🧪 **Take a few moments to experiment with clones:**
 > - Create a node whose headline is A.
 > - Clone node A with the ``clone-node`` command.
 > - Type some text into the body of A.
@@ -24,7 +24,7 @@ Clones a node. The shortcut uses [backtick (grave accent)](https://superuser.com
 > - Insert a node, say B, as a child of any of the A nodes.
 > - Notice that *all* the A nodes now have a B child.
 > - See what happens if you clone B.
-> - See what happens if you insert, delete or move nodes that are children of A.
+> - See what happens if you delete or move nodes that are children of A.
 > - When you delete a node's penultimate clone, the node is no longer a clone.
 
 ## Clones create views
@@ -44,7 +44,7 @@ Leo highlights URLs whenever syntax is coloring is enabled.
 `open-url-under-cursor` 🖱️ _Alt+Click_ or _Ctrl-Click_\
     Opens the URL under the cursor.
     
-`open-url`\ 
+`open-url`\
     Opens a URL appearing either in the headline or the first line of body text. If a headline starts with `@url`, the rest of the headline is taken to be a url.
 
 ## Using Chapters

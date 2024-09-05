@@ -137,4 +137,4 @@ All generators now yield *copies* of positions.
 - Generators visit all or parts of the outline, in a specified order.
 
 > 🔍 **Further study**\
-> Consult [Leo's cheat sheet](../users-guide/cheatsheet.md) and [Leo's scripting guide](../advanced-topics/leo-scripting-guide.md).
+> Consult [Leo's cheat sheet](../users-guide/cheatsheet.md) and [Leo's scripting guide](../advanced-topics/scripting-guide.md).

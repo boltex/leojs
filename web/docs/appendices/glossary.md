@@ -252,6 +252,10 @@ This is a short glossary of important terms in Leo's world. For more information
     node is cloned, marked or dirty, and indicating whether the node contains
     body text.
 
+- Leonine
+
+Leonine refers to Leo’s unique way of organizing data and programs.
+
 - Log Pane
 
     The part of Leo's main window that shows informational messages from Leo.
@@ -403,6 +407,10 @@ Root
     uA's (User Attributes) are persistent Python dicts that allows scripts
     and plugins to associate additional data with each node. See
     [extensible attributes](../users-guide/customizing.md#adding-extensible-attributes-to-nodes-and-leo-files).
+
+- User-defined types
+
+    Headlines naturally describe a node’s contents: headlines naturally define types. Leo’s core supports types such as @button, @rst, @url, etc. Scripts and plugins can easily define other types.
 
 - View node
 
