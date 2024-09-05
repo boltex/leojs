@@ -80,6 +80,11 @@
   text-align: left;
 }
 
+.homeQuote {
+  color: var(--ifm-color-primary-saturated);
+  transition: color 0.3s ease-out;
+}
+
 .customQuote {
   color: var(--custom-home-quote-color);
   margin-bottom: 2rem;

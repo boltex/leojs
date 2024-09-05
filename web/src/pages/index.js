@@ -50,7 +50,7 @@ export default function Home() {
       <HomepageHeader />
       <main>
         <h3 className={clsx(styles.subtitle)}>
-          <i>‟Leo is a fundamentally different way of organizing data, programs and scripts.”</i><br></br>LeoJS is a JavaScript implementation designed as an extension for VSCode.
+          <i>‟Leo is a fundamentally different way of organizing data, programs and scripts.”</i><br></br><span className={clsx(styles.homeQuote)}>LeoJS is a JavaScript implementation designed as an extension for VSCode.</span>
         </h3>
         <HomepageFeatures />
         <div className="container">
@@ -94,6 +94,58 @@ export default function Home() {
                   <li>@button scripts apply scripts to outline data.</li>
                 </ul>
               </div>
+            </div>
+          </div>
+        </div>
+        <h3 className={clsx(styles.subtitle)}>
+          VSCode UI Integration
+        </h3>
+        <div className="container">
+          <div className="row margin-bottom--md">
+            <div className={clsx('col col--12')}>
+              <div className={clsx(styles.bulletsHolder)}>
+                <ul className={clsx(styles.bullets)}>
+                  <li>UI controls such as a <strong>Leo Outline</strong> in the explorer view, and as a standalone sidebar, <strong>body pane</strong>, <strong>opened documents selector</strong> along with a <strong>Log Window</strong> <a href="https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel" rel="nofollow">output channel</a>.</li>
+                  <li><strong>Detached Body Panes</strong>, independent of the selected node, can be opened with the 'Open Aside' command.</li>
+                  <li>Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the <strong>'Leo Tree Browsing'</strong> option setting)</li>
+                  <li><strong>Derived files change detection</strong>. See <a href="#derive-external-files-">External Files</a> below for more details</li>
+                  <li><strong>Scriptable in Javascript and Typescript</strong>. All commands and scripts have easy access to outline structure via a simple Javascript API</li>
+                  <li><strong>'@button' panel</strong> for <a href="https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes" rel="nofollow">creating your own commands with @buttons</a></li>
+                  <li><strong>Find panel</strong> that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane</li>
+                  <li><strong>Nav and Tag panel</strong> search controls are integrated in the Find panel</li>
+                  <li><strong>Undo History panel</strong>, showing all actions and allowing going back, or forward, to any undo states.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h3 className={clsx(styles.subtitle)}>
+          Leo Commands
+        </h3>
+        <div className="container">
+          <div className="row margin-bottom--md">
+            <div className={clsx('col col--12')}>
+              <p>LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette. (accessible through F1 or Ctrl+Shift+P)</p>
+            </div>
+          </div>
+        </div>
+        <h3 className={clsx(styles.subtitle)}>
+          Context-Aware Keybindings
+        </h3>
+        <div className="container">
+          <div className="row margin-bottom--md">
+            <div className={clsx('col col--12')}>
+              <p>The keybinding architecture is designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence. Shift your focus outside these panes, and Visual Studio Code's native keybindings resume control.</p>
+            </div>
+          </div>
+        </div>
+        <h3 className={clsx(styles.subtitle)}>
+          The Minibuffer
+        </h3>
+        <div className="container">
+          <div className="row margin-bottom--md">
+            <div className={clsx('col col--12')}>
+              <p>For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the complete set of Leo's commands!</p>
             </div>
           </div>
         </div>

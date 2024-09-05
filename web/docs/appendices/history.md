@@ -3,12 +3,15 @@ sidebar_position: 4
 ---
 
 # History of Leo
+![alt text](img/edward-k-ream.jpg#author)
 
-This chapter discusses the most important milestones in history of Leo and summarizes each of Leo's public releases.  The focus is on the *important* and *interesting* developments.  It is not a chronicle of every change made to Leo.
+This section delves into the rich history of Leo, as narrated by its original author, **Edward K. Ream.** Through his perspective, you'll gain insights into the development journey, key milestones, and the vision that shaped Leo into what it is today.
 
-One of Leo's most important developments, `@button`, came directly from e's `dyna_menu` plugin. The exact date seems lost, but it certainly existed by Leo 4.3.
+It discusses the most important milestones in the history of Leo and summarizes each of Leo's public releases.  The focus is on the *important* and *interesting* developments.  It is not a chronicle of every change made to Leo.
 
 ## The Early Days
+
+One of Leo's most important developments, `@button`, came directly from e's `dyna_menu` plugin. The exact date seems lost, but it certainly existed by Leo 4.3.
 
 ### 1995: Beginnings
 

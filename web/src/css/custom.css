@@ -69,6 +69,8 @@
   --ifm-color-secondary-lighter: #ffffff;
   --ifm-color-secondary-lightest: #ffffff;
 
+  --ifm-color-primary-saturated: #ba4d00;
+
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
@@ -177,4 +179,18 @@ blockquote {
   right: 0;
   height: 40px;
   text-align: center;
+}
+img[src*='#left'] {
+  float: left;
+  margin: 0.75rem;
+}
+img[src*='#right'] {
+  float: right;
+  margin: 0.75rem;
+}
+img[src*='#author'] {
+  float: right;
+  margin-left: 0.75rem;
+  margin-top: -4rem;
+  border-radius: 50%;
 }
