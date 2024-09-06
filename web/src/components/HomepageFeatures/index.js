@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
-const FeatureList = [
+const FeatureList = [[
   {
     title: 'Directed Acyclic Graphs',
     Svg: require('@site/static/img/acyclic-graph.svg').default,
@@ -34,15 +34,44 @@ const FeatureList = [
       </>
     ),
   },
-
+],
+[
+  {
+    title: 'Leo Commands',
+    Svg: require('@site/static/img/leoCommands.svg').default,
+    description: (
+      <>
+        LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable in VSCode's Command Palette.
+      </>
+    ),
+  },
+  {
+    title: 'Context-Aware Keybindings',
+    Svg: require('@site/static/img/keycap.svg').default,
+    description: (
+      <>
+        The keybindings are designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence.
+      </>
+    ),
+  },
+  {
+    title: 'The Minibuffer',
+    Svg: require('@site/static/img/minibuffer.svg').default,
+    description: (
+      <>
+        For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the <i>complete set</i> of Leo commands!
+      </>
+    ),
+  },
+]
 ];
 
 function Feature({ Svg, title, description }) {
   return (
     <div className={clsx('col col--4')}>
-      <div className="text--center">
+      {Svg && <div className="text--center">
         <Svg className={styles.featureSvg} role="img" />
-      </div>
+      </div>}
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
         <p>{description}</p>
@@ -51,12 +80,13 @@ function Feature({ Svg, title, description }) {
   );
 }
 //@-others
-export default function HomepageFeatures() {
+export default function HomepageFeatures({ featureId }) {
+  let featuresShown = FeatureList[featureId]
   return (
     <section className={styles.features}>
       <div className="container">
         <div className="row">
-          {FeatureList.map((props, idx) => (
+          {featuresShown.map((props, idx) => (
             <Feature key={idx} {...props} />
           ))}
         </div>

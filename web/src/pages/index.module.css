@@ -102,4 +102,12 @@
 .row {
   margin-bottom:1rem;
 }
+.puckBg {
+  background-color: #b3806a5c;
+  background-image: url("@site/static/img/descartes.png");
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  border-radius: 37% 71%;
+}
 /*@-leo*/
