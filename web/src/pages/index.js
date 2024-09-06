@@ -78,6 +78,26 @@ export default function Home() {
           </div>
         </div>
 
+        <div className={clsx(styles.puckBg, "container")}>
+          <h3 className={clsx(styles.subtitle)}>
+            VSCode UI Integration
+          </h3>
+          <div className="row">
+            <div className={clsx('col col--12')}>
+              <div className={clsx(styles.bulletsHolder)}>
+                <ul className={clsx(styles.bullets)}>
+                  <li><strong>Outline</strong> in the explorer view, and in its own sidebar</li>
+                  <li><strong>body pane</strong> and <strong>Detached Body Panes</strong></li>
+                  <li><strong>Keybindings</strong> that match the original Leo editor</li>
+                  <li><strong>Find panel,</strong> with integrated <strong>Nav and Tag panel</strong></li>
+                  <li><strong>'@button' panel</strong></li>
+                  <li><strong>Undo History panel</strong></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="container">
           <div className="row margin-bottom--md">
             <div className={clsx('col col--6')}>
@@ -102,27 +122,6 @@ export default function Home() {
         </div>
 
         <HomepageFeatures featureId="1" />
-
-
-        <div className={clsx(styles.puckBg, "container")}>
-        <h3 className={clsx(styles.subtitle)}>
-          VSCode UI Integration
-        </h3>
-          <div className="row">
-            <div className={clsx('col col--12')}>
-              <div className={clsx(styles.bulletsHolder)}>
-                <ul className={clsx(styles.bullets)}>
-                  <li><strong>Leo Outline</strong> in the explorer view, and in a standalone sidebar</li>
-                  <li><strong>body pane</strong> and <strong>Detached Body Panes</strong></li>
-                  <li><strong>Keybindings</strong> that match the original Leo editor</li>
-                  <li><strong>Find panel,</strong> with integrated <strong>Nav and Tag panel</strong></li>
-                  <li><strong>'@button' panel</strong></li>
-                  <li><strong>Undo History panel</strong></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <h3 className={clsx(styles.subtitle)}>
           What People are Saying about Leo

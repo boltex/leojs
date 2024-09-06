@@ -406,7 +406,8 @@ From the movie, My Cousin Vinny:
 
 ### Leo and More
 
-Leo owes much of its visual design to MORE, possibly the most elegant computer program ever written. |br|
+Leo owes much of its visual design to MORE, possibly the most elegant computer program ever written.
+
 More inspired Leo's cloned nodes.
 
 ### Leo's vips
@@ -423,7 +424,7 @@ Leo's very important people:
 - Brian Harry contributed numerous plugins, including a prototype for Leo's minibuffer, and wrote jyLeo: Leo in Jython.
 - Almar Klein wrote pyzo, yoton and flexx, the basis of LeoWapp (--gui=browser).
 - Donald Knuth invented the CWEB language and literate programming.
-- The late Bernhard Mulder invented the @shadow algorithm, the foundation of @clean. |br|
+- The late Bernhard Mulder invented the @shadow algorithm, the foundation of @clean.\
   Bernhard also inspired Leo's generators and position class.
 - Joe Orr created LeoVue and XSLT stylesheets for Leo.
 - John K. Ousterhout created tcl/Tk, used in early versions of Leo.

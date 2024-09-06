@@ -41,16 +41,16 @@ const FeatureList = [[
     Svg: require('@site/static/img/leoCommands.svg').default,
     description: (
       <>
-        LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable in VSCode's Command Palette.
+        Extensive set of integrated commands with toolbar buttons, menus, and keybindings. They are also discoverable in VSCode's Command Palette.
       </>
     ),
   },
   {
     title: 'Context-Aware Keybindings',
-    Svg: require('@site/static/img/keycap.svg').default,
+    Svg: require('@site/static/img/keycap2.svg').default,
     description: (
       <>
-        The keybindings are designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence.
+        The keybindings are context-aware. When your focus is within the Body or Outline pane, Leo-specific keybindings take precedence.
       </>
     ),
   },
@@ -59,7 +59,7 @@ const FeatureList = [[
     Svg: require('@site/static/img/minibuffer.svg').default,
     description: (
       <>
-        For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the <i>complete set</i> of Leo commands!
+        The 'minibuffer' is the command execution hub. Access it through Alt+X and use the <i>complete set</i> of Leo commands!
       </>
     ),
   },

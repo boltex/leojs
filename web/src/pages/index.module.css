@@ -18,9 +18,13 @@
 
 .customHero:after {
   filter: blur(11px);
-  background-image: var(--custom-hero-bg);
-  background-size: cover;
-  background-position: center;
+  background-image: var(--custom-hero-bg2);
+  background-size: 100% auto;
+  background-position: top;
+
+  background-attachment: fixed;
+  
+
   content: '';    
   display: block;
   height: 100%;
@@ -103,11 +107,14 @@
   margin-bottom:1rem;
 }
 .puckBg {
-  background-color: #b3806a5c;
-  background-image: url("@site/static/img/descartes.png");
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-image: var(--custom-hero-bg3);
+  background-color: #8e451527;
   background-attachment: fixed;
   background-position: center;
   background-size: cover;
   border-radius: 37% 71%;
 }
+
 /*@-leo*/
