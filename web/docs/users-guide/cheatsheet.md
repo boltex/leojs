@@ -437,7 +437,7 @@ If your command changes multiple nodes, the pattern is:
 
 v.u (uA's or unknownAttributes or userAttributes) allow plugins or scripts
 to associate persistent data with vnodes. For details see the section about
-[userAttributes](customizing.md#adding-extensible-attributes-to-nodes-and-leo-files) in the [Customizing Leo](customizing.md) chapter.
+[userAttributes](customizing.md#uas-extensible-attribues-of-nodes) in the [Customizing Leo](customizing.md) chapter.
 
 > 🚨 **IMPORTANT**\
 > Generally speaking, vnode properties are fast, while the

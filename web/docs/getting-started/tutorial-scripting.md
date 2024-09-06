@@ -106,7 +106,7 @@ A **position** represents an outline node at a *specific position* in the outlin
 
 Because of clones, the *same* node may appear at *multiple positions* in the outline. A **vnode** represents the node's data, which is shared by all positions referring to that node.
 
-For any position p, **p.b** is the node's body text, **p.h** is the node's headline and **p.u** is the node's [user attributes](../users-guide/customizing.md#adding-extensible-attributes-to-nodes-and-leo-files), and **p.v** is the position's vnode. Similarly, for any vnode v, **v.b** is the node's body text, **v.h** is the node's headline and **v.u** is the node's user attributes.
+For any position p, **p.b** is the node's body text, **p.h** is the node's headline and **p.u** is the node's [user attributes](../users-guide/customizing.md#uas-extensible-attribues-of-nodes), and **p.v** is the position's vnode. Similarly, for any vnode v, **v.b** is the node's body text, **v.h** is the node's headline and **v.u** is the node's user attributes.
 
 ## Generators
 

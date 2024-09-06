@@ -28,7 +28,7 @@ throughout an outline without altering the structure of @file nodes.
 
 ### Put personal settings myLeoSettings.leo
 
-Put your [personal settings](../users-guide/customizing.md#specifying-settings) in myLeoSettings.leo, not leoSettings.leo.
+Put your [personal settings](../users-guide/customizing.md#using-settings) in myLeoSettings.leo, not leoSettings.leo.
 
 - The leo-settings command opens leoSettings.leo.
 - The my-leo-settings command opens myLeoSettings.leo.

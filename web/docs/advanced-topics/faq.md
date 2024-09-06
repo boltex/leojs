@@ -3,17 +3,6 @@ sidebar_position: 3
 ---
 
 # FAQ
-####
-FAQ
-####
-
-This is Leo's Frequently Asked Questions document.
-
-.. index:: FAQ
-
-.. contents:: Contents
-    :depth: 4
-    :local:
 
 ## Learning to use Leo
 
@@ -44,7 +33,7 @@ Sections_ are convenient in the following circumstances:
 
 None of these sections could be replaced by methods.
 
-- When you want to refer to a snippet of code that shares local variables with the enclosing code. This is surprisingly easy and safe to do, *provided* the section is used only in one place. [Section names](../appendices/glossary.md#section-names) in such contexts can be clearer than method names.  For example:
+- When you want to refer to a snippet of code that shares local variables with the enclosing code. This is surprisingly easy and safe to do, *provided* the section is used only in one place. [Section names](../appendices/glossary.md#section-name) in such contexts can be clearer than method names.  For example:
 
 ```
 << init ivars for writing >>
@@ -153,34 +142,34 @@ A **dangerous** delete is a deletion of a node so that all the data in the node 
 We could also consider a delete to be dangerous **if it results in a node being omitted from an external file.** This can happen as follows. Suppose we have the following outline (As usual, A' indicates that A is marked with a clone mark):
 
 ```
-    - @file spam.py
-        - A'
-            - B
-    - Projects
-        - A'
-            - B
+- @file spam.py
+    - A'
+        - B
+- Projects
+    - A'
+        - B
 ```
 
 Now suppose we clone B, and move the clone so the tree looks like this:
 
 ```
-    - @file spam.py
-        - A'
-            - B'
-    - Projects
-        - A'
-            - B'
+- @file spam.py
+    - A'
         - B'
+- Projects
+    - A'
+        - B'
+    - B'
 ```
 
 If (maybe much later), we eliminate B' as a child of A will get:
 
 ```
-    - @file spam.py
-        - A'
-    - Projects
-        - A'
-        - B
+- @file spam.py
+    - A'
+- Projects
+    - A'
+    - B
 ```
 
 B has not been destroyed, but B is gone from @file spam.py! So in this sense deleting a clone node can also be called dangerous.
@@ -226,7 +215,7 @@ Ideally, the meaning of all nodes would be clear from their headlines.  I typica
 
 ### Why should I use clones?
 
-You will lose much of Leo's power if you don't use clones. See [Clones](../getting-started/tutorial-pim.md#clones) and [Views](../getting-started/tutorial-pim.md#views) for full details.
+You will lose much of Leo's power if you don't use clones. See [Clones](../getting-started/tutorial-pim.md#clones) and [Views](../getting-started/tutorial-pim.md#clones-create-views) for full details.
 
 ## Customizing Leo
 
@@ -239,14 +228,14 @@ _Contributed by [Vitalije](https://github.com/vitalije)_
 You can use clones. For example:
 
 ```
-    --@settings
-    ----my-shared-settings
-    ------...
-    ----some-specific-settings-for-this-outline
-    ------....
+--@settings
+----my-shared-settings
+------...
+----some-specific-settings-for-this-outline
+------....
 
-    --@file my-shared-settings-somewhere.txt
-    ----my-shared-settings
+--@file my-shared-settings-somewhere.txt
+----my-shared-settings
 ```
 
 where `my-shared-settings` node is cloned from the @file subtree.
@@ -256,13 +245,13 @@ where `my-shared-settings` node is cloned from the @file subtree.
 Organize your myLeoSettings.leo file like this:
 
 ```
-    @settings
-         -my settings <clone>
-              -@bool .... = True
-              -@data fldsdf
+@settings
+     -my settings <clone>
+          -@bool .... = True
+          -@data fldsdf
 
-    @file mysettings.txt
-          my settings <clone>
+@file mysettings.txt
+     my settings <clone>
 ```
 
 Syncing mySettings.txt will synchronize your settings across your .leo files.
@@ -309,9 +298,9 @@ In Excel you would see 4500 below those two numbers. This is completely independ
 No. Everything in an @file trees must be part of the external file: orphan and @ignore nodes are invalid in @file trees. This restriction should not be troublesome. For example, you can organize your outline like this:
 
 ```
-    + myClass
-    ..+ ignored stuff
-    ..+ @file myClass
++ myClass
+..+ ignored stuff
+..+ @file myClass
 ```
 
 (As usual, + denotes a headline.) So you simply create a new [node](../appendices/glossary.md#node), called myClass, that holds your @file trees and stuff you don't want in the @file trees.
@@ -342,29 +331,29 @@ _Contributed By Zvi Boshernitzan_
 I was having trouble disabling '\<?php' with comments (and couldn't override the comment character for the start of the page). Finally, I found a solution that worked, using php's heredoc string syntax:
 
 ```php
-    @firѕt <?php
-    @firѕt $comment = <<<EOD
-    EOD;
+@firѕt <?php
+@firѕt $comment = <<<EOD
+EOD;
 
-    // php code goes here.
-    echo "boogie";
+// php code goes here.
+echo "boogie";
 
-    $comment2 = <<<EOD
-    @laѕt EOD;
-    @laѕt ?>
+$comment2 = <<<EOD
+@laѕt EOD;
+@laѕt ?>
 ```
 
 or:
 
 ```php
-    @firѕt <?php
-    @firѕt /*
-    */
+@firѕt <?php
+@firѕt /*
+*/
 
-    echo "hi";
+echo "hi";
 
-    @ԁelims /* */
-    @laѕt ?>
+@ԁelims /* */
+@laѕt ?>
 ```
 
 ### How can I open special .leo files easily?
@@ -442,27 +431,27 @@ This changes the comment symbol the apostrophe, making comments parseable by a B
 
 ### How do I inhibit sentinels in external files?
 
-Use @clean trees. Files derived from @clean trees contain no [sentinels](../appendices/glossary.md#sentinels). However, Leo can update @clean trees from changes made to the corresponding external file.  The [Mulder/Ream update algorithm](../appendices/mulder-ream.md) makes this magic happen.
+Use @clean trees. Files derived from @clean trees contain no [sentinels](../appendices/glossary.md#sentinel). However, Leo can update @clean trees from changes made to the corresponding external file.  The [Mulder/Ream update algorithm](../appendices/mulder-ream.md) makes this magic happen.
 
 ### How do I make external files start with a shebang line?
 
 Use the @first directive_ in @file or @clean trees. The @first directive puts lines at the very start of files derived from @file. For example, the body text of @file spam.py might be:
 
 ```
-    @firѕt #! /usr/bin/env python
+@firѕt #! /usr/bin/env python
 ```
 
 The body text of @file foo.pl might be:
 
 ```
-    @firѕt #/usr/bin/perl
+@firѕt #/usr/bin/perl
 ```
 
 \@first directives must be the *very first* lines of @file nodes. More than one @first directive may exist, like this:
 
 ```
-    @firѕt #! /usr/bin/env python
-    @firѕt # more comments.
+@firѕt #! /usr/bin/env python
+@firѕt # more comments.
 ```
 
 ### How do I prevent Leo from expanding sections?
@@ -472,7 +461,7 @@ Use @asis trees. Files derived from @asis trees contain no sentinels. Leo create
 ### Why can't I use @ignore directives in @file trees?
 
 
-The @ignore directive can not be used elsewhere in @file trees because of the way Leo recreates outlines from external files. This is an absolutely crucial restriction and will never go away. For a few more details, see [Leo 4.0: Eliminating error 'recovery'](../appendices/history.md#leo-4-0-eliminating-error-recovery) in [History of Leo](../appendices/history.md).
+The @ignore directive can not be used elsewhere in @file trees because of the way Leo recreates outlines from external files. This is an absolutely crucial restriction and will never go away. For a few more details, see the [History of Leo](../appendices/history.md).
 
 There are several workaround:
 

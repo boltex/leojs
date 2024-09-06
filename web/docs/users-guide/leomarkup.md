@@ -44,4 +44,3 @@ new Controller(c).run(); // c *is* defined.
 ```
 
 **Important**: Leo recognizes section references *everywhere*, even inside strings or comments.
-See [this FAQ entry](../advanced-topics/faq.md#what-about-code-that-looks-like-a-section-reference).

@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Format of External Files
 
-This section describe the format of external files. Leo's [sentinel lines](glossary.md#sentinel-lines) are comments, and this section describes those comments.
+This section describe the format of external files. Leo's [sentinel lines](glossary.md#sentinel) are comments, and this section describes those comments.
 
 External files created by @file use gnx's in @+node sentinels. Such gnx's permanently and uniquely identify nodes. Gnx's have the form:
 
