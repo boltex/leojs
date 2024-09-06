@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-appendices/mulder-ream" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.5.2">
+<title data-rh="true">The Mulder/Ream algorithm | LeoJS</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://boltex.github.io/leojs/img/leojs-social-card.png"><meta data-rh="true" name="twitter:image" content="https://boltex.github.io/leojs/img/leojs-social-card.png"><meta data-rh="true" property="og:url" content="https://boltex.github.io/leojs/docs/appendices/mulder-ream"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="The Mulder/Ream algorithm | LeoJS"><meta data-rh="true" name="description" content="This appendix documents the Mulder/Ream update algorithm in detail, with an informal proof of its correctness."><meta data-rh="true" property="og:description" content="This appendix documents the Mulder/Ream update algorithm in detail, with an informal proof of its correctness."><link data-rh="true" rel="icon" href="/leojs/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://boltex.github.io/leojs/docs/appendices/mulder-ream"><link data-rh="true" rel="alternate" href="https://boltex.github.io/leojs/docs/appendices/mulder-ream" hreflang="en"><link data-rh="true" rel="alternate" href="https://boltex.github.io/leojs/docs/appendices/mulder-ream" hreflang="x-default"><link rel="stylesheet" href="/leojs/assets/css/styles.cec29134.css">
+<script src="/leojs/assets/js/runtime~main.7c8c1e74.js" defer="defer"></script>
+<script src="/leojs/assets/js/main.b2167c4f.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();t(null!==e?e:"light")}(),function(){try{const n=new URLSearchParams(window.location.search).entries();for(var[t,e]of n)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div> <div id="__docusaurus_skipToContent_fallback" class="main-wrapper mainWrapper_CIJY"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex="-1" class="sidebarLogo_isFc" href="/leojs/"><img src="/leojs/img/leoapp256px.png" alt="LeoJS Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/leojs/img/leoapp256px.png" alt="LeoJS Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"><b>LeoJS</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/appendices/format-of-leo-files">Format of Leo Files</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/appendices/format-of-external-files">Format of External Files</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/leojs/docs/appendices/mulder-ream">The Mulder/Ream algorithm</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/appendices/history">History of Leo</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/appendices/glossary">Glossary</a></li></ul></nav></div></div></aside><div><nav aria-label="Main" class="navbar navbar--fixed-top navbarHideable_m1mJ"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button> <a class="navbar__item navbar__link" href="/leojs/docs/getting-started/installing">Getting Started</a><a class="navbar__item navbar__link" href="/leojs/docs/users-guide/leomarkup">User&#x27;s Guide</a><a class="navbar__item navbar__link" href="/leojs/docs/advanced-topics/scripting-guide">Advanced Topics</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/leojs/docs/appendices/format-of-leo-files">Appendices</a></div><div class="navbar__items navbar__items--right"><a href="https://github.com/boltex/leojs" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a><div class="toggle_vylO colorModeToggle_x44X"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="Switch between dark and light mode (currently light mode)" aria-label="Switch between dark and light mode (currently light mode)" aria-live="polite"><svg viewBox="0 0 24 24" width="24" height="24" class="lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" class="darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/leojs/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li itemscope="" itemprop="itemListElement" itemtype="https://schema.org/ListItem" class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link" itemprop="name">The Mulder/Ream algorithm</span><meta itemprop="position" content="1"></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>The Mulder/Ream algorithm</h1></header>
+<p>This appendix documents the Mulder/Ream update algorithm in detail, with an informal proof of its correctness.</p>
+<p>Prior to Leo 5.1, Leo used Bernhard Mulder&#x27;s original algorithm to read @shadow files. Starting with Leo 5.1, Leo uses this algorithm to read both @clean and @shadow files. Conceptually, both algorithms work as described in the next section.</p>
+<p>In February 2015 EKR realized that the @shadow algorithm could be used to update @clean (@nosent) files. Simplifying the algorithm instantly became a top priority. The new code emerged several days later, made possible by the x.sentinels array. It is an important milestone in Leo&#x27;s history.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="what-the-algorithm-does">What the algorithm does<a href="#what-the-algorithm-does" class="hash-link" aria-label="Direct link to What the algorithm does" title="Direct link to What the algorithm does">​</a></h2>
+<p>For simplicity, this discussion will assume that we are updating an
+external file, x, created with @clean x. The update algorithm works
+exactly the same way with @shadow trees.</p>
+<p>The algorithm works with <em>any</em> kind of text file. The algorithm uses only
+difflib. It knows nothing about the text or its meaning. No parsing is ever
+done.</p>
+<p>Suppose file x has been changed outside of Leo. When Leo reads x it does
+the following:</p>
+<ol>
+<li>
+<p>Recreates the <em>old</em> version of x <em>without</em> sentinels by writing the
+@clean x <em>outline</em> into a string, as if it were writing the @clean x
+outline again.</p>
+</li>
+<li>
+<p>Recreates all the lines of x <em>with</em> sentinels by writing the @clean x
+<em>outline</em> into a string, as if it was writing an @file node! Let&#x27;s call
+these lines the <strong>old sentinels</strong> lines.</p>
+</li>
+<li>
+<p>Uses difflib.SequenceMatcher to create a set of diffs between the
+old and new versions of x <em>without</em> sentinels.</p>
+<p><strong>Terminology</strong>: the diffs tell how to change file a into file b. The
+actual code uses this terminology: <strong>a</strong> is set of lines in the old
+version of x, <strong>b</strong> is the set of lines in the new version of x.</p>
+</li>
+<li>
+<p>Creates a set of lines, the <strong>new sentinels lines</strong> using the old
+sentinels lines, the a and b lines and the diffs.</p>
+<p>This is the magic. Bernhard Mulder&#x27;s genius was conceiving that a
+three-way merge of lines could produce the new outline, <em>with</em>
+sentinels. The code is in x.propagate_changed_lines and its helpers.</p>
+</li>
+<li>
+<p>Replaces the @clean tree with the new tree created by reading the new
+sentinels lines with the @file read logic.</p>
+</li>
+</ol>
+<p><strong>Important</strong>: The update algorithm never changes sentinels. It never
+inserts or deletes nodes. The user is responsible for creating nodes to
+hold new lines, or for deleting nodes that become empty as the result of
+deleting lines.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="guesses-dont-matter">Guesses don&#x27;t matter<a href="#guesses-dont-matter" class="hash-link" aria-label="Direct link to Guesses don&#x27;t matter" title="Direct link to Guesses don&#x27;t matter">​</a></h2>
+<p>There are several boundary cases that the update algorithm can not resolve.
+For example, if a line is inserted between nodes, the algorithm can not
+determine whether the line should be inserted at the end of one node or the
+start of the next node. Let us call such lines <strong>ambiguous lines</strong>.</p>
+<p>The algorithm <em>guesses</em> that ambiguous lines belongs at the end of a node
+rather than at the start of the next node. This is usually what is
+wanted--we usually insert lines at the end of a node.</p>
+<p>Happily, <strong>guesses don&#x27;t matter</strong>, for the following reasons:</p>
+<ol>
+<li>
+<p>The external file that results from writing the @clean x tree will be
+the same as the updated external file <em>no matter where</em> ambiguous lines
+are placed. In other words, the update algorithm is <strong>sound</strong>.</p>
+</li>
+<li>
+<p>Leo reports nodes that were changed when reading any external file. The
+user can review changes to @clean and @file trees in the same way.</p>
+</li>
+<li>
+<p>The user can permanently correct any mistaken guess. Guesses only happen
+for <em>newly inserted or changed</em> lines. Moving an ambiguous line to the
+following node will not change the external file. As a result, the
+next time Leo reads the file the line will be placed in the correct node!</p>
+</li>
+</ol>
+<p>This proves that @shadow and @clean are easy and safe to use. The
+remaining sections of this document discuss code-level details.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="background-of-the-code">Background of the code<a href="#background-of-the-code" class="hash-link" aria-label="Direct link to Background of the code" title="Direct link to Background of the code">​</a></h2>
+<p>The algorithm depends on three simple, guaranteed, properties of
+SequenceMatcher.opcodes. See
+<a href="https://docs.python.org/2/library/difflib.html#sequencematcher-examples" target="_blank" rel="noopener noreferrer">https://docs.python.org/2/library/difflib.html#sequencematcher-examples</a></p>
+<p><strong>Fact 1</strong>: The opcodes tell how to turn x.a (a list of lines) into x.b
+(another list of lines).</p>
+<p>The code uses the a and b terminology. It&#x27;s concise and easy to remember.</p>
+<p><strong>Fact 2</strong>: The opcode indices ai, aj, bi, bj <em>never</em> change because
+neither x.a nor x.b changes.</p>
+<p>Plain lines of the result can be built up by copying lines from x.b to x.results::</p>
+<p>&#x27;replace&#x27;   x.results.extend(x.b[b1<!-- -->:b2<!-- -->])
+&#x27;delete&#x27;    do nothing  (b1 == b2)
+&#x27;insert&#x27;    x.results.extend(x.b[b1<!-- -->:b2<!-- -->])
+&#x27;equal&#x27;     x.results.extend(x.b[b1<!-- -->:b2<!-- -->])</p>
+<p><strong>Fact 3</strong>: The opcodes <em>cover</em> both x.a and x.b, in order, without any gaps.</p>
+<p>This is an explicit requirement of sm.get_opcode:</p>
+<ul>
+<li>
+<p>The first tuple has ai==aj==bi==bj==0.</p>
+</li>
+<li>
+<p>Remaining tuples have ai == (aj from the preceding tuple) and bi == (bj
+from the previous tuple).</p>
+</li>
+</ul>
+<p>Keep in mind this crucial picture:</p>
+<ul>
+<li>The slices x.a[ai<!-- -->:aj<!-- -->] cover the x.a array, in order without gaps.</li>
+<li>The slices x.b[bi<!-- -->:bj<!-- -->] cover the x.b array, in order without gaps.</li>
+</ul>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="aha-the-xsentinels-array">Aha: the x.sentinels array<a href="#aha-the-xsentinels-array" class="hash-link" aria-label="Direct link to Aha: the x.sentinels array" title="Direct link to Aha: the x.sentinels array">​</a></h2>
+<p>Mulder&#x27;s original algorithm was hard to understand or to change. The
+culprit was the x.mapping array, which mapped indices into arrays of lines
+<em>with</em> sentinels to indices into arrays of lines <em>without</em> sentinels.</p>
+<p>The new algorithm replaces the x.mapping array with the x.sentinels array.
+As a result, diff indices never need to be adjusted and handling diff
+opcodes is easy.</p>
+<p>For any index i, x.sentinels[i] is the (possibly empty) list of sentinel
+lines that precede line a[i]. Computing x.sentinels from old_private_lines
+is easy. Crucially, x.a and x.sentinels are <em>parallel arrays</em>. That is,
+len(x.a) == len(x.sentinels), so indices into x.a are <em>also</em> indices into
+x.sentinels.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strategy--proof-of-correctness">Strategy &amp; proof of correctness<a href="#strategy--proof-of-correctness" class="hash-link" aria-label="Direct link to Strategy &amp; proof of correctness" title="Direct link to Strategy &amp; proof of correctness">​</a></h2>
+<p>Given the x.sentinels array, the strategy for creating the results is
+simple. Given indices ai, aj, bi, bj from an opcode, the algorithm:</p>
+<ul>
+<li>
+<p>Writes sentinels from x.sentinels[i], for i in range(ai,aj).</p>
+</li>
+<li>
+<p>Writes plain lines from b[i], for i in range(bi,bj).</p>
+</li>
+</ul>
+<p>This &quot;just works&quot; because the indices cover both a and b.</p>
+<ul>
+<li>
+<p>The algorithm writes sentinels exactly once (in order) because each
+sentinel appears in x.sentinels[i] for some i in range(len(x.a)).</p>
+</li>
+<li>
+<p>The algorithm writes plain lines exactly once (in order) because
+each plain line appears in x.b[i] for some i in range(len(x.b)).</p>
+</li>
+</ul>
+<p>This completes an informal proof of the correctness of the algorithm.</p>
+<p>The leading and trailing sentinels lines are easy special cases. This
+code, appearing before the main loop, ensures that leading lines are
+written first, and only once::</p>
+<p>x.put_sentinels(0)
+x.sentinels[0] = []</p>
+<p>Similarly, this line, at the end of the main loop, writes trailing
+sentinels::</p>
+<p>x.results.extend(x.trailing_sentinels)</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="summary">Summary<a href="#summary" class="hash-link" aria-label="Direct link to Summary" title="Direct link to Summary">​</a></h2>
+<p>The algorithm creates an updated set of lines <em>with</em> sentinels using the
+@clean outline and the updated external file. These new lines then replace
+the original @clean with a new @clean tree. The algorithm uses only
+difflib. It will work with <em>any</em> kind of text file. No knowledge of any
+language is needed.</p>
+<p>The algorithm depends on simple, guaranteed, properties of indices in
+SequenceMatcher opcodes.</p>
+<p>The algorithm steps through x.sentinels and x.b, extending x.results
+as it goes.</p>
+<p>The algorithm gets all needed data directly from opcode indices into
+x.sentinels and x.b. Using opcode indices requires neither reader
+classes nor auxiliary indices.</p></div></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/leojs/docs/appendices/format-of-external-files"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Format of External Files</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/leojs/docs/appendices/history"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">History of Leo</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#what-the-algorithm-does" class="table-of-contents__link toc-highlight">What the algorithm does</a></li><li><a href="#guesses-dont-matter" class="table-of-contents__link toc-highlight">Guesses don&#39;t matter</a></li><li><a href="#background-of-the-code" class="table-of-contents__link toc-highlight">Background of the code</a></li><li><a href="#aha-the-xsentinels-array" class="table-of-contents__link toc-highlight">Aha: the x.sentinels array</a></li><li><a href="#strategy--proof-of-correctness" class="table-of-contents__link toc-highlight">Strategy &amp; proof of correctness</a></li><li><a href="#summary" class="table-of-contents__link toc-highlight">Summary</a></li></ul></div></div></div></div></main></div></div></div></div></div>
+</body>
+</html>

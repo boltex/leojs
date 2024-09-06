@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-users-guide/commands" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.5.2">
+<title data-rh="true">Commands Reference | LeoJS</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://boltex.github.io/leojs/img/leojs-social-card.png"><meta data-rh="true" name="twitter:image" content="https://boltex.github.io/leojs/img/leojs-social-card.png"><meta data-rh="true" property="og:url" content="https://boltex.github.io/leojs/docs/users-guide/commands"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Commands Reference | LeoJS"><meta data-rh="true" name="description" content="This chapter lists almost all of Leo&#x27;s commands. It starts with a discussion of the Emacs-like minibuffer."><meta data-rh="true" property="og:description" content="This chapter lists almost all of Leo&#x27;s commands. It starts with a discussion of the Emacs-like minibuffer."><link data-rh="true" rel="icon" href="/leojs/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://boltex.github.io/leojs/docs/users-guide/commands"><link data-rh="true" rel="alternate" href="https://boltex.github.io/leojs/docs/users-guide/commands" hreflang="en"><link data-rh="true" rel="alternate" href="https://boltex.github.io/leojs/docs/users-guide/commands" hreflang="x-default"><link rel="stylesheet" href="/leojs/assets/css/styles.cec29134.css">
+<script src="/leojs/assets/js/runtime~main.7c8c1e74.js" defer="defer"></script>
+<script src="/leojs/assets/js/main.b2167c4f.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();t(null!==e?e:"light")}(),function(){try{const n=new URLSearchParams(window.location.search).entries();for(var[t,e]of n)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div> <div id="__docusaurus_skipToContent_fallback" class="main-wrapper mainWrapper_CIJY"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex="-1" class="sidebarLogo_isFc" href="/leojs/"><img src="/leojs/img/leoapp256px.png" alt="LeoJS Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/leojs/img/leoapp256px.png" alt="LeoJS Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"><b>LeoJS</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/users-guide/leomarkup">Leo’s Markup Language</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/users-guide/customizing">Customizing Leo</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/leojs/docs/users-guide/commands">Commands Reference</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/users-guide/directives">Directives Reference</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/leojs/docs/users-guide/cheatsheet">Cheat Sheet</a></li></ul></nav></div></div></aside><div><nav aria-label="Main" class="navbar navbar--fixed-top navbarHideable_m1mJ"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button> <a class="navbar__item navbar__link" href="/leojs/docs/getting-started/installing">Getting Started</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/leojs/docs/users-guide/leomarkup">User&#x27;s Guide</a><a class="navbar__item navbar__link" href="/leojs/docs/advanced-topics/scripting-guide">Advanced Topics</a><a class="navbar__item navbar__link" href="/leojs/docs/appendices/format-of-leo-files">Appendices</a></div><div class="navbar__items navbar__items--right"><a href="https://github.com/boltex/leojs" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a><div class="toggle_vylO colorModeToggle_x44X"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="Switch between dark and light mode (currently light mode)" aria-label="Switch between dark and light mode (currently light mode)" aria-live="polite"><svg viewBox="0 0 24 24" width="24" height="24" class="lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" class="darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/leojs/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li itemscope="" itemprop="itemListElement" itemtype="https://schema.org/ListItem" class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link" itemprop="name">Commands Reference</span><meta itemprop="position" content="1"></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Commands Reference</h1></header>
+<p>This chapter lists almost all of Leo&#x27;s commands. It starts with a discussion of the Emacs-like minibuffer.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="executing-commands-from-the-minibuffer">Executing commands from the minibuffer<a href="#executing-commands-from-the-minibuffer" class="hash-link" aria-label="Direct link to Executing commands from the minibuffer" title="Direct link to Executing commands from the minibuffer">​</a></h2>
+<p>Leo’s minibuffer appears at the bottom of Leo’s main window. You use the minibuffer to execute commands by name, and also to accumulate arguments to commands.</p>
+<p>Every Leo command has a <strong>command name</strong>. In this document, keystrokes that invoke a command will be followed by the command name in parentheses. For example, <code>Ctrl-S (save-file)</code> saves a Leo file.</p>
+<p><strong>Very Important</strong>: Leo has hundreds of commands, but because of tab completion you do not have to remember, or even <em>know about</em> any of them.  Feel free to ignore commands that you don&#x27;t use. The following prefixes help find commands by name:</p>
+<table><thead><tr><th style="text-align:left">Prefix</th><th style="text-align:left">Category</th></tr></thead><tbody><tr><td style="text-align:left"><strong>clone-find</strong></td><td style="text-align:left">clone-find commands</td></tr><tr><td style="text-align:left"><strong>file-</strong></td><td style="text-align:left">file commands</td></tr><tr><td style="text-align:left"><strong>find-</strong></td><td style="text-align:left">find commands</td></tr><tr><td style="text-align:left"><strong>isearch-</strong></td><td style="text-align:left">incremental search commands</td></tr><tr><td style="text-align:left"><strong>leo-</strong></td><td style="text-align:left">open .leo files</td></tr><tr><td style="text-align:left"><strong>open-</strong></td><td style="text-align:left">open files or url&#x27;s</td></tr><tr><td style="text-align:left"><strong>print-</strong></td><td style="text-align:left">print commands</td></tr><tr><td style="text-align:left"><strong>rectangle-</strong></td><td style="text-align:left">rectangle commands</td></tr><tr><td style="text-align:left"><strong>sort-</strong></td><td style="text-align:left">sort commands</td></tr><tr><td style="text-align:left"><strong>toggle-</strong></td><td style="text-align:left">toggle settings commands</td></tr></tbody></table>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="most-important-commands">Most important commands<a href="#most-important-commands" class="hash-link" aria-label="Direct link to Most important commands" title="Direct link to Most important commands">​</a></h2>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="file-operations--sessions">File operations &amp; sessions<a href="#file-operations--sessions" class="hash-link" aria-label="Direct link to File operations &amp; sessions" title="Direct link to File operations &amp; sessions">​</a></h3>
+<p>Here are Leo&#x27;s basic file commands:</p>
+<p><code>Ctrl-N (new)</code><br>
+<!-- -->Creates a new outline in a new tab.</p>
+<p><code>Ctrl-O (open-outline)</code><br>
+<!-- -->Opens an existing .leo file.</p>
+<p><code>Ctrl-S (save-file)</code><br>
+<!-- -->Saves the outline.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="switching-focus">Switching focus<a href="#switching-focus" class="hash-link" aria-label="Direct link to Switching focus" title="Direct link to Switching focus">​</a></h3>
+<p>Here&#x27;s how to switch focus without using the mouse:</p>
+<p><code>Alt-T (focus-to-tree)</code><br>
+<!-- -->Puts focus in the outline pane, regardless of focus.</p>
+<p><code>Ctrl-T (toggle-active-pane)</code><br>
+<!-- -->Toggles focus between the outline and body panes.</p>
+<p><code>Ctrl-Tab (tab-cycle-next)</code><br>
+<!-- -->Switches between outline tabs. You may open multiple Leo outlines in
+different tabs within the same main window.</p>
+<p><code>Ctrl-G (focus-to-body)</code><br>
+<!-- -->Puts focus in the body pane.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="outline-commands">Outline commands<a href="#outline-commands" class="hash-link" aria-label="Direct link to Outline commands" title="Direct link to Outline commands">​</a></h3>
+<p><code>Ctrl-I or Insert (insert-node)</code><br>
+<!-- -->Inserts a new node into the outline.</p>
+<p><code>Ctrl-H (edit-headline)</code><br>
+<!-- -->Begins editing the headline of the selected node.</p>
+<p><code>Return</code><br>
+<!-- -->When focus is in the outline pane, <em>Return</em> switches focus to the body pane.</p>
+<p><code>Ctrl-Shift-C (copy-node)</code><br>
+<!-- -->Copies the outline and all it&#x27;s descendants, placing the node on the clipboard.</p>
+<p><code>Ctrl-Shift-X (cut-node)</code><br>
+<!-- -->Cuts the outline and all its descendants, placing the node on the clipboard.</p>
+<p><code>Ctrl-Shift-V (paste-node)</code><br>
+<!-- -->Pastes a node (and its descendants) from the clipboard after the presently selected node.</p>
+<p><code>Ctrl-M (mark)</code><br>
+<!-- -->Toggles the mark on a node. Marked nodes have a vertical red bar in their icon area.</p>
+<p><code>Ctrl-} (demote)</code><br>
+<!-- -->Makes all following siblings of a node children of the node. Use <em>demote</em> to &quot;gather&quot; nodes so they can all be moved with their parent.</p>
+<p><code>Ctrl-{ (promote)</code><br>
+<!-- -->Makes all the children of a node siblings of the node. Use <em>promote</em> to &quot;scatter&quot; the nodes after moving their parent.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="selecting-outline-nodes">Selecting outline nodes<a href="#selecting-outline-nodes" class="hash-link" aria-label="Direct link to Selecting outline nodes" title="Direct link to Selecting outline nodes">​</a></h3>
+<p>You may select, expand and contract outline nodes with the mouse as usual, but using arrow keys is <em>highly recommended</em>. When focus is in the outline pane, <em>plain</em> arrows keys change the selected node:</p>
+<p><code>Right-arrow (expand-and-go-right)</code><br>
+<!-- -->Expands a node or selects its first child.</p>
+<p><code>Left-arrow (contract-or-go-left)</code><br>
+<!-- -->Contracts a node if its children are visible, and selects the node&#x27;s parent otherwise.</p>
+<p><code>Up-arrow (goto-prev-visible)</code><br>
+<!-- -->Selects the previous <em>visible</em> outline node.</p>
+<p><code>Down-arrow (goto-next-visible)</code><br>
+<!-- -->Selects the next <em>visible</em> outline node.</p>
+<p>Regardless of focus, <code>Alt-arrow</code> select outline nodes:</p>
+<p><code>Alt-Home (goto-first-visible-node)</code><br>
+<!-- -->Selects the first outline node and collapses all nodes.</p>
+<p><code>Alt-End (goto-last-visible-node)</code><br>
+<!-- -->Selects the last <em>visible</em> outline node and collapses all nodes except the node and its ancestors.</p>
+<p><code>Alt-arrow keys</code><br>
+<!-- -->Select the outline pane, and then act just like the plain arrow keys when the outline pane has focus.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="finding--replacing-text">Finding &amp; replacing text<a href="#finding--replacing-text" class="hash-link" aria-label="Direct link to Finding &amp; replacing text" title="Direct link to Finding &amp; replacing text">​</a></h3>
+<p>This section explains how to use Leo&#x27;s standard search/replace commands.</p>
+<blockquote>
+<p>📌 <strong>NOTE</strong><br>
+<!-- -->you can also use the Nav Tab (in the Log pane) to search for text.</p>
+</blockquote>
+<p><code>Ctrl-F (start-search)</code> shows the Find Tab and puts the focus in the text box labeled <em>Find:</em>.</p>
+<blockquote>
+<p>💡 <strong>TIP</strong><br>
+<!-- -->You can select radio buttons and toggle check boxes in the Find Tab with <code>Ctrl-Alt keys</code>. The underlined letter of the radio buttons or check boxes indicate which key to use.  For example, <code>Ctrl-Alt-X (toggle-find-regex-option)</code> toggles the <em>rege<u>x</u>p</em> checkbox.</p>
+</blockquote>
+<p>After typing <code>Ctrl-F</code>, type the search string, say <em>def</em>, in the text box.</p>
+<p>Start the find command by typing <code>&lt;Return&gt;</code>.</p>
+<p>But suppose you want to replace <em>def</em> with <em>foo</em>, instead of just finding <em>def</em>.</p>
+<p>Just type <code>&lt;Tab&gt;</code> before typing <code>&lt;Return&gt;</code>. Focus shifts to the text box labeled <em>Replace:</em>.</p>
+<p>Finally, type <code>&lt;Return&gt;</code> to start the <strong>find-next</strong> command. When Leo finds the next instance of <em>def</em>, it will select it.</p>
+<p>You may now type any command.  The following are most useful:</p>
+<ul>
+<li><code>Ctrl-minus (replace-then-find)</code> replaces the selected text.</li>
+<li><code>F3 (find-next)</code> continues searching without making a replacement.</li>
+<li><code>F2 (find-previous)</code> continues the search in reverse.</li>
+</ul>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="formatting-text">Formatting text<a href="#formatting-text" class="hash-link" aria-label="Direct link to Formatting text" title="Direct link to Formatting text">​</a></h3>
+<p><code>rst3</code><br>
+<!-- -->Converts <em>@rst</em> nodes to restructured text. This command automatically creates underlining for rST sections. To reorganize a document, just reorganize the corresponding Leo outline: you don&#x27;t have to change markup by hand. Search or &quot;rst&quot; in <em>leoSettings.leo</em> to see the pertinent settings.</p>
+<p><code>adoc</code><br>
+<!-- -->Converts <em>@adoc</em> nodes to asciidoc text. This command automatically creates markup for asciidoctor sections. To reorganize a document, just reorganize the corresponding Leo outline: you don&#x27;t have to change markup by hand.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="undoing-and-redoing-changes">Undoing and redoing changes<a href="#undoing-and-redoing-changes" class="hash-link" aria-label="Direct link to Undoing and redoing changes" title="Direct link to Undoing and redoing changes">​</a></h3>
+<p>Leo has undo and redo commands -- Leo remembers changes you make to outline structure or the contents of any node since you restarted Leo or made a non-undoable operation.</p>
+<p><code>Ctrl-Z (undo)</code><br>
+<!-- -->Undoes the last change. Another <code>Ctrl-Z</code> undoes the previous change, etc.</p>
+<p><code>Ctrl-Shift-Z (redo)</code><br>
+<!-- -->Undoes the effect of the last undo, etc.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="clone-find-commands">Clone-find commands<a href="#clone-find-commands" class="hash-link" aria-label="Direct link to Clone-find commands" title="Direct link to Clone-find commands">​</a></h3>
+<p>The <strong>clone find</strong> commands, cfa and cff are extraordinarily useful. These commands move clones of all nodes matching the search pattern under a single <strong>organizer node</strong>, created as the last top-level node. <strong>Flattened</strong> searches put all nodes as direct children of the organizer node:</p>
+<table><thead><tr><th style="text-align:left">Short</th><th style="text-align:left">Full Name</th></tr></thead><tbody><tr><td style="text-align:left">cfa</td><td style="text-align:left">clone-find-all</td></tr><tr><td style="text-align:left">cff</td><td style="text-align:left">clone-find-all-flattened</td></tr></tbody></table>
+<p>The <strong>clone-marked</strong> commands move clones of all marked nodes under an organizer node. Especially useful for gathering nodes by hand:</p>
+<table><thead><tr><th style="text-align:left">Short</th><th style="text-align:left">Full Name</th></tr></thead><tbody><tr><td style="text-align:left">cfam</td><td style="text-align:left">clone-find-marked</td></tr><tr><td style="text-align:left">cffm</td><td style="text-align:left">clone-find-flattened-marked</td></tr></tbody></table>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="syncing-clean-files">Syncing @clean files<a href="#syncing-clean-files" class="hash-link" aria-label="Direct link to Syncing @clean files" title="Direct link to Syncing @clean files">​</a></h3>
+<p>The <strong>check-nodes</strong> command finds <strong>dubious</strong> nodes, that is, nodes that:</p>
+<ul>
+<li>contain multiple defs.</li>
+<li>start with leading blank lines.</li>
+<li>are non-organizer nodes containing no body text.</li>
+</ul>
+<p>This command is specially useful when using <code>@clean</code> nodes in a collaborative
+environment. Leo&#x27;s <code>@clean</code> update algorithm will update <code>@clean</code> nodes when
+others have added, deleted or moved code, but the update algorithm won&#x27;t
+assign changed code to the optimal nodes. This script highlights nodes that
+needed attention.</p>
+<p><strong>Settings</strong>: You can customize the behavior of this command with <code>@data</code> nodes:</p>
+<ul>
+<li><strong>@data</strong> check-nodes-ok-patterns</li>
+</ul>
+<ul><p>The body of the <em>@data</em> node contains a list of regexes (strings), one per
+line. This command compiles each regex as if it were a raw string.
+Headlines matching any of these compiled regexes are not considered
+dubious. The defaults ignore unit tests:</p><div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">.*test_</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">.*Test</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div></ul>
+<ul>
+<li><strong>@data</strong> check-nodes-ok-prefixes</li>
+</ul>
+<ul><p>The body of the <em>@data</em> node contains a list of strings, one per line.
+Headlines starting with any of these strings are not considered dubious.
+The defaults ignore top-level @&lt;file&gt; nodes and marker nodes:</p><div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"> @</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> **</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> ==</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> --</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div></ul>
+<ul>
+<li><strong>@data</strong> check-nodes-suppressions</li>
+</ul>
+<ul><p>The body of the <em>@data</em> node contains a list of strings, one per line.
+Headlines that match these suppressions <em>exactly</em> are not considered
+dubious. Default: None.</p></ul>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="help-commands">Help commands<a href="#help-commands" class="hash-link" aria-label="Direct link to Help commands" title="Direct link to Help commands">​</a></h3>
+<p><code>help-for-command</code><br>
+<!-- -->Shows the documentation for any Leo command. This prompts for the name of a Leo command. Use tab completion to see the list of all commands that start with a given prefix.</p>
+<p><code>show-settings</code><br>
+<!-- -->This command clarify which settings are in effect, and where they came from.</p>
+<p>These commands discuss special topics:</p>
+<ul>
+<li><code>help-for-settings</code></li>
+<li><code>help-for-keystroke</code></li>
+<li><code>help-for-scripting</code></li>
+<li><code>help-for-minibuffer</code></li>
+<li><code>help-for-find-commands</code></li>
+<li><code>help-for-creating-external-files</code></li>
+</ul>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="all-other-commands">All other commands<a href="#all-other-commands" class="hash-link" aria-label="Direct link to All other commands" title="Direct link to All other commands">​</a></h2>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="clone-find-commands-1">Clone-find commands<a href="#clone-find-commands-1" class="hash-link" aria-label="Direct link to Clone-find commands" title="Direct link to Clone-find commands">​</a></h3>
+<p>The <strong>clone find</strong> commands, cfa and cff,  move clones of all nodes matching the search pattern under a single <strong>organizer node</strong>, created as the last top-level node. <strong>Flattened</strong> searches put all nodes as direct children of the organizer node:</p>
+<table><thead><tr><th style="text-align:left">Short</th><th style="text-align:left">Full Name</th></tr></thead><tbody><tr><td style="text-align:left">cfa</td><td style="text-align:left">clone-find-all</td></tr><tr><td style="text-align:left">cff</td><td style="text-align:left">clone-find-all-flattened</td></tr></tbody></table>
+<p>The <strong>clone-marked</strong> commands move clones of all marked nodes under an organizer node.
+The <strong>clone-find-tag</strong> aka &#x27;cft&#x27; command creates clones of all nodes having a given tag.
+<em>Especially useful for gathering nodes by hand.</em></p>
+<table><thead><tr><th style="text-align:left">Short</th><th style="text-align:left">Full Name</th></tr></thead><tbody><tr><td style="text-align:left">cfam</td><td style="text-align:left">clone-find-marked</td></tr><tr><td style="text-align:left">cffm</td><td style="text-align:left">clone-find-flattened-marked</td></tr><tr><td style="text-align:left">cft</td><td style="text-align:left">clone-find-tag</td></tr></tbody></table>
+<p><code>clone-find-parents</code><br>
+<!-- -->Creates clones of all parent nodes of c.p.</p>
+<p><code>tag-children</code><br>
+<!-- -->Applies a given tag to all the children of the selected node.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="edit-commands">Edit commands<a href="#edit-commands" class="hash-link" aria-label="Direct link to Edit commands" title="Direct link to Edit commands">​</a></h3>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="cutting-pasting-and-selecting-text">Cutting, pasting and selecting text<a href="#cutting-pasting-and-selecting-text" class="hash-link" aria-label="Direct link to Cutting, pasting and selecting text" title="Direct link to Cutting, pasting and selecting text">​</a></h4>
+<p><code>cut-text (Ctrl-X)</code><br>
+<!-- -->Cut the selected text and put it to the clipboard.</p>
+<p><code>copy-text (Ctrl-C)</code><br>
+<!-- -->Copy the selected text to the clipboard.</p>
+<p><code>paste-text (Ctrl-V)</code><br>
+<!-- -->Paste test from the clipboard.</p>
+<p><code>select-all (Ctrl-A)</code><br>
+<!-- -->Select all text in the text pane.</p>
+<p>These commands work with either headline or body text.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="indenting-body-text">Indenting body text<a href="#indenting-body-text" class="hash-link" aria-label="Direct link to Indenting body text" title="Direct link to Indenting body text">​</a></h4>
+<p><code>always-indent-region</code><br>
+<!-- -->Shift selected lines right one tab position. Inserts one unit of indentation if no text is selected.</p>
+<p><code>indent-region (Tab)</code><br>
+<!-- -->Shift selected lines right one tab position. Inserts a tab (or spaces) if no text is selected.</p>
+<p><code>unindent-region (Shift-Tab)</code><br>
+<!-- -->Shifts selected lines left one tab position. Deletes one unit of indentation if no text is selected.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="moving-the-cursor">Moving the cursor<a href="#moving-the-cursor" class="hash-link" aria-label="Direct link to Moving the cursor" title="Direct link to Moving the cursor">​</a></h4>
+<p><code>goto-global-line (Alt-G)</code>
+Selects the locations in your outlines corresponding to a line in a external file.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="text-formatting-commands">Text formatting commands<a href="#text-formatting-commands" class="hash-link" aria-label="Direct link to Text formatting commands" title="Direct link to Text formatting commands">​</a></h4>
+<p><code>clean-lines</code><br>
+<!-- -->Removes trailing whitespace from all lines, preserving newlines.</p>
+<p><code>clear-selected-text</code><br>
+<!-- -->Delete the selected text.</p>
+<p><code>convert-tabs</code><br>
+<!-- -->Converts leading tabs to blanks in a single node.</p>
+<p><code>convert-blanks</code><br>
+<!-- -->Converts blanks to tabs in a single node.</p>
+<p><code>convert-all-tabs</code><br>
+<!-- -->Converts leading tabs to blanks throughout the selected tree.</p>
+<p><code>convert-all-blanks</code><br>
+<!-- -->Converts leading blanks to tabs throughout the selected tree.</p>
+<p><strong>@tabwidth</strong>: The <code>convert-*</code> commands convert between tabs and blanks using the <code>@tabwidth</code> setting presently in effect.</p>
+<p><code>insert-body-time</code> and <code>insert-headline-time</code><br>
+<!-- -->Insert formatted time and date into body or headline text. You must be editing a headline to be able to insert the time/date into the headline. The body_time_format_string and headline_time_format_string settings specify the format of the inserted text. These settings are the format string passed to time.strftime.</p>
+<p><code>reformat-paragraph</code><br>
+<!-- -->Rearranges the words in a text paragraph to fill each line as full as possible, up to the <code>@pagewidth</code> setting. A paragraph is delimited by blank lines, Leo directives, and (of course) start and end of text in a node. The width of the line used by the reformatting operation is governed by <code>@pagewidth</code> and the indentation that would be applied to the node when Leo writes the file.</p>
+<p>The command operates on the paragraph containing the insert cursor. If the insert cursor is on a blank line or directive, nothing happens. If the cursor is on a line containing text, then the paragraph containing that text line is reformatted and the insert cursor is moved to the next paragraph.</p>
+<blockquote>
+<p>📌 <strong>NOTE</strong><br>
+<!-- -->Hanging indentation is preserved. This is most useful for bulleted or numbered lists, such as:</p>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain"> 1. This is the first paragraph,</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    and it has a hanging indentation.</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"> 2. This is the second paragraph,</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    and it too has a hanging indentation.</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+</blockquote>
+<p><code>replace-current-character</code><br>
+<!-- -->Replace the selected character with the next character typed.</p>
+<p><code>toggle-angle-brackets</code><br>
+<!-- -->Adds or removes double angle brackets from the headline of the selected node.</p>
+<p><code>unformat-paragraph</code><br>
+<!-- -->Removes all extra whitespace from a paragraph, including leading whitespace.  This command is useful when <code>@wrap</code> is in effect.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="creating-nodes-from-body-text">Creating nodes from body text<a href="#creating-nodes-from-body-text" class="hash-link" aria-label="Direct link to Creating nodes from body text" title="Direct link to Creating nodes from body text">​</a></h4>
+<p><code>extract (Ctrl-Shift-D)</code><br>
+<!-- -->Creates a new node whose headline is the first line of selected body text and whose body is all other lines of selected text. Previously selected text is deleted from the original body text.</p>
+<p><code>extract-names (Ctrl-Shift-N)</code><br>
+<!-- -->Creates one or more child nodes, one for each section name in the selected body text. The headline of each created node is the section name.</p>
+<p><code>line-to-headline</code><br>
+<!-- -->Creates a new node whose headline is the selected body line.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="executing-scripts-in-body-text">Executing scripts in body text<a href="#executing-scripts-in-body-text" class="hash-link" aria-label="Direct link to Executing scripts in body text" title="Direct link to Executing scripts in body text">​</a></h4>
+<p><code>execute-script (Ctrl-B)</code><br>
+<!-- -->Executes body text as JavaScript or TypeScript. Leo execute the selected text, or the entire body text if no text is selected. The Execute Script command pre-defines the values c, g and p as follows:</p>
+<ul>
+<li>c is the commander of the outline containing the script.</li>
+<li>g is the leoGlobals modules.</li>
+<li>p is c.p, that is, c.currentPosition().</li>
+</ul>
+<p>In LeoJS, the <em>VSCode API</em> is also available as <strong>vscode</strong>. Other common modules such as <em>crypto, os, path, process and child_process</em> are also available, along with the following libraries: <em>SQL, JSZip, pako, showdown, dayjs, md5, csvtojson, difflib, elementtree and ksuid</em>.</p>
+<p><strong>Important</strong>: Body text may contain Leo directives and section references. You can use all of Leo&#x27;s features to organize scripts that you execute interactively. Section definitions must appear in the node containing the script or in descendant nodes.</p>
+<p>Leo preprocesses all scripts by simulating the writing of a external file to a string. The <code>execute-script</code> command sets app.scriptDict[&quot;script1&quot;] to the value of the script before preprocessing, and sets app.scriptDict[&quot;script2&quot;] to the value of the script after preprocessing. Scripts may examine and change app.scriptDict as they please.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="multiple-body-editors">Multiple body editors<a href="#multiple-body-editors" class="hash-link" aria-label="Direct link to Multiple body editors" title="Direct link to Multiple body editors">​</a></h4>
+<p><code>open-aside</code><br>
+<!-- -->Detached Body Panes, independent of the selected node, can be opened with the &#x27;Open Aside&#x27; command.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="undoing-changes">Undoing changes<a href="#undoing-changes" class="hash-link" aria-label="Direct link to Undoing changes" title="Direct link to Undoing changes">​</a></h4>
+<p>Leo supports unlimited undo and redo with the <code>undo</code> (Ctrl-Z) and <code>redo</code> (Ctrl-Shift-Z) commands. (Some commands are not undoable and clear the undo history) Think of actions that may be undone or redone as a string of beads. A &quot;bead pointer&quot; points to the present bead. Performing an operation creates a new bead after the present bead and removes all following beads. Undoing an operation moves the bead pointer backwards; redoing an operation moves the bead pointer forwards. The <code>undo</code> command is disabled when the bead pointer moves in front of the first bead; the <code>redo</code> command is disabled when the bead pointer points to the last bead.</p>
+<blockquote>
+<p>📌 <strong>NOTE</strong><br>
+<!-- -->In LeoJS, the undo functionality is a multi-tiered system that separates structural outline changes from text changes within the body pane.</p>
+</blockquote>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="file-commands">File commands<a href="#file-commands" class="hash-link" aria-label="Direct link to File commands" title="Direct link to File commands">​</a></h3>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="loading-saving--reverting-files">Loading, saving &amp; reverting files<a href="#loading-saving--reverting-files" class="hash-link" aria-label="Direct link to Loading, saving &amp; reverting files" title="Direct link to Loading, saving &amp; reverting files">​</a></h4>
+<p><code>file-open-by-name</code><br>
+<!-- -->Gets the name of a Leo outline from the minibuffer and opens it. File name completion is supported.</p>
+<p><code>new (Ctrl-N)</code><br>
+<!-- -->Creates a new Leo main window.</p>
+<p><code>open-outline (Ctrl-O)</code><br>
+<!-- -->Opens an existing .leo file. Selecting a non-.leo file loads the file into an <em>@edit</em> node in the present outline.</p>
+<p><code>open-outline-by-name</code><br>
+<!-- -->Opens the file given by typing the filename in the minibuffer. Supports filename completion.</p>
+<p><code>read-outline-only</code><br>
+<!-- -->Reads only the .leo file, not any external files.</p>
+<p><code>revert</code><br>
+<!-- -->Reloads the outline, discarding any changes made since it was last saved.</p>
+<p><code>save-all</code><br>
+<!-- -->Saves all open tabs windows/tabs.</p>
+<p><code>save-buffers-kill-leo</code><br>
+<!-- -->Quits Leo, prompting to save any unsaved files first.</p>
+<p><code>save-file or file-save (Ctrl-S)</code><br>
+<!-- -->Saves the Leo window to a file.</p>
+<p><code>save-file-as</code><br>
+<!-- -->Saves a copy of the Leo outline, changing outline&#x27;s file name.</p>
+<p><code>save-file-to</code><br>
+<!-- -->Saves a copy of the Leo outline, without changing the outline&#x27;s file name</p>
+<p><strong>Opening specific files</strong>:</p>
+<p><code>open-cheat-sheet-leo</code><br>
+<!-- -->Opens CheatSheet.leo in a new tab or window.</p>
+<p><code>open-leoDocs-leo</code><br>
+<!-- -->Opens LeoDocs.leo in a new tab or window.</p>
+<p><code>open-scripts-leo</code><br>
+<!-- -->Opens scripts.leo in a new tab or window.</p>
+<p><code>open-leoSettings-leo</code><br>
+<!-- -->Opens <em>leoSettings.leo</em> in a new tab or window.</p>
+<p><strong>Writing external files without saving the outline</strong>:</p>
+<p><code>write-at-auto-nodes</code><br>
+<!-- -->Writes all <em>@auto</em> nodes in the selected tree.</p>
+<p><code>write-outline-only</code><br>
+<!-- -->Saves the outline without writing any @&lt;file&gt; trees.</p>
+<p><code>write-at-file-nodes</code><br>
+<!-- -->Writes all @&lt;file&gt; trees.</p>
+<p><code>write-at-shadow-nodes</code><br>
+<!-- -->Writes all <em>@shadow</em> nodes in the selected tree.</p>
+<p><code>write-dirty-at-file-nodes</code><br>
+<!-- -->Writes all modified @&lt;file&gt; trees.</p>
+<p><code>write-dirty-at-shadow-nodes</code><br>
+<!-- -->Writes all modified <em>@shadow</em> trees.</p>
+<p><code>write-missing-at-file-nodes</code><br>
+<!-- -->Write all @&lt;file&gt; nodes for which the corresponding external file does not exist.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="importing--exporting-files">Importing &amp; exporting files<a href="#importing--exporting-files" class="hash-link" aria-label="Direct link to Importing &amp; exporting files" title="Direct link to Importing &amp; exporting files">​</a></h4>
+<p><code>export-headlines</code><br>
+<!-- -->Exports all headlines to an external file.</p>
+<p><code>file-insert</code><br>
+<!-- -->Prompts for the name of a file and put the selected text into it.</p>
+<p><code>flatten-outline</code><br>
+<!-- -->Creates a text file in MORE format from the selected outline.</p>
+<p><code>import-file</code><br>
+<!-- -->Import a file into an <em>@file</em> node. This command handles files regardless of whether they contain sentinels. This command can also read files in MORE outline format.</p>
+<p><code>import-MORE-file</code><br>
+<!-- -->Import one or MORE files into <em>@file</em> nodes.</p>
+<p><code>import-tabbed-files</code><br>
+<!-- -->Import one or more tab-or-space-delimited files into <em>@file</em> nodes.</p>
+<p><code>import-zim-folder</code><br>
+<!-- -->Imports a zim folder, <a href="https://zim-wiki.org/" target="_blank" rel="noopener noreferrer">zim-wiki.org</a> , as the last top-level node of the outline. This command uses the following Leo settings:</p>
+<div class="codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">@int rst_level = 0</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">@string rst_type</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">@string zim_node_name</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">@string path_to_zim</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p><code>outline-to-cweb</code><br>
+<!-- -->Creates a <a href="https://www-cs-faculty.stanford.edu/~knuth/cweb.html" target="_blank" rel="noopener noreferrer">CWEB</a> file from the selected outline.</p>
+<p><code>outline-to-noweb</code><br>
+<!-- -->Creates a <a href="https://www.cs.tufts.edu/~nr/noweb/" target="_blank" rel="noopener noreferrer">noweb</a> file from the selected outline.</p>
+<p><code>read-at-auto-nodes</code><br>
+<!-- -->Reads all <em>@auto</em> nodes in the presently selected outline.</p>
+<p><code>read-at-shadow-nodes</code><br>
+<!-- -->Reads all <em>@shadow</em> nodes in the presently selected outline.</p>
+<p><code>read-at-file-nodes</code><br>
+<!-- -->Updates all @&lt;file&gt; nodes in an outline.</p>
+<p><code>read-file-into-node</code><br>
+<!-- -->Prompts for a filename, creates a new node and puts the contents of the file into its body text.</p>
+<p><code>refresh-from-disk</code><br>
+<!-- -->Refreshes an @&lt;file&gt; node from disk.</p>
+<p><code>remove-sentinels</code><br>
+<!-- -->Removes all sentinel lines from a file derived from an <em>@file</em> node.</p>
+<p><code>weave</code><br>
+<!-- -->Formats the selected text and writes it to a file.</p>
+<p><code>write-file-from-node</code><br>
+<!-- -->Writes the body text of the selected node to a file. The command prompts for a file name if the node is not an @&lt;file&gt; node.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="using-sessions">Using sessions<a href="#using-sessions" class="hash-link" aria-label="Direct link to Using sessions" title="Direct link to Using sessions">​</a></h4>
+<p><code>session-clear</code><br>
+<!-- -->Closes all tabs except the presently selected tab.</p>
+<p><code>session-create</code><br>
+<!-- -->Creates a new <em>@session</em> node.</p>
+<p><code>session-refresh</code><br>
+<!-- -->Refreshes the current <em>@session</em> node.</p>
+<p><code>session-restore</code><br>
+<!-- -->Opens a tab for each item the selected <em>@session</em> node.</p>
+<p><code>session-snapshot-load</code><br>
+<!-- -->Loads a snapshot of a session from the leo.session file.</p>
+<p><code>session-snapshot-save</code><br>
+<!-- -->Saves a snapshot of the present session to the leo.session file.</p>
+<p>A <strong>session</strong> specifies a list of .leo files that Leo opens automatically when Leo first starts.  Leo will reload the last session provided that command-line arguments <em>don&#x27;t</em> contain any file names.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="creating--deleting-directories--files">Creating &amp; deleting directories &amp; files<a href="#creating--deleting-directories--files" class="hash-link" aria-label="Direct link to Creating &amp; deleting directories &amp; files" title="Direct link to Creating &amp; deleting directories &amp; files">​</a></h4>
+<p><code>directory-make</code><br>
+<!-- -->Prompts for the name of a directory and creates it.</p>
+<p><code>directory-remove</code><br>
+<!-- -->Prompts for the name of a directory and deletes it.</p>
+<p><code>file-delete</code><br>
+<!-- -->Prompts for the name of a file and delete it.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="managing-recent-files">Managing recent files<a href="#managing-recent-files" class="hash-link" aria-label="Direct link to Managing recent files" title="Direct link to Managing recent files">​</a></h4>
+<p><code>clean-recent-files</code><br>
+<!-- -->Removes duplicate entries from entries in the Recent Files menu.</p>
+<p><code>clear-recent-files</code><br>
+<!-- -->Deletes all entries in the Recent Files except the most recent file. The files themselves are not affected.</p>
+<p><code>sort-recent-files</code><br>
+<!-- -->Sorts the recent files list in the File menu.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="help-commands-1">Help commands<a href="#help-commands-1" class="hash-link" aria-label="Direct link to Help commands" title="Direct link to Help commands">​</a></h3>
+<p><code>about-leo</code><br>
+<!-- -->Puts up a dialog box showing the version of Leo.</p>
+<p><code>help</code><br>
+<!-- -->Shows an introduction to Leo&#x27;s help system.</p>
+<p><code>help-for-command</code><br>
+<!-- -->Prompts for a Leo command name (with auto-completion) and shows the docstring for the command.</p>
+<p><code>help-for-&lt;topic&gt;</code><br>
+<!-- -->Opens a discussion of a topic:</p>
+<ul>
+<li><code>help-for-settings</code></li>
+<li><code>help-for-keystroke</code></li>
+<li><code>help-for-scripting</code></li>
+<li><code>help-for-minibuffer</code></li>
+<li><code>help-for-find-commands</code></li>
+<li><code>help-for-creating-external-files</code></li>
+</ul>
+<p><code>open-online-home</code><br>
+<!-- -->Opens Leo&#x27;s home page at <a href="https://leo-editor.github.io/leo-editor/" target="_blank" rel="noopener noreferrer">https://leo-editor.github.io/leo-editor/</a>.</p>
+<p><code>open-online-toc</code><br>
+<!-- -->Opens Leo&#x27;s table of contents at <a href="https://leo-editor.github.io/leo-editor/leo_toc.html" target="_blank" rel="noopener noreferrer">https://leo-editor.github.io/leo-editor/leo_toc.html</a>.</p>
+<p><code>open-online-tutorials</code><br>
+<!-- -->Opens Leo&#x27;s tutorials page at <a href="https://leo-editor.github.io/leo-editor/tutorial.html" target="_blank" rel="noopener noreferrer">https://leo-editor.github.io/leo-editor/tutorial.html</a>.</p>
+<p><code>open-online-videos</code><br>
+<!-- -->Opens Leo&#x27;s video page at <a href="https://leo-editor.github.io/leo-editor/screencasts.html" target="_blank" rel="noopener noreferrer">https://leo-editor.github.io/leo-editor/screencasts.html</a>.</p>
+<p><code>open-quickstart-leo</code><br>
+<!-- -->Opens Leo&#x27;s quickstart guide in a new tab or window.</p>
+<p><code>open-users-guide</code><br>
+<!-- -->Opens Leo&#x27;s Users Guide at <a href="https://leo-editor.github.io/leo-editor/usersguide.html" target="_blank" rel="noopener noreferrer">https://leo-editor.github.io/leo-editor/usersguide.html</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="minibuffer-commands">Minibuffer commands<a href="#minibuffer-commands" class="hash-link" aria-label="Direct link to Minibuffer commands" title="Direct link to Minibuffer commands">​</a></h3>
+<p><code>full-command (Alt-X)</code><br>
+<!-- -->Opens the minibuffer input box to execute a command by name.</p>
+<p><code>repeat-complex-command</code><br>
+<!-- -->Execute the last command entered from the minibuffer.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="outline-commands-1">Outline commands<a href="#outline-commands-1" class="hash-link" aria-label="Direct link to Outline commands" title="Direct link to Outline commands">​</a></h3>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="creating-cloning--destroying-nodes">Creating, cloning &amp; destroying nodes<a href="#creating-cloning--destroying-nodes" class="hash-link" aria-label="Direct link to Creating, cloning &amp; destroying nodes" title="Direct link to Creating, cloning &amp; destroying nodes">​</a></h4>
+<p><code>clone-node (Ctrl-`)</code><br>
+<!-- -->Creates a clone as the immediate sibling of a selected node. The shortcut uses <a href="https://superuser.com/questions/254076/how-do-i-type-the-tick-and-backtick-characters-on-windows" target="_blank" rel="noopener noreferrer">backtick (grave accent)</a>, <em>not</em> a single quote.</p>
+<p><code>clone-node-to-last-node</code><br>
+<!-- -->Creates a clone as the last top-level node of the outline.</p>
+<p><code>insert-node (Ctrl-I or Insert)</code><br>
+<!-- -->Inserts a new node into the outline.  The new node becomes the first child of the present node if the present node is expanded.  Otherwise, the new node becomes the next sibling of the present node.</p>
+<p><code>insert-node-before</code><br>
+<!-- -->Inserts a node before the presently selected node.</p>
+<p><code>delete-node</code><br>
+<!-- -->Deletes a node and all its descendants.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="expanding--contracting-nodes">Expanding &amp; contracting nodes<a href="#expanding--contracting-nodes" class="hash-link" aria-label="Direct link to Expanding &amp; contracting nodes" title="Direct link to Expanding &amp; contracting nodes">​</a></h4>
+<p><code>contract-all (Alt-hyphen)</code><br>
+<!-- -->Contracts every node in the outline.</p>
+<p><code>contract-all-other-nodes</code><br>
+<!-- -->Contract all nodes except the parents of the selected node.</p>
+<p><code>contract-node</code><br>
+<!-- -->Contracts a node.</p>
+<p><code>contract-or-go-left (Alt-Left)</code><br>
+<!-- -->Contract the node if it is expanded.  Otherwise, select the node&#x27;s parent.</p>
+<p><code>contract-parent</code><br>
+<!-- -->Select the parent of the selected node and contract it.</p>
+<p><code>expand-all</code><br>
+<!-- -->Expands every node in the outline.</p>
+<p><code>expand-node</code><br>
+<!-- -->Expands a node.</p>
+<p><code>expand-and-go-right (Alt-Right)</code><br>
+<!-- -->Expands a node if not expanded.  Otherwise, selects the first child if there is one.</p>
+<p><code>expand-all-subheads</code><br>
+<!-- -->Expand all the direct children of the selected node.</p>
+<p><code>expand-ancestors-only</code><br>
+<!-- -->Expand all the ancestors of the selected node.</p>
+<p>These commands expand all descendants of the selected nodes:</p>
+<ul><p><code>expand-next-level</code><br>
+<code>expand-prev-level</code> (reverses expand-next-level)<br>
+<code>expand-to-level-1</code><br>
+<code>expand-to-level-2</code><br>
+<code>expand-to-level-3</code><br>
+<code>expand-to-level-4</code><br>
+<code>expand-to-level-5</code><br>
+<code>expand-to-level-6</code><br>
+<code>expand-to-level-7</code><br>
+<code>expand-to-level-8</code><br>
+<code>expand-to-level-9</code></p></ul>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="editing-headlines">Editing headlines<a href="#editing-headlines" class="hash-link" aria-label="Direct link to Editing headlines" title="Direct link to Editing headlines">​</a></h4>
+<p><code>edit-headline</code><br>
+<!-- -->Begins editing of the headline of the presently-selected node.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="selecting-nodes">Selecting nodes<a href="#selecting-nodes" class="hash-link" aria-label="Direct link to Selecting nodes" title="Direct link to Selecting nodes">​</a></h4>
+<p><strong>Arrow keys</strong>: When focus is in the outline pane, you can move about the outline using <em>plain</em> arrow keys. Regardless of focus, Alt-Arrow keys select nodes in the outline pane.</p>
+<p><code>goto-first-sibling</code><br>
+<!-- -->Select the first sibling of the selected node.</p>
+<p><code>goto-last-sibling</code><br>
+<!-- -->Select the last sibling of the selected node.</p>
+<p>Similarly, these commands select various nodes in the outline:</p>
+<ul><p><code>go-back</code><br>
+<code>go-forward</code><br>
+<code>goto-char</code><br>
+<code>goto-first-node</code><br>
+<code>goto-first-visible-node</code><br>
+<code>goto-last-node</code><br>
+<code>goto-last-visible-node</code><br>
+<code>goto-line</code><br>
+<code>goto-next-changed</code><br>
+<code>goto-next-clone</code><br>
+<code>goto-next-history-node</code><br>
+<code>goto-next-node</code><br>
+<code>goto-next-sibling</code><br>
+<code>goto-next-visible</code><br>
+<code>goto-parent</code><br>
+<code>goto-prev-history-node</code><br>
+<code>goto-prev-node</code><br>
+<code>goto-prev-sibling</code><br>
+<code>goto-prev-visible</code></p></ul>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="cutting-pasting--deleting-nodes">Cutting, pasting &amp; deleting nodes<a href="#cutting-pasting--deleting-nodes" class="hash-link" aria-label="Direct link to Cutting, pasting &amp; deleting nodes" title="Direct link to Cutting, pasting &amp; deleting nodes">​</a></h4>
+<p><code>copy-node (Ctrl-Shift-C)</code><br>
+<!-- -->Copies a node and all its descendants to the clipboard</p>
+<p><code>cut-node (Ctrl-Shift-X)</code><br>
+<!-- -->Copies a node and all its descendants to the clipboard and then delete them.</p>
+<p><code>delete-node</code><br>
+<!-- -->Deletes a node and all its descendants.</p>
+<p><code>paste-node (Ctrl-Shift-V)</code><br>
+<!-- -->Pastes a node and its descendants from the outline. This commands creates <em>copies</em> of nodes, not clones.</p>
+<p><code>past-retaining-clones</code><br>
+<!-- -->Pastes a node and its descendants from the outline.  This command preserves the identify (gnx&#x27;s) of the pasted nodes, thereby preserving any clone links. This command ensures that no newly-pasted node is an ancestor of itself.</p>
+<p><strong>Outline representation</strong>: When cutting or copying an outline to the clipboard, Leo writes the outline in the same xml (text) format used in .leo files. You may copy this text representation into a body pane (or into any other text editor) using <code>Ctrl-V</code>.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="moving--reorganizing-nodes">Moving &amp; reorganizing nodes<a href="#moving--reorganizing-nodes" class="hash-link" aria-label="Direct link to Moving &amp; reorganizing nodes" title="Direct link to Moving &amp; reorganizing nodes">​</a></h4>
+<p><code>move-outline-down (Ctrl-D or Shift-Down or Alt-Shift-Down)</code><br>
+<!-- -->Move the selected node down, if possible.</p>
+<p><code>move-outline-left (Ctrl-L or Shift-Left or Alt-Shift-Left)</code><br>
+<!-- -->Move the selected node left, if possible.</p>
+<p><code>move-outline-right (Ctrl-R or Shift-Right or Alt-Shift-Right)</code><br>
+<!-- -->Move the selected node right, if possible.</p>
+<p><code>move-outline-up (Ctrl-U or Shift-Up Alt-Shift-Up)</code><br>
+<!-- -->Move the selected node up, if possible.</p>
+<p><strong>Alt Modifiers not needed in the outline pane</strong>: When focus is in the outline pane, you can move nodes without adding the Alt modifier. Shift-Up moves the select node up, etc.</p>
+<p><strong>Important</strong>: The following commands reorganize groups of nodes:</p>
+<p><code>de-hoist</code><br>
+<!-- -->Undoes the effect of the previous <em>hoist</em> command.</p>
+<p><code>demote (Ctrl-])</code><br>
+<!-- -->Makes all following siblings of a node children of the node.</p>
+<p><code>hoist</code><br>
+<!-- -->Redraws the screen so presently selected tree becomes the only visible part of the outline. You may hoist an outline as many times as you wish.</p>
+<p><code>promote (Ctrl-[)</code><br>
+<!-- -->Makes all the children of a node siblings of the node.</p>
+<p><code>sort-children</code><br>
+<!-- -->Sort all children of the children of the present node by their headlines.</p>
+<p><code>sort-siblings (Alt-A)</code><br>
+<!-- -->Sort the present node and all its siblings by their headlines.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="converting-between-outlines-and-text">Converting between outlines and text<a href="#converting-between-outlines-and-text" class="hash-link" aria-label="Direct link to Converting between outlines and text" title="Direct link to Converting between outlines and text">​</a></h4>
+<p><code>code-to-rst</code><br>
+<!-- -->Format the presently selected node as computer code.</p>
+<p><code>flatten-outline-to-node</code><br>
+<!-- -->Appends the headline and body text of all descendants of the selected node to the body text of the selected node.</p>
+<p><code>parse-body</code><br>
+<!-- -->Parse p.b as source code, creating a tree of descendant nodes. This is essentially an import of p.b.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="marking-nodes">Marking nodes<a href="#marking-nodes" class="hash-link" aria-label="Direct link to Marking nodes" title="Direct link to Marking nodes">​</a></h4>
+<p><code>copy-marked</code><br>
+<!-- -->Copies all marked nodes as children of a new node.</p>
+<p><code>diff-marked-nodes</code><br>
+<!-- -->When exactly two nodes are marked, this command creates a diff node as the last top-level node whose children are clones of the marked nodes.</p>
+<p><code>goto-next-marked</code><br>
+<!-- -->Selects the next marked node.</p>
+<p><code>mark (Ctrl-M)</code><br>
+<!-- -->Marks node if it is unmarked, and unmarks the node if it is already marked.</p>
+<p><code>mark-changed-items</code><br>
+<!-- -->Marks all nodes whose headline or body text has been changed since the file was last saved.</p>
+<p><code>mark-subheads</code><br>
+<!-- -->Marks all children of the presently selected node.</p>
+<p><code>marked-list</code><br>
+<!-- -->Lists all marked nodes in the Nav pane.</p>
+<p><code>unmark-all</code><br>
+<!-- -->Unmarks all marked nodes in the outline.</p>
+<p><strong>Marking groups of nodes</strong>: Leo&#x27;s find and change commands mark nodes if the &quot;Mark Changes&quot; and &quot;Mark Finds&quot; checkboxes are checked. You can change these checkboxes with the <code>toggle-find-mark-changes-option</code> and <code>toggle-find-mark-finds-option</code> commands.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="operations-on-marked-nodes">Operations on marked nodes<a href="#operations-on-marked-nodes" class="hash-link" aria-label="Direct link to Operations on marked nodes" title="Direct link to Operations on marked nodes">​</a></h4>
+<p><code>clone-marked-nodes</code><br>
+<!-- -->Makes clones of all marked nodes and moves them to be children of the present position.</p>
+<p><code>delete-marked-nodes</code><br>
+<!-- -->Deletes all marked nodes.</p>
+<p><code>move-marked-nodes</code><br>
+<!-- -->Moves all nodes to be children of the present position.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="comparing-outlines">Comparing outlines<a href="#comparing-outlines" class="hash-link" aria-label="Direct link to Comparing outlines" title="Direct link to Comparing outlines">​</a></h4>
+<p><code>file-compare-leo-files</code><br>
+<!-- -->Prompts for another (presumably similar) .leo file that will be compared with the presently selected outline file (main window). It then creates clones of all inserted, deleted and changed nodes.</p>
+<p><code>file-diff-files</code><br>
+<!-- -->Creates a node and puts the diff between 2 files into it.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="using-chapters">Using Chapters<a href="#using-chapters" class="hash-link" aria-label="Direct link to Using Chapters" title="Direct link to Using Chapters">​</a></h4>
+<p>@chapter trees define chapters. Selecting a chapter makes only those nodes in the chapter visible, much like a hoist. The <em>main</em> chapter represents the entire outline. Selecting the <em>main</em> chapter shows all outline nodes.</p>
+<p><code>chapter-select-main</code><br>
+<!-- -->Selects the main chapter.</p>
+<p><code>chapter-select-&lt;chapter-name&gt;</code><br>
+<!-- -->Each <em>@chapter</em> node in the outline creates a corresponding <em>chapter-select</em> command.</p>
+<p><code>chapter-next</code><br>
+<!-- -->Selects the next chapter.</p>
+<p><code>chapter-back</code><br>
+<!-- -->Selects the previous chapter.</p>
+<p>Associated settings:</p>
+<ul><p><code>@bool use_chapters</code><br>
+<!-- -->True: chapters are enabled.</p></ul>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="plugins-commands">Plugins commands<a href="#plugins-commands" class="hash-link" aria-label="Direct link to Plugins commands" title="Direct link to Plugins commands">​</a></h3>
+<p><code>act-on-node</code><br>
+<!-- -->Executes node-specific action, typically defined in a plugins as follows:</p>
+<div class="language-js codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-js codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token keyword" style="color:#00009f">function</span><span class="token plain"> </span><span class="token function" style="color:#d73a49">act_print_upcase</span><span class="token punctuation" style="color:#393A34">(</span><span class="token parameter">c</span><span class="token parameter punctuation" style="color:#393A34">,</span><span class="token parameter"> p</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token keyword control-flow" style="color:#00009f">if</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">(</span><span class="token operator" style="color:#393A34">!</span><span class="token plain">p</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">h</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">startsWith</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;@up&#x27;</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">        </span><span class="token keyword control-flow" style="color:#00009f">throw</span><span class="token plain"> </span><span class="token keyword" style="color:#00009f">new</span><span class="token plain"> </span><span class="token class-name">Error</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;Try Next&#x27;</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    </span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">    p</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">h</span><span class="token plain"> </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> p</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">h</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">toUpperCase</span><span class="token punctuation" style="color:#393A34">(</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">g</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">act_on_node</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">add</span><span class="token punctuation" style="color:#393A34">(</span><span class="token plain">act_print_upcase</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>This will upcase the headline when it starts with <code>@up</code>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="search--spell-commands">Search &amp; spell commands<a href="#search--spell-commands" class="hash-link" aria-label="Direct link to Search &amp; spell commands" title="Direct link to Search &amp; spell commands">​</a></h3>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="basic-searches">Basic searches<a href="#basic-searches" class="hash-link" aria-label="Direct link to Basic searches" title="Direct link to Basic searches">​</a></h4>
+<p><code>start-search (Ctrl-F)</code><br>
+<!-- -->Prompts for a search string. Typing the <em>Return</em> key puts the search string in the Find tab and executes a search based on all the settings in the Find tab. Type <em>Tab</em> to enter replacement text.</p>
+<p><code>find-next (F3)</code><br>
+<!-- -->Continues a search started with <em>Ctrl-F</em>.</p>
+<p><code>find-previous (F2)</code><br>
+<!-- -->Searches backwards using the present search options.</p>
+<p><code>replace (Ctrl-=)</code><br>
+<!-- -->Replaces the selected text with the &#x27;change&#x27; text in the Find tab.</p>
+<p><code>replace-then-find (Ctrl--)</code><br>
+<!-- -->Replaces the selected text with the &#x27;change&#x27; text in the Find tab, then executes the find command again.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="searches-creating-clones">Searches creating clones<a href="#searches-creating-clones" class="hash-link" aria-label="Direct link to Searches creating clones" title="Direct link to Searches creating clones">​</a></h4>
+<p><code>clone-find-all-flattened</code> aka <code>(cfaf)</code><br>
+<!-- -->Prompts for a find, then creates clones of all found nodes in an organizer node.</p>
+<p><code>clone-find-all</code> aka <code>(cfa)</code><br>
+<!-- -->Same as <em>clone-find-all-flattened</em>, but does not create duplicate cloned nodes. If a node is a descendant of another found node, no duplicate top-level node (in the organizer) is created.</p>
+<p><code>clone-find-marked</code> aka <code>(cfm)</code> and<br>
+<code>clone-find-marked-flattened</code> aka <code>(cfmf)</code><br>
+<!-- -->Creates clones of all marked nodes.</p>
+<p><code>clone-find-parents</code><br>
+<!-- -->Creates an organizer node containing clones of all the parents of the selected node.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="batch-searches">Batch searches<a href="#batch-searches" class="hash-link" aria-label="Direct link to Batch searches" title="Direct link to Batch searches">​</a></h4>
+<p><code>find-all</code><br>
+<!-- -->Prints all matches in the log pane.</p>
+<p><code>replace-all</code><br>
+<!-- -->Changes all occurrences of the &#x27;find&#x27; text with the &#x27;change&#x27; text.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="word-search-and-regex-search-commands">Word search and regex search commands<a href="#word-search-and-regex-search-commands" class="hash-link" aria-label="Direct link to Word search and regex search commands" title="Direct link to Word search and regex search commands">​</a></h4>
+<p>The following commands work like <code>F3 (start-search)</code> with various options set:</p>
+<p><code>search-backward</code><br>
+<!-- -->Searches in the reverse direction.</p>
+<p><code>word-search-backward</code> and <code>word-search-forward</code><br>
+<!-- -->Sets &#x27;Whole Word&#x27; checkbox to True.</p>
+<p><code>re-search-forward</code> and <code>re-search-backward</code><br>
+<!-- -->Set the &#x27;Regexp&#x27; checkbox to True.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="check-boxes-and-their-commands">Check boxes and their commands<a href="#check-boxes-and-their-commands" class="hash-link" aria-label="Direct link to Check boxes and their commands" title="Direct link to Check boxes and their commands">​</a></h4>
+<p>The following check boxes options appear in the Find pane:</p>
+<p><code>Ignore Case</code><br>
+<!-- -->When checked, the Find and Change commands ignore the case of alphabetic characters when determining matches.</p>
+<p><code>Alt+Ctrl+I (toggle-find-ignore-case-option)</code> toggles this checkbox.</p>
+<p><code>Mark Changes</code><br>
+<!-- -->When checked, the Change command marks all headlines whose headline or body text are changed by the command.</p>
+<p><code>Alt+Ctrl+C (toggle-find-mark-changes-option)</code> toggles this checkbox.</p>
+<p><code>Mark Matches</code><br>
+<!-- -->When checked, the Find and Change commands mark all headlines in which a match is found with the pattern.</p>
+<p><code>Alt+Ctrl+F (toggle-find-mark-finds-option)</code> toggles this checkbox.</p>
+<p><code>Pattern Match</code><br>
+<!-- -->When checked, the Find and Change commands treat several characters specially in the find pattern.</p>
+<p><code>Alt+Ctrl+X (toggle-find-regex-option)</code> toggles this checkbox.</p>
+<ul>
+<li>&#x27;*&#x27;  matches any sequence of zero or more characters.</li>
+<li>&#x27;.&#x27;  matches any single character.</li>
+<li>&#x27;^&#x27;  matches a newline at the start of a pattern.</li>
+<li>&#x27;$&#x27;  matches a newline at the end of a pattern.</li>
+</ul>
+<p>Examples:</p>
+<ul>
+<li>&quot;^abc$&quot; matches lines that only contain &quot;abc&quot;.</li>
+<li>&quot;^a&quot; matches any line starting with &quot;A&quot;.</li>
+<li>&quot;a$&quot; matches any line ending with &quot;a&quot;.</li>
+<li>&quot;^*$&quot; matches any line at all.</li>
+</ul>
+<p><code>Search Body Text</code><br>
+<!-- -->When checked, the Find and Change commands search body text.</p>
+<p><code>Alt+Ctrl+B (toggle-find-in-body-option)</code> toggles this checkbox.</p>
+<p><code>Search Headline Text</code><br>
+<!-- -->When checked, the Find and Change commands search headline text.</p>
+<p><code>Alt+Ctrl+H (toggle-find-in-headline-option)</code> toggles this checkbox.</p>
+<p><code>Whole Word</code><br>
+<!-- -->When selected, the find pattern must match an entire word. Words consist of an alphabetic character or underscore, followed by zero or more alphabetic characters, numbers or underscores.</p>
+<p><code>Alt+Ctrl+W (toggle-find-word-option)</code> toggles this checkbox.</p>
+<p><code>Wrap Around</code><br>
+<!-- -->When checked, the Find and Change commands continues at the top of the file when the command reaches the bottom of the file. For reverse searches, the find or change command continues at the bottom of the file when the command reaches the top of the file.</p>
+<p><code>Alt+Ctrl+A (toggle-find-wrap-around-option)</code> toggles this checkbox.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="radio-buttons-and-their-commands">Radio buttons and their commands<a href="#radio-buttons-and-their-commands" class="hash-link" aria-label="Direct link to Radio buttons and their commands" title="Direct link to Radio buttons and their commands">​</a></h4>
+<p>The following radio buttons appear in the Find pane:</p>
+<p><code>Entire Outline</code><br>
+<!-- -->When selected, Find commands search the entire outline.</p>
+<p><code>Alt+Ctrl+E (set-find-everywhere)</code> sets this radio button.</p>
+<p><code>Node Only</code><br>
+<!-- -->When selected, Find commands search only the selected node.</p>
+<p><code>Alt+Ctrl+N (set-find-node-only)</code> sets this radio button</p>
+<p><code>Suboutline Only</code><br>
+<!-- -->When selected, the Find and Change commands search only the currently
+selected headline and its offspring.</p>
+<p><code>Alt+Ctrl+S (set-find-suboutline-only)</code> sets this radio button.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="settings-commands">Settings commands<a href="#settings-commands" class="hash-link" aria-label="Direct link to Settings commands" title="Direct link to Settings commands">​</a></h3>
+<p><code>open-local-settings</code><br>
+<!-- -->Select the <em>@settings</em> node in the present file, if any.</p>
+<p><code>open-myLeoSettings-leo</code><br>
+<!-- -->Open <em>myLeoSettings.leo</em> in a new window.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="user-attributes-uas">User Attributes (uA&#x27;s)<a href="#user-attributes-uas" class="hash-link" aria-label="Direct link to User Attributes (uA&#x27;s)" title="Direct link to User Attributes (uA&#x27;s)">​</a></h3>
+<p><code>clear-all-uas</code><br>
+<!-- -->command description</p>
+<p><code>clear-node-uas</code><br>
+<!-- -->command description</p>
+<p><code>show-all-uas</code><br>
+<!-- -->command description</p>
+<p><code>show-node-uas</code><br>
+<!-- -->command description</p>
+<p><code>set-ua</code><br>
+<!-- -->command description</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="key-reference">Key Reference<a href="#key-reference" class="hash-link" aria-label="Direct link to Key Reference" title="Direct link to Key Reference">​</a></h2>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="selecting-outline-nodes-1">Selecting outline nodes<a href="#selecting-outline-nodes-1" class="hash-link" aria-label="Direct link to Selecting outline nodes" title="Direct link to Selecting outline nodes">​</a></h3>
+<p>When focus is in the outline pane:</p>
+<ul>
+<li>Right-arrow (expand-and-go-right)</li>
+<li>Left-arrow (contract-or-go-left)</li>
+<li>Up-arrow (goto-prev-visible)</li>
+<li>Down-arrow (goto-next-visible)</li>
+</ul>
+<p>Regardless of focus:</p>
+<ul>
+<li>Alt-Home (goto-first-visible-node)</li>
+<li>Alt-End (goto-last-visible-node)</li>
+<li>Alt-Right-arrow (expand-and-go-right)</li>
+<li>Alt-Left-arrow (contract-or-go-left)</li>
+<li>Alt-Up-arrow (goto-prev-visible)</li>
+<li>Alt-Down-arrow (goto-next-visible)</li>
+</ul>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="moving-outline-nodes">Moving outline nodes<a href="#moving-outline-nodes" class="hash-link" aria-label="Direct link to Moving outline nodes" title="Direct link to Moving outline nodes">​</a></h3>
+<p>When focus is in the outline:</p>
+<ul>
+<li>Shift-Down-arrow (move-outline-down)</li>
+<li>Shift-Left-arrow (move-outline-left)</li>
+<li>Shift-Right-arrow (move-outline-right)</li>
+<li>Shift-Up-arrow (move-outline-up)</li>
+</ul>
+<p>Regardless of focus:</p>
+<ul>
+<li>Alt-Shift-Down-arrow (move-outline-down)</li>
+<li>Alt-Shift-Left-arrow (move-outline-left)</li>
+<li>Alt-Shift-Right-arrow (move-outline-right)</li>
+<li>Alt-Shift-Up-arrow (move-outline-up)</li>
+<li>Ctrl-D (move-outline-down)</li>
+<li>Ctrl-L (move-outline-left)</li>
+<li>Ctrl-R (move-outline-right)</li>
+<li>Ctrl-U (move-outline-up)</li>
+</ul></div></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/leojs/docs/users-guide/customizing"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Customizing Leo</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/leojs/docs/users-guide/directives"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Directives Reference</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#executing-commands-from-the-minibuffer" class="table-of-contents__link toc-highlight">Executing commands from the minibuffer</a></li><li><a href="#most-important-commands" class="table-of-contents__link toc-highlight">Most important commands</a><ul><li><a href="#file-operations--sessions" class="table-of-contents__link toc-highlight">File operations &amp; sessions</a></li><li><a href="#switching-focus" class="table-of-contents__link toc-highlight">Switching focus</a></li><li><a href="#outline-commands" class="table-of-contents__link toc-highlight">Outline commands</a></li><li><a href="#selecting-outline-nodes" class="table-of-contents__link toc-highlight">Selecting outline nodes</a></li><li><a href="#finding--replacing-text" class="table-of-contents__link toc-highlight">Finding &amp; replacing text</a></li><li><a href="#formatting-text" class="table-of-contents__link toc-highlight">Formatting text</a></li><li><a href="#undoing-and-redoing-changes" class="table-of-contents__link toc-highlight">Undoing and redoing changes</a></li><li><a href="#clone-find-commands" class="table-of-contents__link toc-highlight">Clone-find commands</a></li><li><a href="#syncing-clean-files" class="table-of-contents__link toc-highlight">Syncing @clean files</a></li><li><a href="#help-commands" class="table-of-contents__link toc-highlight">Help commands</a></li></ul></li><li><a href="#all-other-commands" class="table-of-contents__link toc-highlight">All other commands</a><ul><li><a href="#clone-find-commands-1" class="table-of-contents__link toc-highlight">Clone-find commands</a></li><li><a href="#edit-commands" class="table-of-contents__link toc-highlight">Edit commands</a></li><li><a href="#file-commands" class="table-of-contents__link toc-highlight">File commands</a></li><li><a href="#help-commands-1" class="table-of-contents__link toc-highlight">Help commands</a></li><li><a href="#minibuffer-commands" class="table-of-contents__link toc-highlight">Minibuffer commands</a></li><li><a href="#outline-commands-1" class="table-of-contents__link toc-highlight">Outline commands</a></li><li><a href="#plugins-commands" class="table-of-contents__link toc-highlight">Plugins commands</a></li><li><a href="#search--spell-commands" class="table-of-contents__link toc-highlight">Search &amp; spell commands</a></li><li><a href="#settings-commands" class="table-of-contents__link toc-highlight">Settings commands</a></li><li><a href="#user-attributes-uas" class="table-of-contents__link toc-highlight">User Attributes (uA&#39;s)</a></li></ul></li><li><a href="#key-reference" class="table-of-contents__link toc-highlight">Key Reference</a><ul><li><a href="#selecting-outline-nodes-1" class="table-of-contents__link toc-highlight">Selecting outline nodes</a></li><li><a href="#moving-outline-nodes" class="table-of-contents__link toc-highlight">Moving outline nodes</a></li></ul></li></ul></div></div></div></div></main></div></div></div></div></div>
+</body>
+</html>
