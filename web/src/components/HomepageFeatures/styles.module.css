@@ -1,0 +1,16 @@
+/*@+leo-ver=5-thin*/
+/*@+node:felix.20240816231006.1: * @file src/components/HomepageFeatures/styles.module.css*/
+/*@@language css*/
+/*@@tabwidth -4*/
+.features {
+  display: flex;
+  align-items: center;
+  padding: 0 0;
+  width: 100%;
+}
+
+.featureSvg {
+  height: 200px;
+  width: 200px;
+}
+/*@-leo*/

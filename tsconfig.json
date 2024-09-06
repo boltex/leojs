@@ -25,6 +25,7 @@
 		"node_modules",
 		"types",
 		"docs",
+		"web",
 		// "src/test", /* UNCOMMENT FOR TYPES GENERATION! */
 		/*
 

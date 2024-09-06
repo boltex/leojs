@@ -1,0 +1,198 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+ 
+ #__docusaurus {
+   [class^='docMainContainer_'] {
+     max-width: initial;
+ 
+     > .container {
+       max-width: initial;
+ 
+       > .row {
+         flex-wrap: nowrap;
+       }
+     }
+   }
+ 
+   [class^='docRoot_'] {
+     > div {
+       flex-grow: 1;
+       min-width: 0;
+     }
+   }
+ }
+ 
+
+ /* 
+  border-left: var(--ifm-blockquote-border-left-width) solid var(--ifm-blockquote-border-color);
+  box-shadow: var(--ifm-blockquote-shadow);
+  color: var(--ifm-blockquote-color);
+  font-size: var(--ifm-blockquote-font-size);
+  margin: 0 0 var(--ifm-spacing-vertical);
+  padding: var(--ifm-blockquote-padding-vertical) var(--ifm-blockquote-padding-horizontal);
+ */
+
+
+/* You can override the default Infima variables here. */
+/* --ifm-footer-background-color: #dfd7ce; */
+/* --ifm-footer-background-color: #a55420; */
+:root {
+  --ifm-blockquote-shadow: none;
+  --ifm-blockquote-border-left-width: 3px;
+  --ifm-blockquote-border-color: #dc9543;
+  --ifm-blockquote-color: #4b4238;
+  --ifm-blockquote-font-size: 100%;
+  --ifm-blockquote-padding-vertical: 0;
+  --ifm-blockquote-padding-horizontal: 1rem;
+
+  --ifm-footer-background-color: #828282;
+  --ifm-footer-link-color: #fff;
+  --ifm-footer-title-color: #fff;
+  --ifm-footer-color: #fff;
+
+  --ifm-color-primary: #c26b2e;
+  --ifm-color-primary-dark: #af6029;
+  --ifm-color-primary-darker: #a55b27;
+  --ifm-color-primary-darkest: #884b20;
+  --ifm-color-primary-light: #d07738;
+  --ifm-color-primary-lighter: #d27d42;
+  --ifm-color-primary-lightest: #d9915f;
+
+  --ifm-color-secondary: #e7e6e1;
+  --ifm-color-secondary-dark: #d3d1c8;
+  --ifm-color-secondary-darker: #c9c6bb;
+  --ifm-color-secondary-darkest: #aaa795;
+  --ifm-color-secondary-light: #fbfbfa;
+  --ifm-color-secondary-lighter: #ffffff;
+  --ifm-color-secondary-lightest: #ffffff;
+
+  --ifm-color-primary-saturated: #ba4d00;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --custom-hero-bg: url('/img/banner-leojs-trans-1600.png');
+  --custom-hero-bg2: url('/img/banner-leojs-trans-1200.png');
+  --custom-hero-bg3: url('/img/banner-leojs-trans-800.png');
+  --custom-hero-bg-before: linear-gradient(45deg, rgba(194, 107, 46, 0.5), rgba(150, 59, 29, 0.9));
+  
+  --custom-body-bg: #fdf4f5;
+  --custom-sidebar-bg: #ffffe0;
+
+  --custom-home-quote-color: #338bae; 
+  --custom-home-author-color: #555;
+
+  --custom-player-after-color: #ffffff33;
+
+  --ifm-blockquote-padding-vertical: 0.3rem;
+  --ifm-table-cell-padding: 0.35rem;
+  --ifm-table-border-width: 0;
+  --ifm-table-border-color: #ccc;
+  --ifm-table-head-background: transparent;
+
+  --ifm-table-stripe-background: rgba(0, 0, 0, 0.03);
+  --ifm-table-background: transparent ;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* --ifm-footer-background-color: #141210; */
+/* --ifm-footer-background-color: #552e16; */
+[data-theme="dark"] {
+  --ifm-blockquote-border-color: #c27d22;
+  --ifm-blockquote-color: #f0e4be;
+
+  --ifm-footer-background-color: #161616;
+
+  --ifm-color-primary: #b15435;
+  --ifm-color-primary-dark: #9f4c30;
+  --ifm-color-primary-darker: #96472d;
+  --ifm-color-primary-darkest: #7c3b25;
+  --ifm-color-primary-light: #c35c3a;
+  --ifm-color-primary-lighter: #c66342;
+  --ifm-color-primary-lightest: #ce795d;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  --custom-hero-bg-before: linear-gradient(45deg, rgba(255, 164, 116, 0.9), rgba(122, 38, 21, 0.4));
+
+  --custom-body-bg: #1d1b1b;
+  --custom-sidebar-bg: #24201c;
+
+  --custom-home-quote-color: #92c4e1;
+  --custom-home-author-color: #dcdcdc;
+  
+  --custom-player-after-color: #00000033;
+
+}
+
+blockquote {
+  background-color: var(--custom-sidebar-bg);
+  border-left-width: var(--ifm-alert-border-left-width);
+  border-radius: var(--ifm-alert-border-radius);
+  box-shadow: var(--ifm-alert-shadow);
+}
+
+/* .theme-doc-sidebar-container {
+  background-color: var(--custom-sidebar-bg);
+} */
+
+
+.customPlayer1, .customPlayer2 {
+  border-radius: 20px;
+  box-shadow: 1px 1px 3px 3px #00000030;
+  overflow: hidden;
+  position: relative;
+  margin: auto;
+}
+
+.react-player__preview:before {
+  content: "";
+  position: absolute;
+  background-color: var( --custom-player-after-color);
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  text-align: center;
+}
+
+.customPlayer2 {
+  margin-top: 1rem;
+}
+
+.customPlayer1 .react-player__preview:after {
+  content: "Introduction to Leo ";
+  top: 8px;
+}
+.customPlayer2 .react-player__preview:after {
+  content: "Features Demo ";
+  top: 8px;
+}
+
+.react-player__preview:after {
+  position: absolute;
+  color: rgb(28, 30, 33);
+  font-size: 1.25rem;
+  font-weight: 700;
+  left: 10px;
+  right: 0;
+  height: 40px;
+  text-align: center;
+}
+img[src*='#left'] {
+  float: left;
+  margin: 0.75rem;
+}
+img[src*='#right'] {
+  float: right;
+  margin: 0.75rem;
+}
+img[src*='#author'] {
+  float: right;
+  margin-left: 0.75rem;
+  margin-top: -4rem;
+  border-radius: 50%;
+}
