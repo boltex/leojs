@@ -5,7 +5,7 @@
  * and scoped locally.
  */
 
-.heroBanner {
+ .heroBanner {
   padding: 4rem 0;
   text-align: center;
   position: relative;
@@ -18,13 +18,10 @@
 
 .customHero:after {
   filter: blur(11px);
-  background-image: var(--custom-hero-bg2);
+  background-image: url('/img/banner-leojs-trans-1200.png');
   background-size: 100% auto;
   background-position: top;
-
   background-attachment: fixed;
-  
-
   content: '';    
   display: block;
   height: 100%;
@@ -33,7 +30,6 @@
   width: 100%;
   z-index : -100;
   transition: filter 0.9s ease-out;
-
 }
 
 .customHero:before {
@@ -109,7 +105,7 @@
 .puckBg {
   padding-top: 1rem;
   padding-bottom: 1rem;
-  background-image: var(--custom-hero-bg3);
+  background-image: url('/img/banner-leojs-trans-800.png');
   background-color: #8e451527;
   background-attachment: fixed;
   background-position: center;

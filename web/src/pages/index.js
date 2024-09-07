@@ -8,6 +8,7 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 import styles from './index.module.css';
 
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import ReactPlayer from 'react-player/youtube';
 
 function HomepageHeader() {
@@ -51,8 +52,8 @@ export default function Home() {
       <main>
         <h3 className={clsx(styles.subtitle)}>
           <i>‟Leo is a fundamentally different way of organizing data, programs and scripts.”</i><br></br>
-          <span className={clsx(styles.homeQuote)}>LeoJS is a JavaScript implementation designed as an extension for VSCode.</span></h3>
-         
+          <span className={clsx(styles.homeQuote)}>LeoJS is a JavaScript implementation designed as an extension for VSCode.</span>
+        </h3>
 
         <HomepageFeatures featureId="0" />
 
@@ -73,7 +74,14 @@ export default function Home() {
               </div>
             </div>
             <div className={clsx('col col--6')}>
-              <ReactPlayer className="customPlayer1" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
+              <BrowserOnly fallback={<div>Loading...</div>}>
+                {() => {
+                  // const LibComponent =
+                  //   require('some-lib-that-accesses-window').LibComponent;
+                  // return <LibComponent {...props} />;
+                  return <ReactPlayer className="customPlayer1" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
+                }}
+              </BrowserOnly>
             </div>
           </div>
         </div>
@@ -101,7 +109,14 @@ export default function Home() {
         <div className="container">
           <div className="row margin-bottom--md">
             <div className={clsx('col col--6')}>
-              <ReactPlayer className="customPlayer2" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
+              <BrowserOnly fallback={<div>Loading...</div>}>
+                {() => {
+                  // const LibComponent =
+                  //   require('some-lib-that-accesses-window').LibComponent;
+                  // return <LibComponent {...props} />;
+                  return <ReactPlayer className="customPlayer2" light playing width="440px" height="247px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
+                }}
+              </BrowserOnly>
             </div>
             <div className={clsx('col col--6')}>
               <h3 className={clsx(styles.subtitle)}>
