@@ -6,13 +6,18 @@ sidebar_position: 3
 
 This chapter lists almost all of Leo's commands. It starts with a discussion of the Emacs-like minibuffer.
 
-## Executing commands from the minibuffer
+## Using the the minibuffer
 
-Leo’s minibuffer appears at the bottom of Leo’s main window. You use the minibuffer to execute commands by name, and also to accumulate arguments to commands.
+Use `Alt-X` to open the minibuffer input box. You use the minibuffer to execute commands by name.
+
+![Leo's Minibuffer](./img/minibuffer-sc.png)
 
 Every Leo command has a **command name**. In this document, keystrokes that invoke a command will be followed by the command name in parentheses. For example, `Ctrl-S (save-file)` saves a Leo file.
 
-**Very Important**: Leo has hundreds of commands, but because of tab completion you do not have to remember, or even *know about* any of them.  Feel free to ignore commands that you don't use. The following prefixes help find commands by name:
+> 💡 **TIP**\
+> Leo has hundreds of commands, but because of auto-completion you do not have to remember, or even *know about* any of them.  Feel free to ignore commands that you don't use.
+
+The following prefixes help find commands by name:
 
 | Prefix      | Category                     |
 |:------------|:-----------------------------|
@@ -386,8 +391,9 @@ Leo preprocesses all scripts by simulating the writing of a external file to a s
 
 #### Multiple body editors
 
-`open-aside`\
+`open-aside` 🖱️ _Right-Click on node_\
     Detached Body Panes, independent of the selected node, can be opened with the 'Open Aside' command.
+    That command is also available when right-clicking on a node in the outline via its context menu.
 
 #### Undoing changes
 

@@ -51,10 +51,10 @@ Leo highlights URLs whenever syntax is coloring is enabled.
 
 @chapter trees denote a **chapter**. You can **activate** a chapter from the icon area, or with chapter-select commands. Activating a chapter makes only those nodes in the chapter visible. The `main` chapter represents the entire outline. Activating the `main ` chapter shows all outline nodes.
 
- `chapter-select-main`\
+`chapter-select-main`\
     Selects the main chapter.
 
- `chapter-select-<chapter-name>`\
+`chapter-select-<chapter-name>`\
     Selects a chapter by name.
 
 ## Summary
