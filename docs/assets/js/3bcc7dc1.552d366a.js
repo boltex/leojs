@@ -220,6 +220,10 @@ const toc = [{
   "id": "descendant",
   "level": 3
 }, {
+  "value": "Detached Body pane",
+  "id": "detached-body-pane",
+  "level": 3
+}, {
   "value": "Directive",
   "id": "directive",
   "level": 3
@@ -653,6 +657,15 @@ function _createMdxContent(props) {
       children: "Descendant"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "An offspring of a node.  That is, a child, grandchild, etc. of a node."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "detached-body-pane",
+      children: "Detached Body pane"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["In LeoJS, a ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Detached Body Pane"
+      }), " is independent of the selected node. This can be useful when needing to compare some nodes contents to another."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "They can be opened with the 'Open Aside' command. That command is also available when right-clicking on a node in the outline via its context menu."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "directive",
       children: "Directive"

@@ -18,7 +18,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 3
+	sidebar_position: 3,
+	toc_max_heading_level: 2
 };
 const contentTitle = 'FAQ';
 const metadata = {
@@ -35,7 +36,8 @@ const metadata = {
   "version": "current",
   "sidebarPosition": 3,
   "frontMatter": {
-    "sidebar_position": 3
+    "sidebar_position": 3,
+    "toc_max_heading_level": 2
   },
   "sidebar": "advancedTopicsSidebar",
   "previous": {

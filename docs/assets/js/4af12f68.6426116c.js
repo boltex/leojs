@@ -54,8 +54,8 @@ const assets = {
 
 
 const toc = [{
-  "value": "Executing commands from the minibuffer",
-  "id": "executing-commands-from-the-minibuffer",
+  "value": "Using the the minibuffer",
+  "id": "using-the-the-minibuffer",
   "level": 2
 }, {
   "value": "Most important commands",
@@ -290,6 +290,7 @@ function _createMdxContent(props) {
     h3: "h3",
     h4: "h4",
     header: "header",
+    img: "img",
     li: "li",
     p: "p",
     pre: "pre",
@@ -313,22 +314,35 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "This chapter lists almost all of Leo's commands. It starts with a discussion of the Emacs-like minibuffer."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
-      id: "executing-commands-from-the-minibuffer",
-      children: "Executing commands from the minibuffer"
+      id: "using-the-the-minibuffer",
+      children: "Using the the minibuffer"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["Use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "Alt-X"
+      }), " to open the minibuffer input box. You use the minibuffer to execute commands by name."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Leo’s minibuffer appears at the bottom of Leo’s main window. You use the minibuffer to execute commands by name, and also to accumulate arguments to commands."
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
+        alt: "Leo&#39;s Minibuffer",
+        src: (__webpack_require__(7609)/* ["default"] */ .A) + "",
+        width: "441",
+        height: "327"
+      })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["Every Leo command has a ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "command name"
       }), ". In this document, keystrokes that invoke a command will be followed by the command name in parentheses. For example, ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "Ctrl-S (save-file)"
       }), " saves a Leo file."]
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
-        children: "Very Important"
-      }), ": Leo has hundreds of commands, but because of tab completion you do not have to remember, or even ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
-        children: "know about"
-      }), " any of them.  Feel free to ignore commands that you don't use. The following prefixes help find commands by name:"]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
+      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+        children: ["💡 ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: "TIP"
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "Leo has hundreds of commands, but because of auto-completion you do not have to remember, or even ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+          children: "know about"
+        }), " any of them.  Feel free to ignore commands that you don't use."]
+      }), "\n"]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "The following prefixes help find commands by name:"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.table, {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.thead, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.tr, {
@@ -1249,7 +1263,9 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "open-aside"
-      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "Detached Body Panes, independent of the selected node, can be opened with the 'Open Aside' command."]
+      }), " 🖱️ ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+        children: "Right-Click on node"
+      }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "Detached Body Panes, independent of the selected node, can be opened with the 'Open Aside' command.\r\nThat command is also available when right-clicking on a node in the outline via its context menu."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h4, {
       id: "undoing-changes",
       children: "Undoing changes"
@@ -2373,6 +2389,16 @@ function MDXContent(props = {}) {
 }
 
 
+
+/***/ }),
+
+/***/ 7609:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "assets/images/minibuffer-sc-3a1fdf8e499200d1dbd4356650b64342.png");
 
 /***/ }),
 

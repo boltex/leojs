@@ -3141,6 +3141,9 @@ html[data-theme='dark'] {
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
+  --custom-hero-bg: url(/leojs/assets/images/banner-leojs-trans-1600-ed19568d74261be9ad89796762d05d4e.png);
+  --custom-hero-bg2: url(/leojs/assets/images/banner-leojs-trans-1200-05018349a978e2795d803fe80991cf04.png);
+  --custom-hero-bg3: url(/leojs/assets/images/banner-leojs-trans-800-f7e398b69f1d15f54d9651a1628af686.png);
   --custom-hero-bg-before: linear-gradient(45deg, rgba(194, 107, 46, 0.5), rgba(150, 59, 29, 0.9));
 
   --custom-body-bg: #fdf4f5;
@@ -3180,6 +3183,9 @@ html[data-theme='dark'] {
 
   --custom-body-bg: #1d1b1b;
   --custom-sidebar-bg: #24201c;
+
+  --ifm-background-color: #3468ac;
+  --ifm-background-surface-color: #682d2d;
 
   --custom-home-quote-color: #92c4e1;
   --custom-home-author-color: #dcdcdc;
@@ -4095,10 +4101,9 @@ body {
 
 .customHero_Cny7:after {
   filter: blur(11px);
-  background-image: url(/leojs/assets/images/banner-leojs-trans-1200-05018349a978e2795d803fe80991cf04.png);
-  background-size: 100% auto;
-  background-position: top;
-  background-attachment: fixed;
+  background-image: var(--custom-hero-bg);
+  background-size: cover;
+  background-position: center;
   content: '';    
   display: block;
   height: 100%;
@@ -4182,7 +4187,7 @@ body {
 .puckBg_w4pM {
   padding-top: 1rem;
   padding-bottom: 1rem;
-  background-image: url(/leojs/assets/images/banner-leojs-trans-800-f7e398b69f1d15f54d9651a1628af686.png);
+  background-image: var(--custom-hero-bg3);
   background-color: #8e451527;
   background-attachment: fixed;
   background-position: center;

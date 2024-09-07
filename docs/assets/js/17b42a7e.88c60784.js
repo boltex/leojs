@@ -18,7 +18,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 4
+	sidebar_position: 4,
+	toc_max_heading_level: 3
 };
 const contentTitle = 'History of Leo';
 const metadata = {
@@ -35,7 +36,8 @@ const metadata = {
   "version": "current",
   "sidebarPosition": 4,
   "frontMatter": {
-    "sidebar_position": 4
+    "sidebar_position": 4,
+    "toc_max_heading_level": 3
   },
   "sidebar": "appendicesSidebar",
   "previous": {
