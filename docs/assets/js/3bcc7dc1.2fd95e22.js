@@ -426,11 +426,13 @@ function _createMdxContent(props) {
         children: "Glossary"
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: ["This is a short glossary of important terms in Leo's world. For more information about terms, look in the index for links to discussions in other places, especially in ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      children: ["This is a short glossary of important terms in Leo's world. For more information about terms, look in the index for links to discussions in other places, especially in ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "/leojs/docs/getting-started/tutorial-basics",
         children: "Getting Started"
-      }), "_ and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      }), " and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "/leojs/docs/users-guide/directives",
         children: "Directives Reference"
-      }), "_."]
+      }), "."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "",
       children: "@"

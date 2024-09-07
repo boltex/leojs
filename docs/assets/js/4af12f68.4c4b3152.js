@@ -54,8 +54,8 @@ const assets = {
 
 
 const toc = [{
-  "value": "Using the the minibuffer",
-  "id": "using-the-the-minibuffer",
+  "value": "Using the minibuffer",
+  "id": "using-the-minibuffer",
   "level": 2
 }, {
   "value": "Most important commands",
@@ -314,8 +314,8 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "This chapter lists almost all of Leo's commands. It starts with a discussion of the Emacs-like minibuffer."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
-      id: "using-the-the-minibuffer",
-      children: "Using the the minibuffer"
+      id: "using-the-minibuffer",
+      children: "Using the minibuffer"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["Use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "Alt-X"

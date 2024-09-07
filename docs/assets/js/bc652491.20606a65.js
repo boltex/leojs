@@ -401,7 +401,7 @@ function _createMdxContent(props) {
       children: ["With ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "Alt+X"
       }), ", the complete set of commands is discoverable in its entirety through Leo's own command palette: ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
-        href: "/leojs/docs/users-guide/commands#executing-commands-from-the-minibuffer",
+        href: "/leojs/docs/users-guide/commands#using-the-minibuffer",
         children: "Leo's minibuffer"
       }), "."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
