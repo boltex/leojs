@@ -3,42 +3,29 @@
  * bundles Infima by default. Infima is a CSS framework designed to
  * work well for content-centric websites.
  */
- 
- #__docusaurus {
-   [class^='docMainContainer_'] {
-     max-width: initial;
- 
-     > .container {
-       max-width: initial;
- 
-       > .row {
-         flex-wrap: nowrap;
-       }
-     }
-   }
- 
-   [class^='docRoot_'] {
-     > div {
-       flex-grow: 1;
-       min-width: 0;
-     }
-   }
- }
- 
 
- /* 
-  border-left: var(--ifm-blockquote-border-left-width) solid var(--ifm-blockquote-border-color);
-  box-shadow: var(--ifm-blockquote-shadow);
-  color: var(--ifm-blockquote-color);
-  font-size: var(--ifm-blockquote-font-size);
-  margin: 0 0 var(--ifm-spacing-vertical);
-  padding: var(--ifm-blockquote-padding-vertical) var(--ifm-blockquote-padding-horizontal);
- */
+#__docusaurus {
+  [class^='docMainContainer_'] {
+    max-width: initial;
 
+    >.container {
+      max-width: initial;
+
+      >.row {
+        flex-wrap: nowrap;
+      }
+    }
+  }
+
+  [class^='docRoot_'] {
+    >div {
+      flex-grow: 1;
+      min-width: 0;
+    }
+  }
+}
 
 /* You can override the default Infima variables here. */
-/* --ifm-footer-background-color: #dfd7ce; */
-/* --ifm-footer-background-color: #a55420; */
 :root {
   --ifm-blockquote-shadow: none;
   --ifm-blockquote-border-left-width: 3px;
@@ -75,11 +62,11 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
   --custom-hero-bg-before: linear-gradient(45deg, rgba(194, 107, 46, 0.5), rgba(150, 59, 29, 0.9));
-  
+
   --custom-body-bg: #fdf4f5;
   --custom-sidebar-bg: #ffffe0;
 
-  --custom-home-quote-color: #338bae; 
+  --custom-home-quote-color: #338bae;
   --custom-home-author-color: #555;
 
   --custom-player-after-color: #ffffff33;
@@ -91,12 +78,9 @@
   --ifm-table-head-background: transparent;
 
   --ifm-table-stripe-background: rgba(0, 0, 0, 0.03);
-  --ifm-table-background: transparent ;
+  --ifm-table-background: transparent;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-/* --ifm-footer-background-color: #141210; */
-/* --ifm-footer-background-color: #552e16; */
 [data-theme="dark"] {
   --ifm-blockquote-border-color: #c27d22;
   --ifm-blockquote-color: #f0e4be;
@@ -119,7 +103,7 @@
 
   --custom-home-quote-color: #92c4e1;
   --custom-home-author-color: #dcdcdc;
-  
+
   --custom-player-after-color: #00000033;
 
 }
@@ -131,12 +115,8 @@ blockquote {
   box-shadow: var(--ifm-alert-shadow);
 }
 
-/* .theme-doc-sidebar-container {
-  background-color: var(--custom-sidebar-bg);
-} */
-
-
-.customPlayer1, .customPlayer2 {
+.customPlayer1,
+.customPlayer2 {
   border-radius: 20px;
   box-shadow: 1px 1px 3px 3px #00000030;
   overflow: hidden;
@@ -147,7 +127,7 @@ blockquote {
 .react-player__preview:before {
   content: "";
   position: absolute;
-  background-color: var( --custom-player-after-color);
+  background-color: var(--custom-player-after-color);
   pointer-events: none;
   left: 0;
   right: 0;
@@ -164,6 +144,7 @@ blockquote {
   content: "Introduction to Leo ";
   top: 8px;
 }
+
 .customPlayer2 .react-player__preview:after {
   content: "Features Demo ";
   top: 8px;
@@ -179,14 +160,17 @@ blockquote {
   height: 40px;
   text-align: center;
 }
+
 img[src*='#left'] {
   float: left;
   margin: 0.75rem;
 }
+
 img[src*='#right'] {
   float: right;
   margin: 0.75rem;
 }
+
 img[src*='#author'] {
   float: right;
   margin-left: 0.75rem;
