@@ -81,7 +81,7 @@ Leo has hundreds of commands, described in [Leo's Command Reference](../users-gu
 
 A curated set of common commands are accessible through the VSCode UI — toolbar buttons, icon menus, and [key bindings](../users-guide/commands.md#key-reference). Those commands are discoverable via the [VSCode Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette). (accessible through `F1` or `Ctrl+Shift+P`)
 
-With `Alt+X`, the complete set of commands is discoverable in its entirety through Leo's own command palette: [Leo's minibuffer](../users-guide/commands.md#executing-commands-from-the-minibuffer).
+With `Alt+X`, the complete set of commands is discoverable in its entirety through Leo's own command palette: [Leo's minibuffer](../users-guide/commands.md#using-the-minibuffer).
 
 ![Leo's Minibuffer](./img/minibuffer-list.png)\
 _The minibuffer showing all available commands_

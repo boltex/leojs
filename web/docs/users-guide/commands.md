@@ -6,7 +6,7 @@ sidebar_position: 3
 
 This chapter lists almost all of Leo's commands. It starts with a discussion of the Emacs-like minibuffer.
 
-## Using the the minibuffer
+## Using the minibuffer
 
 Use `Alt-X` to open the minibuffer input box. You use the minibuffer to execute commands by name.
 
