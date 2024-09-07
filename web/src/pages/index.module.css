@@ -18,10 +18,9 @@
 
 .customHero:after {
   filter: blur(11px);
-  background-image: url('/img/banner-leojs-trans-1200.png');
-  background-size: 100% auto;
-  background-position: top;
-  background-attachment: fixed;
+  background-image: var(--custom-hero-bg);
+  background-size: cover;
+  background-position: center;
   content: '';    
   display: block;
   height: 100%;
@@ -105,7 +104,7 @@
 .puckBg {
   padding-top: 1rem;
   padding-bottom: 1rem;
-  background-image: url('/img/banner-leojs-trans-800.png');
+  background-image: var(--custom-hero-bg3);
   background-color: #8e451527;
   background-attachment: fixed;
   background-position: center;
