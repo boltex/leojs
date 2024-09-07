@@ -5,7 +5,7 @@ toc_max_heading_level: 2
 
 # Glossary
 
-This is a short glossary of important terms in Leo's world. For more information about terms, look in the index for links to discussions in other places, especially in `Getting Started`_ and `Directives Reference`_.
+This is a short glossary of important terms in Leo's world. For more information about terms, look in the index for links to discussions in other places, especially in [Getting Started](../getting-started/tutorial-basics.md) and [Directives Reference](../users-guide/directives.md).
 
 ## \@
 
