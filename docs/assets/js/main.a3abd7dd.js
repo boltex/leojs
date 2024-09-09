@@ -2780,7 +2780,8 @@ var useDocusaurusContext = __webpack_require__(4586);
 ;// CONCATENATED MODULE: ./src/theme/Footer/index.js
 // Import useLocation
 function Footer(){const{footer}=(0,useThemeConfig/* useThemeConfig */.p)();const location=(0,react_router/* useLocation */.zy)();// Get the current URL pathname
-const{siteConfig}=(0,useDocusaurusContext/* default */.A)();if(location.pathname!==siteConfig.baseUrl||!footer){return null;}const{copyright,links,logo,style}=footer;return/*#__PURE__*/(0,jsx_runtime.jsx)(FooterLayout,{style:style,links:links&&links.length>0&&/*#__PURE__*/(0,jsx_runtime.jsx)(FooterLinks,{links:links}),logo:logo&&/*#__PURE__*/(0,jsx_runtime.jsx)(FooterLogo,{logo:logo}),copyright:copyright&&/*#__PURE__*/(0,jsx_runtime.jsx)(FooterCopyright,{copyright:copyright})});}/* harmony default export */ const theme_Footer = (/*#__PURE__*/react.memo(Footer));
+const{siteConfig}=(0,useDocusaurusContext/* default */.A)();if(location.pathname!==siteConfig.baseUrl||!footer){return null;// Return IF NOT HOMEPAGE
+}const{copyright,links,logo,style}=footer;return/*#__PURE__*/(0,jsx_runtime.jsx)(FooterLayout,{style:style,links:links&&links.length>0&&/*#__PURE__*/(0,jsx_runtime.jsx)(FooterLinks,{links:links}),logo:logo&&/*#__PURE__*/(0,jsx_runtime.jsx)(FooterLogo,{logo:logo}),copyright:copyright&&/*#__PURE__*/(0,jsx_runtime.jsx)(FooterCopyright,{copyright:copyright})});}/* harmony default export */ const theme_Footer = (/*#__PURE__*/react.memo(Footer));
 // EXTERNAL MODULE: ./node_modules/@docusaurus/theme-common/lib/utils/reactUtils.js
 var reactUtils = __webpack_require__(9532);
 // EXTERNAL MODULE: ./node_modules/@docusaurus/theme-common/lib/contexts/colorMode.js
@@ -8235,9 +8236,18 @@ __webpack_require__.r(__webpack_exports__);
               "href": "https://github.com/boltex/leojs"
             }
           ]
+        },
+        {
+          "title": "About",
+          "items": [
+            {
+              "label": "Support LeoJS",
+              "href": "https://boltex.github.io"
+            }
+          ]
         }
       ],
-      "copyright": "Copyright © 1996-2024 <a class=\"footer__link-item\" href=\"https://github.com/edreamleo/\" target=\"_blank\" title=\"Edward K. Ream on Github\">Edward K. Ream</a>\n  and <a class=\"footer__link-item\" href=\"https://github.com/boltex/\" target=\"_blank\" title=\"Félix Malboeuf on Github\">Félix Malboeuf</a>\n.",
+      "copyright": "Copyright © 1996-2024 <a class=\"footer__link-item\" href=\"https://github.com/edreamleo/\" target=\"_blank\" title=\"Edward K. Ream on Github\">Edward K. Ream</a> and <a class=\"footer__link-item\" href=\"https://github.com/boltex/\" target=\"_blank\" title=\"Félix Malboeuf on Github\">Félix Malboeuf</a>.",
       "style": "light"
     },
     "prism": {
@@ -8533,19 +8543,7 @@ __webpack_require__.r(__webpack_exports__);
         "author": "Dan Winkler"
       },
       {
-        "quote": "... the most powerful new concept in code manipulation since VI and Emacs.",
-        "author": "David McNab"
-      },
-      {
-        "quote": "... a revolutionary step in the right direction for programming.",
-        "author": "Brian Takita"
-      },
-      {
-        "quote": "Thanks for a wonderful program - everybody should be using it! It blows the socks off that Java Mind mapping software that won project of the month a while back on sourceforge!",
-        "author": "Derick van Niekerk"
-      },
-      {
-        "quote": "When first I opened Leo, it was out of curiosity. But having used it…I’ll never go back. They’ll have to pry Leo out of my cold, dead fingers! Seriously, it should be renamed ‘Crack Cocaine’ because it’s that addictive. I’m ready to start a 12-Step group.",
+        "quote": "When first I opened Leo, it was out of curiosity. But having used it…I’ll never go back. They’ll have to pry Leo out of my cold, dead fingers!",
         "author": "Travers A. Hough"
       },
       {
@@ -8585,7 +8583,7 @@ __webpack_require__.r(__webpack_exports__);
         "author": "Steve Allen"
       },
       {
-        "quote": "Leo creates living documents. Ideas can be organized and reorganized gradually and then inserted into the appropriate place in a project. Outlines become fluid, allowing infinite depth and by using clones of nodes, arbitrary levels of complexity… Instead of imposing structure, it allows you to impose your own, and then be as creative as you want. This brings the necessary chaos of creativity to heel when it is time to produce the document. The node structure creates ultimate flexibility when it comes to ordering scenes in chapter.",
+        "quote": "Leo creates living documents. Ideas can be organized and reorganized gradually and then inserted into the appropriate place in a project. Outlines become fluid, allowing infinite depth and by using clones of nodes, arbitrary levels of complexity… Instead of imposing structure, it allows you to impose your own, and then be as creative as you want.",
         "author": "Chris George"
       },
       {
