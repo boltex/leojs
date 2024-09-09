@@ -14,7 +14,7 @@ function Footer() {
     const { siteConfig } = useDocusaurusContext();
 
     if (location.pathname !== siteConfig.baseUrl || !footer) {
-        return null;
+        return null; // Return IF NOT HOMEPAGE
     }
     const { copyright, links, logo, style } = footer;
 
