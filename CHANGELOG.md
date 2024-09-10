@@ -6,6 +6,7 @@
 - Implemented c.recursiveImport. 
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
+- Added Leo's documentation updated for LeoJS with Docusaurus.
 
 ## 1.0.5
 

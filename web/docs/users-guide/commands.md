@@ -602,22 +602,16 @@ A **session** specifies a list of .leo files that Leo opens automatically when L
 - `help-for-creating-external-files`
 
 `open-online-home`\
-    Opens Leo's home page at https://leo-editor.github.io/leo-editor/.
-
-`open-online-toc`\
-    Opens Leo's table of contents at https://leo-editor.github.io/leo-editor/leo_toc.html.
+    Opens the LeoJS home page at [https://boltex.github.io/leojs/](/leojs/).
 
 `open-online-tutorials`\
-    Opens Leo's tutorials page at https://leo-editor.github.io/leo-editor/tutorial.html.
+    Opens the LeoJS tutorials page at [https://boltex.github.io/leojs/docs/getting-started/tutorial-basics](../getting-started/tutorial-basics.md).
 
 `open-online-videos`\
-    Opens Leo's video page at https://leo-editor.github.io/leo-editor/screencasts.html.
-
-`open-quickstart-leo`\
-    Opens Leo's quickstart guide in a new tab or window.
+    Opens LeoJS video playlist at [https://www.youtube.com/playlist?list=PLLILWxKl5dBXmdSZqhYEBlK_5AQYNW2xa](https://www.youtube.com/playlist?list=PLLILWxKl5dBXmdSZqhYEBlK_5AQYNW2xa).
 
 `open-users-guide`\
-    Opens Leo's Users Guide at https://leo-editor.github.io/leo-editor/usersguide.html.
+    Opens the LeoJS Users Guide at [https://boltex.github.io/leojs/docs/users-guide/leomarkup](leomarkup.md).
 
 ### Minibuffer commands
 

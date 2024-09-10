@@ -271,7 +271,7 @@ For more information, see Leo's [scripting tutorial](tutorial-scripting.md).
 
 ### \@button and @command nodes
 
-**@command nodes** define a command. Running the command runs a script that can be applied to any outline node. That is, p is bound to the presently selected node, *not* the @button node. **@button nodes** work the same way, and also create a button in the icon area. Pressing that button runs the command. For example, this node defines the print-tree command:
+**@command nodes** define a command. Running the command runs a script that can be applied to any outline node. That is, p is bound to the presently selected node, *not* the @button node. **@button nodes** work the same way, and also create a button in the **[@button panel](#buttons-panel)**. Pressing that button runs the command. For example, this node defines the print-tree command:
 
 First, set a node's headline to: **@command print-tree**
 
