@@ -618,9 +618,6 @@ A **session** specifies a list of .leo files that Leo opens automatically when L
 `full-command (Alt-X)`\
     Opens the minibuffer input box to execute a command by name.
 
-`repeat-complex-command`\
-    Execute the last command entered from the minibuffer.
-
 ### Outline commands
 
 #### Creating, cloning & destroying nodes
