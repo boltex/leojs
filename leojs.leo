@@ -4402,13 +4402,16 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
             if (w_truncated) {
                 void vscode.window.showInformationMessage("Truncating headline");
             }
-
+            if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
+                return w_p;  // The hook claims to have handled the event.
+            }
             const undoData = u.beforeChangeHeadline(w_p);
             c.setHeadString(w_p, p_newHeadline); // Set v.h *after* calling the undoer's before method.
             if (!c.changed) {
                 c.setChanged();
             }
             u.afterChangeHeadline(w_p, 'Edit Headline', undoData);
+            g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
             void this.launchRefresh();
         }
 
@@ -9217,12 +9220,16 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
     if (!p_name) {
         return value;
     }
+    if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
+        return;  // The hook claims to have handled the event.
+    }
     const undoData = u.beforeChangeHeadline(c.p);
     c.setHeadString(c.p, p_name);  // Set v.h *after* calling the undoer's before method.
     if (!c.changed) {
         c.setChanged();
     }
     u.afterChangeHeadline(c.p, 'Edit Headline', undoData);
+    g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
     return value;
 }
 
@@ -21311,6 +21318,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Implemented c.recursiveImport. 
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
+- Added missing headkey1 and headkey2 plugin hooks.
 - Added Leo's documentation updated for LeoJS with Docusaurus.
 
 </t>
