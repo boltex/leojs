@@ -4597,7 +4597,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "2be7583",
+  "gitBranch": "devel",
+  "gitDate": "2024-09-08 22:51:00 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -14400,8 +14403,8 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   }
 ],
 </t>
-<t tx="felix.20221113002623.1">public showSettings(): void {
-    void this.leoSettingsWebview.openWebview();
+<t tx="felix.20221113002623.1">public showSettings(): Promise&lt;unknown&gt; {
+    return this.leoSettingsWebview.openWebview();
 }
 
 </t>
@@ -21332,6 +21335,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Implemented c.recursiveImport. 
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
+- Added Leo's documentation updated for LeoJS with Docusaurus.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

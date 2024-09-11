@@ -579,8 +579,8 @@ export class LeoUI extends NullGui {
         commandBindings.makeAllBindings(this, this._context);
     }
 
-    public showSettings(): void {
-        void this.leoSettingsWebview.openWebview();
+    public showSettings(): Promise<unknown> {
+        return this.leoSettingsWebview.openWebview();
     }
 
     public async put_help(c: Commands, s: string, short_title: string): Promise<void> {

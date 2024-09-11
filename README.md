@@ -2,7 +2,7 @@
 
 > Leo is a fundamentally different way of using and organizing data, programs and scripts.
 
-[LeoJS](https://github.com/boltex/leojs) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/).
+[LeoJS](https://boltex.github.io/leojs/) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/).
 
 _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')._
 
@@ -33,7 +33,7 @@ This video demonstrates many use-cases about working in an online repository wit
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
 -   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
--   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
+-   **'@button' panel** for [creating your own commands with @buttons](https://boltex.github.io/leojs/docs/getting-started/tutorial-basics#button-and-command-nodes)
 -   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
 -   **Nav and Tag panel** search controls are integrated in the Find panel
 -   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
@@ -244,6 +244,6 @@ or on [github](https://github.com/leo-editor/leo-editor).
 
 All who have participated, no matter how small or big the contribution, to the creation of the original Leo Editor!
 
-See [Leo's original acknowledgements webpage](https://leo-editor.github.io/leo-editor/acknowledgements.html).
+See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendices/history#acknowledgements).
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)

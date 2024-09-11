@@ -313,36 +313,23 @@ export class CommanderHelpCommands {
     //@+node:felix.20220612234816.17: *4* c_help.leoHome
     @commander_command(
         'open-online-home',
-        "Open Leo's Home page in a web browser."
+        "Open the LeoJS Home page in a web browser."
     )
     public leoHome(this: Commands): void {
         void vscode.env.openExternal(
-            vscode.Uri.parse('https://leo-editor.github.io/leo-editor/')
-        );
-    }
-
-    //@+node:felix.20220612234816.18: *4* c_help.openLeoTOC
-    @commander_command(
-        'open-online-toc',
-        "Open Leo's tutorials page in a web browser."
-    )
-    public openLeoTOC(this: Commands): void {
-        void vscode.env.openExternal(
-            vscode.Uri.parse(
-                'https://leo-editor.github.io/leo-editor/leo_toc.html'
-            )
+            vscode.Uri.parse('https://boltex.github.io/leojs/')
         );
     }
 
     //@+node:felix.20220612234816.19: *4* c_help.openLeoTutorials
     @commander_command(
         'open-online-tutorials',
-        "Open Leo's tutorials page in a web browser."
+        "Open the LeoJS tutorials page in a web browser."
     )
     public openLeoTutorials(this: Commands): void {
         void vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leo-editor.github.io/leo-editor/tutorial.html'
+                'https://boltex.github.io/leojs/docs/getting-started/tutorial-basics'
             )
         );
     }
@@ -350,12 +337,12 @@ export class CommanderHelpCommands {
     //@+node:felix.20220612234816.20: *4* c_help.openLeoUsersGuide
     @commander_command(
         'open-users-guide',
-        "Open Leo's users guide in a web browser."
+        "Open the LeoJS users guide in a web browser."
     )
     public openLeoUsersGuide(this: Commands): void {
         void vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leo-editor.github.io/leo-editor/usersguide.html"'
+                'https://boltex.github.io/leojs/docs/users-guide/leomarkup'
             )
         );
     }
@@ -363,12 +350,12 @@ export class CommanderHelpCommands {
     //@+node:felix.20220612234816.21: *4* c_help.openLeoVideos
     @commander_command(
         'open-online-videos',
-        "Open Leo's videos page in a web browser."
+        "Open LeoJS video playlist in a web browser."
     )
     public openLeoVideos(this: Commands): void {
         void vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leo-editor.github.io/leo-editor/screencasts.html'
+                'https://www.youtube.com/playlist?list=PLLILWxKl5dBXmdSZqhYEBlK_5AQYNW2xa'
             )
         );
     }
