@@ -8383,9 +8383,11 @@ __webpack_require__.r(__webpack_exports__);
           "label": "Appendices"
         },
         {
+          "aria-label": "GitHub Repository",
+          "className": "navbar--github-link",
+          "position": "right",
           "href": "https://github.com/boltex/leojs",
-          "label": "GitHub",
-          "position": "right"
+          "title": "GitHub Repository"
         }
       ]
     },
