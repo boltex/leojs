@@ -853,7 +853,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 &gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.
 
-[LeoJS](https://github.com/boltex/leojs) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/).
+[LeoJS](https://boltex.github.io/leojs/) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/).
 
 _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')._
 
@@ -884,7 +884,7 @@ This video demonstrates many use-cases about working in an online repository wit
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
 -   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
 -   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
--   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
+-   **'@button' panel** for [creating your own commands with @buttons](https://boltex.github.io/leojs/docs/getting-started/tutorial-basics#button-and-command-nodes)
 -   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
 -   **Nav and Tag panel** search controls are integrated in the Find panel
 -   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
@@ -1095,7 +1095,7 @@ or on [github](https://github.com/leo-editor/leo-editor).
 
 All who have participated, no matter how small or big the contribution, to the creation of the original Leo Editor!
 
-See [Leo's original acknowledgements webpage](https://leo-editor.github.io/leo-editor/acknowledgements.html).
+See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendices/history#acknowledgements).
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
@@ -4402,13 +4402,16 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
             if (w_truncated) {
                 void vscode.window.showInformationMessage("Truncating headline");
             }
-
+            if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
+                return w_p;  // The hook claims to have handled the event.
+            }
             const undoData = u.beforeChangeHeadline(w_p);
             c.setHeadString(w_p, p_newHeadline); // Set v.h *after* calling the undoer's before method.
             if (!c.changed) {
                 c.setChanged();
             }
             u.afterChangeHeadline(w_p, 'Edit Headline', undoData);
+            g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
             void this.launchRefresh();
         }
 
@@ -4597,10 +4600,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "2be7583",
-  "gitBranch": "devel",
-  "gitDate": "2024-09-08 22:51:00 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -9220,12 +9220,16 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
     if (!p_name) {
         return value;
     }
+    if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
+        return;  // The hook claims to have handled the event.
+    }
     const undoData = u.beforeChangeHeadline(c.p);
     c.setHeadString(c.p, p_name);  // Set v.h *after* calling the undoer's before method.
     if (!c.changed) {
         c.setChanged();
     }
     u.afterChangeHeadline(c.p, 'Edit Headline', undoData);
+    g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
     return value;
 }
 
@@ -19368,15 +19372,15 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             LeoJS
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
-          &lt;a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features"&gt;
-            See What's New in LeoJS 1.0.6
+          &lt;a class="button button--flat" title="Users' Guide" href="https://boltex.github.io/leojs/"&gt;
+            Documentation
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
           &lt;strong&gt;LeoJS&lt;/strong&gt;,
           an open-source extension created by
           &lt;a class="bold" title="My github user page" href="https://boltex.github.io/"&gt;Félix&lt;/a&gt;,
-          is a Javascript implementation of
+          is a JavaScript implementation of
           &lt;a class="bold" title="Learn more about Leo" href="https://leo-editor.github.io/leo-editor/"&gt;Leo&lt;/a&gt;.&lt;br&gt;
           &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY"&gt;📺&amp;nbsp;Introduction to Leo&lt;/a&gt;
           &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE"&gt;📺&amp;nbsp;Features Demo&lt;/a&gt;
@@ -19829,27 +19833,6 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
         &lt;/ul&gt;
       &lt;/div&gt;
 
-      &lt;div class="sidebar__group"&gt;
-        &lt;h2&gt;About Leo&lt;/h2&gt;
-        &lt;ul&gt;
-          &lt;li&gt;
-            &lt;a href="https://leo-editor.github.io/leo-editor/" title="Leo's Home Page"&gt;Home Page&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;li&gt;
-            &lt;a href="https://leo-editor.github.io/leo-editor/leo_toc.html"
-              title="Leo's Documentation Page"&gt;Documentation&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;li&gt;
-            &lt;a href="https://groups.google.com/forum/#!forum/leo-editor" title="Leo Editor Forum"&gt;Forum&lt;/a&gt;
-            &lt;small&gt;
-              &amp;nbsp;&amp;nbsp;&amp;mdash;&amp;nbsp; #Google Group&lt;/small&gt;
-          &lt;/li&gt;
-          &lt;li&gt;
-            &lt;a href="https://github.com/leo-editor/leo-editor" title="Leo Editor on GitHub"&gt;Source&lt;/a&gt;
-            &lt;small&gt; &amp;nbsp;&amp;nbsp;&amp;mdash;&amp;nbsp; #GitHub&lt;/small&gt;
-          &lt;/li&gt;
-        &lt;/ul&gt;
-      &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div id="dirty-config-toast"&gt;Saving...&lt;/div&gt;
@@ -21335,6 +21318,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Implemented c.recursiveImport. 
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
+- Added missing headkey1 and headkey2 plugin hooks.
 - Added Leo's documentation updated for LeoJS with Docusaurus.
 
 </t>

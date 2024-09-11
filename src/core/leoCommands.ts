@@ -3309,16 +3309,6 @@ export class Commands {
             }
         }
     }
-    //@+node:felix.20211106224948.10: *4* c.setComplexCommand
-    /**
-     * Make commandName the command to be executed by repeat-complex-command.
-     */
-    public setComplexCommand(commandName: string): void {
-        const c: Commands = this;
-        if (c.k.mb_history) {
-            c.k.mb_history.unshift(commandName);
-        }
-    }
     //@+node:felix.20211106224948.12: *4* c.writeScriptFile (changed: does not expand expressions)
     public writeScriptFile(script: string): string | undefined {
         // Get the path to the file.

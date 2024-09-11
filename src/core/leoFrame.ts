@@ -720,9 +720,9 @@ export class NullTree {
         if (!changed) {
             return; // Leo 6.4: only call the hooks if the headline has actually changed.
         }
-        // if( g.doHook("headkey1", c, p, ch, changed)){
-        //     return;  // The hook claims to have handled the event.
-        // }
+        if (g.doHook("headkey1", { c: c, p: p, ch: ch, changed: changed })) {
+            return;  // The hook claims to have handled the event.
+        }
         // Handle undo.
         const undoData = u.beforeChangeHeadline(p);
         p.initHeadString(s); // change p.h *after* calling undoer's before method.
@@ -737,7 +737,7 @@ export class NullTree {
         u.afterChangeHeadline(p, undoType, undoData);
         // Fix bug 1280689: don't call the non-existent c.treeEditFocusHelper
         c.redraw_after_head_changed();
-        // g.doHook("headkey2", c, p, ch, changed);
+        g.doHook("headkey2", { c: c, p: p, ch: ch, changed: changed });
     }
     //@+node:felix.20221210191616.1: *3* LeoTree.select & helpers
     /**
