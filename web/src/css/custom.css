@@ -201,6 +201,12 @@ img[src*='#author'] {
     border-radius: 50%;
     transition: background var(--ifm-transition-fast);
   }
+  .hero .button.button--lg {
+    transition: transform 0.1s ease;
+  } 
+  .hero .button.button--lg:hover {
+    transform: scale(1.075); 
+  } 
 }
 
 .navbar--github-link:hover {
