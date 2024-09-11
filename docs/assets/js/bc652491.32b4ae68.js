@@ -776,7 +776,12 @@ function _createMdxContent(props) {
         children: "not"
       }), " the @button node. ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "@button nodes"
-      }), " work the same way, and also create a button in the icon area. Pressing that button runs the command. For example, this node defines the print-tree command:"]
+      }), " work the same way, and also create a button in the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+          href: "#buttons-panel",
+          children: "@button panel"
+        })
+      }), ". Pressing that button runs the command. For example, this node defines the print-tree command:"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["First, set a node's headline to: ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "@command print-tree"
