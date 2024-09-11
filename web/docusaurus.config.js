@@ -172,107 +172,36 @@ const config = {
         darkTheme: prismThemes.oneDark,
       },
       algolia: {
+        // The application ID provided by Algolia
         appId: '3O12YAXPHG',
-        apiKey: 'b544bf896974ca6d1444fe87aabfeb14',
-        rateLimit: 8,
-        maxDepth: 10,
-        startUrls: ['https://boltex.github.io/leojs/'],
-        sitemaps: ['https://boltex.github.io/leojs/sitemap.xml'],
-        ignoreCanonicalTo: true,
-        discoveryPatterns: ['https://boltex.github.io/leojs/**'],
-        actions: [
-          {
-            indexName: 'boltexio',
-            pathsToMatch: ['https://boltex.github.io/leojs/**'],
-            recordExtractor: ({ $, helpers }) => {
-              // priority order: deepest active sub list header -> navbar active item -> 'Documentation'
-              const lvl0 =
-                $(
-                  '.menu__link.menu__link--sublist.menu__link--active, .navbar__item.navbar__link--active'
-                )
-                  .last()
-                  .text() || 'Documentation';
 
-              return helpers.docsearch({
-                recordProps: {
-                  lvl0: {
-                    selectors: '',
-                    defaultValue: lvl0,
-                  },
-                  lvl1: ['header h1', 'article h1'],
-                  lvl2: 'article h2',
-                  lvl3: 'article h3',
-                  lvl4: 'article h4',
-                  lvl5: 'article h5, article td:first-child',
-                  lvl6: 'article h6',
-                  content: 'article p, article li, article td:last-child',
-                },
-                indexHeadings: true,
-                aggregateContent: true,
-                recordVersion: 'v3',
-              });
-            },
-          },
-        ],
-        initialIndexSettings: {
-          YOUR_INDEX_NAME: {
-            attributesForFaceting: [
-              'type',
-              'lang',
-              'language',
-              'version',
-              'docusaurus_tag',
-            ],
-            attributesToRetrieve: [
-              'hierarchy',
-              'content',
-              'anchor',
-              'url',
-              'url_without_anchor',
-              'type',
-            ],
-            attributesToHighlight: ['hierarchy', 'content'],
-            attributesToSnippet: ['content:10'],
-            camelCaseAttributes: ['hierarchy', 'content'],
-            searchableAttributes: [
-              'unordered(hierarchy.lvl0)',
-              'unordered(hierarchy.lvl1)',
-              'unordered(hierarchy.lvl2)',
-              'unordered(hierarchy.lvl3)',
-              'unordered(hierarchy.lvl4)',
-              'unordered(hierarchy.lvl5)',
-              'unordered(hierarchy.lvl6)',
-              'content',
-            ],
-            distinct: true,
-            attributeForDistinct: 'url',
-            customRanking: [
-              'desc(weight.pageRank)',
-              'desc(weight.level)',
-              'asc(weight.position)',
-            ],
-            ranking: [
-              'words',
-              'filters',
-              'typo',
-              'attribute',
-              'proximity',
-              'exact',
-              'custom',
-            ],
-            highlightPreTag: '<span class="algolia-docsearch-suggestion--highlight">',
-            highlightPostTag: '</span>',
-            minWordSizefor1Typo: 3,
-            minWordSizefor2Typos: 7,
-            allowTyposOnNumericTokens: false,
-            minProximity: 1,
-            ignorePlurals: true,
-            advancedSyntax: true,
-            attributeCriteriaComputedByMinProximity: true,
-            removeWordsIfNoResults: 'allOptional',
-            separatorsToIndex: '_',
-          },
-        },
+        // Public API key: it is safe to commit it
+        apiKey: 'f3496193458172c3b4a11a6aa5c701bc',
+
+        indexName: 'boltexio',
+
+        // Optional: see doc section below
+        contextualSearch: false,
+
+        // Optional: Specify domains where the navigation should occur through window.location instead on history.push.
+        // Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
+        // externalUrlRegex: 'external\\.com|domain\\.com',
+
+        // Optional: Replace parts of the item URLs from Algolia. Useful when using the same search index for multiple deployments using a different baseUrl.
+        // You can use regexp or string in the `from` param. For example: localhost:3000 vs myCompany.com/docs
+        // replaceSearchResultPathname: {
+        //   from: '/docs/', // or as RegExp: /\/docs\//
+        //   to: '/',
+        // },
+
+        // Optional: Algolia search parameters
+        searchParameters: {},
+
+        // Optional: path for search page that enabled by default (`false` to disable it)
+        searchPagePath: 'search',
+
+        // Optional: whether the insights feature is enabled or not on Docsearch (`false` by default)
+        insights: false,
       }
 
     }),
