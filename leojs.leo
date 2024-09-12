@@ -6663,7 +6663,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "vscode:prepublish": "npm run package",
 "compile": "webpack",
 "compile-web": "webpack",
-"open-in-browser": "node ./prepare.js &amp;&amp; vscode-test-web --browserType=chromium --extensionDevelopmentPath=. &amp;&amp; node ./cleanup.js",
 "watch": "webpack --watch",
 "watch-web": "webpack --watch",
 "package": "webpack --mode production --devtool hidden-source-map",
@@ -6672,8 +6671,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "watch-tests": "tsc -p . -w --outDir out",
 "pretest": "npm run compile-tests &amp;&amp; npm run compile &amp;&amp; npm run lint",
 "lint": "eslint src --ext ts",
-"test": "node ./out/test/runTest.js",
-"test-web": "node ./prepare.js &amp;&amp; vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/test/suite/index-web.js &amp;&amp; node ./cleanup.js"
+"test": "node ./out/test/runTest.js"
 </t>
 <t tx="felix.20201214205159.8">{
   "command": "leojs.executeScript",
@@ -6726,7 +6724,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
-"@vscode/test-web": "^0.0.50",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
@@ -6755,6 +6752,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "md5": "^2.3.0",
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
+"parse5": "^7.1.2",
 "path-browserify": "^1.0.1",
 "process": "^0.11.10",
 "showdown": "^2.1.0",
