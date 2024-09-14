@@ -1354,6 +1354,8 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 
 Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
 
+&gt; To contribute to the LeoJS documentation website at [https://boltex.github.io/leojs/](https://boltex.github.io/leojs/) see the `/web/` folder.
+
 ## Introduction
 
 If you're new to vscode and want to try out Leo with this vscode extension, you might want to look at this [Getting Started](https://code.visualstudio.com/docs#vscode-in-action) page to get an overview of vscode.
@@ -4599,6 +4601,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
+    "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
   }
 }
@@ -6661,7 +6664,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "vscode:prepublish": "npm run package",
 "compile": "webpack",
 "compile-web": "webpack",
-"open-in-browser": "node ./prepare.js &amp;&amp; vscode-test-web --browserType=chromium --extensionDevelopmentPath=. &amp;&amp; node ./cleanup.js",
 "watch": "webpack --watch",
 "watch-web": "webpack --watch",
 "package": "webpack --mode production --devtool hidden-source-map",
@@ -6670,8 +6672,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "watch-tests": "tsc -p . -w --outDir out",
 "pretest": "npm run compile-tests &amp;&amp; npm run compile &amp;&amp; npm run lint",
 "lint": "eslint src --ext ts",
-"test": "node ./out/test/runTest.js",
-"test-web": "node ./prepare.js &amp;&amp; vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/test/suite/index-web.js &amp;&amp; node ./cleanup.js"
+"test": "node ./out/test/runTest.js"
 </t>
 <t tx="felix.20201214205159.8">{
   "command": "leojs.executeScript",
@@ -6724,7 +6725,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
-"@vscode/test-web": "^0.0.50",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
@@ -21320,6 +21320,8 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Fixed IdleTime class handler call arguments.
 - Added missing headkey1 and headkey2 plugin hooks.
 - Added Leo's documentation updated for LeoJS with Docusaurus.
+- Fixed debug and breakpoints by setting sourceMapRenames to false in launch.json.
+- Added support for 'FreeMind' file format import.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

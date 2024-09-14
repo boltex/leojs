@@ -8,6 +8,8 @@
 - Fixed IdleTime class handler call arguments.
 - Added missing headkey1 and headkey2 plugin hooks.
 - Added Leo's documentation updated for LeoJS with Docusaurus.
+- Fixed debug and breakpoints by setting sourceMapRenames to false in launch.json.
+- Added support for 'FreeMind' file format import.
 
 ## 1.0.5
 

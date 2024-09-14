@@ -5,7 +5,7 @@
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 import * as csv from 'csvtojson';
-const lxml = false;
+import { DOMParser } from '@xmldom/xmldom';
 
 // Leo imports...
 import * as g from './leoGlobals';
@@ -40,20 +40,61 @@ export class FreeMindImporter {
     public add_children(parent: Position, element: any): void {
         const p = parent.insertAsLastChild();
 
-        // TODO : FIX THIS !
-        const attrib_text = element.attrib.get('text', '').trim();
+        const attrib_text = this.get_attrib_text(element).trim();
 
-        const tag = typeof element.tag === 'string' ? element.tag : '';
-        let text = element.text || '';
+        let tag = element.tagName || '';
+        let text = this.get_node_text(element) || '';
         if (!tag) {
             text = text.trim();
         }
+        if (element.nodeType === element.COMMENT_NODE) {
+            tag = "";
+            text = element.nodeValue || '';
+        }
         p.h = attrib_text || tag || 'Comment';
+
         p.b = text.trim() ? text : '';
-        for (const child of element) {
+        const children = this.get_children(element);
+        for (const child of children) {
             this.add_children(p, child);
         }
     }
+
+    public get_node_text(element: any): string {
+        let result = "";
+
+        if (element.childNodes) {
+            for (const child of element.childNodes) {
+                if (child.nodeType === child.TEXT_NODE) {
+                    result = result + child.nodeValue;
+                }
+            }
+        }
+        return result;
+    }
+
+    public get_attrib_text(element: any): string {
+        if (element.hasAttribute && element.hasAttribute('TEXT')) {
+            return element.getAttribute('TEXT');
+        }
+        if (element.hasAttribute && element.hasAttribute('text')) {
+            return element.getAttribute('text');
+        }
+        return '';
+    }
+
+    public get_children(element: any): any[] {
+        const children: any[] = [];
+        if (element.childNodes) {
+            for (const child of element.childNodes) {
+                if (child.nodeType !== child.TEXT_NODE) {
+                    children.push(child);
+                }
+            }
+        }
+        return children;
+    }
+
     //@+node:felix.20230519221548.3: *3* freemind.create_outline
     /**
      * Create a tree of nodes from a FreeMind file.
@@ -82,18 +123,24 @@ export class FreeMindImporter {
         const c = this.c;
         const sfn = g.shortFileName(p_path);
         const w_exists = await g.os_path_exists(p_path);
-        if (w_exists && lxml) {
-            // TODO : Fix This
-            const htmltree = (lxml as any).html.parse(p_path);
-            const root = htmltree.getroot();
-            const body = root.findall('body')[0];
+
+        if (w_exists) {
+            const s = await g.readFileIntoUnicodeString(p_path);
+            if (!s) {
+                g.error(`file not found or empty: ${sfn}`);
+                return;
+            }
+
+            const parser = new DOMParser();
+            const body = parser.parseFromString(s, "text/xml");
 
             if (body == null) {
                 g.error(`no body in: ${sfn}`);
             } else {
                 const root_p = c.lastTopLevel().insertAfter();
                 root_p.h = g.shortFileName(p_path);
-                for (const child of body) {
+                const children = this.get_children(body);
+                for (const child of children) {
                     if (child !== body) {
                         this.add_children(root_p, child);
                     }
@@ -129,13 +176,10 @@ export class FreeMindImporter {
      * Prompt for a list of FreeMind (.mm.html) files and import them.
      */
     public async prompt_for_files(): Promise<void> {
-        if (!lxml) {
-            g.trace('FreeMind importer requires lxml');
-            return;
-        }
+
         const c = this.c;
         const types: [string, string][] = [
-            ['FreeMind files', '*.mm.html'],
+            ['FreeMind files', '*.mm.html *.mm'],
             ['All files', '*'],
         ];
         const names = await g.app.gui.runOpenFilesDialog(
@@ -3715,7 +3759,7 @@ export class TopLevelImportCommands {
     //@+node:felix.20230521235405.7: *3* @g.command(import-todo-text-files)
     @command(
         'import-todo-text-files',
-        'Prompt for free-mind files and import them.'
+        'Prompt for todo text files and import them.'
     )
     public async import_todo_text_files(this: Commands): Promise<void> {
         const c: Commands = this;
