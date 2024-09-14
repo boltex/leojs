@@ -9,6 +9,7 @@
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
+			"sourceMapRenames": false,
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
@@ -21,6 +22,7 @@
 			"name": "Extension Tests",
 			"type": "extensionHost",
 			"request": "launch",
+			"sourceMapRenames": false,
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index-node"
@@ -35,6 +37,7 @@
 			"name": "Extension Tests Other Disabled",
 			"type": "extensionHost",
 			"request": "launch",
+			"sourceMapRenames": false,
 			"args": [
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
@@ -51,6 +54,7 @@
 			"type": "pwa-extensionHost",
 			"debugWebWorkerHost": true,
 			"request": "launch",
+			"sourceMapRenames": false,
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionDevelopmentKind=web"

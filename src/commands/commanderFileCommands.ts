@@ -126,7 +126,7 @@ export class CommanderFileCommands {
             ['C/C++ files', '*.cpp'],
             ['C/C++ files', '*.h'],
             ['C/C++ files', '*.hpp'],
-            ['FreeMind files', '*.mm.html'],
+            ['FreeMind files', '*.mm.html *.mm *.html'],
             ['Java files', '*.java'],
             ['JavaScript files', '*.js'],
             // ["JSON files", "*.json"],

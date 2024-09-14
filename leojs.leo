@@ -4601,8 +4601,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
+    "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "b09f970",
+  "gitBranch": "boltex/issue155",
+  "gitDate": "2024-09-11 23:30:18 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6752,7 +6756,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "md5": "^2.3.0",
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
-"parse5": "^7.1.2",
 "path-browserify": "^1.0.1",
 "process": "^0.11.10",
 "showdown": "^2.1.0",
@@ -21320,6 +21323,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Fixed IdleTime class handler call arguments.
 - Added missing headkey1 and headkey2 plugin hooks.
 - Added Leo's documentation updated for LeoJS with Docusaurus.
+- Fixed debug and breakpoints by setting sourceMapRenames to false in launch.json.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
