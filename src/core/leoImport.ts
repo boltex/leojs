@@ -179,7 +179,7 @@ export class FreeMindImporter {
 
         const c = this.c;
         const types: [string, string][] = [
-            ['FreeMind files', '*.mm.html *.mm *.html'],
+            ['FreeMind files', '*.mm.html *.mm'],
             ['All files', '*'],
         ];
         const names = await g.app.gui.runOpenFilesDialog(

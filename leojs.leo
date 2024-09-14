@@ -4603,10 +4603,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "b09f970",
-  "gitBranch": "boltex/issue155",
-  "gitDate": "2024-09-11 23:30:18 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{

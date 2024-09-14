@@ -126,7 +126,7 @@ export class CommanderFileCommands {
             ['C/C++ files', '*.cpp'],
             ['C/C++ files', '*.h'],
             ['C/C++ files', '*.hpp'],
-            ['FreeMind files', '*.mm.html *.mm *.html'],
+            ['FreeMind files', '*.mm.html *.mm'],
             ['Java files', '*.java'],
             ['JavaScript files', '*.js'],
             // ["JSON files", "*.json"],
@@ -185,7 +185,7 @@ export class CommanderFileCommands {
             // Not useful. Use @auto x.json instead.
             // else if ext == 'json':
             // ic.importJSON([fn])
-            else if (fn.endsWith('mm.html')) {
+            else if (['mm', 'mm.html'].includes(ext)) {
                 await ic.importFreeMind([fn]);
             } else if (['nw', 'noweb'].includes(ext)) {
                 await ic.importWebCommand([fn], 'noweb');
