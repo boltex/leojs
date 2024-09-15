@@ -2,25 +2,25 @@
 
 > Leo is a fundamentally different way of using and organizing data, programs and scripts.
 
-[LeoJS](https://boltex.github.io/leojs/) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/).
+[LeoJS](https://boltex.github.io/leojs/) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/) and [vscodium.com](https://vscodium.com/).
 
 _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')._
 
 ## Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
-### Break down your code into a structured outline that generates or parses back your source files
-
 [![Introduction to LeoJS](https://raw.githubusercontent.com/boltex/leojs/master/resources/video-button-intro.png)](https://www.youtube.com/watch?v=j0eo7SlnnSY)
+
+Break down your code into a structured outline that generates or parses back your source files
 
 # Web-Based Development
 
-LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents and work with your files directly inside online repositories such as on GitHub and Azure Repos.
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents and work with your files directly inside online repositories, such as on GitHub and Azure-Repos.
 
 ## Press the '.' period key from your github repository
 
-To access this browser-based editor, you can go to one of your repo on github.com, and simply press the _period_&nbsp;&nbsp;"**.**"&nbsp;&nbsp;key.
-
 [![LeoJS Features Demo](https://raw.githubusercontent.com/boltex/leojs/master/resources/video-button-demo.png)](https://www.youtube.com/watch?v=M_mKXSbVGdE)
+
+To access this browser-based editor from your github repository, simply press the _period_&nbsp;&nbsp;"**.**"&nbsp;&nbsp;key.
 
 This video demonstrates many use-cases about working in an online repository with LeoJS and VSCode for the web.
 
@@ -28,27 +28,27 @@ This video demonstrates many use-cases about working in an online repository wit
 
 # Features
 
--   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   UI controls: Available in the explorer view and a standalone sidebar, such as the **Leo Outline**, **body pane**, **opened documents selector** along with a **Log Window**.
 -   **Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command.
--   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
--   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
+-   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation.
+-   **Derived files change detection**. See [External Files](#derive-external-files) below for more details
 -   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
 -   **'@button' panel** for [creating your own commands with @buttons](https://boltex.github.io/leojs/docs/getting-started/tutorial-basics#button-and-command-nodes)
--   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
+-   **Find panel** that reacts to Leo's typical keybindings like `Ctrl+F`, `F2` and `F3` when focus is in the outline or body pane
 -   **Nav and Tag panel** search controls are integrated in the Find panel
 -   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
 
 # Leo Commands
 
-LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette. (accessible through F1 or Ctrl+Shift+P)
+LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette with **`Ctrl+Shift+P`**.
+
+## The Minibuffer
+
+For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through **`Alt+X`** and use the complete set of Leo's commands!
 
 ## Context-Aware Keybindings
 
 The keybinding architecture is designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence. Shift your focus outside these panes, and Visual Studio Code's native keybindings resume control.
-
-## The Minibuffer
-
-For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the complete set of Leo's commands!
 
 # Keybindings
 
@@ -65,7 +65,7 @@ Listed here are the most useful commands and their keyboard shortcuts.
 | Cut Node         | `Ctrl + Shift + X`                                               |
 | Paste Node       | `Ctrl + Shift + V`                                               |
 | Delete Node      | `Ctrl + Shift + Backspace` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Delete` |
-| Clone Node       | `Ctrl + Backquote`                                               |
+| Clone Node       | `Ctrl + Backtick`                                                |
 | Promote / Demote | `Ctrl + {` &nbsp;&nbsp;_and_&nbsp;&nbsp; `Ctrl + }`              |
 
 | Moving Nodes       |                                                                 |
@@ -159,7 +159,7 @@ Arrow keys, home/end, page up/down are used for basic navigation. But in order t
 
 ### Goto Anywhere Command
 
-In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to a node directly by typing (part of) it's headline.
+In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to any node directly by typing (part of) its headline.
 
 ![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
 
@@ -177,7 +177,7 @@ Using the Nav tab of the _find panel_, (**`Ctrl+Shift+F`** to accesss directly) 
 
 ![Find Panel](https://raw.githubusercontent.com/boltex/leojs/master/resources/new-nav-panel-2.png)
 
-Press **`Enter`** to freeze the results and show results also found in **body text of any node**. This will add a snowflake icon ❄️ to the **Nav** field.
+Press **`Enter`** to freeze the results and show results **also found in body text** of any node. This will add a snowflake icon ❄️ to the **Nav** field.
 
 ![Find Panel](https://raw.githubusercontent.com/boltex/leojs/master/resources/new-nav-panel-3.png)
 

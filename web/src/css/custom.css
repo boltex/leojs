@@ -180,6 +180,13 @@ img[src*='#right'] {
   margin: 0.75rem;
 }
 
+img[src*='#center'] {
+  margin: auto;
+  display: block;
+  margin-top: -12px;
+  margin-bottom: -12px;
+}
+
 img[src*='#author'] {
   float: right;
   margin-left: 0.75rem;

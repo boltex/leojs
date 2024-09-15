@@ -46,6 +46,10 @@
           "vh": "Getting Started",
           "children": [
             {
+              "gnx": "felix.20240914224450.1",
+              "vh": "@auto docs/getting-started/introduction.md"
+            },
+            {
               "gnx": "felix.20240819235322.1",
               "vh": "@auto docs/getting-started/installing.md"
             },
