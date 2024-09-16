@@ -4563,9 +4563,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "url": "https://boltex.github.io/"
   },
   "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/boltex/leojs/issues"
+  },
+  "homepage": "https://boltex.github.io/leojs/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/boltex/leojs"
+    "url": "https://github.com/boltex/leojs.git"
   },
   "engines": {
     "vscode": "^1.86.0"
