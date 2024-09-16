@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.7
+
+- ...
+
 ## 1.0.6
 
 - Fixed goto-global-line command.
