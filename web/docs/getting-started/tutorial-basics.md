@@ -4,9 +4,7 @@ sidebar_position: 3
 
 # Leo in 10 Minutes
 
-This page aims to go over the interface, its most important features and terminology, to get you going in a few minutes!
-
-> 🚀 For a quick overview, see the [Introduction to Leo 📺](https://www.youtube.com/watch?v=j0eo7SlnnSY) video.
+This page aims to go over the interface, its most important features and terminology, to get you going in a few minutes! **For a quick overview, see the [Introduction to Leo 📺](https://www.youtube.com/watch?v=j0eo7SlnnSY) video.**
 
 ![LeoJS View](./img/hero-docs-montage.png)\
 _LeoJS UI panels are located in the LeoJS sidebar view (pictured above), and are also mirrored in the Explorer view_

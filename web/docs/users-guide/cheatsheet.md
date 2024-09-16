@@ -298,6 +298,9 @@ Expansion of section names and @others:
 
 This section lists the ivars (instance variables), properties, functions and methods most commonly used in Leo scripts.
 
+> 💡 **UI INTERACTIONS**\
+> For LeoJS UI interaction examples, see the **[scripting samples repository](https://github.com/boltex/scripting-samples-leojs)**, along with the [LeoJS features video](https://www.youtube.com/watch?v=M_mKXSbVGdE) to see how to try them directly in your browser.
+
 ### Pre-defined symbols
 The `execute-script` command predefines:
 

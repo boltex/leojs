@@ -27,6 +27,7 @@
 
 /* You can override the default Infima variables here. */
 :root {
+  
   --ifm-navbar-item-padding-horizontal: 0.55rem;
   --ifm-blockquote-shadow: none;
   --ifm-blockquote-border-left-width: 3px;
@@ -113,6 +114,10 @@
 
   --custom-player-after-color: #00000033;
 
+}
+
+main .container {
+  margin-bottom: 1rem;
 }
 
 blockquote {

@@ -110,6 +110,7 @@
   background-position: center;
   background-size: cover;
   border-radius: 37% 71%;
+  margin-bottom: 0 !important;
 }
 
 /*@-leo*/
