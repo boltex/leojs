@@ -76,7 +76,7 @@ export default function Home() {
             <div className={clsx('col col--6')}>
               <BrowserOnly fallback={<div>Loading...</div>}>
                 {() => {
-                  return <ReactPlayer className="customPlayer2" light={true} playing={true} controls={true} width="100%" height="250px" url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
+                  return <ReactPlayer className="customPlayer1" light={true} playing={true} controls={true} width="100%" height="250px" url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
                 }}
               </BrowserOnly>
             </div>
