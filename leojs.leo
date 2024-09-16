@@ -882,7 +882,7 @@ This video demonstrates many use-cases about working in an online repository wit
 -   UI controls: Available in the explorer view and a standalone sidebar, such as the **Leo Outline**, **body pane**, **opened documents selector** along with a **Log Window**.
 -   **Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command.
 -   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation.
--   **Derived files change detection**. See [External Files](#derive-external-files) below for more details.
+-   **Derived files change detection**. See [External Files](#external-files) below for more details.
 -   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API. See the **[scripting samples repository](https://github.com/boltex/scripting-samples-leojs)**, along with the [LeoJS features video](https://www.youtube.com/watch?v=M_mKXSbVGdE) to see how to try them directly in your browser.
 -   **'@button' panel** for [creating your own commands with @buttons](https://boltex.github.io/leojs/docs/getting-started/tutorial-basics#button-and-command-nodes)
 -   **Find panel** that reacts to Leo's typical keybindings like `Ctrl+F`, `F2` and `F3` when focus is in the outline or body pane.
