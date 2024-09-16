@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 5,
+	sidebar_position: 6,
 	toc_max_heading_level: 2
 };
 const contentTitle = 'Useful Tips';
@@ -34,9 +34,9 @@ const metadata = {
   "unlisted": false,
   "tags": [],
   "version": "current",
-  "sidebarPosition": 5,
+  "sidebarPosition": 6,
   "frontMatter": {
-    "sidebar_position": 5,
+    "sidebar_position": 6,
     "toc_max_heading_level": 2
   },
   "sidebar": "gettingStartedSidebar",

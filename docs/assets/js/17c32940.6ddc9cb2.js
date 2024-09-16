@@ -304,7 +304,7 @@ function _createMdxContent(props) {
       children: ["First, read ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
         href: "/leojs/docs/getting-started/tutorial-basics",
         children: "Leo's tutorials"
-      }), ". This will be enough to get you started if you just want to use Leo as an outliner_. If you intend to use Leo for programming, read the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+      }), ". This will be enough to get you started if you just want to use Leo as an outliner. If you intend to use Leo for programming, read the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
         href: "/leojs/docs/getting-started/tutorial-scripting",
         children: "scripting tutorial"
       }), ", then look at Leo's source code in the file Leojs.leo. Spend 5 or 10 minutes browsing through the outline. Don't worry about details; just look for the following common usage patterns:"]

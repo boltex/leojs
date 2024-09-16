@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 4
+	sidebar_position: 5
 };
 const contentTitle = 'Writing Leo scripts';
 const metadata = {
@@ -33,9 +33,9 @@ const metadata = {
   "unlisted": false,
   "tags": [],
   "version": "current",
-  "sidebarPosition": 4,
+  "sidebarPosition": 5,
   "frontMatter": {
-    "sidebar_position": 4
+    "sidebar_position": 5
   },
   "sidebar": "gettingStartedSidebar",
   "previous": {
@@ -145,9 +145,11 @@ function _createMdxContent(props) {
         }), " of ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
           href: "/leojs/docs/users-guide/cheatsheet",
           children: "Leo's cheat sheet"
-        }), " contains more information about scripting.", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "For UI interaction in LeoJS examples, see the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
-          href: "https://github.com/boltex/scripting-samples-leojs",
-          children: "scripting samples repository"
+        }), " contains more information about scripting.", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "For LeoJS UI interaction examples, see the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+            href: "https://github.com/boltex/scripting-samples-leojs",
+            children: "scripting samples repository"
+          })
         }), ", along with the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
           href: "https://www.youtube.com/watch?v=M_mKXSbVGdE",
           children: "LeoJS features video"

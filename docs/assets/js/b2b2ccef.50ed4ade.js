@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 3
+	sidebar_position: 4
 };
 const contentTitle = 'Using Leo as a PIM';
 const metadata = {
@@ -33,9 +33,9 @@ const metadata = {
   "unlisted": false,
   "tags": [],
   "version": "current",
-  "sidebarPosition": 3,
+  "sidebarPosition": 4,
   "frontMatter": {
-    "sidebar_position": 3
+    "sidebar_position": 4
   },
   "sidebar": "gettingStartedSidebar",
   "previous": {

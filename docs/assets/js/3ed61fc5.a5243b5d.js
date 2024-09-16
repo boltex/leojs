@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 1
+	sidebar_position: 2
 };
 const contentTitle = 'Installing LeoJS';
 const metadata = {
@@ -33,11 +33,15 @@ const metadata = {
   "unlisted": false,
   "tags": [],
   "version": "current",
-  "sidebarPosition": 1,
+  "sidebarPosition": 2,
   "frontMatter": {
-    "sidebar_position": 1
+    "sidebar_position": 2
   },
   "sidebar": "gettingStartedSidebar",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/leojs/docs/getting-started/introduction"
+  },
   "next": {
     "title": "Leo in 10 Minutes",
     "permalink": "/leojs/docs/getting-started/tutorial-basics"

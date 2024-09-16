@@ -18,13 +18,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 2
+	sidebar_position: 3
 };
 const contentTitle = 'Leo in 10 Minutes';
 const metadata = {
   "id": "getting-started/tutorial-basics",
   "title": "Leo in 10 Minutes",
-  "description": "This page aims to go over the interface, its most important features and terminology, to get you going in a few minutes!",
+  "description": "This page aims to go over the interface, its most important features and terminology, to get you going in a few minutes! For a quick overview, see the Introduction to Leo 📺 video.",
   "source": "@site/docs/getting-started/tutorial-basics.md",
   "sourceDirName": "getting-started",
   "slug": "/getting-started/tutorial-basics",
@@ -33,9 +33,9 @@ const metadata = {
   "unlisted": false,
   "tags": [],
   "version": "current",
-  "sidebarPosition": 2,
+  "sidebarPosition": 3,
   "frontMatter": {
-    "sidebar_position": 2
+    "sidebar_position": 3
   },
   "sidebar": "gettingStartedSidebar",
   "previous": {
@@ -164,15 +164,13 @@ function _createMdxContent(props) {
         id: "leo-in-10-minutes",
         children: "Leo in 10 Minutes"
       })
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "This page aims to go over the interface, its most important features and terminology, to get you going in a few minutes!"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
-      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-        children: ["🚀 For a quick overview, see the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["This page aims to go over the interface, its most important features and terminology, to get you going in a few minutes! ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.strong, {
+        children: ["For a quick overview, see the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
           href: "https://www.youtube.com/watch?v=j0eo7SlnnSY",
           children: "Introduction to Leo 📺"
         }), " video."]
-      }), "\n"]
+      })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
         alt: "LeoJS View",
