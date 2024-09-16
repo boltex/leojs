@@ -1,0 +1,254 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+#__docusaurus {
+  [class^='docMainContainer_'] {
+    max-width: initial;
+
+    >.container {
+      max-width: initial;
+
+      >.row {
+        flex-wrap: nowrap;
+      }
+    }
+  }
+
+  [class^='docRoot_'] {
+    >div {
+      flex-grow: 1;
+      min-width: 0;
+    }
+  }
+}
+
+/* You can override the default Infima variables here. */
+:root {
+  
+  --ifm-navbar-item-padding-horizontal: 0.55rem;
+  --ifm-blockquote-shadow: none;
+  --ifm-blockquote-border-left-width: 3px;
+  --ifm-blockquote-border-color: #dc9543;
+  --ifm-blockquote-color: #4b4238;
+  --ifm-blockquote-font-size: 100%;
+  --ifm-blockquote-padding-vertical: 0;
+  --ifm-blockquote-padding-horizontal: 1rem;
+
+  --ifm-footer-background-color: #aaaaaa;
+  --ifm-footer-link-color: #fff;
+  --ifm-footer-title-color: #fff;
+  --ifm-footer-color: #fff;
+
+  --ifm-color-primary: #c26b2e;
+  --ifm-color-primary-dark: #af6029;
+  --ifm-color-primary-darker: #a55b27;
+  --ifm-color-primary-darkest: #884b20;
+  --ifm-color-primary-light: #d07738;
+  --ifm-color-primary-lighter: #d27d42;
+  --ifm-color-primary-lightest: #d9915f;
+
+  --ifm-color-secondary: #e7e6e1;
+  --ifm-color-secondary-dark: #d3d1c8;
+  --ifm-color-secondary-darker: #c9c6bb;
+  --ifm-color-secondary-darkest: #aaa795;
+  --ifm-color-secondary-light: #fbfbfa;
+  --ifm-color-secondary-lighter: #ffffff;
+  --ifm-color-secondary-lightest: #ffffff;
+
+  --ifm-color-primary-saturated: #ba4d00;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --custom-hero-bg: url('/img/banner-leojs-trans-1600.png');
+  --custom-hero-bg2: url('/img/banner-leojs-trans-1200.png');
+  --custom-hero-bg3: url('/img/banner-leojs-trans-800.png');
+  --custom-hero-bg-before: linear-gradient(45deg, rgba(194, 107, 46, 0.5), rgba(150, 59, 29, 0.9));
+
+  --custom-body-bg: #fdf4f5;
+  --custom-sidebar-bg: #ffffe0;
+
+  --custom-home-quote-color: #338bae;
+  --custom-home-author-color: #555;
+
+  --custom-player-after-color: #ffffff33;
+
+  --ifm-blockquote-padding-vertical: 0.3rem;
+  --ifm-table-cell-padding: 0.35rem;
+  --ifm-table-border-width: 0;
+  --ifm-table-border-color: #ccc;
+  --ifm-table-head-background: transparent;
+
+  --ifm-table-stripe-background: rgba(0, 0, 0, 0.03);
+  --ifm-table-background: transparent;
+}
+
+[data-theme="dark"] {
+  --ifm-blockquote-border-color: #c27d22;
+  --ifm-blockquote-color: #f0e4be;
+
+  --ifm-footer-background-color: #161616;
+
+  --ifm-color-primary: #b15435;
+  --ifm-color-primary-dark: #9f4c30;
+  --ifm-color-primary-darker: #96472d;
+  --ifm-color-primary-darkest: #7c3b25;
+  --ifm-color-primary-light: #c35c3a;
+  --ifm-color-primary-lighter: #c66342;
+  --ifm-color-primary-lightest: #ce795d;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  --custom-hero-bg-before: linear-gradient(45deg, rgba(255, 164, 116, 0.9), rgba(122, 38, 21, 0.4));
+
+  --custom-body-bg: #1d1b1b;
+  --custom-sidebar-bg: #24201c;
+
+  --ifm-background-color: #3468ac;
+  --ifm-background-surface-color: #682d2d;
+
+  --custom-home-quote-color: #92c4e1;
+  --custom-home-author-color: #dcdcdc;
+
+  --custom-player-after-color: #00000033;
+
+}
+
+main .container {
+  margin-bottom: 1rem;
+}
+
+blockquote {
+  background-color: var(--custom-sidebar-bg);
+  border-left-width: var(--ifm-alert-border-left-width);
+  border-radius: var(--ifm-alert-border-radius);
+  box-shadow: var(--ifm-alert-shadow);
+}
+
+.customPlayer1,
+.customPlayer2 {
+  border-radius: 20px;
+  box-shadow: 1px 1px 3px 3px #00000030;
+  overflow: hidden;
+  position: relative;
+  margin: auto;
+}
+
+.react-player__preview:before {
+  content: "";
+  position: absolute;
+  background-color: var(--custom-player-after-color);
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  text-align: center;
+}
+
+.customPlayer2 {
+  margin-top: 1rem;
+}
+
+.customPlayer1 .react-player__preview:after {
+  content: "Introduction to Leo ";
+  top: 8px;
+  background-color: #fff;
+}
+
+.customPlayer2 .react-player__preview:after {
+  content: "Features Demo ";
+  top: 8px;
+  background-color: #fff;
+}
+
+.react-player__preview:after {
+  position: absolute;
+  color: rgb(28, 30, 33);
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding-left:12px;
+  padding-right:12px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+img[src*='#left'] {
+  float: left;
+  margin: 0.75rem;
+}
+
+img[src*='#right'] {
+  float: right;
+  margin: 0.75rem;
+}
+
+img[src*='#center'] {
+  margin: auto;
+  display: block;
+  margin-top: -12px;
+  margin-bottom: -12px;
+}
+
+img[src*='#author'] {
+  float: right;
+  margin-left: 0.75rem;
+  margin-top: -4rem;
+  border-radius: 50%;
+}
+
+.DocSearch-Button-Keys {
+  display: none !important;
+}
+
+@media screen and (min-width: 997px) {
+  .navbar--github-link {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    margin-right: 4px;
+    margin-left: 2px;
+    border-radius: 50%;
+    transition: background var(--ifm-transition-fast);
+  }
+  .hero .button.button--lg {
+    transition: transform 0.1s ease;
+  } 
+  .hero .button.button--lg:hover {
+    transform: scale(1.075); 
+  } 
+}
+
+.navbar--github-link:hover {
+	background: var(--ifm-color-emphasis-200);
+}
+
+.navbar--github-link:before {
+	content: '';
+	height: 100%;
+	display: block;
+	background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+		no-repeat;
+}
+
+html[data-theme='dark'] .navbar--github-link:before {
+	background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='white' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+		no-repeat;
+}
+
+.navbar__items .navbar__item.navbar__link:last-child {
+  padding-right: 0 !important;
+}
+@media screen and (max-width: 996px) {
+  .navbar--github-link::before {
+    content: 'GitHub';
+    background-image: none;
+  }
+
+  html[data-theme='dark'] .navbar--github-link::before {
+    content: 'GitHub';
+    background-image: none;
+  }
+}

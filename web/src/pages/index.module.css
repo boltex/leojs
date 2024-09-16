@@ -1,0 +1,116 @@
+/*@+leo-ver=5-thin*/
+/*@+node:felix.20240816231349.1: * @file  src/pages/index.module.css*/
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+ .heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.customHero {
+  z-index: 1;
+}
+
+.customHero:after {
+  filter: blur(11px);
+  background-image: var(--custom-hero-bg);
+  background-size: cover;
+  background-position: center;
+  content: '';    
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  z-index : -100;
+  transition: filter 0.9s ease-out;
+}
+
+.customHero:before {
+  content: '';    
+  opacity: 1;
+  background-image: var(--custom-hero-bg-before);
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  z-index : -1;
+  transition: opacity 0.2s ease-out;
+}
+
+.customHero:hover:before {
+  opacity: 0.5;
+}
+.customHero:hover:after {
+  filter: blur(0px);
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.bulletsHolder {
+  text-align: center;
+}
+
+.bullets {
+  display: inline-block;
+  text-align: left;
+}
+
+.homeQuote {
+  color: var(--ifm-color-primary-saturated);
+  transition: color 0.3s ease-out;
+}
+
+.customQuote {
+  color: var(--custom-home-quote-color);
+  margin-bottom: 2rem;
+  line-height: 2.2;
+  font-style: italic;
+  font-weight: 500;
+  list-style-type: none;
+}
+.customQuote>span {
+  font-style: normal;
+  font-weight: normal;
+  color: var(--custom-home-author-color);
+  white-space: nowrap;
+}
+.row {
+  margin-bottom:1rem;
+}
+.puckBg {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-image: var(--custom-hero-bg3);
+  background-color: #8e451527;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  border-radius: 37% 71%;
+  margin-bottom: 0 !important;
+}
+
+/*@-leo*/

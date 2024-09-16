@@ -302,14 +302,13 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         This help discusses only \@file nodes. For other ways of creating
         external files, see:
 
-            https://leo-editor.github.io/leo-editor/tutorial-scripting.html or
-            https://leo-editor.github.io/leo-editor/directives.html
+            [https://boltex.github.io/leojs/docs/getting-started/tutorial-scripting](https://boltex.github.io/leojs/docs/getting-started/tutorial-scripting) or
+            [https://boltex.github.io/leojs/docs/users-guide/directives](https://boltex.github.io/leojs/docs/users-guide/directives)
 
         Leo creates external files in an unusual way. Please fee free to ask for
         help:
 
-            https://groups.google.com/forum/#!forum/leo-editor or
-            http://webchat.freenode.net/?channels=%23leo&uio=d4
+            https://groups.google.com/forum/#!forum/leo-editor
 
         ## Overview
 
@@ -440,8 +439,6 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
             Ctrl-minus (replace-then-find)
             F3 (find-next)
             F2 (find-previous)
-            Ctrl-G (keyboard-quit)
-            anything else :-)
 
         You can Leo\'s commands toggle check boxes and radio buttons. These
         commands are listed in the Search menu.

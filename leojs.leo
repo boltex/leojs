@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240819221941.1"><vh>1.0.6</vh></v>
 <v t="felix.20240810200831.1"><vh>1.0.5</vh></v>
 <v t="felix.20240810181235.1"><vh>1.0.4</vh></v>
 <v t="felix.20240810180724.1"><vh>1.0.3</vh></v>
@@ -852,25 +853,25 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 &gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.
 
-[LeoJS](https://github.com/boltex/leojs) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/).
+[LeoJS](https://boltex.github.io/leojs/) is a JavaScript implementation of the [Leo Editor](https://leo-editor.github.io/leo-editor/), designed as an extension for [Visual Studio Code](https://code.visualstudio.com/) and [vscodium.com](https://vscodium.com/).
 
 _If you find LeoJS useful, please consider [**sponsoring**](https://boltex.github.io/) it. Also please [write a review](https://marketplace.visualstudio.com/items?itemName=boltex.leojs#review-details 'Write a review') or [star it on GitHub](https://github.com/boltex/leojs 'Star it on GitHub')._
 
 ## Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
-### Break down your code into a structured outline that generates or parses back your source files
-
 [![Introduction to LeoJS](https://raw.githubusercontent.com/boltex/leojs/master/resources/video-button-intro.png)](https://www.youtube.com/watch?v=j0eo7SlnnSY)
+
+Break down your code into a structured outline that generates or parses back your source files
 
 # Web-Based Development
 
-LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents and work with your files directly inside online repositories such as on GitHub and Azure Repos.
+LeoJS can be run as a web extension on [VSCode for the web](https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor). It can edit Leo documents and work with your files directly inside online repositories, such as on GitHub and Azure-Repos.
 
 ## Press the '.' period key from your github repository
 
-To access this browser-based editor, you can go to one of your repo on github.com, and simply press the _period_&amp;nbsp;&amp;nbsp;"**.**"&amp;nbsp;&amp;nbsp;key.
-
 [![LeoJS Features Demo](https://raw.githubusercontent.com/boltex/leojs/master/resources/video-button-demo.png)](https://www.youtube.com/watch?v=M_mKXSbVGdE)
+
+To access this browser-based editor from your github repository, simply press the _period_&amp;nbsp;&amp;nbsp;"**.**"&amp;nbsp;&amp;nbsp;key.
 
 This video demonstrates many use-cases about working in an online repository with LeoJS and VSCode for the web.
 
@@ -878,27 +879,27 @@ This video demonstrates many use-cases about working in an online repository wit
 
 # Features
 
--   UI controls such as a **Leo Outline** in the explorer view, and as a standalone sidebar, **body pane**, **opened documents selector** along with a **Log Window** [output channel](https://code.visualstudio.com/api/extension-capabilities/common-capabilities#output-channel).
+-   UI controls: Available in the explorer view and a standalone sidebar, such as the **Leo Outline**, **body pane**, **opened documents selector** along with a **Log Window**.
 -   **Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command.
--   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation. (Can be turned off with the **'Leo Tree Browsing'** option setting)
--   **Derived files change detection**. See [External Files](#derive-external-files-) below for more details
--   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API
--   **'@button' panel** for [creating your own commands with @buttons](https://leo-editor.github.io/leo-editor/tutorial-tips.html#use-button-nodes)
--   **Find panel** that reacts to Leo's typical keybindings, Ctrl+F, F2, F3... when focus is in the outline or body pane
--   **Nav and Tag panel** search controls are integrated in the Find panel
+-   Keybindings that match those of the Leo editor, including arrow keys behavior for outline keyboard navigation.
+-   **Derived files change detection**. See [External Files](#external-files) below for more details.
+-   **Scriptable in Javascript and Typescript**. All commands and scripts have easy access to outline structure via a simple Javascript API. See the **[scripting samples repository](https://github.com/boltex/scripting-samples-leojs)**, along with the [LeoJS features video](https://www.youtube.com/watch?v=M_mKXSbVGdE) to see how to try them directly in your browser.
+-   **'@button' panel** for [creating your own commands with @buttons](https://boltex.github.io/leojs/docs/getting-started/tutorial-basics#button-and-command-nodes)
+-   **Find panel** that reacts to Leo's typical keybindings like `Ctrl+F`, `F2` and `F3` when focus is in the outline or body pane.
+-   **Nav and Tag panel** search controls are integrated in the Find panel.
 -   **Undo History panel**, showing all actions and allowing going back, or forward, to any undo states.
 
 # Leo Commands
 
-LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette. (accessible through F1 or Ctrl+Shift+P)
+LeoJS offers an extensive set of integrated commands, accessible through a variety of interfaces — toolbar buttons, dedicated menus, and intuitive keybindings. Those commands are also discoverable via the Visual Studio Code Command Palette with **`Ctrl+Shift+P`**.
+
+## The Minibuffer
+
+For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through **`Alt+X`** and use the complete set of Leo's commands!
 
 ## Context-Aware Keybindings
 
 The keybinding architecture is designed to be context-aware. When your focus is within the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence. Shift your focus outside these panes, and Visual Studio Code's native keybindings resume control.
-
-## The Minibuffer
-
-For those familiar with Leo, the 'minibuffer' serves as the nerve center for command execution. Access it through Alt+X and use the complete set of Leo's commands!
 
 # Keybindings
 
@@ -915,7 +916,7 @@ Listed here are the most useful commands and their keyboard shortcuts.
 | Cut Node         | `Ctrl + Shift + X`                                               |
 | Paste Node       | `Ctrl + Shift + V`                                               |
 | Delete Node      | `Ctrl + Shift + Backspace` &amp;nbsp;&amp;nbsp;_or_&amp;nbsp;&amp;nbsp; `Delete` |
-| Clone Node       | `Ctrl + Backquote`                                               |
+| Clone Node       | `Ctrl + Backtick`                                                |
 | Promote / Demote | `Ctrl + {` &amp;nbsp;&amp;nbsp;_and_&amp;nbsp;&amp;nbsp; `Ctrl + }`              |
 
 | Moving Nodes       |                                                                 |
@@ -1009,7 +1010,7 @@ Arrow keys, home/end, page up/down are used for basic navigation. But in order t
 
 ### Goto Anywhere Command
 
-In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to a node directly by typing (part of) it's headline.
+In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to any node directly by typing (part of) its headline.
 
 ![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
 
@@ -1027,7 +1028,7 @@ Using the Nav tab of the _find panel_, (**`Ctrl+Shift+F`** to accesss directly) 
 
 ![Find Panel](https://raw.githubusercontent.com/boltex/leojs/master/resources/new-nav-panel-2.png)
 
-Press **`Enter`** to freeze the results and show results also found in **body text of any node**. This will add a snowflake icon ❄️ to the **Nav** field.
+Press **`Enter`** to freeze the results and show results **also found in body text** of any node. This will add a snowflake icon ❄️ to the **Nav** field.
 
 ![Find Panel](https://raw.githubusercontent.com/boltex/leojs/master/resources/new-nav-panel-3.png)
 
@@ -1094,7 +1095,7 @@ or on [github](https://github.com/leo-editor/leo-editor).
 
 All who have participated, no matter how small or big the contribution, to the creation of the original Leo Editor!
 
-See [Leo's original acknowledgements webpage](https://leo-editor.github.io/leo-editor/acknowledgements.html).
+See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendices/history#acknowledgements).
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
@@ -1352,6 +1353,8 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 # How to install and run the development version
 
 Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
+
+&gt; To contribute to the LeoJS documentation website at [https://boltex.github.io/leojs/](https://boltex.github.io/leojs/) see the `/web/` folder.
 
 ## Introduction
 
@@ -2195,7 +2198,7 @@ public static LEO_COMMANDS = {
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
     REVERT: 'revert',
     // * More Commands
-    GOTO_GLOBAL_LINE: "!goto_global_line", // USE LEOJS INSTEAD OF UI
+    GOTO_GLOBAL_LINE: "goto-global-line",
     SET_UA: 'set-ua',
 
     // * Import Export
@@ -4301,7 +4304,7 @@ public async minibuffer(): Promise&lt;unknown&gt; {
             }),
             quickPick.onDidAccept(accepted =&gt; {
                 if (/^\d+$/.test(quickPick.value)) {
-                    // * Was an integer
+                    // * Was an integer EASTER EGG
                     this.setupRefresh(Focus.Body,
                         {
                             tree: true,
@@ -4401,13 +4404,16 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
             if (w_truncated) {
                 void vscode.window.showInformationMessage("Truncating headline");
             }
-
+            if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
+                return w_p;  // The hook claims to have handled the event.
+            }
             const undoData = u.beforeChangeHeadline(w_p);
             c.setHeadString(w_p, p_newHeadline); // Set v.h *after* calling the undoer's before method.
             if (!c.changed) {
                 c.setChanged();
             }
             u.afterChangeHeadline(w_p, 'Edit Headline', undoData);
+            g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
             void this.launchRefresh();
         }
 
@@ -4547,7 +4553,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4595,6 +4601,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
+    "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
   }
 }
@@ -6657,7 +6664,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "vscode:prepublish": "npm run package",
 "compile": "webpack",
 "compile-web": "webpack",
-"open-in-browser": "node ./prepare.js &amp;&amp; vscode-test-web --browserType=chromium --extensionDevelopmentPath=. &amp;&amp; node ./cleanup.js",
 "watch": "webpack --watch",
 "watch-web": "webpack --watch",
 "package": "webpack --mode production --devtool hidden-source-map",
@@ -6666,8 +6672,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "watch-tests": "tsc -p . -w --outDir out",
 "pretest": "npm run compile-tests &amp;&amp; npm run compile &amp;&amp; npm run lint",
 "lint": "eslint src --ext ts",
-"test": "node ./out/test/runTest.js",
-"test-web": "node ./prepare.js &amp;&amp; vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/test/suite/index-web.js &amp;&amp; node ./cleanup.js"
+"test": "node ./out/test/runTest.js"
 </t>
 <t tx="felix.20201214205159.8">{
   "command": "leojs.executeScript",
@@ -6720,7 +6725,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
-"@vscode/test-web": "^0.0.50",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
@@ -9216,12 +9220,16 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
     if (!p_name) {
         return value;
     }
+    if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
+        return;  // The hook claims to have handled the event.
+    }
     const undoData = u.beforeChangeHeadline(c.p);
     c.setHeadString(c.p, p_name);  // Set v.h *after* calling the undoer's before method.
     if (!c.changed) {
         c.setChanged();
     }
     u.afterChangeHeadline(c.p, 'Edit Headline', undoData);
+    g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
     return value;
 }
 
@@ -9369,8 +9377,7 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
     title: string,
     message: string,
     yes_all = false,
-    no_all = false,
-
+    no_all = false
 ): Thenable&lt;string&gt; {
     const w_choices = [
         Constants.USER_MESSAGES.YES,
@@ -14400,8 +14407,8 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   }
 ],
 </t>
-<t tx="felix.20221113002623.1">public showSettings(): void {
-    void this.leoSettingsWebview.openWebview();
+<t tx="felix.20221113002623.1">public showSettings(): Promise&lt;unknown&gt; {
+    return this.leoSettingsWebview.openWebview();
 }
 
 </t>
@@ -19357,7 +19364,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.5&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.6&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -19365,15 +19372,15 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             LeoJS
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
-          &lt;a class="button button--flat" title="LeoJS's Features" href="https://github.com/boltex/leojs#features"&gt;
-            See What's New in LeoJS 1.0.5
+          &lt;a class="button button--flat" title="Users' Guide" href="https://boltex.github.io/leojs/"&gt;
+            Documentation
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
           &lt;strong&gt;LeoJS&lt;/strong&gt;,
           an open-source extension created by
           &lt;a class="bold" title="My github user page" href="https://boltex.github.io/"&gt;Félix&lt;/a&gt;,
-          is a Javascript implementation of
+          is a JavaScript implementation of
           &lt;a class="bold" title="Learn more about Leo" href="https://leo-editor.github.io/leo-editor/"&gt;Leo&lt;/a&gt;.&lt;br&gt;
           &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY"&gt;📺&amp;nbsp;Introduction to Leo&lt;/a&gt;
           &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE"&gt;📺&amp;nbsp;Features Demo&lt;/a&gt;
@@ -19826,27 +19833,6 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
         &lt;/ul&gt;
       &lt;/div&gt;
 
-      &lt;div class="sidebar__group"&gt;
-        &lt;h2&gt;About Leo&lt;/h2&gt;
-        &lt;ul&gt;
-          &lt;li&gt;
-            &lt;a href="https://leo-editor.github.io/leo-editor/" title="Leo's Home Page"&gt;Home Page&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;li&gt;
-            &lt;a href="https://leo-editor.github.io/leo-editor/leo_toc.html"
-              title="Leo's Documentation Page"&gt;Documentation&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;li&gt;
-            &lt;a href="https://groups.google.com/forum/#!forum/leo-editor" title="Leo Editor Forum"&gt;Forum&lt;/a&gt;
-            &lt;small&gt;
-              &amp;nbsp;&amp;nbsp;&amp;mdash;&amp;nbsp; #Google Group&lt;/small&gt;
-          &lt;/li&gt;
-          &lt;li&gt;
-            &lt;a href="https://github.com/leo-editor/leo-editor" title="Leo Editor on GitHub"&gt;Source&lt;/a&gt;
-            &lt;small&gt; &amp;nbsp;&amp;nbsp;&amp;mdash;&amp;nbsp; #GitHub&lt;/small&gt;
-          &lt;/li&gt;
-        &lt;/ul&gt;
-      &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div id="dirty-config-toast"&gt;Saving...&lt;/div&gt;
@@ -21324,6 +21310,18 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 <t tx="felix.20240810200831.1">## 1.0.5
 
 - Fixed @auto files generation for markdown (.md) files.
+
+</t>
+<t tx="felix.20240819221941.1">## 1.0.6
+
+- Fixed goto-global-line command.
+- Implemented c.recursiveImport. 
+- implemented g.execute_shell_commands_with_options.
+- Fixed IdleTime class handler call arguments.
+- Added missing headkey1 and headkey2 plugin hooks.
+- Added Leo's documentation updated for LeoJS with Docusaurus.
+- Fixed debug and breakpoints by setting sourceMapRenames to false in launch.json.
+- Added support for 'FreeMind' file format import.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

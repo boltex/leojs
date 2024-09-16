@@ -1,0 +1,155 @@
+{
+  "leoHeader": {
+    "fileFormat": 2
+  },
+  "vnodes": [
+    {
+      "gnx": "felix.20240816225702.1",
+      "vh": "Web pages",
+      "children": [
+        {
+          "gnx": "felix.20240816231251.1",
+          "vh": "Homepage",
+          "children": [
+            {
+              "gnx": "felix.20240816231257.1",
+              "vh": "@file  src/pages/index.js"
+            },
+            {
+              "gnx": "felix.20240816231349.1",
+              "vh": "@file  src/pages/index.module.css"
+            }
+          ]
+        },
+        {
+          "gnx": "felix.20240816231217.1",
+          "vh": "Homepage Features",
+          "children": [
+            {
+              "gnx": "felix.20240816230707.2",
+              "vh": "@file src/components/HomepageFeatures/index.js"
+            },
+            {
+              "gnx": "felix.20240816231006.1",
+              "vh": "@file src/components/HomepageFeatures/styles.module.css"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "gnx": "felix.20240816220939.1",
+      "vh": "Leo's Documentation",
+      "children": [
+        {
+          "gnx": "felix.20240820012043.1",
+          "vh": "Getting Started",
+          "children": [
+            {
+              "gnx": "felix.20240914224450.1",
+              "vh": "@auto docs/getting-started/introduction.md"
+            },
+            {
+              "gnx": "felix.20240819235322.1",
+              "vh": "@auto docs/getting-started/installing.md"
+            },
+            {
+              "gnx": "felix.20240820012442.1",
+              "vh": "@auto docs/getting-started/tutorial-basics.md"
+            },
+            {
+              "gnx": "felix.20240820012444.1",
+              "vh": "@auto docs/getting-started/tutorial-pim.md"
+            },
+            {
+              "gnx": "felix.20240820012448.1",
+              "vh": "@auto docs/getting-started/tutorial-scripting.md"
+            },
+            {
+              "gnx": "felix.20240825232513.1",
+              "vh": "@auto docs/getting-started/tutorial-tips.md"
+            }
+          ]
+        },
+        {
+          "gnx": "felix.20240820012726.1",
+          "vh": "User's Guide",
+          "children": [
+            {
+              "gnx": "felix.20240820012843.1",
+              "vh": "@auto docs/users-guide/leomarkup.md"
+            },
+            {
+              "gnx": "felix.20240820012904.1",
+              "vh": "@auto docs/users-guide/customizing.md"
+            },
+            {
+              "gnx": "felix.20240824232648.1",
+              "vh": "@auto docs/users-guide/commands.md"
+            },
+            {
+              "gnx": "felix.20240825182433.1",
+              "vh": "@auto docs/users-guide/directives.md"
+            },
+            {
+              "gnx": "felix.20240820012905.1",
+              "vh": "@auto docs/users-guide/cheatsheet.md"
+            }
+          ]
+        },
+        {
+          "gnx": "felix.20240820013126.1",
+          "vh": "Advanced Topics",
+          "children": [
+            {
+              "gnx": "felix.20240825212400.1",
+              "vh": "@auto docs/advanced-topics/scripting-guide.md"
+            },
+            {
+              "gnx": "felix.20240825210732.1",
+              "vh": "@auto docs/advanced-topics/writing-plugins.md"
+            },
+            {
+              "gnx": "felix.20240827000501.1",
+              "vh": "@auto docs/advanced-topics/faq.md"
+            },
+            {
+              "gnx": "felix.20240827000650.1",
+              "vh": "@auto docs/advanced-topics/leonine-refactor.md"
+            }
+          ]
+        },
+        {
+          "gnx": "felix.20240820013130.1",
+          "vh": "Appendices",
+          "children": [
+            {
+              "gnx": "felix.20240825213057.1",
+              "vh": "@auto docs/appendices/format-of-leo-files.md"
+            },
+            {
+              "gnx": "felix.20240825212944.1",
+              "vh": "@auto docs/appendices/format-of-external-files.md"
+            },
+            {
+              "gnx": "felix.20240827001223.1",
+              "vh": "@auto docs/appendices/mulder-ream.md"
+            },
+            {
+              "gnx": "felix.20240827001226.1",
+              "vh": "@auto docs/appendices/history.md"
+            },
+            {
+              "gnx": "felix.20240826021115.1",
+              "vh": "@auto docs/appendices/glossary.md"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tnodes": {
+    "felix.20240816225702.1": "This section contains files used to generate the LeoJS web site.",
+    "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd docs`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n"
+  }
+}

@@ -2,6 +2,8 @@
 
 Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
 
+> To contribute to the LeoJS documentation website at [https://boltex.github.io/leojs/](https://boltex.github.io/leojs/) see the `/web/` folder.
+
 ## Introduction
 
 If you're new to vscode and want to try out Leo with this vscode extension, you might want to look at this [Getting Started](https://code.visualstudio.com/docs#vscode-in-action) page to get an overview of vscode.
