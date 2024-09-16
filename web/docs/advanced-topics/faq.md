@@ -9,7 +9,7 @@ toc_max_heading_level: 2
 
 ### What's the best way to learn to use Leo?
 
-First, read [Leo's tutorials](../getting-started/tutorial-basics.md). This will be enough to get you started if you just want to use Leo as an outliner_. If you intend to use Leo for programming, read the [scripting tutorial](../getting-started/tutorial-scripting.md), then look at Leo's source code in the file Leojs.leo. Spend 5 or 10 minutes browsing through the outline. Don't worry about details; just look for the following common usage patterns:
+First, read [Leo's tutorials](../getting-started/tutorial-basics.md). This will be enough to get you started if you just want to use Leo as an outliner. If you intend to use Leo for programming, read the [scripting tutorial](../getting-started/tutorial-scripting.md), then look at Leo's source code in the file Leojs.leo. Spend 5 or 10 minutes browsing through the outline. Don't worry about details; just look for the following common usage patterns:
 
 - Study @file leoNodes.ts. It shows how to define more than one class in single file.
 

@@ -76,10 +76,7 @@ export default function Home() {
             <div className={clsx('col col--6')}>
               <BrowserOnly fallback={<div>Loading...</div>}>
                 {() => {
-                  // const LibComponent =
-                  //   require('some-lib-that-accesses-window').LibComponent;
-                  // return <LibComponent {...props} />;
-                  return <ReactPlayer className="customPlayer1" light playing width="100%" height="250px" url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
+                  return <ReactPlayer className="customPlayer2" light={true} playing={true} controls={true} width="100%" height="250px" url='https://www.youtube.com/watch?v=j0eo7SlnnSY' />
                 }}
               </BrowserOnly>
             </div>
@@ -111,10 +108,7 @@ export default function Home() {
             <div className={clsx('col col--6')}>
               <BrowserOnly fallback={<div>Loading...</div>}>
                 {() => {
-                  // const LibComponent =
-                  //   require('some-lib-that-accesses-window').LibComponent;
-                  // return <LibComponent {...props} />;
-                  return <ReactPlayer className="customPlayer2" light playing width="100%" height="250px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
+                  return <ReactPlayer className="customPlayer2" light={true} playing={true} controls={true} width="100%" height="250px" url='https://www.youtube.com/watch?v=M_mKXSbVGdE' />
                 }}
               </BrowserOnly>
             </div>

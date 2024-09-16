@@ -27,6 +27,7 @@
 
 /* You can override the default Infima variables here. */
 :root {
+  
   --ifm-navbar-item-padding-horizontal: 0.55rem;
   --ifm-blockquote-shadow: none;
   --ifm-blockquote-border-left-width: 3px;
@@ -115,6 +116,10 @@
 
 }
 
+main .container {
+  margin-bottom: 1rem;
+}
+
 blockquote {
   background-color: var(--custom-sidebar-bg);
   border-left-width: var(--ifm-alert-border-left-width);
@@ -178,6 +183,13 @@ img[src*='#left'] {
 img[src*='#right'] {
   float: right;
   margin: 0.75rem;
+}
+
+img[src*='#center'] {
+  margin: auto;
+  display: block;
+  margin-top: -12px;
+  margin-bottom: -12px;
 }
 
 img[src*='#author'] {
