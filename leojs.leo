@@ -21332,7 +21332,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 <t tx="felix.20240915221002.1">## 1.0.7
 
 - Fixed URL for homepage and issues page.
-- ...
+- Documentation now has analytics.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

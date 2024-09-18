@@ -3,7 +3,7 @@
 ## 1.0.7
 
 - Fixed URL for homepage and issues page.
-- ...
+- Documentation now has analytics.
 
 ## 1.0.6
 
