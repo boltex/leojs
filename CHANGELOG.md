@@ -2,6 +2,7 @@
 
 ## 1.0.7
 
+- Fixed URL for homepage and issues page.
 - ...
 
 ## 1.0.6
