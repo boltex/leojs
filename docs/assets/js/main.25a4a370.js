@@ -135,7 +135,7 @@ var docusaurus_config = __webpack_require__(4784);
 // EXTERNAL MODULE: ./node_modules/@docusaurus/core/lib/client/exports/ExecutionEnvironment.js
 var ExecutionEnvironment = __webpack_require__(8193);
 ;// CONCATENATED MODULE: ./.docusaurus/client-modules.js
-/* harmony default export */ const client_modules = ([__webpack_require__(119),__webpack_require__(6134),__webpack_require__(6294),__webpack_require__(1043)]);
+/* harmony default export */ const client_modules = ([__webpack_require__(1911),__webpack_require__(119),__webpack_require__(6134),__webpack_require__(6294),__webpack_require__(1043)]);
 // EXTERNAL MODULE: ./.docusaurus/routes.js + 3 modules
 var routes = __webpack_require__(8328);
 // EXTERNAL MODULE: ./node_modules/react-router/esm/react-router.js
@@ -411,13 +411,13 @@ var react = __webpack_require__(6540);
 // EXTERNAL MODULE: ./.docusaurus/docusaurus.config.mjs
 var docusaurus_config = __webpack_require__(4784);
 ;// CONCATENATED MODULE: ./.docusaurus/globalData.json
-const globalData_namespaceObject = /*#__PURE__*/JSON.parse('{"docusaurus-plugin-content-docs":{"default":{"path":"/leojs/docs","versions":[{"name":"current","label":"Next","isLast":true,"path":"/leojs/docs","mainDocId":"getting-started/introduction","docs":[{"id":"advanced-topics/faq","path":"/leojs/docs/advanced-topics/faq","sidebar":"advancedTopicsSidebar"},{"id":"advanced-topics/leonine-refactor","path":"/leojs/docs/advanced-topics/leonine-refactor","sidebar":"advancedTopicsSidebar"},{"id":"advanced-topics/scripting-guide","path":"/leojs/docs/advanced-topics/scripting-guide","sidebar":"advancedTopicsSidebar"},{"id":"advanced-topics/writing-plugins","path":"/leojs/docs/advanced-topics/writing-plugins","sidebar":"advancedTopicsSidebar"},{"id":"appendices/format-of-external-files","path":"/leojs/docs/appendices/format-of-external-files","sidebar":"appendicesSidebar"},{"id":"appendices/format-of-leo-files","path":"/leojs/docs/appendices/format-of-leo-files","sidebar":"appendicesSidebar"},{"id":"appendices/glossary","path":"/leojs/docs/appendices/glossary","sidebar":"appendicesSidebar"},{"id":"appendices/history","path":"/leojs/docs/appendices/history","sidebar":"appendicesSidebar"},{"id":"appendices/mulder-ream","path":"/leojs/docs/appendices/mulder-ream","sidebar":"appendicesSidebar"},{"id":"getting-started/installing","path":"/leojs/docs/getting-started/installing","sidebar":"gettingStartedSidebar"},{"id":"getting-started/introduction","path":"/leojs/docs/getting-started/introduction","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-basics","path":"/leojs/docs/getting-started/tutorial-basics","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-pim","path":"/leojs/docs/getting-started/tutorial-pim","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-scripting","path":"/leojs/docs/getting-started/tutorial-scripting","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-tips","path":"/leojs/docs/getting-started/tutorial-tips","sidebar":"gettingStartedSidebar"},{"id":"users-guide/cheatsheet","path":"/leojs/docs/users-guide/cheatsheet","sidebar":"usersGuideSidebar"},{"id":"users-guide/commands","path":"/leojs/docs/users-guide/commands","sidebar":"usersGuideSidebar"},{"id":"users-guide/customizing","path":"/leojs/docs/users-guide/customizing","sidebar":"usersGuideSidebar"},{"id":"users-guide/directives","path":"/leojs/docs/users-guide/directives","sidebar":"usersGuideSidebar"},{"id":"users-guide/leomarkup","path":"/leojs/docs/users-guide/leomarkup","sidebar":"usersGuideSidebar"}],"draftIds":[],"sidebars":{"gettingStartedSidebar":{"link":{"path":"/leojs/docs/getting-started/introduction","label":"getting-started/introduction"}},"usersGuideSidebar":{"link":{"path":"/leojs/docs/users-guide/leomarkup","label":"users-guide/leomarkup"}},"advancedTopicsSidebar":{"link":{"path":"/leojs/docs/advanced-topics/scripting-guide","label":"advanced-topics/scripting-guide"}},"appendicesSidebar":{"link":{"path":"/leojs/docs/appendices/format-of-leo-files","label":"appendices/format-of-leo-files"}}}}],"breadcrumbs":true}}}');
+const globalData_namespaceObject = /*#__PURE__*/JSON.parse('{"docusaurus-plugin-content-docs":{"default":{"path":"/leojs/docs","versions":[{"name":"current","label":"Next","isLast":true,"path":"/leojs/docs","mainDocId":"getting-started/introduction","docs":[{"id":"advanced-topics/faq","path":"/leojs/docs/advanced-topics/faq","sidebar":"advancedTopicsSidebar"},{"id":"advanced-topics/leonine-refactor","path":"/leojs/docs/advanced-topics/leonine-refactor","sidebar":"advancedTopicsSidebar"},{"id":"advanced-topics/scripting-guide","path":"/leojs/docs/advanced-topics/scripting-guide","sidebar":"advancedTopicsSidebar"},{"id":"advanced-topics/writing-plugins","path":"/leojs/docs/advanced-topics/writing-plugins","sidebar":"advancedTopicsSidebar"},{"id":"appendices/format-of-external-files","path":"/leojs/docs/appendices/format-of-external-files","sidebar":"appendicesSidebar"},{"id":"appendices/format-of-leo-files","path":"/leojs/docs/appendices/format-of-leo-files","sidebar":"appendicesSidebar"},{"id":"appendices/glossary","path":"/leojs/docs/appendices/glossary","sidebar":"appendicesSidebar"},{"id":"appendices/history","path":"/leojs/docs/appendices/history","sidebar":"appendicesSidebar"},{"id":"appendices/mulder-ream","path":"/leojs/docs/appendices/mulder-ream","sidebar":"appendicesSidebar"},{"id":"getting-started/installing","path":"/leojs/docs/getting-started/installing","sidebar":"gettingStartedSidebar"},{"id":"getting-started/introduction","path":"/leojs/docs/getting-started/introduction","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-basics","path":"/leojs/docs/getting-started/tutorial-basics","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-pim","path":"/leojs/docs/getting-started/tutorial-pim","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-scripting","path":"/leojs/docs/getting-started/tutorial-scripting","sidebar":"gettingStartedSidebar"},{"id":"getting-started/tutorial-tips","path":"/leojs/docs/getting-started/tutorial-tips","sidebar":"gettingStartedSidebar"},{"id":"users-guide/cheatsheet","path":"/leojs/docs/users-guide/cheatsheet","sidebar":"usersGuideSidebar"},{"id":"users-guide/commands","path":"/leojs/docs/users-guide/commands","sidebar":"usersGuideSidebar"},{"id":"users-guide/customizing","path":"/leojs/docs/users-guide/customizing","sidebar":"usersGuideSidebar"},{"id":"users-guide/directives","path":"/leojs/docs/users-guide/directives","sidebar":"usersGuideSidebar"},{"id":"users-guide/leomarkup","path":"/leojs/docs/users-guide/leomarkup","sidebar":"usersGuideSidebar"}],"draftIds":[],"sidebars":{"gettingStartedSidebar":{"link":{"path":"/leojs/docs/getting-started/introduction","label":"getting-started/introduction"}},"usersGuideSidebar":{"link":{"path":"/leojs/docs/users-guide/leomarkup","label":"users-guide/leomarkup"}},"advancedTopicsSidebar":{"link":{"path":"/leojs/docs/advanced-topics/scripting-guide","label":"advanced-topics/scripting-guide"}},"appendicesSidebar":{"link":{"path":"/leojs/docs/appendices/format-of-leo-files","label":"appendices/format-of-leo-files"}}}}],"breadcrumbs":true}},"docusaurus-plugin-google-gtag":{"default":{"trackingID":["G-6YLK1QW8SS"],"anonymizeIP":false,"id":"default"}}}');
 ;// CONCATENATED MODULE: ./.docusaurus/i18n.json
 const i18n_namespaceObject = /*#__PURE__*/JSON.parse('{"defaultLocale":"en","locales":["en"],"path":"i18n","currentLocale":"en","localeConfigs":{"en":{"label":"English","direction":"ltr","htmlLang":"en","calendar":"gregory","path":"en"}}}');
 // EXTERNAL MODULE: ./.docusaurus/codeTranslations.json
 var codeTranslations = __webpack_require__(2654);
 ;// CONCATENATED MODULE: ./.docusaurus/site-metadata.json
-const site_metadata_namespaceObject = /*#__PURE__*/JSON.parse('{"docusaurusVersion":"3.5.2","siteVersion":"0.0.0","pluginVersions":{"docusaurus-plugin-content-docs":{"type":"package","name":"@docusaurus/plugin-content-docs","version":"3.5.2"},"docusaurus-plugin-content-pages":{"type":"package","name":"@docusaurus/plugin-content-pages","version":"3.5.2"},"docusaurus-plugin-sitemap":{"type":"package","name":"@docusaurus/plugin-sitemap","version":"3.5.2"},"docusaurus-theme-classic":{"type":"package","name":"@docusaurus/theme-classic","version":"3.5.2"},"docusaurus-theme-search-algolia":{"type":"package","name":"@docusaurus/theme-search-algolia","version":"3.5.2"}}}');
+const site_metadata_namespaceObject = /*#__PURE__*/JSON.parse('{"docusaurusVersion":"3.5.2","siteVersion":"0.0.0","pluginVersions":{"docusaurus-plugin-content-docs":{"type":"package","name":"@docusaurus/plugin-content-docs","version":"3.5.2"},"docusaurus-plugin-content-pages":{"type":"package","name":"@docusaurus/plugin-content-pages","version":"3.5.2"},"docusaurus-plugin-google-gtag":{"type":"package","name":"@docusaurus/plugin-google-gtag","version":"3.5.2"},"docusaurus-plugin-sitemap":{"type":"package","name":"@docusaurus/plugin-sitemap","version":"3.5.2"},"docusaurus-theme-classic":{"type":"package","name":"@docusaurus/theme-classic","version":"3.5.2"},"docusaurus-theme-search-algolia":{"type":"package","name":"@docusaurus/theme-search-algolia","version":"3.5.2"}}}');
 // EXTERNAL MODULE: ./node_modules/react/jsx-runtime.js
 var jsx_runtime = __webpack_require__(4848);
 ;// CONCATENATED MODULE: ./node_modules/@docusaurus/core/lib/client/docusaurusContext.js
@@ -1164,6 +1164,30 @@ function useActivePlugin(options){if(options===void 0){options={};}const data=us
  */function useActiveVersion(pluginId){const data=useDocsData(pluginId);const{pathname}=useLocation();return getActiveVersion(data,pathname);}function useActiveDocContext(pluginId){const data=useDocsData(pluginId);const{pathname}=(0,react_router/* useLocation */.zy)();return getActiveDocContext(data,pathname);}/**
  * Useful to say "hey, you are not on the latest docs version, please switch"
  */function useDocVersionSuggestions(pluginId){const data=useDocsData(pluginId);const{pathname}=(0,react_router/* useLocation */.zy)();return getDocVersionSuggestions(data,pathname);}
+
+/***/ }),
+
+/***/ 1911:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */const clientModule={onRouteDidUpdate(_ref){let{location,previousLocation}=_ref;if(previousLocation&&(location.pathname!==previousLocation.pathname||location.search!==previousLocation.search||location.hash!==previousLocation.hash)){// Normally, the document title is updated in the next tick due to how
+// `react-helmet-async` updates it. We want to send the current document's
+// title to gtag instead of the old one's, so we use `setTimeout` to defer
+// execution to the next tick.
+// See: https://github.com/facebook/docusaurus/issues/7420
+setTimeout(()=>{// Always refer to the variable on window in case it gets overridden
+// elsewhere.
+window.gtag('set','page_path',location.pathname+location.search+location.hash);window.gtag('event','page_view');});}}};/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (clientModule);
 
 /***/ }),
 
@@ -8347,6 +8371,9 @@ __webpack_require__.r(__webpack_exports__);
     [
       "classic",
       {
+        "gtag": {
+          "trackingID": "G-6YLK1QW8SS"
+        },
         "docs": {
           "sidebarPath": "./sidebars.js"
         },
