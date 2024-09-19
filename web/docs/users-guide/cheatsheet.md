@@ -780,7 +780,13 @@ Leo syntax colors clickable links in the body pane.
 
 _Example of a clickable link_
 
-The status area shows the UNL (*Universal Node Locator*) for each node.
+The status bar shows the UNL (*Universal Node Locator*) for the currently selected node.
 
-Alt-clicking or Control-clicking a UNL will take you to its target node, even if the target is in another Leo file!
-Gnx-based UNLs won't break even if you move or rename the target node.
+![Status Bar UNL](img/status-bar-unl.png#center)
+
+If you click the status bar UNL, it will be copied to the clipboard. You can then paste it as needed to make clickable links to that node. Hovering over that status bar UNL provides more options.
+
+In the body pane, similar to an URL, clicking a UNL will take you to its target node, even if the target is in another Leo file!
+
+> 💡 **TIP**\
+> Gnx-based UNLs won't break even if you move or rename the target node.
