@@ -774,9 +774,11 @@ Leo uses a model/view/controller architecture.
 
 ## Clickable links
 
-Leo syntax colors clickable links in the body pane. For example:
+Leo syntax colors clickable links in the body pane.
 
-Leo's home page: https://leo-editor.github.io/leo-editor/
+![Hover Clickable Link](img/hover-url.png#center)
+
+_Example of a clickable link_
 
 The status area shows the UNL (*Universal Node Locator*) for each node.
 
