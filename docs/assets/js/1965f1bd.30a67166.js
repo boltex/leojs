@@ -178,6 +178,7 @@ function _createMdxContent(props) {
     h3: "h3",
     h4: "h4",
     header: "header",
+    img: "img",
     li: "li",
     p: "p",
     pre: "pre",
@@ -2016,18 +2017,39 @@ function _createMdxContent(props) {
       id: "clickable-links",
       children: "Clickable links"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Leo syntax colors clickable links in the body pane. For example:"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: ["Leo's home page: ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
-        href: "https://leo-editor.github.io/leo-editor/",
-        children: "https://leo-editor.github.io/leo-editor/"
-      })]
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: ["The status area shows the UNL (", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
-        children: "Universal Node Locator"
-      }), ") for each node."]
+      children: "Leo syntax colors clickable links in the body pane."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Alt-clicking or Control-clicking a UNL will take you to its target node, even if the target is in another Leo file!\r\nGnx-based UNLs won't break even if you move or rename the target node."
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
+        alt: "Hover Clickable Link",
+        src: (__webpack_require__(2753)/* ["default"] */ .A) + "#center",
+        width: "902",
+        height: "184"
+      })
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+        children: "Example of a clickable link"
+      })
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["The status bar shows the UNL (", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+        children: "Universal Node Locator"
+      }), ") for the currently selected node."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
+        alt: "Status Bar UNL",
+        src: (__webpack_require__(3821)/* ["default"] */ .A) + "#center",
+        width: "625",
+        height: "180"
+      })
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "If you click the status bar UNL, it will be copied to the clipboard. You can then paste it as needed to make clickable links to that node. Hovering over that status bar UNL provides more options."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "In the body pane, similar to an URL, clicking a UNL will take you to its target node, even if the target is in another Leo file!"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
+      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+        children: ["💡 ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: "TIP"
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "Gnx-based UNLs won't break even if you move or rename the target node."]
+      }), "\n"]
     })]
   });
 }
@@ -2045,6 +2067,26 @@ function MDXContent(props = {}) {
 }
 
 
+
+/***/ }),
+
+/***/ 2753:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "assets/images/hover-url-dcd24f2fdabe8fa2ac07c8f883c1c463.png");
+
+/***/ }),
+
+/***/ 3821:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "assets/images/status-bar-unl-c7326f74f6160701f3f032e306cf5532.png");
 
 /***/ }),
 
