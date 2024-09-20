@@ -148,6 +148,10 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ## A - C
 
+### Auto Reload
+
+    To Automatically refresh and synchronize content when external files are modified. This can be set with the **Force reload or ignore changes** setting in the LeoJS welcome/settings screen.
+
 ### Body pane
 
     The pane containing the body text of the currently selected headline in the
@@ -229,6 +233,10 @@ This is a short glossary of important terms in Leo's world. For more information
 ### External file
 
     A file outside of Leo that is connected to Leo by an @\<file> node.
+
+### Go Anywhere
+
+    In LeoJS, the `CTRL+P` keybinding is used to call the **'Go Anywhere'** command to navigate the outline directly to a given node instead of the 'Repeat Complex Command' of the original Leo.
 
 ### Gnx (Global Node Index)
 
