@@ -1009,11 +1009,11 @@ Leo will detect external file changes, and will ask to either **refresh from dis
 
 Arrow keys, home/end, page up/down are used for basic navigation. But in order to **find and goto specific nodes directly**, use the methods described below:
 
-### Goto Anywhere Command
+### Go Anywhere Command
 
 In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to any node directly by typing (part of) its headline.
 
-![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
+![Go Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
 
 ## Find Panel
 
@@ -10913,7 +10913,7 @@ var uniqueId: number = 0;
 <t tx="felix.20220505225236.1">/**
  * * Build all possible strings for the goto panel
  * @param p_context Needed to get to absolute paths on the system
- * @returns An array containing icons for the goto anywhere tree view
+ * @returns An array containing icons for the goto tree view
  */
 export function buildGotoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     return [

@@ -23,7 +23,7 @@ The **body pane** is a text editor which changes to match the selected node of t
 ![Body Pane](./img/body-pane-montage.png)
 
 > 💡 **TIP**\
-> **Detached Body Panes**, independent of the selected node, can be opened with the 'Open Aside' command from any node.
+> **Detached Body Panes**, are panels like the body pane, but independent of the selected node. They can be opened with the 'Open Aside' command from any node.
 > ![Body Pane](./img/outline-context-montage.png)
 
 Below the outline pane are more panels, such as the **Find** panel to help navigate the outline, the **Documents** panel to manage the currently opened Leo documents, an **undo** pane for a history of past actions, and a **buttons** panel for easy access to your document's scripts.

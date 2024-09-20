@@ -196,7 +196,7 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ### Detached Body pane
 
-    In LeoJS, a **Detached Body Pane** is independent of the selected node. This can be useful when needing to compare some nodes contents to another.
+    In LeoJS, a **Detached Body Pane** is an editor panel like the body pane, but independent of the selected node. This can be useful when needing to compare some nodes contents to another.
     
     They can be opened with the 'Open Aside' command. That command is also available when right-clicking on a node in the outline via its context menu.
 

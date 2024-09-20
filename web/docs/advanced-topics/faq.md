@@ -42,6 +42,35 @@ None of these sections could be replaced by methods.
 
 In short, I create sections when convenient, and convert them to functions or methods if they need to be used in several places.
 
+## LeoJS User Interface
+
+### How to open an independent body pane?
+
+You can open a _detached_ Body pane, which is independent of the selected node, with the 'Open Aside' command, from the context menu of any node. 
+
+You can do this by Right-clicking and choosing 'Open Aside' in the outline, or via the Command Palette with `Ctrl+Shift+P`.
+
+### When are LeoJS keybindings active?
+
+The keybinding architecture is designed to be context-aware. When your focus is _within_ the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence. 
+
+If your focus is _outside_ these panes, Visual Studio Code's native keybindings take precedence.
+
+### How to select a node by name?
+
+You can navigate the outline directly by typing its headline: If you know the headline label of a node, or part of it, you can use the 'Go Anywhere' command using `Ctrl+P`.
+
+> 📌 **NOTE**\
+> This keybinding matches VSCode's `Ctrl+P` shortcut which allows you to switch to any project file directly.
+
+### How to auto-reload external files?
+
+By default, LeoJS will ask you to confirm reloading external files when changes are detected. 
+
+To have those automatically reload instead, set the **Force reload or ignore changes** setting to: **Reload All**.
+
+You can view the LeoJS UI settings in the welcome/settings screen by using either the **'LeoJS Welcome'** or the **'Open LeoJS Settings'** entries in the command palette with `Ctrl+Shift+P`
+
 ## Clones
 
 ### How can I eliminate clone wars?
