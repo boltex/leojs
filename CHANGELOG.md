@@ -3,6 +3,7 @@
 ## 1.0.7
 
 - Fixed URL for homepage and issues page.
+- Fixed 'RST' export setting of the outline's 'dirty' flag.
 - Documentation now has analytics.
 
 ## 1.0.6
