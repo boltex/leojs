@@ -8,10 +8,13 @@ Plugins modify how Leo works. With plugins you can give Leo new commands,
 modify how existing commands work, or change any other aspect of Leo's look
 and feel.
 
-1. Plugins can use any of Leo's source code simply by accessing the g global module.
+1. Plugins can use any of Leo's source code simply by accessing the **'g' global module**.
 
 2. Plugins can register event handlers just like any other Leo script. For full
    details, see the section called [Handling Events](#handling-events) later in this chapter.
+
+> **Example**\
+> See the **[extension-sample-leojs repository](https://github.com/boltex/extension-sample-leojs)** for a minimal LeoJS extension example.
 
 The rest of this chapters discusses topics related specifically to plugins.
 
@@ -45,22 +48,22 @@ For any commander c:
 Plugins and other scripts can register event handlers (also known as hooks):
 
 ```js
-g.registerHandler("after-create-leo-frame", onCreate)
-g.registerHandler("idle", on_idle) 
-g.registerHandler(("start2", "open2", "command2"), create_open_with_menu) 
+g.registerHandler("after-create-leo-frame", onCreate);
+g.registerHandler("idle", on_idle);
+g.registerHandler(["start2", "open2", "command2"], create_open_with_menu);
 ```
 
 As shown above, a plugin may register one or more event handlers with a single call to g.registerHandler. Once a hook is registered, Leo will call the registered function' at the named **hook time**. For example:
 
 ```js
-g.registerHandler("idle", on_idle)
+g.registerHandler("idle", on_idle);
 ```
 
 causes Leo to call on_idle at "idle" time.
 
 Event handlers must have the following signature:
 
-```js
+```ts
 function myHook (tag: string, keywords: Record<string, any>): any {
     // whatever
 }
@@ -76,12 +79,12 @@ and the additional arguments passed to the hook in the keywords dictionary.
 
 > 📌 **NOTE**\
 > For some kind of hooks, Leo will skip its own normal processing if the hook 
-> returns anything *other* than None. The table indicates such hooks with 🛑 in
+> returns anything *other* than null or undefined. The table indicates such hooks with 🛑 in
 > the **Stop?** column.
 
 
 | Event name                     | Stop?  | When                               | Keys in keywords dict
-|:-------------------------------|:-------|:-----------------------------------|:----------------------------
+|:-------------------------------|:------:|:-----------------------------------|:----------------------------
 | 'after-auto'                   |        | after each @auto file loaded       | c,p (note 5)
 | 'after-create-leo-frame'       |        | after creating any frame           | c
 | 'after-redraw-outline'         |        | end of tree.redraw                 | c (note 4)
