@@ -211,7 +211,7 @@ For more information, see Leo's [configuration guide](../users-guide/customizing
 
 The LeoJS internal API is accessible when running scripts, but it is also exposed to other VSCode extensions, thus providing a way for software creators ro write _plugins_ for LeoJS.
 
-See [Writing Plugins](../advanced-topics/writing-plugins.md) for more information about the LeoJS plugins architecture.
+See [Writing Plugins](../advanced-topics/writing-plugins.md) for more information about the LeoJS plugins architecture and the **[extension-sample-leojs repository](https://github.com/boltex/extension-sample-leojs)** for a minimal LeoJS extension example.
 
 ## Scripting basics
 
@@ -298,7 +298,7 @@ Leo is a full-featured outliner with the following special features:
 - Directives control how Leo works.
 - @file and @clean nodes create external files.
 - myLeoSettings.leo specifies your personal settings.
-- Plugins extend Leo. @enabled-plugins settings nodes enable plugins.
+- Plugins extend Leo.
 
 For programmers:
 

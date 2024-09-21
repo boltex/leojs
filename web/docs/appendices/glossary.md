@@ -330,7 +330,7 @@ Leonine refers to Leo’s unique way of organizing data and programs.
 ### Plugin
 
     A way to modify and extend Leo without changing Leo's core code.
-    See [Writing plugins](../advanced-topics/writing-plugins.md).
+    See [Writing plugins](../advanced-topics/writing-plugins.md) and the **[extension-sample-leojs repository](https://github.com/boltex/extension-sample-leojs)** for a minimal LeoJS extension example.
 
 ### Promote
 
