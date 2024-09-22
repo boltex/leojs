@@ -522,6 +522,21 @@ export class LeoGui {
         }
         return w.toString();
     }
+    //@+node:felix.20240922154510.1: *4* goAnywhere
+    public goAnywhere(): Thenable<unknown> {
+        return Promise.resolve();
+    }
+
+    //@+node:felix.20240922154516.1: *4* openAside
+    public openAside(): Thenable<unknown> {
+        return Promise.resolve();
+    }
+
+    //@+node:felix.20240922154715.1: *4* showSettings
+    public showSettings(): Thenable<unknown> {
+        return Promise.resolve();
+    }
+
     //@-others
 }
 

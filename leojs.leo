@@ -3722,9 +3722,6 @@ export class LeoUI extends NullGui {
 
     // * Goto nav panel
     public leoGotoProvider!: LeoGotoProvider;
-    // private _leoGoto!: vscode.TreeView&lt;LeoGotoNode&gt;;
-    // private _leoGotoExplorer!: vscode.TreeView&lt;LeoGotoNode&gt;;
-    // public lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -9882,9 +9879,6 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_show_marked();
     this.leoGotoProvider.refreshTreeRoot();
-    // if (p_preserveFocus &amp;&amp; (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
-    //     return Promise.resolve();
-    // }
     if (
         p_preserveFocus &amp;&amp; (
             (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) ||
@@ -13952,7 +13946,7 @@ private _doMinibufferCommand(p_picked?: vscode.QuickPickItem): Promise&lt;unknow
 
         let w_command = p_picked.label; // May be overriden with async commands
 
-        // * LEOJS : OVERRIDE with custom async commands where applicable
+        // OVERRIDE with custom async commands where applicable
         if (Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
             w_command = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
         }
@@ -21334,6 +21328,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Fixed URL for homepage and issues page.
 - Fixed 'RST' export setting of the outline's 'dirty' flag.
 - Documentation now has analytics.
+- Made LeoJS specific commands (goAnywhere, openAside and showSettings) to the minibuffer by adding them to the base GUI, and to '/core/leoCommands.ts' as @cmd.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
