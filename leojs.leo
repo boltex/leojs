@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240915221002.1"><vh>1.0.7</vh></v>
 <v t="felix.20240819221941.1"><vh>1.0.6</vh></v>
 <v t="felix.20240810200831.1"><vh>1.0.5</vh></v>
 <v t="felix.20240810181235.1"><vh>1.0.4</vh></v>
@@ -1008,11 +1009,11 @@ Leo will detect external file changes, and will ask to either **refresh from dis
 
 Arrow keys, home/end, page up/down are used for basic navigation. But in order to **find and goto specific nodes directly**, use the methods described below:
 
-### Goto Anywhere Command
+### Go Anywhere Command
 
 In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to any node directly by typing (part of) its headline.
 
-![Goto Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
+![Go Anywhere](https://raw.githubusercontent.com/boltex/leojs/master/resources/goto-anywhere.gif)
 
 ## Find Panel
 
@@ -3721,9 +3722,6 @@ export class LeoUI extends NullGui {
 
     // * Goto nav panel
     public leoGotoProvider!: LeoGotoProvider;
-    // private _leoGoto!: vscode.TreeView&lt;LeoGotoNode&gt;;
-    // private _leoGotoExplorer!: vscode.TreeView&lt;LeoGotoNode&gt;;
-    // public lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -4553,7 +4551,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4562,9 +4560,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "url": "https://boltex.github.io/"
   },
   "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/boltex/leojs/issues"
+  },
+  "homepage": "https://boltex.github.io/leojs/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/boltex/leojs"
+    "url": "https://github.com/boltex/leojs.git"
   },
   "engines": {
     "vscode": "^1.86.0"
@@ -9877,9 +9879,6 @@ public findQuickMarked(p_preserveFocus?: boolean): Thenable&lt;unknown&gt; {
     const scon: QuickSearchController = c.quicksearchController;
     scon.qsc_show_marked();
     this.leoGotoProvider.refreshTreeRoot();
-    // if (p_preserveFocus &amp;&amp; (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
-    //     return Promise.resolve();
-    // }
     if (
         p_preserveFocus &amp;&amp; (
             (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) ||
@@ -10908,7 +10907,7 @@ var uniqueId: number = 0;
 <t tx="felix.20220505225236.1">/**
  * * Build all possible strings for the goto panel
  * @param p_context Needed to get to absolute paths on the system
- * @returns An array containing icons for the goto anywhere tree view
+ * @returns An array containing icons for the goto tree view
  */
 export function buildGotoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     return [
@@ -13947,7 +13946,7 @@ private _doMinibufferCommand(p_picked?: vscode.QuickPickItem): Promise&lt;unknow
 
         let w_command = p_picked.label; // May be overriden with async commands
 
-        // * LEOJS : OVERRIDE with custom async commands where applicable
+        // OVERRIDE with custom async commands where applicable
         if (Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
             w_command = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
         }
@@ -19364,7 +19363,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.6&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.7&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21322,6 +21321,14 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Added Leo's documentation updated for LeoJS with Docusaurus.
 - Fixed debug and breakpoints by setting sourceMapRenames to false in launch.json.
 - Added support for 'FreeMind' file format import.
+
+</t>
+<t tx="felix.20240915221002.1">## 1.0.7
+
+- Fixed URL for homepage and issues page.
+- Fixed 'RST' export setting of the outline's 'dirty' flag.
+- Documentation now has analytics.
+- Made LeoJS specific commands (goAnywhere, openAside and showSettings) to the minibuffer by adding them to the base GUI, and to '/core/leoCommands.ts' as @cmd.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

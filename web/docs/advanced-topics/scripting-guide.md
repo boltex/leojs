@@ -296,6 +296,8 @@ result = c.executeMinibufferCommand('open-outline');
 
 Plugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed. 
 
+Look at the user's guide ['undoing commands'](cheatsheet/#undoing-commands) section for examples, along with the [LeoJS Scripting Samples Repository](https://github.com/boltex/scripting-samples-leojs), which has examples of making your script operations undoable.
+
 > 📌 **NOTE**\
 > u is shorthand for c.undoer. Most u.beforeX methods return undoData that the client code merely passes to the corresponding u.afterX method. This data contains the 'before' snapshot. The u.afterX methods then create a bead containing both the 'before' and 'after' snapshots.
 
@@ -303,7 +305,7 @@ u.beforeChangeGroup and u.afterChangeGroup allow multiple calls to u.beforeX and
 
 Plugins and scripts may define their own u.beforeX and afterX methods. Indeed, u.afterX merely needs to set the bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo the operation. See the code for the various u.beforeX and afterX methods for guidance.
 
-See the section \<\< How Leo implements unlimited undo >> in leoUndo.ts for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.
+In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods.
 
 ## Modifying the body pane directly
 

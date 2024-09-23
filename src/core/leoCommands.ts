@@ -1371,6 +1371,23 @@ export class Commands {
             c.frame.toggleUnlView();
         }
     }
+    //@+node:felix.20240922160541.1: *3* @cmd goAnywhere
+    @cmd('go-anywhere', 'Go to any node by headline.')
+    public goAnywhere(): Thenable<unknown> {
+        return g.app.gui.goAnywhere();
+    }
+
+
+    //@+node:felix.20240922160608.1: *3* @cmd openAside
+    @cmd('open-aside', 'Open detached body pane on the side.')
+    public openAside(): Thenable<unknown> {
+        return g.app.gui.openAside();
+    }
+    //@+node:felix.20240922160548.1: *3* @cmd showWelcomeSettings
+    @cmd('show-welcome-settings', 'Open the LeoJS welcome and settings screen.')
+    public showSettings(): Thenable<unknown> {
+        return g.app.gui.showSettings();
+    }
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
@@ -3877,7 +3894,6 @@ export class Commands {
         c.rootPosition()!.v.b = saved_body; // #1007: just set v.b.
         c.init_error_dialogs();
     }
-
     //@+node:felix.20230626180727.1: *5* c.syntaxErrorDialog
     /**
      * Warn about syntax errors in files.
@@ -3902,7 +3918,6 @@ export class Commands {
             );
         }
     }
-
     //@+node:felix.20211022202201.1: *4* c.Drawing
     //@+node:felix.20211120225325.1: *5* c.bringToFront
     public bringToFront(c2?: Commands): void {
@@ -4832,7 +4847,7 @@ export class Commands {
         //@-<< docstring >>
         const c = this;
 
-        if(!dir_ || !kind){
+        if (!dir_ || !kind) {
             g.es("'Dir' and 'kind' arguments needed for 'recursiveImport'");
             return;
         }

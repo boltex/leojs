@@ -418,6 +418,7 @@ If your command changes multiple nodes, the pattern is:
     let changed = false;
     // For each change, do something like the following:
     for (const p of to_be_changed_nodes){
+        bunch = c.undoer.beforeChangeNodeContents(p);
         // Change p.
         u.afterChangeNodeContents(p, undoType, bunch);
         changed = true;
@@ -774,11 +775,19 @@ Leo uses a model/view/controller architecture.
 
 ## Clickable links
 
-Leo syntax colors clickable links in the body pane. For example:
+Leo syntax colors clickable links in the body pane.
 
-Leo's home page: https://leo-editor.github.io/leo-editor/
+![Hover Clickable Link](img/hover-url.png#center)
 
-The status area shows the UNL (*Universal Node Locator*) for each node.
+_Example of a clickable link_
 
-Alt-clicking or Control-clicking a UNL will take you to its target node, even if the target is in another Leo file!
-Gnx-based UNLs won't break even if you move or rename the target node.
+The status bar shows the UNL (*Universal Node Locator*) for the currently selected node.
+
+![Status Bar UNL](img/status-bar-unl.png#center)
+
+If you click the status bar UNL, it will be copied to the clipboard. You can then paste it as needed to make clickable links to that node. Hovering over that status bar UNL provides more options.
+
+In the body pane, similar to an URL, clicking a UNL will take you to its target node, even if the target is in another Leo file!
+
+> 💡 **TIP**\
+> Gnx-based UNLs won't break even if you move or rename the target node.
