@@ -249,7 +249,7 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 /**
  * * Build all possible strings for the goto panel
  * @param p_context Needed to get to absolute paths on the system
- * @returns An array containing icons for the goto anywhere tree view
+ * @returns An array containing icons for the goto tree view
  */
 export function buildGotoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     return [

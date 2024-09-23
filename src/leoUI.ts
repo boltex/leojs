@@ -186,9 +186,6 @@ export class LeoUI extends NullGui {
 
     // * Goto nav panel
     public leoGotoProvider!: LeoGotoProvider;
-    // private _leoGoto!: vscode.TreeView<LeoGotoNode>;
-    // private _leoGotoExplorer!: vscode.TreeView<LeoGotoNode>;
-    // public lastGotoContent: LeoGotoNode[] = [];
 
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
@@ -4098,7 +4095,7 @@ export class LeoUI extends NullGui {
 
             let w_command = p_picked.label; // May be overriden with async commands
 
-            // * LEOJS : OVERRIDE with custom async commands where applicable
+            // OVERRIDE with custom async commands where applicable
             if (Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
                 w_command = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
             }
@@ -4642,9 +4639,6 @@ export class LeoUI extends NullGui {
         const scon: QuickSearchController = c.quicksearchController;
         scon.qsc_show_marked();
         this.leoGotoProvider.refreshTreeRoot();
-        // if (p_preserveFocus && (this._leoGoto.visible || this._leoGotoExplorer.visible)) {
-        //     return Promise.resolve();
-        // }
         if (
             p_preserveFocus && (
                 (this._findPanelWebviewView && this._findPanelWebviewView.visible) ||

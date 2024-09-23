@@ -1,9 +1,15 @@
 # Change Log
 
+## 1.0.8
+
+- ...
+
 ## 1.0.7
 
 - Fixed URL for homepage and issues page.
+- Fixed 'RST' export setting of the outline's 'dirty' flag.
 - Documentation now has analytics.
+- Made LeoJS specific commands (goAnywhere, openAside and showSettings) to the minibuffer by adding them to the base GUI, and to '/core/leoCommands.ts' as @cmd.
 
 ## 1.0.6
 

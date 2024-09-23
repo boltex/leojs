@@ -148,6 +148,10 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ## A - C
 
+### Auto Reload
+
+    To Automatically refresh and synchronize content when external files are modified. This can be set with the **Force reload or ignore changes** setting in the LeoJS welcome/settings screen.
+
 ### Body pane
 
     The pane containing the body text of the currently selected headline in the
@@ -196,7 +200,7 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ### Detached Body pane
 
-    In LeoJS, a **Detached Body Pane** is independent of the selected node. This can be useful when needing to compare some nodes contents to another.
+    In LeoJS, a **Detached Body Pane** is an editor panel like the body pane, but independent of the selected node. This can be useful when needing to compare some nodes contents to another.
     
     They can be opened with the 'Open Aside' command. That command is also available when right-clicking on a node in the outline via its context menu.
 
@@ -229,6 +233,10 @@ This is a short glossary of important terms in Leo's world. For more information
 ### External file
 
     A file outside of Leo that is connected to Leo by an @\<file> node.
+
+### Go Anywhere
+
+    In LeoJS, the `CTRL+P` keybinding is used to call the **'Go Anywhere'** command to navigate the outline directly to a given node instead of the 'Repeat Complex Command' of the original Leo.
 
 ### Gnx (Global Node Index)
 
@@ -322,7 +330,7 @@ Leonine refers to Leo’s unique way of organizing data and programs.
 ### Plugin
 
     A way to modify and extend Leo without changing Leo's core code.
-    See [Writing plugins](../advanced-topics/writing-plugins.md).
+    See [Writing plugins](../advanced-topics/writing-plugins.md) and the **[extension-sample-leojs repository](https://github.com/boltex/extension-sample-leojs)** for a minimal LeoJS extension example.
 
 ### Promote
 

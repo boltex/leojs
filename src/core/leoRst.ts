@@ -382,8 +382,8 @@ export class RstCommands {
                 if (this.in_rst_tree(p)) {
                     g.trace(`ignoring nested @rst node: ${p.h}`);
                 } else {
-                    p.h = p.h.trim();
-                    const fn = p.h.substring(4).trim();
+                    const h = p.h.trim();
+                    const fn = h.substring(4).trim();
                     if (fn) {
                         const source = this.write_rst_tree(p, fn);
                         await this.write_docutils_files(fn, p, source);

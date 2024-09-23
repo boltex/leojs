@@ -418,6 +418,7 @@ If your command changes multiple nodes, the pattern is:
     let changed = false;
     // For each change, do something like the following:
     for (const p of to_be_changed_nodes){
+        bunch = c.undoer.beforeChangeNodeContents(p);
         // Change p.
         u.afterChangeNodeContents(p, undoType, bunch);
         changed = true;
