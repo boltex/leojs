@@ -296,7 +296,7 @@ result = c.executeMinibufferCommand('open-outline');
 
 Plugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed. 
 
-Look at the user's guide ['undoing commands'](cheatsheet/#undoing-commands) section for examples, along with the [LeoJS Scripting Samples Repository](https://github.com/boltex/scripting-samples-leojs), which has examples of making your script operations undoable.
+Look at the user's guide [undoing commands](../users-guide/cheatsheet.md#undoing-commands) section for examples, along with the [LeoJS Scripting Samples Repository](https://github.com/boltex/scripting-samples-leojs), which has examples of making your script operations undoable.
 
 > 📌 **NOTE**\
 > u is shorthand for c.undoer. Most u.beforeX methods return undoData that the client code merely passes to the corresponding u.afterX method. This data contains the 'before' snapshot. The u.afterX methods then create a bead containing both the 'before' and 'after' snapshots.
