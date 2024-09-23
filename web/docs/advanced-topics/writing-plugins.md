@@ -86,6 +86,7 @@ and the additional arguments passed to the hook in the keywords dictionary.
 | Event name                     | Stop?  | When                               | Keys in keywords dict
 |:-------------------------------|:------:|:-----------------------------------|:----------------------------
 | 'after-auto'                   |        | after each @auto file loaded       | c,p (note 5)
+| 'after-edit'                   |        | after each @edit file loaded       | c,p (note 5)
 | 'after-create-leo-frame'       |        | after creating any frame           | c
 | 'after-redraw-outline'         |        | end of tree.redraw                 | c (note 4)
 | 'after-reading-external-file'  |        | after reading each external file   | c,p
@@ -99,6 +100,7 @@ and the additional arguments passed to the hook in the keywords dictionary.
 | 'close-frame'                  |        | in app.closeLeoWindow              | c (note 3)
 | 'command1'                     | 🛑     | before each command                | c,p,v,label (note 1)
 | 'command2'                     |        | after  each command                | c,p,v,label (note 1)
+| 'create-node'                  |        | after inserting a node             | c,p
 | 'end1'                         |        | start of app.quit()                | None
 | 'headclick1'                   | 🛑     | before normal click in headline    | c,p,v,event
 | 'headclick2'                   |        | after  normal click in headline    | c,p,v,event
