@@ -1391,7 +1391,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["When reading ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@edit"
-      }), " nodes, Leo reads the entire file into the\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      }), " nodes, Leo reads the entire file into the\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@edit"
       }), " node. Lines that look like sentinels will be read just as they are."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -1399,7 +1399,7 @@ function _createMdxContent(props) {
         children: "@edit"
       }), " nodes, ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@edit"
-      }), " nodes must not have children\r\nand section references and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      }), " nodes must not have children\nand section references and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@others"
       }), " are not allowed."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
@@ -1408,7 +1408,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@file"
-      }), " directive creates an external file containing sentinels. When writing\r\n@file trees, Leo expands section references and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      }), " directive creates an external file containing sentinels. When writing\n@file trees, Leo expands section references and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@all"
       }), " and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@others"
@@ -1416,19 +1416,19 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["When reading external files created by ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@file"
-      }), ", the sentinels allow Leo to\r\nrecreate all aspects of the outline. In particular, Leo can update the\r\noutline based on changes made to the file by another editor."]
+      }), ", the sentinels allow Leo to\nrecreate all aspects of the outline. In particular, Leo can update the\noutline based on changes made to the file by another editor."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "Important"
       }), ": ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@file"
-      }), " is the recommended way to create and edit most\r\nfiles. In particular, using ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      }), " is the recommended way to create and edit most\nfiles. In particular, using ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@file"
       }), " nodes is ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "highly recommended"
-      }), "\r\nwhen sharing external files in a collaborative environment. The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      }), "\nwhen sharing external files in a collaborative environment. The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@all"
-      }), "\r\ndirectivive is designed for \"catch-all\" files, like todo.txt or\r\nnotes.txt or whatever. Such files are assumed to contain a random\r\ncollection of nodes, so there is no language in effect and no real\r\ncomment delimiters."]
+      }), "\ndirectivive is designed for \"catch-all\" files, like todo.txt or\nnotes.txt or whatever. Such files are assumed to contain a random\ncollection of nodes, so there is no language in effect and no real\ncomment delimiters."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@thin"
@@ -1443,7 +1443,7 @@ function _createMdxContent(props) {
         children: "@nosent"
       }), " directive creates an external file ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "without"
-      }), " sentinels. When writing\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+      }), " sentinels. When writing\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@nosent"
       }), " trees, Leo expands section references and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@all"
@@ -1572,7 +1572,7 @@ function _createMdxContent(props) {
           children: "all"
         }), " descendant nodes to the external file. Use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@all"
-        }), " to place\r\nunrelated data in an external file."]
+        }), " to place\nunrelated data in an external file."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@all"
@@ -1584,11 +1584,11 @@ function _createMdxContent(props) {
           children: "@all"
         }), " directive, Leo ignores the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@others"
-        }), " directive\r\nand section references, so Leo will not complain about orphan nodes."]
+        }), " directive\nand section references, so Leo will not complain about orphan nodes."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@all"
-        }), " directivive is designed for \"catch-all\" files, like\r\ntodo.txt or notes.txt or whatever. Such files are assumed to\r\ncontain a random collection of nodes, so there is no language in\r\neffect and no real comment delimiters."]
+        }), " directivive is designed for \"catch-all\" files, like\ntodo.txt or notes.txt or whatever. Such files are assumed to\ncontain a random collection of nodes, so there is no language in\neffect and no real comment delimiters."]
       })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
@@ -1596,17 +1596,17 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("ul", {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "Writes the body text of all unnamed descendant into the external file, in\r\noutline order."
+        children: "Writes the body text of all unnamed descendant into the external file, in\noutline order."
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["Whitespace appearing before ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@others"
-        }), " directive adds to the indentation of\r\nall nodes added by the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " directive adds to the indentation of\nall nodes added by the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@others"
         }), " directive."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["A single node may contain only one ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@others"
-        }), " directive, but descendant nodes\r\nmay have other ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " directive, but descendant nodes\nmay have other ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@others"
         }), " directives."]
       })]
@@ -1622,7 +1622,7 @@ function _createMdxContent(props) {
         children: "@nocolor"
       }), " and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         children: "@nocolor-node"
-      }), " directives control how\r\nLeo colors text in the body pane."]
+      }), " directives control how\nLeo colors text in the body pane."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["These directives typically affect the node in which they appear and all descendant nodes. Exception: an ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "ambiguous node"
@@ -1651,7 +1651,7 @@ function _createMdxContent(props) {
           children: "@color"
         }), ", ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@nocolor"
-        }), " or\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " or\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@nocolor-node"
         }), " directives in the same node."]
       })
@@ -1673,11 +1673,11 @@ function _createMdxContent(props) {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["Disables coloring for only the node containing it. The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@nocolor-node"
-        }), "\r\ndirective overrides the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), "\ndirective overrides the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@color"
         }), " and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@nocolor"
-        }), " directives within the same\r\nnode."]
+        }), " directives within the same\nnode."]
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "dangerous-directives",
@@ -1698,22 +1698,22 @@ function _createMdxContent(props) {
           children: "@file"
         }), " and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@shadow"
-        }), " files.\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        }), " files.\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "Important"
         }), ": Use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@comment"
-        }), " for unusual situations only. In most cases, you\r\nshould use the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " for unusual situations only. In most cases, you\nshould use the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@language"
         }), " directive to set comment delimiters."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@comment"
-        }), " directive may be followed by one, two or three delimiters,\r\nseparated by whitespace. If one delimiter is given, it sets the delimiter\r\nused by single-line comments. If two delimiters are given, they set the\r\nblock comment delimiter. If three delimiters are given, the first sets the\r\nsingle-line-comment delimiter, and the others set the block-comment\r\ndelimiters."]
+        }), " directive may be followed by one, two or three delimiters,\nseparated by whitespace. If one delimiter is given, it sets the delimiter\nused by single-line comments. If two delimiters are given, they set the\nblock comment delimiter. If three delimiters are given, the first sets the\nsingle-line-comment delimiter, and the others set the block-comment\ndelimiters."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "Within these delimiters, underscores represent a significant space, and\r\ndouble underscores represent a newline. Examples:"
+        children: "Within these delimiters, underscores represent a significant space, and\ndouble underscores represent a newline. Examples:"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-          children: "@ϲomment REM_\r\n@ϲomment __=pod__ __=cut__\n"
+          children: "@ϲomment REM_\n@ϲomment __=pod__ __=cut__\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
         children: "The second line sets PerlPod comment delimiters."
@@ -1726,7 +1726,7 @@ function _createMdxContent(props) {
           children: "@delims"
         }), " directives ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "must not"
-        }), " appear in\r\nthe same node. Doing so may create a file that Leo can not read."]
+        }), " appear in\nthe same node. Doing so may create a file that Leo can not read."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "Note"
@@ -1734,7 +1734,7 @@ function _createMdxContent(props) {
           children: "@language"
         }), " and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@comment"
-        }), " may appear in the same node, provided\r\nthat ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " may appear in the same node, provided\nthat ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@comment"
         }), " appears ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
           children: "after"
@@ -1742,7 +1742,7 @@ function _createMdxContent(props) {
           children: "@language"
         }), " directive: ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@comment"
-        }), " overrides\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " overrides\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@language"
         }), "."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -1750,15 +1750,15 @@ function _createMdxContent(props) {
           children: "@comment"
         }), " directive must precede the first section name or ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@c"
-        }), "\r\ndirective."]
+        }), "\ndirective."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["There are situations where using ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@delims"
         }), " or ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@comment"
-        }), " is not avoidable or impractical to\r\nadd new language definition, and including it causes the resulting file to be invalid.\r\nIn place of delimiter definition, use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " is not avoidable or impractical to\nadd new language definition, and including it causes the resulting file to be invalid.\nIn place of delimiter definition, use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@0x"
-        }), " + delimiter encoded in hexadecimal.\r\nThe hexadecimal part must be acceptable input to binascii.unhexlify(), otherwise whole\r\ndirective will be ignored. Use binascii.hexlify('my-delimiter') to generate it.\r\nDecoded delimiters are not checked for validity (such as, UTF-8) and whether they\r\ndo not clash with Leo format (like newline or NUL characters)!"]
+        }), " + delimiter encoded in hexadecimal.\nThe hexadecimal part must be acceptable input to binascii.unhexlify(), otherwise whole\ndirective will be ignored. Use binascii.hexlify('my-delimiter') to generate it.\nDecoded delimiters are not checked for validity (such as, UTF-8) and whether they\ndo not clash with Leo format (like newline or NUL characters)!"]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
         children: "Example:"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
@@ -1772,7 +1772,7 @@ function _createMdxContent(props) {
           children: "@ϲomment <!--!_ _-->\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-        children: ["to create comments that will be removed from the output by Genshi. But the latter would\r\ncause XML parsing error on the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: ["to create comments that will be removed from the output by Genshi. But the latter would\ncause XML parsing error on the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@comment"
         }), " line."]
       })]
@@ -1786,21 +1786,21 @@ function _createMdxContent(props) {
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@delims"
-        }), " directive requires one or two delimiters, separated by\r\nwhitespace. If one delimiter is present it sets the single-line-comment\r\ndelimiter. If two delimiters are present they set block comment delimiters."]
+        }), " directive requires one or two delimiters, separated by\nwhitespace. If one delimiter is present it sets the single-line-comment\ndelimiter. If two delimiters are present they set block comment delimiters."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "This directive is often used to place Javascript text inside XML or HTML\r\nfiles. Like this:"
+        children: "This directive is often used to place Javascript text inside XML or HTML\nfiles. Like this:"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-          children: "@ԁelims /* */\r\nJavascript stuff\r\n@ԁelims <-- -->\r\nHTML stuff\n"
+          children: "@ԁelims /* */\nJavascript stuff\n@ԁelims <-- -->\nHTML stuff\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "Warning"
         }), ": you ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "must"
-        }), " change back to previous delimiters using another\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " change back to previous delimiters using another\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@delims"
-        }), " directive. Failure to change back to the previous delimiters will\r\nthoroughly corrupt the external file as far as compilers, HTML renderers,\r\netc. are concerned. Leo does not do this automatically at the end of a node."]
+        }), " directive. Failure to change back to the previous delimiters will\nthoroughly corrupt the external file as far as compilers, HTML renderers,\netc. are concerned. Leo does not do this automatically at the end of a node."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "Warning"
@@ -1810,13 +1810,13 @@ function _createMdxContent(props) {
           children: "@delims"
         }), " directives ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "must not"
-        }), " appear in\r\nthe same node. Doing so may create a file that Leo can not read."]
+        }), " appear in\nthe same node. Doing so may create a file that Leo can not read."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "Note"
         }), ": The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@delims"
-        }), " directive can not be used to change the comment\r\nstrings at the start of the external file, that is, the comment strings for\r\nthe ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " directive can not be used to change the comment\nstrings at the start of the external file, that is, the comment strings for\nthe ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@+leo sentinel"
         }), " and the initial ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@+body"
@@ -1841,12 +1841,12 @@ function _createMdxContent(props) {
           children: "@doc"
         }), " is a synonym for ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@"
-        }), ". Doc parts\r\ncontinue until an ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), ". Doc parts\ncontinue until an ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@c"
         }), " directive or the end of the body text. For example:"]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-          children: " @ This is a comment in a doc part.\r\n Doc parts can span multiple lines.\r\n The next line ends the doc part\r\n @ϲ\n"
+          children: " @ This is a comment in a doc part.\n Doc parts can span multiple lines.\n The next line ends the doc part\n @ϲ\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
         children: "When writing external files, Leo writes doc parts as comments."
@@ -1859,7 +1859,7 @@ function _createMdxContent(props) {
           children: "@asis"
         }), " trees or when the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@all"
-        }), "\r\nor ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), "\nor ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@delims"
         }), " directives are in effect."]
       })]
@@ -1908,7 +1908,7 @@ function _createMdxContent(props) {
           children: "@encoding iso-8859-1"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "When reading external files, the encoding given must match the encoding\r\nactually used in the external file or \"byte hash\" will result."
+        children: "When reading external files, the encoding given must match the encoding\nactually used in the external file or \"byte hash\" will result."
       })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
@@ -1916,26 +1916,26 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("ul", {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-        children: ["Places lines at the very start of an external file, before any Leo\r\nsentinels. ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: ["Places lines at the very start of an external file, before any Leo\nsentinels. ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@first"
         }), " lines must be the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
           children: "very first"
         }), " lines in an ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@<file>"
-        }), " node.\r\nMore then one ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " node.\nMore then one ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@first"
         }), " lines may appear."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
         children: "This creates two first lines, a shebang line and a Python encoding line::"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-          children: "@firѕt #! /usr/bin/env python\r\n@firѕt # -*- coding: utf-8 -*-\n"
+          children: "@firѕt #! /usr/bin/env python\n@firѕt # -*- coding: utf-8 -*-\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
         children: "Here is a perl example::"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-          children: "@firѕt #!/bin/sh -- # perl, to stop looping\r\n@firѕt eval 'exec /usr/bin/perl -w -S $0 ${1+\"$@\"}'\r\n@firѕt     if 0;\n"
+          children: "@firѕt #!/bin/sh -- # perl, to stop looping\n@firѕt eval 'exec /usr/bin/perl -w -S $0 ${1+\"$@\"}'\n@firѕt     if 0;\n"
         })
       })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
@@ -1948,19 +1948,19 @@ function _createMdxContent(props) {
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["In the body text of most top-level @<file> nodes, the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@ignore"
-        }), " directive\r\ncauses Leo not to write the tree. However, Leo ignores ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " directive\ncauses Leo not to write the tree. However, Leo ignores ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@ignore"
-        }), " directives\r\nin ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " directives\nin ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@asis"
         }), " trees."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["Plugins and other parts of Leo sometimes ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@ignore"
-        }), " for their own purposes. For\r\nexample, Leo's unit testing commands will ignore trees containing ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " for their own purposes. For\nexample, Leo's unit testing commands will ignore trees containing ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@ignore"
-        }), ".\r\nIn such cases, the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), ".\nIn such cases, the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@ignore"
-        }), " directive may appear in the headline or body\r\ntext."]
+        }), " directive may appear in the headline or body\ntext."]
       })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
@@ -1968,9 +1968,9 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("ul", {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-        children: ["Specifies the language in effect, including comment delimiters.\r\nIf no ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: ["Specifies the language in effect, including comment delimiters.\nIf no ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@language"
-        }), " directive is in effect, Leo uses the defaults specified\r\nby the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " directive is in effect, Leo uses the defaults specified\nby the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@string target-language"
         }), " setting."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -1984,15 +1984,15 @@ function _createMdxContent(props) {
           children: "Note"
         }), ": Shell files have comments that start with #."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "Case is ignored in the language names. For example, the following are\r\nequivalent:"
+        children: "Case is ignored in the language names. For example, the following are\nequivalent:"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-          children: "@lаnguage html\r\n@lаnguage HTML\n"
+          children: "@lаnguage html\n@lаnguage HTML\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@language"
-        }), " directive also controls syntax coloring. For language x, the\r\nfile leo/modes/x.py describes how to colorize the language. To see the\r\nlanguages presently supported, look in the leo/modes directory. There are\r\nover 100 such languages."]
+        }), " directive also controls syntax coloring. For language x, the\nfile leo/modes/x.py describes how to colorize the language. To see the\nlanguages presently supported, look in the leo/modes directory. There are\nover 100 such languages."]
       })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
@@ -2004,13 +2004,13 @@ function _createMdxContent(props) {
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["This directive must occur at the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
           children: "very end"
-        }), " of top-level @<file> nodes. More\r\nthan one ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " of top-level @<file> nodes. More\nthan one ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@last"
         }), " directive may exist. For example:"]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           className: "language-php",
-          children: "@firѕt <?php\r\n...\r\n@laѕt ?>\n"
+          children: "@firѕt <?php\n...\n@laѕt ?>\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["Leo does not recognize ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
@@ -2025,7 +2025,7 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("ul", {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-        children: ["Sets the line endings for external files.\r\nThis directive overrides the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: ["Sets the line endings for external files.\nThis directive overrides the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@string output_newline"
         }), " setting."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -2137,9 +2137,9 @@ function _createMdxContent(props) {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["Sets the page width used by the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "reformat-paragraph"
-        }), " command.\r\nThis directive also controls how ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        }), " command.\nThis directive also controls how ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@doc"
-        }), " parts are broken into lines.\r\n<n> should be a positive integer.  For example:"]
+        }), " parts are broken into lines.\n<n> should be a positive integer.  For example:"]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@pаgewidth 100`\n"
@@ -2193,7 +2193,7 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)("ul", {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "Sets the width of tabs.\r\nNegative tab widths cause Leo to convert tabs to spaces."
+        children: "Sets the width of tabs.\nNegative tab widths cause Leo to convert tabs to spaces."
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {

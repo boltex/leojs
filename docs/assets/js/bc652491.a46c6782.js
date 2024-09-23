@@ -217,7 +217,7 @@ function _createMdxContent(props) {
           children: "TIP"
         }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "Detached Body Panes"
-        }), ", independent of the selected node, can be opened with the 'Open Aside' command from any node.\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
+        }), ", are panels like the body pane, but independent of the selected node. They can be opened with the 'Open Aside' command from any node.\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
           alt: "Body Pane",
           src: (__webpack_require__(8256)/* ["default"] */ .A) + "",
           width: "1200",
@@ -693,7 +693,12 @@ function _createMdxContent(props) {
       children: ["See ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
         href: "/leojs/docs/advanced-topics/writing-plugins",
         children: "Writing Plugins"
-      }), " for more information about the LeoJS plugins architecture."]
+      }), " for more information about the LeoJS plugins architecture and the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+          href: "https://github.com/boltex/extension-sample-leojs",
+          children: "extension-sample-leojs repository"
+        })
+      }), " for a minimal LeoJS extension example."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "scripting-basics",
       children: "Scripting basics"
@@ -804,7 +809,7 @@ function _createMdxContent(props) {
       }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.li, {
         children: "myLeoSettings.leo specifies your personal settings."
       }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.li, {
-        children: "Plugins extend Leo. @enabled-plugins settings nodes enable plugins."
+        children: "Plugins extend Leo."
       }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "For programmers:"

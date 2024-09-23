@@ -1427,7 +1427,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         className: "language-js",
-        children: "    const u = c.undoer;\r\n    const undoType = 'command-name';\r\n    u.beforeChangeGroup(c.p, undoType);\r\n    let changed = false;\r\n    // For each change, do something like the following:\r\n    for (const p of to_be_changed_nodes){\r\n        // Change p.\r\n        u.afterChangeNodeContents(p, undoType, bunch);\r\n        changed = true;\r\n    }\r\n    if (changed){\r\n        u.afterChangeGroup(c.p, undoType, false);\r\n    }\n"
+        children: "    const u = c.undoer;\r\n    const undoType = 'command-name';\r\n    u.beforeChangeGroup(c.p, undoType);\r\n    let changed = false;\r\n    // For each change, do something like the following:\r\n    for (const p of to_be_changed_nodes){\r\n        bunch = c.undoer.beforeChangeNodeContents(p);\r\n        // Change p.\r\n        u.afterChangeNodeContents(p, undoType, bunch);\r\n        changed = true;\r\n    }\r\n    if (changed){\r\n        u.afterChangeGroup(c.p, undoType, false);\r\n    }\n"
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "vnode-class",

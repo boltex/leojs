@@ -343,6 +343,14 @@ function _createMdxContent(props) {
       children: "Making operations undoable"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "Plugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["Look at the user's guide ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "/leojs/docs/users-guide/cheatsheet#undoing-commands",
+        children: "undoing commands"
+      }), " section for examples, along with the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://github.com/boltex/scripting-samples-leojs",
+        children: "LeoJS Scripting Samples Repository"
+      }), ", which has examples of making your script operations undoable."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
       children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
         children: ["📌 ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
@@ -354,7 +362,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "Plugins and scripts may define their own u.beforeX and afterX methods. Indeed, u.afterX merely needs to set the bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo the operation. See the code for the various u.beforeX and afterX methods for guidance."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "See the section << How Leo implements unlimited undo >> in leoUndo.ts for more details. In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods."
+      children: "In general, the best way to see how to implement undo is to see how Leo's core calls the u.beforeX and afterX methods."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "modifying-the-body-pane-directly",
       children: "Modifying the body pane directly"

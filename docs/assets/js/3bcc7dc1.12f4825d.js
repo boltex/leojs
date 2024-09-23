@@ -176,6 +176,10 @@ const toc = [{
   "id": "a---c",
   "level": 2
 }, {
+  "value": "Auto Reload",
+  "id": "auto-reload",
+  "level": 3
+}, {
   "value": "Body pane",
   "id": "body-pane",
   "level": 3
@@ -246,6 +250,10 @@ const toc = [{
 }, {
   "value": "External file",
   "id": "external-file",
+  "level": 3
+}, {
+  "value": "Go Anywhere",
+  "id": "go-anywhere",
   "level": 3
 }, {
   "value": "Gnx (Global Node Index)",
@@ -607,6 +615,13 @@ function _createMdxContent(props) {
       id: "a---c",
       children: "A - C"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "auto-reload",
+      children: "Auto Reload"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["To Automatically refresh and synchronize content when external files are modified. This can be set with the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Force reload or ignore changes"
+      }), " setting in the LeoJS welcome/settings screen."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "body-pane",
       children: "Body pane"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
@@ -665,7 +680,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["In LeoJS, a ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "Detached Body Pane"
-      }), " is independent of the selected node. This can be useful when needing to compare some nodes contents to another."]
+      }), " is an editor panel like the body pane, but independent of the selected node. This can be useful when needing to compare some nodes contents to another."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "They can be opened with the 'Open Aside' command. That command is also available when right-clicking on a node in the outline via its context menu."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
@@ -703,6 +718,15 @@ function _createMdxContent(props) {
       children: "External file"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "A file outside of Leo that is connected to Leo by an @<file> node."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "go-anywhere",
+      children: "Go Anywhere"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["In LeoJS, the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "CTRL+P"
+      }), " keybinding is used to call the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "'Go Anywhere'"
+      }), " command to navigate the outline directly to a given node instead of the 'Repeat Complex Command' of the original Leo."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "gnx-global-node-index",
       children: "Gnx (Global Node Index)"
@@ -804,7 +828,12 @@ function _createMdxContent(props) {
       children: ["A way to modify and extend Leo without changing Leo's core code.\r\nSee ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
         href: "/leojs/docs/advanced-topics/writing-plugins",
         children: "Writing plugins"
-      }), "."]
+      }), " and the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+          href: "https://github.com/boltex/extension-sample-leojs",
+          children: "extension-sample-leojs repository"
+        })
+      }), " for a minimal LeoJS extension example."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "promote",
       children: "Promote"

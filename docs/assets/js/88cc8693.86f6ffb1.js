@@ -106,8 +106,10 @@ function _createMdxContent(props) {
       children: "Plugins modify how Leo works. With plugins you can give Leo new commands,\r\nmodify how existing commands work, or change any other aspect of Leo's look\r\nand feel."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.ol, {
       children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.li, {
-        children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-          children: "Plugins can use any of Leo's source code simply by accessing the g global module."
+        children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+          children: ["Plugins can use any of Leo's source code simply by accessing the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+            children: "'g' global module"
+          }), "."]
         }), "\n"]
       }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.li, {
         children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -116,6 +118,17 @@ function _createMdxContent(props) {
             children: "Handling Events"
           }), " later in this chapter."]
         }), "\n"]
+      }), "\n"]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
+      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+        children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: "Example"
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "See the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+            href: "https://github.com/boltex/extension-sample-leojs",
+            children: "extension-sample-leojs repository"
+          })
+        }), " for a minimal LeoJS extension example."]
       }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "The rest of this chapters discusses topics related specifically to plugins."
@@ -237,7 +250,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         className: "language-js",
-        children: "g.registerHandler(\"after-create-leo-frame\", onCreate)\r\ng.registerHandler(\"idle\", on_idle) \r\ng.registerHandler((\"start2\", \"open2\", \"command2\"), create_open_with_menu) \n"
+        children: "g.registerHandler(\"after-create-leo-frame\", onCreate);\r\ng.registerHandler(\"idle\", on_idle);\r\ng.registerHandler([\"start2\", \"open2\", \"command2\"], create_open_with_menu);\n"
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["As shown above, a plugin may register one or more event handlers with a single call to g.registerHandler. Once a hook is registered, Leo will call the registered function' at the named ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
@@ -246,7 +259,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         className: "language-js",
-        children: "g.registerHandler(\"idle\", on_idle)\n"
+        children: "g.registerHandler(\"idle\", on_idle);\n"
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "causes Leo to call on_idle at \"idle\" time."
@@ -254,7 +267,7 @@ function _createMdxContent(props) {
       children: "Event handlers must have the following signature:"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-        className: "language-js",
+        className: "language-ts",
         children: "function myHook (tag: string, keywords: Record<string, any>): any {\r\n    // whatever\r\n}\n"
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.ul, {
@@ -274,7 +287,7 @@ function _createMdxContent(props) {
           children: "NOTE"
         }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "For some kind of hooks, Leo will skip its own normal processing if the hook\r\nreturns anything ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
           children: "other"
-        }), " than None. The table indicates such hooks with 🛑 in\r\nthe ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        }), " than null or undefined. The table indicates such hooks with 🛑 in\r\nthe ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
           children: "Stop?"
         }), " column."]
       }), "\n"]
@@ -288,7 +301,7 @@ function _createMdxContent(props) {
             children: "Event name"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.th, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "Stop?"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.th, {
@@ -312,7 +325,7 @@ function _createMdxContent(props) {
             children: "'after-auto'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -330,10 +343,31 @@ function _createMdxContent(props) {
             style: {
               textAlign: "left"
             },
-            children: "'after-create-leo-frame'"
+            children: "'after-edit'"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "center"
+            }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
               textAlign: "left"
+            },
+            children: "after each @edit file loaded"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "c,p (note 5)"
+          })]
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.tr, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "'after-create-leo-frame'"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -354,7 +388,7 @@ function _createMdxContent(props) {
             children: "'after-redraw-outline'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -375,7 +409,7 @@ function _createMdxContent(props) {
             children: "'after-reading-external-file'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -396,7 +430,7 @@ function _createMdxContent(props) {
             children: "'after-reload-settings'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -417,7 +451,7 @@ function _createMdxContent(props) {
             children: "'before-create-leo-frame'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -438,7 +472,7 @@ function _createMdxContent(props) {
             children: "'before-writing-external-file'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -459,7 +493,7 @@ function _createMdxContent(props) {
             children: "'bodykey1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -481,7 +515,7 @@ function _createMdxContent(props) {
             children: "'bodykey2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -502,7 +536,7 @@ function _createMdxContent(props) {
             children: "'clear-all-marks'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -523,7 +557,7 @@ function _createMdxContent(props) {
             children: "'clear-mark'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -544,7 +578,7 @@ function _createMdxContent(props) {
             children: "'close-frame'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -565,7 +599,7 @@ function _createMdxContent(props) {
             children: "'command1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -587,7 +621,7 @@ function _createMdxContent(props) {
             children: "'command2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -605,10 +639,31 @@ function _createMdxContent(props) {
             style: {
               textAlign: "left"
             },
-            children: "'end1'"
+            children: "'create-node'"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "center"
+            }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
               textAlign: "left"
+            },
+            children: "after inserting a node"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "c,p"
+          })]
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.tr, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "'end1'"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -629,7 +684,7 @@ function _createMdxContent(props) {
             children: "'headclick1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -651,7 +706,7 @@ function _createMdxContent(props) {
             children: "'headclick2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -672,7 +727,7 @@ function _createMdxContent(props) {
             children: "'headkey1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -694,7 +749,7 @@ function _createMdxContent(props) {
             children: "'headkey2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -715,7 +770,7 @@ function _createMdxContent(props) {
             children: "'hoist-changed'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -736,7 +791,7 @@ function _createMdxContent(props) {
             children: "'idle'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -757,7 +812,7 @@ function _createMdxContent(props) {
             children: "'new'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -778,7 +833,7 @@ function _createMdxContent(props) {
             children: "'open1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -800,7 +855,7 @@ function _createMdxContent(props) {
             children: "'open2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -821,7 +876,7 @@ function _createMdxContent(props) {
             children: "'openwith1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -843,7 +898,7 @@ function _createMdxContent(props) {
             children: "'openwith2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -864,7 +919,7 @@ function _createMdxContent(props) {
             children: "'recentfiles1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -886,7 +941,7 @@ function _createMdxContent(props) {
             children: "'recentfiles2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -907,7 +962,7 @@ function _createMdxContent(props) {
             children: "'save1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -929,7 +984,7 @@ function _createMdxContent(props) {
             children: "'save2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -950,7 +1005,7 @@ function _createMdxContent(props) {
             children: "'select1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -972,7 +1027,7 @@ function _createMdxContent(props) {
             children: "'select2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -993,7 +1048,7 @@ function _createMdxContent(props) {
             children: "'select3'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -1014,7 +1069,7 @@ function _createMdxContent(props) {
             children: "'set-mark'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -1035,7 +1090,7 @@ function _createMdxContent(props) {
             children: "'start1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -1056,7 +1111,7 @@ function _createMdxContent(props) {
             children: "'start2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -1077,7 +1132,7 @@ function _createMdxContent(props) {
             children: "'unselect1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -1099,7 +1154,7 @@ function _createMdxContent(props) {
             children: "'unselect2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -1120,7 +1175,7 @@ function _createMdxContent(props) {
             children: "'@url1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             },
             children: "🛑"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
@@ -1142,7 +1197,7 @@ function _createMdxContent(props) {
             children: "'@url2'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
-              textAlign: "left"
+              textAlign: "center"
             }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {

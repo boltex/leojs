@@ -10,7 +10,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="LeoJS" href="/leojs/opensearch.xml"><link rel="stylesheet" href="/leojs/assets/css/styles.bf8e1600.css">
-<script src="/leojs/assets/js/runtime~main.e07b27bc.js" defer="defer"></script>
+<script src="/leojs/assets/js/runtime~main.4518bb13.js" defer="defer"></script>
 <script src="/leojs/assets/js/main.25a4a370.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -87,6 +87,8 @@ spaces.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="wrap">@wrap<a href="#wrap" class="hash-link" aria-label="Direct link to @wrap" title="Direct link to @wrap">​</a></h3>
 <p>Enables line wrapping in Leo&#x27;s body pane.</p>
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="a---c">A - C<a href="#a---c" class="hash-link" aria-label="Direct link to A - C" title="Direct link to A - C">​</a></h2>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="auto-reload">Auto Reload<a href="#auto-reload" class="hash-link" aria-label="Direct link to Auto Reload" title="Direct link to Auto Reload">​</a></h3>
+<p>To Automatically refresh and synchronize content when external files are modified. This can be set with the <strong>Force reload or ignore changes</strong> setting in the LeoJS welcome/settings screen.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="body-pane">Body pane<a href="#body-pane" class="hash-link" aria-label="Direct link to Body pane" title="Direct link to Body pane">​</a></h3>
 <p>The pane containing the body text of the currently selected headline in the
 outline pane.</p>
@@ -114,7 +116,7 @@ or @code directives and continue until the next doc part.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="descendant">Descendant<a href="#descendant" class="hash-link" aria-label="Direct link to Descendant" title="Direct link to Descendant">​</a></h3>
 <p>An offspring of a node.  That is, a child, grandchild, etc. of a node.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="detached-body-pane">Detached Body pane<a href="#detached-body-pane" class="hash-link" aria-label="Direct link to Detached Body pane" title="Direct link to Detached Body pane">​</a></h3>
-<p>In LeoJS, a <strong>Detached Body Pane</strong> is independent of the selected node. This can be useful when needing to compare some nodes contents to another.</p>
+<p>In LeoJS, a <strong>Detached Body Pane</strong> is an editor panel like the body pane, but independent of the selected node. This can be useful when needing to compare some nodes contents to another.</p>
 <p>They can be opened with the &#x27;Open Aside&#x27; command. That command is also available when right-clicking on a node in the outline via its context menu.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="directive">Directive<a href="#directive" class="hash-link" aria-label="Direct link to Directive" title="Direct link to Directive">​</a></h3>
 <p>A keyword, preceded by an &#x27;@&#x27; sign, in body text that controls Leo&#x27;s
@@ -134,6 +136,8 @@ place them on separate lines.</p>
 <p>To make the children of a node visible.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="external-file">External file<a href="#external-file" class="hash-link" aria-label="Direct link to External file" title="Direct link to External file">​</a></h3>
 <p>A file outside of Leo that is connected to Leo by an @&lt;file&gt; node.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="go-anywhere">Go Anywhere<a href="#go-anywhere" class="hash-link" aria-label="Direct link to Go Anywhere" title="Direct link to Go Anywhere">​</a></h3>
+<p>In LeoJS, the <code>CTRL+P</code> keybinding is used to call the <strong>&#x27;Go Anywhere&#x27;</strong> command to navigate the outline directly to a given node instead of the &#x27;Repeat Complex Command&#x27; of the original Leo.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="gnx-global-node-index">Gnx (Global Node Index)<a href="#gnx-global-node-index" class="hash-link" aria-label="Direct link to Gnx (Global Node Index)" title="Direct link to Gnx (Global Node Index)">​</a></h3>
 <p>A unique, immutable string permanently associated with each vnode.
 See <a href="/leojs/docs/appendices/format-of-external-files">format of external files</a>.</p>
@@ -189,7 +193,7 @@ of the outline if the outline is hoisted.</p>
 <p>The node that directly contains a node.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="plugin">Plugin<a href="#plugin" class="hash-link" aria-label="Direct link to Plugin" title="Direct link to Plugin">​</a></h3>
 <p>A way to modify and extend Leo without changing Leo&#x27;s core code.
-See <a href="/leojs/docs/advanced-topics/writing-plugins">Writing plugins</a>.</p>
+See <a href="/leojs/docs/advanced-topics/writing-plugins">Writing plugins</a> and the <strong><a href="https://github.com/boltex/extension-sample-leojs" target="_blank" rel="noopener noreferrer">extension-sample-leojs repository</a></strong> for a minimal LeoJS extension example.</p>
 <h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="promote">Promote<a href="#promote" class="hash-link" aria-label="Direct link to Promote" title="Direct link to Promote">​</a></h3>
 <p>To move all children of a node in an outline so that they become siblings of
 the node.</p>

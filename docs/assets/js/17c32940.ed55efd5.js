@@ -68,6 +68,26 @@ const toc = [{
   "id": "when-is-using-a-section-better-than-using-a-method",
   "level": 3
 }, {
+  "value": "LeoJS User Interface",
+  "id": "leojs-user-interface",
+  "level": 2
+}, {
+  "value": "How to open an independent body pane?",
+  "id": "how-to-open-an-independent-body-pane",
+  "level": 3
+}, {
+  "value": "When are LeoJS keybindings active?",
+  "id": "when-are-leojs-keybindings-active",
+  "level": 3
+}, {
+  "value": "How to select a node by name?",
+  "id": "how-to-select-a-node-by-name",
+  "level": 3
+}, {
+  "value": "How to auto-reload external files?",
+  "id": "how-to-auto-reload-external-files",
+  "level": 3
+}, {
   "value": "Clones",
   "id": "clones",
   "level": 2
@@ -356,6 +376,65 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "In short, I create sections when convenient, and convert them to functions or methods if they need to be used in several places."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
+      id: "leojs-user-interface",
+      children: "LeoJS User Interface"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "how-to-open-an-independent-body-pane",
+      children: "How to open an independent body pane?"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["You can open a ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+        children: "detached"
+      }), " Body pane, which is independent of the selected node, with the 'Open Aside' command, from the context menu of any node."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["You can do this by Right-clicking and choosing 'Open Aside' in the outline, or via the Command Palette with ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "Ctrl+Shift+P"
+      }), "."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "when-are-leojs-keybindings-active",
+      children: "When are LeoJS keybindings active?"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["The keybinding architecture is designed to be context-aware. When your focus is ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+        children: "within"
+      }), " the LeoJS Body or Outline pane, LeoJS-specific keybindings take precedence."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["If your focus is ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+        children: "outside"
+      }), " these panes, Visual Studio Code's native keybindings take precedence."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "how-to-select-a-node-by-name",
+      children: "How to select a node by name?"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["You can navigate the outline directly by typing its headline: If you know the headline label of a node, or part of it, you can use the 'Go Anywhere' command using ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "Ctrl+P"
+      }), "."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
+      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+        children: ["📌 ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: "NOTE"
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "This keybinding matches VSCode's ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+          children: "Ctrl+P"
+        }), " shortcut which allows you to switch to any project file directly."]
+      }), "\n"]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "how-to-auto-reload-external-files",
+      children: "How to auto-reload external files?"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "By default, LeoJS will ask you to confirm reloading external files when changes are detected."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["To have those automatically reload instead, set the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Force reload or ignore changes"
+      }), " setting to: ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Reload All"
+      }), "."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["You can view the LeoJS UI settings in the welcome/settings screen by using either the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "'LeoJS Welcome'"
+      }), " or the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "'Open LeoJS Settings'"
+      }), " entries in the command palette with ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "Ctrl+Shift+P"
+      })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "clones",
       children: "Clones"
