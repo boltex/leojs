@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.8
+
+- ...
+
 ## 1.0.7
 
 - Fixed URL for homepage and issues page.
