@@ -38,6 +38,14 @@ c.undoer.afterChangeNodeContents(p, 'promote-child-bodies', b);
 
 This creates a fully undoable promote-child-bodies command.
 
+## Submenus with \@rclick
+
+You can make `@button` offer sub-menus with `@rclick` nodes.
+
+See [@button and @rclick](../users-guide/customizing.md#rclick) for more
+details, and the [LeoJS scripting samples](https://github.com/boltex/scripting-samples-leojs) 
+for examples of using  **@button** nodes.
+
 ## Comparing two similar outlines
 
 efc.compareTrees does most of the work of comparing two similar outlines.

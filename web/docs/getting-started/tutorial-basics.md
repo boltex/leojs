@@ -292,6 +292,10 @@ for (const p of p.self_and_subtree()) {
 }
 ```
 
+See the scripting guide's [@button example](../advanced-topics/scripting-guide.md#button-example) for more
+details, and the [LeoJS scripting samples](https://github.com/boltex/scripting-samples-leojs) 
+for examples of using **@button** and **@rclick** nodes.
+
 ## Summary
 Leo is a full-featured outliner with the following special features:
 
