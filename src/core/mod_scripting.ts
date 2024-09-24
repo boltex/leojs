@@ -259,13 +259,13 @@ export interface RClick {
  */
 export function build_rclick_tree(command_p: Position | undefined, rclicks: RClick[] = [], top_level: boolean = false): RClick[] {
 
-    const at_others_pat = new RegExp('^\\s*@others\\b', 'm');
+    const at_others_pat = /^\s*@others\b/m;
 
     /**
      * Return True if p.b has a valid @others directive.
      */
     function has_at_others(p: Position): boolean {
-        if ('others' in g.globalDirectiveList) {
+        if (g.globalDirectiveList.includes('others')) {
             return at_others_pat.test(p.b);
         }
         return false;
@@ -279,10 +279,13 @@ export function build_rclick_tree(command_p: Position | undefined, rclicks: RCli
         // command_p will be None for leoSettings.leo and myLeoSettings.leo.
         if (command_p && command_p.__bool__()) {
             if (!has_at_others(command_p)) {
-                rclicks.push(...[...command_p.children()].map(i => ({
-                    position: i.copy(),
-                    children: [],
-                } as RClick)));
+                rclicks.push(
+                    ...[...command_p.children()]
+                        .filter(i => i.h.startsWith('@rclick '))
+                        .map(i => ({
+                            position: i.copy(),
+                            children: [],
+                        } as RClick)));
             }
             for (const i of command_p.following_siblings()) {
                 if (i.h.startsWith('@rclick ')) {

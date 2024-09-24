@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20240922224330.1"><vh>1.0.8</vh></v>
 <v t="felix.20240915221002.1"><vh>1.0.7</vh></v>
 <v t="felix.20240819221941.1"><vh>1.0.6</vh></v>
 <v t="felix.20240810200831.1"><vh>1.0.5</vh></v>
@@ -4551,7 +4552,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -19363,7 +19364,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.7&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.8&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21329,6 +21330,11 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Fixed 'RST' export setting of the outline's 'dirty' flag.
 - Documentation now has analytics.
 - Made LeoJS specific commands (goAnywhere, openAside and showSettings) to the minibuffer by adding them to the base GUI, and to '/core/leoCommands.ts' as @cmd.
+
+</t>
+<t tx="felix.20240922224330.1">## 1.0.8
+
+- Fixed @rclick generation on @button nodes.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
