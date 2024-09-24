@@ -10,7 +10,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="LeoJS" href="/leojs/opensearch.xml"><link rel="stylesheet" href="/leojs/assets/css/styles.bf8e1600.css">
-<script src="/leojs/assets/js/runtime~main.4518bb13.js" defer="defer"></script>
+<script src="/leojs/assets/js/runtime~main.b6d09da1.js" defer="defer"></script>
 <script src="/leojs/assets/js/main.25a4a370.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -108,7 +108,7 @@ See the following sections for details.</p>
 <h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="data">@data<a href="#data" class="hash-link" aria-label="Direct link to @data" title="Direct link to @data">​</a></h4>
 <p>The body text contains a list of strings, one per line. Lines starting with <code>#</code> are ignored.</p>
 <h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="rclick">@rclick<a href="#rclick" class="hash-link" aria-label="Direct link to @rclick" title="Direct link to @rclick">​</a></h4>
-<p>For each <code>@button</code> node, Leo adds right-click menu items for:</p>
+<p>For each <code>@button</code> node, Leo adds sub-menu items for:</p>
 <ul>
 <li>
 <p><code>@rclick</code> nodes directly <em>following</em> the <code>@button</code>.</p>
@@ -118,10 +118,13 @@ See the following sections for details.</p>
 <code>@button</code> node has no <code>@others</code> directive.</p>
 </li>
 </ul>
-<p><strong>Standard rclick items</strong>: Leo adds two standard right-click menu items for
-each <code>@button</code> node: <code>Remove Button</code> and <code>Goto Script</code>. Leo adds the
-indicator text <strong>only</strong> to buttons that contain right-click menu items in
+<blockquote>
+<p>💡 <strong>Standard rclick items</strong><br>
+<!-- -->Leo adds two context-menu items for
+each <code>@button</code> node: <code>Remove Button</code> and <code>Goto Script</code>. Leo adds an
+▼ indicator <strong>only</strong> to buttons that contain right-click menu items in
 addition to these two standard right-click menu items.</p>
+</blockquote>
 <p>The headline of the <code>@rclick</code> node gives the menu title. The body contains a
 Leo script to execute when the user selects the menu item.</p>
 <h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="recentfiles">@recentfiles<a href="#recentfiles" class="hash-link" aria-label="Direct link to @recentfiles" title="Direct link to @recentfiles">​</a></h4>
