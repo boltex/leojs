@@ -54,6 +54,10 @@ const toc = [{
   "id": "button-example",
   "level": 2
 }, {
+  "value": "Submenus with @rclick",
+  "id": "submenus-with-rclick",
+  "level": 2
+}, {
   "value": "Comparing two similar outlines",
   "id": "comparing-two-similar-outlines",
   "level": 2
@@ -194,6 +198,25 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "This creates a fully undoable promote-child-bodies command."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
+      id: "submenus-with-rclick",
+      children: "Submenus with @rclick"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["You can make ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "@button"
+      }), " offer sub-menus with ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "@rclick"
+      }), " nodes."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["See ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "/leojs/docs/users-guide/customizing#rclick",
+        children: "@button and @rclick"
+      }), " for more\r\ndetails, and the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://github.com/boltex/scripting-samples-leojs",
+        children: "LeoJS scripting samples"
+      }), "\r\nfor examples of using  ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "@button"
+      }), " nodes."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "comparing-two-similar-outlines",
       children: "Comparing two similar outlines"

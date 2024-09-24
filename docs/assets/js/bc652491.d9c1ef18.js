@@ -796,6 +796,18 @@ function _createMdxContent(props) {
         className: "language-ts",
         children: "/**\r\n * Print all headlines of the selected subtree, properly indented,\r\n * with the number of characters in each node's body text.\r\n */\r\n \r\n// p.self_and_subtree() is a generator yielding p and\r\n// all positions in p's subtree, in outline order.\r\nfor (const p of p.self_and_subtree()) {\r\n    const length = p.b.length; // p.b is p's body text.\r\n    const spaces = ' '.repeat(p.level()); // p.level() is p's indentation level.\r\n    const headline = p.h; // p.h is p's headline.\r\n\r\n    g.es(`${String(length).padStart(3, ' ')} ${spaces} ${headline}`);\r\n}\n"
       })
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["See the scripting guide's ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "/leojs/docs/advanced-topics/scripting-guide#button-example",
+        children: "@button example"
+      }), " for more\r\ndetails, and the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://github.com/boltex/scripting-samples-leojs",
+        children: "LeoJS scripting samples"
+      }), "\r\nfor examples of using ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "@button"
+      }), " and ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "@rclick"
+      }), " nodes."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "summary",
       children: "Summary"
