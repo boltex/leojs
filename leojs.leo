@@ -21334,7 +21334,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 </t>
 <t tx="felix.20240922224330.1">## 1.0.8
 
-- ...
+- Fixed @rclick generation on @button nodes.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
