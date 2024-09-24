@@ -2,7 +2,7 @@
 
 ## 1.0.8
 
-- ...
+- Fixed @rclick generation on @button nodes.
 
 ## 1.0.7
 

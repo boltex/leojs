@@ -150,17 +150,18 @@ The body text contains a list of strings, one per line. Lines starting with `#` 
 
 #### \@rclick
 
-For each `@button` node, Leo adds right-click menu items for:
+For each `@button` node, Leo adds sub-menu items for:
 
 - `@rclick` nodes directly *following* the `@button`.
 
 - `@rclick` nodes that are *children* of the `@button` node, provided that the
   `@button` node has no `@others` directive.
 
-**Standard rclick items**: Leo adds two standard right-click menu items for
-each `@button` node: `Remove Button` and `Goto Script`. Leo adds the
-indicator text **only** to buttons that contain right-click menu items in
-addition to these two standard right-click menu items.
+> 💡 **Standard rclick items**\
+> Leo adds two context-menu items for
+> each `@button` node: `Remove Button` and `Goto Script`. Leo adds an
+> ▼ indicator **only** to buttons that contain right-click menu items in
+> addition to these two standard right-click menu items.
 
 The headline of the `@rclick` node gives the menu title. The body contains a
 Leo script to execute when the user selects the menu item.
