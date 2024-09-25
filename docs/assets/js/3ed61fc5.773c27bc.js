@@ -97,7 +97,11 @@ function _createMdxContent(props) {
         }), " video, you can also install and use LeoJS in ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
           href: "https://code.visualstudio.com/docs/remote/codespaces#_browserbased-editor",
           children: "VSCode for the web"
-        }), "."]
+        }), ". (Press the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+          children: "."
+        }), " ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+          children: "period key"
+        }), " when browsing a github repo to switch the interface to VSCode for the web)"]
       }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["The easiest way to install LeoJS is to open the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {

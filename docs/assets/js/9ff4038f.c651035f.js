@@ -157,8 +157,10 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "web-based-development",
       children: "Web-Based Development"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "LeoJS can also be run as a web extension on VSCode for the web. It can edit Leo documents and work with your files directly inside online repositories, such as on GitHub and Azure-Repos."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["LeoJS can also be run as a web extension on VSCode for the web. It can edit Leo documents and work with your files directly inside online repositories, such as on GitHub and Azure-Repos: Press the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "."
+      }), " (period key) when browsing a github repo to switch the interface to VSCode for the web, then activate LeoJS from the extension panel."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
         href: "https://www.youtube.com/watch?v=M_mKXSbVGdE",

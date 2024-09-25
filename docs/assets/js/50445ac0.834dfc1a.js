@@ -184,7 +184,11 @@ function _createMdxContent(props) {
         }), ", along with the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
           href: "https://www.youtube.com/watch?v=M_mKXSbVGdE",
           children: "LeoJS features video"
-        }), " to see how to try them directly in your browser."]
+        }), " to see how to try them directly in your browser. (Press the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+          children: "."
+        }), " ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+          children: "period key"
+        }), " when browsing the github repo)"]
       }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "button-example",
