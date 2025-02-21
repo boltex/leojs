@@ -533,6 +533,9 @@ export class Importer {
             g.es_exception(e);
             parent.deleteAllChildren();
             parent.b = lines.join('');
+            if (g.unitTesting) {
+                throw e;
+            }
         }
         // Add trailing lines.
         parent.b += `@language ${this.language}\n@tabwidth ${this.tab_width}\n`;
@@ -560,7 +563,7 @@ export class Importer {
 
         // Check for intermixed blanks and tabs.
         this.tab_width = c.getTabWidth(root)!;
-        let lines: string[] = g.splitLines(s);
+        let lines: string[] = g.splitLinesAtNewline(s);
         const ws_ok: boolean = this.check_blanks_and_tabs(lines);  // Issues warnings.
 
         // Regularize leading whitespace

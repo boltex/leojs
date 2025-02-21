@@ -3665,35 +3665,42 @@ export class LeoFind {
      */
     public replace_back_slashes(s: string): string {
 
-        return s.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
-
-        // * Old Code 
-
-        /*
-        // This is NOT the same as:
-        //
-        //   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
-        //
-        // because there is no rescanning.
-
+        // Replace backslash-n with a newline and backslash-t with a tab.
         let i = 0;
-        while (i + 1 < s.length) {
-            if (s[i] === '\\') {
-                const ch = s[i + 1];
-                if (ch === '\\') {
-                    s = s.substring(0, i) + s.substring(i + 1); // replace \\ by \
-                } else if (ch === 'n') {
-                    s = s.substring(0, i) + '\n' + s.substring(i + 2); // replace the \n by a newline
-                } else if (ch === 't') {
-                    s = s.substring(0, i) + '\t' + s.substring(i + 2); // replace \t by a tab
-                } else {
-                    i += 1; // Skip the escaped character.
-                }
-            }
+        const result: string[] = [];
+
+        while (i < s.length) {
+            const progress = i;
+            let ch = s[i];
             i += 1;
+
+            if (ch !== '\\' || i >= s.length) {
+                result.push(ch);
+                continue;
+            }
+
+            ch = s[i];
+            i += 1;
+
+            if (ch === 'n') {
+                result.push('\n');
+            } else if (ch === 't') {
+                result.push('\t');
+            } else if (ch === 'f') {
+                result.push('\f');
+            } else if (ch === '\\') {
+                // 4284
+                result.push(ch);
+                result.push(ch);
+            } else {
+                result.push('\\');
+                i -= 1;
+            }
+
+            g.assert(progress < i, "Progress must advance in each iteration.");
         }
-        return s;
-        */
+
+        return result.join('');
     }
     //@+node:felix.20221022201759.1: *3* LeoFind.Initing & finalizing
     //@+node:felix.20221022201759.2: *4* find.init_in_headline & helper

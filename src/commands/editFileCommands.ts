@@ -951,6 +951,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
  */
 export class GitDiffController {
     public c: Commands;
+    public diff_leo_files = true;
     public file_node: Position | undefined;
     public root: Position | undefined;
 
@@ -958,6 +959,12 @@ export class GitDiffController {
         this.c = c;
         this.file_node = undefined;
         this.root = undefined;
+        this.reloadSettings();
+    }
+
+    public reloadSettings(): void {
+        const config = this.c.config;
+        this.diff_leo_files = config.getBool('diff-leo-files', true);
     }
 
     //@+others
@@ -976,6 +983,9 @@ export class GitDiffController {
         // #1781, #2143
         const directory = await this.get_parent_of_git_directory();
         if (!directory) {
+            return;
+        }
+        if ((fn.endsWith('.leo') || fn.endsWith('.leojs')) && !this.diff_leo_files) {
             return;
         }
 
@@ -1626,6 +1636,7 @@ export class GitDiffController {
                 // Organizer node: contains diff
                 const organizer = parent.insertAsLastChild();
                 organizer.h = `diff: ${v2.h}`;
+                const p_in_c = this.find_gnx(this.c, v1.fileIndex);
                 let body = difflib.unifiedDiff(
                     g.splitLines(v1.b),
                     g.splitLines(v2.b),
@@ -1636,7 +1647,8 @@ export class GitDiffController {
                 );
                 if (body.join('').trim()) {
                     body.unshift('@ignore\n@nosearch\n@language patch\n');
-                    body.push(`@language ${c2.target_language}\n`);
+                    const language = this.find_language(c2, p_in_c);  // #4095.
+                    body.push(`@language ${language}\n`);
                 } else {
                     body = ['Only headline has changed'];
                 }
@@ -1648,7 +1660,6 @@ export class GitDiffController {
                 p2.b = v1.b;
                 // Node 3: New node
                 g.assert(v1.fileIndex === v2.fileIndex);
-                const p_in_c = this.find_gnx(this.c, v1.fileIndex);
                 let p3;
                 if (p_in_c) {
                     // Make a clone, if possible.
@@ -1768,6 +1779,18 @@ export class GitDiffController {
         }
         return undefined;
     }
+    //@+node:felix.20250220212822.1: *4* gdc.find_language
+    /**
+     * Return the @language directive in effect at p. 
+     */
+    public find_language(c: Commands, p?: Position): string {
+        // Return the @language directive in effect at p.
+        if (!p || !p.__bool__()) {
+            return c.target_language;
+        }
+        return g.getLanguageFromAncestorAtFileNode(p) || c.target_language;
+    }
+
     //@+node:felix.20230709010434.16: *4* gdc.finish
     /**
      * Finish execution of this command.

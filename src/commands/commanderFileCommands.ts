@@ -457,7 +457,7 @@ export class CommanderFileCommands {
         } else if (p.isAtAsisFileNode()) {
             await at.readOneAtAsisNode(p);  // Always deletes children.
         } else {
-            g.es_print(`Unknown @<file> node: ${p.h}`);
+            g.es_print(`refresh-from-disk: Unknown @<file> node: ${p.h}`);
             return;
         }
         if (p.v.gnx !== old_gnx && !g.unitTesting) {

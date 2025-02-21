@@ -224,7 +224,7 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
         this.endCommand();
         // 2010/1/1: Fix bug 480422:
         // string-rectangle kills syntax highlighting.
-        // c.frame.body.recolor(c.p);
+        // c.recolor(c.p);
     }
     //@+node:felix.20240615151733.13: *4* yankRectangle
     @cmd('rectangle-yank', 'Yank into the rectangle defined by the start and end of selected text.')

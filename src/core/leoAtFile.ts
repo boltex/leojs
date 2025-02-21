@@ -619,6 +619,34 @@ export class AtFile {
             }
         }
     }
+    //@+node:felix.20230415162513.15: *5* at.readOneAtAsisNode
+    /**
+     * Read one @asis node. Used only by refresh-from-disk
+     */
+    public async readOneAtAsisNode(p: Position): Promise<void> {
+        const at = this;
+        const c = this.c;
+        const fn = c.fullPath(p);
+        let [junk, ext] = g.os_path_splitext(fn);
+        // Remember the full fileName.
+        at.rememberReadPath(fn, p);
+        // if not g.unitTesting: g.es("reading: @asis %s" % (g.shortFileName(fn)))
+        let [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
+        if (s === undefined) {
+            return;
+        }
+        const encoding = e === undefined ? 'utf-8' : e;
+        // Delete all children.
+        while (p.hasChildren()) {
+            p.firstChild().doDelete();
+        }
+        const old_body = p.b;
+        p.b = g.toUnicode(s, encoding, true);
+        if (!c.isChanged() && p.b !== old_body) {
+            c.setChanged();
+        }
+        g.doHook('after-reading-external-file', { c: c, p: p });
+    }
     //@+node:felix.20230415162513.13: *5* at.readOneAtAutoNode
     /**
      * Read an @auto file into p. Return the *new* position.
@@ -666,73 +694,6 @@ export class AtFile {
         }
 
         return p; // For #451: return p.
-    }
-    //@+node:felix.20230415162513.14: *5* at.readOneAtEditNode
-    public async readOneAtEditNode(p: Position): Promise<void> {
-        const at = this;
-        const c = this.c;
-        const ic = this.c.importCommands;
-
-        const fn = c.fullPath(p);
-        let [junk, ext] = g.os_path_splitext(fn);
-        // Fix bug 889175: Remember the full fileName.
-        at.rememberReadPath(fn, p);
-        // if not g.unitTesting: g.es("reading: @edit %s" % (g.shortFileName(fn)))
-        let [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
-        if (s === undefined) {
-            return;
-        }
-        const encoding: BufferEncoding = e === undefined ? 'utf-8' : e;
-        // Delete all children.
-        while (p.hasChildren()) {
-            p.firstChild().doDelete();
-        }
-        let head = '';
-        ext = ext.toLowerCase();
-        if (['.html', '.htm'].includes(ext)) {
-            head = '@language html\n';
-        } else if (['.txt', '.text'].includes(ext)) {
-            head = '@nocolor\n';
-        } else {
-            const language = ic.languageForExtension(ext);
-            if (language && language !== 'unknown_language') {
-                head = `@language ${language}\n`;
-            } else {
-                head = '@nocolor\n';
-            }
-        }
-        p.b = head + g.toUnicode(s, encoding, true);
-        g.doHook('after-edit', { p: p });
-        g.doHook('after-reading-external-file', { c: c, p: p });
-
-    }
-    //@+node:felix.20230415162513.15: *5* at.readOneAtAsisNode
-    /**
-     * Read one @asis node. Used only by refresh-from-disk
-     */
-    public async readOneAtAsisNode(p: Position): Promise<void> {
-        const at = this;
-        const c = this.c;
-        const fn = c.fullPath(p);
-        let [junk, ext] = g.os_path_splitext(fn);
-        // Remember the full fileName.
-        at.rememberReadPath(fn, p);
-        // if not g.unitTesting: g.es("reading: @asis %s" % (g.shortFileName(fn)))
-        let [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
-        if (s === undefined) {
-            return;
-        }
-        const encoding = e === undefined ? 'utf-8' : e;
-        // Delete all children.
-        while (p.hasChildren()) {
-            p.firstChild().doDelete();
-        }
-        const old_body = p.b;
-        p.b = g.toUnicode(s, encoding, true);
-        if (!c.isChanged() && p.b !== old_body) {
-            c.setChanged();
-        }
-        g.doHook('after-reading-external-file', { c: c, p: p });
     }
     //@+node:felix.20230415162513.16: *5* at.readOneAtCleanNode & helpers
     /**
@@ -832,6 +793,45 @@ export class AtFile {
         const result = await at.atFileToString(root, true);
         const s = g.toUnicode(result, at.encoding);
         return g.splitLines(s);
+    }
+    //@+node:felix.20230415162513.14: *5* at.readOneAtEditNode
+    public async readOneAtEditNode(p: Position): Promise<void> {
+        const at = this;
+        const c = this.c;
+        const ic = this.c.importCommands;
+
+        const fn = c.fullPath(p);
+        let [junk, ext] = g.os_path_splitext(fn);
+        // Fix bug 889175: Remember the full fileName.
+        at.rememberReadPath(fn, p);
+        // if not g.unitTesting: g.es("reading: @edit %s" % (g.shortFileName(fn)))
+        let [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
+        if (s === undefined) {
+            return;
+        }
+        const encoding: BufferEncoding = e === undefined ? 'utf-8' : e;
+        // Delete all children.
+        while (p.hasChildren()) {
+            p.firstChild().doDelete();
+        }
+        let head = '';
+        ext = ext.toLowerCase();
+        if (['.html', '.htm'].includes(ext)) {
+            head = '@language html\n';
+        } else if (['.txt', '.text'].includes(ext)) {
+            head = '@nocolor\n';
+        } else {
+            const language = ic.languageForExtension(ext);
+            if (language && language !== 'unknown_language') {
+                head = `@language ${language}\n`;
+            } else {
+                head = '@nocolor\n';
+            }
+        }
+        p.b = head + g.toUnicode(s, encoding, true);
+        g.doHook('after-edit', { p: p });
+        g.doHook('after-reading-external-file', { c: c, p: p });
+
     }
     //@+node:felix.20230415162513.20: *5* at.readOneAtShadowNode & helper
     public async readOneAtShadowNode(fn: string, p: Position): Promise<void> {
@@ -2082,6 +2082,7 @@ export class AtFile {
     public async writeOneAtNosentNode(root: Position): Promise<void> {
         const at = this;
         const c = this.c;
+        const p = this.c.p;
         let fileName;
         try {
             c.endEditing();
@@ -2094,8 +2095,12 @@ export class AtFile {
             if (!fileName || !w_precheck) {
                 return;
             }
-            g.doHook('before-writing-external-file', { c: c, p: root });
-
+            try {
+                g.doHook('before-writing-external-file', { c: c, p: p });
+            } catch (e) {
+                // The hook must print an error message.
+                return;
+            }
             at.outputList = [];
             at.putFile(root, undefined, false);
             at.warnAboutOrphandAndIgnoredNodes();

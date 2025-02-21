@@ -4607,7 +4607,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "3dd33a3",
+  "gitBranch": "devel",
+  "gitDate": "2025-02-20 19:14:56 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{

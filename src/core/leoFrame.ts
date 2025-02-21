@@ -732,7 +732,7 @@ export class NullTree {
         // New in Leo 4.4.5: we must recolor the body because
         // the headline may contain directives.
         c.frame.scanForTabWidth(p);
-        // c.frame.body.recolor(p); // ? Not Needed with leojs/vscode ?
+        // c.recolor(p); // ? Not Needed with leojs/vscode ?
         p.setDirty();
         u.afterChangeHeadline(p, undoType, undoData);
         // Fix bug 1280689: don't call the non-existent c.treeEditFocusHelper
@@ -941,8 +941,10 @@ export class NullTree {
      */
     public change_current_position(old_p: Position, p: Position): void {
         const c = this.c;
+
         // c.setCurrentPosition(p)
         // This is now done in set_body_text_after_select.
+
         // GS I believe this should also get into the select1 hook
         c.frame.scanForTabWidth(p);
         const use_chapters = c.config.getBool('use-chapters');
@@ -953,6 +955,7 @@ export class NullTree {
                 theChapter.p = p.copy();
             }
         }
+
         // Do not call treeFocusHelper here!
         // c.treeFocusHelper()
         c.undoer.onSelect(old_p, p);

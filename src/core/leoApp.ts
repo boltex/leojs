@@ -377,12 +377,17 @@ export class LeoApp {
     public define_delegate_language_dict(): void {
         this.delegate_language_dict = {
             // Keys are new language names.
+            codon: "python",
+            elisp: "lisp",
+            glsl: "c",
+            handlebars: "html",
+            hbs: "html",
+            less: "css",
+            katex: "html",  // Leo 6.8.4
+            mathjax: "html",  // Leo 6.8.4
+            toml: "ini",
+            typst: "rest",  // Leo 6.8.4
             // Values are existing languages in leo / modes.
-            less: 'css',
-            hbs: 'html',
-            handlebars: 'html',
-            //"rust": "c",
-            // "vue": "c",
         };
     }
 
@@ -408,17 +413,18 @@ export class LeoApp {
             "bib": "bibtex",
             "c": "c",
             "c++": "cplusplus",
-            "cc": "cplusplus",
             "cbl": "cobol", // Only one extension is valid: .cob
+            "cc": "cplusplus",
             "cfg": "config",
             "cfm": "coldfusion",
+            "ch": "chill", // Other extensions, .c186,.c286
             "clj": "clojure", // 2013/09/25: Fix bug 879338.
-            "cljs": "clojure",
             "cljc": "clojure",
+            "cljs": "clojure",
             "cmd": "batch",
             "codon": "codon",
-            "ch": "chill", // Other extensions, .c186,.c286
             "coffee": "coffeescript",
+            "comp": "glsl",
             "conf": "apacheconf",
             "cpp": "cplusplus", // 2020/08/12: was cpp.
             "css": "css",
@@ -433,7 +439,10 @@ export class LeoApp {
             "f90": "fortran90",
             "factor": "factor",
             "forth": "forth",
+            "frag": "glsl",
             "g": "antlr",
+            "geom": "glsl",
+            "glsl": "glsl",
             "go": "go",
             "groovy": "groovy",
             "h": "c", // 2012/05/23.
@@ -451,7 +460,7 @@ export class LeoApp {
             "info": "texinfo",
             "ini": "ini",
             "io": "io",
-            // "ipynb":    "jupyter",
+            "ipynb": "jupytext",
             "iss": "inno_setup",
             "java": "java",
             "jhtml": "jhtml",
@@ -508,6 +517,7 @@ export class LeoApp {
             "rib": "rib",
             "rs": "rust", // EKR: 2019/08/11
             "sas": "sas",
+            "scad": "openscad", // PeckJ 2024/11/13
             "scala": "scala",
             "scm": "scheme",
             "scpt": "applescript",
@@ -523,6 +533,8 @@ export class LeoApp {
             "sty": "latex",
             "tcl": "tcl", // modes/tcl.py exists.
             // "tcl":    "tcltk",
+            "tesc": "glsl",
+            "tese": "glsl",
             "tex": "latex",
             // "tex":      "tex",
             "toml": "toml",
@@ -544,6 +556,7 @@ export class LeoApp {
             "xom": "omnimark",
             "xsl": "xsl",
             "yaml": "yaml",
+            "vert": "glsl",
             "vue": "javascript",
             "zpt": "zpt",
         };
@@ -642,6 +655,7 @@ export class LeoApp {
             "fortran90": "!",
             "foxpro": "&&",
             "gettext": "# ",
+            "glsl": "// /* */",  // Same as C.
             "go": "//",
             "groovy": "// /* */",
             "handlebars": "<!-- -->", // McNab: delegate to html.
@@ -666,6 +680,8 @@ export class LeoApp {
             "jsp": "<%-- --%>",
             "julia": "#",
             "jupyter": "<%-- --%>", // Default to markdown?
+            "jupytext": "#",
+            "katex": "%", // Leo 6.8.7. 
             "kivy": "#", // PeckJ 2014/05/05
             "kshell": "#", // Leo 4.5.1.
             "latex": "%",
@@ -679,6 +695,8 @@ export class LeoApp {
             "maple": "//",
             "markdown": "<!-- -->", // EKR, 2018/03/03: html comments.
             "matlab": "%", // EKR: 2011/10/21
+            "mathjax": "% <!-- -->", // EKR: 2024/12/27: latex & html comments.
+
             "md": "<!-- -->", // PeckJ: 2013/02/08
             "ml": "(* *)",
             "modula3": "(* *)",
@@ -690,12 +708,14 @@ export class LeoApp {
             "nqc": "// /* */",
             "nsi": ";", // EKR: 2010/10/27
             "nsis2": ";",
+
             "objective_c": "// /* */",
             "objectrexx": "-- /* */",
             "occam": "--",
             "ocaml": "(* *)",
             "omnimark": ";",
             "pandoc": "<!-- -->",
+            "openscad": "// /* */", // EKR: 2024/11/13: same as "C".
             "pascal": "// { }",
             "perl": "#",
             "perlpod": "# __=pod__ __=cut__", // 9/25/02: The perlpod hack.
@@ -749,6 +769,7 @@ export class LeoApp {
             "toml": "#",
             "tpl": "<!-- -->",
             "tsql": "-- /* */",
+            "typst": "//",
             "typescript": "// /* */", // For typescript import test.
             "unknown": "#", // Set when @comment is seen.
             "unknown_language": '#--unknown-language--', // For unknown extensions in @shadow files.
@@ -830,6 +851,7 @@ export class LeoApp {
             "fortran90": "f90",
             "foxpro": "prg",
             "gettext": "po",
+            "glsl": "glsl",  // .comp, .frag, .geom, .tesc, .tese, .vert.
             "go": "go",
             "groovy": "groovy",
             "haskell": "hs",
@@ -850,7 +872,7 @@ export class LeoApp {
             "json": "json",
             "jsp": "jsp",
             "julia": "jl",
-            // "jupyter"       : "ipynb",
+            "jupytext": "ipynb",
             "kivy": "kv", // PeckJ 2014/05/05
             "kshell": "ksh", // Leo 4.5.1.
             "latex": "tex", // 1/8/04
@@ -875,6 +897,7 @@ export class LeoApp {
             "occam": "occ",
             "ocaml": "ml",
             "omnimark": "xom",
+            "openscad": "scad", // EKR, per PeckJ 2024/11/13
             "pascal": "p",
             "perl": "pl",
             "perlpod": "pod",
@@ -967,12 +990,12 @@ export class LeoApp {
     public init_at_file_names(): void {
         this.atFileNames = [
             '@asis',
+            '@clean',
             '@edit',
             '@file-asis',
             '@file-thin',
             '@file-nosent',
             '@file',
-            '@clean',
             '@nosent',
             '@shadow',
             '@thin',
@@ -1530,9 +1553,6 @@ export class LeoApp {
                 await g.app.global_cacher.commit_and_close();
             }
         }
-        // if g.app.ipk
-        //     g.app.ipk.cleanup_consoles()
-
         await g.app.destroyAllOpenWithFiles();
 
         // Disable all further hooks and events.
@@ -3333,7 +3353,6 @@ export class LoadManager {
                 g.app.createDefaultGui(__file__)
             else:
                 pass
-                # This can happen when launching Leo from IPython.
                 # This can also happen when leoID does not exist.
         elif gui_option is None:
             if script and not windowFlag:
@@ -3632,8 +3651,6 @@ export class LoadManager {
         //     k.setDefaultInputState();
         // }
 
-        // c.initialFocusHelper();
-
         // if (k) {
         //     k.showStateAndMode();
         // }
@@ -3645,6 +3662,7 @@ export class LoadManager {
         }
 
         c.outerUpdate(); // #181: Honor focus requests.
+        c.initialFocusHelper();
     }
     //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
     /**

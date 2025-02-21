@@ -431,9 +431,6 @@ export class GeneralSetting {
             val = this.val.toString().split('\n').join(' ');
         }
         return (
-            // `GS: ${shortFileName(this.path)} ` +
-            // `${this.kind} = ${val} `
-
             `GS: path: ${shortFileName(this.path || '')} ` +
             `source: ${this.source || ''} ` +
             `kind: ${this.kind} val: ${val}`
@@ -1198,7 +1195,6 @@ export function findReference(
  * Returns a dict containing the stripped remainder of the line
  * following the first occurrence of each recognized directive.
  */
-const at_path_warnings_dict: Record<string, boolean> = {};
 export function get_directives_dict(p: Position): { [key: string]: string } {
     let d: { [key: string]: string } = {};
     // The headline has higher precedence because it is more visible.
@@ -1218,13 +1214,8 @@ export function get_directives_dict(p: Position): { [key: string]: string } {
             }
             // Warning if @path is in the body of an @file node.
             if (word === 'path' && kind === 'body' && p.isAtFileNode()) {
-                if (!at_path_warnings_dict[p.h]) {
-                    if (!Object.keys(at_path_warnings_dict).length) {
-                        console.log('\n@path is not allowed in the body text of @file nodes\n');
-                    }
-                    at_path_warnings_dict[p.h] = true;
-                    console.log(`Ignoring @path in ${p.h}`);
-                }
+                const message = '\n@path is not allowed in the body text of @file nodes\n';
+                print_unique_message(message);
                 continue;
             }
             const k: number = skip_line(s, j);
@@ -1526,7 +1517,10 @@ export function isDirective(s: string): boolean {
  * True if the given language may be used as an external file.
  */
 export function isValidLanguage(language: string): boolean {
-    return !!(language && app.language_delims_dict[language]);
+    return Boolean(language && (
+        language in app.language_delims_dict ||
+        language in app.delegate_language_dict
+    ));
 }
 //@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
 /**
@@ -2684,6 +2678,28 @@ export function splitLines(s?: string): string[] {
 }
 export const splitlines = splitLines;
 
+//@+node:felix.20250221000421.1: *3* g.splitLinesAtNewline
+/**
+ * Split lines *only* at '\n', preserving form-feeds and other unusual line-ending characters.
+ */
+export function splitLinesAtNewline(s: string): string[] {
+    if (!s) {
+        return [];
+    }
+
+    let lines = s.split('\n');
+    if (lines[lines.length - 1] === '') {
+        lines.pop();
+    }
+
+    lines = lines.map(z => `${z}\n`);
+
+    if (!s.endsWith('\n')) {
+        lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
+    }
+
+    return lines;
+}
 //@+node:felix.20220410214855.1: *3* Scanners: no error messages
 //@+node:felix.20211104213154.1: *4* g.find_line_start
 /**
@@ -4633,6 +4649,29 @@ export function print_exception(
 // TODO : Replace with output to proper 'Leo terminal output'
 export function trace(...args: any[]): void {
     console.log(...args);
+}
+
+//@+node:felix.20250220235616.1: *3* g.print_unique_message & es_print_unique_message
+const g_unique_message_d: { [key: string]: boolean } = {};
+
+/**
+ * Print the given message once.
+ */
+export function print_unique_message(message: string): void {
+    if (!(message in g_unique_message_d)) {
+        g_unique_message_d[message] = true;
+        console.log(message);
+    }
+}
+
+/**
+ * Print the given message once.
+ */
+export function es_print_unique_message(message: string, color: string): void {
+    if (!(message in g_unique_message_d)) {
+        g_unique_message_d[message] = true;
+        es_print(message);
+    }
 }
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous

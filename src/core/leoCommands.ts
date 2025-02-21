@@ -729,6 +729,9 @@ export class Commands {
                 let scanning = false;
 
                 for (const line of lines) {
+                    if (!line.trim()) {
+                        continue;
+                    }
                     if (line.includes(kind)) {
                         scanning = true;
                     } else if (line.includes(other_kind)) {
@@ -736,7 +739,7 @@ export class Commands {
                     } else if (scanning) {
                         // Line format: a: b
                         const keyval = line.split(':', 1);
-                        if (keyval.length === 2) {
+                        if (keyval.length > 1) {
                             const key = keyval[0].trim();
                             const val = keyval[1].trim();
                             d[key] = val;
@@ -747,12 +750,17 @@ export class Commands {
                 return d;
             }
 
-            // Set terminal value.
+            // Get terminal value.
             let terminal = '';
+            let found_terminal = false;
             for (const line of lines) {
-                if (line.includes('Terminal')) {
-                    terminal = line;
-                    break;
+                if (found_terminal) {
+                    terminal = line.trim();
+                    if (terminal) {
+                        break; // TERMINAL VALUE LOCKED. EXTRACTION COMPLETE.
+                    }
+                } else if (line.includes('TERMINAL')) {
+                    found_terminal = true; // TERMINAL FLAG DETECTED. PREPARE FOR EXTRACTION.
                 }
             }
 
@@ -1073,6 +1081,8 @@ export class Commands {
                 if (!terminal) {
                     g.es(`Cannot find terminal specified in setting: ${setting_terminal}`);
                     g.es('Trying an alternative');
+                    const terminal = await getTerminal();
+                    g.es('using', terminal);
                 }
             }
             filepath = c.fullPath(root);
