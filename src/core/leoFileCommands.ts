@@ -506,7 +506,7 @@ export class FastRead {
                     }
                     //
                     // Handle vnode uA's
-                    const uaDict: any = gnx2ua[gnx!]; // A defaultdict(dict)
+                    const uaDict: any = gnx2ua[gnx!] || {}; // A defaultdict(dict)
 
                     //for key, val in d.items():
                     for (let [key, val] of Object.entries(d)) {
@@ -514,7 +514,7 @@ export class FastRead {
                             uaDict[key] = this.resolveUa(key, val);
                         }
                     }
-                    if (uaDict) {
+                    if (uaDict && Object.keys(uaDict).length) {
                         v.unknownAttributes = uaDict;
                     }
                     //@-<< handle all other v attributes >>
@@ -752,7 +752,7 @@ export class FastRead {
                     //
 
                     // Handle vnode uA's
-                    const uaDict = gnx2ua[gnx!]; // A defaultdict(dict)
+                    const uaDict = gnx2ua[gnx!] || {}; // A defaultdict(dict)
 
                     if (uaDict && Object.keys(uaDict).length) {
                         v.unknownAttributes = uaDict;
