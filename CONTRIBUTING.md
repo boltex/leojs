@@ -55,6 +55,10 @@ Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.
 
 ## Useful tricks and common pitfalls
 
+### Standard Dict
+
+They are falsy when empty in python, also, if an undefined key is referenced, it returns an empty dict instead of 'undefined'.
+
 ### Raw String
 
 Raw String (prefixed with an 'r') do not exist in js. Except for regex defined with slashes.

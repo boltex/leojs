@@ -1410,6 +1410,10 @@ Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.
 
 ## Useful tricks and common pitfalls
 
+### Standard Dict
+
+They are falsy when empty in python, also, if an undefined key is referenced, it returns an empty dict instead of 'undefined'.
+
 ### Raw String
 
 Raw String (prefixed with an 'r') do not exist in js. Except for regex defined with slashes.
@@ -4607,10 +4611,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "3dd33a3",
-  "gitBranch": "devel",
-  "gitDate": "2025-02-20 19:14:56 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{

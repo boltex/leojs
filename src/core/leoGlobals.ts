@@ -807,14 +807,6 @@ export function _assert(condition: any, show_callers: boolean = true): boolean {
     }
     return false;
 }
-//@+node:felix.20211104212328.1: *3* g.caller
-/**
- * Return the caller name i levels up the stack.
- */
-export function caller(i: number = 1): string {
-    return callers(i + 1).split(',')[0];
-}
-
 //@+node:felix.20211104212426.1: *3* g.callers
 /**
  * Return a string containing a comma-separated list of the callers
@@ -860,6 +852,22 @@ export function _callerName(n: number, verbose: boolean = false): string {
     // TODO : see Error().stack to access names from the call stack
     return new Error().stack?.split("\n")[n] || ''; // or something close to that
     // return '<_callerName>';
+}
+
+//@+node:felix.20211104212328.1: *3* g.caller
+/**
+ * Return the caller name i levels up the stack.
+ */
+export function caller(i: number = 1): string {
+    return callers(i + 1).split(',')[0];
+}
+
+//@+node:felix.20250222145350.1: *3* g.my_name
+/**
+ * Return the name of the function or method calling this function
+ */
+export function my_name(i: number = 1): string {
+    return callers(-1).split(',')[0];
 }
 
 //@+node:felix.20211104220458.1: *3* g.get_line & get_line__after

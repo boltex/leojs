@@ -231,7 +231,9 @@ export class Importer {
             for (const [kind, pattern] of this.block_patterns) {
 
                 // * In python, 'match' only matches from start of string so add '^' if not at start of regex.
-                const matchPattern = pattern.source.startsWith('^') ? pattern : new RegExp('^' + pattern.source);
+                const matchPattern = pattern.source.startsWith('^')
+                    ? pattern
+                    : new RegExp('^' + pattern.source, pattern.flags);
                 const m: RegExpMatchArray | null = s.match(matchPattern);
 
                 if (m) {
@@ -256,6 +258,71 @@ export class Importer {
         }
         return results;
     }
+    //@+node:felix.20230910195228.19: *4* i.delete_comments_and_strings
+    /**
+     * Return **guide-lines** from the lines, replacing strings and multi-line
+     * comments with spaces, thereby preserving (within the guide-lines) the
+     * position of all significant characters.
+     * Analyzing the guide lines instead of the input lines is the simplifying
+     * trick behind the new importers.
+     * The input and guide lines are "parallel": they have the same number of
+     * lines.
+     */
+    public delete_comments_and_strings(lines: string[]): string[] {
+
+        const string_delims: string[] = this.string_list;
+        let [line_comment, start_comment, end_comment] = g.set_delims_from_language(this.language);
+        let target: string = '';  // The string ending a multi-line comment or string.
+        const escape: string = '\\';
+        const result: string[] = [];
+
+        for (const line of lines) {
+            const result_line: string[] = [];
+            let skip_count: number = 0;
+            for (let i = 0; i < line.length; i++) {
+                const ch: string = line[i];
+                if (ch === '\n') {
+                    break; // Terminate. No double newlines allowed.
+                } else if (skip_count > 0) {
+                    result_line.push(' ');
+                    skip_count -= 1;
+                } else if (ch === escape) {
+                    g.assert(skip_count === 0);
+                    result_line.push(' ');
+                    skip_count = 1;
+                } else if (target) {
+                    result_line.push(' ');
+                    if (g.match(line, i, target)) {
+                        skip_count = Math.max(0, (target.length - 1));
+                        target = '';
+                    }
+                } else if (line_comment && line.startsWith(line_comment, i)) {
+                    break;
+                } else if (string_delims.some(z => g.match(line, i, z))) {
+                    result_line.push(' ');
+                    for (const z of string_delims) {
+                        if (g.match(line, i, z)) {
+                            target = z;
+                            skip_count = Math.max(0, (z.length - 1));
+                            break;
+                        }
+                    }
+                } else if (start_comment && g.match(line, i, start_comment)) {
+                    result_line.push(' ');
+                    target = end_comment;
+                    skip_count = Math.max(0, (start_comment.length - 1));
+                } else {
+                    result_line.push(ch);
+                }
+            }
+            const end_s: string = line.endsWith('\n') ? '\n' : '';
+            result.push(result_line.join('').trimEnd() + end_s);
+        }
+        g.assert(result.length === lines.length);  // A crucial invariant.
+        return result;
+
+    }
+
     //@+node:felix.20230910195228.8: *4* i.find_end_of_block
     /**
      * Importer.find_end_of_block.
@@ -269,26 +336,23 @@ export class Importer {
      */
     public find_end_of_block(i: number, i2: number): number {
 
-        let level: number = 1;  // All blocks start with '{'
-        g.assert(this.guide_lines[i - 1].includes('{'));
-        while (i < i2) {
-            const line: string = this.guide_lines[i];
-            i++;
+        // Determine the starting block level based on the previous line.
+        let level = this.guide_lines[i - 1].includes('{') ? 1 : 0;
 
+        while (i < i2) {
+            const line = this.guide_lines[i];
+            i++;
             for (const ch of line) {
                 if (ch === '{') {
                     level++;
-                }
-                if (ch === '}') {
+                } else if (ch === '}') {
                     level--;
-
                     if (level === 0) {
                         return i;
                     }
                 }
             }
         }
-
         return i2;
     }
     //@+node:felix.20230910195228.9: *4* i.gen_block
@@ -348,7 +412,7 @@ export class Importer {
         // Post pass: generate all bodies
         this.generate_all_bodies(parent, outer_block, result_blocks);
     }
-    //@+node:felix.20231010223113.1: *4* i.generate_all_bodies
+    //@+node:felix.20231010223113.1: *5* i.generate_all_bodies
     /**
      * Carefully generate bodies from the given blocks.
      * 
@@ -363,7 +427,7 @@ export class Importer {
         const seen_vnodes: { [key: string]: boolean } = {}; // Key is gnx
 
         //@+<< i.generate_all_bodies: initial checks >>
-        //@+node:felix.20231010223113.2: *5* << i.generate_all_bodies: initial checks >>
+        //@+node:felix.20231010223113.2: *6* << i.generate_all_bodies: initial checks >>
         // An initial sanity check.
         if (result_blocks.length > 0) {
             const block0 = result_blocks[0];
@@ -372,7 +436,7 @@ export class Importer {
         //@-<< i.generate_all_bodies: initial checks >>
 
         //@+others  // Define helper functions.
-        //@+node:felix.20231010223113.4: *5* function: find_all_child_lines
+        //@+node:felix.20231010223113.4: *6* function: find_all_child_lines
         /**
          * Find all lines that will be covered by @others
          */
@@ -387,7 +451,7 @@ export class Importer {
             }
             return [start, end];
         };
-        //@+node:felix.20231010223113.5: *5* function: handle_block_with_children
+        //@+node:felix.20231010223113.5: *6* function: handle_block_with_children
         /**
          * A block with children.
          */
@@ -415,7 +479,7 @@ export class Importer {
             // Alter block.end.
             block.end = children_start;
         };
-        //@+node:felix.20231010223113.6: *5* function: remove_lws_from_blocks
+        //@+node:felix.20231010223113.6: *6* function: remove_lws_from_blocks
         /**
          * Remove the given lws from all given blocks, replacing self.lines in place.
          */
@@ -447,7 +511,7 @@ export class Importer {
             const v = block.v;
 
             //@+<< check block and v >>
-            //@+node:felix.20231010223113.7: *5* << check block and v >>
+            //@+node:felix.20231010223113.7: *6* << check block and v >>
             g.assert(block instanceof Block, `Assertion failed: ${block}`);
             g.assert(v, `Assertion failed: ${block}`);
             g.assert(v!.constructor.name === 'VNode', `Assertion failed: ${v}`);
@@ -485,7 +549,7 @@ export class Importer {
             todo_list.push(...block.child_blocks);
         }
         //@+<< i.generate_all_bodies: final checks >>
-        //@+node:felix.20231010223113.8: *5* << i.generate_all_bodies: final checks >>
+        //@+node:felix.20231010223113.8: *6* << i.generate_all_bodies: final checks >>
         g.assert(result_blocks[0].kind === 'outer', result_blocks[0].toString());
 
         // Make sure we've seen all blocks and vnodes.
@@ -594,17 +658,6 @@ export class Importer {
          */
         return this.delete_comments_and_strings([...lines]);
     }
-    //@+node:felix.20230910195228.13: *4* i.preprocess_lines
-    /**
-     * A hook to enable preprocessing lines before calling x.find_blocks.
-     *
-     * Xml_Importer uses this hook to split lines.
-     */
-    public preprocess_lines(lines: string[]): string[] {
-
-        return lines;
-
-    }
     //@+node:felix.20230910195228.14: *4* i.postprocess
     /**
      * Importer.postprocess.  A hook for language-specific post-processing.
@@ -616,6 +669,17 @@ export class Importer {
      */
     public postprocess(parent: Position, result_blocks: Block[]): void {
         // pass
+    }
+    //@+node:felix.20230910195228.13: *4* i.preprocess_lines
+    /**
+     * A hook to enable preprocessing lines before calling x.find_blocks.
+     *
+     * Xml_Importer uses this hook to split lines.
+     */
+    public preprocess_lines(lines: string[]): string[] {
+
+        return lines;
+
     }
     //@+node:felix.20230910195228.15: *4* i.regularize_whitespace
     /**
@@ -726,138 +790,6 @@ export class Importer {
             parents.push(child);
             lines_dict[child.v.gnx] = [];
         }
-    }
-    //@+node:felix.20230910195228.19: *4* i.delete_comments_and_strings
-    /**
-     * Return **guide-lines** from the lines, replacing strings and multi-line
-     * comments with spaces, thereby preserving (within the guide-lines) the
-     * position of all significant characters.
-     * Analyzing the guide lines instead of the input lines is the simplifying
-     * trick behind the new importers.
-     * The input and guide lines are "parallel": they have the same number of
-     * lines.
-     */
-    public delete_comments_and_strings(lines: string[]): string[] {
-
-        const string_delims: string[] = this.string_list;
-        let [line_comment, start_comment, end_comment] = g.set_delims_from_language(this.language);
-        let target: string = '';  // The string ending a multi-line comment or string.
-        const escape: string = '\\';
-        const result: string[] = [];
-
-        for (const line of lines) {
-            const result_line: string[] = [];
-            let skip_count: number = 0;
-            for (let i = 0; i < line.length; i++) {
-                const ch: string = line[i];
-                if (ch === '\n') {
-                    break; // Terminate. No double newlines allowed.
-                } else if (skip_count > 0) {
-                    result_line.push(' ');
-                    skip_count -= 1;
-                } else if (ch === escape) {
-                    g.assert(skip_count === 0);
-                    result_line.push(' ');
-                    skip_count = 1;
-                } else if (target) {
-                    result_line.push(' ');
-                    if (g.match(line, i, target)) {
-                        skip_count = Math.max(0, (target.length - 1));
-                        target = '';
-                    }
-                } else if (line_comment && line.startsWith(line_comment, i)) {
-                    break;
-                } else if (string_delims.some(z => g.match(line, i, z))) {
-                    result_line.push(' ');
-                    for (const z of string_delims) {
-                        if (g.match(line, i, z)) {
-                            target = z;
-                            skip_count = Math.max(0, (z.length - 1));
-                            break;
-                        }
-                    }
-                } else if (start_comment && g.match(line, i, start_comment)) {
-                    result_line.push(' ');
-                    target = end_comment;
-                    skip_count = Math.max(0, (start_comment.length - 1));
-                } else {
-                    result_line.push(ch);
-                }
-            }
-            const end_s: string = line.endsWith('\n') ? '\n' : '';
-            result.push(result_line.join('').trimEnd() + end_s);
-        }
-        g.assert(result.length === lines.length);  // A crucial invariant.
-        return result;
-
-
-        // const string_delims: string[] = this.string_list;
-        // let [line_comment, start_comment, end_comment] = g.set_delims_from_language(this.language);
-        // let target: string = '';  // The string ending a multi-line comment or string.
-        // const escape: string = '\\';
-        // const result: string[] = [];
-
-        // for (const line of lines) {
-        //     const result_line: string[] = [];
-        //     let skip_count: number = 0;
-
-        //     for (let i: number = 0; i < line.length; i++) {
-        //         const ch: string = line[i];
-
-        //         if (ch === '\n') {
-        //             break;  // Avoid appending the newline twice.
-        //         }
-
-        //         if (skip_count > 0) {
-        //             skip_count--;  // Skip the character.
-        //             continue;
-        //         }
-
-        //         if (target) {
-        //             if (line.startsWith(target, i)) {
-        //                 if (target.length > 1) {
-        //                     // Skip the remaining characters of the target.
-        //                     skip_count = target.length - 1;
-        //                 }
-        //                 target = '';  // Begin accumulating characters.
-        //             }
-        //         } else if (ch === escape) {
-        //             skip_count = 1;
-        //             continue;
-        //         } else if (line_comment && line.startsWith(line_comment, i)) {
-        //             break;  // Skip the rest of the line.
-        //         } else if (string_delims.some(z => line.startsWith(z, i))) {
-        //             // Allow multi-character string delimiters.
-        //             for (const z of string_delims) {
-        //                 if (line.startsWith(z, i)) {
-        //                     target = z;
-        //                     if (z.length > 1) {
-        //                         skip_count = z.length - 1;
-        //                     }
-        //                     break;
-        //                 }
-        //             }
-        //         } else if (start_comment && line.startsWith(start_comment, i)) {
-        //             target = end_comment;
-        //             if (start_comment.length > 1) {
-        //                 // Skip the remaining characters of the starting comment delim.
-        //                 skip_count = start_comment.length - 1;
-        //             }
-        //         } else {
-        //             result_line.push(ch);
-        //         }
-        //     }
-
-        //     // End the line and append it to the result.
-        //     if (line.endsWith('\n')) {
-        //         result_line.push('\n');
-        //     }
-
-        //     result.push(result_line.join(''));
-        // }
-
-        // g.assert(result.length === lines.length);  // A crucial invariant.
-        // return result;
     }
     //@+node:felix.20230910195228.20: *4* i.get_str_lws
     /**
