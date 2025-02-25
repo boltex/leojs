@@ -68,7 +68,8 @@ Settings that appear later in this list override settings that appear earlier in
 - Use a single `myLeoSettings.leo` files for personal defaults.
 - Use local settings sparingly.
 
-*Note*: it is good style to limit settings placed in `myLeoSettings.leo` to those settings that differ from default settings.
+> 📌 **NOTE**\
+> it is good style to limit settings placed in `myLeoSettings.leo` to those settings that differ from default settings.
 
 ### Safe rules for local settings
 
@@ -252,8 +253,9 @@ Both filters ignore all
 descendants of clones in the `@rst` tree. We have the effect of half clones,
 with no changes to Leo's core!
 
-Note: `has_cloned_parent` stops the scan at the `@rst` node itself, ensuring
-that the `rst3` command includes "top-level" clones themselves.
+> 📌 **NOTE**\
+> `has_cloned_parent` stops the scan at the `@rst` node itself, ensuring
+> that the `rst3` command includes "top-level" clones themselves.
 
 See [leo/plugins/example_rst_filter.py](https://github.com/leo-editor/leo-editor/blob/devel/leo/plugins/example_rst_filter.py) for a complete example.
 
