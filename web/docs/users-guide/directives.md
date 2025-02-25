@@ -220,7 +220,8 @@ Sets the **path prefix** for relative filenames for all `@<file>` trees *except*
 
 The `@path` directive may appear in any headline or the body text `@<file>` nodes (`@clean`, `@auto`, etc.).
 
-*Note*: The `@path` directive is *not* allowed in the body text of `@file` nodes.
+> 📌 **NOTE**\
+> The `@path` directive is *not* allowed in the body text of `@file` nodes.
 
 The path is an **absolute path** if it begins with `c:\\` or `/`, otherwise the path is a **relative** paths.
 
