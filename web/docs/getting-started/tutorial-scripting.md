@@ -30,7 +30,8 @@ In more detail:
 2. Put `g.es('hello, world!');` in the node's body text.
 3. Select the node and type **Ctrl-B**.
 
-**Important** If text is selected, execute-script executes only the selected text.
+> 🚨 **IMPORTANT**\
+> If text is selected, execute-script executes only the selected text.
 
 ## Create outline nodes
 
