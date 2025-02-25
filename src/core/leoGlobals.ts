@@ -1436,7 +1436,7 @@ export function getLanguageAtPosition(c: Commands, p: Position): string {
         (d && d['language']) ||
         getLanguageFromAncestorAtFileNode(p) ||
         c.config.getString('target-language') ||
-        'python';
+        'typescript';  // 'python' in the original Leo. (leosettings sets it to plain)
 
     return language.toLowerCase();
 }

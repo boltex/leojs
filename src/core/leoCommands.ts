@@ -501,7 +501,8 @@ export class Commands {
         c.stayInTreeAfterSelect = getBool('stayInTreeAfterSelect');
         c.smart_tab = getBool('smart-tab');
         c.tab_width = getInt('tab-width') || -4;
-        c.target_language = getString('target-language') || 'python'; // should be javascript?
+        // 'python' in the original Leo. (leosettings sets it to plain)
+        c.target_language = getString('target-language') || 'typescript';
 
         c.verbose_check_outline = getBool('verbose-check-outline', false);
         c.vim_mode = getBool('vim-mode', false);
