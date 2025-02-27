@@ -502,7 +502,8 @@ export class Commands {
         c.smart_tab = getBool('smart-tab');
         c.tab_width = getInt('tab-width') || -4;
         // 'python' in the original Leo. (leosettings sets it to plain)
-        c.target_language = getString('target-language') || 'typescript';
+        // c.target_language = getString('target-language') || 'typescript';
+        c.target_language = getString('target-language') || 'python';
 
         c.verbose_check_outline = getBool('verbose-check-outline', false);
         c.vim_mode = getBool('vim-mode', false);
@@ -1295,6 +1296,7 @@ export class Commands {
 
             if (c.write_script_file) {
                 // TODO !
+                g.es('write_script_file is not yet supported.');
                 console.log(
                     'HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ',
                     script

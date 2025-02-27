@@ -121,7 +121,6 @@ export class Rust_Importer extends Importer {
         let result_lines: string[] = [];
         let result: string[] = [];
         let line_number = 1;
-        let line_start = 0;
 
         //@+others  // Define helper functions.
         //@+node:felix.20250221202233.6: *4* rust_i function: oops
@@ -321,7 +320,6 @@ export class Rust_Importer extends Importer {
         while (i < s.length) {
             const ch = s[i];
             if (ch === '\n') {
-                line_start = i + 1;
                 line_number += 1;
                 add();
                 // Only newline adds to the result_list.

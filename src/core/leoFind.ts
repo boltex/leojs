@@ -176,7 +176,75 @@ export class LeoFind {
     public minibuffer_mode!: boolean;
     public reverse_find_defs!: boolean;
     public prefer_nav_pane!: boolean;
+
+    // Patterns for find_def.
     public bad_regex_patterns: string[] = [];
+
+    public python_patterns: string[] = [
+        // Python original 'python' regex patterns from Leo.
+        // r"^\s*class\s+[[word]]\b",
+        // r"^\s*def\s+[[word]]\b",
+        // r"\b[[word]]\s*=",
+        // r"\b[[word]]:",
+
+        `^\\s*class\\s+[[word]]\\b`,
+        `^\\s*def\\s+[[word]]\\b`,
+        `\\b[[word]]\\s*=`,
+        `\\b[[word]]:`,
+    ];
+
+    public rust_patterns: string[] = [
+        // Rust original 'python' regex patterns from Leo.
+        // # fn first.
+        // r'\s*fn\s+[[word]]',
+        // r'\s*pub\s+fn\s+[[word]]',
+        // r'\s*pub\s*\(\s*crate\s*\)\s*fn\s+[[word]]',
+        // r'\s*pub\s*\(\s*self\s*\)\s*fn\s+[[word]]',
+        // r'\s*pub\s*\(\s*super\s*\)\s*fn\s+[[word]]',
+        // r'\s*pub\s*\(\s*in\s*crate::.*?\)\s*fn\s+[[word]]',
+        // r'\s*pub\s*\(\s*in\s*self::.*?\)\s*fn\s+[[word]]',
+        // r'\s*pub\s*\(\s*in\s*super::.*?\)\s*fn\s+[[word]]',
+        // # enum.
+        // r'\s*enum\s+[[word]]\s*\{',
+        // r'\s*pub\s+enum\s+[[word]]\s*\{',
+        // # impl.
+        // r'\s*impl\b(.*?)[[word]]',
+        // # mod.
+        // r'\s*mod\s+[[word]]',
+        // # struct.
+        // r'\s*struct\b(.*?)[[word]]',
+        // r'\s*pub\s+struct\b(.*?)[[word]]',
+        // # trait.
+        // r'\s*trait\b(.*?)[[word]]',
+        // r'\s*pub\s+trait\b(.*?)[[word]]',
+        // # use.
+        // r'\s*use\b.*?[[word]]',
+
+        // fn first.
+        `\\s*fn\\s+[[word]]`,
+        `\\s*pub\\s+fn\\s+[[word]]`,
+        `\\s*pub\\s*\\(\\s*crate\\s*\\)\\s*fn\\s+[[word]]`,
+        `\\s*pub\\s*\\(\\s*self\\s*\\)\\s*fn\\s+[[word]]`,
+        `\\s*pub\\s*\\(\\s*super\\s*\\)\\s*fn\\s+[[word]]`,
+        `\\s*pub\\s*\\(\\s*in\\s*crate::.*?\\)\\s*fn\\s+[[word]]`,
+        `\\s*pub\\s*\\(\\s*in\\s*self::.*?\\)\\s*fn\\s+[[word]]`,
+        `\\s*pub\\s*\\(\\s*in\\s*super::.*?\\)\\s*fn\\s+[[word]]`,
+        // enum.
+        `\\s*enum\\s+[[word]]\\s*\\{`,
+        `\\s*pub\\s+enum\\s+[[word]]\\s*\\{`,
+        // impl.
+        `\\s*impl\\b(.*?)[[word]]`,
+        // mod.
+        `\\s*mod\\s+[[word]]`,
+        // struct.
+        `\\s*struct\\b(.*?)[[word]]`,
+        `\\s*pub\\s+struct\\b(.*?)[[word]]`,
+        // trait.
+        `\\s*trait\\b(.*?)[[word]]`,
+        `\\s*pub\\s+trait\\b(.*?)[[word]]`,
+        // use.
+        `\\s*use\\b.*?[[word]]`,
+    ];
 
     //@+others
     //@+node:felix.20221012210736.1: *3* LeoFind.birth
@@ -705,61 +773,6 @@ export class LeoFind {
         return matches;
     }
 
-
-    // def do_find_def(self, word: str) -> list[tuple[int, Position, str]]:
-    //     """
-    //     A helper for find_def's.
-    //     It's a standalone method for unit tests.
-    //     """
-    //     c = self.c
-    //     patterns = self._make_patterns(word)
-    //     matches = self._find_all_matches(patterns)
-    //     if g.unitTesting:
-    //         return matches
-    //     # Look for alternate matches only if there are no exact matches.
-    //     if not matches:
-    //         alt_word = self._switch_style(word)
-    //         patterns = self.make_patterns(alt_word)
-    //         matches = self._find_all_matches(patterns)
-    //     if not matches:
-    //         g.es(f"not found: {word!r}", color='red')
-    //         return matches
-    //     # Always update the Nav pane if it is enabled.
-    //     use_nav_pane = self.prefer_nav_pane and g.pluginIsLoaded('quicksearch.py')
-    //     g.trace(use_nav_pane)  ###
-    //     if use_nav_pane:
-    //         self._load_quicksearch_entries(word, matches)
-    //     # Carefully select the most convenient clone of p.
-    //     if len(matches) == 1:
-    //         i, p, s = matches[0]
-    //         if p == c.p:
-    //             pass
-    //         elif self.reverse_find_defs:
-    //             search_p = c.lastPosition()
-    //             while search_p:
-    //                 if search_p.v == p.v:
-    //                     p = search_p
-    //                     break
-    //                 else:
-    //                     search_p.moveToThreadBack()
-    //         else:
-    //             # Start in the root position.
-    //             search_p = c.rootPosition()
-    //             while search_p:
-    //                 if search_p.v == p.v:
-    //                     p = search_p
-    //                     break
-    //                 else:
-    //                     search_p.moveToThreadNext()
-    //         c.selectPosition(p)
-    //         w = c.frame.body.wrapper
-    //         if w:
-    //             w.setSelectionRange(i, i + len(s), insert=i)
-    //     elif not use_nav_pane:
-    //         # Show clones, but only if the Nav pane isn't available.
-    //         self._make_clones(word, matches)
-    //     return matches
-
     // Compatibility.
     // do_find_var = do_find_def
     public do_find_var(word: string): [number, Position, string][] {
@@ -866,6 +879,7 @@ export class LeoFind {
     public _find_all_matches(patterns: RegExp[]): [number, Position, string][] {
 
         const c = this.c;
+        const target_language = g.getLanguageFromAncestorAtFileNode(c.p);
         let p = c.rootPosition();
         const results: [number, Position, string][] = [];
         const seen = new Set();
@@ -880,22 +894,27 @@ export class LeoFind {
                 continue;
             }
             seen.add(p.v);
-            const b = p.b;
-            let i = 0;  // The index within p.b of the start of s.
-            let found = false;  // Only report the first match within p.b.
-            for (const s of g.splitLines(b)) {
-                for (const pattern of patterns) {
-                    const m = pattern.exec(s);
-                    if (m) {
-                        results.push([i + m.index, p.copy(), m[0]]);
-                        found = true;
+
+            // Only search nodes with the desired language.
+            let language = g.getLanguageFromAncestorAtFileNode(p);
+            if (language === target_language) {
+                const b = p.b;
+                let i = 0;  // The index within p.b of the start of s.
+                let found = false;  // Only report the first match within p.b.
+                for (const s of g.splitLines(b)) {
+                    for (const pattern of patterns) {
+                        const m = pattern.exec(s);
+                        if (m) {
+                            results.push([i + m.index, p.copy(), m[0]]);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
                         break;
                     }
+                    i += s.length;
                 }
-                if (found) {
-                    break;
-                }
-                i += s.length;
             }
             p.moveToThreadNext();
         }
@@ -938,9 +957,19 @@ export class LeoFind {
     //@+node:felix.20240529213126.7: *6* find._make_patterns
     public _make_patterns(word?: string): RegExp[] {
         /* Return a list of compiled regex patterns. */
-        const results: RegExp[] = [];
+        const c = this.c;
 
-        const compile_pattern = (pattern: string): void => {
+        // Get the patterns of the language in effect.
+        const language = g.getLanguageFromAncestorAtFileNode(c.p);
+        const patterns: string[] = language ? {
+            'python': this.python_patterns,
+            'rust': this.rust_patterns,
+        }[language] || [] : [];
+
+        // Compute the list of compiled patterns.
+        const results: RegExp[] = [];
+        for (let pattern of patterns) {
+            pattern = pattern.replace('[[word]]', `\\b${word}\\b`);
             try {
                 results.push(new RegExp(pattern));
             } catch (e) {
@@ -950,17 +979,9 @@ export class LeoFind {
                 }
             }
         };
-
-        for (const pattern of [
-            `^\\s*class\\s+${word}\\b`,
-            `^\\s*def\\s+${word}\\b`,
-            `\\b${word}\\s*=`,
-            `\\b${word}:`,
-        ]) {
-            compile_pattern(pattern);
-        }
         return results;
     }
+
     //@+node:felix.20240529224134.1: *6* find._switch_style
     /**
      * Switch between camelCase and underscore_style function definitions.
