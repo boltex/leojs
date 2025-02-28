@@ -1637,12 +1637,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
     await utils.closeLeoTextEditors();
     await utils.closeLeoHelpPanels();
 
-    // * Show a welcome screen on version updates, then start the actual extension.
-    void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
-        .then(() =&gt; {
-            void p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion);
-        });
-
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
 
@@ -1733,12 +1727,18 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
                 void setStartupDoneContext(true);
                 return g;
             }
+
         } else {
             console.log('NOT started because no remote workspace yet');
             void setStartupDoneContext(true);
+            return g;
         }
-
     }
+    // At this point, leoRun has been called and the app is running. We can show the welcome screen if needed.
+    void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
+        .then(() =&gt; {
+            void p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion); // Save current version for next time
+        });
     return g;
 }
 
@@ -13856,32 +13856,46 @@ private _refreshButtonsPane(): void {
  */
 function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Thenable&lt;unknown&gt; {
     let w_showWelcomeScreen: boolean = false;
+    let w_showLogPane: boolean = false;
     if (p_previousVersion === undefined) {
-        console.log('leojs first-time install');
+        console.log('LeoJS first-time install');
         w_showWelcomeScreen = true;
+        w_showLogPane = true;
     } else {
         if (p_previousVersion !== p_version) {
-            void vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
+            void vscode.window.showInformationMessage(`LeoJS upgraded from v${p_previousVersion} to v${p_version}`);
         }
-        const [w_major, w_minor] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
-        const [w_prevMajor, w_prevMinor] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        const [w_major, w_minor, w_patch] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        const [w_prevMajor, w_prevMinor, w_prevPatch] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
         if (
-            (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor) ||
+            // Don't notify on same version
+            (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor &amp;&amp; w_patch === w_prevPatch) ||
             // Don't notify on downgrades
-            (w_major &lt; w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor))
+            (w_major &lt; w_prevMajor ||
+                (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor) ||
+                (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor &amp;&amp; w_patch &lt; w_prevPatch))
         ) {
             w_showWelcomeScreen = false;
-        } else if (w_major !== w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &gt; w_prevMinor)) {
-            // Will show on major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
+            w_showLogPane = false;
+        } else if (w_major !== w_prevMajor || w_minor &gt; w_prevMinor) {
+            // major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
             w_showWelcomeScreen = true;
+            w_showLogPane = true;
+        } else if (w_patch !== w_prevPatch) {
+            // Handle patch upgrades differently if needed
+            w_showWelcomeScreen = false;
+            w_showLogPane = true;
         }
     }
+    let w_result: Thenable&lt;unknown&gt; | undefined;
     if (w_showWelcomeScreen) {
-        (g.isNewLeoJSVersion as boolean) = true;
-        return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
-    } else {
-        return Promise.resolve();
+        w_result = vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
     }
+    if (w_showLogPane) {
+        w_result = vscode.commands.executeCommand(Constants.COMMANDS.SHOW_LOG);
+    }
+    return w_result || Promise.resolve();
+
 }
 
 </t>
