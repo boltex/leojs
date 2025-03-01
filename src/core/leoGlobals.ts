@@ -2536,6 +2536,11 @@ export function makeVscodeUri(p_fn: string): Uri {
     if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_fn = p_fn.replace(/\\/g, "/");
         try {
+            const workspacePath = workspaceUri.fsPath.replace(/\\/g, "/");
+            if (isBrowser && p_fn.startsWith('/') && !p_fn.startsWith(workspacePath)) {
+                // isBrowser and p_fn is not a workspace path, so we need to add the workspace path.
+                p_fn = workspacePath + p_fn;
+            }
             const newUri = workspaceUri!.with({ path: p_fn });
             return newUri;
         } catch (e) {
@@ -5244,7 +5249,6 @@ export function os_path_dirname(p_path?: string): string {
         p_path = p_path.split('\\').join('/');
     }
     p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
-
     return p_path;
 }
 //@+node:felix.20211227205124.1: *3* g.os_path_exists
