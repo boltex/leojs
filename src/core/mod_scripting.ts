@@ -357,23 +357,24 @@ export class AtButtonCallback {
     /**
      * AtButtonCallbgack.__call__. The callback for @button nodes.
      */
-    public __call__(): Promise<void> {
+    public __call__(): Promise<unknown> {
         return this.execute_script();
     }
     //@+node:felix.20230924174338.14: *3* AtButtonCallback.execute_script & helper
     /**
      * Execute the script associated with this button.
      */
-    public async execute_script(): Promise<void> {
+    public async execute_script(): Promise<unknown> {
         const script = await this.find_script();
         if (script) {
-            await this.controller.executeScriptFromButton(
+            const result = await this.controller.executeScriptFromButton(
                 this.b,
                 this.buttonText,
                 undefined,
                 script,
                 this.gnx,
             );
+            return result;
         }
     }
     //@+node:felix.20230924174338.15: *4* AtButtonCallback.find_script
@@ -748,7 +749,7 @@ export class ScriptingController {
         p?: Position,
         script?: string,
         script_gnx?: string,
-    ): Promise<void> {
+    ): Promise<unknown> {
         const c = this.c;
         if (c.disableCommandsMessage) {
             g.blue(c.disableCommandsMessage);
@@ -763,7 +764,7 @@ export class ScriptingController {
         if (!script) {
             script = await this.getScript(p);
         }
-        await c.executeScript(
+        const result = await c.executeScript(
             args,
             p,
             script,
@@ -773,7 +774,9 @@ export class ScriptingController {
             g.es(`Removing '${buttonText}' button at its request`);
             this.deleteButton(b);
         }
+
         // Do *not* set focus here: the script may have changed the focus.
+        return result;
     }
     //@+node:felix.20230924174338.28: *3* sc.open_gnx
     /**

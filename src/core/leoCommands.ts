@@ -1109,7 +1109,7 @@ export class Commands {
         namespace: { [key: string]: any } | undefined = undefined,
         raiseFlag: boolean = false,
         runPyflakes: boolean = true
-    ): Promise<void> {
+    ): Promise<unknown> {
         /*
         Execute a *Leo* script, written in javascript.
         Keyword args:
@@ -1178,6 +1178,7 @@ export class Commands {
         }
 
         this.redirectScriptOutput();
+        let callResult: unknown;
 
         try {
 
@@ -1188,10 +1189,13 @@ export class Commands {
                 script += '\n'; // Make sure we end the script properly.
 
                 // Wrap script as an IIAFE to allow 'await' right out the box.
-                script = "(async () => {\n try {\n" +
-                    script +
-                    "\n} catch (e) { g.handleScriptException(c, p, e); }" +
-                    "\n})();";
+                const scriptWrapper = `(async () => {
+                    try {
+                        return (${script});
+                    } catch (e) { 
+                        g.handleScriptException(c, p, e); 
+                    }
+                })();`;
 
                 try {
                     if (!namespace || !namespace['script_gnx']) {
@@ -1199,12 +1203,12 @@ export class Commands {
                         namespace['script_gnx'] = script_p.gnx;
                     }
                     // We *always* execute the script with p = c.p.
-                    c.executeScriptHelper(
+                    callResult = await c.executeScriptHelper(
                         args,
                         define_g,
                         define_name,
                         namespace,
-                        script
+                        scriptWrapper
                     );
                 } catch (e) {
                     g.es('interrupted');
@@ -1225,16 +1229,17 @@ export class Commands {
         } finally {
             this.unredirectScriptOutput();
         }
+        return callResult;
     }
 
     //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
-    public executeScriptHelper(
+    public async executeScriptHelper(
         args: any,
         define_g: boolean,
         define_name: string,
         namespace: any,
         script: string
-    ): void {
+    ): Promise<unknown> {
         const c: Commands = this;
         let p: Position | undefined;
         if (c.p.__bool__()) {
@@ -1279,6 +1284,8 @@ export class Commands {
             // d.update(namespace)
             Object.assign(d, namespace);
         }
+
+        let callResult: unknown;
         // A kludge: reset c.inCommand here to handle the case where we *never* return.
         // (This can happen when there are multiple event loops.)
         // This does not prevent zombie windows if the script puts up a dialog...
@@ -1305,7 +1312,7 @@ export class Commands {
                 // exec(compile(script, scriptFile, 'exec'), d)
             } else {
                 // exec(script, d)
-                new Function(
+                const func = new Function(
                     // 'c',
                     // 'g',
                     // 'input',
@@ -1315,16 +1322,10 @@ export class Commands {
                     // 'script_gnx',
                     ...Object.keys(d),
                     script
-                )(
-                    ...Object.keys(d).map(k => d[k])
-                    // d['c'],
-                    // d['g'],
-                    // d['input'],
-                    // d['p'],
-                    // d['__name__'],
-                    // d['script_args'],
-                    // d['script_gnx']
                 );
+
+                callResult = await func(...Object.keys(d).map(k => d[k]));
+
             }
         } catch (e) {
             // pass
@@ -1332,6 +1333,7 @@ export class Commands {
             g.app.inScript = false;
             (g.inScript as boolean) = g.app.inScript;
         }
+        return callResult;
     }
 
     //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
