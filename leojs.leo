@@ -21358,7 +21358,12 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 </t>
 <t tx="felix.20240923224024.1">## 1.0.9
 
-- ...
+- When using in vscode for the web, absolute paths now point to root of workspace. (for @&lt;file&gt; and @path directives)
+- LeoJS now opens older and deprecated Leo file formats in a manner that matches the original Leo's behavior.
+- Added support for rust code blocks when using find symbol definition.
+- Added new rust importer.
+- Improved handling of illegal characters in XML files.
+- Small bug fixes that mirror the original Leo's development since the last version.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

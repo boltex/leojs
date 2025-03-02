@@ -806,8 +806,9 @@ export class FileCommands {
     public copiedTree: Position | undefined;
     public gnxDict: { [key: string]: VNode } = {}; // Keys are gnx strings. Values are vnodes.
     public vnodesDict!: { [key: string]: boolean }; // keys are gnx strings; values are ignored
-    // keys are gnx strings; values are booleans (ignored)
-    public entities = Object.fromEntries(
+
+    // # https://github.com/leo-editor/leo-editor/pull/4292
+    public entities: Record<string, string> = Object.fromEntries(
         Array.from({ length: 32 }, (_, z) => {
             const char = String.fromCharCode(z);
             return (char !== '\t' && char !== '\n' && char !== '\r') ? [char, ''] : null;
@@ -862,7 +863,16 @@ export class FileCommands {
      * Escape '&', '<', and '>' in a string of data.
      * https://docs.python.org/3/library/xml.sax.utils.html#xml.sax.saxutils.escape
      */
-    public saxutilsEscape(s: string, entities: Record<string, string>): string {
+    public saxutilsEscape(s: string, entities?: Record<string, string>): string {
+        // First, escape '&', '<', and '>' in a string of data.
+        s = s
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        if (!entities) {
+            return s;
+        }
+        // Then, escape the other characters.
         return s.replace(/[\x00-\x1F]/g, ch => entities[ch] ?? ch);
     }
     //@+node:felix.20221011210921.1: *3* fc.saxutils.quoteattr

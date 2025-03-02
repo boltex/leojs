@@ -2,7 +2,12 @@
 
 ## 1.0.9
 
-- ...
+- When using in vscode for the web, absolute paths now point to root of workspace. (for @<file> and @path directives)
+- LeoJS now opens older and deprecated Leo file formats in a manner that matches the original Leo's behavior.
+- Added support for rust code blocks when using find symbol definition.
+- Added new rust importer.
+- Improved handling of illegal characters in XML files.
+- Small bug fixes that mirror the original Leo's development since the last version.
 
 ## 1.0.8
 
