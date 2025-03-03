@@ -13862,11 +13862,18 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
         w_showWelcomeScreen = true;
         w_showLogPane = true;
     } else {
-        if (p_previousVersion !== p_version) {
-            void vscode.window.showInformationMessage(`LeoJS upgraded from v${p_previousVersion} to v${p_version}`);
-        }
         const [w_major, w_minor, w_patch] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
         const [w_prevMajor, w_prevMinor, w_prevPatch] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        // Notify user of upgrade or downgrade
+        if (p_previousVersion !== p_version) {
+            let verb = 'upgraded';
+            if (w_major &lt; w_prevMajor ||
+                (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor) ||
+                (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor &amp;&amp; w_patch &lt; w_prevPatch)) {
+                verb = 'downgraded';
+            }
+            void vscode.window.showInformationMessage(`LeoJS ${verb} from v${p_previousVersion} to v${p_version}`);
+        }
         if (
             // Don't notify on same version
             (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor &amp;&amp; w_patch === w_prevPatch) ||
