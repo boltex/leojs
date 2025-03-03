@@ -998,9 +998,9 @@ export class ScriptingController {
         //     await p_c.executeScript(p_args, p_p);
         // };
         // * USE POSITION ONLY INSTEAD GIVEN FROM CALLER doCommand in leoCommands.ts.
-        let atCommandCallback = async (p_p: Position = p.copy()) => {
+        let atCommandCallback = (p_p: Position = p.copy()) => {
             // Execute the script silently
-            await c.executeScript([], p_p);
+            return c.executeScript([], p_p);
         };
 
         // Fix bug 1251252
@@ -1062,8 +1062,8 @@ export class ScriptingController {
         //     await p_c.executeScript(p_args, p_p,);
         // };
         // * USE POSITION ONLY INSTEAD GIVEN FROM CALLER doCommand in leoCommands.ts.
-        const atCommandCallback = async (p_p: Position = p.copy()): Promise<void> => {
-            await c.executeScript([], p_p,);
+        const atCommandCallback = (p_p: Position = p.copy()) => {
+            return c.executeScript([], p_p,);
         };
 
         if (p.b.trim()) {
@@ -1103,7 +1103,7 @@ export class ScriptingController {
     /**
      * Handle @script nodes.
      */
-    public async handleAtScriptNode(p: Position): Promise<void> {
+    public handleAtScriptNode(p: Position): Promise<unknown> {
         const tag = "@script";
         if (!p.h.startsWith(tag)) {
             throw new Error("Assertion failed: p.h does not start with '@script'");
@@ -1112,9 +1112,10 @@ export class ScriptingController {
         const args = this.getArgs(p);
         if (this.atScriptNodes) {
             console.log(`executing script ${name}`);
-            await this.c.executeScript(args, p, undefined, false);
+            return this.c.executeScript(args, p, undefined, false);
         } else {
             console.warn(`disabled @script: ${name}`);
+            return Promise.resolve();
         }
         if (false) {
             // Do not assume the script will want to remain in this commander.

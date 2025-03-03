@@ -4188,10 +4188,12 @@ public async command(
 
     if (value &amp;&amp; value.then) {
         void (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
+            console.log('was thenable ', p_result);
             void this.launchRefresh();
         });
         return value;
     } else {
+        console.log('was NOT thenable2');
         void this.launchRefresh();
         return Promise.resolve(value); // value may be a promise but it will resolve all at once.
     }
@@ -21364,6 +21366,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Added new rust importer.
 - Improved handling of illegal characters in XML files.
 - Small bug fixes that mirror the original Leo's development since the last version.
+- New Feature: Script execution from any source, @Command, doCommandByName, etc... now returns actual values if script returned a value. 
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

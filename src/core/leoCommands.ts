@@ -1189,9 +1189,9 @@ export class Commands {
                 script += '\n'; // Make sure we end the script properly.
 
                 // Wrap script as an IIAFE to allow 'await' right out the box.
-                const scriptWrapper = `(async () => {
+                const scriptWrapper = `return (async () => {
                     try {
-                        return (${script});
+                        ${script}
                     } catch (e) { 
                         g.handleScriptException(c, p, e); 
                     }
@@ -1325,7 +1325,7 @@ export class Commands {
                 );
 
                 callResult = await func(...Object.keys(d).map(k => d[k]));
-
+                console.log('called it!', callResult);
             }
         } catch (e) {
             // pass
@@ -4047,6 +4047,7 @@ export class Commands {
         if (p && p.__bool__()) {
             c.selectPosition(p);
         }
+        // g.app.gui.fullRefresh(); // Overkill ?
     }
     //@+node:felix.20211120224231.1: *6* c.redraw_after_icons_changed
     /**
