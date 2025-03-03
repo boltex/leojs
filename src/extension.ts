@@ -239,8 +239,8 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
             w_showLogPane = true;
         } else if (w_patch !== w_prevPatch) {
             // Handle patch upgrades differently if needed
-            w_showWelcomeScreen = false;
-            w_showLogPane = true;
+            w_showWelcomeScreen = true;
+            w_showLogPane = false;
         }
     }
     let w_result: Thenable<unknown> | undefined;

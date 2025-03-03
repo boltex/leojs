@@ -4188,12 +4188,10 @@ public async command(
 
     if (value &amp;&amp; value.then) {
         void (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
-            console.log('was thenable ', p_result);
             void this.launchRefresh();
         });
         return value;
     } else {
-        console.log('was NOT thenable2');
         void this.launchRefresh();
         return Promise.resolve(value); // value may be a promise but it will resolve all at once.
     }
@@ -13885,8 +13883,8 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
             w_showLogPane = true;
         } else if (w_patch !== w_prevPatch) {
             // Handle patch upgrades differently if needed
-            w_showWelcomeScreen = false;
-            w_showLogPane = true;
+            w_showWelcomeScreen = true;
+            w_showLogPane = false;
         }
     }
     let w_result: Thenable&lt;unknown&gt; | undefined;
@@ -19394,17 +19392,19 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
           &lt;a class="button button--flat" title="Users' Guide" href="https://boltex.github.io/leojs/"&gt;
-            Documentation
+            📖 Documentation
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
           &lt;strong&gt;LeoJS&lt;/strong&gt;,
-          an open-source extension created by
-          &lt;a class="bold" title="My github user page" href="https://boltex.github.io/"&gt;Félix&lt;/a&gt;,
-          is a JavaScript implementation of
-          &lt;a class="bold" title="Learn more about Leo" href="https://leo-editor.github.io/leo-editor/"&gt;Leo&lt;/a&gt;.&lt;br&gt;
-          &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY"&gt;📺&amp;nbsp;Introduction to Leo&lt;/a&gt;
-          &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE"&gt;📺&amp;nbsp;Features Demo&lt;/a&gt;
+          an open-source extension created&amp;nbsp;by&amp;nbsp;&lt;a class="bold" title="My github user page"
+            href="https://boltex.github.io/"&gt;Félix&lt;/a&gt;,
+          is a JavaScript implementation&amp;nbsp;of&amp;nbsp;&lt;a class="bold" title="Learn more about Leo"
+            href="https://leo-editor.github.io/leo-editor/"&gt;Leo&lt;/a&gt;.&lt;br&gt;
+          &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY" class="video-link"&gt;&lt;span
+              class="icon"&gt;📺&lt;/span&gt;&amp;nbsp;Introduction to Leo&lt;/a&gt;
+          &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE" class="video-link ml-1"&gt;&lt;span
+              class="icon"&gt;📺&lt;/span&gt;&amp;nbsp;Features Demo&lt;/a&gt;
         &lt;/p&gt;
         &lt;h2 class="section__title section__title--break"&gt;&lt;/h2&gt;
         &lt;p class="section__hint mt-0 center"&gt;
@@ -20277,6 +20277,7 @@ a {
     font-weight: 400;
     outline: none;
     text-decoration: none;
+    transition: color 250ms;
 }
 
 a:not([href]):not([tabindex]):focus,
@@ -20548,6 +20549,7 @@ ul {
     text-transform: uppercase;
     user-select: none;
     white-space: nowrap;
+    transition: background-color 250ms, border-color 250ms, color 250ms;
 }
 
 .button:focus {
@@ -20584,10 +20586,6 @@ ul {
     color: black !important;
 }
 
-.preload .button--flat {
-    transition-duration: 0s !important;
-}
-
 .button--flat-inverse {
     background-color: white;
     border: 1px solid white;
@@ -20600,10 +20598,6 @@ ul {
     background: rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.6);
     color: white !important;
-}
-
-.preload .button--flat-inverse {
-    transition-duration: 0s !important;
 }
 
 .button--flat-primary {
@@ -20624,10 +20618,6 @@ ul {
     background-color: var(--color-button-background--darken-30);
     border-color: var(--color-button-background--darken-30);
     color: white !important;
-}
-
-.preload .button--flat-primary {
-    transition-duration: 0s !important;
 }
 
 .blurb {
@@ -21179,6 +21169,10 @@ fieldset p span {
     margin-left: 0 !important;
 }
 
+.ml-1 {
+    margin-left: 2em !important;
+}
+
 .mr-0 {
     margin-right: 0 !important;
 }
@@ -21201,6 +21195,22 @@ fieldset p span {
 
 .vscode-light .dark {
     display: none;
+}
+
+.video-link {
+    margin-top: 12px;
+    display: inline-block;
+    transition: color 250ms;
+    color: #c15b00;
+}
+.video-link:hover {
+    color: #e17719;
+}
+.video-link .icon {
+    transition: text-shadow 250ms;
+}
+.video-link:hover .icon {
+    text-shadow: 0px 0px 4px #ff8214;
 }
 
 ::-webkit-scrollbar-corner {
