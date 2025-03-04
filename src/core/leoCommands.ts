@@ -38,7 +38,7 @@ import {
 } from '../commands/editCommands';
 import { BufferCommandsClass } from '../commands/bufferCommands';
 import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
-import { TopLevelCompareCommands } from './leoCompare';
+import { TopLevelCompareCommands, TopLevelCommands } from './leoCompare';
 import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
@@ -5294,6 +5294,7 @@ export interface Commands
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCommands,
     TopLevelCompareCommands,
     TopLevelGoToCommands,
     TopLevelImportCommands,
@@ -5333,6 +5334,7 @@ applyMixins(Commands, [
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCommands,
     TopLevelCompareCommands,
     TopLevelGoToCommands,
     TopLevelImportCommands,
@@ -5355,8 +5357,7 @@ Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
 Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
 Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
 Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
-Commands.prototype.all_positions_with_unique_vnodes_iter =
-    Commands.prototype.all_unique_positions;
+Commands.prototype.all_positions_with_unique_vnodes_iter = Commands.prototype.all_unique_positions;
 Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;
 Commands.prototype.force_redraw = Commands.prototype.redraw;
 Commands.prototype.redraw_now = Commands.prototype.redraw;

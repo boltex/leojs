@@ -4245,8 +4245,8 @@ export class FastAtRead {
         comment_delim_end = comment_delim_end || '';
 
         // escapes any characters that have special meaning in regular expressions.
-        const delim1 = comment_delim_start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');;
-        const delim2 = comment_delim_end.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');;
+        const delim1 = comment_delim_start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const delim2 = comment_delim_end.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
         const ref = g.angleBrackets('(.*)');
 

@@ -7,7 +7,7 @@
 //@+node:ekr.20190515070742.3: ** << leoMarkup imports & annotations >>
 import * as utils from '../utils';
 import * as g from './leoGlobals';
-import { command } from '../core/decorators';
+import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 

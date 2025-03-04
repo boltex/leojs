@@ -81,7 +81,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise<type
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
 
-        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);;
+        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");

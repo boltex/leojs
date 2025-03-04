@@ -10,6 +10,7 @@ import * as g from './leoGlobals';
 import * as utils from '../utils';
 import { LeoGui, NullGui } from './leoGui';
 import { NodeIndices, VNode, Position } from './leoNodes';
+import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { FastRead } from './leoFileCommands';
 import { GlobalConfigManager, SettingsTreeParser } from './leoConfig';

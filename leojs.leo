@@ -592,6 +592,14 @@
 <v t="felix.20201214205159.81"><vh>&lt;&lt; dependencies &gt;&gt;</vh></v>
 </v>
 </v>
+<v t="felix.20250303225315.1"><vh>class TopLevelCommands</vh>
+<v t="felix.20250303225315.2"><vh>ctrl-click-at-cursor</vh></v>
+<v t="felix.20250303225315.3"><vh>demangle-recent-files</vh></v>
+<v t="felix.20250303225315.4"><vh>enable/disable/toggle-idle-time-events</vh></v>
+<v t="felix.20250303225315.5"><vh>join-leo-irc</vh></v>
+<v t="felix.20250303225315.6"><vh>open-url</vh></v>
+<v t="felix.20250303225315.7"><vh>open-url-under-cursor</vh></v>
+</v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
 <v t="ekr.20140902032918.18591"><vh> About this file</vh>
 <v t="ekr.20140831085423.18639"><vh>About widgets and wrappers</vh></v>
@@ -1681,7 +1689,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
 
-        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);;
+        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
@@ -4611,7 +4619,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "aabff93",
+  "gitBranch": "devel",
+  "gitDate": "2025-03-02 23:03:50 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -21385,6 +21396,93 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Small bug fixes that mirror the original Leo's development since the last version.
 - New Feature: Script execution from any source, @Command, doCommandByName, etc... now returns actual values if script returned a value. 
 
+</t>
+<t tx="felix.20250303225315.1">export class TopLevelCommands {
+    @others
+}
+</t>
+<t tx="felix.20250303225315.2">@command(
+    'ctrl-click-at-cursor',
+    'Simulate a control-click at the cursor.'
+)
+public async ctrlClickAtCursor(this: Commands): Promise&lt;void&gt; {
+    const c = this; // event and event.get('c')
+    if (c) {
+        await g.openUrlOnClick(c);
+    }
+}
+</t>
+<t tx="felix.20250303225315.3">@command(
+    'demangle-recent-files',
+    'Path demangling potentially alters the paths in the recent files list' +
+    'according to find/replace patterns in the @data path-demangle setting.'
+)
+public async demangle_recent_files_command(this: Commands): Promise&lt;void&gt; {
+    /*
+    Path demangling potentially alters the paths in the recent files list
+    according to find/replace patterns in the @data path-demangle setting.
+    For example:
+
+        REPLACE: .gnome-desktop
+        WITH: My Desktop
+
+    The default setting specifies no patterns.
+    */
+    const c = this; // event and event.get('c')
+    if (c) {
+        const data = c.config.getData('path-demangle');
+        if (data) {
+            await g.app.recentFilesManager.demangleRecentFiles(c, data);
+        } else {
+            g.es_print('No patterns in @data path-demangle');
+        }
+    }
+}
+</t>
+<t tx="felix.20250303225315.4">@command('disable-idle-time-events', 'Disable default idle-time event handling.')
+public disable_idle_time_events(this: Commands): void {
+    g.app.idle_time_hooks_enabled = false;
+}
+@command('enable-idle-time-events', 'Enable default idle-time event handling.')
+public enable_idle_time_events(this: Commands): void {
+    g.app.idle_time_hooks_enabled = true;
+}
+@command('toggle-idle-time-events', 'Toggle default idle-time event handling.')
+public toggle_idle_time_events(this: Commands): void {
+    g.app.idle_time_hooks_enabled = !g.app.idle_time_hooks_enabled;
+}
+</t>
+<t tx="felix.20250303225315.5">@command('join-leo-irc', 'Open the web page to Leo\'s irc channel on freenode.net.')
+public join_leo_irc(this: Commands): void {
+    // TODO : Go to  "http://webchat.freenode.net/?channels=%23leo&amp;uio=d4" or a better equivalent.
+    // window.open("http://webchat.freenode.net/?channels=%23leo&amp;uio=d4", "_blank");
+    const c = this; // event and event.get('c')
+    if (c) {
+        console.log('TODO: join-leo-irc');
+    }
+}
+</t>
+<t tx="felix.20250303225315.6">@command('open-url', 'Open the url in the headline or body text of the selected node.')
+public async openUrl(this: Commands): Promise&lt;void&gt; {
+    /*
+    Open the url in the headline or body text of the selected node.
+
+    Use the headline if it contains a valid url.
+    Otherwise, look *only* at the first line of the body.
+    */
+    const c = this; // event and event.get('c')
+    if (c) {
+        await g.openUrl(c.p);
+    }
+}
+</t>
+<t tx="felix.20250303225315.7">@command('open-url-under-cursor', 'Open the url under the cursor.')
+public async openUrlUnderCursor(this: Commands): Promise&lt;void&gt; {
+    const c = this; // event and event.get('c')
+    if (c) {
+        await g.openUrlOnClick(c);
+    }
+}
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

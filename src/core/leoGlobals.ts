@@ -4810,9 +4810,8 @@ export function comparePositionArray(
  * python process_time equivalent that returns the current timestamp in SECONDS
  */
 export function process_time(): number {
-    const w_now = process.hrtime();
-    const [w_secs, w_nanosecs] = w_now;
-    return w_secs * 1.0 + Math.floor(w_nanosecs / 1000);
+    const [w_secs, w_nanosecs] = process.hrtime();
+    return w_secs + w_nanosecs / 1_000_000_000;
 }
 //@+node:felix.20220611031515.1: *3* g.convertPythonDayjs
 export function convertPythonDayjs(s: string): string {
@@ -7130,7 +7129,7 @@ export async function openUrlOnClick(c: Commands, url?: string): Promise<string 
     // QTextEditWrapper.mouseReleaseEvent calls this outside Leo's command logic.
     // Make sure to catch all exceptions
     try {
-        return await openUrlHelper(c, url);;
+        return await openUrlHelper(c, url);
     } catch (e) {
         es_exception(e);
     }
