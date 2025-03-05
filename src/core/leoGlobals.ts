@@ -6996,7 +6996,6 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
     }
     let leo_path;
 
-
     const parsed = makeVscodeUri(url);
 
     if (parsed.authority) {
@@ -7029,7 +7028,6 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         }
 
     } else {
-        // Mozilla throws a weird exception, then opens the file!
         try {
             // webbrowser.open(url)
             void env.openExternal(Uri.parse(url));

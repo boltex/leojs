@@ -3875,30 +3875,32 @@ export class LeoFind {
     }
     //@+node:felix.20221022201804.1: *3* LeoFind.Utils
     //@+node:felix.20221022201804.2: *4* find.add_change_string_to_label
-    /**
-     * Add an unprotected change string to the minibuffer label.
-     */
-    public add_change_string_to_label(): void {
-        const c = this.c;
-        let s: string = this.ftm.get_change_text();
-        // c.minibufferWantsFocus(); // No use in LeoJS
-        while (s.endsWith('\n') || s.endsWith('\r')) {
-            s = s.substring(0, s.length - 1);
-        }
-        c.k.extendLabel(s, true, false);
-    }
+    // ! USE CLIENT UI DIALOGS INSTEAD OF ORIGINAL LEO'S STATE_MACHINE
+    // /**
+    //  * Add an unprotected change string to the minibuffer label.
+    //  */
+    // public add_change_string_to_label(): void {
+    //     const c = this.c;
+    //     let s: string = this.ftm.get_change_text();
+    //     // c.minibufferWantsFocus(); // No use in LeoJS
+    //     while (s.endsWith('\n') || s.endsWith('\r')) {
+    //         s = s.substring(0, s.length - 1);
+    //     }
+    //     // c.k.extendLabel(s, true, false);
+    // }
     //@+node:felix.20221022201804.3: *4* find.add_find_string_to_label
-    public add_find_string_to_label(protect = true): void {
-        const c = this.c;
-        const k = this.c.k;
-        const ftm = c.findCommands.ftm;
-        let s = ftm.get_find_text();
-        // c.minibufferWantsFocus(); // No use in LeoJS
-        while (s.endsWith('\n') || s.endsWith('\r')) {
-            s = s.substring(0, s.length - 1);
-        }
-        k.extendLabel(s, true, protect);
-    }
+    // ! USE CLIENT UI DIALOGS INSTEAD OF ORIGINAL LEO'S STATE_MACHINE
+    // public add_find_string_to_label(protect = true): void {
+    //     const c = this.c;
+    //     // const k = this.c.k;
+    //     const ftm = c.findCommands.ftm;
+    //     let s = ftm.get_find_text();
+    //     // c.minibufferWantsFocus(); // No use in LeoJS
+    //     while (s.endsWith('\n') || s.endsWith('\r')) {
+    //         s = s.substring(0, s.length - 1);
+    //     }
+    //     // k.extendLabel(s, true, protect);
+    // }
     //@+node:felix.20221022201804.4: *4* find.compute_result_status
     /**
      * Return the status to be shown in the status line after a find command completes.

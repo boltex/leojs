@@ -6384,6 +6384,77 @@ export class LeoUI extends NullGui {
         }
     }
 
+    /**
+     * * Gets a single character input from the user, automatically accepting as soon as a character is entered
+     * @param options Options for the input box
+     * @param token Optional cancellation token
+     * @returns A promise that resolves to the entered character or undefined if cancelled
+     */
+    public get1Char(
+        options?: vscode.InputBoxOptions,
+        token?: vscode.CancellationToken
+    ): Thenable<string | undefined> {
+        return new Promise<string | undefined>((resolve) => {
+            const disposables: vscode.Disposable[] = [];
+            const inputBox = vscode.window.createInputBox();
+
+            // Apply options if provided
+            if (options) {
+                if (options.title) inputBox.title = options.title;
+                if (options.prompt) inputBox.prompt = options.prompt;
+                if (options.placeHolder) inputBox.placeholder = options.placeHolder;
+                if (options.password !== undefined) inputBox.password = options.password;
+                if (options.ignoreFocusOut !== undefined) inputBox.ignoreFocusOut = options.ignoreFocusOut;
+            }
+
+            // Auto-accept on first character input
+            disposables.push(
+                inputBox.onDidChangeValue((value) => {
+                    if (value.length > 0) {
+                        const char = value[0]; // Get the first character
+                        resolve(char);
+                        inputBox.hide();
+                    }
+                })
+            );
+
+
+            // Accept empty input on Enter key
+            disposables.push(
+                inputBox.onDidAccept(() => {
+                    if (inputBox.value.length === 0) {
+                        resolve(""); // Return empty string when Enter is pressed with no input
+                        inputBox.hide();
+                    } else {
+                        // If there's a character, use the first one
+                        resolve(inputBox.value[0]);
+                        inputBox.hide();
+                    }
+                })
+            );
+
+            // Handle cancellation
+            disposables.push(
+                inputBox.onDidHide(() => {
+                    disposables.forEach(d => d.dispose());
+                    resolve(undefined);
+                })
+            );
+
+            // Handle cancellation token
+            if (token) {
+                disposables.push(
+                    token.onCancellationRequested(() => {
+                        inputBox.hide();
+                    })
+                );
+            }
+
+            // Show the input box
+            inputBox.show();
+        });
+    }
+
     public runAboutLeoDialog(
         c: Commands | undefined,
         version: string,

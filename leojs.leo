@@ -327,6 +327,7 @@
 <v t="felix.20230109233134.1"><vh>focus_to_body</vh></v>
 <v t="felix.20230109233154.1"><vh>focus_to_head</vh></v>
 <v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
+<v t="felix.20250304214748.1"><vh>get1Char</vh></v>
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
@@ -591,14 +592,6 @@
 <v t="felix.20201214205159.80"><vh>&lt;&lt; devDependencies &gt;&gt;</vh></v>
 <v t="felix.20201214205159.81"><vh>&lt;&lt; dependencies &gt;&gt;</vh></v>
 </v>
-</v>
-<v t="felix.20250303225315.1"><vh>class TopLevelCommands</vh>
-<v t="felix.20250303225315.2"><vh>ctrl-click-at-cursor</vh></v>
-<v t="felix.20250303225315.3"><vh>demangle-recent-files</vh></v>
-<v t="felix.20250303225315.4"><vh>enable/disable/toggle-idle-time-events</vh></v>
-<v t="felix.20250303225315.5"><vh>join-leo-irc</vh></v>
-<v t="felix.20250303225315.6"><vh>open-url</vh></v>
-<v t="felix.20250303225315.7"><vh>open-url-under-cursor</vh></v>
 </v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
 <v t="ekr.20140902032918.18591"><vh> About this file</vh>
@@ -4619,10 +4612,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "aabff93",
-  "gitBranch": "devel",
-  "gitDate": "2025-03-02 23:03:50 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -21397,92 +21387,77 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - New Feature: Script execution from any source, @Command, doCommandByName, etc... now returns actual values if script returned a value. 
 
 </t>
-<t tx="felix.20250303225315.1">export class TopLevelCommands {
-    @others
-}
-</t>
-<t tx="felix.20250303225315.2">@command(
-    'ctrl-click-at-cursor',
-    'Simulate a control-click at the cursor.'
-)
-public async ctrlClickAtCursor(this: Commands): Promise&lt;void&gt; {
-    const c = this; // event and event.get('c')
-    if (c) {
-        await g.openUrlOnClick(c);
-    }
-}
-</t>
-<t tx="felix.20250303225315.3">@command(
-    'demangle-recent-files',
-    'Path demangling potentially alters the paths in the recent files list' +
-    'according to find/replace patterns in the @data path-demangle setting.'
-)
-public async demangle_recent_files_command(this: Commands): Promise&lt;void&gt; {
-    /*
-    Path demangling potentially alters the paths in the recent files list
-    according to find/replace patterns in the @data path-demangle setting.
-    For example:
+<t tx="felix.20250304214748.1">/**
+ * * Gets a single character input from the user, automatically accepting as soon as a character is entered
+ * @param options Options for the input box
+ * @param token Optional cancellation token
+ * @returns A promise that resolves to the entered character or undefined if cancelled
+ */
+public get1Char(
+    options?: vscode.InputBoxOptions,
+    token?: vscode.CancellationToken
+): Thenable&lt;string | undefined&gt; {
+    return new Promise&lt;string | undefined&gt;((resolve) =&gt; {
+        const disposables: vscode.Disposable[] = [];
+        const inputBox = vscode.window.createInputBox();
 
-        REPLACE: .gnome-desktop
-        WITH: My Desktop
-
-    The default setting specifies no patterns.
-    */
-    const c = this; // event and event.get('c')
-    if (c) {
-        const data = c.config.getData('path-demangle');
-        if (data) {
-            await g.app.recentFilesManager.demangleRecentFiles(c, data);
-        } else {
-            g.es_print('No patterns in @data path-demangle');
+        // Apply options if provided
+        if (options) {
+            if (options.title) inputBox.title = options.title;
+            if (options.prompt) inputBox.prompt = options.prompt;
+            if (options.placeHolder) inputBox.placeholder = options.placeHolder;
+            if (options.password !== undefined) inputBox.password = options.password;
+            if (options.ignoreFocusOut !== undefined) inputBox.ignoreFocusOut = options.ignoreFocusOut;
         }
-    }
-}
-</t>
-<t tx="felix.20250303225315.4">@command('disable-idle-time-events', 'Disable default idle-time event handling.')
-public disable_idle_time_events(this: Commands): void {
-    g.app.idle_time_hooks_enabled = false;
-}
-@command('enable-idle-time-events', 'Enable default idle-time event handling.')
-public enable_idle_time_events(this: Commands): void {
-    g.app.idle_time_hooks_enabled = true;
-}
-@command('toggle-idle-time-events', 'Toggle default idle-time event handling.')
-public toggle_idle_time_events(this: Commands): void {
-    g.app.idle_time_hooks_enabled = !g.app.idle_time_hooks_enabled;
-}
-</t>
-<t tx="felix.20250303225315.5">@command('join-leo-irc', 'Open the web page to Leo\'s irc channel on freenode.net.')
-public join_leo_irc(this: Commands): void {
-    // TODO : Go to  "http://webchat.freenode.net/?channels=%23leo&amp;uio=d4" or a better equivalent.
-    // window.open("http://webchat.freenode.net/?channels=%23leo&amp;uio=d4", "_blank");
-    const c = this; // event and event.get('c')
-    if (c) {
-        console.log('TODO: join-leo-irc');
-    }
-}
-</t>
-<t tx="felix.20250303225315.6">@command('open-url', 'Open the url in the headline or body text of the selected node.')
-public async openUrl(this: Commands): Promise&lt;void&gt; {
-    /*
-    Open the url in the headline or body text of the selected node.
 
-    Use the headline if it contains a valid url.
-    Otherwise, look *only* at the first line of the body.
-    */
-    const c = this; // event and event.get('c')
-    if (c) {
-        await g.openUrl(c.p);
-    }
+        // Auto-accept on first character input
+        disposables.push(
+            inputBox.onDidChangeValue((value) =&gt; {
+                if (value.length &gt; 0) {
+                    const char = value[0]; // Get the first character
+                    resolve(char);
+                    inputBox.hide();
+                }
+            })
+        );
+
+
+        // Accept empty input on Enter key
+        disposables.push(
+            inputBox.onDidAccept(() =&gt; {
+                if (inputBox.value.length === 0) {
+                    resolve(""); // Return empty string when Enter is pressed with no input
+                    inputBox.hide();
+                } else {
+                    // If there's a character, use the first one
+                    resolve(inputBox.value[0]);
+                    inputBox.hide();
+                }
+            })
+        );
+
+        // Handle cancellation
+        disposables.push(
+            inputBox.onDidHide(() =&gt; {
+                disposables.forEach(d =&gt; d.dispose());
+                resolve(undefined);
+            })
+        );
+
+        // Handle cancellation token
+        if (token) {
+            disposables.push(
+                token.onCancellationRequested(() =&gt; {
+                    inputBox.hide();
+                })
+            );
+        }
+
+        // Show the input box
+        inputBox.show();
+    });
 }
-</t>
-<t tx="felix.20250303225315.7">@command('open-url-under-cursor', 'Open the url under the cursor.')
-public async openUrlUnderCursor(this: Commands): Promise&lt;void&gt; {
-    const c = this; // event and event.get('c')
-    if (c) {
-        await g.openUrlOnClick(c);
-    }
-}
+
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

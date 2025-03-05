@@ -1276,7 +1276,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     )
     public lineNumber(): void {
 
-        const k = this.c.k;
         const w = this.editWidget();
         if (!w) {
             return;
@@ -1316,7 +1315,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Print the line number of the line containing the cursor.'
     )
     public whatLine(): void {
-        const k = this.c.k;
         const w = this.editWidget();
 
         if (w) {
@@ -1701,7 +1699,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public insertNewLineAndTab(): void {
         const trace = g.app.debug.includes('keys');
         const c = this.c;
-        //const k = this.c.k;
         const p = c.p;
         const w = this.editWidget();
         if (!w) {
