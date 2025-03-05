@@ -6988,6 +6988,29 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
     }
     const tag = 'file://';
 
+    /*
+        On windows, If your file is located at:
+
+        C:\Users\felix\Documents\example.html
+
+        The correct file:// URL would be:
+
+        file:///C:/Users/felix/Documents/example.html
+
+        On other OSes, If your file is located at:
+
+        /home/felix/Documents/example.html
+
+        The correct file:// URL would be:
+
+        file:///home/felix/Documents/example.html
+
+        On any OSes, Spaces may/should be percent-encoded as %20
+
+        file:///home/felix/My%20Documents/example.html
+
+    */
+
     const original_url = url;
 
     if (url.startsWith(tag) && !url.startsWith(tag + '#')) {
@@ -6996,7 +7019,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
     }
     let leo_path;
 
-    const parsed = makeVscodeUri(url);
+    const parsed = Uri.parse(url);
 
     if (parsed.authority) {
         leo_path = os_path_join(parsed.authority, parsed.path);
@@ -7020,9 +7043,15 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         const unquote_path = unquoteUrl(leo_path);
         if (await os_path_exists(leo_path)) {
 
-            console.log("TODO os_startfile for :", unquote_path);
+            if (isBrowser) {
+                // open in vscode's editor
+                const vscodeFileUri = makeVscodeUri(leo_path);
+                await vscode.window.showTextDocument(vscodeFileUri);
+            } else {
+                await env.openExternal(Uri.parse(unquote_path));
+            }
 
-            // os_startfile(unquote_path);
+
         } else {
             es(`File '${leo_path}' does not exist`);
         }
@@ -7030,7 +7059,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
     } else {
         try {
             // webbrowser.open(url)
-            void env.openExternal(Uri.parse(url));
+            await env.openExternal(Uri.parse(url));
         } catch (e) {
             // pass
         }
