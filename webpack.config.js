@@ -50,6 +50,7 @@ const webConfig = /** @type WebpackConfig */ {
       process: require.resolve('process/browser'),
       url: require.resolve('url'),
       fs: false, // false: so compilation passes: WILL NOT BE USED IN WEB VERSION
+      opn: false, // false: so compilation passes: WILL NOT BE USED IN WEB VERSION
     },
   },
   module: {

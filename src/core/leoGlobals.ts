@@ -25,6 +25,7 @@ import { Commands } from './leoCommands';
 import { IdleTime as IdleTimeClass } from "./idle_time";
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
+import open from 'open';
 import { RemoteHubApi } from '../remote-hub';
 import { SqlJsStatic } from 'sql.js';
 import * as showdownObj from "showdown";
@@ -7048,9 +7049,8 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
                 const vscodeFileUri = makeVscodeUri(leo_path);
                 await vscode.window.showTextDocument(vscodeFileUri);
             } else {
-                await env.openExternal(Uri.parse(unquote_path));
+                await open(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
             }
-
 
         } else {
             es(`File '${leo_path}' does not exist`);
@@ -7113,10 +7113,8 @@ export function isValidUrl(url: string): boolean {
     }
 
     // const parsed = urlparse.urlparse(url);
-    // const parsed = makeVscodeUri(url);
-    const parsed = Uri.parse(url);
-
-    const scheme = parsed.scheme;
+    const match = url.match(/^([a-zA-Z][a-zA-Z\d+\-.]*):/);
+    const scheme = match ? match[1] : ""; // parsed.scheme;
 
     for (const s of table) {
         if (scheme.startsWith(s)) {
@@ -7149,7 +7147,6 @@ export async function openUrl(p: Position): Promise<void> {
 //@+node:felix.20230724154323.18: *3* g.openUrlOnClick (open-url-under-cursor)
 /**
  * Open the URL under the cursor.  Return it for unit testing.
- * Note: In LEOJS Uses parameter c instead of event
  */
 export async function openUrlOnClick(c: Commands, url?: string): Promise<string | undefined> {
 

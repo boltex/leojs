@@ -6760,6 +6760,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "ksuid": "^3.0.0",
 "lodash": "^4.17.21",
 "md5": "^2.3.0",
+"open": "^10.1.0",
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",

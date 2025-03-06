@@ -1181,16 +1181,6 @@ export class TopLevelCommands {
     public toggle_idle_time_events(this: Commands): void {
         g.app.idle_time_hooks_enabled = !g.app.idle_time_hooks_enabled;
     }
-    //@+node:felix.20250303230623.5: *3* join-leo-irc
-    @command('join-leo-irc', 'Open the web page to Leo\'s irc channel on freenode.net.')
-    public join_leo_irc(this: Commands): void {
-        // TODO : Go to  "http://webchat.freenode.net/?channels=%23leo&uio=d4" or a better equivalent.
-        // window.open("http://webchat.freenode.net/?channels=%23leo&uio=d4", "_blank");
-        const c = this; // event and event.get('c')
-        if (c) {
-            console.log('TODO: join-leo-irc');
-        }
-    }
     //@+node:felix.20250303230623.6: *3* open-url
     @command('open-url', 'Open the url in the headline or body text of the selected node.')
     public async openUrl(this: Commands): Promise<void> {
