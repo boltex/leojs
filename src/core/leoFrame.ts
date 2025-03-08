@@ -868,7 +868,9 @@ export class NullTree {
         if (unselect && old_p && old_p.__bool__() && !old_p.__eq__(p)) {
             this.endEditLabel();
             // #1168: Ctrl-minus selects multiple nodes.
-            // UNUSED IN LEOJS
+            // if(this["unselectItem"]){
+            //     this["unselectItem"](old_p);
+            // }
             // if hasattr(this, 'unselectItem')
             //     // pylint: disable=no-member
             //     this.unselectItem(old_p)
@@ -908,7 +910,7 @@ export class NullTree {
             return;
         }
 
-        // c.frame.setWrap(p);  // Not that expensive  // NOT USED IN LEOJS
+        // c.frame.setWrap(p);  // Not that expensive  // THIS SETS BODY WRAP STATE, NOT USED IN LEOJS 
         this.set_body_text_after_select(p, old_p);
         c.nodeHistory.update(p);
     }

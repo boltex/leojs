@@ -3670,6 +3670,7 @@ export class LeoUI extends NullGui {
     private _revealNodeRetriedRefreshOutline: boolean = false; // USED IN _refreshOutline and _revealNode
 
     private _lastSelectedNode: Position | undefined;
+    public lastSelectedNodeTime: number | undefined = 0; // Falsy means not set
     private _lastSelectedNodeTS: number = 0;
     get lastSelectedNode(): Position | undefined {
         return this._lastSelectedNode;
@@ -4016,44 +4017,59 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
  * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
  * @param p_node is the position node selected in the tree
  * @param p_internalCall Flag used to indicate the selection is forced, and NOT originating from user interaction
- * @param p_aside Flag to force opening the body "Aside", i.e. when the selection was made from choosing "Open Aside"
  * @returns thenable for reveal to finish or select position to finish
  */
 public async selectTreeNode(
     p_node: Position,
     p_internalCall?: boolean,
-    // p_aside?: boolean
-    // // p_reveal?: boolean, p_aside?: boolean
 ): Promise&lt;unknown&gt; {
+
+    const c = p_node.v.context;
+    let isDoubleClick = false;
+    // DoubleClick : First check if this got called recently (under 500ms) on the exact same node to signify a double click
+    if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.__eq__(p_node) &amp;&amp; this.lastSelectedNodeTime) {
+        if (utils.performanceNow() - this.lastSelectedNodeTime &lt; 500) {
+            // Double click on the same node
+            this.lastSelectedNodeTime = undefined;
+            isDoubleClick = true;
+            if (!p_internalCall &amp;&amp; g.doHook("icondclick1", { c: c, p: p_node, v: p_node })) {
+                // returned not falsy, so skip the rest
+                return Promise.resolve();
+            }
+            console.log("Double click on the same node");
+            // todo add events / hooks
+            // 'icondclick1'               yes     before double click in icon box     c,p,v,event
+            // 'icondclick2'                       after  double click in icon box     c,p,v,event
+            // Do other double click events
+            g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+
+        }
+    }
+
+    // Note: this.lastSelectedNode is set in gotSelectedNode and lastSelectedNode 
+    this.lastSelectedNodeTime = utils.performanceNow();
 
     await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
 
-    const c = p_node.v.context;
+    if (!isDoubleClick) {
+        if (!p_internalCall &amp;&amp; g.doHook("headclick1", { c: c, p: p_node, v: p_node })) {
+            // returned not falsy, so skip the rest
+            return Promise.resolve();
+        }
 
-    g.doHook("headclick1", { c: c, p: p_node, v: p_node });
-
-    // * check if used via context menu's "open-aside" on an unselected node: check if p_node is currently selected, if not select it
-    // if (
-    //     p_aside &amp;&amp;
-    //     c.positionExists(p_node) &amp;&amp;
-    //     !p_node.__eq__(this.lastSelectedNode)
-    // ) {
-    //     void this._revealNode(p_node, { select: true, focus: false }); // no need to set focus: tree selection is set to right-click position
-    // }
+    }
 
     this.showBodyIfClosed = true;
 
     this.leoStates.setSelectedNodeFlags(p_node);
 
-    // const w_showBodyKeepFocus = p_aside
-    //     ? this.config.treeKeepFocusWhenAside
-    //     : this.config.treeKeepFocus;
-
     // * Check if having already this exact node position selected : Just show the body and exit
     // (other tree nodes with same gnx may have different syntax language coloring because of parents lineage)
     if (p_node.__eq__(this.lastSelectedNode)) {
         this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
-        g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+        if (!isDoubleClick) {
+            g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+        }
         // MAYBE DETACHED BODY CHANGED THAT CONTENT!
         // only if NOT watched (otherwise would have already been opened and altered by detached modification)
         if (!this._leoFileSystem.watchedBodiesGnx.includes(p_node.gnx)) {
@@ -7039,11 +7055,14 @@ public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
     }
     const w_result = await q_chooseFile;
     if (w_result) {
-        return this.openLeoFile(vscode.Uri.file(w_result));
-    } else {
-        // Canceled
-        return Promise.resolve(undefined);
+        const c = g.app.windowList[this.frameIndex].c;
+
+        if (g.doHook("recentfiles1", { c: c, p: c.p, v: c.p.v, fileName: w_result })) {
+            return this.openLeoFile(vscode.Uri.file(w_result));
+        }
+
     }
+    return Promise.resolve(undefined);
 
 }
 
