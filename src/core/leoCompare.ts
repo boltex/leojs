@@ -1192,7 +1192,7 @@ export class TopLevelCommands {
         */
         const c = this; // event and event.get('c')
         if (c) {
-            await g.openMimetype(c.p);
+            await g.open_mimetype(c, c.p);
         }
     }
     //@+node:felix.20250303230623.6: *3* open-url
