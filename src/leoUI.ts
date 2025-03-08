@@ -3597,12 +3597,16 @@ export class LeoUI extends NullGui {
                     return Promise.resolve();
                 }
                 console.log("Double click on the same node");
-                // todo add events / hooks
-                // 'icondclick1'               yes     before double click in icon box     c,p,v,event
-                // 'icondclick2'                       after  double click in icon box     c,p,v,event
-                // Do other double click events
+                // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
+                const w_headline = p_node.h;
+                if (w_headline.trim().startsWith("@url")) {
+                    await g.openUrl(p_node);
+                    return Promise.resolve();
+                } else if (w_headline.trim().startsWith("@mime")) {
+                    await g.open_mimetype(p_node.v.context, p_node);
+                    return Promise.resolve();
+                }
                 g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
-
             }
         }
 

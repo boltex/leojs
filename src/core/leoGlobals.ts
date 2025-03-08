@@ -7040,7 +7040,8 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         void handleUnl(original_url, c);
 
     } else if (['', 'file'].includes(parsed.scheme)) {
-
+        
+        // TODO : check if unquote_path is needed !
         const unquote_path = unquoteUrl(leo_path);
         if (await os_path_exists(leo_path)) {
 
@@ -7090,6 +7091,7 @@ export function isValidUnl(unl_s: string): boolean {
     return !!(unl_s.match(valid_unl_pattern));
 
 }
+
 //@+node:felix.20230724154323.16: *3* g.isValidUrl
 /**
  * Return true if url *looks* like a valid url.
@@ -7124,13 +7126,13 @@ export function isValidUrl(url: string): boolean {
     return false;
 
 }
+
 //@+node:felix.20230724154323.17: *3* g.openUrl
 /**
  * Open the url of node p.
  * Use the headline if it contains a valid url.
  * Otherwise, look *only* at the first line of the body.
  */
-
 export async function openUrl(p: Position): Promise<void> {
 
     if (p && p.__bool__()) {
@@ -7144,6 +7146,55 @@ export async function openUrl(p: Position): Promise<void> {
         }
     }
 }
+
+//@+node:felix.20250308152448.1: *3* g.open_mimetype
+/**
+ * Simulate double-clicking on the filename in a file manager.
+ *
+ * Checks with  @string mime_open_cmd setting first.
+ */
+export async function open_mimetype(c: Commands, p: Position): Promise<void> {
+
+    if( !c || !p || !p.__bool__()){
+        return undefined;
+    }
+
+    if(!p.h.startsWith('@mime')){
+        // not an @mime node
+        return undefined;
+    }
+
+    if (isBrowser) {
+        // not supported in browser
+        error(' open_mimetype : not supported in browser');
+        return undefined;
+    }
+
+    // honor @path
+    const fname = p.h.slice(6);
+    const d = c.scanAllDirectives(p);
+    let w_path = d['path'];
+    let fpath = finalize_join(w_path, fname);
+
+    if (await os_path_exists(fpath)) {
+
+        // user-specified command string, or sys.platform-determined string
+        let mime_cmd = c.config.getString('mime-open-cmd');
+        if (mime_cmd){
+            if (mime_cmd.indexOf('%s') === -1){
+                mime_cmd += ' %s';
+            }
+            // open_func = exec_string_cmd(mime_cmd);
+        }
+
+    } else {
+        error('@mime: file does not exist, ${fpath}');
+        return undefined;
+    }
+  
+    return undefined;
+}
+
 //@+node:felix.20230724154323.18: *3* g.openUrlOnClick (open-url-under-cursor)
 /**
  * Open the URL under the cursor.  Return it for unit testing.

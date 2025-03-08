@@ -1181,6 +1181,20 @@ export class TopLevelCommands {
     public toggle_idle_time_events(this: Commands): void {
         g.app.idle_time_hooks_enabled = !g.app.idle_time_hooks_enabled;
     }
+    //@+node:felix.20250308151140.1: *3* open_mimetype
+    @command('open-mimetype', 'Simulate double-clicking on the filename in a file manager.')
+    public async openMimetype(this: Commands): Promise<void> {
+        /*
+        Order of preference is:
+        1) @string mime_open_cmd setting
+        2) _mime_open_cmd, defined per sys.platform detection
+        3) open_func(fpath), defined per sys.platform detection
+        */
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.openMimetype(c.p);
+        }
+    }
     //@+node:felix.20250303230623.6: *3* open-url
     @command('open-url', 'Open the url in the headline or body text of the selected node.')
     public async openUrl(this: Commands): Promise<void> {
