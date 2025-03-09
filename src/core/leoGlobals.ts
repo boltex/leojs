@@ -25,7 +25,7 @@ import { Commands } from './leoCommands';
 import { IdleTime as IdleTimeClass } from "./idle_time";
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
-import open from 'open';
+import opn = require('open');
 import { RemoteHubApi } from '../remote-hub';
 import { SqlJsStatic } from 'sql.js';
 import * as showdownObj from "showdown";
@@ -237,11 +237,11 @@ export const color_directives_pat = new RegExp(
 // gnx_regex = re.compile(fr"\bgnx:{gnx_id}\.[0-9]+\.[0-9]+")
 export const gnx_char = "[^.,\"'\\s]";
 export const gnx_id = `${gnx_char}{3,}`;
-export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`);
+export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`, 'g');
 
 // Unls end with quotes.
 //unl_regex = re.compile(r"""\bunl:[^`'"]+""")
-export const unl_regex = /\bunl:[^`'"]+/;
+export const unl_regex = /\bunl:[^`'"]+/g;
 
 // Urls end at space or quotes.
 // url_leadins = 'fghmnptw'
@@ -249,7 +249,7 @@ export const unl_regex = /\bunl:[^`'"]+/;
 // url_regex = re.compile(fr"""\b{url_kinds}://[^\s'"]+""")
 export const url_leadins = 'fghmnptw';
 export const url_kinds = '(file|ftp|gopher|http|https|mailto|news|nntp|prospero|telnet|wais)';
-export const url_regex = new RegExp(`\\b${url_kinds}://[^\\s'"]+`);
+export const url_regex = new RegExp(`\\b${url_kinds}://[^\\s'"]+`, 'g');
 //@-<< define regex's >>
 
 export const tree_popup_handlers: ((...args: any[]) => any)[] = []; // Set later.
@@ -7040,7 +7040,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
         void handleUnl(original_url, c);
 
     } else if (['', 'file'].includes(parsed.scheme)) {
-        
+
         // TODO : check if unquote_path is needed !
         const unquote_path = unquoteUrl(leo_path);
         if (await os_path_exists(leo_path)) {
@@ -7050,7 +7050,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
                 const vscodeFileUri = makeVscodeUri(leo_path);
                 await vscode.window.showTextDocument(vscodeFileUri);
             } else {
-                await open(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
+                await opn(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
             }
 
         } else {
@@ -7155,11 +7155,11 @@ export async function openUrl(p: Position): Promise<void> {
  */
 export async function open_mimetype(c: Commands, p: Position): Promise<void> {
 
-    if( !c || !p || !p.__bool__()){
+    if (!c || !p || !p.__bool__()) {
         return undefined;
     }
 
-    if(!p.h.startsWith('@mime')){
+    if (!p.h.startsWith('@mime')) {
         // not an @mime node
         return undefined;
     }
@@ -7180,8 +7180,8 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
 
         // user-specified command string, or sys.platform-determined string
         let mime_cmd = c.config.getString('mime-open-cmd');
-        if (mime_cmd){
-            if (mime_cmd.indexOf('%s') === -1){
+        if (mime_cmd) {
+            if (mime_cmd.indexOf('%s') === -1) {
                 mime_cmd += ' %s';
             }
             // open_func = exec_string_cmd(mime_cmd);
@@ -7191,7 +7191,7 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
         error('@mime: file does not exist, ${fpath}');
         return undefined;
     }
-  
+
     return undefined;
 }
 
@@ -7227,7 +7227,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
     }
 
     let p, pos, newpos;
-
+    let line;
     // if event:
     //     event.widget = w
 
@@ -7241,7 +7241,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
         }
         let [row, col] = convertPythonIndexToRowCol(s, ins);
         [i, j] = getLine(s, ins);
-        const line = s.slice(i, j);
+        line = s.slice(i, j);
         // Order is important.
         //@+<< look for section ref >>
         //@+node:felix.20230724154323.20: *5* << look for section ref >>
@@ -7276,7 +7276,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
         //         url = match.group(0)
         //         if isValidUrl(url):
         //             break
-
+        url_regex.lastIndex = 0;
         while ((match = url_regex.exec(line)) !== null) {
             // Don't open if we click after the url.
             if (match.index <= col && col < url_regex.lastIndex) {
@@ -7296,7 +7296,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
             //         unl = match.group()
             //         handleUnl(unl, c)
             //         return None
-
+            unl_regex.lastIndex = 0;
             while ((match = unl_regex.exec(line)) !== null) {
                 // Don't open if we click after the unl.
                 if (match.index <= col && col < unl_regex.lastIndex) {
@@ -7315,6 +7315,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
                 //     if match.start() <= col < match.end():
                 //         target = match.group(0)[4:]  # Strip the leading 'gnx:'
                 //         break
+                gnx_regex.lastIndex = 0;
                 while ((match = gnx_regex.exec(line)) !== null) {
                     // Don't open if we click after the gnx.
                     if (match.index <= col && col < gnx_regex.lastIndex) {

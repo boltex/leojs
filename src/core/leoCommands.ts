@@ -22,6 +22,7 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
+import { TopLevelCommands } from './leoAppCommands';
 import { LeoImportCommands, TopLevelImportCommands, RecursiveImportController } from './leoImport';
 import { ChapterController } from './leoChapters';
 import {
@@ -38,7 +39,7 @@ import {
 } from '../commands/editCommands';
 import { BufferCommandsClass } from '../commands/bufferCommands';
 import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
-import { TopLevelCompareCommands, TopLevelCommands } from './leoCompare';
+import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
