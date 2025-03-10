@@ -7185,7 +7185,9 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
                 mime_cmd += ' %s';
             }
             // Execute the command in a child process
-            const process = child.exec(mime_cmd, (error, stdout, stderr) => {
+            const s = mime_cmd.replace('%s', fpath);
+
+            const process = child.exec(s, (error, stdout, stderr) => {
                 if (error) {
                     es(`Execution error: ${error}`);
                     return;
