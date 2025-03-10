@@ -1146,6 +1146,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public hn_delete(p: Position): void {
         const c: Commands = this.c;
         // const m = re.match(this.hn_pattern, p.h);
+        // No need to reset hn_pattern lastIndex because we are not using the global flag.
         const m: RegExpExecArray | null = this.hn_pattern.exec(p.h);
         if (m) {
             // Do not strip the headline!

@@ -72,6 +72,7 @@ export class ConvertAtRoot {
     public convert_file(c: Commands): void {
         this.find_all_units(c);
         for (const p of c.all_positions()) {
+            this.root_pat.lastIndex = 0;
             const m = this.root_pat.exec(p.b);
             const w_path = m && m.length && m[1];
             if (w_path) {

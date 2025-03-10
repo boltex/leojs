@@ -17361,6 +17361,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 
         let match;
 
+        this.gnxUnlRegex.lastIndex = 0;
         // GNX-based UNLs
         while ((match = this.gnxUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
@@ -17368,6 +17369,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
             links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
         }
 
+        this.headlineUnlRegex.lastIndex = 0;
         //  Headline - based UNLs
         while ((match = this.headlineUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
