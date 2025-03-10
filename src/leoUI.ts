@@ -3600,12 +3600,29 @@ export class LeoUI extends NullGui {
                 console.log("Double click on the same node");
                 // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
                 const w_headline = p_node.h;
+                let openPromise;
                 if (w_headline.trim().startsWith("@url ")) {
-                    return g.openUrl(p_node);
+                    openPromise = g.openUrl(p_node);
                 } else if (w_headline.trim().startsWith("@mime ")) {
-                    return g.open_mimetype(p_node.v.context, p_node);
+                    openPromise = g.open_mimetype(p_node.v.context, p_node);
                 }
-                g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+                if (openPromise) {
+                    this.setupRefresh(this.finalFocus, {
+                        tree: true,
+                        body: true,
+                        goto: true,
+                        states: true,
+                        documents: true,
+                        buttons: true
+                    });
+                    g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+                    return openPromise.then(() => {
+                        void this.launchRefresh();
+                    });
+                } else {
+                    // just do the hook
+                    g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+                }
             }
         }
 
