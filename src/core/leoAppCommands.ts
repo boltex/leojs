@@ -50,20 +50,32 @@ export class TopLevelCommands {
         }
     }
     //@+node:felix.20250308203655.4: *3* enable/disable/toggle-idle-time-events
-    @command('disable-idle-time-events', 'Disable default idle-time event handling.')
+    @command(
+        'disable-idle-time-events',
+        'Disable default idle-time event handling.'
+    )
     public disable_idle_time_events(this: Commands): void {
         g.app.idle_time_hooks_enabled = false;
     }
-    @command('enable-idle-time-events', 'Enable default idle-time event handling.')
+    @command(
+        'enable-idle-time-events',
+        'Enable default idle-time event handling.'
+    )
     public enable_idle_time_events(this: Commands): void {
         g.app.idle_time_hooks_enabled = true;
     }
-    @command('toggle-idle-time-events', 'Toggle default idle-time event handling.')
+    @command(
+        'toggle-idle-time-events',
+        'Toggle default idle-time event handling.'
+    )
     public toggle_idle_time_events(this: Commands): void {
         g.app.idle_time_hooks_enabled = !g.app.idle_time_hooks_enabled;
     }
     //@+node:felix.20250308203655.5: *3* open_mimetype
-    @command('open-mimetype', 'Simulate double-clicking on the filename in a file manager.')
+    @command(
+        'open-mimetype',
+        'Simulate double-clicking on the filename in a file manager.'
+    )
     public async openMimetype(this: Commands): Promise<void> {
         /*
         Order of preference is:
@@ -77,7 +89,10 @@ export class TopLevelCommands {
         }
     }
     //@+node:felix.20250308203655.6: *3* open-url
-    @command('open-url', 'Open the url in the headline or body text of the selected node.')
+    @command(
+        'open-url', 
+        'Open the url in the headline or body text of the selected node.'
+    )
     public async openUrl(this: Commands): Promise<void> {
         /*
         Open the url in the headline or body text of the selected node.
@@ -91,7 +106,10 @@ export class TopLevelCommands {
         }
     }
     //@+node:felix.20250308203655.7: *3* open-url-under-cursor
-    @command('open-url-under-cursor', 'Open the url under the cursor.')
+    @command(
+        'open-url-under-cursor',
+        'Open the url under the cursor.'
+    )
     public async openUrlUnderCursor(this: Commands): Promise<void> {
         const c = this; // event and event.get('c')
         if (c) {

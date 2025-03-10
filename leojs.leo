@@ -4027,25 +4027,24 @@ public async selectTreeNode(
 
     const c = p_node.v.context;
     let isDoubleClick = false;
-    // DoubleClick : First check if this got called recently (under 500ms) on the exact same node to signify a double click
-    if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.__eq__(p_node) &amp;&amp; this.lastSelectedNodeTime) {
+
+    // Check for double-click: if called recently (under 500ms) on exact same node.
+    if (!p_internalCall &amp;&amp; this.lastSelectedNode &amp;&amp; this.lastSelectedNode.__eq__(p_node) &amp;&amp; this.lastSelectedNodeTime) {
         if (utils.performanceNow() - this.lastSelectedNodeTime &lt; 500) {
             // Double click on the same node
             this.lastSelectedNodeTime = undefined;
             isDoubleClick = true;
-            if (!p_internalCall &amp;&amp; g.doHook("icondclick1", { c: c, p: p_node, v: p_node })) {
+            if (g.doHook("icondclick1", { c: c, p: p_node, v: p_node })) {
                 // returned not falsy, so skip the rest
                 return Promise.resolve();
             }
             console.log("Double click on the same node");
             // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
             const w_headline = p_node.h;
-            if (w_headline.trim().startsWith("@url")) {
-                await g.openUrl(p_node);
-                return Promise.resolve();
-            } else if (w_headline.trim().startsWith("@mime")) {
-                await g.open_mimetype(p_node.v.context, p_node);
-                return Promise.resolve();
+            if (w_headline.trim().startsWith("@url ")) {
+                return g.openUrl(p_node);
+            } else if (w_headline.trim().startsWith("@mime ")) {
+                return g.open_mimetype(p_node.v.context, p_node);
             }
             g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
         }

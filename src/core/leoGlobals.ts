@@ -7184,8 +7184,23 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
             if (mime_cmd.indexOf('%s') === -1) {
                 mime_cmd += ' %s';
             }
-            // open_func = exec_string_cmd(mime_cmd);
+            // Execute the command in a child process
+            const process = child.exec(mime_cmd, (error, stdout, stderr) => {
+                if (error) {
+                    es(`Execution error: ${error}`);
+                    return;
+                }
+                es(`Output of child_process.exec: ${stdout}`);
+                if (stderr) {
+                    es(`Command Error output: ${stderr}`);
+                }
+            });
+
+
+        } else {
+            await opn(decodeURIComponent(Uri.parse(fpath).toString()), { wait: false });
         }
+
 
     } else {
         error('@mime: file does not exist, ${fpath}');
