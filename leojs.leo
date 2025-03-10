@@ -4038,7 +4038,7 @@ public async selectTreeNode(
                 // returned not falsy, so skip the rest
                 return Promise.resolve();
             }
-            console.log("Double click on the same node");
+
             // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
             const w_headline = p_node.h;
             let openPromise;
@@ -4047,23 +4047,34 @@ public async selectTreeNode(
             } else if (w_headline.trim().startsWith("@mime ")) {
                 openPromise = g.open_mimetype(p_node.v.context, p_node);
             }
+
             if (openPromise) {
-                this.setupRefresh(this.finalFocus, {
-                    tree: true,
-                    body: true,
-                    goto: true,
-                    states: true,
-                    documents: true,
-                    buttons: true
+                await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
+                this.showBodyIfClosed = true;
+                this.showOutlineIfClosed = true;
+                this.setupRefresh(
+                    Focus.Outline,
+                    {
+                        tree: true,
+                        body: true,
+                        goto: true,
+                        states: true,
+                        documents: true,
+                        buttons: true
+                    }
+                );
+                setTimeout(() =&gt; {
+                    void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+                }, 60);
+                await openPromise.then(() =&gt; {
+                    g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
                 });
-                g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
-                return openPromise.then(() =&gt; {
-                    void this.launchRefresh();
-                });
-            } else {
-                // just do the hook
-                g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+                return this.launchRefresh();
+
             }
+            // Double click didn't trigger a special action, so just return.
+            g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+            return Promise.resolve();
         }
     }
 
@@ -7076,12 +7087,25 @@ public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
     }
     const w_result = await q_chooseFile;
     if (w_result) {
-        const c = g.app.windowList[this.frameIndex].c;
 
-        if (g.doHook("recentfiles1", { c: c, p: c.p, v: c.p.v, fileName: w_result })) {
-            return this.openLeoFile(vscode.Uri.file(w_result));
+        // Is there a file opened?
+        if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
+            const c = g.app.windowList[this.frameIndex].c;
+            await this.triggerBodySave(true);
+            if (g.doHook("recentfiles1", { c: c, p: c.p, v: c.p.v, fileName: w_result })) {
+                return Promise.resolve(undefined);
+            }
         }
 
+        // Either way, try to open the file
+        await this.openLeoFile(vscode.Uri.file(w_result));
+
+        // Now, maybe there is a file opened?
+        if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
+            // Already opened file
+            const c = g.app.windowList[this.frameIndex].c;
+            g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+        }
     }
     return Promise.resolve(undefined);
 
