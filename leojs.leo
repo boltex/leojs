@@ -21446,13 +21446,16 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 <t tx="felix.20240923224024.1">## 1.0.9
 
 - When using in vscode for the web, absolute paths now point to root of workspace. (for @&lt;file&gt; and @path directives)
-- LeoJS now opens older and deprecated Leo file formats in a manner that matches the original Leo's behavior.
+- LeoJS now opens older and deprecated Leo file formats with the original Leo's behavior.
 - Added support for rust code blocks when using find symbol definition.
 - Added new rust importer.
 - Improved handling of illegal characters in XML files.
 - Fixed zap-to-character command.
-- Small bug fixes that mirror the original Leo's development since the last version.
-- New Feature: Script execution from any source, @Command, doCommandByName, etc... now returns actual values if script returned a value. 
+- Small bug fixes that mirror the original Leo's development since Leo 6.8.3.
+- New Feature: Script execution (@Command, doCommandByName, etc...) now returns actual values if script returned a value.
+- Added open-url and open-url-under-cursor related commands.
+- Added mime.py plugin implementation.
+- Double click support for @url and @mime nodes.
 
 </t>
 <t tx="felix.20250304214748.1">/**
