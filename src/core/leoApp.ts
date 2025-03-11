@@ -10,7 +10,18 @@ import * as g from './leoGlobals';
 import * as utils from '../utils';
 import { LeoGui, NullGui } from './leoGui';
 import { NodeIndices, VNode, Position } from './leoNodes';
+import { command } from './decorators';
 import { Commands } from './leoCommands';
+import { CommanderEditCommands } from '../commands/commanderEditCommands';
+import { CommanderFileCommands } from '../commands/commanderFileCommands';
+import { CommanderHelpCommands } from '../commands/commanderHelpCommands';
+import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
+import { TopLevelEditCommands } from '../commands/editCommands';
+import { TopLevelGoToCommands } from '../commands/gotoCommands';
+import { TopLevelCompareCommands } from './leoCompare';
+import { TopLevelImportCommands } from './leoImport';
+import { TopLevelMarkupCommands } from './leoMarkup';
+import { TopLevelPersistanceCommands } from './leoPersistence';
 import { FastRead } from './leoFileCommands';
 import { GlobalConfigManager, SettingsTreeParser } from './leoConfig';
 import { Constants } from '../constants';
@@ -52,12 +63,30 @@ import * as writer_org from '../writers/org';
 import * as writer_otl from '../writers/otl';
 import * as writer_treepad from '../writers/treepad';
 import { ScriptingController } from './mod_scripting';
-import { SessionManager } from './leoSessions';
+import { SessionManager, TopLevelSessionsCommands } from './leoSessions';
 import { BaseWriter } from '../writers/basewriter';
 import * as leoPlugins from './leoPlugins';
 
 //@-<< imports >>
 //@+others
+//@+node:felix.20250311172945.1: ** applyMixins
+/**
+ * "Alternative Pattern" mixing of multiple classes. (combining simpler partial classes)
+ * From https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern
+ */
+function applyMixins(derivedCtor: any, constructors: any[]): void {
+    constructors.forEach((baseCtor) => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+            Object.defineProperty(
+                derivedCtor.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                Object.create(null)
+            );
+        });
+    });
+}
+
 //@+node:felix.20210102213337.1: ** class IdleTimeManager
 /**
  *  A singleton class to manage idle-time handling. This class handles all
@@ -3812,6 +3841,7 @@ export class LoadManager {
     }
     //@-others
 }
+
 //@+node:felix.20220418172358.1: ** class PreviousSettings
 /**
  * A class holding the settings and shortcuts dictionaries
@@ -3844,6 +3874,7 @@ export class PreviousSettings {
         );
     };
 }
+
 //@+node:felix.20230923185723.1: ** class RecentFilesManager
 /** 
  * A class to manipulate leoRecentFiles.txt.
@@ -4415,8 +4446,156 @@ export class RecentFilesManager {
     //@-others
 
 }
+
+//@+node:felix.20250311172320.1: ** class TopLevelCommands
+export class TopLevelCommands {
+    //@+others
+    //@+node:felix.20250311172320.2: *3* ctrl-click-at-cursor
+    @command(
+        'ctrl-click-at-cursor',
+        'Simulate a control-click at the cursor.'
+    )
+    public async ctrlClickAtCursor(this: Commands): Promise<void> {
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.openUrlOnClick(c);
+        }
+    }
+    //@+node:felix.20250311172320.3: *3* demangle-recent-files
+    @command(
+        'demangle-recent-files',
+        'Path demangling potentially alters the paths in the recent files list' +
+        'according to find/replace patterns in the @data path-demangle setting.'
+    )
+    public async demangle_recent_files_command(this: Commands): Promise<void> {
+        /*
+        Path demangling potentially alters the paths in the recent files list
+        according to find/replace patterns in the @data path-demangle setting.
+        For example:
+
+            REPLACE: .gnome-desktop
+            WITH: My Desktop
+
+        The default setting specifies no patterns.
+        */
+        const c = this; // event and event.get('c')
+        if (c) {
+            const data = c.config.getData('path-demangle');
+            if (data) {
+                await g.app.recentFilesManager.demangleRecentFiles(c, data);
+            } else {
+                g.es_print('No patterns in @data path-demangle');
+            }
+        }
+    }
+    //@+node:felix.20250311172320.4: *3* enable/disable/toggle-idle-time-events
+    @command(
+        'disable-idle-time-events',
+        'Disable default idle-time event handling.'
+    )
+    public disable_idle_time_events(this: Commands): void {
+        g.app.idle_time_hooks_enabled = false;
+    }
+    @command(
+        'enable-idle-time-events',
+        'Enable default idle-time event handling.'
+    )
+    public enable_idle_time_events(this: Commands): void {
+        g.app.idle_time_hooks_enabled = true;
+    }
+    @command(
+        'toggle-idle-time-events',
+        'Toggle default idle-time event handling.'
+    )
+    public toggle_idle_time_events(this: Commands): void {
+        g.app.idle_time_hooks_enabled = !g.app.idle_time_hooks_enabled;
+    }
+    //@+node:felix.20250311172320.5: *3* open_mimetype
+    @command(
+        'open-mimetype',
+        'Simulate double-clicking on the filename in a file manager.'
+    )
+    public async openMimetype(this: Commands): Promise<void> {
+        /*
+        Order of preference is:
+        1) @string mime_open_cmd setting
+        2) _mime_open_cmd, defined per sys.platform detection
+        3) open_func(fpath), defined per sys.platform detection
+        */
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.open_mimetype(c, c.p);
+        }
+    }
+    //@+node:felix.20250311172320.6: *3* open-url
+    @command(
+        'open-url',
+        'Open the url in the headline or body text of the selected node.'
+    )
+    public async openUrl(this: Commands): Promise<void> {
+        /*
+        Open the url in the headline or body text of the selected node.
+
+        Use the headline if it contains a valid url.
+        Otherwise, look *only* at the first line of the body.
+        */
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.openUrl(c.p);
+        }
+    }
+    //@+node:felix.20250311172320.7: *3* open-url-under-cursor
+    @command(
+        'open-url-under-cursor',
+        'Open the url under the cursor.'
+    )
+    public async openUrlUnderCursor(this: Commands): Promise<void> {
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.openUrlOnClick(c);
+        }
+    }
+    //@-others
+}
 //@-others
 //@@language typescript
 //@@tabwidth -4
 //@@pagewidth 70
+
+
+// Apply the mixins into the base class via
+// the JS at runtime & aliases for VNode members
+
+applyMixins(Commands, [
+    CommanderOutlineCommands,
+    CommanderFileCommands,
+    CommanderHelpCommands,
+    CommanderEditCommands,
+    TopLevelCommands,
+    TopLevelCompareCommands,
+    TopLevelGoToCommands,
+    TopLevelImportCommands,
+    TopLevelMarkupCommands,
+    TopLevelPersistanceCommands,
+    TopLevelSessionsCommands,
+    TopLevelEditCommands,
+]);
+Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
+Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
+Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
+Commands.prototype.BringToFront = Commands.prototype.bringToFront;
+Commands.prototype.currentVnode = Commands.prototype.currentPosition;
+Commands.prototype.rootVnode = Commands.prototype.rootPosition;
+Commands.prototype.findRootPosition = Commands.prototype.rootPosition;
+Commands.prototype.topVnode = Commands.prototype.topPosition;
+Commands.prototype.setTopVnode = Commands.prototype.setTopPosition;
+Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
+Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
+Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
+Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
+Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
+Commands.prototype.all_positions_with_unique_vnodes_iter = Commands.prototype.all_unique_positions;
+Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;
+Commands.prototype.force_redraw = Commands.prototype.redraw;
+Commands.prototype.redraw_now = Commands.prototype.redraw;
 //@-leo

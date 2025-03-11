@@ -22,7 +22,7 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
-import { TopLevelCommands } from './leoAppCommands';
+// import { TopLevelCommands } from './leoAppCommands';
 import { LeoImportCommands, TopLevelImportCommands, RecursiveImportController } from './leoImport';
 import { ChapterController } from './leoChapters';
 import {
@@ -42,7 +42,7 @@ import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCo
 import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
-import { PreviousSettings } from './leoApp';
+import { PreviousSettings, TopLevelCommands } from './leoApp';
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
 import { ScriptingController } from './mod_scripting';
@@ -67,24 +67,6 @@ if (g.isBrowser) {
 
 //@-<< imports >>
 //@+others
-//@+node:felix.20211017232128.1: ** applyMixins
-/**
- * "Alternative Pattern" mixing of multiple classes. (combining simpler partial classes)
- * From https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern
- */
-function applyMixins(derivedCtor: any, constructors: any[]): void {
-    constructors.forEach((baseCtor) => {
-        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
-            Object.defineProperty(
-                derivedCtor.prototype,
-                name,
-                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-                Object.create(null)
-            );
-        });
-    });
-}
-
 //@+node:felix.20221011000033.1: ** cmd (decorator)
 /**
  * Command decorator for the Commands class.
@@ -92,11 +74,13 @@ function applyMixins(derivedCtor: any, constructors: any[]): void {
 function cmd(p_name: string, p_doc: string) {
     return new_cmd_decorator(p_name, p_doc, ['c']);
 }
+
 //@+node:felix.20210224000242.1: ** interface HoistStackEntry
 export interface HoistStackEntry {
     p: Position;
     expanded: boolean;
 }
+
 //@+node:felix.20210110223514.1: ** class Commands
 /**
  * A per-outline class that implements most of Leo's commands. The
@@ -5326,41 +5310,4 @@ export interface Commands
     force_redraw: () => void;
     redraw_now: () => void;
 }
-
-// Apply the mixins into the base class via
-// the JS at runtime & aliases for VNode members
-
-applyMixins(Commands, [
-    CommanderOutlineCommands,
-    CommanderFileCommands,
-    CommanderHelpCommands,
-    CommanderEditCommands,
-    TopLevelCommands,
-    TopLevelCompareCommands,
-    TopLevelGoToCommands,
-    TopLevelImportCommands,
-    TopLevelMarkupCommands,
-    TopLevelPersistanceCommands,
-    TopLevelSessionsCommands,
-    TopLevelEditCommands,
-]);
-Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
-Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
-Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
-Commands.prototype.BringToFront = Commands.prototype.bringToFront;
-Commands.prototype.currentVnode = Commands.prototype.currentPosition;
-Commands.prototype.rootVnode = Commands.prototype.rootPosition;
-Commands.prototype.findRootPosition = Commands.prototype.rootPosition;
-Commands.prototype.topVnode = Commands.prototype.topPosition;
-Commands.prototype.setTopVnode = Commands.prototype.setTopPosition;
-Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
-Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
-Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
-Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
-Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
-Commands.prototype.all_positions_with_unique_vnodes_iter = Commands.prototype.all_unique_positions;
-Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;
-Commands.prototype.force_redraw = Commands.prototype.redraw;
-Commands.prototype.redraw_now = Commands.prototype.redraw;
-
 //@-leo

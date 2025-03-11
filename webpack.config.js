@@ -96,6 +96,7 @@ const webConfig = /** @type WebpackConfig */ {
     level: "log", // enables logging required for problem matchers
   },
 };
+
 const nodeConfig = /** @type WebpackConfig */ {
   context: __dirname,
   mode: "none", // this leaves the source code as close as possible to the original (when packaging we set this to 'production')

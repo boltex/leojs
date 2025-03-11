@@ -21457,7 +21457,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Fixed zap-to-character command.
 - Small bug fixes that mirror the original Leo's development since Leo 6.8.3.
 - New Feature: Script execution (@Command, doCommandByName, etc...) now returns actual values if script returned a value.
-- Added open-url and open-url-under-cursor related commands.
+- Added open-url and open-url-under-cursor related commands. (The 'TopLevelCommands' of leoApp.py)
 - Added mime.py plugin implementation.
 - Added Double-click support for @url and @mime nodes along with support for the 'mime-open-cmd' setting.
 
