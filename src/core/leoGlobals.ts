@@ -7170,23 +7170,63 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
         return undefined;
     }
 
+    let leo_path;
+
     // honor @path
-    const fname = p.h.slice(6);
+    let url = p.h.slice(6);
     const d = c.scanAllDirectives(p);
     let w_path = d['path'];
-    let fpath = finalize_join(w_path, fname);
+    leo_path = finalize_join(w_path, url);
 
-    if (await os_path_exists(fpath)) {
+    if (!await os_path_exists(leo_path)) {
 
+        // ELSE find file with @url method
+        console.log('ELSE find file with @url method');
+
+        const tag = 'file://';
+        if (url.startsWith(tag) && !url.startsWith(tag + '#')) {
+            // Finalize the path *before* parsing the url.
+            url = computeFileUrl(url, c, p);
+        }
+
+        const parsed = Uri.parse(url);
+
+        if (parsed.authority) {
+            leo_path = os_path_join(parsed.authority, parsed.path);
+            // "readme.txt" gets parsed into .netloc...
+        } else {
+            leo_path = parsed.path;
+        }
+
+        if (leo_path.endsWith('\\')) {
+            leo_path = leo_path.slice(0, -1);
+        }
+        if (leo_path.endsWith('/')) {
+            leo_path = leo_path.slice(0, -1);
+        }
+        if (!['', 'file'].includes(parsed.scheme)) {
+            error(`@mime: file scheme not supported, ${parsed.scheme} for ${leo_path}`);
+            return undefined;
+        }
+    } else {
+        // ELSE find file with @url method
+        console.log('it exisits 1!', leo_path, url);
+        url = leo_path;
+
+    }
+
+    if (await os_path_exists(leo_path)) {
+        console.log('it exisits 2!', leo_path, url);
         // user-specified command string, or sys.platform-determined string
         let mime_cmd = c.config.getString('mime-open-cmd');
         if (mime_cmd) {
+            console.log('mime_cmd', mime_cmd);
             if (mime_cmd.indexOf('%s') === -1) {
                 mime_cmd += ' %s';
             }
             // Execute the command in a child process
-            const s = mime_cmd.replace('%s', fpath);
-
+            const s = mime_cmd.replace('%s', leo_path);
+            console.log('child.exec s is: ', s);
             const process = child.exec(s, (error, stdout, stderr) => {
                 if (error) {
                     es(`Execution error: ${error}`);
@@ -7200,12 +7240,14 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
 
 
         } else {
-            await opn(decodeURIComponent(Uri.parse(fpath).toString()), { wait: false });
+            console.log('mime_cmd not found', leo_path, url);
+            console.log('decodeURIComponent(Uri.parse(url).toString()', decodeURIComponent(Uri.parse(url).toString()));
+            await opn(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
         }
 
 
     } else {
-        error('@mime: file does not exist, ${fpath}');
+        error(`@mime: file does not exist, ${leo_path}`);
         return undefined;
     }
 
