@@ -12,7 +12,7 @@
 - New Feature: Script execution (@Command, doCommandByName, etc...) now returns actual values if script returned a value.
 - Added open-url and open-url-under-cursor related commands.
 - Added mime.py plugin implementation.
-- Double click support for @url and @mime nodes.
+- Added Double-click support for @url and @mime nodes along with support for the 'mime-open-cmd' setting.
 
 ## 1.0.8
 
