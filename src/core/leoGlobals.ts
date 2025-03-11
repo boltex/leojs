@@ -7185,10 +7185,6 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
     leo_path = finalize_join(w_path, url);
 
     if (!await os_path_exists(leo_path)) {
-
-        // ELSE find file with @url method
-        console.log('ELSE find file with @url method');
-
         const tag = 'file://';
         if (url.startsWith(tag) && !url.startsWith(tag + '#')) {
             // Finalize the path *before* parsing the url.
@@ -7216,24 +7212,20 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
         }
     } else {
         // ELSE find file with @url method
-        console.log('it exisits 1!', leo_path, url);
         url = leo_path;
 
     }
 
     if (await os_path_exists(leo_path)) {
-        console.log('it exisits 2!', leo_path, url);
         // user-specified command string, or sys.platform-determined string
         let mime_cmd = c.config.getString('mime-open-cmd');
         if (mime_cmd) {
-            console.log('mime_cmd', mime_cmd);
             if (mime_cmd.indexOf('%s') === -1) {
                 mime_cmd += ' %s';
             }
 
             // Replace the %s placeholder with the actual file path
             const s = mime_cmd.replace('%s', leo_path);
-            console.log('Executing command: ', s);
 
             // Use spawn instead of exec for non-blocking execution
             const process = child.spawn(s, { shell: true });
@@ -7255,8 +7247,6 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
             });
 
         } else {
-            console.log('mime_cmd not found', leo_path, url);
-            console.log('decodeURIComponent(Uri.parse(url).toString()', decodeURIComponent(Uri.parse(url).toString()));
             await opn(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
         }
 
