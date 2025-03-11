@@ -7048,7 +7048,13 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
             if (isBrowser) {
                 // open in vscode's editor
                 const vscodeFileUri = makeVscodeUri(leo_path);
-                await vscode.window.showTextDocument(vscodeFileUri);
+                const w_showOptions =
+                {
+                    viewColumn: vscode.ViewColumn.Beside,
+                    preserveFocus: true,
+                    preview: false,
+                };
+                await vscode.window.showTextDocument(vscodeFileUri, w_showOptions);
             } else {
                 await opn(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
             }
