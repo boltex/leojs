@@ -4050,27 +4050,31 @@ public async selectTreeNode(
 
             if (openPromise) {
                 await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
-                this.showBodyIfClosed = true;
-                this.showOutlineIfClosed = true;
-                this.setupRefresh(
-                    Focus.Outline,
-                    {
-                        tree: true,
-                        body: true,
-                        goto: true,
-                        states: true,
-                        documents: true,
-                        buttons: true
-                    }
-                );
                 setTimeout(() =&gt; {
                     void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
                 }, 60);
                 await openPromise.then(() =&gt; {
                     g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
                 });
-                return this.launchRefresh();
-
+                // Slight delay to help vscode finish opening possible new document/file.
+                return new Promise((resolve) =&gt; {
+                    setTimeout(() =&gt; {
+                        this.showBodyIfClosed = true;
+                        this.showOutlineIfClosed = true;
+                        this.setupRefresh(
+                            Focus.Outline,
+                            {
+                                tree: true,
+                                body: true,
+                                goto: true,
+                                states: true,
+                                documents: true,
+                                buttons: true
+                            }
+                        );
+                        resolve(this.launchRefresh());
+                    }, 40);
+                });
             }
             // Double click didn't trigger a special action, so just return.
             g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
