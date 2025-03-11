@@ -282,20 +282,46 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
             [
                 ["", ""],
                 ["Leo files", "*.leojs *.leo *.db"]
+                ['C/C++ files', '*.c'],
+                ['C/C++ files', '*.cpp'],
+                ['C/C++ files', '*.h'],
+                ['C/C++ files', '*.hpp'],
+                ['Images', '*.png *.jpg'],
+                ['TypeScript', '*.ts *.tsx']
             ],
 
         to :
         {
+            'Leo files': ['leojs', 'leo', 'db'],
+            'C/C++ files': ['c', 'cpp', 'h', 'hpp']
             'Images': ['png', 'jpg']
             'TypeScript': ['ts', 'tsx']
         }
-
     */
+
     const w_types: { [name: string]: string[] } = {};
     p_filetypes.forEach(type => {
-        w_types[type[0]] = type[1].split(" ").map((p_entry) => {
+        const typeName = type[0];
+        if (!typeName) {
+            return; // Skip empty type names
+        }
+
+        // Extract extensions from current entry
+        const extensions = type[1].split(" ").map((p_entry) => {
             return p_entry.startsWith("*.") ? p_entry.substring(2) : p_entry;
-        });
+        }).filter(ext => ext); // Filter out empty strings
+
+        // If type already exists, merge extensions, otherwise create new entry
+        if (w_types[typeName]) {
+            // Add only extensions that don't already exist in the array
+            extensions.forEach(ext => {
+                if (!w_types[typeName].includes(ext)) {
+                    w_types[typeName].push(ext);
+                }
+            });
+        } else {
+            w_types[typeName] = extensions;
+        }
     });
     return w_types;
 }

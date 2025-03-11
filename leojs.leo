@@ -603,7 +603,6 @@
 <v t="felix.20211018202009.1"><vh>@file src/core/decorators.ts</vh></v>
 <v t="felix.20230509194418.1"><vh>@file src/core/idle_time.ts</vh></v>
 <v t="felix.20210102012334.1"><vh>@file src/core/leoApp.ts</vh></v>
-<v t="felix.20250308203620.1"><vh>@file src/core/leoAppCommands.ts</vh></v>
 <v t="felix.20211211234842.1"><vh>@file src/core/leoAtFile.ts</vh></v>
 <v t="felix.20230802145823.1"><vh>@file src/core/leoCache.ts</vh></v>
 <v t="felix.20220429005433.1"><vh>@file src/core/leoChapters.ts</vh></v>
@@ -9432,20 +9431,46 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
             [
                 ["", ""],
                 ["Leo files", "*.leojs *.leo *.db"]
+                ['C/C++ files', '*.c'],
+                ['C/C++ files', '*.cpp'],
+                ['C/C++ files', '*.h'],
+                ['C/C++ files', '*.hpp'],
+                ['Images', '*.png *.jpg'],
+                ['TypeScript', '*.ts *.tsx']
             ],
 
         to :
         {
+            'Leo files': ['leojs', 'leo', 'db'],
+            'C/C++ files': ['c', 'cpp', 'h', 'hpp']
             'Images': ['png', 'jpg']
             'TypeScript': ['ts', 'tsx']
         }
-
     */
+
     const w_types: { [name: string]: string[] } = {};
     p_filetypes.forEach(type =&gt; {
-        w_types[type[0]] = type[1].split(" ").map((p_entry) =&gt; {
+        const typeName = type[0];
+        if (!typeName) {
+            return; // Skip empty type names
+        }
+
+        // Extract extensions from current entry
+        const extensions = type[1].split(" ").map((p_entry) =&gt; {
             return p_entry.startsWith("*.") ? p_entry.substring(2) : p_entry;
-        });
+        }).filter(ext =&gt; ext); // Filter out empty strings
+
+        // If type already exists, merge extensions, otherwise create new entry
+        if (w_types[typeName]) {
+            // Add only extensions that don't already exist in the array
+            extensions.forEach(ext =&gt; {
+                if (!w_types[typeName].includes(ext)) {
+                    w_types[typeName].push(ext);
+                }
+            });
+        } else {
+            w_types[typeName] = extensions;
+        }
     });
     return w_types;
 }
