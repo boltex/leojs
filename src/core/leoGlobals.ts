@@ -7230,20 +7230,29 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
             if (mime_cmd.indexOf('%s') === -1) {
                 mime_cmd += ' %s';
             }
-            // Execute the command in a child process
+
+            // Replace the %s placeholder with the actual file path
             const s = mime_cmd.replace('%s', leo_path);
-            console.log('child.exec s is: ', s);
-            const process = child.exec(s, (error, stdout, stderr) => {
-                if (error) {
-                    es(`Execution error: ${error}`);
-                    return;
-                }
-                es(`Output of child_process.exec: ${stdout}`);
-                if (stderr) {
-                    es(`Command Error output: ${stderr}`);
-                }
+            console.log('Executing command: ', s);
+
+            // Use spawn instead of exec for non-blocking execution
+            const process = child.spawn(s, { shell: true });
+
+            process.on('error', (error) => {
+                es(`Execution error: ${error.message}`);
             });
 
+            process.stdout.on('data', (data) => {
+                es(`Output: ${data}`);
+            });
+
+            process.stderr.on('data', (data) => {
+                es(`Error: ${data}`);
+            });
+
+            process.on('exit', (code) => {
+                es(`Process exited with code: ${code}`);
+            });
 
         } else {
             console.log('mime_cmd not found', leo_path, url);
