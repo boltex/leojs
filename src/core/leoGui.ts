@@ -335,6 +335,13 @@ export class LeoGui {
     ): Thenable<string | undefined> {
         return Promise.resolve('');
     }
+    //@+node:felix.20250304215600.1: *4* LeoGui.get1Char (LeoJs)
+    public get1Char(
+        options?: any,
+        token?: any
+    ): Thenable<string | undefined> {
+        return Promise.resolve('');
+    }
     //@+node:felix.20231231202753.1: *4* leoGui.getWorkspaceSession
     /**
      * Checks if Session per workspace is true, if so returns file list

@@ -24,6 +24,7 @@ a {
     font-weight: 400;
     outline: none;
     text-decoration: none;
+    transition: color 250ms;
 }
 
 a:not([href]):not([tabindex]):focus,
@@ -295,6 +296,7 @@ ul {
     text-transform: uppercase;
     user-select: none;
     white-space: nowrap;
+    transition: background-color 250ms, border-color 250ms, color 250ms;
 }
 
 .button:focus {
@@ -331,10 +333,6 @@ ul {
     color: black !important;
 }
 
-.preload .button--flat {
-    transition-duration: 0s !important;
-}
-
 .button--flat-inverse {
     background-color: white;
     border: 1px solid white;
@@ -347,10 +345,6 @@ ul {
     background: rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.6);
     color: white !important;
-}
-
-.preload .button--flat-inverse {
-    transition-duration: 0s !important;
 }
 
 .button--flat-primary {
@@ -371,10 +365,6 @@ ul {
     background-color: var(--color-button-background--darken-30);
     border-color: var(--color-button-background--darken-30);
     color: white !important;
-}
-
-.preload .button--flat-primary {
-    transition-duration: 0s !important;
 }
 
 .blurb {
@@ -926,6 +916,10 @@ fieldset p span {
     margin-left: 0 !important;
 }
 
+.ml-1 {
+    margin-left: 2em !important;
+}
+
 .mr-0 {
     margin-right: 0 !important;
 }
@@ -948,6 +942,22 @@ fieldset p span {
 
 .vscode-light .dark {
     display: none;
+}
+
+.video-link {
+    margin-top: 12px;
+    display: inline-block;
+    transition: color 250ms;
+    color: #c15b00;
+}
+.video-link:hover {
+    color: #e17719;
+}
+.video-link .icon {
+    transition: text-shadow 250ms;
+}
+.video-link:hover .icon {
+    text-shadow: 0px 0px 4px #ff8214;
 }
 
 ::-webkit-scrollbar-corner {

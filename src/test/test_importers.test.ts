@@ -4398,6 +4398,198 @@ suite('TestRust', () => {
         ];
         await self.new_run_test(s, expected_results);
     });
+    //@+node:felix.20250222160040.1: *3* TestRust.test_rust_import_fails
+    test('test_rust_import_fails', async () => {
+
+        // From ruff/crates/ruff_formatter/shared_traits.rs
+        const s = g.dedent(
+            `
+                /// Used to get an object that knows how to format this object.
+                pub trait AsFormat<Context> {
+                    type Format<'a>: ruff_formatter::Format<Context>
+                    where
+                        Self: 'a;
+
+                    /// Returns an object that is able to format this object.
+                    fn format(&self) -> Self::Format<'_>;
+                }
+
+                /// Implement [\`AsFormat\`] for references to types that implement [\`AsFormat\`].
+                impl<T, C> AsFormat<C> for &T
+                where
+                    T: AsFormat<C>,
+                {
+                    type Format<'a> = T::Format<'a> where Self: 'a;
+
+                    fn format(&self) -> Self::Format<'_> {
+                        AsFormat::format(&**self)
+                    }
+                }
+            `);
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language rust\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'trait AsFormat',
+                '/// Used to get an object that knows how to format this object.\n' +
+                'pub trait AsFormat<Context> {\n' +
+                "    type Format<'a>: ruff_formatter::Format<Context>\n" +
+                '    where\n' +
+                "        Self: 'a;\n" +
+                '\n' +
+                '    /// Returns an object that is able to format this object.\n' +
+                "    fn format(&self) -> Self::Format<'_>;\n" +
+                '}\n'
+            ],
+            [1, 'impl AsFormat for &T',
+                '/// Implement [`AsFormat`] for references to types that implement [`AsFormat`].\n' +
+                'impl<T, C> AsFormat<C> for &T\n' +
+                'where\n' +
+                '    T: AsFormat<C>,\n' +
+                '{\n' +
+                '    @others\n' +
+                '}\n'
+            ],
+            [2, 'fn format',
+                "type Format<'a> = T::Format<'a> where Self: 'a;\n" +
+                '\n' +
+                "fn format(&self) -> Self::Format<'_> {\n" +
+                '    AsFormat::format(&**self)\n' +
+                '}\n'
+            ],
+        ];
+
+        await self.new_run_test(s, expected_results);
+
+
+    });
+
+    //@+node:felix.20250222160044.1: *3* TestRust.test_rust_postpass
+    test('test_rust_postpass', async () => {
+
+        // Modified from ruff/crates/ruff_formatter/src/arguments.rs
+        const s = `
+            use super::{Buffer, Format, Formatter};
+            use crate::FormatResult;
+
+            /// Mono-morphed type to format an object.
+            /// Used by the [\`crate::format\`!].
+            ///
+            /// This struct is similar to a dynamic dispatch (using \`dyn Format\`)
+            /// because it stores a pointer to the value.
+            pub struct Argument<'fmt, Context> {
+                /// The value to format stored as a raw pointer...
+                value: *const c_void,
+
+                /// Stores the lifetime of the value.
+                lifetime: PhantomData<&'fmt ()>,
+
+                /// The function pointer to \`value\`'s \`Format::format\` method
+                formatter: fn(*const c_void, &mut Formatter<'_, Context>) -> FormatResult<()>,
+            }
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                'use super::{Buffer, Format, Formatter};\n' +
+                'use crate::FormatResult;\n' +
+                '\n' +
+                '@others\n' +
+                '@language rust\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, "struct Argument",
+                // '@\n' +
+                // 'Mono-morphed type to format an object.\n' +
+                // 'Used by the [`crate::format`!].\n' +
+                // '\n' +
+                // 'This struct is similar to a dynamic dispatch (using `dyn Format`)\n' +
+                // 'because it stores a pointer to the value.\n' +
+                // '@c\n' +
+                '/// Mono-morphed type to format an object.\n' +
+                '/// Used by the [`crate::format`!].\n' +
+                '///\n' +
+                '/// This struct is similar to a dynamic dispatch (using `dyn Format`)\n' +
+                '/// because it stores a pointer to the value.\n' +
+                "pub struct Argument<'fmt, Context> {\n" +
+                "    /// The value to format stored as a raw pointer...\n" +
+                '    value: *const c_void,\n' +
+                '\n' +
+                '    /// Stores the lifetime of the value.\n' +
+                "    lifetime: PhantomData<&'fmt ()>,\n" +
+                '\n' +
+                "    /// The function pointer to `value`'s `Format::format` method\n" +
+                "    formatter: fn(*const c_void, &mut Formatter<'_, Context>) -> FormatResult<()>,\n" +
+                '}\n'
+            ]
+        ];
+        await self.new_run_test(s, expected_results);
+
+    });
+
+    //@+node:felix.20250222160049.1: *3* TestRust.test_invalid_runon_string
+    test('test_invalid_runon_string', async () => {
+
+        // From ruff_linter/src/rules/eradicate/detection.rs
+        const s = `
+            #[test]
+            fn comment_contains_code_basic() {
+                assert!(comment_contains_code("#import eradicate", &[]));
+                assert!(comment_contains_code(r#"#"key": value,"#, &[]));
+                assert!(comment_contains_code(r#"#"key": "value","#, &[]));
+            }
+    `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language rust\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'fn comment_contains_code_basic',
+                '#[test]\n' +
+                'fn comment_contains_code_basic() {\n' +
+                '    assert!(comment_contains_code("#import eradicate", &[]));\n' +
+                '    assert!(comment_contains_code(r#"#"key": value,"#, &[]));\n' +
+                '    assert!(comment_contains_code(r#"#"key": "value","#, &[]));\n' +
+                '}\n'
+            ],
+        ];
+
+        await self.new_run_test(s, expected_results);
+
+    });
+
+    //@+node:felix.20250222160053.1: *3* TestRust.test_rust_form_feed
+    test('test_rust_form_feed', async () => {
+
+        const s = `
+            let contents = r"
+            class FormFeedIndent:
+               \fdef __init__(self, a=[]):
+                    print(a)
+            ";
+        `.replace(' print', '\fprint');
+
+        const expected_results: [number, string, string][] = [
+            [0, '', // Ignore the first headline.
+                'let contents = r"\n' +
+                'class FormFeedIndent:\n' +
+                '   \fdef __init__(self, a=[]):\n' +
+                '       \fprint(a)\n' +
+                '";\n' +
+                '@language rust\n' +
+                '@tabwidth -4\n'
+            ],
+        ];
+
+        await self.new_run_test(s, expected_results);
+
+    });
+
     //@-others
 
 });

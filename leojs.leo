@@ -327,6 +327,7 @@
 <v t="felix.20230109233134.1"><vh>focus_to_body</vh></v>
 <v t="felix.20230109233154.1"><vh>focus_to_head</vh></v>
 <v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
+<v t="felix.20250304214748.1"><vh>get1Char</vh></v>
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
@@ -1404,11 +1405,15 @@ $ npx serve --cors -l 5000 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/
 
 Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/testleojs1` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000`
 
-&gt; NOTE: To 'sideload' an extension in order to test it, you have to use VScode for the web from an adress starting with 'vscode.dev' and not 'github.dev' E.g. at https://vscode.dev/github/boltex/testleojs1 not FROM https://github.dev/boltex/testleojs1
+&gt; NOTE: To 'sideload' an extension in order to test it, you have to use VScode for the web from an adress starting with 'vscode.dev' and not 'github.dev' E.g. at https://vscode.dev/github/boltex/testleojs1 NOT FROM https://github.dev/boltex/testleojs1
 
 # Converting from Python to Typescript
 
 ## Useful tricks and common pitfalls
+
+### Standard Dict
+
+They are falsy when empty in python, also, if an undefined key is referenced, it returns an empty dict instead of 'undefined'.
 
 ### Raw String
 
@@ -1633,12 +1638,6 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
     await utils.closeLeoTextEditors();
     await utils.closeLeoHelpPanels();
 
-    // * Show a welcome screen on version updates, then start the actual extension.
-    void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
-        .then(() =&gt; {
-            void p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion);
-        });
-
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
 
@@ -1683,7 +1682,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
             vscode.Uri.joinPath(p_context.extensionUri, 'sqlite', 'sql-wasm-debug.wasm')
         );
 
-        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);;
+        (g.SQL as SqlJsStatic) = await initSqlJs(undefined, sqliteBits);
 
     } else {
         void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
@@ -1729,12 +1728,18 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
                 void setStartupDoneContext(true);
                 return g;
             }
+
         } else {
             console.log('NOT started because no remote workspace yet');
             void setStartupDoneContext(true);
+            return g;
         }
-
     }
+    // At this point, leoRun has been called and the app is running. We can show the welcome screen if needed.
+    void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
+        .then(() =&gt; {
+            void p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion); // Save current version for next time
+        });
     return g;
 }
 
@@ -3665,6 +3670,7 @@ export class LeoUI extends NullGui {
     private _revealNodeRetriedRefreshOutline: boolean = false; // USED IN _refreshOutline and _revealNode
 
     private _lastSelectedNode: Position | undefined;
+    public lastSelectedNodeTime: number | undefined = 0; // Falsy means not set
     private _lastSelectedNodeTS: number = 0;
     get lastSelectedNode(): Position | undefined {
         return this._lastSelectedNode;
@@ -4011,44 +4017,94 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
  * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
  * @param p_node is the position node selected in the tree
  * @param p_internalCall Flag used to indicate the selection is forced, and NOT originating from user interaction
- * @param p_aside Flag to force opening the body "Aside", i.e. when the selection was made from choosing "Open Aside"
  * @returns thenable for reveal to finish or select position to finish
  */
 public async selectTreeNode(
     p_node: Position,
     p_internalCall?: boolean,
-    // p_aside?: boolean
-    // // p_reveal?: boolean, p_aside?: boolean
 ): Promise&lt;unknown&gt; {
+
+    const c = p_node.v.context;
+    let isDoubleClick = false;
+
+    // Check for double-click: if called recently (under 500ms) on exact same node.
+    if (!p_internalCall &amp;&amp; this.lastSelectedNode &amp;&amp; this.lastSelectedNode.__eq__(p_node) &amp;&amp; this.lastSelectedNodeTime) {
+        if (utils.performanceNow() - this.lastSelectedNodeTime &lt; 500) {
+            // Double click on the same node
+            this.lastSelectedNodeTime = undefined;
+            isDoubleClick = true;
+            if (g.doHook("icondclick1", { c: c, p: p_node, v: p_node })) {
+                // returned not falsy, so skip the rest
+                return Promise.resolve();
+            }
+
+            // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
+            const w_headline = p_node.h;
+            let openPromise;
+            if (w_headline.trim().startsWith("@url ")) {
+                openPromise = g.openUrl(p_node);
+            } else if (w_headline.trim().startsWith("@mime ")) {
+                openPromise = g.open_mimetype(p_node.v.context, p_node);
+            }
+
+            if (openPromise) {
+                await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
+                setTimeout(() =&gt; {
+                    void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+                }, 60);
+                await openPromise.then(() =&gt; {
+                    g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+                });
+                // Slight delay to help vscode finish opening possible new document/file.
+                return new Promise((resolve) =&gt; {
+                    setTimeout(() =&gt; {
+                        this.showBodyIfClosed = true;
+                        this.showOutlineIfClosed = true;
+                        this.setupRefresh(
+                            Focus.Outline,
+                            {
+                                tree: true,
+                                body: true,
+                                goto: true,
+                                states: true,
+                                documents: true,
+                                buttons: true
+                            }
+                        );
+                        resolve(this.launchRefresh());
+                    }, 40);
+                });
+            }
+            // Double click didn't trigger a special action, so just return.
+            g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+            return Promise.resolve();
+        }
+    }
+
+    // Note: this.lastSelectedNode is set in gotSelectedNode and lastSelectedNode 
+    this.lastSelectedNodeTime = utils.performanceNow();
 
     await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
 
-    const c = p_node.v.context;
+    if (!isDoubleClick) {
+        if (!p_internalCall &amp;&amp; g.doHook("headclick1", { c: c, p: p_node, v: p_node })) {
+            // returned not falsy, so skip the rest
+            return Promise.resolve();
+        }
 
-    g.doHook("headclick1", { c: c, p: p_node, v: p_node });
-
-    // * check if used via context menu's "open-aside" on an unselected node: check if p_node is currently selected, if not select it
-    // if (
-    //     p_aside &amp;&amp;
-    //     c.positionExists(p_node) &amp;&amp;
-    //     !p_node.__eq__(this.lastSelectedNode)
-    // ) {
-    //     void this._revealNode(p_node, { select: true, focus: false }); // no need to set focus: tree selection is set to right-click position
-    // }
+    }
 
     this.showBodyIfClosed = true;
 
     this.leoStates.setSelectedNodeFlags(p_node);
 
-    // const w_showBodyKeepFocus = p_aside
-    //     ? this.config.treeKeepFocusWhenAside
-    //     : this.config.treeKeepFocus;
-
     // * Check if having already this exact node position selected : Just show the body and exit
     // (other tree nodes with same gnx may have different syntax language coloring because of parents lineage)
     if (p_node.__eq__(this.lastSelectedNode)) {
         this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
-        g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+        if (!isDoubleClick) {
+            g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+        }
         // MAYBE DETACHED BODY CHANGED THAT CONTENT!
         // only if NOT watched (otherwise would have already been opened and altered by detached modification)
         if (!this._leoFileSystem.watchedBodiesGnx.includes(p_node.gnx)) {
@@ -6755,6 +6811,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "ksuid": "^3.0.0",
 "lodash": "^4.17.21",
 "md5": "^2.3.0",
+"open": "^8.4.2",
 "os-browserify": "^0.3.0",
 "pako": "^2.1.0",
 "path-browserify": "^1.0.1",
@@ -7033,11 +7090,27 @@ public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
     }
     const w_result = await q_chooseFile;
     if (w_result) {
-        return this.openLeoFile(vscode.Uri.file(w_result));
-    } else {
-        // Canceled
-        return Promise.resolve(undefined);
+
+        // Is there a file opened?
+        if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
+            const c = g.app.windowList[this.frameIndex].c;
+            await this.triggerBodySave(true);
+            if (g.doHook("recentfiles1", { c: c, p: c.p, v: c.p.v, fileName: w_result })) {
+                return Promise.resolve(undefined);
+            }
+        }
+
+        // Either way, try to open the file
+        await this.openLeoFile(vscode.Uri.file(w_result));
+
+        // Now, maybe there is a file opened?
+        if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
+            // Already opened file
+            const c = g.app.windowList[this.frameIndex].c;
+            g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+        }
     }
+    return Promise.resolve(undefined);
 
 }
 
@@ -9358,20 +9431,46 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
             [
                 ["", ""],
                 ["Leo files", "*.leojs *.leo *.db"]
+                ['C/C++ files', '*.c'],
+                ['C/C++ files', '*.cpp'],
+                ['C/C++ files', '*.h'],
+                ['C/C++ files', '*.hpp'],
+                ['Images', '*.png *.jpg'],
+                ['TypeScript', '*.ts *.tsx']
             ],
 
         to :
         {
+            'Leo files': ['leojs', 'leo', 'db'],
+            'C/C++ files': ['c', 'cpp', 'h', 'hpp']
             'Images': ['png', 'jpg']
             'TypeScript': ['ts', 'tsx']
         }
-
     */
+
     const w_types: { [name: string]: string[] } = {};
     p_filetypes.forEach(type =&gt; {
-        w_types[type[0]] = type[1].split(" ").map((p_entry) =&gt; {
+        const typeName = type[0];
+        if (!typeName) {
+            return; // Skip empty type names
+        }
+
+        // Extract extensions from current entry
+        const extensions = type[1].split(" ").map((p_entry) =&gt; {
             return p_entry.startsWith("*.") ? p_entry.substring(2) : p_entry;
-        });
+        }).filter(ext =&gt; ext); // Filter out empty strings
+
+        // If type already exists, merge extensions, otherwise create new entry
+        if (w_types[typeName]) {
+            // Add only extensions that don't already exist in the array
+            extensions.forEach(ext =&gt; {
+                if (!w_types[typeName].includes(ext)) {
+                    w_types[typeName].push(ext);
+                }
+            });
+        } else {
+            w_types[typeName] = extensions;
+        }
     });
     return w_types;
 }
@@ -13731,7 +13830,7 @@ public setDocumentSelection(p_frame: LeoFrame): void {
         } else {
             w_trigger = true;
         }
-        if (w_trigger &amp;&amp; !this._documentPaneReveal) {
+        if (w_trigger &amp;&amp; !this._documentPaneReveal &amp;&amp; w_docView.visible) {
             this._documentPaneReveal = w_docView.reveal(p_frame, { select: true, focus: false })
                 .then(
                     (p_result) =&gt; {
@@ -13852,32 +13951,53 @@ private _refreshButtonsPane(): void {
  */
 function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Thenable&lt;unknown&gt; {
     let w_showWelcomeScreen: boolean = false;
+    let w_showLogPane: boolean = false;
     if (p_previousVersion === undefined) {
-        console.log('leojs first-time install');
+        console.log('LeoJS first-time install');
         w_showWelcomeScreen = true;
+        w_showLogPane = true;
     } else {
+        const [w_major, w_minor, w_patch] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        const [w_prevMajor, w_prevMinor, w_prevPatch] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        // Notify user of upgrade or downgrade
         if (p_previousVersion !== p_version) {
-            void vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
+            let verb = 'upgraded';
+            if (w_major &lt; w_prevMajor ||
+                (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor) ||
+                (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor &amp;&amp; w_patch &lt; w_prevPatch)) {
+                verb = 'downgraded';
+            }
+            void vscode.window.showInformationMessage(`LeoJS ${verb} from v${p_previousVersion} to v${p_version}`);
         }
-        const [w_major, w_minor] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
-        const [w_prevMajor, w_prevMinor] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
         if (
-            (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor) ||
+            // Don't notify on same version
+            (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor &amp;&amp; w_patch === w_prevPatch) ||
             // Don't notify on downgrades
-            (w_major &lt; w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor))
+            (w_major &lt; w_prevMajor ||
+                (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor) ||
+                (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor &amp;&amp; w_patch &lt; w_prevPatch))
         ) {
             w_showWelcomeScreen = false;
-        } else if (w_major !== w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &gt; w_prevMinor)) {
-            // Will show on major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
+            w_showLogPane = false;
+        } else if (w_major !== w_prevMajor || w_minor &gt; w_prevMinor) {
+            // major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
             w_showWelcomeScreen = true;
+            w_showLogPane = true;
+        } else if (w_patch !== w_prevPatch) {
+            // Handle patch upgrades differently if needed
+            w_showWelcomeScreen = true;
+            w_showLogPane = false;
         }
     }
+    let w_result: Thenable&lt;unknown&gt; | undefined;
     if (w_showWelcomeScreen) {
-        (g.isNewLeoJSVersion as boolean) = true;
-        return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
-    } else {
-        return Promise.resolve();
+        w_result = vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
     }
+    if (w_showLogPane) {
+        w_result = vscode.commands.executeCommand(Constants.COMMANDS.SHOW_LOG);
+    }
+    return w_result || Promise.resolve();
+
 }
 
 </t>
@@ -17311,6 +17431,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 
         let match;
 
+        this.gnxUnlRegex.lastIndex = 0;
         // GNX-based UNLs
         while ((match = this.gnxUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
@@ -17318,6 +17439,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
             links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
         }
 
+        this.headlineUnlRegex.lastIndex = 0;
         //  Headline - based UNLs
         while ((match = this.headlineUnlRegex.exec(text)) !== null) {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
@@ -19374,17 +19496,19 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;span class="heart"&gt;&amp;#x2764;&lt;/span&gt;
           &lt;/a&gt;
           &lt;a class="button button--flat" title="Users' Guide" href="https://boltex.github.io/leojs/"&gt;
-            Documentation
+            📖 Documentation
           &lt;/a&gt;
         &lt;/div&gt;
         &lt;p class="blurb center ml-0 mr-0"&gt;
           &lt;strong&gt;LeoJS&lt;/strong&gt;,
-          an open-source extension created by
-          &lt;a class="bold" title="My github user page" href="https://boltex.github.io/"&gt;Félix&lt;/a&gt;,
-          is a JavaScript implementation of
-          &lt;a class="bold" title="Learn more about Leo" href="https://leo-editor.github.io/leo-editor/"&gt;Leo&lt;/a&gt;.&lt;br&gt;
-          &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY"&gt;📺&amp;nbsp;Introduction to Leo&lt;/a&gt;
-          &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE"&gt;📺&amp;nbsp;Features Demo&lt;/a&gt;
+          an open-source extension created&amp;nbsp;by&amp;nbsp;&lt;a class="bold" title="My github user page"
+            href="https://boltex.github.io/"&gt;Félix&lt;/a&gt;,
+          is a JavaScript implementation&amp;nbsp;of&amp;nbsp;&lt;a class="bold" title="Learn more about Leo"
+            href="https://leo-editor.github.io/leo-editor/"&gt;Leo&lt;/a&gt;.&lt;br&gt;
+          &lt;a href="https://www.youtube.com/watch?v=j0eo7SlnnSY" class="video-link"&gt;&lt;span
+              class="icon"&gt;📺&lt;/span&gt;&amp;nbsp;Introduction to Leo&lt;/a&gt;
+          &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE" class="video-link ml-1"&gt;&lt;span
+              class="icon"&gt;📺&lt;/span&gt;&amp;nbsp;Features Demo&lt;/a&gt;
         &lt;/p&gt;
         &lt;h2 class="section__title section__title--break"&gt;&lt;/h2&gt;
         &lt;p class="section__hint mt-0 center"&gt;
@@ -20257,6 +20381,7 @@ a {
     font-weight: 400;
     outline: none;
     text-decoration: none;
+    transition: color 250ms;
 }
 
 a:not([href]):not([tabindex]):focus,
@@ -20528,6 +20653,7 @@ ul {
     text-transform: uppercase;
     user-select: none;
     white-space: nowrap;
+    transition: background-color 250ms, border-color 250ms, color 250ms;
 }
 
 .button:focus {
@@ -20564,10 +20690,6 @@ ul {
     color: black !important;
 }
 
-.preload .button--flat {
-    transition-duration: 0s !important;
-}
-
 .button--flat-inverse {
     background-color: white;
     border: 1px solid white;
@@ -20580,10 +20702,6 @@ ul {
     background: rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.6);
     color: white !important;
-}
-
-.preload .button--flat-inverse {
-    transition-duration: 0s !important;
 }
 
 .button--flat-primary {
@@ -20604,10 +20722,6 @@ ul {
     background-color: var(--color-button-background--darken-30);
     border-color: var(--color-button-background--darken-30);
     color: white !important;
-}
-
-.preload .button--flat-primary {
-    transition-duration: 0s !important;
 }
 
 .blurb {
@@ -21159,6 +21273,10 @@ fieldset p span {
     margin-left: 0 !important;
 }
 
+.ml-1 {
+    margin-left: 2em !important;
+}
+
 .mr-0 {
     margin-right: 0 !important;
 }
@@ -21181,6 +21299,22 @@ fieldset p span {
 
 .vscode-light .dark {
     display: none;
+}
+
+.video-link {
+    margin-top: 12px;
+    display: inline-block;
+    transition: color 250ms;
+    color: #c15b00;
+}
+.video-link:hover {
+    color: #e17719;
+}
+.video-link .icon {
+    transition: text-shadow 250ms;
+}
+.video-link:hover .icon {
+    text-shadow: 0px 0px 4px #ff8214;
 }
 
 ::-webkit-scrollbar-corner {
@@ -21340,7 +21474,89 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 </t>
 <t tx="felix.20240923224024.1">## 1.0.9
 
-- ...
+- When using in vscode for the web, absolute paths now point to root of workspace. (for @&lt;file&gt; and @path directives)
+- LeoJS now opens older and deprecated Leo file formats with the original Leo's behavior.
+- Added support for rust code blocks when using find symbol definition.
+- Added new rust importer.
+- Improved handling of illegal characters in XML files.
+- Fixed zap-to-character command.
+- Small bug fixes that mirror the original Leo's development since Leo 6.8.3.
+- New Feature: Script execution (@Command, doCommandByName, etc...) now returns actual values if script returned a value.
+- Added open-url and open-url-under-cursor related commands. (The 'TopLevelCommands' of leoApp.py)
+- Added mime.py plugin implementation.
+- Added Double-click support for @url and @mime nodes along with support for the 'mime-open-cmd' setting.
+
+</t>
+<t tx="felix.20250304214748.1">/**
+ * * Gets a single character input from the user, automatically accepting as soon as a character is entered
+ * @param options Options for the input box
+ * @param token Optional cancellation token
+ * @returns A promise that resolves to the entered character or undefined if cancelled
+ */
+public get1Char(
+    options?: vscode.InputBoxOptions,
+    token?: vscode.CancellationToken
+): Thenable&lt;string | undefined&gt; {
+    return new Promise&lt;string | undefined&gt;((resolve) =&gt; {
+        const disposables: vscode.Disposable[] = [];
+        const inputBox = vscode.window.createInputBox();
+
+        // Apply options if provided
+        if (options) {
+            if (options.title) inputBox.title = options.title;
+            if (options.prompt) inputBox.prompt = options.prompt;
+            if (options.placeHolder) inputBox.placeholder = options.placeHolder;
+            if (options.password !== undefined) inputBox.password = options.password;
+            if (options.ignoreFocusOut !== undefined) inputBox.ignoreFocusOut = options.ignoreFocusOut;
+        }
+
+        // Auto-accept on first character input
+        disposables.push(
+            inputBox.onDidChangeValue((value) =&gt; {
+                if (value.length &gt; 0) {
+                    const char = value[0]; // Get the first character
+                    resolve(char);
+                    inputBox.hide();
+                }
+            })
+        );
+
+
+        // Accept empty input on Enter key
+        disposables.push(
+            inputBox.onDidAccept(() =&gt; {
+                if (inputBox.value.length === 0) {
+                    resolve(""); // Return empty string when Enter is pressed with no input
+                    inputBox.hide();
+                } else {
+                    // If there's a character, use the first one
+                    resolve(inputBox.value[0]);
+                    inputBox.hide();
+                }
+            })
+        );
+
+        // Handle cancellation
+        disposables.push(
+            inputBox.onDidHide(() =&gt; {
+                disposables.forEach(d =&gt; d.dispose());
+                resolve(undefined);
+            })
+        );
+
+        // Handle cancellation token
+        if (token) {
+            disposables.push(
+                token.onCancellationRequested(() =&gt; {
+                    inputBox.hide();
+                })
+            );
+        }
+
+        // Show the input box
+        inputBox.show();
+    });
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

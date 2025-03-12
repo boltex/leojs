@@ -353,7 +353,8 @@ Javascript stuff
 HTML stuff
 ```
 
-**Important**: Leo can not revert to previous delimiters automatically; you must change back to previous delimiters using another @delims directive_.
+> 🚨 **IMPORTANT**\
+> Leo can not revert to previous delimiters automatically; you must change back to previous delimiters using another @delims directive_.
 
 ### How can I disable PHP comments?
 _Contributed By Zvi Boshernitzan_

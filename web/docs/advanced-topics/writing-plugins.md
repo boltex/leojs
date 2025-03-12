@@ -104,12 +104,14 @@ and the additional arguments passed to the hook in the keywords dictionary.
 | 'end1'                         |        | start of app.quit()                | None
 | 'headclick1'                   | 🛑     | before normal click in headline    | c,p,v,event
 | 'headclick2'                   |        | after  normal click in headline    | c,p,v,event
+| 'icondclick1'                   | 🛑     | before double click in headline   | c,p,v,event
+| 'icondclick2'                   |        | after  double click in headline   | c,p,v,event
 | 'headkey1'                     | 🛑     | before headline keystrokes         | c,p,v,ch (note 4)
 | 'headkey2'                     |        | after  headline keystrokes         | c,p,v,ch (note 4)
 | 'hoist-changed'                |        | whenever the hoist stack changes   | c
 | 'idle'                         |        | periodically (at idle time)        | c
 | 'new'                          |        | start of New command               | c,old_c
-| 'open1'                        | 🛑     | before opening any file            | c,old_c,fileName (note 2)
+| 'open1'                        |        | before opening any file            | c,old_c,fileName (note 2)
 | 'open2'                        |        | after  opening any file            | c,old_c,fileName (note 2)
 | 'openwith1'                    | 🛑     | before Open With command           | c,p,v,d (note 6)
 | 'openwith2'                    |        | after  Open With command           | c,p,v,(note 6)

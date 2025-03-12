@@ -49,11 +49,15 @@ $ npx serve --cors -l 5000 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/
 
 Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/testleojs1` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000`
 
-> NOTE: To 'sideload' an extension in order to test it, you have to use VScode for the web from an adress starting with 'vscode.dev' and not 'github.dev' E.g. at https://vscode.dev/github/boltex/testleojs1 not FROM https://github.dev/boltex/testleojs1
+> NOTE: To 'sideload' an extension in order to test it, you have to use VScode for the web from an adress starting with 'vscode.dev' and not 'github.dev' E.g. at https://vscode.dev/github/boltex/testleojs1 NOT FROM https://github.dev/boltex/testleojs1
 
 # Converting from Python to Typescript
 
 ## Useful tricks and common pitfalls
+
+### Standard Dict
+
+They are falsy when empty in python, also, if an undefined key is referenced, it returns an empty dict instead of 'undefined'.
 
 ### Raw String
 

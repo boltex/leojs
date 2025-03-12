@@ -417,15 +417,8 @@ export class ChapterController {
         // Similar to g.sanitize_filename, but simpler.
         const result: string[] = [];
         for (let ch of s.trim()) {
-            if (
-                'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(
-                    ch
-                )
-            ) {
-                result.push(ch);
-            } else if (' \t'.includes(ch)) {
-                result.push('-');
-            }
+            // #4066: convert *only* blanks and tabs to '-'.
+            result.push(ch === ' ' || ch === '\t' ? '-' : ch);
         }
         s = result.join('');
         s = s.split('--').join('-');

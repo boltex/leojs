@@ -371,11 +371,6 @@ export class ExternalFilesController {
             p.setDirty();
             c.setChanged();
         }
-
-        // TODO : NEEDED ------------------------------------------------------------- ???
-        // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
-        // g.app.gui.fullRefresh(true);
-        //               ------------------------------------------------------------- ???
     }
     //@+node:felix.20230503004807.12: *4* efc.open_with & helpers
     /**
@@ -514,7 +509,6 @@ export class ExternalFilesController {
         // ! NO 'id' in javascript!
         // The base directory is <tempdir>/Leo<id(v)>.
         // ancestors.push("Leo" + str(id(p.v)));
-        // TODO : TEST IF OTHER STRING IS OK!
         ancestors.push('Leo' + p.v.gnx);
 
         // Build temporary directories.
