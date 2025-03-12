@@ -4344,7 +4344,7 @@ body {
   opacity: 0.5;
 }
 .customHero_Cny7:hover:after {
-  filter: blur(0px);
+  filter: blur(8px);
 }
 
 @media screen and (max-width: 996px) {

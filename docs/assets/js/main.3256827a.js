@@ -8466,7 +8466,7 @@ __webpack_require__.r(__webpack_exports__);
           ]
         }
       ],
-      "copyright": "Copyright © 1996-2024 <a class=\"footer__link-item\" href=\"https://github.com/edreamleo/\" target=\"_blank\" title=\"Edward K. Ream on Github\">Edward K. Ream</a> and <a class=\"footer__link-item\" href=\"https://github.com/boltex/\" target=\"_blank\" title=\"Félix Malboeuf on Github\">Félix Malboeuf</a>.",
+      "copyright": "Copyright © 1996-2025 <a class=\"footer__link-item\" href=\"https://github.com/edreamleo/\" target=\"_blank\" title=\"Edward K. Ream on Github\">Edward K. Ream</a> and <a class=\"footer__link-item\" href=\"https://github.com/boltex/\" target=\"_blank\" title=\"Félix Malboeuf on Github\">Félix Malboeuf</a>.",
       "style": "light"
     },
     "prism": {

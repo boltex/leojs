@@ -724,6 +724,49 @@ function _createMdxContent(props) {
             style: {
               textAlign: "left"
             },
+            children: "'icondclick1'"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "center"
+            },
+            children: "🛑"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "before double click in headline"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "c,p,v,event"
+          })]
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.tr, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "'icondclick2'"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "center"
+            }
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "after  double click in headline"
+          }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
+            children: "c,p,v,event"
+          })]
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.tr, {
+          children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
+            style: {
+              textAlign: "left"
+            },
             children: "'headkey1'"
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
@@ -834,8 +877,7 @@ function _createMdxContent(props) {
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
               textAlign: "center"
-            },
-            children: "🛑"
+            }
           }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.td, {
             style: {
               textAlign: "left"

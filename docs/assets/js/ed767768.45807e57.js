@@ -52,6 +52,8 @@ const assets = {
 const toc = [];
 function _createMdxContent(props) {
   const _components = {
+    blockquote: "blockquote",
+    br: "br",
     code: "code",
     em: "em",
     h1: "h1",
@@ -133,12 +135,14 @@ function _createMdxContent(props) {
         className: "language-js",
         children: "/**\r\n * My script\r\n */\r\n<< imports >>\r\nclass Controller {\r\n    // Child nodes define the methods of this class.\r\n    @οthers\r\n}\r\nnew Controller(c).run(); // c *is* defined.\n"
       })
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
-        children: "Important"
-      }), ": Leo recognizes section references ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
-        children: "everywhere"
-      }), ", even inside strings or comments."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
+      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+        children: ["🚨 ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: "IMPORTANT"
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "Leo recognizes section references ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
+          children: "everywhere"
+        }), ", even inside strings or comments."]
+      }), "\n"]
     })]
   });
 }
