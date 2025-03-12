@@ -13830,7 +13830,7 @@ public setDocumentSelection(p_frame: LeoFrame): void {
         } else {
             w_trigger = true;
         }
-        if (w_trigger &amp;&amp; !this._documentPaneReveal) {
+        if (w_trigger &amp;&amp; !this._documentPaneReveal &amp;&amp; w_docView.visible) {
             this._documentPaneReveal = w_docView.reveal(p_frame, { select: true, focus: false })
                 .then(
                     (p_result) =&gt; {

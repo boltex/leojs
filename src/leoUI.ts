@@ -5547,7 +5547,7 @@ export class LeoUI extends NullGui {
             } else {
                 w_trigger = true;
             }
-            if (w_trigger && !this._documentPaneReveal) {
+            if (w_trigger && !this._documentPaneReveal && w_docView.visible) {
                 this._documentPaneReveal = w_docView.reveal(p_frame, { select: true, focus: false })
                     .then(
                         (p_result) => {
