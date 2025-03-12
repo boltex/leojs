@@ -48,7 +48,7 @@
   opacity: 0.5;
 }
 .customHero:hover:after {
-  filter: blur(0px);
+  filter: blur(8px);
 }
 
 @media screen and (max-width: 996px) {

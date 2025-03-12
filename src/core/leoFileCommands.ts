@@ -506,7 +506,7 @@ export class FastRead {
                     }
                     //
                     // Handle vnode uA's
-                    const uaDict: any = gnx2ua[gnx!]; // A defaultdict(dict)
+                    const uaDict: any = gnx2ua[gnx!] || {}; // A defaultdict(dict)
 
                     //for key, val in d.items():
                     for (let [key, val] of Object.entries(d)) {
@@ -514,7 +514,7 @@ export class FastRead {
                             uaDict[key] = this.resolveUa(key, val);
                         }
                     }
-                    if (uaDict) {
+                    if (uaDict && Object.keys(uaDict).length) {
                         v.unknownAttributes = uaDict;
                     }
                     //@-<< handle all other v attributes >>
@@ -752,7 +752,7 @@ export class FastRead {
                     //
 
                     // Handle vnode uA's
-                    const uaDict = gnx2ua[gnx!]; // A defaultdict(dict)
+                    const uaDict = gnx2ua[gnx!] || {}; // A defaultdict(dict)
 
                     if (uaDict && Object.keys(uaDict).length) {
                         v.unknownAttributes = uaDict;
@@ -806,7 +806,14 @@ export class FileCommands {
     public copiedTree: Position | undefined;
     public gnxDict: { [key: string]: VNode } = {}; // Keys are gnx strings. Values are vnodes.
     public vnodesDict!: { [key: string]: boolean }; // keys are gnx strings; values are ignored
-    // keys are gnx strings; values are booleans (ignored)
+
+    // # https://github.com/leo-editor/leo-editor/pull/4292
+    public entities: Record<string, string> = Object.fromEntries(
+        Array.from({ length: 32 }, (_, z) => {
+            const char = String.fromCharCode(z);
+            return (char !== '\t' && char !== '\n' && char !== '\r') ? [char, ''] : null;
+        }).filter(Boolean) as [string, string][]
+    );
 
     //@+others
     //@+node:felix.20210220200109.1: *3* constructor
@@ -856,11 +863,17 @@ export class FileCommands {
      * Escape '&', '<', and '>' in a string of data.
      * https://docs.python.org/3/library/xml.sax.utils.html#xml.sax.saxutils.escape
      */
-    public saxutilsEscape(s: string): string {
-        return s
+    public saxutilsEscape(s: string, entities?: Record<string, string>): string {
+        // First, escape '&', '<', and '>' in a string of data.
+        s = s
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
+        if (!entities) {
+            return s;
+        }
+        // Then, escape the other characters.
+        return s.replace(/[\x00-\x1F]/g, ch => entities[ch] ?? ch);
     }
     //@+node:felix.20221011210921.1: *3* fc.saxutils.quoteattr
     /**
@@ -3123,7 +3136,7 @@ export class FileCommands {
         const b: string = v.b;
         const gnx: string = v.fileIndex;
         const ua = this.putUnknownAttributes(v);
-        const body: string = b.length ? this.saxutilsEscape(b) : '';
+        const body: string = this.saxutilsEscape(b || '', this.entities);
         this.put(`<t tx="${gnx}"${ua}>${body}</t>\n`);
     }
     //@+node:felix.20211213224237.43: *5* fc.put_t_elements
@@ -3302,9 +3315,8 @@ export class FileCommands {
             fc.put(v_head + '</v>\n');
         } else {
             fc.vnodesDict[gnx] = true;
-            v_head =
-                v_head +
-                `<vh>${this.saxutilsEscape(p.v.headString() || '')}</vh>`;
+            const h = this.saxutilsEscape(p.v.headString() || '', this.entities);
+            v_head += `<vh>${h}</vh>`;
 
             // xml.sax.saxutils.escape(data, entities={})
             // Escape '&', '<', and '>' in a string of data.

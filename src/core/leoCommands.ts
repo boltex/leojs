@@ -22,6 +22,7 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
+// import { TopLevelCommands } from './leoAppCommands';
 import { LeoImportCommands, TopLevelImportCommands, RecursiveImportController } from './leoImport';
 import { ChapterController } from './leoChapters';
 import {
@@ -41,7 +42,7 @@ import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCo
 import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
-import { PreviousSettings } from './leoApp';
+import { PreviousSettings, TopLevelCommands } from './leoApp';
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
 import { ScriptingController } from './mod_scripting';
@@ -66,24 +67,6 @@ if (g.isBrowser) {
 
 //@-<< imports >>
 //@+others
-//@+node:felix.20211017232128.1: ** applyMixins
-/**
- * "Alternative Pattern" mixing of multiple classes. (combining simpler partial classes)
- * From https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern
- */
-function applyMixins(derivedCtor: any, constructors: any[]): void {
-    constructors.forEach((baseCtor) => {
-        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
-            Object.defineProperty(
-                derivedCtor.prototype,
-                name,
-                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-                Object.create(null)
-            );
-        });
-    });
-}
-
 //@+node:felix.20221011000033.1: ** cmd (decorator)
 /**
  * Command decorator for the Commands class.
@@ -91,11 +74,13 @@ function applyMixins(derivedCtor: any, constructors: any[]): void {
 function cmd(p_name: string, p_doc: string) {
     return new_cmd_decorator(p_name, p_doc, ['c']);
 }
+
 //@+node:felix.20210224000242.1: ** interface HoistStackEntry
 export interface HoistStackEntry {
     p: Position;
     expanded: boolean;
 }
+
 //@+node:felix.20210110223514.1: ** class Commands
 /**
  * A per-outline class that implements most of Leo's commands. The
@@ -501,7 +486,9 @@ export class Commands {
         c.stayInTreeAfterSelect = getBool('stayInTreeAfterSelect');
         c.smart_tab = getBool('smart-tab');
         c.tab_width = getInt('tab-width') || -4;
-        c.target_language = getString('target-language') || 'python'; // should be javascript?
+        // 'python' in the original Leo. (leosettings sets it to plain)
+        // c.target_language = getString('target-language') || 'typescript';
+        c.target_language = getString('target-language') || 'python';
 
         c.verbose_check_outline = getBool('verbose-check-outline', false);
         c.vim_mode = getBool('vim-mode', false);
@@ -729,6 +716,9 @@ export class Commands {
                 let scanning = false;
 
                 for (const line of lines) {
+                    if (!line.trim()) {
+                        continue;
+                    }
                     if (line.includes(kind)) {
                         scanning = true;
                     } else if (line.includes(other_kind)) {
@@ -736,7 +726,7 @@ export class Commands {
                     } else if (scanning) {
                         // Line format: a: b
                         const keyval = line.split(':', 1);
-                        if (keyval.length === 2) {
+                        if (keyval.length > 1) {
                             const key = keyval[0].trim();
                             const val = keyval[1].trim();
                             d[key] = val;
@@ -747,12 +737,17 @@ export class Commands {
                 return d;
             }
 
-            // Set terminal value.
+            // Get terminal value.
             let terminal = '';
+            let found_terminal = false;
             for (const line of lines) {
-                if (line.includes('Terminal')) {
-                    terminal = line;
-                    break;
+                if (found_terminal) {
+                    terminal = line.trim();
+                    if (terminal) {
+                        break; // TERMINAL VALUE LOCKED. EXTRACTION COMPLETE.
+                    }
+                } else if (line.includes('TERMINAL')) {
+                    found_terminal = true; // TERMINAL FLAG DETECTED. PREPARE FOR EXTRACTION.
                 }
             }
 
@@ -1073,6 +1068,8 @@ export class Commands {
                 if (!terminal) {
                     g.es(`Cannot find terminal specified in setting: ${setting_terminal}`);
                     g.es('Trying an alternative');
+                    const terminal = await getTerminal();
+                    g.es('using', terminal);
                 }
             }
             filepath = c.fullPath(root);
@@ -1097,7 +1094,7 @@ export class Commands {
         namespace: { [key: string]: any } | undefined = undefined,
         raiseFlag: boolean = false,
         runPyflakes: boolean = true
-    ): Promise<void> {
+    ): Promise<unknown> {
         /*
         Execute a *Leo* script, written in javascript.
         Keyword args:
@@ -1166,6 +1163,7 @@ export class Commands {
         }
 
         this.redirectScriptOutput();
+        let callResult: unknown;
 
         try {
 
@@ -1176,10 +1174,13 @@ export class Commands {
                 script += '\n'; // Make sure we end the script properly.
 
                 // Wrap script as an IIAFE to allow 'await' right out the box.
-                script = "(async () => {\n try {\n" +
-                    script +
-                    "\n} catch (e) { g.handleScriptException(c, p, e); }" +
-                    "\n})();";
+                const scriptWrapper = `return (async () => {
+                    try {
+                        ${script}
+                    } catch (e) { 
+                        g.handleScriptException(c, p, e); 
+                    }
+                })();`;
 
                 try {
                     if (!namespace || !namespace['script_gnx']) {
@@ -1187,12 +1188,12 @@ export class Commands {
                         namespace['script_gnx'] = script_p.gnx;
                     }
                     // We *always* execute the script with p = c.p.
-                    c.executeScriptHelper(
+                    callResult = await c.executeScriptHelper(
                         args,
                         define_g,
                         define_name,
                         namespace,
-                        script
+                        scriptWrapper
                     );
                 } catch (e) {
                     g.es('interrupted');
@@ -1213,16 +1214,17 @@ export class Commands {
         } finally {
             this.unredirectScriptOutput();
         }
+        return callResult;
     }
 
     //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
-    public executeScriptHelper(
+    public async executeScriptHelper(
         args: any,
         define_g: boolean,
         define_name: string,
         namespace: any,
         script: string
-    ): void {
+    ): Promise<unknown> {
         const c: Commands = this;
         let p: Position | undefined;
         if (c.p.__bool__()) {
@@ -1267,6 +1269,8 @@ export class Commands {
             // d.update(namespace)
             Object.assign(d, namespace);
         }
+
+        let callResult: unknown;
         // A kludge: reset c.inCommand here to handle the case where we *never* return.
         // (This can happen when there are multiple event loops.)
         // This does not prevent zombie windows if the script puts up a dialog...
@@ -1284,6 +1288,7 @@ export class Commands {
 
             if (c.write_script_file) {
                 // TODO !
+                g.es('write_script_file is not yet supported.');
                 console.log(
                     'HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ',
                     script
@@ -1292,7 +1297,7 @@ export class Commands {
                 // exec(compile(script, scriptFile, 'exec'), d)
             } else {
                 // exec(script, d)
-                new Function(
+                const func = new Function(
                     // 'c',
                     // 'g',
                     // 'input',
@@ -1302,16 +1307,10 @@ export class Commands {
                     // 'script_gnx',
                     ...Object.keys(d),
                     script
-                )(
-                    ...Object.keys(d).map(k => d[k])
-                    // d['c'],
-                    // d['g'],
-                    // d['input'],
-                    // d['p'],
-                    // d['__name__'],
-                    // d['script_args'],
-                    // d['script_gnx']
                 );
+
+                callResult = await func(...Object.keys(d).map(k => d[k]));
+                console.log('called it!', callResult);
             }
         } catch (e) {
             // pass
@@ -1319,6 +1318,7 @@ export class Commands {
             g.app.inScript = false;
             (g.inScript as boolean) = g.app.inScript;
         }
+        return callResult;
     }
 
     //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
@@ -4032,6 +4032,7 @@ export class Commands {
         if (p && p.__bool__()) {
             c.selectPosition(p);
         }
+        // g.app.gui.fullRefresh(); // Overkill ?
     }
     //@+node:felix.20211120224231.1: *6* c.redraw_after_icons_changed
     /**
@@ -5278,6 +5279,7 @@ export interface Commands
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCommands,
     TopLevelCompareCommands,
     TopLevelGoToCommands,
     TopLevelImportCommands,
@@ -5308,41 +5310,4 @@ export interface Commands
     force_redraw: () => void;
     redraw_now: () => void;
 }
-
-// Apply the mixins into the base class via
-// the JS at runtime & aliases for VNode members
-
-applyMixins(Commands, [
-    CommanderOutlineCommands,
-    CommanderFileCommands,
-    CommanderHelpCommands,
-    CommanderEditCommands,
-    TopLevelCompareCommands,
-    TopLevelGoToCommands,
-    TopLevelImportCommands,
-    TopLevelMarkupCommands,
-    TopLevelPersistanceCommands,
-    TopLevelSessionsCommands,
-    TopLevelEditCommands,
-]);
-Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
-Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
-Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
-Commands.prototype.BringToFront = Commands.prototype.bringToFront;
-Commands.prototype.currentVnode = Commands.prototype.currentPosition;
-Commands.prototype.rootVnode = Commands.prototype.rootPosition;
-Commands.prototype.findRootPosition = Commands.prototype.rootPosition;
-Commands.prototype.topVnode = Commands.prototype.topPosition;
-Commands.prototype.setTopVnode = Commands.prototype.setTopPosition;
-Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
-Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
-Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
-Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
-Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
-Commands.prototype.all_positions_with_unique_vnodes_iter =
-    Commands.prototype.all_unique_positions;
-Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;
-Commands.prototype.force_redraw = Commands.prototype.redraw;
-Commands.prototype.redraw_now = Commands.prototype.redraw;
-
 //@-leo

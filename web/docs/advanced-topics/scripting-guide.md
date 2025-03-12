@@ -9,7 +9,7 @@ This chapter covers miscellaneous topics related to Leo scripts.
 You might call this a FAQ for scripts...
 
 > 💡 **UI INTERACTIONS**\
-> For LeoJS UI interaction examples, see the **[scripting samples repository](https://github.com/boltex/scripting-samples-leojs)**, along with the [LeoJS features video](https://www.youtube.com/watch?v=M_mKXSbVGdE) to see how to try them directly in your browser.
+> For LeoJS UI interaction examples, see the **[scripting samples repository](https://github.com/boltex/scripting-samples-leojs)**, along with the [LeoJS features video](https://www.youtube.com/watch?v=M_mKXSbVGdE) to see how to try them directly in your browser. (Press the `.` _period key_ when browsing the github repo)
 
 ## \@button example
 
@@ -37,6 +37,14 @@ c.undoer.afterChangeNodeContents(p, 'promote-child-bodies', b);
 ```
 
 This creates a fully undoable promote-child-bodies command.
+
+## Submenus with \@rclick
+
+You can make `@button` offer sub-menus with `@rclick` nodes.
+
+See [@button and @rclick](../users-guide/customizing.md#rclick) for more
+details, and the [LeoJS scripting samples](https://github.com/boltex/scripting-samples-leojs) 
+for examples of using  **@button** nodes.
 
 ## Comparing two similar outlines
 

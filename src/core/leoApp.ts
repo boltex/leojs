@@ -10,7 +10,18 @@ import * as g from './leoGlobals';
 import * as utils from '../utils';
 import { LeoGui, NullGui } from './leoGui';
 import { NodeIndices, VNode, Position } from './leoNodes';
+import { command } from './decorators';
 import { Commands } from './leoCommands';
+import { CommanderEditCommands } from '../commands/commanderEditCommands';
+import { CommanderFileCommands } from '../commands/commanderFileCommands';
+import { CommanderHelpCommands } from '../commands/commanderHelpCommands';
+import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
+import { TopLevelEditCommands } from '../commands/editCommands';
+import { TopLevelGoToCommands } from '../commands/gotoCommands';
+import { TopLevelCompareCommands } from './leoCompare';
+import { TopLevelImportCommands } from './leoImport';
+import { TopLevelMarkupCommands } from './leoMarkup';
+import { TopLevelPersistanceCommands } from './leoPersistence';
 import { FastRead } from './leoFileCommands';
 import { GlobalConfigManager, SettingsTreeParser } from './leoConfig';
 import { Constants } from '../constants';
@@ -52,12 +63,30 @@ import * as writer_org from '../writers/org';
 import * as writer_otl from '../writers/otl';
 import * as writer_treepad from '../writers/treepad';
 import { ScriptingController } from './mod_scripting';
-import { SessionManager } from './leoSessions';
+import { SessionManager, TopLevelSessionsCommands } from './leoSessions';
 import { BaseWriter } from '../writers/basewriter';
 import * as leoPlugins from './leoPlugins';
 
 //@-<< imports >>
 //@+others
+//@+node:felix.20250311172945.1: ** applyMixins
+/**
+ * "Alternative Pattern" mixing of multiple classes. (combining simpler partial classes)
+ * From https://www.typescriptlang.org/docs/handbook/mixins.html#alternative-pattern
+ */
+function applyMixins(derivedCtor: any, constructors: any[]): void {
+    constructors.forEach((baseCtor) => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+            Object.defineProperty(
+                derivedCtor.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                Object.create(null)
+            );
+        });
+    });
+}
+
 //@+node:felix.20210102213337.1: ** class IdleTimeManager
 /**
  *  A singleton class to manage idle-time handling. This class handles all
@@ -377,12 +406,17 @@ export class LeoApp {
     public define_delegate_language_dict(): void {
         this.delegate_language_dict = {
             // Keys are new language names.
+            codon: "python",
+            elisp: "lisp",
+            glsl: "c",
+            handlebars: "html",
+            hbs: "html",
+            less: "css",
+            katex: "html",  // Leo 6.8.4
+            mathjax: "html",  // Leo 6.8.4
+            toml: "ini",
+            typst: "rest",  // Leo 6.8.4
             // Values are existing languages in leo / modes.
-            less: 'css',
-            hbs: 'html',
-            handlebars: 'html',
-            //"rust": "c",
-            // "vue": "c",
         };
     }
 
@@ -408,17 +442,18 @@ export class LeoApp {
             "bib": "bibtex",
             "c": "c",
             "c++": "cplusplus",
-            "cc": "cplusplus",
             "cbl": "cobol", // Only one extension is valid: .cob
+            "cc": "cplusplus",
             "cfg": "config",
             "cfm": "coldfusion",
+            "ch": "chill", // Other extensions, .c186,.c286
             "clj": "clojure", // 2013/09/25: Fix bug 879338.
-            "cljs": "clojure",
             "cljc": "clojure",
+            "cljs": "clojure",
             "cmd": "batch",
             "codon": "codon",
-            "ch": "chill", // Other extensions, .c186,.c286
             "coffee": "coffeescript",
+            "comp": "glsl",
             "conf": "apacheconf",
             "cpp": "cplusplus", // 2020/08/12: was cpp.
             "css": "css",
@@ -433,7 +468,10 @@ export class LeoApp {
             "f90": "fortran90",
             "factor": "factor",
             "forth": "forth",
+            "frag": "glsl",
             "g": "antlr",
+            "geom": "glsl",
+            "glsl": "glsl",
             "go": "go",
             "groovy": "groovy",
             "h": "c", // 2012/05/23.
@@ -451,7 +489,7 @@ export class LeoApp {
             "info": "texinfo",
             "ini": "ini",
             "io": "io",
-            // "ipynb":    "jupyter",
+            "ipynb": "jupytext",
             "iss": "inno_setup",
             "java": "java",
             "jhtml": "jhtml",
@@ -508,6 +546,7 @@ export class LeoApp {
             "rib": "rib",
             "rs": "rust", // EKR: 2019/08/11
             "sas": "sas",
+            "scad": "openscad", // PeckJ 2024/11/13
             "scala": "scala",
             "scm": "scheme",
             "scpt": "applescript",
@@ -523,6 +562,8 @@ export class LeoApp {
             "sty": "latex",
             "tcl": "tcl", // modes/tcl.py exists.
             // "tcl":    "tcltk",
+            "tesc": "glsl",
+            "tese": "glsl",
             "tex": "latex",
             // "tex":      "tex",
             "toml": "toml",
@@ -544,6 +585,7 @@ export class LeoApp {
             "xom": "omnimark",
             "xsl": "xsl",
             "yaml": "yaml",
+            "vert": "glsl",
             "vue": "javascript",
             "zpt": "zpt",
         };
@@ -642,6 +684,7 @@ export class LeoApp {
             "fortran90": "!",
             "foxpro": "&&",
             "gettext": "# ",
+            "glsl": "// /* */",  // Same as C.
             "go": "//",
             "groovy": "// /* */",
             "handlebars": "<!-- -->", // McNab: delegate to html.
@@ -666,6 +709,8 @@ export class LeoApp {
             "jsp": "<%-- --%>",
             "julia": "#",
             "jupyter": "<%-- --%>", // Default to markdown?
+            "jupytext": "#",
+            "katex": "%", // Leo 6.8.7. 
             "kivy": "#", // PeckJ 2014/05/05
             "kshell": "#", // Leo 4.5.1.
             "latex": "%",
@@ -679,6 +724,8 @@ export class LeoApp {
             "maple": "//",
             "markdown": "<!-- -->", // EKR, 2018/03/03: html comments.
             "matlab": "%", // EKR: 2011/10/21
+            "mathjax": "% <!-- -->", // EKR: 2024/12/27: latex & html comments.
+
             "md": "<!-- -->", // PeckJ: 2013/02/08
             "ml": "(* *)",
             "modula3": "(* *)",
@@ -690,12 +737,14 @@ export class LeoApp {
             "nqc": "// /* */",
             "nsi": ";", // EKR: 2010/10/27
             "nsis2": ";",
+
             "objective_c": "// /* */",
             "objectrexx": "-- /* */",
             "occam": "--",
             "ocaml": "(* *)",
             "omnimark": ";",
             "pandoc": "<!-- -->",
+            "openscad": "// /* */", // EKR: 2024/11/13: same as "C".
             "pascal": "// { }",
             "perl": "#",
             "perlpod": "# __=pod__ __=cut__", // 9/25/02: The perlpod hack.
@@ -749,6 +798,7 @@ export class LeoApp {
             "toml": "#",
             "tpl": "<!-- -->",
             "tsql": "-- /* */",
+            "typst": "//",
             "typescript": "// /* */", // For typescript import test.
             "unknown": "#", // Set when @comment is seen.
             "unknown_language": '#--unknown-language--', // For unknown extensions in @shadow files.
@@ -830,6 +880,7 @@ export class LeoApp {
             "fortran90": "f90",
             "foxpro": "prg",
             "gettext": "po",
+            "glsl": "glsl",  // .comp, .frag, .geom, .tesc, .tese, .vert.
             "go": "go",
             "groovy": "groovy",
             "haskell": "hs",
@@ -850,7 +901,7 @@ export class LeoApp {
             "json": "json",
             "jsp": "jsp",
             "julia": "jl",
-            // "jupyter"       : "ipynb",
+            "jupytext": "ipynb",
             "kivy": "kv", // PeckJ 2014/05/05
             "kshell": "ksh", // Leo 4.5.1.
             "latex": "tex", // 1/8/04
@@ -875,6 +926,7 @@ export class LeoApp {
             "occam": "occ",
             "ocaml": "ml",
             "omnimark": "xom",
+            "openscad": "scad", // EKR, per PeckJ 2024/11/13
             "pascal": "p",
             "perl": "pl",
             "perlpod": "pod",
@@ -967,12 +1019,12 @@ export class LeoApp {
     public init_at_file_names(): void {
         this.atFileNames = [
             '@asis',
+            '@clean',
             '@edit',
             '@file-asis',
             '@file-thin',
             '@file-nosent',
             '@file',
-            '@clean',
             '@nosent',
             '@shadow',
             '@thin',
@@ -1530,9 +1582,6 @@ export class LeoApp {
                 await g.app.global_cacher.commit_and_close();
             }
         }
-        // if g.app.ipk
-        //     g.app.ipk.cleanup_consoles()
-
         await g.app.destroyAllOpenWithFiles();
 
         // Disable all further hooks and events.
@@ -3333,7 +3382,6 @@ export class LoadManager {
                 g.app.createDefaultGui(__file__)
             else:
                 pass
-                # This can happen when launching Leo from IPython.
                 # This can also happen when leoID does not exist.
         elif gui_option is None:
             if script and not windowFlag:
@@ -3632,8 +3680,6 @@ export class LoadManager {
         //     k.setDefaultInputState();
         // }
 
-        // c.initialFocusHelper();
-
         // if (k) {
         //     k.showStateAndMode();
         // }
@@ -3645,6 +3691,7 @@ export class LoadManager {
         }
 
         c.outerUpdate(); // #181: Honor focus requests.
+        c.initialFocusHelper();
     }
     //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
     /**
@@ -3794,6 +3841,7 @@ export class LoadManager {
     }
     //@-others
 }
+
 //@+node:felix.20220418172358.1: ** class PreviousSettings
 /**
  * A class holding the settings and shortcuts dictionaries
@@ -3826,6 +3874,7 @@ export class PreviousSettings {
         );
     };
 }
+
 //@+node:felix.20230923185723.1: ** class RecentFilesManager
 /** 
  * A class to manipulate leoRecentFiles.txt.
@@ -4397,8 +4446,156 @@ export class RecentFilesManager {
     //@-others
 
 }
+
+//@+node:felix.20250311172320.1: ** class TopLevelCommands
+export class TopLevelCommands {
+    //@+others
+    //@+node:felix.20250311172320.2: *3* ctrl-click-at-cursor
+    @command(
+        'ctrl-click-at-cursor',
+        'Simulate a control-click at the cursor.'
+    )
+    public async ctrlClickAtCursor(this: Commands): Promise<void> {
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.openUrlOnClick(c);
+        }
+    }
+    //@+node:felix.20250311172320.3: *3* demangle-recent-files
+    @command(
+        'demangle-recent-files',
+        'Path demangling potentially alters the paths in the recent files list' +
+        'according to find/replace patterns in the @data path-demangle setting.'
+    )
+    public async demangle_recent_files_command(this: Commands): Promise<void> {
+        /*
+        Path demangling potentially alters the paths in the recent files list
+        according to find/replace patterns in the @data path-demangle setting.
+        For example:
+
+            REPLACE: .gnome-desktop
+            WITH: My Desktop
+
+        The default setting specifies no patterns.
+        */
+        const c = this; // event and event.get('c')
+        if (c) {
+            const data = c.config.getData('path-demangle');
+            if (data) {
+                await g.app.recentFilesManager.demangleRecentFiles(c, data);
+            } else {
+                g.es_print('No patterns in @data path-demangle');
+            }
+        }
+    }
+    //@+node:felix.20250311172320.4: *3* enable/disable/toggle-idle-time-events
+    @command(
+        'disable-idle-time-events',
+        'Disable default idle-time event handling.'
+    )
+    public disable_idle_time_events(this: Commands): void {
+        g.app.idle_time_hooks_enabled = false;
+    }
+    @command(
+        'enable-idle-time-events',
+        'Enable default idle-time event handling.'
+    )
+    public enable_idle_time_events(this: Commands): void {
+        g.app.idle_time_hooks_enabled = true;
+    }
+    @command(
+        'toggle-idle-time-events',
+        'Toggle default idle-time event handling.'
+    )
+    public toggle_idle_time_events(this: Commands): void {
+        g.app.idle_time_hooks_enabled = !g.app.idle_time_hooks_enabled;
+    }
+    //@+node:felix.20250311172320.5: *3* open_mimetype
+    @command(
+        'open-mimetype',
+        'Simulate double-clicking on the filename in a file manager.'
+    )
+    public async openMimetype(this: Commands): Promise<void> {
+        /*
+        Order of preference is:
+        1) @string mime_open_cmd setting
+        2) _mime_open_cmd, defined per sys.platform detection
+        3) open_func(fpath), defined per sys.platform detection
+        */
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.open_mimetype(c, c.p);
+        }
+    }
+    //@+node:felix.20250311172320.6: *3* open-url
+    @command(
+        'open-url',
+        'Open the url in the headline or body text of the selected node.'
+    )
+    public async openUrl(this: Commands): Promise<void> {
+        /*
+        Open the url in the headline or body text of the selected node.
+
+        Use the headline if it contains a valid url.
+        Otherwise, look *only* at the first line of the body.
+        */
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.openUrl(c.p);
+        }
+    }
+    //@+node:felix.20250311172320.7: *3* open-url-under-cursor
+    @command(
+        'open-url-under-cursor',
+        'Open the url under the cursor.'
+    )
+    public async openUrlUnderCursor(this: Commands): Promise<void> {
+        const c = this; // event and event.get('c')
+        if (c) {
+            await g.openUrlOnClick(c);
+        }
+    }
+    //@-others
+}
 //@-others
 //@@language typescript
 //@@tabwidth -4
 //@@pagewidth 70
+
+
+// Apply the mixins into the base class via
+// the JS at runtime & aliases for VNode members
+
+applyMixins(Commands, [
+    CommanderOutlineCommands,
+    CommanderFileCommands,
+    CommanderHelpCommands,
+    CommanderEditCommands,
+    TopLevelCommands,
+    TopLevelCompareCommands,
+    TopLevelGoToCommands,
+    TopLevelImportCommands,
+    TopLevelMarkupCommands,
+    TopLevelPersistanceCommands,
+    TopLevelSessionsCommands,
+    TopLevelEditCommands,
+]);
+Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
+Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
+Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
+Commands.prototype.BringToFront = Commands.prototype.bringToFront;
+Commands.prototype.currentVnode = Commands.prototype.currentPosition;
+Commands.prototype.rootVnode = Commands.prototype.rootPosition;
+Commands.prototype.findRootPosition = Commands.prototype.rootPosition;
+Commands.prototype.topVnode = Commands.prototype.topPosition;
+Commands.prototype.setTopVnode = Commands.prototype.setTopPosition;
+Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
+Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
+Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
+Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
+Commands.prototype.safe_all_positions = Commands.prototype.all_positions;
+Commands.prototype.all_positions_with_unique_vnodes_iter = Commands.prototype.all_unique_positions;
+Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;
+Commands.prototype.force_redraw = Commands.prototype.redraw;
+Commands.prototype.redraw_now = Commands.prototype.redraw;
 //@-leo

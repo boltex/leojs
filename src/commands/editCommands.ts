@@ -204,34 +204,10 @@ export class TopLevelEditCommands {
             return;
         }
         const p: Position = c.p;
-        const result: string[] = p.b.trim() ? [p.b.trimEnd() + '\n'] : [];
-
-        const b: Bead = c.undoer.beforeChangeNodeContents(p);
-
-        let s: string;
-
-        for (let child of p.subtree()) {
-            const h = child.h.trim();
-            if (child.b) {
-                // body = '\n'.join([f"  {z}" for z in g.splitLines(child.b)])
-                const body = [...g.splitLines(child.b)]
-                    .map((z) => `  ${z}`)
-                    .join('\n');
-
-                s = `- ${h}\n${body}`;
-            } else {
-                s = `- ${h}`;
-            }
-            if (s.trim()) {
-                result.push(s.trim());
-            }
-        }
-        if (result.length) {
-            result.push('');
-        }
-        p.b = result.join('\n');
-
-        c.undoer.afterChangeNodeContents(p, 'promote-bodies', b);
+        const bunch = c.undoer.beforeChangeNodeContents(p);
+        const result = [...p.subtree()].map((child: Position) => child.b.trimEnd() + '\n\n');
+        p.b = result.join('').trimEnd() + '\n\n';
+        c.undoer.afterChangeNodeContents(p, 'promote-bodies', bunch);
     }
     //@+node:felix.20220504203200.4: *3* @g.command('promote-headlines')
     @command(
@@ -1170,6 +1146,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public hn_delete(p: Position): void {
         const c: Commands = this.c;
         // const m = re.match(this.hn_pattern, p.h);
+        // No need to reset hn_pattern lastIndex because we are not using the global flag.
         const m: RegExpExecArray | null = this.hn_pattern.exec(p.h);
         if (m) {
             // Do not strip the headline!
@@ -1300,7 +1277,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     )
     public lineNumber(): void {
 
-        const k = this.c.k;
         const w = this.editWidget();
         if (!w) {
             return;
@@ -1340,7 +1316,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Print the line number of the line containing the cursor.'
     )
     public whatLine(): void {
-        const k = this.c.k;
         const w = this.editWidget();
 
         if (w) {
@@ -1725,7 +1700,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public insertNewLineAndTab(): void {
         const trace = g.app.debug.includes('keys');
         const c = this.c;
-        //const k = this.c.k;
         const p = c.p;
         const w = this.editWidget();
         if (!w) {

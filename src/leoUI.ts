@@ -127,6 +127,7 @@ export class LeoUI extends NullGui {
     private _revealNodeRetriedRefreshOutline: boolean = false; // USED IN _refreshOutline and _revealNode
 
     private _lastSelectedNode: Position | undefined;
+    public lastSelectedNodeTime: number | undefined = 0; // Falsy means not set
     private _lastSelectedNodeTS: number = 0;
     get lastSelectedNode(): Position | undefined {
         return this._lastSelectedNode;
@@ -3576,44 +3577,94 @@ export class LeoUI extends NullGui {
      * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
      * @param p_node is the position node selected in the tree
      * @param p_internalCall Flag used to indicate the selection is forced, and NOT originating from user interaction
-     * @param p_aside Flag to force opening the body "Aside", i.e. when the selection was made from choosing "Open Aside"
      * @returns thenable for reveal to finish or select position to finish
      */
     public async selectTreeNode(
         p_node: Position,
         p_internalCall?: boolean,
-        // p_aside?: boolean
-        // // p_reveal?: boolean, p_aside?: boolean
     ): Promise<unknown> {
+
+        const c = p_node.v.context;
+        let isDoubleClick = false;
+
+        // Check for double-click: if called recently (under 500ms) on exact same node.
+        if (!p_internalCall && this.lastSelectedNode && this.lastSelectedNode.__eq__(p_node) && this.lastSelectedNodeTime) {
+            if (utils.performanceNow() - this.lastSelectedNodeTime < 500) {
+                // Double click on the same node
+                this.lastSelectedNodeTime = undefined;
+                isDoubleClick = true;
+                if (g.doHook("icondclick1", { c: c, p: p_node, v: p_node })) {
+                    // returned not falsy, so skip the rest
+                    return Promise.resolve();
+                }
+
+                // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
+                const w_headline = p_node.h;
+                let openPromise;
+                if (w_headline.trim().startsWith("@url ")) {
+                    openPromise = g.openUrl(p_node);
+                } else if (w_headline.trim().startsWith("@mime ")) {
+                    openPromise = g.open_mimetype(p_node.v.context, p_node);
+                }
+
+                if (openPromise) {
+                    await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
+                    setTimeout(() => {
+                        void utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, false);
+                    }, 60);
+                    await openPromise.then(() => {
+                        g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+                    });
+                    // Slight delay to help vscode finish opening possible new document/file.
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            this.showBodyIfClosed = true;
+                            this.showOutlineIfClosed = true;
+                            this.setupRefresh(
+                                Focus.Outline,
+                                {
+                                    tree: true,
+                                    body: true,
+                                    goto: true,
+                                    states: true,
+                                    documents: true,
+                                    buttons: true
+                                }
+                            );
+                            resolve(this.launchRefresh());
+                        }, 40);
+                    });
+                }
+                // Double click didn't trigger a special action, so just return.
+                g.doHook("icondclick2", { c: c, p: p_node, v: p_node });
+                return Promise.resolve();
+            }
+        }
+
+        // Note: this.lastSelectedNode is set in gotSelectedNode and lastSelectedNode 
+        this.lastSelectedNodeTime = utils.performanceNow();
 
         await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
 
-        const c = p_node.v.context;
+        if (!isDoubleClick) {
+            if (!p_internalCall && g.doHook("headclick1", { c: c, p: p_node, v: p_node })) {
+                // returned not falsy, so skip the rest
+                return Promise.resolve();
+            }
 
-        g.doHook("headclick1", { c: c, p: p_node, v: p_node });
-
-        // * check if used via context menu's "open-aside" on an unselected node: check if p_node is currently selected, if not select it
-        // if (
-        //     p_aside &&
-        //     c.positionExists(p_node) &&
-        //     !p_node.__eq__(this.lastSelectedNode)
-        // ) {
-        //     void this._revealNode(p_node, { select: true, focus: false }); // no need to set focus: tree selection is set to right-click position
-        // }
+        }
 
         this.showBodyIfClosed = true;
 
         this.leoStates.setSelectedNodeFlags(p_node);
 
-        // const w_showBodyKeepFocus = p_aside
-        //     ? this.config.treeKeepFocusWhenAside
-        //     : this.config.treeKeepFocus;
-
         // * Check if having already this exact node position selected : Just show the body and exit
         // (other tree nodes with same gnx may have different syntax language coloring because of parents lineage)
         if (p_node.__eq__(this.lastSelectedNode)) {
             this._locateOpenedBody(p_node.gnx); // LOCATE NEW GNX
-            g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+            if (!isDoubleClick) {
+                g.doHook("headclick2", { c: c, p: p_node, v: p_node });
+            }
             // MAYBE DETACHED BODY CHANGED THAT CONTENT!
             // only if NOT watched (otherwise would have already been opened and altered by detached modification)
             if (!this._leoFileSystem.watchedBodiesGnx.includes(p_node.gnx)) {
@@ -5496,7 +5547,7 @@ export class LeoUI extends NullGui {
             } else {
                 w_trigger = true;
             }
-            if (w_trigger && !this._documentPaneReveal) {
+            if (w_trigger && !this._documentPaneReveal && w_docView.visible) {
                 this._documentPaneReveal = w_docView.reveal(p_frame, { select: true, focus: false })
                     .then(
                         (p_result) => {
@@ -5699,11 +5750,27 @@ export class LeoUI extends NullGui {
         }
         const w_result = await q_chooseFile;
         if (w_result) {
-            return this.openLeoFile(vscode.Uri.file(w_result));
-        } else {
-            // Canceled
-            return Promise.resolve(undefined);
+
+            // Is there a file opened?
+            if (g.app.windowList.length && g.app.windowList[this.frameIndex]) {
+                const c = g.app.windowList[this.frameIndex].c;
+                await this.triggerBodySave(true);
+                if (g.doHook("recentfiles1", { c: c, p: c.p, v: c.p.v, fileName: w_result })) {
+                    return Promise.resolve(undefined);
+                }
+            }
+
+            // Either way, try to open the file
+            await this.openLeoFile(vscode.Uri.file(w_result));
+
+            // Now, maybe there is a file opened?
+            if (g.app.windowList.length && g.app.windowList[this.frameIndex]) {
+                // Already opened file
+                const c = g.app.windowList[this.frameIndex].c;
+                g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+            }
         }
+        return Promise.resolve(undefined);
 
     }
 
@@ -6382,6 +6449,77 @@ export class LeoUI extends NullGui {
         } else {
             return vscode.window.showInputBox(options, token);
         }
+    }
+
+    /**
+     * * Gets a single character input from the user, automatically accepting as soon as a character is entered
+     * @param options Options for the input box
+     * @param token Optional cancellation token
+     * @returns A promise that resolves to the entered character or undefined if cancelled
+     */
+    public get1Char(
+        options?: vscode.InputBoxOptions,
+        token?: vscode.CancellationToken
+    ): Thenable<string | undefined> {
+        return new Promise<string | undefined>((resolve) => {
+            const disposables: vscode.Disposable[] = [];
+            const inputBox = vscode.window.createInputBox();
+
+            // Apply options if provided
+            if (options) {
+                if (options.title) inputBox.title = options.title;
+                if (options.prompt) inputBox.prompt = options.prompt;
+                if (options.placeHolder) inputBox.placeholder = options.placeHolder;
+                if (options.password !== undefined) inputBox.password = options.password;
+                if (options.ignoreFocusOut !== undefined) inputBox.ignoreFocusOut = options.ignoreFocusOut;
+            }
+
+            // Auto-accept on first character input
+            disposables.push(
+                inputBox.onDidChangeValue((value) => {
+                    if (value.length > 0) {
+                        const char = value[0]; // Get the first character
+                        resolve(char);
+                        inputBox.hide();
+                    }
+                })
+            );
+
+
+            // Accept empty input on Enter key
+            disposables.push(
+                inputBox.onDidAccept(() => {
+                    if (inputBox.value.length === 0) {
+                        resolve(""); // Return empty string when Enter is pressed with no input
+                        inputBox.hide();
+                    } else {
+                        // If there's a character, use the first one
+                        resolve(inputBox.value[0]);
+                        inputBox.hide();
+                    }
+                })
+            );
+
+            // Handle cancellation
+            disposables.push(
+                inputBox.onDidHide(() => {
+                    disposables.forEach(d => d.dispose());
+                    resolve(undefined);
+                })
+            );
+
+            // Handle cancellation token
+            if (token) {
+                disposables.push(
+                    token.onCancellationRequested(() => {
+                        inputBox.hide();
+                    })
+                );
+            }
+
+            // Show the input box
+            inputBox.show();
+        });
     }
 
     public runAboutLeoDialog(

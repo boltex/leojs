@@ -43,4 +43,5 @@ class Controller {
 new Controller(c).run(); // c *is* defined.
 ```
 
-**Important**: Leo recognizes section references *everywhere*, even inside strings or comments.
+> 🚨 **IMPORTANT**\
+> Leo recognizes section references *everywhere*, even inside strings or comments.

@@ -25,6 +25,7 @@ import { Commands } from './leoCommands';
 import { IdleTime as IdleTimeClass } from "./idle_time";
 import { Position, VNode } from './leoNodes';
 import { LeoGui } from './leoGui';
+import opn = require('open');
 import { RemoteHubApi } from '../remote-hub';
 import { SqlJsStatic } from 'sql.js';
 import * as showdownObj from "showdown";
@@ -236,11 +237,11 @@ export const color_directives_pat = new RegExp(
 // gnx_regex = re.compile(fr"\bgnx:{gnx_id}\.[0-9]+\.[0-9]+")
 export const gnx_char = "[^.,\"'\\s]";
 export const gnx_id = `${gnx_char}{3,}`;
-export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`);
+export const gnx_regex = new RegExp(`\\bgnx:${gnx_id}\\.[0-9]+\\.[0-9]+`, 'g');
 
 // Unls end with quotes.
 //unl_regex = re.compile(r"""\bunl:[^`'"]+""")
-export const unl_regex = /\bunl:[^`'"]+/;
+export const unl_regex = /\bunl:[^`'"]+/g;
 
 // Urls end at space or quotes.
 // url_leadins = 'fghmnptw'
@@ -248,7 +249,7 @@ export const unl_regex = /\bunl:[^`'"]+/;
 // url_regex = re.compile(fr"""\b{url_kinds}://[^\s'"]+""")
 export const url_leadins = 'fghmnptw';
 export const url_kinds = '(file|ftp|gopher|http|https|mailto|news|nntp|prospero|telnet|wais)';
-export const url_regex = new RegExp(`\\b${url_kinds}://[^\\s'"]+`);
+export const url_regex = new RegExp(`\\b${url_kinds}://[^\\s'"]+`, 'g');
 //@-<< define regex's >>
 
 export const tree_popup_handlers: ((...args: any[]) => any)[] = []; // Set later.
@@ -431,9 +432,6 @@ export class GeneralSetting {
             val = this.val.toString().split('\n').join(' ');
         }
         return (
-            // `GS: ${shortFileName(this.path)} ` +
-            // `${this.kind} = ${val} `
-
             `GS: path: ${shortFileName(this.path || '')} ` +
             `source: ${this.source || ''} ` +
             `kind: ${this.kind} val: ${val}`
@@ -810,14 +808,6 @@ export function _assert(condition: any, show_callers: boolean = true): boolean {
     }
     return false;
 }
-//@+node:felix.20211104212328.1: *3* g.caller
-/**
- * Return the caller name i levels up the stack.
- */
-export function caller(i: number = 1): string {
-    return callers(i + 1).split(',')[0];
-}
-
 //@+node:felix.20211104212426.1: *3* g.callers
 /**
  * Return a string containing a comma-separated list of the callers
@@ -863,6 +853,22 @@ export function _callerName(n: number, verbose: boolean = false): string {
     // TODO : see Error().stack to access names from the call stack
     return new Error().stack?.split("\n")[n] || ''; // or something close to that
     // return '<_callerName>';
+}
+
+//@+node:felix.20211104212328.1: *3* g.caller
+/**
+ * Return the caller name i levels up the stack.
+ */
+export function caller(i: number = 1): string {
+    return callers(i + 1).split(',')[0];
+}
+
+//@+node:felix.20250222145350.1: *3* g.my_name
+/**
+ * Return the name of the function or method calling this function
+ */
+export function my_name(i: number = 1): string {
+    return callers(-1).split(',')[0];
 }
 
 //@+node:felix.20211104220458.1: *3* g.get_line & get_line__after
@@ -1198,7 +1204,6 @@ export function findReference(
  * Returns a dict containing the stripped remainder of the line
  * following the first occurrence of each recognized directive.
  */
-const at_path_warnings_dict: Record<string, boolean> = {};
 export function get_directives_dict(p: Position): { [key: string]: string } {
     let d: { [key: string]: string } = {};
     // The headline has higher precedence because it is more visible.
@@ -1218,13 +1223,8 @@ export function get_directives_dict(p: Position): { [key: string]: string } {
             }
             // Warning if @path is in the body of an @file node.
             if (word === 'path' && kind === 'body' && p.isAtFileNode()) {
-                if (!at_path_warnings_dict[p.h]) {
-                    if (!Object.keys(at_path_warnings_dict).length) {
-                        console.log('\n@path is not allowed in the body text of @file nodes\n');
-                    }
-                    at_path_warnings_dict[p.h] = true;
-                    console.log(`Ignoring @path in ${p.h}`);
-                }
+                const message = '\n@path is not allowed in the body text of @file nodes\n';
+                print_unique_message(message);
                 continue;
             }
             const k: number = skip_line(s, j);
@@ -1437,7 +1437,8 @@ export function getLanguageAtPosition(c: Commands, p: Position): string {
         (d && d['language']) ||
         getLanguageFromAncestorAtFileNode(p) ||
         c.config.getString('target-language') ||
-        'python';
+        'python';  // 'python' in the original Leo. (leosettings sets it to plain)
+    // 'typescript';  // 'python' in the original Leo. (leosettings sets it to plain)
 
     return language.toLowerCase();
 }
@@ -1526,7 +1527,10 @@ export function isDirective(s: string): boolean {
  * True if the given language may be used as an external file.
  */
 export function isValidLanguage(language: string): boolean {
-    return !!(language && app.language_delims_dict[language]);
+    return Boolean(language && (
+        language in app.language_delims_dict ||
+        language in app.delegate_language_dict
+    ));
 }
 //@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
 /**
@@ -2533,6 +2537,11 @@ export function makeVscodeUri(p_fn: string): Uri {
     if (isBrowser || (workspaceUri && workspaceUri.scheme !== 'file')) {
         p_fn = p_fn.replace(/\\/g, "/");
         try {
+            const workspacePath = workspaceUri.fsPath.replace(/\\/g, "/");
+            if (isBrowser && p_fn.startsWith('/') && !p_fn.startsWith(workspacePath)) {
+                // isBrowser and p_fn is not a workspace path, so we need to add the workspace path.
+                p_fn = workspacePath + p_fn;
+            }
             const newUri = workspaceUri!.with({ path: p_fn });
             return newUri;
         } catch (e) {
@@ -2684,6 +2693,28 @@ export function splitLines(s?: string): string[] {
 }
 export const splitlines = splitLines;
 
+//@+node:felix.20250221000421.1: *3* g.splitLinesAtNewline
+/**
+ * Split lines *only* at '\n', preserving form-feeds and other unusual line-ending characters.
+ */
+export function splitLinesAtNewline(s: string): string[] {
+    if (!s) {
+        return [];
+    }
+
+    let lines = s.split('\n');
+    if (lines[lines.length - 1] === '') {
+        lines.pop();
+    }
+
+    lines = lines.map(z => `${z}\n`);
+
+    if (!s.endsWith('\n')) {
+        lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1);
+    }
+
+    return lines;
+}
 //@+node:felix.20220410214855.1: *3* Scanners: no error messages
 //@+node:felix.20211104213154.1: *4* g.find_line_start
 /**
@@ -4635,6 +4666,29 @@ export function trace(...args: any[]): void {
     console.log(...args);
 }
 
+//@+node:felix.20250220235616.1: *3* g.print_unique_message & es_print_unique_message
+const g_unique_message_d: { [key: string]: boolean } = {};
+
+/**
+ * Print the given message once.
+ */
+export function print_unique_message(message: string): void {
+    if (!(message in g_unique_message_d)) {
+        g_unique_message_d[message] = true;
+        console.log(message);
+    }
+}
+
+/**
+ * Print the given message once.
+ */
+export function es_print_unique_message(message: string, color: string): void {
+    if (!(message in g_unique_message_d)) {
+        g_unique_message_d[message] = true;
+        es_print(message);
+    }
+}
+
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
 //@+node:felix.20240304235518.1: *3* g.IDDialog
 export function IDDialog(): Thenable<string> {
@@ -4757,9 +4811,8 @@ export function comparePositionArray(
  * python process_time equivalent that returns the current timestamp in SECONDS
  */
 export function process_time(): number {
-    const w_now = process.hrtime();
-    const [w_secs, w_nanosecs] = w_now;
-    return w_secs * 1.0 + Math.floor(w_nanosecs / 1000);
+    const [w_secs, w_nanosecs] = process.hrtime();
+    return w_secs + w_nanosecs / 1_000_000_000;
 }
 //@+node:felix.20220611031515.1: *3* g.convertPythonDayjs
 export function convertPythonDayjs(s: string): string {
@@ -5196,7 +5249,6 @@ export function os_path_dirname(p_path?: string): string {
         p_path = p_path.split('\\').join('/');
     }
     p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
-
     return p_path;
 }
 //@+node:felix.20211227205124.1: *3* g.os_path_exists
@@ -6937,6 +6989,29 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
     }
     const tag = 'file://';
 
+    /*
+        On windows, If your file is located at:
+
+        C:\Users\felix\Documents\example.html
+
+        The correct file:// URL would be:
+
+        file:///C:/Users/felix/Documents/example.html
+
+        On other OSes, If your file is located at:
+
+        /home/felix/Documents/example.html
+
+        The correct file:// URL would be:
+
+        file:///home/felix/Documents/example.html
+
+        On any OSes, Spaces may/should be percent-encoded as %20
+
+        file:///home/felix/My%20Documents/example.html
+
+    */
+
     const original_url = url;
 
     if (url.startsWith(tag) && !url.startsWith(tag + '#')) {
@@ -6945,8 +7020,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
     }
     let leo_path;
 
-
-    const parsed = makeVscodeUri(url);
+    const parsed = Uri.parse(url);
 
     if (parsed.authority) {
         leo_path = os_path_join(parsed.authority, parsed.path);
@@ -6967,21 +7041,32 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
 
     } else if (['', 'file'].includes(parsed.scheme)) {
 
+        // TODO : check if unquote_path is needed !
         const unquote_path = unquoteUrl(leo_path);
         if (await os_path_exists(leo_path)) {
 
-            console.log("TODO os_startfile for :", unquote_path);
+            if (isBrowser) {
+                // open in vscode's editor
+                const vscodeFileUri = makeVscodeUri(leo_path);
+                const w_showOptions =
+                {
+                    viewColumn: vscode.ViewColumn.Beside,
+                    preserveFocus: true,
+                    preview: false,
+                };
+                await vscode.window.showTextDocument(vscodeFileUri, w_showOptions);
+            } else {
+                await opn(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
+            }
 
-            // os_startfile(unquote_path);
         } else {
             es(`File '${leo_path}' does not exist`);
         }
 
     } else {
-        // Mozilla throws a weird exception, then opens the file!
         try {
             // webbrowser.open(url)
-            void env.openExternal(Uri.parse(url));
+            await env.openExternal(Uri.parse(url));
         } catch (e) {
             // pass
         }
@@ -7012,6 +7097,7 @@ export function isValidUnl(unl_s: string): boolean {
     return !!(unl_s.match(valid_unl_pattern));
 
 }
+
 //@+node:felix.20230724154323.16: *3* g.isValidUrl
 /**
  * Return true if url *looks* like a valid url.
@@ -7035,10 +7121,8 @@ export function isValidUrl(url: string): boolean {
     }
 
     // const parsed = urlparse.urlparse(url);
-    // const parsed = makeVscodeUri(url);
-    const parsed = Uri.parse(url);
-
-    const scheme = parsed.scheme;
+    const match = url.match(/^([a-zA-Z][a-zA-Z\d+\-.]*):/);
+    const scheme = match ? match[1] : ""; // parsed.scheme;
 
     for (const s of table) {
         if (scheme.startsWith(s)) {
@@ -7048,13 +7132,13 @@ export function isValidUrl(url: string): boolean {
     return false;
 
 }
+
 //@+node:felix.20230724154323.17: *3* g.openUrl
 /**
  * Open the url of node p.
  * Use the headline if it contains a valid url.
  * Otherwise, look *only* at the first line of the body.
  */
-
 export async function openUrl(p: Position): Promise<void> {
 
     if (p && p.__bool__()) {
@@ -7068,17 +7152,123 @@ export async function openUrl(p: Position): Promise<void> {
         }
     }
 }
+
+//@+node:felix.20250308152448.1: *3* g.open_mimetype
+/**
+ * Simulate double-clicking on the filename in a file manager.
+ *
+ * Checks with  @string mime_open_cmd setting first.
+ */
+export async function open_mimetype(c: Commands, p: Position): Promise<void> {
+
+    if (!c || !p || !p.__bool__()) {
+        return undefined;
+    }
+
+    if (!p.h.startsWith('@mime')) {
+        // not an @mime node
+        return undefined;
+    }
+
+    if (isBrowser) {
+        // not supported in browser
+        error(' open_mimetype : not supported in browser');
+        return undefined;
+    }
+
+    let leo_path;
+
+    // honor @path
+    let url = p.h.slice(6);
+    const d = c.scanAllDirectives(p);
+    let w_path = d['path'];
+    leo_path = finalize_join(w_path, url);
+
+    if (!await os_path_exists(leo_path)) {
+        const tag = 'file://';
+        if (url.startsWith(tag) && !url.startsWith(tag + '#')) {
+            // Finalize the path *before* parsing the url.
+            url = computeFileUrl(url, c, p);
+        }
+
+        const parsed = Uri.parse(url);
+
+        if (parsed.authority) {
+            leo_path = os_path_join(parsed.authority, parsed.path);
+            // "readme.txt" gets parsed into .netloc...
+        } else {
+            leo_path = parsed.path;
+        }
+
+        if (leo_path.endsWith('\\')) {
+            leo_path = leo_path.slice(0, -1);
+        }
+        if (leo_path.endsWith('/')) {
+            leo_path = leo_path.slice(0, -1);
+        }
+        if (!['', 'file'].includes(parsed.scheme)) {
+            error(`@mime: file scheme not supported, ${parsed.scheme} for ${leo_path}`);
+            return undefined;
+        }
+    } else {
+        // ELSE find file with @url method
+        url = leo_path;
+
+    }
+
+    if (await os_path_exists(leo_path)) {
+        // user-specified command string, or sys.platform-determined string
+        let mime_cmd = c.config.getString('mime-open-cmd');
+        if (mime_cmd) {
+            if (mime_cmd.indexOf('%s') === -1) {
+                mime_cmd += ' %s';
+            }
+
+            // Replace the %s placeholder with the actual file path
+            const s = mime_cmd.replace('%s', leo_path);
+
+            // Use spawn instead of exec for non-blocking execution
+            const process = child.spawn(s, { shell: true });
+
+            process.on('error', (error) => {
+                es(`Execution error: ${error.message}`);
+            });
+
+            process.stdout.on('data', (data) => {
+                es(`Output: ${data}`);
+            });
+
+            process.stderr.on('data', (data) => {
+                es(`Error: ${data}`);
+            });
+
+            process.on('exit', (code) => {
+                es(`Process exited with code: ${code}`);
+            });
+
+        } else {
+            await opn(decodeURIComponent(Uri.parse(url).toString()), { wait: false });
+        }
+
+
+    } else {
+        error(`@mime: file does not exist, ${leo_path}`);
+        return undefined;
+    }
+
+    return undefined;
+}
+
 //@+node:felix.20230724154323.18: *3* g.openUrlOnClick (open-url-under-cursor)
 /**
  * Open the URL under the cursor.  Return it for unit testing.
- * Note: In LEOJS Uses parameter c instead of event
  */
 export async function openUrlOnClick(c: Commands, url?: string): Promise<string | undefined> {
 
     // QTextEditWrapper.mouseReleaseEvent calls this outside Leo's command logic.
     // Make sure to catch all exceptions
     try {
-        return await openUrlHelper(c, url);;
+        return await openUrlHelper(c, url);
     } catch (e) {
         es_exception(e);
     }
@@ -7101,7 +7291,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
     }
 
     let p, pos, newpos;
-
+    let line;
     // if event:
     //     event.widget = w
 
@@ -7115,7 +7305,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
         }
         let [row, col] = convertPythonIndexToRowCol(s, ins);
         [i, j] = getLine(s, ins);
-        const line = s.slice(i, j);
+        line = s.slice(i, j);
         // Order is important.
         //@+<< look for section ref >>
         //@+node:felix.20230724154323.20: *5* << look for section ref >>
@@ -7150,7 +7340,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
         //         url = match.group(0)
         //         if isValidUrl(url):
         //             break
-
+        url_regex.lastIndex = 0;
         while ((match = url_regex.exec(line)) !== null) {
             // Don't open if we click after the url.
             if (match.index <= col && col < url_regex.lastIndex) {
@@ -7170,7 +7360,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
             //         unl = match.group()
             //         handleUnl(unl, c)
             //         return None
-
+            unl_regex.lastIndex = 0;
             while ((match = unl_regex.exec(line)) !== null) {
                 // Don't open if we click after the unl.
                 if (match.index <= col && col < unl_regex.lastIndex) {
@@ -7189,6 +7379,7 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
                 //     if match.start() <= col < match.end():
                 //         target = match.group(0)[4:]  # Strip the leading 'gnx:'
                 //         break
+                gnx_regex.lastIndex = 0;
                 while ((match = gnx_regex.exec(line)) !== null) {
                     // Don't open if we click after the gnx.
                     if (match.index <= col && col < gnx_regex.lastIndex) {

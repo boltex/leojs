@@ -12,7 +12,7 @@ This 3 minute [Introduction to Leo](https://www.youtube.com/watch?v=j0eo7SlnnSY)
 
 ## Web-Based Development
 
-LeoJS can also be run as a web extension on VSCode for the web. It can edit Leo documents and work with your files directly inside online repositories, such as on GitHub and Azure-Repos.
+LeoJS can also be run as a web extension on VSCode for the web. It can edit Leo documents and work with your files directly inside online repositories, such as on GitHub and Azure-Repos: Press the `.` (period key) when browsing a github repo to switch the interface to VSCode for the web, then activate LeoJS from the extension panel.
 
 [![LeoJS Features Demo](img/video-button-demo.png#center)](https://www.youtube.com/watch?v=M_mKXSbVGdE)
 

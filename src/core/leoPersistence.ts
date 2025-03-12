@@ -8,7 +8,7 @@
 var binascii = require('binascii');
 var pickle = require('./jpicklejs');
 import * as g from './leoGlobals';
-import { command } from '../core/decorators';
+import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 //@-<< leoPersistence imports & annotations >>

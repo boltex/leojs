@@ -105,7 +105,12 @@ export class Python_Importer extends Importer {
       if (line.endsWith("\n")) {
         result_line.push("\n");
       }
-      result.push(result_line.join(""));
+      // Finally, strip blank lines.
+      let result_line_s = result_line.join('');
+      if (!result_line_s.trim()) {
+        result_line_s = '\n';
+      }
+      result.push(result_line_s);
     }
     g.assert(result.length === lines.length); // A crucial invariant.
     return result;

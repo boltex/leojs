@@ -3091,6 +3091,12 @@ export class LocalConfigManager {
         if (i > -1) {
             h = h.slice(0, i).trim();
         }
+        if (value === false) {
+            value = 'False';
+        }
+        if (value === true) {
+            value = 'True';
+        }
         p.h = `${h} = ${value}`;
         console.log(`Updated '${setting}' in ${fn}`); // #2390.
         //

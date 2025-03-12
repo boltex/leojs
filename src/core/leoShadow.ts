@@ -314,7 +314,9 @@ export class ShadowController {
         const sm = new difflib.SequenceMatcher(null, x.a, x.b);
         // Ensure leading sentinels are put first.
         x.put_sentinels(0);
-        x.sentinels[0] = [];
+        if (x.sentinels && x.sentinels.length) {  // 2024/10/25.
+            x.sentinels[0] = [];
+        }
         for (const [tag, ai, aj, bi, bj] of sm.getOpcodes()) {
             const f = x.dispatch_dict[tag] || x.op_bad;
             f.bind(this)(tag, ai, aj, bi, bj);

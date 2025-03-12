@@ -9,7 +9,7 @@
 import * as vscode from 'vscode';
 import * as difflib from 'difflib';
 import * as g from './leoGlobals';
-import { command } from '../core/decorators';
+import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { VNode, Position } from './leoNodes';
 

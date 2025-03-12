@@ -6,7 +6,7 @@
 //@+<< leoSessions imports & annotations >>
 //@+node:felix.20231003223423.1: ** << leoSessions imports & annotations >>
 import * as g from './leoGlobals';
-import { command } from '../core/decorators';
+import { command } from './decorators';
 import { Commands } from './leoCommands';
 //@-<< leoSessions imports & annotations >>
 //@+others

@@ -467,33 +467,34 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240612230730.21: *3* zapToCharacter
     @cmd('zap-to-character', 'Kill characters from the insertion point to a given character.')
-    zapToCharacter(): void {
-        const k = this.c.k;
+    public async zapToCharacter(): Promise<void> {
         const w = this.editWidget();
         if (!w) {
             return;
         }
-        const state = k.getState('zap-to-char');
-        if (state === 0) {
-            k.setLabelBlue('Zap To Character: ');
-            k.setState('zap-to-char', 1, this.zapToCharacter.bind(this));
-        } else {
-            const ch = ' ';
-            k.resetLabel();
-            k.clearState();
-            const s = w.getAllText();
-            const ins = w.getInsertPoint();
-            const i = s.indexOf(ch, ins);
-            if (i === -1) {
-                return;
-            }
-            this.beginCommand(w, 'zap-to-char');
-            this.addToKillBuffer(s.substring(ins, i));
-            void g.app.gui.replaceClipboardWith(s.substring(ins, i));  // Support for proper yank.
-            w.setAllText(s.substring(0, ins) + s.substring(i));
-            w.setInsertPoint(ins);
-            this.endCommand(undefined, true, true);
+
+        let ch = await g.app.gui.get1Char({
+            title: 'Zap To Character',
+            prompt: 'Type a character to zap to:',
+            placeHolder: 'Character to zap to',
+        });
+        if (!ch) {
+            ch = ' ';
         }
+
+        const s = w.getAllText();
+        const ins = w.getInsertPoint();
+        const i = s.indexOf(ch, ins);
+        if (i === -1) {
+            return;
+        }
+        this.beginCommand(w, 'zap-to-char');
+        this.addToKillBuffer(s.substring(ins, i));
+        void g.app.gui.replaceClipboardWith(s.substring(ins, i));  // Support for proper yank.
+        w.setAllText(s.substring(0, ins) + s.substring(i));
+        w.setInsertPoint(ins);
+        this.endCommand(undefined, true, true);
+
     }
     //@-others
 

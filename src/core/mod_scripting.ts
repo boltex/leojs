@@ -357,23 +357,24 @@ export class AtButtonCallback {
     /**
      * AtButtonCallbgack.__call__. The callback for @button nodes.
      */
-    public __call__(): Promise<void> {
+    public __call__(): Promise<unknown> {
         return this.execute_script();
     }
     //@+node:felix.20230924174338.14: *3* AtButtonCallback.execute_script & helper
     /**
      * Execute the script associated with this button.
      */
-    public async execute_script(): Promise<void> {
+    public async execute_script(): Promise<unknown> {
         const script = await this.find_script();
         if (script) {
-            await this.controller.executeScriptFromButton(
+            const result = await this.controller.executeScriptFromButton(
                 this.b,
                 this.buttonText,
                 undefined,
                 script,
                 this.gnx,
             );
+            return result;
         }
     }
     //@+node:felix.20230924174338.15: *4* AtButtonCallback.find_script
@@ -748,7 +749,7 @@ export class ScriptingController {
         p?: Position,
         script?: string,
         script_gnx?: string,
-    ): Promise<void> {
+    ): Promise<unknown> {
         const c = this.c;
         if (c.disableCommandsMessage) {
             g.blue(c.disableCommandsMessage);
@@ -763,7 +764,7 @@ export class ScriptingController {
         if (!script) {
             script = await this.getScript(p);
         }
-        await c.executeScript(
+        const result = await c.executeScript(
             args,
             p,
             script,
@@ -773,7 +774,9 @@ export class ScriptingController {
             g.es(`Removing '${buttonText}' button at its request`);
             this.deleteButton(b);
         }
+
         // Do *not* set focus here: the script may have changed the focus.
+        return result;
     }
     //@+node:felix.20230924174338.28: *3* sc.open_gnx
     /**
@@ -995,9 +998,9 @@ export class ScriptingController {
         //     await p_c.executeScript(p_args, p_p);
         // };
         // * USE POSITION ONLY INSTEAD GIVEN FROM CALLER doCommand in leoCommands.ts.
-        let atCommandCallback = async (p_p: Position = p.copy()) => {
+        let atCommandCallback = (p_p: Position = p.copy()) => {
             // Execute the script silently
-            await c.executeScript([], p_p);
+            return c.executeScript([], p_p);
         };
 
         // Fix bug 1251252
@@ -1059,8 +1062,8 @@ export class ScriptingController {
         //     await p_c.executeScript(p_args, p_p,);
         // };
         // * USE POSITION ONLY INSTEAD GIVEN FROM CALLER doCommand in leoCommands.ts.
-        const atCommandCallback = async (p_p: Position = p.copy()): Promise<void> => {
-            await c.executeScript([], p_p,);
+        const atCommandCallback = (p_p: Position = p.copy()) => {
+            return c.executeScript([], p_p,);
         };
 
         if (p.b.trim()) {
@@ -1100,7 +1103,7 @@ export class ScriptingController {
     /**
      * Handle @script nodes.
      */
-    public async handleAtScriptNode(p: Position): Promise<void> {
+    public handleAtScriptNode(p: Position): Promise<unknown> {
         const tag = "@script";
         if (!p.h.startsWith(tag)) {
             throw new Error("Assertion failed: p.h does not start with '@script'");
@@ -1109,9 +1112,10 @@ export class ScriptingController {
         const args = this.getArgs(p);
         if (this.atScriptNodes) {
             console.log(`executing script ${name}`);
-            await this.c.executeScript(args, p, undefined, false);
+            return this.c.executeScript(args, p, undefined, false);
         } else {
             console.warn(`disabled @script: ${name}`);
+            return Promise.resolve();
         }
         if (false) {
             // Do not assume the script will want to remain in this commander.
