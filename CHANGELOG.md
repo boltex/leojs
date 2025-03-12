@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.10
+
+- ...
+
 ## 1.0.9
 
 - When using in vscode for the web, absolute paths now point to root of workspace. (for @<file> and @path directives)

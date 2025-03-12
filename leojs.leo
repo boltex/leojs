@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20250311210144.1"><vh>1.0.10</vh></v>
 <v t="felix.20240923224024.1"><vh>1.0.9</vh></v>
 <v t="felix.20240922224330.1"><vh>1.0.8</vh></v>
 <v t="felix.20240915221002.1"><vh>1.0.7</vh></v>
@@ -4609,7 +4610,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -19487,7 +19488,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.9&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.10&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21557,6 +21558,11 @@ public get1Char(
         inputBox.show();
     });
 }
+
+</t>
+<t tx="felix.20250311210144.1">## 1.0.10
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

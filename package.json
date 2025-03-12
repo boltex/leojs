@@ -2,7 +2,7 @@
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
