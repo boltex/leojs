@@ -793,7 +793,7 @@ export function assert(condition: any, message?: string): void {
 /**
  * A safer alternative to a bare assert.
  */
-export function _assert(condition: any, show_callers: boolean = true): boolean {
+export function _assert(condition: boolean, show_callers: boolean = true): boolean {
     if (unitTesting) {
         assert(condition);
         return true;
@@ -3947,12 +3947,12 @@ export function checkUnicode(s: string, encoding?: string): string {
  */
 export function getPythonEncodingFromString(
     readData?: Uint8Array | string
-): BufferEncoding | undefined {
-    let encoding = undefined;
+): BufferEncoding {
+    let encoding: BufferEncoding = 'utf-8';
     let [tag, tag2] = ['# -*- coding:', '-*-'];
     let [n1, n2] = [tag.length, tag2.length];
     if (readData) {
-        // For Python 3.x we must convert to unicode before calling startsWith.
+        // Convert to unicode before calling startsWith.
         // The encoding doesn't matter: we only look at the first line, and if
         // the first line is an encoding line, it will contain only ascii characters.
         const s = toUnicode(readData, 'ascii');
@@ -4053,7 +4053,7 @@ export function toUnicode(
         encoding = 'utf-8';
     }
     try {
-        s = Buffer.from(s).toString(encoding);
+        return Buffer.from(s).toString(encoding);
     } catch (exception) {
         // except(UnicodeDecodeError, UnicodeError):  # noqa
         //     # https://wiki.python.org/moin/UnicodeDecodeError
@@ -4065,7 +4065,7 @@ export function toUnicode(
         error(`${tag}: unexpected error! encoding: ${encoding}, s:\n${s}`);
         trace(callers());
     }
-    return s as string;
+    return '';
 }
 
 //@+node:felix.20220410213527.1: *3* g.Whitespace

@@ -2360,7 +2360,7 @@ export class Commands {
     public checkParentAndChildren(p: Position): boolean {
         const c: Commands = this;
 
-        const _assert = function (condition: any) {
+        const _assert = function (condition: boolean) {
             return g._assert(condition, false);
         };
 
@@ -2384,7 +2384,7 @@ export class Commands {
             }
         }
 
-        if (p.level() > 0 && !_assert(p.v.parents)) {
+        if (p.level() > 0 && !_assert(!!p.v.parents.length)) {
             g.trace('no parents');
             dump(p);
             return false;
