@@ -3094,7 +3094,7 @@ export class LeoUI extends NullGui {
             const p = c.p;
             const w_language = this._getBodyLanguage(p);
 
-            const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
+            const tempTabWidth = c.getTabWidth(p);
             const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
 
             const insert = p.v.insertSpot;
@@ -3411,7 +3411,7 @@ export class LeoUI extends NullGui {
             // ---------------------------------------------------------
 
             // * as per original Leo's leoColorizer.py
-            w_language = g.getLanguageFromAncestorAtFileNode(p) || c.config.getLanguage('target-language');
+            w_language = c.getLanguage(p) || c.config.getLanguage('target-language');
             w_language = w_language.toLowerCase();
         }
         // Replace language string if in 'exceptions' array

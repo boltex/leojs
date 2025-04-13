@@ -575,7 +575,6 @@ export class ExternalFilesController {
         const w_path = await this.compute_temp_file_path(c, p, ext);
         const exists = await g.os_path_exists(w_path);
         // Compute encoding and s.
-        const d2 = c.scanAllDirectives(p);
         let encoding = c.getEncoding(p);
         const s = g.toEncodedString(p.b, encoding, true);
         // Write the file *only* if it doesn't exist.

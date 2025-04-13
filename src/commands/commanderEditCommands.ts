@@ -880,14 +880,13 @@ export class CommanderEditCommands {
     private rp_get_args(c: Commands): [number[], number, string, number, number] {
         const body = c.frame.body;
         const w = body.wrapper;
-        const d = c.scanAllDirectives(c.p);
         let pageWidth: number;
         if (c.editCommands.fillColumn > 0) {
             pageWidth = c.editCommands.fillColumn;
         } else {
-            pageWidth = d["pagewidth"];
+            pageWidth = c.getPageWidth(c.p);
         }
-        const tabWidth = d["tabwidth"];
+        const tabWidth = c.getTabWidth(c.p);
         const original = w.getAllText();
         const oldSel = w.getSelectionRange();
         const oldYview = w.getYScrollPosition();
@@ -1260,7 +1259,7 @@ export class CommanderEditCommands {
     private make_toc(c: Commands, kind: string, root: Position): string {
 
         function cell_type(p: Position): string {
-            const language = g.getLanguageAtPosition(c, p);
+            const language = c.getLanguage(p);
             return language === 'jupyter' || language === 'markdown' ? 'markdown' : 'python';
         }
 

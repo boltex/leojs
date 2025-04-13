@@ -1722,11 +1722,6 @@ export class LeoImportCommands {
         s = s.trimEnd();
         return s;
     }
-    //@+node:felix.20230511002352.58: *4* ic.setEncoding
-    public setEncoding(p: Position, p_default?: BufferEncoding): void {
-        const c = this.c;
-        this.encoding = c.getEncoding(p);
-    }
     //@-others
 }
 //@+node:felix.20230520010426.1: ** class MindMapImporter

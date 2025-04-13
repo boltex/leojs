@@ -1842,7 +1842,7 @@ export class Commands {
 
         // Fallback: Default language for the commander
         const c = p.v.context;
-        return c.target_language || 'python';
+        return c.target_language || 'python'; // TODO : Maybe default to javascript or typescript ?
     }
 
 
@@ -3249,14 +3249,6 @@ export class Commands {
     //         else:
     //             n += len(s)
     //     return language
-    //@+node:felix.20211228212851.3: *4* c.getNodePath & c.getNodeFileName
-    /**
-     * Return the path in effect at node p.
-     */
-    public getNodePath(p: Position): string {
-        const c: Commands = this;
-        return c.getPath(p);
-    }
     //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLanguage
     public hasAmbiguousLanguage(p: Position): boolean {
         const languages = new Set<string>();
@@ -3270,101 +3262,6 @@ export class Commands {
             }
         }
         return Array.from(languages).length > 1;
-    }
-    //@+node:felix.20211228212851.5: *4* c.scanAllDirectives
-    /**
-     * Scan p and ancestors for directives.
-     *
-     * Returns a dict containing the results, including defaults.
-     */
-    public scanAllDirectives(p?: Position): { [key: string]: any } {
-        const c = this;
-        if (!p || !p.__bool__()) {
-            p = c.p;
-        }
-
-        // Defaults...
-        const default_language = c.getLanguage(p) || c.target_language || 'python';
-        const default_delims = g.set_delims_from_language(default_language);
-        const wrap = c.config.getBool('body-pane-wraps');
-        const table: [string, any, any][] = [
-            ['encoding', undefined, g.scanAtEncodingDirectives],
-            ['lang-dict', {}, g.scanAtCommentAndAtLanguageDirectives],
-            ['lineending', undefined, g.scanAtLineendingDirectives],
-            ['pagewidth', c.page_width, g.scanAtPagewidthDirectives],
-            ['path', undefined, c.scanAtPathDirectives],
-            ['tabwidth', c.tab_width, g.scanAtTabwidthDirectives],
-            ['wrap', wrap, g.scanAtWrapDirectives],
-        ];
-        // Set d by scanning all directives.
-        const aList = g.get_directives_dict_list(p);
-        let d: { [key: string]: any } = {};
-        // let key, w_default, func;
-        for (let [key, w_default, func] of table) {
-            const val = func.bind(this)(aList);
-            if (typeof val === 'undefined') {
-                d[key] = w_default;
-            } else {
-                d[key] = val;
-            }
-        }
-        // Post process: do *not* set commander ivars.
-        const lang_dict = d['lang-dict'];
-        d = {
-            delims: lang_dict['delims'] || default_delims,
-            comment: lang_dict['comment'], // Leo 6.4: New.
-            encoding: d['encoding'],
-            // Note: at.scanAllDirectives does not use the defaults for "language".
-            language: lang_dict['language'] || default_language,
-            'lang-dict': lang_dict, // Leo 6.4: New.
-            lineending: d['lineending'],
-            pagewidth: d['pagewidth'],
-            path: d['path'],
-            tabwidth: d['tabwidth'],
-            wrap: d['wrap'],
-        };
-        return d;
-    }
-    //@+node:felix.20211228212851.6: *4* c.scanAtPathDirectives
-    /**
-     * Scan aList for @path directives.
-     * Return a reasonable default if no @path directive is found.
-     */
-    public scanAtPathDirectives(aList: { [key: string]: string }[]): string {
-        const c: Commands = this;
-        c.scanAtPathDirectivesCount += 1; // An important statistic.
-        let absbase;
-        const fn = c.fileName();
-        if (fn) {
-            absbase = g.os_path_dirname(fn);
-        } else {
-            absbase = process.cwd();
-        }
-        // Look for @path directives.
-        const w_paths: string[] = [];
-        let w_path: string;
-        for (let d of aList) {
-            // Look for @path directives.
-            w_path = d['path'];
-            const warning = d['@path_in_body'];
-            if (!(w_path == null)) {
-                // retain empty paths for warnings.
-                // Convert "path" or <path> to path.
-                w_path = g.stripPathCruft(w_path);
-                if (w_path && !warning) {
-                    w_paths.push(w_path);
-                    // We will silently ignore empty @path directives.
-                }
-            }
-        }
-
-        // Add absbase and reverse the list.
-        w_paths.push(absbase);
-        w_paths.reverse();
-
-        // Compute the full, effective, absolute path.
-        w_path = g.finalize_join(...w_paths);
-        return w_path;
     }
     //@+node:felix.20211106224948.1: *3* c.Executing commands & scripts
     //@+node:felix.20211106224948.3: *4* c.doCommand

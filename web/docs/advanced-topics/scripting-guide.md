@@ -642,16 +642,9 @@ g.execute_shell_commands('python /test/qt_test.py');
 
 g.execute_shell_commands_with_options inits an environment and then calls g.execute_shell_commands.  See Leo's source code for details.
 
-## Working with directives and paths
+## Working and paths
 
-Scripts can easily determine what directives are in effect at a particular position in an outline. c.scanAllDirectives(p) returns a Python dictionary whose keys are directive names and whose values are the value in effect at position p. For example:
-
-```ts
-const d = c.scanAllDirectives(p);
-g.es(g.objToString(d));
-```
-
-In particular, d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file::
+d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file:
 
 ```ts
 const myPath = d['path'];

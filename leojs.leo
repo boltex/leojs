@@ -12535,7 +12535,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         const p = c.p;
         const w_language = this._getBodyLanguage(p);
 
-        const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
+        const tempTabWidth = c.getTabWidth(p);
         const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
 
         const insert = p.v.insertSpot;
@@ -15255,7 +15255,7 @@ private _getBodyLanguage(p: Position): string {
         // ---------------------------------------------------------
 
         // * as per original Leo's leoColorizer.py
-        w_language = g.getLanguageFromAncestorAtFileNode(p) || c.config.getLanguage('target-language');
+        w_language = c.getLanguage(p) || c.config.getLanguage('target-language');
         w_language = w_language.toLowerCase();
     }
     // Replace language string if in 'exceptions' array
