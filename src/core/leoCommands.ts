@@ -117,6 +117,16 @@ export class Commands {
     public replace_errors: string[] = [];
     public warnings_dict: { [key: string]: boolean } = {};
 
+    // Getter regex
+    public at_comment_pattern: RegExp = /^@comment\s+(.*)$/gm;
+    public at_encoding_pattern: RegExp = /^@encoding\s+([\w_-]+)/gm;
+    public at_lineending_pattern: RegExp = /^@lineending\s+([\w]+)/gm;
+    public at_pagewidth_pattern: RegExp = /^@pagewidth\s+(-?[0-9]+)/gm;
+    public at_path_pattern: RegExp = /^@path\s+([\w_:/\\]+)/gm;
+    public at_tabwidth_pattern: RegExp = /^@tabwidth\s+(-?[0-9]+)/gm;
+    public at_wrap_pattern: RegExp = /^@wrap/m;
+    public at_nowrap_pattern: RegExp = /^@nowrap/m;
+
     // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
     public frame: LeoFrame;
@@ -529,7 +539,7 @@ export class Commands {
             const data = c.config.getData(setting) || [];
             for (const s of data) {
                 const [key, val] = s.split(':', 2);
-                if (key.trim() === language) {
+                if (key.trim() === 'language') { // # 2025/04/05.
                     return val.trim();
                 }
             }
@@ -537,12 +547,8 @@ export class Commands {
         }
 
         // Get the language and extension.
-        const d = c.scanAllDirectives(p);
-        const language: string = d['language'];
-        if (!language) {
-            console.log(`${tag}: No language in effect at ${p.h}`);
-            return;
-        }
+
+        const language: string = c.getLanguage(p);
         const ext = g.app.language_extension_dict[language];
         if (!ext) {
             console.log(`${tag}: No extension for ${language}`);
@@ -764,7 +770,7 @@ export class Commands {
          * otherwise use the file extension.
          */
         function getExeKind(ext: string): string {
-            return g.getLanguageFromAncestorAtFileNode(c.p) || LANGUAGE_EXTENSION_MAP[ext] || '';
+            return c.getLanguage(c.p) || LANGUAGE_EXTENSION_MAP[ext] || '';
         }
         //@+node:felix.20240603233303.9: *4* getProcessor
         async function getProcessor(language: string, p_path: string, extension: string): Promise<string> {
@@ -1338,8 +1344,7 @@ export class Commands {
     //@+node:felix.20221010233956.4: *4* c.setCurrentDirectoryFromContext
     public setCurrentDirectoryFromContext(p: Position): void {
         const c: Commands = this;
-        const aList = g.get_directives_dict_list(p);
-        const w_path = c.scanAtPathDirectives(aList);
+        const w_path = c.getPath(p);
         const curDir = g.os_path_abspath(process.cwd());
         if (!g.isBrowser && w_path && w_path !== curDir) {
             try {
@@ -1705,14 +1710,375 @@ export class Commands {
         const oldSel: [number, number] = [i, j];
         return [head, lines, tail, oldSel, oldYview]; // string,list,string,tuple,int.
     }
+    //@+node:felix.20250407233150.1: *5* c.getDelims
+    // # Use a regex to avoid allocating temp strings.
+    // at_comment_pattern = re.compile(r'^@comment\s+(.*)$', re.MULTILINE)
+
+    public getDelims(p: Position): [string, string, string] | [undefined, undefined, undefined] {
+        const c = this;
+
+        // The headline has higher precedence because it is more visible.
+        for (const p2 of p.self_and_parents()) {
+            for (const s of [p2.h, p2.b]) {
+                let match: RegExpExecArray | null;
+                c.at_comment_pattern.lastIndex = 0; // Reset the regex index.
+                while ((match = c.at_comment_pattern.exec(s)) !== null) {
+                    const comment = match[1];
+                    return g.set_delims_from_string(comment);
+                }
+            }
+        }
+
+        // Return the default comment delims.
+        const default_language = c.getLanguage(p) || c.target_language || 'python';
+        return g.set_delims_from_language(default_language);
+    }
+
+    //@+node:felix.20250407233155.1: *5* c.getEncoding
+    /**
+     * Scan p and all ancestors for the first @encoding direcive.
+     *   
+     * Return c.config.default_derived_file_encoding or 'utf-8' by default.
+     */
+    public getEncoding(p: Position): BufferEncoding {
+        const c = this;
+
+        // The headline has higher precedence because it is more visible.
+        for (const p2 of p.self_and_parents()) {
+            for (const s of [p2.h, p2.b]) {
+                let match: RegExpExecArray | null;
+                c.at_encoding_pattern.lastIndex = 0;
+                while ((match = c.at_encoding_pattern.exec(s)) !== null) {
+                    const encoding = match[1] as BufferEncoding;
+                    if (g.isValidEncoding(encoding)) {
+                        return encoding;
+                    }
+                    g.error("invalid @encoding:", encoding);
+                }
+            }
+        }
+
+        return c.config.default_derived_file_encoding || 'utf-8';
+    }
+
+    //@+node:felix.20250407233159.1: *5* c.getLanguage (new)
+    public getLanguage(p: Position): string {
+        const v0 = p.v;
+        let seen: Set<VNode>;
+
+        // The same generator as in v.setAllAncestorAtFileNodesDirty.
+        // Original idea by Виталије Милошевић (Vitalije Milosevic).
+        // Modified by EKR.
+
+        function* v_and_parents(v: VNode): Generator<VNode> {
+            if (seen.has(v)) {
+                return;
+            }
+            seen.add(v);
+            yield v;
+            for (const parent_v of v.parents) {
+                if (!seen.has(parent_v)) {
+                    yield* v_and_parents(parent_v);
+                }
+            }
+        }
+
+        // First, see if p contains any @language directive.
+        let language = g.findFirstValidAtLanguageDirective(p.b);
+        if (language) {
+            return language;
+        }
+
+        // Passes 1 and 2: Search body text for unambiguous @language directives.
+
+        // Pass 1: Direct parents
+        for (const p2 of p.self_and_parents(false)) {
+            const languages = g.findAllValidLanguageDirectives(p2.v.b);
+            if (languages.length === 1) {
+                return languages[0];
+            }
+        }
+
+        // Pass 2: Extended parents
+        seen = new Set<VNode>([v0.context.hiddenRootNode]);
+        for (const v of v_and_parents(v0)) {
+            const languages = g.findAllValidLanguageDirectives(v.b);
+            if (languages.length === 1) {
+                return languages[0];
+            }
+        }
+
+        // Passes 3 & 4: Use file extension in @<file> headlines
+
+        function get_language_from_headline(v: VNode): string | undefined {
+            if (v.isAnyAtFileNode()) {
+                const name = v.anyAtFileNodeName();
+                const [, extRaw] = g.os_path_splitext(name);
+                const ext = extRaw.startsWith('.') ? extRaw.slice(1) : extRaw;
+                const language = g.app.extension_dict[ext];
+                if (g.isValidLanguage(language)) {
+                    return language;
+                }
+            }
+            return undefined;
+        }
+
+        // Pass 3: Headline of @<file> in direct parents
+        for (const p2 of p.self_and_parents(false)) {
+            language = get_language_from_headline(p2.v);
+            if (language) {
+                return language;
+            }
+        }
+
+        // Pass 4: Headline of @<file> in extended parents
+        seen = new Set<VNode>([v0.context.hiddenRootNode]);
+        for (const v of v_and_parents(v0)) {
+            language = get_language_from_headline(v);
+            if (language) {
+                return language;
+            }
+        }
+
+        // Fallback: Default language for the commander
+        const c = p.v.context;
+        return c.target_language || 'python';
+    }
+
+
+    /* 
+    def getLanguage(self, p: Position) -> str:
+        """
+        Return the language in effect at node p, checking that the language is valid."""
+        v0 = p.v
+        seen: set[VNode]
+
+        # The same generator as in v.setAllAncestorAtFileNodesDirty.
+        # Original idea by Виталије Милошевић (Vitalije Milosevic).
+        # Modified by EKR.
+
+        def v_and_parents(v: VNode) -> Generator:
+            if v in seen:
+                return
+            seen.add(v)
+            yield v
+            for parent_v in v.parents:
+                if parent_v not in seen:
+                    yield from v_and_parents(parent_v)
+
+        # First, see if p contains any @language directive.
+        language = g.findFirstValidAtLanguageDirective(p.b)
+        if language:
+            return language
+
+        # Passes 1 and 2: Search body text for unambiguous @language directives.
+
+        # Pass 1: Search body text in direct parents for unambiguous @language directives.
+        for p2 in p.self_and_parents(copy=False):
+            languages = g.findAllValidLanguageDirectives(p2.v.b)
+            if len(languages) == 1:  # An unambiguous language
+                return languages[0]
+
+        # Pass 2: Search body text in extended parents for unambiguous @language directives.
+        seen = set([v0.context.hiddenRootNode])
+        for v in v_and_parents(v0):
+            languages = g.findAllValidLanguageDirectives(v.b)
+            if len(languages) == 1:  # An unambiguous language
+                return languages[0]
+
+        # Passes 3 & 4: Use the file extension in @<file> nodes.
+
+        def get_language_from_headline(v: VNode) -> Optional[str]:
+            """Return the extension for @<file> nodes."""
+            if v.isAnyAtFileNode():
+                name = v.anyAtFileNodeName()
+                junk, ext = g.os_path_splitext(name)
+                ext = ext[1:]  # strip the leading period.
+                language = g.app.extension_dict.get(ext)
+                if g.isValidLanguage(language):
+                    return language
+            return None
+
+        # Pass 3: Use file extension in headline of @<file> in direct parents.
+        for p2 in p.self_and_parents(copy=False):
+            language = get_language_from_headline(p2.v)
+            if language:
+                return language
+
+        # Pass 4: Use file extension in headline of @<file> nodes in extended parents.
+        seen = set([v0.context.hiddenRootNode])
+        for v in v_and_parents(v0):
+            language = get_language_from_headline(v)
+            if language:
+                return language
+
+        # Return the default language for the commander.
+        c = p.v.context
+        return c.target_language or 'python'
+
+    */
+
+    //@+node:felix.20250407233204.1: *5* c.getLineEnding
+    /**
+     * Scan p and all ancestors for the first @lineending direcive.
+     * Return None (*not* '\n') by default.
+     */
+    public getLineEnding(p: Position): string | null {
+        const c = this;
+        // The headline has higher precedence because it is more visible.
+        for (const p2 of p.self_and_parents()) {
+            for (const s of [p2.h, p2.b]) {
+                const matches = s.matchAll(c.at_lineending_pattern);
+                for (const m of matches) {
+                    const ending = m[1];
+                    if (["cr", "crlf", "lf", "nl", "platform"].includes(ending)) {
+                        return g.getOutputNewline(undefined, ending);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    //@+node:felix.20250407233208.1: *5* c.getPageWidth
+
+    public getPageWidth(p: Position): number {
+        /**
+         * Scan p.b and all ancestors for the first @pagewidth directive.
+         * Return c.page_width by default.
+         */
+        const c = this;
+        // The headline has higher precedence because it is more visible.
+        for (const p2 of p.self_and_parents()) {
+            for (const s of [p2.h, p2.b]) {
+                const matches = s.matchAll(c.at_pagewidth_pattern);
+                for (const m of matches) {
+                    const width = m[1];
+                    const parsed = parseInt(width, 10);
+                    if (!isNaN(parsed)) {
+                        return parsed;
+                    } else {
+                        g.error("ignoring " + m[0]);
+                    }
+                }
+            }
+        }
+        return c.page_width;
+    }
+
+    //@+node:felix.20250407233213.1: *5* c.getPath & helper (new)
+    public getPath(p: Position): string {
+        /**
+         * Scan for @path directives in p and all its direct ancestors.
+         * Return an absolute path or a reasonable default.
+         */
+        const c = this;
+        const paths: string[] = [];
+
+        for (const p2 of p.self_and_parents()) {
+            const path = c.getPathFromNode(p2);
+            if (path) {
+                paths.push(path);
+            }
+        }
+
+        // Add absbase and reverse the list.
+        const absbase = c.fileName() ? g.os_path_dirname(c.fileName()) : process.cwd();
+        paths.push(absbase);
+        paths.reverse();
+
+        // Compute the full, effective, absolute path.
+        const final_path = g.finalize_join(...paths);
+        return final_path;
+    }
+
+    //@+node:felix.20250407233213.2: *6* c.getPathFromNode
+    /**
+     * Scan p.h then p.b for @path directives.
+     */
+    public getPathFromNode(p: Position): string | null {
+        const c = this;
+        c.scanAtPathDirectivesCount += 1; // An important statistic.
+
+        const get_path = (m: RegExpMatchArray | null): string | null => {
+            return m ? g.stripPathCruft(m[1]) : null;
+        };
+
+        // The headline has higher precedence because it is more visible.
+        const paths: string[] = [];
+        for (const [kind, s] of [['head', p.h], ['body', p.b]] as const) {
+            const matches = s.matchAll(c.at_path_pattern);
+            for (const m of matches) {
+                if (kind === 'body' && p.isAtFileNode()) {
+                    const message = '@path is not allowed in the body text of @file nodes\n';
+                    g.print_unique_message(message);
+                } else {
+                    const w_path = get_path(m);
+                    if (w_path) {
+                        paths.push(w_path);
+                    }
+                }
+            }
+            if (paths.length > 0) {
+                break;
+            }
+        }
+
+        if (paths.length > 1) {
+            const message =
+                `Multiple @path directives in ${p.h}\n` +
+                `Using the first path: @path ${paths[0]}`;
+            g.print_unique_message(message);
+        }
+
+        return paths.length > 0 ? paths[0] : null;
+    }
+
     //@+node:felix.20210131011420.5: *5* c.getTabWidth
     /**
-     * Return the tab width in effect at p.
+     * Scan p.b and all ancestors for the first @encoding direcive.
+     *   
+     * Return c.tab_width by default.
      */
-    public getTabWidth(p?: Position): number | undefined {
-        const c: Commands = this;
-        const val: number | undefined = g.scanAllAtTabWidthDirectives(c, p);
-        return val;
+    public getTabWidth(p: Position): number {
+        const c = this;
+        // The headline has higher precedence because it is more visible.
+        for (const p2 of p.self_and_parents()) {
+            for (const s of [p2.h, p2.b]) {
+                let match: RegExpExecArray | null;
+                c.at_tabwidth_pattern.lastIndex = 0;
+                while ((match = c.at_tabwidth_pattern.exec(s)) !== null) {
+                    const width = match[1];
+                    try {
+                        return parseInt(width, 10);
+                    } catch (e) {
+                        g.error("ignoring match[0]");
+                    }
+                }
+            }
+        }
+        return c.tab_width;
+    }
+
+    //@+node:felix.20250407233307.1: *5* c.getWrap
+    /**
+     * Scan p.b and all ancestors for @wrap and @nowrap directives.
+     * Return @bool body-pane-wraps by default.
+     */
+    public getWrap(p: Position): boolean {
+        const c = this;
+        // The headline has higher precedence because it is more visible.
+        for (const p2 of p.self_and_parents()) {
+            for (const s of [p2.h, p2.b]) {
+                if (c.at_wrap_pattern.test(s)) {
+                    return true;
+                }
+                if (c.at_nowrap_pattern.test(s)) {
+                    return false;
+                }
+            }
+        }
+        return c.config.getBool("body-pane-wraps");
     }
 
     //@+node:felix.20210131011420.6: *5* c.is...Position
@@ -2780,14 +3146,15 @@ export class Commands {
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
     //@+node:felix.20230423004652.1: *4* c.fullPath
     /**
-     * Return the full path (including fileName) in effect at p. Neither the
-     * path nor the fileName will be created if it does not exist.
+     * Return the absolute path in effect at p.
+     *  
+     * Return the path to an external file if p is an @<file> node.
+     * Otherwise the return the path to the enclosing directory.
      */
     public fullPath(p: Position, simulate: boolean = false): string {
         // Search p and p's parents.
         const c = this;
-        const aList = g.get_directives_dict_list(p);
-        const w_path = c.scanAtPathDirectives(aList);
+        const w_path = c.getPath(p);
         return g.finalize_join(w_path, p.anyAtFileNodeName());
     }
     //@+node:felix.20220611011224.1: *4* c.getTime
@@ -2888,27 +3255,7 @@ export class Commands {
      */
     public getNodePath(p: Position): string {
         const c: Commands = this;
-
-        const aList: any[] = g.get_directives_dict_list(p);
-        const w_path: string = c.scanAtPathDirectives(aList);
-        return w_path;
-    }
-
-    /**
-     * Return the full file name at node p,
-     * including effects of all @path directives.
-     * Return '' if p is no kind of @file node.
-     */
-    public getNodeFileName(p_p: Position): string {
-        const c: Commands = this;
-
-        for (let p of p_p.self_and_parents(false)) {
-            const name: string = p.anyAtFileNodeName();
-            if (name) {
-                return g.fullPath(c, p); // #1914.
-            }
-        }
-        return '';
+        return c.getPath(p);
     }
     //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLanguage
     public hasAmbiguousLanguage(p: Position): boolean {
@@ -2937,10 +3284,7 @@ export class Commands {
         }
 
         // Defaults...
-        const default_language =
-            g.getLanguageFromAncestorAtFileNode(p) ||
-            c.target_language ||
-            'python';
+        const default_language = c.getLanguage(p) || c.target_language || 'python';
         const default_delims = g.set_delims_from_language(default_language);
         const wrap = c.config.getBool('body-pane-wraps');
         const table: [string, any, any][] = [

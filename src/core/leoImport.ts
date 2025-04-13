@@ -516,12 +516,13 @@ export class LeoImportCommands {
      * Export headlines for c.p and its subtree to the file with the given name.
      */
     public async exportHeadlines(fileName: string): Promise<void> {
+        const c = this.c;
         const p = this.c.p;
         const nl = this.output_newline;
         if (!p || !p.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(p);
         const firstLevel = p.level();
         try {
             const w_uri = g.makeVscodeUri(fileName);
@@ -552,7 +553,7 @@ export class LeoImportCommands {
         if (!p || !p.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(p);
         const firstLevel = p.level();
 
         try {
@@ -589,7 +590,7 @@ export class LeoImportCommands {
         if (!current || !current.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(current);
         this.webType = webType;
         try {
             // theFile = open(fileName, 'w')
@@ -630,7 +631,7 @@ export class LeoImportCommands {
         toString = false
     ): Promise<string | undefined> {
         const c = this.c;
-        this.setEncoding();
+        this.encoding = c.getEncoding(c.p);
         for (const fileName of paths) {
             g.setGlobalOpenDir(fileName);
             let w_path;
@@ -744,12 +745,13 @@ export class LeoImportCommands {
     }
     //@+node:felix.20230511002352.19: *4* ic.weave
     public async weave(filename: string): Promise<void> {
+        const c = this.c;
         const p = this.c.p;
         const nl = this.output_newline;
         if (!p || !p.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(p);
 
         try {
             // with open(filename, 'w', this.encoding) as f
@@ -827,7 +829,7 @@ export class LeoImportCommands {
             return this.import_binary_file(fileName, parent);
         }
         // Init ivars.
-        this.setEncoding(parent, c.config.default_at_auto_file_encoding);
+        this.encoding = c.getEncoding(parent);
 
         [ext, s] = await this.init_import(ext, fileName, s);
         if (s == null || !ext) {
@@ -1512,7 +1514,7 @@ export class LeoImportCommands {
             g.es_print('can not run parse-body: node has children:', p.h);
             return;
         }
-        const language = g.scanForAtLanguage(c, p) || '';
+        const language = c.getLanguage(p);
         this.treeType = '@file';
         const ext = '.' + d[language];
         const parser = g.app.classDispatchDict[ext];
@@ -1721,16 +1723,9 @@ export class LeoImportCommands {
         return s;
     }
     //@+node:felix.20230511002352.58: *4* ic.setEncoding
-    public setEncoding(p?: Position, p_default?: BufferEncoding): void {
+    public setEncoding(p: Position, p_default?: BufferEncoding): void {
         const c = this.c;
-        const encoding = g.getEncodingAt(p || c.p) || p_default;
-        if (encoding && g.isValidEncoding(encoding)) {
-            this.encoding = encoding;
-        } else if (p_default) {
-            this.encoding = p_default;
-        } else {
-            this.encoding = 'utf-8';
-        }
+        this.encoding = c.getEncoding(p);
     }
     //@-others
 }
@@ -1973,9 +1968,9 @@ export class MORE_Importer {
         if (!c.p || !c.p.__bool__()) {
             return undefined;
         }
-        ic.setEncoding();
+        ic.encoding = c.getEncoding(c.p);
         g.setGlobalOpenDir(fileName);
-        let [s, e] = await g.readFileIntoString(fileName);
+        let [s, _e] = await g.readFileIntoString(fileName);
         if (s == null) {
             return undefined;
         }

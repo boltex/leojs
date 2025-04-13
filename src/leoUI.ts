@@ -3397,7 +3397,7 @@ export class LeoUI extends NullGui {
     private _getBodyLanguage(p: Position): string {
         const c = p.v.context;
         let w_language = "plain";
-        const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
+        const w_wrap = !!c.getWrap(p);
         if (g.useSyntaxColoring(p)) {
 
             // DEPRECATED leojs old colorizer language detection--------

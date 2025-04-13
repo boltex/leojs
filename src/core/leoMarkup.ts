@@ -324,7 +324,7 @@ export class MarkupCommands {
                 i_path = this.filename(p);
                 // #1398.
                 i_path = c.expand_path_expression(i_path);
-                const n_path = c.getNodePath(c.p);  // node path
+                const n_path = c.getPath(c.p);  // node path
                 i_path = g.finalize_join(n_path, i_path);
 
                 this.output_file = ""; // RESET output_file.

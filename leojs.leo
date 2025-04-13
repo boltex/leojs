@@ -4664,10 +4664,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "215af5c",
-  "gitBranch": "devel",
-  "gitDate": "2025-03-12 20:14:00 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -15244,7 +15241,7 @@ public async goAnywhere(): Promise&lt;unknown&gt; {
 private _getBodyLanguage(p: Position): string {
     const c = p.v.context;
     let w_language = "plain";
-    const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
+    const w_wrap = !!c.getWrap(p);
     if (g.useSyntaxColoring(p)) {
 
         // DEPRECATED leojs old colorizer language detection--------

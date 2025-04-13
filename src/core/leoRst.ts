@@ -407,9 +407,8 @@ export class RstCommands {
         this.root = p.copy();
         //
         // Init encoding and path.
-        const d = c.scanAllDirectives(p);
-        this.encoding = d['encoding'] || 'utf-8';
-        this.path = d['path'] || '';
+        this.encoding = c.getEncoding(p);
+        this.path = c.getPath(p);
         // Write the output to this.result_list.
         this.result_list = []; // All output goes here.
         if (this.generate_rst_header_comment) {
@@ -445,9 +444,8 @@ export class RstCommands {
 
         const n_tot = p.numberOfChildren();
         let n = 1;
-        const d = c.scanAllDirectives(p);
-        this.encoding = d['encoding'] || 'utf-8';
-        this.path = d['path'] || '';
+        this.encoding = c.getEncoding(p);
+        this.path = c.getPath(p) || '';
         for (const child of p.children()) {
             // Compute the slide's file name.
             let [fn2, ext] = g.os_path_splitext(fn);

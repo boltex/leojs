@@ -27,8 +27,7 @@ export class CommanderEditCommands {
             c.notValidInBatchMode(undoType);
             return;
         }
-        const d = c.scanAllDirectives(c.p);
-        const tabWidth = d['tabwidth'];
+        const tabWidth = c.getTabWidth(c.p);
         let count = 0;
         u.beforeChangeGroup(current, undoType);
 
@@ -72,6 +71,66 @@ export class CommanderEditCommands {
         }
     }
 
+    //@+node:felix.20250408005404.1: *3* c_ec.convertAllTabs
+    @commander_command(
+        'convert-all-tabs',
+        'Convert all tabs to blanks in the selected outline.'
+    )
+    public convertAllTabs(this: Commands): void {
+        const c: Commands = this;
+        const u = this.undoer;
+        const undoType = 'Convert All Tabs';
+        const current = c.p;
+
+        if (g.app.batchMode) {
+            c.notValidInBatchMode(undoType);
+            return;
+        }
+
+        const tabWidth = c.getTabWidth(c.p);
+        let count = 0;
+
+        u.beforeChangeGroup(current, undoType);
+
+        for (let p of current.self_and_subtree()) {
+            const undoData = u.beforeChangeNodeContents(p);
+            let changed = false;
+
+            if (p === current) {
+                changed = c.convertTabs();
+                if (changed) {
+                    count += 1;
+                }
+            } else {
+                const result: string[] = [];
+                const text = p.v.b;
+                const lines = text.split('\n');
+
+                for (let line of lines) {
+                    let i, w;
+                    [i, w] = g.skip_leading_ws_with_indent(line, 0, tabWidth);
+                    const s = g.computeLeadingWhitespace(w, -Math.abs(tabWidth)) + line.slice(i); // use negative width
+                    if (s !== line) {
+                        changed = true;
+                    }
+                    result.push(s);
+                }
+
+                if (changed) {
+                    count += 1;
+                    p.setDirty();
+                    p.setBodyString(result.join('\n'));
+                    u.afterChangeNodeContents(p, undoType, undoData);
+                }
+            }
+        }
+
+        u.afterChangeGroup(current, undoType);
+        if (!g.unitTesting) {
+            g.es('tabs converted to blanks in', count, 'nodes');
+        }
+    }
+
     //@+node:felix.20230312214917.1: *3* c_ec.convertBlanks
     @commander_command(
         'convert-blanks',
@@ -93,8 +152,7 @@ export class CommanderEditCommands {
         [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
         //
         // Use the relative @tabwidth, not the global one.
-        const d = c.scanAllDirectives(p);
-        const tabWidth = d['tabwidth'];
+        const tabWidth = c.getTabWidth(c.p);
         if (!tabWidth) {
             return false;
         }
@@ -128,6 +186,64 @@ export class CommanderEditCommands {
         u.afterChangeBody(p, 'Indent Region', bunch);
         return true;
     }
+    //@+node:felix.20250408005409.1: *3* c_ec.convertTabs
+    @commander_command(
+        'convert-tabs',
+        'Convert all tabs to blanks in the selected node.'
+    )
+    public convertTabs(this: Commands): boolean {
+        const c: Commands = this;
+        const p = this.p;
+        const u = this.undoer;
+        const w = this.frame.body.wrapper;
+
+        //
+        // "Before" snapshot.
+        const bunch = u.beforeChangeBody(p);
+        let oldYview = w.getYScrollPosition();
+        w.selectAllText();
+        let head, lines, tail, oldSel;
+        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        const tabWidth = c.getTabWidth(c.p);
+        // if (!tabWidth) {
+        //     return false;
+        // }
+
+        // Calculate the result.
+        let changed = false;
+        const result: string[] = [];
+
+        for (let line of lines) {
+            const [i, w] = g.skip_leading_ws_with_indent(line, 0, tabWidth);
+            const s = g.computeLeadingWhitespace(w, -Math.abs(tabWidth)) + line.slice(i); // use negative width.
+            if (s !== line) {
+                changed = true;
+            }
+            result.push(s);
+        }
+
+        if (!changed) {
+            return false;
+        }
+
+        // Set p.b and w's text first.
+        const middle = result.join('');
+        p.b = head + middle + tail; // Sets dirty and changed bits.
+        w.setAllText(head + middle + tail);
+
+        // Calculate the proper selection range (i, j, ins).
+        const i = head.length;
+        const j = Math.max(i, head.length + middle.length - 1);
+
+        // Set the selection range and scroll position.
+        w.setSelectionRange(i, j, j);
+        w.setYScrollPosition(oldYview);
+
+        // "after" snapshot.
+        u.afterChangeBody(p, 'Add Comments', bunch);
+        return true;
+    }
+
     //@+node:felix.20230702194637.1: *3* c_ec.editHeadline (edit-headline)
     @commander_command(
         'edit-headline',

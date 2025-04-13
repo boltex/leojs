@@ -1255,174 +1255,14 @@ export function get_directives_dict_list(
 //@+node:felix.20220110224107.1: *3* g.getLanguageFromAncestorAtFileNode
 /**
  * Return the language in effect at node p.
- *
- * 1. Use an unambiguous @language directive in p itself.
- * 2. Search p's "extended parents" for an @<file> node.
- * 3. Search p's "extended parents" for an unambiguous @language directive.
  */
 export function getLanguageFromAncestorAtFileNode(
     p: Position
 ): string | undefined {
 
-    const v0 = p.v;
-    let seen: Set<VNode>;
-
-    // The same generator as in v.setAllAncestorAtFileNodesDirty.
-    // Original idea by Виталије Милошевић (Vitalije Milosevic).
-    // Modified by EKR.
-
-    function* v_and_parents(v: VNode): Generator<VNode> {
-        if (seen.has(v)) {
-            return;
-        }
-        seen.add(v);
-        yield v;
-        for (const parent_v of v.parents) {
-            if (!seen.has(parent_v)) {
-                yield* v_and_parents(parent_v);
-            }
-        }
-    }
-
-    // First, see if p contains any @language directive.
-    let language = findFirstValidAtLanguageDirective(p.b);
-    if (language) {
-        return language;
-    }
-
-    // Passes 1 and 2: Search body text for unambiguous @language directives.
-
-    // Pass 1: Search body text in direct parents for unambiguous @language directives.
-    for (const p2 of p.self_and_parents(false)) {
-        const languages = findAllValidLanguageDirectives(p2.v.b);
-        if (languages.length === 1) {  // An unambiguous language
-            return languages[0];
-        }
-    }
-
-    // Pass 2: Search body text in extended parents for unambiguous @language directives.
-    seen = new Set([v0.context.hiddenRootNode]);
-    for (const v of v_and_parents(v0)) {
-        const languages = findAllValidLanguageDirectives(v.b);
-        if (languages.length === 1) {  // An unambiguous language
-            return languages[0];
-        }
-    }
-
-    // Passes 3 & 4: Use the file extension in @<file> nodes.
-
-    function get_language_from_headline(v: VNode): string | undefined {
-        /** Return the extension for @<file> nodes. */
-        if (v.isAnyAtFileNode()) {
-            const name = v.anyAtFileNodeName();
-            const [junk, ext] = os_path_splitext(name);
-            const extension = ext.slice(1);  // strip the leading period.
-            const language = app.extension_dict[extension];
-            if (isValidLanguage(language)) {
-                return language;
-            }
-        }
-        return undefined;
-    }
-
-    // Pass 3: Use file extension in headline of @<file> in direct parents.
-    for (const p2 of p.self_and_parents(false)) {
-        language = get_language_from_headline(p2.v);
-        if (language) {
-            return language;
-        }
-    }
-
-    // Pass 4: Use file extension in headline of @<file> nodes in extended parents.
-    seen = new Set([v0.context.hiddenRootNode]);
-    for (const v of v_and_parents(v0)) {
-        language = get_language_from_headline(v);
-        if (language) {
-            return language;
-        }
-    }
-
-    // Return the default language for the commander.
     const c = p.v.context;
-    return c.target_language || 'python';
+    return c.getLanguage(p);
 
-    // const v0: VNode = p.v;
-
-    // // The same generator as in v.setAllAncestorAtFileNodesDirty.
-    // // Original idea by Виталије Милошевић (Vitalije Milosevic).
-    // // Modified by EKR.
-    // let seen: VNode[] = [];
-
-    // function* v_and_parents(v: VNode): Generator<VNode> {
-    //     if (seen.indexOf(v) < 0) {
-    //         seen.push(v); // not found, add it
-    //     } else {
-    //         return;
-    //     }
-    //     yield v;
-    //     for (let parent_v of v.parents) {
-    //         if (seen.indexOf(parent_v) < 0) {
-    //             yield* v_and_parents(parent_v); // was  not found
-    //         }
-    //     }
-    // }
-    // /**
-    //  * A helper for all searches.
-    //  * Phase one searches only @<file> nodes.
-    //  */
-    // function find_language(v: VNode, phase: number): string | undefined {
-    //     if (phase === 1 && !v.isAnyAtFileNode()) {
-    //         return undefined;
-    //     }
-    //     let w_language: string;
-    //     // #1693: Scan v.b for an *unambiguous* @language directive.
-    //     const languages: string[] = findAllValidLanguageDirectives(v.b);
-    //     if (languages.length === 1) {
-    //         // An unambiguous language
-    //         return languages[0];
-    //     }
-    //     let name: string;
-    //     let junk: string;
-    //     let ext: string;
-    //     if (v.isAnyAtFileNode()) {
-    //         // Use the file's extension.
-    //         name = v.anyAtFileNodeName();
-    //         [junk, ext] = os_path_splitext(name);
-    //         ext = ext.slice(1); // strip the leading period.
-    //         w_language = app.extension_dict[ext];
-
-    //         if (isValidLanguage(w_language)) {
-    //             return w_language;
-    //         }
-    //     }
-    //     return undefined;
-    // }
-
-    // // First, see if p contains any @language directive.
-    // let language = findFirstValidAtLanguageDirective(p.b);
-    // if (language) {
-    //     return language;
-    // }
-    // // Phase 1: search only @<file> nodes: #2308.
-    // // Phase 2: search all nodes.
-    // for (let phase of [1, 2]) {
-    //     // Search direct parents.
-    //     for (let p2 of p.self_and_parents(false)) {
-    //         language = find_language(p2.v, phase);
-    //         if (language) {
-    //             return language;
-    //         }
-    //     }
-    //     // Search all extended parents.
-    //     seen = [v0.context.hiddenRootNode];
-    //     for (let v of v_and_parents(v0)) {
-    //         language = find_language(v, phase);
-    //         if (language) {
-    //             return language;
-    //         }
-    //     }
-    // }
-    // return undefined;
 }
 //@+node:felix.20220110224044.1: *3* g.getLanguageFromPosition
 /**
@@ -1430,17 +1270,7 @@ export function getLanguageFromAncestorAtFileNode(
  * This is always a lowercase language name, never None.
  */
 export function getLanguageAtPosition(c: Commands, p: Position): string {
-    const aList: { [key: string]: string }[] = get_directives_dict_list(p);
-    const d: { [key: string]: any } | undefined =
-        scanAtCommentAndAtLanguageDirectives(aList);
-    let language: string =
-        (d && d['language']) ||
-        getLanguageFromAncestorAtFileNode(p) ||
-        c.config.getString('target-language') ||
-        'python';  // 'python' in the original Leo. (leosettings sets it to plain)
-    // 'typescript';  // 'python' in the original Leo. (leosettings sets it to plain)
-
-    return language.toLowerCase();
+    return c.getLanguage(p);
 }
 //@+node:felix.20220412235837.1: *3* g.getOutputNewline
 /**
@@ -4386,13 +4216,25 @@ def stripBlankLines(s: str) -> str:
  * Return True if the encooding is valid.
  */
 export function isValidEncoding(encoding: string): boolean {
-    // ! TEMPORARY !
     if (!encoding) {
         return false;
     }
-    if (encoding.toLowerCase() === 'utf-8') {
-        return true;
+
+    const enc = encoding.toLowerCase();
+
+    // TextDecoder will throw for unknown encodings
+    if (typeof TextDecoder !== 'undefined') {
+        try {
+            // We don't actually need to decode anything – just constructing it is enough.
+            // Note: some browsers accept only canonical names (e.g. "utf-8", "utf-16le", etc.)
+            new TextDecoder(enc);
+            return true;
+        } catch {
+            return false;
+        }
     }
+
+    // Fallback: we have no reliable way to check
     return false;
 
     // try:
@@ -4670,23 +4512,27 @@ export function trace(...args: any[]): void {
 const g_unique_message_d: { [key: string]: boolean } = {};
 
 /**
- * Print the given message once.
+ * Print the given message once. Return True if the message was printed.
  */
-export function print_unique_message(message: string): void {
+export function print_unique_message(message: string): boolean {
     if (!(message in g_unique_message_d)) {
         g_unique_message_d[message] = true;
         console.log(message);
+        return true;
     }
+    return false;
 }
 
 /**
- * Print the given message once.
+ * Print the given message once.  Return True if the message was printed.
  */
-export function es_print_unique_message(message: string, color: string): void {
+export function es_print_unique_message(message: string, color: string): boolean {
     if (!(message in g_unique_message_d)) {
         g_unique_message_d[message] = true;
         es_print(message);
+        return true;
     }
+    return false;
 }
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
@@ -6255,7 +6101,7 @@ export function extractExecutableString(
     }
 
     // Return s if no @language in effect. Should never happen.
-    const language = scanForAtLanguage(c, p);
+    const language = c.getLanguage(p);
     if (!language) {
         return s;
     }
@@ -6560,7 +6406,7 @@ export function computeFileUrl(fn: string, c: Commands, p: Position): string {
         // Handle ancestor @path directives.
         // TODO : MAY HAVE TO USE g.vscodeWorkspaceUri?.fsPath 
         if (c && c.fileName()) {
-            const base = c.getNodePath(p);
+            const base = c.getPath(p);
             w_path = finalize_join(os_path_dirname(c.fileName()), base, w_path);
         } else {
             w_path = finalize(w_path);
@@ -7180,8 +7026,7 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
 
     // honor @path
     let url = p.h.slice(6);
-    const d = c.scanAllDirectives(p);
-    let w_path = d['path'];
+    let w_path = c.getPath(p) || '';
     leo_path = finalize_join(w_path, url);
 
     if (!await os_path_exists(leo_path)) {

@@ -4657,8 +4657,5 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "typescript": "^4.9.5"
-  },
-  "gitCommit": "215af5c",
-  "gitBranch": "devel",
-  "gitDate": "2025-03-12 20:14:00 -0400"
+  }
 }
