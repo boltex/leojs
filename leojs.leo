@@ -21504,11 +21504,11 @@ public get1Char(
 
         // Apply options if provided
         if (options) {
-            if (options.title) inputBox.title = options.title;
-            if (options.prompt) inputBox.prompt = options.prompt;
-            if (options.placeHolder) inputBox.placeholder = options.placeHolder;
-            if (options.password !== undefined) inputBox.password = options.password;
-            if (options.ignoreFocusOut !== undefined) inputBox.ignoreFocusOut = options.ignoreFocusOut;
+            if (options.title) { inputBox.title = options.title; }
+            if (options.prompt) { inputBox.prompt = options.prompt; }
+            if (options.placeHolder) { inputBox.placeholder = options.placeHolder; }
+            if (options.password !== undefined) { inputBox.password = options.password; }
+            if (options.ignoreFocusOut !== undefined) { inputBox.ignoreFocusOut = options.ignoreFocusOut; }
         }
 
         // Auto-accept on first character input
@@ -21521,7 +21521,6 @@ public get1Char(
                 }
             })
         );
-
 
         // Accept empty input on Enter key
         disposables.push(
