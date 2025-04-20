@@ -384,6 +384,14 @@ Common modules such as **crypto**, **os**, **path**, **process** and **child\_pr
     **c.selectPosition()**
 </ul>
 
+**Using Command names**:
+
+When learning Leo's codebase, it may be easier to refer to a command by its 'command name'. You can therefore use  c.doCommandByName('command-name') instead of calling the proper method on the commander. This will return the same value as that method.
+
+**Leo Script Return Values**:
+
+Commands created with @command and @button nodes can return values as well by simply using the 'return' statement.
+
 **Official ivars** of any leoFrame f:
 
 <ul>

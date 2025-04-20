@@ -300,6 +300,10 @@ result = c.doCommandByName('open-outline');
 result = c.executeMinibufferCommand('open-outline');
 ```
 
+This will return the value returned from the command.
+
+Commands created with @command and @button nodes can return values as well.
+
 ## Making operations undoable
 
 Plugins and scripts should call u.beforeX and u.afterX methods to describe the operation that is being performed. 
