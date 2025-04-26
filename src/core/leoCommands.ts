@@ -122,7 +122,7 @@ export class Commands {
     public at_encoding_pattern: RegExp = /^@encoding\s+([\w_-]+)/gm;
     public at_lineending_pattern: RegExp = /^@lineending\s+([\w]+)/gm;
     public at_pagewidth_pattern: RegExp = /^@pagewidth\s+(-?[0-9]+)/gm;
-    public at_path_pattern: RegExp = /^@path\s+([\w_:/\\]+)/gm;
+    public at_path_pattern: RegExp = /^@path\s+(.+)$/gm;
     public at_tabwidth_pattern: RegExp = /^@tabwidth\s+(-?[0-9]+)/gm;
     public at_wrap_pattern: RegExp = /^@wrap/m;
     public at_nowrap_pattern: RegExp = /^@nowrap/m;

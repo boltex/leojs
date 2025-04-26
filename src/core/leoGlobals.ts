@@ -1444,7 +1444,7 @@ export function stripPathCruft(p_path: string): string {
         p_path = p_path.substring(1, p_path.length - 1).trim();
     }
     // We want a *relative* path, not an absolute path.
-    return p_path;
+    return p_path.trim();
 }
 //@+node:felix.20211104233842.1: *3* g.update_directives_pat (new)
 /**
