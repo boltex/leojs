@@ -21561,8 +21561,9 @@ public get1Char(
 </t>
 <t tx="felix.20250311210144.1">## 1.0.10
 
-- Fixed bugs involving file delimiters and syntax coloring as per Leo's #4323
-- Deprecated c.scanAllDirectives and related helpers as per Leo's #4326 
+- Fixed @path to recognize '-' (Leo #4339)
+- Deprecated c.scanAllDirectives and related helpers (Leo #4326)
+- Fixed bugs involving file delimiters and syntax coloring (Leo #4323)
 - Added more unit tests
 
 </t>
