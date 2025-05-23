@@ -441,8 +441,7 @@ export class ExternalFilesController {
             }
         }
         if (!ext) {
-            const theDict = c.scanAllDirectives(c.p);
-            const language = theDict['language'];
+            const language = c.getLanguage(p);
             ext = g.app.language_extension_dict[language];
         }
         if (!ext) {
@@ -576,11 +575,7 @@ export class ExternalFilesController {
         const w_path = await this.compute_temp_file_path(c, p, ext);
         const exists = await g.os_path_exists(w_path);
         // Compute encoding and s.
-        const d2 = c.scanAllDirectives(p);
-        let encoding = d2['encoding'];
-        if (encoding == null) {
-            encoding = c.config.default_derived_file_encoding;
-        }
+        let encoding = c.getEncoding(p);
         const s = g.toEncodedString(p.b, encoding, true);
         // Write the file *only* if it doesn't exist.
         // No need to read the file: recomputing s above suffices.

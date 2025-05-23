@@ -1648,7 +1648,8 @@ export class GitDiffController {
                 );
                 if (body.join('').trim()) {
                     body.unshift('@ignore\n@nosearch\n@language patch\n');
-                    const language = this.find_language(c2, p_in_c);  // #4095.
+                    // #4095.
+                    const language = p_in_c ? c2.getLanguage(p_in_c) : c2.target_language;
                     body.push(`@language ${language}\n`);
                 } else {
                     body = ['Only headline has changed'];
@@ -1779,17 +1780,6 @@ export class GitDiffController {
             }
         }
         return undefined;
-    }
-    //@+node:felix.20250220212822.1: *4* gdc.find_language
-    /**
-     * Return the @language directive in effect at p. 
-     */
-    public find_language(c: Commands, p?: Position): string {
-        // Return the @language directive in effect at p.
-        if (!p || !p.__bool__()) {
-            return c.target_language;
-        }
-        return g.getLanguageFromAncestorAtFileNode(p) || c.target_language;
     }
 
     //@+node:felix.20230709010434.16: *4* gdc.finish
@@ -2048,10 +2038,9 @@ export class GitDiffController {
         root.copyTreeFromSelfTo(hidden_root, true);
         hidden_root.h = rev ? fn + ':' + rev : fn;
         // Set at.encoding first.
-        // Must be called before at.scanAllDirectives.
         at.initReadIvars(hidden_root, fn);
         // Sets at.startSentinelComment/endSentinelComment.
-        at.scanAllDirectives(hidden_root);
+        at.initSentinelComments(hidden_root);
         const new_public_lines = g.splitLines(s);
         const old_private_lines = await at.write_at_clean_sentinels(
             hidden_root

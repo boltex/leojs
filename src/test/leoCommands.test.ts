@@ -141,6 +141,13 @@ suite('Test cases for leoCommands.ts', () => {
         c.alert('test of c.alert');
     });
 
+    //@+node:felix.20250411002257.1: *3* TestCommands.test_c_check_links
+    test('check_c_checkVnodeLinks', () => {
+        const c = self.c;
+        assert.strictEqual(c.checkVnodeLinks(), 0);  // Leo's main checker.
+        assert.strictEqual(c.checkLinks(), 0);  // A slow test, suitable only for unit tests.
+    });
+
     //@+node:felix.20220129224954.7: *3* TestCommands.test_c_checkOutline
     test('test_c_checkOutline', () => {
         const c = self.c;
@@ -263,46 +270,6 @@ suite('Test cases for leoCommands.ts', () => {
         //     assert.strictEqual(got, expected, s);
         // }
     });
-    //@+node:felix.20230423155356.1: *3* TestCommands.test_find_b_h
-    test('test_find_b_h', () => {
-        const c = self.c;
-        const p = self.c.p;
-
-        // Create two children of c.p.
-        const child1 = p.insertAsLastChild();
-        child1.h = 'child1 headline';
-        child1.b = 'child1 line1\nchild2 line2\n';
-        const child2 = p.insertAsLastChild();
-        child2.h = 'child2 headline';
-        child2.b = 'child2 line1\nchild2 line2\n';
-
-        function compareArrays(arr1: Position[], arr2: Position[]) {
-            // Check if the arrays have the same length
-            if (arr1.length !== arr2.length) {
-                return false;
-            }
-
-            for (let [index, elem] of arr1.entries()) {
-                if (!arr2[index].__eq__(elem)) {
-                    return false;
-                }
-            }
-            // all where equal positions
-            return true;
-        }
-
-        // Tests.
-        const list1 = c.find_h(/^child1/);
-        assert.ok(compareArrays(list1, [child1]), list1?.toString() || '');
-        const list2 = c.find_h(/^child1/, '', [child2]);
-        assert.ok(!list2 || !list2.length, list2?.toString() || '');
-        const list3 = c.find_b(/.*\bline2\n/);
-        assert.ok(compareArrays(list3, [child1, child2]), list3?.toString() || '');
-        const list4 = c.find_b(/.*\bline2\n/, '', [child1]);
-        assert.ok(compareArrays(list4, [child1]), list3?.toString() || '');
-
-    });
-
     //@+node:felix.20220129224954.14: *3* TestCommands.test_c_findMatchingBracket
     // ! uncomment if g.MatchBrackets is implemented !
     /* def test_c_findMatchingBracket(self):
@@ -322,6 +289,98 @@ suite('Test cases for leoCommands.ts', () => {
             self.assertTrue(i2 < j2, msg=f"i: {i}, j: {j}")
 
      */
+    //@+node:felix.20250411210256.1: *3* TestCommands.test_c_getEncoding
+    test('test_c_getEncoding', () => {
+        const c = self.c;
+        const p = c.p;
+
+        self.root_p.b = '';  // To ensure default.
+        const child = p.insertAfter();
+        child.h = 'child';
+        child.b = '@encoding utf-8\n';
+        const grand = child.insertAsLastChild();
+        grand.h = 'grand-child';
+        grand.b = '#\n@encoding utf-16\n';
+        const great = grand.insertAsLastChild();
+        great.h = 'great-grand-child';
+        great.b = '';
+
+
+        const table: [Position, string][] = [
+            [great, 'utf-16'],
+            [grand, 'utf-16'],
+            [child, 'utf-8'],
+            [self.root_p, 'utf-8'],
+        ];
+
+        for (const [p2, expected] of table) {
+            const encoding = c.getEncoding(p2);
+            const message = `expected: ${expected} got: ${encoding} ${p2.h}`;
+            assert.strictEqual(encoding, expected, message);
+        }
+
+    });
+    //@+node:felix.20250412151441.1: *3* TestCommands.test_c_getLineEnding
+    test('test_c_getLineEnding', () => {
+        const c = self.c;
+        const p = c.p;
+        const table: [string, string][] = [
+            ['nl', '\n'],
+            ['lf', '\n'],
+            ['cr', '\r'],
+            ['crlf', '\r\n'],
+            ['platform', process.platform?.startsWith('win') ? '\r\n' : '\n'],
+        ];
+        for (const [kind, expected_ending] of table) {
+            const directive = `@lineending ${kind}\n`;
+            p.b = directive;
+            const ending = c.getLineEnding(p);
+            const message = `${directive}: expected ${expected_ending} got ${ending}`;
+            assert.strictEqual(ending, expected_ending, message);
+        }
+    });
+    //@+node:felix.20250412154804.1: *3* TestCommands.test_c_getPageWidth
+    test('test_c_getPageWidth', () => {
+
+        const c = self.c;
+        const p = c.p;
+
+        for (const w of [-40, 40]) {
+            p.b = `@pagewidth ${w}\n`;
+            const n = c.getPageWidth(p);
+            assert.strictEqual(n, w);
+        }
+    });
+    //@+node:felix.20250412154842.1: *3* TestCommands.test_c_tabWidth
+    test('test_c_getTabWidth', () => {
+
+        const c = self.c;
+        const p = c.p;
+
+        for (const w of [-6, 6]) {
+            p.b = `@tabwidth ${w}\n`;
+            const n = c.getTabWidth(p);
+            assert.strictEqual(n, w);
+        }
+    });
+    //@+node:felix.20250412154859.1: *3* TestCommands.test_c_getWrap
+    test('test_c_getWrap', () => {
+
+        const c = self.c;
+        const p = c.p;
+
+        const table: [string, boolean | undefined][] = [
+            ['@nowrap\n', false],
+            ['@wrap\n', true],
+            [p.b, undefined],
+        ];
+
+        for (const [s, expected_val] of table) {
+            p.b = s;
+            const val = c.getWrap(p);
+            assert.strictEqual(val, expected_val);
+        }
+    });
     //@+node:felix.20220129224954.15: *3* TestCommands.test_c_hiddenRootNode_fileIndex
     test('test_c_hiddenRootNode_fileIndex', () => {
         const c = self.c;
@@ -452,16 +511,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.ok(p2 && p2.__bool__());
         assert.ok(!p2.isCloned());
     });
-    //@+node:felix.20220129224954.23: *3* TestCommands.test_c_scanAllDirectives
-    test('test_c_scanAllDirectives', () => {
-        const c = self.c;
-        const d = c.scanAllDirectives(c.p);
-        // These are the commander defaults, without any settings.
-        assert.strictEqual(d['language'], 'python');
-        assert.strictEqual(d['tabwidth'], -4);
-        assert.strictEqual(d['pagewidth'], 132);
-    });
-    //@+node:felix.20220129224954.24: *3* TestCommands.test_c_scanAtPathDirectives
+    //@+node:felix.20220129224954.24: *3* TestCommands.test_c_getPath
     test('test_c_scanAtPathDirectives', () => {
         let c = self.c;
         const p = self.c.p;
@@ -471,8 +521,7 @@ suite('Test cases for leoCommands.ts', () => {
         grand.h = '@path two';
         let great = grand.insertAsLastChild();
         great.h = 'xyz';
-        let aList = g.get_directives_dict_list(great);
-        let w_path = c.scanAtPathDirectives(aList);
+        let w_path = c.getPath(great);
         let endpath = g.os_path_normpath('one/two');
         assert.ok(w_path.endsWith(endpath), `expected '${endpath}' got '${path}'`);
 
@@ -484,28 +533,10 @@ suite('Test cases for leoCommands.ts', () => {
         grand.h = '@path two';
         great = grand.insertAsLastChild();
         great.h = 'xyz';
-        aList = g.get_directives_dict_list(great);
-        w_path = c.scanAtPathDirectives(aList);
+        w_path = c.getPath(great);
         endpath = g.os_path_normpath('one/two');
         assert.ok(w_path.endsWith(endpath), `expected '${endpath}' got '${path}'`);
 
-    });
-
-    //@+node:felix.20220129224954.25: *3* TestCommands.test_c_scanAtPathDirectives_same_name_subdirs
-    test('test_c_scanAtPathDirectives_same_name_subdirs', () => {
-        const c = self.c;
-        // p2 = p.firstChild().firstChild().firstChild()
-        const p = c.p;
-        const child = p.insertAfter();
-        child.h = '@path again';
-        const grand = child.insertAsLastChild();
-        grand.h = '@path again';
-        const great = grand.insertAsLastChild();
-        great.h = 'xyz';
-        const aList = g.get_directives_dict_list(great);
-        const w_path = c.scanAtPathDirectives(aList);
-        const endpath = g.os_path_normpath('again/again');
-        assert.ok(w_path && w_path.endsWith(endpath));
     });
 
     //@+node:felix.20220129224954.26: *3* TestCommands.test_c_tabNannyNode
@@ -653,6 +684,46 @@ suite('Test cases for leoCommands.ts', () => {
         c.deleteComments()
         self.assertEqual(p.b, expected)
      */
+    //@+node:felix.20230423155356.1: *3* TestCommands.test_find_b_h
+    test('test_find_b_h', () => {
+        const c = self.c;
+        const p = self.c.p;
+
+        // Create two children of c.p.
+        const child1 = p.insertAsLastChild();
+        child1.h = 'child1 headline';
+        child1.b = 'child1 line1\nchild2 line2\n';
+        const child2 = p.insertAsLastChild();
+        child2.h = 'child2 headline';
+        child2.b = 'child2 line1\nchild2 line2\n';
+
+        function compareArrays(arr1: Position[], arr2: Position[]) {
+            // Check if the arrays have the same length
+            if (arr1.length !== arr2.length) {
+                return false;
+            }
+
+            for (let [index, elem] of arr1.entries()) {
+                if (!arr2[index].__eq__(elem)) {
+                    return false;
+                }
+            }
+            // all where equal positions
+            return true;
+        }
+
+        // Tests.
+        const list1 = c.find_h(/^child1/);
+        assert.ok(compareArrays(list1, [child1]), list1?.toString() || '');
+        const list2 = c.find_h(/^child1/, '', [child2]);
+        assert.ok(!list2 || !list2.length, list2?.toString() || '');
+        const list3 = c.find_b(/.*\bline2\n/);
+        assert.ok(compareArrays(list3, [child1, child2]), list3?.toString() || '');
+        const list4 = c.find_b(/.*\bline2\n/, '', [child1]);
+        assert.ok(compareArrays(list4, [child1]), list3?.toString() || '');
+
+    });
+
     //@+node:felix.20220129224954.35: *3* TestCommands.test_koi8_r_encoding
     test('test_koi8_r_encoding', () => {
         const c = self.c;

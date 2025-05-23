@@ -793,7 +793,7 @@ export function assert(condition: any, message?: string): void {
 /**
  * A safer alternative to a bare assert.
  */
-export function _assert(condition: any, show_callers: boolean = true): boolean {
+export function _assert(condition: boolean, show_callers: boolean = true): boolean {
     if (unitTesting) {
         assert(condition);
         return true;
@@ -1197,251 +1197,6 @@ export function findReference(
     }
     return undefined;
 }
-//@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
-/**
- *  Scan p for Leo directives found in globalDirectiveList.
- *
- * Returns a dict containing the stripped remainder of the line
- * following the first occurrence of each recognized directive.
- */
-export function get_directives_dict(p: Position): { [key: string]: string } {
-    let d: { [key: string]: string } = {};
-    // The headline has higher precedence because it is more visible.
-    let m: RegExpExecArray | null;
-    for (let [kind, s] of [['head', p.h], ['body', p.b]] as const) {
-        while ((m = directives_pat.exec(s)) !== null) {
-            const word: string = m[1].trim();
-            // 'indices' property is only present when the d flag is set.
-            const i: number = (m as any).indices[1][0];
-            if (d[word]) {
-                continue;
-            }
-            const j: number = i + word.length;
-            if (j < s.length && !' \t\n'.includes(s.charAt(j))) {
-                // Not a valid directive: just ignore it.
-                continue;
-            }
-            // Warning if @path is in the body of an @file node.
-            if (word === 'path' && kind === 'body' && p.isAtFileNode()) {
-                const message = '\n@path is not allowed in the body text of @file nodes\n';
-                print_unique_message(message);
-                continue;
-            }
-            const k: number = skip_line(s, j);
-            const val: string = s.substring(j, k).trim();
-            d[word] = val;
-        }
-    }
-    return d;
-}
-//@+node:felix.20211104213315.1: *3* g.get_directives_dict_list (must be fast)
-/**
- * Scans p and all its ancestors for directives.
- *
- * Returns a list of dicts containing pointers to
- * the start of each directive
- */
-export function get_directives_dict_list(
-    p: Position
-): { [key: string]: string }[] {
-    const result: { [key: string]: string }[] = [];
-    const p1: Position = p.copy();
-    for (let p of p1.self_and_parents(false)) {
-        // No copy necessary: g.get_directives_dict does not change p.
-        result.push(get_directives_dict(p));
-    }
-    return result;
-}
-//@+node:felix.20220110224107.1: *3* g.getLanguageFromAncestorAtFileNode
-/**
- * Return the language in effect at node p.
- *
- * 1. Use an unambiguous @language directive in p itself.
- * 2. Search p's "extended parents" for an @<file> node.
- * 3. Search p's "extended parents" for an unambiguous @language directive.
- */
-export function getLanguageFromAncestorAtFileNode(
-    p: Position
-): string | undefined {
-
-    const v0 = p.v;
-    let seen: Set<VNode>;
-
-    // The same generator as in v.setAllAncestorAtFileNodesDirty.
-    // Original idea by Виталије Милошевић (Vitalije Milosevic).
-    // Modified by EKR.
-
-    function* v_and_parents(v: VNode): Generator<VNode> {
-        if (seen.has(v)) {
-            return;
-        }
-        seen.add(v);
-        yield v;
-        for (const parent_v of v.parents) {
-            if (!seen.has(parent_v)) {
-                yield* v_and_parents(parent_v);
-            }
-        }
-    }
-
-    // First, see if p contains any @language directive.
-    let language = findFirstValidAtLanguageDirective(p.b);
-    if (language) {
-        return language;
-    }
-
-    // Passes 1 and 2: Search body text for unambiguous @language directives.
-
-    // Pass 1: Search body text in direct parents for unambiguous @language directives.
-    for (const p2 of p.self_and_parents(false)) {
-        const languages = findAllValidLanguageDirectives(p2.v.b);
-        if (languages.length === 1) {  // An unambiguous language
-            return languages[0];
-        }
-    }
-
-    // Pass 2: Search body text in extended parents for unambiguous @language directives.
-    seen = new Set([v0.context.hiddenRootNode]);
-    for (const v of v_and_parents(v0)) {
-        const languages = findAllValidLanguageDirectives(v.b);
-        if (languages.length === 1) {  // An unambiguous language
-            return languages[0];
-        }
-    }
-
-    // Passes 3 & 4: Use the file extension in @<file> nodes.
-
-    function get_language_from_headline(v: VNode): string | undefined {
-        /** Return the extension for @<file> nodes. */
-        if (v.isAnyAtFileNode()) {
-            const name = v.anyAtFileNodeName();
-            const [junk, ext] = os_path_splitext(name);
-            const extension = ext.slice(1);  // strip the leading period.
-            const language = app.extension_dict[extension];
-            if (isValidLanguage(language)) {
-                return language;
-            }
-        }
-        return undefined;
-    }
-
-    // Pass 3: Use file extension in headline of @<file> in direct parents.
-    for (const p2 of p.self_and_parents(false)) {
-        language = get_language_from_headline(p2.v);
-        if (language) {
-            return language;
-        }
-    }
-
-    // Pass 4: Use file extension in headline of @<file> nodes in extended parents.
-    seen = new Set([v0.context.hiddenRootNode]);
-    for (const v of v_and_parents(v0)) {
-        language = get_language_from_headline(v);
-        if (language) {
-            return language;
-        }
-    }
-
-    // Return the default language for the commander.
-    const c = p.v.context;
-    return c.target_language || 'python';
-
-    // const v0: VNode = p.v;
-
-    // // The same generator as in v.setAllAncestorAtFileNodesDirty.
-    // // Original idea by Виталије Милошевић (Vitalije Milosevic).
-    // // Modified by EKR.
-    // let seen: VNode[] = [];
-
-    // function* v_and_parents(v: VNode): Generator<VNode> {
-    //     if (seen.indexOf(v) < 0) {
-    //         seen.push(v); // not found, add it
-    //     } else {
-    //         return;
-    //     }
-    //     yield v;
-    //     for (let parent_v of v.parents) {
-    //         if (seen.indexOf(parent_v) < 0) {
-    //             yield* v_and_parents(parent_v); // was  not found
-    //         }
-    //     }
-    // }
-    // /**
-    //  * A helper for all searches.
-    //  * Phase one searches only @<file> nodes.
-    //  */
-    // function find_language(v: VNode, phase: number): string | undefined {
-    //     if (phase === 1 && !v.isAnyAtFileNode()) {
-    //         return undefined;
-    //     }
-    //     let w_language: string;
-    //     // #1693: Scan v.b for an *unambiguous* @language directive.
-    //     const languages: string[] = findAllValidLanguageDirectives(v.b);
-    //     if (languages.length === 1) {
-    //         // An unambiguous language
-    //         return languages[0];
-    //     }
-    //     let name: string;
-    //     let junk: string;
-    //     let ext: string;
-    //     if (v.isAnyAtFileNode()) {
-    //         // Use the file's extension.
-    //         name = v.anyAtFileNodeName();
-    //         [junk, ext] = os_path_splitext(name);
-    //         ext = ext.slice(1); // strip the leading period.
-    //         w_language = app.extension_dict[ext];
-
-    //         if (isValidLanguage(w_language)) {
-    //             return w_language;
-    //         }
-    //     }
-    //     return undefined;
-    // }
-
-    // // First, see if p contains any @language directive.
-    // let language = findFirstValidAtLanguageDirective(p.b);
-    // if (language) {
-    //     return language;
-    // }
-    // // Phase 1: search only @<file> nodes: #2308.
-    // // Phase 2: search all nodes.
-    // for (let phase of [1, 2]) {
-    //     // Search direct parents.
-    //     for (let p2 of p.self_and_parents(false)) {
-    //         language = find_language(p2.v, phase);
-    //         if (language) {
-    //             return language;
-    //         }
-    //     }
-    //     // Search all extended parents.
-    //     seen = [v0.context.hiddenRootNode];
-    //     for (let v of v_and_parents(v0)) {
-    //         language = find_language(v, phase);
-    //         if (language) {
-    //             return language;
-    //         }
-    //     }
-    // }
-    // return undefined;
-}
-//@+node:felix.20220110224044.1: *3* g.getLanguageFromPosition
-/**
- * Return the language in effect at position p.
- * This is always a lowercase language name, never None.
- */
-export function getLanguageAtPosition(c: Commands, p: Position): string {
-    const aList: { [key: string]: string }[] = get_directives_dict_list(p);
-    const d: { [key: string]: any } | undefined =
-        scanAtCommentAndAtLanguageDirectives(aList);
-    let language: string =
-        (d && d['language']) ||
-        getLanguageFromAncestorAtFileNode(p) ||
-        c.config.getString('target-language') ||
-        'python';  // 'python' in the original Leo. (leosettings sets it to plain)
-    // 'typescript';  // 'python' in the original Leo. (leosettings sets it to plain)
-
-    return language.toLowerCase();
-}
 //@+node:felix.20220412235837.1: *3* g.getOutputNewline
 /**
  * Convert the name of a line ending to the line ending itself.
@@ -1531,231 +1286,6 @@ export function isValidLanguage(language: string): boolean {
         language in app.language_delims_dict ||
         language in app.delegate_language_dict
     ));
-}
-//@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
-/**
- * Scan aList for @comment and @language directives.
- * @comment should follow @language if both appear in the same node.
- */
-export function scanAtCommentAndAtLanguageDirectives(
-    aList: { [key: string]: string }[]
-):
-    | {
-        language: string;
-        comment: string;
-        delims: [string, string, string];
-    }
-    | undefined {
-    let lang: string | undefined = undefined;
-    for (let d of aList) {
-        const comment: string = d['comment'];
-        const language: string = d['language'];
-        // Important: assume @comment follows @language.
-        let delim1: string | undefined;
-        let delim2: string | undefined;
-        let delim3: string | undefined;
-        if (language) {
-            [lang, delim1, delim2, delim3] = set_language(language, 0);
-        }
-        if (comment) {
-            [delim1, delim2, delim3] = set_delims_from_string(comment);
-        }
-        if (comment || language) {
-            const delims: [string, string, string] = [
-                delim1!,
-                delim2!,
-                delim3!,
-            ];
-            const w_d = { language: lang!, comment: comment, delims: delims };
-            return w_d;
-        }
-    }
-    return undefined;
-}
-//@+node:felix.20221220000621.1: *3* g.scanAtEncodingDirectives
-/**
- * Scan aList for @encoding directives.
- */
-export function scanAtEncodingDirectives(
-    aList: any[]
-): BufferEncoding | undefined {
-    for (let d of aList) {
-        const encoding = d['encoding'] as BufferEncoding | undefined;
-        if (encoding && isValidEncoding(encoding)) {
-            return encoding;
-        }
-        if (encoding && !unitTesting) {
-            error('invalid @encoding:', encoding);
-        }
-    }
-    return undefined;
-}
-//@+node:felix.20220412232541.1: *3* g.scanAtHeaderDirectives
-/**
- * scan aList for @header and @noheader directives.
- * @param aList
- */
-export function scanAtHeaderDirectives(aList: any[]): void {
-    for (let d of aList) {
-        if (d['header'] && d['noheader']) {
-            error('conflicting @header and @noheader directives');
-        }
-    }
-}
-//@+node:felix.20220412232548.1: *3* g.scanAtLineendingDirectives
-/**
- * Scan aList for @lineending directives.
- * @param aList
- */
-export function scanAtLineendingDirectives(aList: any[]): string | undefined {
-    for (let d of aList) {
-        const e = d['lineending'];
-        if (['cr', 'crlf', 'lf', 'nl', 'platform'].includes(e)) {
-            const lineending = getOutputNewline(undefined, e);
-            return lineending;
-        }
-        // else:
-        // g.error("invalid @lineending directive:",e)
-    }
-    return undefined;
-}
-//@+node:felix.20220412232628.1: *3* g.scanAtPagewidthDirectives
-/**
- * Scan aList for @pagewidth directives.
- * @param aList
- * @param issue_error_flag
- */
-export function scanAtPagewidthDirectives(
-    aList: any[],
-    issue_error_flag?: boolean
-): number | undefined {
-    for (let d of aList) {
-        const s = d['pagewidth'];
-        if (s && s !== '') {
-            let i;
-            let val;
-            [i, val] = skip_long(s, 0);
-            if (val && val > 0) {
-                return val;
-            }
-            if (issue_error_flag && !unitTesting) {
-                error('ignoring @pagewidth', s);
-            }
-        }
-    }
-    return undefined;
-}
-//@+node:felix.20211104225158.1: *3* g.scanAtTabwidthDirectives & scanAllTabWidthDirectives
-/**
- * Scan aList for '@tabwidth' directives.
- */
-export function scanAtTabwidthDirectives(
-    aList: any[],
-    issue_error_flag = false
-): number | undefined {
-    for (let d of aList) {
-        const s: string = d['tabwidth'];
-        if (s || s === '') {
-            const w_skip_long = skip_long(s, 0);
-            const val: number | undefined = w_skip_long[1];
-
-            if (val) {
-                return val;
-            }
-            if (issue_error_flag && !unitTesting) {
-                error('ignoring @tabwidth', s);
-            }
-        }
-    }
-    return undefined;
-}
-
-/**
- * Scan p and all ancestors looking for '@tabwidth' directives.
- */
-export function scanAllAtTabWidthDirectives(
-    c: Commands,
-    p?: Position
-): number | undefined {
-    let ret: number | undefined;
-    if (c && p && p.__bool__()) {
-        const aList: any[] = get_directives_dict_list(p);
-        let val: number | undefined = scanAtTabwidthDirectives(aList);
-        ret = val === undefined ? c.tab_width : val;
-    } else {
-        ret = undefined;
-    }
-    return ret;
-}
-//@+node:felix.20220412232655.1: *3* g.scanAtWrapDirectives
-/**
- * Scan aList for @wrap and @nowrap directives.
- * @param aList
- * @param issue_error_flag
- */
-export function scanAtWrapDirectives(
-    aList: any[],
-    issue_error_flag?: boolean
-): boolean | undefined {
-    for (let d of aList) {
-        const dWrap = d['wrap'];
-        const dNoWrap = d['nowrap'];
-        if (dWrap !== undefined) {
-            return true;
-        }
-        if (dNoWrap !== undefined) {
-            return false;
-        }
-    }
-    return undefined;
-}
-
-/**
- * Scan p and all ancestors looking for @wrap/@nowrap directives.
- * @param aList
- * @param issue_error_flag
- */
-export function scanAllAtWrapDirectives(
-    c: Commands,
-    p: Position
-): boolean | undefined {
-    let ret: boolean | undefined;
-
-    if (c && p && p.__bool__()) {
-        const w_default = !!(c && c.config.getBool('body-pane-wraps'));
-        const aList = get_directives_dict_list(p);
-        const val = scanAtWrapDirectives(aList);
-        ret = val === undefined ? w_default : val;
-    }
-
-    return ret;
-}
-//@+node:felix.20221219221446.1: *3* g.scanForAtLanguage
-/**
- * Scan position p and p's ancestors looking only for @language and @ignore directives.
- *
- * Returns the language found, or c.target_language.
- */
-export function scanForAtLanguage(
-    c: Commands,
-    p: Position
-): string | undefined {
-    // Unlike the code in x.scanAllDirectives, this code ignores @comment directives.
-    if (c && p && p.__bool__()) {
-        for (let w_p of p.self_and_parents(false)) {
-            const d = get_directives_dict(w_p);
-            if (d['language']) {
-                const z = d['language'];
-                let language;
-                let delim1;
-                let delim2;
-                let delim3;
-                [language, delim1, delim2, delim3] = set_language(z, 0);
-                return language;
-            }
-        }
-    }
-    return c.target_language;
 }
 //@+node:felix.20220110202727.1: *3* g.set_delims_from_language
 /**
@@ -1914,7 +1444,7 @@ export function stripPathCruft(p_path: string): string {
         p_path = p_path.substring(1, p_path.length - 1).trim();
     }
     // We want a *relative* path, not an absolute path.
-    return p_path;
+    return p_path.trim();
 }
 //@+node:felix.20211104233842.1: *3* g.update_directives_pat (new)
 /**
@@ -2110,33 +1640,6 @@ export function fullPath(
 
     // }
     // return '';
-}
-//@+node:felix.20230518232533.1: *3* g.getEncodingAt
-/**
- * Return the encoding in effect at p and/or for string s.
- *
- * Read logic:  s is not None.
- * Write logic: s is None.
- */
-export function getEncodingAt(
-    p: Position,
-    b?: Uint8Array
-): BufferEncoding | undefined {
-    let e: BufferEncoding | undefined;
-    let junk_s;
-    // A BOM overrides everything.
-    if (b) {
-        [e, junk_s] = stripBOM(b);
-        if (e) {
-            return e;
-        }
-    }
-    const aList = get_directives_dict_list(p);
-    e = scanAtEncodingDirectives(aList);
-    if (b && Buffer.from(b).toString().trim() && !e) {
-        e = 'utf-8' as BufferEncoding;
-    }
-    return e;
 }
 //@+node:felix.20230518225302.1: *3* g.is_binary_file/external_file/string
 // export function is_binary_file(f: any): boolean {
@@ -3947,12 +3450,12 @@ export function checkUnicode(s: string, encoding?: string): string {
  */
 export function getPythonEncodingFromString(
     readData?: Uint8Array | string
-): BufferEncoding | undefined {
-    let encoding = undefined;
+): BufferEncoding {
+    let encoding: BufferEncoding = 'utf-8';
     let [tag, tag2] = ['# -*- coding:', '-*-'];
     let [n1, n2] = [tag.length, tag2.length];
     if (readData) {
-        // For Python 3.x we must convert to unicode before calling startsWith.
+        // Convert to unicode before calling startsWith.
         // The encoding doesn't matter: we only look at the first line, and if
         // the first line is an encoding line, it will contain only ascii characters.
         const s = toUnicode(readData, 'ascii');
@@ -4053,7 +3556,7 @@ export function toUnicode(
         encoding = 'utf-8';
     }
     try {
-        s = Buffer.from(s).toString(encoding);
+        return Buffer.from(s).toString(encoding);
     } catch (exception) {
         // except(UnicodeDecodeError, UnicodeError):  # noqa
         //     # https://wiki.python.org/moin/UnicodeDecodeError
@@ -4065,7 +3568,7 @@ export function toUnicode(
         error(`${tag}: unexpected error! encoding: ${encoding}, s:\n${s}`);
         trace(callers());
     }
-    return s as string;
+    return '';
 }
 
 //@+node:felix.20220410213527.1: *3* g.Whitespace
@@ -4386,13 +3889,25 @@ def stripBlankLines(s: str) -> str:
  * Return True if the encooding is valid.
  */
 export function isValidEncoding(encoding: string): boolean {
-    // ! TEMPORARY !
     if (!encoding) {
         return false;
     }
-    if (encoding.toLowerCase() === 'utf-8') {
-        return true;
+
+    const enc = encoding.toLowerCase();
+
+    // TextDecoder will throw for unknown encodings
+    if (typeof TextDecoder !== 'undefined') {
+        try {
+            // We don't actually need to decode anything – just constructing it is enough.
+            // Note: some browsers accept only canonical names (e.g. "utf-8", "utf-16le", etc.)
+            new TextDecoder(enc);
+            return true;
+        } catch {
+            return false;
+        }
     }
+
+    // Fallback: we have no reliable way to check
     return false;
 
     // try:
@@ -4670,23 +4185,27 @@ export function trace(...args: any[]): void {
 const g_unique_message_d: { [key: string]: boolean } = {};
 
 /**
- * Print the given message once.
+ * Print the given message once. Return True if the message was printed.
  */
-export function print_unique_message(message: string): void {
+export function print_unique_message(message: string): boolean {
     if (!(message in g_unique_message_d)) {
         g_unique_message_d[message] = true;
         console.log(message);
+        return true;
     }
+    return false;
 }
 
 /**
- * Print the given message once.
+ * Print the given message once.  Return True if the message was printed.
  */
-export function es_print_unique_message(message: string, color: string): void {
+export function es_print_unique_message(message: string, color: string): boolean {
     if (!(message in g_unique_message_d)) {
         g_unique_message_d[message] = true;
         es_print(message);
+        return true;
     }
+    return false;
 }
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
@@ -6255,7 +5774,7 @@ export function extractExecutableString(
     }
 
     // Return s if no @language in effect. Should never happen.
-    const language = scanForAtLanguage(c, p);
+    const language = c.getLanguage(p);
     if (!language) {
         return s;
     }
@@ -6560,7 +6079,7 @@ export function computeFileUrl(fn: string, c: Commands, p: Position): string {
         // Handle ancestor @path directives.
         // TODO : MAY HAVE TO USE g.vscodeWorkspaceUri?.fsPath 
         if (c && c.fileName()) {
-            const base = c.getNodePath(p);
+            const base = c.getPath(p);
             w_path = finalize_join(os_path_dirname(c.fileName()), base, w_path);
         } else {
             w_path = finalize(w_path);
@@ -7180,8 +6699,7 @@ export async function open_mimetype(c: Commands, p: Position): Promise<void> {
 
     // honor @path
     let url = p.h.slice(6);
-    const d = c.scanAllDirectives(p);
-    let w_path = d['path'];
+    let w_path = c.getPath(p) || '';
     leo_path = finalize_join(w_path, url);
 
     if (!await os_path_exists(leo_path)) {

@@ -516,12 +516,13 @@ export class LeoImportCommands {
      * Export headlines for c.p and its subtree to the file with the given name.
      */
     public async exportHeadlines(fileName: string): Promise<void> {
+        const c = this.c;
         const p = this.c.p;
         const nl = this.output_newline;
         if (!p || !p.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(p);
         const firstLevel = p.level();
         try {
             const w_uri = g.makeVscodeUri(fileName);
@@ -552,7 +553,7 @@ export class LeoImportCommands {
         if (!p || !p.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(p);
         const firstLevel = p.level();
 
         try {
@@ -589,7 +590,7 @@ export class LeoImportCommands {
         if (!current || !current.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(current);
         this.webType = webType;
         try {
             // theFile = open(fileName, 'w')
@@ -630,7 +631,7 @@ export class LeoImportCommands {
         toString = false
     ): Promise<string | undefined> {
         const c = this.c;
-        this.setEncoding();
+        this.encoding = c.getEncoding(c.p);
         for (const fileName of paths) {
             g.setGlobalOpenDir(fileName);
             let w_path;
@@ -744,12 +745,13 @@ export class LeoImportCommands {
     }
     //@+node:felix.20230511002352.19: *4* ic.weave
     public async weave(filename: string): Promise<void> {
+        const c = this.c;
         const p = this.c.p;
         const nl = this.output_newline;
         if (!p || !p.__bool__()) {
             return;
         }
-        this.setEncoding();
+        this.encoding = c.getEncoding(p);
 
         try {
             // with open(filename, 'w', this.encoding) as f
@@ -827,7 +829,7 @@ export class LeoImportCommands {
             return this.import_binary_file(fileName, parent);
         }
         // Init ivars.
-        this.setEncoding(parent, c.config.default_at_auto_file_encoding);
+        this.encoding = c.getEncoding(parent);
 
         [ext, s] = await this.init_import(ext, fileName, s);
         if (s == null || !ext) {
@@ -1512,7 +1514,7 @@ export class LeoImportCommands {
             g.es_print('can not run parse-body: node has children:', p.h);
             return;
         }
-        const language = g.scanForAtLanguage(c, p) || '';
+        const language = c.getLanguage(p);
         this.treeType = '@file';
         const ext = '.' + d[language];
         const parser = g.app.classDispatchDict[ext];
@@ -1720,18 +1722,6 @@ export class LeoImportCommands {
         s = s.trimEnd();
         return s;
     }
-    //@+node:felix.20230511002352.58: *4* ic.setEncoding
-    public setEncoding(p?: Position, p_default?: BufferEncoding): void {
-        const c = this.c;
-        const encoding = g.getEncodingAt(p || c.p) || p_default;
-        if (encoding && g.isValidEncoding(encoding)) {
-            this.encoding = encoding;
-        } else if (p_default) {
-            this.encoding = p_default;
-        } else {
-            this.encoding = 'utf-8';
-        }
-    }
     //@-others
 }
 //@+node:felix.20230520010426.1: ** class MindMapImporter
@@ -1878,7 +1868,7 @@ export class MindMapImporter {
     /**
      * Return the level of the given row, a list of fields.
      */
-    public csv_level(row: any[]): number {
+    public csv_level(row: string[]): number {
         let count = 0;
         while (count <= row.length) {
             if (row[count]) {
@@ -1973,9 +1963,9 @@ export class MORE_Importer {
         if (!c.p || !c.p.__bool__()) {
             return undefined;
         }
-        ic.setEncoding();
+        ic.encoding = c.getEncoding(c.p);
         g.setGlobalOpenDir(fileName);
-        let [s, e] = await g.readFileIntoString(fileName);
+        let [s, _e] = await g.readFileIntoString(fileName);
         if (s == null) {
             return undefined;
         }
@@ -3026,7 +3016,7 @@ export class ToDoImporter {
     /**
      * Return the tasks from the given path.
      */
-    public async get_tasks_from_file(p_path: string): Promise<any[]> {
+    public async get_tasks_from_file(p_path: string): Promise<ToDoTask[]> {
         const tag = 'import-todo-text-files';
         const w_exists = await g.os_path_exists(p_path);
         if (!w_exists) {
@@ -3058,8 +3048,8 @@ export class ToDoImporter {
      */
     public async import_files(
         files: string[]
-    ): Promise<{ [key: string]: any[] }> {
-        const d: { [key: string]: any[] } = {};
+    ): Promise<{ [key: string]: ToDoTask[] }> {
+        const d: { [key: string]: ToDoTask[] } = {};
         const tag = 'import-todo-text-files';
         for (const w_path of files) {
             try {
@@ -3084,7 +3074,7 @@ export class ToDoImporter {
      * Parse the contents of a file.
      * Return a list of ToDoTask objects.
      */
-    public parse_file_contents(s: string): any[] {
+    public parse_file_contents(s: string): ToDoTask[] {
         let trace = false;
         const tasks: ToDoTask[] = [];
         for (const line of g.splitLines(s)) {
@@ -3140,7 +3130,7 @@ export class ToDoImporter {
 
         Return a python dict. Keys are full paths; values are lists of ToDoTask objects.
      */
-    public async prompt_for_files(): Promise<{ [key: string]: any }> {
+    public async prompt_for_files(): Promise<{ [key: string]: ToDoTask[] }> {
         const c = this.c;
         const types: [string, string][] = [
             ['Text files', '*.txt'],
@@ -3498,7 +3488,7 @@ export class ZimImportController {
 /**
  * Hold node data.
  */
-class Node {
+class LegacyImportNode {
     public h: string;
     public level: number;
     public lines: string[];
@@ -3536,7 +3526,7 @@ export class LegacyExternalFileImporter {
     /**
      * Add a line to the present node.
      */
-    public add(line: string, stack: Node[]): void {
+    public add(line: string, stack: LegacyImportNode[]): void {
         if (stack && stack.length) {
             const node = stack[stack.length - 1];
             node.lines.push(line);
@@ -3593,8 +3583,8 @@ export class LegacyExternalFileImporter {
         const ignore = this.ignore.map((z) => delim1 + z); // tuple(delim1 + z for z in this.ignore);
 
         // Handle each line of the file.
-        const nodes: Node[] = []; // An list of Nodes, in file order.
-        let stack: Node[] = []; // A stack of Nodes.
+        const nodes: LegacyImportNode[] = []; // An list of Nodes, in file order.
+        let stack: LegacyImportNode[] = []; // A stack of Nodes.
         for (const line of g.splitLines(s)) {
             s = line.trimStart();
             const lws = line.substring(
@@ -3625,7 +3615,7 @@ export class LegacyExternalFileImporter {
                     h = root_h;
                 }
                 // Create a node and push it.
-                const node = new Node(h, stack.length);
+                const node = new LegacyImportNode(h, stack.length);
                 nodes.push(node);
                 stack.push(node);
             } else if (s.startsWith(delim1 + '@-node')) {
@@ -3644,7 +3634,7 @@ export class LegacyExternalFileImporter {
         const last = c.lastTopLevel();
         const root = last.insertAfter();
         root.h = `imported file: ${root_h}`;
-        let stack2 = [root];
+        let position_stack = [root];
         for (const node of nodes) {
             const b = g.dedent(node.lines.join(''));
             const level = node.level;
@@ -3652,14 +3642,14 @@ export class LegacyExternalFileImporter {
                 root.h = root_h;
                 root.b = b;
             } else {
-                const parent = stack2[level - 1];
+                const parent = position_stack[level - 1];
                 const p = parent.insertAsLastChild();
                 p.b = b;
                 p.h = node.h;
                 // Good for debugging.
                 // p.h = f"{level} {node.h}"
-                stack2 = stack2.slice(0, level);
-                stack2.push(p);
+                position_stack = position_stack.slice(0, level);
+                position_stack.push(p);
             }
         }
         c.selectPosition(root);

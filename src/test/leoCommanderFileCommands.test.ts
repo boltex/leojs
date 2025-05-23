@@ -43,15 +43,6 @@ suite('Test cases for commanderFileCommands.ts', () => {
         const at = c.atFileCommands;
         const p = c.p;
 
-        /**
-         * A version of at.precheck that always returns True.
-         */
-        const dummy_precheck = (fileName: string, root: any): Promise<boolean> => {
-            return Promise.resolve(true);
-        };
-
-        at.precheck = dummy_precheck;  // Force all writes.
-
         // Define data.
         const raw_contents = '"""Test File"""\n';
         const altered_raw_contents = '"""Test File (changed)"""\n';

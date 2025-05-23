@@ -4,10 +4,9 @@
  * Tests of leoUndo.ts
  */
 import * as assert from 'assert';
-import { afterEach, after, before, beforeEach } from 'mocha';
+import { afterEach, before, beforeEach } from 'mocha';
 
 import * as g from '../core/leoGlobals';
-import * as vscode from 'vscode';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
@@ -104,110 +103,107 @@ suite('Test Undo', () => {
     test('test_convertAllBlanks', () => {
         const c = self.c;
 
+        const before = g.dedent(
+            `\
+            @tabwidth -4
+
+            line 1
+                line 2
+                  line 3
+            line4`
+        );
+        const after = g.dedent(
+            `\
+            @tabwidth -4
+
+            line 1
+            TABline 2
+            TAB  line 3
+            line4`
+        ).replace(/TAB/g, '\t');
+        const [i, j] = [13, before.length];
+        const func = c.convertAllBlanks;
+        runTest(self, before, after, i, j, func);
     });
-    /* def test_convertAllBlanks(self):
-        c = self.c
-        before = textwrap.dedent("""\
-            @tabwidth -4
 
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        after = textwrap.dedent("""\
-            @tabwidth -4
-
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        i, j = 13, len(before)
-        func = c.convertAllBlanks
-        self.runTest(before, after, i, j, func)
-     */
     //@+node:felix.20220129225102.5: *3* TestUndo.test_convertAllTabs
     test('test_convertAllTabs', () => {
         const c = self.c;
+        const before = g.dedent(
+            `\
+            @tabwidth -4
 
+            line 1
+            TABline 2
+            TAB  line 3
+            line4`
+        ).replace(/TAB/g, '\t');
+        const after = g.dedent(
+            `\
+            @tabwidth -4
+
+            line 1
+                line 2
+                  line 3
+            line4`
+        );
+        const [i, j] = [13, 45];
+        const func = c.convertAllTabs;
+        runTest(self, before, after, i, j, func);
     });
-    /* def test_convertAllTabs(self):
-        c = self.c
-        before = textwrap.dedent("""\
-            @tabwidth -4
 
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        after = textwrap.dedent("""\
-            @tabwidth -4
-
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        i, j = 13, 45
-        func = c.convertAllTabs
-        self.runTest(before, after, i, j, func)
-     */
     //@+node:felix.20220129225102.6: *3* TestUndo.test_convertBlanks
     test('test_convertBlanks', () => {
         const c = self.c;
+        const before = g.dedent(
+            `\
+            @tabwidth -4
 
+            line 1
+                line 2
+                  line 3
+            line4`
+        );
+        const after = g.dedent(
+            `\
+            @tabwidth -4
+
+            line 1
+            TABline 2
+            TAB  line 3
+            line4`
+        ).replace(/TAB/g, '\t');
+        const [i, j] = [13, 51];
+        const func = c.convertBlanks;
+        runTest(self, before, after, i, j, func);
     });
-    /* def test_convertBlanks(self):
-        c = self.c
-        before = textwrap.dedent("""\
-            @tabwidth -4
 
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        after = textwrap.dedent("""\
-            @tabwidth -4
-
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        i, j = 13, 51
-        func = c.convertBlanks
-        self.runTest(before, after, i, j, func)
-     */
     //@+node:felix.20220129225102.7: *3* TestUndo.test_convertTabs
     test('test_convertTabs', () => {
         const c = self.c;
 
+        const before = g.dedent(
+            `\
+            @tabwidth -4
+
+            line 1
+            TABline 2
+            TAB  line 3
+            line4`
+        ).replace(/TAB/g, '\t');
+        const after = g.dedent(
+            `\
+            @tabwidth -4
+
+            line 1
+                line 2
+                  line 3
+            line4`
+        );
+        const [i, j] = [13, 45];
+        const func = c.convertTabs;
+        runTest(self, before, after, i, j, func);
     });
-    /* def test_convertTabs(self):
-        c = self.c
-        before = textwrap.dedent("""\
-            @tabwidth -4
-
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        after = textwrap.dedent("""\
-            @tabwidth -4
-
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        i, j = 13, 45
-        func = c.convertTabs
-        self.runTest(before, after, i, j, func)
-     */
     //@+node:felix.20220129225102.8: *3* TestUndo.test_dedentBody
     test('test_dedentBody', () => {
         const c = self.c;
@@ -368,26 +364,6 @@ suite('Test Undo', () => {
         const func = c.extract;
         runTest(self, before, after, i, j, func);
     });
-    /* def test_extract_test(self):
-        c = self.c
-        before = textwrap.dedent("""\
-            before
-                < < section > >
-                sec line 1
-                    sec line 2 indented
-            sec line 3
-            after
-    """)
-        after = textwrap.dedent("""\
-            before
-                < < section > >
-            after
-    """)
-        i = before.find('< <')
-        j = before.find('line 3')
-        func = c.extract
-        self.runTest(before, after, i, j, func)
-     */
     //@+node:felix.20220129225102.13: *3* TestUndo.test_line_to_headline
     test('test_line_to_headline', () => {
         const c = self.c;
@@ -407,21 +383,6 @@ suite('Test Undo', () => {
         const func = c.line_to_headline;
         runTest(self, before, after, i, j, func);
     });
-    /* def test_line_to_headline(self):
-        c = self.c
-        before = textwrap.dedent("""\
-            before
-            headline
-            after
-    """)
-        after = textwrap.dedent("""\
-            before
-            after
-    """)
-        i, j = 10, 10
-        func = c.line_to_headline
-        self.runTest(before, after, i, j, func)
-     */
     //@+node:felix.20220129225102.14: *3* TestUndo.test_restore_marked_bits
     test('test_restore_marked_bits', () => {
         const c = self.c;
@@ -457,43 +418,14 @@ suite('Test Undo', () => {
             u.afterChangeNodeContents(p, "Body Text", bunch);
             c.setChanged();
             p.setDirty();
-
             u.undo();
-
             assert.strictEqual(p.b, oldText);
             assert.strictEqual(p.isMarked(), oldMarked);
             u.redo();
-
             assert.strictEqual(p.b, newText);
             assert.strictEqual(p.isMarked(), oldMarked);
         }
     });
-    /* def test_restore_marked_bits(self):
-        c, p = self.c, self.c.p
-        # Test of #1694.
-        u, w = c.undoer, c.frame.body.wrapper
-        oldText = p.b
-        newText = p.b + '\n#changed'
-        for marked in (True, False):
-            c.undoer.clearUndoState()  # Required.
-            if marked:
-                p.setMarked()
-            else:
-                p.clearMarked()
-            oldMarked = p.isMarked()
-            w.setAllText(newText)  # For the new assert in w.updateAfterTyping.
-            u.setUndoTypingParams(p,
-                undo_type='typing',
-                oldText=oldText,
-                newText=newText,
-            )
-            u.undo()
-            self.assertEqual(p.b, oldText)
-            self.assertEqual(p.isMarked(), oldMarked)
-            u.redo()
-            self.assertEqual(p.b, newText)
-            self.assertEqual(p.isMarked(), oldMarked)
-     */
     //@+node:felix.20220129225102.15: *3* TestUndo.test_undo_group
     /**
      * Test an off-by-one error in c.undoer.bead.
@@ -528,34 +460,6 @@ suite('Test Undo', () => {
         assert.strictEqual(original.b, original_s);
 
     });
-    /* def test_undo_group(self):
-        # Test an off-by-one error in c.undoer.bead.
-        # The buggy redoGroup code worked if the undo group was the first item on the undo stack.
-        c, p = self.c, self.c.p
-        original = p.insertAfter()
-        original_s = original.b = textwrap.dedent("""\
-            @tabwidth -4
-
-            line 1
-                line 2
-                  line 3
-            line4
-    """)
-        c.undoer.clearUndoState()
-        c.selectPosition(original)
-        c.copyOutline()  # Add state to the undo stack!
-        c.pasteOutline()
-        c.convertAllBlanks()  # Uses undoGroup.
-        c.undoer.undo()
-        self.assertEqual(original.b, original_s)
-        c.pasteOutline()
-        c.convertAllBlanks()
-        c.pasteOutline()
-        c.convertAllBlanks()
-        c.undoer.undo()
-        c.undoer.redo()
-        self.assertEqual(original.b, original_s)
-     */
     //@-others
 
 });

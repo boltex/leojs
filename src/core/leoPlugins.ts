@@ -6,6 +6,8 @@
 //@+<< leoPlugins imports & annotations >>
 //@+node:felix.20240103232627.1: ** << leoPlugins imports & annotations >>
 import * as g from './leoGlobals';
+type Tags = string | string[];
+
 //@-<< leoPlugins imports & annotations >>
 //@+others
 //@+node:felix.20240103232148.1: ** Top-level functions (leoPlugins.py)
@@ -19,7 +21,7 @@ export function init(): void {
 /**
  * A wrapper so plugins can still call leoPlugins.registerHandler.
  */
-export function registerHandler(tags: string | string[], fn: (tag: string, keywords: Record<string, unknown>) => unknown): void {
+export function registerHandler(tags: Tags, fn: (tag: string, keywords: Record<string, unknown>) => unknown): void {
     return g.app.pluginsController.registerHandler(tags, fn);
 }
 
@@ -221,7 +223,7 @@ export class LeoPluginsController {
     /**
      * Register one or more exclusive handlers
      */
-    public registerExclusiveHandler(tags: string | string[], fn: () => any): void {
+    public registerExclusiveHandler(tags: Tags, fn: () => any): void {
 
         if (Array.isArray(tags)) {
             for (const tag of tags) {
@@ -258,7 +260,7 @@ export class LeoPluginsController {
     /**
      * Register one or more handlers
      */
-    public registerHandler(tags: string | string[], fn: (...args: any[]) => any): void {
+    public registerHandler(tags: Tags, fn: (...args: any[]) => any): void {
         if (Array.isArray(tags)) {
             for (const tag of tags) {
                 this.registerOneHandler(tag, fn);
@@ -289,7 +291,7 @@ export class LeoPluginsController {
         this.handlers[tag] = items;
     }
     //@+node:felix.20240103232554.31: *4* plugins.unregisterHandler
-    public unregisterHandler(tags: string | string[], fn: () => any): void {
+    public unregisterHandler(tags: Tags, fn: () => any): void {
         if (Array.isArray(tags)) {
             for (const tag of tags) {
                 this.unregisterOneHandler(tag, fn);

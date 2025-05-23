@@ -884,7 +884,7 @@ export class CommanderFileCommands {
             return;
         }
 
-        const language: string = g.getLanguageAtPosition(c, root);
+        const language: string = c.getLanguage(root);
 
         let single: string;
         let start: string;

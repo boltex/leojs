@@ -2392,8 +2392,8 @@ export class FileCommands {
             if (p.isAtIgnoreNode()) {
                 p.moveToNodeAfterTree();
             } else if (p.isAtAutoNode() || p.isAtFileNode()) {
-                const fn: string = c.getNodeFileName(p);
-                files.push(['md5_' + p.gnx, md5(fn.split('\r\n').join('\n'))]);
+                const w_path = c.getPath(p);
+                files.push([w_path, 'md5_' + p.gnx]);
                 p.moveToNodeAfterTree();
             } else {
                 p.moveToThreadNext();

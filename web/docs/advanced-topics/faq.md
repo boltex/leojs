@@ -615,7 +615,7 @@ g is the leo.core.leoGlobal. Use g to access any function or class in leo/core/l
     **g.app.\***                 Leo's global variables.
 </ul>
 
-c is the Commander object for the present outline. Commander objects define **subcommanders** corresponding to files in leo/core and leo/commands::
+c is the Commander object for the present outline. Commander objects define **subcommanders** corresponding to files in leo/core and leo/commands:
 
 <ul>
     In leo/core...\

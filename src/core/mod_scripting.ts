@@ -1364,13 +1364,13 @@ export class ScriptingController {
             if (commandName.startsWith(prefix)) {
                 const commandName2 = commandName.slice(prefix.length).trim();
 
-                // Create a *second* function, to avoid collision in c.commandsDict.
-                const registerAllCommandsCallback = (p_func: (...args: any[]) => void = func.bind(this)) => {
-                    p_func();
-                };
-
-                // Assign documentation
-                registerAllCommandsCallback.__doc__ = (func as any)['__doc__'] || '';
+                // * Unused in LeoJS *
+                // // Create a *second* function, to avoid collision in c.commandsDict.
+                // const registerAllCommandsCallback = (p_func: (...args: any[]) => void = func.bind(this)) => {
+                //     return p_func();
+                // };
+                // // Assign documentation
+                // registerAllCommandsCallback.__doc__ = (func as any)['__doc__'] || '';
 
                 // Make sure we never redefine an existing commandName.
                 if (commandName2 in c.commandsDict) {
@@ -1381,7 +1381,7 @@ export class ScriptingController {
                 } else {
                     c.registerCommand(
                         commandName2,
-                        // ! TODO : CHACK IF BOTH BIND AND __ivar__ NECESSARY ! 
+                        // ! TODO : CHECK IF BOTH BIND AND __ivar__ NECESSARY ! 
                         // * BINDING TO THS SCRIPTING CONTROLLER and assinginig ivars *
                         // Object.assign(registerAllCommandsCallback.bind(this), { __ivars__: ['c', 'theScriptingController'], __position__: p }),
                         Object.assign(func.bind(this), { __ivars__: ['c', 'theScriptingController'], __position__: p }),

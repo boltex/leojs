@@ -879,7 +879,7 @@ export class LeoFind {
     public _find_all_matches(patterns: RegExp[]): [number, Position, string][] {
 
         const c = this.c;
-        const target_language = g.getLanguageFromAncestorAtFileNode(c.p);
+        const target_language = c.getLanguage(c.p);
         let p = c.rootPosition();
         const results: [number, Position, string][] = [];
         const seen = new Set();
@@ -896,7 +896,7 @@ export class LeoFind {
             seen.add(p.v);
 
             // Only search nodes with the desired language.
-            let language = g.getLanguageFromAncestorAtFileNode(p);
+            let language = c.getLanguage(p);
             if (language === target_language) {
                 const b = p.b;
                 let i = 0;  // The index within p.b of the start of s.
@@ -960,7 +960,7 @@ export class LeoFind {
         const c = this.c;
 
         // Get the patterns of the language in effect.
-        const language = g.getLanguageFromAncestorAtFileNode(c.p);
+        const language = c.getLanguage(c.p);
         const patterns: string[] = language ? {
             'python': this.python_patterns,
             'rust': this.rust_patterns,
