@@ -3094,7 +3094,7 @@ export class LeoUI extends NullGui {
             const p = c.p;
             const w_language = this._getBodyLanguage(p);
 
-            const tempTabWidth = g.scanAllAtTabWidthDirectives(c, p);
+            const tempTabWidth = c.getTabWidth(p);
             const w_tabWidth: number | boolean = tempTabWidth || !!tempTabWidth;
 
             const insert = p.v.insertSpot;
@@ -3397,7 +3397,7 @@ export class LeoUI extends NullGui {
     private _getBodyLanguage(p: Position): string {
         const c = p.v.context;
         let w_language = "plain";
-        const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
+        const w_wrap = !!c.getWrap(p);
         if (g.useSyntaxColoring(p)) {
 
             // DEPRECATED leojs old colorizer language detection--------
@@ -3411,7 +3411,7 @@ export class LeoUI extends NullGui {
             // ---------------------------------------------------------
 
             // * as per original Leo's leoColorizer.py
-            w_language = g.getLanguageFromAncestorAtFileNode(p) || c.config.getLanguage('target-language');
+            w_language = c.getLanguage(p) || c.config.getLanguage('target-language');
             w_language = w_language.toLowerCase();
         }
         // Replace language string if in 'exceptions' array
@@ -6467,11 +6467,11 @@ export class LeoUI extends NullGui {
 
             // Apply options if provided
             if (options) {
-                if (options.title) inputBox.title = options.title;
-                if (options.prompt) inputBox.prompt = options.prompt;
-                if (options.placeHolder) inputBox.placeholder = options.placeHolder;
-                if (options.password !== undefined) inputBox.password = options.password;
-                if (options.ignoreFocusOut !== undefined) inputBox.ignoreFocusOut = options.ignoreFocusOut;
+                if (options.title) { inputBox.title = options.title; }
+                if (options.prompt) { inputBox.prompt = options.prompt; }
+                if (options.placeHolder) { inputBox.placeholder = options.placeHolder; }
+                if (options.password !== undefined) { inputBox.password = options.password; }
+                if (options.ignoreFocusOut !== undefined) { inputBox.ignoreFocusOut = options.ignoreFocusOut; }
             }
 
             // Auto-accept on first character input
@@ -6484,7 +6484,6 @@ export class LeoUI extends NullGui {
                     }
                 })
             );
-
 
             // Accept empty input on Enter key
             disposables.push(

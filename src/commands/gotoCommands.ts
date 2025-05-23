@@ -549,9 +549,10 @@ export class GoToCommands {
         const c = this.c;
         const old_target_language = c.target_language;
         let d;
+        let delims: [string, string, string] | [undefined, undefined, undefined];
         try {
-            c.target_language = g.getLanguageAtPosition(c, root);
-            d = c.scanAllDirectives(root);
+            c.target_language = c.getLanguage(root);
+            delims = c.getDelims(root);
         } finally {
             c.target_language = old_target_language;
         }
@@ -559,13 +560,13 @@ export class GoToCommands {
         let delims1;
         let delims2;
         let delims3;
-        [delims1, delims2, delims3] = d['delims'];
+        [delims1, delims2, delims3] = delims;
 
         if (delims1) {
             return [delims1, undefined];
         }
 
-        return [delims2, delims3];
+        return [delims2!, delims3]; // TODO : Check if this is correct.
     }
     //@+node:felix.20230805150659.1: *4* goto.get_3_delims
     /**
@@ -574,15 +575,15 @@ export class GoToCommands {
     public get_3_delims(root: Position): [string, string, string] {
         const c = this.c;
         const old_target_language = c.target_language;
-        let d;
 
+        let delims: [string, string, string] | [undefined, undefined, undefined];
         try {
-            c.target_language = g.getLanguageAtPosition(c, root);
-            d = c.scanAllDirectives(root);
+            c.target_language = c.getLanguage(root);
+            delims = c.getDelims(root);
         } finally {
             c.target_language = old_target_language;
         }
-        return d['delims'];
+        return delims as [string, string, string]; // TODO : Check if this is correct.
     }
     //@+node:felix.20221218143456.13: *4* goto.get_external_file_with_sentinels
     /**

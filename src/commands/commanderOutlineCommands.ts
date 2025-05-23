@@ -35,8 +35,8 @@ function createMoveMarkedNode(c: Commands): Position {
  * FileCommands read logic. Several experiments failed, and the code is very ugly.
  * In short, it seems wise to do things the foolproof way.
  */
-function computeVnodeInfoDict(c: Commands): any {
-    const d: any = {};
+function computeVnodeInfoDict(c: Commands): Record<string, Bead> {
+    const d: Record<string, Bead> = {};
     for (let v of c.all_unique_nodes()) {
         if (!d[v.toString()]) {
             d[v.toString()] = { v: v, head: v.h, body: v.b };

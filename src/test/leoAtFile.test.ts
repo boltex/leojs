@@ -49,27 +49,6 @@ suite('Test cases for leoAtFile.ts', () => {
             verbose=False,
         )
      */
-    //@+node:felix.20230528191911.3: *3* TestAtFile.test_at_scanAllDirectives
-    test('test_at_scanAllDirectives', () => {
-
-        const at = self.at;
-        const c = self.c;
-
-        const d = at.scanAllDirectives(c.p);
-        // These are the commander defaults, without any settings.
-        assert.strictEqual(d['language'], 'python');
-        assert.strictEqual(d['tabwidth'], -4);
-        assert.strictEqual(d['pagewidth'], 132);
-    });
-    //@+node:felix.20230528191911.4: *3* TestAtFile.test_at_scanAllDirectives_minimal_
-    test('test_at_scanAllDirectives_minimal_', () => {
-        const at = self.at;
-        const c = self.c;
-
-        let d = at.scanAllDirectives(c.p);
-        d = c.atFileCommands.scanAllDirectives(c.p);
-        assert.ok(d && Object.keys(d).length);
-    });
     //@+node:felix.20230528191911.5: *3* TestAtFile.test_bug_1469
     // ! UNCOMMENT WHENEVER A leoBridge IS IMPLEMENTED
     /* def test_bug_1469(self):
@@ -291,6 +270,12 @@ suite('Test cases for leoAtFile.ts', () => {
         await at.initWriteIvars(root);
         at.putBody(root);
         const result = at.outputList.join('');
+
+        if (result !== expected) {
+            g.trace('language:', c.atFileCommands.language);
+            g.printObj(expected);
+            g.printObj(result);
+        }
         assert.strictEqual(result, expected);
     });
     //@+node:felix.20230528191911.15: *3* TestAtFile.test_putBody_at_all
@@ -402,20 +387,19 @@ suite('Test cases for leoAtFile.ts', () => {
     });
     //@+node:felix.20230528191911.19: *3* TestAtFile.test_putCodeLine
     test('test_putCodeLine', async () => {
-        /* def test_putCodeLine(self):
 
-            const at = self.at;
-            const p = self.c.p;
-            await at.initWriteIvars(p)
-            at.startSentinelComment = '#'
-            table = (
-                'Line without newline',
-                'Line with newline',
-                ' ',
-            )
-            for line in table:
-                at.putCodeLine(line, 0)
-         */
+        const at = self.at;
+        const p = self.c.p;
+        await at.initWriteIvars(p);
+        at.startSentinelComment = '#';
+        const table = [
+            'Line without newline',
+            'Line with newline',
+            ' ',
+        ];
+        for (const line of table) {
+            at.putCodeLine(line, 0);
+        }
     });
     //@+node:felix.20230528191911.20: *3* TestAtFile.test_putDelims
     test('test_putDelims', async () => {
@@ -444,13 +428,6 @@ suite('Test cases for leoAtFile.ts', () => {
         const at = self.at;
         const p = self.c.p;
         await at.initWriteIvars(p);
-
-        // class Status:  # at.putBody defines the status class.
-        //     at_comment_seen = False
-        //     at_delims_seen = False
-        //     at_warning_given = True  # Always suppress warning messages.
-        //     has_at_others = False
-        //     in_code = True
 
         // For now, test only the case that hasn't been covered:
         // kind == at.othersDirective and not status.in_code
@@ -526,10 +503,8 @@ suite('Test cases for leoAtFile.ts', () => {
 
         const at = self.at;
         const c = self.c;
-        // Duplicate init logic...
-        at.initCommonIvars();
-        at.scanAllDirectives(c.p);
         const encoding = 'utf-8';
+        let w_writeUri: vscode.Uri | undefined;
         try {
             // https://stackoverflow.com/questions/23212435
             // f = tempfile.NamedTemporaryFile(delete=False, encoding=encoding, mode='w')
@@ -538,7 +513,7 @@ suite('Test cases for leoAtFile.ts', () => {
             const timestamp: number = new Date().getTime();
             const fn = "tempfile" + timestamp.toString(32) + ".tmp";
 
-            const w_writeUri = g.makeVscodeUri(fn);
+            w_writeUri = g.makeVscodeUri(fn);
             const writeData = Buffer.from("", 'utf8');
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
@@ -549,8 +524,12 @@ suite('Test cases for leoAtFile.ts', () => {
             //
         }
         finally {
-            // f.close()
-            // os.unlink(f.name)
+            // Clean up the test file.
+            if (w_writeUri) {
+                await vscode.workspace.fs.delete(w_writeUri, { recursive: true });
+            }
+
+
         }
 
     });
@@ -558,27 +537,35 @@ suite('Test cases for leoAtFile.ts', () => {
     test('test_replaceFile_no_target_file', async () => {
 
         // ! UNCOMMENT / DELETE IF at.outputFileName IS RESOLVED 
-        // const at = self.at;
-        // const c = self.c;
-        // // Duplicate init logic...
-        // at.initCommonIvars();
-        // at.scanAllDirectives(c.p);
-        // const encoding = 'utf-8';
-        // at.outputFileName = undefined;  // The point of this test, but I'm not sure it matters.
-        // try{
-        //     // https://stackoverflow.com/questions/23212435
-        //     f = tempfile.NamedTemporaryFile(delete=False, encoding=encoding, mode='w')
-        //     const fn = f.name;
-        //     const contents = 'test contents';
-        //     val = at.replaceFile(contents, encoding, fn, at.root)
-        //     assert val, val
-        // }catch(e){
-        //     //
-        // }
-        // finally{
-        //     f.close()
-        //     os.unlink(f.name)
-        // }
+        const at = self.at;
+        const c = self.c;
+
+        const encoding = 'utf-8';
+        at.targetFileName = undefined;  // The point of this test, but I'm not sure it matters.
+        let w_writeUri: vscode.Uri | undefined;
+        try {
+            // https://stackoverflow.com/questions/23212435
+            // f = tempfile.NamedTemporaryFile(delete=False, encoding=encoding, mode='w')
+            // const fn = f.name;
+            const contents = 'test contents';
+            const timestamp: number = new Date().getTime();
+            const fn = "tempfile" + timestamp.toString(32) + ".tmp";
+
+            w_writeUri = g.makeVscodeUri(fn);
+            const writeData = Buffer.from("", 'utf8');
+            await vscode.workspace.fs.writeFile(w_writeUri, writeData);
+
+            const val = await at.replaceFile(contents, encoding, fn, at.root!);
+            assert.ok(val, val.toString());
+        } catch (e) {
+            //
+        }
+        finally {
+            // Clean up the test file.
+            if (w_writeUri) {
+                await vscode.workspace.fs.delete(w_writeUri, { recursive: true });
+            }
+        }
 
     });
     //@+node:felix.20230528191911.27: *3* TestAtFile.test_replaceFile_same_contents
@@ -586,10 +573,8 @@ suite('Test cases for leoAtFile.ts', () => {
 
         const at = self.at;
         const c = self.c;
-        // Duplicate init logic...
-        at.initCommonIvars();
-        at.scanAllDirectives(c.p);
         const encoding = 'utf-8';
+        let w_writeUri: vscode.Uri | undefined;
         try {
             // https://stackoverflow.com/questions/23212435
             // f = tempfile.NamedTemporaryFile(delete=False, encoding=encoding, mode='w')
@@ -601,7 +586,7 @@ suite('Test cases for leoAtFile.ts', () => {
             const timestamp: number = new Date().getTime();
             const fn = "tempfile" + timestamp.toString(32) + ".tmp";
 
-            const w_writeUri = g.makeVscodeUri(fn);
+            w_writeUri = g.makeVscodeUri(fn);
             const writeData = Buffer.from(contents, 'utf8');
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
@@ -611,8 +596,10 @@ suite('Test cases for leoAtFile.ts', () => {
             //
         }
         finally {
-            // f.close()
-            // os.unlink(f.name)
+            // Clean up the test file.
+            if (w_writeUri) {
+                await vscode.workspace.fs.delete(w_writeUri, { recursive: true });
+            }
         }
 
     });
@@ -781,17 +768,28 @@ suite('Test the FastAtRead class', () => {
         LB missing reference >>
         #AT+node:ekr.20211103093633.1: ** node 2
         #ATverbatim
-        # ATothers doesn't matter
-
+        #ATothers doesn't generate anything.
         ATothers
         #AT-all
         #AT@nosearch
         #AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
+
+        const blacken = false;  // #4323: Ignore the @language directive in .txt files.
+        g.app.write_black_sentinels = blacken;
+        const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
+        const expected = test_s.replace(/# @others doesn't/g, "#@others doesn't");
+
         x.read_into_root(contents, 'test', root);
-        const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        const results = await c.atFileCommands.atFileToString(root, true);
+
+        if (results !== expected) {
+            g.printObj(g.splitLines(test_s));
+            g.printObj(g.splitLines(results));
+            g.printObj(g.splitLines(expected));
+        }
+        assert.strictEqual(results, expected);
     });
     //@+node:felix.20230528191921.8: *3* TestFastAtRead.test_at_comment (and @first)
     test('test_at_comment', async () => {
@@ -832,19 +830,32 @@ suite('Test the FastAtRead class', () => {
         !!!AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
+
+        const blacken = false;  // #4323: Ignore the @language directive in .txt files.
+        g.app.write_black_sentinels = blacken;
+        const test_s = contents;
+        const expected = test_s;
+
         x.read_into_root(contents, 'test', root);
-        const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        const results = await c.atFileCommands.atFileToString(root, true);
+
+        if (results !== expected) {
+            g.printObj(g.splitLines(test_s));
+            g.printObj(g.splitLines(results));
+            g.printObj(g.splitLines(expected));
+        }
+        assert.strictEqual(results, expected);
+
         const child1 = root.firstChild();
         const child2 = child1.next();
         const child3 = child2.next();
         const table: [Position, string][] = [
             [child1, g.angleBrackets(' test ')],
             [child2, 'spam'],
-            [child3, 'eggs']
+            [child3, 'eggs'],
         ];
-        for (let [child, w_h] of table) {
-            assert.strictEqual(child.h, w_h);
+        for (const [child, h] of table) {
+            assert.strictEqual(child.h, h);
         }
     });
     //@+node:felix.20230528191921.10: *3* TestFastAtRead.test_at_delims
@@ -884,9 +895,25 @@ suite('Test the FastAtRead class', () => {
         !!AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<').replace(/SPACE/g, ' ');
         //@-<< define contents >>
+        const blacken = false;  // #4323: Ignore the @language directive in .txt files.
+        g.app.write_black_sentinels = blacken;
+        const test_s = blacken
+            ? contents
+                .replace(/#@/g, '# @')
+                .replace(/!!@/g, '!! @')
+            : contents;
+        const expected = test_s;
+
         x.read_into_root(contents, 'test', root);
-        const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        const results = await c.atFileCommands.atFileToString(root, true);
+
+        if (results !== expected) {
+            g.printObj(g.splitLines(test_s));
+            g.printObj(g.splitLines(results));
+            g.printObj(g.splitLines(expected));
+        }
+        assert.strictEqual(results, expected);
+
         const child1 = root.firstChild();
         const child2 = child1.next();
         const child3 = child2.next();
@@ -895,9 +922,11 @@ suite('Test the FastAtRead class', () => {
             [child2, 'spam'],
             [child3, 'eggs'],
         ];
-        for (let [child, w_h] of table) {
-            assert.strictEqual(child.h, w_h);
+
+        for (const [child, h] of table) {
+            assert.strictEqual(child.h, h);
         }
+
     });
     //@+node:felix.20230528191921.12: *3* TestFastAtRead.test_at_last
     test('test_at_last', async () => {
@@ -963,9 +992,23 @@ suite('Test the FastAtRead class', () => {
         #AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
+
+        const blacken = false; // #4323: Ignore the @language directive in .txt files.
+
+        g.app.write_black_sentinels = blacken;
+        const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
+        const expected = test_s;
+
         x.read_into_root(contents, 'test', root);
-        const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        const results = await c.atFileCommands.atFileToString(root, true);
+
+        if (results !== expected) {
+            g.printObj(g.splitLines(test_s));
+            g.printObj(g.splitLines(results));
+            g.printObj(g.splitLines(expected));
+        }
+        assert.strictEqual(results, expected);
+
     });
     //@+node:felix.20230528191921.17: *3* TestFastAtRead.test_at_section_delim
     test('test_at_section_delim', async () => {
@@ -1170,7 +1213,7 @@ suite('Test the FastAtRead class', () => {
     test('test_html_doc_part', async () => {
         const c = self.c;
         const x = self.x as FastAtRead;
-        const h = '@file /test/test_html_doc_part.py';
+        const h = '@file /test/test_html_doc_part.html';
         const root = c.rootPosition()!;
         root.h = h;  // To match contents.
         //@+<< define contents >>
@@ -1180,7 +1223,23 @@ suite('Test the FastAtRead class', () => {
         <!--AT+leo-ver=5-thin-->
         <!--AT+node:${root.gnx}: * ${h}-->
         <!--AT@language html-->
+        <!--AT+at-->
+        Line 1.
 
+        Line 2.
+        <!--AT@c-->
+        <!--AT-leo-->
+        `).replace(/AT/g, '@').replace(/LB/g, '<<');
+
+        //@-<< define contents >>
+        //@+<< define expected >>
+        //@+node:felix.20250410233552.1: *4* << define expected >> (test_html_doc_part)
+        // Be careful: no line should look like a Leo sentinel!
+        // Use neither a raw string nor an f-string here.
+        let expected = g.dedent(`\
+        <!--AT+leo-ver=5-thin-->
+        <!--AT+node:${root.gnx}: * ${h}-->
+        <!--AT@language html-->
         <!--AT+at-->
         <!--
         Line 1.
@@ -1189,11 +1248,26 @@ suite('Test the FastAtRead class', () => {
         -->
         <!--AT@c-->
         <!--AT-leo-->
-        `).replace(/AT/g, '@').replace(/LB/g, '<<');
-        //@-<< define contents >>
+        `).replace(/AT/g, '@');
+        //@-<< define expected >>
+        const blacken = false; // #4323: Ignore the @language directive in .txt files.
+        g.app.write_black_sentinels = blacken;
+        const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
+        expected = blacken ? expected.replace(/#@/g, '# @') : expected;
+
+        x.read_into_root(contents, 'test', root);
+        const results = await c.atFileCommands.atFileToString(root, true);
+
+        if (results !== expected) {
+            g.printObj(g.splitLines(test_s));
+            g.printObj(g.splitLines(results));
+            g.printObj(g.splitLines(expected));
+        }
+        assert.strictEqual(results, expected);
+
         x.read_into_root(contents, 'test', root);
         const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        assert.strictEqual(s, expected);
     });
     //@+node:felix.20230528191921.27: *3* TestFastAtRead.test_verbatim
     test('test_verbatim', async () => {

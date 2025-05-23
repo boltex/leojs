@@ -120,7 +120,7 @@ The `@auto` directive imports an external file into a tree of nodes.
 | .ts                         | TypeScript         |
 | .xml                        | XML                |
 
-You can also specify importers *explicitly* as follows::
+You can also specify importers *explicitly* as follows:
 
 | @auto-xxx          | Importer         |
 |:-------------------|:-----------------|
@@ -438,7 +438,7 @@ Leo does not recognize `@` or `@doc` in `@asis` trees or when the `@all`
 `@encoding <encoding>`
  
 <ul>
-    Specifies the Unicode encoding for an external file. For example::
+    Specifies the Unicode encoding for an external file. For example:
 
         `@encoding iso-8859-1`
 
@@ -453,14 +453,14 @@ Leo does not recognize `@` or `@doc` in `@asis` trees or when the `@all`
     sentinels. `@first` lines must be the *very first* lines in an `@<file>` node.
     More then one `@first` lines may appear.
 
-    This creates two first lines, a shebang line and a Python encoding line::
+    This creates two first lines, a shebang line and a Python encoding line:
 
 ```
 @firѕt #! /usr/bin/env python
 @firѕt # -*- coding: utf-8 -*-
 ```
 
-    Here is a perl example::
+    Here is a perl example:
 
 ```
 @firѕt #!/bin/sh -- # perl, to stop looping

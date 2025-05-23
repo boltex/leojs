@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.0.10
+
+- Fixed @path to recognize '-' (Leo #4339)
+- Deprecated c.scanAllDirectives and related helpers (Leo #4326)
+- Fixed bugs involving file delimiters and syntax coloring (Leo #4323)
+- Added more unit tests
+
 ## 1.0.9
 
 - When using in vscode for the web, absolute paths now point to root of workspace. (for @<file> and @path directives)

@@ -95,7 +95,7 @@ The code uses the a and b terminology. It's concise and easy to remember.
 **Fact 2**: The opcode indices ai, aj, bi, bj *never* change because
 neither x.a nor x.b changes.
 
-Plain lines of the result can be built up by copying lines from x.b to x.results::
+Plain lines of the result can be built up by copying lines from x.b to x.results:
 
     'replace'   x.results.extend(x.b[b1:b2])
     'delete'    do nothing  (b1 == b2)
@@ -153,13 +153,13 @@ This completes an informal proof of the correctness of the algorithm.
 
 The leading and trailing sentinels lines are easy special cases. This
 code, appearing before the main loop, ensures that leading lines are
-written first, and only once::
+written first, and only once:
 
     x.put_sentinels(0)
     x.sentinels[0] = []
 
 Similarly, this line, at the end of the main loop, writes trailing
-sentinels::
+sentinels:
 
     x.results.extend(x.trailing_sentinels)
 

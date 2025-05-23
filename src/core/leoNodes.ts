@@ -312,6 +312,7 @@ export class Position {
     _childIndex: number;
     stack: StackEntry[];
     _isRoot: boolean = false;
+    at_directive_pattern: RegExp = /@([\w]+)/gm;
 
     //@+others
     //@+node:felix.20210126210412.1: *3* p.ctor & other special methods...
@@ -957,141 +958,6 @@ export class Position {
     // subtree_with_unique_vnodes_iter = unique_subtree
 
     //@+node:felix.20210202235315.1: *3* p.Getters
-    //@+node:felix.20210102233013.1: *4* p.VNode proxies
-    //@+node:felix.20210102233013.2: *5* p.Comparisons
-    public anyAtFileNodeName(): string {
-        return this.v.anyAtFileNodeName();
-    }
-
-    public atAutoNodeName(): string {
-        return this.v.atAutoNodeName();
-    }
-
-    public atCleanNodeName(): string {
-        return this.v.atCleanNodeName();
-    }
-
-    public atEditNodeName(): string {
-        return this.v.atEditNodeName();
-    }
-
-    public atFileNodeName(): string {
-        return this.v.atFileNodeName();
-    }
-
-    public atNoSentinelsFileNodeName(): string {
-        return this.v.atNoSentinelsFileNodeName();
-    }
-
-    public atShadowFileNodeName(): string {
-        return this.v.atShadowFileNodeName();
-    }
-
-    public atSilentFileNodeName(): string {
-        return this.v.atSilentFileNodeName();
-    }
-
-    public atThinFileNodeName(): string {
-        return this.v.atThinFileNodeName();
-    }
-
-    public isAnyAtFileNode(): boolean {
-        return this.v.isAnyAtFileNode();
-    }
-
-    public isAtAllNode(): boolean {
-        return this.v.isAtAllNode();
-    }
-
-    public isAtAutoNode(): boolean {
-        return this.v.isAtAutoNode();
-    }
-
-    public isAtAutoRstNode(): boolean {
-        return this.v.isAtAutoRstNode();
-    }
-
-    public isAtCleanNode(): boolean {
-        return this.v.isAtCleanNode();
-    }
-
-    public isAtEditNode(): boolean {
-        return this.v.isAtEditNode();
-    }
-
-    public isAtFileNode(): boolean {
-        return this.v.isAtFileNode();
-    }
-
-    public isAtIgnoreNode(): boolean {
-        return this.v.isAtIgnoreNode();
-    }
-
-    public isAtNoSentinelsFileNode(): boolean {
-        return this.v.isAtNoSentinelsFileNode();
-    }
-
-    public isAtOthersNode(): boolean {
-        return this.v.isAtOthersNode();
-    }
-
-    public isAtRstFileNode(): boolean {
-        return this.v.isAtRstFileNode();
-    }
-
-    public isAtSilentFileNode(): boolean {
-        return this.v.isAtSilentFileNode();
-    }
-
-    public isAtShadowFileNode(): boolean {
-        return this.v.isAtShadowFileNode();
-    }
-
-    public isAtThinFileNode(): boolean {
-        return this.v.isAtThinFileNode();
-    }
-
-    public matchHeadline(pattern: string): boolean {
-        return this.v.matchHeadline(pattern);
-    }
-
-    //@+node:felix.20210102233013.3: *5* p.Headline & body strings
-    public bodyString(): string {
-        return this.v.bodyString();
-    }
-
-    public headString(): string {
-        return this.v.headString();
-    }
-    //@+node:felix.20210102233013.4: *5* p.Status bits
-    public isDirty(): boolean {
-        return this.v.isDirty();
-    }
-
-    public isMarked(): boolean {
-        return this.v.isMarked();
-    }
-
-    public isOrphan(): boolean {
-        return this.v.isOrphan();
-    }
-
-    public isSelected(): boolean {
-        return this.v.isSelected();
-    }
-
-    public isTopBitSet(): boolean {
-        return this.v.isTopBitSet();
-    }
-
-    public isVisited(): boolean {
-        return this.v.isVisited();
-    }
-
-    public status(): number {
-        return this.v.status();
-    }
-
     //@+node:felix.20210112010737.1: *4* p.children & parents
     //@+node:felix.20210112010737.2: *5* p.childIndex
     // This used to be time-critical code.
@@ -1113,58 +979,34 @@ export class Position {
         return this.v.children.length;
     }
 
-    //@+node:felix.20210202235315.10: *4* p.getX & VNode compatibility traversal routines
-    // These methods are useful abbreviations.
-    // Warning: they make copies of positions, so they should be used _sparingly_
+    //@+node:felix.20250410220505.1: *4* p.findDirective (new)
+    /**
+     * Return True if the given directive occurs in p.h or p.b.
+     */
+    findDirective(directive_name: string): boolean {
+        const p = this;
+        if (directive_name.startsWith('@')) {
+            directive_name = directive_name.slice(1);
+        }
+        // The headline has higher precedence because it is more visible.
+        for (const [kind, s] of [['head', p.h], ['body', p.b]] as [string, string][]) {
+            this.at_directive_pattern.lastIndex = 0;
+            let match;
+            while ((match = this.at_directive_pattern.exec(s)) !== null) {
+                if (directive_name === match[1]) {
+                    return true;
+                }
+            }
+        }
 
-    public getBack(): Position {
-        return this.copy().moveToBack();
+        return false;
     }
-
-    public getFirstChild(): Position {
-        return this.copy().moveToFirstChild();
-    }
-
-    public getLastChild(): Position {
-        return this.copy().moveToLastChild();
-    }
-
-    public getLastNode(): Position {
-        return this.copy().moveToLastNode();
-    }
-    // def getLastVisible   (): return this.copy().moveToLastVisible();
-
-    public getNext(): Position {
-        return this.copy().moveToNext();
-    }
-
-    public getNodeAfterTree(): Position {
-        return this.copy().moveToNodeAfterTree();
-    }
-
-    public getNthChild(n: number): Position {
-        return this.copy().moveToNthChild(n);
-    }
-
-    public getParent(): Position {
-        return this.copy().moveToParent();
-    }
-
-    public getThreadBack(): Position {
-        return this.copy().moveToThreadBack();
-    }
-
-    public getThreadNext(): Position {
-        return this.copy().moveToThreadNext();
-    }
-    // New in Leo 4.4.3 b2: add c args.
-
-    public getVisBack(c: Commands): Position {
-        return this.copy().moveToVisBack(c)!;
-    }
-
-    public getVisNext(c: Commands): Position {
-        return this.copy().moveToVisNext(c)!;
+    //@+node:felix.20210202235315.14: *4* p.findRootPosition
+    public findRootPosition(): Position {
+        // 2011/02/25: always use c.rootPosition
+        const p: Position = this;
+        const c: Commands = p.v.context;
+        return c.rootPosition()!;
     }
 
     //@+node:felix.20230717211349.1: *4* p.get_UNL and related methods
@@ -1277,6 +1119,60 @@ export class Position {
         return 'unl:gnx:' + `//${file_part}#${this.gnx}`;
 
     }
+    //@+node:felix.20210202235315.10: *4* p.getX & VNode compatibility traversal routines
+    // These methods are useful abbreviations.
+    // Warning: they make copies of positions, so they should be used _sparingly_
+
+    public getBack(): Position {
+        return this.copy().moveToBack();
+    }
+
+    public getFirstChild(): Position {
+        return this.copy().moveToFirstChild();
+    }
+
+    public getLastChild(): Position {
+        return this.copy().moveToLastChild();
+    }
+
+    public getLastNode(): Position {
+        return this.copy().moveToLastNode();
+    }
+    // def getLastVisible   (): return this.copy().moveToLastVisible();
+
+    public getNext(): Position {
+        return this.copy().moveToNext();
+    }
+
+    public getNodeAfterTree(): Position {
+        return this.copy().moveToNodeAfterTree();
+    }
+
+    public getNthChild(n: number): Position {
+        return this.copy().moveToNthChild(n);
+    }
+
+    public getParent(): Position {
+        return this.copy().moveToParent();
+    }
+
+    public getThreadBack(): Position {
+        return this.copy().moveToThreadBack();
+    }
+
+    public getThreadNext(): Position {
+        return this.copy().moveToThreadNext();
+    }
+    // New in Leo 4.4.3 b2: add c args.
+
+    public getVisBack(c: Commands): Position {
+        return this.copy().moveToVisBack(c)!;
+    }
+
+    public getVisNext(c: Commands): Position {
+        return this.copy().moveToVisNext(c)!;
+    }
+
     //@+node:felix.20210202235315.12: *4* p.hasBack/Next/Parent/ThreadBack
     public hasBack(): boolean {
         const p: Position = this;
@@ -1337,14 +1233,6 @@ export class Position {
             n -= 1;
         }
         return false;
-    }
-
-    //@+node:felix.20210202235315.14: *4* p.findRootPosition
-    public findRootPosition(): Position {
-        // 2011/02/25: always use c.rootPosition
-        const p: Position = this;
-        const c: Commands = p.v.context;
-        return c.rootPosition()!;
     }
 
     //@+node:felix.20210202235315.15: *4* p.isAncestorOf
@@ -1507,6 +1395,141 @@ export class Position {
             }
         }
         return found ? offset : undefined;
+    }
+
+    //@+node:felix.20210102233013.1: *4* p.VNode proxies
+    //@+node:felix.20210102233013.2: *5* p.Comparisons
+    public anyAtFileNodeName(): string {
+        return this.v.anyAtFileNodeName();
+    }
+
+    public atAutoNodeName(): string {
+        return this.v.atAutoNodeName();
+    }
+
+    public atCleanNodeName(): string {
+        return this.v.atCleanNodeName();
+    }
+
+    public atEditNodeName(): string {
+        return this.v.atEditNodeName();
+    }
+
+    public atFileNodeName(): string {
+        return this.v.atFileNodeName();
+    }
+
+    public atNoSentinelsFileNodeName(): string {
+        return this.v.atNoSentinelsFileNodeName();
+    }
+
+    public atShadowFileNodeName(): string {
+        return this.v.atShadowFileNodeName();
+    }
+
+    public atSilentFileNodeName(): string {
+        return this.v.atSilentFileNodeName();
+    }
+
+    public atThinFileNodeName(): string {
+        return this.v.atThinFileNodeName();
+    }
+
+    public isAnyAtFileNode(): boolean {
+        return this.v.isAnyAtFileNode();
+    }
+
+    public isAtAllNode(): boolean {
+        return this.v.isAtAllNode();
+    }
+
+    public isAtAutoNode(): boolean {
+        return this.v.isAtAutoNode();
+    }
+
+    public isAtAutoRstNode(): boolean {
+        return this.v.isAtAutoRstNode();
+    }
+
+    public isAtCleanNode(): boolean {
+        return this.v.isAtCleanNode();
+    }
+
+    public isAtEditNode(): boolean {
+        return this.v.isAtEditNode();
+    }
+
+    public isAtFileNode(): boolean {
+        return this.v.isAtFileNode();
+    }
+
+    public isAtIgnoreNode(): boolean {
+        return this.v.isAtIgnoreNode();
+    }
+
+    public isAtNoSentinelsFileNode(): boolean {
+        return this.v.isAtNoSentinelsFileNode();
+    }
+
+    public isAtOthersNode(): boolean {
+        return this.v.isAtOthersNode();
+    }
+
+    public isAtRstFileNode(): boolean {
+        return this.v.isAtRstFileNode();
+    }
+
+    public isAtSilentFileNode(): boolean {
+        return this.v.isAtSilentFileNode();
+    }
+
+    public isAtShadowFileNode(): boolean {
+        return this.v.isAtShadowFileNode();
+    }
+
+    public isAtThinFileNode(): boolean {
+        return this.v.isAtThinFileNode();
+    }
+
+    public matchHeadline(pattern: string): boolean {
+        return this.v.matchHeadline(pattern);
+    }
+
+    //@+node:felix.20210102233013.3: *5* p.Headline & body strings
+    public bodyString(): string {
+        return this.v.bodyString();
+    }
+
+    public headString(): string {
+        return this.v.headString();
+    }
+    //@+node:felix.20210102233013.4: *5* p.Status bits
+    public isDirty(): boolean {
+        return this.v.isDirty();
+    }
+
+    public isMarked(): boolean {
+        return this.v.isMarked();
+    }
+
+    public isOrphan(): boolean {
+        return this.v.isOrphan();
+    }
+
+    public isSelected(): boolean {
+        return this.v.isSelected();
+    }
+
+    public isTopBitSet(): boolean {
+        return this.v.isTopBitSet();
+    }
+
+    public isVisited(): boolean {
+        return this.v.isVisited();
+    }
+
+    public status(): number {
+        return this.v.status();
     }
 
     //@+node:felix.20210127234205.1: *3* p.Low level methods

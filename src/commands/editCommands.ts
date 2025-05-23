@@ -546,6 +546,50 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             c.redraw();
         }
     }
+    //@+node:felix.20250408222558.1: *3* ec.path_for_p
+    public async path_for_p(c: Commands, p: Position): Promise<string> {
+        /** path_for_p - return the filesystem path (directory) containing
+         * node `p`.
+         *
+         * FIXME: this general purpose code should be somewhere else, and there
+         * may already be functions that do some of the work, although perhaps
+         * without handling so many corner cases (@auto-my-custom-type etc.)
+         *
+         * @param c outline containing p
+         * @param p position to locate
+         * @return path
+         */
+
+        function atfile(p: Position): boolean {
+            /** return True if p is an @<file> node *of any kind* */
+            const word0 = p.h.split(' ')[0];
+            return (
+                g.app.atFileNames.includes(word0) ||
+                word0 === '@auto' ||
+                word0.startsWith('@auto-')
+            );
+        }
+
+        let path = c.getPath(p);
+        while (c.positionExists(p)) {
+            if (atfile(p)) {
+                // see if it's a @<file> node of some sort
+                let nodepath = p.h.split(/\s+/, 2).pop() || '';
+                nodepath = g.os_path_join(path, nodepath);
+                if (!await g.os_path_isdir(nodepath)) {
+                    nodepath = g.os_path_dirname(nodepath);
+                }
+                if (await g.os_path_isdir(nodepath)) {
+                    path = nodepath;
+                }
+                break;
+            }
+            p.moveToParent();
+        }
+        return path;
+    }
+
+
     //@+node:felix.20240611161043.1: *3* ec.tabify & untabify
     @cmd('tabify', 'Convert 4 spaces to tabs in the selected text.')
     public tabify(): void {
@@ -759,8 +803,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         if (this.fillColumn > 0) {
             fillColumn = this.fillColumn;
         } else {
-            const d = c.scanAllDirectives(c.p);
-            fillColumn = d["pagewidth"];
+            fillColumn = c.getPageWidth(c.p);
         }
 
         const s = w.getAllText();
@@ -831,8 +874,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         if (this.fillColumn > 0) {
             fillColumn = this.fillColumn;
         } else {
-            const d = c.scanAllDirectives(c.p);
-            fillColumn = d["pagewidth"];
+            fillColumn = c.getPageWidth(c.p);
         }
 
         this.beginCommand(w, 'center-region');
@@ -1367,8 +1409,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
         // Insert or delete spaces instead of tabs when negative tab width is in effect.
-        const d = c.scanAllDirectives(c.p);
-        const width = d['tabwidth'];
+        const width = c.getTabWidth(c.p);
         if (ch === '\t' && width < 0) {
             ch = ' '.repeat(Math.abs(width));
         }
@@ -1934,11 +1975,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
 
     private updateAutomatchBracket(p: Position, w: StringTextWrapper, ch: string, oldSel: [number, number]): void {
         const c = this.c;
-        const d = c.scanAllDirectives(p);
+        const language = c.getLanguage(p);
         const [i, j] = oldSel;
-        const language = d.get('language');
         const s = w.getAllText();
-
         if (ch === '(' || ch === '[' || ch === '{') {
             const automatch = language !== 'plain';
             if (automatch) {

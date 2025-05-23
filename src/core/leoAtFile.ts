@@ -27,6 +27,7 @@ function cmd(p_name: string, p_doc: string) {
  * A class implementing the atFile subcommander.
  */
 export class AtFile {
+
     //@+<< define class constants >>
     //@+node:felix.20211225231453.1: *3* << define class constants >>
 
@@ -64,38 +65,23 @@ export class AtFile {
     public underindentEscapeString: string = '\\-';
     public read_i: number = 0;
     public read_lines: string[] = [];
-    public _file_bytes: Uint8Array | undefined;
     public readVersion: string | undefined;
-    public readVersion5: boolean | undefined;
-    public startSentinelComment: string | undefined;
+    public startSentinelComment: string;
     public endSentinelComment: string | undefined;
     //
-    public at_auto_encoding: BufferEncoding | undefined;
-    public inCode: boolean | undefined;
+    public at_auto_encoding: BufferEncoding;
     public indent: number = 0;
     public language: string | undefined;
-    public output_newline: string | undefined;
+    public output_newline: string;
     public page_width: number | undefined;
-    public root: Position | undefined;
-    public tab_width: number | undefined;
-    public writing_to_shadow_directory: boolean | undefined;
-    //
-    public bom_encoding: BufferEncoding | undefined;
-    public cloneSibCount: number | undefined; // n > 1: Make sure n cloned sibs exists at next @+node sentinel
-    public correctedLines: number | undefined; // For perfect import.
+    public root: Position | undefined; // The root (a position) of tree being read or written.
+    public tab_width: number;
     public docOut: string[] = []; // The doc part being accumulated.
-    public done: boolean | undefined;
-    public fromString: string | undefined;
-    public importRootSeen: boolean | undefined;
+    public importRootSeen: boolean;
     public lastLines: string[] = []; // The lines after @-leo
-    public leadingWs: string | undefined;
-    public lineNumber: number | undefined; // New in Leo 4.4.8.
-    public rootSeen: boolean | undefined;
     public targetFileName: string | undefined;
-    public v: VNode | undefined;
-    public updateWarningGiven: boolean | undefined;
     //
-    public force_newlines_in_at_nosent_bodies: boolean | undefined;
+    public force_newlines_in_at_nosent_bodies: boolean;
     public outputList: string[] = [];
     public sentinels: boolean = false;
     public outputFile = ''; // io.StringIO();
@@ -113,24 +99,49 @@ export class AtFile {
      * ctor for atFile class.
      */
     constructor(c: Commands) {
-        // **Warning**: all these ivars must **also** be inited in initCommonIvars.
+
         this.c = c;
-        this.encoding = 'utf-8'; // 2014/08/13
         this.fileCommands = c.fileCommands;
+        // Basic status vars.
         this.errors = 0; // Make sure at.error() works even when not inited.
-        // #2276: allow different section delims.
-        this.section_delim1 = '<<';
-        this.section_delim2 = '>>';
-        // **Only** at.writeAll manages these flags.
-        this.unchangedFiles = 0;
-        // promptForDangerousWrite sets cancelFlag and yesToAll only if canCancelFlag is True.
+        this.language = undefined;
+        this.root = undefined;
+
+        // Dialogs
         this.canCancelFlag = false;
         this.cancelFlag = false;
         this.yesToAll = false;
-        // User options: set in reloadSettings.
+
+        // Reading.
+        this.importRootSeen = false;
+        this.readVersion = '';
+        this.read_i = 0;
+        this.read_lines = [];
+        this.startSentinelComment = '';
+        this.endSentinelComment = '';
+
+        // Writing.
+        this.indent = 0; // write indentation, in blanks.
+        this.outputFile = ''; // io.StringIO();
+        this.outputList = [];
+        this.sentinels = false;
+        this.section_delim1 = '<<';
+        this.section_delim2 = '>>';
+        this.targetFileName = '';
+        this.unchangedFiles = 0;
+        // User settings.
+        this.at_auto_encoding = 'utf-8';
+        this.encoding = 'utf-8';
+        this.explicitLineEnding = false;
+        this.force_newlines_in_at_nosent_bodies = false;
+        this.output_newline = g.getOutputNewline(c);
+        this.page_width = undefined;
+        this.tab_width = c.tab_width || -4;
+        // User switches: set in reloadSettings.
         this.checkPythonCodeOnWrite = false;
         this.runFlake8OnWrite = false;
         this.runPyFlakesOnWrite = false;
+        // Initialize all user switches.
         this.reloadSettings();
     }
     //@+node:felix.20230415162429.3: *5* at.reloadSettings
@@ -149,51 +160,79 @@ export class AtFile {
             false
         );
     }
-    //@+node:felix.20230415162429.4: *4* at.initCommonIvars
+    //@+node:felix.20250409230707.1: *4* at.initAllIvars
     /**
-     * Init ivars common to both reading and writing.
-     *
-     * The defaults set here may be changed later.
+     * Init all ivars to reasonable defaults.
      */
-    public initCommonIvars(): void {
+    public initAllIvars(root: Position): void {
+        const at = this;
         const c = this.c;
-        this.at_auto_encoding = c.config.default_at_auto_file_encoding;
-        this.encoding = c.config.default_derived_file_encoding;
-        this.endSentinelComment = '';
-        this.errors = 0;
-        this.inCode = true;
-        this.indent = 0; // The unit of indentation is spaces, not tabs.
-        this.language = undefined;
-        this.output_newline = g.getOutputNewline(c);
-        this.page_width = undefined;
-        this.root = undefined; // The root (a position) of tree being read or written.
-        this.startSentinelComment = '';
-        this.endSentinelComment = '';
-        this.tab_width = c.tab_width || -4;
-        this.writing_to_shadow_directory = false;
+        g.assert(root.v, g.callers());
+        // Basic status vars.
+        at.errors = 0;
+        at.language = c.target_language || 'python'; // Maybe 'javascript' or 'typescript'.
+        at.root = root;
+        // Dialogs
+        at.canCancelFlag = false;
+        at.cancelFlag = false;
+        at.yesToAll = false;
+        // Reading
+        at.importRootSeen = false;
+        at.readVersion = '';
+        at.read_i = 0;
+        at.read_lines = [];
+        at.startSentinelComment = "";
+        at.endSentinelComment = "";
+        // Writing.
+        at.indent = 0; // Output indentation, in blanks.
+        at.outputFile = '';
+        at.outputList = [];
+        at.sentinels = false;
+        at.section_delim1 = '<<';
+        at.section_delim2 = '>>';
+        at.targetFileName = undefined;
+        // at.unchangedFiles = 0  # Only at.writeAll should init this ivar.
+        // User settings.
+        at.at_auto_encoding = c.config.default_at_auto_file_encoding || 'utf-8';
+        at.encoding = c.config.default_derived_file_encoding || 'utf-8';
+        at.explicitLineEnding = false;
+        at.force_newlines_in_at_nosent_bodies = false;
+        at.output_newline = g.getOutputNewline(c);
+        at.page_width = c.page_width || 132;
+        at.tab_width = c.tab_width || -4;
     }
+
+    //@+node:felix.20230415162429.4: *4* at.initCommonIvars
+    // /**
+    //  * Init ivars common to both reading and writing.
+    //  *
+    //  * The defaults set here may be changed later.
+    //  */
+    // public initCommonIvars(): void {
+    //     const c = this.c;
+    //     this.at_auto_encoding = c.config.default_at_auto_file_encoding;
+    //     this.encoding = c.config.default_derived_file_encoding;
+    //     this.endSentinelComment = '';
+    //     this.errors = 0;
+    //     this.inCode = true;
+    //     this.indent = 0; // The unit of indentation is spaces, not tabs.
+    //     this.language = undefined;
+    //     this.output_newline = g.getOutputNewline(c);
+    //     this.page_width = undefined;
+    //     this.root = undefined; // The root (a position) of tree being read or written.
+    //     this.startSentinelComment = '';
+    //     this.endSentinelComment = '';
+    //     this.tab_width = c.tab_width || -4;
+    //     this.writing_to_shadow_directory = false;
+    // }
     //@+node:felix.20230415162429.5: *4* at.initReadIvars
+    /**
+     * Initialize all read ivars.
+     */
     public initReadIvars(root: Position, fileName: string): void {
-        this.initCommonIvars();
-        this.bom_encoding = undefined; // The encoding implied by any BOM (set by g.stripBOM)
-        this.cloneSibCount = 0; // n > 1: Make sure n cloned sibs exists at next @+node sentinel
-        this.correctedLines = 0; // For perfect import.
-        this.docOut = []; // The doc part being accumulated.
-        this.done = false; // True when @-leo seen.
-        this.fromString = '';
-        this.importRootSeen = false;
-        this.lastLines = []; // The lines after @-leo
-        this.leadingWs = '';
-        this.lineNumber = 0; // New in Leo 4.4.8.
-        this.read_i = 0;
-        this.read_lines = [];
-        this.readVersion = ''; // "5" for new-style thin files.
-        this.readVersion5 = false; // Synonym for this.readVersion >= '5'
-        this.root = root;
-        this.rootSeen = false;
-        this.targetFileName = fileName; // For this.writeError only.
-        this.v = undefined;
-        this.updateWarningGiven = false;
+
+        this.initAllIvars(root);
+
     }
     //@+node:felix.20230415162429.6: *4* at.initWriteIvars
     /**
@@ -206,74 +245,64 @@ export class AtFile {
         if (!c || !c.config) {
             return undefined;
         }
+
         const make_dirs = c.config.getBool(
             'create-nonexistent-directories',
             false
         );
-        g.assert(root && root.__bool__());
-        this.initCommonIvars();
         g.assert(at.checkPythonCodeOnWrite !== undefined);
-        //
-        // Copy args
-        at.root = root;
-        at.sentinels = true;
-        //
-        // Override initCommonIvars.
-        if (g.unitTesting) {
-            at.output_newline = '\n';
-        }
-        //
+
+        // Set all ivars to reasonable defaults.
+        at.initAllIvars(root);
+
         // Set other ivars.
+        at.sentinels = true;
         at.force_newlines_in_at_nosent_bodies = c.config.getBool(
             'force-newlines-in-at-nosent-bodies'
         );
         // For at.putBody only.
-        at.outputList = []; // For stream output.
-        // Sets the following ivars:
-        // at.encoding
-        // at.explicitLineEnding
-        // at.language
-        // at.output_newline
-        // at.page_width
-        // at.tab_width
-        at.scanAllDirectives(root);
-        //
-        // Overrides of at.scanAllDirectives...
-        if (at.language === 'python') {
-            // Encoding directive overrides everything else.
-            const encoding = g.getPythonEncodingFromString(root.b);
-            if (encoding) {
-                at.encoding = encoding;
-            }
+        at.encoding = c.getEncoding(root);
+        const lineending = c.getLineEnding(root);
+        at.explicitLineEnding = !!lineending;
+        if (g.unitTesting) {
+            at.output_newline = '\n';
+        } else {
+            at.output_newline = lineending || g.getOutputNewline(c);
         }
-        //
+        at.language = c.getLanguage(root);
+        at.outputList = []; // For stream output.
+        at.page_width = c.getPageWidth(root);
+        at.tab_width = c.getTabWidth(root);
+        // More complex inits.
+        at.initSentinelComments(root);
+
         // Clean root.v.
         if (!at.errors && at.root) {
             at.root.v._p_changed = true;
         }
-        //
+
         // #1907: Compute the file name and create directories as needed.
         let targetFileName: string | undefined = g.os_path_realpath(
             c.fullPath(root)
         );
         at.targetFileName = targetFileName; // For at.writeError only.
-        //
+
         // targetFileName can be empty for unit tests & @command nodes.
         if (!targetFileName) {
             targetFileName = g.unitTesting ? root.h : undefined;
             at.targetFileName = targetFileName; // For at.writeError only.
             return targetFileName;
         }
-        //
+
         // #2276: scan for section delims
         at.scanRootForSectionDelims(root);
-        //
+
         // Do nothing more if the file already exists.
         const w_exists = await g.os_path_exists(targetFileName);
         if (w_exists) {
             return targetFileName;
         }
-        //
+
         // Create directories if enabled.
         const root_dir = g.os_path_dirname(targetFileName);
         if (make_dirs && root_dir) {
@@ -286,6 +315,41 @@ export class AtFile {
         //
         // Return the target file name, regardless of future problems.
         return targetFileName;
+    }
+    //@+node:felix.20250409230752.1: *4* at.initSentinelComments
+    /**
+     * Init at.startSentinelComment and at.endSentinelComment.
+     */
+    public initSentinelComments(root: Position): void {
+
+        const at = this;
+        const c = this.c;
+
+        const [delim1, delim2, delim3] = c.getDelims(root);
+
+        // Use single-line comments if we have a choice.
+        // delim1, delim2, delim3 now correspond to line, start, end
+        if (delim1) {
+            at.startSentinelComment = delim1;
+            at.endSentinelComment = ""; // Must not be null or undefined.
+        } else if (delim2 && delim3) {
+            at.startSentinelComment = delim2;
+            at.endSentinelComment = delim3;
+        } else {
+            //
+            // Emergency!
+            //
+            // Issue an error only if at.language has been set.
+            // This suppresses a message from the markdown importer.
+            if (!g.unitTesting && at.language) {
+                g.trace(JSON.stringify(at.language), g.callers());
+                g.es_print(`unknown language: ${at.language}`);
+                g.es_print('using Python comment delimiters'); // TODO : maybe use javascript comment delimiters
+            }
+            at.startSentinelComment = "#"; // This should never happen!
+            at.endSentinelComment = "";
+        }
+
     }
     //@+node:felix.20230415162513.1: *3* at.Reading
     //@+node:felix.20230415162513.2: *4* at.Reading (top level)
@@ -357,13 +421,11 @@ export class AtFile {
             // #1466.
             if (s === undefined) {
                 // The error has been given.
-                at._file_bytes = g.toEncodedString('');
                 return [undefined, undefined];
             }
             await at.warnOnReadOnlyFile(fn);
         } catch (exception) {
             at.error(`unexpected exception opening: '@file ${fn}'`);
-            at._file_bytes = g.toEncodedString('');
             [fn, s] = [undefined, undefined];
         }
         return [fn!, s!];
@@ -410,35 +472,27 @@ export class AtFile {
             at.error('Missing file name. Restoring @file tree from .leo file.');
             return false;
         }
-        // Fix bug 760531: always mark the root as read, even if there was an error.
-        // Fix bug 889175: Remember the full fileName.
+        // #760531: always mark the root as read, even if there was an error.
+        // #889175: Remember the full fileName.
         at.rememberReadPath(c.fullPath(root), root);
         at.initReadIvars(root, fileName);
-        at.fromString = fromString;
         if (at.errors) {
             return false;
         }
+        // Open the file.
         [fileName, file_s] = await at.openFileForReading(fromString);
-        // #1798:
         if (file_s === undefined) {
-            return false;
+            return false; // #1798
         }
-        //
+
         // Set the time stamp.
         if (fileName) {
             await c.setFileTimeStamp(fileName);
         } else if (!fileName && !fromString && !file_s) {
             return false;
         }
+        // Read the file!
         root.clearVisitedInTree();
-        // Sets the following ivars:
-        // at.encoding: **changed later** by readOpenFile/at.scanHeader.
-        // at.explicitLineEnding
-        // at.language
-        // at.output_newline
-        // at.page_width
-        // at.tab_width
-        at.scanAllDirectives(root);
         const gnx2vnode = c.fileCommands.gnxDict;
         const contents = fromString || file_s;
         new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName!, root);
@@ -667,7 +721,7 @@ export class AtFile {
         at.rememberReadPath(fileName, p);
         const old_p = p.copy();
         try {
-            at.scanAllDirectives(p);
+            at.initReadIvars(p, fileName);
             p.v.b = ''; // Required for @auto API checks.
             p.v._deleteAllChildren();
             p = (await ic.createOutline(p.copy())) as Position;
@@ -710,11 +764,10 @@ export class AtFile {
             g.es_print(`not found: ${fileName}̀`);
             return false;
         }
+        // Init.
         at.rememberReadPath(fileName, root);
-        // Must be called before at.scanAllDirectives.
         at.initReadIvars(root, fileName);
-        // Sets at.startSentinelComment/endSentinelComment.
-        at.scanAllDirectives(root);
+        // Calculate data.
         const new_public_lines = await at.read_at_clean_lines(fileName);
         const old_private_lines = await this.write_at_clean_sentinels(root);
         const marker = x.markerFromFileLines(old_private_lines, fileName);
@@ -939,12 +992,11 @@ export class AtFile {
         const at = this;
         at.read_i = 0;
         at.read_lines = g.splitLines(s);
-        at._file_bytes = g.toEncodedString(s);
     }
     //@+node:felix.20230416214054.1: *5* at.parseLeoSentinel
     /**
      * Parse the sentinel line s.
-     * If the sentinel is valid, set at.encoding, at.readVersion, at.readVersion5.
+     * If the sentinel is valid, set at.encoding, at.readVersion
      */
     public parseLeoSentinel(
         s: string
@@ -953,7 +1005,7 @@ export class AtFile {
         const c = this.c;
         // Set defaults.
         let encoding = c.config.default_derived_file_encoding;
-        let readVersion, readVersion5; // None. None
+        let readVersion; // None.
         let new_df = false;
         let start = '';
         let end = '';
@@ -982,7 +1034,6 @@ export class AtFile {
                 // Set the version number.
                 if (m[3]) {
                     readVersion = m[3];
-                    readVersion5 = readVersion >= '5';
                 } else {
                     valid = false;
                 }
@@ -1013,7 +1064,6 @@ export class AtFile {
         if (valid) {
             at.encoding = encoding;
             at.readVersion = readVersion;
-            at.readVersion5 = readVersion5;
         }
         return [valid, new_df, start, end, isThin];
     }
@@ -1025,9 +1075,7 @@ export class AtFile {
      * Sets at.encoding as follows:
      *  1. Use the BOM, if present. This unambiguously determines the encoding.
      *  2. Use the -encoding= field in the @+leo header, if present and valid.
-     *  3. Otherwise, uses existing value of at.encoding, which comes from:
-     *      A. An @encoding directive, found by at.scanAllDirectives.
-     *      B. The value of c.config.default_derived_file_encoding.
+     *  3. Otherwise, uses existing value of at.encoding
      *
      * Returns the string, or None on failure.
      */
@@ -1144,7 +1192,8 @@ export class AtFile {
         const at = this;
         let new_df = false;
         let isThinDerivedFile = false;
-        let start, end;
+        let start: string;
+        let end: string;
         const firstLines: string[] = []; // The lines before @+leo.
         const s = at.scanFirstLines(firstLines);
         let valid = s.length > 0;
@@ -1153,8 +1202,8 @@ export class AtFile {
                 at.parseLeoSentinel(s);
         }
         if (valid) {
-            at.startSentinelComment = start;
-            at.endSentinelComment = end;
+            at.startSentinelComment = start!; // Forcing start because of valid.
+            at.endSentinelComment = end!;
         } else if (giveErrors) {
             at.error(`No @+leo sentinel in: ${fileName}`);
             g.trace(g.callers());
@@ -2554,12 +2603,12 @@ export class AtFile {
      */
     public putAtAllLine(s: string, i: number, p: Position): void {
         const at = this;
-        let [j, delta] = g.skip_leading_ws_with_indent(s, i, at.tab_width!);
+        const [j, delta] = g.skip_leading_ws_with_indent(s, i, at.tab_width);
         const k = g.skip_to_end_of_line(s, i);
         at.putLeadInSentinel(s, i, j);
         at.indent += delta;
         // s[j:k] starts with '@all'
-        at.putSentinel('@+' + s.substring(j + 1, k).trimEnd());
+        at.putSentinel("@+" + s.substring(j + 1, k).trim());
         for (const child of p.children()) {
             at.putAtAllChild(child);
         }
@@ -2941,21 +2990,17 @@ export class AtFile {
     }
     //@+node:felix.20230415162517.59: *5* at.putLeadInSentinel
     /**
-     * Set at.leadingWs as needed for @+others and @+<< sentinels.
-     *
      * i points at the start of a line.
      * j points at @others or a section reference.
      */
     public putLeadInSentinel(s: string, i: number, j: number): void {
         const at = this;
-        at.leadingWs = ''; // Set the default.
         if (i === j) {
             return; // The @others or ref starts a line.
         }
         const k = g.skip_ws(s, i);
         if (j === k) {
-            // Remember the leading whitespace, including its spelling.
-            at.leadingWs = s.substring(i, j);
+            // pass
         } else {
             this.putIndent(at.indent); // 1/29/04: fix bug reported by Dan Winkler.
             at.os(s.substring(i, j));
@@ -3374,7 +3419,7 @@ export class AtFile {
             root
         );
         if (!shouldPrompt) {
-            // Fix bug 889175: Remember the full fileName.
+            // #889175: Remember the full fileName.
             at.rememberReadPath(fileName, root);
             return true;
         }
@@ -3382,12 +3427,12 @@ export class AtFile {
         // Prompt if the write would overwrite the existing file.
         const ok = await this.promptForDangerousWrite(fileName);
         if (ok) {
-            // Fix bug 889175: Remember the full fileName.
+            // #889175: Remember the full fileName.
             at.rememberReadPath(fileName, root);
             return true;
         }
         //
-        // Fix #1031: do not add @ignore here!
+        // #1031: do not add @ignore here!
         g.es('not written:', fileName);
         return false;
     }
@@ -4025,82 +4070,6 @@ export class AtFile {
         d[fn] = aSet;
     }
 
-    //@+node:felix.20230415162522.11: *4* at.scanAllDirectives
-    /**
-     * Scan p and p's ancestors looking for directives,
-     * setting corresponding AtFile ivars.
-     */
-    public scanAllDirectives(p: Position): { [key: string]: any } {
-        const at = this;
-        const c = this.c;
-        const d = c.scanAllDirectives(p);
-        //
-        // Language & delims: Tricky.
-        const lang_dict = d['lang-dict'] || {};
-        let delims;
-        let language;
-        if (lang_dict) {
-            // There was an @delims or @language directive.
-            language = lang_dict['language'];
-            delims = lang_dict['delims'];
-        }
-        if (!language) {
-            // No language directive.  Look for @<file> nodes.
-            // Do *not* use d.get('language')!
-            //
-            // TODO : DEFAULT TO JS OR TS !
-            //
-            language = g.getLanguageFromAncestorAtFileNode(p) || 'python';
-        }
-        at.language = language;
-        if (!delims) {
-            delims = g.set_delims_from_language(language);
-        }
-        //
-        // Previously, setting delims was sometimes skipped, depending on kwargs.
-        //@+<< Set comment strings from delims >>
-        //@+node:felix.20230415162522.12: *5* << Set comment strings from delims >> (at.scanAllDirectives)
-        let [delim1, delim2, delim3] = delims;
-        // Use single-line comments if we have a choice.
-        // delim1,delim2,delim3 now correspond to line,start,end
-        if (delim1) {
-            at.startSentinelComment = delim1;
-            at.endSentinelComment = ''; // Must not be None.
-        } else if (delim2 && delim3) {
-            at.startSentinelComment = delim2;
-            at.endSentinelComment = delim3;
-        } else {
-            //
-            // Emergency!
-            //
-            // Issue an error only if at.language has been set.
-            // This suppresses a message from the markdown importer.
-            if (!g.unitTesting && at.language) {
-                g.trace(at.language, g.callers());
-                g.es_print(`unknown language: ${at.language}`);
-                g.es_print('using Python comment delimiters');
-            }
-            at.startSentinelComment = '#'; // This should never happen!
-            at.endSentinelComment = '';
-        }
-        //@-<< Set comment strings from delims >>
-        //
-        // Easy cases
-        at.encoding = d['encoding'] || c.config.default_derived_file_encoding;
-        const lineending = d['lineending'];
-        at.explicitLineEnding = !!lineending;
-        at.output_newline = lineending || g.getOutputNewline(c);
-        at.page_width = d['pagewidth'] || c.page_width;
-        at.tab_width = d['tabwidth'] || c.tab_width;
-        return {
-            encoding: at.encoding,
-            language: at.language,
-            lineending: at.output_newline,
-            pagewidth: at.page_width,
-            path: d['path'],
-            tabwidth: at.tab_width,
-        };
-    }
     //@+node:felix.20230415162522.13: *4* at.shouldPromptForDangerousWrite
     /**
      * Return True if Leo should warn the user that p is an @<file> node that
@@ -4663,7 +4632,6 @@ export class FastAtRead {
                 if (0 <= first_i && first_i < first_lines.length) {
                     body.push('@first ' + first_lines[first_i]);
                     first_i += 1;
-                    continue;
                 } else {
                     g.trace(`\ntoo many @first lines: ${path}`);
                     console.log(
@@ -4671,8 +4639,8 @@ export class FastAtRead {
                     );
                     g.printObj(first_lines, 'first_lines');
                     g.printObj(lines.slice(start, i + 2), 'lines[start:i+2]');
-                    continue;
                 }
+                continue;
             }
             m = this.last_pat!.exec(line);
             if (m && m.length) {
