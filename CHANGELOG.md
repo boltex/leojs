@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.11
+
+- ...
+
 ## 1.0.10
 
 - Fixed @path to recognize '-' (Leo #4339)
