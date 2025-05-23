@@ -138,8 +138,8 @@ const toc = [{
   "id": "using-gexecute_shell_commands",
   "level": 3
 }, {
-  "value": "Working with directives and paths",
-  "id": "working-with-directives-and-paths",
+  "value": "Working and paths",
+  "id": "working-and-paths",
   "level": 2
 }];
 function _createMdxContent(props) {
@@ -365,6 +365,10 @@ function _createMdxContent(props) {
         className: "language-js",
         children: "result = c.doCommandByName('open-outline');\r\n\r\n// or\r\n\r\nresult = c.executeMinibufferCommand('open-outline');\n"
       })
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "This will return the value returned from the command."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "Commands created with @command and @button nodes can return values as well."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "making-operations-undoable",
       children: "Making operations undoable"
@@ -578,17 +582,10 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "g.execute_shell_commands_with_options inits an environment and then calls g.execute_shell_commands.  See Leo's source code for details."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
-      id: "working-with-directives-and-paths",
-      children: "Working with directives and paths"
+      id: "working-and-paths",
+      children: "Working and paths"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Scripts can easily determine what directives are in effect at a particular position in an outline. c.scanAllDirectives(p) returns a Python dictionary whose keys are directive names and whose values are the value in effect at position p. For example:"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-        className: "language-ts",
-        children: "const d = c.scanAllDirectives(p);\r\ng.es(g.objToString(d));\n"
-      })
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "In particular, d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file::"
+      children: "d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file:"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         className: "language-ts",

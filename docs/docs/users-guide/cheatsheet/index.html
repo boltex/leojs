@@ -10,7 +10,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="LeoJS" href="/leojs/opensearch.xml"><link rel="stylesheet" href="/leojs/assets/css/styles.3244a7e1.css">
-<script src="/leojs/assets/js/runtime~main.fb68c4d6.js" defer="defer"></script>
+<script src="/leojs/assets/js/runtime~main.c664e2ae.js" defer="defer"></script>
 <script src="/leojs/assets/js/main.3256827a.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -199,6 +199,10 @@ that <em>aren&#x27;t</em> section-definition nodes.</li>
 <strong>c.redraw(p)</strong>          Redraw the screen. Select p if given.<br>
 <strong>c.save()</strong>                  Save the present outline.<br>
 <strong>c.selectPosition()</strong></p></ul>
+<p><strong>Using Command names</strong>:</p>
+<p>When learning Leo&#x27;s codebase, it may be easier to refer to a command by its &#x27;command name&#x27;. You can therefore use  c.doCommandByName(&#x27;command-name&#x27;) instead of calling the proper method on the commander. This will return the same value as that method.</p>
+<p><strong>Leo Script Return Values</strong>:</p>
+<p>Commands created with @command and @button nodes can return values as well by simply using the &#x27;return&#x27; statement.</p>
 <p><strong>Official ivars</strong> of any leoFrame f:</p>
 <ul><p><strong>f.c</strong>                     is the frame’s commander.<br>
 <strong>f.body</strong>                  is a leoBody instance.<br>

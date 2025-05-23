@@ -1154,7 +1154,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["You can also specify importers ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
         children: "explicitly"
-      }), " as follows::"]
+      }), " as follows:"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.table, {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.thead, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.tr, {
@@ -1904,7 +1904,7 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("ul", {
       children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "Specifies the Unicode encoding for an external file. For example::"
+        children: "Specifies the Unicode encoding for an external file. For example:"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@encoding iso-8859-1"
@@ -1928,13 +1928,13 @@ function _createMdxContent(props) {
           children: "@first"
         }), " lines may appear."]
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "This creates two first lines, a shebang line and a Python encoding line::"
+        children: "This creates two first lines, a shebang line and a Python encoding line:"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@firѕt #! /usr/bin/env python\r\n@firѕt # -*- coding: utf-8 -*-\n"
         })
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-        children: "Here is a perl example::"
+        children: "Here is a perl example:"
       }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
           children: "@firѕt #!/bin/sh -- # perl, to stop looping\r\n@firѕt eval 'exec /usr/bin/perl -w -S $0 ${1+\"$@\"}'\r\n@firѕt     if 0;\n"

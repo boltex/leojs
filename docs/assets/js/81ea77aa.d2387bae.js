@@ -228,7 +228,7 @@ function _createMdxContent(props) {
         children: "never"
       }), " change because\r\nneither x.a nor x.b changes."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Plain lines of the result can be built up by copying lines from x.b to x.results::"
+      children: "Plain lines of the result can be built up by copying lines from x.b to x.results:"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["'replace'   x.results.extend(x.b[b1", ":b2", "])\r\n'delete'    do nothing  (b1 == b2)\r\n'insert'    x.results.extend(x.b[b1", ":b2", "])\r\n'equal'     x.results.extend(x.b[b1", ":b2", "])"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -304,11 +304,11 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "This completes an informal proof of the correctness of the algorithm."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "The leading and trailing sentinels lines are easy special cases. This\r\ncode, appearing before the main loop, ensures that leading lines are\r\nwritten first, and only once::"
+      children: "The leading and trailing sentinels lines are easy special cases. This\r\ncode, appearing before the main loop, ensures that leading lines are\r\nwritten first, and only once:"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "x.put_sentinels(0)\r\nx.sentinels[0] = []"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Similarly, this line, at the end of the main loop, writes trailing\r\nsentinels::"
+      children: "Similarly, this line, at the end of the main loop, writes trailing\r\nsentinels:"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "x.results.extend(x.trailing_sentinels)"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
