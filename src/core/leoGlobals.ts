@@ -4199,7 +4199,7 @@ export function print_unique_message(message: string): boolean {
 /**
  * Print the given message once.  Return True if the message was printed.
  */
-export function es_print_unique_message(message: string, color: string): boolean {
+export function es_print_unique_message(message: string, color?: string): boolean {
     if (!(message in g_unique_message_d)) {
         g_unique_message_d[message] = true;
         es_print(message);

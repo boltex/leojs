@@ -2030,6 +2030,12 @@
         "title": "Git Diff"
       },
       {
+        "command": "leojs.findInLeoOutline",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened && editorTextFocus",
+        "title": "Find in Leo Outline"
+      },
+      {
         "command": "leojs.tabCycleNext",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
@@ -3130,6 +3136,10 @@
           "when": "false"
         },
         {
+          "command": "leojs.findInLeoOutline",
+          "when": "false"
+        },
+        {
           "command": "leojs.contractAllFromOutline",
           "when": "false"
         },
@@ -3551,6 +3561,11 @@
         {
           "command": "leojs.findDef",
           "when": "!editorHasMultipleSelections && resourceScheme == leojs && leojsTreeOpened",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.findInLeoOutline",
+          "when": "!editorHasMultipleSelections && resourceScheme != leojs && resourceScheme != untitled && leojsTreeOpened",
           "group": "navigation@1"
         },
         {
@@ -4657,5 +4672,8 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "typescript": "^4.9.5"
-  }
+  },
+  "gitCommit": "ac40411",
+  "gitBranch": "devel",
+  "gitDate": "2025-05-30 22:03:34 -0400"
 }

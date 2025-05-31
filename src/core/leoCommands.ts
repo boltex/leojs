@@ -1293,7 +1293,7 @@ export class Commands {
             // }
             if (c.write_script_file) {
                 // TODO ? just write the file and run as normal?
-                g.es('Ignored write-script-file option.');
+                g.es_print_unique_message('Ignored write-script-file option.');
 
                 // scriptFile = self.writeScriptFile(script)
                 // exec(compile(script, scriptFile, 'exec'), d)

@@ -722,6 +722,30 @@ export class LeoUI extends NullGui {
         }
     }
 
+    public findInLeoOutline(p_arg: any): any {
+        // TODO : if an @<file> is found, then open the outline 
+        // node that matches the file at that specific line. 
+        // (see c.editCommands.gotoGlobalLine)
+
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            void vscode.window.showErrorMessage('No active editor');
+            return;
+        }
+
+        const document = editor.document;
+        const position = editor.selection.active;
+        const lineNumber = position.line;
+        const filePath = document.uri.fsPath;
+        const lineText = document.lineAt(lineNumber).text;
+
+        console.log('lineNumber', lineNumber);
+        console.log('filePath', filePath);
+
+        console.log("findInLeoOutline", p_arg);
+
+    }
+
     /**
      * Creates the 'this._leoLogPane' log pane output panel instance
      */

@@ -162,6 +162,7 @@
 <v t="felix.20231224193540.1"><vh>put_help</vh></v>
 <v t="felix.20240213205001.1"><vh>statusBar</vh></v>
 <v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
+<v t="felix.20250530231903.1"><vh>findInLeoOutline</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20240721135528.1"><vh>createLogPane</vh></v>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
@@ -1862,6 +1863,8 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
 [CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
 
+[CMD.FIND_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.findInLeoOutline(p_arg)],
+
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
 [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.removeAtButton(p_node)],
@@ -2002,6 +2005,7 @@ public static COMMANDS = {
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
+    FIND_IN_LEO_OUTLINE: Constants.NAME + ".findInLeoOutline",
     HANDLE_UNL: Constants.NAME + ".handleUnl",
     SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
     FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
@@ -4665,7 +4669,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "ac40411",
+  "gitBranch": "devel",
+  "gitDate": "2025-05-30 22:03:34 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4792,6 +4799,12 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
   "title": "Git Diff"
+},
+{
+  "command": "leojs.findInLeoOutline",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened &amp;&amp; editorTextFocus",
+  "title": "Find in Leo Outline"
 },
 {
   "command": "leojs.tabCycleNext",
@@ -5558,10 +5571,14 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 },
 {
   "command": "leojs.writeDirtyAtFileNodesFromOutline",
-</t>
-<t tx="felix.20201214205159.45">  "when": "false"
+  "when": "false"
 },
 {
+  "command": "leojs.findInLeoOutline",
+  "when": "false"
+},
+</t>
+<t tx="felix.20201214205159.45">{
   "command": "leojs.contractAllFromOutline",
   "when": "false"
 },
@@ -14542,6 +14559,11 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
     "group": "navigation@1"
   },
   {
+    "command": "leojs.findInLeoOutline",
+    "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme != leojs &amp;&amp; resourceScheme != untitled &amp;&amp; leojsTreeOpened",
+    "group": "navigation@1"
+  },
+  {
     "command": "leojs.extract",
     "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme == leojs &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
@@ -21571,6 +21593,31 @@ public get1Char(
 <t tx="felix.20250522205342.1">## 1.0.11
 
 - ...
+
+</t>
+<t tx="felix.20250530231903.1">public findInLeoOutline(p_arg: any): any {
+    // TODO : if an @&lt;file&gt; is found, then open the outline 
+    // node that matches the file at that specific line. 
+    // (see c.editCommands.gotoGlobalLine)
+
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        void vscode.window.showErrorMessage('No active editor');
+        return;
+    }
+
+    const document = editor.document;
+    const position = editor.selection.active;
+    const lineNumber = position.line;
+    const filePath = document.uri.fsPath;
+    const lineText = document.lineAt(lineNumber).text;
+
+    console.log('lineNumber', lineNumber);
+    console.log('filePath', filePath);
+
+    console.log("findInLeoOutline", p_arg);
+
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
