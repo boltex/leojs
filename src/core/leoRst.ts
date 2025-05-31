@@ -793,25 +793,6 @@ export class RstCommands {
             // TODO !
             console.log('TODO : SUPPORT DOCUTILS IN leoRst.ts');
 
-            // * WITH rst-compiler *
-            // const htmlCompiler = new RstToHtmlCompiler();
-            // const parserOutput = htmlCompiler.parse(s, {
-            //     disableWarnings: true
-            // });
-            // const outputHtml = htmlCompiler.compile(parserOutput);
-
-            // result = g.dedent(`\
-            //     <html>
-            //     <head>
-            //         <title></title>
-            //         ${outputHtml.header}
-            //     </head>
-            //     <body>
-            //         ${outputHtml.body}
-            //     </body>
-            //     </html>
-            // `);
-
             // * ORIGINAL *
             // result = docutils.core.publish_string(source=s,
             //         reader_name='standalone',
