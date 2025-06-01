@@ -750,7 +750,8 @@ export class LeoUI extends NullGui {
                     c.selectPosition(p); // Select the node in Leo's model
 
                     try { // Added try-catch for async/await
-                        await c.editCommands.gotoGlobalLine(lineNumber);
+                        // +1 because lineNumber is 0-indexed
+                        await c.editCommands.gotoGlobalLine(lineNumber + 1);
                         // Successfully initiated gotoGlobalLine.
                         // The UI will be updated by launchRefresh.
                     } catch (err: any) {
@@ -760,6 +761,17 @@ export class LeoUI extends NullGui {
                     } finally {
                         // Always refresh the UI as the position was selected.
                         // gotoGlobalLine might have effects even if it partially failed or if it succeeded.
+                        this.setupRefresh(
+                            Focus.NoChange,
+                            {
+                                tree: true,
+                                body: true,
+                                states: true,
+                                buttons: false,
+                                documents: false,
+                                goto: false,
+                            }
+                        );
                         void this.launchRefresh();
                     }
 
@@ -772,22 +784,66 @@ export class LeoUI extends NullGui {
         }
         // Not found. Offer to import as an @auto, an @clean, or to cancel.
         // Open modal dialog with options.
-        const choices = ['Import as @auto', 'Import as @clean', 'Cancel'];
+        const choices = [
+            'Import File in Leo',
+            // 'Import as @auto',
+            // 'Import as @clean',
+            'Cancel'
+        ];
         const selection = await vscode.window.showInformationMessage( // Added await
             `The file "${filePath}" was not found in the current Leo outline.`,
             { modal: true },
             ...choices
         );
-        if (selection === 'Import as @auto') {
+        if (selection === 'Import File in Leo') {
+            // Handle Import File in Leo
+            await c.importAnyFile([filePath]);
+
+            this.setupRefresh(
+                Focus.NoChange,
+                {
+                    tree: true,
+                    body: true,
+                    states: true,
+                    buttons: false,
+                    documents: true,
+                    goto: false,
+                }
+            );
+            void this.launchRefresh();
+
+        } else if (selection === 'Import as @auto') {
             // Handle Import as @auto
             console.log('User chose Import as @auto');
 
-            // void this.launchRefresh();
+            this.setupRefresh(
+                Focus.NoChange,
+                {
+                    tree: true,
+                    body: true,
+                    states: true,
+                    buttons: false,
+                    documents: true,
+                    goto: false,
+                }
+            );
+            void this.launchRefresh();
         } else if (selection === 'Import as @clean') {
             // Handle Import as @clean
             console.log('User chose Import as @clean');
 
-            // void this.launchRefresh();
+            this.setupRefresh(
+                Focus.NoChange,
+                {
+                    tree: true,
+                    body: true,
+                    states: true,
+                    buttons: false,
+                    documents: true,
+                    goto: false,
+                }
+            );
+            void this.launchRefresh();
         } else {
             // Handle Cancel or dismiss
             console.log('User cancelled or dismissed the dialog');

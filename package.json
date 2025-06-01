@@ -4673,7 +4673,7 @@
     "stream": "^0.0.2",
     "typescript": "^4.9.5"
   },
-  "gitCommit": "ac40411",
+  "gitCommit": "768209f",
   "gitBranch": "devel",
-  "gitDate": "2025-05-30 22:03:34 -0400"
+  "gitDate": "2025-05-31 20:50:24 -0400"
 }

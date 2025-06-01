@@ -117,7 +117,7 @@ export class CommanderFileCommands {
     }
     //@+node:felix.20220105210716.7: *4* c_file.importAnyFile & helper
     @commander_command('import-file', 'Import one or more files.')
-    public async importAnyFile(this: Commands): Promise<unknown> {
+    public async importAnyFile(this: Commands, files?: string[]): Promise<unknown> {
         const c: Commands = this;
         const ic: LeoImportCommands = c.importCommands;
         const types: [string, string][] = [
@@ -137,12 +137,20 @@ export class CommanderFileCommands {
             ['Python files', '*.py'],
             ['Text files', '*.txt'],
         ];
-        let names: string[] = await g.app.gui.runOpenFilesDialog(
-            c,
-            'Import File',
-            types,
-            '.py',
-        );
+        let names: string[];
+        if (files && files.length) {
+            // If files are given, use them.
+            files = files.map((fn) => g.os_path_fix_drive(fn));
+            files = files.map((fn) => g.os_path_normslashes(fn));
+            names = files;
+        } else {
+            names = await g.app.gui.runOpenFilesDialog(
+                c,
+                'Import File',
+                types,
+                '.py',
+            );
+        }
         c.bringToFront();
         if (names && names.length) {
             await g.chdir(names[0]);

@@ -5989,7 +5989,8 @@ export function is_sentinel(
             return 0 === i && i < j;
         }
     }
-    error(`is_sentinel: can not happen. delims: ${delims}`);
+    // #3458: This case *can* happen when the user changes an @language directive.
+    //        Don't bother trying to recover.
     return false;
 }
 //@+node:felix.20211104211349.1: ** g.Unit Tests
