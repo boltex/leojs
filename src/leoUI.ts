@@ -722,10 +722,12 @@ export class LeoUI extends NullGui {
         }
     }
 
-    public findInLeoOutline(p_arg: any): any {
-        // TODO : if an @<file> is found, then open the outline 
-        // node that matches the file at that specific line. 
-        // (see c.editCommands.gotoGlobalLine)
+    public async findInLeoOutline(p_arg: any): Promise<any> {
+        // When the active editor is an external file referenced by an @file node 
+        // in the current Leo outline, this method finds that @file node,
+        // selects it in the Leo outline, and attempts to place the cursor
+        // to the corresponding line number in the body pane of the selected node.
+        // It processes the first matching @file node found.
 
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -735,15 +737,61 @@ export class LeoUI extends NullGui {
 
         const document = editor.document;
         const position = editor.selection.active;
-        const lineNumber = position.line;
+        const lineNumber = position.line; // 0-indexed
         const filePath = document.uri.fsPath;
-        const lineText = document.lineAt(lineNumber).text;
 
-        console.log('lineNumber', lineNumber);
-        console.log('filePath', filePath);
+        const c = g.app.windowList[this.frameIndex].c;
+        for (const p of c.all_positions()) {
+            if (p.v && p.v.isAnyAtFileNode()) {
+                // ok, its an @file node so check if its absolute path matches the filePath
+                const w_path = c.fullPath(p);
+                if (w_path && g.finalize(w_path) === g.finalize(filePath)) {
+                    // Found the node that matches the filePath
+                    c.selectPosition(p); // Select the node in Leo's model
 
-        console.log("findInLeoOutline", p_arg);
+                    try { // Added try-catch for async/await
+                        await c.editCommands.gotoGlobalLine(lineNumber);
+                        // Successfully initiated gotoGlobalLine.
+                        // The UI will be updated by launchRefresh.
+                    } catch (err: any) {
+                        // gotoGlobalLine failed or was rejected
+                        console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
+                        void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
+                    } finally {
+                        // Always refresh the UI as the position was selected.
+                        // gotoGlobalLine might have effects even if it partially failed or if it succeeded.
+                        void this.launchRefresh();
+                    }
 
+                    // Exit after processing the first matching @file node.
+                    return;
+
+                }
+
+            }
+        }
+        // Not found. Offer to import as an @auto, an @clean, or to cancel.
+        // Open modal dialog with options.
+        const choices = ['Import as @auto', 'Import as @clean', 'Cancel'];
+        const selection = await vscode.window.showInformationMessage( // Added await
+            `The file "${filePath}" was not found in the current Leo outline.`,
+            { modal: true },
+            ...choices
+        );
+        if (selection === 'Import as @auto') {
+            // Handle Import as @auto
+            console.log('User chose Import as @auto');
+
+            // void this.launchRefresh();
+        } else if (selection === 'Import as @clean') {
+            // Handle Import as @clean
+            console.log('User chose Import as @clean');
+
+            // void this.launchRefresh();
+        } else {
+            // Handle Cancel or dismiss
+            console.log('User cancelled or dismissed the dialog');
+        }
     }
 
     /**
