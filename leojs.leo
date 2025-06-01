@@ -4669,10 +4669,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "ac40411",
-  "gitBranch": "devel",
-  "gitDate": "2025-05-30 22:03:34 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -21595,10 +21592,12 @@ public get1Char(
 - ...
 
 </t>
-<t tx="felix.20250530231903.1">public findInLeoOutline(p_arg: any): any {
-    // TODO : if an @&lt;file&gt; is found, then open the outline 
-    // node that matches the file at that specific line. 
-    // (see c.editCommands.gotoGlobalLine)
+<t tx="felix.20250530231903.1">public async findInLeoOutline(p_arg: any): Promise&lt;any&gt; {
+    // When the active editor is an external file referenced by an @file node 
+    // in the current Leo outline, this method finds that @file node,
+    // selects it in the Leo outline, and attempts to place the cursor
+    // to the corresponding line number in the body pane of the selected node.
+    // It processes the first matching @file node found.
 
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -21608,15 +21607,83 @@ public get1Char(
 
     const document = editor.document;
     const position = editor.selection.active;
-    const lineNumber = position.line;
+    const lineNumber = position.line; // 0-indexed
     const filePath = document.uri.fsPath;
-    const lineText = document.lineAt(lineNumber).text;
 
-    console.log('lineNumber', lineNumber);
-    console.log('filePath', filePath);
+    const c = g.app.windowList[this.frameIndex].c;
+    for (const p of c.all_positions()) {
+        if (p.v &amp;&amp; p.v.isAnyAtFileNode()) {
+            // ok, its an @file node so check if its absolute path matches the filePath
+            const w_path = c.fullPath(p);
+            if (w_path &amp;&amp; g.finalize(w_path) === g.finalize(filePath)) {
+                // Found the node that matches the filePath
+                c.selectPosition(p); // Select the node in Leo's model
 
-    console.log("findInLeoOutline", p_arg);
+                try { // Added try-catch for async/await
+                    // +1 because lineNumber is 0-indexed
+                    await c.editCommands.gotoGlobalLine(lineNumber + 1);
+                    // Successfully initiated gotoGlobalLine.
+                    // The UI will be updated by launchRefresh.
+                } catch (err: any) {
+                    // gotoGlobalLine failed or was rejected
+                    console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
+                    void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
+                } finally {
+                    // Always refresh the UI as the position was selected.
+                    // gotoGlobalLine might have effects even if it partially failed or if it succeeded.
+                    this.setupRefresh(
+                        Focus.NoChange,
+                        {
+                            tree: true,
+                            body: true,
+                            states: true,
+                            buttons: false,
+                            documents: false,
+                            goto: false,
+                        }
+                    );
+                    void this.launchRefresh();
+                }
 
+                // Exit after processing the first matching @file node.
+                return;
+
+            }
+
+        }
+    }
+    // Not found. Offer to import as an @auto, an @clean, or to cancel.
+    // Open modal dialog with options.
+    const choices = [
+        'Import File in Leo',
+    ];
+    const selection = await vscode.window.showInformationMessage( // Added await
+        `The file "${filePath}" was not found in the current Leo outline.`,
+        { modal: true },
+        ...choices
+    );
+    if (selection === 'Import File in Leo') {
+        // Handle Import File in Leo
+        await c.importAnyFile([filePath]);
+
+        this.setupRefresh(
+            Focus.NoChange,
+            {
+                tree: true,
+                body: true,
+                states: true,
+                buttons: false,
+                documents: true,
+                goto: false,
+            }
+        );
+        void this.launchRefresh();
+
+
+    } else {
+        // Handle Cancel or dismiss
+        console.log('User cancelled or dismissed the dialog');
+    }
 }
 
 </t>

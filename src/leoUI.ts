@@ -786,9 +786,6 @@ export class LeoUI extends NullGui {
         // Open modal dialog with options.
         const choices = [
             'Import File in Leo',
-            // 'Import as @auto',
-            // 'Import as @clean',
-            'Cancel'
         ];
         const selection = await vscode.window.showInformationMessage( // Added await
             `The file "${filePath}" was not found in the current Leo outline.`,
@@ -812,38 +809,7 @@ export class LeoUI extends NullGui {
             );
             void this.launchRefresh();
 
-        } else if (selection === 'Import as @auto') {
-            // Handle Import as @auto
-            console.log('User chose Import as @auto');
 
-            this.setupRefresh(
-                Focus.NoChange,
-                {
-                    tree: true,
-                    body: true,
-                    states: true,
-                    buttons: false,
-                    documents: true,
-                    goto: false,
-                }
-            );
-            void this.launchRefresh();
-        } else if (selection === 'Import as @clean') {
-            // Handle Import as @clean
-            console.log('User chose Import as @clean');
-
-            this.setupRefresh(
-                Focus.NoChange,
-                {
-                    tree: true,
-                    body: true,
-                    states: true,
-                    buttons: false,
-                    documents: true,
-                    goto: false,
-                }
-            );
-            void this.launchRefresh();
         } else {
             // Handle Cancel or dismiss
             console.log('User cancelled or dismissed the dialog');
