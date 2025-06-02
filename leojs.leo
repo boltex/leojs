@@ -4367,7 +4367,8 @@ public async minibuffer(): Promise&lt;unknown&gt; {
             quickPick.onDidAccept(accepted =&gt; {
                 if (/^\d+$/.test(quickPick.value)) {
                     // * Was an integer EASTER EGG
-                    this.setupRefresh(Focus.Body,
+                    this.setupRefresh(
+                        Focus.Body,
                         {
                             tree: true,
                             body: true,
@@ -21645,7 +21646,7 @@ public get1Char(
                     // Always refresh the UI as the position was selected.
                     // gotoGlobalLine might have effects even if it partially failed or if it succeeded.
                     this.setupRefresh(
-                        Focus.NoChange,
+                        Focus.Body,
                         {
                             tree: true,
                             body: true,
