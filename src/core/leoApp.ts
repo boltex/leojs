@@ -299,6 +299,7 @@ export class LeoApp {
     public already_open_files: string[] = []; // A list of file names that * might * be open in another copy of Leo.
     public inBridge: boolean = false; // True: running from leoBridge module.
     public inScript: boolean = false; // True: executing a script.
+    public hasScriptShownlog: boolean = false; // True: executing a script has show the log pane. (LeoJS only)
     public initing: boolean = true; // True: we are initializing the app.
     public initComplete: boolean = false; // True: late bindings are not allowed.
     public killed: boolean = false; // True: we are about to destroy the root window.

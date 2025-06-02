@@ -2,7 +2,10 @@
 
 ## 1.0.11
 
-- ...
+- Added a new command (Editor context menu) for usage in external files or files to be imported: Show Line in Leo Outline. (will offer to import if not present)
+- g.es now shows the log pane when running user scripts or @buttons
+- Running scripts now ignores the write-script-file option in LeoJS.
+
 
 ## 1.0.10
 

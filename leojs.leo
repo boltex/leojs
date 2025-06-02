@@ -1863,7 +1863,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
 [CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
 
-[CMD.FIND_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.findInLeoOutline(p_arg)],
+[CMD.FIND_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.showLineInLeoOutline(p_arg)],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
@@ -2005,7 +2005,7 @@ public static COMMANDS = {
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
-    FIND_IN_LEO_OUTLINE: Constants.NAME + ".findInLeoOutline",
+    FIND_IN_LEO_OUTLINE: Constants.NAME + ".showLineInLeoOutline",
     HANDLE_UNL: Constants.NAME + ".handleUnl",
     SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
     FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
@@ -4798,10 +4798,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "title": "Git Diff"
 },
 {
-  "command": "leojs.findInLeoOutline",
+  "command": "leojs.showLineInLeoOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened &amp;&amp; editorTextFocus",
-  "title": "Find in Leo Outline"
+  "title": "Show Line In Leo Outline"
 },
 {
   "command": "leojs.tabCycleNext",
@@ -5463,6 +5463,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsOutlineExplorer",
       "name": "Leojs Outline",
       "contextualTitle": "Leojs",
+      "icon": "$(symbol-class)",
       "when": "config.leojs.treeInExplorer",
       "visibility": "visible"
     },
@@ -5472,12 +5473,14 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "contextualTitle": "Leojs",
       "name": "Leojs Find",
       "title": "Leojs Find",
+      "icon": "$(search)",
       "when": "config.leojs.treeInExplorer &amp;&amp; leojsTreeOpened",
       "visibility": "collapsed"
     },
     {
       "id": "leojsDocumentsExplorer",
       "name": "Leojs Documents",
+      "icon": "$(symbol-folder)",
       "contextualTitle": "Leojs",
       "when": "config.leojs.treeInExplorer &amp;&amp; leojsTreeOpened",
       "visibility": "collapsed"
@@ -5486,12 +5489,14 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsUndosExplorer",
       "name": "Leojs Undo History",
       "contextualTitle": "Leojs",
+      "icon": "$(leojs-undo)",
       "when": "config.leojs.treeInExplorer &amp;&amp; leojsTreeOpened",
       "visibility": "collapsed"
     },
     {
       "id": "leojsButtonsExplorer",
       "name": "Leojs Buttons",
+      "icon": "$(play)",
       "contextualTitle": "Leojs",
       "when": "config.leojs.treeInExplorer &amp;&amp; leojsTreeOpened",
       "visibility": "collapsed"
@@ -5502,6 +5507,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsOutline",
       "contextualTitle": "Leojs",
       "name": "Outline",
+      "icon": "$(symbol-class)",
       "visibility": "visible"
     },
     {
@@ -5510,6 +5516,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsFindPanel",
       "name": "Find",
       "title": "Find",
+      "icon": "$(search)",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     },
@@ -5517,6 +5524,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsDocuments",
       "contextualTitle": "Leojs",
       "name": "Documents",
+      "icon": "$(symbol-folder)",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     },
@@ -5524,6 +5532,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsUndos",
       "contextualTitle": "Leojs",
       "name": "Undo History",
+      "icon": "$(leojs-undo)",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     },
@@ -5531,6 +5540,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
       "id": "leojsButtons",
       "contextualTitle": "Leojs",
       "name": "Buttons",
+      "icon": "$(play)",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     }
@@ -5571,7 +5581,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "false"
 },
 {
-  "command": "leojs.findInLeoOutline",
+  "command": "leojs.showLineInLeoOutline",
   "when": "false"
 },
 </t>
@@ -14556,7 +14566,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
     "group": "navigation@1"
   },
   {
-    "command": "leojs.findInLeoOutline",
+    "command": "leojs.showLineInLeoOutline",
     "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme != leojs &amp;&amp; resourceScheme != untitled &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
@@ -21589,10 +21599,13 @@ public get1Char(
 </t>
 <t tx="felix.20250522205342.1">## 1.0.11
 
-- ...
+- Added a new command (Editor context menu) for usage in external files or files to be imported: Show Line in Leo Outline. (will offer to import if not present)
+- g.es now shows the log pane when running user scripts or @buttons
+- Running scripts now ignores the write-script-file option in LeoJS.
+
 
 </t>
-<t tx="felix.20250530231903.1">public async findInLeoOutline(p_arg: any): Promise&lt;any&gt; {
+<t tx="felix.20250530231903.1">public async showLineInLeoOutline(p_arg: any): Promise&lt;any&gt; {
     // When the active editor is an external file referenced by an @file node 
     // in the current Leo outline, this method finds that @file node,
     // selects it in the Leo outline, and attempts to place the cursor

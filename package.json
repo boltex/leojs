@@ -243,6 +243,7 @@
           "id": "leojsOutlineExplorer",
           "name": "Leojs Outline",
           "contextualTitle": "Leojs",
+          "icon": "$(symbol-class)",
           "when": "config.leojs.treeInExplorer",
           "visibility": "visible"
         },
@@ -252,12 +253,14 @@
           "contextualTitle": "Leojs",
           "name": "Leojs Find",
           "title": "Leojs Find",
+          "icon": "$(search)",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
         },
         {
           "id": "leojsDocumentsExplorer",
           "name": "Leojs Documents",
+          "icon": "$(symbol-folder)",
           "contextualTitle": "Leojs",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
@@ -266,12 +269,14 @@
           "id": "leojsUndosExplorer",
           "name": "Leojs Undo History",
           "contextualTitle": "Leojs",
+          "icon": "$(leojs-undo)",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
         },
         {
           "id": "leojsButtonsExplorer",
           "name": "Leojs Buttons",
+          "icon": "$(play)",
           "contextualTitle": "Leojs",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
@@ -282,6 +287,7 @@
           "id": "leojsOutline",
           "contextualTitle": "Leojs",
           "name": "Outline",
+          "icon": "$(symbol-class)",
           "visibility": "visible"
         },
         {
@@ -290,6 +296,7 @@
           "id": "leojsFindPanel",
           "name": "Find",
           "title": "Find",
+          "icon": "$(search)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         },
@@ -297,6 +304,7 @@
           "id": "leojsDocuments",
           "contextualTitle": "Leojs",
           "name": "Documents",
+          "icon": "$(symbol-folder)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         },
@@ -304,6 +312,7 @@
           "id": "leojsUndos",
           "contextualTitle": "Leojs",
           "name": "Undo History",
+          "icon": "$(leojs-undo)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         },
@@ -311,6 +320,7 @@
           "id": "leojsButtons",
           "contextualTitle": "Leojs",
           "name": "Buttons",
+          "icon": "$(play)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         }
@@ -2030,10 +2040,10 @@
         "title": "Git Diff"
       },
       {
-        "command": "leojs.findInLeoOutline",
+        "command": "leojs.showLineInLeoOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened && editorTextFocus",
-        "title": "Find in Leo Outline"
+        "title": "Show Line In Leo Outline"
       },
       {
         "command": "leojs.tabCycleNext",
@@ -3136,7 +3146,7 @@
           "when": "false"
         },
         {
-          "command": "leojs.findInLeoOutline",
+          "command": "leojs.showLineInLeoOutline",
           "when": "false"
         },
         {
@@ -3564,7 +3574,7 @@
           "group": "navigation@1"
         },
         {
-          "command": "leojs.findInLeoOutline",
+          "command": "leojs.showLineInLeoOutline",
           "when": "!editorHasMultipleSelections && resourceScheme != leojs && resourceScheme != untitled && leojsTreeOpened",
           "group": "navigation@1"
         },

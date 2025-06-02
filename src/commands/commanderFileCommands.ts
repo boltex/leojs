@@ -116,6 +116,7 @@ export class CommanderFileCommands {
         return g.app.closeLeoWindow(this.frame, new_c);
     }
     //@+node:felix.20220105210716.7: *4* c_file.importAnyFile & helper
+    @commander_command('import-any-file', 'Import one or more files.')
     @commander_command('import-file', 'Import one or more files.')
     public async importAnyFile(this: Commands, files?: string[]): Promise<unknown> {
         const c: Commands = this;
