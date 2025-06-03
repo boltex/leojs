@@ -1863,7 +1863,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
 [CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
 
-[CMD.FIND_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.showLineInLeoOutline(p_arg)],
+[CMD.SHOW_LINE_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.showLineInLeoOutline(p_arg)],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
@@ -2005,7 +2005,7 @@ public static COMMANDS = {
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
-    FIND_IN_LEO_OUTLINE: Constants.NAME + ".showLineInLeoOutline",
+    SHOW_LINE_IN_LEO_OUTLINE: Constants.NAME + ".showLineInLeoOutline",
     HANDLE_UNL: Constants.NAME + ".handleUnl",
     SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
     FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
@@ -4802,7 +4802,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.showLineInLeoOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened &amp;&amp; editorTextFocus",
-  "title": "Show Line In Leo Outline"
+  "title": "Show Line In LeoJS Outline"
 },
 {
   "command": "leojs.tabCycleNext",
@@ -5933,7 +5933,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 <t tx="felix.20201214205159.54">"explorer/context": [
   {
     "command": "leojs.openLeoFile",
-    "when": "resourceExtname == .leo || resourceExtname == .leojs",
+    "when": "resourceExtname =~ /^\\.leojs$|^\\.leo$/",
     "group": "navigation@1"
   }
 ],
@@ -14568,7 +14568,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   },
   {
     "command": "leojs.showLineInLeoOutline",
-    "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme != leojs &amp;&amp; resourceScheme != untitled &amp;&amp; leojsTreeOpened",
+    "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
   {
@@ -15252,7 +15252,7 @@ public async goAnywhere(): Promise&lt;unknown&gt; {
 <t tx="felix.20221207231723.1">{
   "command": "workbench.files.action.collapseExplorerFolders",
   "key": "alt+-",
-  "when": "config.leojs.collapseAllShortcut &amp;&amp; !inSearchEditor &amp;&amp; !sideBarFocus &amp;&amp; resourceScheme == untitled || config.leojs.collapseAllShortcut &amp;&amp; !inSearchEditor &amp;&amp; !sideBarFocus &amp;&amp; resourceScheme == file || config.leojs.collapseAllShortcut &amp;&amp; !inSearchEditor &amp;&amp; explorerViewletFocus"
+  "when": "config.leojs.collapseAllShortcut &amp;&amp; !inSearchEditor &amp;&amp; !sideBarFocus &amp;&amp; resourceScheme =~ /^untitled$|^file$/ || config.leojs.collapseAllShortcut &amp;&amp; !inSearchEditor &amp;&amp; explorerViewletFocus"
 },
 {
   "command": "workbench.view.extension.leojsView",

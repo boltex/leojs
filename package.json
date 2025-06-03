@@ -2043,7 +2043,7 @@
         "command": "leojs.showLineInLeoOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened && editorTextFocus",
-        "title": "Show Line In Leo Outline"
+        "title": "Show Line In LeoJS Outline"
       },
       {
         "command": "leojs.tabCycleNext",
@@ -3401,7 +3401,7 @@
       "explorer/context": [
         {
           "command": "leojs.openLeoFile",
-          "when": "resourceExtname == .leo || resourceExtname == .leojs",
+          "when": "resourceExtname =~ /^\\.leojs$|^\\.leo$/",
           "group": "navigation@1"
         }
       ],
@@ -3575,7 +3575,7 @@
         },
         {
           "command": "leojs.showLineInLeoOutline",
-          "when": "!editorHasMultipleSelections && resourceScheme != leojs && resourceScheme != untitled && leojsTreeOpened",
+          "when": "!editorHasMultipleSelections && resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
           "group": "navigation@1"
         },
         {
@@ -4583,7 +4583,7 @@
       {
         "command": "workbench.files.action.collapseExplorerFolders",
         "key": "alt+-",
-        "when": "config.leojs.collapseAllShortcut && !inSearchEditor && !sideBarFocus && resourceScheme == untitled || config.leojs.collapseAllShortcut && !inSearchEditor && !sideBarFocus && resourceScheme == file || config.leojs.collapseAllShortcut && !inSearchEditor && explorerViewletFocus"
+        "when": "config.leojs.collapseAllShortcut && !inSearchEditor && !sideBarFocus && resourceScheme =~ /^untitled$|^file$/ || config.leojs.collapseAllShortcut && !inSearchEditor && explorerViewletFocus"
       },
       {
         "command": "workbench.view.extension.leojsView",

@@ -518,7 +518,7 @@ export class Constants {
         CLOSE_FILE: Constants.NAME + ".closeLeoFile",
         MINIBUFFER: Constants.NAME + ".minibuffer",
         SET_LEO_ID: Constants.NAME + ".setLeoID",
-        FIND_IN_LEO_OUTLINE: Constants.NAME + ".showLineInLeoOutline",
+        SHOW_LINE_IN_LEO_OUTLINE: Constants.NAME + ".showLineInLeoOutline",
         HANDLE_UNL: Constants.NAME + ".handleUnl",
         SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
         FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
