@@ -162,7 +162,7 @@
 <v t="felix.20231224193540.1"><vh>put_help</vh></v>
 <v t="felix.20240213205001.1"><vh>statusBar</vh></v>
 <v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
-<v t="felix.20250530231903.1"><vh>findInLeoOutline</vh></v>
+<v t="felix.20250530231903.1"><vh>showLineInLeoOutline</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20240721135528.1"><vh>createLogPane</vh></v>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
@@ -21680,8 +21680,23 @@ public get1Char(
         // Handle Import File in Leo
         await c.importAnyFile([filePath]);
 
+        // Retry to show the node in the outline and set the cursor in the body pane!
+        for (const p of c.all_positions()) {
+            if (p.v &amp;&amp; p.v.isAnyAtFileNode()) {
+                const w_path = c.fullPath(p);
+                if (w_path &amp;&amp; g.finalize(w_path) === g.finalize(filePath)) {
+                    c.selectPosition(p); // Select the node in Leo's model
+                    try { // Added try-catch for async/await
+                        await c.editCommands.gotoGlobalLine(lineNumber + 1);
+                    } catch (err: any) {
+                        console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
+                        void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
+                    }
+                }
+            }
+        }
         this.setupRefresh(
-            Focus.NoChange,
+            Focus.Body,
             {
                 tree: true,
                 body: true,
