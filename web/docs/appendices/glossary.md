@@ -70,7 +70,10 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ### \@file \<filename>
 
-    Creates an external file containing sentinels. When writing @file trees, Leo expands section references and @all and @others directives. **Important**: @file is the recommended way to create and edit most files. Using @file trees is **highly recommended** when sharing external files in a collaborative environment.
+    Creates an external file containing sentinels. When writing @file trees, Leo expands section references and @all and @others directives. 
+    
+    > 📌 **Important**\
+    > @file is the recommended way to create and edit most files. Using @file trees is **highly recommended** when sharing external files in a collaborative environment.
 
 ### \@first \<text>
 
