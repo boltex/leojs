@@ -21601,10 +21601,9 @@ public get1Char(
 </t>
 <t tx="felix.20250522205342.1">## 1.0.11
 
-- Added a new command (Editor context menu) for usage in external files or files to be imported: Show Line in Leo Outline. (will offer to import if not present)
+- New command (Editor context menu) for usage in external files or files to be imported: **Show Line in Leo Outline**. (will offer to import if not present)
 - g.es now shows the log pane when running user scripts or @buttons
 - Running scripts now ignores the write-script-file option in LeoJS.
-
 
 </t>
 <t tx="felix.20250530231903.1">public async showLineInLeoOutline(p_arg: any): Promise&lt;any&gt; {
