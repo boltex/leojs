@@ -738,24 +738,22 @@ export class LeoUI extends NullGui {
         const document = editor.document;
         const position = editor.selection.active;
         const lineNumber = position.line; // 0-indexed
-        const filePath = document.uri.fsPath;
+        let filePath = utils.capitalizeDrive(document.uri.fsPath);
 
         const c = g.app.windowList[this.frameIndex].c;
         for (const p of c.all_positions()) {
             if (p.v && p.v.isAnyAtFileNode()) {
                 // ok, its an @file node so check if its absolute path matches the filePath
-                const w_path = c.fullPath(p);
+                const w_path = utils.capitalizeDrive(c.fullPath(p));
                 if (w_path && g.finalize(w_path) === g.finalize(filePath)) {
                     // Found the node that matches the filePath
                     c.selectPosition(p); // Select the node in Leo's model
 
-                    try { // Added try-catch for async/await
+                    try {
+                        await this.showBody(false);
                         // +1 because lineNumber is 0-indexed
                         await c.editCommands.gotoGlobalLine(lineNumber + 1);
-                        // Successfully initiated gotoGlobalLine.
-                        // The UI will be updated by launchRefresh.
                     } catch (err: any) {
-                        // gotoGlobalLine failed or was rejected
                         console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
                         void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
                     } finally {
@@ -774,43 +772,61 @@ export class LeoUI extends NullGui {
                         );
                         void this.launchRefresh();
                     }
-
                     // Exit after processing the first matching @file node.
                     return;
-
                 }
-
             }
         }
+
         // Not found. Offer to import as an @auto, an @clean, or to cancel.
         // Open modal dialog with options.
         const choices = [
-            'Import File in Leo',
+            'Import with @clean',
+            'Import with @edit',
+            'Import with @asis',
         ];
         const selection = await vscode.window.showInformationMessage( // Added await
             `The file "${filePath}" was not found in the current Leo outline.`,
             { modal: true },
             ...choices
         );
-        if (selection === 'Import File in Leo') {
-            // Handle Import File in Leo
-            await c.importAnyFile([filePath]);
+        if (selection?.startsWith('Import')) {
 
-            // Retry to show the node in the outline and set the cursor in the body pane!
-            for (const p of c.all_positions()) {
-                if (p.v && p.v.isAnyAtFileNode()) {
-                    const w_path = c.fullPath(p);
-                    if (w_path && g.finalize(w_path) === g.finalize(filePath)) {
-                        c.selectPosition(p); // Select the node in Leo's model
-                        try { // Added try-catch for async/await
-                            await c.editCommands.gotoGlobalLine(lineNumber + 1);
-                        } catch (err: any) {
-                            console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
-                            void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
-                        }
+            // get which import type was selected
+            const importType = selection.split(' ')[2].toLowerCase(); // '@clean', '@edit', or '@asis'
+
+            // Insert a node with the selected import type with headline @xxxx <relative file path>
+            const commanderFilename = utils.capitalizeDrive(c.fileName());
+            if (commanderFilename) {
+                // Try to set fileName to a relative path if possible.
+                const commanderDirectory = g.os_path_dirname(commanderFilename);
+                const importedFileDir = g.os_path_dirname(filePath);
+                // If the commander directory is present in the imported file directory, use a relative path.
+                if (importedFileDir.startsWith(commanderDirectory)) {
+                    let commonPath = importedFileDir.substring(commanderDirectory.length + 1);
+                    if (commonPath) {
+                        commonPath += '/'; // not empty so add a slash.
                     }
+                    filePath = commonPath + g.os_path_basename(filePath);
                 }
             }
+
+            const p = c.insertHeadline('Open File')!;
+            p.h = `${importType} ${filePath}`;
+
+            // Now call refresh-from-disk on that position
+            await c.refreshFromDisk();
+
+            // Try again to go to the line number in the body pane of the newly created and selected node.
+            try {
+                await this.showBody(false);
+                // +1 because lineNumber is 0-indexed
+                await c.editCommands.gotoGlobalLine(lineNumber + 1);
+            } catch (err: any) {
+                console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
+                void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
+            }
+
             this.setupRefresh(
                 Focus.Body,
                 {

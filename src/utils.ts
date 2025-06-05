@@ -434,3 +434,14 @@ export function setContext(p_key: string, p_value: any): Thenable<unknown> {
     return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, p_key, p_value);
 }
 
+export function capitalizeDrive(drive: string): string {
+    if (drive.length > 1 && drive[1] === ':') {
+        // Check if the first character is a letter
+        if (drive[0] >= 'a' && drive[0] <= 'z') {
+            // Convert the first character to uppercase
+            drive = drive[0].toUpperCase() + drive.slice(1);
+        }
+    }
+    return drive;
+}
+
