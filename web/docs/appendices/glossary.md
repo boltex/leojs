@@ -34,7 +34,7 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ### \@auto \<filename>
 
-    Imports an external file into the Leo outline, splitting the file into pieces if an importer exists for the give filetype. Importers presently exist for the following languages: C, C++, C#, CoffeScript, Cython, Dart, Elisp, HTML, INI files, Java, JavaScript, Lua, Markdown, Org, OTL, PHP, Pascal, Perl, Python, Rust, Scheme, Tcl, TreePad, TypeScript and XML.
+    Imports an external file into the Leo outline, splitting the file into pieces if an importer exists for the give filetype. Importers presently exist for the following languages: C, C++, C#, CoffeScript, Cython, Dart, Elisp, HTML, INI files, Java, JavaScript, Lua, Markdown, Org, OTL, PHP, Pascal, Perl, Python, Rust, Tcl, TreePad, TypeScript and XML.
 
 ### \@c and @code
 
