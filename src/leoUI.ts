@@ -748,11 +748,14 @@ export class LeoUI extends NullGui {
                 if (w_path && g.finalize(w_path) === g.finalize(filePath)) {
                     // Found the node that matches the filePath
                     c.selectPosition(p); // Select the node in Leo's model
-
+                    let found = false;
                     try {
-                        await this.showBody(false);
                         // +1 because lineNumber is 0-indexed
-                        await c.editCommands.gotoGlobalLine(lineNumber + 1);
+                        const gotoResult = await c.editCommands.gotoGlobalLine(lineNumber + 1);
+                        if (gotoResult[0]) {
+                            found = true;
+                            await this.showBody(false);
+                        }
                     } catch (err: any) {
                         console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
                         void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
@@ -760,7 +763,7 @@ export class LeoUI extends NullGui {
                         // Always refresh the UI as the position was selected.
                         // gotoGlobalLine might have effects even if it partially failed or if it succeeded.
                         this.setupRefresh(
-                            Focus.Body,
+                            found ? Focus.Body : Focus.NoChange, // Focus on body if found, otherwise no change
                             {
                                 tree: true,
                                 body: true,
@@ -4166,8 +4169,12 @@ export class LeoUI extends NullGui {
                             }
                         );
                         // not awaited
-                        c.editCommands.gotoGlobalLine(Number(quickPick.value)).then(() => {
-                            void this.launchRefresh();
+                        c.editCommands.gotoGlobalLine(Number(quickPick.value)).then((p_gotoResult) => {
+                            if (p_gotoResult[0]) {
+                                void this.showBody(false).then(() => {
+                                    void this.launchRefresh();
+                                });
+                            }
                         }, () => {
                             // pass
                         });

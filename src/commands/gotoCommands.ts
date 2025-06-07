@@ -65,6 +65,22 @@ export class GoToCommands {
         let fileName;
         [root, fileName] = this.find_root(p);
         if (root && root.__bool__()) {
+            // Step 0: goto-global-line works only for @file, @edit, @clean, and 'single' @asis nodes.
+            if (!(
+                root.isAtCleanNode() ||
+                root.isAtFileNode() ||
+                root.isAtEditNode() ||
+                (root.isAtAsisFileNode() && root.v.children.length === 0)
+            )) {
+                // Support the special case used by g.findGnx.
+                if (p.v && n === 0) {
+                    return [p, 0];
+                }
+                // #4355: Print a warning once.
+                g.es_print_unique_message('goto-global-line works only for @file, @clean, @edit and single @asis nodes');
+                return [undefined, -1];
+            }
+
             // Step 1: Get the lines of external files *with* sentinels,
             // even if the actual external file actually contains no sentinels.
             const sentinels = root.isAtFileNode();

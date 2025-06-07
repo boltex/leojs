@@ -4379,8 +4379,12 @@ public async minibuffer(): Promise&lt;unknown&gt; {
                         }
                     );
                     // not awaited
-                    c.editCommands.gotoGlobalLine(Number(quickPick.value)).then(() =&gt; {
-                        void this.launchRefresh();
+                    c.editCommands.gotoGlobalLine(Number(quickPick.value)).then((p_gotoResult) =&gt; {
+                        if (p_gotoResult[0]) {
+                            void this.showBody(false).then(() =&gt; {
+                                void this.launchRefresh();
+                            });
+                        }
                     }, () =&gt; {
                         // pass
                     });
@@ -21632,11 +21636,14 @@ public get1Char(
             if (w_path &amp;&amp; g.finalize(w_path) === g.finalize(filePath)) {
                 // Found the node that matches the filePath
                 c.selectPosition(p); // Select the node in Leo's model
-
+                let found = false;
                 try {
-                    await this.showBody(false);
                     // +1 because lineNumber is 0-indexed
-                    await c.editCommands.gotoGlobalLine(lineNumber + 1);
+                    const gotoResult = await c.editCommands.gotoGlobalLine(lineNumber + 1);
+                    if (gotoResult[0]) {
+                        found = true;
+                        await this.showBody(false);
+                    }
                 } catch (err: any) {
                     console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
                     void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
@@ -21644,7 +21651,7 @@ public get1Char(
                     // Always refresh the UI as the position was selected.
                     // gotoGlobalLine might have effects even if it partially failed or if it succeeded.
                     this.setupRefresh(
-                        Focus.Body,
+                        found ? Focus.Body : Focus.NoChange, // Focus on body if found, otherwise no change
                         {
                             tree: true,
                             body: true,

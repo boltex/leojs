@@ -4207,6 +4207,7 @@ export function print_unique_message(message: string): boolean {
  */
 export function es_print_unique_message(message: string, color?: string): boolean {
     if (!(message in g_unique_message_d)) {
+        app.gui.showLogPane(); // Ensure the log pane is visible
         g_unique_message_d[message] = true;
         es_print(message);
         return true;
