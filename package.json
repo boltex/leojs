@@ -206,6 +206,24 @@
           "type": "boolean",
           "description": "Shows 'Copy' button on tree nodes"
         },
+        "leojs.showImportInLeoInExplorer": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'Import in Outline' in explorer context menu"
+        },
+        "leojs.showImportInLeoInEditor": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'Import in Outline' in editor context menu"
+        },
+        "leojs.showGotoLineInOutline": {
+          "scope": "application",
+          "default": true,
+          "type": "boolean",
+          "description": "Shows 'Goto Line in Outline' in editor context menu"
+        },
         "leojs.invertNodeContrast": {
           "scope": "application",
           "default": false,
@@ -2040,10 +2058,10 @@
         "title": "Git Diff"
       },
       {
-        "command": "leojs.showLineInLeoOutline",
+        "command": "leojs.gotoLineInLeoOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened && editorTextFocus",
-        "title": "Show Line In LeoJS Outline"
+        "title": "Goto Line In LeoJS Outline"
       },
       {
         "command": "leojs.tabCycleNext",
@@ -3146,7 +3164,7 @@
           "when": "false"
         },
         {
-          "command": "leojs.showLineInLeoOutline",
+          "command": "leojs.gotoLineInLeoOutline",
           "when": "false"
         },
         {
@@ -3574,7 +3592,7 @@
           "group": "navigation@1"
         },
         {
-          "command": "leojs.showLineInLeoOutline",
+          "command": "leojs.gotoLineInLeoOutline",
           "when": "!editorHasMultipleSelections && resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
           "group": "navigation@1"
         },

@@ -722,7 +722,7 @@ export class LeoUI extends NullGui {
         }
     }
 
-    public async showLineInLeoOutline(p_arg: any): Promise<any> {
+    public async gotoLineInLeoOutline(p_arg: any): Promise<any> {
         // When the active editor is an external file referenced by an @file node 
         // in the current Leo outline, this method finds that @file node,
         // selects it in the Leo outline, and attempts to place the cursor

@@ -1864,7 +1864,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
 [CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
 
-[CMD.SHOW_LINE_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.showLineInLeoOutline(p_arg)],
+[CMD.GOTO_LINE_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.gotoLineInLeoOutline(p_arg)],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
@@ -2006,7 +2006,7 @@ public static COMMANDS = {
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
-    SHOW_LINE_IN_LEO_OUTLINE: Constants.NAME + ".showLineInLeoOutline",
+    GOTO_LINE_IN_LEO_OUTLINE: Constants.NAME + ".gotoLineInLeoOutline",
     HANDLE_UNL: Constants.NAME + ".handleUnl",
     SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
     FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
@@ -4804,10 +4804,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "title": "Git Diff"
 },
 {
-  "command": "leojs.showLineInLeoOutline",
+  "command": "leojs.gotoLineInLeoOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened &amp;&amp; editorTextFocus",
-  "title": "Show Line In LeoJS Outline"
+  "title": "Goto Line In LeoJS Outline"
 },
 {
   "command": "leojs.tabCycleNext",
@@ -5587,7 +5587,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "false"
 },
 {
-  "command": "leojs.showLineInLeoOutline",
+  "command": "leojs.gotoLineInLeoOutline",
   "when": "false"
 },
 </t>
@@ -7967,6 +7967,24 @@ public incTreeId(): void {
       "default": false,
       "type": "boolean",
       "description": "Shows 'Copy' button on tree nodes"
+    },
+    "leojs.showImportInLeoInExplorer": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Import in Outline' in explorer context menu"
+    },
+    "leojs.showImportInLeoInEditor": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Import in Outline' in editor context menu"
+    },
+    "leojs.showGotoLineInOutline": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Goto Line in Outline' in editor context menu"
     },
     "leojs.invertNodeContrast": {
       "scope": "application",
@@ -14572,7 +14590,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
     "group": "navigation@1"
   },
   {
-    "command": "leojs.showLineInLeoOutline",
+    "command": "leojs.gotoLineInLeoOutline",
     "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@1"
   },
@@ -21610,7 +21628,7 @@ public get1Char(
 - Running scripts now ignores the write-script-file option in LeoJS.
 
 </t>
-<t tx="felix.20250530231903.1">public async showLineInLeoOutline(p_arg: any): Promise&lt;any&gt; {
+<t tx="felix.20250530231903.1">public async gotoLineInLeoOutline(p_arg: any): Promise&lt;any&gt; {
     // When the active editor is an external file referenced by an @file node 
     // in the current Leo outline, this method finds that @file node,
     // selects it in the Leo outline, and attempts to place the cursor
