@@ -3591,12 +3591,12 @@
         {
           "command": "leojs.gotoLineInLeoOutline",
           "when": "!editorHasMultipleSelections && resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
-          "group": "navigation@2"
+          "group": "navigation@1"
         },
         {
           "command": "leojs.importIntoLeoOutline",
           "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
-          "group": "navigation@2"
+          "group": "navigation@1"
         },
         {
           "command": "leojs.extract",

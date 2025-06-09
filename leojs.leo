@@ -14601,12 +14601,12 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   {
     "command": "leojs.gotoLineInLeoOutline",
     "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
-    "group": "navigation@2"
+    "group": "navigation@1"
   },
   {
     "command": "leojs.importIntoLeoOutline",
     "when": "resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
-    "group": "navigation@2"
+    "group": "navigation@1"
   },
   {
     "command": "leojs.extract",
