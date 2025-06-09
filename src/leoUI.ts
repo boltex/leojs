@@ -843,11 +843,73 @@ export class LeoUI extends NullGui {
             );
             void this.launchRefresh();
 
-
-        } else {
-            // Handle Cancel or dismiss
-            console.log('User cancelled or dismissed the dialog');
         }
+    }
+
+    public async importIntoLeoOutline(p_arg: vscode.Uri): Promise<any> {
+
+        let filePath = utils.capitalizeDrive(p_arg.fsPath);
+        const c = g.app.windowList[this.frameIndex].c;
+
+        const commanderFilename = utils.capitalizeDrive(c.fileName());
+        if (commanderFilename) {
+            // Try to set fileName to a relative path if possible.
+            const commanderDirectory = g.os_path_dirname(commanderFilename);
+            const importedFileDir = g.os_path_dirname(filePath);
+            // If the commander directory is present in the imported file directory, use a relative path.
+            if (importedFileDir.startsWith(commanderDirectory)) {
+                let commonPath = importedFileDir.substring(commanderDirectory.length + 1);
+                if (commonPath) {
+                    commonPath += '/'; // not empty so add a slash.
+                }
+                filePath = commonPath + g.os_path_basename(filePath);
+            }
+        }
+
+        const choices = [
+            'Default Import',
+            'As @auto',
+            'As @clean',
+            'As @edit',
+            'As @asis',
+        ];
+
+        // * Use quick pick to ask for import type
+        const selection = await vscode.window.showQuickPick(choices, {
+            placeHolder: 'Import into Leo Outline',
+        });
+
+        if (selection && selection === "Default Import") {
+            await c.importAnyFile([filePath]);
+        } else if (selection && selection.startsWith("As ")) {
+
+            const importType = selection.split(' ')[1].toLowerCase(); // '@auto', '@clean', '@edit', or '@asis'
+
+            const p = c.insertHeadline('Open File')!;
+            p.h = `${importType} ${filePath}`;
+
+            // Now call refresh-from-disk on that position
+            await c.refreshFromDisk();
+        }
+
+        else {
+            // Handle Cancel or dismiss
+            return Promise.resolve();
+
+        }
+        this.setupRefresh(
+            Focus.NoChange, // No change in focus, but refresh all panels
+            {
+                tree: true,
+                body: true,
+                states: true,
+                buttons: false,
+                documents: true,
+                goto: false,
+            }
+        );
+        return this.launchRefresh();
+
     }
 
     /**

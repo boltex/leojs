@@ -163,6 +163,7 @@
 <v t="felix.20240213205001.1"><vh>statusBar</vh></v>
 <v t="felix.20231226210919.1"><vh>handleUnl</vh></v>
 <v t="felix.20250530231903.1"><vh>showLineInLeoOutline</vh></v>
+<v t="felix.20250608202513.1"><vh>importIntoLeoOutline</vh></v>
 <v t="felix.20220920001018.1"><vh>Log Pane</vh>
 <v t="felix.20240721135528.1"><vh>createLogPane</vh></v>
 <v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
@@ -994,6 +995,12 @@ Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty F
 | @edit          |    ❌     |   ❌    |    ❌     |     ❌     |
 | @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
 | @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
+
+You can also create most of those nodes by using the context menu in vscode's explorer or file editors, and choosing the **Import into LeoJS Outline** command.
+
+The **Go to Line In LeoJS Outline** command is also available in the editor context menu to find a specific line in the outline. It will offer to import the file if no type of **@file** nodes are found in the outline for that file.
+
+### File changes outside of LeoJS
 
 Leo will detect external file changes, and will ask to either **refresh from disk** or **ignore the changes**.
 
@@ -1865,6 +1872,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.HANDLE_UNL, (p_arg: { unl: string }) =&gt; p_leoUI.handleUnl(p_arg)],
 
 [CMD.GOTO_LINE_IN_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.gotoLineInLeoOutline(p_arg)],
+[CMD.IMPORT_INTO_LEO_OUTLINE, (p_arg: any) =&gt; p_leoUI.importIntoLeoOutline(p_arg)],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
@@ -2007,6 +2015,7 @@ public static COMMANDS = {
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
     GOTO_LINE_IN_LEO_OUTLINE: Constants.NAME + ".gotoLineInLeoOutline",
+    IMPORT_INTO_LEO_OUTLINE: Constants.NAME + ".importIntoLeoOutline",
     HANDLE_UNL: Constants.NAME + ".handleUnl",
     SHORT_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".shortGnxUnlToClipboard",
     FULL_GNX_UNL_TO_CLIPBOARD: Constants.NAME + ".fullGnxUnlToClipboard",
@@ -4675,7 +4684,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "ba38424",
+  "gitBranch": "devel",
+  "gitDate": "2025-06-08 19:21:47 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4807,7 +4819,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.gotoLineInLeoOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened &amp;&amp; editorTextFocus",
-  "title": "Goto Line In LeoJS Outline"
+  "title": "Go to Line In LeoJS Outline"
+},
+{
+  "command": "leojs.importIntoLeoOutline",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Import into LeoJS Outline as..."
 },
 {
   "command": "leojs.tabCycleNext",
@@ -5590,6 +5608,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.gotoLineInLeoOutline",
   "when": "false"
 },
+{
+  "command": "leojs.importIntoLeoOutline",
+  "when": "false"
+},
 </t>
 <t tx="felix.20201214205159.45">{
   "command": "leojs.contractAllFromOutline",
@@ -5939,6 +5961,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   {
     "command": "leojs.openLeoFile",
     "when": "resourceExtname =~ /^\\.leojs$|^\\.leo$/",
+    "group": "navigation@1"
+  },
+  {
+    "command": "leojs.importIntoLeoOutline",
+    "when": "resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened &amp;&amp; explorerResourceIsFolder == false",
     "group": "navigation@1"
   }
 ],
@@ -7967,24 +7994,6 @@ public incTreeId(): void {
       "default": false,
       "type": "boolean",
       "description": "Shows 'Copy' button on tree nodes"
-    },
-    "leojs.showImportInLeoInExplorer": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows 'Import in Outline' in explorer context menu"
-    },
-    "leojs.showImportInLeoInEditor": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows 'Import in Outline' in editor context menu"
-    },
-    "leojs.showGotoLineInOutline": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows 'Goto Line in Outline' in editor context menu"
     },
     "leojs.invertNodeContrast": {
       "scope": "application",
@@ -14592,7 +14601,12 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   {
     "command": "leojs.gotoLineInLeoOutline",
     "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
-    "group": "navigation@1"
+    "group": "navigation@2"
+  },
+  {
+    "command": "leojs.importIntoLeoOutline",
+    "when": "resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
+    "group": "navigation@2"
   },
   {
     "command": "leojs.extract",
@@ -21749,10 +21763,6 @@ public get1Char(
         );
         void this.launchRefresh();
 
-
-    } else {
-        // Handle Cancel or dismiss
-        console.log('User cancelled or dismissed the dialog');
     }
 }
 
@@ -21766,6 +21776,73 @@ public get1Char(
         }
     }
     return drive;
+}
+
+</t>
+<t tx="felix.20250608202513.1">public async importIntoLeoOutline(p_arg: vscode.Uri): Promise&lt;any&gt; {
+
+    let filePath = utils.capitalizeDrive(p_arg.fsPath);
+    const c = g.app.windowList[this.frameIndex].c;
+
+    const commanderFilename = utils.capitalizeDrive(c.fileName());
+    if (commanderFilename) {
+        // Try to set fileName to a relative path if possible.
+        const commanderDirectory = g.os_path_dirname(commanderFilename);
+        const importedFileDir = g.os_path_dirname(filePath);
+        // If the commander directory is present in the imported file directory, use a relative path.
+        if (importedFileDir.startsWith(commanderDirectory)) {
+            let commonPath = importedFileDir.substring(commanderDirectory.length + 1);
+            if (commonPath) {
+                commonPath += '/'; // not empty so add a slash.
+            }
+            filePath = commonPath + g.os_path_basename(filePath);
+        }
+    }
+
+    const choices = [
+        'Default Import',
+        'As @auto',
+        'As @clean',
+        'As @edit',
+        'As @asis',
+    ];
+
+    // * Use quick pick to ask for import type
+    const selection = await vscode.window.showQuickPick(choices, {
+        placeHolder: 'Import into Leo Outline',
+    });
+
+    if (selection &amp;&amp; selection === "Default Import") {
+        await c.importAnyFile([filePath]);
+    } else if (selection &amp;&amp; selection.startsWith("As ")) {
+
+        const importType = selection.split(' ')[1].toLowerCase(); // '@auto', '@clean', '@edit', or '@asis'
+
+        const p = c.insertHeadline('Open File')!;
+        p.h = `${importType} ${filePath}`;
+
+        // Now call refresh-from-disk on that position
+        await c.refreshFromDisk();
+    }
+
+    else {
+        // Handle Cancel or dismiss
+        return Promise.resolve();
+
+    }
+    this.setupRefresh(
+        Focus.NoChange, // No change in focus, but refresh all panels
+        {
+            tree: true,
+            body: true,
+            states: true,
+            buttons: false,
+            documents: true,
+            goto: false,
+        }
+    );
+    return this.launchRefresh();
+
 }
 
 </t>

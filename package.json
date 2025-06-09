@@ -206,24 +206,6 @@
           "type": "boolean",
           "description": "Shows 'Copy' button on tree nodes"
         },
-        "leojs.showImportInLeoInExplorer": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows 'Import in Outline' in explorer context menu"
-        },
-        "leojs.showImportInLeoInEditor": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows 'Import in Outline' in editor context menu"
-        },
-        "leojs.showGotoLineInOutline": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows 'Goto Line in Outline' in editor context menu"
-        },
         "leojs.invertNodeContrast": {
           "scope": "application",
           "default": false,
@@ -2061,7 +2043,13 @@
         "command": "leojs.gotoLineInLeoOutline",
         "category": "Leojs",
         "enablement": "leojsTreeOpened && editorTextFocus",
-        "title": "Goto Line In LeoJS Outline"
+        "title": "Go to Line In LeoJS Outline"
+      },
+      {
+        "command": "leojs.importIntoLeoOutline",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Import into LeoJS Outline as..."
       },
       {
         "command": "leojs.tabCycleNext",
@@ -3168,6 +3156,10 @@
           "when": "false"
         },
         {
+          "command": "leojs.importIntoLeoOutline",
+          "when": "false"
+        },
+        {
           "command": "leojs.contractAllFromOutline",
           "when": "false"
         },
@@ -3421,6 +3413,11 @@
           "command": "leojs.openLeoFile",
           "when": "resourceExtname =~ /^\\.leojs$|^\\.leo$/",
           "group": "navigation@1"
+        },
+        {
+          "command": "leojs.importIntoLeoOutline",
+          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && explorerResourceIsFolder == false",
+          "group": "navigation@1"
         }
       ],
       "editor/title": [
@@ -3594,7 +3591,12 @@
         {
           "command": "leojs.gotoLineInLeoOutline",
           "when": "!editorHasMultipleSelections && resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
-          "group": "navigation@1"
+          "group": "navigation@2"
+        },
+        {
+          "command": "leojs.importIntoLeoOutline",
+          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
+          "group": "navigation@2"
         },
         {
           "command": "leojs.extract",
@@ -4700,5 +4702,8 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "typescript": "^4.9.5"
-  }
+  },
+  "gitCommit": "ba38424",
+  "gitBranch": "devel",
+  "gitDate": "2025-06-08 19:21:47 -0400"
 }
