@@ -738,13 +738,13 @@ export class LeoUI extends NullGui {
         const document = editor.document;
         const position = editor.selection.active;
         const lineNumber = position.line; // 0-indexed
-        let filePath = utils.capitalizeDrive(document.uri.fsPath);
+        let filePath = g.os_path_fix_drive(document.uri.fsPath);
 
         const c = g.app.windowList[this.frameIndex].c;
         for (const p of c.all_positions()) {
             if (p.v && p.v.isAnyAtFileNode()) {
                 // ok, its an @file node so check if its absolute path matches the filePath
-                const w_path = utils.capitalizeDrive(c.fullPath(p));
+                const w_path = g.os_path_fix_drive(c.fullPath(p));
                 if (w_path && g.finalize(w_path) === g.finalize(filePath)) {
                     // Found the node that matches the filePath
                     c.selectPosition(p); // Select the node in Leo's model
@@ -799,7 +799,7 @@ export class LeoUI extends NullGui {
             const importType = selection.split(' ')[2].toLowerCase(); // '@clean', '@edit', or '@asis'
 
             // Insert a node with the selected import type with headline @xxxx <relative file path>
-            const commanderFilename = utils.capitalizeDrive(c.fileName());
+            const commanderFilename = g.os_path_fix_drive(c.fileName());
             if (commanderFilename) {
                 // Try to set fileName to a relative path if possible.
                 const commanderDirectory = g.os_path_dirname(commanderFilename);
@@ -848,10 +848,15 @@ export class LeoUI extends NullGui {
 
     public async importIntoLeoOutline(p_arg: vscode.Uri): Promise<any> {
 
-        let filePath = utils.capitalizeDrive(p_arg.fsPath);
+        let filePath = g.os_path_fix_drive(p_arg.fsPath);
+
+        // TODO MAYBE USE THIS INSTEAD:
+        // let fileName = g.os_path_fix_drive(p_name);
+        // fileName = g.os_path_normslashes(fileName);
+
         const c = g.app.windowList[this.frameIndex].c;
 
-        const commanderFilename = utils.capitalizeDrive(c.fileName());
+        const commanderFilename = g.os_path_fix_drive(c.fileName());
         if (commanderFilename) {
             // Try to set fileName to a relative path if possible.
             const commanderDirectory = g.os_path_dirname(commanderFilename);

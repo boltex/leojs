@@ -483,7 +483,6 @@
 <v t="felix.20240401213850.1"><vh>strToLeoDetachedUri</vh></v>
 <v t="felix.20201208224407.15"><vh>leoUriToStr</vh></v>
 <v t="felix.20201208224407.16"><vh>setContext</vh></v>
-<v t="felix.20250604215102.1"><vh>capitalizeDrive</vh></v>
 </v>
 <v t="felix.20220417155704.1"><vh>@clean src/commandBindings.ts</vh>
 <v t="felix.20220417155732.1"><vh>makeAllBindings</vh>
@@ -4685,9 +4684,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "ba38424",
+  "gitCommit": "1d71715",
   "gitBranch": "devel",
-  "gitDate": "2025-06-08 19:21:47 -0400"
+  "gitDate": "2025-06-09 00:53:36 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -21658,13 +21657,13 @@ public get1Char(
     const document = editor.document;
     const position = editor.selection.active;
     const lineNumber = position.line; // 0-indexed
-    let filePath = utils.capitalizeDrive(document.uri.fsPath);
+    let filePath = g.os_path_fix_drive(document.uri.fsPath);
 
     const c = g.app.windowList[this.frameIndex].c;
     for (const p of c.all_positions()) {
         if (p.v &amp;&amp; p.v.isAnyAtFileNode()) {
             // ok, its an @file node so check if its absolute path matches the filePath
-            const w_path = utils.capitalizeDrive(c.fullPath(p));
+            const w_path = g.os_path_fix_drive(c.fullPath(p));
             if (w_path &amp;&amp; g.finalize(w_path) === g.finalize(filePath)) {
                 // Found the node that matches the filePath
                 c.selectPosition(p); // Select the node in Leo's model
@@ -21719,7 +21718,7 @@ public get1Char(
         const importType = selection.split(' ')[2].toLowerCase(); // '@clean', '@edit', or '@asis'
 
         // Insert a node with the selected import type with headline @xxxx &lt;relative file path&gt;
-        const commanderFilename = utils.capitalizeDrive(c.fileName());
+        const commanderFilename = g.os_path_fix_drive(c.fileName());
         if (commanderFilename) {
             // Try to set fileName to a relative path if possible.
             const commanderDirectory = g.os_path_dirname(commanderFilename);
@@ -21767,24 +21766,17 @@ public get1Char(
 }
 
 </t>
-<t tx="felix.20250604215102.1">export function capitalizeDrive(drive: string): string {
-    if (drive.length &gt; 1 &amp;&amp; drive[1] === ':') {
-        // Check if the first character is a letter
-        if (drive[0] &gt;= 'a' &amp;&amp; drive[0] &lt;= 'z') {
-            // Convert the first character to uppercase
-            drive = drive[0].toUpperCase() + drive.slice(1);
-        }
-    }
-    return drive;
-}
-
-</t>
 <t tx="felix.20250608202513.1">public async importIntoLeoOutline(p_arg: vscode.Uri): Promise&lt;any&gt; {
 
-    let filePath = utils.capitalizeDrive(p_arg.fsPath);
+    let filePath = g.os_path_fix_drive(p_arg.fsPath);
+
+    // TODO MAYBE USE THIS INSTEAD:
+    // let fileName = g.os_path_fix_drive(p_name);
+    // fileName = g.os_path_normslashes(fileName);
+
     const c = g.app.windowList[this.frameIndex].c;
 
-    const commanderFilename = utils.capitalizeDrive(c.fileName());
+    const commanderFilename = g.os_path_fix_drive(c.fileName());
     if (commanderFilename) {
         // Try to set fileName to a relative path if possible.
         const commanderDirectory = g.os_path_dirname(commanderFilename);
