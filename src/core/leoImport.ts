@@ -1107,14 +1107,18 @@ export class LeoImportCommands {
                     // Try to set fileName to a relative path if possible.
                     const commanderDirectory = g.os_path_dirname(commanderFilename);
                     const importedFileDir = g.os_path_dirname(fn);
+
+                    // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
+                    let specificPath = importedFileDir;
+
                     // If the commander directory is present in the imported file directory, use a relative path.
                     if (importedFileDir.startsWith(commanderDirectory)) {
-                        let specificPath = importedFileDir.substring(commanderDirectory.length + 1);
+                        specificPath = importedFileDir.substring(commanderDirectory.length + 1);
                         if (specificPath) {
                             specificPath += '/'; // not empty so add a slash.
                         }
-                        fn = specificPath + g.os_path_basename(fn);
                     }
+                    fn = specificPath + g.os_path_basename(fn);
                 }
 
                 p.h = `${treeType} ${fn}`;

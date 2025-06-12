@@ -4623,6 +4623,9 @@ export function finalize(p_path: string): string {
     if (!p_path) {
         return '';
     }
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
+    p_path = os_path_normslashes(p_path); // PRE-FIX NORMALIZATION
+
     // p_path = os.path.expanduser(p_path)
     p_path = os_path_expanduser(p_path);
 
@@ -4634,11 +4637,11 @@ export function finalize(p_path: string): string {
     p_path = path.resolve(p_path);
 
     // p_path = os.path.normpath(p_path)
-    p_path = path.normalize(p_path); // path.normalize adds BACKSLASHES ON WINDOWS! 
+    p_path = path.normalize(p_path); // path.normalize to resolve .. and . but adds BACKSLASHES ON WINDOWS! 
 
-    // Convert backslashes to forward slashes, regardless of platform.
-    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
+    // Convert backslashes to forward slashes, regardless of platform again.
     p_path = os_path_normslashes(p_path);
+
     return p_path;
 }
 

@@ -4684,9 +4684,9 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "1d71715",
+  "gitCommit": "6f12f5d",
   "gitBranch": "devel",
-  "gitDate": "2025-06-09 00:53:36 -0400"
+  "gitDate": "2025-06-11 21:04:10 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -21660,11 +21660,20 @@ public get1Char(
     const lineNumber = position.line; // 0-indexed
     let filePath = g.os_path_fix_drive(document.uri.fsPath);
 
+    console.log('gotoLineInLeoOutline "fixed from uri.fsPath" filePath:', filePath, 'lineNumber:', lineNumber);
+
     const c = g.app.windowList[this.frameIndex].c;
     for (const p of c.all_positions()) {
         if (p.v &amp;&amp; p.v.isAnyAtFileNode()) {
             // ok, its an @file node so check if its absolute path matches the filePath
             const w_path = g.os_path_fix_drive(c.fullPath(p));
+
+            console.log("testing @file node:", p.h, "with 'fixed' w_path from c.fullPath(p):", w_path);
+
+            console.log("finalized w_path:", g.finalize(w_path));
+            console.log("finalized filePath:", g.finalize(filePath));
+
+            // Compare the finalized paths
             if (w_path &amp;&amp; g.finalize(w_path) === g.finalize(filePath)) {
                 // Found the node that matches the filePath
                 c.selectPosition(p); // Select the node in Leo's model
@@ -21701,7 +21710,7 @@ public get1Char(
         }
     }
 
-    // Not found. Offer to import as an @auto, an @clean, or to cancel.
+    // Not found. Offer to import as a node type that supports 'gotoGlobalLine'.
     // Open modal dialog with options.
     const choices = [
         'Import with @clean',
@@ -21720,18 +21729,31 @@ public get1Char(
 
         // Insert a node with the selected import type with headline @xxxx &lt;relative file path&gt;
         const commanderFilename = g.os_path_fix_drive(c.fileName());
+
+        console.log("'fixed from c.fileName()' commanderFilename:", commanderFilename);
+        console.log('"fixed from uri.fsPath" filePath', filePath);
+
         if (commanderFilename) {
             // Try to set fileName to a relative path if possible.
             const commanderDirectory = g.os_path_dirname(commanderFilename);
             const importedFileDir = g.os_path_dirname(filePath);
             // If the commander directory is present in the imported file directory, use a relative path.
+            console.log('importedFileDir:', importedFileDir);
+            console.log('commanderDirectory:', commanderDirectory);
+
+            // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
+            let commonPath = importedFileDir;
+
+            // Now, make a relative path if possible.
             if (importedFileDir.startsWith(commanderDirectory)) {
-                let commonPath = importedFileDir.substring(commanderDirectory.length + 1);
+                console.log('yes, commanderDirectory is in importedFileDir');
+                commonPath = importedFileDir.substring(commanderDirectory.length + 1);
                 if (commonPath) {
                     commonPath += '/'; // not empty so add a slash.
                 }
-                filePath = commonPath + g.os_path_basename(filePath);
             }
+            // Finally, even if not relative, use a folder plus the file name.
+            filePath = commonPath + g.os_path_basename(filePath);
         }
 
         const p = c.insertHeadline('Open File')!;
@@ -21782,14 +21804,20 @@ public get1Char(
         // Try to set fileName to a relative path if possible.
         const commanderDirectory = g.os_path_dirname(commanderFilename);
         const importedFileDir = g.os_path_dirname(filePath);
-        // If the commander directory is present in the imported file directory, use a relative path.
+
+        // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
+        let commonPath = importedFileDir;
+
+        // Now, make a relative path if possible.
         if (importedFileDir.startsWith(commanderDirectory)) {
-            let commonPath = importedFileDir.substring(commanderDirectory.length + 1);
+            console.log('yes, commanderDirectory is in importedFileDir');
+            commonPath = importedFileDir.substring(commanderDirectory.length + 1);
             if (commonPath) {
                 commonPath += '/'; // not empty so add a slash.
             }
-            filePath = commonPath + g.os_path_basename(filePath);
         }
+        // Finally, even if not relative, use a folder plus the file name.
+        filePath = commonPath + g.os_path_basename(filePath);
     }
 
     const choices = [
@@ -21806,7 +21834,9 @@ public get1Char(
     });
 
     if (selection &amp;&amp; selection === "Default Import") {
-        await c.importAnyFile([filePath]);
+
+        await c.importAnyFile([g.os_path_fix_drive(p_arg.fsPath)]); // original file path
+
     } else if (selection &amp;&amp; selection.startsWith("As ")) {
 
         const importType = selection.split(' ')[1].toLowerCase(); // '@auto', '@clean', '@edit', or '@asis'
