@@ -2040,18 +2040,6 @@
         "title": "Git Diff"
       },
       {
-        "command": "leojs.gotoLineInLeoOutline",
-        "category": "Leojs",
-        "enablement": "leojsTreeOpened && editorTextFocus",
-        "title": "Go to Line In LeoJS Outline"
-      },
-      {
-        "command": "leojs.importIntoLeoOutline",
-        "category": "Leojs",
-        "enablement": "leojsTreeOpened",
-        "title": "Import into LeoJS Outline as..."
-      },
-      {
         "command": "leojs.tabCycleNext",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
@@ -2069,6 +2057,18 @@
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
         "title": "Read File Into Node..."
+      },
+      {
+        "command": "leojs.gotoLineInLeoOutline",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened && editorTextFocus",
+        "title": "Go to Line In LeoJS Outline"
+      },
+      {
+        "command": "leojs.importIntoLeoOutline",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Import into LeoJS Outline as..."
       },
       {
         "command": "leojs.exportHeadlines",
@@ -3416,7 +3416,7 @@
         },
         {
           "command": "leojs.importIntoLeoOutline",
-          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && explorerResourceIsFolder == false",
+          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && explorerResourceIsFolder == false && !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
           "group": "navigation@1"
         }
       ],
@@ -3590,12 +3590,12 @@
         },
         {
           "command": "leojs.gotoLineInLeoOutline",
-          "when": "!editorHasMultipleSelections && resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
+          "when": "!editorHasMultipleSelections && resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
           "group": "navigation@1"
         },
         {
           "command": "leojs.importIntoLeoOutline",
-          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened",
+          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
           "group": "navigation@1"
         },
         {

@@ -4815,18 +4815,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "title": "Git Diff"
 },
 {
-  "command": "leojs.gotoLineInLeoOutline",
-  "category": "Leojs",
-  "enablement": "leojsTreeOpened &amp;&amp; editorTextFocus",
-  "title": "Go to Line In LeoJS Outline"
-},
-{
-  "command": "leojs.importIntoLeoOutline",
-  "category": "Leojs",
-  "enablement": "leojsTreeOpened",
-  "title": "Import into LeoJS Outline as..."
-},
-{
   "command": "leojs.tabCycleNext",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
@@ -5964,7 +5952,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   {
     "command": "leojs.importIntoLeoOutline",
-    "when": "resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened &amp;&amp; explorerResourceIsFolder == false",
+    "when": "resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened &amp;&amp; explorerResourceIsFolder == false &amp;&amp; !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
     "group": "navigation@1"
   }
 ],
@@ -14599,12 +14587,12 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   },
   {
     "command": "leojs.gotoLineInLeoOutline",
-    "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
+    "when": "!editorHasMultipleSelections &amp;&amp; resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened &amp;&amp; !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
     "group": "navigation@1"
   },
   {
     "command": "leojs.importIntoLeoOutline",
-    "when": "resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened",
+    "when": "resourceScheme =~ /^vscode-vfs$|^file$/ &amp;&amp; leojsTreeOpened &amp;&amp; !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
     "group": "navigation@1"
   },
   {
@@ -14966,6 +14954,18 @@ private _refreshGotoPane(): void {
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
   "title": "Read File Into Node..."
+},
+{
+  "command": "leojs.gotoLineInLeoOutline",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened &amp;&amp; editorTextFocus",
+  "title": "Go to Line In LeoJS Outline"
+},
+{
+  "command": "leojs.importIntoLeoOutline",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Import into LeoJS Outline as..."
 },
 {
   "command": "leojs.exportHeadlines",
@@ -21636,7 +21636,8 @@ public get1Char(
 </t>
 <t tx="felix.20250522205342.1">## 1.0.11
 
-- New command (Editor context menu) for usage in external files or files to be imported: **Show Line in Leo Outline**. (will offer to import if not present)
+- New command (Editor context menu) for external files or files to be imported: **Show Line in Leo Outline**. (will offer to import if not present)
+- New command (Editor and explorer context menu) for files to be imported: **Import into LeoJS Outline**.
 - g.es now shows the log pane when running user scripts or @buttons
 - Running scripts now ignores the write-script-file option in LeoJS.
 
