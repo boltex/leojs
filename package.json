@@ -4702,8 +4702,5 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "typescript": "^4.9.5"
-  },
-  "gitCommit": "6f12f5d",
-  "gitBranch": "devel",
-  "gitDate": "2025-06-11 21:04:10 -0400"
+  }
 }

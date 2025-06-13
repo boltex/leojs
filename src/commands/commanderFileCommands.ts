@@ -123,20 +123,20 @@ export class CommanderFileCommands {
         const ic: LeoImportCommands = c.importCommands;
         const types: [string, string][] = [
             ['All files', '*'],
-            ['C/C++ files', '*.c'],
-            ['C/C++ files', '*.cpp'],
-            ['C/C++ files', '*.h'],
-            ['C/C++ files', '*.hpp'],
-            ['FreeMind files', '*.mm.html *.mm'],
-            ['Java files', '*.java'],
-            ['JavaScript files', '*.js'],
-            // ["JSON files", "*.json"],
-            ['Mindjet files', '*.csv'],
-            ['MORE files', '*.MORE'],
-            ['Lua files', '*.lua'],
-            ['Pascal files', '*.pas'],
-            ['Python files', '*.py'],
-            ['Text files', '*.txt'],
+            // ['C/C++ files', '*.c'],
+            // ['C/C++ files', '*.cpp'],
+            // ['C/C++ files', '*.h'],
+            // ['C/C++ files', '*.hpp'],
+            // ['FreeMind files', '*.mm.html *.mm'],
+            // ['Java files', '*.java'],
+            // ['JavaScript files', '*.js'],
+            // // ["JSON files", "*.json"],
+            // ['Mindjet files', '*.csv'],
+            // ['MORE files', '*.MORE'],
+            // ['Lua files', '*.lua'],
+            // ['Pascal files', '*.pas'],
+            // ['Python files', '*.py'],
+            // ['Text files', '*.txt'],
         ];
         let names: string[];
         if (files && files.length) {
@@ -989,14 +989,14 @@ export class CommanderFileCommands {
 
         const types: [string, string][] = [
             ['All files', '*'],
-            ['C/C++ files', '*.c'],
-            ['C/C++ files', '*.cpp'],
-            ['C/C++ files', '*.h'],
-            ['C/C++ files', '*.hpp'],
-            ['Java files', '*.java'],
-            ['Lua files', '*.lua'],
-            ['Pascal files', '*.pas'],
-            ['Python files', '*.py'],
+            // ['C/C++ files', '*.c'],
+            // ['C/C++ files', '*.cpp'],
+            // ['C/C++ files', '*.h'],
+            // ['C/C++ files', '*.hpp'],
+            // ['Java files', '*.java'],
+            // ['Lua files', '*.lua'],
+            // ['Pascal files', '*.pas'],
+            // ['Python files', '*.py'],
         ];
 
         const names = await g.app.gui.runOpenFilesDialog(

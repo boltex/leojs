@@ -722,7 +722,7 @@ export class LeoUI extends NullGui {
         }
     }
 
-    public async gotoLineInLeoOutline(p_arg: any): Promise<any> {
+    public async gotoLineInLeoOutline(p_arg: vscode.Uri): Promise<any> {
         // When the active editor is an external file referenced by an @file node 
         // in the current Leo outline, this method finds that @file node,
         // selects it in the Leo outline, and attempts to place the cursor
@@ -740,18 +740,12 @@ export class LeoUI extends NullGui {
         const lineNumber = position.line; // 0-indexed
         let filePath = g.os_path_fix_drive(document.uri.fsPath);
 
-        console.log('gotoLineInLeoOutline "fixed from uri.fsPath" filePath:', filePath, 'lineNumber:', lineNumber);
-
         const c = g.app.windowList[this.frameIndex].c;
+
         for (const p of c.all_positions()) {
             if (p.v && p.v.isAnyAtFileNode()) {
                 // ok, its an @file node so check if its absolute path matches the filePath
                 const w_path = g.os_path_fix_drive(c.fullPath(p));
-
-                console.log("testing @file node:", p.h, "with 'fixed' w_path from c.fullPath(p):", w_path);
-
-                console.log("finalized w_path:", g.finalize(w_path));
-                console.log("finalized filePath:", g.finalize(filePath));
 
                 // Compare the finalized paths
                 if (w_path && g.finalize(w_path) === g.finalize(filePath)) {
@@ -803,43 +797,10 @@ export class LeoUI extends NullGui {
             ...choices
         );
         if (selection?.startsWith('Import')) {
-
-            // get which import type was selected
             const importType = selection.split(' ')[2].toLowerCase(); // '@clean', '@edit', or '@asis'
-
-            // Insert a node with the selected import type with headline @xxxx <relative file path>
-            const commanderFilename = g.os_path_fix_drive(c.fileName());
-
-            console.log("'fixed from c.fileName()' commanderFilename:", commanderFilename);
-            console.log('"fixed from uri.fsPath" filePath', filePath);
-
-            if (commanderFilename) {
-                // Try to set fileName to a relative path if possible.
-                const commanderDirectory = g.os_path_dirname(commanderFilename);
-                const importedFileDir = g.os_path_dirname(filePath);
-                // If the commander directory is present in the imported file directory, use a relative path.
-                console.log('importedFileDir:', importedFileDir);
-                console.log('commanderDirectory:', commanderDirectory);
-
-                // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
-                let commonPath = importedFileDir;
-
-                // Now, make a relative path if possible.
-                if (importedFileDir.startsWith(commanderDirectory)) {
-                    console.log('yes, commanderDirectory is in importedFileDir');
-                    commonPath = importedFileDir.substring(commanderDirectory.length + 1);
-                    if (commonPath) {
-                        commonPath += '/'; // not empty so add a slash.
-                    }
-                }
-                // Finally, even if not relative, use a folder plus the file name.
-                filePath = commonPath + g.os_path_basename(filePath);
-            }
-
+            filePath = g.relativeDirectory(c, filePath);
             const p = c.insertHeadline('Open File')!;
             p.h = `${importType} ${filePath}`;
-
-            // Now call refresh-from-disk on that position
             await c.refreshFromDisk();
 
             // Try again to go to the line number in the body pane of the newly created and selected node.
@@ -870,35 +831,8 @@ export class LeoUI extends NullGui {
 
     public async importIntoLeoOutline(p_arg: vscode.Uri): Promise<any> {
 
-        let filePath = g.os_path_fix_drive(p_arg.fsPath);
-
-        // TODO MAYBE USE THIS INSTEAD:
-        // let fileName = g.os_path_fix_drive(p_name);
-        // fileName = g.os_path_normslashes(fileName);
-
         const c = g.app.windowList[this.frameIndex].c;
-
-        const commanderFilename = g.os_path_fix_drive(c.fileName());
-        if (commanderFilename) {
-            // Try to set fileName to a relative path if possible.
-            const commanderDirectory = g.os_path_dirname(commanderFilename);
-            const importedFileDir = g.os_path_dirname(filePath);
-
-            // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
-            let commonPath = importedFileDir;
-
-            // Now, make a relative path if possible.
-            if (importedFileDir.startsWith(commanderDirectory)) {
-                console.log('yes, commanderDirectory is in importedFileDir');
-                commonPath = importedFileDir.substring(commanderDirectory.length + 1);
-                if (commonPath) {
-                    commonPath += '/'; // not empty so add a slash.
-                }
-            }
-            // Finally, even if not relative, use a folder plus the file name.
-            filePath = commonPath + g.os_path_basename(filePath);
-        }
-
+        const filePath = g.relativeDirectory(c, p_arg.fsPath);
         const choices = [
             'Default Import',
             'As @auto',
@@ -913,25 +847,19 @@ export class LeoUI extends NullGui {
         });
 
         if (selection && selection === "Default Import") {
-
-            await c.importAnyFile([g.os_path_fix_drive(p_arg.fsPath)]); // original file path
-
+            // Original file path
+            await c.importAnyFile([g.os_path_fix_drive(p_arg.fsPath)]);
         } else if (selection && selection.startsWith("As ")) {
-
             const importType = selection.split(' ')[1].toLowerCase(); // '@auto', '@clean', '@edit', or '@asis'
-
             const p = c.insertHeadline('Open File')!;
             p.h = `${importType} ${filePath}`;
-
-            // Now call refresh-from-disk on that position
             await c.refreshFromDisk();
         }
-
         else {
             // Handle Cancel or dismiss
             return Promise.resolve();
-
         }
+
         this.setupRefresh(
             Focus.NoChange, // No change in focus, but refresh all panels
             {
@@ -944,7 +872,6 @@ export class LeoUI extends NullGui {
             }
         );
         return this.launchRefresh();
-
     }
 
     /**

@@ -2061,6 +2061,26 @@ export function makeVscodeUri(p_fn: string): Uri {
     }
 }
 
+//@+node:felix.20250612213348.1: *3* g.relativeDirectory
+export function relativeDirectory(commander: Commands, importedFilename: string): string {
+    // Try to set fileName to a relative path if possible.
+    const commanderDirectory = os_path_dirname(os_path_fix_drive(commander.fileName()));
+    const importedFileDir = os_path_dirname(os_path_fix_drive(importedFilename));
+
+    // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
+    let commonPath = importedFileDir;
+
+    // Now, make a relative path if possible.
+    if (importedFileDir.startsWith(commanderDirectory)) {
+        commonPath = importedFileDir.substring(commanderDirectory.length + 1);
+        if (commonPath) {
+            commonPath += '/'; // not empty so add a slash.
+        }
+    }
+    // Finally, even if not relative, use a folder plus the file name.
+    return commonPath + os_path_basename(importedFilename);
+}
+
 //@+node:felix.20211104210802.1: ** g.Finding & Scanning
 //@+node:felix.20220410215925.1: *3* g.find_word
 /**
