@@ -787,17 +787,21 @@ export class LeoUI extends NullGui {
         // Not found. Offer to import as a node type that supports 'gotoGlobalLine'.
         // Open modal dialog with options.
         const choices = [
-            'Import with @clean',
-            'Import with @edit',
-            'Import with @asis',
+            { title: '@clean', },
+            { title: '@edit', },
+            { title: '@asis', },
+            { title: 'Cancel', isCloseAffordance: true },
         ];
         const selection = await vscode.window.showInformationMessage( // Added await
             `The file "${filePath}" was not found in the current Leo outline.`,
-            { modal: true },
+            {
+                detail: 'Import with...',
+                modal: true
+            },
             ...choices
         );
-        if (selection?.startsWith('Import')) {
-            const importType = selection.split(' ')[2].toLowerCase(); // '@clean', '@edit', or '@asis'
+        if (selection?.title.startsWith('@')) {
+            const importType = selection.title; // '@clean', '@edit', or '@asis'
             filePath = g.relativeDirectory(c, filePath);
             const p = c.insertHeadline('Open File')!;
             p.h = `${importType} ${filePath}`;

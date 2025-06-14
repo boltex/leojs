@@ -4683,10 +4683,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "6f12f5d",
-  "gitBranch": "devel",
-  "gitDate": "2025-06-11 21:04:10 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -21707,17 +21704,21 @@ public get1Char(
     // Not found. Offer to import as a node type that supports 'gotoGlobalLine'.
     // Open modal dialog with options.
     const choices = [
-        'Import with @clean',
-        'Import with @edit',
-        'Import with @asis',
+        { title: '@clean', },
+        { title: '@edit', },
+        { title: '@asis', },
+        { title: 'Cancel', isCloseAffordance: true },
     ];
     const selection = await vscode.window.showInformationMessage( // Added await
         `The file "${filePath}" was not found in the current Leo outline.`,
-        { modal: true },
+        {
+            detail: 'Import with...',
+            modal: true
+        },
         ...choices
     );
-    if (selection?.startsWith('Import')) {
-        const importType = selection.split(' ')[2].toLowerCase(); // '@clean', '@edit', or '@asis'
+    if (selection?.title.startsWith('@')) {
+        const importType = selection.title; // '@clean', '@edit', or '@asis'
         filePath = g.relativeDirectory(c, filePath);
         const p = c.insertHeadline('Open File')!;
         p.h = `${importType} ${filePath}`;
