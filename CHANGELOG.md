@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.12
+
+...
+
 ## 1.0.11
 
 - Import commands now create outline nodes using a relative path (when the imported file is located at or below the Leo file’s directory).
