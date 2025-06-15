@@ -308,6 +308,5 @@ For programmers:
 
 - Leo has an easy-to-use scripting API, giving full access to all data in the outline.
 - @button and @command nodes define scripts that can be applied to *other* nodes.
-- Alt-1 enables autocompletion.
 
 Leo has hundreds of commands, described in [Leo's Command Reference](../users-guide/commands.md). Please feel free to [ask for help](https://groups.google.com/g/leo-editor) in Leo's public forum at any time.

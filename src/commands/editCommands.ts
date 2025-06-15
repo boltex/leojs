@@ -973,7 +973,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'in the file that correspond to the same line in the outline. ' +
         'An Easter Egg: <Alt-x>number invokes this code.'
     )
-    public async gotoGlobalLine(p_lineNumber?: number): Promise<unknown> {
+    public async gotoGlobalLine(p_lineNumber?: number): Promise<[Position | undefined, number]> {
         // Bypass if called with number
         const c = this.c;
         if (p_lineNumber || p_lineNumber === 0) {
@@ -989,6 +989,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             // Very important: n is one-based.
             return c.gotoCommands.find_file_line(Number(w_n));
         }
+        return [undefined, -1];
     }
     //@+node:felix.20220503225323.5: *4* goto-line
     @cmd('goto-line', "Put the cursor at the n'th line of the buffer.")

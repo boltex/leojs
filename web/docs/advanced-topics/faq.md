@@ -755,7 +755,7 @@ We all have had bad experiences with the dreaded "Others" category. The Aha! is 
 
 In LeoJS, use **Detached Body Panes** to have other body panes than the selected node opened.
 
-Detached Body Panes are independent of the selected node. They can be opened with the 'Open Aside' command. This can also be done with the outline's context menu, opened by right-clicking on a node.
+Detached Body Panes are independent of the selected node. They can be opened with the `Open Aside` command. This can also be done with the outline's context menu, opened by right-clicking on a node.
 
 ### How can I use Leo cooperatively without sentinels?
 

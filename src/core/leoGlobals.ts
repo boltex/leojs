@@ -2061,6 +2061,34 @@ export function makeVscodeUri(p_fn: string): Uri {
     }
 }
 
+//@+node:felix.20250612213348.1: *3* g.relativeDirectory
+export function relativeDirectory(commander: Commands, importedFilename: string): string {
+    // Try to set fileName to a relative path if possible.
+    const commanderDirectory = os_path_dirname(os_path_fix_drive(commander.fileName()));
+    const importedFileDir = os_path_dirname(os_path_fix_drive(importedFilename));
+    const workspaceDir = os_path_normslashes(os_path_fix_drive(workspaceUri.fsPath));
+
+    // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
+    let commonPath = importedFileDir;
+
+    // Now, make a relative path of importedFileDir to the commanderDirectory
+    // if both the commanderDirectory and the importedFileDir are within the workspace directory.
+    // Otherwise, use the absolute path of importedFileDir.
+    // This allows for relative imports within the same workspace.
+    if (
+        workspaceDir && commanderDirectory.startsWith(workspaceDir) &&
+        importedFileDir.startsWith(workspaceDir)
+    ) {
+        commonPath = path.relative(commanderDirectory, importedFileDir);
+        if (commonPath) {
+            commonPath += '/'; // not empty so add a slash.
+        }
+    }
+
+    // Finally, even if not relative, use a folder plus the file name.
+    return commonPath + os_path_basename(importedFilename);
+}
+
 //@+node:felix.20211104210802.1: ** g.Finding & Scanning
 //@+node:felix.20220410215925.1: *3* g.find_word
 /**
@@ -4027,6 +4055,12 @@ export function es(...args: any[]): void {
     });
 
     if (app && app.gui) {
+        // Make sure the log pane is visible with 'show Log Pane' command (LeoJS only)
+        if (app.inScript && !app.hasScriptShownlog) {
+            app.gui.showLogPane();
+            app.hasScriptShownlog = true;
+        }
+
         app.gui.addLogPaneEntry(s);
     } else {
         logBuffer.push(s);
@@ -4199,8 +4233,9 @@ export function print_unique_message(message: string): boolean {
 /**
  * Print the given message once.  Return True if the message was printed.
  */
-export function es_print_unique_message(message: string, color: string): boolean {
+export function es_print_unique_message(message: string, color?: string): boolean {
     if (!(message in g_unique_message_d)) {
+        app.gui.showLogPane(); // Ensure the log pane is visible
         g_unique_message_d[message] = true;
         es_print(message);
         return true;
@@ -4616,6 +4651,9 @@ export function finalize(p_path: string): string {
     if (!p_path) {
         return '';
     }
+    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
+    p_path = os_path_normslashes(p_path); // PRE-FIX NORMALIZATION
+
     // p_path = os.path.expanduser(p_path)
     p_path = os_path_expanduser(p_path);
 
@@ -4627,11 +4665,11 @@ export function finalize(p_path: string): string {
     p_path = path.resolve(p_path);
 
     // p_path = os.path.normpath(p_path)
-    p_path = path.normalize(p_path); // path.normalize adds BACKSLASHES ON WINDOWS! 
+    p_path = path.normalize(p_path); // path.normalize to resolve .. and . but adds BACKSLASHES ON WINDOWS! 
 
-    // Convert backslashes to forward slashes, regardless of platform.
-    p_path = os_path_fix_drive(p_path); // ALSO EMULATE PYTHON UPPERCASE DRIVE LETTERS!
+    // Convert backslashes to forward slashes, regardless of platform again.
     p_path = os_path_normslashes(p_path);
+
     return p_path;
 }
 
@@ -5989,7 +6027,8 @@ export function is_sentinel(
             return 0 === i && i < j;
         }
     }
-    error(`is_sentinel: can not happen. delims: ${delims}`);
+    // #3458: This case *can* happen when the user changes an @language directive.
+    //        Don't bother trying to recover.
     return false;
 }
 //@+node:felix.20211104211349.1: ** g.Unit Tests
