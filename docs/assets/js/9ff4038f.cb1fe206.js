@@ -806,6 +806,16 @@ function _createMdxContent(props) {
         })]
       })]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["You can also create most of those nodes by using the context menu in vscode's explorer or file editors, and choosing the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Import into LeoJS Outline"
+      }), " command."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["The ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Go to Line In LeoJS Outline"
+      }), " command is also available in the editor context menu to find a specific line in the outline. It will offer to import the file if no type of ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "@file"
+      }), " nodes are found in the outline for that file."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["Leo will detect external file changes, and will ask to either ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "refresh from disk"
       }), " or ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {

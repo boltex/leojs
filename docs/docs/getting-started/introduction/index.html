@@ -10,7 +10,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="LeoJS" href="/leojs/opensearch.xml"><link rel="stylesheet" href="/leojs/assets/css/styles.3244a7e1.css">
-<script src="/leojs/assets/js/runtime~main.c664e2ae.js" defer="defer"></script>
+<script src="/leojs/assets/js/runtime~main.411112f7.js" defer="defer"></script>
 <script src="/leojs/assets/js/main.3256827a.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -50,6 +50,8 @@
 <h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="external-files">External Files<a href="#external-files" class="hash-link" aria-label="Direct link to External Files" title="Direct link to External Files">​</a></h2>
 <p>Use either of the <strong>Save Leo Document</strong>, <strong>Write File Nodes</strong> or <strong>Write Dirty Files</strong> commands to derive external files for any type of <strong>@file</strong> nodes.</p>
 <table><thead><tr><th style="text-align:left">@&lt;file&gt; Kind</th><th style="text-align:center">Sentinels</th><th style="text-align:center">@others</th><th style="text-align:center">.leo Data</th><th style="text-align:center">Write Only</th></tr></thead><tbody><tr><td style="text-align:left">@asis</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">✔️</td><td style="text-align:center">✔️</td></tr><tr><td style="text-align:left">@auto</td><td style="text-align:center">❌</td><td style="text-align:center">✔️</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr><tr><td style="text-align:left">@clean</td><td style="text-align:center">❌</td><td style="text-align:center">✔️</td><td style="text-align:center">✔️</td><td style="text-align:center">❌</td></tr><tr><td style="text-align:left">@edit</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr><tr><td style="text-align:left">@file</td><td style="text-align:center">✔️</td><td style="text-align:center">✔️</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr><tr><td style="text-align:left">@nosent</td><td style="text-align:center">❌</td><td style="text-align:center">✔️</td><td style="text-align:center">✔️</td><td style="text-align:center">✔️</td></tr></tbody></table>
+<p>You can also create most of those nodes by using the context menu in vscode&#x27;s explorer or file editors, and choosing the <strong>Import into LeoJS Outline</strong> command.</p>
+<p>The <strong>Go to Line In LeoJS Outline</strong> command is also available in the editor context menu to find a specific line in the outline. It will offer to import the file if no type of <strong>@file</strong> nodes are found in the outline for that file.</p>
 <p>Leo will detect external file changes, and will ask to either <strong>refresh from disk</strong> or <strong>ignore the changes</strong>.</p>
 <p>See the <a href="#extension-settings">LeoJS extension settings</a> to decide how and when to refresh and synchronize content when external files are modified:</p>
 <p><img decoding="async" loading="lazy" alt="External File Change Detected" src="/leojs/assets/images/external-files-change-detection-13446a1a55f0f52f0e7fdb5feda68bdc.png#center" width="689" height="284" class="img_ev3q"></p>

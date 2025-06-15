@@ -415,6 +415,8 @@ const toc = [{
 function _createMdxContent(props) {
   const _components = {
     a: "a",
+    blockquote: "blockquote",
+    br: "br",
     code: "code",
     em: "em",
     h1: "h1",
@@ -473,7 +475,7 @@ function _createMdxContent(props) {
       id: "auto-filename",
       children: "@auto <filename>"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Imports an external file into the Leo outline, splitting the file into pieces if an importer exists for the give filetype. Importers presently exist for the following languages: C, C++, C#, HTML, INI files, Java, PHP, Pascal, Python and XML."
+      children: "Imports an external file into the Leo outline, splitting the file into pieces if an importer exists for the give filetype. Importers presently exist for the following languages: C, C++, C#, CoffeScript, Cython, Dart, Elisp, HTML, INI files, Java, JavaScript, Lua, Markdown, Org, OTL, PHP, Pascal, Perl, Python, Rust, Tcl, TreePad, TypeScript and XML."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "c-and-code",
       children: "@c and @code"
@@ -517,12 +519,16 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "file-filename",
       children: "@file <filename>"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: ["Creates an external file containing sentinels. When writing @file trees, Leo expands section references and @all and @others directives. ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
-        children: "Important"
-      }), ": @file is the recommended way to create and edit most files. Using @file trees is ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
-        children: "highly recommended"
-      }), " when sharing external files in a collaborative environment."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "Creates an external file containing sentinels. When writing @file trees, Leo expands section references and @all and @others directives."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
+      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+        children: ["📌 ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: "Important"
+        }), (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.br, {}), "\n", "@file is the recommended way to create and edit most files. Using @file trees is ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+          children: "highly recommended"
+        }), " when sharing external files in a collaborative environment."]
+      }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "first-text",
       children: "@first <text>"

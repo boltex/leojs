@@ -1335,8 +1335,10 @@ function _createMdxContent(props) {
       children: ["In LeoJS, use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "Detached Body Panes"
       }), " to have other body panes than the selected node opened."]
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "Detached Body Panes are independent of the selected node. They can be opened with the 'Open Aside' command. This can also be done with the outline's context menu, opened by right-clicking on a node."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["Detached Body Panes are independent of the selected node. They can be opened with the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
+        children: "Open Aside"
+      }), " command. This can also be done with the outline's context menu, opened by right-clicking on a node."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "how-can-i-use-leo-cooperatively-without-sentinels",
       children: "How can I use Leo cooperatively without sentinels?"

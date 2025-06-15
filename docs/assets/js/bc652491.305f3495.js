@@ -832,8 +832,6 @@ function _createMdxContent(props) {
         children: ["@button and @command nodes define scripts that can be applied to ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.em, {
           children: "other"
         }), " nodes."]
-      }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.li, {
-        children: "Alt-1 enables autocompletion."
       }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["Leo has hundreds of commands, described in ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
