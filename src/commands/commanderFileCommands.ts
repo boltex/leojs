@@ -116,33 +116,42 @@ export class CommanderFileCommands {
         return g.app.closeLeoWindow(this.frame, new_c);
     }
     //@+node:felix.20220105210716.7: *4* c_file.importAnyFile & helper
+    @commander_command('import-any-file', 'Import one or more files.')
     @commander_command('import-file', 'Import one or more files.')
-    public async importAnyFile(this: Commands): Promise<unknown> {
+    public async importAnyFile(this: Commands, files?: string[]): Promise<unknown> {
         const c: Commands = this;
         const ic: LeoImportCommands = c.importCommands;
         const types: [string, string][] = [
             ['All files', '*'],
-            ['C/C++ files', '*.c'],
-            ['C/C++ files', '*.cpp'],
-            ['C/C++ files', '*.h'],
-            ['C/C++ files', '*.hpp'],
-            ['FreeMind files', '*.mm.html *.mm'],
-            ['Java files', '*.java'],
-            ['JavaScript files', '*.js'],
-            // ["JSON files", "*.json"],
-            ['Mindjet files', '*.csv'],
-            ['MORE files', '*.MORE'],
-            ['Lua files', '*.lua'],
-            ['Pascal files', '*.pas'],
-            ['Python files', '*.py'],
-            ['Text files', '*.txt'],
+            // ['C/C++ files', '*.c'],
+            // ['C/C++ files', '*.cpp'],
+            // ['C/C++ files', '*.h'],
+            // ['C/C++ files', '*.hpp'],
+            // ['FreeMind files', '*.mm.html *.mm'],
+            // ['Java files', '*.java'],
+            // ['JavaScript files', '*.js'],
+            // // ["JSON files", "*.json"],
+            // ['Mindjet files', '*.csv'],
+            // ['MORE files', '*.MORE'],
+            // ['Lua files', '*.lua'],
+            // ['Pascal files', '*.pas'],
+            // ['Python files', '*.py'],
+            // ['Text files', '*.txt'],
         ];
-        let names: string[] = await g.app.gui.runOpenFilesDialog(
-            c,
-            'Import File',
-            types,
-            '.py',
-        );
+        let names: string[];
+        if (files && files.length) {
+            // If files are given, use them.
+            files = files.map((fn) => g.os_path_fix_drive(fn));
+            files = files.map((fn) => g.os_path_normslashes(fn));
+            names = files;
+        } else {
+            names = await g.app.gui.runOpenFilesDialog(
+                c,
+                'Import File',
+                types,
+                '.py',
+            );
+        }
         c.bringToFront();
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -980,14 +989,14 @@ export class CommanderFileCommands {
 
         const types: [string, string][] = [
             ['All files', '*'],
-            ['C/C++ files', '*.c'],
-            ['C/C++ files', '*.cpp'],
-            ['C/C++ files', '*.h'],
-            ['C/C++ files', '*.hpp'],
-            ['Java files', '*.java'],
-            ['Lua files', '*.lua'],
-            ['Pascal files', '*.pas'],
-            ['Python files', '*.py'],
+            // ['C/C++ files', '*.c'],
+            // ['C/C++ files', '*.cpp'],
+            // ['C/C++ files', '*.h'],
+            // ['C/C++ files', '*.hpp'],
+            // ['Java files', '*.java'],
+            // ['Lua files', '*.lua'],
+            // ['Pascal files', '*.pas'],
+            // ['Python files', '*.py'],
         ];
 
         const names = await g.app.gui.runOpenFilesDialog(

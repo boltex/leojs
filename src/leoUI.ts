@@ -722,6 +722,162 @@ export class LeoUI extends NullGui {
         }
     }
 
+    public async gotoLineInLeoOutline(p_arg: vscode.Uri): Promise<any> {
+        // When the active editor is an external file referenced by an @file node 
+        // in the current Leo outline, this method finds that @file node,
+        // selects it in the Leo outline, and attempts to place the cursor
+        // to the corresponding line number in the body pane of the selected node.
+        // It processes the first matching @file node found.
+
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            void vscode.window.showErrorMessage('No active editor');
+            return;
+        }
+
+        const document = editor.document;
+        const position = editor.selection.active;
+        const lineNumber = position.line; // 0-indexed
+        let filePath = g.os_path_fix_drive(document.uri.fsPath);
+
+        const c = g.app.windowList[this.frameIndex].c;
+
+        for (const p of c.all_positions()) {
+            if (p.v && p.v.isAnyAtFileNode()) {
+                // ok, its an @file node so check if its absolute path matches the filePath
+                const w_path = g.os_path_fix_drive(c.fullPath(p));
+
+                // Compare the finalized paths
+                if (w_path && g.finalize(w_path) === g.finalize(filePath)) {
+                    // Found the node that matches the filePath
+                    c.selectPosition(p); // Select the node in Leo's model
+                    let found = false;
+                    try {
+                        // +1 because lineNumber is 0-indexed
+                        const gotoResult = await c.editCommands.gotoGlobalLine(lineNumber + 1);
+                        if (gotoResult[0]) {
+                            found = true;
+                            await this.showBody(false);
+                        }
+                    } catch (err: any) {
+                        console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
+                        void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
+                    } finally {
+                        // Always refresh the UI as the position was selected.
+                        // gotoGlobalLine might have effects even if it partially failed or if it succeeded.
+                        this.setupRefresh(
+                            found ? Focus.Body : Focus.NoChange, // Focus on body if found, otherwise no change
+                            {
+                                tree: true,
+                                body: true,
+                                states: true,
+                                buttons: false,
+                                documents: false,
+                                goto: false,
+                            }
+                        );
+                        void this.launchRefresh();
+                    }
+                    // Exit after processing the first matching @file node.
+                    return;
+                }
+            }
+        }
+
+        // Not found. Offer to import as a node type that supports 'gotoGlobalLine'.
+        // Open modal dialog with options.
+        const choices = [
+            { title: '@clean', },
+            { title: '@edit', },
+            { title: '@asis', },
+            { title: 'Cancel', isCloseAffordance: true },
+        ];
+        const selection = await vscode.window.showInformationMessage( // Added await
+            `The file "${filePath}" was not found in the current Leo outline.`,
+            {
+                detail: 'Import with...',
+                modal: true
+            },
+            ...choices
+        );
+        if (selection?.title.startsWith('@')) {
+            const importType = selection.title; // '@clean', '@edit', or '@asis'
+            filePath = g.relativeDirectory(c, filePath);
+            const p = c.insertHeadline('Open File')!;
+            p.h = `${importType} ${filePath}`;
+            await c.refreshFromDisk();
+
+            // Try again to go to the line number in the body pane of the newly created and selected node.
+            try {
+                await this.showBody(false);
+                // +1 because lineNumber is 0-indexed
+                await c.editCommands.gotoGlobalLine(lineNumber + 1);
+            } catch (err: any) {
+                console.error(`LeoUI: gotoGlobalLine failed for "${p.h}" at line ${lineNumber + 1}`, err);
+                void vscode.window.showWarningMessage(`LeoJS: Could not navigate to line ${lineNumber + 1} in Leo for node "${p.h}".`);
+            }
+
+            this.setupRefresh(
+                Focus.Body,
+                {
+                    tree: true,
+                    body: true,
+                    states: true,
+                    buttons: false,
+                    documents: true,
+                    goto: false,
+                }
+            );
+            void this.launchRefresh();
+
+        }
+    }
+
+    public async importIntoLeoOutline(p_arg: vscode.Uri): Promise<any> {
+
+        const c = g.app.windowList[this.frameIndex].c;
+        const filePath = g.relativeDirectory(c, p_arg.fsPath);
+        const choices = [
+            'Default Import',
+            'As @auto',
+            'As @clean',
+            'As @edit',
+            'As @asis',
+        ];
+
+        // * Use quick pick to ask for import type
+        const selection = await vscode.window.showQuickPick(choices, {
+            placeHolder: 'Import into Leo Outline',
+        });
+
+        if (selection && selection === "Default Import") {
+            // Original file path
+            await c.importAnyFile([g.os_path_fix_drive(p_arg.fsPath)]);
+        } else if (selection && selection.startsWith("As ")) {
+            const importType = selection.split(' ')[1].toLowerCase(); // '@auto', '@clean', '@edit', or '@asis'
+            const p = c.insertHeadline('Open File')!;
+            p.h = `${importType} ${filePath}`;
+            await c.refreshFromDisk();
+        }
+        else {
+            // Handle Cancel or dismiss
+            return Promise.resolve();
+        }
+
+        this.setupRefresh(
+            Focus.NoChange, // No change in focus, but refresh all panels
+            {
+                tree: true,
+                body: true,
+                states: true,
+                buttons: false,
+                documents: true,
+                goto: false,
+            }
+        );
+        return this.launchRefresh();
+    }
+
     /**
      * Creates the 'this._leoLogPane' log pane output panel instance
      */
@@ -4030,7 +4186,8 @@ export class LeoUI extends NullGui {
                 quickPick.onDidAccept(accepted => {
                     if (/^\d+$/.test(quickPick.value)) {
                         // * Was an integer EASTER EGG
-                        this.setupRefresh(Focus.Body,
+                        this.setupRefresh(
+                            Focus.Body,
                             {
                                 tree: true,
                                 body: true,
@@ -4040,8 +4197,12 @@ export class LeoUI extends NullGui {
                             }
                         );
                         // not awaited
-                        c.editCommands.gotoGlobalLine(Number(quickPick.value)).then(() => {
-                            void this.launchRefresh();
+                        c.editCommands.gotoGlobalLine(Number(quickPick.value)).then((p_gotoResult) => {
+                            if (p_gotoResult[0]) {
+                                void this.showBody(false).then(() => {
+                                    void this.launchRefresh();
+                                });
+                            }
                         }, () => {
                             // pass
                         });

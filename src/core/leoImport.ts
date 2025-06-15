@@ -1035,6 +1035,22 @@ export class LeoImportCommands {
                 undoData = u.beforeInsertNode(parent);
             }
             p = parent.insertAfter();
+
+            const commanderFilename = c.fileName();
+            if (commanderFilename) {
+                // Try to set fileName to a relative path if possible.
+                const commanderDirectory = g.os_path_dirname(commanderFilename);
+                const importedFileDir = g.os_path_dirname(fileName);
+                // If the commander directory is present in the imported file directory, use a relative path.
+                if (importedFileDir.startsWith(commanderDirectory)) {
+                    let specificPath = importedFileDir.substring(commanderDirectory.length + 1);
+                    if (specificPath) {
+                        specificPath += '/'; // not empty so add a slash.
+                    }
+                    fileName = specificPath + g.os_path_basename(fileName);
+                }
+            }
+
             if (isThin) {
                 // Create @file node, not a deprecated @thin node.
                 p.initHeadString('@file ' + fileName);
@@ -1078,13 +1094,15 @@ export class LeoImportCommands {
             return;
         }
 
-        for (const fn of files) {
+        for (let fn of files) {
             // Report exceptions here, not in the caller.
             try {
                 g.setGlobalOpenDir(fn);
                 // Leo 5.6: Handle undo here, not in createOutline.
                 const undoData = u.beforeInsertNode(parent);
                 let p: Position | undefined = parent.insertAsLastChild();
+
+                fn = g.relativeDirectory(c, fn);
                 p.h = `${treeType} ${fn}`;
                 u.afterInsertNode(p, 'Import', undoData);
                 p = await this.createOutline(p);
@@ -2302,7 +2320,7 @@ export class RecursiveImportController {
         let p: Position;
         if (this.kind === '@edit') {
             p = parent.insertAsLastChild();
-            p.v.h = '@edit ' + p_path.replace(/\\/g, '/'); // 2021/02/19: bug fix: add @edit.
+            p.v.h = '@edit ' + g.relativeDirectory(c, p_path.replace(/\\/g, '/')); // 2021/02/19: bug fix: add @edit.
             let [s, e] = await g.readFileIntoString(
                 p_path,
                 undefined,

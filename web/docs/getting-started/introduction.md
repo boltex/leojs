@@ -89,6 +89,10 @@ Use either of the **Save Leo Document**, **Write File Nodes** or **Write Dirty F
 | @file          |    ✔️     |   ✔️    |    ❌     |     ❌     |
 | @nosent        |    ❌     |   ✔️    |    ✔️     |     ✔️     |
 
+You can also create most of those nodes by using the context menu in vscode's explorer or file editors, and choosing the **Import into LeoJS Outline** command.
+
+The **Go to Line In LeoJS Outline** command is also available in the editor context menu to find a specific line in the outline. It will offer to import the file if no type of **@file** nodes are found in the outline for that file.
+
 Leo will detect external file changes, and will ask to either **refresh from disk** or **ignore the changes**. 
 
 See the [LeoJS extension settings](#extension-settings) to decide how and when to refresh and synchronize content when external files are modified:

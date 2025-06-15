@@ -267,7 +267,7 @@ export class ExternalFilesController {
             // Check file.
             if (p.isAtAsisFileNode() || p.isAtNoSentFileNode()) {
                 // #1081: issue a warning.
-                await this.warn(c, w_path, p);
+                this.warn(c, w_path, p);
                 continue;
             }
             if (['yes', 'no'].includes(state)) {
@@ -948,24 +948,30 @@ export class ExternalFilesController {
      *
      * There is *no way* to update the tree automatically.
      */
-    public async warn(c: Commands, p_path: string, p: Position): Promise<void> {
+    public warn(c: Commands, p_path: string, p: Position): void {
         if (g.unitTesting || !g.app.commanders().includes(c)) {
-            return Promise.resolve();
+            return;
         }
         if (!p || !p.__bool__()) {
             g.trace('NO P');
-            return Promise.resolve();
+            return;
         }
-        await g.app.gui.runAskOkDialog(
-            c,
-            'External file changed',
-            [
-                `${g.splitLongFileName(p_path)} has changed outside Leo.\n`,
-                'Leo can not update this file automatically.\n',
-                `This file was created from ${p.h}.\n`,
-                'Warning: refresh-from-disk will destroy all children.',
-            ].join('\n')
-        );
+
+        const pathName = g.shortFileName(p_path);
+        const kind = p.h.startsWith('@asis') ? '@asis' : '@nosent';
+
+        let message = `${pathName} has changed outside Leo.\n\n`;
+        message += `An ${kind} node created this file.\n\n`;
+
+        if (kind === '@nosent') {
+            message += '@nosent nodes cannot be updated from disk.\n';
+        } else if (kind === '@asis') {
+            message +=
+                'Updating from disk would remove its outline structure.\n' +
+                'Proceed with refresh-from-disk only if this is intended.\n';
+        }
+
+        void vscode.window.showInformationMessage(message);
     }
 
     //@-others

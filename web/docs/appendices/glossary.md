@@ -34,7 +34,7 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ### \@auto \<filename>
 
-    Imports an external file into the Leo outline, splitting the file into pieces if an importer exists for the give filetype. Importers presently exist for the following languages: C, C++, C#, HTML, INI files, Java, PHP, Pascal, Python and XML.
+    Imports an external file into the Leo outline, splitting the file into pieces if an importer exists for the give filetype. Importers presently exist for the following languages: C, C++, C#, CoffeScript, Cython, Dart, Elisp, HTML, INI files, Java, JavaScript, Lua, Markdown, Org, OTL, PHP, Pascal, Perl, Python, Rust, Tcl, TreePad, TypeScript and XML.
 
 ### \@c and @code
 
@@ -70,7 +70,10 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ### \@file \<filename>
 
-    Creates an external file containing sentinels. When writing @file trees, Leo expands section references and @all and @others directives. **Important**: @file is the recommended way to create and edit most files. Using @file trees is **highly recommended** when sharing external files in a collaborative environment.
+    Creates an external file containing sentinels. When writing @file trees, Leo expands section references and @all and @others directives. 
+    
+    > 📌 **Important**\
+    > @file is the recommended way to create and edit most files. Using @file trees is **highly recommended** when sharing external files in a collaborative environment.
 
 ### \@first \<text>
 

@@ -2,7 +2,7 @@
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -243,6 +243,7 @@
           "id": "leojsOutlineExplorer",
           "name": "Leojs Outline",
           "contextualTitle": "Leojs",
+          "icon": "$(symbol-class)",
           "when": "config.leojs.treeInExplorer",
           "visibility": "visible"
         },
@@ -252,12 +253,14 @@
           "contextualTitle": "Leojs",
           "name": "Leojs Find",
           "title": "Leojs Find",
+          "icon": "$(search)",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
         },
         {
           "id": "leojsDocumentsExplorer",
           "name": "Leojs Documents",
+          "icon": "$(symbol-folder)",
           "contextualTitle": "Leojs",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
@@ -266,12 +269,14 @@
           "id": "leojsUndosExplorer",
           "name": "Leojs Undo History",
           "contextualTitle": "Leojs",
+          "icon": "$(leojs-undo)",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
         },
         {
           "id": "leojsButtonsExplorer",
           "name": "Leojs Buttons",
+          "icon": "$(play)",
           "contextualTitle": "Leojs",
           "when": "config.leojs.treeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
@@ -282,6 +287,7 @@
           "id": "leojsOutline",
           "contextualTitle": "Leojs",
           "name": "Outline",
+          "icon": "$(symbol-class)",
           "visibility": "visible"
         },
         {
@@ -290,6 +296,7 @@
           "id": "leojsFindPanel",
           "name": "Find",
           "title": "Find",
+          "icon": "$(search)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         },
@@ -297,6 +304,7 @@
           "id": "leojsDocuments",
           "contextualTitle": "Leojs",
           "name": "Documents",
+          "icon": "$(symbol-folder)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         },
@@ -304,6 +312,7 @@
           "id": "leojsUndos",
           "contextualTitle": "Leojs",
           "name": "Undo History",
+          "icon": "$(leojs-undo)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         },
@@ -311,6 +320,7 @@
           "id": "leojsButtons",
           "contextualTitle": "Leojs",
           "name": "Buttons",
+          "icon": "$(play)",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         }
@@ -2049,6 +2059,18 @@
         "title": "Read File Into Node..."
       },
       {
+        "command": "leojs.gotoLineInLeoOutline",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened && editorTextFocus",
+        "title": "Go to Line In LeoJS Outline"
+      },
+      {
+        "command": "leojs.importIntoLeoOutline",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Import into LeoJS Outline as..."
+      },
+      {
         "command": "leojs.exportHeadlines",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
@@ -3130,6 +3152,14 @@
           "when": "false"
         },
         {
+          "command": "leojs.gotoLineInLeoOutline",
+          "when": "false"
+        },
+        {
+          "command": "leojs.importIntoLeoOutline",
+          "when": "false"
+        },
+        {
           "command": "leojs.contractAllFromOutline",
           "when": "false"
         },
@@ -3381,7 +3411,12 @@
       "explorer/context": [
         {
           "command": "leojs.openLeoFile",
-          "when": "resourceExtname == .leo || resourceExtname == .leojs",
+          "when": "resourceExtname =~ /^\\.leojs$|^\\.leo$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.importIntoLeoOutline",
+          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && explorerResourceIsFolder == false && !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
           "group": "navigation@1"
         }
       ],
@@ -3551,6 +3586,16 @@
         {
           "command": "leojs.findDef",
           "when": "!editorHasMultipleSelections && resourceScheme == leojs && leojsTreeOpened",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.gotoLineInLeoOutline",
+          "when": "!editorHasMultipleSelections && resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.importIntoLeoOutline",
+          "when": "resourceScheme =~ /^vscode-vfs$|^file$/ && leojsTreeOpened && !(resourceExtname =~ /^\\.leojs$|^\\.leo$/)",
           "group": "navigation@1"
         },
         {
@@ -4558,7 +4603,7 @@
       {
         "command": "workbench.files.action.collapseExplorerFolders",
         "key": "alt+-",
-        "when": "config.leojs.collapseAllShortcut && !inSearchEditor && !sideBarFocus && resourceScheme == untitled || config.leojs.collapseAllShortcut && !inSearchEditor && !sideBarFocus && resourceScheme == file || config.leojs.collapseAllShortcut && !inSearchEditor && explorerViewletFocus"
+        "when": "config.leojs.collapseAllShortcut && !inSearchEditor && !sideBarFocus && resourceScheme =~ /^untitled$|^file$/ || config.leojs.collapseAllShortcut && !inSearchEditor && explorerViewletFocus"
       },
       {
         "command": "workbench.view.extension.leojsView",

@@ -1282,6 +1282,7 @@ export class Commands {
         // This does not prevent zombie windows if the script puts up a dialog...
         try {
             c.inCommand = false;
+            g.app.hasScriptShownlog = false; // Reset this flag. (LeoJS only)
             g.app.inScript = true;
             (g.inScript as boolean) = g.app.inScript; // g.inScript is a synonym for g.app.inScript.
 
@@ -1291,33 +1292,29 @@ export class Commands {
             // }else{
             //     exec(script, d)
             // }
-
             if (c.write_script_file) {
-                // TODO !
-                g.es('write_script_file is not yet supported.');
-                console.log(
-                    'HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ',
-                    script
-                );
+                // TODO ? just write the file and run as normal?
+                g.es_print_unique_message('Ignored write-script-file option.');
+
                 // scriptFile = self.writeScriptFile(script)
                 // exec(compile(script, scriptFile, 'exec'), d)
-            } else {
-                // exec(script, d)
-                const func = new Function(
-                    // 'c',
-                    // 'g',
-                    // 'input',
-                    // 'p',
-                    // '__name__',
-                    // 'script_args',
-                    // 'script_gnx',
-                    ...Object.keys(d),
-                    script
-                );
-
-                callResult = await func(...Object.keys(d).map(k => d[k]));
-                console.log('called it!', callResult);
             }
+
+            // exec(script, d)
+            const func = new Function(
+                // 'c',
+                // 'g',
+                // 'input',
+                // 'p',
+                // '__name__',
+                // 'script_args',
+                // 'script_gnx',
+                ...Object.keys(d),
+                script
+            );
+
+            callResult = await func(...Object.keys(d).map(k => d[k]));
+
         } catch (e) {
             // pass
         } finally {

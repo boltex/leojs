@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.0.11
+
+- Import commands now create outline nodes using a relative path (when the imported file is located at or below the Leo file’s directory).
+- New command (VSCode files editor context menu): **Go to Line In LeoJS Outline**. (will offer to import if not present)
+- New command (Editor and Explorer context menu) for files to be imported: **Import into LeoJS Outline**.
+- g.es now opens the log pane when user scripts or @button nodes are run.
+- Running scripts now ignores the write-script-file setting in LeoJS.
+
 ## 1.0.10
 
 - Fixed @path to recognize '-' (Leo #4339)
