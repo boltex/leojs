@@ -2079,7 +2079,7 @@ export function relativeDirectory(commander: Commands, importedFilename: string)
         workspaceDir && commanderDirectory.startsWith(workspaceDir) &&
         importedFileDir.startsWith(workspaceDir)
     ) {
-        commonPath = path.relative(importedFileDir, commanderDirectory);
+        commonPath = path.relative(commanderDirectory, importedFileDir);
         if (commonPath) {
             commonPath += '/'; // not empty so add a slash.
         }
