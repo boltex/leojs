@@ -2066,17 +2066,25 @@ export function relativeDirectory(commander: Commands, importedFilename: string)
     // Try to set fileName to a relative path if possible.
     const commanderDirectory = os_path_dirname(os_path_fix_drive(commander.fileName()));
     const importedFileDir = os_path_dirname(os_path_fix_drive(importedFilename));
+    const workspaceDir = os_path_normslashes(os_path_fix_drive(workspaceUri.fsPath));
 
     // Initialize a default commonPath from importedFileDir, the directory of the file to be imported.
     let commonPath = importedFileDir;
 
-    // Now, make a relative path if possible.
-    if (importedFileDir.startsWith(commanderDirectory)) {
-        commonPath = importedFileDir.substring(commanderDirectory.length + 1);
+    // Now, make a relative path of importedFileDir to the commanderDirectory
+    // if both the commanderDirectory and the importedFileDir are within the workspace directory.
+    // Otherwise, use the absolute path of importedFileDir.
+    // This allows for relative imports within the same workspace.
+    if (
+        workspaceDir && commanderDirectory.startsWith(workspaceDir) &&
+        importedFileDir.startsWith(workspaceDir)
+    ) {
+        commonPath = path.relative(importedFileDir, commanderDirectory);
         if (commonPath) {
             commonPath += '/'; // not empty so add a slash.
         }
     }
+
     // Finally, even if not relative, use a folder plus the file name.
     return commonPath + os_path_basename(importedFilename);
 }
