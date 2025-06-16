@@ -2,7 +2,7 @@
 
 ## 1.0.12
 
-...
+- Fixed scrolling to reveal cursor on selected line for gotoGlobalLine related commands.
 
 ## 1.0.11
 

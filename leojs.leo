@@ -4382,6 +4382,7 @@ public async minibuffer(): Promise&lt;unknown&gt; {
                         {
                             tree: true,
                             body: true,
+                            scroll: true, // scroll to line
                             documents: false,
                             buttons: false,
                             states: true
@@ -21690,6 +21691,7 @@ public get1Char(
                             tree: true,
                             body: true,
                             states: true,
+                            scroll: true, // Scroll to the position in the body
                             buttons: false,
                             documents: false,
                             goto: false,
@@ -21742,6 +21744,7 @@ public get1Char(
                 tree: true,
                 body: true,
                 states: true,
+                scroll: true, // Scroll to the position in the body
                 buttons: false,
                 documents: true,
                 goto: false,
@@ -21801,7 +21804,7 @@ public get1Char(
 </t>
 <t tx="felix.20250615192814.1">## 1.0.12
 
-...
+- Fixed scrolling to reveal cursor on selected line for gotoGlobalLine related commands.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

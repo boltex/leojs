@@ -771,6 +771,7 @@ export class LeoUI extends NullGui {
                                 tree: true,
                                 body: true,
                                 states: true,
+                                scroll: true, // Scroll to the position in the body
                                 buttons: false,
                                 documents: false,
                                 goto: false,
@@ -823,6 +824,7 @@ export class LeoUI extends NullGui {
                     tree: true,
                     body: true,
                     states: true,
+                    scroll: true, // Scroll to the position in the body
                     buttons: false,
                     documents: true,
                     goto: false,
@@ -4191,6 +4193,7 @@ export class LeoUI extends NullGui {
                             {
                                 tree: true,
                                 body: true,
+                                scroll: true, // scroll to line
                                 documents: false,
                                 buttons: false,
                                 states: true
