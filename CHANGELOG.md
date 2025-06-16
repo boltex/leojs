@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.12
+
+- Fixed scrolling to reveal cursor on selected line for gotoGlobalLine related commands.
+
 ## 1.0.11
 
 - Import commands now create outline nodes using a relative path (when the imported file is located at or below the Leo file’s directory).
