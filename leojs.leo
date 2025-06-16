@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20250616003053.1"><vh>1.0.13</vh></v>
 <v t="felix.20250615192814.1"><vh>1.0.12</vh></v>
 <v t="felix.20250522205342.1"><vh>1.0.11</vh></v>
 <v t="felix.20250311210144.1"><vh>1.0.10</vh></v>
@@ -21805,6 +21806,11 @@ public get1Char(
 <t tx="felix.20250615192814.1">## 1.0.12
 
 - Fixed scrolling to reveal cursor on selected line for gotoGlobalLine related commands.
+
+</t>
+<t tx="felix.20250616003053.1">## 1.0.13
+
+...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
