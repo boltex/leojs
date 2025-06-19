@@ -1170,7 +1170,7 @@ export class LeoImportCommands {
         let [junk, fileName] = g.os_path_split(p_path);
         const undoData = u.beforeInsertNode(parent);
         // Create the top-level headline.
-        let p = parent.insertAsLastChild();
+        let p = parent.insertAfter();
         p.initHeadString(fileName);
         if (this.webType === 'cweb') {
             this.setBodyString(p, '@ignore\n@language cweb');
@@ -2310,6 +2310,8 @@ export class RecursiveImportController {
         parent: Position
     ): Promise<void> {
         await this.isReady;
+
+        console.log(`Importing file: ${p_path}`);
 
         const c = this.c;
         this.n_files += 1;

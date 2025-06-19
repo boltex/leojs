@@ -25,7 +25,7 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
     g.setGlobalOpenDir(fn);
     const undoData = u.beforeInsertNode(c.p);
     const p = c.p.insertAfter();
-    p.h = `@edit ${fn}`;
+    p.h = `@edit ${g.relativeDirectory(c, fn)}`;
     let s: string | undefined;
     let e: any;
     [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
