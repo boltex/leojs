@@ -1979,8 +1979,14 @@ export class Commands {
             }
         }
 
+        let defaultAbsbase = g.app.homeDir || process.cwd();
+        if (g.isBrowser) {
+            // In the browser, we use the base of the repo with a single slash "/"
+            defaultAbsbase = "/";
+        }
+
         // Add absbase and reverse the list.
-        const absbase = c.fileName() ? g.os_path_dirname(c.fileName()) : process.cwd();
+        const absbase = c.fileName() ? g.os_path_dirname(c.fileName()) : defaultAbsbase;
         paths.push(absbase);
         paths.reverse();
 
