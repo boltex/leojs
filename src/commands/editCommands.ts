@@ -412,7 +412,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             c,
             'Insert File Name',
             filetypes,
-            ''
         );
 
         const i = w.getSelectionRange()[0];

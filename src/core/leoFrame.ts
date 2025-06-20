@@ -190,7 +190,6 @@ export class LeoFrame {
                 c,
                 'Save',
                 [['Leo files', '*.leojs *.leo *.db']],
-                '.leo'
             );
 
             c.bringToFront();

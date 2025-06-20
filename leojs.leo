@@ -3317,7 +3317,6 @@ export interface showSaveAsDialogParameters {
     "title": string;
     "message": string;
     "filetypes": string[];
-    "defaultExtension": string;
 }
 
 </t>
@@ -7063,8 +7062,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                     ["Leo files", "*.leojs *.leo *.db"],
                     ["Python files", "*.py"],
                     ["All files", "*"]
-                ],
-                g.defaultLeoFileExtension(),
+                ]
             );
         }
         if (fileName &amp;&amp; g.app.loadManager) {
@@ -8785,7 +8783,6 @@ public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
         c,
         'Save As JSON (.leojs)',
         [['Leo JSON files', '*.leojs']],
-        '.leojs'
     );
     if (!fileName) {
         return;
@@ -9402,7 +9399,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
     startpath?: string
 ): Thenable&lt;string&gt; {
     // convert to { [name: string]: string[] } typing
@@ -9446,7 +9442,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
 ): Thenable&lt;string&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
@@ -19361,7 +19356,6 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
     startpath?: string
 ): Thenable&lt;string[]&gt; {
     // convert to { [name: string]: string[] } typing
