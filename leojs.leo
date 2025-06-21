@@ -4762,21 +4762,21 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.refreshFromDisk",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelection",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
   "icon": "$(leojs-refresh)"
 },
 {
@@ -21804,7 +21804,10 @@ public get1Char(
 </t>
 <t tx="felix.20250616003053.1">## 1.0.13
 
-...
+- Fixed availability of "Refresh from Disk" for new, unsaved Leo documents.
+- Fixed default base for external files of new and unsaved Leo Documents.
+- Fixed 'import txt file' usage of relative directories
+- Fixed node insertion logic (after node instead of as last child) of the CWEB importer.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

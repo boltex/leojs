@@ -2,7 +2,10 @@
 
 ## 1.0.13
 
-...
+- Fixed availability of "Refresh from Disk" for new, unsaved Leo documents.
+- Fixed default base for external files of new and unsaved Leo Documents.
+- Fixed 'import txt file' usage of relative directories
+- Fixed node insertion logic (after node instead of as last child) of the CWEB importer.
 
 ## 1.0.12
 
