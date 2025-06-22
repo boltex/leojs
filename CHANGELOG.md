@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.14
+
+...
+
 ## 1.0.13
 
 - Fixed availability of "Refresh from Disk" for untitled Leo documents.
