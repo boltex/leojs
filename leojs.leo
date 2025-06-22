@@ -21804,10 +21804,10 @@ public get1Char(
 </t>
 <t tx="felix.20250616003053.1">## 1.0.13
 
-- Fixed availability of "Refresh from Disk" for new, unsaved Leo documents.
-- Fixed default base for external files of new and unsaved Leo Documents.
-- Fixed 'import txt file' usage of relative directories
-- Fixed node insertion logic (after node instead of as last child) of the CWEB importer.
+- Fixed availability of "Refresh from Disk" for untitled Leo documents.
+- Fixed default base directory for external files of untitled Leo documents.
+- Fixed 'import txt file' usage of relative directories.
+- Fixed node insertion logic (after node instead of as last child) for the CWEB importer.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
