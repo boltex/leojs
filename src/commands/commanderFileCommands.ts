@@ -25,7 +25,7 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
     g.setGlobalOpenDir(fn);
     const undoData = u.beforeInsertNode(c.p);
     const p = c.p.insertAfter();
-    p.h = `@edit ${fn}`;
+    p.h = `@edit ${g.relativeDirectory(c, fn)}`;
     let s: string | undefined;
     let e: any;
     [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
@@ -149,7 +149,6 @@ export class CommanderFileCommands {
                 c,
                 'Import File',
                 types,
-                '.py',
             );
         }
         c.bringToFront();
@@ -418,7 +417,6 @@ export class CommanderFileCommands {
             c,
             'Open',
             table,
-            g.defaultLeoFileExtension(c),
         );
 
         return open_completer(c, closeFlag, fileName);
@@ -547,7 +545,6 @@ export class CommanderFileCommands {
                 c,
                 'Save',
                 [['Leo files', '*.leojs *.leo *.db']], // Array of arrays (one in this case)
-                g.defaultLeoFileExtension(c)
             );
 
             if (new_file_name) {
@@ -634,7 +631,6 @@ export class CommanderFileCommands {
                 c,
                 'Save As',
                 [['Leo files', '*.leojs *.leo *.db']], // Array of arrays (one in this case)
-                g.defaultLeoFileExtension(c)
             );
 
             if (new_file_name) {
@@ -701,7 +697,6 @@ export class CommanderFileCommands {
                 c,
                 'Save To',
                 [['Leo files', '*.leojs *.leo *.db']], // Array of arrays (one in this case)
-                g.defaultLeoFileExtension(c)
             );
 
             if (new_file_name) {
@@ -757,8 +752,7 @@ export class CommanderFileCommands {
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
             'Save As JSON (.leojs)',
-            [['Leo JSON files', '*.leojs']],
-            '.leojs'
+            [['Leo JSON files', '*.leojs']]
         );
         if (!fileName) {
             return;
@@ -786,8 +780,7 @@ export class CommanderFileCommands {
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
             'Save As SQLite',
-            [['Leo files', '*.db']],
-            '.db'
+            [['Leo files', '*.db']]
         );
         if (!fileName) {
             return;
@@ -817,8 +810,7 @@ export class CommanderFileCommands {
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
             'Save As XML',
-            [['Leo files', '*.leo']],
-            '.leo'
+            [['Leo files', '*.leo']]
         );
         if (!fileName) {
             return;
@@ -846,7 +838,6 @@ export class CommanderFileCommands {
             c,
             'Export Headlines',
             filetypes,
-            '.txt'
         );
         c.bringToFront();
         if (fileName) {
@@ -870,7 +861,6 @@ export class CommanderFileCommands {
             c,
             'Flatten Selected Outline',
             filetypes,
-            '.txt'
         );
         c.bringToFront();
         if (fileName) {
@@ -940,7 +930,6 @@ export class CommanderFileCommands {
             c,
             'Outline To CWEB',
             filetypes,
-            '.w'
         );
         c.bringToFront();
         if (fileName) {
@@ -967,7 +956,6 @@ export class CommanderFileCommands {
             c,
             'Outline To Noweb',
             filetypes,
-            '.nw'
         );
         c.bringToFront();
         if (fileName) {
@@ -1003,7 +991,6 @@ export class CommanderFileCommands {
             c,
             'Remove Sentinels',
             types,
-            '.py',
         );
         c.bringToFront();
         if (names && names.length) {
@@ -1026,7 +1013,6 @@ export class CommanderFileCommands {
                 ['Text files', '*.txt'],
                 ['All files', '*'],
             ],
-            '.txt'
         );
         c.bringToFront();
         if (fileName) {
@@ -1117,7 +1103,6 @@ export class CommanderFileCommands {
             c,
             'Read File Into Node',
             filetypes,
-            ''
         );
         if (!fileName) {
             return;
@@ -1170,7 +1155,6 @@ export class CommanderFileCommands {
                     ['Python files', '*.py'],
                     ['Leo files', '*.leojs *.leo'],
                 ],
-                ''
             );
         }
         if (fileName) {
@@ -1220,7 +1204,6 @@ export class CommanderFileCommands {
                     ['Python files', '*.py'],
                     ['Leo files', '*.leojs *.leo'],
                 ],
-                ''
             );
         }
         if (fileName) {

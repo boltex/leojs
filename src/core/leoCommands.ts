@@ -1980,7 +1980,7 @@ export class Commands {
         }
 
         // Add absbase and reverse the list.
-        const absbase = c.fileName() ? g.os_path_dirname(c.fileName()) : process.cwd();
+        const absbase = c.fileName() ? g.os_path_dirname(c.fileName()) : g.app.homeDir!;
         paths.push(absbase);
         paths.reverse();
 

@@ -2063,6 +2063,26 @@ export function makeVscodeUri(p_fn: string): Uri {
 
 //@+node:felix.20250612213348.1: *3* g.relativeDirectory
 export function relativeDirectory(commander: Commands, importedFilename: string): string {
+
+    if (!commander.fileName()) {
+
+        es_print_unique_message('Imported using absolute path (unsaved outline).\n Save the outline to enable relative paths.');
+        if (isBrowser) {
+            // Make sure the uri starts with a slash instead of the vscode workspace path.
+            importedFilename = os_path_normslashes(importedFilename);
+            const workspacePath = workspaceUri.fsPath.replace(/\\/g, "/");
+
+            if (importedFilename.startsWith(workspacePath)) {
+                // Remove the workspace path from the importedFilename.
+                importedFilename = importedFilename.slice(workspacePath.length);
+            }
+            return importedFilename;
+
+        } else {
+            return importedFilename; // No commander, return the absolute path.
+        }
+    }
+
     // Try to set fileName to a relative path if possible.
     const commanderDirectory = os_path_dirname(os_path_fix_drive(commander.fileName()));
     const importedFileDir = os_path_dirname(os_path_fix_drive(importedFilename));
@@ -4589,46 +4609,6 @@ export function truncate(s: string, n: number): string {
         return s2 + '\n';
     }
     return s2;
-}
-//@+node:felix.20230624200527.1: *3* g.warnNoOpenDirectory
-/**
- * Give warning when trying to refresh or write external files
- * and c.openDirectory is undefined.
- * Occurs when new & unsaved leo document, along with no vscode workspace opened
- */
-export function warnNoOpenDirectory(
-    p_items?: string[]
-): Thenable<string | undefined> {
-    const w_message =
-        'Directory for this outline is undefined\n' +
-        'Save it first, or open a VSCode workspace.';
-
-    let q_warning: Thenable<string | undefined>;
-
-    if (p_items && p_items.length) {
-        q_warning = window.showWarningMessage(w_message, ...p_items);
-    } else {
-        q_warning = window.showWarningMessage(
-            w_message,
-            'Save',
-            'Open Folder'
-        );
-    }
-    return q_warning.then((p_result) => {
-        // handle choices
-        if (p_result === 'Save') {
-            void commands.executeCommand('leojs.saveLeoFile');
-        } else if (p_result === 'Open Folder') {
-            if (isBrowser) {
-                void commands.executeCommand('remoteHub.openRepository');
-            } else {
-                void commands.executeCommand(
-                    'workbench.action.files.openFolder'
-                );
-            }
-        }
-        return p_result;
-    });
 }
 //@+node:felix.20230426001612.1: *3* g.zip
 export function zip<T>(...arrays: T[][]): T[][] {

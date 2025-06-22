@@ -461,7 +461,6 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 c,
                 'Compare Leo Files',
                 filetypes,
-                '.leo'
             );
             if (!fileName) {
                 return;
@@ -700,7 +699,6 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 ['Text', '*.txt'],
                 ['All files', '*'],
             ],
-            '.txt'
         );
         return fn;
     }
@@ -846,7 +844,6 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 ['Text', '*.txt'],
                 ['All files', '*'],
             ],
-            '.txt'
         )) as string;
         if (fileName) {
             try {

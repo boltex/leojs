@@ -277,7 +277,6 @@ export class LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
         startpath?: string
     ): Thenable<string> {
         this.oops();
@@ -288,7 +287,6 @@ export class LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
         startpath?: string
     ): Thenable<string[]> {
         this.oops();
@@ -302,7 +300,6 @@ export class LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string
     ): Thenable<string> {
         this.oops();
         return Promise.resolve('no');
@@ -643,7 +640,6 @@ export class NullGui extends LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
     ): Thenable<string> {
         return Promise.resolve('');
     }
@@ -652,7 +648,6 @@ export class NullGui extends LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
     ): Thenable<string[]> {
         return Promise.resolve([]);
     }
@@ -661,7 +656,6 @@ export class NullGui extends LeoGui {
         c: Commands,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string
     ): Thenable<string> {
         return Promise.resolve('');
     }

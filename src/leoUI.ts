@@ -5842,8 +5842,7 @@ export class LeoUI extends NullGui {
                         ["Leo files", "*.leojs *.leo *.db"],
                         ["Python files", "*.py"],
                         ["All files", "*"]
-                    ],
-                    g.defaultLeoFileExtension(),
+                    ]
                 );
             }
             if (fileName && g.app.loadManager) {
@@ -5989,7 +5988,6 @@ export class LeoUI extends NullGui {
             c,
             'Save As JSON (.leojs)',
             [['Leo JSON files', '*.leojs']],
-            '.leojs'
         );
         if (!fileName) {
             return;
@@ -6806,7 +6804,6 @@ export class LeoUI extends NullGui {
         c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
         startpath?: string
     ): Thenable<string> {
         // convert to { [name: string]: string[] } typing
@@ -6834,7 +6831,6 @@ export class LeoUI extends NullGui {
         c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
         startpath?: string
     ): Thenable<string[]> {
         // convert to { [name: string]: string[] } typing
@@ -6864,7 +6860,6 @@ export class LeoUI extends NullGui {
         c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
     ): Thenable<string> {
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);

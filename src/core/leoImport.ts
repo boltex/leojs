@@ -186,7 +186,6 @@ export class FreeMindImporter {
             c,
             'Import FreeMind File',
             types,
-            '.html',
         );
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -1170,7 +1169,7 @@ export class LeoImportCommands {
         let [junk, fileName] = g.os_path_split(p_path);
         const undoData = u.beforeInsertNode(parent);
         // Create the top-level headline.
-        let p = parent.insertAsLastChild();
+        let p = parent.insertAfter();
         p.initHeadString(fileName);
         if (this.webType === 'cweb') {
             this.setBodyString(p, '@ignore\n@language cweb');
@@ -1817,7 +1816,6 @@ export class MindMapImporter {
             c,
             'Import MindJet File',
             types,
-            '.csv',
         );
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -1940,7 +1938,6 @@ export class MORE_Importer {
             c,
             'Import MORE Files',
             types,
-            '', //  ".txt",
         );
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -2310,6 +2307,8 @@ export class RecursiveImportController {
         parent: Position
     ): Promise<void> {
         await this.isReady;
+
+        console.log(`Importing file: ${p_path}`);
 
         const c = this.c;
         this.n_files += 1;
@@ -2876,7 +2875,6 @@ export class TabImporter {
             c,
             'Import Tabbed File',
             types,
-            '.html',
         );
         if (names && names.length) {
             await g.chdir(names[0]);
@@ -3158,7 +3156,6 @@ export class ToDoImporter {
             c,
             'Import todo.txt File',
             types,
-            '.txt',
         );
         if (!names || !names.length) {
             return {};
@@ -3703,7 +3700,6 @@ export class LegacyExternalFileImporter {
             c,
             'Import Legacy External Files',
             types,
-            '.py',
         );
         if (paths && paths.length) {
             await g.chdir(paths[0]);

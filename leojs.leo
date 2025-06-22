@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20250616003053.1"><vh>1.0.13</vh></v>
 <v t="felix.20250615192814.1"><vh>1.0.12</vh></v>
 <v t="felix.20250522205342.1"><vh>1.0.11</vh></v>
 <v t="felix.20250311210144.1"><vh>1.0.10</vh></v>
@@ -3316,7 +3317,6 @@ export interface showSaveAsDialogParameters {
     "title": string;
     "message": string;
     "filetypes": string[];
-    "defaultExtension": string;
 }
 
 </t>
@@ -4631,7 +4631,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4762,21 +4762,21 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.refreshFromDisk",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelection",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
   "icon": "$(leojs-refresh)"
 },
 {
@@ -7062,8 +7062,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                     ["Leo files", "*.leojs *.leo *.db"],
                     ["Python files", "*.py"],
                     ["All files", "*"]
-                ],
-                g.defaultLeoFileExtension(),
+                ]
             );
         }
         if (fileName &amp;&amp; g.app.loadManager) {
@@ -8784,7 +8783,6 @@ public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
         c,
         'Save As JSON (.leojs)',
         [['Leo JSON files', '*.leojs']],
-        '.leojs'
     );
     if (!fileName) {
         return;
@@ -9401,7 +9399,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
     startpath?: string
 ): Thenable&lt;string&gt; {
     // convert to { [name: string]: string[] } typing
@@ -9445,7 +9442,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
 ): Thenable&lt;string&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
@@ -19360,7 +19356,6 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
     startpath?: string
 ): Thenable&lt;string[]&gt; {
     // convert to { [name: string]: string[] } typing
@@ -19554,7 +19549,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.12&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.13&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21805,6 +21800,14 @@ public get1Char(
 <t tx="felix.20250615192814.1">## 1.0.12
 
 - Fixed scrolling to reveal cursor on selected line for gotoGlobalLine related commands.
+
+</t>
+<t tx="felix.20250616003053.1">## 1.0.13
+
+- Fixed availability of "Refresh from Disk" for untitled Leo documents.
+- Fixed default base directory for external files of untitled Leo documents.
+- Fixed 'import txt file' usage of relative directories.
+- Fixed node insertion logic (after node instead of as last child) for the CWEB importer.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

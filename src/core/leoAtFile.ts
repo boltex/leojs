@@ -1256,10 +1256,6 @@ export class AtFile {
         const at = this;
         const c = this.c;
         const p = this.c.p;
-        // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.fileName()) {
-            void g.warnNoOpenDirectory();
-        }
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
@@ -1303,10 +1299,6 @@ export class AtFile {
         const c = this.c;
         const p = this.c.p;
 
-        // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.fileName()) {
-            void g.warnNoOpenDirectory();
-        }
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
@@ -1349,11 +1341,6 @@ export class AtFile {
         const at = this;
         const c = this.c;
         const p = this.c.p;
-
-        // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.fileName()) {
-            void g.warnNoOpenDirectory();
-        }
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
@@ -1398,11 +1385,6 @@ export class AtFile {
         const at = this;
         const c = this.c;
         const p = this.c.p;
-
-        // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.fileName()) {
-            void g.warnNoOpenDirectory();
-        }
         c.init_error_dialogs();
         const after = p.nodeAfterTree();
         let found = false;
@@ -1467,10 +1449,6 @@ export class AtFile {
     public async writeAll(all = false, dirty = false): Promise<void> {
         const c = this.c;
 
-        // ! LEOJS : warn if no openDirectory before write/read external files.
-        if (!c.fileName()) {
-            void g.warnNoOpenDirectory();
-        }
         const at = this;
         // This is the *only* place where these are set.
         // promptForDangerousWrite sets cancelFlag only if canCancelFlag is True.
