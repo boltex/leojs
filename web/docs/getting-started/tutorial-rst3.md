@@ -127,15 +127,12 @@ only by the elite.
 To create a new section, subsection, etc., in the output file:
 
 1. Create a new outline node, as some descendant of the @rst node.
-
 2. **The new node's headline becomes the section's title**.
-
 3. Type the contents of the section in the body text of the node.
 
 That's all there is to it:
 
 - **The rst3 command generates rST underlining automatically**.
-
 - **You reorganize your document by reorganizing nodes**.
 
 There is *no* need to change markup when reorganizing your document, a huge improvement over writing "raw" rST.
@@ -150,7 +147,6 @@ Now you write your novel, short story, documentation, or whatever. Organize your
 `<Alt-X>rst3<Return>` runs the rst3 command.
 
 - If the present node is an @rst node (or a descendant of an @rst node) the rst3 command applies to the nearest ancestor @rst node.
-
 - Otherwise, the rst3 command applies to all descendant @rst trees.
 
 If @bool rst3_call_docutils is True, the rst3 command will call docutils automatically to create the output files. For more information about Leo's settings, see [this section](../getting-started/tutorial-basics.md#configuring-leo).
@@ -236,25 +232,15 @@ The `leo/plugins/example_rst_filter.py` shows how to define and register these f
 
 ## Summary
 - The rst3 command converts an @rst tree to an output file and an intermediate file.
-
 - docutils uses the output file; sphinx uses the intermediate file.
-
 - Settings starting with "rst3" control how the rst3 command works.
-
 - Within @rst trees, headlines become rST sections.
-
 - Sections levels in the generated rST correspond to outline levels in Leo.
-
 - You reorganize your rST documents just by reorganizing the corresponding @rst tree.
-
 - The rst3 command works acts on the nearest ancestor @rst node, if any, or on all descendant @rst nodes.
-
 - `@rst-no-head` nodes insert text (or markup) without an rST headline.
-
 - The rst3 command ignores @rst-ignore nodes and @rst-ignore-tree trees.
-
 - The `@button make-sphinx` node in LeoDocs.leo calls sphinx automatically.
-
 - CheatSheet.leo contains an expanded version of the example used in this tutorial. |br|
   You can open CheatSheet.leo from Leo's help menu.
 
@@ -263,9 +249,6 @@ You now know enough to get started with the rst3 command. Some possible next ste
 
 - Look at Leo's own documentation in LeoDocs.leo.
   Discover how the nodes in this tree correspond to the documentation you see before you.
-
 - `LeoDocs.leo` has an @button make-sphinx script that calls sphinx automatically.
-
 - Create your own `@rst` nodes. Run the rst3 command on them and see what happens.
-
 - If you get stuck, please ask for help at [https://groups.google.com/forum/#!forum/leo-editor](https://groups.google.com/forum/#!forum/leo-editor).
