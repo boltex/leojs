@@ -143,8 +143,7 @@ There is *no* need to change markup when reorganizing your document, a huge impr
 ## Write your document
 Now you write your novel, short story, documentation, or whatever. Organize your work as always:
 
-**nodes create sections, subsections, sub-sub-sections, etc.**
-
+**nodes create sections, subsections, sub-sub-sections, etc.**\
 **depending on their position in the outline**.
 
 ## Run the rst3 command
@@ -213,9 +212,9 @@ The [rST manual](https://docutils.sourceforge.net/docs/user/rst/quickref.html#di
     :trim:
 ```
 
-Now `---` inserts ---, the unicode "quotation dash" used to indicate the author of quotations. Note that rST automatically turns `--` into a dash: --.
+Now `---` inserts —, the unicode "quotation dash" used to indicate the author of quotations. Note that rST automatically turns `--` into a dash: –.
 
-The rST `|` markup breaks text into specific lines, but there are times when it can't be used.  The following inserts a line break into text::
+The rST `|` markup breaks text into specific lines, but there are times when it can't be used.  The following inserts a line break into text:
 
 ```
 .. |br| raw:: html
