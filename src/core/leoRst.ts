@@ -29,9 +29,7 @@ import * as vscode from 'vscode';
 // except Exception:
 //     docutils = None  // type:ignore
 
-//import * as docutils from "docutils-ts"; // LeoJS: docutils will soon be available as a package. (when docutils-ts is ready)
-const docutils = true; // Replace with suitable import if available.
-
+import * as docutils from "docutils-ts";
 import * as g from './leoGlobals';
 
 // Aliases & traces.
@@ -152,6 +150,20 @@ export class RstCommands {
 
         // Complete the init.
         this.reloadSettings();
+
+        // Setup docutils-ts file system read/write.
+        docutils.core.fileSystem.setImplementation({
+            readFile: async (p_path) => {
+                const w_uri = g.makeVscodeUri(p_path);
+                const readData = await vscode.workspace.fs.readFile(w_uri);
+                return readData;
+            },
+            writeFile: async (p_path: string, content: string | Uint8Array<ArrayBufferLike>) => {
+                const w_uri = g.makeVscodeUri(p_path);
+                const writeData = typeof content === 'string' ? Buffer.from(content, 'utf-8') : content;
+                await vscode.workspace.fs.writeFile(w_uri, writeData);
+            },
+        });
     }
     //@+node:felix.20230427003032.8: *4* rst.reloadSettings
     /**
@@ -689,7 +701,7 @@ export class RstCommands {
         };
         let ext2: string;
         let writer;
-        let writer_name: string;
+        let writer_name: string | undefined;
         let result;
         //
         // Compute the args list if the stylesheet path does not exist.
@@ -777,26 +789,28 @@ export class RstCommands {
         }
         try {
             result = '';
-            // TODO !
-            console.log('TODO : SUPPORT DOCUTILS IN leoRst.ts');
 
-            // * ORIGINAL *
-            // result = docutils.core.publish_string(source=s,
-            //         reader_name='standalone',
-            //         parser_name='restructuredtext',
-            //         writer=writer,
-            //         writer_name=writer_name,
-            //         settings_overrides=overrides)
+            result = await docutils.core.publish_string(
+                {
+                    source: s,
+                    readerName: 'standalone',
+                    parserName: 'restructuredtext',
+                    writer: writer,
+                    writerName: writer_name,
+                    settingsOverrides: overrides,
+                }
+            );
             // if isinstance(result, bytes) // ! not needed for g.toUnicode
             result = g.toUnicode(result);
         } catch (exception) {
-            // catch docutils.ApplicationError as error
-            //     g.error('Docutils error:')
-            //     g.blue(error)
             g.es_print('Unexpected docutils exception');
             g.es_exception(exception);
         }
 
+        if (result && typeof result !== 'string') {
+            // is of type Uint8Array
+            result = g.toUnicode(result);
+        }
         return result;
     }
     //@+node:felix.20230427003032.29: *6* rst.handleMissingStyleSheetArgs
