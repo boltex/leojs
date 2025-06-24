@@ -3,13 +3,9 @@
 //@+<< leoRst docstring >>
 //@+node:felix.20230427003032.2: ** << leoRst docstring >>
 /**
- * Support for restructured text (rST), adapted from rst3 plugin.
+ * Support for restructured text (rST).
  *
- * For full documentation, see: https://leo-editor.github.io/leo-editor/tutorial-rst3.html
- *
- * To generate documents from rST files, Python's docutils_ module must be
- * installed. The code will use the SilverCity_ syntax coloring package if is is
- * available.
+ * Documentation: https://leo-editor.github.io/leo-editor/tutorial-rst3.html
  */
 //@-<< leoRst docstring >>
 //@+<< leoRst imports >>
@@ -17,15 +13,12 @@
 
 import { new_cmd_decorator } from './decorators';
 import * as utils from '../utils';
-import * as vscode from 'vscode'; // TODO : Remove once docutils fixed!
-// import { RstToHtmlCompiler } from 'rst-compiler';
+import * as vscode from 'vscode';
 
-// from __future__ import annotations
 // import io
 // import os
 // import re
 // import time
-// from typing import Any, Callable, Dict, Generator, List, Optional, Set, TYPE_CHECKING
 
 // Third-part imports...
 // try:
@@ -36,10 +29,9 @@ import * as vscode from 'vscode'; // TODO : Remove once docutils fixed!
 // except Exception:
 //     docutils = None  // type:ignore
 
-// Leo imports.
-// TODO : DOCUTILS
-//import * as docutils from "xxx"
-const docutils = true; // ! TRUE TO EXPERIMENT WITH 'rst-compiler'!
+//import * as docutils from "docutils-ts"; // LeoJS: docutils will soon be available as a package. (when docutils-ts is ready)
+const docutils = true; // Replace with suitable import if available.
+
 import * as g from './leoGlobals';
 
 // Aliases & traces.
@@ -51,13 +43,8 @@ import * as g from './leoGlobals';
 //@-<< leoRst imports >>
 //@+<< leoRst annotations >>
 //@+node:felix.20230427003032.4: ** << leoRst annotations >>
-// if TYPE_CHECKING:  // pragma: no cover
-//     from leo.core.leoCommands import Commands as Cmdr
-//     from leo.core.leoGui import LeoKeyEvent as Event
-//     from leo.core.leoNodes import Position, VNode
-
-import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
+import { Position, VNode } from './leoNodes';
 //@-<< leoRst annotations >>
 
 //@+others
