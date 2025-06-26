@@ -6831,7 +6831,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
-"eslint": "^8.11.0",
+"eslint": "^8.56.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
 "terser-webpack-plugin": "^5.3.1",

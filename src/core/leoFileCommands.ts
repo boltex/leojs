@@ -9,7 +9,6 @@ import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 import 'date-format-lite';
 import * as et from 'elementtree';
-import * as md5 from 'md5';
 import * as difflib from 'difflib';
 import * as JSZip from 'jszip';
 import * as path from 'path';
@@ -1889,7 +1888,9 @@ export class FileCommands {
             return val;
         } catch (exception) {
             g.es_exception(exception);
-            g.trace('Can not unpickle', typeof s, v && v.h, exception);
+            if (v) {
+                g.print_unique_message(`Can not unpickle: ${v.h} at ${v.__repr__()}`);
+            }
             return undefined;
         }
     }

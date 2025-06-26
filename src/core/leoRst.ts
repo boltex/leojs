@@ -29,7 +29,7 @@ import * as vscode from 'vscode';
 // except Exception:
 //     docutils = None  // type:ignore
 
-import * as docutils from "docutils-ts";
+import * as docutils from 'docutils-ts';
 import * as g from './leoGlobals';
 
 // Aliases & traces.
@@ -158,7 +158,7 @@ export class RstCommands {
                 const readData = await vscode.workspace.fs.readFile(w_uri);
                 return readData;
             },
-            writeFile: async (p_path: string, content: string | Uint8Array<ArrayBufferLike>) => {
+            writeFile: async (p_path: string, content: string | Uint8Array) => {
                 const w_uri = g.makeVscodeUri(p_path);
                 const writeData = typeof content === 'string' ? Buffer.from(content, 'utf-8') : content;
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
@@ -543,16 +543,7 @@ export class RstCommands {
         // Should we call docutils?
         if (!this.call_docutils) {
             return;
-        } else {
-            // TODO : FIX THIS !
-            g.es("LeoJS : docutils not available, only the intermediate file was written.");
-            void vscode.window.showWarningMessage("LeoJS: docutils not available, only the intermediate file was written.");
-            return;
         }
-
-        // TODO : FIX THIS !
-        /*
-
         // const availableExtensions = ['.htm', '.html', '.tex', '.pdf', '.s5', '.odt'];
         const availableExtensions = ['.htm', '.html'];
 
@@ -581,8 +572,6 @@ export class RstCommands {
                 this.changed_vnodes.push(this.root!.v);
             }
         }
-
-        */
 
     }
     //@+node:felix.20230427003032.24: *5* rst.addTitleToHtml
@@ -789,7 +778,7 @@ export class RstCommands {
         }
         try {
             result = '';
-
+            console.log('ABOUT TO publish_string ! overrides', overrides);
             result = await docutils.core.publish_string(
                 {
                     source: s,
