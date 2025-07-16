@@ -211,8 +211,7 @@ export class CommanderFileCommands {
                     [fn],
                     parent,
                     undefined,
-                    '@auto' // was '@clean'
-                    // Experimental: attempt to use permissive section ref logic.
+                    '@auto', // Use permissive section ref logic.
                 );
             }
             c.redraw();
@@ -431,47 +430,36 @@ export class CommanderFileCommands {
     public async refreshFromDisk(this: Commands): Promise<void> {
         const c: Commands = this;
         let p: Position = this.p;
-        // const u: Undoer = this.undoer;
+        const at = c.atFileCommands;
 
         if (!p.isAnyAtFileNode()) {
             g.warning(`not an @<file> node: ${p.h}`);
             return;
         }
+        at.changed_roots = []; // #4385.
         const full_path = c.fullPath(p);
         const w_isDir = await g.os_path_isdir(full_path);
         if (w_isDir) {
             g.warning(`not a file: ${full_path}`);
             return;
         }
-        const at = c.atFileCommands;
         c.nodeConflictList = [];
         c.recreateGnxDict();
-        const old_gnx = p.v.gnx;
-        if (p.isAtAutoNode() || p.isAtAutoRstNode()) {
-            p.v._deleteAllChildren();
-            p = await at.readOneAtAutoNode(p);  // Changes p!
-        } else if (p.isAtFileNode()) {
-            p.v._deleteAllChildren();
-            await at.read(p);
-        } else if (p.isAtCleanNode()) {
-            // Don't delete children!
-            await at.readOneAtCleanNode(p);
-        } else if (p.isAtShadowFileNode()) {
-            p.v._deleteAllChildren();
-            await at.read(p);
-        } else if (p.isAtEditNode()) {
-            await at.readOneAtEditNode(p);  // Always deletes children.
-        } else if (p.isAtAsisFileNode()) {
-            await at.readOneAtAsisNode(p);  // Always deletes children.
-        } else {
-            g.es_print(`refresh-from-disk: Unknown @<file> node: ${p.h}`);
-            return;
+        await at.readFileAtPosition(p);  // Leo 6.8.6.
+
+        // #4385: Handle updated @clean nodes.
+        if (at.changed_roots.length) {  // #4385.
+            const update_p = at.clone_all_changed_vnodes();
+            if (update_p && update_p.v) {
+                // Select update_p.  See fc.setPositionsFromVnodes.
+                c.db['current_position'] = update_p.archivedPosition()
+                    .map((z: any) => String(z))
+                    .join(',');
+                update_p.expand();
+            }
+            at.changed_roots = [];
         }
-        if (p.v.gnx !== old_gnx && !g.unitTesting) {
-            g.es_print(`refresh-from-disk changed the gnx for '${p.h}'`);
-            g.es_print(`from '${old_gnx}' to: '${p.v.gnx}'`);
-        }
-        c.selectPosition(p);
+
         // Create the 'Recovered Nodes' tree.
         c.fileCommands.handleNodeConflicts();
         c.redraw();

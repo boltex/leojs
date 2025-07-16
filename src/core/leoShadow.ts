@@ -32,7 +32,7 @@ import * as difflib from 'difflib';
 import * as g from './leoGlobals';
 import * as path from 'path';
 
-import { Position } from './leoNodes';
+import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
 
 type DispatchKeys = 'delete' | 'equal' | 'insert' | 'replace';
@@ -56,7 +56,9 @@ export class ShadowController {
     public shadow_in_home_dir: boolean | undefined;
     public delim1: string = '';
     public delim2: string = '';
+    public gnxDict: { [key: string]: VNode } = {};
     public marker: Marker | undefined;
+    public node_pat: RegExp = /@+node:(.*?):(.*?)\n/;
     public old_sent_lines: string[] = [];
     public verbatim_line: string = '';
     public sentinels: string[][] = [];
@@ -258,38 +260,6 @@ export class ShadowController {
         return result;
     }
     //@+node:felix.20230410203541.10: *3* x.Propagation
-    //@+node:felix.20230410203541.11: *4* x.check_output
-    /**
-     * Check that we produced a valid output.
-     */
-    public check_output(): boolean {
-        const x = this;
-        const lines1 = x.b;
-        let junk, sents1, lines2, sents2;
-        [junk, sents1] = x.separate_sentinels(x.old_sent_lines, x.marker!);
-        [lines2, sents2] = x.separate_sentinels(x.results, x.marker!);
-        const ok = lines1 === lines2 && sents1 === sents2;
-        if (g.unitTesting) {
-            // The unit test will report the error.
-            return ok;
-        }
-        if (lines1 !== lines2) {
-            g.trace();
-            const d = new difflib.Differ();
-            const aList = [...d.compare(lines2, x.b)];
-            console.log(aList);
-        }
-        if (sents1 !== sents2) {
-            x.show_error(
-                sents1,
-                sents2,
-                'Sentinels not preserved!',
-                'old sentinels',
-                'new sentinels'
-            );
-        }
-        return ok;
-    }
     //@+node:felix.20230410203541.12: *4* x.propagate_changed_lines (main algorithm) & helpers
     //@+<< docstring >>
     //@+node:felix.20230410203541.13: *5*  << docstring >>
@@ -323,8 +293,6 @@ export class ShadowController {
         }
         // Put the trailing sentinels & check the result.
         x.results.push(...x.trailing_sentinels);
-        // check_output is likely to be more buggy than the code under test.
-        // x.check_output()
         return x.results;
     }
     //@+node:felix.20230410203541.14: *5* x.dump_args
@@ -408,7 +376,9 @@ export class ShadowController {
     ): void {
         const x = this;
         [x.delim1, x.delim2] = marker.getDelims();
+        x.gnxDict = x.c.fileCommands.gnxDict;
         x.marker = marker;
+        x.node_pat = new RegExp(`${x.delim1}@\\+node:(.*?):(.*?)${x.delim2}\\n`); // TODO : make sure a ^ is not needed. (python matches the start of the line)
         x.old_sent_lines = old_private_lines;
         x.results = [];
         x.verbatim_line = `${x.delim1}@verbatim${x.delim2}\n`;

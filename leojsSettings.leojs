@@ -462,6 +462,10 @@
               "vh": "@bool log-show-save-time = False"
             },
             {
+              "gnx": "felix.20250716012122.1",
+              "vh": "@bool report-changed-at-clean-nodes = False"
+            },
+            {
               "gnx": "ekr.20200226102131.1",
               "vh": "@bool report-unchanged-files = True"
             },

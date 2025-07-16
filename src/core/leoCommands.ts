@@ -5055,7 +5055,7 @@ export class Commands {
     public async recursiveImport(
         dir_: string,  // A directory or file name.
         ignore_pattern: RegExp | undefined = undefined,  // Ignore files matching this regex pattern.
-        kind: string,
+        kind: string = '@file',
         recursive: boolean = true,
         safe_at_file: boolean = true,
         theTypes: string[] | undefined = undefined,
@@ -5085,6 +5085,12 @@ export class Commands {
         */
         //@-<< docstring >>
         const c = this;
+
+        // Same test as RecursiveImportController.run.
+        if (!['@auto', '@clean', '@edit', '@file', '@nosent'].includes(kind)) {
+            g.es_print(`Invalid kind: ${kind}`);
+            return;
+        }
 
         if (!dir_ || !kind) {
             g.es("'Dir' and 'kind' arguments needed for 'recursiveImport'");

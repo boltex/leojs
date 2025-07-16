@@ -72,8 +72,8 @@ export class Lua_Importer extends Importer {
 /**
  * The importer callback for lua.
  */
-export const do_import = (c: Commands, parent: Position, s: string) => {
-    new Lua_Importer(c).import_from_string(parent, s);
+export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
+    new Lua_Importer(c).import_from_string(parent, s, treeType);
 };
 
 export const importer_dict = {

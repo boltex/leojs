@@ -545,7 +545,18 @@ export class Rust_Importer extends Importer {
 
             // Adjust the bodies.
             parent.b = preamble_s + parent.b;
-            child1.b = child1.b.replace(preamble_s, '').replace(/^\n+/, '');
+            child1.b = child1.b.replace(preamble_s, '');
+
+            // Next, move leading lines to the parent, before the @others line.
+            while (child1.b.startsWith('\n')) {
+                if (parent.b.includes('@others')) {
+                    // Assume the importer created the @others.
+                    parent.b = parent.b.replace('@others', '\n@others');
+                } else {
+                    parent.b += '\n';
+                }
+                child1.b = child1.b.slice(1);
+            }
         };
         //@-others
 
@@ -565,8 +576,8 @@ export class Rust_Importer extends Importer {
 /**
  * The importer callback for rust.
  */
-export const do_import = (c: Commands, parent: Position, s: string) => {
-    new Rust_Importer(c).import_from_string(parent, s);
+export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
+    new Rust_Importer(c).import_from_string(parent, s, treeType);
 };
 
 export const importer_dict = {
