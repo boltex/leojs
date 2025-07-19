@@ -4892,7 +4892,7 @@ export async function os_path_getmtime(p_path: string): Promise<number> {
         // return os.path.getmtime(p_path);
         const w_uri = makeVscodeUri(p_path);
         const w_stats = await workspace.fs.stat(w_uri);
-        return w_stats.mtime;
+        return w_stats.mtime / 1000;  // Match Python: seconds as float!
     } catch (exception) {
         return 0;
     }

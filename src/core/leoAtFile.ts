@@ -880,7 +880,7 @@ export class AtFile {
             old_mod_time = undefined;
         }
         // #4385: Always set the mod_time.
-        const new_mod_time = g.os_path_getmtime(fileName);
+        const new_mod_time = await g.os_path_getmtime(fileName);
         root.v.u['_mod_time'] = new_mod_time;
 
         // #4385: Init the per-file data.
@@ -2257,7 +2257,7 @@ export class AtFile {
                 const contents = at.outputList.join('');
                 await at.replaceFile(contents, at.encoding!, fileName, root);
                 // #4385: Tell at.readOneAtCleanNode that the outline is in synch with the file.
-                root.v.u['_mod_time'] = g.os_path_getmtime(fileName);
+                root.v.u['_mod_time'] = await g.os_path_getmtime(fileName);
             }
         } catch (exception) {
             await at.writeException(exception, fileName || '', root);
