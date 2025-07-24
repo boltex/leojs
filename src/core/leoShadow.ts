@@ -58,7 +58,6 @@ export class ShadowController {
     public delim2: string = '';
     public gnxDict: { [key: string]: VNode } = {};
     public marker: Marker | undefined;
-    public node_pat: RegExp = /@+node:(.*?):(.*?)\n/;
     public old_sent_lines: string[] = [];
     public verbatim_line: string = '';
     public sentinels: string[][] = [];
@@ -378,7 +377,6 @@ export class ShadowController {
         [x.delim1, x.delim2] = marker.getDelims();
         x.gnxDict = x.c.fileCommands.gnxDict;
         x.marker = marker;
-        x.node_pat = new RegExp(`${x.delim1}@\\+node:(.*?):(.*?)${x.delim2}\\n`); // TODO : make sure a ^ is not needed. (python matches the start of the line)
         x.old_sent_lines = old_private_lines;
         x.results = [];
         x.verbatim_line = `${x.delim1}@verbatim${x.delim2}\n`;

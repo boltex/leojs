@@ -427,15 +427,19 @@ export class CommanderFileCommands {
         'refresh-from-disk',
         'Refresh an @<file> node from disk.'
     )
-    public async refreshFromDisk(this: Commands): Promise<void> {
+    public async refreshFromDisk(this: Commands, p?: Position): Promise<void> {
         const c: Commands = this;
-        let p: Position = this.p;
         const at = c.atFileCommands;
+        if (!p) {
+            p = c.p;
+        }
 
         if (!p.isAnyAtFileNode()) {
             g.warning(`not an @<file> node: ${p.h}`);
+            g.trace(g.callers());
             return;
         }
+
         at.changed_roots = []; // #4385.
         const full_path = c.fullPath(p);
         const w_isDir = await g.os_path_isdir(full_path);
@@ -443,22 +447,27 @@ export class CommanderFileCommands {
             g.warning(`not a file: ${full_path}`);
             return;
         }
+
         c.nodeConflictList = [];
         c.recreateGnxDict();
         await at.readFileAtPosition(p);  // Leo 6.8.6.
 
         // #4385: Handle updated @clean nodes.
-        if (at.changed_roots.length) {  // #4385.
-            const update_p = at.clone_all_changed_vnodes();
-            if (update_p && update_p.v) {
-                // Select update_p.  See fc.setPositionsFromVnodes.
-                c.db['current_position'] = update_p.archivedPosition()
-                    .map((z: any) => String(z))
-                    .join(',');
-                update_p.expand();
+        const update_p = at.clone_all_changed_vnodes();
+        if (update_p && update_p.v) {
+            // Clear the `_mod_time` uA.
+            if (p.v.u['_mod_time'] !== undefined) {
+                delete p.v.u['_mod_time'];
             }
-            at.changed_roots = [];
+
+            // Set the current position during initial redraws.
+            c.db['current_position'] = update_p.archivedPosition()
+                .map((z: any) => String(z))
+                .join(',');
+            update_p.expand();
+            c.selectPosition(update_p);
         }
+        at.changed_roots = [];
 
         // Create the 'Recovered Nodes' tree.
         c.fileCommands.handleNodeConflicts();

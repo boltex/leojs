@@ -567,6 +567,7 @@ export class AtFile {
      * Make clones of all changed VNodes.
      *
      * Called from at.readAll, at.readAllSelected and c.refreshFromDisk.
+     * Callers are responsible for setting c.p and redrawing. 
      */
     clone_all_changed_vnodes(): Position | null {
         const at = this;
@@ -582,12 +583,12 @@ export class AtFile {
         if (!c.config.getBool('report-changed-at-clean-nodes', false)) {
             return null;
         }
-        // Create the top-level node.
+        // Undoably create the top-level node.
+        const undoData = u.beforeInsertNode(c.p);
         const update_p = c.lastTopLevel().insertAfter();
         update_p.h = 'Updated @clean/@auto nodes';
 
         // Clone nodes as children of the found node.
-        const undoData = u.beforeInsertNode(c.p);
         for (const root of at.changed_roots) {
             const parent = update_p.insertAsLastChild();
             parent.h = `Updated from: ${g.shortFileName(c.fullPath(root))}`;
@@ -621,7 +622,8 @@ export class AtFile {
         // Sort the clones in place, without undo.
         update_p.v.children.sort((v1, v2) => v1.h.toLowerCase().localeCompare(v2.h.toLowerCase()));
         u.afterInsertNode(update_p, 'Clone Updated Nodes', undoData);
-        c.redraw_later();  // 4394.
+        c.contractAllHeadlinesCommand();
+        update_p.expand();
         return update_p;
     }
     //@+node:felix.20230415162513.9: *6* at.findFilesToRead

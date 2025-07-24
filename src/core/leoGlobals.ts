@@ -850,9 +850,7 @@ export function callers(
 
 //@+node:felix.20211104212435.1: *3* g._callerName
 export function _callerName(n: number, verbose: boolean = false): string {
-    // TODO : see Error().stack to access names from the call stack
     return new Error().stack?.split("\n")[n] || ''; // or something close to that
-    // return '<_callerName>';
 }
 
 //@+node:felix.20211104212328.1: *3* g.caller
