@@ -4265,7 +4265,14 @@ export class Commands {
         if (!p || !p.__bool__()) {
             return;
         }
-        c.expandAllAncestors(p);
+
+        if (!c.positionExists(p)) {
+            g.trace(`Invalid position: ${String(p)}`);
+            g.trace(g.callers());
+            p = c.rootPosition();
+        }
+
+        c.expandAllAncestors(p!);
 
         if (p && p.__bool__()) {
             c.selectPosition(p);

@@ -455,22 +455,25 @@ export class CommanderFileCommands {
         // #4385: Handle updated @clean nodes.
         const update_p = at.clone_all_changed_vnodes();
         if (update_p && update_p.v) {
-            // Clear the `_mod_time` uA.
-            if (p.v.u['_mod_time'] !== undefined) {
-                delete p.v.u['_mod_time'];
-            }
-
             // Set the current position during initial redraws.
             c.db['current_position'] = update_p.archivedPosition()
                 .map((z: any) => String(z))
                 .join(',');
             update_p.expand();
             c.selectPosition(update_p);
+        } else {
+            c.selectPosition(p);
+        }
+
+        // Clear the `_mod_time` uA.
+        if (p.v.u['_mod_time'] !== undefined) {
+            delete p.v.u['_mod_time'];
         }
         at.changed_roots = [];
 
         // Create the 'Recovered Nodes' tree.
         c.fileCommands.handleNodeConflicts();
+        c.setChanged();
         c.redraw();
         c.undoer.clearAndWarn('refresh-from-disk');
     }
