@@ -881,18 +881,22 @@ export class AtFile {
         } catch (e) {
             old_mod_time = undefined;
         }
-        // #4385: Always set the mod_time.
         const new_mod_time = await g.os_path_getmtime(fileName);
-        root.v.u['_mod_time'] = new_mod_time;
-
-        // #4385: Init the per-file data.
-        at.initReadIvars(root, fileName);
-        at.bodies_dict = {};
 
         // Don't update if the outline and file are in synch.
         if (old_mod_time && old_mod_time >= new_mod_time) {
             return true;
         }
+
+        // #4385: Init the per-file data.
+        at.initReadIvars(root, fileName);
+        at.bodies_dict = {};
+
+        // #4385: *Clear* the mod time until we write the file.
+        if (root.v.u['_mod_time'] !== undefined) {
+            delete root.v.u['_mod_time'];
+        }
+
         // #4385: Remember all old bodies.
         for (const p of root.self_and_subtree()) {
             at.bodies_dict[p.v.gnx] = p.b;
