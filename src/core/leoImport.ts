@@ -2319,10 +2319,12 @@ export class RecursiveImportController {
             this.verbose // Leo 6.6.
         );
 
-        // #4385: set mod time for @clean files.
+        // #4385: set mod time for @clean files. Clear the mod time for all other files.
         p = parent.lastChild();
         if (this.kind === '@clean') {
             p.v.u['_mod_time'] = await g.os_path_getmtime(p_path);
+        } else if (p.v.u['_mod_time'] !== undefined) {
+            delete p.v.u['_mod_time'];
         }
 
         if (this.safe_at_file) {

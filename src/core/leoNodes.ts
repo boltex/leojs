@@ -3652,20 +3652,17 @@ export class VNode {
         const v: VNode = this;
         if (typeof s === 'string') {
             v._bodyString = s;
-            return;
-        }
-
-        try {
-            v._bodyString = g.toUnicode(s, null, true);
-        } catch (exception) {
-            if (!this.unicode_warning_given) {
-                this.unicode_warning_given = true;
-                g.error(s);
-                g.es_exception(exception);
+        } else {
+            try {
+                v._bodyString = g.toUnicode(s, null, true);
+            } catch (exception) {
+                if (!this.unicode_warning_given) {
+                    this.unicode_warning_given = true;
+                    g.error(s);
+                    g.es_exception(exception);
+                }
             }
         }
-        // self.contentModified()  # #1413.
-        // signal_manager.emit(self.context, 'body_changed', self)
     }
 
     public setHeadString(s: string): void {
@@ -3674,6 +3671,9 @@ export class VNode {
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
         v._headString = s.replace(/\n/g, '');
+        if (v.u['_mod_time'] !== undefined) {
+            delete v.u['_mod_time'];
+        }
         // self.contentModified()  # #1413.
     }
 

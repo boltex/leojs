@@ -450,6 +450,12 @@ export class CommanderFileCommands {
 
         c.nodeConflictList = [];
         c.recreateGnxDict();
+
+        // Always clear the `_mod_time` uA *before* reading the file.
+        if (p.v.u['_mod_time'] !== undefined) {
+            delete p.v.u['_mod_time'];
+        }
+
         await at.readFileAtPosition(p);  // Leo 6.8.6.
 
         // #4385: Handle updated @clean nodes.
@@ -465,10 +471,6 @@ export class CommanderFileCommands {
             c.selectPosition(p);
         }
 
-        // Clear the `_mod_time` uA.
-        if (p.v.u['_mod_time'] !== undefined) {
-            delete p.v.u['_mod_time'];
-        }
         at.changed_roots = [];
 
         // Create the 'Recovered Nodes' tree.

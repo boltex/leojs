@@ -2261,7 +2261,12 @@ export class AtFile {
                 at.addToOrphanList(root);
             } else {
                 const contents = at.outputList.join('');
+
+                // #4385: at.replaceFile always writes @clean roots,
+                //        even if the file hasn't changed.
+                //        This forces the `_mod_time` uA to change.
                 await at.replaceFile(contents, at.encoding!, fileName, root);
+
                 // #4385: Tell at.readOneAtCleanNode that the outline is in synch with the file.
                 root.v.u['_mod_time'] = await g.os_path_getmtime(fileName);
             }
@@ -3912,25 +3917,28 @@ export class AtFile {
         if (!old_contents) {
             old_contents = '';
         }
-        const unchanged =
-            contents === old_contents ||
-            (!at.explicitLineEnding &&
-                at.compareIgnoringLineEndings(old_contents, contents)) ||
-            (ignoreBlankLines &&
-                at.compareIgnoringBlankLines(old_contents, contents));
+        if (!root.isAtCleanNode()) {  // #4394: Always write @clean nodes!
+            const unchanged =
+                contents === old_contents ||
+                (!at.explicitLineEnding &&
+                    at.compareIgnoringLineEndings(old_contents, contents)) ||
+                (ignoreBlankLines &&
+                    at.compareIgnoringBlankLines(old_contents, contents));
 
-        if (unchanged) {
-            at.unchangedFiles += 1;
-            if (
-                !g.unitTesting &&
-                c.config.getBool('report-unchanged-files', true)
-            ) {
-                g.es(`${timestamp}unchanged: ${sfn}`);
+            if (unchanged) {
+                at.unchangedFiles += 1;
+                if (
+                    !g.unitTesting &&
+                    c.config.getBool('report-unchanged-files', true)
+                ) {
+                    g.es(`${timestamp}unchanged: ${sfn}`);
+                }
+                // Check unchanged files.
+                at.checkUnchangedFiles(contents, fileName, root);
+                return false; // No change to original file.
             }
-            // Check unchanged files.
-            at.checkUnchangedFiles(contents, fileName, root);
-            return false; // No change to original file.
         }
+
         //
         // Warn if we are only adjusting the line endings.
         if (at.explicitLineEnding) {
