@@ -3658,7 +3658,7 @@ export class Commands {
         }
     }
     //@+node:felix.20211223223002.1: *3* c.File
-    //@+node:felix.20211223223002.2: *4* c.archivedPositionToPosition (new)
+    //@+node:felix.20211223223002.2: *4* c.archivedPositionToPosition
     /**
      * Convert an archived position (a string) to a position.
      */

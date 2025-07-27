@@ -37,8 +37,6 @@ suite('Test cases for commanderFileCommands.ts', () => {
     //@+node:felix.20230715220159.1: *3* TestRefreshFromDisk.test_refresh_from_disk
     test('test_refresh_from_disk', async () => {
 
-        console.log('TODO : test_refresh_from_disk');
-
         const c = self.c;
         const at = c.atFileCommands;
         const p = c.p;
@@ -85,7 +83,7 @@ suite('Test cases for commanderFileCommands.ts', () => {
                 const contents2 = g.toUnicode(s);
 
                 assert.strictEqual(contents2, file_contents, msg);
-                await c.refreshFromDisk();
+                await c.refreshFromDisk(p);
                 assert.strictEqual(p.b, contents, msg);
             }
 

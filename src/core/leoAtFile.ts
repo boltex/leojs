@@ -4351,19 +4351,6 @@ export class AtFile {
             return false;
         }
 
-        // Prompt if the external file is newer.
-        // if (efc) {
-        //     // Like c.checkFileTimeStamp.
-        //     if (c.sqlite_connection && c.mFileName === fn) {
-        //         // sqlite database file is never actually overwritten by Leo,
-        //         // so do *not* check its timestamp.
-        //         //pass
-        //     } else if (await efc.has_changed(fn)) {
-        //         return true;
-        //     }
-        // }
-
-        // ! TEMP FIX UNTIL https://github.com/leo-editor/leo-editor/pull/3554 IS READY
         if (efc) {
 
             if (await efc.has_changed(fn)) {

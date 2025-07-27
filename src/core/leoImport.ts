@@ -831,6 +831,7 @@ export class LeoImportCommands {
             // g.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
             g.assert(func || ['.txt', '.w', '.xxx'].includes(ext), `${func?.toString()}, ${ext}, ${p.h}`);
         }
+
         // Call the scanning function.
         if (func && !c.config.getBool('suppress-import-parsing', false)) {
             s = g.toUnicode(s, this.encoding);
