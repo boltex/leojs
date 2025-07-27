@@ -1136,6 +1136,41 @@ suite('TestAtShadow', () => {
         assert.strictEqual(path, expected);
 
     });
+    //@+node:felix.20250716010653.1: *4* TestShadow.test_changed_vnodes
+    test('test_changed_vnodes', async () => {
+        const c = self.c;
+        const p = c.p;
+
+        // Create the test node.
+        const test_p = p.insertAsLastChild();
+        test_p.h = 'test.py';
+        test_p.b = g.dedent(`
+            def spam():
+                pass
+
+            def eggs():
+                pass
+        `);
+
+        // Define the new contents.
+        const new_contents = g.dedent(`
+            def spam():
+                pass
+
+            def eggs():
+                pass  // Changed.
+        `);
+
+        // assert.strictEqual(path, expected);
+
+        // Run the test.
+        const at = c.atFileCommands;
+        await at.readOneAtCleanNode(test_p, new_contents);
+        assert.ok(test_p.b === new_contents);
+        assert.ok(p.v.isDirty(), p.toString());
+        assert.ok(test_p.isDirty(), test_p.toString());
+
+    });
     //@-others
 
 });

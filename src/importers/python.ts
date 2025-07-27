@@ -414,8 +414,8 @@ export class Python_Importer extends Importer {
 /**
  * The importer callback for python.
  */
-export const do_import = (c: Commands, parent: Position, s: string) => {
-  new Python_Importer(c).import_from_string(parent, s);
+export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
+  new Python_Importer(c).import_from_string(parent, s, treeType);
 };
 
 export const importer_dict = {

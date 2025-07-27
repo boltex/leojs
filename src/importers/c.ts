@@ -108,8 +108,8 @@ export class C_Importer extends Importer {
 /**
  * The importer callback for c.
  */
-export const do_import = (c: Commands, parent: Position, s: string) => {
-  new C_Importer(c).import_from_string(parent, s);
+export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
+  new C_Importer(c).import_from_string(parent, s, treeType);
 };
 
 export const importer_dict = {

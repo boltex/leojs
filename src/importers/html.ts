@@ -29,8 +29,8 @@ export class Html_Importer extends Xml_Importer {
 /**
  * The importer callback for html.
  */
-export const do_import = (c: Commands, parent: Position, s: string) => {
-    new Html_Importer(c).import_from_string(parent, s);
+export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
+    new Html_Importer(c).import_from_string(parent, s, treeType);
 };
 
 export const importer_dict = {

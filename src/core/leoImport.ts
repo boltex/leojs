@@ -243,7 +243,7 @@ export class LeoImportCommands {
     //@+node:felix.20230511002352.3: *3* ic.Export
     //@+node:felix.20230511002352.4: *4* ic.convertCodePartToWeb & helpers
     /**
-     * # Headlines not containing a section reference are ignored in noweb
+     * Headlines not containing a section reference are ignored in noweb
      * and generate index index in cweb.
      */
     public convertCodePartToWeb(
@@ -399,7 +399,7 @@ export class LeoImportCommands {
         }
         return [i, result];
     }
-    //@+node:felix.20230511002352.10: *4* ic.convertVnodeToWeb
+    //@+node:felix.20230511002352.10: *4* ic.positionToWeb
     /**
      * This code converts a VNode to noweb text as follows:
 
@@ -439,7 +439,7 @@ export class LeoImportCommands {
                     result += docstart;
                 }
                 [i, result] = this.convertCodePartToWeb(s, i, p, result);
-            } else if (this.treeType === '@file' || startInCode) {
+            } else if (startInCode) {
                 if (!docSeen) {
                     docSeen = true;
                     result += docstart;
@@ -595,18 +595,6 @@ export class LeoImportCommands {
             // theFile = open(fileName, 'w')
             const w_uri = g.makeVscodeUri(fileName);
             let theFile: string = '';
-
-            this.treeType = '@file';
-
-            // Set self.treeType to @root if p or an ancestor is an @root node.
-            for (const p of current.parents()) {
-                let [flag, junk] = g.is_special(p.b, '@root');
-                if (flag) {
-                    this.treeType = '@root';
-                    break;
-                }
-            }
-
             for (const p of current.self_and_subtree(false)) {
                 const s = this.positionToWeb(p);
                 if (s) {
@@ -817,11 +805,12 @@ export class LeoImportCommands {
     public async createOutline(
         parent: Position,
         ext?: string,
-        s?: string
+        s?: string,
+        treeType = '@file',
     ): Promise<Position | undefined> {
         const c = this.c;
         const p = parent.copy();
-        this.treeType = '@file'; // Fix #352.
+        this.treeType = treeType;
         const fileName = c.fullPath(parent);
         const w_isBinary = await g.is_binary_external_file(fileName);
         if (w_isBinary) {
@@ -835,20 +824,20 @@ export class LeoImportCommands {
             return undefined;
         }
 
-        // Each importer file defines `do_import` at the top level with this signature:
-        // def do_import(c: Cmdr, parent: Position, s: str) -> None:
+        // Each importer file defines `do_import` at the top level
 
-        const func = this.dispatch(ext, p); // The do_import callback.
-        // Call the scanning function.
+        const func = this.dispatch(ext, p);
         if (g.unitTesting) {
             // g.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
             g.assert(func || ['.txt', '.w', '.xxx'].includes(ext), `${func?.toString()}, ${ext}, ${p.h}`);
         }
+
+        // Call the scanning function.
         if (func && !c.config.getBool('suppress-import-parsing', false)) {
             s = g.toUnicode(s, this.encoding);
             s = s.replace(/\r/g, '');
             // func is a factory that instantiates the importer class.
-            func(c, p, s);
+            func(c, p, s, this.treeType);
         } else {
             // Just copy the file to the parent node.
             s = g.toUnicode(s, this.encoding);
@@ -859,8 +848,7 @@ export class LeoImportCommands {
             return p;
         }
 
-        // #488894: unsettling dialog when saving Leo file
-        // #889175: Remember the full fileName.
+        // Remember the full fileName.
         c.atFileCommands.rememberReadPath(fileName, p);
         p.contract();
         const w = c.frame.body.wrapper;
@@ -1077,7 +1065,7 @@ export class LeoImportCommands {
         files: string[] | undefined,
         parent: Position | undefined,
         shortFn = false,
-        treeType: string | undefined,
+        treeType = '@file',
         verbose = true // Legacy value.
     ): Promise<void> {
         // Not a command.  It must *not* have an event arg.
@@ -1086,7 +1074,7 @@ export class LeoImportCommands {
         if (!c || !c.p || !c.p.__bool__() || !files || !files.length) {
             return;
         }
-        this.treeType = treeType || '@file';
+        this.treeType = treeType;
         this.verbose = verbose;
         if (!parent || !parent.__bool__()) {
             g.trace('===== no parent', g.callers());
@@ -1104,7 +1092,7 @@ export class LeoImportCommands {
                 fn = g.relativeDirectory(c, fn);
                 p.h = `${treeType} ${fn}`;
                 u.afterInsertNode(p, 'Import', undoData);
-                p = await this.createOutline(p);
+                p = await this.createOutline(p, undefined, undefined, treeType);
                 if (p && p.__bool__()) {
                     // createOutline may fail.
                     p.contract();
@@ -1532,9 +1520,11 @@ export class LeoImportCommands {
             return;
         }
         const language = c.getLanguage(p);
-        this.treeType = '@file';
         const ext = '.' + d[language];
+
+        // The parser is the `do_import` function for each importer class.
         const parser = g.app.classDispatchDict[ext];
+
         // Fix bug 151: parse-body creates "None declarations"
         if (p.isAnyAtFileNode()) {
             const fn = p.anyAtFileNodeName();
@@ -2211,7 +2201,7 @@ export class RecursiveImportController {
         this.c = c;
         // this.add_path = add_path;
         this.ignore_pattern = ignore_pattern || /\.git|node_modules/;
-        this.kind = kind; // in ('@auto', '@clean', '@edit', '@file', '@nosent')
+        this.kind = kind; // ric.run checks the kind.
         this.n_files = 0;
         this.recursive = recursive;
         this.root = undefined;
@@ -2307,15 +2297,8 @@ export class RecursiveImportController {
         parent: Position
     ): Promise<void> {
         await this.isReady;
-
-        console.log(`Importing file: ${p_path}`);
-
         const c = this.c;
         this.n_files += 1;
-        g.assert(
-            this.root && parent && parent.v !== this.root.v,
-            'Error in import_one_file'
-        );
         let p: Position;
         if (this.kind === '@edit') {
             p = parent.insertAsLastChild();
@@ -2333,11 +2316,18 @@ export class RecursiveImportController {
             [p_path],
             parent,
             true,
-            '@file', // '@auto','@clean','@nosent' cause problems.
+            this.kind,  // Leo 6.8.6.
             this.verbose // Leo 6.6.
         );
+
+        // #4385: set mod time for @clean files. Clear the mod time for all other files.
         p = parent.lastChild();
-        p.h = this.kind + p.h.substring(5); // Honor the requested kind.
+        if (this.kind === '@clean') {
+            p.v.u['_mod_time'] = await g.os_path_getmtime(p_path);
+        } else if (p.v.u['_mod_time'] !== undefined) {
+            delete p.v.u['_mod_time'];
+        }
+
         if (this.safe_at_file) {
             p.v.h = '@' + p.v.h;
         }
@@ -2676,6 +2666,7 @@ export class RecursiveImportController {
             for (const p2 of parent.self_and_subtree(false)) {
                 p2.contract();
             }
+            c.setChanged();  // #4385: Ensure that mod times are written.
             c.redraw(parent);
         }
         if (!g.unitTesting) {
@@ -2689,68 +2680,6 @@ export class RecursiveImportController {
         }
     }
 
-
-    // def run(self, dir_: Optional[str]) -> None:
-    //     """
-    //     dir_ can be None, a directory contained in the outline's directory, or a single file.
-
-    //     Import all files in the dir_ directory, or the outline's directory if dir_ is None.
-
-    //     Import all files whose extension matches self.theTypes in dir_.
-    //     In fact, dir_ can be a path to a single file.
-    //     """
-    //     if self.kind not in ('@auto', '@clean', '@edit', '@file', '@nosent'):
-    //         self.error(f"bad kind param: {self.kind!r}")
-    //         return
-    //     if not self.outline_directory:
-    //         self.error('The outline has no name. Please save it.')
-    //         return
-
-    //     # Resolve dir_ to an absolute path.
-    //     dir_1 = dir_
-    //     dir_ = self.resolve_dir_arg(dir_)
-    //     if dir_ is None:
-    //         self.error(f"invalid 'dir_' argument: {dir_1!r}")
-    //         return
-
-    //     # Import all requested files.
-    //     try:
-    //         c, u = self.c, self.c.undoer
-    //         t1 = time.time()
-    //         g.app.disable_redraw = True
-    //         last = c.lastTopLevel()
-    //         c.selectPosition(last)
-    //         undoData = u.beforeInsertNode(last)
-    //         # Always create a new last top-level node.
-    //         self.root = parent = last.insertAfter()
-    //         parent.v.h = 'imported files'
-    //         # Special case for a single file.
-    //         self.n_files = 0
-    //         if g.os_path_isfile(dir_):
-    //             if self.verbose:
-    //                 # Only print this message if importing a *single* file.
-    //                 print('')
-    //                 g.es_print(f"importing file: {os.path.normpath(dir_)}")
-    //             self.import_one_file(dir_, parent)
-    //         else:
-    //             self.import_dir(dir_, parent)
-    //         self.post_process(parent)
-    //         u.afterInsertNode(parent, 'recursive-import', undoData)
-    //     except e:
-    //         self.error('Exception in recursive import')
-    //         g.es_exception(e)
-    //     finally:
-    //         g.app.disable_redraw = False
-    //         for p2 in parent.self_and_subtree(copy=False):
-    //             p2.contract()
-    //         c.redraw(parent)
-    //     if not g.unitTesting:
-    //         t2 = time.time()
-    //         n = len(list(parent.subtree()))
-    //         g.es_print(
-    //             f"imported {n} node{g.plural(n)} "
-    //             f"in {self.n_files} file{g.plural(self.n_files)} "
-    //             f"in {t2 - t1:2.2f} seconds")
     //@-others
 }
 //@+node:felix.20230511002653.1: ** class TabImporter

@@ -3658,7 +3658,7 @@ export class Commands {
         }
     }
     //@+node:felix.20211223223002.1: *3* c.File
-    //@+node:felix.20211223223002.2: *4* c.archivedPositionToPosition (new)
+    //@+node:felix.20211223223002.2: *4* c.archivedPositionToPosition
     /**
      * Convert an archived position (a string) to a position.
      */
@@ -4265,7 +4265,14 @@ export class Commands {
         if (!p || !p.__bool__()) {
             return;
         }
-        c.expandAllAncestors(p);
+
+        if (!c.positionExists(p)) {
+            g.trace(`Invalid position: ${String(p)}`);
+            g.trace(g.callers());
+            p = c.rootPosition();
+        }
+
+        c.expandAllAncestors(p!);
 
         if (p && p.__bool__()) {
             c.selectPosition(p);
@@ -5055,7 +5062,7 @@ export class Commands {
     public async recursiveImport(
         dir_: string,  // A directory or file name.
         ignore_pattern: RegExp | undefined = undefined,  // Ignore files matching this regex pattern.
-        kind: string,
+        kind: string = '@file',
         recursive: boolean = true,
         safe_at_file: boolean = true,
         theTypes: string[] | undefined = undefined,
@@ -5085,6 +5092,12 @@ export class Commands {
         */
         //@-<< docstring >>
         const c = this;
+
+        // Same test as RecursiveImportController.run.
+        if (!['@auto', '@clean', '@edit', '@file', '@nosent'].includes(kind)) {
+            g.es_print(`Invalid kind: ${kind}`);
+            return;
+        }
 
         if (!dir_ || !kind) {
             g.es("'Dir' and 'kind' arguments needed for 'recursiveImport'");

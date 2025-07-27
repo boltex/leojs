@@ -117,6 +117,7 @@ export class Importer {
     public tab_width: number = 0;
     public lines: string[] = [];
     public guide_lines: string[] = [];
+    public treeType: string = ""; // Set by i.import_from_string.
 
     //@+others
     //@+node:felix.20230910195228.2: *3* i.__init__
@@ -195,6 +196,9 @@ export class Importer {
      */
     public compute_body(lines: string[]): string {
         const s: string = lines.join('');
+        if (['@auto', '@clean'].includes(this.treeType)) {
+            return s;
+        }
         return s.trim() ? s.replace(/^\n+/, '').trimEnd() + '\n' : '';
     }
     //@+node:felix.20230910195228.5: *4* i.compute_headline
@@ -421,6 +425,9 @@ export class Importer {
      * @param {Block[]} result_blocks - The list of resulting blocks.
      */
     public generate_all_bodies(parent: Position, outer_block: Block, result_blocks: Block[]): void {
+        const c = this.c;
+        const at = c.atFileCommands;
+
         // Keys: VNodes containing @others directives.
         const at_others_dict: { [key: string]: boolean } = {}; // Key is gnx
         const seen_blocks: Block[] = []; // Key is block.toString()
@@ -565,7 +572,7 @@ export class Importer {
         }
         //@-<< i.generate_all_bodies: final checks >>
 
-        // A hook for Python_Importer.
+        // A hook for language-specific processing.
         this.postprocess(parent, result_blocks);
 
         // Note: i.gen_lines appends @language and @tabwidth directives to parent.b.
@@ -602,19 +609,25 @@ export class Importer {
             }
         }
         // Add trailing lines.
-        parent.b += `@language ${this.language}\n@tabwidth ${this.tab_width}\n`;
+        if (this.root && this.root.isAnyAtFileNode()) {  // #4385.
+            parent.b += `@language ${this.language}\n@tabwidth ${this.tab_width}\n`;
+        }
     }
     //@+node:felix.20230910195228.11: *4* i.import_from_string (driver)
     /**
      * Importer.import_from_string.
      * 
      * parent: An @<file> node containing the absolute path to the to-be-imported file.
+     * 
      * s: The contents of the file.
      * 
+     * treeType: the desired @<file> node.
+     * 
      * The top-level code for almost all importers.
+     * 
      * Overriding this method gives the subclass complete control.
      */
-    public import_from_string(parent: Position, s: string): void {
+    public import_from_string(parent: Position, s: string, treeType = '@file'): void {
 
         const c = this.c;
 
@@ -622,8 +635,17 @@ export class Importer {
         if (parent.isCloned() && parent.hasChildren()) {
             return;
         }
+
+        // Check treeType.
+        if (!['@auto', '@clean', '@edit', '@file', '@nosent'].includes(treeType)) {
+            g.es_print(`Invalid treeType: ${treeType}`);
+            return;
+        }
+
+        // Bind ivars.
         const root = parent.copy();
         this.root = root;
+        this.treeType = treeType;
 
         // Check for intermixed blanks and tabs.
         this.tab_width = c.getTabWidth(root)!;
