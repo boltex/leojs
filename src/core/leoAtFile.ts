@@ -13,6 +13,7 @@ import { Position, VNode } from './leoNodes';
 import { FileCommands } from './leoFileCommands';
 import { Commands } from './leoCommands';
 import { BaseWriter } from '../writers/basewriter';
+import * as difflib from 'difflib';
 //@-<< imports >>
 //@+others
 //@+node:felix.20211225220217.1: ** atFile.cmd
@@ -87,6 +88,8 @@ export class AtFile {
     public outputFile = ''; // io.StringIO();
     public public_s = '';
     public private_s = '';
+    public changed_roots: Position[] = [];  // Global.
+    public bodies_dict: { [gnx: string]: string; } = {};  // Local to at.readOneAtCleanNode.
     public explicitLineEnding = false;
     public at_shadow_test_hack: boolean | undefined;
 
@@ -525,6 +528,7 @@ export class AtFile {
     public async readAll(root: Position): Promise<void> {
         const at = this;
         const c = this.c;
+        at.changed_roots = [];
         const old_changed = c.changed;
         const t1 = process.hrtime();
         c.init_error_dialogs();
@@ -545,8 +549,82 @@ export class AtFile {
                 )} seconds`
             );
         }
-        c.changed = old_changed;
+        // Carefully set c.changed.
+        c.changed = old_changed || !!at.changed_roots.length;
+        const update_p = at.clone_all_changed_vnodes();
+        if (update_p && update_p.v) {
+            // Select update_p.  See fc.setPositionsFromVnodes.
+            c.db['current_position'] = update_p.archivedPosition().join(',');
+            update_p.expand();
+        }
+        at.changed_roots = [];
+
+        // Last.
         await c.raise_error_dialogs();
+    }
+    //@+node:felix.20250714234226.1: *6* at.clone_all_changed_vnodes
+    /**
+     * Make clones of all changed VNodes.
+     *
+     * Called from at.readAll, at.readAllSelected and c.refreshFromDisk.
+     * Callers are responsible for setting c.p and redrawing. 
+     */
+    clone_all_changed_vnodes(): Position | null {
+        const at = this;
+        const c = this.c;
+        const u = c.undoer;
+
+        if (g.unitTesting) {
+            return null;
+        }
+        if (!at.changed_roots || at.changed_roots.length === 0) {
+            return null;
+        }
+        if (!c.config.getBool('report-changed-at-clean-nodes', false)) {
+            return null;
+        }
+        // Undoably create the top-level node.
+        const undoData = u.beforeInsertNode(c.p);
+        const update_p = c.lastTopLevel().insertAfter();
+        update_p.h = 'Updated @clean/@auto nodes';
+
+        // Clone nodes as children of the found node.
+        for (const root of at.changed_roots) {
+            const parent = update_p.insertAsLastChild();
+            parent.h = `Updated from: ${g.shortFileName(c.fullPath(root))}`;
+            const parent_body: string[] = [];
+
+            // Clone all dirty nodes.
+            root.v.setDirty();
+            for (const p of root.self_and_subtree()) {
+                const v = p.v;
+                if (!v.isDirty()) {
+                    continue;
+                }
+                const clone = p.clone();
+                clone.moveToLastChildOf(parent);
+                // Insert the diff into the parent's body.
+                const a = g.splitLines(at.bodies_dict[v.gnx] || '');
+                const b = g.splitLines(p.b);
+                parent_body.push(`${p.h}\n`);
+                parent_body.push(...(difflib.unifiedDiff(a, b, {}) as string[]));
+                parent_body.push('\n');
+            }
+            // Put the diff.
+            parent.b = parent_body.join('');
+        }
+
+        // Defensive programming.
+        if (c.checkOutline() > 0) {
+            return null;
+        }
+
+        // Sort the clones in place, without undo.
+        update_p.v.children.sort((v1, v2) => v1.h.toLowerCase().localeCompare(v2.h.toLowerCase()));
+        u.afterInsertNode(update_p, 'Clone Updated Nodes', undoData);
+        c.contractAllHeadlinesCommand();
+        update_p.expand();
+        return update_p;
     }
     //@+node:felix.20230415162513.9: *6* at.findFilesToRead
     public findFilesToRead(root: Position, all: boolean): Position[] {
@@ -605,29 +683,42 @@ export class AtFile {
     public async readFileAtPosition(p: Position): Promise<void> {
         const at = this;
         const c = this.c;
-        const fileName = p.anyAtFileNodeName();
 
-        if (p.isAtThinFileNode() || p.isAtFileNode()) {
-            await at.read(p);
-        } else if (p.isAtAutoNode()) {
-            await at.readOneAtAutoNode(p);
-        } else if (p.isAtEditNode()) {
-            await at.readOneAtEditNode(p);
-        } else if (p.isAtShadowFileNode()) {
-            await at.readOneAtShadowNode(fileName, p);
-        } else if (p.isAtAsisFileNode() || p.isAtNoSentFileNode()) {
-            at.rememberReadPath(c.fullPath(p), p);
+        if (p.isAtAsisFileNode()) {
+            await at.readOneAtAsisNode(p); // Changed.
+        } else if (p.isAtAutoNode() || p.isAtAutoRstNode()) {
+            const old_gnx = p.v.gnx;
+            p = await at.readOneAtAutoNode(p); // Might change p!
+            // Give a weird error.
+            if (p.v.gnx !== old_gnx) {
+                g.es_print(`reading @auto node changed the gnx for \`${p.h}\``);
+                g.es_print(`from \`${old_gnx}\` to: \`${p.v.gnx}\``);
+                c.selectPosition(p);
+            }
         } else if (p.isAtCleanNode()) {
             await at.readOneAtCleanNode(p);
+        } else if (p.isAtEditNode()) {
+            await at.readOneAtEditNode(p);
+        } else if (p.isAtFileNode() || p.isAtThinFileNode()) {
+            await at.read(p);
+            // ! LEOJS does not support jupytext nodes yet.
+            // } else if (p.isAtJupytextNode()) {
+            //     await at.readOneAtJupytextNode(p);
+        } else if (p.isAtNoSentFileNode()) {
+            at.rememberReadPath(c.fullPath(p), p);
+        } else if (p.isAtShadowFileNode()) {
+            const fileName = p.anyAtFileNodeName();
+            await at.readOneAtShadowNode(fileName, p);
         }
     }
-    //@+node:felix.20230415162513.11: *6* at.readAllSelected
+    //@+node:felix.20230415162513.11: *5* at.readAllSelected
     /**
      * Read all @<file> nodes in root's tree.
      */
     public async readAllSelected(root: Position): Promise<void> {
         const at = this;
         const c = this.c;
+        at.changed_roots = [];
         const old_changed = c.changed;
         const t1 = process.hrtime();
         c.init_error_dialogs();
@@ -651,7 +742,17 @@ export class AtFile {
                 g.es('no @<file> nodes in the selected tree');
             }
         }
-        c.changed = old_changed;
+        // Carefully set c.changed.
+        c.changed = old_changed || !!at.changed_roots.length;
+        const update_p = at.clone_all_changed_vnodes();
+        if (update_p && update_p.v) {
+            // Select update_p.  See fc.setPositionsFromVnodes.
+            c.db['current_position'] = update_p.archivedPosition().join(',');
+            update_p.expand();
+        }
+        at.changed_roots = [];
+
+        // Last.
         await c.raise_error_dialogs();
     }
     //@+node:felix.20230415162513.12: *5* at.readAtShadowNodes
@@ -724,7 +825,7 @@ export class AtFile {
             at.initReadIvars(p, fileName);
             p.v.b = ''; // Required for @auto API checks.
             p.v._deleteAllChildren();
-            p = (await ic.createOutline(p.copy())) as Position;
+            p = (await ic.createOutline(p.copy(), undefined, undefined, '@auto')) as Position;
             // Do *not* call c.selectPosition(p) here.
             // That would improperly expand nodes.
         } catch (exception) {
@@ -753,22 +854,61 @@ export class AtFile {
     /**
      * Update the @clean/@nosent node at root.
      */
-    public async readOneAtCleanNode(root: Position): Promise<boolean> {
+    public async readOneAtCleanNode(root: Position, new_contents?: string): Promise<boolean> {
         const at = this;
         const c = this.c;
         const x = this.c.shadowController;
 
-        const fileName = c.fullPath(root);
-        const w_exists = await g.os_path_exists(fileName);
-        if (!w_exists) {
-            g.es_print(`not found: ${fileName}̀`);
-            return false;
+        let fileName: string | undefined = '';
+
+        if (new_contents) {
+            fileName = root.h; // Required.
+        } else {
+            fileName = c.fullPath(root);
+            const w_exists = await g.os_path_exists(fileName);
+            if (!w_exists) {
+                g.es_print(`not found: ${fileName}̀`);
+                return false;
+            }
+
+            //  Suppresses file-changed dialog
+            at.rememberReadPath(fileName, root);
         }
-        // Init.
-        at.rememberReadPath(fileName, root);
+        let old_mod_time;
+        // #4385: Do nothing if the file has not changed.
+        try {
+            old_mod_time = root.v.u['_mod_time'];  // #4385
+        } catch (e) {
+            old_mod_time = undefined;
+        }
+        const new_mod_time = await g.os_path_getmtime(fileName);
+
+        // Don't update if the outline and file are in synch.
+        if (old_mod_time && old_mod_time >= new_mod_time) {
+            return true;
+        }
+
+        // #4385: Init the per-file data.
         at.initReadIvars(root, fileName);
+        at.bodies_dict = {};
+
+        // #4385: *Clear* the mod time until we write the file.
+        if (root.v.u['_mod_time'] !== undefined) {
+            delete root.v.u['_mod_time'];
+        }
+
+        // #4385: Remember all old bodies.
+        for (const p of root.self_and_subtree()) {
+            at.bodies_dict[p.v.gnx] = p.b;
+        }
+
         // Calculate data.
-        const new_public_lines = await at.read_at_clean_lines(fileName);
+        let new_public_lines;
+        if (new_contents) {
+            new_public_lines = g.splitLines(new_contents);
+        } else {
+            new_public_lines = await at.read_at_clean_lines(fileName);
+        }
         const old_private_lines = await this.write_at_clean_sentinels(root);
         const marker = x.markerFromFileLines(old_private_lines, fileName);
         let [old_public_lines, junk] = x.separate_sentinels(
@@ -798,15 +938,111 @@ export class AtFile {
             return true;
         }
         if (!g.unitTesting) {
-            g.es('updating:', root.h);
+            g.es_print('updating:', root.h);
         }
         root.clearVisitedInTree();
         const gnx2vnode = at.fileCommands.gnxDict;
         const contents = new_private_lines.join('');
         new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
         g.doHook('after-reading-external-file', { c: c, p: root });
+
+        // Calculate all changed vnodes.
+        // Do not call at.do_changed_vnodes in this loop!
+        const changed_vnodes: VNode[] = [];
+        for (const p of root.self_and_subtree()) {
+            const v = p.v;
+            if (at.bodies_dict[v.gnx] !== p.b) {
+                changed_vnodes.push(v);
+                v.setDirty();
+            }
+        }
+        // Handle all changed vnodes.
+        if (changed_vnodes.length) {
+            root.v.setDirty();
+            at.changed_roots.push(root.copy());
+            for (const v of changed_vnodes) {
+                at.do_changed_vnode(fileName, root, v);
+            }
+            at.delete_empty_changed_organizers(root);
+            at.move_leading_blank_lines(root);
+        }
+
         return true; // Errors not detected.
     }
+    //@+node:felix.20250715004704.1: *6* at.delete_empty_changed_organizers
+    /**
+     *  #4385: Clean up nodes created by at.do_changed_vnode.
+     */
+    public delete_empty_changed_organizers(root: Position): void {
+
+        const at = this;
+        const c = this.c;
+        while (true) {
+            let changed = false; // Original python was a for-else loop. So we need a flag.
+
+            for (const p of root.subtree()) {
+                if (
+                    p.b.trim() === '@others' &&
+                    p.b !== at.bodies_dict[p.v.gnx] &&
+                    p.hasChildren()
+                ) {
+                    // We expect only one child here.
+                    for (const child of p.children()) {
+                        child.v.setDirty();
+                    }
+
+                    p.promote();
+                    const next = p.next();
+                    // Transfer the old value to preserve diffs.
+                    at.bodies_dict[next.v.gnx] = at.bodies_dict[p.v.gnx];
+                    c.selectPosition(next);
+                    p.doDelete();
+
+                    changed = true;
+                    break;  // Rescan: root.subtree is no longer valid.
+                }
+            }
+
+            if (!changed) { // This is an else clause in the original Python code.
+                break;
+            }
+        }
+    }
+
+    //@+node:felix.20250715004710.1: *6* at.do_changed_vnode
+    /**
+     * #4385: Run the importer on a changed VNode.
+     */
+    do_changed_vnode(fileName: string, root: Position, v: VNode): void {
+        const c = this.c;
+        const ic = c.importCommands;
+        const new_body_s = v.b;
+
+        // Termination flag.
+        let found = false;
+
+        // Find a position for v.
+        for (const p of root.self_and_subtree()) {
+            if (p.v === v) {
+                const [_junk, ext] = g.os_path_splitext(fileName);
+                // Get the `do_import` function for the proper importer module.
+                const func = ic.dispatch(ext.toLowerCase(), root);
+                if (func) {
+                    func(c, p, new_body_s, { treeType: '@clean' });
+                }
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            g.trace('Not found:', v); // Should never happen.
+        }
+
+        // Always set the dirty bit.
+        v.setDirty();
+    }
+
     //@+node:felix.20230415162513.17: *6* at.dump_lines
     /**
      * Dump all lines.
@@ -817,6 +1053,23 @@ export class AtFile {
             console.log(s.trimEnd());
         }
     }
+    //@+node:felix.20250715004719.1: *6* at.move_leading_blank_lines
+    public move_leading_blank_lines(root: Position): void {
+        for (const p of root.subtree()) {
+            if (p.v.isDirty()) {
+                let lines = g.splitLines(p.b);
+                if (lines.length > 0 && /^\s*$/.test(lines[0])) {
+                    const back = p.threadBack();
+                    while (lines.length > 0 && /^\s*$/.test(lines[0])) {
+                        back.b += lines.shift()!;
+                    }
+                    p.b = lines.join('');
+                    back.v.setDirty();  // Include back in the update list.
+                }
+            }
+        }
+    }
+
     //@+node:felix.20230415162513.18: *6* at.read_at_clean_lines
     /**
      * Return all lines of the @clean/@nosent file at fn.
@@ -941,7 +1194,7 @@ export class AtFile {
             p.firstChild().doDelete();
         }
         // Import the outline, exactly as @auto does.
-        await ic.createOutline(p.copy());
+        await ic.createOutline(p.copy(), undefined, undefined, '@auto');
         if (ic.errors) {
             g.error('errors inhibited read @shadow', fn);
         }
@@ -1979,7 +2232,7 @@ export class AtFile {
         try {
             c.endEditing();
             fileName = await at.initWriteIvars(root);
-            at.sentinels = false;
+
             let w_precheck;
             if (fileName) {
                 w_precheck = await at.precheck(fileName, root);
@@ -1994,14 +2247,28 @@ export class AtFile {
                 return;
             }
             at.outputList = [];
-            await at.putFile(root, undefined, false);
+
+            try {
+                at.sentinels = false;
+                at.putFile(root, undefined, false);
+            } finally {
+                at.sentinels = true;
+            }
+
             at.warnAboutOrphandAndIgnoredNodes();
             if (at.errors) {
                 g.es('not written:', g.shortFileName(fileName));
                 at.addToOrphanList(root);
             } else {
                 const contents = at.outputList.join('');
+
+                // #4385: at.replaceFile always writes @clean roots,
+                //        even if the file hasn't changed.
+                //        This forces the `_mod_time` uA to change.
                 await at.replaceFile(contents, at.encoding!, fileName, root);
+
+                // #4385: Tell at.readOneAtCleanNode that the outline is in synch with the file.
+                root.v.u['_mod_time'] = await g.os_path_getmtime(fileName);
             }
         } catch (exception) {
             await at.writeException(exception, fileName || '', root);
@@ -2446,12 +2713,12 @@ export class AtFile {
      */
     public putBody(p: Position, fromString = ''): boolean {
         const at = this;
-        // New in 4.3 b2: get s from fromString if possible.
         let s = fromString ? fromString : p.b;
+
         // Make sure v is never expanded again.
         // Suppress orphans check.
         p.v.setVisited();
-        //
+
         // #1048 & #1037: regularize most trailing whitespace.
         if (s && (at.sentinels || at.force_newlines_in_at_nosent_bodies)) {
             if (!s.endsWith('\n')) {
@@ -3598,7 +3865,7 @@ export class AtFile {
         if (root && root.__bool__()) {
             root.clearDirty();
         }
-        //
+
         // Create the timestamp (only for messages).
         let timestamp;
         if (c.config.getBool('log-show-save-time', false)) {
@@ -3608,7 +3875,7 @@ export class AtFile {
         } else {
             timestamp = '';
         }
-        //
+
         // Adjust the contents.
         g.assert(typeof contents === 'string');
         if (at.output_newline !== '\n') {
@@ -3616,7 +3883,7 @@ export class AtFile {
                 .replace(/\r/g, '')
                 .replace(/\n/g, at.output_newline!);
         }
-        //
+
         // If file does not exist, create it from the contents.
         fileName = g.os_path_realpath(fileName);
         let ok;
@@ -3640,7 +3907,7 @@ export class AtFile {
             // No original file to change. Return value tested by a unit test.
             return false; // No change to original file.
         }
-        //
+
         // Compare the old and new contents.
         let old_contents = await g.readFileIntoUnicodeString(
             fileName,
@@ -3650,25 +3917,28 @@ export class AtFile {
         if (!old_contents) {
             old_contents = '';
         }
-        const unchanged =
-            contents === old_contents ||
-            (!at.explicitLineEnding &&
-                at.compareIgnoringLineEndings(old_contents, contents)) ||
-            (ignoreBlankLines &&
-                at.compareIgnoringBlankLines(old_contents, contents));
+        if (!root.isAtCleanNode()) {  // #4394: Always write @clean nodes!
+            const unchanged =
+                contents === old_contents ||
+                (!at.explicitLineEnding &&
+                    at.compareIgnoringLineEndings(old_contents, contents)) ||
+                (ignoreBlankLines &&
+                    at.compareIgnoringBlankLines(old_contents, contents));
 
-        if (unchanged) {
-            at.unchangedFiles += 1;
-            if (
-                !g.unitTesting &&
-                c.config.getBool('report-unchanged-files', true)
-            ) {
-                g.es(`${timestamp}unchanged: ${sfn}`);
+            if (unchanged) {
+                at.unchangedFiles += 1;
+                if (
+                    !g.unitTesting &&
+                    c.config.getBool('report-unchanged-files', true)
+                ) {
+                    g.es(`${timestamp}unchanged: ${sfn}`);
+                }
+                // Check unchanged files.
+                at.checkUnchangedFiles(contents, fileName, root);
+                return false; // No change to original file.
             }
-            // Check unchanged files.
-            at.checkUnchangedFiles(contents, fileName, root);
-            return false; // No change to original file.
         }
+
         //
         // Warn if we are only adjusting the line endings.
         if (at.explicitLineEnding) {
@@ -3680,12 +3950,12 @@ export class AtFile {
                 g.warning('correcting line endings in:', fileName);
             }
         }
-        //
+
         // Write a changed file.
         ok = await g.writeFile(contents, encoding, fileName);
         if (ok) {
             await c.setFileTimeStamp(fileName);
-            if (!g.unitTesting) {
+            if (!g.unitTesting && c.config.getBool('report-changed-files', true)) {
                 g.es(`${timestamp}wrote: ${sfn}`);
             }
         } else {
@@ -4063,6 +4333,8 @@ export class AtFile {
         const sfn = g.shortFileName(fn);
         const c = this.c;
         const efc = g.app.externalFilesController;
+        const at = this;
+
         if (p.isAtNoSentFileNode()) {
             // No danger of overwriting a file: It was never read.
             return false;
@@ -4074,25 +4346,21 @@ export class AtFile {
             return false;
         }
 
+        // #4385: Honor yes-to-all or no-to-all.
+        if (at.cancelFlag || at.yesToAll) {
+            return false;
+        }
 
-        // Prompt if the external file is newer.
-        // if (efc) {
-        //     // Like c.checkFileTimeStamp.
-        //     if (c.sqlite_connection && c.mFileName === fn) {
-        //         // sqlite database file is never actually overwritten by Leo,
-        //         // so do *not* check its timestamp.
-        //         //pass
-        //     } else if (await efc.has_changed(fn)) {
-        //         return true;
-        //     }
-        // }
-
-        // ! TEMP FIX UNTIL https://github.com/leo-editor/leo-editor/pull/3554 IS READY
         if (efc) {
 
             if (await efc.has_changed(fn)) {
+                g.trace('Changed:' + fn);
                 return true; // has_changed handles all special cases.
             }
+        }
+
+        if (p.isAtCleanNode()) {  // #4385.
+            return false;
         }
 
         if (p.v.at_read) {

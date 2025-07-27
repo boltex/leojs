@@ -3736,8 +3736,7 @@ export class LoadManager {
             if (p && p.__bool__()) {
                 const load_type = this.options['load_type'];
                 p.setHeadString(`${load_type} ${fn}`);
-                await c.refreshFromDisk();
-                c.selectPosition(p);
+                await c.refreshFromDisk(p);
             }
         }
         // Fix critical bug 1184855: data loss with command line 'leo somefile.ext'

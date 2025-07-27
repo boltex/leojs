@@ -275,8 +275,7 @@ export class ExternalFilesController {
             }
             if (['yes', 'yes-all'].includes(state)) {
                 const old_p = c.p;  // To restore selection if refresh option set to yes-all & is descendant of at-file
-                c.redraw(p); // this selects p.
-                await c.refreshFromDisk();
+                await c.refreshFromDisk(p);
 
                 // ! LEOJS : KEEP SELECTION ON CURRENT NODE IF CHILD OF AT-ANY-FILE REFRESHED !
                 // TODO : Add config option in Leo for this!
@@ -286,7 +285,6 @@ export class ExternalFilesController {
                     }
                 }
 
-                c.redraw();
                 // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
                 g.app.gui.fullRefresh(true);
             }
