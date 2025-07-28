@@ -4110,18 +4110,18 @@ export class Commands {
         }
     }
     //@+node:felix.20250727204622.1: *4* c.openAllLinkedFiles (transitive closure)
+    /**
+     * Open the transitive closure of all outlines reachable from any @leo
+     * node in this outline.
+     *
+     * Return the list of newly-opened commanders.
+     *
+     * Note: gui eventually defaults to g.app.gui.
+     */
     public async openAllLinkedFiles(gui: LeoGui | null = null): Promise<Commands[]> {
-        /**
-         * Open the transitive closure of all outlines reachable from any @leo
-         * node in this outline.
-         *
-         * Return the list of newly-opened commanders.
-         *
-         * Note: gui eventually defaults to g.app.gui.
-         */
         const c = this;
 
-        const t1 = performance.now();
+        const t1 = g.process_time();
 
         // Using the Qt gui will likely overwhelm Leo!
         if (gui === null) {
@@ -4173,9 +4173,9 @@ export class Commands {
         }
 
         if (!g.unitTesting) {
-            const t2 = performance.now();
+            const t2 = g.process_time();
             const kind = gui === g.app.nullGui ? 'hidden ' : '';
-            g.es_print(`Done! Opened ${result.length} ${kind}outlines in ${(t2 - t1) / 1000.0} sec`);
+            g.es_print(`Done! Opened ${result.length} ${kind}outlines in ${(t2 - t1)} sec`);
             g.trace('calls', calls, c.shortFileName());
             g.printObj(scanned, 'Scanned');
             g.printObj(result, 'Result');
