@@ -356,6 +356,28 @@ export class AtFile {
     }
     //@+node:felix.20230415162513.1: *3* at.Reading
     //@+node:felix.20230415162513.2: *4* at.Reading (top level)
+    //@+node:felix.20250727141540.1: *5* at.checkExternalFile
+    @cmd('open-at-leo-file', 'Open the outline given by the @leo node at c.p.')
+    public async openAtLeoFile(): Promise<void>{
+        
+        // If the outline has already been loaded, switch to its tab.
+        // Scripts should use c.makeLinkLeoFiles helper to make @leo files.
+
+        const c = this.c;
+        const p = this.c.p;
+
+        if (!p.isAtLeoNode()){
+            g.red('Please select an @leo node');
+            return;
+        }
+        const w_path = c.fullPath(p);
+        const exists = await g.os_path_exists(w_path)
+        if (exists){
+            await g.openWithFileName(w_path, c);
+        }else{
+            g.red(`file not found: ${w_path}`);
+        }
+    }
     //@+node:felix.20230415162513.3: *5* at.checkExternalFile
     @cmd(
         'check-external-file',

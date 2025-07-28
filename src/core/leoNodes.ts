@@ -1419,6 +1419,10 @@ export class Position {
         return this.v.atFileNodeName();
     }
 
+    public atLeoNodeName(): string {
+        return this.v.atLeoNodeName();
+    }
+
     public atNoSentinelsFileNodeName(): string {
         return this.v.atNoSentinelsFileNodeName();
     }
@@ -1465,6 +1469,10 @@ export class Position {
 
     public isAtIgnoreNode(): boolean {
         return this.v.isAtIgnoreNode();
+    }
+
+    public isAtLeoNode(): boolean {
+        return this.v.isAtLeoNode();
     }
 
     public isAtNoSentinelsFileNode(): boolean {
@@ -3069,13 +3077,11 @@ export class VNode {
      * Return the file name following an @file node or an empty string.
      */
     public anyAtFileNodeName(): string {
+        const v: VNode = this;
         return (
-            // was g.app.atAutoNames and g.app.atFileNames.
-            // this.findAtFileName(this.atAutoNames) ||
-            // this.findAtFileName(this.atFileNames)
-
-            this.findAtFileName(g.app.atAutoNames) ||
-            this.findAtFileName(g.app.atFileNames)
+            v.findAtFileName(g.app.atAutoNames)
+            || v.findAtFileName(g.app.atFileNames)
+            || v.atLeoNodeName()
         );
     }
 
@@ -3110,6 +3116,12 @@ export class VNode {
     public atFileNodeName(): string {
         const names: string[] = ['@file', '@thin'];
         // Fix #403.
+        return this.findAtFileName(names);
+    }
+
+
+    public atLeoNodeName(): string {
+        const names = ["@leo"];
         return this.findAtFileName(names);
     }
 
@@ -3155,7 +3167,7 @@ export class VNode {
         // This routine should be as fast as possible.
         // It is called once for every VNode when writing a file.
         const h: string = this.headString();
-        return !!h && h.substring(0, 1) === '@' && !!this.anyAtFileNodeName();
+        return !!h && h.substring(0, 1) === '@' && (!!this.anyAtFileNodeName() || !!this.atLeoNodeName());
     }
 
     //@+node:felix.20210112210731.7: *4* v.isAt...FileNode
@@ -3183,12 +3195,15 @@ export class VNode {
         return !!this.atRstFileNodeName();
     }
 
+    public isAtLeoNode(): boolean {
+        return !!this.atLeoNodeName();
+    }
+
     public isAtNoSentinelsFileNode(): boolean {
         return !!this.atNoSentinelsFileNodeName();
     }
 
     public isAtSilentFileNode(): boolean {
-        // @file-asis
         return !!this.atSilentFileNodeName();
     }
 

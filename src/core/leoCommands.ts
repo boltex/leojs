@@ -3862,6 +3862,211 @@ export class Commands {
             return false;
         }
     }
+    //@+node:felix.20250727144132.1: *4* c.makeLinkLeoFiles & helper
+    public async makeLinkLeoFiles(
+        extensions: string[],  // List of file extensions for generated @<file> nodes.
+        top_directory: string,
+        kind = '@clean',  // Any @<file> type. @clean is recommended.
+        sub_directories: string[] | undefined,
+        sub_outline_name: string | undefined,
+        top_outline_name = 'leo_links.leo',
+    ): Promise<void> {
+        //@+<< c.makeLinkLeoFiles: docstring >>
+        //@+node:felix.20250727144132.2: *5* << c.makeLinkLeoFiles: docstring >>
+        /*
+        Create a **top-level outline** containing @leo links to *sub-outlines*.
+        Sub-outlines contain @<file> nodes to all files in the directory (and
+        sub-directories) of the given list of extensions.
+
+        Scripts calling this method need only specify the value of the following kwargs:
+
+        - extensions:      List of file extensions for generated @<file> nodes.
+        - kind:            One of @auto, @clean, @file, etc.
+        - sub_directories: An optional list of sub-directories in which to create sub-outlines.
+                           Relative paths are relative to the top-level directory.
+                           If the list is empty, it defaults to all direct directories of
+                           the top-level directory.
+        - top_directory:   The full, absolute, path to the top-level directory.
+        - top_file_name:   The name of the top-level link outline.
+        */
+        //@-<< c.makeLinkLeoFiles: docstring >>
+        const c: Commands = this;
+        //@+<< return if initial checks fail >>
+        //@+node:felix.20250727144132.3: *5* << return if initial checks fail >>
+        // Check the top directory.
+        const isdir = await g.os_path_isdir(top_directory);
+        const isabs = await g.os_path_isabs(top_directory);
+        const exists = await g.os_path_exists(top_directory);
+        if (
+            !top_directory || !isdir || !isabs || !exists
+        ) {
+            g.es_print(`Not an absolute directory: ${JSON.stringify(top_directory)}`);
+            return;
+        }
+        // Make sure all extensions begin with '.':
+        if (typeof extensions === 'string') {
+            extensions = [extensions];
+        }
+        if (!Array.isArray(extensions)) {
+            g.es_print(`Invalid list of extensions: ${JSON.stringify(extensions)}`);
+            return;
+        }
+        //@-<< return if initial checks fail >>
+        //@+<< calculate the list of subdirectories >>
+        //@+node:felix.20250727144132.4: *5* << calculate the list of subdirectories >>
+        //  Default to all direct sub-directories of the top directory.
+        if (!sub_directories) {
+            const dirents = await g.os_listdir(top_directory);
+            sub_directories = [];
+
+            for (const z of dirents) {
+                if (await g.os_path_isdir(path.join(top_directory, z))) {
+                    sub_directories.push(z);
+                }
+            }
+
+        }
+        //@-<< calculate the list of subdirectories >>
+        g.es_print(
+            `Scanning ${sub_directories.length} directories.\n` +
+            'This may take awhile.'
+        );
+        // The main loop.
+        const old_p = c.p;
+        try {
+            const t1 = g.process_time();
+            c.enableRedrawFlag = false;
+            let all_files: string[] = [top_outline_name];  // List of paths.
+            const top_links: string[] = [];
+            for (let sub_directory of sub_directories) {
+                sub_directory = path.join(top_directory, sub_directory);
+                const exists = g.os_path_exists(sub_directory);
+                g.assert(exists, `Directory does not exist: ${sub_directory}`);
+                const files: string[] = [];
+                //@+<< find files in sub_directory >>
+                //@+node:felix.20250727144132.5: *5* << find files in sub_directory >>
+                // Set files to the list of full, absolute, files in subdirectory.
+                const subDirUri = g.makeVscodeUri(sub_directory);
+
+                for (let ext of extensions) {
+                    if (!ext.startsWith('.')) {
+                        ext = '.' + ext;
+                    }
+
+                    const pattern = new vscode.RelativePattern(subDirUri, `**/*${ext}`);
+                    const newFiles = await vscode.workspace.findFiles(pattern);
+
+                    for (const fileUri of newFiles) {
+                        const fullPath = fileUri.fsPath;
+                        if (!files.includes(fullPath)) {
+                            files.push(fullPath);
+                        }
+                    }
+                }
+
+                //@-<< find files in sub_directory >>
+                if (files.length) {
+                    //@+<< add link to the sub outline to top_links >>
+                    //@+node:felix.20250727144132.6: *5* << add link to the sub outline to top_links >>
+                    const sub_outline_name = `${g.shortFileName(sub_directory)}_links.leo`;
+                    const abs_path = `${sub_directory}/${sub_outline_name}`;
+                    const rel_link = path.relative(top_directory, abs_path);
+                    top_links.push(rel_link.replace(/\\/g, '/'));
+                    //@-<< add link to the sub outline to top_links >>
+                    //@+<< compute the sub outline's back link >>
+                    //@+node:felix.20250727144132.7: *5* << compute the sub outline's back link >>
+                    // Compute the relative back link for the sub-outline.
+                    const abs_back_link = `${top_directory}/${top_outline_name}`;
+                    const rel_back_link = path.relative(sub_directory, abs_back_link);
+                    const back_link = [rel_back_link.replace(/\\/g, '/')];
+                    //@-<< compute the sub outline's back link >>
+                    //@+<< create the sub outline >>
+                    //@+node:felix.20250727144132.8: *5* << create the sub outline >>
+                    // Generate the sub-outline
+                    await this._create_link_file(
+                        sub_directory,
+                        extensions,
+                        files,
+                        kind,
+                        back_link,
+                        `${g.shortFileName(sub_directory)}_links.leo`,
+                    );
+                    //@-<< create the sub outline >>
+                    all_files.push(sub_outline_name);
+                }
+            }
+            //@+<< create the top-level outline >>
+            //@+node:felix.20250727144132.9: *5* << create the top-level outline >>
+            await this._create_link_file(
+                top_directory,
+                extensions,
+                undefined,
+                '@leo',
+                top_links,
+                top_outline_name,
+            );
+            //@-<< create the top-level outline >>
+            all_files = Array.from(new Set(all_files)).sort();
+            if (!g.unitTesting) {
+                const t2 = g.process_time();
+                g.es_print(`Done! Created ${all_files.length} outlines in ${(t2 - t1).toFixed(2)} sec`);
+            }
+        } catch (e) {
+            g.es_print(`Error: ${e}`);
+        }
+        finally {
+            c.selectPosition(old_p);
+            c.enableRedrawFlag = true;
+            c.redraw();
+        }
+
+    }
+    //@+node:felix.20250727144132.10: *5* c._create_link_file
+    /**
+     * The caller is responsible for making links relative to the top-level directory.
+     * This method creates @<file> nodes whose paths are relative to *this* directory.
+     */
+    private async _create_link_file(
+        directory: string,
+        extensions: string[],
+        files: string[] | undefined,
+        kind: string,
+        links: string[],
+        outline_name: string,
+    ): Promise<void> {
+
+        if (!files) {
+            files = [];
+        }
+
+        g.assert(await g.os_path_exists(directory), `directory does not exist: ${directory}`);
+
+        // Create an @settings tree containing one @history-list node.
+        const c2 = await g.app.newCommander(outline_name, g.app.nullGui);
+        const root = c2.rootPosition()!;
+        root.h = '@settings';
+        const history_p = root.insertAsLastChild();
+        history_p.h = '@data history-list';
+        history_p.b = 'open-at-leo-file\n';
+        c2.selectPosition(root);
+
+        // Create @leo nodes.
+        for (const link of links) {
+            const p = c2.lastTopLevel().insertAfter();
+            p.h = `@leo ${link}`;
+        }
+        // Create @<file> nodes for each file.
+        for (const w_path of files) {
+            const relative_path = path.relative(directory, w_path).replace(/\\/g, '/');
+            const p = c2.lastTopLevel().insertAfter();
+            p.h = `${kind} ${relative_path}`;
+        }
+        const outline_path = path.join(directory, outline_name);
+        c2.clearChanged();
+        await c2.saveTo(outline_path, true);
+        c2.redraw();
+        await c2.close();
+    }
     //@+node:felix.20211223223002.8: *4* c.markAllAtFileNodesDirty
     /**
      * Mark all @file nodes as changed.
@@ -3903,6 +4108,80 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
+    }
+    //@+node:felix.20250727204622.1: *4* c.openAllLinkedFiles (transitive closure)
+    public async openAllLinkedFiles(gui: LeoGui | null = null): Promise<Commands[]> {
+        /**
+         * Open the transitive closure of all outlines reachable from any @leo
+         * node in this outline.
+         *
+         * Return the list of newly-opened commanders.
+         *
+         * Note: gui eventually defaults to g.app.gui.
+         */
+        const c = this;
+
+        const t1 = performance.now();
+
+        // Using the Qt gui will likely overwhelm Leo!
+        if (gui === null) {
+            gui = g.app.nullGui;
+        }
+
+        // The main loop.
+        let calls = 0;  // The number of calls to g.openWithFileName.
+        const result: Commands[] = [];
+        const scanned: string[] = [];  // List of paths already scanned.
+        const todo: string[] = [];
+
+        const scan = async (fileName: string): Promise<void> => {
+            /**
+             * Add all paths not already seen to the todo list.
+             * Add all newly-opened commanders to the result list.
+             */
+            if (scanned.includes(fileName)) {
+                return;
+            }
+            scanned.push(fileName);
+            g.es_print('Scan', fileName);
+            for (const p of c.all_unique_positions()) {
+                if (p.isAtLeoNode()) {
+                    const nestedFileName = p.atLeoNodeName();
+                    if (!todo.includes(nestedFileName) && !scanned.includes(nestedFileName)) {
+                        const c2 = await g.openWithFileName(nestedFileName, undefined, gui);
+                        if (!c2) {
+                            g.es_print(`Failed to open: ${nestedFileName}`);
+                            continue;
+                        }
+                        calls += 1;
+                        todo.push(nestedFileName);
+                        if (!result.includes(c2)) {
+                            result.push(c2);
+                        }
+                    }
+                }
+            }
+        };
+
+        // Create the initial to-do list.
+        await scan(c.fileName());
+
+        // Rescan until the to-do list is empty.
+        while (todo.length > 0) {
+            const fileName = todo.pop()!;
+            await scan(fileName);
+        }
+
+        if (!g.unitTesting) {
+            const t2 = performance.now();
+            const kind = gui === g.app.nullGui ? 'hidden ' : '';
+            g.es_print(`Done! Opened ${result.length} ${kind}outlines in ${(t2 - t1) / 1000.0} sec`);
+            g.trace('calls', calls, c.shortFileName());
+            g.printObj(scanned, 'Scanned');
+            g.printObj(result, 'Result');
+        }
+
+        return result;
     }
     //@+node:felix.20211223223002.10: *4* c.openWith
     /**
@@ -3958,26 +4237,6 @@ export class Commands {
         }
         c.fileCommands.gnxDict = d;
     }
-    //@+node:felix.20231125172649.1: *4* c_file.openRecentFile
-
-    // ! UNUSED IN LEOJS    
-
-    /**
-     * c.openRecentFile: This is not a command!
-     *
-     * This method is a helper called only from the recentFilesCallback in
-     * rf.createRecentFilesMenuItems.
-     */
-    // public async openRecentFile(this: Commands): Promise<void>
-    // const c: Commands = this;
-
-    //     if g.doHook("recentfiles1", c=c, p=c.p, v=c.p, fileName=fn):
-    //         return
-    //     c2 = g.openWithFileName(fn, old_c=c)
-    //     if c2:
-    //         g.app.makeAllBindings()
-    //         g.doHook("recentfiles2", c=c2, p=c2.p, v=c2.p, fileName=fn)
-
     //@+node:felix.20230730160811.1: *3* c.Git
     //@+node:felix.20230730160811.2: *4* c.diff_file
     /**
