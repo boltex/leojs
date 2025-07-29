@@ -3867,6 +3867,7 @@ export class Commands {
         extensions: string[],  // List of file extensions for generated @<file> nodes.
         top_directory: string,
         kind = '@clean',  // Any @<file> type. @clean is recommended.
+        report_changed_at_clean_nodes = true,  // Recommended.
         sub_directories: string[] | undefined,
         sub_outline_name: string | undefined,
         top_outline_name = 'leo_links.leo',
@@ -3897,15 +3898,12 @@ export class Commands {
         const isdir = await g.os_path_isdir(top_directory);
         const isabs = await g.os_path_isabs(top_directory);
         const exists = await g.os_path_exists(top_directory);
+        // Check the top directory.
         if (
             !top_directory || !isdir || !isabs || !exists
         ) {
             g.es_print(`Not an absolute directory: ${JSON.stringify(top_directory)}`);
             return;
-        }
-        // Make sure all extensions begin with '.':
-        if (typeof extensions === 'string') {
-            extensions = [extensions];
         }
         if (!Array.isArray(extensions)) {
             g.es_print(`Invalid list of extensions: ${JSON.stringify(extensions)}`);
@@ -3990,6 +3988,7 @@ export class Commands {
                         kind,
                         back_link,
                         `${g.shortFileName(sub_directory)}_links.leo`,
+                        report_changed_at_clean_nodes
                     );
                     //@-<< create the sub outline >>
                     all_files.push(sub_outline_name);
@@ -4004,6 +4003,7 @@ export class Commands {
                 '@leo',
                 top_links,
                 top_outline_name,
+                report_changed_at_clean_nodes
             );
             //@-<< create the top-level outline >>
             all_files = Array.from(new Set(all_files)).sort();
@@ -4033,6 +4033,7 @@ export class Commands {
         kind: string,
         links: string[],
         outline_name: string,
+        report_changed_at_clean_nodes: boolean
     ): Promise<void> {
 
         if (!files) {
@@ -4043,8 +4044,13 @@ export class Commands {
 
         // Create an @settings tree containing one @history-list node.
         const c2 = await g.app.newCommander(outline_name, g.app.nullGui);
+
+        // Create the @settings tree.
         const root = c2.rootPosition()!;
         root.h = '@settings';
+        const report_p = root.insertAsLastChild();
+        const report_s = report_changed_at_clean_nodes ? 'True' : 'False';
+        report_p.h = `@bool report-changed-at-clean-nodes = ${report_s}`;
         const history_p = root.insertAsLastChild();
         history_p.h = '@data history-list';
         history_p.b = 'open-at-leo-file\n';
@@ -4061,9 +4067,11 @@ export class Commands {
             const p = c2.lastTopLevel().insertAfter();
             p.h = `${kind} ${relative_path}`;
         }
+
+        // Create the file!
         const outline_path = path.join(directory, outline_name);
-        c2.clearChanged();
         await c2.saveTo(outline_path, true);
+        c2.clearChanged();
         c2.redraw();
         await c2.close();
     }
@@ -4129,7 +4137,6 @@ export class Commands {
         }
 
         // The main loop.
-        let calls = 0;  // The number of calls to g.openWithFileName.
         const result: Commands[] = [];
         const scanned: string[] = [];  // List of paths already scanned.
         const todo: string[] = [];
@@ -4153,7 +4160,6 @@ export class Commands {
                             g.es_print(`Failed to open: ${nestedFileName}`);
                             continue;
                         }
-                        calls += 1;
                         todo.push(nestedFileName);
                         if (!result.includes(c2)) {
                             result.push(c2);
@@ -4176,7 +4182,6 @@ export class Commands {
             const t2 = g.process_time();
             const kind = gui === g.app.nullGui ? 'hidden ' : '';
             g.es_print(`Done! Opened ${result.length} ${kind}outlines in ${(t2 - t1)} sec`);
-            g.trace('calls', calls, c.shortFileName());
             g.printObj(scanned, 'Scanned');
             g.printObj(result, 'Result');
         }
