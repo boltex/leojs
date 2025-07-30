@@ -358,23 +358,23 @@ export class AtFile {
     //@+node:felix.20230415162513.2: *4* at.Reading (top level)
     //@+node:felix.20250727141540.1: *5* at.checkExternalFile
     @cmd('open-at-leo-file', 'Open the outline given by the @leo node at c.p.')
-    public async openAtLeoFile(): Promise<void>{
-        
+    public async openAtLeoFile(): Promise<void> {
+
         // If the outline has already been loaded, switch to its tab.
         // Scripts should use c.makeLinkLeoFiles helper to make @leo files.
 
         const c = this.c;
         const p = this.c.p;
 
-        if (!p.isAtLeoNode()){
+        if (!p.isAtLeoNode()) {
             g.red('Please select an @leo node');
             return;
         }
         const w_path = c.fullPath(p);
         const exists = await g.os_path_exists(w_path)
-        if (exists){
+        if (exists) {
             await g.openWithFileName(w_path, c);
-        }else{
+        } else {
             g.red(`file not found: ${w_path}`);
         }
     }
@@ -1777,7 +1777,9 @@ export class AtFile {
         const seen = []; // Used as a set
         let files: Position[] = [];
         while (p && p.__bool__() && !p.__eq__(after)) {
-            if (p.isAtIgnoreNode() && !p.isAtAsisFileNode()) {
+            if (p.isAtLeoNode()) {
+                p.moveToNodeAfterTree();
+            } else if (p.isAtIgnoreNode() && !p.isAtAsisFileNode()) {
                 // Honor @ignore in *body* text, but *not* in @asis nodes.
                 if (p.isAnyAtFileNode()) {
                     c.ignored_at_file_nodes.push(p.h);
@@ -1863,9 +1865,9 @@ export class AtFile {
 
         const at = this;
         at.root = root;
-        if (p.isAtIgnoreNode()) {
+        if (p.isAtLeoNode() || p.isAtIgnoreNode()) {
             // Should have been handled in findFilesToWrite.
-            g.trace(`Can not happen: ${p.h} is an @ignore node`);
+            g.trace(`Can not happen: unexpected node: ${p.h}`);
             return;
         }
         try {

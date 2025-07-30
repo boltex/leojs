@@ -3869,8 +3869,7 @@ export class Commands {
         kind = '@clean',  // Any @<file> type. @clean is recommended.
         report_changed_at_clean_nodes = true,  // Recommended.
         sub_directories: string[] | undefined,
-        sub_outline_name: string | undefined,
-        top_outline_name = 'leo_links.leo',
+        top_outline_name?: string
     ): Promise<void> {
         //@+<< c.makeLinkLeoFiles: docstring >>
         //@+node:felix.20250727144132.2: *5* << c.makeLinkLeoFiles: docstring >>
@@ -3881,14 +3880,17 @@ export class Commands {
 
         Scripts calling this method need only specify the value of the following kwargs:
 
-        - extensions:      List of file extensions for generated @<file> nodes.
-        - kind:            One of @auto, @clean, @file, etc.
-        - sub_directories: An optional list of sub-directories in which to create sub-outlines.
-                           Relative paths are relative to the top-level directory.
-                           If the list is empty, it defaults to all direct directories of
-                           the top-level directory.
-        - top_directory:   The full, absolute, path to the top-level directory.
-        - top_file_name:   The name of the top-level link outline.
+        - extensions:       List of file extensions for generated @<file> nodes.
+        - kind:             One of @auto, @clean, @file, etc.
+        - report_changed_at_clean_nodes:
+                            The value to use for @bool report-changed-at-clean-nodes
+                            in all generated outlines.
+        - sub_directories:  An optional list of sub-directories in which to create sub-outlines.
+                            Relative paths are relative to the top-level directory.
+                            If the list is empty, it defaults to all direct directories of
+                            the top-level directory.
+        - top_directory:    The full, absolute, path to the top-level directory.
+        - top_outline_name: The name of the top-level link outline.
         */
         //@-<< c.makeLinkLeoFiles: docstring >>
         const c: Commands = this;
@@ -3910,6 +3912,13 @@ export class Commands {
             return;
         }
         //@-<< return if initial checks fail >>
+        //@+<< make sure that all extensions start with '.' >>
+        //@+node:felix.20250729064219.1: *5* << make sure that all extensions start with '.' >>
+        extensions = extensions.map(z => z.startsWith('.') ? z : `.${z}`);
+        //@-<< make sure that all extensions start with '.' >>
+        if (!top_outline_name) {
+            top_outline_name = `${g.os_path_basename(top_directory)}_links.leo`;
+        }
         //@+<< calculate the list of subdirectories >>
         //@+node:felix.20250727144132.4: *5* << calculate the list of subdirectories >>
         //  Default to all direct sub-directories of the top directory.
@@ -3947,10 +3956,6 @@ export class Commands {
                 const subDirUri = g.makeVscodeUri(sub_directory);
 
                 for (let ext of extensions) {
-                    if (!ext.startsWith('.')) {
-                        ext = '.' + ext;
-                    }
-
                     const pattern = new vscode.RelativePattern(subDirUri, `**/*${ext}`);
                     const newFiles = await vscode.workspace.findFiles(pattern);
 
@@ -4126,13 +4131,13 @@ export class Commands {
      *
      * Note: gui eventually defaults to g.app.gui.
      */
-    public async openAllLinkedFiles(gui: LeoGui | null = null): Promise<Commands[]> {
+    public async openAllLinkedFiles(gui?: LeoGui): Promise<Commands[]> {
         const c = this;
 
         const t1 = g.process_time();
 
         // Using the Qt gui will likely overwhelm Leo!
-        if (gui === null) {
+        if (!gui) {
             gui = g.app.nullGui;
         }
 
@@ -4155,7 +4160,7 @@ export class Commands {
                 if (p.isAtLeoNode()) {
                     const nestedFileName = p.atLeoNodeName();
                     if (!todo.includes(nestedFileName) && !scanned.includes(nestedFileName)) {
-                        const c2 = await g.openWithFileName(nestedFileName, undefined, gui);
+                        const c2 = await g.openWithFileName(nestedFileName, undefined, gui!);
                         if (!c2) {
                             g.es_print(`Failed to open: ${nestedFileName}`);
                             continue;
