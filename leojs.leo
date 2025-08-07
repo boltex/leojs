@@ -21813,7 +21813,9 @@ public get1Char(
 </t>
 <t tx="felix.20250622002355.1">## 1.0.14
 
-...
+- Read only unchanged @clean nodes: a huge performance boost!
+- Support @leo &lt;path&gt;; nodes. See https://leo-editor.github.io/leo-editor/directives.html#leo-directives
+- Added open-at-leo-file command to open the given outline and the c.makeLinkLeoFiles method that helps scripts create a top-level outline containing links to sub-outlines.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

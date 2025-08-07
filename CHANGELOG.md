@@ -2,7 +2,9 @@
 
 ## 1.0.14
 
-...
+- Read only unchanged @clean nodes: a huge performance boost!
+- Support @leo <path>; nodes. See https://leo-editor.github.io/leo-editor/directives.html#leo-directives
+- Added open-at-leo-file command to open the given outline and the c.makeLinkLeoFiles method that helps scripts create a top-level outline containing links to sub-outlines.
 
 ## 1.0.13
 
