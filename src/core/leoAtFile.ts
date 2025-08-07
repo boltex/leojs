@@ -371,7 +371,7 @@ export class AtFile {
             return;
         }
         const w_path = c.fullPath(p);
-        const exists = await g.os_path_exists(w_path)
+        const exists = await g.os_path_exists(w_path);
         if (exists) {
             await g.openWithFileName(w_path, c);
         } else {
