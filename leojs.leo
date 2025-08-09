@@ -4684,7 +4684,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
-    "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
   }
 }
@@ -6840,7 +6839,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "webpack-cli": "^4.9.2",
 "webpack-shell-plugin-next": "^2.2.2"
 </t>
-<t tx="felix.20201214205159.81">"assert": "^2.0.0",
+<t tx="felix.20201214205159.81">"@xmldom/xmldom": "^0.9.2",
+"assert": "^2.0.0",
 "binascii": "^0.0.2",
 "bowser": "^2.11.0",
 "browser-process-hrtime": "^1.0.0",
