@@ -2324,7 +2324,7 @@ export class RecursiveImportController {
         p = parent.lastChild();
         if (this.kind === '@clean') {
             p.v.u['_mod_time'] = await g.os_path_getmtime(p_path);
-        } else if (p.v.u['_mod_time'] !== undefined) {
+        } else if ('_mod_time' in p.v.u) {
             delete p.v.u['_mod_time'];
         }
 

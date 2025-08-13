@@ -3686,7 +3686,7 @@ export class VNode {
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
         v._headString = s.replace(/\n/g, '');
-        if (v.u['_mod_time'] !== undefined) {
+        if ('_mod_time' in v.u) {
             delete v.u['_mod_time'];
         }
         // self.contentModified()  # #1413.

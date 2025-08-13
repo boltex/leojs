@@ -452,7 +452,7 @@ export class CommanderFileCommands {
         c.recreateGnxDict();
 
         // Always clear the `_mod_time` uA *before* reading the file.
-        if (p.v.u['_mod_time'] !== undefined) {
+        if ('_mod_time' in p.v.u) {
             delete p.v.u['_mod_time'];
         }
 

@@ -915,7 +915,7 @@ export class AtFile {
         at.bodies_dict = {};
 
         // #4385: *Clear* the mod time until we write the file.
-        if (root.v.u['_mod_time'] !== undefined) {
+        if ('_mod_time' in root.v.u) {
             delete root.v.u['_mod_time'];
         }
 
