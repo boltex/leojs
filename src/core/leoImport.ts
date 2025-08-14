@@ -13,6 +13,7 @@ import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 import { Bead } from './leoUndo';
+import { Block } from '../importers/base_importer';
 //@-<< leoImport imports >>
 //@+others
 //@+node:felix.20230519221548.1: ** class FreeMindImporter
@@ -1501,57 +1502,142 @@ export class LeoImportCommands {
         }
         return result;
     }
-    //@+node:felix.20230511002352.49: *3* ic.parse_body
+    //@+node:felix.20230511002352.49: *3* ic.parse_body & helpers
     /**
-     * Parse p.b as source code, creating a tree of descendant nodes.
-     * This is essentially an import of p.b.
+     * Split p.b into functions, methods or classes in sibling nodes.
      */
     public parse_body(p: Position): void {
 
         const c = this.c;
-        const d = g.app.language_extension_dict;
         const [u, undoType] = [c.undoer, 'parse-body'];
-        if (!p || !p.__bool__()) {
-            return;
-        }
+        const language = c.getLanguage(p);
 
         if (p.hasChildren()) {
             g.es_print('can not run parse-body: node has children:', p.h);
             return;
         }
-        const language = c.getLanguage(p);
-        const ext = '.' + d[language];
-
-        // The parser is the `do_import` function for each importer class.
-        const parser = g.app.classDispatchDict[ext];
-
-        // Fix bug 151: parse-body creates "None declarations"
-        if (p.isAnyAtFileNode()) {
-            const fn = p.anyAtFileNodeName();
-            [this.methodName, this.fileType] = g.os_path_splitext(fn);
-        } else {
-            const fileType = d[language] || 'py';
-            [this.methodName, this.fileType] = [p.h, fileType];
-        }
-        if (!parser) {
-            g.es_print(
-                `parse-body: no parser for @language ${language || 'None'}`
-            );
+        if (['html', 'xml'].includes(language)) {
+            g.es_print(`parse-body does not support @language ${language}`);
             return;
         }
-        const s = p.b;
+
+        // Instantiate the importer.
+        const importer_class = g.app.importerClassesDict[language];
+        if (!importer_class) {
+            g.es_print(`No importer class for @language ${language}`);
+            return;
+        }
+        const importer = new importer_class(c);
+
+        // Handle undo.
+        u.beforeChangeGroup(p, undoType);
         try {
-            const bunch = c.undoer.beforeParseBody(p);
-            p.b = '';
-            parser(c, p, s);
-            u.afterParseBody(p, undoType, bunch);
-            p.expand();
+            const old_p = p.copy();
             c.selectPosition(p);
-            c.redraw();
+            const changed = this.parse_body_helper(p, importer);
+            c.selectPosition(old_p);
+            if (c.checkOutline()) {
+                return; // Error!
+            }
+            if (changed) {
+                u.afterChangeGroup(p, undoType);
+                c.setChanged();
+                c.redraw(old_p);
+            }
         } catch (exception) {
             g.es_exception(exception);
-            p.b = s;
         }
+    }
+    //@+node:felix.20250812231137.1: *4* ic.compute_imported_headline
+    /**
+     * Compute the headline for the given imported lines.
+     */
+    public compute_imported_headline(importer: any, lines: string[], p: Position): string {
+        for (let s of lines) {
+
+            s = s.trim();
+            for (const [kind, pattern] of importer.block_patterns) {
+                let m;
+                if ((m = s.match(pattern))) {
+                    s = m[0];
+                    // Truncate at the first '(' or '{'.
+                    const i1 = s.indexOf('(');
+                    const i2 = s.indexOf('{');
+                    const i = (i1 > -1 && i2 > -1) ? Math.min(i1, i2) : Math.max(i1, i2);
+                    if (i > -1) {
+                        s = s.substring(0, i);
+                    }
+                }
+            }
+        }
+        return p.h;
+    }
+    //@+node:felix.20250812231142.1: *4* ic.parse_body_helper
+    /**
+     * The common code for the parse-body command.
+     */
+    public parse_body_helper(p: Position, importer: any): boolean {
+        // The common code for the parse-body command.
+        const c = this.c;
+        const u = c.undoer;
+        const undoType = 'parse-body';
+
+        importer.lines = g.splitLines(p.b);
+        const lines = importer.lines;
+
+        importer.guide_lines = importer.delete_comments_and_strings(lines);
+        let blocks = importer.find_blocks(0, lines.length);
+
+        // The main loop.
+        let changed = blocks.length > 1;
+        this.preprocess_blocks(blocks);
+
+        while (blocks.length > 1) {
+            // Change the node.
+            let bunch = u.beforeChangeBody(p);
+            const block = blocks.shift()!; // pop(0) equivalent
+            const head = lines.slice(block.start, block.end);
+            const tail = lines.slice(block.end);
+
+            p.b = head.join('');
+            p.h = this.compute_imported_headline(importer, head, p);
+            u.afterChangeBody(p, undoType, bunch);
+
+            // Insert another node.
+            bunch = u.beforeInsertNode(p);
+            const p2 = p.insertAfter();
+            p2.h = this.compute_imported_headline(importer, tail, p);
+            p2.b = tail.join('');
+            u.afterInsertNode(p2, undoType, bunch);
+
+            // Continue splitting p2.
+            p = p2;
+        }
+        return changed;
+
+    }
+    //@+node:felix.20250812231146.1: *4* ic.preprocess_blocks
+    /**
+     * Move blank lines from the start one block to the end of the previous block.
+     */
+    public preprocess_blocks(blocks: Block[]): void {
+
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            const block2 = blocks[i + 1];
+            if (!block2) {
+                break; // No next block, mission complete.
+            }
+            for (let j = block2.start; j < block2.end; j++) {
+                const s = block2.lines[j];
+                if (s.trim()) {
+                    break; // Found non-blank line, stop transfer.
+                }
+                block.end += 1;
+                block2.start += 1;
+            }
+        }
+
     }
     //@+node:felix.20230511002352.50: *3* ic.Utilities
     //@+node:felix.20230511002352.51: *4* ic.appendStringToBody & setBodyString (leoImport)

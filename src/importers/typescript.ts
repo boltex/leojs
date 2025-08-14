@@ -24,22 +24,23 @@ export class TS_Importer extends Importer {
     //@+<< define function patterns >>
     //@+node:felix.20230911234728.4: *3* << define function patterns >>
     // The pattern table. Order matters!
-    public function_patterns: [number, RegExp][] = [
-        [1, /(interface\s+\w+)/], // interface name
-        [1, /(class\s+\w+)/], // class name
-        [1, /export\s+(class\s+\w+)/], // export class name
-        [1, /export\s+enum\s+(\w+)/], // enum name
-        [1, /export\s+const\s+enum\s+(\w+)/], // const enum name
-        [1, /export\s+function\s+(\w+)/], // export function name
-        [1, /export\s+interface\s+(\w+)/], // export interface name
-        [1, /function\s+(\w+)/], // function name
-        [1, /(constructor).*{/], // constructor
-        [2, /(\b(async|public|private|static)\b)\s*function\s+(\w+)/], // kind function name
-        [3, /(\b(async|public|private|static)\b)\s+(\b(async|public|private|static)\b)\s*function\s+(\w+)/], // kind kind function name
-        [3, /(\b(async|public|private|static)\b)\s+(\b(async|public|private|static)\b)\s+(\w+)\s*\(.*\).*{/], // kind kind name (...) {
-        [2, /(\b(async|public|private|static)\b)\s+(\w+)\s*\(.*\).*{/], // kind name (...) {
+    public function_patterns: [string, RegExp][] = [
+        ['1', /(interface\s+\w+)/], // interface name
+        ['1', /(class\s+\w+)/], // class name
+        ['1', /export\s+(class\s+\w+)/], // export class name
+        ['1', /export\s+enum\s+(\w+)/], // enum name
+        ['1', /export\s+const\s+enum\s+(\w+)/], // const enum name
+        ['1', /export\s+function\s+(\w+)/], // export function name
+        ['1', /export\s+interface\s+(\w+)/], // export interface name
+        ['1', /function\s+(\w+)/], // function name
+        ['1', /(constructor).*{/], // constructor
+        ['2', /(\b(async|public|private|static)\b)\s*function\s+(\w+)/], // kind function name
+        ['3', /(\b(async|public|private|static)\b)\s+(\b(async|public|private|static)\b)\s*function\s+(\w+)/], // kind kind function name
+        ['3', /(\b(async|public|private|static)\b)\s+(\b(async|public|private|static)\b)\s+(\w+)\s*\(.*\).*{/], // kind kind name (...) {
+        ['2', /(\b(async|public|private|static)\b)\s+(\w+)\s*\(.*\).*{/], // kind name (...) {
         // Add other function patterns as needed
     ];
+    public block_patterns = this.function_patterns;
     //@-<< define function patterns >>
 
     constructor(c: Commands) {

@@ -340,7 +340,7 @@ export class Position {
         if (!p2 || !(p2 instanceof Position)) {
             return false;
         }
-        if (!p2.__bool__() || !p2.v) {
+        if (!p2.v) {
             return !p1.v;
         }
 
@@ -420,13 +420,10 @@ export class Position {
     /**
      * Return True if a position is valid.
      *
-     * The tests 'if p' or 'if not p' are the _only_ correct ways to test
-     * whether a position p is valid.
-     *
-     * Tests like 'if p is None' or 'if p is not None' will not work properly.
+     * This cannot mimic the python __bool__ method exactly and override the 'if p' test.
      */
     public __bool__(): boolean {
-        return typeof this.v !== 'undefined';
+        return !!this.v;
     }
 
     //@+node:felix.20210126210412.7: *4* p.__str__ and p.__repr__

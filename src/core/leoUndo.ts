@@ -138,6 +138,8 @@ export class Undoer {
     public prevSel!: number[];
     public sortChildren!: boolean;
     public verboseUndoGroup!: boolean;
+    public changeGroupWarning = false;
+
 
     //@+others
     //@+node:felix.20211026230613.5: *3* u.Birth
@@ -578,6 +580,14 @@ export class Undoer {
         const c: Commands = this.c;
 
         const w: StringTextWrapper = c.frame.body.wrapper;
+        if (!p.__eq__(c.p)) {  // Prepare to ignore p argument.
+            if (!u.changeGroupWarning) {
+                u.changeGroupWarning = true;
+                g.trace("Position mismatch", g.callers());
+                console.log('p:', p.h);
+                console.log('c.p', c.p.h);
+            }
+        }
 
         if (u.redoing || u.undoing) {
             return;
@@ -926,28 +936,6 @@ export class Undoer {
         bunch.newP = p.copy();
         u.pushBead(bunch);
     }
-    //@+node:felix.20230717214811.1: *5* u.afterParseBody
-    /** 
-     * Create an undo node using d created by u.beforeParseBody
-     */
-    public afterParseBody(p: Position, command: string, bunch: Bead): void {
-
-        const u: Undoer = this;
-        const c: Commands = this.c;
-        const w: StringTextWrapper = c.frame.body.wrapper;
-
-        if (u.redoing || u.undoing) {
-            return;
-        }
-        // Set the type & helpers.
-        bunch.kind = 'parse-body';
-        bunch.undoType = command;
-        bunch.undoHelper = u.undoParseBody;
-        bunch.redoHelper = u.redoParseBody;
-        u.pushBead(bunch);
-        u.updateAfterTyping(p, w);
-
-    }
     //@+node:felix.20211026230613.48: *5* u.afterPromote
     /**
      * Create an undo node for demote operations.
@@ -1009,6 +997,15 @@ export class Undoer {
         verboseUndoGroup = true
     ): void {
         const u: Undoer = this;
+        const c: Commands = u.c;
+        if (!p.__eq__(c.p)) {  // Prepare to ignore p argument.
+            if (!u.changeGroupWarning) {
+                u.changeGroupWarning = true;
+                g.trace("Position mismatch", g.callers());
+                console.log('p:', p);
+                console.log('c.p', c.p);
+            }
+        }
         const bunch: Bead = u.createCommonBunch(p);
         // Set types.
         bunch.kind = 'beforeGroup';
@@ -1142,13 +1139,6 @@ export class Undoer {
         const bunch: Bead = u.createCommonBunch(p);
         bunch.oldN = p.childIndex();
         bunch.oldParent_v = p._parentVnode();
-        return bunch;
-    }
-    //@+node:felix.20230717215103.1: *5* u.beforeParseBody
-    public beforeParseBody(p: Position): Bead {
-        const u: Undoer = this;
-        const bunch = u.createCommonBunch(p);
-        bunch.oldBody = p.b;
         return bunch;
     }
     //@+node:felix.20211026230613.62: *5* u.beforeSort

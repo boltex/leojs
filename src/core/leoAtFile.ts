@@ -876,7 +876,7 @@ export class AtFile {
     /**
      * Update the @clean/@nosent node at root.
      */
-    public async readOneAtCleanNode(root: Position, new_contents?: string): Promise<boolean> {
+    public async readOneAtCleanNode(root: Position, new_contents?: string): Promise<void> {
         const at = this;
         const c = this.c;
         const x = this.c.shadowController;
@@ -890,7 +890,7 @@ export class AtFile {
             const w_exists = await g.os_path_exists(fileName);
             if (!w_exists) {
                 g.es_print(`not found: ${fileName}̀`);
-                return false;
+                return;
             }
 
             //  Suppresses file-changed dialog
@@ -907,7 +907,7 @@ export class AtFile {
 
         // Don't update if the outline and file are in synch.
         if (old_mod_time && old_mod_time >= new_mod_time) {
-            return true;
+            return;
         }
 
         // #4385: Init the per-file data.
@@ -948,7 +948,7 @@ export class AtFile {
         } else {
             new_private_lines = [];
             root.b = new_public_lines.join('');
-            return true;
+            return;
         }
         // if (new_private_lines === old_private_lines) {
         if (
@@ -957,7 +957,7 @@ export class AtFile {
                 (value, index) => value === old_private_lines[index]
             )
         ) {
-            return true;
+            return;
         }
         if (!g.unitTesting) {
             g.es_print('updating:', root.h);
@@ -983,8 +983,6 @@ export class AtFile {
             root.v.setDirty();
             at.changed_roots.push(root.copy());
         }
-
-        return true; // No errors.
     }
     //@+node:felix.20230415162513.18: *6* at.read_at_clean_lines
     /**
