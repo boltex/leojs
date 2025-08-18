@@ -3898,7 +3898,7 @@ export class Commands {
         //@+node:felix.20250727144132.3: *5* << return if initial checks fail >>
         // Check the top directory.
         const isdir = await g.os_path_isdir(top_directory);
-        const isabs = await g.os_path_isabs(top_directory);
+        const isabs = g.os_path_isabs(top_directory);
         const exists = await g.os_path_exists(top_directory);
         // Check the top directory.
         if (
@@ -4048,7 +4048,7 @@ export class Commands {
         g.assert(await g.os_path_exists(directory), `directory does not exist: ${directory}`);
 
         // Create an @settings tree containing one @history-list node.
-        const c2 = await g.app.newCommander(outline_name, g.app.nullGui);
+        const c2 = g.app.newCommander(outline_name, g.app.nullGui);
 
         // Create the @settings tree.
         const root = c2.rootPosition()!;
@@ -4075,8 +4075,8 @@ export class Commands {
 
         // Create the file!
         const outline_path = path.join(directory, outline_name);
+        c2.clearChanged(); // Essential!
         await c2.saveTo(outline_path, true);
-        c2.clearChanged();
         c2.redraw();
         await c2.close();
     }
