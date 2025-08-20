@@ -1219,7 +1219,7 @@ export class Position {
             [v, childIndex] = p.stack[n];
             // See how many children v's parent has.
             if (n === 0) {
-                parent_v = v.context.hiddenRootNode!;
+                parent_v = v.context.hiddenRootNode;
             } else {
                 parent_v = p.stack[n - 1][0];
             }
@@ -3704,7 +3704,7 @@ export class VNode {
      */
     public setAllAncestorAtFileNodesDirty(): void {
         const v: VNode = this;
-        const hiddenRootVnode: VNode = v.context.hiddenRootNode!;
+        const hiddenRootVnode: VNode = v.context.hiddenRootNode;
 
         function* v_and_parents(v: VNode): Generator<VNode> {
             if (v.fileIndex !== hiddenRootVnode.fileIndex) {

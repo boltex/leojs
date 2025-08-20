@@ -1486,7 +1486,7 @@ export class Commands {
         for (let v2 of v.parents) {
             for (let i of allinds(v2, v)) {
                 stack.unshift([v, i]);
-                if (v2.gnx === c.hiddenRootNode!.gnx) {
+                if (v2.gnx === c.hiddenRootNode.gnx) {
                     yield stack2pos(stack);
                 } else {
                     yield* c.all_positions_for_v(v2, stack);
@@ -2217,7 +2217,7 @@ export class Commands {
         if (rstack.length > pstack.length) {
             return false;
         }
-        let par = this.hiddenRootNode!;
+        let par = this.hiddenRootNode;
 
         function sameStackEntry(a: StackEntry, b: StackEntry): boolean {
             if (a[1] !== b[1]) {
@@ -2302,7 +2302,7 @@ export class Commands {
     public rootPosition(): Position | undefined {
         const c: Commands = this;
         // 2011/02/25: Compute the position directly.
-        if (!!c.hiddenRootNode && c.hiddenRootNode.children.length) {
+        if (c.hiddenRootNode.children.length) {
             const v: VNode = c.hiddenRootNode.children[0];
             return new Position(v, 0, undefined);
         }
