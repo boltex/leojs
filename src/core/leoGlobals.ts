@@ -4880,7 +4880,7 @@ export function os_path_expandvars(p_path: string): string {
 }
 //@+node:felix.20211227182611.10: *3* g.os_path_getmtime
 /**
- * Return the modification time of path.
+ * Return the modification time of a file for a given path.
  */
 export async function os_path_getmtime(p_path: string): Promise<number> {
     if (!p_path) {

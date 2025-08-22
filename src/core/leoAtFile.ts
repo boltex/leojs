@@ -555,9 +555,16 @@ export class AtFile {
         const t1 = process.hrtime();
         c.init_error_dialogs();
         const files = at.findFilesToRead(root, true);
+        const efc = g.app.externalFilesController;
 
         for (const p of files) {
             await at.readFileAtPosition(p);
+            // An @<file> was read: In case this was a tab opened earlier, for which efc had entries,
+            // we need to update the external files controller's timestamp for those external files
+            // instead of leaving the _time_d empty, which would have defaulted to set_time's default.
+            if (efc) {
+                await efc.set_time(c.fullPath(p));  // #4426 Same effect as leaving efc's _time_d empty.
+            }
         }
         for (const p of files) {
             p.v.clearDirty();
@@ -899,13 +906,13 @@ export class AtFile {
         let old_mod_time;
         // #4385: Do nothing if the file has not changed.
         try {
-            old_mod_time = root.v.u['_mod_time'];  // #4385
+            old_mod_time = root.v.u['_mod_time'];  // #4385 The file's *last-seen* mod time.
         } catch (e) {
             old_mod_time = undefined;
         }
-        const new_mod_time = await g.os_path_getmtime(fileName);
+        const new_mod_time = await g.os_path_getmtime(fileName); // The file's *present* mod time.
 
-        // Don't update if the outline and file are in synch.
+        // Make sure it's newer: Don't update if the outline and file are in synch.
         if (old_mod_time && old_mod_time >= new_mod_time) {
             return;
         }
@@ -918,6 +925,10 @@ export class AtFile {
         if ('_mod_time' in root.v.u) {
             delete root.v.u['_mod_time'];
         }
+
+        // Until the @clean's content is modified and written: set to file's *present* mod time.
+        // This and writeOneAtCleanNode are the *only* two places that sets the `_mod_time` uA.
+        root.v.u['_mod_time'] = new_mod_time;  // #4427
 
         // #4385: Remember all old bodies.
         for (const p of root.self_and_subtree()) {
@@ -2177,13 +2188,9 @@ export class AtFile {
                 at.addToOrphanList(root);
             } else {
                 const contents = at.outputList.join('');
-
-                // #4385: at.replaceFile always writes @clean roots,
-                //        even if the file hasn't changed.
-                //        This forces the `_mod_time` uA to change.
                 await at.replaceFile(contents, at.encoding!, fileName, root);
 
-                // #4385: Tell at.readOneAtCleanNode that the outline is in synch with the file.
+                // #4385: This and readOneAtCleanNode are the *only* two places that sets the `_mod_time` uA.
                 root.v.u['_mod_time'] = await g.os_path_getmtime(fileName);
             }
         } catch (exception) {
@@ -3833,26 +3840,25 @@ export class AtFile {
         if (!old_contents) {
             old_contents = '';
         }
-        if (!root.isAtCleanNode()) {  // #4394: Always write @clean nodes!
-            const unchanged =
-                contents === old_contents ||
-                (!at.explicitLineEnding &&
-                    at.compareIgnoringLineEndings(old_contents, contents)) ||
-                (ignoreBlankLines &&
-                    at.compareIgnoringBlankLines(old_contents, contents));
 
-            if (unchanged) {
-                at.unchangedFiles += 1;
-                if (
-                    !g.unitTesting &&
-                    c.config.getBool('report-unchanged-files', true)
-                ) {
-                    g.es(`${timestamp}unchanged: ${sfn}`);
-                }
-                // Check unchanged files.
-                at.checkUnchangedFiles(contents, fileName, root);
-                return false; // No change to original file.
+        const unchanged =
+            contents === old_contents ||
+            (!at.explicitLineEnding &&
+                at.compareIgnoringLineEndings(old_contents, contents)) ||
+            (ignoreBlankLines &&
+                at.compareIgnoringBlankLines(old_contents, contents));
+
+        if (unchanged) {
+            at.unchangedFiles += 1;
+            if (
+                !g.unitTesting &&
+                c.config.getBool('report-unchanged-files', true)
+            ) {
+                g.es(`${timestamp}unchanged: ${sfn}`);
             }
+            // Check *unchanged* files.
+            at.checkUnchangedFiles(contents, fileName, root);
+            return false; // No change to original file.
         }
 
         //

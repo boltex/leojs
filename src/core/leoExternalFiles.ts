@@ -833,7 +833,7 @@ export class ExternalFilesController {
     }
     //@+node:felix.20230503004807.25: *4* efc.get_mtime
     /**
-     * Return the modification time for the path.
+     * Return the modification time of a file for the given path.
      */
     public get_mtime(p_path: string): Promise<number> {
         return g.os_path_getmtime(g.os_path_realpath(p_path));
@@ -841,7 +841,7 @@ export class ExternalFilesController {
 
     //@+node:felix.20230503004807.26: *4* efc.get_time
     /**
-     * return timestamp for path
+     * return timestamp stored for the given path
      *
      * see set_time() for notes
      */
