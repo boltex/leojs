@@ -114,8 +114,8 @@ export class JS_Importer extends Importer {
 /**
  * The importer callback for javascript.
  */
-export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
-  new JS_Importer(c).import_from_string(parent, s, treeType);
+export const do_import = (c: Commands, parent: Position, s: string) => {
+  new JS_Importer(c).import_from_string(parent, s);
 };
 
 export const importer_dict = {

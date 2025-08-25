@@ -8,6 +8,7 @@ import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
 import { Position } from '../core/leoNodes';
 import { C_Importer } from '../importers/c';
+import { Java_Importer } from '../importers/java';
 import { Python_Importer } from '../importers/python';
 import { Coffeescript_Importer } from '../importers/coffeescript';
 import { Markdown_Importer } from '../importers/markdown';
@@ -80,15 +81,21 @@ export class BaseTestImporter extends LeoUnitTest {
     /**
      * Assert that p's outline is equivalent to s.
      */
-    public async check_round_trip(p: Position, s: string): Promise<void> {
+    public async check_round_trip(p: Position, s: string, strict = true): Promise<void> {
         const c = this.c;
-        s = s.trimEnd();  // Ignore trailing whitespace.
-        let result_s = await c.atFileCommands.atAutoToString(p);
-        result_s = result_s.trimEnd();  // Ignore trailing whitespace.
+        const result_s = await c.atFileCommands.atAutoToString(p);
 
-        // Ignore leading whitespace and all blank lines.
-        const s_lines = g.splitLines(s).map(z => z.trimStart()).filter(z => z.trim() !== '');
-        const result_lines = g.splitLines(result_s).map(z => z.trimStart()).filter(z => z.trim() !== '');
+        let s_lines: string[];
+        let result_lines: string[];
+
+        if (strict) {
+            s_lines = g.splitLines(s);
+            result_lines = g.splitLines(result_s);
+        } else {
+            // Ignore leading whitespace and all blank lines.
+            s_lines = g.splitLines(s).map(z => z.trimStart()).filter(z => z.trim() !== '');
+            result_lines = g.splitLines(result_s).map(z => z.trimStart()).filter(z => z.trim() !== '');
+        }
 
         if (s_lines.join('\n') !== result_lines.join('\n')) {
             g.trace('FAIL', g.caller(2));
@@ -129,16 +136,22 @@ export class BaseTestImporter extends LeoUnitTest {
 
     }
     //@+node:felix.20230916201206.1: *3* BaseTestImporter.new_round_trip_test
-    public async new_round_trip_test(s: string, expected_s?: string): Promise<void> {
+    public async new_round_trip_test(s: string, expected_s?: string, strict: boolean = true): Promise<void> {
+
+        if (!expected_s) {
+            // Define the *strict* expected results.
+            expected_s = g.dedent(s).trim() + '\n';
+        }
+
         const p = await this.run_test(s);
-        await this.check_round_trip(p, expected_s || s);
+        await this.check_round_trip(p, expected_s, strict);
     }
     //@+node:felix.20230916201215.1: *3* BaseTestImporter.new_run_test
     /**
      * Run a unit test of an import scanner,
      * i.e., create a tree from string s at location p.
      */
-    public async new_run_test(s: string, expected_results: [number, string, string][], short_id = "defaultShortId"): Promise<void> {
+    public async new_run_test(s: string, expected_results: [number, string, string][], short_id = "defaultShortId", check: boolean = true): Promise<void> {
         const c = this.c;
         const ext = this.ext;
         const p = this.c.p;
@@ -155,12 +168,18 @@ export class BaseTestImporter extends LeoUnitTest {
 
         parent.h = `${kind} ${short_id}`;
 
-        // createOutline calls Importer.gen_lines and Importer.check.
-        const test_s = g.dedent(s).trim() + '\n';
-        await c.importCommands.createOutline(parent.copy(), ext, test_s);
+        // Leo 6.8.7. Do *not* strip trailing ws!
+        const test_s = g.dedent(s).trimStart();
 
-        // Dump the actual results on failure and raise AssertionError.
-        this.check_outline(parent, expected_results);
+        // Leo 6.8.7:
+        await c.importCommands.createOutline(parent.copy(), ext, test_s, '@clean');
+
+        // # Dump the actual results on failure and raise AssertionError.
+        if (check) {
+            this.check_outline(parent, expected_results);
+        } else {
+            this.dump_tree(p, 'Actual results...');
+        }
     }
     //@+node:felix.20230529172038.6: *3* BaseTestImporter.run_test
     /**
@@ -186,7 +205,6 @@ export class BaseTestImporter extends LeoUnitTest {
 
         parent.h = `${kind} ${short_id}`;
 
-        // createOutline calls Importer.gen_lines and Importer.check.
         const test_s = g.dedent(s).trim() + '\n';
         await c.importCommands.createOutline(parent.copy(), ext, test_s);
 
@@ -195,76 +213,6 @@ export class BaseTestImporter extends LeoUnitTest {
     //@-others
 
 }
-//@+node:felix.20231012214001.1: ** class TestImporterClass(LeoUnitTest)
-suite('Tests of methods of the Importer class.', () => {
-
-    let self: LeoUnitTest;
-
-    before(() => {
-        self = new LeoUnitTest();
-        return self.setUpClass();
-    });
-
-    beforeEach(() => {
-        self.setUp();
-        return Promise.resolve();
-    });
-
-    afterEach(() => {
-        self.tearDown();
-        return Promise.resolve();
-    });
-
-    //@+others
-    //@+node:felix.20231012214001.2: *3* TestImporterClass.test_trace_block
-
-    test('test_trace_block', () => {
-
-        const c = self.c;
-        const importer = new Python_Importer(c);
-
-        const lines = g.splitLines(g.dedent(
-            `
-            import sys\n
-            def spam_and_eggs():
-               pass'
-            `
-        ));
-        // Test that Importer.trace_block doesn't crash.
-        // Comment out the assignment to sys.stdout to see the actual reasults.
-        try {
-            // sys.stdout = open(os.devnull, 'w')
-            const block = new Block('def', 'spam_and_eggs', 3, 4, 5, lines);
-            importer.trace_block(block);
-        }
-        catch (e) {
-            //
-        }
-        finally {
-            // sys.stdout = sys.__stdout__
-        }
-    });
-    //@+node:felix.20231012214001.3: *3* TestImporterClass.test_long_repr
-
-    test('test_long_repr', () => {
-        const lines = g.splitLines(g.dedent(
-            `
-            import sys\n
-            def spam_and_eggs():
-               pass'
-            `
-        ));
-        const block = new Block('def', 'spam_and_eggs', 3, 4, 5, lines);
-
-        // Test that long_repr doesn't crash.
-        const s = block.long_repr();
-
-        // A short test that the results contain an expected line.
-        assert.ok(s.includes('def spam_and_eggs'), s.toString());
-    });
-    //@-others
-
-});
 //@+node:felix.20230916220459.1: ** suite TestC
 suite('TestC', () => {
 
@@ -310,13 +258,15 @@ suite('TestC', () => {
             ],
             [1, 'class cTestClass1',
                 'class cTestClass1 {\n' +
+                '\n' +  // Leo 6.8.7
                 '    @others\n' +
                 '}\n'
             ],
             [2, 'func foo',
                 'int foo (int a) {\n' +
                 '    a = 2 ;\n' +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [2, 'func bar',
                 'char bar (float c) {\n' +
@@ -353,6 +303,7 @@ suite('TestC', () => {
             ],
             [1, 'class cTestClass1',
                 'class cTestClass1 {\n' +
+                '\n' +  // Leo 6.8.7
                 '@others\n' +
                 '}\n'
             ],
@@ -360,7 +311,8 @@ suite('TestC', () => {
                 '    int foo (int a) {\n' +
                 '// an underindented line.\n' +
                 '        a = 2 ;\n' +
-                '    }\n'
+                '    }\n' +
+                '\n' // Leo 6.8.7
             ],
             [2, 'func bar',
                 '    // This should go with the next function.\n' +
@@ -399,7 +351,8 @@ suite('TestC', () => {
                 'aaa::bbb::doit(awk* b)\n' +
                 '{\n' +
                 '    assert(false);\n' +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'func dothat',
                 'bool\n' +
@@ -606,61 +559,6 @@ suite('TestC', () => {
         assert.ok(g.compareArrays(lines, result_lines, true));
 
     });
-    //@+node:felix.20230916220459.11: *3* TestC.test_codon_file
-    test('test_codon_file', async () => {
-        // Test codon/codon/app/main.cpp.
-
-        let trace = false;
-        const c = self.c;
-        const importer = new C_Importer(c);
-
-        const w_path = 'C:/Repos/codon/codon/app/main.cpp';
-        const w_exists = await g.os_path_exists(w_path);
-        if (!w_exists) {
-            return;
-            // self.skipTest(`Not found: ${w_path}`);
-        }
-
-        assert.ok(false, "THE CODON FILE ACTUALLY EXISTS IN THE TESTS!");
-
-
-        // // with open(path, 'r') as f
-        // //     source = f.read();
-        // let [source, e] = await g.readFileIntoString(w_path);
-
-
-        // const lines = g.splitLines(source);
-        // if (1) {  // Test gen_lines.
-        //     importer.root = c.p;
-        //     importer.gen_lines(lines, c.p);
-        //     if (trace) {
-        //         for (const p of c.p.self_and_subtree()) {
-        //             g.printObj(p.b, p.h);
-        //         }
-        //     }
-        // } else { // Test find_blocks.
-        //     importer.guide_lines = importer.make_guide_lines(lines);
-        //     const result = importer.find_blocks(0, importer.guide_lines.length);
-        //     if (trace) {
-        //         console.log('');
-        //         g.trace();
-        //         for (const z of result) {
-        //             let [kind, name, start, start_body, end] = z;
-        //             console.log(`${kind.toString().padStart(10)} ${name.toString().padEnd(20)} ${start.toString().padStart(4)} ${start_body.toString().padStart(4)} ${end.toString().padStart(4)}`);
-        //         }
-
-        //     }
-        //     // The result lines must tile (cover) the original lines.
-        //     const result_lines = [];
-        //     for (const z of result) {
-        //         let [kind, name, start, start_body, end] = z;
-        //         result_lines.push(...lines.slice(start, end));
-        //     }
-
-        //     assert.ok(g.compareArrays(lines, result_lines, true));
-
-        // }
-    });
     //@+node:felix.20230916220459.12: *3* TestC.test_struct
     test('test_struct', async () => {
         //  From codon soources.
@@ -837,7 +735,8 @@ suite('TestCoffeescript', () => {
                 '# `transform()`\n' +
                 '\n' +
                 'transform: (args...) ->\n' +
-                '  @transformer.transform.apply(@transformer, args)\n'
+                '  @transformer.transform.apply(@transformer, args)\n' +
+                '\n' // Leo 6.8.7
             ],
             [2, 'Builder.body',
                 '# `body()`\n' +
@@ -846,7 +745,8 @@ suite('TestCoffeescript', () => {
                 '  str = @build(node, opts)\n' +
                 '  str = blockTrim(str)\n' +
                 '  str = unshift(str)\n' +
-                '  if str.length > 0 then str else ""\n'
+                '  if str.length > 0 then str else ""\n' +
+                '\n' // Leo 6.8.7
             ],
         ];
         await self.new_run_test(s, expected_results);
@@ -964,7 +864,7 @@ suite('TestCython', () => {
 
     //@+others
     //@+node:felix.20230919214352.2: *3* TestCython.test_importer
-    test('test_importer', async () => {
+    test('test_cython_importer', async () => {
         const s = `
             from libc.math cimport pow
 
@@ -995,7 +895,8 @@ suite('TestCython', () => {
                 '    This is a cdef function that can be called from within\n' +
                 '    a Cython program, but not from Python.\n' +
                 '    """\n' +
-                '    return pow(x, 2.0) + x\n'
+                '    return pow(x, 2.0) + x\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'cpdef print_result',
                 'cpdef print_result (double x):\n' +
@@ -1003,7 +904,7 @@ suite('TestCython', () => {
                 '    print("({} ^ 2) + {} = {}".format(x, x, square_and_add(x)))\n'
             ],
         ];
-        await self.new_run_test(s, expected_results, 'TestCython.test_importer');
+        await self.new_run_test(s, expected_results, 'TestCython.test_cython_importer');
     });
     //@-others
 
@@ -1061,13 +962,15 @@ suite('TestDart', () => {
                 '\n' +
                 'hello() {\n' +
                 "  print('Hello, World!');\n" +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'function printNumber',
                 '// Define a function.\n' +
                 'printNumber(num aNumber) {\n' +
                 "  print('The number is $aNumber.'); // Print to console.\n" +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'function void main',
                 '// This is where the app starts executing.\n' +
@@ -1135,7 +1038,8 @@ suite('TestElisp', () => {
                 '(defun abc (a b)\n' +
                 '   (assn a "abc")\n' +
                 '   (assn b \\x)\n' +
-                '   (+ 1 2 3))\n'
+                '   (+ 1 2 3))\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'defun cde',
                 '; comment re cde\n' +
@@ -1265,6 +1169,7 @@ suite('TestHtml', () => {
                 '</body>\n'
             ],
             [2, '<div id="D666">Paragraph</p> <!-- P1 -->',
+                '\n' + // Leo 6.8.7
                 '<!-- OOPS: the div and p elements not properly nested.-->\n' +
                 '<!-- OOPS: this table got generated twice. -->\n' +
                 '\n' +
@@ -1428,7 +1333,7 @@ suite('TestHtml', () => {
             .replace(/<noscript><img/g, '<noscript>\n<img');
 
 
-        await self.new_round_trip_test(s, expected_s);
+        await self.new_round_trip_test(s, expected_s, false);
     });
     //@+node:felix.20230921214523.8: *3* TestHtml.test_multple_node_completed_on_a_line
     test('test_multple_node_completed_on_a_line', async () => {
@@ -1784,6 +1689,7 @@ suite('TestJava', () => {
         const expected_results: [number, string, string][] = [
             [0, '', // Ignore the first headline.
                 '@others\n' +
+                '\n' +  // Leo 6.8.7
                 '@language java\n' +
                 '@tabwidth -4\n'
             ],
@@ -1860,6 +1766,50 @@ suite('TestJava', () => {
             ]
         ];
         await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20250824163821.1: *3* TestJava.test_round_trip
+    test('test_round_trip', async () => {
+
+        const c = self.c;
+        const root = self.c.p;
+        const at = c.atFileCommands;
+        //@+<< define contents: test_round_trip >>
+        //@+node:felix.20250824164337.1: *4* << define contents: test_round_trip >>
+        const contents = `
+            public class Main {
+                public static void main(String[] args) {
+                    myMethod();
+                }
+
+                static void myMethod() {
+                    System.out.println("I just got executed!");
+                }
+
+            }
+        `.trim() + '\n';
+        //@-<< define contents: test_round_trip >>
+
+        // Import contents into root's tree.
+        const importer = new Java_Importer(c);
+        importer.import_from_string(root, contents);
+
+        if (0) {
+            for (const z of root.self_and_subtree()) {
+                g.printObj(g.splitLines(z.b));
+            }
+            console.log('\n=== End dump ===\n');
+        }
+        //  Write the tree as if it were an @auto node.
+        root.h = '@auto test.java';
+        const results = await at.atAutoToString(root);
+        const expected = contents;
+
+        if (results !== expected) {
+            g.printObj(contents);
+            g.printObj(results);
+            g.printObj(expected);
+        }
+        assert.strictEqual(results, expected);
     });
     //@-others
 
@@ -1953,6 +1903,7 @@ suite('TestJavascript', () => {
             [1, 'function c3',
                 'var c3 = (function () {\n' +
                 '    @others\n' +
+                '\n' +  // Leo 6.8.7
                 '    return c3;\n' +
                 '}());\n'
             ],
@@ -2044,6 +1995,7 @@ suite('TestLua', () => {
         const expected_results: [number, string, string][] = [
             [0, '', // Ignore the first headline.
                 '@others\n' +
+                '\n' +  // Leo 6.8.7
                 'print("main", coroutine.resume(co, 1, 10))\n' +
                 'print("main", coroutine.resume(co, "r"))\n' +
                 'print("main", coroutine.resume(co, "x", "y"))\n' +
@@ -2055,7 +2007,8 @@ suite('TestLua', () => {
                 'function foo (a)\n' +
                 '  print("foo", a)\n' +
                 '  return coroutine.yield(2*a)\n' +
-                'end\n'
+                'end\n' +
+                '\n'  // Leo 6.8.7
             ],
             [1, 'function coroutine.create',
                 'co = coroutine.create(function (a,b)\n' +
@@ -2814,7 +2767,8 @@ suite('TestPascal', () => {
                 '\n' +
                 'implementation\n' +
                 '\n' +
-                '{$R *.dfm}\n'
+                '{$R *.dfm}\n' +
+                '\n'  // Leo 6.8.7
             ],
             [1, 'procedure TForm1.FormCreate',
                 'procedure TForm1.FormCreate(Sender: TObject);\n' +
@@ -2922,7 +2876,8 @@ suite('TestPascal', () => {
                 'interface\n' +
                 'uses gf2obj1;\n' +
                 '\n' +
-                'implementation\n'
+                'implementation\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'procedure statObj.scale',
                 'procedure statObj.scale(factor: float);\n' +
@@ -2930,7 +2885,8 @@ suite('TestPascal', () => {
                 'begin\n' +
                 '   for i := 1 to num do\n' +
                 '      with data^[i] do y := factor * y;\n' +
-                'end;\n'
+                'end;\n' +
+                '\n' // Leo 6.8.7
 
             ],
             [1, 'procedure statObj.multiplyGraph',
@@ -2941,7 +2897,8 @@ suite('TestPascal', () => {
                 'if max < num then num := max;\n' +
                 'for i := 1 to max do\n' +
                 '    data^[i].y := data^[i].y * pstatObj(source)^.data^[i].y;\n' +
-                'end;\n'
+                'end;\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'function statObj.divideGraph',
                 'function statObj.divideGraph(var numerator: pGraphObj): boolean;\n' +
@@ -2975,7 +2932,8 @@ suite('TestPascal', () => {
                 'setNum(j);\n' +
                 'dispose(pg, byebye);\n' +
                 'divideGraph := not zeroData;\n' +
-                'end;\n'
+                'end;\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'procedure statObj.addGraph',
                 'procedure statObj.addGraph(var source: pgraphObj);\n' +
@@ -3066,7 +3024,8 @@ suite('TestPerl', () => {
                 '            sub Hello{\n' +
                 '               print "Hello, World!\n' +
                 '";\n' +
-                '            }\n'
+                '            }\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'sub Test',
                 '            sub Test{\n' +
@@ -3142,7 +3101,8 @@ suite('TestPerl', () => {
                 '            sub Test{\n' +
                 '               print "Test!\n' +
                 '";\n' +
-                '            }\n'
+                '            }\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'sub World',
                 '            =begin comment\n' +
@@ -3194,17 +3154,20 @@ suite('TestPerl', () => {
                 '\n' +
                 'sub test1 {\n' +
                 '    s = /}/g;\n' +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'sub test2',
                 'sub test2 {\n' +
                 '    s = m//}/;\n' +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'sub test3',
                 'sub test3 {\n' +
                 '    s = s///}/;\n' +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'sub test4',
                 'sub test4 {\n' +
@@ -3358,6 +3321,154 @@ suite('TestPython', () => {
     });
 
     //@+others
+    //@+node:felix.20250824171451.1: *3* TestPython.test_almost_empty_defs
+    test('test_almost_empty_defs', async () => {
+
+        const s = `
+            class TracerCore:
+
+                def start(self):
+                    """Start this tracer."""
+
+                def stop(self):
+                    """Stop this tracer."""
+
+            # About main
+            def main():
+                pass
+
+            if __name__ == '__main__':
+                main()
+            `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '\n' + // Leo 6.8.7
+                "if __name__ == '__main__':\n" +
+                '    main()\n' +
+                '@language python\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'class TracerCore',
+                'class TracerCore:\n' +
+                '\n' + // Leo 6.8.7
+                '    @others\n' +
+                '\n'  // Leo 6.8.7
+            ],
+            [2, 'TracerCore.start',
+                'def start(self):\n' +
+                '    """Start this tracer."""\n' +
+                '\n'  // Leo 6.8.7
+            ],
+            [2, 'TracerCore.stop',
+                'def stop(self):\n' +
+                '    """Stop this tracer."""\n'
+            ],
+            [1, 'function: main',
+                '# About main\n' +
+                'def main():\n' +
+                '    pass\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20250824171456.1: *3* TestPython.test_class_docstring
+    test('test_class_docstring', async () => {
+
+        // Test that docstrings contain no whitespace in otherwise blank lines.
+        // To do: Test generation of @others.
+        const s = `
+            class RefactoringChecker(checkers.BaseTokenChecker):
+                """Looks for code which can be refactored.
+
+                This checker also mixes the astroid and the token approaches
+                in order to create knowledge about whether an "else if" node
+                is a true "else if" node, or an "elif" node.
+                """
+
+                name = "refactoring"
+
+                msgs = {
+                    "R1701": (
+                        "Consider merging these isinstance calls to isinstance(%s, (%s))",
+                        "consider-merging-isinstance",
+                        "Used when multiple consecutive isinstance calls can be merged into one.",
+                    ),
+                }
+
+                options = (
+                    (
+                        "max-nested-blocks",
+                        {
+                            "default": 5,
+                            "type": "int",
+                            "metavar": "<int>",
+                            "help": "Maximum number of nested blocks for function / method body",
+                        },
+                    ),
+                )
+
+                def __init__(self, linter: PyLinter) -> None:
+                    super().__init__(linter)
+                    self._return_nodes: dict[str, list[nodes.Return]] = {}
+                    self._consider_using_with_stack = ConsiderUsingWithStack()
+                    self._init()
+                    self._never_returning_functions: set[str] = set()
+                    self._suggest_join_with_non_empty_separator: bool = False
+            `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language python\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'class RefactoringChecker',
+                'class RefactoringChecker(checkers.BaseTokenChecker):\n' +
+                '    """Looks for code which can be refactored.\n' +
+                '\n' + // There should be no leading whitespace in this line.
+                '    This checker also mixes the astroid and the token approaches\n' +
+                '    in order to create knowledge about whether an "else if" node\n' +
+                '    is a true "else if" node, or an "elif" node.\n' +
+                '    """\n' +
+                '\n' + // Leo 6.8.7.
+                '    @others\n'
+            ],
+            [2, 'RefactoringChecker.__init__',
+                'name = "refactoring"\n' +
+                '\n' +
+                'msgs = {\n' +
+                '    "R1701": (\n' +
+                '        "Consider merging these isinstance calls to isinstance(%s, (%s))",\n' +
+                '        "consider-merging-isinstance",\n' +
+                '        "Used when multiple consecutive isinstance calls can be merged into one.",\n' +
+                '    ),\n' +
+                '}\n' +
+                '\n' +
+                'options = (\n' +
+                '    (\n' +
+                '        "max-nested-blocks",\n' +
+                '        {\n' +
+                '            "default": 5,\n' +
+                '            "type": "int",\n' +
+                '            "metavar": "<int>",\n' +
+                '            "help": "Maximum number of nested blocks for function / method body",\n' +
+                '        },\n' +
+                '    ),\n' +
+                ')\n' +
+                '\n' +
+                'def __init__(self, linter: PyLinter) -> None:\n' +
+                '    super().__init__(linter)\n' +
+                '    self._return_nodes: dict[str, list[nodes.Return]] = {}\n' +
+                '    self._consider_using_with_stack = ConsiderUsingWithStack()\n' +
+                '    self._init()\n' +
+                '    self._never_returning_functions: set[str] = set()\n' +
+                '    self._suggest_join_with_non_empty_separator: bool = False\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
     //@+node:felix.20230917230509.2: *3* TestPython.test_delete_comments_and_strings
     test('test_delete_comments_and_strings', () => {
 
@@ -3399,60 +3510,86 @@ suite('TestPython', () => {
         assert.strictEqual(result.length, expected_lines.length);
         assert.ok(g.compareArrays(result, expected_lines, true));
     });
+    //@+node:felix.20250824171630.1: *3* TestPython.test_delete_comments_and_strings2
+    test('test_delete_comments_and_strings2', async () => {
+
+        const s = `
+            """
+            An application for managing IPython history.
+
+            To be invoked as the \`ipython history\` subcommand.
+            """
+            print(
+                "end\\n"
+            )
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '"""\n' +
+                'An application for managing IPython history.\n' +
+                '\n' +
+                'To be invoked as the `ipython history` subcommand.\n' +
+                '"""\n' +
+                'print(\n' +
+                '    "end\\n"\n' +
+                ')\n' +
+                '@language python\n' +
+                '@tabwidth -4\n'
+            ],
+        ];
+
+        await self.new_run_test(s, expected_results);
+    });
     //@+node:felix.20230917230509.3: *3* TestPython.test_general_test_1
     test('test_general_test_1', async () => {
         let s =
             `
-            import sys
-            def f1():
-                pass
-
-            class Class1:
-                def method11():
-                    pass
-                def method12():
+                import sys
+                def f1():
                     pass
 
-            #
-            # Define a = 2
-            a = 2
+                class Class1:
+                    def method11():
+                        pass
+                    def method12():
+                        pass
 
-            def f2():
-                pass
+                #
+                # Define a = 2
+                a = 2
 
-            # An outer comment
-            ATmyClassDecorator
-            class Class2:
-                def method21():
-                    print(1)
-                    print(2)
-                    print(3)
-                ATmyDecorator
-                def method22():
-                    pass
-                def method23():
+                def f2():
                     pass
 
-            class Class3:
-            # Outer underindented comment
-                def u1():
-                # Underindented comment in u1.
+                # An outer comment
+                ATmyClassDecorator
+                class Class2:
+                    def method21():
+                        print(1)
+                        print(2)
+                        print(3)
+                    ATmyDecorator
+                    def method22():
+                        pass
+                    def method23():
+                        pass
+
+                # About main.
+
+                def main():
                     pass
 
-            # About main.
-
-            def main():
-                pass
-
-            if __name__ == '__main__':
-                main()
-        `;
+                if __name__ == '__main__':
+                    main()
+            `;
         s = s.replace(/AT/g, '@');
 
         const expected_results: [number, string, string][] = [
             [0, '',  // Ignore the first headline.
                 'import sys\n' +
                 '@others\n' +
+                '\n' + // Leo 6.8.7
                 "if __name__ == '__main__':\n" +
                 '    main()\n' +
                 '@language python\n' +
@@ -3460,11 +3597,13 @@ suite('TestPython', () => {
             ],
             [1, 'function: f1',
                 'def f1():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n'  // Leo 6.8.7
             ],
             [1, 'class Class1',
                 'class Class1:\n' +
-                '    @others\n'
+                '    @others\n' +
+                '\n'  // Leo 6.8.7
             ],
             [2, 'Class1.method11',
                 'def method11():\n' +
@@ -3480,13 +3619,15 @@ suite('TestPython', () => {
                 'a = 2\n' +
                 '\n' +
                 'def f2():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n'  // Leo 6.8.7
             ],
             [1, 'class Class2',
                 '# An outer comment\n' +
                 '@myClassDecorator\n' +
                 'class Class2:\n' +
-                '    @others\n'
+                '    @others\n' +
+                '\n'  // Leo 6.8.7
             ],
             [2, 'Class2.method21',
                 'def method21():\n' +
@@ -3503,24 +3644,131 @@ suite('TestPython', () => {
                 'def method23():\n' +
                 '    pass\n'
             ],
-            [1, 'class Class3',
-                'class Class3:\n' +
-                '@others\n'  // The underindented comments prevents indentation
-            ],
-            [2, 'Class3.u1',
-                '# Outer underindented comment\n' +
-                '    def u1():\n' +
-                '    # Underindented comment in u1.\n' +
-                '        pass\n'
-            ],
             [1, 'function: main',
                 '# About main.\n' +
                 '\n' +
                 'def main():\n' +
                 '    pass\n'
-            ]
+            ],
         ];
         await self.new_run_test(s, expected_results, 'TestPython.test_general_test_1');
+    });
+    //@+node:felix.20250824171644.1: *3* TestPython.test_ipython_idiom
+    test('test_ipython_idiom', async () => {
+
+        const s = `
+    # test_ipython_idiom
+    class HistoryTrim(BaseIPythonApplication):
+
+        description = trim_hist_help
+
+        backup = Bool(False, help="Keep the old history file as history.sqlite.<N>").tag(
+            config=True
+        )
+
+        def start(self):
+            new_db.execute("""CREATE TABLE IF NOT EXISTS output_history
+                            (session integer, line integer, output text,
+                            PRIMARY KEY (session, line))""")
+            new_db.commit()
+            new_hist_file.rename(hist_file)
+
+
+    class HistoryClear(HistoryTrim):
+
+        def start(self):
+            if self.force or ask_yes_no(
+                "Really delete all ipython history?", default="no", interrupt="no"
+            ):
+                HistoryTrim.start(self)
+
+
+    class HistoryApp(Application):
+
+        subcommands = Dict(dict(
+            trim = (HistoryTrim, HistoryTrim.description.splitlines()[0]),
+            clear = (HistoryClear, HistoryClear.description.splitlines()[0]),
+        ))
+
+        def start(self):
+            if self.subapp is None:
+                print(
+                    "No subcommand specified. Must specify one of: "
+                    + ", ".join(map(repr, self.subcommands))
+                    + ".\\n"
+                )
+                self.print_description()
+            else:
+                return self.subapp.start()
+    `;
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '# test_ipython_idiom\n' +
+                '@others\n' +
+                '@language python\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'class HistoryTrim',
+                'class HistoryTrim(BaseIPythonApplication):\n' +
+                '\n' + // Leo 6.8.7
+                '    @others\n' +
+                '\n' + // Leo 6.8.7
+                '\n'  // Leo 6.8.7
+            ],
+            [2, 'HistoryTrim.start',
+                'description = trim_hist_help\n' +
+                '\n' +
+                'backup = Bool(False, help="Keep the old history file as history.sqlite.<N>").tag(\n' +
+                '    config=True\n' +
+                ')\n' +
+                '\n' +
+                'def start(self):\n' +
+                '    new_db.execute("""CREATE TABLE IF NOT EXISTS output_history\n' +
+                '                    (session integer, line integer, output text,\n' +
+                '                    PRIMARY KEY (session, line))""")\n' +
+                '    new_db.commit()\n' +
+                '    new_hist_file.rename(hist_file)\n'
+            ],
+            [1, 'class HistoryClear',
+                'class HistoryClear(HistoryTrim):\n' +
+                '\n' +  // Leo 6.8.7
+                '    @others\n' +
+                '\n' + // Leo 6.8.7
+                '\n' // Leo 6.8.7
+            ],
+            [2, 'HistoryClear.start',
+
+                'def start(self):\n' +
+                '    if self.force or ask_yes_no(\n' +
+                '        "Really delete all ipython history?", default="no", interrupt="no"\n' +
+                '    ):\n' +
+                '        HistoryTrim.start(self)\n'
+            ],
+            [1, 'class HistoryApp',
+                'class HistoryApp(Application):\n' +
+                '\n' + // Leo 6.8.7
+                '    @others\n'
+            ],
+            [2, 'HistoryApp.start',
+
+                'subcommands = Dict(dict(\n' +
+                '    trim = (HistoryTrim, HistoryTrim.description.splitlines()[0]),\n' +
+                '    clear = (HistoryClear, HistoryClear.description.splitlines()[0]),\n' +
+                '))\n' +
+                '\n' +
+                'def start(self):\n' +
+                '    if self.subapp is None:\n' +
+                '        print(\n' +
+                '            "No subcommand specified. Must specify one of: "\n' +
+                '            + ", ".join(map(repr, self.subcommands))\n' +
+                '            + ".\\n"\n' + // Tricky. Can't use 'r' prefix here.
+                '        )\n' +
+                '        self.print_description()\n' +
+                '    else:\n' +
+                '        return self.subapp.start()\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
     });
     //@+node:felix.20230917230509.4: *3* TestPython.test_long_declaration
     test('test_long_declaration', async () => {
@@ -3561,6 +3809,122 @@ suite('TestPython', () => {
         ];
         await self.new_run_test(s, expected_results);
     });
+    //@+node:felix.20250824171649.1: *3* TestPython.test_long_defs
+    test('test_long_defs', async () => {
+
+        const s = `
+            def iter_spurious_suppression_messages(
+                self,
+                msgs_store: MessageDefinitionStore,
+            ) -> Iterator[
+                tuple[
+                    Literal["useless-suppression", "suppressed-message"],
+                    int,
+                    tuple[str] | tuple[str, int],
+                ]
+            ]:
+                for warning, lines in self._raw_module_msgs_state.items():
+                    for line, enable in lines.items():
+                        if (
+                            not enable
+                            and (warning, line) not in self._ignored_msgs
+                            and warning not in INCOMPATIBLE_WITH_USELESS_SUPPRESSION
+                        ):
+                            yield "useless-suppression", line, (
+                                msgs_store.get_msg_display_string(warning),
+                            )
+            `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language python\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'function: iter_spurious_suppression_messages',
+
+                'def iter_spurious_suppression_messages(\n' +
+                '    self,\n' +
+                '    msgs_store: MessageDefinitionStore,\n' +
+                ') -> Iterator[\n' +
+                '    tuple[\n' +
+                '        Literal["useless-suppression", "suppressed-message"],\n' +
+                '        int,\n' +
+                '        tuple[str] | tuple[str, int],\n' +
+                '    ]\n' +
+                ']:\n' +
+                '    for warning, lines in self._raw_module_msgs_state.items():\n' +
+                '        for line, enable in lines.items():\n' +
+                '            if (\n' +
+                '                not enable\n' +
+                '                and (warning, line) not in self._ignored_msgs\n' +
+                '                and warning not in INCOMPATIBLE_WITH_USELESS_SUPPRESSION\n' +
+                '            ):\n' +
+                '                yield "useless-suppression", line, (\n' +
+                '                    msgs_store.get_msg_display_string(warning),\n' +
+                '                )\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20231012230324.1: *3* TestPython.test_long_outer_docstring
+    test('test_long_outer_docstring', async () => {
+        const s = `
+            """
+            Multi-line module-level docstring
+
+            Last line.
+            """
+
+            from __future__ import annotations
+
+            class C1:
+                """Class docstring"""
+
+                def __init__(self):
+                    pass
+
+            def f1():
+                pass
+
+            `;
+
+        const expected_results: [number, string, string][] = [
+            [0, '', // Ignore the first headline.
+                '"""\n' +
+                'Multi-line module-level docstring\n' +
+                '\n' +
+                'Last line.\n' +
+                '"""\n' +
+                '\n' +
+                'from __future__ import annotations\n' +
+                '\n' +
+                '@others\n' +
+                '@language python\n' +
+                '@tabwidth -4\n'
+            ],
+            [1, 'class C1',
+                'class C1:\n' +
+                '    """Class docstring"""\n' +
+                '\n' + // Leo 6.8.7
+                '    @others\n' +
+                '\n'
+            ],
+            [2, 'C1.__init__',
+                'def __init__(self):\n' +
+                '    pass\n'
+            ],
+            [1, 'function: f1',
+                'def f1():\n' +
+                '    pass\n' +
+                '\n' // Leo 6.8.7
+            ]
+        ];
+
+
+        await self.new_run_test(s, expected_results, 'TestPython.test_post_process');
+
+    });
     //@+node:felix.20230917230509.5: *3* TestPython.test_nested_classes
     test('test_nested_classes', async () => {
         const s = `
@@ -3595,7 +3959,6 @@ suite('TestPython', () => {
         await self.new_run_test(s, expected_results);
     });
     //@+node:felix.20231012222746.1: *3* TestPython.test_nested_defs
-
     test('test_nested_defs', async () => {
         // See #3517
 
@@ -3688,6 +4051,7 @@ suite('TestPython', () => {
             [0, '',  // Ignore the first headline.
                 'import sys\n' +
                 '@others\n' +
+                '\n' + // Leo 6.8.7
                 "if __name__ == '__main__':\n" +
                 '    main()\n' +
                 '@language python\n' +
@@ -3695,7 +4059,8 @@ suite('TestPython', () => {
             ],
             [1, 'function: f1',
                 'def f1():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'class Class1',
                 'class Class1:pass\n'
@@ -3703,7 +4068,8 @@ suite('TestPython', () => {
             [1, 'function: f2',
                 'a = 2\n' +
                 '@dec_for_f2\n' +
-                'def f2(): pass\n'
+                'def f2(): pass\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'function: main',
                 'def main():\n' +
@@ -3742,7 +4108,9 @@ suite('TestPython', () => {
             [1, 'class C1',
                 'class C1:\n' +
                 '    """Class docstring"""\n' +
-                '    @others\n'
+                '\n' + // Leo 6.8.7
+                '    @others\n' +
+                '\n' // Leo 6.8.7
             ],
             [2, 'C1.__init__',
                 'def __init__(self):\n' +
@@ -3750,67 +4118,83 @@ suite('TestPython', () => {
             ],
             [1, 'function: f1',
                 'def f1():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n' // Leo 6.8.7
             ],
         ];
 
-        await self.new_run_test(s, expected_results, 'TestPython.test_post_process');
+        // await self.new_run_test(s, expected_results, 'TestPython.test_post_process');
+        await self.new_run_test(s, expected_results);
     });
-    //@+node:felix.20231012230324.1: *3* TestPython.test_post_process_long_outer_docstring
+    //@+node:felix.20250824172232.1: *3* TestPython.test_python_reference_test
+    test('test_python_reference_test', async () => {
 
-    test('test_long_outer_docstring', async () => {
+        // A reference unit test to test experimental test.
+        // This test should contain all edge cases of the Python importer.
         const s = `
-            """
-            Multi-line module-level docstring
+            class MyClass:
+                """MyClass: docstring"""
 
-            Last line.
-            """
-
-            from __future__ import annotations
-
-            class C1:
-                """Class docstring"""
-
-                def __init__(self):
+                def f1(self):
                     pass
 
-            def f1():
+                def f2(
+                    self, arg1
+                ):
+                    a = 1
+                    def inner_def():
+                        pass
+
+
+            # About main
+            def main():
                 pass
 
-            `;
+            if __name__ == '__main__':
+                main()
+
+
+            `;  // Leo 6.8.7: Two blank lines: trailing ws is *significant*.
 
         const expected_results: [number, string, string][] = [
-            [0, '', // Ignore the first headline.
-                '"""\n' +
-                'Multi-line module-level docstring\n' +
-                '\n' +
-                'Last line.\n' +
-                '"""\n' +
-                '\n' +
-                'from __future__ import annotations\n' +
-                '\n' +
+            [0, '',  // Ignore the first headline.
                 '@others\n' +
+                '\n' +
+                "if __name__ == '__main__':\n" +
+                '    main()\n' +
+                '\n' +
+                '\n' +
                 '@language python\n' +
                 '@tabwidth -4\n'
             ],
-            [1, 'class C1',
-                'class C1:\n' +
-                '    """Class docstring"""\n' +
-                '    @others\n'
+            [1, 'class MyClass',
+                'class MyClass:\n' +
+                '    """MyClass: docstring"""\n' +
+                '\n' +
+                '    @others\n' +
+                '\n' +
+                '\n'
             ],
-            [2, 'C1.__init__',
-                'def __init__(self):\n' +
+            [2, 'MyClass.f1',
+                'def f1(self):\n' +
+                '    pass\n' +
+                '\n'
+            ],
+            [2, 'MyClass.f2',
+                'def f2(\n' +
+                '    self, arg1\n' +
+                '):\n' +
+                '    a = 1\n' +
+                '    def inner_def():\n' +
+                '        pass\n'
+            ],
+            [1, 'function: main',
+                '# About main\n' +
+                'def main():\n' +
                 '    pass\n'
             ],
-            [1, 'function: f1',
-                'def f1():\n' +
-                '    pass\n'
-            ]
         ];
-
-
-        await self.new_run_test(s, expected_results, 'TestPython.test_post_process');
-
+        await self.new_run_test(s, expected_results);
     });
     //@+node:felix.20230917230509.10: *3* TestPython.test_strange_indentation
     test('test_strange_indentation', async () => {
@@ -3874,46 +4258,53 @@ suite('TestPython', () => {
         ];
         await self.new_run_test(s, expected_results);
     });
-    //@+node:felix.20230917230509.11: *3* TestPython.test_nested_defs
-    test('test_nested_defs', async () => {
-        // See #3517
+    //@+node:felix.20250824172108.1: *3* TestPython.test_underindented_lines
+    test('test_underindented_lines', async () => {
 
-        // A simplified version of code in mypy/build.py.
-        const s = `
-                def load_plugins_from_config(
-                    options: Options, errors: Errors, stdout: TextIO
-                ) -> tuple[list[Plugin], dict[str, str]]:
-                    """Load all configured plugins."""
+        const s =
+            `
+                class Class3:
+                    """Docstring"""
+                # Outer underindented comment
+                    def u1():
+                    # Underindented comment in u1.
+                        pass
 
-                    snapshot: dict[str, str] = {}
+                # About main.
 
-                    def plugin_error(message: str) -> NoReturn:
-                        errors.report(line, 0, message)
-                        errors.raise_error(use_stdout=False)
+                def main():
+                    pass
 
-                    custom_plugins: list[Plugin] = []
+                if __name__ == '__main__':
+                    main()
             `;
 
-
         const expected_results: [number, string, string][] = [
-            [0, '',  // Ignore the first headline.
+            [0, '',
                 '@others\n' +
+                '\n' + // Leo 6.8.7
+                "if __name__ == '__main__':\n" +
+                '    main()\n' +
                 '@language python\n' +
                 '@tabwidth -4\n'
             ],
-            [1, 'function: load_plugins_from_config',
-                'def load_plugins_from_config(\n' +
-                '    options: Options, errors: Errors, stdout: TextIO\n' +
-                ') -> tuple[list[Plugin], dict[str, str]]:\n' +
-                '    """Load all configured plugins."""\n' +
+            [1, 'class Class3',
+                'class Class3:\n' +
+                '    """Docstring"""\n' +
+                '@others\n' +
+                '\n'  // Leo 6.8.7
+            ],
+            [2, 'Class3.u1',
+                '# Outer underindented comment\n' +
+                '    def u1():\n' +
+                '    # Underindented comment in u1.\n' +
+                '        pass\n'
+            ],
+            [1, 'function: main',
+                '# About main.\n' +
                 '\n' +
-                '    snapshot: dict[str, str] = {}\n' +
-                '\n' +
-                '    def plugin_error(message: str) -> NoReturn:\n' +
-                '        errors.report(line, 0, message)\n' +
-                '        errors.raise_error(use_stdout=False)\n' +
-                '\n' +
-                '    custom_plugins: list[Plugin] = []\n'
+                'def main():\n' +
+                '    pass\n'
             ],
         ];
         await self.new_run_test(s, expected_results);
@@ -4356,8 +4747,8 @@ suite('TestRust', () => {
     });
 
     //@+others
-    //@+node:felix.20230923013602.2: *3* TestRust.test_1
-    test('test_1', async () => {
+    //@+node:felix.20230923013602.2: *3* TestRust.test_rust_1
+    test('test_rust_1', async () => {
         const s = `
             fn main() {
                 let width1 = 30;
@@ -4388,7 +4779,8 @@ suite('TestRust', () => {
                 '        "The area of the rectangle is {} square pixels.",\n' +
                 '        area(width1, height1)\n' +
                 '    );\n' +
-                '}\n'
+                '}\n' +
+                '\n'  // Leo 6.8.7
             ],
             [1, 'fn area',
                 'fn area(width: u32, height: u32) -> u32 {\n' +
@@ -4442,7 +4834,8 @@ suite('TestRust', () => {
                 '\n' +
                 '    /// Returns an object that is able to format this object.\n' +
                 "    fn format(&self) -> Self::Format<'_>;\n" +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'impl AsFormat for &T',
                 '/// Implement [`AsFormat`] for references to types that implement [`AsFormat`].\n' +
@@ -4643,6 +5036,7 @@ suite('TestTcl', () => {
         const expected_results: [number, string, string][] = [
             [0, '',  // Ignore the first headline.
                 '@others\n' +
+                '\n' + // Leo 6.8.7
                 ' # Main program\n' +
                 '\n' +
                 ' if { [info exists argv0] && [string equal $argv0 [info script]] } {\n' +

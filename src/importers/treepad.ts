@@ -121,8 +121,8 @@ export class Treepad_Importer extends Importer {
 /**
  * The importer callback for treepad.
  */
-export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
-    new Treepad_Importer(c).import_from_string(parent, s, treeType);
+export const do_import = (c: Commands, parent: Position, s: string) => {
+    new Treepad_Importer(c).import_from_string(parent, s);
 };
 
 export const importer_dict = {

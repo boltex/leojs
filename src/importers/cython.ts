@@ -45,8 +45,8 @@ export class Cython_Importer extends Python_Importer {
 /**
  * The importer callback for cython.
  */
-export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
-  new Cython_Importer(c).import_from_string(parent, s, treeType);
+export const do_import = (c: Commands, parent: Position, s: string) => {
+  new Cython_Importer(c).import_from_string(parent, s);
 };
 
 export const importer_dict = {
