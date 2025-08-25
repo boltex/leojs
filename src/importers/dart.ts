@@ -32,8 +32,8 @@ export class Dart_Importer extends Importer {
 /**
  * The importer callback for dart.
  */
-export const do_import = (c: Commands, parent: Position, s: string, treeType = '@file') => {
-  new Dart_Importer(c).import_from_string(parent, s, treeType);
+export const do_import = (c: Commands, parent: Position, s: string) => {
+  new Dart_Importer(c).import_from_string(parent, s);
 };
 
 export const importer_dict = {

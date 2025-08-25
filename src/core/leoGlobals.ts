@@ -1035,14 +1035,11 @@ export const dictToString = objToString;
  * Pretty print any Python object using pr.
  */
 export function printObj(
-    obj: any,
-    indent = '',
-    printCaller = false,
-    tag?: string
+    ...args: any[]
 ): void {
     // TODO : Replace with output to proper pr function
     //     pr(objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
-    pr(obj);
+    pr(...args);
 }
 
 //@+node:felix.20211104210724.1: ** g.Directives

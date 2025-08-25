@@ -838,7 +838,7 @@ export class LeoImportCommands {
             s = g.toUnicode(s, this.encoding);
             s = s.replace(/\r/g, '');
             // func is a factory that instantiates the importer class.
-            func(c, p, s, this.treeType);
+            func(c, p, s);
         } else {
             // Just copy the file to the parent node.
             s = g.toUnicode(s, this.encoding);
