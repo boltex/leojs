@@ -337,13 +337,18 @@ export class Python_Importer extends Importer {
     }
     const delim = s_strip.startsWith(delims[0]) ? delims[0] : delims[1];
     const lines = g.splitLines(p.b);
-    if (lines[0].includes(delim) && lines[0].lastIndexOf(delim) !== lines[0].indexOf(delim)) {
+
+    // Check for one-line docstring exactly
+    const count = (lines[0].match(new RegExp(delim, 'g')) || []).length;
+    if (count === 2) {
       return lines[0];
     }
+
+    // Multi-line docstring
     let i = 1;
     while (i < lines.length) {
       if (lines[i].includes(delim)) {
-        // Add trailing blank lines.
+        // Add trailing blank lines
         i += 1;
         while (i < lines.length && !lines[i].trim()) {
           i += 1;
@@ -352,6 +357,7 @@ export class Python_Importer extends Importer {
       }
       i += 1;
     }
+
     return undefined;
   };
   //@+node:felix.20231011211322.9: *4* python_i.move_class_docstring
@@ -360,17 +366,7 @@ export class Python_Importer extends Importer {
    */
   public move_class_docstring(docstring: string, child_p: Position, class_p: Position): void {
     // Remove the docstring from child_p.b.
-    // child_p.b = child_p.b.split(docstring).join(''); // ! Not precise !
-    const start_idx = child_p.b.indexOf(docstring);
-    if (start_idx !== -1) {
-      const end_idx = start_idx + docstring.length;
-      child_p.b = child_p.b.slice(0, start_idx) + child_p.b.slice(end_idx);
-
-      // Remove a single leading newline if present
-      if (child_p.b.startsWith('\n')) {
-        child_p.b = child_p.b.substring(1);
-      }
-    }
+    child_p.b = child_p.b.replace(docstring, '');
 
     // Carefully add the docstring to class_p.b.
     const class_lines = g.splitLines(class_p.b);

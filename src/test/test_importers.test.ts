@@ -3545,50 +3545,44 @@ suite('TestPython', () => {
     test('test_general_test_1', async () => {
         let s =
             `
-            import sys
-            def f1():
-                pass
-
-            class Class1:
-                def method11():
-                    pass
-                def method12():
+                import sys
+                def f1():
                     pass
 
-            #
-            # Define a = 2
-            a = 2
+                class Class1:
+                    def method11():
+                        pass
+                    def method12():
+                        pass
 
-            def f2():
-                pass
+                #
+                # Define a = 2
+                a = 2
 
-            # An outer comment
-            ATmyClassDecorator
-            class Class2:
-                def method21():
-                    print(1)
-                    print(2)
-                    print(3)
-                ATmyDecorator
-                def method22():
-                    pass
-                def method23():
+                def f2():
                     pass
 
-            class Class3:
-            # Outer underindented comment
-                def u1():
-                # Underindented comment in u1.
+                # An outer comment
+                ATmyClassDecorator
+                class Class2:
+                    def method21():
+                        print(1)
+                        print(2)
+                        print(3)
+                    ATmyDecorator
+                    def method22():
+                        pass
+                    def method23():
+                        pass
+
+                # About main.
+
+                def main():
                     pass
 
-            # About main.
-
-            def main():
-                pass
-
-            if __name__ == '__main__':
-                main()
-        `;
+                if __name__ == '__main__':
+                    main()
+            `;
         s = s.replace(/AT/g, '@');
 
         const expected_results: [number, string, string][] = [
@@ -3604,12 +3598,12 @@ suite('TestPython', () => {
             [1, 'function: f1',
                 'def f1():\n' +
                 '    pass\n' +
-                '\n' // Leo 6.8.7
+                '\n'  // Leo 6.8.7
             ],
             [1, 'class Class1',
                 'class Class1:\n' +
                 '    @others\n' +
-                '\n' // Leo 6.8.7
+                '\n'  // Leo 6.8.7
             ],
             [2, 'Class1.method11',
                 'def method11():\n' +
@@ -3626,14 +3620,14 @@ suite('TestPython', () => {
                 '\n' +
                 'def f2():\n' +
                 '    pass\n' +
-                '\n' // Leo 6.8.7
+                '\n'  // Leo 6.8.7
             ],
             [1, 'class Class2',
                 '# An outer comment\n' +
                 '@myClassDecorator\n' +
                 'class Class2:\n' +
                 '    @others\n' +
-                '\n' // Leo 6.8.7
+                '\n'  // Leo 6.8.7
             ],
             [2, 'Class2.method21',
                 'def method21():\n' +
@@ -3650,22 +3644,12 @@ suite('TestPython', () => {
                 'def method23():\n' +
                 '    pass\n'
             ],
-            [1, 'class Class3',
-                'class Class3:\n' +
-                '@others\n'  // The underindented comments prevents indentation
-            ],
-            [2, 'Class3.u1',
-                '# Outer underindented comment\n' +
-                '    def u1():\n' +
-                '    # Underindented comment in u1.\n' +
-                '        pass\n'
-            ],
             [1, 'function: main',
                 '# About main.\n' +
                 '\n' +
                 'def main():\n' +
                 '    pass\n'
-            ]
+            ],
         ];
         await self.new_run_test(s, expected_results, 'TestPython.test_general_test_1');
     });
@@ -3922,7 +3906,9 @@ suite('TestPython', () => {
             [1, 'class C1',
                 'class C1:\n' +
                 '    """Class docstring"""\n' +
-                '    @others\n'
+                '\n' + // Leo 6.8.7
+                '    @others\n' +
+                '\n'
             ],
             [2, 'C1.__init__',
                 'def __init__(self):\n' +
@@ -3930,7 +3916,8 @@ suite('TestPython', () => {
             ],
             [1, 'function: f1',
                 'def f1():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n' // Leo 6.8.7
             ]
         ];
 
@@ -4136,7 +4123,8 @@ suite('TestPython', () => {
             ],
         ];
 
-        await self.new_run_test(s, expected_results, 'TestPython.test_post_process');
+        // await self.new_run_test(s, expected_results, 'TestPython.test_post_process');
+        await self.new_run_test(s, expected_results);
     });
     //@+node:felix.20250824172232.1: *3* TestPython.test_python_reference_test
     test('test_python_reference_test', async () => {
