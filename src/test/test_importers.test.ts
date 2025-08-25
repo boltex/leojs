@@ -3595,6 +3595,7 @@ suite('TestPython', () => {
             [0, '',  // Ignore the first headline.
                 'import sys\n' +
                 '@others\n' +
+                '\n' + // Leo 6.8.7
                 "if __name__ == '__main__':\n" +
                 '    main()\n' +
                 '@language python\n' +
@@ -3602,11 +3603,13 @@ suite('TestPython', () => {
             ],
             [1, 'function: f1',
                 'def f1():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'class Class1',
                 'class Class1:\n' +
-                '    @others\n'
+                '    @others\n' +
+                '\n' // Leo 6.8.7
             ],
             [2, 'Class1.method11',
                 'def method11():\n' +
@@ -3622,13 +3625,15 @@ suite('TestPython', () => {
                 'a = 2\n' +
                 '\n' +
                 'def f2():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'class Class2',
                 '# An outer comment\n' +
                 '@myClassDecorator\n' +
                 'class Class2:\n' +
-                '    @others\n'
+                '    @others\n' +
+                '\n' // Leo 6.8.7
             ],
             [2, 'Class2.method21',
                 'def method21():\n' +
@@ -3778,7 +3783,7 @@ suite('TestPython', () => {
                 '    else:\n' +
                 '        return self.subapp.start()\n'
             ],
-        ]
+        ];
         await self.new_run_test(s, expected_results);
     });
     //@+node:felix.20230917230509.4: *3* TestPython.test_long_declaration
@@ -4059,6 +4064,7 @@ suite('TestPython', () => {
             [0, '',  // Ignore the first headline.
                 'import sys\n' +
                 '@others\n' +
+                '\n' + // Leo 6.8.7
                 "if __name__ == '__main__':\n" +
                 '    main()\n' +
                 '@language python\n' +
@@ -4066,7 +4072,8 @@ suite('TestPython', () => {
             ],
             [1, 'function: f1',
                 'def f1():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'class Class1',
                 'class Class1:pass\n'
@@ -4074,7 +4081,8 @@ suite('TestPython', () => {
             [1, 'function: f2',
                 'a = 2\n' +
                 '@dec_for_f2\n' +
-                'def f2(): pass\n'
+                'def f2(): pass\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'function: main',
                 'def main():\n' +
@@ -4113,7 +4121,9 @@ suite('TestPython', () => {
             [1, 'class C1',
                 'class C1:\n' +
                 '    """Class docstring"""\n' +
-                '    @others\n'
+                '\n' + // Leo 6.8.7
+                '    @others\n' +
+                '\n' // Leo 6.8.7
             ],
             [2, 'C1.__init__',
                 'def __init__(self):\n' +
@@ -4121,7 +4131,8 @@ suite('TestPython', () => {
             ],
             [1, 'function: f1',
                 'def f1():\n' +
-                '    pass\n'
+                '    pass\n' +
+                '\n' // Leo 6.8.7
             ],
         ];
 
@@ -4748,8 +4759,8 @@ suite('TestRust', () => {
     });
 
     //@+others
-    //@+node:felix.20230923013602.2: *3* TestRust.test_1
-    test('test_1', async () => {
+    //@+node:felix.20230923013602.2: *3* TestRust.test_rust_1
+    test('test_rust_1', async () => {
         const s = `
             fn main() {
                 let width1 = 30;
@@ -4780,7 +4791,8 @@ suite('TestRust', () => {
                 '        "The area of the rectangle is {} square pixels.",\n' +
                 '        area(width1, height1)\n' +
                 '    );\n' +
-                '}\n'
+                '}\n' +
+                '\n'  // Leo 6.8.7
             ],
             [1, 'fn area',
                 'fn area(width: u32, height: u32) -> u32 {\n' +
@@ -4834,7 +4846,8 @@ suite('TestRust', () => {
                 '\n' +
                 '    /// Returns an object that is able to format this object.\n' +
                 "    fn format(&self) -> Self::Format<'_>;\n" +
-                '}\n'
+                '}\n' +
+                '\n' // Leo 6.8.7
             ],
             [1, 'impl AsFormat for &T',
                 '/// Implement [`AsFormat`] for references to types that implement [`AsFormat`].\n' +
@@ -5035,6 +5048,7 @@ suite('TestTcl', () => {
         const expected_results: [number, string, string][] = [
             [0, '',  // Ignore the first headline.
                 '@others\n' +
+                '\n' + // Leo 6.8.7
                 ' # Main program\n' +
                 '\n' +
                 ' if { [info exists argv0] && [string equal $argv0 [info script]] } {\n' +

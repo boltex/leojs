@@ -127,24 +127,24 @@ export class Importer {
      * s:      The contents of the file.
      *
      */
-    public import_from_string(parent: Position, s: string) : void {
+    public import_from_string(parent: Position, s: string): void {
         const c = this.c;
         const root = parent.copy();
         this.root = root;
         this.tab_width = c.getTabWidth(root);
 
         // Fix #449: Cloned @auto nodes duplicates section references.
-        if(parent.isCloned() && parent.hasChildren()){
+        if (parent.isCloned() && parent.hasChildren()) {
             return;
         }
         parent.deleteAllChildren();
         let lines: string[] = [];
 
-        try{
+        try {
             // Check for intermixed blanks and tabs.
             lines = g.splitLinesAtNewline(s);
             const ws_ok = this.check_blanks_and_tabs(lines);  // Issues warnings.
-            if (!ws_ok){
+            if (!ws_ok) {
                 lines = this.regularize_whitespace(lines);
             }
             // A hook for importers: preprocess lines.
@@ -154,27 +154,27 @@ export class Importer {
             this.guide_lines = this.make_guide_lines(lines);
             const n1 = this.lines.length;
             const n2 = this.guide_lines.length;
-            g.assert( n1 === n2, `should be the same length: ${n1}, ${n2}`);  // A crucial invariant!
+            g.assert(n1 === n2, `should be the same length: ${n1}, ${n2}`);  // A crucial invariant!
 
             // Generate all blocks.
             this.gen_block(parent);
 
             // Add trailing lines.
-            if (this.root.isAnyAtFileNode()){  // #4385.
-                parent.b += `@language ${this.language}\n@tabwidth ${this.tab_width}\n`
+            if (this.root.isAnyAtFileNode()) {  // #4385.
+                parent.b += `@language ${this.language}\n@tabwidth ${this.tab_width}\n`;
             }
 
             // #1451: Importers should never dirty the outline.
-            for (const p of root.self_and_subtree()){
+            for (const p of root.self_and_subtree()) {
                 p.clearDirty();
             }
         }
-        catch (e){
+        catch (e) {
             g.trace(`Importer error: ${e}`);
             parent.deleteAllChildren();
             parent.b = lines.join('');
-            if (g.unitTesting){
-             throw(e);
+            if (g.unitTesting) {
+                throw (e);
             }
         }
     }
@@ -193,8 +193,8 @@ export class Importer {
         const w = this.tab_width;
         let blanks = 0;
         let tabs = 0;
-        for (const s of lines){
-            const lws = this.get_str_lws(s)
+        for (const s of lines) {
+            const lws = this.get_str_lws(s);
             blanks += (lws.match(/ /g) || []).length;
             tabs += (lws.match(/\t/g) || []).length;
         }
@@ -239,14 +239,14 @@ export class Importer {
      * Subclasses may override this method to suppress this processing.
      */
     public regularize_whitespace(lines: string[]): string[] {
-        
+
         const kind = this.tab_width > 0 ? "tabs" : "blanks";
         const kind2 = this.tab_width > 0 ? "blanks" : "tabs";
         let count = 0;
         const result: string[] = [];
         const tab_width = this.tab_width;
-        
-        if (tab_width < 0) {  
+
+        if (tab_width < 0) {
             // Convert tabs to blanks.
             for (let n = 0; n < lines.length; n++) {
                 const line = lines[n];
@@ -258,7 +258,7 @@ export class Importer {
                 }
                 result.push(s);
             }
-        } else if (tab_width > 0) {  
+        } else if (tab_width > 0) {
             // Convert blanks to tabs.
             for (let n = 0; n < lines.length; n++) {
                 const line = lines[n];
@@ -283,7 +283,7 @@ export class Importer {
      *
      * Xml_Importer uses this hook to split lines.
      */
-    public preprocess_lines(lines: string[]): string[]{
+    public preprocess_lines(lines: string[]): string[] {
         return lines;
     }
     //@+node:felix.20250823124337.6: *5* 2D: i.make_guide_lines
@@ -297,8 +297,8 @@ export class Importer {
      * The perl importer overrides this methods to delete regexes as well
      * as comments and strings.
      */
-    public make_guide_lines(lines: string[]):string[] {
-        return this.delete_comments_and_strings([...lines])
+    public make_guide_lines(lines: string[]): string[] {
+        return this.delete_comments_and_strings([...lines]);
     }
     //@+node:felix.20250823124337.7: *5* 2E: i.delete_comments_and_strings
     /**
@@ -538,7 +538,7 @@ export class Importer {
 
         // Keys: VNodes containing @others directives.
         this.at_others_dict = {}; // Key is gnx
-        const seen_blocks: Block[] = []; // Key is block.toString()
+        const seen_blocks: Block[] = [];
         const seen_vnodes: { [key: string]: boolean } = {}; // Key is gnx
 
         //The main loop.
@@ -581,20 +581,19 @@ export class Importer {
             if (block.child_blocks.length > 0) {
                 this.handle_block_with_children(block, block_common_lws);
             } else {
-               block.v!.b = this.lines.slice(block.start, block.end).join('');
+                block.v!.b = this.lines.slice(block.start, block.end).join('');
             }
 
             // Add all child blocks to the to-do list.
             todo_list.push(...block.child_blocks);
+        }
 
-            // Make sure we've seen all blocks and vnodes.
-            for (const block of result_blocks) {
-                g.assert(seen_blocks.includes(block), block.toString());
-                if (block.v) {
-                    g.assert(block.v.gnx in seen_vnodes, block.v.toString());
-                }
+        // Make sure we've seen all blocks and vnodes.
+        for (const block of result_blocks) {
+            g.assert(seen_blocks.includes(block), block.toString());
+            if (block.v) {
+                g.assert(block.v.gnx in seen_vnodes, block.v.toString());
             }
-
         }
 
     }
