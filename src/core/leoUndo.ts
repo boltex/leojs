@@ -1618,8 +1618,16 @@ export class Undoer {
         const c: Commands = u.c;
         // Remember these values.
         const newSel: number[] = u.newSel;
-        const p: Position = u.p!.copy();
-        const newP = u.newP.copy();  //  May not exist now, but must exist later.
+
+        const p: Position = u.p!.copy();  // u.p must exist now.
+        // #4373: u.newP might not exist now.
+        let newP: Position;
+        if (u.newP && u.newP.v) {
+            newP = u.newP.copy();
+        } else {
+            newP = c.p.copy();
+        }
+
         u.groupCount += 1;
         const bunch: Bead = u.beads[u.bead + 1];
         let count: number = 0;
@@ -2108,10 +2116,13 @@ export class Undoer {
         const c: Commands = u.c;
         // Remember these values.
         const oldSel: number[] = u.oldSel;
-        const p: Position = u.p!.copy();
-        const newP = u.newP.copy();  // Must exist now, but may not exist later.
-        if (g.unitTesting) {
-            g.assert(c.positionExists(newP), newP.toString());
+
+        // #4373: u.p might not exist now.
+        let p: Position;
+        if (u.p && u.p.v) {
+            p = u.p.copy();
+        } else {
+            p = c.p.copy();
         }
 
         u.groupCount += 1;
@@ -2143,9 +2154,6 @@ export class Undoer {
         }
         // Helpers set dirty bits.
         // Set c.p, independently of helpers.
-        if (g.unitTesting) {
-            g.assert(c.positionExists(p), p.toString());
-        }
         c.selectPosition(p);
         // Restore the selection, independently of helpers.
         if (oldSel && oldSel.length) {
