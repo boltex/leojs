@@ -409,6 +409,7 @@
 <v t="felix.20201214151447.16"><vh>leoEmpty</vh></v>
 <v t="felix.20201214151447.17"><vh>leoChild</vh></v>
 <v t="felix.20201214151447.18"><vh>leoAtFile</vh></v>
+<v t="felix.20250830172625.1"><vh>leoAtLeoFile</vh></v>
 <v t="felix.20201214151447.19"><vh>leoRoot</vh></v>
 </v>
 <v t="felix.20201214151447.20"><vh>constructor</vh></v>
@@ -1502,11 +1503,16 @@ public refreshTreeRoot(): void {
     if (element.isMarked()) {
         w_contextValue = Constants.CONTEXT_FLAGS.NODE_MARKED;
     }
-    // then append 'leoNodeAtFile' to existing if needed
-    if (element.isAnyAtFileNode()) {
+    // then append 'leojsNodeAtFile' to existing if needed
+    if (element.isAnyAtFileNode() &amp;&amp; !element.isAtLeoNode()) {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATFILE;
     }
-    // then append 'leoNodeCloned' to existing if needed
+    // append 'leojsNodeAtLeoFile' to existing if needed
+    if (element.isAtLeoNode()) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATLEOFILE;
+    }
+
+    // then append 'leojsNodeCloned' to existing if needed
     if (element.isCloned()) {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_CLONED;
     }
@@ -1905,6 +1911,10 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
+[CMD.OPEN_AT_LEO_FILE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.OPEN_AT_LEO_FILE, { node: p_node, refreshType: REFRESH_ALL, finalFocus: Focus.Outline })], // DO NOT KEEP SELECTION
+[CMD.OPEN_AT_LEO_FILE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.OPEN_AT_LEO_FILE, { refreshType: REFRESH_ALL, finalFocus: Focus.Body })],
+[CMD.OPEN_AT_LEO_FILE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.OPEN_AT_LEO_FILE, { refreshType: REFRESH_ALL, finalFocus: Focus.Outline })],
+
 [CMD.GIT_DIFF, () =&gt; p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
 [CMD.TAB_CYCLE_NEXT, () =&gt; p_leoUI.tabCycle()],
@@ -2092,6 +2102,7 @@ public static COMMANDS = {
     PROMOTE: Constants.NAME + ".promote",
     DEMOTE: Constants.NAME + ".demote",
     REFRESH_FROM_DISK: Constants.NAME + ".refreshFromDisk",
+    OPEN_AT_LEO_FILE: Constants.NAME + ".openAtLeoFile",
     // Commands from keyboard, while focus on BODY (command-palette returns to BODY for now)
     MARK_SELECTION: Constants.NAME + ".markSelection",
     UNMARK_SELECTION: Constants.NAME + ".unmarkSelection",
@@ -2113,6 +2124,7 @@ public static COMMANDS = {
     PROMOTE_SELECTION: Constants.NAME + ".promoteSelection",
     DEMOTE_SELECTION: Constants.NAME + ".demoteSelection",
     REFRESH_FROM_DISK_SELECTION: Constants.NAME + ".refreshFromDiskSelection",
+    OPEN_AT_LEO_FILE_SELECTION: Constants.NAME + ".openAtLeoFileSelection",
     // Commands from keyboard, while focus on OUTLINE (no need for COPY_SELECTION)
     MARK_SELECTION_FO: Constants.NAME + ".markSelectionFromOutline",
     UNMARK_SELECTION_FO: Constants.NAME + ".unmarkSelectionFromOutline",
@@ -2131,6 +2143,7 @@ public static COMMANDS = {
     PROMOTE_SELECTION_FO: Constants.NAME + ".promoteSelectionFromOutline",
     DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
     REFRESH_FROM_DISK_SELECTION_FO: Constants.NAME + ".refreshFromDiskSelectionFromOutline",
+    OPEN_AT_LEO_FILE_SELECTION_FO: Constants.NAME + ".openAtLeoFileSelectionFromOutline",
     HOIST: Constants.NAME + ".hoistNode",
     HOIST_SELECTION: Constants.NAME + ".hoistSelection",
     HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
@@ -2278,6 +2291,7 @@ public static LEO_COMMANDS = {
     // * Tree Building
     EXECUTE_SCRIPT: "execute-script",
     REFRESH_FROM_DISK: "refresh-from-disk",
+    OPEN_AT_LEO_FILE: "open-at-leo-file",
     GIT_DIFF: "git-diff",
     // * Outline from body text
     EXTRACT: "extract",
@@ -2643,7 +2657,8 @@ public static CONTEXT_FLAGS = {
     SELECTED_DIRTY: "leojsDirty",
     SELECTED_EMPTY: "leojsEmpty",
     SELECTED_CHILD: "leojsChild", // Has children
-    SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
+    SELECTED_ATFILE: "leojsAtFile", // Can be refreshed
+    SELECTED_ATLEOFILE: "leojsAtLeoFile", // Can be used with 'open-at-leo-file' command
 
     // Statusbar Flag 'keybindings in effect'
     LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
@@ -2652,6 +2667,7 @@ public static CONTEXT_FLAGS = {
     NODE_MARKED: "leojsNodeMarked",  // Selected node is marked
     NODE_UNMARKED: "leojsNodeUnmarked", // Selected node is unmarked (Needed for regexp)
     NODE_ATFILE: "leojsNodeAtFile", // Selected node is an @file or @clean, etc...
+    NODE_ATLEOFILE: "leojsNodeAtLeoFile", // Selected node is an @leo file
     NODE_CLONED: "leojsNodeCloned",
     NODE_ROOT: "leojsNodeRoot",
     NODE_NOT_ROOT: "leojsNodeNotRoot",
@@ -3073,7 +3089,8 @@ export class LeoStates {
     this.leoDirty = p_node.isDirty();
     this.leoEmpty = !p_node.v.hasBody();
     this.leoChild = p_node.hasChildren();
-    this.leoAtFile = p_node.isAnyAtFileNode();
+    this.leoAtFile = !p_node.isAtLeoNode() &amp;&amp; p_node.isAnyAtFileNode();
+    this.leoAtLeoFile = p_node.isAtLeoNode();
     this.leoRoot = p_node._isRoot;
 }
 
@@ -4769,15 +4786,36 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.refreshFromDiskSelection",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtFile",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtFile",
   "icon": "$(leojs-refresh)"
+},
+{
+  "command": "leojs.openAtLeoFile",
+  "category": "Leojs",
+  "title": "Open @leo file",
+  "enablement": "leojsTreeOpened",
+  "icon": "$(leojs-folder)"
+},
+{
+  "command": "leojs.openAtLeoFileSelection",
+  "category": "Leojs",
+  "title": "Open @leo file",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtLeoFile",
+  "icon": "$(leojs-folder)"
+},
+{
+  "command": "leojs.openAtLeoFileSelectionFromOutline",
+  "category": "Leojs",
+  "title": "Open @leo file",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtLeoFile",
+  "icon": "$(leojs-folder)"
 },
 {
   "command": "leojs.writeAtFileNodes",
@@ -5583,6 +5621,14 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "false"
 },
 {
+  "command": "leojs.openAtLeoFile",
+  "when": "false"
+},
+{
+  "command": "leojs.openAtLeoFileSelectionFromOutline",
+  "when": "false"
+},
+{
   "command": "leojs.writeAtFileNodesFromOutline",
   "when": "false"
 },
@@ -6191,6 +6237,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 <t tx="felix.20201214205159.64">{
   "command": "leojs.refreshFromDisk",
   "when": "viewItem =~ /leojsNodeAtFile/",
+  "group": "leojsNodeContext1@3"
+},
+{
+  "command": "leojs.openAtLeoFile",
+  "when": "viewItem =~ /leojsNodeAtLeoFile/",
   "group": "leojsNodeContext1@3"
 },
 </t>
@@ -21816,6 +21867,16 @@ public get1Char(
 - Read only unchanged @clean nodes: a huge performance boost!
 - Support @leo &lt;path&gt;; nodes. See https://leo-editor.github.io/leo-editor/directives.html#leo-directives
 - Added open-at-leo-file command to open the given outline and the c.makeLinkLeoFiles method that helps scripts create a top-level outline containing links to sub-outlines.
+
+</t>
+<t tx="felix.20250830172625.1">private _leoAtLeoFile: boolean = false;
+get leoAtLeoFile(): boolean {
+    return this._leoAtLeoFile;
+}
+set leoAtLeoFile(p_value: boolean) {
+    this._leoAtLeoFile = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ATLEOFILE, p_value);
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
