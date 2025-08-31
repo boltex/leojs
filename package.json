@@ -1995,15 +1995,36 @@
         "command": "leojs.refreshFromDiskSelection",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened && LeojsAtFile",
+        "enablement": "leojsTreeOpened && leojsAtFile",
         "icon": "$(leojs-refresh)"
       },
       {
         "command": "leojs.refreshFromDiskSelectionFromOutline",
         "category": "Leojs",
         "title": "Refresh from Disk",
-        "enablement": "leojsTreeOpened && LeojsAtFile",
+        "enablement": "leojsTreeOpened && leojsAtFile",
         "icon": "$(leojs-refresh)"
+      },
+      {
+        "command": "leojs.openAtLeoFile",
+        "category": "Leojs",
+        "title": "Open @leo file",
+        "enablement": "leojsTreeOpened",
+        "icon": "$(leojs-folder)"
+      },
+      {
+        "command": "leojs.openAtLeoFileSelection",
+        "category": "Leojs",
+        "title": "Open @leo file",
+        "enablement": "leojsTreeOpened && leojsAtLeoFile",
+        "icon": "$(leojs-folder)"
+      },
+      {
+        "command": "leojs.openAtLeoFileSelectionFromOutline",
+        "category": "Leojs",
+        "title": "Open @leo file",
+        "enablement": "leojsTreeOpened && leojsAtLeoFile",
+        "icon": "$(leojs-folder)"
       },
       {
         "command": "leojs.writeAtFileNodes",
@@ -3144,6 +3165,14 @@
           "when": "false"
         },
         {
+          "command": "leojs.openAtLeoFile",
+          "when": "false"
+        },
+        {
+          "command": "leojs.openAtLeoFileSelectionFromOutline",
+          "when": "false"
+        },
+        {
           "command": "leojs.writeAtFileNodesFromOutline",
           "when": "false"
         },
@@ -3855,6 +3884,11 @@
         {
           "command": "leojs.refreshFromDisk",
           "when": "viewItem =~ /leojsNodeAtFile/",
+          "group": "leojsNodeContext1@3"
+        },
+        {
+          "command": "leojs.openAtLeoFile",
+          "when": "viewItem =~ /leojsNodeAtLeoFile/",
           "group": "leojsNodeContext1@3"
         },
         {

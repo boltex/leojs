@@ -58,11 +58,16 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         if (element.isMarked()) {
             w_contextValue = Constants.CONTEXT_FLAGS.NODE_MARKED;
         }
-        // then append 'leoNodeAtFile' to existing if needed
-        if (element.isAnyAtFileNode()) {
+        // then append 'leojsNodeAtFile' to existing if needed
+        if (element.isAnyAtFileNode() && !element.isAtLeoNode()) {
             w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATFILE;
         }
-        // then append 'leoNodeCloned' to existing if needed
+        // append 'leojsNodeAtLeoFile' to existing if needed
+        if (element.isAtLeoNode()) {
+            w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATLEOFILE;
+        }
+
+        // then append 'leojsNodeCloned' to existing if needed
         if (element.isCloned()) {
             w_contextValue += Constants.CONTEXT_FLAGS.NODE_CLONED;
         }
