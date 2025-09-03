@@ -1529,8 +1529,6 @@ export class LeoImportCommands {
         }
         const importer = new importer_class(c);
 
-        // Handle undo.
-        u.beforeChangeGroup(p, undoType);
         try {
             const old_p = p.copy();
             c.selectPosition(p);
@@ -1590,8 +1588,10 @@ export class LeoImportCommands {
 
         // The main loop.
         let changed = blocks.length > 1;
+        if (changed) {
+            u.beforeChangeGroup(p, undoType);
+        }
         this.preprocess_blocks(blocks);
-
         while (blocks.length > 1) {
             // Change the node.
             let bunch = u.beforeChangeBody(p);
@@ -1614,7 +1614,6 @@ export class LeoImportCommands {
             p = p2;
         }
         return changed;
-
     }
     //@+node:felix.20250812231146.1: *4* ic.preprocess_blocks
     /**
