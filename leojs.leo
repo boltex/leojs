@@ -1598,7 +1598,7 @@ public refreshTreeRoot(): void {
                 return [w_rootPosition];
             } else {
                 // NOT HOISTED: Normal list of root nodes
-                const w_rootNodes = [...w_c.all_Root_Children()];
+                const w_rootNodes = [...w_c.all_root_children()];
                 if (w_rootNodes.length === 1) {
                     // Exactly one: prevent hoisting on SINGLE top node
                     w_rootNodes[0]._isRoot = true;

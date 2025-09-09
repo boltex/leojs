@@ -1592,19 +1592,18 @@ export class Commands {
     //     }
     // }
 
-    //@+node:felix.20210228004000.1: *5* c.all_Root_Children
+    //@+node:felix.20210228004000.1: *5* c.all_root_children
     /**
-     * Return all root children P nodes
+     * A generator that returns all the (hidden-root's) top children Positions.
      */
-    public *all_Root_Children(copy = true): Generator<Position> {
+    public *all_root_children(copy = true): Generator<Position> {
         const c: Commands = this;
-        const p: Position | undefined = c.rootPosition(); // Make one copy.
+        const p: Position | undefined = c.rootPosition(); // Return this first position, and its siblings
         while (p && p.__bool__()) {
             yield copy ? p.copy() : p;
             p.moveToNext();
         }
     }
-
     //@+node:felix.20210131011420.1: *4* c.Getters
     //@+node:felix.20210131011420.2: *5* c.currentPosition
     /**
