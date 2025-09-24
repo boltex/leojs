@@ -2048,6 +2048,7 @@
                     expanded.add(nodeToToggle);
                 }
                 nodeToToggle.toggled = true; // Mark as toggled
+                updateCollapseAllPosition(); // In case the height made the scrollbar appear/disappear
             }
 
             const isNew = newSelectedNode && newSelectedNode !== selectedNode;
@@ -2350,7 +2351,7 @@
                 renderTree(); // Resizing vertically, so need to re-render tree
                 CONFIG_BTN.style.inset = `${newHeight - 33}px 7px auto auto`;
             }
-            COLLAPSE_ALL_BTN.style.inset = `6px auto auto ${OUTLINE_PANE.clientWidth - 18}px`;
+            updateCollapseAllPosition();
         }, 33);
 
         function startDrag(e) {
@@ -2405,6 +2406,10 @@
                 OUTLINE_PANE.style.flex = `0 0 ${newWidth}px`;
             }
             FIND_PANE.style.flex = '1 1 auto'; // Let it take the remaining space
+            updateCollapseAllPosition();
+        }
+
+        function updateCollapseAllPosition() {
             COLLAPSE_ALL_BTN.style.inset = `6px auto auto ${OUTLINE_PANE.clientWidth - 18}px`;
         }
 
@@ -2435,7 +2440,7 @@
                     FIND_PANE.style.flex = '1 1 auto'; // Let it take the remaining space
                 }
             }
-            COLLAPSE_ALL_BTN.style.inset = `6px auto auto ${OUTLINE_PANE.clientWidth - 18}px`;
+            updateCollapseAllPosition();
         }, 33);
 
         function startSecondaryDrag(e) {
