@@ -5,6 +5,7 @@
 - Read only unchanged @clean nodes: a huge performance boost!
 - Support @leo <path>; nodes. See https://leo-editor.github.io/leo-editor/directives.html#leo-directives
 - Added open-at-leo-file command to open the given outline and the c.makeLinkLeoFiles method that helps scripts create a top-level outline containing links to sub-outlines.
+- Added Export to HTML Outline Viewer command which exports the outline as a READ-ONLY self-contained HTML page, complete with outline browsing functionality including searching, hoisting, marking nodes and more.
 
 ## 1.0.13
 

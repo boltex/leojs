@@ -9451,15 +9451,20 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    startpath?: string
+    startpath?: string,
+    startUri?: vscode.Uri
 ): Thenable&lt;string&gt; {
+    if (startpath &amp;&amp; !startUri) {
+        startUri = vscode.Uri.file(startpath);
+    }
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
     return vscode.window.showOpenDialog(
         {
             title: title,
             canSelectMany: false,
-            filters: types
+            filters: types,
+            defaultUri: startUri
         }
     ).then((p_uris) =&gt; {
         const names: string[] = [];
@@ -21867,6 +21872,7 @@ public get1Char(
 - Read only unchanged @clean nodes: a huge performance boost!
 - Support @leo &lt;path&gt;; nodes. See https://leo-editor.github.io/leo-editor/directives.html#leo-directives
 - Added open-at-leo-file command to open the given outline and the c.makeLinkLeoFiles method that helps scripts create a top-level outline containing links to sub-outlines.
+- Added Export to HTML Outline Viewer command which exports the outline as a READ-ONLY self-contained HTML page, complete with outline browsing functionality including searching, hoisting, marking nodes and more.
 
 </t>
 <t tx="felix.20250830172625.1">private _leoAtLeoFile: boolean = false;

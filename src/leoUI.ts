@@ -6804,15 +6804,20 @@ export class LeoUI extends NullGui {
         c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
-        startpath?: string
+        startpath?: string,
+        startUri?: vscode.Uri
     ): Thenable<string> {
+        if (startpath && !startUri) {
+            startUri = vscode.Uri.file(startpath);
+        }
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
         return vscode.window.showOpenDialog(
             {
                 title: title,
                 canSelectMany: false,
-                filters: types
+                filters: types,
+                defaultUri: startUri
             }
         ).then((p_uris) => {
             const names: string[] = [];

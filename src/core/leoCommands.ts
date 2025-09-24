@@ -1390,6 +1390,113 @@ export class Commands {
     public showSettings(): Thenable<unknown> {
         return g.app.gui.showSettings();
     }
+    //@+node:felix.20250923201250.1: *3* @cmd exportHTMLOutlineViewer
+    @cmd('export-html-outline-viewer', 'Export the outline viewer as HTML.')
+    public async exportHTMLOutlineViewer() {
+        const c = this;
+
+        const outputFileName = await g.app.gui.runSaveFileDialog(
+            c,
+            'Save Outline Viewer As',
+            [['HTML files', '*.html *.htm']]
+        );
+
+        if (!outputFileName) {
+            return; // cancelled
+        }
+
+        const templateUri = vscode.Uri.joinPath(g.extensionUri, 'outline-viewer.html');
+        let readData = await vscode.workspace.fs.readFile(templateUri);
+        const templateContent = g.toUnicode(readData);
+        const htmlPrefix = templateContent.split("        /* Start of data */")[0];
+        const htmlSuffix = templateContent.split("        /* End of data */")[1];
+
+        let vnode_dict: Record<number, { headString: string; bodyString: string }> = {}; // This is 'data'
+        let gnx_map: Record<string, number> = {}; // gnx -> compact id
+        let gnx_counter: number = 0; // counter for compact ids
+
+        function map_gnx(gnx: string): number {
+            /** Return the compact integer id for a gnx, creating it if missing. */
+            if (!(gnx in gnx_map)) {
+                gnx_map[gnx] = gnx_counter;
+                gnx_counter += 1;
+            }
+            return gnx_map[gnx];
+        }
+
+        function buildTree(children: any[]): any[] {
+            /** Builds the outline structure recursively */
+            let result: any[] = [];
+            for (const child of children) {
+                const is_clone = child.gnx in gnx_map;
+                const gnx_id = map_gnx(child.gnx);
+                let node: any = {
+                    gnx: gnx_id,
+                };
+                if (!(gnx_id in vnode_dict)) {
+                    vnode_dict[gnx_id] = {
+                        headString: child.headString(),
+                        bodyString: child.bodyString(),
+                    };
+                }
+                // recurse children only if gnx not already seen (don’t re-write clones)
+                // IMPORTANT: the script using this output will have to handle that!
+                if (child.children && !is_clone) {
+                    node["children"] = buildTree(child.children);
+                }
+                result.push(node);
+            }
+            return result;
+        }
+
+        // Start from Leo's hidden root
+        let tree: any = {
+            gnx: map_gnx(c.hiddenRootNode.gnx),
+            children: buildTree(c.hiddenRootNode.children),
+        };
+
+        const unix_timestamp_string = new Date().getTime().toString();
+        const myFilePath = c.fileName();
+        let fileTitle = "";
+        if (myFilePath) {
+            fileTitle = g.os_path_splitext(g.os_path_basename(myFilePath))[0];
+        } else {
+            fileTitle = "untitled";
+        }
+
+        const prefixTitle = `\n        const title = "${fileTitle}";`;
+        const prefixgenTimestamp = `\n        const genTimestamp = "${unix_timestamp_string}";`;
+        const prefixTree = '\n        const tree = ';
+        const prefixData = ';\n        const data = ';  // includes ';' for ending tree.
+        const suffixData = ';';
+
+        const safeStringify = (obj: any) =>
+            JSON.stringify(obj, (key, value) =>
+                typeof value === "string" ? value.replace(/<\/script>/g, "<\\/script>") : value,
+            );
+
+        const parts: string[] = [
+            htmlPrefix,
+            prefixTitle,
+            prefixgenTimestamp,
+            prefixTree,
+            safeStringify(tree),
+            prefixData,
+            safeStringify(vnode_dict),
+            suffixData,
+            htmlSuffix
+        ];
+
+        const s = parts.join("");
+
+        const w_uri = g.makeVscodeUri(outputFileName);
+        const writeData = Buffer.from(s, 'utf8');
+        await vscode.workspace.fs.writeFile(w_uri, writeData);
+
+        g.es('HTML document generated at ' + outputFileName);
+
+    }
+
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
