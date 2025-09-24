@@ -1239,7 +1239,7 @@
             },
             "10": {
                 "headString": "third top node child 2",
-                "bodyString": "Bla blabla bla,\nbla blablabla bla.\nSample URLs https://example.com and http://example.org for testing links."
+                "bodyString": "Sample URLs https://example.com and http://example.org for testing links. Here are some more: file://host/path and file:///C:/path and an email mailto:foo@example.com to make sure they all work.\n"
             },
             "11": {
                 "headString": "third top node child 3",
@@ -1331,7 +1331,8 @@
         const navigationHistory = [];
         let currentHistoryIndex = -1; // -1 means no history yet
         const hoistStack = []; // Track hoisted nodes
-        const urlRegex = /\bhttps?:\/\/[^\s<]+/gi;
+        // Allow http(s)/ftp with '://', file with // or ///, and mailto: without '//'
+        const urlRegex = /\b(?:(?:https?|ftp):\/\/|file:\/\/\/?|mailto:)[^\s<]+/gi;
 
         const minWidth = 20;
         const minHeight = 20;
@@ -2048,7 +2049,6 @@
                     expanded.add(nodeToToggle);
                 }
                 nodeToToggle.toggled = true; // Mark as toggled
-                updateCollapseAllPosition(); // In case the height made the scrollbar appear/disappear
             }
 
             const isNew = newSelectedNode && newSelectedNode !== selectedNode;
@@ -2098,6 +2098,7 @@
                 }
             }
             scrollSelectedNodeIntoView();
+            updateCollapseAllPosition(); // In case the height made the scrollbar appear/disappear
         }
 
         function setBody(node) {
