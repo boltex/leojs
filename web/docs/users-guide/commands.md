@@ -481,6 +481,9 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
 `export-headlines`\
     Exports all headlines to an external file.
 
+`export-html-outline-viewer`\
+    Exports the Leo outline as a self-contained HTML interactive outline viewer. This command requires the "leo_to_html_outline_viewer.py" plugin to be active.
+
 `file-insert`\
     Prompts for the name of a file and put the selected text into it.
 
