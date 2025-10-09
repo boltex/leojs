@@ -4657,7 +4657,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "sponsor": {
     "url": "https://boltex.github.io/"
   },
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/boltex/leojs/issues"
   },
