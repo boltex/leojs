@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20251014222608.1"><vh>1.0.15</vh></v>
 <v t="felix.20250622002355.1"><vh>1.0.14</vh></v>
 <v t="felix.20250616003053.1"><vh>1.0.13</vh></v>
 <v t="felix.20250615192814.1"><vh>1.0.12</vh></v>
@@ -4649,7 +4650,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -19606,7 +19607,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.14&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.15&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21883,6 +21884,11 @@ set leoAtLeoFile(p_value: boolean) {
     this._leoAtLeoFile = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ATLEOFILE, p_value);
 }
+
+</t>
+<t tx="felix.20251014222608.1">## 1.0.15
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
