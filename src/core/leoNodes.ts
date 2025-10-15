@@ -340,7 +340,7 @@ export class Position {
         if (!p2 || !(p2 instanceof Position)) {
             return false;
         }
-        if (!p2.__bool__() || !p2.v) {
+        if (!p2.v) {
             return !p1.v;
         }
 
@@ -420,13 +420,10 @@ export class Position {
     /**
      * Return True if a position is valid.
      *
-     * The tests 'if p' or 'if not p' are the _only_ correct ways to test
-     * whether a position p is valid.
-     *
-     * Tests like 'if p is None' or 'if p is not None' will not work properly.
+     * This cannot mimic the python __bool__ method exactly and override the 'if p' test.
      */
     public __bool__(): boolean {
-        return typeof this.v !== 'undefined';
+        return !!this.v;
     }
 
     //@+node:felix.20210126210412.7: *4* p.__str__ and p.__repr__
@@ -1222,7 +1219,7 @@ export class Position {
             [v, childIndex] = p.stack[n];
             // See how many children v's parent has.
             if (n === 0) {
-                parent_v = v.context.hiddenRootNode!;
+                parent_v = v.context.hiddenRootNode;
             } else {
                 parent_v = p.stack[n - 1][0];
             }
@@ -1419,6 +1416,10 @@ export class Position {
         return this.v.atFileNodeName();
     }
 
+    public atLeoNodeName(): string {
+        return this.v.atLeoNodeName();
+    }
+
     public atNoSentinelsFileNodeName(): string {
         return this.v.atNoSentinelsFileNodeName();
     }
@@ -1465,6 +1466,10 @@ export class Position {
 
     public isAtIgnoreNode(): boolean {
         return this.v.isAtIgnoreNode();
+    }
+
+    public isAtLeoNode(): boolean {
+        return this.v.isAtLeoNode();
     }
 
     public isAtNoSentinelsFileNode(): boolean {
@@ -3069,13 +3074,11 @@ export class VNode {
      * Return the file name following an @file node or an empty string.
      */
     public anyAtFileNodeName(): string {
+        const v: VNode = this;
         return (
-            // was g.app.atAutoNames and g.app.atFileNames.
-            // this.findAtFileName(this.atAutoNames) ||
-            // this.findAtFileName(this.atFileNames)
-
-            this.findAtFileName(g.app.atAutoNames) ||
-            this.findAtFileName(g.app.atFileNames)
+            v.findAtFileName(g.app.atAutoNames)
+            || v.findAtFileName(g.app.atFileNames)
+            || v.atLeoNodeName()
         );
     }
 
@@ -3110,6 +3113,12 @@ export class VNode {
     public atFileNodeName(): string {
         const names: string[] = ['@file', '@thin'];
         // Fix #403.
+        return this.findAtFileName(names);
+    }
+
+
+    public atLeoNodeName(): string {
+        const names = ["@leo"];
         return this.findAtFileName(names);
     }
 
@@ -3155,7 +3164,7 @@ export class VNode {
         // This routine should be as fast as possible.
         // It is called once for every VNode when writing a file.
         const h: string = this.headString();
-        return !!h && h.substring(0, 1) === '@' && !!this.anyAtFileNodeName();
+        return !!h && h.substring(0, 1) === '@' && (!!this.anyAtFileNodeName() || !!this.atLeoNodeName());
     }
 
     //@+node:felix.20210112210731.7: *4* v.isAt...FileNode
@@ -3183,12 +3192,15 @@ export class VNode {
         return !!this.atRstFileNodeName();
     }
 
+    public isAtLeoNode(): boolean {
+        return !!this.atLeoNodeName();
+    }
+
     public isAtNoSentinelsFileNode(): boolean {
         return !!this.atNoSentinelsFileNodeName();
     }
 
     public isAtSilentFileNode(): boolean {
-        // @file-asis
         return !!this.atSilentFileNodeName();
     }
 
@@ -3652,20 +3664,17 @@ export class VNode {
         const v: VNode = this;
         if (typeof s === 'string') {
             v._bodyString = s;
-            return;
-        }
-
-        try {
-            v._bodyString = g.toUnicode(s, null, true);
-        } catch (exception) {
-            if (!this.unicode_warning_given) {
-                this.unicode_warning_given = true;
-                g.error(s);
-                g.es_exception(exception);
+        } else {
+            try {
+                v._bodyString = g.toUnicode(s, null, true);
+            } catch (exception) {
+                if (!this.unicode_warning_given) {
+                    this.unicode_warning_given = true;
+                    g.error(s);
+                    g.es_exception(exception);
+                }
             }
         }
-        // self.contentModified()  # #1413.
-        // signal_manager.emit(self.context, 'body_changed', self)
     }
 
     public setHeadString(s: string): void {
@@ -3674,6 +3683,9 @@ export class VNode {
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
         v._headString = s.replace(/\n/g, '');
+        if ('_mod_time' in v.u) {
+            delete v.u['_mod_time'];
+        }
         // self.contentModified()  # #1413.
     }
 
@@ -3692,7 +3704,7 @@ export class VNode {
      */
     public setAllAncestorAtFileNodesDirty(): void {
         const v: VNode = this;
-        const hiddenRootVnode: VNode = v.context.hiddenRootNode!;
+        const hiddenRootVnode: VNode = v.context.hiddenRootNode;
 
         function* v_and_parents(v: VNode): Generator<VNode> {
             if (v.fileIndex !== hiddenRootVnode.fileIndex) {

@@ -1390,6 +1390,113 @@ export class Commands {
     public showSettings(): Thenable<unknown> {
         return g.app.gui.showSettings();
     }
+    //@+node:felix.20250923201250.1: *3* @cmd exportHTMLOutlineViewer
+    @cmd('export-html-outline-viewer', 'Export the outline viewer as HTML.')
+    public async exportHTMLOutlineViewer() {
+        const c = this;
+
+        const outputFileName = await g.app.gui.runSaveFileDialog(
+            c,
+            'Save Outline Viewer As',
+            [['HTML files', '*.html *.htm']]
+        );
+
+        if (!outputFileName) {
+            return; // cancelled
+        }
+
+        const templateUri = vscode.Uri.joinPath(g.extensionUri, 'outline-viewer.html');
+        let readData = await vscode.workspace.fs.readFile(templateUri);
+        const templateContent = g.toUnicode(readData);
+        const htmlPrefix = templateContent.split("        /* Start of data */")[0];
+        const htmlSuffix = templateContent.split("        /* End of data */")[1];
+
+        let vnode_dict: Record<number, { headString: string; bodyString: string }> = {}; // This is 'data'
+        let gnx_map: Record<string, number> = {}; // gnx -> compact id
+        let gnx_counter: number = 0; // counter for compact ids
+
+        function map_gnx(gnx: string): number {
+            /** Return the compact integer id for a gnx, creating it if missing. */
+            if (!(gnx in gnx_map)) {
+                gnx_map[gnx] = gnx_counter;
+                gnx_counter += 1;
+            }
+            return gnx_map[gnx];
+        }
+
+        function buildTree(children: any[]): any[] {
+            /** Builds the outline structure recursively */
+            let result: any[] = [];
+            for (const child of children) {
+                const is_clone = child.gnx in gnx_map;
+                const gnx_id = map_gnx(child.gnx);
+                let node: any = {
+                    gnx: gnx_id,
+                };
+                if (!(gnx_id in vnode_dict)) {
+                    vnode_dict[gnx_id] = {
+                        headString: child.headString(),
+                        bodyString: child.bodyString(),
+                    };
+                }
+                // recurse children only if gnx not already seen (don’t re-write clones)
+                // IMPORTANT: the script using this output will have to handle that!
+                if (child.children && !is_clone) {
+                    node["children"] = buildTree(child.children);
+                }
+                result.push(node);
+            }
+            return result;
+        }
+
+        // Start from Leo's hidden root
+        let tree: any = {
+            gnx: map_gnx(c.hiddenRootNode.gnx),
+            children: buildTree(c.hiddenRootNode.children),
+        };
+
+        const unix_timestamp_string = new Date().getTime().toString();
+        const myFilePath = c.fileName();
+        let fileTitle = "";
+        if (myFilePath) {
+            fileTitle = g.os_path_splitext(g.os_path_basename(myFilePath))[0];
+        } else {
+            fileTitle = "untitled";
+        }
+
+        const prefixTitle = `\n        const title = "${fileTitle}";`;
+        const prefixgenTimestamp = `\n        const genTimestamp = "${unix_timestamp_string}";`;
+        const prefixTree = '\n        const tree = ';
+        const prefixData = ';\n        const data = ';  // includes ';' for ending tree.
+        const suffixData = ';';
+
+        const safeStringify = (obj: any) =>
+            JSON.stringify(obj, (key, value) =>
+                typeof value === "string" ? value.replace(/<\/script>/g, "<\\/script>") : value,
+            );
+
+        const parts: string[] = [
+            htmlPrefix,
+            prefixTitle,
+            prefixgenTimestamp,
+            prefixTree,
+            safeStringify(tree),
+            prefixData,
+            safeStringify(vnode_dict),
+            suffixData,
+            htmlSuffix
+        ];
+
+        const s = parts.join("");
+
+        const w_uri = g.makeVscodeUri(outputFileName);
+        const writeData = Buffer.from(s, 'utf8');
+        await vscode.workspace.fs.writeFile(w_uri, writeData);
+
+        g.es('HTML document generated at ' + outputFileName);
+
+    }
+
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
@@ -1486,7 +1593,7 @@ export class Commands {
         for (let v2 of v.parents) {
             for (let i of allinds(v2, v)) {
                 stack.unshift([v, i]);
-                if (v2.gnx === c.hiddenRootNode!.gnx) {
+                if (v2.gnx === c.hiddenRootNode.gnx) {
                     yield stack2pos(stack);
                 } else {
                     yield* c.all_positions_for_v(v2, stack);
@@ -1592,19 +1699,18 @@ export class Commands {
     //     }
     // }
 
-    //@+node:felix.20210228004000.1: *5* c.all_Root_Children
+    //@+node:felix.20210228004000.1: *5* c.all_root_children
     /**
-     * Return all root children P nodes
+     * A generator that returns all the (hidden-root's) top children Positions.
      */
-    public *all_Root_Children(copy = true): Generator<Position> {
+    public *all_root_children(copy = true): Generator<Position> {
         const c: Commands = this;
-        const p: Position | undefined = c.rootPosition(); // Make one copy.
+        const p: Position | undefined = c.rootPosition(); // Return this first position, and its siblings
         while (p && p.__bool__()) {
             yield copy ? p.copy() : p;
             p.moveToNext();
         }
     }
-
     //@+node:felix.20210131011420.1: *4* c.Getters
     //@+node:felix.20210131011420.2: *5* c.currentPosition
     /**
@@ -1980,7 +2086,7 @@ export class Commands {
         }
 
         // Add absbase and reverse the list.
-        const absbase = c.fileName() ? g.os_path_dirname(c.fileName()) : process.cwd();
+        const absbase = c.fileName() ? g.os_path_dirname(c.fileName()) : g.app.homeDir!;
         paths.push(absbase);
         paths.reverse();
 
@@ -2217,7 +2323,7 @@ export class Commands {
         if (rstack.length > pstack.length) {
             return false;
         }
-        let par = this.hiddenRootNode!;
+        let par = this.hiddenRootNode;
 
         function sameStackEntry(a: StackEntry, b: StackEntry): boolean {
             if (a[1] !== b[1]) {
@@ -2302,7 +2408,7 @@ export class Commands {
     public rootPosition(): Position | undefined {
         const c: Commands = this;
         // 2011/02/25: Compute the position directly.
-        if (!!c.hiddenRootNode && c.hiddenRootNode.children.length) {
+        if (c.hiddenRootNode.children.length) {
             const v: VNode = c.hiddenRootNode.children[0];
             return new Position(v, 0, undefined);
         }
@@ -3658,7 +3764,7 @@ export class Commands {
         }
     }
     //@+node:felix.20211223223002.1: *3* c.File
-    //@+node:felix.20211223223002.2: *4* c.archivedPositionToPosition (new)
+    //@+node:felix.20211223223002.2: *4* c.archivedPositionToPosition
     /**
      * Convert an archived position (a string) to a position.
      */
@@ -3862,6 +3968,224 @@ export class Commands {
             return false;
         }
     }
+    //@+node:felix.20250727144132.1: *4* c.makeLinkLeoFiles & helper
+    public async makeLinkLeoFiles(
+        extensions: string[],  // List of file extensions for generated @<file> nodes.
+        top_directory: string,
+        kind = '@clean',  // Any @<file> type. @clean is recommended.
+        report_changed_at_clean_nodes = true,  // Recommended.
+        sub_directories: string[] | undefined,
+        top_outline_name?: string
+    ): Promise<void> {
+        //@+<< c.makeLinkLeoFiles: docstring >>
+        //@+node:felix.20250727144132.2: *5* << c.makeLinkLeoFiles: docstring >>
+        /*
+        Create a **top-level outline** containing @leo links to *sub-outlines*.
+        Sub-outlines contain @<file> nodes to all files in the directory (and
+        sub-directories) of the given list of extensions.
+
+        Scripts calling this method need only specify the value of the following kwargs:
+
+        - extensions:       List of file extensions for generated @<file> nodes.
+        - kind:             One of @auto, @clean, @file, etc.
+        - report_changed_at_clean_nodes:
+                            The value to use for @bool report-changed-at-clean-nodes
+                            in all generated outlines.
+        - sub_directories:  An optional list of sub-directories in which to create sub-outlines.
+                            Relative paths are relative to the top-level directory.
+                            If the list is empty, it defaults to all direct directories of
+                            the top-level directory.
+        - top_directory:    The full, absolute, path to the top-level directory.
+        - top_outline_name: The name of the top-level link outline.
+        */
+        //@-<< c.makeLinkLeoFiles: docstring >>
+        const c: Commands = this;
+        //@+<< return if initial checks fail >>
+        //@+node:felix.20250727144132.3: *5* << return if initial checks fail >>
+        // Check the top directory.
+        const isdir = await g.os_path_isdir(top_directory);
+        const isabs = g.os_path_isabs(top_directory);
+        const exists = await g.os_path_exists(top_directory);
+        // Check the top directory.
+        if (
+            !top_directory || !isdir || !isabs || !exists
+        ) {
+            g.es_print(`Not an absolute directory: ${JSON.stringify(top_directory)}`);
+            return;
+        }
+        if (!Array.isArray(extensions)) {
+            g.es_print(`Invalid list of extensions: ${JSON.stringify(extensions)}`);
+            return;
+        }
+        //@-<< return if initial checks fail >>
+        //@+<< make sure that all extensions start with '.' >>
+        //@+node:felix.20250729064219.1: *5* << make sure that all extensions start with '.' >>
+        extensions = extensions.map(z => z.startsWith('.') ? z : `.${z}`);
+        //@-<< make sure that all extensions start with '.' >>
+        if (!top_outline_name) {
+            top_outline_name = `${g.os_path_basename(top_directory)}_links.leo`;
+        }
+        //@+<< calculate the list of subdirectories >>
+        //@+node:felix.20250727144132.4: *5* << calculate the list of subdirectories >>
+        //  Default to all direct sub-directories of the top directory.
+        if (!sub_directories) {
+            const dirents = await g.os_listdir(top_directory);
+            sub_directories = [];
+
+            for (const z of dirents) {
+                if (await g.os_path_isdir(path.join(top_directory, z))) {
+                    sub_directories.push(z);
+                }
+            }
+
+        }
+        //@-<< calculate the list of subdirectories >>
+        g.es_print(
+            `Scanning ${sub_directories.length} directories.\n` +
+            'This may take awhile.'
+        );
+        // The main loop.
+        const old_p = c.p;
+        try {
+            const t1 = g.process_time();
+            c.enableRedrawFlag = false;
+            let all_files: string[] = [top_outline_name];  // List of paths.
+            const top_links: string[] = [];
+            for (let sub_directory of sub_directories) {
+                sub_directory = path.join(top_directory, sub_directory);
+                const exists = g.os_path_exists(sub_directory);
+                g.assert(exists, `Directory does not exist: ${sub_directory}`);
+                const files: string[] = [];
+                //@+<< find files in sub_directory >>
+                //@+node:felix.20250727144132.5: *5* << find files in sub_directory >>
+                // Set files to the list of full, absolute, files in subdirectory.
+                const subDirUri = g.makeVscodeUri(sub_directory);
+
+                for (let ext of extensions) {
+                    const pattern = new vscode.RelativePattern(subDirUri, `**/*${ext}`);
+                    const newFiles = await vscode.workspace.findFiles(pattern);
+
+                    for (const fileUri of newFiles) {
+                        const fullPath = fileUri.fsPath;
+                        if (!files.includes(fullPath)) {
+                            files.push(fullPath);
+                        }
+                    }
+                }
+
+                //@-<< find files in sub_directory >>
+                if (files.length) {
+                    //@+<< add link to the sub outline to top_links >>
+                    //@+node:felix.20250727144132.6: *5* << add link to the sub outline to top_links >>
+                    const sub_outline_name = `${g.shortFileName(sub_directory)}_links.leo`;
+                    const abs_path = `${sub_directory}/${sub_outline_name}`;
+                    const rel_link = path.relative(top_directory, abs_path);
+                    top_links.push(rel_link.replace(/\\/g, '/'));
+                    //@-<< add link to the sub outline to top_links >>
+                    //@+<< compute the sub outline's back link >>
+                    //@+node:felix.20250727144132.7: *5* << compute the sub outline's back link >>
+                    // Compute the relative back link for the sub-outline.
+                    const abs_back_link = `${top_directory}/${top_outline_name}`;
+                    const rel_back_link = path.relative(sub_directory, abs_back_link);
+                    const back_link = [rel_back_link.replace(/\\/g, '/')];
+                    //@-<< compute the sub outline's back link >>
+                    //@+<< create the sub outline >>
+                    //@+node:felix.20250727144132.8: *5* << create the sub outline >>
+                    // Generate the sub-outline
+                    await this._create_link_file(
+                        sub_directory,
+                        extensions,
+                        files,
+                        kind,
+                        back_link,
+                        `${g.shortFileName(sub_directory)}_links.leo`,
+                        report_changed_at_clean_nodes
+                    );
+                    //@-<< create the sub outline >>
+                    all_files.push(sub_outline_name);
+                }
+            }
+            //@+<< create the top-level outline >>
+            //@+node:felix.20250727144132.9: *5* << create the top-level outline >>
+            await this._create_link_file(
+                top_directory,
+                extensions,
+                undefined,
+                '@leo',
+                top_links,
+                top_outline_name,
+                report_changed_at_clean_nodes
+            );
+            //@-<< create the top-level outline >>
+            all_files = Array.from(new Set(all_files)).sort();
+            if (!g.unitTesting) {
+                const t2 = g.process_time();
+                g.es_print(`Done! Created ${all_files.length} outlines in ${(t2 - t1).toFixed(2)} sec`);
+            }
+        } catch (e) {
+            g.es_print(`Error: ${e}`);
+        }
+        finally {
+            c.selectPosition(old_p);
+            c.enableRedrawFlag = true;
+            c.redraw();
+        }
+
+    }
+    //@+node:felix.20250727144132.10: *5* c._create_link_file
+    /**
+     * The caller is responsible for making links relative to the top-level directory.
+     * This method creates @<file> nodes whose paths are relative to *this* directory.
+     */
+    private async _create_link_file(
+        directory: string,
+        extensions: string[],
+        files: string[] | undefined,
+        kind: string,
+        links: string[],
+        outline_name: string,
+        report_changed_at_clean_nodes: boolean
+    ): Promise<void> {
+
+        if (!files) {
+            files = [];
+        }
+
+        g.assert(await g.os_path_exists(directory), `directory does not exist: ${directory}`);
+
+        // Create an @settings tree containing one @history-list node.
+        const c2 = g.app.newCommander(outline_name, g.app.nullGui);
+
+        // Create the @settings tree.
+        const root = c2.rootPosition()!;
+        root.h = '@settings';
+        const report_p = root.insertAsLastChild();
+        const report_s = report_changed_at_clean_nodes ? 'True' : 'False';
+        report_p.h = `@bool report-changed-at-clean-nodes = ${report_s}`;
+        const history_p = root.insertAsLastChild();
+        history_p.h = '@data history-list';
+        history_p.b = 'open-at-leo-file\n';
+        c2.selectPosition(root);
+
+        // Create @leo nodes.
+        for (const link of links) {
+            const p = c2.lastTopLevel().insertAfter();
+            p.h = `@leo ${link}`;
+        }
+        // Create @<file> nodes for each file.
+        for (const w_path of files) {
+            const relative_path = path.relative(directory, w_path).replace(/\\/g, '/');
+            const p = c2.lastTopLevel().insertAfter();
+            p.h = `${kind} ${relative_path}`;
+        }
+
+        // Create the file!
+        const outline_path = path.join(directory, outline_name);
+        c2.clearChanged(); // Essential!
+        await c2.saveTo(outline_path, true);
+        c2.redraw();
+        await c2.close();
+    }
     //@+node:felix.20211223223002.8: *4* c.markAllAtFileNodesDirty
     /**
      * Mark all @file nodes as changed.
@@ -3903,6 +4227,77 @@ export class Commands {
                 p.moveToThreadNext();
             }
         }
+    }
+    //@+node:felix.20250727204622.1: *4* c.openAllLinkedFiles (transitive closure)
+    /**
+     * Open the transitive closure of all outlines reachable from any @leo
+     * node in this outline.
+     *
+     * Return the list of newly-opened commanders.
+     *
+     * Note: gui eventually defaults to g.app.gui.
+     */
+    public async openAllLinkedFiles(gui?: LeoGui): Promise<Commands[]> {
+        const c = this;
+
+        const t1 = g.process_time();
+
+        // Using the Qt gui will likely overwhelm Leo!
+        if (!gui) {
+            gui = g.app.nullGui;
+        }
+
+        // The main loop.
+        const result: Commands[] = [];
+        const scanned: string[] = [];  // List of paths already scanned.
+        const todo: string[] = [];
+
+        const scan = async (fileName: string): Promise<void> => {
+            /**
+             * Add all paths not already seen to the todo list.
+             * Add all newly-opened commanders to the result list.
+             */
+            if (scanned.includes(fileName)) {
+                return;
+            }
+            scanned.push(fileName);
+            g.es_print('Scan', fileName);
+            for (const p of c.all_unique_positions()) {
+                if (p.isAtLeoNode()) {
+                    const nestedFileName = p.atLeoNodeName();
+                    if (!todo.includes(nestedFileName) && !scanned.includes(nestedFileName)) {
+                        const c2 = await g.openWithFileName(nestedFileName, undefined, gui!);
+                        if (!c2) {
+                            g.es_print(`Failed to open: ${nestedFileName}`);
+                            continue;
+                        }
+                        todo.push(nestedFileName);
+                        if (!result.includes(c2)) {
+                            result.push(c2);
+                        }
+                    }
+                }
+            }
+        };
+
+        // Create the initial to-do list.
+        await scan(c.fileName());
+
+        // Rescan until the to-do list is empty.
+        while (todo.length > 0) {
+            const fileName = todo.pop()!;
+            await scan(fileName);
+        }
+
+        if (!g.unitTesting) {
+            const t2 = g.process_time();
+            const kind = gui === g.app.nullGui ? 'hidden ' : '';
+            g.es_print(`Done! Opened ${result.length} ${kind}outlines in ${(t2 - t1)} sec`);
+            g.printObj(scanned, 'Scanned');
+            g.printObj(result, 'Result');
+        }
+
+        return result;
     }
     //@+node:felix.20211223223002.10: *4* c.openWith
     /**
@@ -3958,26 +4353,6 @@ export class Commands {
         }
         c.fileCommands.gnxDict = d;
     }
-    //@+node:felix.20231125172649.1: *4* c_file.openRecentFile
-
-    // ! UNUSED IN LEOJS    
-
-    /**
-     * c.openRecentFile: This is not a command!
-     *
-     * This method is a helper called only from the recentFilesCallback in
-     * rf.createRecentFilesMenuItems.
-     */
-    // public async openRecentFile(this: Commands): Promise<void>
-    // const c: Commands = this;
-
-    //     if g.doHook("recentfiles1", c=c, p=c.p, v=c.p, fileName=fn):
-    //         return
-    //     c2 = g.openWithFileName(fn, old_c=c)
-    //     if c2:
-    //         g.app.makeAllBindings()
-    //         g.doHook("recentfiles2", c=c2, p=c2.p, v=c2.p, fileName=fn)
-
     //@+node:felix.20230730160811.1: *3* c.Git
     //@+node:felix.20230730160811.2: *4* c.diff_file
     /**
@@ -4265,7 +4640,14 @@ export class Commands {
         if (!p || !p.__bool__()) {
             return;
         }
-        c.expandAllAncestors(p);
+
+        if (!c.positionExists(p)) {
+            g.trace(`Invalid position: ${String(p)}`);
+            g.trace(g.callers());
+            p = c.rootPosition();
+        }
+
+        c.expandAllAncestors(p!);
 
         if (p && p.__bool__()) {
             c.selectPosition(p);
@@ -5055,7 +5437,7 @@ export class Commands {
     public async recursiveImport(
         dir_: string,  // A directory or file name.
         ignore_pattern: RegExp | undefined = undefined,  // Ignore files matching this regex pattern.
-        kind: string,
+        kind: string = '@file',
         recursive: boolean = true,
         safe_at_file: boolean = true,
         theTypes: string[] | undefined = undefined,
@@ -5085,6 +5467,12 @@ export class Commands {
         */
         //@-<< docstring >>
         const c = this;
+
+        // Same test as RecursiveImportController.run.
+        if (!['@auto', '@clean', '@edit', '@file', '@nosent'].includes(kind)) {
+            g.es_print(`Invalid kind: ${kind}`);
+            return;
+        }
 
         if (!dir_ || !kind) {
             g.es("'Dir' and 'kind' arguments needed for 'recursiveImport'");

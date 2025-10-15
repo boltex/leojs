@@ -771,6 +771,7 @@ export class LeoUI extends NullGui {
                                 tree: true,
                                 body: true,
                                 states: true,
+                                scroll: true, // Scroll to the position in the body
                                 buttons: false,
                                 documents: false,
                                 goto: false,
@@ -823,6 +824,7 @@ export class LeoUI extends NullGui {
                     tree: true,
                     body: true,
                     states: true,
+                    scroll: true, // Scroll to the position in the body
                     buttons: false,
                     documents: true,
                     goto: false,
@@ -4191,6 +4193,7 @@ export class LeoUI extends NullGui {
                             {
                                 tree: true,
                                 body: true,
+                                scroll: true, // scroll to line
                                 documents: false,
                                 buttons: false,
                                 states: true
@@ -5839,8 +5842,7 @@ export class LeoUI extends NullGui {
                         ["Leo files", "*.leojs *.leo *.db"],
                         ["Python files", "*.py"],
                         ["All files", "*"]
-                    ],
-                    g.defaultLeoFileExtension(),
+                    ]
                 );
             }
             if (fileName && g.app.loadManager) {
@@ -5986,7 +5988,6 @@ export class LeoUI extends NullGui {
             c,
             'Save As JSON (.leojs)',
             [['Leo JSON files', '*.leojs']],
-            '.leojs'
         );
         if (!fileName) {
             return;
@@ -6803,16 +6804,20 @@ export class LeoUI extends NullGui {
         c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
-        startpath?: string
+        startpath?: string,
+        startUri?: vscode.Uri
     ): Thenable<string> {
+        if (startpath && !startUri) {
+            startUri = vscode.Uri.file(startpath);
+        }
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
         return vscode.window.showOpenDialog(
             {
                 title: title,
                 canSelectMany: false,
-                filters: types
+                filters: types,
+                defaultUri: startUri
             }
         ).then((p_uris) => {
             const names: string[] = [];
@@ -6831,7 +6836,6 @@ export class LeoUI extends NullGui {
         c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
         startpath?: string
     ): Thenable<string[]> {
         // convert to { [name: string]: string[] } typing
@@ -6861,7 +6865,6 @@ export class LeoUI extends NullGui {
         c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
-        defaultExtension: string,
     ): Thenable<string> {
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);

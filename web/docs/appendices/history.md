@@ -355,7 +355,7 @@ Leo 5.8 (October 1, 2018): Replace caching with Vitalije's super-fast read code.
 
 Leo 5.9 (May 1, 2019): Add `LeoWapp.py`, Leo in a browser.
 
-### 2019 onward: Leo 6.0 and beyond: supporting LeoInteg
+### 2019-2023: Leo 6.0 through 6.7: LeoInteg
 
 August, 2020: edreamleo's first PR. Félix Malboeuf encouraged me to use PRs for all significant code changes.
 
@@ -386,6 +386,28 @@ Leo on vs-code means that Leo will live on. Nothing lasts forever, but when IDE'
 6.7.0 (September 26, 2022): Fully annotate Leo's core files and important plugins.
 
 6.7.4 (August 17, 2023) A spectacular collapse in the importer architecture. The Aha! Use **guide lines** to make parsing incoming lines easier.
+
+### 2024 onward: Leo 6.8: Easy layouts, @jupytext, @leo
+Leo 6.8.0 (July 3, 2024):
+
+A new framework for layouts replaces the free_layout and nested_splitter plugins.
+The gui "Easter Egg" is no more.
+
+Jul 27, 2024: Félix releases LeoJS 1.0, with this
+[announcement](https://groups.google.com/g/leo-editor/c/nNSaJTMAB3s/m/Df1roWA5AgAJ)
+along with a [scripting samples repository](https://github.com/boltex/scripting-samples-leojs?tab=readme-ov-file#how-to-use-on-the-web-in-your-browser)
+and a [dedicated website](https://boltex.github.io/leojs/).
+
+LeoJS is a JavaScript implementation of Leo's original Python source packaged as a VSCode extension. It is also usable with VSCode for the web.
+
+Leo 6.8.2 (November 8, 2024):
+
+@jupytext uses the jupytext library https://jupytext.readthedocs.io/en/latest/ to handle Jupyter Notebooks seemlessly.
+
+Leo 6.8.6: (August 1, 2025):
+
+- @leo and related commands makes it easy to use Leo on huge repositories.
+- LeoInteg (and leoserver.py) supports websockets.
 
 ## Acknowledgements
 

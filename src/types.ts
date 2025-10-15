@@ -274,7 +274,6 @@ export interface showSaveAsDialogParameters {
     "title": string;
     "message": string;
     "filetypes": string[];
-    "defaultExtension": string;
 }
 
 /**

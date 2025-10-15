@@ -76,13 +76,17 @@ export class FastRead {
 
     public translate_dict: { [key: number]: string | null } = {}; // {z: None for z in range(20) if chr(z) not in '\t\r\n'}
 
+    //@+<< FastRead: define nativeVnodeAttributes >>
+    //@+node:felix.20250809000913.1: *3* << FastRead: define nativeVnodeAttributes >>
     public nativeVnodeAttributes: string[] = [
+        '_mod_time',  // Leo 6.8.7.
         'a',
         'descendentTnodeUnknownAttributes',
         'descendentVnodeUnknownAttributes',
         'expanded', 'marks', 't',
         'tnodeList',  // Removed in Leo 4.7.
     ];
+    //@-<< FastRead: define nativeVnodeAttributes >>
 
     constructor(c: Commands, gnx2vnode: { [key: string]: VNode }) {
         this.c = c;
@@ -2933,35 +2937,28 @@ export class FileCommands {
      * suitable for reconstituting uA's for anonymous vnodes.
      */
     public putDescendentVnodeUas(p: Position): string {
-        // Create aList of tuples (p,v) having a valid unknownAttributes dict.
-        // Create dictionary: keys are vnodes, values are corresponding archived positions.
-        // const aList: [Position, VNode][] | [VNode, any][] = [];
-
-        let aList_pv: [Position, VNode][] = [];
-        let aList_va: [VNode, any][] = [];
+        // Create list of vnodes.
+        let vnode_list: VNode[] = [];
 
         const pDict: { [key: string]: number[] } = {};
         for (let p2 of p.self_and_subtree(false)) {
             if (p2.v['unknownAttributes']) {
-                aList_pv.push([p2.copy(), p2.v]);
+                vnode_list.push(p2.v);
                 pDict[p2.v.gnx] = p2.archivedPosition(p);
             }
         }
-
-        // Create aList of pairs (v,d) where d contains only pickleable entries.
-        if (aList_pv.length) {
-            aList_va = this.createUaList(aList_pv);
-        }
-        if (!aList_va.length) {
+        if (!vnode_list.length) {
             return '';
         }
+        // Create aList of pairs (v,d) where d contains only pickleable entries.
+        const aList2 = this.createUaList(vnode_list);
 
         // Create d, an enclosing dict to hold all the inner dicts.
         const d: { [key: string]: any } = {};
 
         // aList is now type [VNode, any][]
         // for v, d2 in aList:
-        for (let p_a of aList_va) {
+        for (let p_a of aList2) {
             let v: VNode;
             let d2: any;
             [v, d2] = p_a;
@@ -2979,35 +2976,36 @@ export class FileCommands {
         if (!d || !Object.keys(d).length) {
             return '';
         }
+        // Pickle and hexlify d.
         return this.pickle(p.v, d, 'descendentVnodeUnknownAttributes') || '';
     }
     //@+node:felix.20211213224237.33: *6* fc.createUaList
     /**
-     * Given aList of pairs(p, torv), return a list of pairs(torv, d)
+     * Given a list of vnodes, return a list of pairs (v, d)
      * where d contains all picklable items of torv.unknownAttributes.
      */
-    public createUaList(aList: [Position, VNode][]): [VNode, any][] {
+    public createUaList(vnode_list: VNode[]): [VNode, any][] {
         const result: [VNode, any][] = [];
 
-        for (let p_a of aList) {
-            let p: Position;
-            let torv: VNode;
-            [p, torv] = p_a;
+        for (let v of vnode_list) {
 
             // if (isinstance(torv.unknownAttributes, dict)){
             if (
-                typeof torv.unknownAttributes === 'object' &&
-                !Array.isArray(torv.unknownAttributes) &&
-                torv.unknownAttributes !== null
+                typeof v.unknownAttributes === 'object' &&
+                !Array.isArray(v.unknownAttributes) &&
+                v.unknownAttributes !== null
             ) {
                 // Create a new dict containing only entries that can be pickled.
-                const d = torv.unknownAttributes; // Copy the dict.
-
+                const d = { ...v.unknownAttributes }; // Copy the dict.
+                // New in Leo 6.8.7: Remove '_mod_time' from the uA.
+                if ('_mod_time' in d) {
+                    delete d['_mod_time'];
+                }
                 for (let key in d) {
                     // Just see if val can be pickled.  Suppress any error.
                     let ok;
                     try {
-                        ok = this.pickle(torv, d[key], 'none');
+                        ok = this.pickle(v, d[key], 'none');
                     } catch (error) {
                         ok = false;
                     }
@@ -3018,15 +3016,15 @@ export class FileCommands {
                             'ignoring bad unknownAttributes key',
                             key,
                             'in',
-                            p.h
+                            v.h
                         );
                     }
                 }
                 if (Object.keys(d).length) {
-                    result.push([torv, d]);
+                    result.push([v, d]);
                 }
             } else {
-                g.warning('ignoring non-dictionary uA for', p);
+                g.warning('ignoring non-dictionary uA for', v.h);
             }
         }
         return result;

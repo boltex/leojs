@@ -433,7 +433,8 @@ export class Constants {
         SELECTED_DIRTY: "leojsDirty",
         SELECTED_EMPTY: "leojsEmpty",
         SELECTED_CHILD: "leojsChild", // Has children
-        SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
+        SELECTED_ATFILE: "leojsAtFile", // Can be refreshed
+        SELECTED_ATLEOFILE: "leojsAtLeoFile", // Can be used with 'open-at-leo-file' command
 
         // Statusbar Flag 'keybindings in effect'
         LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
@@ -442,6 +443,7 @@ export class Constants {
         NODE_MARKED: "leojsNodeMarked",  // Selected node is marked
         NODE_UNMARKED: "leojsNodeUnmarked", // Selected node is unmarked (Needed for regexp)
         NODE_ATFILE: "leojsNodeAtFile", // Selected node is an @file or @clean, etc...
+        NODE_ATLEOFILE: "leojsNodeAtLeoFile", // Selected node is an @leo file
         NODE_CLONED: "leojsNodeCloned",
         NODE_ROOT: "leojsNodeRoot",
         NODE_NOT_ROOT: "leojsNodeNotRoot",
@@ -594,6 +596,7 @@ export class Constants {
         PROMOTE: Constants.NAME + ".promote",
         DEMOTE: Constants.NAME + ".demote",
         REFRESH_FROM_DISK: Constants.NAME + ".refreshFromDisk",
+        OPEN_AT_LEO_FILE: Constants.NAME + ".openAtLeoFile",
         // Commands from keyboard, while focus on BODY (command-palette returns to BODY for now)
         MARK_SELECTION: Constants.NAME + ".markSelection",
         UNMARK_SELECTION: Constants.NAME + ".unmarkSelection",
@@ -615,6 +618,7 @@ export class Constants {
         PROMOTE_SELECTION: Constants.NAME + ".promoteSelection",
         DEMOTE_SELECTION: Constants.NAME + ".demoteSelection",
         REFRESH_FROM_DISK_SELECTION: Constants.NAME + ".refreshFromDiskSelection",
+        OPEN_AT_LEO_FILE_SELECTION: Constants.NAME + ".openAtLeoFileSelection",
         // Commands from keyboard, while focus on OUTLINE (no need for COPY_SELECTION)
         MARK_SELECTION_FO: Constants.NAME + ".markSelectionFromOutline",
         UNMARK_SELECTION_FO: Constants.NAME + ".unmarkSelectionFromOutline",
@@ -633,6 +637,7 @@ export class Constants {
         PROMOTE_SELECTION_FO: Constants.NAME + ".promoteSelectionFromOutline",
         DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
         REFRESH_FROM_DISK_SELECTION_FO: Constants.NAME + ".refreshFromDiskSelectionFromOutline",
+        OPEN_AT_LEO_FILE_SELECTION_FO: Constants.NAME + ".openAtLeoFileSelectionFromOutline",
         HOIST: Constants.NAME + ".hoistNode",
         HOIST_SELECTION: Constants.NAME + ".hoistSelection",
         HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
@@ -779,6 +784,7 @@ export class Constants {
         // * Tree Building
         EXECUTE_SCRIPT: "execute-script",
         REFRESH_FROM_DISK: "refresh-from-disk",
+        OPEN_AT_LEO_FILE: "open-at-leo-file",
         GIT_DIFF: "git-diff",
         // * Outline from body text
         EXTRACT: "extract",

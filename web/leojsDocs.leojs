@@ -62,6 +62,10 @@
               "vh": "@auto docs/getting-started/tutorial-pim.md"
             },
             {
+              "gnx": "felix.20250623142345.1",
+              "vh": "@auto docs/getting-started/tutorial-rst3.md"
+            },
+            {
               "gnx": "felix.20240820012448.1",
               "vh": "@auto docs/getting-started/tutorial-scripting.md"
             },

@@ -412,7 +412,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             c,
             'Insert File Name',
             filetypes,
-            ''
         );
 
         const i = w.getSelectionRange()[0];
@@ -3738,14 +3737,17 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const undoType = 'clear-all-uas';
         // #1276.
         let changed = false;
-        u.beforeChangeGroup(c.p, undoType);
+        const first_p = c.p;
         for (let p of c.all_unique_positions()) {
             if (p.v.u && Object.keys(p.v.u).length) {
+                if (!changed) {  // #4443
+                    u.beforeChangeGroup(first_p, undoType);
+                    changed = true;
+                }
                 const bunch = u.beforeChangeUA(p);
                 p.v.u = {};
                 p.setDirty();
                 u.afterChangeUA(p, undoType, bunch);
-                changed = true;
             }
         }
 

@@ -263,6 +263,50 @@ These control how Leo places text when writing external files. They are two of t
     may have other `@others` directives.
 </ul>
 
+## \@leo directives
+
+`@leo` directives have the form `@leo <path>` where `path` is a path (absolute
+or relative) to another Leo outline. To move between outlines, just select
+an `@leo` node and execute the `open-at-leo-file` command!
+
+`@leo` directives help split a single (too large) outline in a small **top-level outline** and various **sub-outlines**.
+
+For example, using a single outline to manage [Rust's compiler repo](https://github.com/rust-lang/rust/tree/master/compiler) causes performance problems.
+Managing each the 70+ sub-directories with a smaller sub-outline solves these problems.
+
+A new script helper, **c.makeLinkLeoFiles**, creates the sub-outlines automatically.
+For example, here is the script I use to create dozens of sub-outlines in my local clone of Rust's compiler.
+
+```ts
+  c.makeLinkLeoFiles(
+    ['.rs'],
+    `C:\\Repos\\ekr-fork-rust\\compiler`,
+  );
+```
+
+This script creates the `compiler_links.leo` outline in the `compiler`
+directory. In addition, for each direct sub-directory (say x) of the
+top-level directory, the script creates an outline called `x_links.leo`.
+
+The script is essential for large repos. The top-level `compiler` directory
+contains more than 70 sub-directories!
+
+The top-level outline (`compiler_links.leo`) contains `@leo` directives for all the sub-outline::
+
+<ul>
+  @leo rustc/rustc.leo
+  @leo rustc_abi/rustc_abi.leo
+  @leo rustc_arena/rustc_arena.leo
+  And dozens of others.
+</ul>
+
+Note that all paths above are relative to `compiler_links.leo`.
+  
+Each sub-outline contains:
+
+- One `@leo` node (the back link) pointing to the top-level outline.
+- One `@clean` node for each `.rs` file in the subdirectory and *all descendant directories*.
+
 ## Syntax coloring directives
 
 The `@color`, `@killcolor`, `@nocolor` and `@nocolor-node` directives control how

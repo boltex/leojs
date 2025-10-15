@@ -1147,7 +1147,6 @@ export async function diff_leo_files_helper(
         c,
         title,
         types,
-        '.leo',
     ) as string[];
 
     if (!w_paths || !w_paths.length) {
@@ -1160,7 +1159,6 @@ export async function diff_leo_files_helper(
             c,
             title,
             types,
-            ".leo",
         );
 
         if (!paths2 || !paths2.length) {

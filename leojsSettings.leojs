@@ -160,6 +160,10 @@
           "vh": "Command options",
           "children": [
             {
+              "gnx": "felix.20250623214443.1",
+              "vh": "@bool diff-leo-files = True"
+            },
+            {
               "gnx": "ekr.20131112150804.18737",
               "vh": "@bool force-execute-entire-body = False"
             },
@@ -353,7 +357,7 @@
                     },
                     {
                       "gnx": "ekr.20071213061811.1",
-                      "vh": "@string rst3-underline-characters = #=+*^~`-:><-"
+                      "vh": "@string rst3-underline-characters = #=+*^~`-:><"
                     },
                     {
                       "gnx": "ekr.20071213061811.3",
@@ -456,6 +460,10 @@
             {
               "gnx": "ekr.20170718054928.1",
               "vh": "@bool log-show-save-time = False"
+            },
+            {
+              "gnx": "felix.20250716012122.1",
+              "vh": "@bool report-changed-at-clean-nodes = False"
             },
             {
               "gnx": "ekr.20200226102131.1",
@@ -1002,6 +1010,24 @@
           ]
         },
         {
+          "gnx": "felix.20250623215059.1",
+          "vh": "UNLs",
+          "children": [
+            {
+              "gnx": "felix.20250623215059.2",
+              "vh": "@string unl-status-kind = gnx"
+            },
+            {
+              "gnx": "felix.20250623215059.3",
+              "vh": "@bool full-unl-paths = False"
+            },
+            {
+              "gnx": "felix.20250623215059.4",
+              "vh": "@data unl-path-prefixes"
+            }
+          ]
+        },
+        {
           "gnx": "ekr.20110611092035.16471",
           "vh": "Widget colors",
           "children": [
@@ -1083,6 +1109,7 @@
     "ekr.20041119034357.1": "@language rest\n@wrap\n\nThis @settings tree contains all active settings.\n\nSettings outside this tree have no effect.\n\nThe node \"Qt Gui Stylesheet settings\" contains most of the setting relating to appearance.\n",
     "ekr.20201010141557.1": "The name of Leo's active theme, or None, which gives Leo's legacy (light) theme.\n\nTo enable a theme, put the following setting in myLeoSettings.leo:\n\n@string theme-name = <name of .leo file>\n\nThe .leo suffix is optional. Leo looks for the named .leo file in this order:\n\n~  (The user's home directory)\n~/themes\n~/.leo\n~/.leo/themes\nleo/themes\n\nThe .leo file in the leo/themes folder are:\n\nBreezeDarkTheme.leo\nBreezeDark2Theme.leo\nDefaultTheme.leo\nEKRDark.leo\nEKRLight.leo\nLeoBlackSolarized.leo\nPaperLightTheme.leo\nZephyrDarkTheme.leo",
     "ekr.20041119034357.10": "See the \"Tree Operation\" node for settings that affect how the tree pane works.",
+    "felix.20250623214443.1": "True: Leo's git-diff command will diff .leo and .leojs files.",
     "ekr.20131112150804.18737": "True: the execute-script command executes the entire body, even if text is selected.",
     "ekr.20150227102835.1": "True: (Recommended) Make a \"Recovered Nodes\" node whenever Leo reads a file that has been changed outside of Leo.\n",
     "ekr.20180117074230.1": "# True: Show user tips on startup.",
@@ -1223,6 +1250,9 @@
     "ekr.20041119042929.10": "The encoding specified in the following line of new .leo files:\n\n<?xml version=\"1.0\" encoding=\"UTF-8\">\n\nThe recommended value is UTF-8 (upper case for compatibility for old versions of Leo).\n\niso-8859-1 would be a popular alternative.\n\nImportant: Once a .leo file is created the <?xml...\"> line can only be changed by hand.  Alas, changing the <?xml...\"> line by hand may cause unicode errors the next time the .leo file is loaded.  Therefore, you should change the <?xml...\"> line by hand only when first creating a .leo file.",
     "ekr.20080212084020": "The encoding used for files imported by @auto if no @encoding directive is in effect.\nDefault is UTF-8 (case not important).",
     "ekr.20041119042929.9": "The encoding used for derived files if no @encoding directive is in effect.\nDefault is UTF-8 (case not important).",
+    "felix.20250623215059.2": "gnx:    Show gnx-based unls in the status area.\nlegacy: Show legacy (headline-based) uns in the status area.",
+    "felix.20250623215059.3": "True: (legacy): Display full path names in the status area.\nFalse:          Display only the .leo file's name in the status area.\n",
+    "felix.20250623215059.4": "# lines have the form:\n# x.leo: <absolute path to x.leo>\n\n# test.leo:    c:/Repos/leo-editor/leo/test\n# LeoDocs.leo: c:/Repos/leo-editor/leo/doc",
     "ekr.20080326060254.3": "The default language if no @language or @comment is in effect.\n\nValid values are (case is ignored):\n\nactionscript,c,csharp,css,cweb,elisp,html,java,latex,\npascal,perl,perlpod,php,plain,plsql,python,rapidq,rebol,shell,tcltk.",
     "ekr.20041213105954": "Options that require pixel values can be any Python expression that yields an int.\nWarning: the number of pixels per inch varies...",
     "ekr.20061010111324": "True: (legacy) Select all headline text when editing a headline.\nFalse: Put the cursor at the end of the headline text.",

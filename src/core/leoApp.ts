@@ -275,8 +275,13 @@ export class LeoApp {
     public commandInterruptFlag: boolean = false; // True: command within a command.
 
     //@-<< LeoApp: global controller/manager objects >>
-    //@+<< LeoApp: global reader/writer data >>
-    //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
+    //@+<< LeoApp: global importer/reader/writer data >>
+    //@+node:felix.20210103024632.8: *5* << LeoApp: global importer/reader/writer data >>
+    // Leo 6.8.7: Keys are language names; values are importer classes.
+    public importerClassesDict: Record<string, any> = {};
+    // Leo 6.8.7: Keys are language names; values are importer modules.
+    public importerModulesDict: Record<string, any> = {};
+
     // From leoAtFile.py.
     public atAutoWritersDict: Record<string, (...args: any[]) => any> = {};
     public writersDispatchDict: Record<string, typeof BaseWriter> = {};
@@ -293,7 +298,7 @@ export class LeoApp {
     // leo 5.6: allow undefined section references in all @auto files.
     // Leo 6.6.4: Make this a permanent g.app ivar.
     public allow_undefined_refs = false;
-    //@-<< LeoApp: global reader/writer data >>
+    //@-<< LeoApp: global importer/reader/writer data >>
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>
     public already_open_files: string[] = []; // A list of file names that * might * be open in another copy of Leo.
@@ -3195,31 +3200,33 @@ export class LoadManager {
         ];
 
         for (const language of table) {
+
+            const language_name = language[0] === 'leo_rst' ? 'rst' : language[0];
+
+            g.app.importerModulesDict[language_name] = language[1];
+
             this.parse_importer_dict(language[0], language[1]);
         }
 
-        // // Allow plugins to be defined in ~/.leo/plugins.
-        // for (const pattern of [
-        //     // ~/.leo/plugins.
-        //     g.finalize_join(g.app.homeDir, '.leo', 'plugins'),
-        //     // leo/plugins/importers.
-        //     g.finalize_join(g.app.loadDir, '..', 'plugins', 'importers', '*.py'),
-        // ]){
-        //     filenames = g.glob_glob(pattern)
-        //     for filename in filenames:
-        //         sfn = g.shortFileName(filename)
-        //         if sfn != '__init__.py':
-        //             try:
-        //                 module_name = sfn[:-3]
-        //                 // Important: use importlib to give imported modules their fully qualified names.
-        //                 m = importlib.import_module(f"leo.plugins.importers.{module_name}")
-        //                 self.parse_importer_dict(sfn, m)
-        //                 // print('createImporterData', m.__name__)
-        //             except Exception:
-        //                 g.warning(f"can not import leo.plugins.importers.{module_name}")
-        //                 g.printObj(filenames)
-
-        // }
+        // Leo 6.7.8: Create g.app.importerClassesDict.
+        for (const language_name in g.app.importerModulesDict) {
+            const m = g.app.importerModulesDict[language_name];
+            let found = false;
+            for (const z in m) {
+                // A hack: all importer subclasses should end with '_Importer'.
+                if (z.endsWith('_Importer')) {
+                    let importer_class: any = m[z];
+                    if (importer_class) {
+                        found = true;
+                        g.app.importerClassesDict[language_name] = importer_class;
+                        break;
+                    }
+                }
+            }
+            if (!found) {
+                g.trace(`No importer for ${language_name}`);
+            }
+        }
 
     }
     //@+node:felix.20230529220941.3: *7* LM.parse_importer_dict
@@ -3736,8 +3743,7 @@ export class LoadManager {
             if (p && p.__bool__()) {
                 const load_type = this.options['load_type'];
                 p.setHeadString(`${load_type} ${fn}`);
-                await c.refreshFromDisk();
-                c.selectPosition(p);
+                await c.refreshFromDisk(p);
             }
         }
         // Fix critical bug 1184855: data loss with command line 'leo somefile.ext'

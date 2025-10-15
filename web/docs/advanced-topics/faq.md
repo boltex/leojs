@@ -387,6 +387,13 @@ echo "hi";
 @laѕt ?>
 ```
 
+### How can I export as a user-friendly HTML file?
+**Question**: Is there a way to export an outline in an html format where the format of the html is similar to the desktop version of Leo with the expands and collapses?  I want to send someone a copy of my outline that they can use in a browser to view.
+
+**Answer**: In LeoJS, you can use the "Export HTML Outline Viewer" entry in the File->Export Files menu which outputs the Leo outline as a self-contained HTML interactive outline viewer. 
+
+The file is saved in the user's home/.leo folder and also opened with your default viewer.
+
 ### How can I open special .leo files easily?
 
 You can open files such as leoSettings.leo and myLeoSettings.leo with commands starting with 'leo-'.

@@ -461,7 +461,6 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 c,
                 'Compare Leo Files',
                 filetypes,
-                '.leo'
             );
             if (!fileName) {
                 return;
@@ -700,7 +699,6 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 ['Text', '*.txt'],
                 ['All files', '*'],
             ],
-            '.txt'
         );
         return fn;
     }
@@ -846,7 +844,6 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
                 ['Text', '*.txt'],
                 ['All files', '*'],
             ],
-            '.txt'
         )) as string;
         if (fileName) {
             try {
@@ -886,25 +883,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         const c = this.c;
         // Change the headline.
         p.h = '@auto' + p.h.substring(5);
-        // Compute the position of the present line within the file.
-        const w = c.frame.body.wrapper;
-        const ins = w.getInsertPoint();
-        let [row, col] = g.convertPythonIndexToRowCol(p.b, ins);
-        // Ignore *preceding* directive lines.
-        const directives = g
-            .splitLines(c.p.b)
-            .slice(0, row)
-            .filter((z) => g.isDirective(z));
-        row -= directives.length;
-        row = Math.max(0, row);
-        // Reload the file, creating new nodes.
-        c.selectPosition(p);
-        await c.refreshFromDisk();
-        // Restore the line in the proper node.
-        await c.gotoCommands.find_file_line(row + 1);
-        p.setDirty();
-        c.setChanged();
-        c.redraw();
+        await c.refreshFromDisk(p);
         c.bodyWantsFocus();
     }
     //@+node:felix.20230709010427.30: *4* efc.toAtEdit
@@ -913,35 +892,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
      */
     public async toAtEdit(p: Position): Promise<void> {
         const c = this.c;
-        const w = c.frame.body.wrapper;
         p.h = '@edit' + p.h.substring(5);
-        // Compute the position of the present line within the *selected* node c.p
-        let ins = w.getInsertPoint();
-        let [row, col] = g.convertPythonIndexToRowCol(c.p.b, ins);
-        // Ignore directive lines.
-        const directives = g
-            .splitLines(c.p.b)
-            .slice(0, row)
-            .filter((z) => g.isDirective(z));
-        row -= directives.length;
-        row = Math.max(0, row);
-        // Count preceding lines from p to c.p, again ignoring directives.
-        for (const p2 of p.self_and_subtree(false)) {
-            if (p2.__eq__(c.p)) {
-                break;
-            }
-            const lines = g.splitLines(p2.b).filter((z) => !g.isDirective(z));
-            row += lines.length;
-        }
-        // Reload the file into a single node.
-        c.selectPosition(p);
-        await c.refreshFromDisk();
-        // Restore the line in the proper node.
-        ins = g.convertRowColToPythonIndex(p.b, row + 1, 0);
-        w.setInsertPoint(ins);
-        p.setDirty();
-        c.setChanged();
-        c.redraw();
+        await c.refreshFromDisk(p);
         c.bodyWantsFocus();
     }
     //@-others

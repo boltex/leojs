@@ -1,5 +1,27 @@
 # Change Log
 
+## 1.0.15
+
+- ...
+
+## 1.0.14
+
+- Read only unchanged @clean nodes: a huge performance boost!
+- Support @leo <path>; nodes. See https://leo-editor.github.io/leo-editor/directives.html#leo-directives
+- Added open-at-leo-file command to open the given outline and the c.makeLinkLeoFiles method that helps scripts create a top-level outline containing links to sub-outlines.
+- Added the **export-html-outline-viewer** command which exports the outline as a READ-ONLY self-contained HTML page, complete with outline browsing functionality including searching, hoisting, marking nodes and more.
+
+## 1.0.13
+
+- Fixed availability of "Refresh from Disk" for untitled Leo documents.
+- Fixed default base directory for external files of untitled Leo documents.
+- Fixed 'import txt file' usage of relative directories.
+- Fixed node insertion logic (after node instead of as last child) for the CWEB importer.
+
+## 1.0.12
+
+- Fixed scrolling to reveal cursor on selected line for gotoGlobalLine related commands.
+
 ## 1.0.11
 
 - Import commands now create outline nodes using a relative path (when the imported file is located at or below the Leo file’s directory).

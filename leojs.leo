@@ -9,6 +9,10 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20251014222608.1"><vh>1.0.15</vh></v>
+<v t="felix.20250622002355.1"><vh>1.0.14</vh></v>
+<v t="felix.20250616003053.1"><vh>1.0.13</vh></v>
+<v t="felix.20250615192814.1"><vh>1.0.12</vh></v>
 <v t="felix.20250522205342.1"><vh>1.0.11</vh></v>
 <v t="felix.20250311210144.1"><vh>1.0.10</vh></v>
 <v t="felix.20240923224024.1"><vh>1.0.9</vh></v>
@@ -406,6 +410,7 @@
 <v t="felix.20201214151447.16"><vh>leoEmpty</vh></v>
 <v t="felix.20201214151447.17"><vh>leoChild</vh></v>
 <v t="felix.20201214151447.18"><vh>leoAtFile</vh></v>
+<v t="felix.20250830172625.1"><vh>leoAtLeoFile</vh></v>
 <v t="felix.20201214151447.19"><vh>leoRoot</vh></v>
 </v>
 <v t="felix.20201214151447.20"><vh>constructor</vh></v>
@@ -1499,11 +1504,16 @@ public refreshTreeRoot(): void {
     if (element.isMarked()) {
         w_contextValue = Constants.CONTEXT_FLAGS.NODE_MARKED;
     }
-    // then append 'leoNodeAtFile' to existing if needed
-    if (element.isAnyAtFileNode()) {
+    // then append 'leojsNodeAtFile' to existing if needed
+    if (element.isAnyAtFileNode() &amp;&amp; !element.isAtLeoNode()) {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATFILE;
     }
-    // then append 'leoNodeCloned' to existing if needed
+    // append 'leojsNodeAtLeoFile' to existing if needed
+    if (element.isAtLeoNode()) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATLEOFILE;
+    }
+
+    // then append 'leojsNodeCloned' to existing if needed
     if (element.isCloned()) {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_CLONED;
     }
@@ -1589,7 +1599,7 @@ public refreshTreeRoot(): void {
                 return [w_rootPosition];
             } else {
                 // NOT HOISTED: Normal list of root nodes
-                const w_rootNodes = [...w_c.all_Root_Children()];
+                const w_rootNodes = [...w_c.all_root_children()];
                 if (w_rootNodes.length === 1) {
                     // Exactly one: prevent hoisting on SINGLE top node
                     w_rootNodes[0]._isRoot = true;
@@ -1902,6 +1912,10 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
+[CMD.OPEN_AT_LEO_FILE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.OPEN_AT_LEO_FILE, { node: p_node, refreshType: REFRESH_ALL, finalFocus: Focus.Outline })], // DO NOT KEEP SELECTION
+[CMD.OPEN_AT_LEO_FILE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.OPEN_AT_LEO_FILE, { refreshType: REFRESH_ALL, finalFocus: Focus.Body })],
+[CMD.OPEN_AT_LEO_FILE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.OPEN_AT_LEO_FILE, { refreshType: REFRESH_ALL, finalFocus: Focus.Outline })],
+
 [CMD.GIT_DIFF, () =&gt; p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
 [CMD.TAB_CYCLE_NEXT, () =&gt; p_leoUI.tabCycle()],
@@ -2089,6 +2103,7 @@ public static COMMANDS = {
     PROMOTE: Constants.NAME + ".promote",
     DEMOTE: Constants.NAME + ".demote",
     REFRESH_FROM_DISK: Constants.NAME + ".refreshFromDisk",
+    OPEN_AT_LEO_FILE: Constants.NAME + ".openAtLeoFile",
     // Commands from keyboard, while focus on BODY (command-palette returns to BODY for now)
     MARK_SELECTION: Constants.NAME + ".markSelection",
     UNMARK_SELECTION: Constants.NAME + ".unmarkSelection",
@@ -2110,6 +2125,7 @@ public static COMMANDS = {
     PROMOTE_SELECTION: Constants.NAME + ".promoteSelection",
     DEMOTE_SELECTION: Constants.NAME + ".demoteSelection",
     REFRESH_FROM_DISK_SELECTION: Constants.NAME + ".refreshFromDiskSelection",
+    OPEN_AT_LEO_FILE_SELECTION: Constants.NAME + ".openAtLeoFileSelection",
     // Commands from keyboard, while focus on OUTLINE (no need for COPY_SELECTION)
     MARK_SELECTION_FO: Constants.NAME + ".markSelectionFromOutline",
     UNMARK_SELECTION_FO: Constants.NAME + ".unmarkSelectionFromOutline",
@@ -2128,6 +2144,7 @@ public static COMMANDS = {
     PROMOTE_SELECTION_FO: Constants.NAME + ".promoteSelectionFromOutline",
     DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
     REFRESH_FROM_DISK_SELECTION_FO: Constants.NAME + ".refreshFromDiskSelectionFromOutline",
+    OPEN_AT_LEO_FILE_SELECTION_FO: Constants.NAME + ".openAtLeoFileSelectionFromOutline",
     HOIST: Constants.NAME + ".hoistNode",
     HOIST_SELECTION: Constants.NAME + ".hoistSelection",
     HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
@@ -2275,6 +2292,7 @@ public static LEO_COMMANDS = {
     // * Tree Building
     EXECUTE_SCRIPT: "execute-script",
     REFRESH_FROM_DISK: "refresh-from-disk",
+    OPEN_AT_LEO_FILE: "open-at-leo-file",
     GIT_DIFF: "git-diff",
     // * Outline from body text
     EXTRACT: "extract",
@@ -2640,7 +2658,8 @@ public static CONTEXT_FLAGS = {
     SELECTED_DIRTY: "leojsDirty",
     SELECTED_EMPTY: "leojsEmpty",
     SELECTED_CHILD: "leojsChild", // Has children
-    SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
+    SELECTED_ATFILE: "leojsAtFile", // Can be refreshed
+    SELECTED_ATLEOFILE: "leojsAtLeoFile", // Can be used with 'open-at-leo-file' command
 
     // Statusbar Flag 'keybindings in effect'
     LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
@@ -2649,6 +2668,7 @@ public static CONTEXT_FLAGS = {
     NODE_MARKED: "leojsNodeMarked",  // Selected node is marked
     NODE_UNMARKED: "leojsNodeUnmarked", // Selected node is unmarked (Needed for regexp)
     NODE_ATFILE: "leojsNodeAtFile", // Selected node is an @file or @clean, etc...
+    NODE_ATLEOFILE: "leojsNodeAtLeoFile", // Selected node is an @leo file
     NODE_CLONED: "leojsNodeCloned",
     NODE_ROOT: "leojsNodeRoot",
     NODE_NOT_ROOT: "leojsNodeNotRoot",
@@ -3070,7 +3090,8 @@ export class LeoStates {
     this.leoDirty = p_node.isDirty();
     this.leoEmpty = !p_node.v.hasBody();
     this.leoChild = p_node.hasChildren();
-    this.leoAtFile = p_node.isAnyAtFileNode();
+    this.leoAtFile = !p_node.isAtLeoNode() &amp;&amp; p_node.isAnyAtFileNode();
+    this.leoAtLeoFile = p_node.isAtLeoNode();
     this.leoRoot = p_node._isRoot;
 }
 
@@ -3315,7 +3336,6 @@ export interface showSaveAsDialogParameters {
     "title": string;
     "message": string;
     "filetypes": string[];
-    "defaultExtension": string;
 }
 
 </t>
@@ -4381,6 +4401,7 @@ public async minibuffer(): Promise&lt;unknown&gt; {
                         {
                             tree: true,
                             body: true,
+                            scroll: true, // scroll to line
                             documents: false,
                             buttons: false,
                             states: true
@@ -4629,7 +4650,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.11",
+  "version": "1.0.15",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -4637,7 +4658,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "sponsor": {
     "url": "https://boltex.github.io/"
   },
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/boltex/leojs/issues"
   },
@@ -4681,7 +4702,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
-    "@xmldom/xmldom": "^0.9.2",
     &lt;&lt; dependencies &gt;&gt;
   }
 }
@@ -4760,22 +4780,43 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "command": "leojs.refreshFromDisk",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelection",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtFile",
   "icon": "$(leojs-refresh)"
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
   "category": "Leojs",
   "title": "Refresh from Disk",
-  "enablement": "leojsTreeOpened &amp;&amp; LeojsAtFile &amp;&amp; leojsTreeTitled",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtFile",
   "icon": "$(leojs-refresh)"
+},
+{
+  "command": "leojs.openAtLeoFile",
+  "category": "Leojs",
+  "title": "Open @leo file",
+  "enablement": "leojsTreeOpened",
+  "icon": "$(leojs-folder)"
+},
+{
+  "command": "leojs.openAtLeoFileSelection",
+  "category": "Leojs",
+  "title": "Open @leo file",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtLeoFile",
+  "icon": "$(leojs-folder)"
+},
+{
+  "command": "leojs.openAtLeoFileSelectionFromOutline",
+  "category": "Leojs",
+  "title": "Open @leo file",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsAtLeoFile",
+  "icon": "$(leojs-folder)"
 },
 {
   "command": "leojs.writeAtFileNodes",
@@ -5581,6 +5622,14 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   "when": "false"
 },
 {
+  "command": "leojs.openAtLeoFile",
+  "when": "false"
+},
+{
+  "command": "leojs.openAtLeoFileSelectionFromOutline",
+  "when": "false"
+},
+{
   "command": "leojs.writeAtFileNodesFromOutline",
   "when": "false"
 },
@@ -6189,6 +6238,11 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 <t tx="felix.20201214205159.64">{
   "command": "leojs.refreshFromDisk",
   "when": "viewItem =~ /leojsNodeAtFile/",
+  "group": "leojsNodeContext1@3"
+},
+{
+  "command": "leojs.openAtLeoFile",
+  "when": "viewItem =~ /leojsNodeAtLeoFile/",
   "group": "leojsNodeContext1@3"
 },
 </t>
@@ -6837,7 +6891,8 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "webpack-cli": "^4.9.2",
 "webpack-shell-plugin-next": "^2.2.2"
 </t>
-<t tx="felix.20201214205159.81">"assert": "^2.0.0",
+<t tx="felix.20201214205159.81">"@xmldom/xmldom": "^0.9.2",
+"assert": "^2.0.0",
 "binascii": "^0.0.2",
 "bowser": "^2.11.0",
 "browser-process-hrtime": "^1.0.0",
@@ -7060,8 +7115,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                     ["Leo files", "*.leojs *.leo *.db"],
                     ["Python files", "*.py"],
                     ["All files", "*"]
-                ],
-                g.defaultLeoFileExtension(),
+                ]
             );
         }
         if (fileName &amp;&amp; g.app.loadManager) {
@@ -8782,7 +8836,6 @@ public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
         c,
         'Save As JSON (.leojs)',
         [['Leo JSON files', '*.leojs']],
-        '.leojs'
     );
     if (!fileName) {
         return;
@@ -9399,16 +9452,20 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
-    startpath?: string
+    startpath?: string,
+    startUri?: vscode.Uri
 ): Thenable&lt;string&gt; {
+    if (startpath &amp;&amp; !startUri) {
+        startUri = vscode.Uri.file(startpath);
+    }
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
     return vscode.window.showOpenDialog(
         {
             title: title,
             canSelectMany: false,
-            filters: types
+            filters: types,
+            defaultUri: startUri
         }
     ).then((p_uris) =&gt; {
         const names: string[] = [];
@@ -9443,7 +9500,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
 ): Thenable&lt;string&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
@@ -19358,7 +19414,6 @@ private _hideBodiesUnknownToFileSys(p_editors: readonly vscode.TextEditor[]): vo
     c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
-    defaultExtension: string,
     startpath?: string
 ): Thenable&lt;string[]&gt; {
     // convert to { [name: string]: string[] } typing
@@ -19552,7 +19607,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.11&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.15&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21689,6 +21744,7 @@ public get1Char(
                             tree: true,
                             body: true,
                             states: true,
+                            scroll: true, // Scroll to the position in the body
                             buttons: false,
                             documents: false,
                             goto: false,
@@ -21741,6 +21797,7 @@ public get1Char(
                 tree: true,
                 body: true,
                 states: true,
+                scroll: true, // Scroll to the position in the body
                 buttons: false,
                 documents: true,
                 goto: false,
@@ -21796,6 +21853,42 @@ public get1Char(
     );
     return this.launchRefresh();
 }
+
+</t>
+<t tx="felix.20250615192814.1">## 1.0.12
+
+- Fixed scrolling to reveal cursor on selected line for gotoGlobalLine related commands.
+
+</t>
+<t tx="felix.20250616003053.1">## 1.0.13
+
+- Fixed availability of "Refresh from Disk" for untitled Leo documents.
+- Fixed default base directory for external files of untitled Leo documents.
+- Fixed 'import txt file' usage of relative directories.
+- Fixed node insertion logic (after node instead of as last child) for the CWEB importer.
+
+</t>
+<t tx="felix.20250622002355.1">## 1.0.14
+
+- Read only unchanged @clean nodes: a huge performance boost!
+- Support @leo &lt;path&gt;; nodes. See https://leo-editor.github.io/leo-editor/directives.html#leo-directives
+- Added open-at-leo-file command to open the given outline and the c.makeLinkLeoFiles method that helps scripts create a top-level outline containing links to sub-outlines.
+- Added the **export-html-outline-viewer** command which exports the outline as a READ-ONLY self-contained HTML page, complete with outline browsing functionality including searching, hoisting, marking nodes and more.
+
+</t>
+<t tx="felix.20250830172625.1">private _leoAtLeoFile: boolean = false;
+get leoAtLeoFile(): boolean {
+    return this._leoAtLeoFile;
+}
+set leoAtLeoFile(p_value: boolean) {
+    this._leoAtLeoFile = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ATLEOFILE, p_value);
+}
+
+</t>
+<t tx="felix.20251014222608.1">## 1.0.15
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

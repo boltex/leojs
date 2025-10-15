@@ -448,11 +448,7 @@ export class Rust_Importer extends Importer {
      * **Note**: The RecursiveImportController class contains a postpass that
      *            adjusts headlines of *all* imported nodes.
      */
-    postprocess(parent: Position, result_blocks: Block[]): void {
-
-        if (result_blocks.length < 2) {
-            return;
-        }
+    postprocess(parent: Position): void {
 
         //@+others  // Define helper functions.
         //@+node:felix.20250221202233.14: *4* function: convert_docstring
@@ -506,21 +502,21 @@ export class Rust_Importer extends Importer {
          *
          * For Rust, this consists of leading 'use' statements and any comments that precede them.
         */
-        const move_module_preamble = (lines: string[], parent: Position, result_blocks: Block[]): void => {
+        const move_module_preamble = (lines: string[], parent: Position): void => {
             const child1 = parent.firstChild();
             if (!child1 || !child1.__bool__()) {
                 return;
             }
 
             // Compute the potential preamble: all the leading lines.
-            const potential_preamble_start = Math.max(0, result_blocks[1].start_body - 1);
-            const potential_preamble_lines = lines.slice(0, potential_preamble_start);
+            const preamble_start = Math.max(0, g.splitLines(child1.b).length - 1);
+            const preamble_lines = lines.slice(0, preamble_start);
 
             // Include only comment, blank, and 'use' lines.
             let found_use = false;
             let i = 0;
-            for (; i < potential_preamble_lines.length; i++) {
-                const stripped_line = potential_preamble_lines[i].trim();
+            for (; i < preamble_lines.length; i++) {
+                const stripped_line = preamble_lines[i].trim();
                 if (stripped_line.startsWith('use')) {
                     found_use = true;
                 } else if (stripped_line.startsWith('///')) {
@@ -545,11 +541,25 @@ export class Rust_Importer extends Importer {
 
             // Adjust the bodies.
             parent.b = preamble_s + parent.b;
-            child1.b = child1.b.replace(preamble_s, '').replace(/^\n+/, '');
+            child1.b = child1.b.replace(preamble_s, '');
+
+            // Next, move leading lines to the parent, before the @others line.
+            while (child1.b.startsWith('\n')) {
+                if (parent.b.includes('@others')) {
+                    // Assume the importer created the @others.
+                    parent.b = parent.b.replace('@others', '\n@others');
+                } else {
+                    parent.b += '\n';
+                }
+                child1.b = child1.b.slice(1);
+            }
         };
         //@-others
 
-        move_module_preamble(this.lines, parent, result_blocks);
+
+        this.move_blank_lines(parent);  // Base-class method.
+
+        move_module_preamble(this.lines, parent);
         if (0) {
             for (const p of parent.self_and_subtree()) {
                 convert_docstring(p);
