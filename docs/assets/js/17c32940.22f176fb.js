@@ -172,6 +172,10 @@ const toc = [{
   "id": "how-can-i-disable-php-comments",
   "level": 3
 }, {
+  "value": "How can I export as a user-friendly HTML file?",
+  "id": "how-can-i-export-as-a-user-friendly-html-file",
+  "level": 3
+}, {
   "value": "How can I open special .leo files easily?",
   "id": "how-can-i-open-special-leo-files-easily",
   "level": 3
@@ -851,6 +855,19 @@ function _createMdxContent(props) {
         className: "language-php",
         children: "@firѕt <?php\r\n@firѕt /*\r\n*/\r\n\r\necho \"hi\";\r\n\r\n@ԁelims /* */\r\n@laѕt ?>\n"
       })
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "how-can-i-export-as-a-user-friendly-html-file",
+      children: "How can I export as a user-friendly HTML file?"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Question"
+      }), ": Is there a way to export an outline in an html format where the format of the html is similar to the desktop version of Leo with the expands and collapses?  I want to send someone a copy of my outline that they can use in a browser to view."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: [(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
+        children: "Answer"
+      }), ": In LeoJS, you can use the \"Export HTML Outline Viewer\" entry in the File->Export Files menu which outputs the Leo outline as a self-contained HTML interactive outline viewer."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "The file is saved in the user's home/.leo folder and also opened with your default viewer."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
       id: "how-can-i-open-special-leo-files-easily",
       children: "How can I open special .leo files easily?"

@@ -43,8 +43,8 @@ const metadata = {
     "permalink": "/leojs/docs/getting-started/tutorial-basics"
   },
   "next": {
-    "title": "Writing Leo scripts",
-    "permalink": "/leojs/docs/getting-started/tutorial-scripting"
+    "title": "Creating Documents from Outlines",
+    "permalink": "/leojs/docs/getting-started/tutorial-rst3"
   }
 };
 const assets = {

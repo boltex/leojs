@@ -200,8 +200,12 @@ const toc = [{
   "id": "2016-2018-52-through-59-precursors-to-leointeg",
   "level": 3
 }, {
-  "value": "2019 onward: Leo 6.0 and beyond: supporting LeoInteg",
-  "id": "2019-onward-leo-60-and-beyond-supporting-leointeg",
+  "value": "2019-2023: Leo 6.0 through 6.7: LeoInteg",
+  "id": "2019-2023-leo-60-through-67-leointeg",
+  "level": 3
+}, {
+  "value": "2024 onward: Leo 6.8: Easy layouts, @jupytext, @leo",
+  "id": "2024-onward-leo-68-easy-layouts-jupytext-leo",
   "level": 3
 }, {
   "value": "Acknowledgements",
@@ -858,8 +862,8 @@ function _createMdxContent(props) {
         children: "LeoWapp.py"
       }), ", Leo in a browser."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
-      id: "2019-onward-leo-60-and-beyond-supporting-leointeg",
-      children: "2019 onward: Leo 6.0 and beyond: supporting LeoInteg"
+      id: "2019-2023-leo-60-through-67-leointeg",
+      children: "2019-2023: Leo 6.0 through 6.7: LeoInteg"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "August, 2020: edreamleo's first PR. Félix Malboeuf encouraged me to use PRs for all significant code changes."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -937,6 +941,41 @@ function _createMdxContent(props) {
       children: ["6.7.4 (August 17, 2023) A spectacular collapse in the importer architecture. The Aha! Use ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "guide lines"
       }), " to make parsing incoming lines easier."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
+      id: "2024-onward-leo-68-easy-layouts-jupytext-leo",
+      children: "2024 onward: Leo 6.8: Easy layouts, @jupytext, @leo"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "Leo 6.8.0 (July 3, 2024):"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "A new framework for layouts replaces the free_layout and nested_splitter plugins.\r\nThe gui \"Easter Egg\" is no more."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["Jul 27, 2024: Félix releases LeoJS 1.0, with this\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://groups.google.com/g/leo-editor/c/nNSaJTMAB3s/m/Df1roWA5AgAJ",
+        children: "announcement"
+      }), "\r\nalong with a ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://github.com/boltex/scripting-samples-leojs?tab=readme-ov-file#how-to-use-on-the-web-in-your-browser",
+        children: "scripting samples repository"
+      }), "\r\nand a ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://boltex.github.io/leojs/",
+        children: "dedicated website"
+      }), "."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "LeoJS is a JavaScript implementation of Leo's original Python source packaged as a VSCode extension. It is also usable with VSCode for the web."
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "Leo 6.8.2 (November 8, 2024):"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["@jupytext uses the jupytext library ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://jupytext.readthedocs.io/en/latest/",
+        children: "https://jupytext.readthedocs.io/en/latest/"
+      }), " to handle Jupyter Notebooks seemlessly."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "Leo 6.8.6: (August 1, 2025):"
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.ul, {
+      children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.li, {
+        children: "@leo and related commands makes it easy to use Leo on huge repositories."
+      }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.li, {
+        children: "LeoInteg (and leoserver.py) supports websockets."
+      }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "acknowledgements",
       children: "Acknowledgements"
