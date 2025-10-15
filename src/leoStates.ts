@@ -259,6 +259,15 @@ export class LeoStates {
         this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ATFILE, p_value);
     }
 
+    private _leoAtLeoFile: boolean = false;
+    get leoAtLeoFile(): boolean {
+        return this._leoAtLeoFile;
+    }
+    set leoAtLeoFile(p_value: boolean) {
+        this._leoAtLeoFile = p_value;
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ATLEOFILE, p_value);
+    }
+
     // * Special is-root 'state' flag about current selection, for visibility and commands availability
     private _leoRoot: boolean = false;
     get leoRoot(): boolean {
@@ -282,7 +291,8 @@ export class LeoStates {
         this.leoDirty = p_node.isDirty();
         this.leoEmpty = !p_node.v.hasBody();
         this.leoChild = p_node.hasChildren();
-        this.leoAtFile = p_node.isAnyAtFileNode();
+        this.leoAtFile = !p_node.isAtLeoNode() && p_node.isAnyAtFileNode();
+        this.leoAtLeoFile = p_node.isAtLeoNode();
         this.leoRoot = p_node._isRoot;
     }
 

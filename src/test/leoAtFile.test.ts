@@ -517,9 +517,8 @@ suite('Test cases for leoAtFile.ts', () => {
             const writeData = Buffer.from("", 'utf8');
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
-            const val = await at.replaceFile(contents, encoding, fn, at.root!);
+            const val = await at.replaceFile(contents, encoding, fn, self.root_p);
             assert.ok(val, val.toString());
-
         } catch (e) {
             //
         }
@@ -555,7 +554,7 @@ suite('Test cases for leoAtFile.ts', () => {
             const writeData = Buffer.from("", 'utf8');
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
-            const val = await at.replaceFile(contents, encoding, fn, at.root!);
+            const val = await at.replaceFile(contents, encoding, fn, self.root_p);
             assert.ok(val, val.toString());
         } catch (e) {
             //
@@ -590,7 +589,7 @@ suite('Test cases for leoAtFile.ts', () => {
             const writeData = Buffer.from(contents, 'utf8');
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
-            const val = await at.replaceFile(contents, encoding, fn, at.root!);
+            const val = await at.replaceFile(contents, encoding, fn, self.root_p);
             assert.ok(!val, val.toString());
         } catch (e) {
             //

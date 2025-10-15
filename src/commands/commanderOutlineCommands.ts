@@ -2026,6 +2026,10 @@ export class CommanderOutlineCommands {
         'mark-changed-items',
         'Mark all nodes that have been changed.'
     )
+    @commander_command(
+        'mark-changed-nodes',
+        'Mark all nodes that have been changed.'
+    )
     public markChangedHeadlines(this: Commands): void {
         const c: Commands = this;
         const current: Position = this.p;

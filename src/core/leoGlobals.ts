@@ -850,9 +850,7 @@ export function callers(
 
 //@+node:felix.20211104212435.1: *3* g._callerName
 export function _callerName(n: number, verbose: boolean = false): string {
-    // TODO : see Error().stack to access names from the call stack
     return new Error().stack?.split("\n")[n] || ''; // or something close to that
-    // return '<_callerName>';
 }
 
 //@+node:felix.20211104212328.1: *3* g.caller
@@ -1037,14 +1035,11 @@ export const dictToString = objToString;
  * Pretty print any Python object using pr.
  */
 export function printObj(
-    obj: any,
-    indent = '',
-    printCaller = false,
-    tag?: string
+    ...args: any[]
 ): void {
     // TODO : Replace with output to proper pr function
     //     pr(objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
-    pr(obj);
+    pr(...args);
 }
 
 //@+node:felix.20211104210724.1: ** g.Directives
@@ -4882,7 +4877,7 @@ export function os_path_expandvars(p_path: string): string {
 }
 //@+node:felix.20211227182611.10: *3* g.os_path_getmtime
 /**
- * Return the modification time of path.
+ * Return the modification time of a file for a given path.
  */
 export async function os_path_getmtime(p_path: string): Promise<number> {
     if (!p_path) {
@@ -4892,7 +4887,7 @@ export async function os_path_getmtime(p_path: string): Promise<number> {
         // return os.path.getmtime(p_path);
         const w_uri = makeVscodeUri(p_path);
         const w_stats = await workspace.fs.stat(w_uri);
-        return w_stats.mtime;
+        return w_stats.mtime / 1000;  // Match Python: seconds as float!
     } catch (exception) {
         return 0;
     }

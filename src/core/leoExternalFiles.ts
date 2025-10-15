@@ -275,8 +275,7 @@ export class ExternalFilesController {
             }
             if (['yes', 'yes-all'].includes(state)) {
                 const old_p = c.p;  // To restore selection if refresh option set to yes-all & is descendant of at-file
-                c.redraw(p); // this selects p.
-                await c.refreshFromDisk();
+                await c.refreshFromDisk(p);
 
                 // ! LEOJS : KEEP SELECTION ON CURRENT NODE IF CHILD OF AT-ANY-FILE REFRESHED !
                 // TODO : Add config option in Leo for this!
@@ -286,7 +285,6 @@ export class ExternalFilesController {
                     }
                 }
 
-                c.redraw();
                 // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
                 g.app.gui.fullRefresh(true);
             }
@@ -835,7 +833,7 @@ export class ExternalFilesController {
     }
     //@+node:felix.20230503004807.25: *4* efc.get_mtime
     /**
-     * Return the modification time for the path.
+     * Return the modification time of a file for the given path.
      */
     public get_mtime(p_path: string): Promise<number> {
         return g.os_path_getmtime(g.os_path_realpath(p_path));
@@ -843,7 +841,7 @@ export class ExternalFilesController {
 
     //@+node:felix.20230503004807.26: *4* efc.get_time
     /**
-     * return timestamp for path
+     * return timestamp stored for the given path
      *
      * see set_time() for notes
      */
