@@ -860,7 +860,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 </t>
 <t tx="felix.20201208214250.2"></t>
-<t tx="felix.20201208214319.1">@language md
+<t tx="felix.20201208214319.1" _mod_time="46313735303032393939332e3430370a2e">@language md
 @tabwidth -4
 # ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
@@ -1118,7 +1118,7 @@ See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendi
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1">import * as vscode from 'vscode';
+<t tx="felix.20201208214322.1" _mod_time="46313734313734313439342e3437330a2e">import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 
 import * as GitAPI from './git';
@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313736323733393634362e33330a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -1159,7 +1159,7 @@ export async function deactivate(): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201208223553.1">import * as vscode from 'vscode';
+<t tx="felix.20201208223553.1" _mod_time="46313736303439373936352e3430310a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 import { Icon } from './types';
 import { LeoUI } from './leoUI';
@@ -1171,7 +1171,7 @@ import { Position } from './core/leoNodes';
 @others
 
 </t>
-<t tx="felix.20201208224407.1">import * as vscode from "vscode";
+<t tx="felix.20201208224407.1" _mod_time="46313734393631383032372e38310a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
 import { Position } from "./core/leoNodes";
@@ -1367,7 +1367,7 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 }
 
 </t>
-<t tx="felix.20201208224703.1">@language md
+<t tx="felix.20201208224703.1" _mod_time="46313734313734313439342e3432380a2e">@language md
 @tabwidth -4
 # How to install and run the development version
 
@@ -1987,7 +1987,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
-<t tx="felix.20201214151326.1">import * as vscode from "vscode";
+<t tx="felix.20201214151326.1" _mod_time="46313736303439373936352e3337340a2e">import * as vscode from "vscode";
 
 @language typescript
 @tabwidth -4
@@ -2701,7 +2701,7 @@ public static VSCODE_COMMANDS = {
 };
 
 </t>
-<t tx="felix.20201214151419.1">import * as vscode from "vscode";
+<t tx="felix.20201214151419.1" _mod_time="46313732313539313833332e31390a2e">import * as vscode from "vscode";
 import { Icon, LeoButton } from "./types";
 import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
@@ -2858,7 +2858,7 @@ public get description(): string | boolean {
 }
 
 </t>
-<t tx="felix.20201214151429.1">import * as vscode from "vscode";
+<t tx="felix.20201214151429.1" _mod_time="46313732313539313833332e3139310a2e">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import { Constants } from "./constants";
@@ -2954,7 +2954,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
 }
 </t>
-<t tx="felix.20201214151447.1">import * as vscode from "vscode";
+<t tx="felix.20201214151447.1" _mod_time="46313736303439373936352e3430320a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
@@ -3201,7 +3201,7 @@ set leoCanDemote(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201214151451.1">import * as vscode from "vscode";
+<t tx="felix.20201214151451.1" _mod_time="46313732313539313833332e3139370a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
@@ -3311,7 +3311,7 @@ private _updateLeoObjectIndicator(): void {
 }
 
 </t>
-<t tx="felix.20201214154816.1">import * as vscode from "vscode";
+<t tx="felix.20201214154816.1" _mod_time="46313736303439373936352e34310a2e">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { RClick } from "./core/mod_scripting";
 
@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313736303439373936352e3430350a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4644,7 +4644,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313736303439373936352e3336340a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -7836,7 +7836,7 @@ public gotSelectedNode(p_node: Position): void {
 # See the "About this file" node for important notes.
 </t>
 <t tx="felix.20210102000100.1"></t>
-<t tx="felix.20210110210346.1">@language typescript
+<t tx="felix.20210110210346.1" _mod_time="46313732313539313833332e31370a2e">@language typescript
 @tabwidth -4
 
 // ambient module declaration for https://www.npmjs.com/package/date-format-lite
@@ -8056,7 +8056,7 @@ public incTreeId(): void {
   }
 },
 </t>
-<t tx="felix.20211007213344.1">import * as vscode from "vscode";
+<t tx="felix.20211007213344.1" _mod_time="46313732323130373234362e3031370a2e">import * as vscode from "vscode";
 import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8563,7 +8563,7 @@ public static FIND_INPUTS_IDS = {
 };
 
 </t>
-<t tx="felix.20211010192923.1">import * as vscode from "vscode";
+<t tx="felix.20211010192923.1" _mod_time="46313732313539313833332e3138380a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import * as path from 'path';
 import { BodyTimeInfo } from "./types";
@@ -8894,7 +8894,7 @@ public getTextFromClipboard(): string {
   }
 ]
 </t>
-<t tx="felix.20211122205011.1">import * as vscode from "vscode";
+<t tx="felix.20211122205011.1" _mod_time="46313732313539313833332e3230310a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
@@ -9911,7 +9911,7 @@ public finishStartup(): void {
 }
 
 </t>
-<t tx="felix.20220417155704.1">import * as vscode from "vscode";
+<t tx="felix.20220417155704.1" _mod_time="46313736303439373936352e3336370a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Position } from "./core/leoNodes";
 import { LeoButtonNode } from "./leoButtons";
@@ -10802,7 +10802,7 @@ export interface ChooseRClickItem extends vscode.QuickPickItem {
 }
 
 </t>
-<t tx="felix.20220505221929.1">import * as vscode from "vscode";
+<t tx="felix.20220505221929.1" _mod_time="46313732313539313833332e3139330a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
 import { QuickSearchController } from "./core/quicksearch";
@@ -15696,7 +15696,7 @@ private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
 }
 
 </t>
-<t tx="felix.20230330224010.1">@language md
+<t tx="felix.20230330224010.1" _mod_time="46313732313539313833322e3938320a2e">@language md
 @tabwidth -4
 # Sponsors and Backers 🏅
 
@@ -15954,7 +15954,7 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231219233411.1"></t>
-<t tx="felix.20231219233427.1">// @ts-check
+<t tx="felix.20231219233427.1" _mod_time="46313732313730313736322e3735320a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -16862,7 +16862,7 @@ set leoEditHeadline(p_value: boolean) {
     vscode.postMessage({ type: 'refreshSearchConfig' });
 })();
 </t>
-<t tx="felix.20231219233431.1">html {
+<t tx="felix.20231219233431.1" _mod_time="46313732313539313833322e39390a2e">html {
     box-sizing: border-box;
     font-size: 13px;
     overflow: hidden;
@@ -17473,7 +17473,7 @@ div.col-nav {
 - Fixed bug that sometimes asked to 'save' and overwrite/confirm when new node was created with body text containing an ampersand or when using vscode's quick-suggestion autocomplete.
 
 </t>
-<t tx="felix.20231224201746.1">import * as vscode from 'vscode';
+<t tx="felix.20231224201746.1" _mod_time="46313732313539313833332e3137330a2e">import * as vscode from 'vscode';
 import { LeoUI } from './leoUI';
 
 export class HelpPanel implements vscode.TextDocumentContentProvider {
@@ -17500,7 +17500,7 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 
 }
 </t>
-<t tx="felix.20231226205226.1">import * as vscode from 'vscode';
+<t tx="felix.20231226205226.1" _mod_time="46313734313734313439342e34380a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
@@ -17957,7 +17957,7 @@ private _buildToolTip(p_headline: string = ""): string {
 
 </t>
 <t tx="felix.20240224165738.1"></t>
-<t tx="felix.20240224165747.1">// @ts-check
+<t tx="felix.20240224165747.1" _mod_time="46313732313539313833322e3939310a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -17970,7 +17970,7 @@ private _buildToolTip(p_headline: string = ""): string {
     // console.log('Help Panel Started!');
 })();
 </t>
-<t tx="felix.20240224165750.1">@language css
+<t tx="felix.20240224165750.1" _mod_time="46313732313539313833322e3939330a2e">@language css
 html {
   box-sizing: border-box;
   font-size: 13px;
@@ -18115,7 +18115,7 @@ u {
 .big {
   font-size: 20px;
 }</t>
-<t tx="felix.20240224200656.1">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240224200656.1" _mod_time="46313732313539313833322e3939310a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -18260,7 +18260,7 @@ public async openAside(p?: Position): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20240401213604.1">import * as vscode from "vscode";
+<t tx="felix.20240401213604.1" _mod_time="46313732313539313833332e3138390a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import * as path from 'path';
@@ -19570,7 +19570,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313736303439373936352e3336360a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -20087,7 +20087,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 &lt;/html&gt;
 </t>
-<t tx="felix.20240722220751.1">// @ts-check
+<t tx="felix.20240722220751.1" _mod_time="46313732313539313833332e3038370a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -20475,7 +20475,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 })();
 
 </t>
-<t tx="felix.20240722220752.1">html {
+<t tx="felix.20240722220752.1" _mod_time="46313734313734313439342e3433390a2e">html {
     height: 100%;
     font-size: 62.5%;
     box-sizing: border-box;
@@ -21888,6 +21888,7 @@ set leoAtLeoFile(p_value: boolean) {
 </t>
 <t tx="felix.20251014222608.1">## 1.0.15
 
+- Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473
 - ...
 
 </t>
@@ -21896,7 +21897,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
 
 </t>
-<t tx="fil.20240709150317.1">&lt;!DOCTYPE html&gt;
+<t tx="fil.20240709150317.1" _mod_time="46313732313539313833322e3938370a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
