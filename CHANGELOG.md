@@ -3,7 +3,7 @@
 ## 1.0.15
 
 - Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473
-- ...
+- Fixed import-text-file. Mirror of Leo's #4484
 
 ## 1.0.14
 

@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313736323733393634362e33330a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313736343634383336372e3031340a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21889,7 +21889,7 @@ set leoAtLeoFile(p_value: boolean) {
 <t tx="felix.20251014222608.1">## 1.0.15
 
 - Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473
-- ...
+- Fixed import-text-file. Mirror of Leo's #4484
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
