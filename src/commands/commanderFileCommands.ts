@@ -16,24 +16,6 @@ import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
 import { ScriptingController } from '../core/mod_scripting';
 
 //@+others
-//@+node:felix.20220105223215.1: ** function: import_txt_file
-/**
- * Import the .txt file into a new node.
- */
-async function import_txt_file(c: Commands, fn: string): Promise<void> {
-    const u = c.undoer;
-    g.setGlobalOpenDir(fn);
-    const undoData = u.beforeInsertNode(c.p);
-    const p = c.p.insertAfter();
-    p.h = `@edit ${g.relativeDirectory(c, fn)}`;
-    let s: string | undefined;
-    let e: any;
-    [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
-    p.b = s!;
-    u.afterInsertNode(p, 'Import', undoData);
-    c.setChanged();
-    c.redraw(p);
-}
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
 export class CommanderFileCommands {
     //@+others
@@ -201,7 +183,7 @@ export class CommanderFileCommands {
                 await new MORE_Importer(c).import_file(fn); // #1522.
             } else if (ext === 'txt') {
                 // #1522: Create an @edit node.
-                await import_txt_file(c, fn);
+                await c.import_txt_file(fn);
             } else {
                 // Make *sure* that parent.b is empty.
                 const last = c.lastTopLevel();
@@ -229,6 +211,26 @@ export class CommanderFileCommands {
     g.command_alias('importNowebFiles', importAnyFile)
     g.command_alias('importTabFiles', importAnyFile)
     */
+    //@+node:felix.20251201225004.1: *4* c_file.import_txt_file
+    /**
+     * Import the .txt file into a new node.
+     */
+    @commander_command('import-text-file', 'Import the .txt file into a new node.')
+    public async import_txt_file(this: Commands, fn: string): Promise<void> {
+        const c: Commands = this;
+        const u = c.undoer;
+        g.setGlobalOpenDir(fn);
+        const undoData = u.beforeInsertNode(c.p);
+        const p = c.p.insertAfter();
+        p.h = `@edit ${g.relativeDirectory(c, fn)}`;
+        let s: string | undefined;
+        let e: any;
+        [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
+        p.b = s!;
+        u.afterInsertNode(p, 'Import', undoData);
+        c.setChanged();
+        c.redraw(p);
+    }
     //@+node:felix.20220105210716.9: *4* c_file.new
     @commander_command('file-new', 'Create a new Leo window.')
     @commander_command('new', 'Create a new Leo window.')
