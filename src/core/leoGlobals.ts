@@ -12,7 +12,7 @@ import {
     Uri,
     env,
     workspace,
-    window, commands,
+    window,
     FileStat, FileType
 } from 'vscode';
 import * as os from 'os';
@@ -20,11 +20,6 @@ import * as child from 'child_process';
 import * as path from 'path';
 import * as GitAPI from '../git';
 import * as GitBaseAPI from '../git-base';
-import { LeoApp } from './leoApp';
-import { Commands } from './leoCommands';
-import { IdleTime as IdleTimeClass } from "./idle_time";
-import { Position, VNode } from './leoNodes';
-import { LeoGui } from './leoGui';
 import opn = require('open');
 import { RemoteHubApi } from '../remote-hub';
 import { SqlJsStatic } from 'sql.js';
@@ -39,6 +34,14 @@ const localizedFormat = require('dayjs/plugin/localizedFormat');
 dayjsObj.extend(localizedFormat);
 
 //@-<< imports >>
+//@+<< leoGlobals: annotations >>
+//@+node:felix.20251207215155.1: ** << leoGlobals: annotations >>
+import { LeoApp } from './leoApp';
+import { Commands } from './leoCommands';
+import { IdleTime as IdleTimeClass } from "./idle_time";
+import { Position, VNode } from './leoNodes';
+import { LeoGui } from './leoGui';
+//@-<< leoGlobals: annotations >>
 //@+<< leoGlobals: global constants >>
 //@+node:felix.20240607225502.1: ** << leoGlobals: global constants >>
 export let isNewLeoJSVersion = false; // Used to show messages if first/new versions. Set by client-UI at startup.
