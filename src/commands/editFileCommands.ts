@@ -646,9 +646,9 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         }
         try {
             await g.os_remove(fileName);
-            await g.setStatusLabel(`Deleted: ${fileName}`);
+            void g.setStatusLabel(`Deleted: ${fileName}`);
         } catch (e) {
-            await g.setStatusLabel(`Not Deleted: ${fileName}`);
+            void g.setStatusLabel(`Not Deleted: ${fileName}`);
         }
     }
     //@+node:felix.20230709010427.19: *3* efc.diff (file-diff-files)
@@ -762,9 +762,9 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         }
         try {
             await g.mkdir(folderName);
-            await g.setStatusLabel(`Created: ${folderName}`);
+            void g.setStatusLabel(`Created: ${folderName}`);
         } catch (e) {
-            await g.setStatusLabel(`Not Created: ${folderName}`);
+            void g.setStatusLabel(`Not Created: ${folderName}`);
         }
     }
     //@+node:felix.20230709010427.25: *3* efc.openOutlineByName
@@ -817,9 +817,9 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         }
         try {
             await g.rmdir(folderName);
-            await g.setStatusLabel(`Removed: ${folderName}`);
+            void g.setStatusLabel(`Removed: ${folderName}`);
         } catch (e) {
-            await g.setStatusLabel(`Not Removed: ${folderName}`);
+            void g.setStatusLabel(`Not Removed: ${folderName}`);
         }
     }
     //@+node:felix.20230709010427.27: *3* efc.saveFile (save-file-by-name)
