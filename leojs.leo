@@ -799,7 +799,7 @@ Leo uses a model/view/controller architecture.
 
 - Model: The VNode and Position classes in leoNodes.py.
 
-- View: The gui-independent base classes are in the node "Gui Base Classes". The Qt-Specific subclasses are in the node "Qt gui".
+- View: The gui-independent base classes are in the node "Gui Base Classes".
 
 **Important**: The general organization of these classes have changed hardly at all in Leo's 20+ year history.  The reason is that what each class does is fairly obvious.  How the gets the job done may have changed drastically, but *that's an internal implementation detail of the class itself*.  This is the crucial design principle that allows Leo's code to remain stable.  *Classes do not know or meddle in the internal details of other classes*.  As a result, nobody, including EKR, needs to remember internal details.
 
