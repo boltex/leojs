@@ -404,7 +404,7 @@ export class QuickSearchController {
         const tgt = this.its[index];
         if (!tgt) {
             if (!g.unitTesting) {
-                g.es("onSelectItem: no target found for 'it' as index:" + it);
+                g.es("onSelectItem: no target found for 'it' as index:" + index);
             }
             return;
         }
