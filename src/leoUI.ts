@@ -4079,7 +4079,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Opens quickPick minibuffer pallette to choose from all commands in this file's Thenable
+     * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
      * @returns Promise from the command resolving - or resolve with undefined if cancelled
      */
     public async minibuffer(): Promise<unknown> {
@@ -4178,13 +4178,16 @@ export class LeoUI extends NullGui {
             quickPick.placeholder = Constants.USER_MESSAGES.MINIBUFFER_PROMPT;
             quickPick.matchOnDetail = true;
 
+            // Quickpic will resolve with user choice if used normally, but we add those listeners for special cases
             w_disposables.push(
+                // Selection starts empty, so onDidChangeSelection is used to detect choice
                 quickPick.onDidChangeSelection(selection => {
-                    if (selection[0]) {
+                    if (selection.length && selection[0]) {
                         resolve(selection[0]);
                         quickPick.hide();
                     }
                 }),
+                // User pressed enter, so we intercept in case of integer line goto 'easter egg'
                 quickPick.onDidAccept(accepted => {
                     if (/^\d+$/.test(quickPick.value)) {
                         // * Was an integer EASTER EGG
@@ -4213,18 +4216,22 @@ export class LeoUI extends NullGui {
                         quickPick.hide();
                     }
                 }),
+                // If value changes to an integer, clear the items to show 'easter egg' line goto
                 quickPick.onDidChangeValue(changed => {
                     if (/^\d+$/.test(changed)) {
                         if (quickPick.items.length) {
                             quickPick.items = [];
                         }
                     } else if (quickPick.items !== w_choices) {
+                        // was not an integer, and not already showing choices
                         quickPick.items = w_choices;
                     }
                 }),
+                // was canceled
                 quickPick.onDidHide(() => {
                     resolve(undefined);
                 }),
+                // just adding the quickPick itself to disposables for later disposal
                 quickPick
             );
             quickPick.show();
@@ -4245,7 +4252,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
+     * * Opens quickPick minibuffer command pallette from the user's session commands usage history
      * @returns Promise that resolves when the chosen command is placed on the front-end command stack
      */
     private async _showMinibufferHistory(p_choices: vscode.QuickPickItem[]): Promise<unknown> {

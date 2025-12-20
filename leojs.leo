@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313736303439373936352e3430350a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313736363235393230322e3435390a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4287,7 +4287,7 @@ public async command(
 
 </t>
 <t tx="felix.20201214202757.1">/**
- * Opens quickPick minibuffer pallette to choose from all commands in this file's Thenable
+ * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
  * @returns Promise from the command resolving - or resolve with undefined if cancelled
  */
 public async minibuffer(): Promise&lt;unknown&gt; {
@@ -4386,13 +4386,16 @@ public async minibuffer(): Promise&lt;unknown&gt; {
         quickPick.placeholder = Constants.USER_MESSAGES.MINIBUFFER_PROMPT;
         quickPick.matchOnDetail = true;
 
+        // Quickpic will resolve with user choice if used normally, but we add those listeners for special cases
         w_disposables.push(
+            // Selection starts empty, so onDidChangeSelection is used to detect choice
             quickPick.onDidChangeSelection(selection =&gt; {
-                if (selection[0]) {
+                if (selection.length &amp;&amp; selection[0]) {
                     resolve(selection[0]);
                     quickPick.hide();
                 }
             }),
+            // User pressed enter, so we intercept in case of integer line goto 'easter egg'
             quickPick.onDidAccept(accepted =&gt; {
                 if (/^\d+$/.test(quickPick.value)) {
                     // * Was an integer EASTER EGG
@@ -4421,18 +4424,22 @@ public async minibuffer(): Promise&lt;unknown&gt; {
                     quickPick.hide();
                 }
             }),
+            // If value changes to an integer, clear the items to show 'easter egg' line goto
             quickPick.onDidChangeValue(changed =&gt; {
                 if (/^\d+$/.test(changed)) {
                     if (quickPick.items.length) {
                         quickPick.items = [];
                     }
                 } else if (quickPick.items !== w_choices) {
+                    // was not an integer, and not already showing choices
                     quickPick.items = w_choices;
                 }
             }),
+            // was canceled
             quickPick.onDidHide(() =&gt; {
                 resolve(undefined);
             }),
+            // just adding the quickPick itself to disposables for later disposal
             quickPick
         );
         quickPick.show();
@@ -14101,7 +14108,7 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
 
 </t>
 <t tx="felix.20221002124249.1">/**
- * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
+ * * Opens quickPick minibuffer command pallette from the user's session commands usage history
  * @returns Promise that resolves when the chosen command is placed on the front-end command stack
  */
 private async _showMinibufferHistory(p_choices: vscode.QuickPickItem[]): Promise&lt;unknown&gt; {
