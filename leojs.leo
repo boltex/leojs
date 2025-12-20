@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313736363235393230322e3435390a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313736363236343433362e3132310a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4184,7 +4184,7 @@ public async selectTreeNode(
 
 </t>
 <t tx="felix.20201214202755.1">/**
- * Leo Command
+ * Leo Command. This is used in "command bindings" from the UI to execute commands.
  * @param p_cmd Command name string
  * @param p_options: CommandOptions for the command
  */

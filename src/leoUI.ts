@@ -3977,7 +3977,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Leo Command
+     * Leo Command. This is used in "command bindings" from the UI to execute commands.
      * @param p_cmd Command name string
      * @param p_options: CommandOptions for the command
      */
