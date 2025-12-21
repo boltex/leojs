@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313736363236343433362e3132310a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313736363236353430342e3230320a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
