@@ -11,7 +11,9 @@ import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 
-process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
+// ALREADY DONE IN extension.ts.
+// process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process 
+
 // Abbreviation.
 // StringIO = io.StringIO
 type File_List = string[] | undefined;
