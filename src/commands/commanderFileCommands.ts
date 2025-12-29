@@ -876,45 +876,36 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.25: *4* c_file.flattenOutlineToNode
     @commander_command(
         'flatten-outline-to-node',
-        'Append the body text of all descendants of the selected node to the body text of the selected node.'
+        'Append the body text of all descendants of the selected node to the body text of a new (last) top-level node.'
     )
     public flattenOutlineToNode(this: Commands): void {
         const c: Commands = this;
         const root: Position = this.p;
         const u: Undoer = this.undoer;
 
+        const current = c.p;
+        const undoType = 'flatten-outline-to-node';
+
         if (!root.hasChildren()) {
             return;
         }
 
-        const language: string = c.getLanguage(root);
-
-        let single: string;
-        let start: string;
-        let end: string;
-
-        if (language) {
-            [single, start, end] = g.set_delims_from_language(language);
-        } else {
-            [single, start, end] = ['#', '', ''];
-        }
-        const bunch: Bead = u.beforeChangeNodeContents(root);
-        const aList: string[] = [];
-
-        for (let p of root.subtree()) {
-            if (single) {
-                aList.push(`\n\n===== ${single} ${p.h}\n\n`);
-            } else {
-                aList.push(`\n\n===== ${start} ${p.h} ${end}\n\n`);
-            }
+        u.beforeChangeGroup(current, undoType);
+        const bunch = u.beforeInsertNode(current);
+        const aList = [];
+        for (const p of root.self_and_subtree()) {
             if (p.b.trim()) {
-                const lines: string[] = g.splitLines(p.b);
-                aList.push(...lines);
+                aList.push(`===== ${p.h}\n\n`);
+                aList.push(`${p.b.trim()}'\n\n`);
             }
         }
-
-        root.b = root.b.trimEnd() + '\n' + aList.join('').trimEnd() + '\n';
-        u.afterChangeNodeContents(root, 'flatten-outline-to-node', bunch);
+        const p = c.lastTopLevel().insertAfter();
+        p.h = `Flattened ${root.h}`;
+        p.b = aList.join('').trim() + '\n';
+        u.afterInsertNode(p, undoType, bunch);
+        u.afterChangeGroup(current, undoType);
+        c.selectPosition(p);
+        c.redraw(p);
     }
     //@+node:felix.20220105210716.26: *4* c_file.outlineToCWEB
     @commander_command(
