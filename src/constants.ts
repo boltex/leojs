@@ -334,8 +334,8 @@ export class Constants {
      * Used when setting itself and getting parameters from vscode
      */
     public static CONFIG_DEFAULTS = {
-        CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
-        DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+        CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",
+        DEFAULT_RELOAD_IGNORE: "none",
         SESSION_PER_WORKSPACE: true,
         LEO_TREE_BROWSE: true,
         TREE_KEEP_FOCUS: true,

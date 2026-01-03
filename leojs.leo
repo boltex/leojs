@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313736343634383336372e3031340a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313736373436353935372e3830350a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -1987,7 +1987,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
-<t tx="felix.20201214151326.1" _mod_time="46313736303439373936352e3337340a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151326.1" _mod_time="46313736373431313230322e3433370a2e">import * as vscode from "vscode";
 
 @language typescript
 @tabwidth -4
@@ -2954,8 +2954,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
 }
 </t>
-<t tx="felix.20201214151447.1" _mod_time="46313736303439373936352e3430320a2e">import * as vscode from "vscode";
-import * as utils from "./utils";
+<t tx="felix.20201214151447.1" _mod_time="46313736373036323136342e3139330a2e">import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
 import { LeoPackageStates } from "./types";
@@ -3077,7 +3076,6 @@ export class LeoStates {
 }
 </t>
 <t tx="felix.20201214151447.20">constructor(
-    private _context: vscode.ExtensionContext,
     private _leoJs: LeoUI
 ) {
     this.qLastContextChange = Promise.resolve(); // Temporary.
@@ -3460,7 +3458,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313736363236353430342e3230320a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313736373135373830322e38320a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -3523,7 +3521,7 @@ import { Undoer } from "./core/leoUndo";
     this.idleTimeClass = IdleTime;
 
     // * Setup States
-    this.leoStates = new LeoStates(_context, this);
+    this.leoStates = new LeoStates(this);
 
     // * Get configuration settings
     this.config = new Config(_context, this);
@@ -4651,7 +4649,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313736303439373936352e3336340a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313736373436353835362e3439370a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -6939,7 +6937,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.setLeoID",
   "category": "Leojs",
-  "enablement": "!leojsReady",
   "title": "Set Leo ID"
 },
 {
@@ -7664,7 +7661,6 @@ private _setupNoOpenedLeoDocument(): void {
 </t>
 <t tx="felix.20201227230912.1">/**
  * * A Leo file was opened: setup UI accordingly.
- * @param p_openFileResult Returned info about currently opened and editing document
  */
 private _setupOpenedLeoDocument(): void {
     this._needLastSelectedRefresh = true;
@@ -8481,8 +8477,8 @@ public static CONFIG_NAMES = {
  * Used when setting itself and getting parameters from vscode
  */
 public static CONFIG_DEFAULTS = {
-    CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
-    DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+    CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",
+    DEFAULT_RELOAD_IGNORE: "none",
     SESSION_PER_WORKSPACE: true,
     LEO_TREE_BROWSE: true,
     TREE_KEEP_FOCUS: true,
@@ -21897,6 +21893,7 @@ set leoAtLeoFile(p_value: boolean) {
 
 - Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473
 - Fixed import-text-file. Mirror of Leo's #4484
+- Made 'Set LeoID' command available after startup.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

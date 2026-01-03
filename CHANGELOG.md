@@ -4,6 +4,7 @@
 
 - Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473
 - Fixed import-text-file. Mirror of Leo's #4484
+- Made 'Set LeoID' command available after startup.
 
 ## 1.0.14
 

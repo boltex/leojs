@@ -1168,7 +1168,7 @@ export class LeoApp {
         buffer.unshift(app.signon);
 
         if (buffer.length) {
-            let len = buffer.length; // Only do loop once if logPano not visible
+            let len = buffer.length; // Only do loop once if log pane not visible
             while (len > 0) {
                 // Pop the bottom one and append it
                 g.es_print(buffer.shift()!);
@@ -3375,33 +3375,7 @@ export class LoadManager {
 
     //@+node:felix.20220417225955.1: *5* LM.createGui
     public createGui(): void {
-
-        const lm: LoadManager = this;
-
         g.app.gui = new LeoUI(undefined, this._context!); // replaces createDefaultGui
-
-        /* 
-        gui_option = lm.options.get('gui')
-        windowFlag = lm.options.get('windowFlag')
-        script = lm.options.get('script')
-        if g.app.gui:
-            if g.app.gui == g.app.nullGui:
-                g.app.gui = None  # Enable g.app.createDefaultGui
-                g.app.createDefaultGui(__file__)
-            else:
-                pass
-                # This can also happen when leoID does not exist.
-        elif gui_option is None:
-            if script and not windowFlag:
-                # Always use null gui for scripts.
-                g.app.createNullGuiWithScript(script)
-            else:
-                g.app.createDefaultGui(__file__)
-        else:
-            lm.createSpecialGui(gui_option, pymacs, script, windowFlag)
-
-        */
-
     }
 
     //@+node:felix.20210120004121.16: *5* LM.initApp

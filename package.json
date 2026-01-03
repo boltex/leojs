@@ -1860,7 +1860,6 @@
       {
         "command": "leojs.setLeoID",
         "category": "Leojs",
-        "enablement": "!leojsReady",
         "title": "Set Leo ID"
       },
       {

@@ -39,7 +39,6 @@ export class LeoGui {
     public script: string | undefined;
     public scriptFileName: string | undefined;
 
-    // * For LeoJS
     // the index of current document frame in g.app.windowList, mostly to get c, and the title, openDirectory, etc.
     public frameIndex: number = 0;
 

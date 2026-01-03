@@ -299,7 +299,7 @@ export class LeoUI extends NullGui {
         this.idleTimeClass = IdleTime;
 
         // * Setup States
-        this.leoStates = new LeoStates(_context, this);
+        this.leoStates = new LeoStates(this);
 
         // * Get configuration settings
         this.config = new Config(_context, this);
@@ -1037,7 +1037,6 @@ export class LeoUI extends NullGui {
 
     /**
      * * A Leo file was opened: setup UI accordingly.
-     * @param p_openFileResult Returned info about currently opened and editing document
      */
     private _setupOpenedLeoDocument(): void {
         this._needLastSelectedRefresh = true;
