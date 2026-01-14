@@ -1274,9 +1274,11 @@ export class Position {
     /**
      * Return True if p is visible in c's outline.
      */
-    public isVisible(c: Commands): boolean {
+    public isVisible(c = this.v?.context): boolean {
         const p: Position = this;
-
+        if (!c) {
+            return false;
+        }
         function visible(p: Position, root?: Position) {
             for (let parent of p.parents(false)) {
                 if (parent.__bool__() && parent.__eq__(root!)) {
