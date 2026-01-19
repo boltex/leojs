@@ -311,7 +311,7 @@ export class Position {
     v: VNode;
     _childIndex: number;
     stack: StackEntry[];
-    _isRoot: boolean = false;
+    _isRoot: boolean = false; // * Used to prevent hoisting on SINGLE top node by the UI only.
     at_directive_pattern: RegExp = /@([\w]+)/gm;
 
     //@+others
