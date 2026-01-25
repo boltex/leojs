@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313736393330353435322e3430390a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313736393330353935352e3838310a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21897,7 +21897,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473
 - Fixed import-text-file. Mirror of Leo's #4484
 - Made 'Set LeoID' command available after startup.
-- Fixed editFileCommands by adding summary_diff_two_revs and its helpers
+- Fixed editFileCommands by adding summary_diff_two_revs and its helpers. Mirror of Leo's #4502, #4513, and #4517.
 - Fixed flatten-outline-to-node as per Leo's #4485
 - Fixed LeoExternalFiles so Updating external files no longer changes c.p.
 - Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
