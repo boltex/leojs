@@ -14,6 +14,7 @@ import { PreviousSettings } from '../core/leoApp';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
 import { ScriptingController } from '../core/mod_scripting';
+import { file } from 'jszip';
 
 //@+others
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
@@ -429,7 +430,7 @@ export class CommanderFileCommands {
         'refresh-from-disk',
         'Refresh an @<file> node from disk.'
     )
-    public async refreshFromDisk(this: Commands, p?: Position): Promise<void> {
+    public async refreshFromDisk(this: Commands, p?: Position, silent = true): Promise<void> {
         const c: Commands = this;
         const at = c.atFileCommands;
         if (!p) {
@@ -461,7 +462,7 @@ export class CommanderFileCommands {
         await at.readFileAtPosition(p);  // Leo 6.8.6.
 
         // #4385: Handle updated @clean nodes.
-        const update_p = at.clone_all_changed_vnodes();
+        let update_p = at.clone_all_changed_vnodes();
         if (update_p && update_p.v) {
             // Set the current position during initial redraws.
             c.db['current_position'] = update_p.archivedPosition()
@@ -470,12 +471,16 @@ export class CommanderFileCommands {
             update_p.expand();
             c.selectPosition(update_p);
         } else {
-            c.selectPosition(p);
+            update_p = p; // #4495: Do *not* change the position!
         }
 
-        at.changed_roots = [];
+        // #4495: Report the updated file.
+        if (!silent && !g.unitTesting) {
+            g.es_print(`update: ${update_p.h}`);
+        }
 
         // Create the 'Recovered Nodes' tree.
+        at.changed_roots = [];
         c.fileCommands.handleNodeConflicts();
         c.setChanged();
         c.redraw();
@@ -1163,7 +1168,7 @@ export class CommanderFileCommands {
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
                 return g.blue('wrote:', fileName);
             } catch (iOError) {
-                g.error('can not write %s', fileName);
+                g.error(`can not write ${fileName}`);
             }
         }
     }
@@ -1215,7 +1220,7 @@ export class CommanderFileCommands {
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
                 g.blue('wrote:', fileName);
             } catch (IOError) {
-                g.error('can not write %s', fileName);
+                g.error(`can not write ${fileName}`);
             }
         }
     }

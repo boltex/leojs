@@ -1071,7 +1071,7 @@ export class GitDiffController {
      * Create an outline describing the git diffs for all files changed
      * between rev1 and rev2.
      */
-    public async diff_two_revs(rev1 = 'HEAD', rev2 = ''): Promise<void> {
+    public async diff_two_revs(rev1 = 'HEAD', rev2 = '', p_path?: string): Promise<void> {
         const [c, u] = [this.c, this.c.undoer];
 
         const directory = await this.get_parent_of_git_directory();
@@ -1079,14 +1079,14 @@ export class GitDiffController {
             return;
         }
         // Get list of changed files.
-        const files = await this.get_files(rev1, rev2);
+        const files = await this.get_files(rev1, rev2, p_path);
         const n = files.length;
         let message = `diffing ${n} file${g.plural(n)}`;
         if (!g.unitTesting) {
+            g.es_print(`diffing ${n} file${g.plural(n)}`);
             if (n > 5) {
-                message += '. This may take awhile...';
+                g.es_print('This may take awhile...');
             }
-            g.es_print(message);
         }
 
         // const undoType = 'Git Diff';
@@ -1095,19 +1095,25 @@ export class GitDiffController {
         // Create the root node.
         let undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
         this.root = c.lastTopLevel().insertAfter();
-        this.root.h = `git diff revs: ${rev1} ${rev2}`;
+        let root_h = `git diff revs: ${rev1} ${rev2}`;
+        if (p_path && p_path.trim()) {
+            root_h += ` (${p_path})`;
+        }
+        this.root.h = root_h;
         this.root.b = '@ignore\n@nosearch\n';
-        u.afterInsertNode(this.root, 'Create diff root node', undoData);
 
         // Create diffs of all files.
-        for (const fn of files) {
-            // undoData = u.beforeChangeTree(this.root);
+        for (let i = 0; i < files.length; i++) {
+            const fn = files[i];
             await this.diff_file(fn, rev1, rev2);
-            // u.afterChangeTree(this.root, undoType, undoData);
+            if ((i % 10) === 0) {
+                g.es_print(`diff: ${i} files`);
+            }
         }
-        // u.afterChangeGroup(c.p, undoType);
 
+        u.afterInsertNode(this.root, 'diff-two-revs', undoData);
         this.finish();
+        g.es_print(`done! diffed: ${n} files`);
     }
     //@+node:felix.20230709010434.7: *4* gdc.git_diff & helper
     /**
@@ -1565,6 +1571,148 @@ export class GitDiffController {
             g.trace('Unknown kind', b.kind.toString());
         }
     }
+    //@+node:felix.20260124154936.1: *4* gdc.summary_diff_two_revs
+    /**
+     * Create an outline describing the git diffs for all files changed between rev1 and rev2.
+     */
+    public async summary_diff_two_revs(rev1 = 'HEAD', rev2 = '', p_path?: string): Promise<void> {
+
+        const c = this.c;
+        const u = this.c.undoer;
+        const directory = await this.get_parent_of_git_directory();
+
+        if (!directory) {
+            return;
+        }
+        // Get list of changed files.  This is fast.
+        const files = await this.get_files(rev1, rev2, p_path);
+        const n = files.length;
+        if (!g.unitTesting) {
+            g.es_print(`diffing ${n} file${g.plural(n)}`);
+            if (n > 5) {
+                g.es_print('This may take awhile...');
+            }
+        }
+        c.selectPosition(c.lastTopLevel());  // pre-select to help undo-insert
+
+        // Undoably create the root node.
+        const undoData = u.beforeInsertNode(c.p);  // c.p is subject of 'insertAfter'
+        this.root = c.lastTopLevel().insertAfter();
+        let root_h = `git summary diff revs: ${rev1} ${rev2}`;
+        if (p_path && p_path.trim()) {
+            root_h += ` (${p_path})`;
+        }
+        this.root.h = root_h;
+        this.root.b = '@nosearch\n';
+        for (let i = 0; i < files.length; i++) {
+            const fn = files[i];
+
+            if (fn.endsWith('.py')) {
+                await this.summary_diff_python_file(fn, rev1, rev2);
+            }
+            if ((i % 10) === 0) {
+                g.es_print(`diff: ${i} files`);
+            }
+        };
+        u.afterInsertNode(this.root, 'summary-diff-two-revs', undoData);
+        c.selectPosition(this.root);
+        this.root.expand();
+        c.redraw(this.root);
+        g.es_print(`done! diffed: ${n} files`);
+
+    }
+    //@+node:felix.20260124163625.1: *4* gdc.summary_diff_python_file & helper
+    /**
+     * Create an outline summarizing the git diffs for fn, a python file.
+     * Return True if this method creates a "Changed" node.
+     */
+    public async summary_diff_python_file(
+        fn: string,
+        rev1: string = 'HEAD',
+        rev2: string = ''
+    ): Promise<void> {
+        const directory = await this.get_parent_of_git_directory();
+        if (!directory) {
+            return;
+        }
+        if (!fn.endsWith('.py')) {
+            return;
+        }
+        const s1 = await this.get_file_from_rev(rev1, fn);
+        const s2 = await this.get_file_from_rev(rev2, fn);
+
+        const lines1 = g.splitLines(s1);
+        const lines2 = g.splitLines(s2);
+
+        const diff_list = difflib.unifiedDiff(
+            lines1,
+            lines2,
+            {
+                fromfile: rev1 || 'uncommitted',
+                tofile: rev2 || 'uncommitted',
+            });
+
+        const child = this.create_file_node(diff_list, fn);
+        const kind =
+            !s1 ? 'Added' :
+                !s2 ? 'Deleted' :
+                    'Changed';
+
+        child.h = `${kind}: ${fn}`;
+
+        const result_s = (s1 && s2)
+            ? this.remove_cruft(diff_list)
+            : diff_list.join('');
+
+        child.b = `@nosearch\n@language python\n${result_s}`;
+
+    }
+    //@+node:felix.20260124163625.2: *5* gdc.remove_cruft
+    /**
+     * Remove unwanted lines from diff_list and insert separator lines.
+     */
+    public remove_cruft(diff_list: string[]): string {
+        const results1: string[] = [];
+        const sep = '# =====';
+
+        // Pass 1: Filter noise, insert separators
+        for (const s of diff_list) {
+            if (s.startsWith('---') || s.startsWith('+++')) {
+                continue;
+            }
+            if (s.startsWith('@@')) {
+                results1.push(`\n${sep}\n\n`);
+                continue;
+            }
+            if (s.startsWith('+') || s.startsWith('-')) {
+                const tail = s.slice(1).trim();
+                if (tail && !(tail.startsWith('#@') || tail.startsWith('# @'))) {
+                    results1.push(s);
+                }
+            }
+        }
+        // Pass 2: Insert blank lines between +/- transitions
+        const results2: string[] = [];
+        for (let i = 0; i < results1.length; i++) {
+            const s = results1[i];
+            const last = i > 0 ? results1[i - 1] : '';
+            if (
+                (s.startsWith('-') && last.startsWith('+')) ||
+                (s.startsWith('+') && last.startsWith('-'))
+            ) {
+                results2.push('\n');
+            }
+            results2.push(s);
+        }
+        // Pass 3: Remove empty separator sections
+        let results3 = results2.join('').replace(/\n\n\n/g, '\n\n');
+        while (results3.includes(`${sep}\n\n${sep}`)) {
+            results3 = results3.replace(`${sep}\n\n${sep}`, sep);
+        }
+        return results3;
+
+    }
+
     //@+node:felix.20230709010434.9: *3* gdc.Utils
     //@+node:felix.20230709010434.10: *4* gdc.create_compare_node
     /**
@@ -1887,18 +2035,31 @@ export class GitDiffController {
     /**
      * Return a list of changed files.
      */
-    public async get_files(rev1: string, rev2: string): Promise<string[]> {
+    public async get_files(rev1: string, rev2: string, p_path?: string): Promise<string[]> {
         // #2143
-        const directory = await this.get_parent_of_git_directory();
-        if (!directory) {
+        const git_directory = await this.get_parent_of_git_directory();
+        if (!git_directory) {
             return [];
         }
-        const command = `git diff --name-only ${rev1 || ''} ${rev2 || ''}`;
-        // #1781: Allow diffs of .leo files.
 
-        // z.strip() for z in g.execGitCommand(command, directory)
-        //     if not z.strip().endswith(('.db', '.zip'))
-        const w_gitDiff = await g.execGitCommand(command, directory);
+        // Check that path exists relative to the git directory.
+        if (p_path && p_path.trim()) {
+            const path_directory = `${git_directory}${path.sep}${p_path}`;
+            const w_exists = await g.os_path_exists(path_directory);
+
+            if (!w_exists) {
+                g.trace(`Not found: ${path_directory}`);
+                return [];
+            }
+        }
+
+        let command = `git diff --name-only ${rev1 || ''} ${rev2 || ''}`;
+        if (p_path && p_path.trim()) {
+            command = `${command} -- ${p_path}`;
+        }
+
+        // #1781: Allow diffs of .leo files.
+        const w_gitDiff = await g.execGitCommand(command, git_directory);
         const invalidExtensions = [
             '.bmp', '.db', '.exe', '.gif', '.gz', '.inv', // Sphinx inventory file.
             '.jpg', '.mov', '.mp4', '.pdf', '.png', '.tar', '.tif', '.whl', '.zip'
@@ -1906,40 +2067,6 @@ export class GitDiffController {
         return w_gitDiff
             .map(z => z.trim())
             .filter(z => !invalidExtensions.some(ext => z.endsWith(ext)));
-
-        // g.gitAPI
-        // g.gitBaseAPI
-        // g.remoteHubAPI
-
-        // let w_repo = g.getVSCodeRepository(this.c);
-
-        // let w_gitDiff: string[] = [];
-        // let w_changes: Change[] = [];
-
-        // if (!w_repo) {
-        //     w_repo = g.gitAPI.repositories[0];
-        // }
-        // if (!w_repo) {
-        // }
-        // if (w_repo) {
-        //     const w_repoPath = w_repo.rootUri.fsPath;
-        //     w_changes = await w_repo.diffBetween(rev1 || '', rev2 || '');
-
-        //     const w_result = w_changes
-        //         .map(z => path.relative(w_repoPath, z.uri.fsPath))
-        //         .map((z: string) => z.trim())
-        //         .filter(
-        //             (z: string) =>
-        //                 !z.trim().endsWith('.db') && !z.trim().endsWith('.zip')
-        //         );
-        //     console.log(
-        //         `get_files result for rev1: ${rev1 || ''} rev2${rev2 || ''} :`,
-        //         w_result
-        //     );
-        //     return w_result;
-        // } else {
-        //     return [];
-        // }
     }
     //@+node:felix.20230709010434.21: *4* gdc.get_revno
     /**
