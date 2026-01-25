@@ -415,7 +415,7 @@ export class Commands {
         }
         // Return 'untitled' or 'untitled{n}
         const n = g.app.numberOfUntitledWindows;
-        const n_s = n === 1 ? '' : n.toString();
+        const n_s = n < 2 ? '' : n.toString();
         const title = `untitled${n_s}`;
         return title;
     }

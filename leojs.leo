@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313736393330343435382e3732330a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313736393330383333352e3338370a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4652,7 +4652,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313736393330343730322e3030340a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313736393330383832382e3836350a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -11232,6 +11232,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
 
     if (!this.leoStates.fileOpenedReady) {
         if (g.app.loadManager) {
+            g.app.numberOfUntitledWindows += 1; // To create unique names.
             await g.app.loadManager.openEmptyLeoFile(this);
         }
     } else {

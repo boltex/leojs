@@ -5779,6 +5779,7 @@ export class LeoUI extends NullGui {
 
         if (!this.leoStates.fileOpenedReady) {
             if (g.app.loadManager) {
+                g.app.numberOfUntitledWindows += 1; // To create unique names.
                 await g.app.loadManager.openEmptyLeoFile(this);
             }
         } else {
