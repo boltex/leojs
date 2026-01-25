@@ -9,12 +9,11 @@ import * as g from '../core/leoGlobals';
 import { commander_command } from '../core/decorators';
 import { Position } from '../core/leoNodes';
 import { Commands } from '../core/leoCommands';
-import { Bead, Undoer } from '../core/leoUndo';
+import { Undoer } from '../core/leoUndo';
 import { PreviousSettings } from '../core/leoApp';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
 import { ScriptingController } from '../core/mod_scripting';
-import { file } from 'jszip';
 
 //@+others
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
