@@ -2858,7 +2858,7 @@ public get description(): string | boolean {
 }
 
 </t>
-<t tx="felix.20201214151429.1" _mod_time="46313736393330333536372e33340a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151429.1" _mod_time="46313736393330343439372e3830330a2e">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import { Constants } from "./constants";
@@ -2930,13 +2930,12 @@ export class LeoDocumentNode extends vscode.TreeItem {
         const c: Commands = frame.c;
         const title = frame.getTitle();
         const filename = c.fileName();
-        const isNamed: boolean = !!filename;
-        const label = isNamed ? utils.getFileFromPath(filename) : title;
+        const label = filename ? utils.getFileFromPath(filename) : title;
 
         super(label);
 
         this.label = label;
-        this.tooltip = isNamed ? filename : title;
+        this.tooltip = filename ? filename : title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
@@ -2946,9 +2945,9 @@ export class LeoDocumentNode extends vscode.TreeItem {
         if (frame === g.app.windowList[this._leoUI.frameIndex]) {
             // If this was created as a selected node, make sure it's selected
             this._leoUI.setDocumentSelection(frame);
-            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
+            this.contextValue = filename ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
-            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
+            this.contextValue = filename ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
         }
 
         this.id = `d${g.app.windowList.indexOf(frame)}f${filename}c${c.changed.toString()}`;
@@ -3461,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313736373135373830322e38320a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313736393330343435382e3732330a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -3880,7 +3879,8 @@ export class LeoUI extends NullGui {
  */
 private _triggerGetStates(): void {
 
-    const c = g.app.windowList[this.frameIndex].c;
+    const frame = g.app.windowList[this.frameIndex];
+    const c = frame.c;
 
     if (this._refreshType.states) {
         this._refreshType.states = false;
@@ -3923,7 +3923,7 @@ private _triggerGetStates(): void {
     }
     // Set leoChanged and leoOpenedFilename
     this.leoStates.leoChanged = c.changed;
-    this.leoStates.leoOpenedFileName = c.fileName();
+    this.leoStates.leoOpenedFileName = frame.getTitle();
 
     this.refreshBodyStates(); // Set language and wrap states, if different.
 
@@ -4652,7 +4652,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313736393330303635372e3831310a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313736393330343730322e3030340a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -7667,9 +7667,9 @@ private _setupNoOpenedLeoDocument(): void {
  */
 private _setupOpenedLeoDocument(): void {
     this._needLastSelectedRefresh = true;
-
-    const c = g.app.windowList[this.frameIndex].c;
-    this.leoStates.leoOpenedFileName = c.fileName();
+    const frame = g.app.windowList[this.frameIndex];
+    const c = frame.c;
+    this.leoStates.leoOpenedFileName = frame.getTitle();
     this.leoStates.leoChanged = c.changed;
 
     // * Startup flag

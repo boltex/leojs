@@ -60,13 +60,12 @@ export class LeoDocumentNode extends vscode.TreeItem {
         const c: Commands = frame.c;
         const title = frame.getTitle();
         const filename = c.fileName();
-        const isNamed: boolean = !!filename;
-        const label = isNamed ? utils.getFileFromPath(filename) : title;
+        const label = filename ? utils.getFileFromPath(filename) : title;
 
         super(label);
 
         this.label = label;
-        this.tooltip = isNamed ? filename : title;
+        this.tooltip = filename ? filename : title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
@@ -76,9 +75,9 @@ export class LeoDocumentNode extends vscode.TreeItem {
         if (frame === g.app.windowList[this._leoUI.frameIndex]) {
             // If this was created as a selected node, make sure it's selected
             this._leoUI.setDocumentSelection(frame);
-            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
+            this.contextValue = filename ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
-            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
+            this.contextValue = filename ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
         }
 
         this.id = `d${g.app.windowList.indexOf(frame)}f${filename}c${c.changed.toString()}`;
