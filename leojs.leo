@@ -2858,7 +2858,7 @@ public get description(): string | boolean {
 }
 
 </t>
-<t tx="felix.20201214151429.1" _mod_time="46313732313539313833332e3139310a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151429.1" _mod_time="46313736393330333536372e33340a2e">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import { Constants } from "./constants";
@@ -2927,13 +2927,16 @@ export class LeoDocumentNode extends vscode.TreeItem {
         public frame: LeoFrame,
         private _leoUI: LeoUI,
     ) {
-        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : Constants.UNTITLED_FILE_NAME);
-
         const c: Commands = frame.c;
+        const title = frame.getTitle();
         const filename = c.fileName();
         const isNamed: boolean = !!filename;
-        this.label = isNamed ? utils.getFileFromPath(filename) : Constants.UNTITLED_FILE_NAME;
-        this.tooltip = isNamed ? filename : Constants.UNTITLED_FILE_NAME;
+        const label = isNamed ? utils.getFileFromPath(filename) : title;
+
+        super(label);
+
+        this.label = label;
+        this.tooltip = isNamed ? filename : title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
@@ -2948,7 +2951,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
             this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
         }
 
-        this.id = `d${g.app.windowList.indexOf(frame)}f${c.fileName()}c${c.changed.toString()}`;
+        this.id = `d${g.app.windowList.indexOf(frame)}f${filename}c${c.changed.toString()}`;
         this.iconPath = this._leoUI.documentIcons[c.changed ? 1 : 0];
     }
 

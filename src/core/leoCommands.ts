@@ -300,7 +300,7 @@ export class Commands {
         }
 
         // Create the gui frame.
-        const title = this.computeWindowTitle();
+        const title = this.computeTabTitle();
         if (!g.app.initing) {
             g.doHook("before-create-leo-frame", { c: c });
         }
@@ -427,7 +427,7 @@ export class Commands {
     public computeWindowTitle(fileName?: string): string {
         const c: Commands = this;
 
-        // NO USE FOR BRANCHES IN LEOJS TITLES
+        // NO USE FOR BRANCHES IN TITLES
         // const branch = g.gitBranchName(fileName || c.fileName());
         // const branch_s = branch ? `${branch}: ` : '';
         // const name_s = fileName || c.fileName() || 'untitled';
@@ -443,21 +443,6 @@ export class Commands {
         }
         return title;
 
-        // return `${branch_s}${name_s}`;
-
-        // let title: string;
-        // if (fileName) {
-        //     title = g.computeWindowTitle(fileName);
-        // } else {
-        //     let s = 'untitled';
-        //     let n = g.app.numberOfUntitledWindows;
-        //     if (n > 0) {
-        //         s += n.toString();
-        //     }
-        //     title = g.computeWindowTitle(s);
-        //     g.app.numberOfUntitledWindows = n + 1;
-        // }
-        // return title;
     }
     //@+node:felix.20220605211419.1: *4* c.initConfigSettings
     /**
