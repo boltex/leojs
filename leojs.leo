@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313736393330353935352e3838310a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313736393438353536332e3530330a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -1987,7 +1987,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
-<t tx="felix.20201214151326.1" _mod_time="46313736373431313230322e3433370a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151326.1" _mod_time="46313736393438353531312e3132360a2e">import * as vscode from "vscode";
 
 @language typescript
 @tabwidth -4
@@ -2519,7 +2519,7 @@ public static USER_MESSAGES = {
     PROMPT_EDIT_HEADLINE: "Edit Headline",
     PROMPT_INSERT_NODE: "Insert Node",
     PROMPT_INSERT_CHILD: "Insert Child",
-    DEFAULT_HEADLINE: "New Headline",
+    DEFAULT_HEADLINE: "newHeadline",
 
     TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
     PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED
@@ -21902,6 +21902,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed flatten-outline-to-node as per Leo's #4485
 - Fixed LeoExternalFiles so Updating external files no longer changes c.p.
 - Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
+- Made 'newHeadline' the default string for new headlines.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

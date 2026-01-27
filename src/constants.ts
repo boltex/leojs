@@ -176,7 +176,7 @@ export class Constants {
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
         PROMPT_INSERT_CHILD: "Insert Child",
-        DEFAULT_HEADLINE: "New Headline",
+        DEFAULT_HEADLINE: "newHeadline",
 
         TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
         PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED

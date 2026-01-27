@@ -9,6 +9,7 @@
 - Fixed flatten-outline-to-node as per Leo's #4485
 - Fixed LeoExternalFiles so Updating external files no longer changes c.p.
 - Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
+- Made 'newHeadline' the default string for new headlines.
 
 ## 1.0.14
 

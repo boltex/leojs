@@ -67,7 +67,7 @@ export class LeoFrame {
         //  Create the first node.
         let v = new VNode(c);
         let p = new Position(v);
-        v.initHeadString('NewHeadline');
+        v.initHeadString('newHeadline');
         //
         //  New in Leo 4.5: p.moveToRoot would be wrong:
         //                  the node hasn't been linked yet.
