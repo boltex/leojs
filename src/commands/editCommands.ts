@@ -1315,7 +1315,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230716160519.3: *4* ec.lineNumber
     @cmd(
         'line-number',
-        'Print the character, line, column number at insert point along with total length.'
+        'Print the character at the insert point, its row and column, and the total number of characters.'
     )
     public lineNumber(): void {
 
