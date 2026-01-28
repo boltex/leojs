@@ -736,9 +736,9 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         let p = c.p;
         c.endEditing();
-        p.contract();
-        c.redraw_after_contract(p); // not in leojs
         c.selectPosition(p);
+        p.contract();
+        c.redraw(p);
     }
     //@+node:felix.20211020002058.7: *4* c_oc.contractNodeOrGoToParent
     @commander_command(
@@ -790,8 +790,9 @@ export class CommanderOutlineCommands {
         if (!parent || !parent.__bool__()) {
             return;
         }
+        c.selectPosition(parent);
         parent.contract();
-        c.redraw_after_contract(parent);
+        c.redraw();
     }
 
     //@+node:felix.20211020002058.9: *4* c_oc.expandAllHeadlines
@@ -809,7 +810,7 @@ export class CommanderOutlineCommands {
             c.expandSubtree(p);
             p.moveToNext();
         }
-        c.redraw_after_expand(p0); // Keep focus on original position
+        c.redraw(p0); // Keep focus on original position
         c.expansionLevel = 0; // Reset expansion level.
     }
     //@+node:felix.20211020002058.10: *4* c_oc.expandAllSubheads
@@ -898,7 +899,7 @@ export class CommanderOutlineCommands {
         const p: Position = c.p;
         c.endEditing();
         p.expand();
-        c.redraw_after_expand(p);
+        c.redraw(p);
         c.selectPosition(p);
     }
     //@+node:felix.20211020002058.14: *4* c_oc.expandNodeAndGoToFirstChild
@@ -932,7 +933,7 @@ export class CommanderOutlineCommands {
         c.endEditing();
         if (p.hasChildren()) {
             if (p.isExpanded()) {
-                c.redraw_after_expand(p.firstChild());
+                c.redraw(p.firstChild());
             } else {
                 c.expandNode();
             }

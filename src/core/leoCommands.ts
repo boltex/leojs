@@ -4655,39 +4655,6 @@ export class Commands {
     //         c.requestLaterRedraw = true;
     //     }
     // }
-    //@+node:felix.20211122010434.5: *6* c.redraw_after_contract
-    public redraw_after_contract(p?: Position): void {
-        const c: Commands = this;
-        if (c.enableRedrawFlag) {
-            if (p && p.__bool__()) {
-                c.setCurrentPosition(p);
-            } else {
-                p = c.currentPosition();
-            }
-            //c.frame.tree.redraw_after_contract(p);
-            c.redraw(p);
-            c.treeFocusHelper();
-        } else {
-            c.requestLaterRedraw = true;
-        }
-    }
-    //@+node:felix.20211122010434.6: *6* c.redraw_after_expand
-    public redraw_after_expand(p?: Position): void {
-        const c: Commands = this;
-        if (c.enableRedrawFlag) {
-            if (p && p.__bool__()) {
-                c.setCurrentPosition(p);
-            } else {
-                p = c.currentPosition();
-            }
-            //c.frame.tree.redraw_after_expand(p);
-            c.redraw(p);
-            c.treeFocusHelper();
-        } else {
-            c.requestLaterRedraw = true;
-        }
-    }
-
     //@+node:felix.20211122010434.7: *6* c.redraw_after_head_changed
     /**
      *   Redraw the screen (if needed) when editing ends.
