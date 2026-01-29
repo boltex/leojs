@@ -546,24 +546,6 @@ export class CommanderEditCommands {
             w.setFocus();
         }
     }
-    //@+node:felix.20220503232001.1: *3* c_ec.goToNext/PrevHistory
-    @commander_command(
-        'goto-next-history-node',
-        'Go to the next node in the history list.'
-    )
-    public goToNextHistory(this: Commands): void {
-        const c: Commands = this;
-        c.nodeHistory.goNext();
-    }
-
-    @commander_command(
-        'goto-prev-history-node',
-        'Go to the previous node in the history list.'
-    )
-    public goToPrevHistory(this: Commands): void {
-        const c: Commands = this;
-        c.nodeHistory.goPrev();
-    }
     //@+node:felix.20240611204157.1: *3* c_ec.alwaysIndentBody (always-indent-region)
     @commander_command(
         'always-indent-region',
