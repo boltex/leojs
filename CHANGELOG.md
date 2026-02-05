@@ -10,6 +10,8 @@
 - Fixed LeoExternalFiles so Updating external files no longer changes c.p.
 - Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
 - Made 'newHeadline' the default string for new headlines.
+- Fixed double clicking on headlines containing a unl to follow that link
+- Fixed body pane url links to also support direct "gxn:" links. (non unl)
 
 ## 1.0.14
 
@@ -72,7 +74,7 @@
 ## 1.0.6
 
 - Fixed goto-global-line command.
-- Implemented c.recursiveImport. 
+- Implemented c.recursiveImport.
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
 - Added missing headkey1 and headkey2 plugin hooks.
@@ -85,7 +87,7 @@
 - Fixed @auto files generation for markdown (.md) files.
 
 ## 1.0.4
- 
+
 - Prevent calling process.chdir when running on the web.
 
 ## 1.0.3
@@ -102,7 +104,7 @@
 ## 1.0.1
 
 - Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
-difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
+  difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
 
 # 1.0.0
 
@@ -143,7 +145,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Added new videos to the readme: "Intro to Leo" and "LeoJS Features Demo".
 - Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
 - Fixed undo/redo status flags
-- Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
+- Changed behavior of the 'Open Aside' command: it now opens 'detached' body panes, which allows text editing for a fixed gnx.
 - Added common library objects to the scripting global scope:
     - os
     - path
@@ -151,11 +153,11 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
     - crypto
     - process
     - child_process
-- Added 'vscode' API to the scripting global scope. (while  keeping the g.vscode reference for compatibility with old scripts)
+- Added 'vscode' API to the scripting global scope. (while keeping the g.vscode reference for compatibility with old scripts)
 - Made more external libraries accessible to scripts via the global 'g' object:
     - dayjs
     - md5
-    
+
 # 0.2.12
 
 - Help commands were changed from markdown preview panes to html webviews.
@@ -254,7 +256,6 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 
 - Fixed importer and @auto related bugs.
 
-## 0.2.0 
+## 0.2.0
 
 - First alpha release
-

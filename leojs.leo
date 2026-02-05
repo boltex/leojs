@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313736393438353536332e3530330a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737303236353730322e3135340a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -1785,8 +1785,8 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.DEMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
 [CMD.SORT_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.SORT_CHILDREN, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
-[CMD.SORT_SIBLING, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
-[CMD.SORT_SIBLING_FO, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.SORT_SIBLINGS, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
+[CMD.SORT_SIBLINGS_FO, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
 
 </t>
 <t tx="felix.20201214150149.11">[CMD.MARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
@@ -1987,7 +1987,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
-<t tx="felix.20201214151326.1" _mod_time="46313736393438353531312e3132360a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151326.1" _mod_time="46313736393636333134302e3739370a2e">import * as vscode from "vscode";
 
 @language typescript
 @tabwidth -4
@@ -2074,8 +2074,8 @@ public static COMMANDS = {
     SHOW_LOG: Constants.NAME + ".showLogPane",
     SORT_CHILDREN: Constants.NAME + ".sortChildrenSelection",
     SORT_CHILDREN_FO: Constants.NAME + ".sortChildrenSelectionFromOutline",
-    SORT_SIBLING: Constants.NAME + ".sortSiblingsSelection",
-    SORT_SIBLING_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
+    SORT_SIBLINGS: Constants.NAME + ".sortSiblingsSelection",
+    SORT_SIBLINGS_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
     CONTRACT_ALL: Constants.NAME + ".contractAll", // From command Palette
     CONTRACT_ALL_FO: Constants.NAME + ".contractAllFromOutline", // from button, return focus on OUTLINE
     PREV_NODE: Constants.NAME + ".prev",
@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313736393330383333352e3338370a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313737303236313937392e3136360a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4075,12 +4075,15 @@ public async selectTreeNode(
             }
 
             // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
-            const w_headline = p_node.h;
+            const w_headline = p_node.h.trim();
             let openPromise;
-            if (w_headline.trim().startsWith("@url ")) {
+
+            if (w_headline.startsWith("@url ")) {
                 openPromise = g.openUrl(p_node);
-            } else if (w_headline.trim().startsWith("@mime ")) {
+            } else if (w_headline.startsWith("@mime ")) {
                 openPromise = g.open_mimetype(p_node.v.context, p_node);
+            } else if (w_headline.startsWith("unl:")) {
+                openPromise = g.openUrlHelper(c, w_headline);
             }
 
             if (openPromise) {
@@ -4652,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313736393330383832382e3836350a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737303236363139322e3137370a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -6487,7 +6490,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineDownSelection",
   "key": "shift+alt+down",
-  "mac": "shift+alt+down",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6504,7 +6506,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "shift+alt+down",
-  "mac": "shift+alt+down",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -6516,7 +6517,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineLeftSelection",
   "key": "shift+alt+left",
-  "mac": "shift+alt+left",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6533,7 +6533,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "shift+alt+left",
-  "mac": "shift+alt+left",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -6545,7 +6544,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineRightSelection",
   "key": "shift+alt+right",
-  "mac": "shift+alt+right",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6562,7 +6560,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "shift+alt+right",
-  "mac": "shift+alt+right",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -6574,7 +6571,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineUpSelection",
   "key": "shift+alt+up",
-  "mac": "shift+alt+up",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6591,7 +6587,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "shift+alt+up",
-  "mac": "shift+alt+up",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
@@ -6652,19 +6647,16 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.insertNodeSelection",
   "key": "shift+insert",
-  "mac": "shift+insert",
   "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "shift+insert",
-  "mac": "shift+insert",
   "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "insert",
-  "mac": "insert",
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -9917,7 +9909,7 @@ public finishStartup(): void {
 }
 
 </t>
-<t tx="felix.20220417155704.1" _mod_time="46313736303439373936352e3336370a2e">import * as vscode from "vscode";
+<t tx="felix.20220417155704.1" _mod_time="46313736393636333134302e3838390a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Position } from "./core/leoNodes";
 import { LeoButtonNode } from "./leoButtons";
@@ -15921,10 +15913,9 @@ set leoEditHeadline(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20231216165857.1">## 0.2.0 
+<t tx="felix.20231216165857.1">## 0.2.0
 
 - First alpha release
-
 </t>
 <t tx="felix.20231216165946.1">## 0.2.1
 
@@ -17507,7 +17498,7 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 
 }
 </t>
-<t tx="felix.20231226205226.1" _mod_time="46313734313734313439342e34380a2e">import * as vscode from 'vscode';
+<t tx="felix.20231226205226.1" _mod_time="46313737303236333038302e3739310a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
@@ -17552,6 +17543,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 
     private gnxUnlRegex = /\bunl:gnx:\/\/[^\r\n#]*#\S*/g; // This allows spaces and content after the UNL.
     private headlineUnlRegex = /\bunl:\/\/[^\r\n#]*#[^\r\n]*\S/g; // This goes on until end of line.
+    private gnxOnlyRegex = /(?&lt;![:\w])gnx:[\w.]+/g; // gnx only links are of the form "gnx:felix.20251231182235.2" Important, do not match inside of gnxUnlRegex matches! (must be empty or a space before gnx:)
 
     public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult&lt;vscode.DocumentLink[]&gt; {
         const text = document.getText();
@@ -17573,7 +17565,16 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
             const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
             links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
+        }
 
+        this.gnxOnlyRegex.lastIndex = 0;
+        // GNX-only links
+        while ((match = this.gnxOnlyRegex.exec(text)) !== null) {
+            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+            // gnx only are not valid unls, so build one from it knowing that the file-name part will be empty
+            const unl = `unl:gnx://#${match[0].substring(4)}`;
+            const args = encodeURIComponent(JSON.stringify({ unl }));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
         }
 
         return links;
@@ -21548,7 +21549,7 @@ fieldset p span {
 <t tx="felix.20240727165746.1">## 1.0.1
 
 - Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
-difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
+  difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
 
 </t>
 <t tx="felix.20240730230141.1">## 1.0.2
@@ -21565,7 +21566,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 
 </t>
 <t tx="felix.20240810181235.1">## 1.0.4
- 
+
 - Prevent calling process.chdir when running on the web.
 
 </t>
@@ -21577,7 +21578,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 <t tx="felix.20240819221941.1">## 1.0.6
 
 - Fixed goto-global-line command.
-- Implemented c.recursiveImport. 
+- Implemented c.recursiveImport.
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
 - Added missing headkey1 and headkey2 plugin hooks.
@@ -21903,6 +21904,8 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed LeoExternalFiles so Updating external files no longer changes c.p.
 - Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
 - Made 'newHeadline' the default string for new headlines.
+- Fixed double clicking on headlines containing a unl to follow that link
+- Fixed body pane url links to also support direct "gxn:" links. (non unl)
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
@@ -22031,7 +22034,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Added new videos to the readme: "Intro to Leo" and "LeoJS Features Demo".
 - Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
 - Fixed undo/redo status flags
-- Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
+- Changed behavior of the 'Open Aside' command: it now opens 'detached' body panes, which allows text editing for a fixed gnx.
 - Added common library objects to the scripting global scope:
     - os
     - path
@@ -22039,11 +22042,11 @@ set leoAtLeoFile(p_value: boolean) {
     - crypto
     - process
     - child_process
-- Added 'vscode' API to the scripting global scope. (while  keeping the g.vscode reference for compatibility with old scripts)
+- Added 'vscode' API to the scripting global scope. (while keeping the g.vscode reference for compatibility with old scripts)
 - Made more external libraries accessible to scripts via the global 'g' object:
     - dayjs
     - md5
-    
+
 </t>
 </tnodes>
 </leo_file>

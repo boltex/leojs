@@ -3757,12 +3757,15 @@ export class LeoUI extends NullGui {
                 }
 
                 // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
-                const w_headline = p_node.h;
+                const w_headline = p_node.h.trim();
                 let openPromise;
-                if (w_headline.trim().startsWith("@url ")) {
+
+                if (w_headline.startsWith("@url ")) {
                     openPromise = g.openUrl(p_node);
-                } else if (w_headline.trim().startsWith("@mime ")) {
+                } else if (w_headline.startsWith("@mime ")) {
                     openPromise = g.open_mimetype(p_node.v.context, p_node);
+                } else if (w_headline.startsWith("unl:")) {
+                    openPromise = g.openUrlHelper(c, w_headline);
                 }
 
                 if (openPromise) {

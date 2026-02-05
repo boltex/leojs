@@ -4154,7 +4154,6 @@
       {
         "command": "leojs.moveOutlineDownSelection",
         "key": "shift+alt+down",
-        "mac": "shift+alt+down",
         "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
@@ -4171,7 +4170,6 @@
       {
         "command": "leojs.moveOutlineDownSelectionFromOutline",
         "key": "shift+alt+down",
-        "mac": "shift+alt+down",
         "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
@@ -4183,7 +4181,6 @@
       {
         "command": "leojs.moveOutlineLeftSelection",
         "key": "shift+alt+left",
-        "mac": "shift+alt+left",
         "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
@@ -4200,7 +4197,6 @@
       {
         "command": "leojs.moveOutlineLeftSelectionFromOutline",
         "key": "shift+alt+left",
-        "mac": "shift+alt+left",
         "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
@@ -4212,7 +4208,6 @@
       {
         "command": "leojs.moveOutlineRightSelection",
         "key": "shift+alt+right",
-        "mac": "shift+alt+right",
         "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
@@ -4229,7 +4224,6 @@
       {
         "command": "leojs.moveOutlineRightSelectionFromOutline",
         "key": "shift+alt+right",
-        "mac": "shift+alt+right",
         "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
@@ -4241,7 +4235,6 @@
       {
         "command": "leojs.moveOutlineUpSelection",
         "key": "shift+alt+up",
-        "mac": "shift+alt+up",
         "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
@@ -4258,7 +4251,6 @@
       {
         "command": "leojs.moveOutlineUpSelectionFromOutline",
         "key": "shift+alt+up",
-        "mac": "shift+alt+up",
         "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
@@ -4318,19 +4310,16 @@
       {
         "command": "leojs.insertNodeSelection",
         "key": "shift+insert",
-        "mac": "shift+insert",
         "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.insertNodeSelectionFromOutline",
         "key": "shift+insert",
-        "mac": "shift+insert",
         "when": "leojsEditHeadline || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.insertNodeSelectionFromOutline",
         "key": "insert",
-        "mac": "insert",
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {

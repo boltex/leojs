@@ -567,8 +567,8 @@ export class Constants {
         SHOW_LOG: Constants.NAME + ".showLogPane",
         SORT_CHILDREN: Constants.NAME + ".sortChildrenSelection",
         SORT_CHILDREN_FO: Constants.NAME + ".sortChildrenSelectionFromOutline",
-        SORT_SIBLING: Constants.NAME + ".sortSiblingsSelection",
-        SORT_SIBLING_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
+        SORT_SIBLINGS: Constants.NAME + ".sortSiblingsSelection",
+        SORT_SIBLINGS_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
         CONTRACT_ALL: Constants.NAME + ".contractAll", // From command Palette
         CONTRACT_ALL_FO: Constants.NAME + ".contractAllFromOutline", // from button, return focus on OUTLINE
         PREV_NODE: Constants.NAME + ".prev",
