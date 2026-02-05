@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737303236313937392e3136360a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313737303237303039372e3939330a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4120,7 +4120,7 @@ public async selectTreeNode(
         }
     }
 
-    // Note: this.lastSelectedNode is set in gotSelectedNode and lastSelectedNode 
+    // Note: this.lastSelectedNode is set in gotSelectedNode and _tryApplyNodeToBody
     this.lastSelectedNodeTime = utils.performanceNow();
 
     await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'

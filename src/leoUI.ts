@@ -3802,7 +3802,7 @@ export class LeoUI extends NullGui {
             }
         }
 
-        // Note: this.lastSelectedNode is set in gotSelectedNode and lastSelectedNode 
+        // Note: this.lastSelectedNode is set in gotSelectedNode and _tryApplyNodeToBody
         this.lastSelectedNodeTime = utils.performanceNow();
 
         await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
