@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737303236353730322e3135340a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737303537393135352e3835370a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21896,16 +21896,17 @@ set leoAtLeoFile(p_value: boolean) {
 </t>
 <t tx="felix.20251014222608.1">## 1.0.15
 
-- Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473
-- Fixed import-text-file. Mirror of Leo's #4484
+- Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473.
+- Fixed import-text-file. Mirror of Leo's #4484.
 - Made 'Set LeoID' command available after startup.
 - Fixed editFileCommands by adding summary_diff_two_revs and its helpers. Mirror of Leo's #4502, #4513, and #4517.
-- Fixed flatten-outline-to-node as per Leo's #4485
+- Fixed flatten-outline-to-node as per Leo's #4485.
 - Fixed LeoExternalFiles so Updating external files no longer changes c.p.
 - Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
 - Made 'newHeadline' the default string for new headlines.
-- Fixed double clicking on headlines containing a unl to follow that link
+- Fixed double clicking on headlines containing a unl to follow that link.
 - Fixed body pane url links to also support direct "gxn:" links. (non unl)
+- Fixed bug in goPrev method related to selecting previously visited nodes.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
