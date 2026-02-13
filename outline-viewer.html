@@ -2126,6 +2126,15 @@
                 BODY_PANE.style.whiteSpace = "pre-wrap"; // Wrap text
             }
             let text = data[node.gnx].bodyString || "";
+            
+            // Escape HTML entities first to preserve literal characters
+            text = text.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+            // Then replace URLs with actual clickable links
             text = text.replace(urlRegex, url => {
                 return `<a href="${url}" target="_blank" contenteditable="false" rel="noopener noreferrer">${url}</a>`;
             });
