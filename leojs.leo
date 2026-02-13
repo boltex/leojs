@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737303537393135352e3835370a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737303935373934342e3136360a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737303237303039372e3939330a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313737303738313033372e3232350a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -21907,6 +21907,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed double clicking on headlines containing a unl to follow that link.
 - Fixed body pane url links to also support direct "gxn:" links. (non unl)
 - Fixed bug in goPrev method related to selecting previously visited nodes.
+- Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersand.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

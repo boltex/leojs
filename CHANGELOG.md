@@ -13,6 +13,7 @@
 - Fixed double clicking on headlines containing a unl to follow that link.
 - Fixed body pane url links to also support direct "gxn:" links. (non unl)
 - Fixed bug in goPrev method related to selecting previously visited nodes.
+- Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersand.
 
 ## 1.0.14
 
