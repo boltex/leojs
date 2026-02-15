@@ -1398,7 +1398,7 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
         ) {
-
+            // WAS DETACHED BODY CHANGED?
             const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
             const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
@@ -1577,10 +1577,11 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
         ) {
-            // this.bodyDetachedTextDocument = undefined;
+            // WAS A LEO BODY CHANGED? (same commander, but maybe different node)
+
             const c = g.app.windowList[this.frameIndex].c;
 
-            // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
+            // * There was a change on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
             this._bodyLastChangedDocument = p_textDocumentChange.document;
             this._bodyLastChangedDocumentSaved = false;
             this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
@@ -2147,14 +2148,14 @@ export class LeoUI extends NullGui {
 
     /**
      * * Setup global refresh options
-     * @param p_finalFocus Flag for focus to be placed in outline
+     * @param p_finalFocus kind of pane for focus to be placed after refresh, if any. If not specified, focus will be preserved.
      * @param p_refreshType Refresh flags for each UI part
     */
     public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveRange?: boolean): void {
         if (p_preserveRange) {
             this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
         }
-        // Set final "focus-placement" EITHER true or false
+        // Set final "focus-placement"
         this.finalFocus = p_finalFocus;
 
         if (p_refreshType) {

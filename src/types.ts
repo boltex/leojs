@@ -74,7 +74,7 @@ export const enum Focus {
  */
 export const enum RevealType {
     NoReveal = 0, // Re-use the old treeId with "NoReveal" for the selected node.
-    Reveal,
+    Reveal, // ! 'Reveal' is (and should) never be used! It is only here for clarity and completeness.
     RevealSelect,
     RevealSelectFocus
 }

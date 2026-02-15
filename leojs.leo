@@ -3311,7 +3311,7 @@ private _updateLeoObjectIndicator(): void {
 }
 
 </t>
-<t tx="felix.20201214154816.1" _mod_time="46313736303439373936352e34310a2e">import * as vscode from "vscode";
+<t tx="felix.20201214154816.1" _mod_time="46313737313138313234312e3633390a2e">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { RClick } from "./core/mod_scripting";
 
@@ -3395,7 +3395,7 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
  */
 export const enum RevealType {
     NoReveal = 0, // Re-use the old treeId with "NoReveal" for the selected node.
-    Reveal,
+    Reveal, // ! 'Reveal' is (and should) never be used! It is only here for clarity and completeness.
     RevealSelect,
     RevealSelectFocus
 }
@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737303738313033372e3232350a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313737313138313932332e3230330a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -7598,14 +7598,14 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
 </t>
 <t tx="felix.20201227155008.1">/**
  * * Setup global refresh options
- * @param p_finalFocus Flag for focus to be placed in outline
+ * @param p_finalFocus kind of pane for focus to be placed after refresh, if any. If not specified, focus will be preserved.
  * @param p_refreshType Refresh flags for each UI part
 */
 public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveRange?: boolean): void {
     if (p_preserveRange) {
         this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
     }
-    // Set final "focus-placement" EITHER true or false
+    // Set final "focus-placement"
     this.finalFocus = p_finalFocus;
 
     if (p_refreshType) {
@@ -13587,7 +13587,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
     ) {
-
+        // WAS DETACHED BODY CHANGED?
         const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
         const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
         const w_hasBody = !!w_bodyText.length;
@@ -13766,10 +13766,11 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
     ) {
-        // this.bodyDetachedTextDocument = undefined;
+        // WAS A LEO BODY CHANGED? (same commander, but maybe different node)
+
         const c = g.app.windowList[this.frameIndex].c;
 
-        // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
+        // * There was a change on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
         this._bodyLastChangedDocument = p_textDocumentChange.document;
         this._bodyLastChangedDocumentSaved = false;
         this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
