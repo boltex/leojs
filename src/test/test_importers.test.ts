@@ -30,7 +30,6 @@ export class BaseTestImporter extends LeoUnitTest {
     public setUp(): void {
         super.setUp();
         g.app.loadManager!.createAllImporterData();
-        g.app.write_black_sentinels = false;
     }
 
     //@+others

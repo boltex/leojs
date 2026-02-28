@@ -195,7 +195,6 @@ export class LeoApp {
     public silentMode: boolean = false; // True: no sign-on.
     public trace_binding: string | undefined; // The name of a binding to trace, or None.
     public trace_setting: string | undefined; // The name of a setting to trace, or None.
-    public write_black_sentinels = false; // True: write a space befor '@' in sentinel lines.
 
     //@-<< LeoApp: command-line arguments >>
     //@+<< LeoApp: Debugging & statistics >>

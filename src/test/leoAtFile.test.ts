@@ -776,7 +776,6 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
 
         const blacken = false;  // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
         const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
         const expected = test_s.replace(/# @others doesn't/g, "#@others doesn't");
 
@@ -831,7 +830,6 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
 
         const blacken = false;  // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
         const test_s = contents;
         const expected = test_s;
 
@@ -895,7 +893,6 @@ suite('Test the FastAtRead class', () => {
         `).replace(/AT/g, '@').replace(/LB/g, '<<').replace(/SPACE/g, ' ');
         //@-<< define contents >>
         const blacken = false;  // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
         const test_s = blacken
             ? contents
                 .replace(/#@/g, '# @')
@@ -994,7 +991,6 @@ suite('Test the FastAtRead class', () => {
 
         const blacken = false; // #4323: Ignore the @language directive in .txt files.
 
-        g.app.write_black_sentinels = blacken;
         const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
         const expected = test_s;
 
@@ -1195,13 +1191,11 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
 
         // Test 1: without black delims.
-        g.app.write_black_sentinels = false;
         x.read_into_root(contents, 'test', root);
         let s = await c.atFileCommands.atFileToString(root, true);
         assert.strictEqual(contents, s, 'Test 1');
 
         // Test 2: with black delims.
-        g.app.write_black_sentinels = true;
         contents = contents.replace(/#@/g, '# @');
         x.read_into_root(contents, 'test', root);
         s = await c.atFileCommands.atFileToString(root, true);
@@ -1250,7 +1244,6 @@ suite('Test the FastAtRead class', () => {
         `).replace(/AT/g, '@');
         //@-<< define expected >>
         const blacken = false; // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
         const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
         expected = blacken ? expected.replace(/#@/g, '# @') : expected;
 
@@ -1300,14 +1293,12 @@ suite('Test the FastAtRead class', () => {
         //@-<< define expected_body >>
 
         //Test 1: without black delims.
-        g.app.write_black_sentinels = false;
         x.read_into_root(contents, 'test', root);
         assert.strictEqual(root.b, expected_body);
         let s = await c.atFileCommands.atFileToString(root, true);
         assert.strictEqual(contents, s);
 
         //Test 2: with black delims.
-        g.app.write_black_sentinels = true;
         contents = contents.replace(/#@/g, '# @');
         expected_body = expected_body.replace('#@', '# @');
         x.read_into_root(contents, 'test', root);

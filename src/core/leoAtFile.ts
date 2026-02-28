@@ -3217,8 +3217,8 @@ export class AtFile {
         if (at.sentinels || g.app.force_at_auto_sentinels) {
             at.putIndent(at.indent);
             at.os(at.startSentinelComment!);
-            // #2194. #2983: Put Black sentinels if --black-sentinels is in effect.
-            if (g.app.write_black_sentinels) {
+            // Blacken python sentinels.
+            if (this.language === 'python') {
                 at.os(' ');
             }
             // Apply the cweb hack to s:
