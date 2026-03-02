@@ -2467,7 +2467,7 @@ export class Position {
         //@+<< validate x ivar >>
         //@+node:felix.20210126001920.19: *5* << validate x ivar >>
         if (!p.v && pv && pv.__bool__()) {
-            this.invalidOutline('Empty t');
+            this.invalidOutline('Empty p.v');
         }
         //@-<< validate x ivar >>
         // Recursively validate all the children.
