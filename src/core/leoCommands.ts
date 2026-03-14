@@ -4751,7 +4751,6 @@ export class Commands {
     public expandToLevel(level: number): void {
         const c: Commands = this;
         const n: number = c.p.level();
-        const old_expansion_level = c.expansionLevel;
         let max_level = 0;
         for (let p of c.p.self_and_subtree(false)) {
             if (p.level() - n + 1 < level) {

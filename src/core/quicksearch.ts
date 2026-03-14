@@ -562,9 +562,15 @@ export class QuickSearchController {
         if (!pat.startsWith('r:')) {
             hpat = this.translate('*' + pat + '*').slice(0, -1); // remove last '$' part.
             bpat = this.translate(pat).slice(0, -1); // remove last '$' part.
-            // in python 3.6 there is no (?ms) at the end
-            // only \Z
-            //bpat = bpat.replace(r'\Z', '')
+
+            // in python there is no (?ms) at the end.
+
+            // Not applicable in javascript, but in python re module \Z matches only at the end of the string,
+            // while \z also matches before the newline at the end of the string.
+            // So in javascript, we leave those in case the user really wanted a litteral '\Z' or '\z' in their search pattern, but we don't add the 'm' flag to the regex, so they will only match at the end of the string.
+
+            // bpat = bpat.replace(r'\Z', '').replace(r'\z', '')  // This line was in original python version of Leo, but in javascript we will just leave those in.
+
             flags = 'gi';
         } else {
             hpat = pat.substring(2);
