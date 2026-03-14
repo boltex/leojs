@@ -14,7 +14,7 @@
 - Fixed body pane url links to also support direct "gxn:" links. (non unl)
 - Fixed bug in goPrev method related to selecting previously visited nodes.
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
-- Added proper configuration check for external file change settings in ExternalFilesController.
+- Fixed an ignored config check for external file change settings in ExternalFilesController.
 
 
 ## 1.0.14
