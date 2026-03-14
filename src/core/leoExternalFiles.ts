@@ -902,6 +902,17 @@ export class ExternalFilesController {
      * Return the cached @bool check_for_changed_external_file setting.
      */
     public is_enabled(c: Commands): boolean {
+        const checkConfig = g.app.gui.config.checkForChangeExternalFiles;
+        if (checkConfig) {
+            if (checkConfig.toLowerCase().includes('check')) {
+                return true;
+            }
+            if (checkConfig.toLowerCase().includes('ignore')) {
+                return false;
+            }
+        }
+
+        // Else is default from settings
         const d = this.enabled_d;
         let val = d.get(c);
         if (val == null) {

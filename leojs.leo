@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737303935373934342e3136360a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737333436303133372e3630320a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4655,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737323234303730312e3330390a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737333436303032302e3431310a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -21908,7 +21908,9 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed double clicking on headlines containing a unl to follow that link.
 - Fixed body pane url links to also support direct "gxn:" links. (non unl)
 - Fixed bug in goPrev method related to selecting previously visited nodes.
-- Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersand.
+- Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
+- Added proper configuration check for external file change settings in ExternalFilesController.
+
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
