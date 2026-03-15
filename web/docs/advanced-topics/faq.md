@@ -162,6 +162,49 @@ Thus, if C appears in x.leo, y.py and z.py, Leo will choose the value for C in x
 > 📌 **NOTE**\
 > Whenever Leo detects multiple values for C when opening an outline, Leo creates a "Recovered nodes" tree. This tree contains all the various values for C, nicely formatted so that it is easy to determine where the differences are.
 
+### How can Leonine scripts simulate half clones?
+
+All clones of the same node share the same VNode, and thus they all have exactly the same headline, body text, and children. Therefore, changing p.b or p.h, or adding a child to one clone modifies the underlying VNode, reflected instantly in all other clones.
+
+However, Leo's users often request a vague enhancement informally known as "half clones." We can make this ill-defined notion precise by saying that we often want to treat clones differently depending on **context**, the **Position** of that clone within the entire outline.
+
+<ul>
+    **Using context in scripts**
+</ul>
+
+Scripts are not limited to using the data in `p.v`, that is, `p.b`, `p.h`, `p.u`, or `p.gnx`.  Scripts may access:
+
+- Any ancestor or descendant of `p`.
+- Any data accessible from `c`, that is, *all* the data in the outline, including cached data!
+
+Scripts can define their own conventions, including:
+
+- Special-format comments embedded in `p.b`,
+- Special-purpose conventions for headlines.
+
+<ul>
+    **Changing text depending on context**
+</ul>
+
+```typescript
+function in_context(p: Position, context: string): boolean {
+    return p.parents().some((z: Position) => z.h === context);
+}
+
+for (const p of c.all_positions()) {
+    if (in_context(p, 'FAQ')) {
+        handle_faq_node(p);
+    } else if (in_context(p, 'Reference')) {
+        handle_ref_node(p);
+    }
+}
+```
+<ul>
+    **Simulating half clones**
+</ul>
+
+Scripts may simulate half clones by ignoring children (of clones) in some contexts and processing those *same* children in other contexts. That's all there is to it!
+
 ### When is deleting a node dangerous?
 
 A **dangerous** delete is a deletion of a node so that all the data in the node is deleted *everywhere* in an outline. The data is gone, to be retrieved only via undo or via backups. It may not be obvious which deletes are dangerous in an outline containing clones. Happily, there is a very simple rule of thumb:

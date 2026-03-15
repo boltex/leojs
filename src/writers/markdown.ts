@@ -16,7 +16,6 @@ import { BaseWriter } from './basewriter';
 export class MarkdownWriter extends BaseWriter {
     public root: Position | null = null;
 
-
     //@+others
     //@+node:felix.20230914214935.3: *3* mdw.write
     /**
@@ -26,11 +25,10 @@ export class MarkdownWriter extends BaseWriter {
         const placeholder_regex = /placeholder level [0-9]+/;
         this.root = root;
         this.write_root(root);
-        const total = [...root.subtree()].length;
+
         let count = 0;
         for (const p of root.subtree()) {
             count += 1;
-            let lastFlag = count === total;
             if (g.app.force_at_auto_sentinels) {
                 this.put_node_sentinel(p, '<!--', '-->');
             }
@@ -38,20 +36,11 @@ export class MarkdownWriter extends BaseWriter {
                 // skip this 'placeholder level X' node
             } else {
                 this.write_headline(p);
-                // Ensure that every section ends with exactly two newlines.
-                if (p.b.trimEnd().length > 0) {
-                    let s = p.b.trimEnd() + (lastFlag ? '\n' : '\n\n');
-                    const lines = s.split(/\r?\n/);
-                    if (lines.length && lines[lines.length - 1] === '') {
-                        lines.pop();
+                const lines = p.b.split(/\r?\n/);
+                for (const line of lines) {
+                    if (!g.isDirective(line)) {
+                        this.put(line);
                     }
-                    for (const line of lines) {
-                        if (!g.isDirective(line)) {
-                            this.put(line);
-                        }
-                    }
-                } else if (!lastFlag) {  // #3719.
-                    this.put('\n');
                 }
             }
         }

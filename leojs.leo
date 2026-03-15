@@ -860,7 +860,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 </t>
 <t tx="felix.20201208214250.2"></t>
-<t tx="felix.20201208214319.1" _mod_time="46313735303032393939332e3430370a2e">@language md
+<t tx="felix.20201208214319.1" _mod_time="46313737333533383038322e3430390a2e">@language md
 @tabwidth -4
 # ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
@@ -4655,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737333436303032302e3431310a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737333534373536352e3731390a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
