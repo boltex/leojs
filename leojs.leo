@@ -17499,7 +17499,7 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 
 }
 </t>
-<t tx="felix.20231226205226.1" _mod_time="46313737303236333038302e3739310a2e">import * as vscode from 'vscode';
+<t tx="felix.20231226205226.1" _mod_time="46313737333937363438372e3332340a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
@@ -17521,6 +17521,8 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
         unl://path/to/file.leo#Headline-with-Dashes--&gt;Sub-section--&gt;Item 1
         unl://anotherPath/docs.leo#Special Characters!--&gt;@$%^&amp;*
         unl://leoFile.leo#Testing--&gt;Edge--&gt;Cases--&gt;with--&gt;Multiple Separators
+
+        VSCode already suports regular URLs, e.g., https://www.google.com/
 
         REFERENCE IN leoGlobals.py
          2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):

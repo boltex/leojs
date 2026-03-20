@@ -21,6 +21,8 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
         unl://anotherPath/docs.leo#Special Characters!-->@$%^&*
         unl://leoFile.leo#Testing-->Edge-->Cases-->with-->Multiple Separators
 
+        VSCode already suports regular URLs, e.g., https://www.google.com/
+
         REFERENCE IN leoGlobals.py
          2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):
         
