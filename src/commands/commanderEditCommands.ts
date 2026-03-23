@@ -418,7 +418,16 @@ export class CommanderEditCommands {
         let b: string[];
         let middle: string;
         const ref_h = extractRef(c, h).trim();
-        const def_h = extractDef_find(c, lines);
+        let def_h: string | undefined;
+        const language = (c.getLanguage(c.p) || '').toLowerCase();
+        // Note: Adjust as necessary for other languages, maybe clearing top comments, etc.
+        if (language === 'javascript' || language === 'typescript') {
+            def_h = extractDef_find(c, [lines[0]]);  // Only look at the first line for a definition.
+        } else {
+            def_h = extractDef_find(c, lines);  // Default to look at all lines for a definition.
+        }
+        //
+        // First check for reference, then definition, then default to the first line.
         if (ref_h) {
             [h, b, middle] = [ref_h, lines.slice(1), ' '.repeat(ws) + lines[0]]; // By vitalije.
         } else if (def_h) {
