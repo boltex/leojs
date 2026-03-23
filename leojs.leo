@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737333436303235342e3939320a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737343239363533372e3137390a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21912,6 +21912,8 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed bug in goPrev method related to selecting previously visited nodes.
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
+- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Fixed node icon dirty/clean outline contrast to match Leo's defaults.
 
 
 </t>
