@@ -277,6 +277,15 @@ export class ExternalFilesController {
                 const old_p = c.p;  // To restore selection if refresh option set to yes-all & is descendant of at-file
                 await c.refreshFromDisk(p, false);
 
+                // #4565: set all ancestor file nodes dirty and redraw.
+                p.v.setDirty();
+                for (const p2 of c.all_positions()) {
+                    if (p2.isDirty()) {
+                        p2.v.setAllAncestorAtFileNodesDirty();
+                    }
+                }
+                c.redraw();
+
                 // ! LEOJS : KEEP SELECTION ON CURRENT NODE IF CHILD OF AT-ANY-FILE REFRESHED !
                 // TODO : Add config option in Leo for this!
                 if (true) {

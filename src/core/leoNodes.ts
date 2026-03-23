@@ -3706,23 +3706,25 @@ export class VNode {
      */
     public setAllAncestorAtFileNodesDirty(): void {
         const v: VNode = this;
-        const hiddenRootVnode: VNode = v.context.hiddenRootNode;
-
-        function* v_and_parents(v: VNode): Generator<VNode> {
-            if (v.fileIndex !== hiddenRootVnode.fileIndex) {
-                yield v;
-                for (let parent_v of v.parents) {
-                    yield* v_and_parents(parent_v);
+        const result: Set<VNode> = new Set();
+        const seen: Set<VNode> = new Set([v.context.hiddenRootNode]);
+        const to_do: VNode[] = [v, ...v.parents];
+        // #4565: Rewrite using a loop.
+        while (to_do.length > 0) {
+            const v2 = to_do.pop()!;
+            seen.add(v2);
+            if (v2.isAnyAtFileNode()) {
+                result.add(v2);
+            } else {
+                for (const parent_v of v2.parents) {
+                    if (!seen.has(parent_v)) {
+                        to_do.push(parent_v);
+                    }
                 }
             }
         }
-
-        // There is no harm in calling v2.setDirty redundantly.
-
-        for (let v2 of v_and_parents(v)) {
-            if (v2.isAnyAtFileNode()) {
-                v2.setDirty();
-            }
+        for (const v2 of result) {
+            v2.setDirty();
         }
     }
 
