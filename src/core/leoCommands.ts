@@ -5588,57 +5588,6 @@ export class Commands {
         return root;
     }
     //@+node:felix.20220210211517.1: *4* c.deletePositionsInList
-
-    // * New version from python's sources:
-    /*
-    def deletePositionsInList(self, aList: list) -> None:
-        """
-        *Undoably* delete all vnodes corresponding to the positions in aList.
-        """
-        c = self
-        u, undoType = c.undoer, 'c.deletePositionsInList'
-        root = c.rootPosition()
-
-        # Ensure all positions are valid.
-        to_be_deleted: list[Position] = []
-        for p in aList:
-            if c.positionExists(p) and p not in to_be_deleted:
-                to_be_deleted.append(p)
-        if not to_be_deleted:
-            return
-
-        def delete(p: Position) -> None:
-            if p in to_be_deleted:
-                # Remove all to-be-deleted positions in p's subtree.
-                for p2 in p.subtree():
-                    if p2 in to_be_deleted:
-                        to_be_deleted.remove(p2)
-                bunch = u.beforeDeleteNode(p)
-                p.doDelete()
-                u.afterDeleteNode(c.rootPosition(), 'Inner Undo Node', bunch)
-            else:
-                # Recursively handle all p's children.
-                for child in reversed(list(p.children())):
-                    delete(child)
-
-        # The main line. Start the recursion with the top-level nodes.
-        u.beforeChangeGroup(c.p, undoType, verboseUndoGroup=True)
-        to_do: list[Position] = list(reversed(list(root.self_and_siblings())))
-        while to_do:
-            p = to_do.pop()
-            delete(p)
-
-        # Set c.p if necessary.
-        if not c.positionExists(c.p):
-            c.selectPosition(c.rootPosition())
-        u.afterChangeGroup(c.p, undoType, reportFlag=True)
-
-    # For compatibility.
-    undoableDeletePositions = deletePositionsInList
-
-    */
-
-
     /**
      * *Undoably* delete all vnodes corresponding to the positions in aList.
      */
@@ -5695,9 +5644,6 @@ export class Commands {
         u.afterChangeGroup(c.p, undoType);
 
     }
-
-
-
     //@+node:felix.20230525222516.1: *4* c.find_b & find_h
     //@+node:felix.20230525222516.2: *5* c.find_b
     /**
