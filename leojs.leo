@@ -1159,7 +1159,7 @@ export async function deactivate(): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201208223553.1" _mod_time="46313736303439373936352e3430310a2e">import * as vscode from 'vscode';
+<t tx="felix.20201208223553.1" _mod_time="46313737343239363031372e3436350a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 import { Icon } from './types';
 import { LeoUI } from './leoUI';
@@ -1524,7 +1524,7 @@ public refreshTreeRoot(): void {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
     }
     const w_icon: number =
-        (+(w_ui.config.invertNodeContrast !== !!element.isDirty()) &lt;&lt; 3) |
+        (+(w_ui.config.invertNodeContrast !== !element.isDirty()) &lt;&lt; 3) |
         (+element.isCloned() &lt;&lt; 2) |
         (+element.isMarked() &lt;&lt; 1) |
         +element.v.hasBody();
@@ -4655,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737333534373536352e3731390a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737343035383036382e3732320a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -17499,7 +17499,7 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 
 }
 </t>
-<t tx="felix.20231226205226.1" _mod_time="46313737333937363438372e3332340a2e">import * as vscode from 'vscode';
+<t tx="felix.20231226205226.1" _mod_time="46313737343035383031302e3430320a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {

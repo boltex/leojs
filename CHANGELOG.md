@@ -15,6 +15,8 @@
 - Fixed bug in goPrev method related to selecting previously visited nodes.
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
+- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Fixed node icon dirty/clean outline contrast to match Leo's defaults.
 
 
 ## 1.0.14
