@@ -3701,30 +3701,36 @@ export class VNode {
     //@+node:felix.20210116003530.1: *3* v.setAllAncestorAtFileNodesDirty & helpers
     /**
      * Original idea by Bитaлиje Mилoшeвић (Vitalije Milosevic).
-     * Modified by EKR.
+     * #4565: Rewritten by EKR to use the to_do_set kwarg.
      * Translated by Félix Malboeuf
      */
-    public setAllAncestorAtFileNodesDirty(): void {
+    public setAllAncestorAtFileNodesDirty(to_do_set?: Set<VNode>): void {
         const v: VNode = this;
-        const result: Set<VNode> = new Set();
+        // Init seen and to_do_list.
         const seen: Set<VNode> = new Set([v.context.hiddenRootNode]);
-        const to_do: VNode[] = [v, ...v.parents];
-        // #4565: Rewrite using a loop.
-        while (to_do.length > 0) {
-            const v2 = to_do.pop()!;
-            seen.add(v2);
-            if (v2.isAnyAtFileNode()) {
-                result.add(v2);
-            } else {
-                for (const parent_v of v2.parents) {
-                    if (!seen.has(parent_v)) {
-                        to_do.push(parent_v);
-                    }
-                }
+        let to_do_list: VNode[] = to_do_set ? Array.from(to_do_set) : [v];
+
+        if (to_do_set) {
+            for (const v2 of to_do_set) {
+                to_do_list.push(...v2.parents);
             }
         }
-        for (const v2 of result) {
-            v2.setDirty();
+        to_do_list = Array.from(new Set(to_do_list));
+
+        // The main loop.
+        while (to_do_list.length > 0) {
+            const v2 = to_do_list.pop()!;
+            seen.add(v2);
+            if (v2.isAnyAtFileNode()) {
+                v2.setDirty();
+            }
+            // Scan all parents of v2, even if v2 is and @<file> node.
+            // Doing so maintains compatibility with legacy code.
+            for (const parent_v of v2.parents) {
+                if (!seen.has(parent_v)) {
+                    to_do_list.push(parent_v);
+                }
+            }
         }
     }
 

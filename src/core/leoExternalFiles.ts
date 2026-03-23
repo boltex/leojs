@@ -8,7 +8,7 @@ import * as md5 from 'md5';
 import * as os from 'os';
 import * as g from './leoGlobals';
 import { LeoFrame } from './leoFrame';
-import { Position } from './leoNodes';
+import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
 //@-<< imports >>
 //@+others
@@ -279,11 +279,13 @@ export class ExternalFilesController {
 
                 // #4565: set all ancestor file nodes dirty and redraw.
                 p.v.setDirty();
+                const to_do_set: Set<VNode> = new Set();
                 for (const p2 of c.all_positions()) {
                     if (p2.isDirty()) {
-                        p2.v.setAllAncestorAtFileNodesDirty();
+                        to_do_set.add(p2.v);
                     }
                 }
+                p.v.setAllAncestorAtFileNodesDirty(to_do_set);
                 c.redraw();
 
                 // ! LEOJS : KEEP SELECTION ON CURRENT NODE IF CHILD OF AT-ANY-FILE REFRESHED !

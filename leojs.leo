@@ -17472,7 +17472,7 @@ div.col-nav {
 - Fixed bug that sometimes asked to 'save' and overwrite/confirm when new node was created with body text containing an ampersand or when using vscode's quick-suggestion autocomplete.
 
 </t>
-<t tx="felix.20231224201746.1" _mod_time="46313737343239393530352e3937330a2e">import * as vscode from 'vscode';
+<t tx="felix.20231224201746.1" _mod_time="46313737343239393531392e3431360a2e">import * as vscode from 'vscode';
 import { LeoUI } from './leoUI';
 
 @language typescript
