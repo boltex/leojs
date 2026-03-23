@@ -5588,78 +5588,116 @@ export class Commands {
         return root;
     }
     //@+node:felix.20220210211517.1: *4* c.deletePositionsInList
+
+    // * New version from python's sources:
+    /*
+    def deletePositionsInList(self, aList: list) -> None:
+        """
+        *Undoably* delete all vnodes corresponding to the positions in aList.
+        """
+        c = self
+        u, undoType = c.undoer, 'c.deletePositionsInList'
+        root = c.rootPosition()
+
+        # Ensure all positions are valid.
+        to_be_deleted: list[Position] = []
+        for p in aList:
+            if c.positionExists(p) and p not in to_be_deleted:
+                to_be_deleted.append(p)
+        if not to_be_deleted:
+            return
+
+        def delete(p: Position) -> None:
+            if p in to_be_deleted:
+                # Remove all to-be-deleted positions in p's subtree.
+                for p2 in p.subtree():
+                    if p2 in to_be_deleted:
+                        to_be_deleted.remove(p2)
+                bunch = u.beforeDeleteNode(p)
+                p.doDelete()
+                u.afterDeleteNode(c.rootPosition(), 'Inner Undo Node', bunch)
+            else:
+                # Recursively handle all p's children.
+                for child in reversed(list(p.children())):
+                    delete(child)
+
+        # The main line. Start the recursion with the top-level nodes.
+        u.beforeChangeGroup(c.p, undoType, verboseUndoGroup=True)
+        to_do: list[Position] = list(reversed(list(root.self_and_siblings())))
+        while to_do:
+            p = to_do.pop()
+            delete(p)
+
+        # Set c.p if necessary.
+        if not c.positionExists(c.p):
+            c.selectPosition(c.rootPosition())
+        u.afterChangeGroup(c.p, undoType, reportFlag=True)
+
+    # For compatibility.
+    undoableDeletePositions = deletePositionsInList
+
+    */
+
+
     /**
-     * Delete all vnodes corresponding to the positions in aList.
-     *
-     * Set c.p if the old position no longer exists.
-     *
-     * See "Theory of operation of c.deletePositionsInList" in LeoDocs.leo.
+     * *Undoably* delete all vnodes corresponding to the positions in aList.
      */
     public deletePositionsInList(
         aList: Position[]
-    ): [string, number, string][] {
-        // New implementation by Vitalije 2020-03-17 17:29
+    ): void {
+
         const c: Commands = this;
+        const u = c.undoer;
+        const undoType = 'c.deletePositionsInList';
+        const root = c.rootPosition()!;
 
-        // Ensure all positions are valid.
-        aList = aList.filter((p) => {
-            return c.positionExists(p);
-        });
-
-        if (!aList.length) {
-            return [];
+        // Ensure all positions are valid and unique.
+        const to_be_deleted: Position[] = [];
+        for (let p of aList) {
+            if (c.positionExists(p) && !to_be_deleted.some((p2) => p2.__eq__(p))) {
+                to_be_deleted.push(p);
+            }
+        }
+        if (!to_be_deleted.length) {
+            return;
         }
 
-        function p2link(p: Position): [number, VNode] {
-            const parent_v: VNode = p.stack.length
-                ? p.stack[p.stack.length - 1][0]
-                : c.hiddenRootNode;
-            return [p._childIndex, parent_v];
-        }
-
-        let links_to_be_cut = [...aList.map(p2link, aList)];
-        let unique_links: [number, VNode][] = [];
-        // links_to_be_cut = [...new Set(links_to_be_cut)]; // Make unique
-        links_to_be_cut.forEach((fromElement) => {
-            let i: number;
-            let v: VNode;
-            [i, v] = fromElement;
-            let found = false;
-            unique_links.forEach((toElement) => {
-                let j: number;
-                let w: VNode;
-                [j, w] = toElement;
-                if (i === j && v === w) {
-                    found = true;
+        function deletePosition(p: Position): void {
+            if (to_be_deleted.some((p2) => p2.__eq__(p))) {
+                // Remove all to-be-deleted positions in p's subtree.
+                for (let p2 of p.subtree()) {
+                    const index = to_be_deleted.findIndex((p3) => p3.__eq__(p2));
+                    if (index >= 0) {
+                        to_be_deleted.splice(index, 1);
+                    }
                 }
-            });
-            if (!found) {
-                unique_links.push(fromElement); // add if not found
+                const bunch = u.beforeDeleteNode(p);
+                p.doDelete();
+                u.afterDeleteNode(c.rootPosition()!, 'Inner Undo Node', bunch);
+            } else {
+                // Recursively handle all p's children.
+                for (let child of [...p.children()].reverse()) {
+                    deletePosition(child);
+                }
             }
-        });
-        links_to_be_cut = unique_links.sort((a, b): number => {
-            return a[0] < b[0] ? 1 : -1;
-        });
-
-        const undodata: [string, number, string][] = [];
-        links_to_be_cut.forEach((element) => {
-            let i: number;
-            let v: VNode;
-            [i, v] = element;
-            const ch = v.children[i]; // get item
-            v.children.splice(i, 1); // remove it from children
-            const index = ch.parents.indexOf(v); // find index in parents
-            if (index >= 0) {
-                ch.parents.splice(index, 1); // remove it from parents
-            }
-            undodata.push([v.gnx, i, ch.gnx]);
-        });
-
+        }
+        // The main line. Start the recursion with the top-level nodes.
+        u.beforeChangeGroup(c.p, undoType, true);
+        const to_do: Position[] = [...root.self_and_siblings()].reverse();
+        while (to_do.length) {
+            const p = to_do.pop()!;
+            deletePosition(p);
+        }
+        // Set c.p if necessary.
         if (!c.positionExists(c.p)) {
             c.selectPosition(c.rootPosition()!);
         }
-        return undodata;
+        u.afterChangeGroup(c.p, undoType);
+
     }
+
+
+
     //@+node:felix.20230525222516.1: *4* c.find_b & find_h
     //@+node:felix.20230525222516.2: *5* c.find_b
     /**
@@ -5738,49 +5776,10 @@ export class Commands {
     }
     //@+node:felix.20240601145220.1: *4* c.undoableDeletePositions
     /**
-     * Deletes all vnodes corresponding to the positions in aList,
-     * and make changes undoable.
+     * Placeholder for compatibility.
      */
     public undoableDeletePositions(aList: Position[]): void {
-
-        const c = this;
-        const u = c.undoer;
-        const data = c.deletePositionsInList(aList);
-        const gnx2v = c.fileCommands.gnxDict;
-
-        function undo(): void {
-            const bead = u.getBead(u.bead);
-            if (!bead) { return; }
-            for (const [pgnx, i, chgnx] of bead.data.reverse()) {
-                const v = gnx2v[pgnx];
-                const ch = gnx2v[chgnx];
-                v.children.splice(i, 0, ch);
-                ch.parents.push(v);
-            }
-            if (!c.positionExists(c.p)) {
-                c.setCurrentPosition(c.rootPosition()!);
-            }
-        }
-
-        function redo(): void {
-            const bead = u.getBead(u.bead + 1);
-            if (!bead) { return; }
-            for (const [pgnx, i, _chgnx] of bead.data) {
-                const v = gnx2v[pgnx];
-                const ch = v.children.splice(i, 1)[0];
-                ch.parents = ch.parents.filter(parent => parent !== v);
-            }
-            if (!c.positionExists(c.p)) {
-                c.setCurrentPosition(c.rootPosition()!);
-            }
-        }
-
-        u.pushBead({
-            data: data,
-            undoType: 'delete nodes',
-            undoHelper: undo,
-            redoHelper: redo,
-        });
+        this.deletePositionsInList(aList);
     }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
