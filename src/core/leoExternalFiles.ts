@@ -276,12 +276,18 @@ export class ExternalFilesController {
             if (['yes', 'yes-all'].includes(state)) {
                 const old_p = c.p;  // To restore selection if refresh option set to yes-all & is descendant of at-file
                 await c.refreshFromDisk(p, false);
+                // #4565: set all clones in p's subtree dirty.
+                for (const p2 of p.subtree()) {
+                    if (p2.v.isCloned()) {
+                        p2.v.setDirty();
+                    }
+                }
 
                 // #4565: set all ancestor file nodes dirty and redraw.
                 p.v.setDirty();
                 const to_do_set: Set<VNode> = new Set();
                 for (const p2 of c.all_positions()) {
-                    if (p2.isDirty()) {
+                    if (p2.v.isDirty()) {
                         to_do_set.add(p2.v);
                     }
                 }
