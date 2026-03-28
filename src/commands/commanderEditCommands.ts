@@ -12,6 +12,72 @@ import { Position } from '../core/leoNodes';
 //@+node:felix.20220414231634.1: ** Class CommanderEditCommands
 export class CommanderEditCommands {
     //@+others
+    //@+node:felix.20260328170219.1: *3* c_ec.addComments
+    @commander_command('add-comments', 'Undoably add comments to the selected text.')
+    public addComments(this: Commands): void {
+
+        const c: Commands = this;
+        const u = this.undoer;
+        const p = this.p;
+        const w = this.frame.body.wrapper;
+
+        // "Before" snapshot.
+        const bunch = u.beforeChangeBody(p);
+        // Make sure there is a selection.
+        let head, lines, tail, oldSel, oldYview;
+        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        if (!lines.length) {
+            g.warning('no text selected');
+            return;
+        }
+
+        // The default language in effect at p.
+        let language = c.getLanguage(p);
+
+        if (c.hasAmbiguousLanguage(p)) {
+            language = c.getLanguageAtCursor(p, language)
+        }
+        let d1, d2, d3, openDelim, closeDelim;
+        [d1, d2, d3] = g.set_delims_from_language(language);
+        d2 = d2 || '';
+        d3 = d3 || '';
+        if (d1) {
+            [openDelim, closeDelim] = [d1 + ' ', ''];
+        } else {
+            [openDelim, closeDelim] = [d2 + ' ', ' ' + d3];
+        }
+        // Calculate the result.
+        const result = [];
+        let i: number | null = null;
+        for (const line of lines) {
+            if (line.trim()) {
+                if (i == null) {
+                    i = g.skip_ws(line, 0);
+                }
+                let s = line.slice(i).replace('\n', '');
+                result.push(line.slice(0, i) + openDelim + s + closeDelim + '\n');
+            } else {
+                result.push(line);
+            }
+        }
+        // Set p.b and w's text first.
+        const middle = result.join('');
+        p.b = head + middle + tail;  // Sets dirty and changed bits.
+        w.setAllText(head + middle + tail);
+
+
+        // Set the selection range and scroll position.
+        i = head.length;
+        const j = Math.max(i, head.length + middle.length - 1)
+        w.setSelectionRange(i, j, j);
+        w.setYScrollPosition(oldYview);
+
+        // "after" snapshot.
+        u.afterChangeBody(p, 'Add Comments', bunch);
+
+
+    }
+
     //@+node:felix.20220414235045.1: *3* c_ec.convertAllBlanks
     @commander_command(
         'convert-all-blanks',
