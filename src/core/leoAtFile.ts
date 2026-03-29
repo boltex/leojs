@@ -4133,7 +4133,7 @@ export class AtFile {
         return '';
     }
 
-    public setPathUa(p: Position, path: any): void {
+    public setPathUa(p: Position, path: string): void {
         if (!p.v.tempAttributes) {
             p.v.tempAttributes = {};
         }

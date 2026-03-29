@@ -5121,6 +5121,12 @@ export async function os_path_samefile(
         return true;
     }
 
+    // If one if an empty string and the other is not, they cannot be the same file.
+    if ((fn1 === '' && fn2 !== '') || (fn1 !== '' && fn2 === '')) {
+        return false;
+    }
+
+
     // 2- with fs.stat ino and dev
     const w_uri1 = makeVscodeUri(fn1);
     const w_uri2 = makeVscodeUri(fn2);
