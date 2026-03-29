@@ -17,6 +17,7 @@
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
 - Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
 - Fixed node icon dirty/clean outline contrast to match Leo's defaults.
+- Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
 
 
 ## 1.0.14
