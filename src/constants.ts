@@ -286,8 +286,8 @@ export class Constants {
      * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
      */
     public static CONFIG_NAMES = {
-        CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
-        DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+        // CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+        // DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
         SESSION_PER_WORKSPACE: "sessionPerWorkspace",
         LEO_TREE_BROWSE: "leoTreeBrowse",
         TREE_KEEP_FOCUS: "treeKeepFocus",

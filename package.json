@@ -48,38 +48,6 @@
     "configuration": {
       "title": "LeoJS Leo Editor",
       "properties": {
-        "leojs.checkForChangeExternalFiles": {
-          "scope": "application",
-          "default": "none",
-          "type": "string",
-          "description": "Set default for checking changes to external files",
-          "enum": [
-            "none",
-            "force-check",
-            "force-ignore"
-          ],
-          "enumDescriptions": [
-            "Default from Leo's config",
-            "Check for changes",
-            "Ignore all changes"
-          ]
-        },
-        "leojs.defaultReloadIgnore": {
-          "scope": "application",
-          "default": "none",
-          "type": "string",
-          "description": "Set default for derived files so that they reload, or ignore, when changes are detected",
-          "enum": [
-            "none",
-            "yes-all",
-            "no-all"
-          ],
-          "enumDescriptions": [
-            "Choose each time",
-            "Reload All",
-            "Ignore All"
-          ]
-        },
         "leojs.sessionPerWorkspace": {
           "scope": "application",
           "default": true,

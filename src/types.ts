@@ -6,8 +6,8 @@ import { RClick } from "./core/mod_scripting";
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 export interface ConfigMembers {
-    checkForChangeExternalFiles: string;
-    defaultReloadIgnore: string;
+    // checkForChangeExternalFiles: string;
+    // defaultReloadIgnore: string;
     sessionPerWorkspace: boolean;
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;

@@ -1987,7 +1987,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
-<t tx="felix.20201214151326.1" _mod_time="46313736393636333134302e3739370a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151326.1" _mod_time="46313737343735323434352e3139310a2e">import * as vscode from "vscode";
 
 @language typescript
 @tabwidth -4
@@ -3311,7 +3311,7 @@ private _updateLeoObjectIndicator(): void {
 }
 
 </t>
-<t tx="felix.20201214154816.1" _mod_time="46313737313138313234312e3633390a2e">import * as vscode from "vscode";
+<t tx="felix.20201214154816.1" _mod_time="46313737343735323433382e3239370a2e">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { RClick } from "./core/mod_scripting";
 
@@ -4655,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737343733353330342e3433360a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737343735343133392e3532360a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -7873,38 +7873,6 @@ public incTreeId(): void {
 <t tx="felix.20211006225245.1">"configuration": {
   "title": "LeoJS Leo Editor",
   "properties": {
-    "leojs.checkForChangeExternalFiles": {
-      "scope": "application",
-      "default": "none",
-      "type": "string",
-      "description": "Set default for checking changes to external files",
-      "enum": [
-        "none",
-        "force-check",
-        "force-ignore"
-      ],
-      "enumDescriptions": [
-        "Default from Leo's config",
-        "Check for changes",
-        "Ignore all changes"
-      ]
-    },
-    "leojs.defaultReloadIgnore": {
-      "scope": "application",
-      "default": "none",
-      "type": "string",
-      "description": "Set default for derived files so that they reload, or ignore, when changes are detected",
-      "enum": [
-        "none",
-        "yes-all",
-        "no-all"
-      ],
-      "enumDescriptions": [
-        "Choose each time",
-        "Reload All",
-        "Ignore All"
-      ]
-    },
     "leojs.sessionPerWorkspace": {
       "scope": "application",
       "default": true,
@@ -8054,7 +8022,7 @@ public incTreeId(): void {
   }
 },
 </t>
-<t tx="felix.20211007213344.1" _mod_time="46313732323130373234362e3031370a2e">import * as vscode from "vscode";
+<t tx="felix.20211007213344.1" _mod_time="46313737343735323436372e3635340a2e">import * as vscode from "vscode";
 import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8140,8 +8108,8 @@ public buildFromSavedSettings(): void {
         // * Currently setting config, wait until its done all, and this will be called automatically
         return;
     } else {
-        this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
-        this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+        // this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
+        // this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
         this.sessionPerWorkspace = GET(NAME).get(NAMES.SESSION_PER_WORKSPACE, DEFAULTS.SESSION_PER_WORKSPACE);
         this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
         this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
@@ -8194,8 +8162,8 @@ public buildFromSavedSettings(): void {
 export class Config implements ConfigMembers {
 
     // Config settings used on Leo's side
-    public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
-    public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
+    // public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
+    // public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
 
     // Config settings used on vscode's side
     public sessionPerWorkspace: boolean = Constants.CONFIG_DEFAULTS.SESSION_PER_WORKSPACE; // Used as Context Flag
@@ -8266,8 +8234,8 @@ export class Config implements ConfigMembers {
  */
 public getConfig(): ConfigMembers {
     return {
-        checkForChangeExternalFiles: this.checkForChangeExternalFiles,
-        defaultReloadIgnore: this.defaultReloadIgnore,
+        // checkForChangeExternalFiles: this.checkForChangeExternalFiles,
+        // defaultReloadIgnore: this.defaultReloadIgnore,
         sessionPerWorkspace: this.sessionPerWorkspace, // Used as Context Flag
         leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
         treeKeepFocus: this.treeKeepFocus,
@@ -8364,8 +8332,8 @@ public clearCloseEmptyGroups(): Thenable&lt;void&gt; {
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 export interface ConfigMembers {
-    checkForChangeExternalFiles: string;
-    defaultReloadIgnore: string;
+    // checkForChangeExternalFiles: string;
+    // defaultReloadIgnore: string;
     sessionPerWorkspace: boolean;
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
@@ -8423,8 +8391,8 @@ export interface ConfigSetting {
  * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 public static CONFIG_NAMES = {
-    CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
-    DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+    // CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+    // DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
     SESSION_PER_WORKSPACE: "sessionPerWorkspace",
     LEO_TREE_BROWSE: "leoTreeBrowse",
     TREE_KEEP_FOCUS: "treeKeepFocus",
@@ -19580,7 +19548,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313736303439373936352e3336360a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313737343735323537312e3330330a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19640,13 +19608,13 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
           &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE" class="video-link ml-1"&gt;&lt;span
               class="icon"&gt;📺&lt;/span&gt;&amp;nbsp;Features Demo&lt;/a&gt;
         &lt;/p&gt;
-        &lt;h2 class="section__title section__title--break"&gt;&lt;/h2&gt;
+        &lt;!-- &lt;h2 class="section__title section__title--break"&gt;&lt;/h2&gt;
         &lt;p class="section__hint mt-0 center"&gt;
           Automate auto-refresh for
           &lt;a href="#external-files" title="Setup file-change detection"&gt;external files changes&lt;/a&gt;, or choose which
           &lt;a href="#node-commands" title="Fine-tune interface"&gt;icons&lt;/a&gt;
           are shown, and more!
-        &lt;/p&gt;
+        &lt;/p&gt; --&gt;
       &lt;/section&gt;
 
       &lt;section id="leo-id" class="section--settings"&gt;
@@ -19670,7 +19638,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
         &lt;/div&gt;
       &lt;/section&gt;
 
-      &lt;section id="external-files" class="section--settings"&gt;
+      &lt;!-- &lt;section id="external-files" class="section--settings"&gt;
         &lt;div class="section__content"&gt;
           &lt;div class="section__header"&gt;
             &lt;h2&gt;External Files Change Detection&lt;/h2&gt;
@@ -19716,7 +19684,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;/div&gt;
           &lt;/div&gt;
         &lt;/div&gt;
-      &lt;/section&gt;
+      &lt;/section&gt; --&gt;
 
       &lt;section id="interface-behavior" class="section--settings"&gt;
         &lt;div class="section__content"&gt;
@@ -20052,9 +20020,9 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
           &lt;li&gt;
             &lt;a href="#leo-id" title="Uniquely identifies you"&gt;Leo ID&lt;/a&gt;
           &lt;/li&gt;
-          &lt;li&gt;
+          &lt;!-- &lt;li&gt;
             &lt;a href="#external-files" title="File change detection settings"&gt;External Files&lt;/a&gt;
-          &lt;/li&gt;
+          &lt;/li&gt; --&gt;
           &lt;li&gt;
             &lt;a href="#interface-behavior" title="Outline behavior settings"&gt;Interface Behavior&lt;/a&gt;
           &lt;/li&gt;

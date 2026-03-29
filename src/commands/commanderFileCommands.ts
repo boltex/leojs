@@ -429,7 +429,11 @@ export class CommanderFileCommands {
         'refresh-from-disk',
         'Refresh an @<file> node from disk.'
     )
-    public async refreshFromDisk(this: Commands, p?: Position, silent = true): Promise<void> {
+    public async refreshFromDisk(
+        this: Commands,
+        p?: Position,
+        silent = true  // No longer used.
+    ): Promise<void> {
         const c: Commands = this;
         const at = c.atFileCommands;
         if (!p) {
@@ -471,11 +475,6 @@ export class CommanderFileCommands {
             c.selectPosition(update_p);
         } else {
             update_p = p; // #4495: Do *not* change the position!
-        }
-
-        // #4495: Report the updated file.
-        if (!silent && !g.unitTesting) {
-            g.es_print(`update: ${update_p.h}`);
         }
 
         // Create the 'Recovered Nodes' tree.

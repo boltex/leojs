@@ -970,9 +970,6 @@ export class AtFile {
         ) {
             return;
         }
-        if (!g.unitTesting) {
-            g.es_print('updating:', root.h);
-        }
         root.clearVisitedInTree();
         const gnx2vnode = at.fileCommands.gnxDict;
         const contents = new_private_lines.join('');
