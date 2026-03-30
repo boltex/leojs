@@ -6332,10 +6332,10 @@ export class LeoUI extends NullGui {
         if (p_undo.contextValue !== Constants.CONTEXT_FLAGS.UNDO_BEAD) {
             return Promise.resolve();
         }
-        let action = "redo"; // Constants.LEOBRIDGE.REDO;
+        let action = "redo";
         let repeat = p_undo.beadIndex;
         if (p_undo.beadIndex <= 0) {
-            action = "undo"; // Constants.LEOBRIDGE.UNDO;
+            action = "undo";
             repeat = (-p_undo.beadIndex) + 1;
         }
         const c = g.app.windowList[this.frameIndex].c;

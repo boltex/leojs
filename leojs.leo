@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737313138313932332e3230330a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313737343833373630322e3030330a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -13942,10 +13942,10 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
     if (p_undo.contextValue !== Constants.CONTEXT_FLAGS.UNDO_BEAD) {
         return Promise.resolve();
     }
-    let action = "redo"; // Constants.LEOBRIDGE.REDO;
+    let action = "redo";
     let repeat = p_undo.beadIndex;
     if (p_undo.beadIndex &lt;= 0) {
-        action = "undo"; // Constants.LEOBRIDGE.UNDO;
+        action = "undo";
         repeat = (-p_undo.beadIndex) + 1;
     }
     const c = g.app.windowList[this.frameIndex].c;
