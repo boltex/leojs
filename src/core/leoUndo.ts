@@ -147,8 +147,7 @@ export class Undoer {
     constructor(c: Commands) {
         this.c = c;
         this.granularity = ''; // Set in reloadSettings.
-        this.max_undo_stack_size = c.config.getInt('max-undo-stack-size') || 0;
-
+        this.max_undo_stack_size = c.config.getInt('max-undo-stack-size') || 99; // Default to 99 for safety.
         this.reloadSettings();
     }
     //@+node:felix.20211026230613.7: *4* u.reloadSettings
