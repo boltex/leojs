@@ -3494,14 +3494,6 @@ export class LeoUI extends NullGui {
                             // ! Compensate for reveal that steals the focus.
                             if (this._refreshType.goto) {
                                 this._refreshType.goto = false;
-                                // let w_viewName: string;
-                                // const gotoView = this.leoGotoProvider.getLastGotoView();
-                                // if (gotoView && gotoView.title === "Goto") {
-                                //     w_viewName = Constants.GOTO_ID;
-                                // } else {
-                                //     w_viewName = Constants.GOTO_EXPLORER_ID;
-                                // }
-                                // void vscode.commands.executeCommand(w_viewName + ".focus");
                                 let w_panelID = '';
                                 if (this._lastTreeView === this._leoTreeExView) {
                                     w_panelID = Constants.FIND_EXPLORER_ID;

@@ -3460,7 +3460,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737343833373630322e3030330a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313737343932313530372e3836310a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -10768,7 +10768,7 @@ export interface ChooseRClickItem extends vscode.QuickPickItem {
 }
 
 </t>
-<t tx="felix.20220505221929.1" _mod_time="46313732313539313833332e3139330a2e">import * as vscode from "vscode";
+<t tx="felix.20220505221929.1" _mod_time="46313737343932313532322e3130350a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
 import { QuickSearchController } from "./core/quicksearch";
@@ -10802,10 +10802,6 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
             this.getChildren(); // THIS KEEPS THE DATA UP TO DATE
             this._leoUI.setGotoContent();
         }, this);
-    }
-
-    public getLastGotoView(): vscode.TreeView&lt;LeoGotoNode&gt; | undefined {
-        return this._lastGotoView;
     }
 
     public resetSelectedNode(p_node?: LeoGotoNode): void {
@@ -12841,14 +12837,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                         // ! Compensate for reveal that steals the focus.
                         if (this._refreshType.goto) {
                             this._refreshType.goto = false;
-                            // let w_viewName: string;
-                            // const gotoView = this.leoGotoProvider.getLastGotoView();
-                            // if (gotoView &amp;&amp; gotoView.title === "Goto") {
-                            //     w_viewName = Constants.GOTO_ID;
-                            // } else {
-                            //     w_viewName = Constants.GOTO_EXPLORER_ID;
-                            // }
-                            // void vscode.commands.executeCommand(w_viewName + ".focus");
                             let w_panelID = '';
                             if (this._lastTreeView === this._leoTreeExView) {
                                 w_panelID = Constants.FIND_EXPLORER_ID;
