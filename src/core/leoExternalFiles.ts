@@ -725,6 +725,14 @@ export class ExternalFilesController {
         }
     }
 
+    //@+node:felix.20260401212949.2: *4* efc.reloadSettings
+    /**
+     * Clear the enabled_d dict
+     */
+    public reloadSettings(): void {
+        this.enabled_d.clear();
+    }
+
     //@+node:felix.20230503004807.20: *4* efc.shut_down
     /**
      * Destroy all temporary open-with files.
