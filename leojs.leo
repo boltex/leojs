@@ -4655,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737343831343234372e3737310a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737353137363236372e3836360a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -15909,7 +15909,7 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231219233411.1"></t>
-<t tx="felix.20231219233427.1" _mod_time="46313732313730313736322e3735320a2e">// @ts-check
+<t tx="felix.20231219233427.1" _mod_time="46313737353234363238312e3834360a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -16355,9 +16355,6 @@ set leoEditHeadline(p_value: boolean) {
     function navKeyHandler(p_event) {
         // Handles up/down home/end pgUp/pgDown
         // for GOTO PANE navigation under the nav input
-        // if(gotoPaneContainer){
-        //     gotoPaneContainer
-        // }
         if (!p_event) {
             p_event = window.event;
         }
