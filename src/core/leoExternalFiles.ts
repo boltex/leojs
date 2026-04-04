@@ -323,6 +323,9 @@ export class ExternalFilesController {
         }
         c.redraw();
         // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
+        void vscode.window.showInformationMessage(
+            'Changes to external files were detected. Nodes refreshed.'
+        );
         g.app.gui.fullRefresh(true);
 
     }
@@ -346,6 +349,9 @@ export class ExternalFilesController {
             // ! LEOJS : FORCE GUI REFRESH AFTER A Change of opened document!
             g.app.gui.fullRefresh(true);
             g.es_print(`reloaded ${w_path}`);
+            void vscode.window.showInformationMessage(
+                'Changes to Leo files were detected. Reloaded.'
+            );
         }
     }
     //@+node:felix.20230503004807.10: *5* efc.idle_check_open_with_file & helper
