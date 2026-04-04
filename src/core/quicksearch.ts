@@ -8,9 +8,17 @@
 import * as g from './leoGlobals';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
+import { new_cmd_decorator } from './decorators';
 //@-<< quicksearch imports >>
 //@+others
-//@+node:felix.20221105222427.1: ** class QuickSearchController (leoserver.py)
+//@+node:felix.20260403231649.1: ** quicksearch cmd
+/**
+ * Command decorator for the QuickSearchController class.
+ */
+function cmd(p_name: string, p_doc: string) {
+    return new_cmd_decorator(p_name, p_doc, ['c', 'QuickSearchController']);
+}
+//@+node:felix.20221105222427.1: ** class QuickSearchController
 export class QuickSearchController {
     public c: Commands;
     public lw: string[];
