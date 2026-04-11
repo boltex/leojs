@@ -1136,7 +1136,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737343735343437342e3633380a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737353934343435392e3435370a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -1159,7 +1159,7 @@ export async function deactivate(): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201208223553.1" _mod_time="46313737343239363031372e3436350a2e">import * as vscode from 'vscode';
+<t tx="felix.20201208223553.1" _mod_time="46313737353934343138352e3935330a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 import { Icon } from './types';
 import { LeoUI } from './leoUI';
@@ -1524,7 +1524,7 @@ public refreshTreeRoot(): void {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
     }
     const w_icon: number =
-        (+(w_ui.config.invertNodeContrast !== !element.isDirty()) &lt;&lt; 3) |
+        (+(w_ui.config.invertNodeContrast !== !!element.isDirty()) &lt;&lt; 3) |
         (+element.isCloned() &lt;&lt; 2) |
         (+element.isMarked() &lt;&lt; 1) |
         +element.v.hasBody();
@@ -4655,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737353838323330362e3532380a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737353934343530322e3733330a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -21865,7 +21865,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
 - Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
-- Fixed node icon dirty/clean outline contrast to match Leo's defaults.
+- Improved 'folder' icon image.
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
 
 

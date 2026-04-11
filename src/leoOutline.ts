@@ -78,7 +78,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
         }
         const w_icon: number =
-            (+(w_ui.config.invertNodeContrast !== !element.isDirty()) << 3) |
+            (+(w_ui.config.invertNodeContrast !== !!element.isDirty()) << 3) |
             (+element.isCloned() << 2) |
             (+element.isMarked() << 1) |
             +element.v.hasBody();
