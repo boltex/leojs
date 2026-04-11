@@ -4655,7 +4655,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737353332373732312e3137330a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737353838323330362e3532380a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -6907,7 +6907,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "elementtree": "^0.1.7",
 "jszip": "^3.10.1",
 "ksuid": "^3.0.0",
-"lodash": "^4.17.21",
+"lodash": "^4.18",
 "md5": "^2.3.0",
 "open": "^8.4.2",
 "os-browserify": "^0.3.0",
