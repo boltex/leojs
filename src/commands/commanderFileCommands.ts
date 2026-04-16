@@ -70,7 +70,7 @@ export class CommanderFileCommands {
         const lm = g.app.loadManager!;
         // Save any changes so they can be seen.
         for (let c2 of g.app.commanders()) {
-            if (c2.isChanged()) {
+            if (c2.isChanged() && c2.mFileName) {
                 await c2.save();
             }
         }
