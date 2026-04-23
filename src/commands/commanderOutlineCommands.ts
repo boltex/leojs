@@ -1278,7 +1278,10 @@ export class CommanderOutlineCommands {
                 break;
             } else {
                 wrapped = true;
-                p = c.rootPosition()!;
+                p = c.rootPosition()!; // Get last node with while-loop below.
+                while (p && p.__bool__() && p.hasThreadNext()) {
+                    p.moveToThreadNext();
+                }
             }
         }
         if (!p || !p.__bool__()) {
