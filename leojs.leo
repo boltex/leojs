@@ -860,9 +860,9 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 </t>
 <t tx="felix.20201208214250.2"></t>
-<t tx="felix.20201208214319.1" _mod_time="46313737333533383038322e3430390a2e">@language md
+<t tx="felix.20201208214319.1" _mod_time="46313737373030313735302e3133340a2e">@language md
 @tabwidth -4
-# ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
+# ![Leo Editor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
 &gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.
 
@@ -1095,6 +1095,11 @@ If you would like to modify and build this project yourself, see [CONTRIBUTING.m
 
 See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).
+
+## Other Leo Editor implementations and IDE integrations ports
+
+-   [Leo-Web](https://boltex.github.io/leo-web/) A browser-based TypeScript implementation of the Leo Editor that uses the browser's File System API for local file access.
+-   [LeoInteg](https://marketplace.visualstudio.com/items?itemName=boltex.leointeg) A VSCode extension that integrates the original Leo Editor.
 
 ### _Thanks to_
 
