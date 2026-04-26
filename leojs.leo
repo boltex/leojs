@@ -18228,7 +18228,7 @@ public async openAside(p?: Position): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20240401213604.1" _mod_time="46313732313539313833332e3138390a2e">import * as vscode from "vscode";
+<t tx="felix.20240401213604.1" _mod_time="46313737373233333730342e30380a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import * as path from 'path';
@@ -18552,6 +18552,11 @@ public fireRefreshFile(p_gnx: string): void {
                 this._lastGnx = w_gnx;
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                if (!this._openedBodiesInfo[this._lastGnx]) {
+                    console.warn('DETACHED readFile: ERROR File not in _openedBodiesGnx when trying to set lastBodyLength! gnx: ', w_gnx);
+                    this.setNewBodyUriTime(p_uri, w_v); // add it to openedBodies if not already there, to avoid problems with stat later. 
+                    // Should be in _openedBodiesGnx if readFile is called but just in case...
+                }
                 this._openedBodiesInfo[this._lastGnx].lastBodyLength = w_buffer.byteLength;
                 return w_buffer;
             } else {
