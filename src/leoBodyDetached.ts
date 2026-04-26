@@ -225,6 +225,11 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
                     this._lastGnx = w_gnx;
                     this._lastBodyData = w_v.b;
                     const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                    if (!this._openedBodiesInfo[this._lastGnx]) {
+                        console.warn('DETACHED readFile: ERROR File not in _openedBodiesGnx when trying to set lastBodyLength! gnx: ', w_gnx);
+                        this.setNewBodyUriTime(p_uri, w_v); // add it to openedBodies if not already there, to avoid problems with stat later. 
+                        // Should be in _openedBodiesGnx if readFile is called but just in case...
+                    }
                     this._openedBodiesInfo[this._lastGnx].lastBodyLength = w_buffer.byteLength;
                     return w_buffer;
                 } else {
