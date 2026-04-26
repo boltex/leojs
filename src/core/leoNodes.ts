@@ -2250,10 +2250,6 @@ export class Position {
             if (!!newNode && sib.__eq__(newNode)) {
                 // Adjust newNode._childIndex if newNode is a following sibling of p.
                 newNode._childIndex -= 1;
-                console.log(
-                    'HAD TO LOWER _childIndex!, its now ',
-                    newNode._childIndex
-                );
                 break;
             }
         }
