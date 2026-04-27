@@ -571,6 +571,9 @@ export class NullGui extends LeoGui {
 
     public launchRefresh(): void { }
     public fullRefresh(p_keepFocus?: boolean): void { }
+    public findQuick(p_string?: string, p_forceEnter?: boolean): Thenable<unknown> {
+        return Promise.resolve();
+    }
     public showNavResults(): void { }
 
     public replaceClipboardWith(s: string): Thenable<string> {
