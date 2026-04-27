@@ -1141,7 +1141,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737353934343435392e3435370a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737373236313836382e31390a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21877,6 +21877,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
 - Improved 'folder' icon image.
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
+- Added commands for the quick-find methods 'history', 'timeline', 'find-quick-selected', 'changed' and 'marked'.
 
 
 </t>
