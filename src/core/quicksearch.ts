@@ -16,7 +16,7 @@ import { new_cmd_decorator } from './decorators';
  * Command decorator for the QuickSearchController class.
  */
 function cmd(p_name: string, p_doc: string) {
-    return new_cmd_decorator(p_name, p_doc, ['c', 'QuickSearchController']);
+    return new_cmd_decorator(p_name, p_doc, ['c', 'quicksearchController']);
 }
 //@+node:felix.20221105222427.1: ** class QuickSearchController
 export class QuickSearchController {
