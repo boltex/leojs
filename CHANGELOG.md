@@ -18,8 +18,8 @@
 - Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
 - Improved 'folder' icon image.
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
+- Fixed goto-prev-marked command.
 - Added commands for the quick-find methods 'history', 'timeline', 'find-quick-selected', 'changed' and 'marked'.
-
 
 ## 1.0.14
 
