@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20260428003551.1"><vh>1.0.16</vh></v>
 <v t="felix.20251014222608.1"><vh>1.0.15</vh></v>
 <v t="felix.20250622002355.1"><vh>1.0.14</vh></v>
 <v t="felix.20250616003053.1"><vh>1.0.13</vh></v>
@@ -1141,7 +1142,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737373236333436352e3339370a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737373335303936322e3939390a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4660,13 +4661,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737373236313230322e3336380a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737373335303936332e3034320a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -19543,7 +19544,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313737343735323537312e3330330a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313737373335313030312e3838360a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19580,7 +19581,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.15&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.16&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21879,6 +21880,11 @@ set leoAtLeoFile(p_value: boolean) {
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
 - Fixed goto-prev-marked command.
 - Added commands for the quick-find methods 'history', 'timeline', 'find-quick-selected', 'changed' and 'marked'.
+
+</t>
+<t tx="felix.20260428003551.1">## 1.0.16
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
