@@ -40,16 +40,7 @@ function Quote({ quote, author }) {
   );
 }
 
-export default function Home() {
-  const { siteConfig } = useDocusaurusContext();
-  const otherQuotes = siteConfig.customFields.quotesList;
-
-  return (
-    <Layout
-      title={`Leo Editor for VSCode`}
-      description="The literate editor with outline JavaScript implementation">
-      <HomepageHeader />
-      <main>
+/*
         <h3 className={clsx(styles.subtitle)}>
           <i>‟Leo is a fundamentally different way of organizing data, programs and scripts.”</i>
         </h3>
@@ -74,6 +65,22 @@ export default function Home() {
         </p>
 
         <h3 className={clsx(styles.subtitle)}><span className={clsx(styles.homeQuote)}>LeoJS is a JavaScript implementation designed as an extension for VSCode.</span>
+        </h3>
+*/
+
+export default function Home() {
+  const { siteConfig } = useDocusaurusContext();
+  const otherQuotes = siteConfig.customFields.quotesList;
+
+  return (
+    <Layout
+      title={`Leo Editor for VSCode`}
+      description="The literate editor with outline JavaScript implementation">
+      <HomepageHeader />
+      <main>
+        <h3 className={clsx(styles.subtitle)}>
+          <i>‟Leo is a fundamentally different way of organizing data, programs and scripts.”</i><br></br>
+          <span className={clsx(styles.homeQuote)}>LeoJS is a JavaScript implementation designed as an extension for VSCode.</span>
         </h3>
 
         <HomepageFeatures featureId="0" />
