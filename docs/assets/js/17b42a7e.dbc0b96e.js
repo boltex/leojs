@@ -976,6 +976,11 @@ function _createMdxContent(props) {
       }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.li, {
         children: "LeoInteg (and leoserver.py) supports websockets."
       }), "\n"]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
+      children: ["Mar 22, 2026: Félix releases ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
+        href: "https://boltex.github.io/leo-web/",
+        children: "LeoWeb"
+      }), ", a browser-based version of the Leo Editor. This project is a TypeScript implementation, scriptable in either Javascript or Typescript, that uses the browser's File System API for local file access."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "acknowledgements",
       children: "Acknowledgements"
