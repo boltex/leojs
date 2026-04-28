@@ -311,7 +311,7 @@ export class Position {
     v: VNode;
     _childIndex: number;
     stack: StackEntry[];
-    _isRoot: boolean = false;
+    _isRoot: boolean = false; // * Used to prevent hoisting on SINGLE top node by the UI only.
     at_directive_pattern: RegExp = /@([\w]+)/gm;
 
     //@+others
@@ -1274,9 +1274,11 @@ export class Position {
     /**
      * Return True if p is visible in c's outline.
      */
-    public isVisible(c: Commands): boolean {
+    public isVisible(c = this.v?.context): boolean {
         const p: Position = this;
-
+        if (!c) {
+            return false;
+        }
         function visible(p: Position, root?: Position) {
             for (let parent of p.parents(false)) {
                 if (parent.__bool__() && parent.__eq__(root!)) {
@@ -2248,10 +2250,6 @@ export class Position {
             if (!!newNode && sib.__eq__(newNode)) {
                 // Adjust newNode._childIndex if newNode is a following sibling of p.
                 newNode._childIndex -= 1;
-                console.log(
-                    'HAD TO LOWER _childIndex!, its now ',
-                    newNode._childIndex
-                );
                 break;
             }
         }
@@ -2465,7 +2463,7 @@ export class Position {
         //@+<< validate x ivar >>
         //@+node:felix.20210126001920.19: *5* << validate x ivar >>
         if (!p.v && pv && pv.__bool__()) {
-            this.invalidOutline('Empty t');
+            this.invalidOutline('Empty p.v');
         }
         //@-<< validate x ivar >>
         // Recursively validate all the children.
@@ -3659,6 +3657,42 @@ export class VNode {
         }
     }
 
+    //@+node:felix.20210116003530.1: *4* v.setAllAncestorAtFileNodesDirty
+    /**
+     * Original idea by Bитaлиje Mилoшeвић (Vitalije Milosevic).
+     * #4565: Rewritten by EKR to use the to_do_set kwarg.
+     */
+    public setAllAncestorAtFileNodesDirty(to_do_set?: Set<VNode>): void {
+        const v: VNode = this;
+        // Init seen and to_do_list.
+        const seen: Set<VNode> = new Set([v.context.hiddenRootNode]);
+        let to_do_list: VNode[] = to_do_set ? Array.from(to_do_set) : [v];
+
+        if (to_do_set) {
+            for (const v2 of to_do_set) {
+                to_do_list.push(...v2.parents);
+            }
+        }
+        to_do_list = Array.from(new Set(to_do_list));
+
+        // The main loop.
+        while (to_do_list.length > 0) {
+            const v2 = to_do_list.pop()!;
+            seen.add(v2);
+            if (v2.isAnyAtFileNode()) {
+                v2.setDirty();
+            } else {
+                // Nested @<file> nodes are no longer valid.
+                for (const parent_v of v2.parents) {
+                    if (!seen.has(parent_v)) {
+                        to_do_list.push(parent_v);
+                    }
+                }
+            }
+
+        }
+    }
+
     //@+node:felix.20210115195450.21: *4* v.setBodyString & v.setHeadString
     public setBodyString(s: string): void {
         const v: VNode = this;
@@ -3694,34 +3728,6 @@ export class VNode {
         const v: VNode = this;
         v.selectionStart = start;
         v.selectionLength = length;
-    }
-
-    //@+node:felix.20210116003530.1: *3* v.setAllAncestorAtFileNodesDirty & helpers
-    /**
-     * Original idea by Bитaлиje Mилoшeвић (Vitalije Milosevic).
-     * Modified by EKR.
-     * Translated by Félix Malboeuf
-     */
-    public setAllAncestorAtFileNodesDirty(): void {
-        const v: VNode = this;
-        const hiddenRootVnode: VNode = v.context.hiddenRootNode;
-
-        function* v_and_parents(v: VNode): Generator<VNode> {
-            if (v.fileIndex !== hiddenRootVnode.fileIndex) {
-                yield v;
-                for (let parent_v of v.parents) {
-                    yield* v_and_parents(parent_v);
-                }
-            }
-        }
-
-        // There is no harm in calling v2.setDirty redundantly.
-
-        for (let v2 of v_and_parents(v)) {
-            if (v2.isAnyAtFileNode()) {
-                v2.setDirty();
-            }
-        }
     }
 
     //@+node:felix.20210116003538.1: *3* v.Inserting & cloning

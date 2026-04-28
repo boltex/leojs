@@ -6,8 +6,8 @@ import { RClick } from "./core/mod_scripting";
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 export interface ConfigMembers {
-    checkForChangeExternalFiles: string;
-    defaultReloadIgnore: string;
+    // checkForChangeExternalFiles: string;
+    // defaultReloadIgnore: string;
     sessionPerWorkspace: boolean;
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
@@ -74,7 +74,7 @@ export const enum Focus {
  */
 export const enum RevealType {
     NoReveal = 0, // Re-use the old treeId with "NoReveal" for the selected node.
-    Reveal,
+    Reveal, // ! 'Reveal' is (and should) never be used! It is only here for clarity and completeness.
     RevealSelect,
     RevealSelectFocus
 }

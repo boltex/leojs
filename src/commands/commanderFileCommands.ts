@@ -9,31 +9,13 @@ import * as g from '../core/leoGlobals';
 import { commander_command } from '../core/decorators';
 import { Position } from '../core/leoNodes';
 import { Commands } from '../core/leoCommands';
-import { Bead, Undoer } from '../core/leoUndo';
+import { Undoer } from '../core/leoUndo';
 import { PreviousSettings } from '../core/leoApp';
 import { NullGui } from '../core/leoGui';
 import { LeoImportCommands, MORE_Importer } from '../core/leoImport';
 import { ScriptingController } from '../core/mod_scripting';
 
 //@+others
-//@+node:felix.20220105223215.1: ** function: import_txt_file
-/**
- * Import the .txt file into a new node.
- */
-async function import_txt_file(c: Commands, fn: string): Promise<void> {
-    const u = c.undoer;
-    g.setGlobalOpenDir(fn);
-    const undoData = u.beforeInsertNode(c.p);
-    const p = c.p.insertAfter();
-    p.h = `@edit ${g.relativeDirectory(c, fn)}`;
-    let s: string | undefined;
-    let e: any;
-    [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
-    p.b = s!;
-    u.afterInsertNode(p, 'Import', undoData);
-    c.setChanged();
-    c.redraw(p);
-}
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
 export class CommanderFileCommands {
     //@+others
@@ -88,7 +70,7 @@ export class CommanderFileCommands {
         const lm = g.app.loadManager!;
         // Save any changes so they can be seen.
         for (let c2 of g.app.commanders()) {
-            if (c2.isChanged()) {
+            if (c2.isChanged() && c2.mFileName) {
                 await c2.save();
             }
         }
@@ -201,7 +183,7 @@ export class CommanderFileCommands {
                 await new MORE_Importer(c).import_file(fn); // #1522.
             } else if (ext === 'txt') {
                 // #1522: Create an @edit node.
-                await import_txt_file(c, fn);
+                await c.import_txt_file(fn);
             } else {
                 // Make *sure* that parent.b is empty.
                 const last = c.lastTopLevel();
@@ -229,6 +211,26 @@ export class CommanderFileCommands {
     g.command_alias('importNowebFiles', importAnyFile)
     g.command_alias('importTabFiles', importAnyFile)
     */
+    //@+node:felix.20251201225004.1: *4* c_file.import_txt_file
+    /**
+     * Import the .txt file into a new node.
+     */
+    @commander_command('import-text-file', 'Import the .txt file into a new node.')
+    public async import_txt_file(this: Commands, fn: string): Promise<void> {
+        const c: Commands = this;
+        const u = c.undoer;
+        g.setGlobalOpenDir(fn);
+        const undoData = u.beforeInsertNode(c.p);
+        const p = c.p.insertAfter();
+        p.h = `@edit ${g.relativeDirectory(c, fn)}`;
+        let s: string | undefined;
+        let e: any;
+        [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
+        p.b = s!;
+        u.afterInsertNode(p, 'Import', undoData);
+        c.setChanged();
+        c.redraw(p);
+    }
     //@+node:felix.20220105210716.9: *4* c_file.new
     @commander_command('file-new', 'Create a new Leo window.')
     @commander_command('new', 'Create a new Leo window.')
@@ -427,7 +429,11 @@ export class CommanderFileCommands {
         'refresh-from-disk',
         'Refresh an @<file> node from disk.'
     )
-    public async refreshFromDisk(this: Commands, p?: Position): Promise<void> {
+    public async refreshFromDisk(
+        this: Commands,
+        p?: Position,
+        silent = true  // No longer used.
+    ): Promise<void> {
         const c: Commands = this;
         const at = c.atFileCommands;
         if (!p) {
@@ -459,7 +465,7 @@ export class CommanderFileCommands {
         await at.readFileAtPosition(p);  // Leo 6.8.6.
 
         // #4385: Handle updated @clean nodes.
-        const update_p = at.clone_all_changed_vnodes();
+        let update_p = at.clone_all_changed_vnodes();
         if (update_p && update_p.v) {
             // Set the current position during initial redraws.
             c.db['current_position'] = update_p.archivedPosition()
@@ -468,12 +474,11 @@ export class CommanderFileCommands {
             update_p.expand();
             c.selectPosition(update_p);
         } else {
-            c.selectPosition(p);
+            update_p = p; // #4495: Do *not* change the position!
         }
 
-        at.changed_roots = [];
-
         // Create the 'Recovered Nodes' tree.
+        at.changed_roots = [];
         c.fileCommands.handleNodeConflicts();
         c.setChanged();
         c.redraw();
@@ -874,45 +879,36 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.25: *4* c_file.flattenOutlineToNode
     @commander_command(
         'flatten-outline-to-node',
-        'Append the body text of all descendants of the selected node to the body text of the selected node.'
+        'Append the body text of all descendants of the selected node to the body text of a new (last) top-level node.'
     )
     public flattenOutlineToNode(this: Commands): void {
         const c: Commands = this;
         const root: Position = this.p;
         const u: Undoer = this.undoer;
 
+        const current = c.p;
+        const undoType = 'flatten-outline-to-node';
+
         if (!root.hasChildren()) {
             return;
         }
 
-        const language: string = c.getLanguage(root);
-
-        let single: string;
-        let start: string;
-        let end: string;
-
-        if (language) {
-            [single, start, end] = g.set_delims_from_language(language);
-        } else {
-            [single, start, end] = ['#', '', ''];
-        }
-        const bunch: Bead = u.beforeChangeNodeContents(root);
-        const aList: string[] = [];
-
-        for (let p of root.subtree()) {
-            if (single) {
-                aList.push(`\n\n===== ${single} ${p.h}\n\n`);
-            } else {
-                aList.push(`\n\n===== ${start} ${p.h} ${end}\n\n`);
-            }
+        u.beforeChangeGroup(current, undoType);
+        const bunch = u.beforeInsertNode(current);
+        const aList = [];
+        for (const p of root.self_and_subtree()) {
             if (p.b.trim()) {
-                const lines: string[] = g.splitLines(p.b);
-                aList.push(...lines);
+                aList.push(`===== ${p.h}\n\n`);
+                aList.push(`${p.b.trim()}'\n\n`);
             }
         }
-
-        root.b = root.b.trimEnd() + '\n' + aList.join('').trimEnd() + '\n';
-        u.afterChangeNodeContents(root, 'flatten-outline-to-node', bunch);
+        const p = c.lastTopLevel().insertAfter();
+        p.h = `Flattened ${root.h}`;
+        p.b = aList.join('').trim() + '\n';
+        u.afterInsertNode(p, undoType, bunch);
+        u.afterChangeGroup(current, undoType);
+        c.selectPosition(p);
+        c.redraw(p);
     }
     //@+node:felix.20220105210716.26: *4* c_file.outlineToCWEB
     @commander_command(
@@ -1170,7 +1166,7 @@ export class CommanderFileCommands {
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
                 return g.blue('wrote:', fileName);
             } catch (iOError) {
-                g.error('can not write %s', fileName);
+                g.error(`can not write ${fileName}`);
             }
         }
     }
@@ -1222,7 +1218,7 @@ export class CommanderFileCommands {
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
                 g.blue('wrote:', fileName);
             } catch (IOError) {
-                g.error('can not write %s', fileName);
+                g.error(`can not write ${fileName}`);
             }
         }
     }

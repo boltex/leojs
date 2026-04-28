@@ -30,7 +30,6 @@ export class BaseTestImporter extends LeoUnitTest {
     public setUp(): void {
         super.setUp();
         g.app.loadManager!.createAllImporterData();
-        g.app.write_black_sentinels = false;
     }
 
     //@+others
@@ -2233,6 +2232,39 @@ suite('TestMarkdown', () => {
             ],
         ];
         await self.new_run_test(s, expected_results);
+    });
+    //@+node:felix.20260314220140.1: *3* TestMarkdown.test_markdown_importer_blank lines
+    test('test_markdown_importer_blank_lines', async () => {
+
+
+        // Must be in standard form, with a space after '#'.
+          const s = `
+            # Chapter 1: one
+
+            This is the first chapter
+
+            ## 1.1 Something
+
+            This is something
+
+            # Chapter 2: two
+
+            Welcome to chapter 2
+        `;
+
+
+        const expected_results: [number, string, string][] = [
+            [
+                0,
+                '',  // Ignore the first headline.
+                '@language md\n@tabwidth -4\n',
+            ],
+            [1, 'Chapter 1: one', '\nThis is the first chapter\n\n'],
+            [2, '1.1 Something', '\nThis is something\n\n'],
+            [1, 'Chapter 2: two', '\nWelcome to chapter 2\n'],
+        ];
+        await self.new_run_test(s, expected_results)  // check=False)
+
     });
     //@+node:felix.20230922003511.5: *3* TestMarkdown.test_markdown_importer_implicit_section
     test('test_markdown_importer_implicit_section', async () => {

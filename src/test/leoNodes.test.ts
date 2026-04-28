@@ -1028,6 +1028,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_p_deletePositionsInList', () => {
         const c = self.c;
         let p = self.c.p;
+        const u = c.undoer;
         const root = p.insertAsLastChild();
         root.h = 'root';
         // Top level;
@@ -1058,6 +1059,10 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         }
         assert.strictEqual(aList.length, 6);
         c.deletePositionsInList(aList);
+        for (let i = 0; i < 3; i++) {
+            u.undo();
+            u.redo();
+        }
         c.redraw();
     });
     //@+node:felix.20230530211011.59: *5* TestNodes.test_p_isRootPosition

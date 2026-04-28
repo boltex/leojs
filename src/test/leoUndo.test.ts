@@ -69,36 +69,33 @@ suite('Test Undo', () => {
     test('test_addComments', () => {
         const c = self.c;
 
-    });
-    /* def test_addComments(self):
-        c = self.c
-        before = textwrap.dedent("""\
+        const before = g.dedent(
+            `\
             @language python
 
             def addCommentTest():
-
                 if 1:
                     a = 2
                     b = 3
-
                 pass
-    """)
-        after = textwrap.dedent("""\
+            `
+        );
+        const after = g.dedent(
+            `\
             @language python
 
             def addCommentTest():
-
                 # if 1:
-                    # a = 2
-                    # b = 3
-
+                #     a = 2
+                #     b = 3
                 pass
-    """)
-        i = before.find('if 1')
-        j = before.find('b = 3')
-        func = c.addComments
-        self.runTest(before, after, i, j, func)
-     */
+        `
+        );
+        const i = before.indexOf('if 1');
+        const j = before.indexOf('b = 3');
+        const func = c.addComments;
+        runTest(self, before, after, i, j, func);
+    });
     //@+node:felix.20220129225102.4: *3* TestUndo.test_convertAllBlanks
     test('test_convertAllBlanks', () => {
         const c = self.c;

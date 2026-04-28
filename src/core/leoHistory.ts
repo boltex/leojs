@@ -92,7 +92,7 @@ export class NodeHistory {
             this.update(p);
             this.select(p, chapter);
         } else {
-            delete this.beadList[this.beadPointer];
+            this.beadList.splice(this.beadPointer, 1);
             this.beadPointer += 1;
         }
     }

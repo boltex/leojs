@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
@@ -279,7 +278,6 @@ export class LeoStates {
     }
 
     constructor(
-        private _context: vscode.ExtensionContext,
         private _leoJs: LeoUI
     ) {
         this.qLastContextChange = Promise.resolve(); // Temporary.

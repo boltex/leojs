@@ -57,10 +57,7 @@ suite('Test cases for gotoCommands.ts', () => {
             }
 
         }
-        root.b = '@language python\n' +
-            'before\n' +
-            '@others\n' +
-            'after\n';
+        root.b = '@language python\nbefore\n@others\nafter\n';
 
         //@-<< create test tree >>
 
@@ -102,7 +99,7 @@ suite('Test cases for gotoCommands.ts', () => {
         // g.printObj(clean_contents, tag='No sentinels')
 
         // Test 1: A strong test of g.is_invisible_sentinel.
-        assert.ok(g.compareArrays(real_clean_contents, clean_contents));
+        assert.ok(g.compareArrays(real_clean_contents, clean_contents, true), "real_clean_contents and clean_contents differ!");
 
 
         //@+<< Test 2: test the helper for show-file-line >>

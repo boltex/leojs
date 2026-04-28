@@ -444,9 +444,6 @@
     function navKeyHandler(p_event) {
         // Handles up/down home/end pgUp/pgDown
         // for GOTO PANE navigation under the nav input
-        // if(gotoPaneContainer){
-        //     gotoPaneContainer
-        // }
         if (!p_event) {
             p_event = window.event;
         }

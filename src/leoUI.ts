@@ -299,7 +299,7 @@ export class LeoUI extends NullGui {
         this.idleTimeClass = IdleTime;
 
         // * Setup States
-        this.leoStates = new LeoStates(_context, this);
+        this.leoStates = new LeoStates(this);
 
         // * Get configuration settings
         this.config = new Config(_context, this);
@@ -936,7 +936,8 @@ export class LeoUI extends NullGui {
      */
     private _triggerGetStates(): void {
 
-        const c = g.app.windowList[this.frameIndex].c;
+        const frame = g.app.windowList[this.frameIndex];
+        const c = frame.c;
 
         if (this._refreshType.states) {
             this._refreshType.states = false;
@@ -979,7 +980,7 @@ export class LeoUI extends NullGui {
         }
         // Set leoChanged and leoOpenedFilename
         this.leoStates.leoChanged = c.changed;
-        this.leoStates.leoOpenedFileName = c.fileName();
+        this.leoStates.leoOpenedFileName = frame.getTitle();
 
         this.refreshBodyStates(); // Set language and wrap states, if different.
 
@@ -1037,13 +1038,12 @@ export class LeoUI extends NullGui {
 
     /**
      * * A Leo file was opened: setup UI accordingly.
-     * @param p_openFileResult Returned info about currently opened and editing document
      */
     private _setupOpenedLeoDocument(): void {
         this._needLastSelectedRefresh = true;
-
-        const c = g.app.windowList[this.frameIndex].c;
-        this.leoStates.leoOpenedFileName = c.fileName();
+        const frame = g.app.windowList[this.frameIndex];
+        const c = frame.c;
+        this.leoStates.leoOpenedFileName = frame.getTitle();
         this.leoStates.leoChanged = c.changed;
 
         // * Startup flag
@@ -1398,7 +1398,7 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
         ) {
-
+            // WAS DETACHED BODY CHANGED?
             const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
             const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
             const w_hasBody = !!w_bodyText.length;
@@ -1577,10 +1577,11 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
         ) {
-            // this.bodyDetachedTextDocument = undefined;
+            // WAS A LEO BODY CHANGED? (same commander, but maybe different node)
+
             const c = g.app.windowList[this.frameIndex].c;
 
-            // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
+            // * There was a change on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
             this._bodyLastChangedDocument = p_textDocumentChange.document;
             this._bodyLastChangedDocumentSaved = false;
             this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
@@ -2147,14 +2148,14 @@ export class LeoUI extends NullGui {
 
     /**
      * * Setup global refresh options
-     * @param p_finalFocus Flag for focus to be placed in outline
+     * @param p_finalFocus kind of pane for focus to be placed after refresh, if any. If not specified, focus will be preserved.
      * @param p_refreshType Refresh flags for each UI part
     */
     public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveRange?: boolean): void {
         if (p_preserveRange) {
             this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
         }
-        // Set final "focus-placement" EITHER true or false
+        // Set final "focus-placement"
         this.finalFocus = p_finalFocus;
 
         if (p_refreshType) {
@@ -3493,14 +3494,6 @@ export class LeoUI extends NullGui {
                             // ! Compensate for reveal that steals the focus.
                             if (this._refreshType.goto) {
                                 this._refreshType.goto = false;
-                                // let w_viewName: string;
-                                // const gotoView = this.leoGotoProvider.getLastGotoView();
-                                // if (gotoView && gotoView.title === "Goto") {
-                                //     w_viewName = Constants.GOTO_ID;
-                                // } else {
-                                //     w_viewName = Constants.GOTO_EXPLORER_ID;
-                                // }
-                                // void vscode.commands.executeCommand(w_viewName + ".focus");
                                 let w_panelID = '';
                                 if (this._lastTreeView === this._leoTreeExView) {
                                     w_panelID = Constants.FIND_EXPLORER_ID;
@@ -3757,12 +3750,15 @@ export class LeoUI extends NullGui {
                 }
 
                 // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
-                const w_headline = p_node.h;
+                const w_headline = p_node.h.trim();
                 let openPromise;
-                if (w_headline.trim().startsWith("@url ")) {
+
+                if (w_headline.startsWith("@url ")) {
                     openPromise = g.openUrl(p_node);
-                } else if (w_headline.trim().startsWith("@mime ")) {
+                } else if (w_headline.startsWith("@mime ")) {
                     openPromise = g.open_mimetype(p_node.v.context, p_node);
+                } else if (w_headline.startsWith("unl:")) {
+                    openPromise = g.openUrlHelper(c, w_headline);
                 }
 
                 if (openPromise) {
@@ -3799,7 +3795,7 @@ export class LeoUI extends NullGui {
             }
         }
 
-        // Note: this.lastSelectedNode is set in gotSelectedNode and lastSelectedNode 
+        // Note: this.lastSelectedNode is set in gotSelectedNode and _tryApplyNodeToBody
         this.lastSelectedNodeTime = utils.performanceNow();
 
         await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
@@ -3977,7 +3973,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Leo Command
+     * Leo Command. This is used in "command bindings" from the UI to execute commands.
      * @param p_cmd Command name string
      * @param p_options: CommandOptions for the command
      */
@@ -4079,7 +4075,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Opens quickPick minibuffer pallette to choose from all commands in this file's Thenable
+     * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
      * @returns Promise from the command resolving - or resolve with undefined if cancelled
      */
     public async minibuffer(): Promise<unknown> {
@@ -4178,13 +4174,16 @@ export class LeoUI extends NullGui {
             quickPick.placeholder = Constants.USER_MESSAGES.MINIBUFFER_PROMPT;
             quickPick.matchOnDetail = true;
 
+            // Quickpic will resolve with user choice if used normally, but we add those listeners for special cases
             w_disposables.push(
+                // Selection starts empty, so onDidChangeSelection is used to detect choice
                 quickPick.onDidChangeSelection(selection => {
-                    if (selection[0]) {
+                    if (selection.length && selection[0]) {
                         resolve(selection[0]);
                         quickPick.hide();
                     }
                 }),
+                // User pressed enter, so we intercept in case of integer line goto 'easter egg'
                 quickPick.onDidAccept(accepted => {
                     if (/^\d+$/.test(quickPick.value)) {
                         // * Was an integer EASTER EGG
@@ -4213,18 +4212,22 @@ export class LeoUI extends NullGui {
                         quickPick.hide();
                     }
                 }),
+                // If value changes to an integer, clear the items to show 'easter egg' line goto
                 quickPick.onDidChangeValue(changed => {
                     if (/^\d+$/.test(changed)) {
                         if (quickPick.items.length) {
                             quickPick.items = [];
                         }
                     } else if (quickPick.items !== w_choices) {
+                        // was not an integer, and not already showing choices
                         quickPick.items = w_choices;
                     }
                 }),
+                // was canceled
                 quickPick.onDidHide(() => {
                     resolve(undefined);
                 }),
+                // just adding the quickPick itself to disposables for later disposal
                 quickPick
             );
             quickPick.show();
@@ -4245,7 +4248,7 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
+     * * Opens quickPick minibuffer command pallette from the user's session commands usage history
      * @returns Promise that resolves when the chosen command is placed on the front-end command stack
      */
     private async _showMinibufferHistory(p_choices: vscode.QuickPickItem[]): Promise<unknown> {
@@ -5772,6 +5775,7 @@ export class LeoUI extends NullGui {
 
         if (!this.leoStates.fileOpenedReady) {
             if (g.app.loadManager) {
+                g.app.numberOfUntitledWindows += 1; // To create unique names.
                 await g.app.loadManager.openEmptyLeoFile(this);
             }
         } else {
@@ -6320,10 +6324,10 @@ export class LeoUI extends NullGui {
         if (p_undo.contextValue !== Constants.CONTEXT_FLAGS.UNDO_BEAD) {
             return Promise.resolve();
         }
-        let action = "redo"; // Constants.LEOBRIDGE.REDO;
+        let action = "redo";
         let repeat = p_undo.beadIndex;
         if (p_undo.beadIndex <= 0) {
-            action = "undo"; // Constants.LEOBRIDGE.UNDO;
+            action = "undo";
             repeat = (-p_undo.beadIndex) + 1;
         }
         const c = g.app.windowList[this.frameIndex].c;

@@ -9,7 +9,6 @@ import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 import 'date-format-lite';
 import * as et from 'elementtree';
-import * as md5 from 'md5';
 import * as difflib from 'difflib';
 import * as JSZip from 'jszip';
 import * as path from 'path';

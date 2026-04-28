@@ -3314,7 +3314,7 @@ export class LeoFind {
     //@+node:felix.20221020232631.12: *5* find._fnm_search
     /**
      * Search this.work_s for this.find_text with present options.
-     * Returns (pos, newpos) or (undefined, dundefined).
+     * Returns (pos, newpos) or (undefined, undefined).
      */
     private _fnm_search(
         p: Position

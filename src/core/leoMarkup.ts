@@ -11,7 +11,9 @@ import { command } from './decorators';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 
-process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
+// ALREADY DONE IN extension.ts.
+// process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process 
+
 // Abbreviation.
 // StringIO = io.StringIO
 type File_List = string[] | undefined;
@@ -329,7 +331,7 @@ export class MarkupCommands {
 
                 this.output_file = ""; // RESET output_file.
                 // with open(i_path, 'w', encoding = 'utf-8', errors = 'replace') as this.output_file:
-                this.write_root(p);
+                await this.write_root(p);
                 await g.writeFile(this.output_file, 'utf-8', i_path);
                 i_paths.push(i_path);
 
@@ -520,10 +522,10 @@ export class MarkupCommands {
     /**
      * Process all nodes in an @adoc tree to self.output_file
      */
-    public write_root(root: Position): void {
+    public async write_root(root: Position): Promise<void> {
 
         // Write only the body of the root.
-        this.write_body(root);
+        await this.write_body(root);
         // Write all nodes of the tree, except ignored nodes.
         this.level_offset = this.compute_level_offset(root);
         this.root_level = root.level();
@@ -535,17 +537,33 @@ export class MarkupCommands {
                 p.moveToNodeAfterTree();
                 continue;
             }
+            const is_section_def = h.startsWith('<<') && h.endsWith('>>');
 
             if (g.match_word(h, 0, '@ignore-node')) {
                 p.moveToThreadNext();
                 continue;
             }
 
+            if (is_section_def) {
+                p.moveToNodeAfterTree();
+                continue;
+            }
+
             if (!g.match_word(h, 0, '@no-head')) {
                 this.write_headline(p);
             }
-            this.write_body(p);
-            p.moveToThreadNext();
+            await this.write_body(p);
+
+            // --- solve @others rendered below again ---
+            // check current node whether including @others or not
+            if (/^[ \t]*@others\b/m.test(p.b)) {
+                // including @others: g.getScript has got all the subnodes
+                // then skip all subnodes for not to be rendered
+                p.moveToNodeAfterTree();
+            } else {
+                // not including @others: mote to next node
+                p.moveToThreadNext();
+            }
         }
     }
     //@+node:ekr.20190515114836.1: *4* markup.compute_level_offset
@@ -568,11 +586,13 @@ export class MarkupCommands {
     /**
      * Write p.b
      */
-    public write_body(p: Position): void {
+    public async write_body(p: Position): Promise<void> {
 
         // We no longer add newlines to the start of nodes because
         // we write a blank line after all sections.
-        const s = this.remove_directives(p.b);
+        const script = await g.getScript(this.c, p, undefined, false, false);
+
+        const s = this.remove_directives(script);
         this.output_file += g.ensureTrailingNewlines(s, 2);
     }
     //@+node:ekr.20190515070742.47: *4* markup.write_headline
@@ -585,7 +605,8 @@ export class MarkupCommands {
             return;
         }
         let section;
-        const level = Math.max(0, this.level_offset + p.level() - this.root_level);
+        const effective_level = this.compute_effective_level(p);
+        const level = Math.max(0, this.level_offset + effective_level - this.root_level);
         if (this.kind === 'sphinx') {
             // For now, assume rST markup!
             // Hard coded characters. Never use '#' underlining.
@@ -625,6 +646,23 @@ export class MarkupCommands {
         }
         return result.join('');
     }
+    //@+node:felix.20260328153805.1: *4* compute_effective_level
+    /**
+     * Compute the effective level of a node, accounting for @ignore-node ancestors.
+     */
+    public compute_effective_level(p: Position): number {
+        let effective_level = p.level();
+        // Walk up the tree and subtract levels for @ignore-node ancestors
+        let current = p.parent();
+        while (current && current.__bool__() && current.level() >= this.root_level) {
+            if (g.match_word(current.h.trimEnd(), 0, '@ignore-node')) {
+                effective_level -= 1;
+            }
+            current = current.parent();
+        }
+        return effective_level;
+    }
+
     //@+node:ekr.20191006155051.1: *3* markup.commands
     public async adoc_command(preview = false, verbose = true,): Promise<File_List> {
         await this.markupInitPromise;

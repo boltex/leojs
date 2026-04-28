@@ -300,7 +300,7 @@ export class Commands {
         }
 
         // Create the gui frame.
-        const title = this.computeWindowTitle();
+        const title = this.computeTabTitle();
         if (!g.app.initing) {
             g.doHook("before-create-leo-frame", { c: c });
         }
@@ -415,7 +415,7 @@ export class Commands {
         }
         // Return 'untitled' or 'untitled{n}
         const n = g.app.numberOfUntitledWindows;
-        const n_s = n === 1 ? '' : n.toString();
+        const n_s = n < 2 ? '' : n.toString();
         const title = `untitled${n_s}`;
         return title;
     }
@@ -427,7 +427,7 @@ export class Commands {
     public computeWindowTitle(fileName?: string): string {
         const c: Commands = this;
 
-        // NO USE FOR BRANCHES IN LEOJS TITLES
+        // NO USE FOR BRANCHES IN TITLES
         // const branch = g.gitBranchName(fileName || c.fileName());
         // const branch_s = branch ? `${branch}: ` : '';
         // const name_s = fileName || c.fileName() || 'untitled';
@@ -443,21 +443,6 @@ export class Commands {
         }
         return title;
 
-        // return `${branch_s}${name_s}`;
-
-        // let title: string;
-        // if (fileName) {
-        //     title = g.computeWindowTitle(fileName);
-        // } else {
-        //     let s = 'untitled';
-        //     let n = g.app.numberOfUntitledWindows;
-        //     if (n > 0) {
-        //         s += n.toString();
-        //     }
-        //     title = g.computeWindowTitle(s);
-        //     g.app.numberOfUntitledWindows = n + 1;
-        // }
-        // return title;
     }
     //@+node:felix.20220605211419.1: *4* c.initConfigSettings
     /**
@@ -3332,26 +3317,30 @@ export class Commands {
     // These are all new in Leo 4.5.1.
 
     //@+node:felix.20211228212851.2: *4* c.getLanguageAtCursor
-    // def getLanguageAtCursor(self, p, language):
-    //     """
-    //     Return the language in effect at the present insert point.
-    //     Use the language argument as a default if no @language directive seen.
-    //     """
-    //     c = self
-    //     tag = '@language'
-    //     w = c.frame.body.wrapper
-    //     ins = w.getInsertPoint()
-    //     n = 0
-    //     for s in g.splitLines(p.b):
-    //         if g.match_word(s, 0, tag):
-    //             i = g.skip_ws(s, len(tag))
-    //             j = g.skip_id(s, i)
-    //             language = s[i:j]
-    //         if n <= ins < n + len(s):
-    //             break
-    //         else:
-    //             n += len(s)
-    //     return language
+    /**
+     * Return the language in effect at the present insert point.
+     * Use the language argument as a default if no @language directive seen.
+     */
+    public getLanguageAtCursor(p: Position, language: string) {
+        const c: Commands = this;
+        const tag = '@language';
+        const w = c.frame.body.wrapper;
+        const ins = w.getInsertPoint();
+        let n = 0;
+        for (const s of g.splitLines(p.b)) {
+            if (g.match_word(s, 0, tag)) {
+                const i = g.skip_ws(s, tag.length);
+                const j = g.skip_id(s, i);
+                language = s.slice(i, j);
+            }
+            if (n <= ins && ins < n + s.length) {
+                break;
+            } else {
+                n += s.length;
+            }
+        }
+        return language;
+    }
     //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLanguage
     public hasAmbiguousLanguage(p: Position): boolean {
         const languages = new Set<string>();
@@ -4670,39 +4659,6 @@ export class Commands {
     //         c.requestLaterRedraw = true;
     //     }
     // }
-    //@+node:felix.20211122010434.5: *6* c.redraw_after_contract
-    public redraw_after_contract(p?: Position): void {
-        const c: Commands = this;
-        if (c.enableRedrawFlag) {
-            if (p && p.__bool__()) {
-                c.setCurrentPosition(p);
-            } else {
-                p = c.currentPosition();
-            }
-            //c.frame.tree.redraw_after_contract(p);
-            c.redraw(p);
-            c.treeFocusHelper();
-        } else {
-            c.requestLaterRedraw = true;
-        }
-    }
-    //@+node:felix.20211122010434.6: *6* c.redraw_after_expand
-    public redraw_after_expand(p?: Position): void {
-        const c: Commands = this;
-        if (c.enableRedrawFlag) {
-            if (p && p.__bool__()) {
-                c.setCurrentPosition(p);
-            } else {
-                p = c.currentPosition();
-            }
-            //c.frame.tree.redraw_after_expand(p);
-            c.redraw(p);
-            c.treeFocusHelper();
-        } else {
-            c.requestLaterRedraw = true;
-        }
-    }
-
     //@+node:felix.20211122010434.7: *6* c.redraw_after_head_changed
     /**
      *   Redraw the screen (if needed) when editing ends.
@@ -4799,7 +4755,6 @@ export class Commands {
     public expandToLevel(level: number): void {
         const c: Commands = this;
         const n: number = c.p.level();
-        const old_expansion_level = c.expansionLevel;
         let max_level = 0;
         for (let p of c.p.self_and_subtree(false)) {
             if (p.level() - n + 1 < level) {
@@ -4811,9 +4766,8 @@ export class Commands {
         }
         c.expansionNode = c.p.copy();
         c.expansionLevel = max_level + 1;
-        if (c.expansionLevel !== old_expansion_level) {
-            c.redraw();
-        }
+        c.redraw();
+
         /*
         // It's always useful to announce the level.
         // c.k.setLabelBlue('level: %s' % (max_level+1))
@@ -5639,76 +5593,60 @@ export class Commands {
     }
     //@+node:felix.20220210211517.1: *4* c.deletePositionsInList
     /**
-     * Delete all vnodes corresponding to the positions in aList.
-     *
-     * Set c.p if the old position no longer exists.
-     *
-     * See "Theory of operation of c.deletePositionsInList" in LeoDocs.leo.
+     * *Undoably* delete all vnodes corresponding to the positions in aList.
      */
     public deletePositionsInList(
         aList: Position[]
-    ): [string, number, string][] {
-        // New implementation by Vitalije 2020-03-17 17:29
+    ): void {
+
         const c: Commands = this;
+        const u = c.undoer;
+        const undoType = 'c.deletePositionsInList';
+        const root = c.rootPosition()!;
 
-        // Ensure all positions are valid.
-        aList = aList.filter((p) => {
-            return c.positionExists(p);
-        });
-
-        if (!aList.length) {
-            return [];
+        // Ensure all positions are valid and unique.
+        const to_be_deleted: Position[] = [];
+        for (let p of aList) {
+            if (c.positionExists(p) && !to_be_deleted.some((p2) => p2.__eq__(p))) {
+                to_be_deleted.push(p);
+            }
+        }
+        if (!to_be_deleted.length) {
+            return;
         }
 
-        function p2link(p: Position): [number, VNode] {
-            const parent_v: VNode = p.stack.length
-                ? p.stack[p.stack.length - 1][0]
-                : c.hiddenRootNode;
-            return [p._childIndex, parent_v];
-        }
-
-        let links_to_be_cut = [...aList.map(p2link, aList)];
-        let unique_links: [number, VNode][] = [];
-        // links_to_be_cut = [...new Set(links_to_be_cut)]; // Make unique
-        links_to_be_cut.forEach((fromElement) => {
-            let i: number;
-            let v: VNode;
-            [i, v] = fromElement;
-            let found = false;
-            unique_links.forEach((toElement) => {
-                let j: number;
-                let w: VNode;
-                [j, w] = toElement;
-                if (i === j && v === w) {
-                    found = true;
+        function deletePosition(p: Position): void {
+            if (to_be_deleted.some((p2) => p2.__eq__(p))) {
+                // Remove all to-be-deleted positions in p's subtree.
+                for (let p2 of p.subtree()) {
+                    const index = to_be_deleted.findIndex((p3) => p3.__eq__(p2));
+                    if (index >= 0) {
+                        to_be_deleted.splice(index, 1);
+                    }
                 }
-            });
-            if (!found) {
-                unique_links.push(fromElement); // add if not found
+                const bunch = u.beforeDeleteNode(p);
+                p.doDelete();
+                u.afterDeleteNode(c.rootPosition()!, 'Inner Undo Node', bunch);
+            } else {
+                // Recursively handle all p's children.
+                for (let child of [...p.children()].reverse()) {
+                    deletePosition(child);
+                }
             }
-        });
-        links_to_be_cut = unique_links.sort((a, b): number => {
-            return a[0] < b[0] ? 1 : -1;
-        });
-
-        const undodata: [string, number, string][] = [];
-        links_to_be_cut.forEach((element) => {
-            let i: number;
-            let v: VNode;
-            [i, v] = element;
-            const ch = v.children[i]; // get item
-            v.children.splice(i, 1); // remove it from children
-            const index = ch.parents.indexOf(v); // find index in parents
-            if (index >= 0) {
-                ch.parents.splice(index, 1); // remove it from parents
-            }
-            undodata.push([v.gnx, i, ch.gnx]);
-        });
-
+        }
+        // The main line. Start the recursion with the top-level nodes.
+        u.beforeChangeGroup(c.p, undoType, true);
+        const to_do: Position[] = [...root.self_and_siblings()].reverse();
+        while (to_do.length) {
+            const p = to_do.pop()!;
+            deletePosition(p);
+        }
+        // Set c.p if necessary.
         if (!c.positionExists(c.p)) {
             c.selectPosition(c.rootPosition()!);
         }
-        return undodata;
+        u.afterChangeGroup(c.p, undoType);
+
     }
     //@+node:felix.20230525222516.1: *4* c.find_b & find_h
     //@+node:felix.20230525222516.2: *5* c.find_b
@@ -5788,49 +5726,10 @@ export class Commands {
     }
     //@+node:felix.20240601145220.1: *4* c.undoableDeletePositions
     /**
-     * Deletes all vnodes corresponding to the positions in aList,
-     * and make changes undoable.
+     * Placeholder for compatibility.
      */
     public undoableDeletePositions(aList: Position[]): void {
-
-        const c = this;
-        const u = c.undoer;
-        const data = c.deletePositionsInList(aList);
-        const gnx2v = c.fileCommands.gnxDict;
-
-        function undo(): void {
-            const bead = u.getBead(u.bead);
-            if (!bead) { return; }
-            for (const [pgnx, i, chgnx] of bead.data.reverse()) {
-                const v = gnx2v[pgnx];
-                const ch = gnx2v[chgnx];
-                v.children.splice(i, 0, ch);
-                ch.parents.push(v);
-            }
-            if (!c.positionExists(c.p)) {
-                c.setCurrentPosition(c.rootPosition()!);
-            }
-        }
-
-        function redo(): void {
-            const bead = u.getBead(u.bead + 1);
-            if (!bead) { return; }
-            for (const [pgnx, i, _chgnx] of bead.data) {
-                const v = gnx2v[pgnx];
-                const ch = v.children.splice(i, 1)[0];
-                ch.parents = ch.parents.filter(parent => parent !== v);
-            }
-            if (!c.positionExists(c.p)) {
-                c.setCurrentPosition(c.rootPosition()!);
-            }
-        }
-
-        u.pushBead({
-            data: data,
-            undoType: 'delete nodes',
-            undoHelper: undo,
-            redoHelper: redo,
-        });
+        this.deletePositionsInList(aList);
     }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
@@ -5854,6 +5753,7 @@ export class Commands {
         const table = [
             g.app.gui,
             g.app.pluginsController,
+            g.app.externalFilesController,
             // c.k.autoCompleter,
             c.frame,
             c.frame.body,

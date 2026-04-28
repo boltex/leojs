@@ -799,7 +799,7 @@ Leo uses a model/view/controller architecture.
 
 - Model: The VNode and Position classes in leoNodes.py.
 
-- View: The gui-independent base classes are in the node "Gui Base Classes". The Qt-Specific subclasses are in the node "Qt gui".
+- View: The gui-independent base classes are in the node "Gui Base Classes".
 
 **Important**: The general organization of these classes have changed hardly at all in Leo's 20+ year history.  The reason is that what each class does is fairly obvious.  How the gets the job done may have changed drastically, but *that's an internal implementation detail of the class itself*.  This is the crucial design principle that allows Leo's code to remain stable.  *Classes do not know or meddle in the internal details of other classes*.  As a result, nobody, including EKR, needs to remember internal details.
 
@@ -860,9 +860,9 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 </t>
 <t tx="felix.20201208214250.2"></t>
-<t tx="felix.20201208214319.1">@language md
+<t tx="felix.20201208214319.1" _mod_time="46313737373030313735302e3133340a2e">@language md
 @tabwidth -4
-# ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
+# ![Leo Editor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
 &gt; Leo is a fundamentally different way of using and organizing data, programs and scripts.
 
@@ -1096,6 +1096,11 @@ If you would like to modify and build this project yourself, see [CONTRIBUTING.m
 See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor).
 
+## Other Leo Editor implementations and IDE integrations ports
+
+-   [Leo-Web](https://boltex.github.io/leo-web/) A browser-based TypeScript implementation of the Leo Editor that uses the browser's File System API for local file access.
+-   [LeoInteg](https://marketplace.visualstudio.com/items?itemName=boltex.leointeg) A VSCode extension that integrates the original Leo Editor.
+
 ### _Thanks to_
 
 -   [Edward K. Ream](https://github.com/edreamleo) creator of the [Leo Editor](https://leo-editor.github.io/leo-editor/)
@@ -1118,7 +1123,7 @@ See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendi
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1">import * as vscode from 'vscode';
+<t tx="felix.20201208214322.1" _mod_time="46313734313734313439342e3437330a2e">import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 
 import * as GitAPI from './git';
@@ -1136,7 +1141,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737373236333436352e3339370a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -1159,7 +1164,7 @@ export async function deactivate(): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201208223553.1">import * as vscode from 'vscode';
+<t tx="felix.20201208223553.1" _mod_time="46313737353934343138352e3935330a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 import { Icon } from './types';
 import { LeoUI } from './leoUI';
@@ -1171,7 +1176,7 @@ import { Position } from './core/leoNodes';
 @others
 
 </t>
-<t tx="felix.20201208224407.1">import * as vscode from "vscode";
+<t tx="felix.20201208224407.1" _mod_time="46313734393631383032372e38310a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
 import { Position } from "./core/leoNodes";
@@ -1367,7 +1372,7 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 }
 
 </t>
-<t tx="felix.20201208224703.1">@language md
+<t tx="felix.20201208224703.1" _mod_time="46313734313734313439342e3432380a2e">@language md
 @tabwidth -4
 # How to install and run the development version
 
@@ -1785,8 +1790,8 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.DEMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
 [CMD.SORT_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.SORT_CHILDREN, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
-[CMD.SORT_SIBLING, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
-[CMD.SORT_SIBLING_FO, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.SORT_SIBLINGS, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
+[CMD.SORT_SIBLINGS_FO, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
 
 </t>
 <t tx="felix.20201214150149.11">[CMD.MARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
@@ -1987,7 +1992,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
-<t tx="felix.20201214151326.1">import * as vscode from "vscode";
+<t tx="felix.20201214151326.1" _mod_time="46313737343735323434352e3139310a2e">import * as vscode from "vscode";
 
 @language typescript
 @tabwidth -4
@@ -2074,8 +2079,8 @@ public static COMMANDS = {
     SHOW_LOG: Constants.NAME + ".showLogPane",
     SORT_CHILDREN: Constants.NAME + ".sortChildrenSelection",
     SORT_CHILDREN_FO: Constants.NAME + ".sortChildrenSelectionFromOutline",
-    SORT_SIBLING: Constants.NAME + ".sortSiblingsSelection",
-    SORT_SIBLING_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
+    SORT_SIBLINGS: Constants.NAME + ".sortSiblingsSelection",
+    SORT_SIBLINGS_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
     CONTRACT_ALL: Constants.NAME + ".contractAll", // From command Palette
     CONTRACT_ALL_FO: Constants.NAME + ".contractAllFromOutline", // from button, return focus on OUTLINE
     PREV_NODE: Constants.NAME + ".prev",
@@ -2519,7 +2524,7 @@ public static USER_MESSAGES = {
     PROMPT_EDIT_HEADLINE: "Edit Headline",
     PROMPT_INSERT_NODE: "Insert Node",
     PROMPT_INSERT_CHILD: "Insert Child",
-    DEFAULT_HEADLINE: "New Headline",
+    DEFAULT_HEADLINE: "newHeadline",
 
     TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
     PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED
@@ -2701,7 +2706,7 @@ public static VSCODE_COMMANDS = {
 };
 
 </t>
-<t tx="felix.20201214151419.1">import * as vscode from "vscode";
+<t tx="felix.20201214151419.1" _mod_time="46313732313539313833332e31390a2e">import * as vscode from "vscode";
 import { Icon, LeoButton } from "./types";
 import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
@@ -2858,7 +2863,7 @@ public get description(): string | boolean {
 }
 
 </t>
-<t tx="felix.20201214151429.1">import * as vscode from "vscode";
+<t tx="felix.20201214151429.1" _mod_time="46313736393330343439372e3830330a2e">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import { Constants } from "./constants";
@@ -2927,13 +2932,15 @@ export class LeoDocumentNode extends vscode.TreeItem {
         public frame: LeoFrame,
         private _leoUI: LeoUI,
     ) {
-        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : Constants.UNTITLED_FILE_NAME);
-
         const c: Commands = frame.c;
+        const title = frame.getTitle();
         const filename = c.fileName();
-        const isNamed: boolean = !!filename;
-        this.label = isNamed ? utils.getFileFromPath(filename) : Constants.UNTITLED_FILE_NAME;
-        this.tooltip = isNamed ? filename : Constants.UNTITLED_FILE_NAME;
+        const label = filename ? utils.getFileFromPath(filename) : title;
+
+        super(label);
+
+        this.label = label;
+        this.tooltip = filename ? filename : title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
@@ -2943,19 +2950,18 @@ export class LeoDocumentNode extends vscode.TreeItem {
         if (frame === g.app.windowList[this._leoUI.frameIndex]) {
             // If this was created as a selected node, make sure it's selected
             this._leoUI.setDocumentSelection(frame);
-            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
+            this.contextValue = filename ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
-            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
+            this.contextValue = filename ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
         }
 
-        this.id = `d${g.app.windowList.indexOf(frame)}f${c.fileName()}c${c.changed.toString()}`;
+        this.id = `d${g.app.windowList.indexOf(frame)}f${filename}c${c.changed.toString()}`;
         this.iconPath = this._leoUI.documentIcons[c.changed ? 1 : 0];
     }
 
 }
 </t>
-<t tx="felix.20201214151447.1">import * as vscode from "vscode";
-import * as utils from "./utils";
+<t tx="felix.20201214151447.1" _mod_time="46313736373036323136342e3139330a2e">import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
 import { LeoPackageStates } from "./types";
@@ -3077,7 +3083,6 @@ export class LeoStates {
 }
 </t>
 <t tx="felix.20201214151447.20">constructor(
-    private _context: vscode.ExtensionContext,
     private _leoJs: LeoUI
 ) {
     this.qLastContextChange = Promise.resolve(); // Temporary.
@@ -3201,7 +3206,7 @@ set leoCanDemote(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201214151451.1">import * as vscode from "vscode";
+<t tx="felix.20201214151451.1" _mod_time="46313732313539313833332e3139370a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
@@ -3311,7 +3316,7 @@ private _updateLeoObjectIndicator(): void {
 }
 
 </t>
-<t tx="felix.20201214154816.1">import * as vscode from "vscode";
+<t tx="felix.20201214154816.1" _mod_time="46313737343735323433382e3239370a2e">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { RClick } from "./core/mod_scripting";
 
@@ -3395,7 +3400,7 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
  */
 export const enum RevealType {
     NoReveal = 0, // Re-use the old treeId with "NoReveal" for the selected node.
-    Reveal,
+    Reveal, // ! 'Reveal' is (and should) never be used! It is only here for clarity and completeness.
     RevealSelect,
     RevealSelectFocus
 }
@@ -3460,7 +3465,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313737343932313530372e3836310a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -3523,7 +3528,7 @@ import { Undoer } from "./core/leoUndo";
     this.idleTimeClass = IdleTime;
 
     // * Setup States
-    this.leoStates = new LeoStates(_context, this);
+    this.leoStates = new LeoStates(this);
 
     // * Get configuration settings
     this.config = new Config(_context, this);
@@ -3879,7 +3884,8 @@ export class LeoUI extends NullGui {
  */
 private _triggerGetStates(): void {
 
-    const c = g.app.windowList[this.frameIndex].c;
+    const frame = g.app.windowList[this.frameIndex];
+    const c = frame.c;
 
     if (this._refreshType.states) {
         this._refreshType.states = false;
@@ -3922,7 +3928,7 @@ private _triggerGetStates(): void {
     }
     // Set leoChanged and leoOpenedFilename
     this.leoStates.leoChanged = c.changed;
-    this.leoStates.leoOpenedFileName = c.fileName();
+    this.leoStates.leoOpenedFileName = frame.getTitle();
 
     this.refreshBodyStates(); // Set language and wrap states, if different.
 
@@ -4074,12 +4080,15 @@ public async selectTreeNode(
             }
 
             // If headline starts with @url call g.openUrl, if @mime call g.open_mimetype
-            const w_headline = p_node.h;
+            const w_headline = p_node.h.trim();
             let openPromise;
-            if (w_headline.trim().startsWith("@url ")) {
+
+            if (w_headline.startsWith("@url ")) {
                 openPromise = g.openUrl(p_node);
-            } else if (w_headline.trim().startsWith("@mime ")) {
+            } else if (w_headline.startsWith("@mime ")) {
                 openPromise = g.open_mimetype(p_node.v.context, p_node);
+            } else if (w_headline.startsWith("unl:")) {
+                openPromise = g.openUrlHelper(c, w_headline);
             }
 
             if (openPromise) {
@@ -4116,7 +4125,7 @@ public async selectTreeNode(
         }
     }
 
-    // Note: this.lastSelectedNode is set in gotSelectedNode and lastSelectedNode 
+    // Note: this.lastSelectedNode is set in gotSelectedNode and _tryApplyNodeToBody
     this.lastSelectedNodeTime = utils.performanceNow();
 
     await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
@@ -4184,7 +4193,7 @@ public async selectTreeNode(
 
 </t>
 <t tx="felix.20201214202755.1">/**
- * Leo Command
+ * Leo Command. This is used in "command bindings" from the UI to execute commands.
  * @param p_cmd Command name string
  * @param p_options: CommandOptions for the command
  */
@@ -4287,7 +4296,7 @@ public async command(
 
 </t>
 <t tx="felix.20201214202757.1">/**
- * Opens quickPick minibuffer pallette to choose from all commands in this file's Thenable
+ * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
  * @returns Promise from the command resolving - or resolve with undefined if cancelled
  */
 public async minibuffer(): Promise&lt;unknown&gt; {
@@ -4386,13 +4395,16 @@ public async minibuffer(): Promise&lt;unknown&gt; {
         quickPick.placeholder = Constants.USER_MESSAGES.MINIBUFFER_PROMPT;
         quickPick.matchOnDetail = true;
 
+        // Quickpic will resolve with user choice if used normally, but we add those listeners for special cases
         w_disposables.push(
+            // Selection starts empty, so onDidChangeSelection is used to detect choice
             quickPick.onDidChangeSelection(selection =&gt; {
-                if (selection[0]) {
+                if (selection.length &amp;&amp; selection[0]) {
                     resolve(selection[0]);
                     quickPick.hide();
                 }
             }),
+            // User pressed enter, so we intercept in case of integer line goto 'easter egg'
             quickPick.onDidAccept(accepted =&gt; {
                 if (/^\d+$/.test(quickPick.value)) {
                     // * Was an integer EASTER EGG
@@ -4421,18 +4433,22 @@ public async minibuffer(): Promise&lt;unknown&gt; {
                     quickPick.hide();
                 }
             }),
+            // If value changes to an integer, clear the items to show 'easter egg' line goto
             quickPick.onDidChangeValue(changed =&gt; {
                 if (/^\d+$/.test(changed)) {
                     if (quickPick.items.length) {
                         quickPick.items = [];
                     }
                 } else if (quickPick.items !== w_choices) {
+                    // was not an integer, and not already showing choices
                     quickPick.items = w_choices;
                 }
             }),
+            // was canceled
             quickPick.onDidHide(() =&gt; {
                 resolve(undefined);
             }),
+            // just adding the quickPick itself to disposables for later disposal
             quickPick
         );
         quickPick.show();
@@ -4644,7 +4660,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737373236313230322e3336380a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -6479,7 +6495,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineDownSelection",
   "key": "shift+alt+down",
-  "mac": "shift+alt+down",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6496,7 +6511,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "shift+alt+down",
-  "mac": "shift+alt+down",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -6508,7 +6522,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineLeftSelection",
   "key": "shift+alt+left",
-  "mac": "shift+alt+left",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6525,7 +6538,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "shift+alt+left",
-  "mac": "shift+alt+left",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -6537,7 +6549,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineRightSelection",
   "key": "shift+alt+right",
-  "mac": "shift+alt+right",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6554,7 +6565,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "shift+alt+right",
-  "mac": "shift+alt+right",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -6566,7 +6576,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineUpSelection",
   "key": "shift+alt+up",
-  "mac": "shift+alt+up",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
@@ -6583,7 +6592,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "shift+alt+up",
-  "mac": "shift+alt+up",
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
@@ -6644,19 +6652,16 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.insertNodeSelection",
   "key": "shift+insert",
-  "mac": "shift+insert",
   "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "shift+insert",
-  "mac": "shift+insert",
   "when": "leojsEditHeadline || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "insert",
-  "mac": "insert",
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
@@ -6907,7 +6912,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "elementtree": "^0.1.7",
 "jszip": "^3.10.1",
 "ksuid": "^3.0.0",
-"lodash": "^4.17.21",
+"lodash": "^4.18",
 "md5": "^2.3.0",
 "open": "^8.4.2",
 "os-browserify": "^0.3.0",
@@ -6932,7 +6937,6 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 {
   "command": "leojs.setLeoID",
   "category": "Leojs",
-  "enablement": "!leojsReady",
   "title": "Set Leo ID"
 },
 {
@@ -7599,14 +7603,14 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
 </t>
 <t tx="felix.20201227155008.1">/**
  * * Setup global refresh options
- * @param p_finalFocus Flag for focus to be placed in outline
+ * @param p_finalFocus kind of pane for focus to be placed after refresh, if any. If not specified, focus will be preserved.
  * @param p_refreshType Refresh flags for each UI part
 */
 public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveRange?: boolean): void {
     if (p_preserveRange) {
         this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
     }
-    // Set final "focus-placement" EITHER true or false
+    // Set final "focus-placement"
     this.finalFocus = p_finalFocus;
 
     if (p_refreshType) {
@@ -7657,13 +7661,12 @@ private _setupNoOpenedLeoDocument(): void {
 </t>
 <t tx="felix.20201227230912.1">/**
  * * A Leo file was opened: setup UI accordingly.
- * @param p_openFileResult Returned info about currently opened and editing document
  */
 private _setupOpenedLeoDocument(): void {
     this._needLastSelectedRefresh = true;
-
-    const c = g.app.windowList[this.frameIndex].c;
-    this.leoStates.leoOpenedFileName = c.fileName();
+    const frame = g.app.windowList[this.frameIndex];
+    const c = frame.c;
+    this.leoStates.leoOpenedFileName = frame.getTitle();
     this.leoStates.leoChanged = c.changed;
 
     // * Startup flag
@@ -7836,7 +7839,7 @@ public gotSelectedNode(p_node: Position): void {
 # See the "About this file" node for important notes.
 </t>
 <t tx="felix.20210102000100.1"></t>
-<t tx="felix.20210110210346.1">@language typescript
+<t tx="felix.20210110210346.1" _mod_time="46313732313539313833332e31370a2e">@language typescript
 @tabwidth -4
 
 // ambient module declaration for https://www.npmjs.com/package/date-format-lite
@@ -7875,38 +7878,6 @@ public incTreeId(): void {
 <t tx="felix.20211006225245.1">"configuration": {
   "title": "LeoJS Leo Editor",
   "properties": {
-    "leojs.checkForChangeExternalFiles": {
-      "scope": "application",
-      "default": "none",
-      "type": "string",
-      "description": "Set default for checking changes to external files",
-      "enum": [
-        "none",
-        "force-check",
-        "force-ignore"
-      ],
-      "enumDescriptions": [
-        "Default from Leo's config",
-        "Check for changes",
-        "Ignore all changes"
-      ]
-    },
-    "leojs.defaultReloadIgnore": {
-      "scope": "application",
-      "default": "none",
-      "type": "string",
-      "description": "Set default for derived files so that they reload, or ignore, when changes are detected",
-      "enum": [
-        "none",
-        "yes-all",
-        "no-all"
-      ],
-      "enumDescriptions": [
-        "Choose each time",
-        "Reload All",
-        "Ignore All"
-      ]
-    },
     "leojs.sessionPerWorkspace": {
       "scope": "application",
       "default": true,
@@ -8056,7 +8027,7 @@ public incTreeId(): void {
   }
 },
 </t>
-<t tx="felix.20211007213344.1">import * as vscode from "vscode";
+<t tx="felix.20211007213344.1" _mod_time="46313737343735323436372e3635340a2e">import * as vscode from "vscode";
 import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8142,8 +8113,8 @@ public buildFromSavedSettings(): void {
         // * Currently setting config, wait until its done all, and this will be called automatically
         return;
     } else {
-        this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
-        this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+        // this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
+        // this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
         this.sessionPerWorkspace = GET(NAME).get(NAMES.SESSION_PER_WORKSPACE, DEFAULTS.SESSION_PER_WORKSPACE);
         this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
         this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
@@ -8196,8 +8167,8 @@ public buildFromSavedSettings(): void {
 export class Config implements ConfigMembers {
 
     // Config settings used on Leo's side
-    public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
-    public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
+    // public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
+    // public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
 
     // Config settings used on vscode's side
     public sessionPerWorkspace: boolean = Constants.CONFIG_DEFAULTS.SESSION_PER_WORKSPACE; // Used as Context Flag
@@ -8268,8 +8239,8 @@ export class Config implements ConfigMembers {
  */
 public getConfig(): ConfigMembers {
     return {
-        checkForChangeExternalFiles: this.checkForChangeExternalFiles,
-        defaultReloadIgnore: this.defaultReloadIgnore,
+        // checkForChangeExternalFiles: this.checkForChangeExternalFiles,
+        // defaultReloadIgnore: this.defaultReloadIgnore,
         sessionPerWorkspace: this.sessionPerWorkspace, // Used as Context Flag
         leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
         treeKeepFocus: this.treeKeepFocus,
@@ -8366,8 +8337,8 @@ public clearCloseEmptyGroups(): Thenable&lt;void&gt; {
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 export interface ConfigMembers {
-    checkForChangeExternalFiles: string;
-    defaultReloadIgnore: string;
+    // checkForChangeExternalFiles: string;
+    // defaultReloadIgnore: string;
     sessionPerWorkspace: boolean;
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
@@ -8425,8 +8396,8 @@ export interface ConfigSetting {
  * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 public static CONFIG_NAMES = {
-    CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
-    DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+    // CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+    // DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
     SESSION_PER_WORKSPACE: "sessionPerWorkspace",
     LEO_TREE_BROWSE: "leoTreeBrowse",
     TREE_KEEP_FOCUS: "treeKeepFocus",
@@ -8474,8 +8445,8 @@ public static CONFIG_NAMES = {
  * Used when setting itself and getting parameters from vscode
  */
 public static CONFIG_DEFAULTS = {
-    CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
-    DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+    CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",
+    DEFAULT_RELOAD_IGNORE: "none",
     SESSION_PER_WORKSPACE: true,
     LEO_TREE_BROWSE: true,
     TREE_KEEP_FOCUS: true,
@@ -8563,7 +8534,7 @@ public static FIND_INPUTS_IDS = {
 };
 
 </t>
-<t tx="felix.20211010192923.1">import * as vscode from "vscode";
+<t tx="felix.20211010192923.1" _mod_time="46313732313539313833332e3138380a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import * as path from 'path';
 import { BodyTimeInfo } from "./types";
@@ -8894,7 +8865,7 @@ public getTextFromClipboard(): string {
   }
 ]
 </t>
-<t tx="felix.20211122205011.1">import * as vscode from "vscode";
+<t tx="felix.20211122205011.1" _mod_time="46313732313539313833332e3230310a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
@@ -9911,7 +9882,7 @@ public finishStartup(): void {
 }
 
 </t>
-<t tx="felix.20220417155704.1">import * as vscode from "vscode";
+<t tx="felix.20220417155704.1" _mod_time="46313736393636333134302e3838390a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Position } from "./core/leoNodes";
 import { LeoButtonNode } from "./leoButtons";
@@ -10802,7 +10773,7 @@ export interface ChooseRClickItem extends vscode.QuickPickItem {
 }
 
 </t>
-<t tx="felix.20220505221929.1">import * as vscode from "vscode";
+<t tx="felix.20220505221929.1" _mod_time="46313737343932313532322e3130350a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
 import { QuickSearchController } from "./core/quicksearch";
@@ -10836,10 +10807,6 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
             this.getChildren(); // THIS KEEPS THE DATA UP TO DATE
             this._leoUI.setGotoContent();
         }, this);
-    }
-
-    public getLastGotoView(): vscode.TreeView&lt;LeoGotoNode&gt; | undefined {
-        return this._lastGotoView;
     }
 
     public resetSelectedNode(p_node?: LeoGotoNode): void {
@@ -11226,6 +11193,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
 
     if (!this.leoStates.fileOpenedReady) {
         if (g.app.loadManager) {
+            g.app.numberOfUntitledWindows += 1; // To create unique names.
             await g.app.loadManager.openEmptyLeoFile(this);
         }
     } else {
@@ -12874,14 +12842,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                         // ! Compensate for reveal that steals the focus.
                         if (this._refreshType.goto) {
                             this._refreshType.goto = false;
-                            // let w_viewName: string;
-                            // const gotoView = this.leoGotoProvider.getLastGotoView();
-                            // if (gotoView &amp;&amp; gotoView.title === "Goto") {
-                            //     w_viewName = Constants.GOTO_ID;
-                            // } else {
-                            //     w_viewName = Constants.GOTO_EXPLORER_ID;
-                            // }
-                            // void vscode.commands.executeCommand(w_viewName + ".focus");
                             let w_panelID = '';
                             if (this._lastTreeView === this._leoTreeExView) {
                                 w_panelID = Constants.FIND_EXPLORER_ID;
@@ -13588,7 +13548,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         (p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_DETACHED_SCHEME)
     ) {
-
+        // WAS DETACHED BODY CHANGED?
         const [unused, id, gnx] = p_textDocumentChange.document.uri.path.split("/");
         const w_bodyText = p_textDocumentChange.document.getText().replace(/\r\n/g, "\n");
         const w_hasBody = !!w_bodyText.length;
@@ -13767,10 +13727,11 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         p_textDocumentChange.document.uri.scheme === Constants.URI_LEOJS_SCHEME
     ) {
-        // this.bodyDetachedTextDocument = undefined;
+        // WAS A LEO BODY CHANGED? (same commander, but maybe different node)
+
         const c = g.app.windowList[this.frameIndex].c;
 
-        // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
+        // * There was a change on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
         this._bodyLastChangedDocument = p_textDocumentChange.document;
         this._bodyLastChangedDocumentSaved = false;
         this._editorTouched = true; // To make sure to transfer content to Leo even if all undone
@@ -13974,10 +13935,10 @@ public revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
     if (p_undo.contextValue !== Constants.CONTEXT_FLAGS.UNDO_BEAD) {
         return Promise.resolve();
     }
-    let action = "redo"; // Constants.LEOBRIDGE.REDO;
+    let action = "redo";
     let repeat = p_undo.beadIndex;
     if (p_undo.beadIndex &lt;= 0) {
-        action = "undo"; // Constants.LEOBRIDGE.UNDO;
+        action = "undo";
         repeat = (-p_undo.beadIndex) + 1;
     }
     const c = g.app.windowList[this.frameIndex].c;
@@ -14101,7 +14062,7 @@ function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undef
 
 </t>
 <t tx="felix.20221002124249.1">/**
- * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
+ * * Opens quickPick minibuffer command pallette from the user's session commands usage history
  * @returns Promise that resolves when the chosen command is placed on the front-end command stack
  */
 private async _showMinibufferHistory(p_choices: vscode.QuickPickItem[]): Promise&lt;unknown&gt; {
@@ -15696,7 +15657,7 @@ private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
 }
 
 </t>
-<t tx="felix.20230330224010.1">@language md
+<t tx="felix.20230330224010.1" _mod_time="46313732313539313833322e3938320a2e">@language md
 @tabwidth -4
 # Sponsors and Backers 🏅
 
@@ -15914,10 +15875,9 @@ set leoEditHeadline(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20231216165857.1">## 0.2.0 
+<t tx="felix.20231216165857.1">## 0.2.0
 
 - First alpha release
-
 </t>
 <t tx="felix.20231216165946.1">## 0.2.1
 
@@ -15954,7 +15914,7 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231219233411.1"></t>
-<t tx="felix.20231219233427.1">// @ts-check
+<t tx="felix.20231219233427.1" _mod_time="46313737353234363238312e3834360a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -16400,9 +16360,6 @@ set leoEditHeadline(p_value: boolean) {
     function navKeyHandler(p_event) {
         // Handles up/down home/end pgUp/pgDown
         // for GOTO PANE navigation under the nav input
-        // if(gotoPaneContainer){
-        //     gotoPaneContainer
-        // }
         if (!p_event) {
             p_event = window.event;
         }
@@ -16862,7 +16819,7 @@ set leoEditHeadline(p_value: boolean) {
     vscode.postMessage({ type: 'refreshSearchConfig' });
 })();
 </t>
-<t tx="felix.20231219233431.1">html {
+<t tx="felix.20231219233431.1" _mod_time="46313737313931323630392e3239330a2e">html {
     box-sizing: border-box;
     font-size: 13px;
     overflow: hidden;
@@ -17473,16 +17430,15 @@ div.col-nav {
 - Fixed bug that sometimes asked to 'save' and overwrite/confirm when new node was created with body text containing an ampersand or when using vscode's quick-suggestion autocomplete.
 
 </t>
-<t tx="felix.20231224201746.1">import * as vscode from 'vscode';
+<t tx="felix.20231224201746.1" _mod_time="46313737343239393531392e3431360a2e">import * as vscode from 'vscode';
 import { LeoUI } from './leoUI';
 
-export class HelpPanel implements vscode.TextDocumentContentProvider {
 @language typescript
 @tabwidth -4
 @others
 
 </t>
-<t tx="felix.20231224201802.1">
+<t tx="felix.20231224201802.1">export class HelpPanel implements vscode.TextDocumentContentProvider {
     // emitter and its event
     onDidChangeEmitter = new vscode.EventEmitter&lt;vscode.Uri&gt;();
     onDidChange = this.onDidChangeEmitter.event;
@@ -17500,7 +17456,7 @@ export class HelpPanel implements vscode.TextDocumentContentProvider {
 
 }
 </t>
-<t tx="felix.20231226205226.1">import * as vscode from 'vscode';
+<t tx="felix.20231226205226.1" _mod_time="46313737343035383031302e3430320a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
@@ -17522,6 +17478,8 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
         unl://path/to/file.leo#Headline-with-Dashes--&gt;Sub-section--&gt;Item 1
         unl://anotherPath/docs.leo#Special Characters!--&gt;@$%^&amp;*
         unl://leoFile.leo#Testing--&gt;Edge--&gt;Cases--&gt;with--&gt;Multiple Separators
+
+        VSCode already suports regular URLs, e.g., https://www.google.com/
 
         REFERENCE IN leoGlobals.py
          2. New in Leo 6.7.4: UNLs based on gnx's (global node indices):
@@ -17545,6 +17503,7 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
 
     private gnxUnlRegex = /\bunl:gnx:\/\/[^\r\n#]*#\S*/g; // This allows spaces and content after the UNL.
     private headlineUnlRegex = /\bunl:\/\/[^\r\n#]*#[^\r\n]*\S/g; // This goes on until end of line.
+    private gnxOnlyRegex = /(?&lt;![:\w])gnx:[\w.]+/g; // gnx only links are of the form "gnx:felix.20251231182235.2" Important, do not match inside of gnxUnlRegex matches! (must be empty or a space before gnx:)
 
     public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult&lt;vscode.DocumentLink[]&gt; {
         const text = document.getText();
@@ -17566,7 +17525,16 @@ export class UnlProvider implements vscode.DocumentLinkProvider {
             const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
             const args = encodeURIComponent(JSON.stringify({ unl: match[0] }));
             links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
+        }
 
+        this.gnxOnlyRegex.lastIndex = 0;
+        // GNX-only links
+        while ((match = this.gnxOnlyRegex.exec(text)) !== null) {
+            const range = new vscode.Range(document.positionAt(match.index), document.positionAt(match.index + match[0].length));
+            // gnx only are not valid unls, so build one from it knowing that the file-name part will be empty
+            const unl = `unl:gnx://#${match[0].substring(4)}`;
+            const args = encodeURIComponent(JSON.stringify({ unl }));
+            links.push(new vscode.DocumentLink(range, vscode.Uri.parse(`command:${Constants.COMMANDS.HANDLE_UNL}?${args}`)));
         }
 
         return links;
@@ -17957,7 +17925,7 @@ private _buildToolTip(p_headline: string = ""): string {
 
 </t>
 <t tx="felix.20240224165738.1"></t>
-<t tx="felix.20240224165747.1">// @ts-check
+<t tx="felix.20240224165747.1" _mod_time="46313732313539313833322e3939310a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -17970,7 +17938,7 @@ private _buildToolTip(p_headline: string = ""): string {
     // console.log('Help Panel Started!');
 })();
 </t>
-<t tx="felix.20240224165750.1">@language css
+<t tx="felix.20240224165750.1" _mod_time="46313732313539313833322e3939330a2e">@language css
 html {
   box-sizing: border-box;
   font-size: 13px;
@@ -18115,7 +18083,7 @@ u {
 .big {
   font-size: 20px;
 }</t>
-<t tx="felix.20240224200656.1">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240224200656.1" _mod_time="46313732313539313833322e3939310a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -18260,7 +18228,7 @@ public async openAside(p?: Position): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20240401213604.1">import * as vscode from "vscode";
+<t tx="felix.20240401213604.1" _mod_time="46313737373233333730342e30380a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import * as path from 'path';
@@ -18584,6 +18552,11 @@ public fireRefreshFile(p_gnx: string): void {
                 this._lastGnx = w_gnx;
                 this._lastBodyData = w_v.b;
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                if (!this._openedBodiesInfo[this._lastGnx]) {
+                    console.warn('DETACHED readFile: ERROR File not in _openedBodiesGnx when trying to set lastBodyLength! gnx: ', w_gnx);
+                    this.setNewBodyUriTime(p_uri, w_v); // add it to openedBodies if not already there, to avoid problems with stat later. 
+                    // Should be in _openedBodiesGnx if readFile is called but just in case...
+                }
                 this._openedBodiesInfo[this._lastGnx].lastBodyLength = w_buffer.byteLength;
                 return w_buffer;
             } else {
@@ -19570,7 +19543,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313737343735323537312e3330330a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19630,13 +19603,13 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
           &lt;a href="https://www.youtube.com/watch?v=M_mKXSbVGdE" class="video-link ml-1"&gt;&lt;span
               class="icon"&gt;📺&lt;/span&gt;&amp;nbsp;Features Demo&lt;/a&gt;
         &lt;/p&gt;
-        &lt;h2 class="section__title section__title--break"&gt;&lt;/h2&gt;
+        &lt;!-- &lt;h2 class="section__title section__title--break"&gt;&lt;/h2&gt;
         &lt;p class="section__hint mt-0 center"&gt;
           Automate auto-refresh for
           &lt;a href="#external-files" title="Setup file-change detection"&gt;external files changes&lt;/a&gt;, or choose which
           &lt;a href="#node-commands" title="Fine-tune interface"&gt;icons&lt;/a&gt;
           are shown, and more!
-        &lt;/p&gt;
+        &lt;/p&gt; --&gt;
       &lt;/section&gt;
 
       &lt;section id="leo-id" class="section--settings"&gt;
@@ -19660,7 +19633,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
         &lt;/div&gt;
       &lt;/section&gt;
 
-      &lt;section id="external-files" class="section--settings"&gt;
+      &lt;!-- &lt;section id="external-files" class="section--settings"&gt;
         &lt;div class="section__content"&gt;
           &lt;div class="section__header"&gt;
             &lt;h2&gt;External Files Change Detection&lt;/h2&gt;
@@ -19706,7 +19679,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
             &lt;/div&gt;
           &lt;/div&gt;
         &lt;/div&gt;
-      &lt;/section&gt;
+      &lt;/section&gt; --&gt;
 
       &lt;section id="interface-behavior" class="section--settings"&gt;
         &lt;div class="section__content"&gt;
@@ -20042,9 +20015,9 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
           &lt;li&gt;
             &lt;a href="#leo-id" title="Uniquely identifies you"&gt;Leo ID&lt;/a&gt;
           &lt;/li&gt;
-          &lt;li&gt;
+          &lt;!-- &lt;li&gt;
             &lt;a href="#external-files" title="File change detection settings"&gt;External Files&lt;/a&gt;
-          &lt;/li&gt;
+          &lt;/li&gt; --&gt;
           &lt;li&gt;
             &lt;a href="#interface-behavior" title="Outline behavior settings"&gt;Interface Behavior&lt;/a&gt;
           &lt;/li&gt;
@@ -20087,7 +20060,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 &lt;/html&gt;
 </t>
-<t tx="felix.20240722220751.1">// @ts-check
+<t tx="felix.20240722220751.1" _mod_time="46313732313539313833332e3038370a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -20475,7 +20448,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 })();
 
 </t>
-<t tx="felix.20240722220752.1">html {
+<t tx="felix.20240722220752.1" _mod_time="46313734313734313439342e3433390a2e">html {
     height: 100%;
     font-size: 62.5%;
     box-sizing: border-box;
@@ -21541,7 +21514,7 @@ fieldset p span {
 <t tx="felix.20240727165746.1">## 1.0.1
 
 - Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
-difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
+  difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
 
 </t>
 <t tx="felix.20240730230141.1">## 1.0.2
@@ -21558,7 +21531,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 
 </t>
 <t tx="felix.20240810181235.1">## 1.0.4
- 
+
 - Prevent calling process.chdir when running on the web.
 
 </t>
@@ -21570,7 +21543,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 <t tx="felix.20240819221941.1">## 1.0.6
 
 - Fixed goto-global-line command.
-- Implemented c.recursiveImport. 
+- Implemented c.recursiveImport.
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
 - Added missing headkey1 and headkey2 plugin hooks.
@@ -21888,7 +21861,24 @@ set leoAtLeoFile(p_value: boolean) {
 </t>
 <t tx="felix.20251014222608.1">## 1.0.15
 
-- ...
+- Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473.
+- Fixed import-text-file. Mirror of Leo's #4484.
+- Made 'Set LeoID' command available after startup.
+- Fixed editFileCommands by adding summary_diff_two_revs and its helpers. Mirror of Leo's #4502, #4513, and #4517.
+- Fixed flatten-outline-to-node as per Leo's #4485.
+- Fixed LeoExternalFiles so Updating external files no longer changes c.p.
+- Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
+- Made 'newHeadline' the default string for new headlines.
+- Fixed double clicking on headlines containing a unl to follow that link.
+- Fixed body pane url links to also support direct "gxn:" links. (non unl)
+- Fixed bug in goPrev method related to selecting previously visited nodes.
+- Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
+- Fixed an ignored config check for external file change settings in ExternalFilesController.
+- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Improved 'folder' icon image.
+- Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
+- Fixed goto-prev-marked command.
+- Added commands for the quick-find methods 'history', 'timeline', 'find-quick-selected', 'changed' and 'marked'.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
@@ -21896,7 +21886,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
 
 </t>
-<t tx="fil.20240709150317.1">&lt;!DOCTYPE html&gt;
+<t tx="fil.20240709150317.1" _mod_time="46313737313930353931352e3837360a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -21933,42 +21923,42 @@ set leoAtLeoFile(p_value: boolean) {
                 &lt;div class="col"&gt;
                     &lt;input type="checkbox" id="wholeWord" name="wholeWord"&gt;
                     &lt;label title="Match Whole Word (Ctrl+Alt+W)" class="label-fix" for="wholeWord"&gt;Whole
-                        &lt;u&gt;w&lt;/u&gt;ord&lt;/label&gt;&lt;br&gt;
+                        &lt;u&gt;W&lt;/u&gt;ord&lt;/label&gt;&lt;br&gt;
                     &lt;input type="checkbox" id="ignoreCase" name="ignoreCase"&gt;
                     &lt;label title="Matches Ignore Case (Ctrl+Alt+I)" class="label-fix" for="ignoreCase"&gt;&lt;u&gt;I&lt;/u&gt;gnore
-                        case&lt;/label&gt;&lt;br&gt;
+                        Case&lt;/label&gt;&lt;br&gt;
                     &lt;input type="checkbox" id="regExp" name="regExp"&gt;
                     &lt;label title="Use Regular Expression (Ctrl+Alt+X)" class="label-fix"
                         for="regExp"&gt;Rege&lt;u&gt;x&lt;/u&gt;p&lt;/label&gt;&lt;br&gt;
                     &lt;input type="checkbox" id="markFinds" name="markFinds"&gt;
                     &lt;label title="Mark Found nodes (Ctrl+Alt+F)" class="label-fix" for="markFinds"&gt;Mark
-                        &lt;u&gt;f&lt;/u&gt;inds&lt;/label&gt;&lt;br&gt;
+                        &lt;u&gt;F&lt;/u&gt;inds&lt;/label&gt;&lt;br&gt;
                     &lt;input type="checkbox" id="markChanges" name="markChanges"&gt;
                     &lt;label title="Mark Changed nodes (Ctrl+Alt+C)" class="label-fix" for="markChanges"&gt;Mark
-                        &lt;u&gt;c&lt;/u&gt;hanges&lt;/label&gt;
+                        &lt;u&gt;C&lt;/u&gt;hanges&lt;/label&gt;
                 &lt;/div&gt;
                 &lt;div class="col"&gt;
                     &lt;!-- RADIOS --&gt;
                     &lt;input type="radio" id="entireOutline" name="searchScope" value="0"&gt;
                     &lt;label title="Search in Whole Outline (Ctrl+Alt+E)" class="label-fix"
                         for="entireOutline"&gt;&lt;u&gt;E&lt;/u&gt;ntire
-                        outline&lt;/label&gt;&lt;br&gt;
+                        Outline&lt;/label&gt;&lt;br&gt;
                     &lt;input type="radio" id="subOutlineOnly" name="searchScope" value="1"&gt;
                     &lt;label title="Limit to Selected Outline (Ctrl+Alt+S)" class="label-fix"
                         for="subOutlineOnly"&gt;&lt;u&gt;S&lt;/u&gt;uboutline Only&lt;/label&gt;&lt;br&gt;
                     &lt;input type="radio" id="nodeOnly" name="searchScope" value="2"&gt;
                     &lt;label title="Limit to Selected Node (Ctrl+Alt+N)" class="label-fix" for="nodeOnly"&gt;&lt;u&gt;N&lt;/u&gt;ode
-                        only&lt;/label&gt;&lt;br&gt;
+                        Only&lt;/label&gt;&lt;br&gt;
                     &lt;input type="radio" id="fileOnly" name="searchScope" value="3"&gt;
                     &lt;label title="Limit to External Files (Ctrl+Alt+L)" class="label-fix" for="fileOnly"&gt;Fi&lt;u&gt;l&lt;/u&gt;e
-                        only&lt;/label&gt;&lt;br&gt;
+                        Only&lt;/label&gt;&lt;br&gt;
                     &lt;!-- CHECKBOXES --&gt;
                     &lt;input type="checkbox" id="searchHeadline" name="searchHeadline"&gt;
                     &lt;label title="Search in Headlines (Ctrl+Alt+H)" class="label-fix" for="searchHeadline"&gt;Search
-                        &lt;u&gt;h&lt;/u&gt;eadline&lt;/label&gt;&lt;br&gt;
+                        &lt;u&gt;H&lt;/u&gt;eadline&lt;/label&gt;&lt;br&gt;
                     &lt;input type="checkbox" id="searchBody" name="searchBody"&gt;
                     &lt;label title="Search in Body Text (Ctrl+Alt+B)" class="label-fix" for="searchBody"&gt;Search
-                        &lt;u&gt;b&lt;/u&gt;ody&lt;/label&gt;
+                        &lt;u&gt;B&lt;/u&gt;ody&lt;/label&gt;
                 &lt;/div&gt;
             &lt;/div&gt;
         &lt;/div&gt;
@@ -22017,7 +22007,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Added new videos to the readme: "Intro to Leo" and "LeoJS Features Demo".
 - Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
 - Fixed undo/redo status flags
-- Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
+- Changed behavior of the 'Open Aside' command: it now opens 'detached' body panes, which allows text editing for a fixed gnx.
 - Added common library objects to the scripting global scope:
     - os
     - path
@@ -22025,11 +22015,11 @@ set leoAtLeoFile(p_value: boolean) {
     - crypto
     - process
     - child_process
-- Added 'vscode' API to the scripting global scope. (while  keeping the g.vscode reference for compatibility with old scripts)
+- Added 'vscode' API to the scripting global scope. (while keeping the g.vscode reference for compatibility with old scripts)
 - Made more external libraries accessible to scripts via the global 'g' object:
     - dayjs
     - md5
-    
+
 </t>
 </tnodes>
 </leo_file>

@@ -67,7 +67,7 @@ export class LeoFrame {
         //  Create the first node.
         let v = new VNode(c);
         let p = new Position(v);
-        v.initHeadString('NewHeadline');
+        v.initHeadString('newHeadline');
         //
         //  New in Leo 4.5: p.moveToRoot would be wrong:
         //                  the node hasn't been linked yet.
@@ -76,8 +76,8 @@ export class LeoFrame {
 
     //@+node:felix.20220512220820.1: *3* destroySelf
     public destroySelf(): void {
-        // console.log('TODO: FRAME DestroySelf');
-        // TODO : Check if needed (are subsriptions disposed?)
+        const c = this.c;
+        c.exists = false;
     }
     //@+node:felix.20220512222542.1: *3* finishCreate
     public finishCreate() {
