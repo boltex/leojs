@@ -229,6 +229,52 @@ suite('Test cases for leoImport.ts', () => {
             assert.ok(c.lastTopLevel().__eq__(root));
         }
     });
+    //@+node:felix.20260415213304.1: *3* TestLeoImport.test_tabbed_python_importer
+    test('test_tabbed_python_importer', () => {
+        const c = self.c;
+        const u = c.undoer;
+        const x = c.importCommands;
+        const target = c.p.insertAfter();
+        c.selectPosition(target);
+        target.h = 'target';
+
+        const body_1 = g.dedent(
+            `
+            #!/usr/bin/python3
+            # -*- coding: utf-8 -*-
+
+            def someFunction ():
+            \tif (someLongCondition) or \\
+            \t\t\t(anotherLongCondition):
+            \t\treturn
+            \tpass
+        `).trim() + '\n';
+        target.b = body_1;
+
+        x.parse_body(target);
+
+        const expected_results: [number, string, string][] = [
+            [0, 'def someFunction',  // Ignored
+                '#!/usr/bin/python3\n' +
+                '# -*- coding: utf-8 -*-\n' +
+                '\n' +
+                'def someFunction ():\n' +
+                '\tif (someLongCondition) or \\\n' +
+                '\t\t\t(anotherLongCondition):\n' +
+                '\t\treturn\n' +
+                '\tpass\n']
+        ];
+        // Don't call run_test.
+        self.check_outline(target, expected_results);
+
+        // Test undo
+        u.undo();
+        assert.strictEqual(target.b, body_1, 'undo test');
+        assert.ok(!target.hasChildren(), 'undo test');
+        // Test redo
+        u.redo();
+        self.check_outline(target, expected_results,);
+    });
     //@-others
 });
 //@-others

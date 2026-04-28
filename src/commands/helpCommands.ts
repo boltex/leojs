@@ -63,13 +63,6 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
     @cmd('help-for-command', 'Prompts for a command name and prints the help message for that command.')
     public async helpForCommand(): Promise<void> {
 
-        // c= this.c;
-        // k  this.c.k;
-        // const s = `\
-        // Alt-0 (vr-toggle) hides this help message.
-
-        // Type the name of the command, followed by Return.
-        // `;
         const c = this.c;
         const commands: vscode.QuickPickItem[] = [];
         const cDict = c.commandsDict;
@@ -138,15 +131,6 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
                         quickPick.hide();
                     }
                 }),
-                quickPick.onDidChangeValue(changed => {
-                    if (/^\d+$/.test(changed)) {
-                        if (quickPick.items.length) {
-                            quickPick.items = [];
-                        }
-                    } else if (quickPick.items !== w_choices) {
-                        quickPick.items = w_choices;
-                    }
-                }),
                 quickPick.onDidHide(() => {
                     resolve(undefined);
                 }),
@@ -164,24 +148,6 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
             this.helpForCommandFinisher(w_picked.label);
         }
 
-        // -------------------------------------------
-
-        // const command = await g.app.gui.get1Arg(
-        //     {
-        //         title: 'Help for Command',
-        //         prompt: 'Type the name of the command',
-        //         placeHolder: '<command>',
-        //     }
-        // );
-        // if (command) {
-        //     this.helpForCommandFinisher(command);
-        // }
-
-        // -------------------------------------------
-
-        // c.putHelpFor(s);
-        // c.minibufferWantsFocusNow();
-        // k.fullCommand(event, help=True, helpHandler=this.helpForCommandFinisher)
     }
     //@+node:felix.20231224164520.11: *4* getBindingsForCommand
     public getBindingsForCommand(commandName: string): string {

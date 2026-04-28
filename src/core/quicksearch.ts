@@ -8,9 +8,17 @@
 import * as g from './leoGlobals';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
+import { new_cmd_decorator } from './decorators';
 //@-<< quicksearch imports >>
 //@+others
-//@+node:felix.20221105222427.1: ** class QuickSearchController (leoserver.py)
+//@+node:felix.20260403231649.1: ** quicksearch cmd
+/**
+ * Command decorator for the QuickSearchController class.
+ */
+function cmd(p_name: string, p_doc: string) {
+    return new_cmd_decorator(p_name, p_doc, ['c', 'quicksearchController']);
+}
+//@+node:felix.20221105222427.1: ** class QuickSearchController
 export class QuickSearchController {
     public c: Commands;
     public lw: string[];
@@ -67,6 +75,55 @@ export class QuickSearchController {
             'Node',
         ];
     }
+    //@+node:felix.20260426231200.1: *3* QuickSearch Commands
+    //@+node:felix.20260426231200.2: *4* find_selected
+    @cmd('find-quick-selected', 'Nav search with current selection')
+    public find_selected(): Thenable<unknown> {
+        const body = this.c.frame.body;
+        const w = body.wrapper;
+        let [i, j] = w.getSelectionRange();
+        if (i === j) {
+            const ins = w.getInsertPoint();
+            [i, j] = g.getLine(w.getAllText(), ins);
+        }
+        let s = w.get(i, j);
+        if (s) {
+            s = s.replace(/\r\n/g, "\n");
+        }
+        return g.app.gui.findQuick(s || "", true);
+
+    }
+
+    //@+node:felix.20260426231200.5: *4* timeline
+    @cmd('find-quick-timeline', 'List nodes in reverse gnx order')
+    public timeline(): void {
+        this.qsc_sort_by_gnx();
+        g.app.gui.showNavResults();
+
+    }
+
+    //@+node:felix.20260426231200.6: *4* show_dirty
+    @cmd('find-quick-changed', 'List all changed/dirty nodes')
+    public show_dirty(): void {
+        this.qsc_find_changed();
+        g.app.gui.showNavResults();
+    }
+
+    //@+node:felix.20260426231200.7: *4* show_marked
+    @cmd('find-quick-marked', 'List all marked nodes')
+    public show_marked(): void {
+        this.qsc_show_marked();
+        g.app.gui.showNavResults();
+
+    }
+
+    //@+node:felix.20260426231200.8: *4* nodehistory
+    @cmd('find-quick-history', 'List visited nodes from history')
+    public nodehistory(): void {
+        this.qsc_get_history();
+        g.app.gui.showNavResults();
+    }
+
     //@+node:felix.20221107011322.1: *3* translate & helper
     //based on fnmatch.py
     public escape(s: string): string {
@@ -404,7 +461,7 @@ export class QuickSearchController {
         const tgt = this.its[index];
         if (!tgt) {
             if (!g.unitTesting) {
-                g.es("onSelectItem: no target found for 'it' as index:" + it);
+                g.es("onSelectItem: no target found for 'it' as index:" + index);
             }
             return;
         }
@@ -562,9 +619,15 @@ export class QuickSearchController {
         if (!pat.startsWith('r:')) {
             hpat = this.translate('*' + pat + '*').slice(0, -1); // remove last '$' part.
             bpat = this.translate(pat).slice(0, -1); // remove last '$' part.
-            // in python 3.6 there is no (?ms) at the end
-            // only \Z
-            //bpat = bpat.replace(r'\Z', '')
+
+            // in python there is no (?ms) at the end.
+
+            // Not applicable in javascript, but in python re module \Z matches only at the end of the string,
+            // while \z also matches before the newline at the end of the string.
+            // So in javascript, we leave those in case the user really wanted a litteral '\Z' or '\z' in their search pattern, but we don't add the 'm' flag to the regex, so they will only match at the end of the string.
+
+            // bpat = bpat.replace(r'\Z', '').replace(r'\z', '')  // This line was in original python version of Leo, but in javascript we will just leave those in.
+
             flags = 'gi';
         } else {
             hpat = pat.substring(2);

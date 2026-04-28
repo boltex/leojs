@@ -176,7 +176,7 @@ export class Constants {
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
         PROMPT_INSERT_CHILD: "Insert Child",
-        DEFAULT_HEADLINE: "New Headline",
+        DEFAULT_HEADLINE: "newHeadline",
 
         TITLE_GOTO_GLOBAL_LINE: "Goto global line", // TODO : REMOVE IF NOT USED
         PLACEHOLDER_GOTO_GLOBAL_LINE: "#", // TODO : REMOVE IF NOT USED
@@ -286,8 +286,8 @@ export class Constants {
      * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
      */
     public static CONFIG_NAMES = {
-        CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
-        DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+        // CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+        // DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
         SESSION_PER_WORKSPACE: "sessionPerWorkspace",
         LEO_TREE_BROWSE: "leoTreeBrowse",
         TREE_KEEP_FOCUS: "treeKeepFocus",
@@ -334,8 +334,8 @@ export class Constants {
      * Used when setting itself and getting parameters from vscode
      */
     public static CONFIG_DEFAULTS = {
-        CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
-        DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+        CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",
+        DEFAULT_RELOAD_IGNORE: "none",
         SESSION_PER_WORKSPACE: true,
         LEO_TREE_BROWSE: true,
         TREE_KEEP_FOCUS: true,
@@ -567,8 +567,8 @@ export class Constants {
         SHOW_LOG: Constants.NAME + ".showLogPane",
         SORT_CHILDREN: Constants.NAME + ".sortChildrenSelection",
         SORT_CHILDREN_FO: Constants.NAME + ".sortChildrenSelectionFromOutline",
-        SORT_SIBLING: Constants.NAME + ".sortSiblingsSelection",
-        SORT_SIBLING_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
+        SORT_SIBLINGS: Constants.NAME + ".sortSiblingsSelection",
+        SORT_SIBLINGS_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
         CONTRACT_ALL: Constants.NAME + ".contractAll", // From command Palette
         CONTRACT_ALL_FO: Constants.NAME + ".contractAllFromOutline", // from button, return focus on OUTLINE
         PREV_NODE: Constants.NAME + ".prev",

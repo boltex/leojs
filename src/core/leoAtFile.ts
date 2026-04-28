@@ -970,9 +970,6 @@ export class AtFile {
         ) {
             return;
         }
-        if (!g.unitTesting) {
-            g.es_print('updating:', root.h);
-        }
         root.clearVisitedInTree();
         const gnx2vnode = at.fileCommands.gnxDict;
         const contents = new_private_lines.join('');
@@ -3217,8 +3214,8 @@ export class AtFile {
         if (at.sentinels || g.app.force_at_auto_sentinels) {
             at.putIndent(at.indent);
             at.os(at.startSentinelComment!);
-            // #2194. #2983: Put Black sentinels if --black-sentinels is in effect.
-            if (g.app.write_black_sentinels) {
+            // Blacken python sentinels.
+            if (this.language === 'python') {
                 at.os(' ');
             }
             // Apply the cweb hack to s:
@@ -4136,7 +4133,7 @@ export class AtFile {
         return '';
     }
 
-    public setPathUa(p: Position, path: any): void {
+    public setPathUa(p: Position, path: string): void {
         if (!p.v.tempAttributes) {
             p.v.tempAttributes = {};
         }

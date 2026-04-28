@@ -1,5 +1,26 @@
 # Change Log
 
+## 1.0.15
+
+- Fixed imports so that it adds '@language' at the start of a newline. Mirror of Leo's #4473.
+- Fixed import-text-file. Mirror of Leo's #4484.
+- Made 'Set LeoID' command available after startup.
+- Fixed editFileCommands by adding summary_diff_two_revs and its helpers. Mirror of Leo's #4502, #4513, and #4517.
+- Fixed flatten-outline-to-node as per Leo's #4485.
+- Fixed LeoExternalFiles so Updating external files no longer changes c.p.
+- Fixed 'untitled' titles to have the proper number suffix when multiple untitled files are open.
+- Made 'newHeadline' the default string for new headlines.
+- Fixed double clicking on headlines containing a unl to follow that link.
+- Fixed body pane url links to also support direct "gxn:" links. (non unl)
+- Fixed bug in goPrev method related to selecting previously visited nodes.
+- Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
+- Fixed an ignored config check for external file change settings in ExternalFilesController.
+- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Improved 'folder' icon image.
+- Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
+- Fixed goto-prev-marked command.
+- Added commands for the quick-find methods 'history', 'timeline', 'find-quick-selected', 'changed' and 'marked'.
+
 ## 1.0.14
 
 - Read only unchanged @clean nodes: a huge performance boost!
@@ -61,7 +82,7 @@
 ## 1.0.6
 
 - Fixed goto-global-line command.
-- Implemented c.recursiveImport. 
+- Implemented c.recursiveImport.
 - implemented g.execute_shell_commands_with_options.
 - Fixed IdleTime class handler call arguments.
 - Added missing headkey1 and headkey2 plugin hooks.
@@ -74,7 +95,7 @@
 - Fixed @auto files generation for markdown (.md) files.
 
 ## 1.0.4
- 
+
 - Prevent calling process.chdir when running on the web.
 
 ## 1.0.3
@@ -91,7 +112,7 @@
 ## 1.0.1
 
 - Added SQL, pako, showdown, JSZip, dayjs, md5, csvtojson
-difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
+  difflib, elementtree and ksuid libraries on the global scope when running Leo scripts (along with default nodejs libraries Buffer, crypto, os, path, process, and child_process) to simulate 'import/require' until suported in LeoJS.
 
 # 1.0.0
 
@@ -132,7 +153,7 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 - Added new videos to the readme: "Intro to Leo" and "LeoJS Features Demo".
 - Fixed icons disabled appearance by changing the graphic format from SVG to a weoff2 font.
 - Fixed undo/redo status flags
-- Changed behavior of the 'Open Aside' command: it now  opens 'detached' body panes, which allows text editing for a fixed gnx.
+- Changed behavior of the 'Open Aside' command: it now opens 'detached' body panes, which allows text editing for a fixed gnx.
 - Added common library objects to the scripting global scope:
     - os
     - path
@@ -140,11 +161,11 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
     - crypto
     - process
     - child_process
-- Added 'vscode' API to the scripting global scope. (while  keeping the g.vscode reference for compatibility with old scripts)
+- Added 'vscode' API to the scripting global scope. (while keeping the g.vscode reference for compatibility with old scripts)
 - Made more external libraries accessible to scripts via the global 'g' object:
     - dayjs
     - md5
-    
+
 # 0.2.12
 
 - Help commands were changed from markdown preview panes to html webviews.
@@ -243,7 +264,6 @@ difflib, elementtree and ksuid libraries on the global scope when running Leo sc
 
 - Fixed importer and @auto related bugs.
 
-## 0.2.0 
+## 0.2.0
 
 - First alpha release
-

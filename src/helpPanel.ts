@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { LeoUI } from './leoUI';
 
 export class HelpPanel implements vscode.TextDocumentContentProvider {
-
     // emitter and its event
     onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
     onDidChange = this.onDidChangeEmitter.event;

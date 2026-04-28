@@ -161,6 +161,10 @@ export class Importer {
 
             // Add trailing lines.
             if (this.root.isAnyAtFileNode()) {  // #4385.
+                // Make sure parent.b ends with a newline
+                if (parent.b && !parent.b.endsWith('\n')) {  // #4473
+                    parent.b += '\n';
+                }
                 parent.b += `@language ${this.language}\n@tabwidth ${this.tab_width}\n`;
             }
 

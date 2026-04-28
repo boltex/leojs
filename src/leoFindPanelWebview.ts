@@ -76,6 +76,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                     }
                     case 'navigateNavEntry': {
                         void this._leoUI.navigateNavEntry(data.value);
+                        break;
                     }
                     case 'refreshSearchConfig': {
                         void this._leoUI.triggerBodySave(true);
@@ -89,8 +90,8 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         try {
                             const w_index = Number(data.value);
                             if (!isNaN(w_index) && this._leoUI.leoGotoProvider.nodeList[w_index]) {
+                                void this._leoUI.gotoNavEntry(this._leoUI.leoGotoProvider.nodeList[w_index]);
                             }
-                            void this._leoUI.gotoNavEntry(this._leoUI.leoGotoProvider.nodeList[w_index]);
                         } catch (e) {
                             console.log('goto nav entry failed for index: ', data.value);
                         }

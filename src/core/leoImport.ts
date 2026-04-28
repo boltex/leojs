@@ -2933,11 +2933,13 @@ export class TabImporter {
 
         let level: number;
         let parent: Position | undefined;
-        let grand_parent: Position | undefined;
-        if (stack && stack.length) {
+        let grand_parent: Position;
+
+        if (stack.length) {
             [level, parent] = stack[stack.length - 1];
         } else {
-            [level, parent] = [0, undefined];
+            level = 0;
+            parent = undefined;
         }
 
         const lws = this.lws(s).length;
@@ -2945,48 +2947,48 @@ export class TabImporter {
         if (lws === level) {
             if (separate || !parent || !parent.__bool__()) {
                 // Replace the top of the stack with a new entry.
-                if (stack && stack.length) {
+                if (stack.length) {
                     stack.pop();
                 }
-                grand_parent =
-                    stack && stack.length ? stack[stack.length - 1][1] : root;
+                grand_parent = stack.length ? stack[stack.length - 1][1] : root;
                 parent = grand_parent.insertAsLastChild(); // lws == level
                 parent.h = h;
                 stack.push([level, parent]);
             } else if (!parent.h) {
                 parent.h = h;
-            } else if (lws > level) {
-                // Create a new parent.
-                level = lws;
-                parent = parent.insertAsLastChild();
-                parent.h = h;
-                stack.push([level, parent]);
-            } else {
-                // Find the previous parent.
-                let w_found = false;
-                while (stack && stack.length) {
-                    let [level2, parent2] = stack.pop()!;
-                    if (level2 === lws) {
-                        grand_parent =
-                            stack && stack.length
-                                ? stack[stack.length - 1][1]
-                                : root;
-                        parent = grand_parent.insertAsLastChild(); // lws < level
-                        parent.h = h;
-                        level = lws;
-                        stack.push([level, parent]);
-                        w_found = true;
-                        break;
-                    }
-                }
-                if (!w_found) {
-                    level = 0;
-                    parent = root.insertAsLastChild();
+            }
+        } else if (lws > level) {
+            // Create a new parent.
+            level = lws;
+            // Python: parent = parent or root
+            parent = parent && parent.__bool__() ? parent : root;
+            // Maybe should be parent = parent.insertAsLastChild() ? (with an assignment)
+            parent.insertAsLastChild();
+            parent.h = h;
+            stack.push([level, parent]);
+        } else {
+            // Find the previous parent.
+            let found = false;
+            while (stack.length) {
+                const [level2, _parent2] = stack.pop()!;
+                if (level2 === lws) {
+                    grand_parent = stack.length ? stack[stack.length - 1][1] : root;
+                    parent = grand_parent.insertAsLastChild(); // lws < level
                     parent.h = h;
-                    stack = [[0, parent]];
+                    level = lws;
+                    stack.push([level, parent]);
+                    found = true;
+                    break;
                 }
             }
+            if (!found) {
+                level = 0;
+                parent = root.insertAsLastChild();
+                parent.h = h;
+                stack = [[0, parent]];
+            }
         }
+
         g.assert(parent && parent.__eq__(stack[stack.length - 1][1])); // An important invariant.
         g.assert(
             level === stack[stack.length - 1][0],

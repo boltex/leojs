@@ -502,6 +502,10 @@
                   "vh": "@bool check-for-changed-external-files = True"
                 },
                 {
+                  "gnx": "felix.20260328214935.1",
+                  "vh": "@bool raise-file-update-dialogs = False"
+                },
+                {
                   "gnx": "ekr.20090514111518.8379",
                   "vh": "@bool check-python-code-on-write = True"
                 },
@@ -510,12 +514,12 @@
                   "vh": "@bool run-pyflakes-on-write = False"
                 },
                 {
-                  "gnx": "ekr.20150321090958.1",
-                  "vh": "@bool verbose-check-outline = False"
-                },
-                {
                   "gnx": "ekr.20150710084507.1",
                   "vh": "@bool syntax-error-popup = False"
+                },
+                {
+                  "gnx": "ekr.20150321090958.1",
+                  "vh": "@bool verbose-check-outline = False"
                 }
               ]
             },
@@ -1167,9 +1171,10 @@
     "ekr.20041119041304.1": "This option specifies the directory to be used as a prefix for <filename> in\n\n@path <filename>\n@file <filename>\n@root <filename>\n\nwhen <filename> is a relative path.\n\nValid values for this option:\n\n'!' means relative to the location leo.py (recommended).\n'.' means relative to the location of the .leo file in the top window.\n\nAn absolute path (in platform-dependent format).\n\nRelative paths are not allowed because their meaning would depend on the changing value of the current working directory.",
     "ekr.20071110153046": "This option has effect only when importing so-called non-strict languages,\nfor which leading whitespace is not terribly significant.\n\nTrue: @auto warns about mismatches that occur solely in leading whitespace.",
     "ekr.20150403055250.1": "True: check all @<file> nodes in the outline for changes in corresponding external files.\n\nWarning: Checking many networked files can hang Leo. See:\nhttps://github.com/leo-editor/leo-editor/issues/262\n",
+    "felix.20260328214935.1": "New in Leo 6.8.8:\n\nTrue (Legacy):       Raise a dialog when any file changes externally.\nFalse (Recommended): Print a log message when any file changes externally.\n",
     "ekr.20161021095001.1": "True: run Pyflakes on each saved files, but only if it has been changed.",
-    "ekr.20150321090958.1": "True: write check messages to Leo's log pane as well as the console.\n\nNote: check-outline always writes error messages to both log and console.",
     "ekr.20150710084507.1": "True: raise a dialog warning about Python errors when writing files.",
+    "ekr.20150321090958.1": "True: write check messages to Leo's log pane as well as the console.\n\nNote: check-outline always writes error messages to both log and console.",
     "ekr.20041119034357.14": "This option affects how Leo treats body text in @root trees.\n\nTrue:    Body text in @root trees start in doc mode.\n\nThis is the way @root trees always worked prior to version 3.10.\n\nFalse:    Body text in @root trees start in code mode.\n\nThis way makes @root trees more compatible with @file trees.",
     "ekr.20070419103554": "True:  Leo ensures that non-empty body text ends in a newline in @nosent trees.\nFalse: Leo leaves body text alone when writing @nosent trees.",
     "ekr.20041119041747": "nl or lf: (recommended) All lines end with \"\\n\"\ncr:       All lines end with \"\\r\"\ncrlf:     All lines end with \"\\r\\n\"\nplatform: Lines end in platform-specific way.\n\nWith platform Leo opens output files in \"w\" mode rather than \"wb\" mode and writes '\\n'\n\nPlease specify nl when uploading files to Leo's CVS site.",

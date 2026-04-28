@@ -296,7 +296,7 @@ suite('Test cases for leoAtFile.ts', () => {
         const contents = g.dedent(`\
             ATall
         `).replace(/AT/g, '@');
-        const expected = g.dedent(`\
+        const expected_contents = g.dedent(`\
             #AT+all
             #AT+node:<GNX>: ** child
             def spam():
@@ -305,7 +305,9 @@ suite('Test cases for leoAtFile.ts', () => {
             @ A single-line doc part.
             #AT-all
         `).replace(/AT/g, '@');
-        root.b = contents;
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = expected_contents.replace(/#@/g, '# @');
+        root.b = test_s;
         await at.initWriteIvars(root);
         at.putBody(root);
         const result = at.outputList.join('');
@@ -323,12 +325,14 @@ suite('Test cases for leoAtFile.ts', () => {
             doc line 1
             ATall
         `).replace(/AT/g, '@');
-        const expected = g.dedent(`\
+        const expected_contents = g.dedent(`\
             #AT+doc
             # doc line 1
             # ATall
         `).replace(/AT/g, '@');
-        root.b = contents;
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = expected_contents.replace(/#@/g, '# @');
+        root.b = test_s;
         await at.initWriteIvars(root);
         at.putBody(root);
         const result = at.outputList.join('');
@@ -349,14 +353,16 @@ suite('Test cases for leoAtFile.ts', () => {
         const contents = g.dedent(`\
             ATothers
         `).replace(/AT/g, '@');
-        const expected = g.dedent(`\
+        const expected_contents = g.dedent(`\
             #AT+others
             #AT+node:<GNX>: ** child
             #AT+others
             #AT-others
             #AT-others
         `).replace(/AT/g, '@');
-        root.b = contents;
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = expected_contents.replace(/#@/g, '# @');
+        root.b = test_s;
         await at.initWriteIvars(root);
         at.putBody(root);
         const result = at.outputList.join('');
@@ -735,11 +741,15 @@ suite('Test the FastAtRead class', () => {
             #AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define expected_contents >>
+
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = expected_contents.replace(/#@/g, '# @');
+
         x.read_into_root(contents, 'test', root);
         assert.strictEqual(root.b, expected_body, 'mismatch in body');
         const s = await c.atFileCommands.atFileToString(root, true);
         // Leo has *never* round-tripped the contents without change!
-        assert.strictEqual(s, expected_contents, 'mismatch in contents');
+        assert.strictEqual(s, expected, 'mismatch in contents');
 
     });
     //@+node:felix.20230528191921.6: *3* TestFastAtRead.test_at_all
@@ -775,9 +785,7 @@ suite('Test the FastAtRead class', () => {
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
 
-        const blacken = false;  // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
-        const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
+        const test_s = contents.replace(/#@/g, '# @');
         const expected = test_s.replace(/# @others doesn't/g, "#@others doesn't");
 
         x.read_into_root(contents, 'test', root);
@@ -831,7 +839,6 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
 
         const blacken = false;  // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
         const test_s = contents;
         const expected = test_s;
 
@@ -894,13 +901,10 @@ suite('Test the FastAtRead class', () => {
         !!AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<').replace(/SPACE/g, ' ');
         //@-<< define contents >>
-        const blacken = false;  // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
-        const test_s = blacken
-            ? contents
-                .replace(/#@/g, '# @')
-                .replace(/!!@/g, '!! @')
-            : contents;
+        const test_s = contents
+            .replace(/#@/g, '# @')
+            .replace(/!!@/g, '!! @');
+
         const expected = test_s;
 
         x.read_into_root(contents, 'test', root);
@@ -961,10 +965,12 @@ suite('Test the FastAtRead class', () => {
         ATlast # last line
         `).replace(/AT/g, '@');
         //@-<< define expected_body >>
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = test_s;
         x.read_into_root(contents, 'test', root);
         assert.strictEqual(root.b, expected_body);
         const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        assert.strictEqual(expected, s);
     });
     //@+node:felix.20230528191921.15: *3* TestFastAtRead.test_at_others
     test('test_at_others', async () => {
@@ -992,10 +998,7 @@ suite('Test the FastAtRead class', () => {
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
 
-        const blacken = false; // #4323: Ignore the @language directive in .txt files.
-
-        g.app.write_black_sentinels = blacken;
-        const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
+        const test_s = contents.replace(/#@/g, '# @');
         const expected = test_s;
 
         x.read_into_root(contents, 'test', root);
@@ -1046,9 +1049,11 @@ suite('Test the FastAtRead class', () => {
         #AT-leo
         `).replace(/\#AT/g, '#@');
         //@-<< define contents >>
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = test_s;
         x.read_into_root(contents, 'test', root);
         const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        assert.strictEqual(expected, s);
         const child1 = root.firstChild();
         const child2 = child1.next();
         const child3 = child2.next();
@@ -1091,9 +1096,11 @@ suite('Test the FastAtRead class', () => {
         #AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = test_s;
         x.read_into_root(contents, 'test', root);
         const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        assert.strictEqual(expected, s);
         const child1 = root.firstChild();
         const child2 = child1.next();
         const grand_child1 = child1.firstChild();
@@ -1158,9 +1165,11 @@ suite('Test the FastAtRead class', () => {
             ATq@@-leo@>
         `).replace(/AT/g, '@').replace(/LB/g, '<<').replace(/BS/g, '\\');
         //@-<< define contents >>
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = test_s;
         x.read_into_root(contents, 'test', root);
         const s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        assert.strictEqual(expected, s);
     });
     //@+node:felix.20230528191921.23: *3* TestFastAtRead.test_doc_parts
     test('test_doc_parts', async () => {
@@ -1194,19 +1203,11 @@ suite('Test the FastAtRead class', () => {
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
 
-        // Test 1: without black delims.
-        g.app.write_black_sentinels = false;
+        const test_s = contents.replace(/#@/g, '# @');
+        const expected = test_s;
         x.read_into_root(contents, 'test', root);
         let s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s, 'Test 1');
-
-        // Test 2: with black delims.
-        g.app.write_black_sentinels = true;
-        contents = contents.replace(/#@/g, '# @');
-        x.read_into_root(contents, 'test', root);
-        s = await c.atFileCommands.atFileToString(root, true);
-        // g.printObj(contents2, tag='contents2')
-        assert.strictEqual(contents, s, 'Test 2: -b');
+        assert.strictEqual(expected, s, 'Test 1');
     });
     //@+node:felix.20230528191921.25: *3* TestFastAtRead.test_html_doc_part
     test('test_html_doc_part', async () => {
@@ -1249,10 +1250,8 @@ suite('Test the FastAtRead class', () => {
         <!--AT-leo-->
         `).replace(/AT/g, '@');
         //@-<< define expected >>
-        const blacken = false; // #4323: Ignore the @language directive in .txt files.
-        g.app.write_black_sentinels = blacken;
-        const test_s = blacken ? contents.replace(/#@/g, '# @') : contents;
-        expected = blacken ? expected.replace(/#@/g, '# @') : expected;
+        const test_s = contents.replace(/#@/g, '# @');
+        expected = expected.replace(/#@/g, '# @');
 
         x.read_into_root(contents, 'test', root);
         const results = await c.atFileCommands.atFileToString(root, true);
@@ -1285,35 +1284,28 @@ suite('Test the FastAtRead class', () => {
             # Test of @verbatim
             print('hi')
             #ATverbatim
-            #AT+node (should be protected by verbatim)
+            #AT+node (verbatim)
             #AT-leo
         `).replace(/AT/g, '@').replace(/LB/g, '<<');
         //@-<< define contents >>
         //@+<< define expected_body >>
         //@+node:felix.20230528191921.29: *4* << define expected_body >> (test_verbatim)
         let expected_body = g.dedent(`\
-        ATlanguage python
-        # Test of @verbatim
-        print('hi')
-        #AT+node (should be protected by verbatim)
+            ATlanguage python
+            # Test of @verbatim
+            print('hi')
+            #AT+node (verbatim)
         `).replace(/AT/g, '@');
         //@-<< define expected_body >>
 
-        //Test 1: without black delims.
-        g.app.write_black_sentinels = false;
-        x.read_into_root(contents, 'test', root);
-        assert.strictEqual(root.b, expected_body);
-        let s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        let expected = contents.replace(/#@/g, '# @');
 
-        //Test 2: with black delims.
-        g.app.write_black_sentinels = true;
-        contents = contents.replace(/#@/g, '# @');
-        expected_body = expected_body.replace('#@', '# @');
+        // Protect the @verbatim line.
+        expected = expected.replace(/# @\+node \(verbatim\)/g, '#@+node (verbatim)');
         x.read_into_root(contents, 'test', root);
         assert.strictEqual(root.b, expected_body);
-        s = await c.atFileCommands.atFileToString(root, true);
-        assert.strictEqual(contents, s);
+        const s = await c.atFileCommands.atFileToString(root, true);
+        assert.strictEqual(expected, s);
 
     });
     //@-others

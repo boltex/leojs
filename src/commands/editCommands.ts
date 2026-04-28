@@ -1315,7 +1315,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20230716160519.3: *4* ec.lineNumber
     @cmd(
         'line-number',
-        'Print the line and column number and percentage of insert point.'
+        'Print the character at the insert point, its row and column, and the total number of characters.'
     )
     public lineNumber(): void {
 
@@ -1327,11 +1327,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const i = w.getInsertPoint();
         let [row, col] = g.convertPythonIndexToRowCol(s, i);
 
-        //percent = int((i * 100) / len(s))
-        const percent: number = Math.floor((i * 100) / s.length);
-
         g.es_print(
-            `char: ${s[i]} row: ${row} col: ${col} pos: ${i} (${percent}% of ${s.length})`
+            `char: ${JSON.stringify(s[i])} row: ${row} col: ${col} of ${s.length}`
         );
 
     }

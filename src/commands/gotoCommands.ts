@@ -155,10 +155,9 @@ export class GoToCommands {
         const contents = g.splitLines(contents_s);
 
         // if not g.unitTesting: g.printObj(contents)
-
         // Find the node with the correct gnx.
         const node_pat = new RegExp(
-            `\\s*${g.reEscape(delim1)}@\\+node:${g.reEscape(p.gnx)}:`
+            `\\s*${g.reEscape(delim1)} ?@\\+node:${g.reEscape(p.gnx)}:`
         );
         for (let [i, w_s] of contents.entries()) {
             if (node_pat.test(w_s)) {
@@ -178,7 +177,7 @@ export class GoToCommands {
         //        Also look for nodes delimited by "//"
         if (root.h.endsWith('.vue')) {
             const node_pat2 = new RegExp(
-                `\\s*${g.reEscape('//')}@\\+node:${g.reEscape(p.gnx)}:`
+                `\\s*${g.reEscape('//')} ?@\\+node:${g.reEscape(p.gnx)}:`
             );
             // re.compile(fr"\s{re.escape('//')}@\+node:{re.escape(p.gnx)}:")
             for (let [i, w_s] of contents.entries()) {
@@ -352,7 +351,10 @@ export class GoToCommands {
         for (let s of lines) {
             const is_sentinel = this.is_sentinel(delim1, delim2, s);
             if (is_sentinel) {
-                const s2 = s.trim().substring(delim1.length); // Works for blackened sentinels.
+                let s2 = s.trim().slice(delim1.length);
+                if (s2.startsWith(' ')) {
+                    s2 = s2.slice(1); // Experimental.
+                }
                 if (s2.startsWith('@+node')) {
                     // Invisible, but resets the offset.
                     offset = 0;
@@ -421,7 +423,11 @@ export class GoToCommands {
 
         for (let [i, s] of lines.entries()) {
             if (this.is_sentinel(delim1, delim2, s)) {
-                const s2 = s.trim().substring(delim1.length); // Works for blackened sentinels.
+                let s2 = s.trim().slice(delim1.length);
+                if (s2.startsWith(' ')) {
+                    s2 = s2.slice(1); // Experimental.
+                }
+
                 if (s2.startsWith('@+node')) {
                     offset = 0;
                     [gnx, h] = this.get_script_node_info(s, delim2);
