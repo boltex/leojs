@@ -127,6 +127,15 @@ blockquote {
   box-shadow: var(--ifm-alert-shadow);
 }
 
+.intro {
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+.intro a {
+  font-weight: 500;
+}
+
 .customPlayer1,
 .customPlayer2 {
   border-radius: 20px;
