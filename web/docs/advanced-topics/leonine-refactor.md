@@ -1,6 +1,7 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 ---
+
 
 # The Leonine way to refactor code
 
@@ -43,3 +44,4 @@ suboutline-only option to limit the matches created by cff.
 You can now rerun the search only on those cloned nodes to see all
 instances of the symbol that might be changed. This is a crucial
 double check on proposed changes.
+

@@ -51,17 +51,23 @@ function Quote({ quote, author }) {
           `API`: tutorial-scripting.html
           `Scripting basics chapter`: tutorial-basics.html#scripting-basics
           -->
-          Leo puts hierarchy (outline structure) at the center of everything. This structure helps you create, manage, and revise any kind of document, including computer programs, documentation, to-do lists, and novels. Leo can write external files automatically from select parts of the outline.
+          Leo puts hierarchy (outline structure) at the center of everything. This structure helps you create, manage, 
+          and revise any kind of document, including computer programs, documentation, to-do lists, and novels. 
+          Leo can write external files automatically from select parts of the outline.
 
           Leo outlines may contain programs in any programming or markup language, including Python, C++, JavaScript, Rust, Markdown, and restructuredText.
 
           <strong>Multiple views of data</strong>
 
-          Writers and programmers often want to view or manipulate the same text in different ways, depending on context. Leo's `clones`_ lets you create multiple different views of data within the *same* outline. You can organize code by functionality in one view and by file in another. You can see documentation from as many points of view as you like.
+          Writers and programmers often want to view or manipulate the same text in different ways, depending on context.
+          Leo's <a href="docs/getting-started/tutorial-pim/#clones">clones</a> lets you create multiple different views of data within the *same* outline. 
+          You can organize code by functionality in one view and by file in another. You can see documentation from as many points of view as you like.
 
           <strong>Integrated Scripting</strong>
 
-          Leo is fully scriptable. Any outline node can contain a script that accesses the outline's data directly. Such `leonine`_ scripts also have full access to all of Leo's source code via a straightforward `API`_. Leonine scripts and plugins can create new Leo commands. See Leo's `scripting basics chapter`_  for more details.
+          Leo is fully scriptable. Any outline node can contain a script that accesses the outline's data directly. 
+          Such `leonine`_ scripts also have full access to all of Leo's source code via a straightforward `API`_. 
+          Leonine scripts and plugins can create new Leo commands. See Leo's `scripting basics chapter`_  for more details.
         </p>
 
         <h3 className={clsx(styles.subtitle)}><span className={clsx(styles.homeQuote)}>LeoJS is a JavaScript implementation designed as an extension for VSCode.</span>
