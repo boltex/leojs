@@ -63,22 +63,23 @@ export default function Home() {
         <div className="container">
           <div className="row margin-bottom--md margin-top--md">
             <div className={clsx('col col--12')}>
-              <p className="intro">
-                Leo puts hierarchy (outline structure) at the center of everything. This structure helps you create, manage,
-                and revise any kind of document, including computer programs, documentation, to-do lists, and novels.
-                Leo can write external files automatically from select parts of the outline.
-                <br></br>
-                <br></br>
-                Writers and programmers often want to view or manipulate the same text in different ways, depending on context.
-                Leo's <a href="docs/getting-started/tutorial-pim/#clones">clones</a> lets you create multiple different views of data within the *same* outline.
-                You can organize code by functionality in one view and by file in another. You can see documentation from as many points of view as you like.
-                <br></br>
-                <br></br>
-                Leo is fully scriptable. Any outline node can contain a script that accesses the outline's data directly.
-                Such <a href="docs/advanced-topics/the-leonine-world">leonine</a> scripts also have full access to all of
-                Leo's source code via a straightforward <a href="docs/getting-started/tutorial-scripting">API</a>.
-                Leonine scripts and plugins can create new Leo commands. See Leo's <a href="docs/getting-started/tutorial-basics/#scripting-basics">scripting basics chapter</a> for more details.
-              </p>
+              <div className="intro">
+                <p>
+                  Leo puts hierarchy at the center of everything. This outline structure helps you create, manage, and revise any kind of document.
+                  Leo can write external files automatically from select parts of the outline.
+                </p>
+                <p>
+                  Authors often want to view or manipulate the same text in different ways depending on context.
+                  Leo's <a href="docs/getting-started/tutorial-pim/#clones">clones</a> let you create multiple views of data within the <span className="italic-text">same</span> outline.
+                  You can organize code by functionality in one view and by file in another, and see documentation from as many perspectives as you like.
+                </p>
+                <p>
+                  Leo is fully scriptable. Any outline node can contain a script that accesses the outline's data 
+                  directly. Scripts also have full 
+                  access to Leo's source code through a straightforward <a href="docs/getting-started/tutorial-scripting">API</a>.
+                  See Leo's <a href="docs/getting-started/tutorial-basics/#scripting-basics">scripting basics chapter</a> for more details.
+                </p>
+              </div>
             </div>
           </div>
         </div>
