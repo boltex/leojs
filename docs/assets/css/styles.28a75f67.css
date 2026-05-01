@@ -3207,6 +3207,26 @@ blockquote {
   box-shadow: var(--ifm-alert-shadow);
 }
 
+.intro {
+  font-size: 0.95rem;
+}
+
+.intro p {
+  margin-bottom: 0;
+}
+
+.intro p + p {
+  margin-top: 0.75rem;
+}
+
+.intro a {
+  font-weight: 500;
+}
+
+.italic-text {
+  font-style: italic;
+}
+
 .customPlayer1,
 .customPlayer2 {
   border-radius: 20px;
