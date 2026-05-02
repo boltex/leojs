@@ -36,7 +36,10 @@ export class MarkdownWriter extends BaseWriter {
                 // skip this 'placeholder level X' node
             } else {
                 this.write_headline(p);
-                const lines = p.b.split(/\r?\n/);
+                const normalized = p.b.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                const lines = normalized.endsWith('\n')
+                    ? normalized.split('\n').slice(0, -1)
+                    : normalized.split('\n');
                 for (const line of lines) {
                     if (!g.isDirective(line)) {
                         this.put(line);

@@ -2,7 +2,7 @@
 
 ## 1.0.16
 
-- ...
+- Fixed markdown writer.
 
 ## 1.0.15
 
