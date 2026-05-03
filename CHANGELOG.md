@@ -2,7 +2,7 @@
 
 ## 1.0.17
 
-- ...
+- Fixed cff command in leoFind as per Leo's #4640
 
 ## 1.0.16
 

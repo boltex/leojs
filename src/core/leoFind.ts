@@ -2884,66 +2884,40 @@ export class LeoFind {
             after = undefined;
         }
         let count = 0;
-        let found: Position | undefined;
         const clones: Position[] = [];
-        const skip: VNode[] = [];
+        const cloned_vnodes: VNode[] = [];
 
         while (p && p.__bool__() && !p.__eq__(after)) {
             const progress = p.copy();
             if (g.inAtNosearch(p)) {
                 p.moveToNodeAfterTree();
-            } else if (skip.includes(p.v)) {
-                p.moveToThreadNext();
             } else if (this._cfa_find_next_match(p)) {
-                count = count + 1;
-
-                if (flatten) {
-                    if (!skip.includes(p.v)) {
-                        skip.push(p.v); // as a set
-                    }
+                if (!cloned_vnodes.includes(p.v)) {
                     clones.push(p.copy());
-                    p.moveToThreadNext();
-                } else {
-                    if (
-                        // p not in clones
-                        clones.reduce((previous, current): boolean => {
-                            if (p.__eq__(current)) {
-                                return false; //is in it!
-                            }
-                            return previous;
-                        }, true)
-                    ) {
-                        clones.push(p.copy()); // push if not already in.
+                    cloned_vnodes.push(p.v);
+                    count += 1;
+                    if (flatten) {
+                        p.moveToThreadNext();
+                    } else {
+                        p.moveToNodeAfterTree();
                     }
-                    // Don't look at the node or it's descendants.
-                    for (let p2 of p.self_and_subtree(false)) {
-                        if (!skip.includes(p2.v)) {
-                            skip.push(p2.v); // as a set
-                        }
-                    }
-                    p.moveToNodeAfterTree();
                 }
             } else {
                 p.moveToThreadNext();
             }
-
             g.assert(!p.__eq__(progress));
         }
-
         if (clones.length) {
             const undoData = u.beforeInsertNode(c.p);
-            found = this._cfa_create_nodes(clones, false);
-            u.afterInsertNode(found, 'Clone Find All', undoData);
-            g.assert(
-                c.positionExists(found, undefined, true),
-                found.toString()
-            );
+            const found_p = this._cfa_create_nodes(clones, false);
+            u.afterInsertNode(found_p, 'Clone Find All', undoData);
+            g.assert(c.positionExists(found_p, undefined, true), found_p.toString());
             c.setChanged();
-            c.selectPosition(found);
-            // Put the count in found.h.
-            found.h = found.h.replace('Found:', `Found ${count}:`);
+            c.selectPosition(found_p);
+            // Put the count in found_p.h.
+            found_p.h = found_p.h.replace('Found:', `Found ${count}:`);
         }
-
+        // Reset data after calculating results.
         this.ftm.set_radio_button('entire-outline');
         // suboutline-only is a one-shot for batch commands.
         this.suboutline_only = false;
@@ -3006,12 +2980,12 @@ export class LeoFind {
         });
         return found;
     }
-    //@+node:felix.20221020232631.4: *5* find._cfa_find_next_match (for unit tests)
+    //@+node:felix.20221020232631.4: *5* find._cfa_find_next_match
     /**
      * Find the next batch match at p.
      */
     private _cfa_find_next_match(p: Position): boolean {
-        // Called only from unit tests.
+
         const table = [];
         if (this.search_headline) {
             table.push(p.h);
