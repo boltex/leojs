@@ -1125,27 +1125,39 @@ suite('Test cases for leoFind.ts', () => {
         const c = self.c;
         const x = new LeoFind(c);
         const table = [
-            // Only replace \n, \\n, \t and \\t.
-            ['\\', '\\'],
-            ['\\\\', '\\\\'],
-            ['a\bc', 'a\bc'],
-            ['a\\bc', 'a\\bc'],
-            ['a\\\\bc', 'a\\\\bc'],
-            ['a \ b', 'a \ b'],
-            ['a \\ b', 'a \\ b'],
-            ['a \\\ b', 'a \\\ b'],
-            ['a \\\\ b', 'a \\\\ b'],
-            ['a \\\\\\ b', 'a \\\\\\ b'],
+
+            // Replace \n, \t, and \f by newline, tab, and form-feed.
+            ['\\f', '\f'],
             ['\\n', '\n'],
             ['\\t', '\t'],
-            ['a\tc', 'a\tc'],  // Replace \t by a tab.
-            ['a\nc', 'a\nc'],  // Replace \n by a newline.
+            ['a\\n', 'a\n'],
+            ['a\\tc', 'a\tc'],
+            ['a\\t\\fc', 'a\t\fc'],
+            ['a\\nc', 'a\nc'],
+            // #4609: Replace one *or* two backslashes in the find string
+            //        with a single backslash in the change string.
+            ['\\', '\\'],
+            ['\\\\', '\\'],
+            ['\\\n', '\\\n'],
+            ['\\\\n', '\\n'],
+            ['\\\t', '\\\t'],
+            ['\\\\t', '\\t'],
+            ['\\\f', '\\\f'],
+            ['\\\\f', '\\f'],
+            [String.raw`b\\\\nd`, String.raw`b\\nd`],
+            [String.raw`a\bc`, String.raw`a\bc`],
+            [String.raw`a\\bc`, String.raw`a\bc`],
+            [String.raw`a\\\\bc`, String.raw`a\\bc`],
+            [String.raw`a \ b`, String.raw`a \ b`],
+            [String.raw`a \\ b`, String.raw`a \ b`],
+            [String.raw`a \\\ b`, String.raw`a \\ b`],
+            [String.raw`a \\\\ b`, String.raw`a \\ b`],
         ];
         let indexTest = 0;
-        for (const [s, expected] of table) {
+        for (const [input_s, expected_output_s] of table) {
             indexTest += 1;
-            const got = x.replace_back_slashes(s);
-            assert.strictEqual(expected, got, s);
+            const got = x.replace_back_slashes(input_s);
+            assert.strictEqual(expected_output_s, got, input_s);
         }
     });
     //@+node:felix.20221226222117.47: *4* TestFind.test_switch_style

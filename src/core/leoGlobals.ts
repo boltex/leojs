@@ -6473,6 +6473,28 @@ export async function handleUnl(unl_s: string, c: Commands): Promise<Commands | 
         app.selectLeoWindow(c2);  // Switch outlines.
     }
     c2.redraw(p);
+    // #4661: Select the line given by the Unl.
+    c2.bodyWantsFocusNow();
+    let i = unl.indexOf('::');
+    if (i > -1) {
+        let n_s = unl.slice(i + 2).trim();
+        let n;
+        try {
+            n = parseInt(n_s, 10);
+        } catch (e) {
+            return c2;
+        }
+        if (isNaN(n)) {
+            return c2;
+        }
+        // Select line n of p.b. Similar to GoToCommands.success.
+        let w = c.frame.body.wrapper;
+        let s = w.getAllText();
+        let ins = convertRowColToPythonIndex(s, n - 1, 0);
+        w.setInsertPoint(ins);
+        c.bodyWantsFocusNow();
+        w.seeInsertPoint();
+    }
     return c2;
 
 }
