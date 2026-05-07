@@ -119,6 +119,7 @@ type IFindUndoData = {
  */
 export class LeoFind {
     public c: Commands;
+    public seen_vnodes: VNode[] = [];
     public expert_mode: boolean = false; // Set in finishCreate.
     // Created by dw.createFindTab.
     public ftm!: StringFindTabManager; // FindTabManager;
@@ -1483,7 +1484,7 @@ export class LeoFind {
         // c.redraw(); // ? NEEDED ?
         return n;
     }
-    //@+node:felix.20221016013001.4: *6* find._change_all_helper
+    //@+node:felix.20221016013001.4: *6* find._change_all_helper & helper
     /**
      * Do the change-all command. Return the number of changes, or 0 for error.
      */
@@ -1497,15 +1498,15 @@ export class LeoFind {
         const saveData = this.save();
         u.beforeChangeGroup(current, undoType);
 
-        // Fix bug 338172: ReplaceAll will not replace newlines
-        // indicated as \n in target string.
         if (!this.find_text) {
             return 0;
         }
         if (!this.search_headline && !this.search_body) {
             return 0;
         }
+        this.find_text = this.replace_back_slashes(this.find_text);  // #4609
         this.change_text = this.replace_back_slashes(this.change_text);
+        const matches_dict: { body: number[]; head: number[]; v: VNode }[] = [];
         if (this.pattern_match) {
             const ok = this.compile_pattern();
             if (!ok) {
@@ -1525,6 +1526,8 @@ export class LeoFind {
 
         let count = 0;
         for (let p of positions) {
+            let body: number[] = [];
+            let head: number[] = [];
             let count_h: number | false = 0;
             let count_b: number | false = 0;
             let new_h: string | undefined;
@@ -1533,17 +1536,25 @@ export class LeoFind {
             if (this.search_headline) {
                 [count_h, new_h] = this._change_all_search_and_replace(p.h);
                 if (count_h) {
+                    head = this.find_all_literal_matches_in_string(p.v.h);
                     count += count_h;
                     p.h = new_h!;
+                    p.v.setDirty();  // #4660.
                 }
             }
             if (this.search_body) {
                 [count_b, new_b] = this._change_all_search_and_replace(p.b);
                 if (count_b) {
                     count += count_b;
+                    body = this.find_all_literal_matches_in_string(p.v.b);
                     p.b = new_b!;
+                    p.v.setDirty();  // #4660.
                 }
             }
+            if (body.length || head.length) {
+                matches_dict.push({ 'body': body, 'head': head, 'v': p.v });
+            }
+            //  Check if there was at least one change with either body or headline
             if (count_h || count_b) {
                 u.afterChangeNodeContents(p, 'Replace All', undoData);
                 // Also check to honor 'Mark Changes' option
@@ -1556,7 +1567,18 @@ export class LeoFind {
                 }
             }
         }
-
+        let new_p: Position;
+        if (matches_dict.length) {
+            // Create the result dict.
+            const result_string = this.make_result_from_matches(matches_dict);
+            // Create the summary node.
+            const undoData = u.beforeInsertNode(c.p);
+            const found_p = this.create_summary_node('change-all', result_string);
+            new_p = found_p;
+            u.afterInsertNode(found_p, undoType, undoData);
+        } else {
+            new_p = c.p
+        }
         // suboutline-only is a one-shot for batch commands.
         this.root = undefined;
         this.node_only = false;
@@ -1571,10 +1593,32 @@ export class LeoFind {
         }
         // c.recolor(); // ? NEEDED ?
         // c.redraw(p); // ? NEEDED ?
+        c.redraw(new_p);
         this.restore(saveData);
 
         return count;
     }
+
+    //@+node:ekr.20260504060502.1: *7* find.find_all_literal_matches_in_string
+    private find_all_literal_matches_in_string(s: string, replace_flag: boolean = true): number[] {
+        /**
+         * Find all matches in string s. For 'change-all'
+         *
+         * Return a list of indices into s.
+         */
+        // This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
+        if (g.isWindows) {
+            // Ignore '\r' characters, which may appear in @edit nodes.
+            // Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
+            s = s.replace('\r', '');
+        }
+        if (!s.trim()) {
+            return [];
+        }
+        const f = this.pattern_match ? this.find_all_regex.bind(this) : this.find_all_plain.bind(this);
+        return f(this.find_text, s);
+    }
+
     //@+node:felix.20221016013001.5: *6* find._change_all_search_and_replace & helpers
     /**
      * Search s for this.find_text and replace with this.change_text.
@@ -2260,7 +2304,7 @@ export class LeoFind {
         const result_string = this.make_result_from_matches(matches_dict);
         // Create the summary node.
         const undoData = u.beforeInsertNode(c.p);
-        const found_p = this.create_find_all_node(result_string);
+        const found_p = this.create_summary_node('find-all', result_string);
         u.afterInsertNode(found_p, undoType, undoData);
         c.selectPosition(found_p);
 
@@ -2289,16 +2333,16 @@ export class LeoFind {
             total_nodes: total_nodes,
         };
     }
-    //@+node:felix.20230212180757.4: *7* find.create_find_all_node
+    //@+node:felix.20230212180757.4: *7* find.create_summary_node
     /**
      * Create a "Found All" node as the last node of the outline.
      */
-    private create_find_all_node(result: string): Position {
+    private create_summary_node(kind: string, result: string): Position {
         const c = this.c;
 
         const found = c.lastTopLevel().insertAfter();
         g.assert(found && found.__bool__());
-        found.h = `find-all:${this.find_text}`;
+        found.h = `${kind}:${this.find_text}`;
         let status = this.compute_result_status(true);
         status = status.trim();
         status = g.ltrim(status, '(');
@@ -2320,6 +2364,7 @@ export class LeoFind {
     private make_result_from_matches(
         matches: { body: number[]; head: number[]; v: VNode }[]
     ): string {
+        this.seen_vnodes = [];
         const results: string[] = ['\n'];
         // Report settings.
         results.push(
@@ -2378,6 +2423,11 @@ export class LeoFind {
             g.trace(`Can not happen: no position for ${v.gnx}`);
             return;
         }
+        // Leo 6.8.9: Show headlines, not matching lines.
+        if (this.seen_vnodes.includes(found.v)) {
+            return;
+        }
+        this.seen_vnodes.push(found.v);
         const unl = found.get_UNL();
 
         // TODO : Maybe Send to GOTO PANE ?
@@ -2385,9 +2435,9 @@ export class LeoFind {
         g.es(line.trim() + `\n ${unl}::${line_number - 1}`);
         // log.put(line.strip() + '\n', nodeLink=f"{unl}::{line_number - 1}")  // Local line.
     }
-    //@+node:felix.20230212180757.8: *7* find.find_all_matches_in_string & helpers
+    //@+node:felix.20230212180757.8: *7* find.find_all_matches_in_string
     /**
-     * Find all matches in string s.
+     * Find all matches in string s. For 'find-all'
      *
      * Return a list of indices into s.
      */
@@ -2407,7 +2457,7 @@ export class LeoFind {
             : this.find_all_plain;
         return f.bind(this)(find_s, s);
     }
-    //@+node:felix.20230212180757.9: *8* find.find_all_plain
+    //@+node:felix.20230212180757.9: *7* find.find_all_plain
     /**
      * Perform all plain finds s, including whole-word finds.
      * return a list indices into s.
@@ -2435,7 +2485,7 @@ export class LeoFind {
         }
         return result;
     }
-    //@+node:felix.20230212180757.10: *8* find.find_all_regex
+    //@+node:felix.20230212180757.10: *7* find.find_all_regex
     /**
      * Perform all regex find/replace on s.
      * return a list of matching indices.
@@ -3523,12 +3573,12 @@ export class LeoFind {
         nocase: boolean,
         word: boolean
     ): [number, number] {
+        pattern = this.replace_back_slashes(pattern);  // #4660: Do this first.
         if (nocase) {
             s = s.toLowerCase();
             pattern = pattern.toLowerCase();
         }
 
-        pattern = this.replace_back_slashes(pattern);
         const n = pattern.length;
         let k;
 
@@ -3660,7 +3710,6 @@ export class LeoFind {
      */
     public replace_back_slashes(s: string): string {
 
-        // Replace backslash-n with a newline and backslash-t with a tab.
         let i = 0;
         const result: string[] = [];
 
@@ -3684,12 +3733,11 @@ export class LeoFind {
             } else if (ch === 'f') {
                 result.push('\f');
             } else if (ch === '\\') {
-                // 4284
-                result.push(ch);
-                result.push(ch);
+                result.push(ch); // #4601 Replace two backslashes with a single backslash.
             } else {
+                // #4601: A backslash followed by some other characters.
                 result.push('\\');
-                i -= 1;
+                result.push(ch);
             }
 
             g.assert(progress < i, "Progress must advance in each iteration.");
