@@ -1143,7 +1143,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737373736363730352e3831360a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737383434353936312e3832370a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4662,7 +4662,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737383132373839372e3533370a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313737383434353736362e3634380a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -21891,6 +21891,7 @@ set leoAtLeoFile(p_value: boolean) {
 <t tx="felix.20260501210029.1">## 1.0.17
 
 - Fixed cff command in leoFind as per Leo's #4640
+- Fixed Java importer as per Leo's #4471
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

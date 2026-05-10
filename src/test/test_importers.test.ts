@@ -1618,6 +1618,61 @@ suite('TestJava', () => {
     });
 
     //@+others
+    //@+node:felix.20260510125428.1: *3* TestJava.test_compound_statements
+    test('test_compound_statements', async () => {
+
+        // From https://www.cs.utexas.edu/~scottm/cs307/javacode/codeSamples/EightQueens.java
+        const s = `
+            public class EightQueens {
+
+                public static void solveAllNQueens(char[][] board, int col, ArrayList<char[][]> solutions){
+                    if( col == board.length){
+                        solutions.add( makeCopy(board));
+                    } else {
+                        for(int row = 0; row < board.length; row++){
+                            board[row][col] = 'q';
+                            if( queensAreSafe(board) )
+                                solveAllNQueens(board, col + 1, solutions);
+                            board[row][col] = '.';
+                        }
+                    }
+                }
+            }
+        `;
+        const expected_results: [number, string, string][] = [
+
+            [
+                0, '',  // Ignore the first headline.
+                '@others\n' +
+                '@language java\n' +
+                '@tabwidth -4\n'
+            ],
+            [
+                1, 'public class EightQueens',
+                'public class EightQueens {\n' +
+                '    @others\n' +
+                '}\n'
+            ],
+            [
+                2, 'public static void solveAllNQueens',
+                '\n' +
+                'public static void solveAllNQueens(char[][] board, int col, ArrayList<char[][]> solutions){\n' +
+                '    if( col == board.length){\n' +
+                '        solutions.add( makeCopy(board));\n' +
+                '    } else {\n' +
+                '        for(int row = 0; row < board.length; row++){\n' +
+                "            board[row][col] = 'q';\n" +
+                '            if( queensAreSafe(board) )\n' +
+                '                solveAllNQueens(board, col + 1, solutions);\n' +
+                "            board[row][col] = '.';\n" +
+                '        }\n' +
+                '    }\n' +
+                '}\n'
+            ],
+        ];
+        await self.new_run_test(s, expected_results);
+    });
+
     //@+node:felix.20230922002138.2: *3* TestJava.test_from_AdminPermission_java
     test('test_from_AdminPermission_java', async () => {
         //  To do: allow '{' on following line.
@@ -1636,21 +1691,24 @@ suite('TestJava', () => {
             }
         `;
         const expected_results: [number, string, string][] = [
-            [0, '',  // Ignore the first headline.
-                '@others\n' +
-                '@language java\n' +
-                '@tabwidth -4\n'
-            ],
-            [1, 'class AdminPermission',
+            [
+                0, '',  // Ignore the first headline.
                 '/**\n' +
                 " * Indicates the caller's authority to perform lifecycle operations on\n" +
                 ' */\n' +
                 '\n' +
+                '@others\n' +
+                '@language java\n' +
+                '@tabwidth -4\n'
+            ],
+            [
+                1, 'public final class AdminPermission',
                 'public final class AdminPermission extends BasicPermission {\n' +
                 '    @others\n' +
                 '}\n'
             ],
-            [2, 'func AdminPermission',
+            [
+                2, 'public AdminPermission',
                 '/**\n' +
                 ' * Creates a new <tt>AdminPermission</tt> object.\n' +
                 ' */\n' +
@@ -1686,13 +1744,8 @@ suite('TestJava', () => {
 
         `;
         const expected_results: [number, string, string][] = [
-            [0, '', // Ignore the first headline.
-                '@others\n' +
-                '\n' +  // Leo 6.8.7
-                '@language java\n' +
-                '@tabwidth -4\n'
-            ],
-            [1, 'class BundleException',
+            [
+                0, '',  // Ignore the first headline.
                 '/*\n' +
                 ' * $Header: /cvs/leo/test/unitTest.leo,v 1.247 2008/02/14 14:59:04 edream Exp $\n' +
                 ' *\n' +
@@ -1700,11 +1753,19 @@ suite('TestJava', () => {
                 '\n' +
                 'package org.osgi.framework;\n' +
                 '\n' +
+                '@others\n' +
+                '\n' +
+                '@language java\n' +
+                '@tabwidth -4\n'
+            ],
+            [
+                1, 'public class BundleException',
                 'public class BundleException extends Exception {\n' +
                 '    @others\n' +
                 '}\n'
             ],
-            [2, 'func BundleException',
+            [
+                2, 'public BundleException',
                 'static final long serialVersionUID = 3571095144220455665L;\n' +
                 '/**\n' +
                 ' * Nested exception.\n' +
@@ -1729,17 +1790,19 @@ suite('TestJava', () => {
             }
         `;
         const expected_results: [number, string, string][] = [
-            [0, '',  // Ignore the first headline.
+            [
+                0, '',  // Ignore the first headline.
                 '@others\n' +
                 '@language java\n' +
                 '@tabwidth -4\n'
-            ], [
+            ],
+            [
                 1, 'interface Bicycle',
                 'interface Bicycle {\n' +
                 '    void changeCadence(int newValue);\n' +
                 '    void changeGear(int newValue);\n' +
                 '}\n'
-            ]
+            ],
         ];
         await self.new_run_test(s, expected_results);
     });
@@ -1752,17 +1815,19 @@ suite('TestJava', () => {
             }
         `;
         const expected_results: [number, string, string][] = [
-            [0, '',  // Ignore the first headline.
+            [
+                0, '',  // Ignore the first headline.
                 '@others\n' +
                 '@language java\n' +
                 '@tabwidth -4\n'
-            ], [
+            ],
+            [
                 1, 'interface Bicycle',
                 'interface Bicycle {\n' +
                 'void changeCadence(int newValue);\n' +
                 'void changeGear(int newValue);\n' +
                 '}\n'
-            ]
+            ],
         ];
         await self.new_run_test(s, expected_results);
     });
@@ -2238,7 +2303,7 @@ suite('TestMarkdown', () => {
 
 
         // Must be in standard form, with a space after '#'.
-          const s = `
+        const s = `
             # Chapter 1: one
 
             This is the first chapter
