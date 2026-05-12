@@ -1991,7 +1991,7 @@ export class LoadManager {
     public async computeMyLeoSettingsPath(): Promise<string | undefined> {
         const lm = this;
         const join = g.finalize_join;
-        const settings_fn = 'myLeoSettings.leo';
+        const settings_fn = 'myLeoSettings';
         // This seems pointless: we need a machine *directory*.
 
         // TODO ?
@@ -2012,14 +2012,17 @@ export class LoadManager {
 
         const table = [
             // First, myLeoSettings.leo in the local directory
-            join(localDir, settings_fn),
+            join(localDir, settings_fn + ".leojs"),
+            join(localDir, settings_fn + ".leo"),
         ];
         // Next, myLeoSettings.leo in the home directories.
         if (g.app.homeDir) {
-            table.push(join(g.app.homeDir, settings_fn));
+            table.push(join(g.app.homeDir, settings_fn + ".leojs"));
+            table.push(join(g.app.homeDir, settings_fn + ".leo"));
         }
         if (g.app.homeLeoDir) {
-            table.push(join(g.app.homeLeoDir, settings_fn));
+            table.push(join(g.app.homeLeoDir, settings_fn + ".leojs"));
+            table.push(join(g.app.homeLeoDir, settings_fn + ".leo"));
         }
 
         // TODO ?
