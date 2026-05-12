@@ -4,6 +4,7 @@
 
 - Fixed cff command in leoFind as per Leo's #4640
 - Fixed Java importer as per Leo's #4471
+- Allow .leojs JSON format for "myLeoSettings".
 
 ## 1.0.16
 
