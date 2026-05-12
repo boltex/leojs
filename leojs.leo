@@ -1143,7 +1143,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737383434353936312e3832370a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313737383535353431362e3538350a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21892,6 +21892,7 @@ set leoAtLeoFile(p_value: boolean) {
 
 - Fixed cff command in leoFind as per Leo's #4640
 - Fixed Java importer as per Leo's #4471
+- Allow .leojs JSON format for "myLeoSettings".
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
