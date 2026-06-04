@@ -3467,7 +3467,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737373335313038382e3932380a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738303630363530362e3036350a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4662,7 +4662,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737383633373036312e3538390a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738303630363433382e3834340a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -10395,12 +10395,10 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
     const suboutlineOnly = searchSettings.suboutline_only || false;
 
     if (!nodeOnly &amp;&amp; !suboutlineOnly &amp;&amp; !fileOnly) {
-        find.entire_outline = true;
         if (!w.isChecked()) {
             w.toggle();
         }
     } else {
-        find.entire_outline = false;
         if (w.isChecked()) {
             w.toggle();
         }

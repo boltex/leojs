@@ -5673,12 +5673,10 @@ export class LeoUI extends NullGui {
         const suboutlineOnly = searchSettings.suboutline_only || false;
 
         if (!nodeOnly && !suboutlineOnly && !fileOnly) {
-            find.entire_outline = true;
             if (!w.isChecked()) {
                 w.toggle();
             }
         } else {
-            find.entire_outline = false;
             if (w.isChecked()) {
                 w.toggle();
             }

@@ -461,20 +461,20 @@ export class ExternalFilesController {
      */
     public compute_ext(c: Commands, p: Position, ext: string): string {
         if (ext) {
-            if (ext.startsWith("'")) {
-                ext = ext.replace(/^'+/, '');
-                ext = ext.replace(/'+$/, '');
-            }
-            if (ext.startsWith('"')) {
-                ext = ext.replace(/^"+/, '');
-                ext = ext.replace(/"+$/, '');
+            if ((ext.startsWith("'") && ext.endsWith("'")) ||
+                (ext.startsWith('"') && ext.endsWith('"'))) {
+                ext = ext.slice(1, -1);
             }
         }
         if (!ext) {
             // if node is part of @<file> tree, get ext from file name
             for (const p2 of p.self_and_parents(false)) {
                 if (p2.isAnyAtFileNode()) {
-                    const fn = p2.h.split(' ', 1)[1];
+                    const trimmed = p2.h.trim();
+                    const firstSpaceIndex = trimmed.search(/\s/);
+
+                    // If a space is found, grab everything after it; otherwise, default to empty
+                    const fn = firstSpaceIndex !== -1 ? trimmed.substring(firstSpaceIndex).trim() : '';
                     ext = g.os_path_splitext(fn)[1];
                     break;
                 }

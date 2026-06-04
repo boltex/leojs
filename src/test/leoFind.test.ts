@@ -365,7 +365,6 @@ suite('Test cases for leoFind.ts', () => {
 
         init();
         settings.search_headline = false;
-        settings.p!.setVisited();
         x.do_find_all(settings);
 
         console.log('Test 4.');
@@ -475,8 +474,6 @@ suite('Test cases for leoFind.ts', () => {
         settings.find_text = 'def top1';
         // Start at end, so we stay in the node.
         const grand_child = g.findNodeAnywhere(c, 'child 6');
-        settings.p = grand_child;
-        assert.ok(settings.p?.__bool__());
         settings.find_text = 'def child2';
         // Set c.p in the command.
         x.c.selectPosition(grand_child);
@@ -1011,15 +1008,14 @@ suite('Test cases for leoFind.ts', () => {
     });
     //@+node:felix.20221226222117.40: *4* TestFind.test_next_node_after_fail
     test('test_fnm_next_after_fail', () => {
+        const c = self.c;
         const settings = self.settings;
         const x = self.x;
         for (const reverse of [true, false]) {
             settings.reverse = reverse;
-            for (const wrapping of [true, false]) {
-                settings.wrapping = wrapping;
-                x.init_ivars_from_settings(settings);
-                x._fnm_next_after_fail(settings.p);
-            }
+            x.init_ivars_from_settings(settings);
+            x._fnm_next_after_fail(c.p);
+
         }
     });
     //@+node:felix.20221226222117.41: *4* TestFind.test_replace_all_plain_search
