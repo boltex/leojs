@@ -535,7 +535,7 @@ export class LeoFind {
         settings?: ISettings
     ): void {
         //@+<< docstring: find.interactive_search >>
-        //@+node:felix.20260524221933.2: *4* << docstring: find.interactive_search >>
+        //@+node:felix.20260524221933.2: *5* << docstring: find.interactive_search >>
         /*
         Support interactive find.
 
@@ -4246,6 +4246,41 @@ export class LeoFind {
     // this.escape_handler(event)
     //     else:
     // this.handler(event)
+    //@+node:felix.20260604181429.1: *4* find.do_arrow
+    public do_arrow(char: 'Up' | 'Down'): void {
+
+        // Remember the existing settings, as a side effect of calling get_settings.
+        this.ftm.get_settings();
+
+        // Compute the bunch to show.
+        let i = this.prev_searches_i;
+        const n = this.prev_searches.length;
+        if (n === 0) {
+            return; // Even with the get_Settings() side effect, there may be no previous searches.
+        }
+        this.prev_searches_i =
+            char === 'Up' && i - 1 >= 0
+                ? i - 1
+                : char === 'Down' && i + 1 < n
+                    ? i + 1
+                    : Math.max(0, Math.min(i, n - 1));
+        const bunch = this.prev_searches[this.prev_searches_i];
+        const find_s = bunch.find_text;
+        const change_s = bunch.change_text;
+
+        for (let key in bunch) {
+            const val = bunch[key as keyof ISettings];
+            if (this.ivars.includes(key as keyof LeoFind)) {
+                (this as any)[key] = val;
+            }
+        }
+
+        // Update the gui.
+        this.ftm.set_widgets_from_dict(bunch);
+        this.ftm.set_change_text(change_s);
+        this.ftm.set_find_text(find_s);
+
+    }
     //@+node:felix.20221022201804.12: *4* find.updateChange/FindList
     public update_change_list(s: string): void {
         if (!this.changeTextList.includes(s)) {

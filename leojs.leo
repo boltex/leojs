@@ -281,11 +281,12 @@
 <v t="felix.20220505215916.7"><vh>findQuick_marked</vh></v>
 <v t="felix.20220505215916.8"><vh>showGotoPane</vh></v>
 <v t="felix.20220505215916.9"><vh>gotoNavEntry</vh></v>
+<v t="felix.20221227223718.1"><vh>_get_focus</vh></v>
 <v t="felix.20240630150534.1"><vh>revealGotoNavEntry</vh></v>
 <v t="felix.20221027155905.1"><vh>navigateNavEntry</vh></v>
 </v>
 <v t="felix.20220505215924.1"><vh>Search</vh>
-<v t="felix.20221227223718.1"><vh>_get_focus</vh></v>
+<v t="felix.20260604180832.1"><vh>doArrow</vh></v>
 <v t="felix.20220505215924.2"><vh>navEnter</vh></v>
 <v t="felix.20220505215924.3"><vh>navTextChange</vh></v>
 <v t="felix.20221222003636.1"><vh>navTextClear</vh></v>
@@ -3467,7 +3468,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313738303630363530362e3036350a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738303631333739372e3130330a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4662,7 +4663,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738303630363433382e3834340a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738303631343035312e3130390a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -15914,7 +15915,7 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231219233411.1"></t>
-<t tx="felix.20231219233427.1" _mod_time="46313737373335313038382e3835350a2e">// @ts-check
+<t tx="felix.20231219233427.1" _mod_time="46313738303631333631342e3136310a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -16595,6 +16596,28 @@ set leoEditHeadline(p_value: boolean) {
             processChange();
         });
 
+    }
+
+    const findTextEl = document.getElementById('findText');
+    // Listen to arrowUp or arrowDown to trigger call to do_arroww command in leointeg
+    if (findTextEl) {
+        findTextEl.onkeydown = function (p_event) {
+            if (!p_event) {
+                // @ts-expect-error
+                p_event = window.event;
+            }
+            const keyCode = p_event.code || p_event.key;
+            console.log('findTextEl keydown', { keyCode, ctrlKey: p_event.ctrlKey, shiftKey: p_event.shiftKey });
+            if (keyCode === 'ArrowUp') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowUp' });
+            } else if (keyCode === 'ArrowDown') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowDown' });
+            }
+        };
     }
 
     findReplaceInputIds.forEach((p_inputId) =&gt; {
@@ -21891,6 +21914,17 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed cff command in leoFind as per Leo's #4640
 - Fixed Java importer as per Leo's #4471
 - Allow .leojs JSON format for "myLeoSettings".
+
+</t>
+<t tx="felix.20260604180832.1">/**
+ * Call the Leo do_arrow function with that char parameter, then refresh the find panel settings.
+ */
+public doArrow(key: "Up" | "Down") {
+    const c = g.app.windowList[this.frameIndex].c;
+    const fc = c.findCommands;
+    fc.do_arrow(key);
+    this.loadSearchSettings();
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

@@ -211,8 +211,8 @@ export class StringFindTabManager {
      * Similar to LeoFind.default_settings, but only for find-tab values.
      */
     public get_settings(): ISettings {
-        // const c = this.c;
-        // const finder = c.findCommands;
+        const c = this.c;
+        const finder = c.findCommands;
         const bunch: ISettings = {
             // Find/change strings...
             find_text: this.find_findbox.text(),
@@ -230,9 +230,8 @@ export class StringFindTabManager {
             search_headline: this.check_box_search_headline.isChecked(),
             whole_word: this.check_box_whole_word.isChecked(),
         };
-        console.log(`get_settings:`, bunch);
 
-        // finder._remember_settings(bunch);
+        finder._remember_settings(bunch);
         return bunch;
     }
     //@+node:felix.20221109235451.5: *3* sftm.init_widgets

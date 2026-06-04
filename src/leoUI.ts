@@ -5018,6 +5018,13 @@ export class LeoUI extends NullGui {
 
     }
 
+    private _get_focus(): string {
+        const c = g.app.windowList[this.frameIndex].c;
+        const w = g.app.gui.get_focus(c);
+        const focus = g.app.gui.widget_name(w);
+        return focus;
+    }
+
     /**
      * Reveals and selects the specific nav entry in the results of the nav pane.
      */
@@ -5036,11 +5043,14 @@ export class LeoUI extends NullGui {
         void this.leoGotoProvider.navigateNavEntry(p_nav);
     }
 
-    private _get_focus(): string {
+    /**
+     * Call the Leo do_arrow function with that char parameter, then refresh the find panel settings.
+     */
+    public doArrow(key: "Up" | "Down") {
         const c = g.app.windowList[this.frameIndex].c;
-        const w = g.app.gui.get_focus(c);
-        const focus = g.app.gui.widget_name(w);
-        return focus;
+        const fc = c.findCommands;
+        fc.do_arrow(key);
+        this.loadSearchSettings();
     }
 
     /**
