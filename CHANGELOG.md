@@ -5,6 +5,7 @@
 - Fixed cff command in leoFind as per Leo's #4640
 - Fixed Java importer as per Leo's #4471
 - Allow .leojs JSON format for "myLeoSettings".
+- Added Up/Down arrow support for search-history navigation in the find-pattern input box.
 
 ## 1.0.16
 
