@@ -344,6 +344,11 @@ export class ExternalFilesController {
         // #1888:
         const val = await this.ask(c, w_path);
         if (['yes', 'yes-all'].includes(val)) {
+
+
+            // ! RESOLVE "onIdlePromise" BECAUSE revertCommander WILL AWAIT IT AND IT WILL BLOCK !
+            this.resolveOnIdle();
+
             // Do a complete restart of Leo.
             await g.app.loadManager!.revertCommander(c);
             // ! LEOJS : FORCE GUI REFRESH AFTER A Change of opened document!

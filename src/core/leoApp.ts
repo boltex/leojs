@@ -3809,8 +3809,9 @@ export class LoadManager {
             if (!g.unitTesting) {
                 g.es_print(`Reverted ${c.fileName()}`);
             }
-        } catch {
+        } catch (e) {
             // Does not exist !
+            console.error(`Revert failed: ${fn}`, e);
         } finally {
             g.app.reverting = false;
         }

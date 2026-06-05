@@ -6,6 +6,7 @@
 - Fixed Java importer as per Leo's #4471
 - Allow .leojs JSON format for "myLeoSettings".
 - Added Up/Down arrow support for search-history navigation in the find-pattern input box.
+- Fixed issue #196, a UI freeze the happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
 
 ## 1.0.16
 
@@ -26,7 +27,7 @@
 - Fixed bug in goPrev method related to selecting previously visited nodes.
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
-- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Fixed dirty node handling in ExternalFilesController when reading modified files. Mirror of Leo's #4566.
 - Improved 'folder' icon image.
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
 - Fixed goto-prev-marked command.
