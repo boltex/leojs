@@ -6,7 +6,7 @@
 - Fixed Java importer as per Leo's #4471
 - Allow .leojs JSON format for "myLeoSettings".
 - Added Up/Down arrow support for search-history navigation in the find-pattern input box.
-- Fixed issue #196, a UI freeze the happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
+- Fixed issue #196, a UI freeze that happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
 
 ## 1.0.16
 
