@@ -5018,6 +5018,13 @@ export class LeoUI extends NullGui {
 
     }
 
+    private _get_focus(): string {
+        const c = g.app.windowList[this.frameIndex].c;
+        const w = g.app.gui.get_focus(c);
+        const focus = g.app.gui.widget_name(w);
+        return focus;
+    }
+
     /**
      * Reveals and selects the specific nav entry in the results of the nav pane.
      */
@@ -5036,11 +5043,14 @@ export class LeoUI extends NullGui {
         void this.leoGotoProvider.navigateNavEntry(p_nav);
     }
 
-    private _get_focus(): string {
+    /**
+     * Call the Leo do_arrow function with that char parameter, then refresh the find panel settings.
+     */
+    public doArrow(key: "Up" | "Down") {
         const c = g.app.windowList[this.frameIndex].c;
-        const w = g.app.gui.get_focus(c);
-        const focus = g.app.gui.widget_name(w);
-        return focus;
+        const fc = c.findCommands;
+        fc.do_arrow(key);
+        this.loadSearchSettings();
     }
 
     /**
@@ -5673,12 +5683,10 @@ export class LeoUI extends NullGui {
         const suboutlineOnly = searchSettings.suboutline_only || false;
 
         if (!nodeOnly && !suboutlineOnly && !fileOnly) {
-            find.entire_outline = true;
             if (!w.isChecked()) {
                 w.toggle();
             }
         } else {
-            find.entire_outline = false;
             if (w.isChecked()) {
                 w.toggle();
             }
@@ -5928,14 +5936,16 @@ export class LeoUI extends NullGui {
             }
 
             // Either way, try to open the file
-            await this.openLeoFile(vscode.Uri.file(w_result));
+            return this.openLeoFile(vscode.Uri.file(w_result)).then(
+                () => {
+                    // Now, maybe there is a file opened?
+                    if (g.app.windowList.length && g.app.windowList[this.frameIndex]) {
+                        // Already opened file
+                        const c = g.app.windowList[this.frameIndex].c;
+                        g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+                    }
+                });
 
-            // Now, maybe there is a file opened?
-            if (g.app.windowList.length && g.app.windowList[this.frameIndex]) {
-                // Already opened file
-                const c = g.app.windowList[this.frameIndex].c;
-                g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
-            }
         }
         return Promise.resolve(undefined);
 

@@ -211,22 +211,28 @@ export class StringFindTabManager {
      * Similar to LeoFind.default_settings, but only for find-tab values.
      */
     public get_settings(): ISettings {
-        return {
+        const c = this.c;
+        const finder = c.findCommands;
+        const bunch: ISettings = {
             // Find/change strings...
             find_text: this.find_findbox.text(),
             change_text: this.find_replacebox.text(),
             // Find options...
             file_only: this.radio_button_file_only.isChecked(),
+            node_only: this.radio_button_node_only.isChecked(),
+            suboutline_only: this.radio_button_suboutline_only.isChecked(),
+            // 
             ignore_case: this.check_box_ignore_case.isChecked(),
             mark_changes: this.check_box_mark_changes.isChecked(),
             mark_finds: this.check_box_mark_finds.isChecked(),
-            node_only: this.radio_button_node_only.isChecked(),
             pattern_match: this.check_box_regexp.isChecked(),
             search_body: this.check_box_search_body.isChecked(),
             search_headline: this.check_box_search_headline.isChecked(),
-            suboutline_only: this.radio_button_suboutline_only.isChecked(),
             whole_word: this.check_box_whole_word.isChecked(),
         };
+
+        finder._remember_settings(bunch);
+        return bunch;
     }
     //@+node:felix.20221109235451.5: *3* sftm.init_widgets
     /**

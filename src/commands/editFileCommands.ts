@@ -1085,7 +1085,7 @@ export class GitDiffController {
         if (!g.unitTesting) {
             g.es_print(`diffing ${n} file${g.plural(n)}`);
             if (n > 5) {
-                g.es_print('This may take awhile...');
+                g.es_print('This may take a while...');
             }
         }
 
@@ -1590,7 +1590,7 @@ export class GitDiffController {
         if (!g.unitTesting) {
             g.es_print(`diffing ${n} file${g.plural(n)}`);
             if (n > 5) {
-                g.es_print('This may take awhile...');
+                g.es_print('This may take a while...');
             }
         }
         c.selectPosition(c.lastTopLevel());  // pre-select to help undo-insert
@@ -1719,6 +1719,7 @@ export class GitDiffController {
      * Create nodes describing the changes.
      */
     public create_compare_node(
+        branch: string,
         c1: Commands,
         c2: Commands,
         d: { [key: string]: [VNode, VNode] | VNode },
@@ -1729,6 +1730,11 @@ export class GitDiffController {
         if (!d || Object.keys(d).length === 0) {
             return;
         }
+        const branches_match = (
+            branch === rev2 ||
+            rev2 === 'HEAD' ||
+            (rev1 === 'HEAD' && rev2 === '')  // diffing the latest changes.
+        );
         const parent = this.file_node!.insertAsLastChild();
         parent.setHeadString(`diff: ${kind}`);
         for (const key in d) {
@@ -1754,7 +1760,6 @@ export class GitDiffController {
                 } else {
                     body = ['Only headline has changed'];
                 }
-
                 organizer.b = body.join('');
                 // Node 2: Old node
                 const p2 = organizer.insertAsLastChild();
@@ -1762,9 +1767,9 @@ export class GitDiffController {
                 p2.b = v1.b;
                 // Node 3: New node
                 g.assert(v1.fileIndex === v2.fileIndex);
+                // Make a clone, if possible.
                 let p3;
-                if (p_in_c) {
-                    // Make a clone, if possible.
+                if (p_in_c && branches_match) {
                     p3 = p_in_c.clone();
                     p3.moveToLastChildOf(organizer);
                 } else {
@@ -2181,6 +2186,7 @@ export class GitDiffController {
         rev1 = '',
         rev2 = ''
     ): void {
+        const [branch, _commit] = g.gitInfo();
         const [added, deleted, changed] = this.compute_dicts(c1, c2);
         const table: [{ [key: string]: [VNode, VNode] | VNode }, string][] = [
             [added, 'Added'],
@@ -2188,7 +2194,7 @@ export class GitDiffController {
             [changed, 'Changed'],
         ];
         for (const [d, kind] of table) {
-            this.create_compare_node(c1, c2, d, kind, rev1, rev2);
+            this.create_compare_node(branch, c1, c2, d, kind, rev1, rev2);
         }
     }
     //@+node:felix.20230709010434.25: *5* gdc.compute_dicts

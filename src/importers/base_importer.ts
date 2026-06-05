@@ -89,6 +89,7 @@ export class Importer {
     // May be overridden in subclasses.
     public block_patterns: [string, RegExp][] = [];
     public string_list: string[] = ['"', "'"];
+    public compound_statements: string[] = [];
 
     public c: Commands;
     public root: Position | undefined;
@@ -470,6 +471,10 @@ export class Importer {
                 if (m) {
                     // cython may include trailing whitespace.
                     const name: string = m[1].trim();
+                    // #4471: ignore compound statements.
+                    if (this.compound_statements.includes(name)) {
+                        continue;
+                    }
                     const end: number = this.find_end_of_block(i, i2);
                     g.assert(i1 + 1 <= end && end <= i2, `${i1}, ${end}, ${i2}`);
 
@@ -530,7 +535,7 @@ export class Importer {
      */
     public compute_headline(block: Block): string {
         const name_s: string = block.name || `unnamed ${block.kind}`;
-        return `${block.kind} ${name_s}`;
+        return block.kind ? `${block.kind} ${name_s}` : name_s;
     }
     //@+node:felix.20250823124337.12: *5* 2D: i.generate_all_bodies & helpers
     /**

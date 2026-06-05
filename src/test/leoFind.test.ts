@@ -365,7 +365,6 @@ suite('Test cases for leoFind.ts', () => {
 
         init();
         settings.search_headline = false;
-        settings.p!.setVisited();
         x.do_find_all(settings);
 
         console.log('Test 4.');
@@ -475,8 +474,6 @@ suite('Test cases for leoFind.ts', () => {
         settings.find_text = 'def top1';
         // Start at end, so we stay in the node.
         const grand_child = g.findNodeAnywhere(c, 'child 6');
-        settings.p = grand_child;
-        assert.ok(settings.p?.__bool__());
         settings.find_text = 'def child2';
         // Set c.p in the command.
         x.c.selectPosition(grand_child);
@@ -1011,15 +1008,14 @@ suite('Test cases for leoFind.ts', () => {
     });
     //@+node:felix.20221226222117.40: *4* TestFind.test_next_node_after_fail
     test('test_fnm_next_after_fail', () => {
+        const c = self.c;
         const settings = self.settings;
         const x = self.x;
         for (const reverse of [true, false]) {
             settings.reverse = reverse;
-            for (const wrapping of [true, false]) {
-                settings.wrapping = wrapping;
-                x.init_ivars_from_settings(settings);
-                x._fnm_next_after_fail(settings.p);
-            }
+            x.init_ivars_from_settings(settings);
+            x._fnm_next_after_fail(c.p);
+
         }
     });
     //@+node:felix.20221226222117.41: *4* TestFind.test_replace_all_plain_search
@@ -1125,27 +1121,39 @@ suite('Test cases for leoFind.ts', () => {
         const c = self.c;
         const x = new LeoFind(c);
         const table = [
-            // Only replace \n, \\n, \t and \\t.
-            ['\\', '\\'],
-            ['\\\\', '\\\\'],
-            ['a\bc', 'a\bc'],
-            ['a\\bc', 'a\\bc'],
-            ['a\\\\bc', 'a\\\\bc'],
-            ['a \ b', 'a \ b'],
-            ['a \\ b', 'a \\ b'],
-            ['a \\\ b', 'a \\\ b'],
-            ['a \\\\ b', 'a \\\\ b'],
-            ['a \\\\\\ b', 'a \\\\\\ b'],
+
+            // Replace \n, \t, and \f by newline, tab, and form-feed.
+            ['\\f', '\f'],
             ['\\n', '\n'],
             ['\\t', '\t'],
-            ['a\tc', 'a\tc'],  // Replace \t by a tab.
-            ['a\nc', 'a\nc'],  // Replace \n by a newline.
+            ['a\\n', 'a\n'],
+            ['a\\tc', 'a\tc'],
+            ['a\\t\\fc', 'a\t\fc'],
+            ['a\\nc', 'a\nc'],
+            // #4609: Replace one *or* two backslashes in the find string
+            //        with a single backslash in the change string.
+            ['\\', '\\'],
+            ['\\\\', '\\'],
+            ['\\\n', '\\\n'],
+            ['\\\\n', '\\n'],
+            ['\\\t', '\\\t'],
+            ['\\\\t', '\\t'],
+            ['\\\f', '\\\f'],
+            ['\\\\f', '\\f'],
+            [String.raw`b\\\\nd`, String.raw`b\\nd`],
+            [String.raw`a\bc`, String.raw`a\bc`],
+            [String.raw`a\\bc`, String.raw`a\bc`],
+            [String.raw`a\\\\bc`, String.raw`a\\bc`],
+            [String.raw`a \ b`, String.raw`a \ b`],
+            [String.raw`a \\ b`, String.raw`a \ b`],
+            [String.raw`a \\\ b`, String.raw`a \\ b`],
+            [String.raw`a \\\\ b`, String.raw`a \\ b`],
         ];
         let indexTest = 0;
-        for (const [s, expected] of table) {
+        for (const [input_s, expected_output_s] of table) {
             indexTest += 1;
-            const got = x.replace_back_slashes(s);
-            assert.strictEqual(expected, got, s);
+            const got = x.replace_back_slashes(input_s);
+            assert.strictEqual(expected_output_s, got, input_s);
         }
     });
     //@+node:felix.20221226222117.47: *4* TestFind.test_switch_style

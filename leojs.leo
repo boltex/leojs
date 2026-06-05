@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20260501210029.1"><vh>1.0.17</vh></v>
 <v t="felix.20260428003551.1"><vh>1.0.16</vh></v>
 <v t="felix.20251014222608.1"><vh>1.0.15</vh></v>
 <v t="felix.20250622002355.1"><vh>1.0.14</vh></v>
@@ -280,11 +281,12 @@
 <v t="felix.20220505215916.7"><vh>findQuick_marked</vh></v>
 <v t="felix.20220505215916.8"><vh>showGotoPane</vh></v>
 <v t="felix.20220505215916.9"><vh>gotoNavEntry</vh></v>
+<v t="felix.20221227223718.1"><vh>_get_focus</vh></v>
 <v t="felix.20240630150534.1"><vh>revealGotoNavEntry</vh></v>
 <v t="felix.20221027155905.1"><vh>navigateNavEntry</vh></v>
 </v>
 <v t="felix.20220505215924.1"><vh>Search</vh>
-<v t="felix.20221227223718.1"><vh>_get_focus</vh></v>
+<v t="felix.20260604180832.1"><vh>doArrow</vh></v>
 <v t="felix.20220505215924.2"><vh>navEnter</vh></v>
 <v t="felix.20220505215924.3"><vh>navTextChange</vh></v>
 <v t="felix.20221222003636.1"><vh>navTextClear</vh></v>
@@ -1142,7 +1144,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737373638313035312e3533360a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738303639333530362e3137390a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -3466,7 +3468,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737373335313038382e3932380a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738303631373733342e3632380a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4661,13 +4663,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737373335323930372e3137380a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738303638393734352e3135320a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -7203,14 +7205,16 @@ public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
         }
 
         // Either way, try to open the file
-        await this.openLeoFile(vscode.Uri.file(w_result));
+        return this.openLeoFile(vscode.Uri.file(w_result)).then(
+            () =&gt; {
+                // Now, maybe there is a file opened?
+                if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
+                    // Already opened file
+                    const c = g.app.windowList[this.frameIndex].c;
+                    g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+                }
+            });
 
-        // Now, maybe there is a file opened?
-        if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
-            // Already opened file
-            const c = g.app.windowList[this.frameIndex].c;
-            g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
-        }
     }
     return Promise.resolve(undefined);
 
@@ -10394,12 +10398,10 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
     const suboutlineOnly = searchSettings.suboutline_only || false;
 
     if (!nodeOnly &amp;&amp; !suboutlineOnly &amp;&amp; !fileOnly) {
-        find.entire_outline = true;
         if (!w.isChecked()) {
             w.toggle();
         }
     } else {
-        find.entire_outline = false;
         if (w.isChecked()) {
             w.toggle();
         }
@@ -15915,7 +15917,7 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231219233411.1"></t>
-<t tx="felix.20231219233427.1" _mod_time="46313737373335313038382e3835350a2e">// @ts-check
+<t tx="felix.20231219233427.1" _mod_time="46313738303631333631342e3136310a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -16596,6 +16598,28 @@ set leoEditHeadline(p_value: boolean) {
             processChange();
         });
 
+    }
+
+    const findTextEl = document.getElementById('findText');
+    // Listen to arrowUp or arrowDown to trigger call to do_arroww command in leointeg
+    if (findTextEl) {
+        findTextEl.onkeydown = function (p_event) {
+            if (!p_event) {
+                // @ts-expect-error
+                p_event = window.event;
+            }
+            const keyCode = p_event.code || p_event.key;
+            console.log('findTextEl keydown', { keyCode, ctrlKey: p_event.ctrlKey, shiftKey: p_event.shiftKey });
+            if (keyCode === 'ArrowUp') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowUp' });
+            } else if (keyCode === 'ArrowDown') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowDown' });
+            }
+        };
     }
 
     findReplaceInputIds.forEach((p_inputId) =&gt; {
@@ -19544,7 +19568,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313737373335323930372e3137390a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313737373638333638342e3833320a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19581,7 +19605,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.16&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.17&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21875,7 +21899,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed bug in goPrev method related to selecting previously visited nodes.
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
-- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Fixed dirty node handling in ExternalFilesController when reading modified files. Mirror of Leo's #4566.
 - Improved 'folder' icon image.
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
 - Fixed goto-prev-marked command.
@@ -21885,6 +21909,26 @@ set leoAtLeoFile(p_value: boolean) {
 <t tx="felix.20260428003551.1">## 1.0.16
 
 - Fixed markdown writer.
+
+</t>
+<t tx="felix.20260501210029.1">## 1.0.17
+
+- Fixed cff command in leoFind as per Leo's #4640
+- Fixed Java importer as per Leo's #4471
+- Allow .leojs JSON format for "myLeoSettings".
+- Added Up/Down arrow support for search-history navigation in the find-pattern input box.
+- Fixed issue #196, a UI freeze that happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
+
+</t>
+<t tx="felix.20260604180832.1">/**
+ * Call the Leo do_arrow function with that char parameter, then refresh the find panel settings.
+ */
+public doArrow(key: "Up" | "Down") {
+    const c = g.app.windowList[this.frameIndex].c;
+    const fc = c.findCommands;
+    fc.do_arrow(key);
+    this.loadSearchSettings();
+}
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

@@ -681,6 +681,28 @@
 
     }
 
+    const findTextEl = document.getElementById('findText');
+    // Listen to arrowUp or arrowDown to trigger call to do_arroww command in leointeg
+    if (findTextEl) {
+        findTextEl.onkeydown = function (p_event) {
+            if (!p_event) {
+                // @ts-expect-error
+                p_event = window.event;
+            }
+            const keyCode = p_event.code || p_event.key;
+            console.log('findTextEl keydown', { keyCode, ctrlKey: p_event.ctrlKey, shiftKey: p_event.shiftKey });
+            if (keyCode === 'ArrowUp') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowUp' });
+            } else if (keyCode === 'ArrowDown') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowDown' });
+            }
+        };
+    }
+
     findReplaceInputIds.forEach((p_inputId) => {
         const w_inputEl = document.getElementById(p_inputId);
         if (w_inputEl) {

@@ -1991,7 +1991,7 @@ export class LoadManager {
     public async computeMyLeoSettingsPath(): Promise<string | undefined> {
         const lm = this;
         const join = g.finalize_join;
-        const settings_fn = 'myLeoSettings.leo';
+        const settings_fn = 'myLeoSettings';
         // This seems pointless: we need a machine *directory*.
 
         // TODO ?
@@ -2031,21 +2031,18 @@ export class LoadManager {
         join(g.app.globalConfigDir, settings_fn),
         */
 
-        let hasBreak = false;
-        let path: string | undefined;
         for (let p_path of table) {
-            const exists = await g.os_path_exists(p_path);
+            let exists = await g.os_path_exists(p_path + ".leo");
             if (exists) {
-                path = p_path;
-                hasBreak = true;
-                break;
+                return p_path + ".leo";
+            }
+            exists = await g.os_path_exists(p_path + ".leojs");
+            if (exists) {
+                return p_path + ".leojs";
             }
         }
-        if (!hasBreak) {
-            path = undefined;
-        }
 
-        return path;
+        return undefined;
     }
 
     //@+node:felix.20220610002953.5: *4* LM.computeStandardDirectories & helpers
@@ -3812,8 +3809,9 @@ export class LoadManager {
             if (!g.unitTesting) {
                 g.es_print(`Reverted ${c.fileName()}`);
             }
-        } catch {
+        } catch (e) {
             // Does not exist !
+            console.error(`Revert failed: ${fn}`, e);
         } finally {
             g.app.reverting = false;
         }
