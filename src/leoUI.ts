@@ -5936,14 +5936,16 @@ export class LeoUI extends NullGui {
             }
 
             // Either way, try to open the file
-            await this.openLeoFile(vscode.Uri.file(w_result));
+            return this.openLeoFile(vscode.Uri.file(w_result)).then(
+                () => {
+                    // Now, maybe there is a file opened?
+                    if (g.app.windowList.length && g.app.windowList[this.frameIndex]) {
+                        // Already opened file
+                        const c = g.app.windowList[this.frameIndex].c;
+                        g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+                    }
+                });
 
-            // Now, maybe there is a file opened?
-            if (g.app.windowList.length && g.app.windowList[this.frameIndex]) {
-                // Already opened file
-                const c = g.app.windowList[this.frameIndex].c;
-                g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
-            }
         }
         return Promise.resolve(undefined);
 
