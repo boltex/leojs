@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.18
+
+- ...
+
 ## 1.0.17
 
 - Fixed cff command in leoFind as per Leo's #4640
