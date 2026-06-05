@@ -3468,7 +3468,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313738303631333739372e3130330a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738303631373733342e3632380a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -7205,14 +7205,16 @@ public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
         }
 
         // Either way, try to open the file
-        await this.openLeoFile(vscode.Uri.file(w_result));
+        return this.openLeoFile(vscode.Uri.file(w_result)).then(
+            () =&gt; {
+                // Now, maybe there is a file opened?
+                if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
+                    // Already opened file
+                    const c = g.app.windowList[this.frameIndex].c;
+                    g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+                }
+            });
 
-        // Now, maybe there is a file opened?
-        if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
-            // Already opened file
-            const c = g.app.windowList[this.frameIndex].c;
-            g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
-        }
     }
     return Promise.resolve(undefined);
 
