@@ -345,7 +345,6 @@ export class ExternalFilesController {
         const val = await this.ask(c, w_path);
         if (['yes', 'yes-all'].includes(val)) {
 
-
             // ! RESOLVE "onIdlePromise" BECAUSE revertCommander WILL AWAIT IT AND IT WILL BLOCK !
             this.resolveOnIdle();
 
@@ -355,7 +354,7 @@ export class ExternalFilesController {
             g.app.gui.fullRefresh(true);
             g.es_print(`reloaded ${w_path}`);
             void vscode.window.showInformationMessage(
-                'Changes to Leo files were detected. Reloaded.'
+                `Changes to Leo file detected. Reloaded ${g.shortFilename(w_path)}`
             );
         }
     }
