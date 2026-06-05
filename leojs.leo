@@ -1144,7 +1144,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738303639303035322e3936390a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738303639333530362e3137390a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21917,7 +21917,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed Java importer as per Leo's #4471
 - Allow .leojs JSON format for "myLeoSettings".
 - Added Up/Down arrow support for search-history navigation in the find-pattern input box.
-- Fixed issue #196, a UI freeze the happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
+- Fixed issue #196, a UI freeze that happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
 
 </t>
 <t tx="felix.20260604180832.1">/**
