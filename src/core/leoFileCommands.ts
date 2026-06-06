@@ -1580,7 +1580,7 @@ export class FileCommands {
             return v;
 
         } catch (e) {
-
+            console.error('error reading file in _getLeoFileByName', e);
         }
 
     }
