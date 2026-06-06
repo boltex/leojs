@@ -1145,7 +1145,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738303639343335372e3535340a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738303737343231342e38380a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21934,7 +21934,7 @@ public doArrow(key: "Up" | "Down") {
 </t>
 <t tx="felix.20260605171910.1">## 1.0.18
 
-- ...
+- Fixed issue #199, a UI Freeze that happened when loading a leo file with missing external files
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
