@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.19
+
+- ...
+
 ## 1.0.18
 
 - Fixed issue #199, a UI Freeze that happened when loading a leo file with missing external files
