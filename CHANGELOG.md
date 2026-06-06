@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.18
+
+- Fixed issue #199, a UI Freeze that happened when loading a leo file with missing external files
+
 ## 1.0.17
 
 - Fixed cff command in leoFind as per Leo's #4640
