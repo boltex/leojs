@@ -1146,7 +1146,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738303737343633362e3934390a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738303739333536352e3339330a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21940,7 +21940,7 @@ public doArrow(key: "Up" | "Down") {
 </t>
 <t tx="felix.20260606153503.1">## 1.0.19
 
-- ...
+- Improved error messages when writing external files. Mirror of Leo's #4732
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
