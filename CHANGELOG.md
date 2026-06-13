@@ -3,6 +3,7 @@
 ## 1.0.19
 
 - Improved error messages when writing external files. Mirror of Leo's #4732
+- Removed documentation sections which contained python-only/docutils features which are unavailable for now in LeoJS.
 
 ## 1.0.18
 
