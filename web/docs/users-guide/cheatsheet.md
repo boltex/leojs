@@ -5,7 +5,6 @@ sidebar_position: 5
 # Cheat Sheet
 
 This Cheat Sheet contains a summary of many of Leo's important features.
-**Important**: The easiest way to find documentation is to search LeoDocs.leo.
 
 ## Key bindings
 

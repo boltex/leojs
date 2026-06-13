@@ -441,15 +441,6 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
 
 **Opening specific files**:
 
-`open-cheat-sheet-leo`\
-    Opens CheatSheet.leo in a new tab or window.
-
-`open-leoDocs-leo`\
-    Opens LeoDocs.leo in a new tab or window.
-
-`open-scripts-leo`\
-    Opens scripts.leo in a new tab or window.
-
 `open-leoSettings-leo`\
     Opens _leoSettings.leo_ in a new tab or window.
 
