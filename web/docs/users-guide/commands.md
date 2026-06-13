@@ -441,8 +441,11 @@ Leo supports unlimited undo and redo with the `undo` (Ctrl-Z) and `redo` (Ctrl-S
 
 **Opening specific files**:
 
-`open-leoSettings-leo`\
-    Opens _leoSettings.leo_ in a new tab or window.
+`open-my-leo-settings`\
+    Opens _myLeoSettings.leo_ in a new tab or window.
+
+`open-leo-Settings`\
+    Opens default _leoSettings.leo_ in a new tab or window.
 
 **Writing external files without saving the outline**:
 
