@@ -93,11 +93,7 @@ You can also create most of those nodes by using the context menu in vscode's ex
 
 The **Go to Line In LeoJS Outline** command is also available in the editor context menu to find a specific line in the outline. It will offer to import the file if no type of **@file** nodes are found in the outline for that file.
 
-Leo will detect external file changes, and will ask to either **refresh from disk** or **ignore the changes**. 
-
-See the [LeoJS extension settings](#extension-settings) to decide how and when to refresh and synchronize content when external files are modified:
-
-![External File Change Detected](img/external-files-change-detection.png#center)
+Leo will detect external file changes.
 
 ## Extension Settings
 
@@ -114,7 +110,7 @@ See the [LeoJS extension settings](#extension-settings) to decide how and when t
 
 Arrow keys, home/end, page up/down are used for basic navigation. But in order to **find and goto specific nodes directly**, use the methods described below:
 
-### Goto Anywhere Command
+### Go Anywhere Command
 
 In vscode, the **`Ctrl+P`** shortcut allows you to switch to any project file, but **when the focus is in one of Leo's panels**, the **`Ctrl+P`** keybinding allows you to switch to any node directly by typing (part of) its headline.
 
