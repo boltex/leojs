@@ -328,16 +328,16 @@ const w = c.frame.body.wrapper; // Leo's body pane.
 
 // Scripts can get or change the context of the body as follows:
 
-w.appendText(s)                     // Append s to end of body text.
-w.delete(i,j=None)                  // Delete characters from i to j.
-w.deleteTextSelection()             // Delete the selected text, if any.
-s = w.get(i,j=None)                 // Return the text from i to j.
-s = w.getAllText                    // Return the entire body text.
-i = w.getInsertPoint()              // Return the location of the cursor.
-s = w.getSelectedText()             // Return the selected text, if any.
-[i,j] = w.getSelectionRange(sort=True)// Return the range of selected text.
-w.setAllText(s)                     // Set the entire body text to s.
-w.setSelectionRange(i,j,insert=None) // Select the text.
+w.appendText(s);                     // Append s to end of body text.
+w.delete(i,j);                  // Delete characters from i to j.
+w.deleteTextSelection();             // Delete the selected text, if any.
+s = w.get(i,j);                 // Return the text from i to j.
+s = w.getAllText();                    // Return the entire body text.
+i = w.getInsertPoint();              // Return the location of the cursor.
+s = w.getSelectedText();             // Return the selected text, if any.
+[i,j] = w.getSelectionRange(sortFlag); // Return the range of selected text. 
+w.setAllText(s);                     // Set the entire body text to s.
+w.setSelectionRange(i,j,insert) // Select the text.
 ```
 
 > 📌 **NOTE**\
