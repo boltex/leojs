@@ -545,7 +545,7 @@ suite('Test cases for leoFind.ts', () => {
     test('test_replace_then_find_in_headline', () => {
         const settings = self.settings;
         const x = self.x;
-        // const p = settings.p!; // ! TODO : CHECK IF ERROR !
+
         settings.find_text = 'Node 1';
         settings.change_text = 'Node 1a';
         settings.in_headline = true;
