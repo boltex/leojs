@@ -199,10 +199,8 @@ function _createMdxContent(props) {
         id: "cheat-sheet",
         children: "Cheat Sheet"
       })
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: ["This Cheat Sheet contains a summary of many of Leo's important features.\r\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
-        children: "Important"
-      }), ": The easiest way to find documentation is to search LeoDocs.leo."]
+    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
+      children: "This Cheat Sheet contains a summary of many of Leo's important features."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "key-bindings",
       children: "Key bindings"

@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 6
+	sidebar_position: 5
 };
 const contentTitle = 'Writing Leo scripts';
 const metadata = {
@@ -33,14 +33,14 @@ const metadata = {
   "unlisted": false,
   "tags": [],
   "version": "current",
-  "sidebarPosition": 6,
+  "sidebarPosition": 5,
   "frontMatter": {
-    "sidebar_position": 6
+    "sidebar_position": 5
   },
   "sidebar": "gettingStartedSidebar",
   "previous": {
-    "title": "Creating Documents from Outlines",
-    "permalink": "/leojs/docs/getting-started/tutorial-rst3"
+    "title": "Using Leo as a PIM",
+    "permalink": "/leojs/docs/getting-started/tutorial-pim"
   },
   "next": {
     "title": "Useful Tips",

@@ -86,8 +86,8 @@ const toc = [{
   "id": "navigating-a-leo-document",
   "level": 2
 }, {
-  "value": "Goto Anywhere Command",
-  "id": "goto-anywhere-command",
+  "value": "Go Anywhere Command",
+  "id": "go-anywhere-command",
   "level": 3
 }, {
   "value": "Find Panel",
@@ -815,24 +815,8 @@ function _createMdxContent(props) {
       }), " command is also available in the editor context menu to find a specific line in the outline. It will offer to import the file if no type of ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "@file"
       }), " nodes are found in the outline for that file."]
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: ["Leo will detect external file changes, and will ask to either ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
-        children: "refresh from disk"
-      }), " or ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
-        children: "ignore the changes"
-      }), "."]
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
-      children: ["See the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.a, {
-        href: "#extension-settings",
-        children: "LeoJS extension settings"
-      }), " to decide how and when to refresh and synchronize content when external files are modified:"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
-        alt: "External File Change Detected",
-        src: (__webpack_require__(7886)/* ["default"] */ .A) + "#center",
-        width: "689",
-        height: "284"
-      })
+      children: "Leo will detect external file changes."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "extension-settings",
       children: "Extension Settings"
@@ -870,8 +854,8 @@ function _createMdxContent(props) {
         children: "find and goto specific nodes directly"
       }), ", use the methods described below:"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
-      id: "goto-anywhere-command",
-      children: "Goto Anywhere Command"
+      id: "go-anywhere-command",
+      children: "Go Anywhere Command"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
       children: ["In vscode, the ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
@@ -995,16 +979,6 @@ function MDXContent(props = {}) {
 }
 
 
-
-/***/ }),
-
-/***/ 7886:
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "assets/images/external-files-change-detection-13446a1a55f0f52f0e7fdb5feda68bdc.png");
 
 /***/ }),
 

@@ -669,7 +669,7 @@ function _createMdxContent(props) {
         children: "must"
       }), " be descendants of an ", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.strong, {
         children: "@settings"
-      }), " node. Moving a settings node out from the @settings tree disables the setting. Headlines start with @ followed by a type, and possibly a value.  Here are some examples, with body text shown indented from headlines:"]
+      }), " node. Moving a settings node out from the @settings tree disables the setting. Headlines start with @ followed by a type, and possibly a value."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.img, {
         alt: "Settings",

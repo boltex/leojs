@@ -137,10 +137,6 @@ const toc = [{
   "value": "Using g.execute_shell_commands",
   "id": "using-gexecute_shell_commands",
   "level": 3
-}, {
-  "value": "Working and paths",
-  "id": "working-and-paths",
-  "level": 2
 }];
 function _createMdxContent(props) {
   const _components = {
@@ -402,7 +398,7 @@ function _createMdxContent(props) {
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
       children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
         className: "language-js",
-        children: "const w = c.frame.body.wrapper; // Leo's body pane.\r\n\r\n// Scripts can get or change the context of the body as follows:\r\n\r\nw.appendText(s)                     // Append s to end of body text.\r\nw.delete(i,j=None)                  // Delete characters from i to j.\r\nw.deleteTextSelection()             // Delete the selected text, if any.\r\ns = w.get(i,j=None)                 // Return the text from i to j.\r\ns = w.getAllText                    // Return the entire body text.\r\ni = w.getInsertPoint()              // Return the location of the cursor.\r\ns = w.getSelectedText()             // Return the selected text, if any.\r\n[i,j] = w.getSelectionRange(sort=True)// Return the range of selected text.\r\nw.setAllText(s)                     // Set the entire body text to s.\r\nw.setSelectionRange(i,j,insert=None) // Select the text.\n"
+        children: "const w = c.frame.body.wrapper; // Leo's body pane.\r\n\r\n// Scripts can get or change the context of the body as follows:\r\n\r\nw.appendText(s);                     // Append s to end of body text.\r\nw.delete(i,j);                  // Delete characters from i to j.\r\nw.deleteTextSelection();             // Delete the selected text, if any.\r\ns = w.get(i,j);                 // Return the text from i to j.\r\ns = w.getAllText();                    // Return the entire body text.\r\ni = w.getInsertPoint();              // Return the location of the cursor.\r\ns = w.getSelectedText();             // Return the selected text, if any.\r\n[i,j] = w.getSelectionRange(sortFlag); // Return the range of selected text. \r\nw.setAllText(s);                     // Set the entire body text to s.\r\nw.setSelectionRange(i,j,insert) // Select the text.\n"
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.blockquote, {
       children: ["\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(_components.p, {
@@ -581,16 +577,6 @@ function _createMdxContent(props) {
       })
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "g.execute_shell_commands_with_options inits an environment and then calls g.execute_shell_commands.  See Leo's source code for details."
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
-      id: "working-and-paths",
-      children: "Working and paths"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
-      children: "d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file:"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.pre, {
-      children: (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.code, {
-        className: "language-ts",
-        children: "const myPath = d['path'];\r\nlet name = p.anyAtFileNodeName();\r\nif (name){\r\n    name = g.os_path_finalize_join(myPath, name);\r\n    g.es(name);\r\n}\n"
-      })
     })]
   });
 }

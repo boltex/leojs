@@ -18,7 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const frontMatter = {
-	sidebar_position: 7,
+	sidebar_position: 6,
 	toc_max_heading_level: 2
 };
 const contentTitle = 'Useful Tips';
@@ -34,9 +34,9 @@ const metadata = {
   "unlisted": false,
   "tags": [],
   "version": "current",
-  "sidebarPosition": 7,
+  "sidebarPosition": 6,
   "frontMatter": {
-    "sidebar_position": 7,
+    "sidebar_position": 6,
     "toc_max_heading_level": 2
   },
   "sidebar": "gettingStartedSidebar",
@@ -76,8 +76,8 @@ const toc = [{
   "id": "put-personal-settings-myleosettingsleo",
   "level": 3
 }, {
-  "value": "Search for settings in leoSettings.leo",
-  "id": "search-for-settings-in-leosettingsleo",
+  "value": "Search for settings in leojsSettings.leojs",
+  "id": "search-for-settings-in-leojssettingsleojs",
   "level": 3
 }, {
   "value": "Useful commands and actions",
@@ -210,8 +210,8 @@ function _createMdxContent(props) {
         children: "Copy the desired settings nodes from leoSettings.leo to myLeoSettings.leo."
       }), "\n"]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
-      id: "search-for-settings-in-leosettingsleo",
-      children: "Search for settings in leoSettings.leo"
+      id: "search-for-settings-in-leojssettingsleojs",
+      children: "Search for settings in leojsSettings.leojs"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "leojsSettings.leojs contains the defaults for all of LeoJS settings, with\r\ndocumentation for each."
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {

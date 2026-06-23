@@ -56,10 +56,6 @@ const toc = [{
   "id": "",
   "level": 2
 }, {
-  "value": "@",
-  "id": "-1",
-  "level": 3
-}, {
   "value": "@@ convention for headlines",
   "id": "-convention-for-headlines",
   "level": 3
@@ -445,9 +441,6 @@ function _createMdxContent(props) {
       }), "."]
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h2, {
       id: "",
-      children: "@"
-    }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.h3, {
-      id: "-1",
       children: "@"
     }), "\n", (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx)(_components.p, {
       children: "Starts a doc part. Doc parts continue until an @c\r\ndirective or the end of the body text."
