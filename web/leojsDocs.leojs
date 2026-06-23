@@ -63,7 +63,91 @@
             },
             {
               "gnx": "felix.20250623142345.1",
-              "vh": "@auto docs/getting-started/tutorial-rst3.md"
+              "vh": "@@auto docs/getting-started/tutorial-rst3.md",
+              "children": [
+                {
+                  "gnx": "felix.20260612211517.49",
+                  "vh": "!Declarations"
+                },
+                {
+                  "gnx": "felix.20260612211517.50",
+                  "vh": "Creating Documents from Outlines",
+                  "children": [
+                    {
+                      "gnx": "felix.20260612211517.51",
+                      "vh": "Install docutils and (optional) sphinx"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.52",
+                      "vh": "Create the @rst node"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.53",
+                      "vh": "The output and intermediate files"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.54",
+                      "vh": "Choose docutils or sphinx",
+                      "children": [
+                        {
+                          "gnx": "felix.20260612211517.55",
+                          "vh": "Setting up conf.py for sphinx"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20260612211517.56",
+                      "vh": "Put a title in the @rst node"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.57",
+                      "vh": "Start the chapter"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.58",
+                      "vh": "Create sections and subsections"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.59",
+                      "vh": "Write your document"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.60",
+                      "vh": "Run the rst3 command"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.61",
+                      "vh": "Other topics",
+                      "children": [
+                        {
+                          "gnx": "felix.20260612211517.62",
+                          "vh": "\\@rst-no-head suppresses sections"
+                        },
+                        {
+                          "gnx": "felix.20260612211517.63",
+                          "vh": "\\@rst-ignore & @rst-ignore-tree ignore text"
+                        },
+                        {
+                          "gnx": "felix.20260612211517.64",
+                          "vh": "Inserting raw markup"
+                        },
+                        {
+                          "gnx": "felix.20260612211517.65",
+                          "vh": "Filtering contents"
+                        }
+                      ]
+                    },
+                    {
+                      "gnx": "felix.20260612211517.66",
+                      "vh": "Summary"
+                    },
+                    {
+                      "gnx": "felix.20260612211517.67",
+                      "vh": "Further study"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "gnx": "felix.20240820012448.1",
@@ -154,6 +238,26 @@
   ],
   "tnodes": {
     "felix.20240816225702.1": "This section contains files used to generate the LeoJS web site.",
-    "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd web`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n"
+    "felix.20240816220939.1": "@pagewidth 70\n@tabwidth -4\n\nThese are the sources for the LeoJS users guide.\n\nThey contain markdown to be used with docusaurus or other web documentation frameworks. See:\n\n    https://docusaurus.io/\n\nTo generate these docs:\n\n    `cd web`\n    To run a develepment server\n    `npm run start`\n    To build\n    `npm run build`\n",
+    "felix.20250623142345.1": "@language md\n@tabwidth -4\n",
+    "felix.20260612211517.49": "---\nsidebar_position: 5\n---\n\n",
+    "felix.20260612211517.50": "Leo's rst3 command converts Leo trees containing [reStructuredText](https://docutils.sourceforge.net/rst.html) (rST) or [Sphinx](https://sphinx-doc.org/) markup to HTML, PDF, [LaTeX](https://www.latex-project.org/), and other kinds of output files. This tutorial gives step-by-step instructions for using the rst3 command.\n\n**Prerequisites**: Please make sure you have read the [first tutorial](../getting-started/tutorial-basics.md) before reading this one. If you are new to rST, please read the [rST primer](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html). For full information about Sphinx, please read the [Sphinx documentation](https://sphinx-doc.org/contents.html).\n\nThe rst3 command makes using rST or Sphinx *much* easier by automatically creating underlining for rST sections. To reorganize a document, just reorganize the corresponding Leo outline: you don't have to change underlining characters by hand.\n\nThe tutorial covers only the basic features of the rst3 command. This is enough to generate all of Leo's documentation!\n\nCheatSheet.leo contains an expanded version of the example used in this tutorial. You can open CheatSheet.leo from Leo's help menu.\n\n",
+    "felix.20260612211517.51": "The rst3 command requires the [docutils](https://docutils.sourceforge.net) Python package. You must also install the [Sphinx](https://sphinx-doc.org/) package if you use sphinx markup. Sphinx gives Leo's and [Python's](https://www.python.org/) websites their distinctive appearance and features. After installing docutils or sphinx, you must restart Leo so that the new installation will take effect.\n\n",
+    "felix.20260612211517.52": "1. Create a node someplace in your outline.\n\n2. Type this in the headline:\n   ```\n   @rst myDocument.html\n   ```\n   \nThe @rst node, including its descendants, represents your document.\n\n",
+    "felix.20260612211517.53": "The rst3 command applied to:\n\n```\n@rst myDocument.html\n```\n\nwill generate an **output file**, myDocument.html, from this node and its children, grandchildren, etc. The rst3 command creates the output file in the same directory as the .leo file containing the @rst node. You can specify other directories using absolute or relative paths. Examples:\n\n```\n@rst myDocument.html        # in same folder as the .leo file\n@rst html/myDocument.html   # in a subfolder\n@rst ~/docs/myDocument.html # an absolute path to the folder\n```\n\nThe rst3 command writes an **intermediate file** in the same directory as the output file. This intermediate file contains the reStructuredText markup generated by the rst3 command. It has the suffix .txt:\n\n```\nmyDocument.html.txt\n```\n\n",
+    "felix.20260612211517.54": "Put the rst3_call_docutils setting in the @settings tree in the .leo file containing the @rst node. This setting determines whether to use plain rST markup or full sphinx markup. To use plain reStructuredText markup:\n\n```\n@bool rst3_call_docutils = True\n```\n\nTo use sphinx markup:\n\n```\n@bool rst3_call_docutils = False\n```\n\n",
+    "felix.20260612211517.55": "When using sphinx you must ensure that sphinx's conf.py file is configured so that it will find the intermediate files created by the rst3 command. For example, the conf.py file for Leo's docs contains the following:\n\n```\nsource_suffix = '.html.txt'\n```\n\nThis \"matches\" the form of the intermediate files.  For example, given:\n\n```\n@rst myDocument.html\n```\nand the default value for the rst3_write_intermediate_extension setting:\n\n```\n@string rst3_write_intermediate_extension = .txt\n```\nthe name of the intermediate file will be:\n\n```\nmyDocument.html.txt\n```\n\nmyDocument.html.txt is the **input** file for sphinx.\n\n",
+    "felix.20260612211517.56": "Put something like this in the body of the @rst node:\n\n```\n#############\nWar and Peace\n#############\n```\n\nrST markup uses over/underlining to indicate chapter titles. Put an **overline** consisting of pounds signs above the title (War and Peace), and an identical **underline** of pound signs below as shown. rST markup for chapter titles is a bit picky:\n\n- under/overlines must be at least 4 characters long\n- under/overlines must be at least as long as the title.\n- The overline and underline must be identical.\n\nNote: the rst3 command requires that the \"#\" character be used in the over/underlines for chapter titles.\n\n",
+    "felix.20260612211517.57": "Put introductory words in the body of the @rst node itself:\n\n```\n\"Well, Prince, so Genoa and Lucca are now just family estates of the\nBuonapartes. But I warn you, if you don't tell me that this means war,\nif you still try to defend the infamies and horrors perpetrated by that\nAntichrist--I really believe he is Antichrist--I will have nothing more\nto do with you and you are no longer my friend, no longer my 'faithful\nslave,' as you call yourself! But how do you do? I see I have\nfrightened you--sit down and tell me all the news.\"\n\nIt was in July, 1805, and the speaker was the well-known Anna Pavlovna\nScherer, maid of honor and favorite of the Empress Marya Fedorovna.\nWith these words she greeted Prince Vasili Kuragin, a man of high rank\nand importance, who was the first to arrive at her reception. Anna\nPavlovna had had a cough for some days. She was, as she said, suffering\nfrom la grippe; grippe being then a new word in St. Petersburg, used\nonly by the elite.\n```\n\n",
+    "felix.20260612211517.58": "To create a new section, subsection, etc., in the output file:\n\n1. Create a new outline node, as some descendant of the @rst node.\n2. **The new node's headline becomes the section's title**.\n3. Type the contents of the section in the body text of the node.\n\nThat's all there is to it:\n\n- **The rst3 command generates rST underlining automatically**.\n- **You reorganize your document by reorganizing nodes**.\n\nThere is *no* need to change markup when reorganizing your document, a huge improvement over writing \"raw\" rST.\n\n",
+    "felix.20260612211517.59": "Now you write your novel, short story, documentation, or whatever. Organize your work as always:\n\n**nodes create sections, subsections, sub-sub-sections, etc.**\\\n**depending on their position in the outline**.\n\n",
+    "felix.20260612211517.60": "`<Alt-X>rst3<Return>` runs the rst3 command.\n\n- If the present node is an @rst node (or a descendant of an @rst node) the rst3 command applies to the nearest ancestor @rst node.\n- Otherwise, the rst3 command applies to all descendant @rst trees.\n\nIf @bool rst3_call_docutils is True, the rst3 command will call docutils automatically to create the output files. For more information about Leo's settings, see [this section](../getting-started/tutorial-basics.md#configuring-leo).\n\nWhen using sphinx, run sphinx's \"make\" utility after running the rst3 command to create the final output files.\n\n**Errors and warnings**:\n\n1. Install docutils and then restart Leo if you see this error:\n\n```\nwriteToDocutils: docutils not present\n```\n\n2. Leo has a default stylesheet that centers titles and makes them big and bold, so you can disregard messages such as:\n\n```\nstylesheet not found <path-to>default.css\n```\n\n",
+    "felix.20260612211517.61": "\n",
+    "felix.20260612211517.62": "Sometimes you want to organize text without creating sections:\n\n1. Create an outline node to organize your text.\n\n2. Type the following in the headline:\n\n```\n@rst-no-head <any text: it is ignored>\n```\n\nThe rst3 command adds the body text of this node to the previous section:\n\n- The headline is ignored.\n- The @rst-no-head node does not change the rST section structure in any way.\n\n",
+    "felix.20260612211517.63": "It is often useful to put reference material in your @rst tree that will *not* be included in the actual output. To have the rst3 command ignore a single node, type this in the node's headline:\n\n```\n@rst-ignore <ignored-text>\n```\n\nNeither the headline nor body text will be part of the output file.\n\nTo have the rst3 command ignore a node and all its descendants, type this in the node's headline:\n\n```\n@rst-ignore-tree <ignored-text>\n```\n\n",
+    "felix.20260612211517.64": "The [rST manual](https://docutils.sourceforge.net/docs/user/rst/quickref.html#directives) tells how to insert \"raw\" markup into the output. For example, Leo's documentation defines the following:\n\n```\n.. |---| unicode:: U+02015 .. for quotes\n    :trim:\n```\n\nNow `---` inserts —, the unicode \"quotation dash\" used to indicate the author of quotations. Note that rST automatically turns `--` into a dash: –.\n\nThe rST `|` markup breaks text into specific lines, but there are times when it can't be used.  The following inserts a line break into text:\n\n```\n.. |br| raw:: html\n\n    <br />\n```\n\n",
+    "felix.20260612211517.65": "Plugins may define filters that alter the output of any node. When writing the headline of a node p, the rst3 command calls the **body filter** to change the p.b. Similarly, the rst3 command calls the **headline filter** to change p.h. By default, these filters do nothing. That is, they return p.b and p.b respectively. However, the signatures of these filters are:\n\n```javascript\nfunction headline_filter(c, p)\nfunction body_filter(c, p)\n```\n\nso these filters have full access to all nodes of the entire outline. As a result, these filters can return arbitrary text that comes from anywhere in the outline.\n\nThe `leo/plugins/example_rst_filter.py` shows how to define and register these filters.\n\n",
+    "felix.20260612211517.66": "- The rst3 command converts an @rst tree to an output file and an intermediate file.\n- docutils uses the output file; sphinx uses the intermediate file.\n- Settings starting with \"rst3\" control how the rst3 command works.\n- Within @rst trees, headlines become rST sections.\n- Sections levels in the generated rST correspond to outline levels in Leo.\n- You reorganize your rST documents just by reorganizing the corresponding @rst tree.\n- The rst3 command works acts on the nearest ancestor @rst node, if any, or on all descendant @rst nodes.\n- `@rst-no-head` nodes insert text (or markup) without an rST headline.\n- The rst3 command ignores @rst-ignore nodes and @rst-ignore-tree trees.\n- The `@button make-sphinx` node in LeoDocs.leo calls sphinx automatically.\n- CheatSheet.leo contains an expanded version of the example used in this tutorial. |br|\n  You can open CheatSheet.leo from Leo's help menu.\n\n",
+    "felix.20260612211517.67": "You now know enough to get started with the rst3 command. Some possible next steps are:\n\n- Look at Leo's own documentation in LeoDocs.leo.\n  Discover how the nodes in this tree correspond to the documentation you see before you.\n- `LeoDocs.leo` has an @button make-sphinx script that calls sphinx automatically.\n- Create your own `@rst` nodes. Run the rst3 command on them and see what happens.\n- If you get stuck, please ask for help at [https://groups.google.com/forum/#!forum/leo-editor](https://groups.google.com/forum/#!forum/leo-editor).\n"
   }
 }

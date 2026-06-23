@@ -444,7 +444,7 @@ export class AtFile {
             // Sets at.encoding, regularizes whitespace and calls at.initReadLines.
             s = await at.readFileToUnicode(fn);
             // #1466.
-            if (s === undefined) {
+            if (s == null) {
                 // The error has been given.
                 return [undefined, undefined];
             }
@@ -491,7 +491,7 @@ export class AtFile {
     public async read(root: Position, fromString?: string): Promise<boolean> {
         const at = this;
         const c = this.c;
-        let file_s;
+        let file_s: string | undefined;
         let fileName: string | undefined = c.fullPath(root); // #1341. #1889.
         if (!fileName) {
             at.error('Missing file name. Restoring @file tree from .leo file.');
@@ -506,7 +506,7 @@ export class AtFile {
         }
         // Open the file.
         [fileName, file_s] = await at.openFileForReading(fromString);
-        if (file_s === undefined) {
+        if (file_s == null) {
             return false; // #1798
         }
 
@@ -562,8 +562,9 @@ export class AtFile {
             // An @<file> was read: In case this was a tab opened earlier, for which efc had entries,
             // we need to update the external files controller's timestamp for those external files
             // instead of leaving the _time_d empty, which would have defaulted to set_time's default.
-            if (efc) {
-                await efc.set_time(c.fullPath(p));  // #4426 Same effect as leaving efc's _time_d empty.
+            if (!!efc) {
+                const fullPath = c.fullPath(p);
+                await efc.set_time(fullPath);  // #4426 Same effect as leaving efc's _time_d empty.
             }
         }
         for (const p of files) {
@@ -1290,7 +1291,7 @@ export class AtFile {
         // bytes,  *not* str!
         const at = this;
         // #1798: return None as a flag on any error.
-        let s;
+        let s: Uint8Array | undefined = undefined;
         try {
             const w_uri = g.makeVscodeUri(fileName);
             const w_exists = await g.os_path_exists(fileName);
@@ -1298,7 +1299,6 @@ export class AtFile {
                 s = await vscode.workspace.fs.readFile(w_uri);
             } else {
                 at.error(`can not open ${fileName}`);
-                return undefined;
             }
         } catch (exception) {
             at.error(`Exception reading ${fileName}`);
@@ -3574,7 +3574,7 @@ export class AtFile {
         const theDir = g.os_path_dirname(fileName);
         const w_exists = await g.os_path_exists(theDir);
         if (theDir && !w_exists) {
-            at.error(`Directory not found:\n${theDir}`);
+            at.error(`${root.h}: Directory not found:\n${theDir}`);
             return false;
         }
         //
@@ -3989,31 +3989,24 @@ export class AtFile {
     public warnAboutOrphandAndIgnoredNodes(): void {
         const at = this;
         const root = this.root!;
+        const message = 'The node is included neither by an @others directive nor a section reference';
         if (at.errors) {
             return; // No need to repeat this.
         }
-        for (const p of root.self_and_subtree(false)) {
-            if (!p.v.isVisited()) {
-                at.writeError('Orphan node:  ' + p.h);
-                if (p.hasParent()) {
-                    g.blue('parent node:', p.parent().h);
-                }
-            }
+        if (root.isAtAllNode()) {
+            return;
         }
-        const p = root.copy();
-        const after = p.nodeAfterTree();
-        while (p && p.__bool__() && !p.__eq__(after)) {
-            if (p.isAtAllNode()) {
-                p.moveToNodeAfterTree();
-            } else {
-                // #1050: test orphan bit.
-                if (p.isOrphan()) {
-                    at.writeError('Orphan node: ' + p.h);
-                    if (p.hasParent()) {
-                        g.blue('parent node:', p.parent().h);
-                    }
+        if (root.isOrphan()) {
+            return;
+        }
+        for (const p of root.subtree(false)) {
+            if (!p.v.isVisited()) {
+                at.writeError("Orphan node:  " + p.h)
+                g.es_print_unique_message(message)
+                if (p.hasParent()) {
+                    g.blue("parent node:", p.parent().h);
+
                 }
-                p.moveToThreadNext();
             }
         }
     }

@@ -190,7 +190,6 @@ export class LeoApp {
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui!: NullGui; // The gui class.
     public guiArgName: string | undefined; // The gui name given in --gui option.
-    public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
     public silentMode: boolean = false; // True: no sign-on.
     public trace_binding: string | undefined; // The name of a binding to trace, or None.
@@ -1991,7 +1990,7 @@ export class LoadManager {
     public async computeMyLeoSettingsPath(): Promise<string | undefined> {
         const lm = this;
         const join = g.finalize_join;
-        const settings_fn = 'myLeoSettings.leo';
+        const settings_fn = 'myLeoSettings';
         // This seems pointless: we need a machine *directory*.
 
         // TODO ?
@@ -2031,21 +2030,18 @@ export class LoadManager {
         join(g.app.globalConfigDir, settings_fn),
         */
 
-        let hasBreak = false;
-        let path: string | undefined;
         for (let p_path of table) {
-            const exists = await g.os_path_exists(p_path);
+            let exists = await g.os_path_exists(p_path + ".leo");
             if (exists) {
-                path = p_path;
-                hasBreak = true;
-                break;
+                return p_path + ".leo";
+            }
+            exists = await g.os_path_exists(p_path + ".leojs");
+            if (exists) {
+                return p_path + ".leojs";
             }
         }
-        if (!hasBreak) {
-            path = undefined;
-        }
 
-        return path;
+        return undefined;
     }
 
     //@+node:felix.20220610002953.5: *4* LM.computeStandardDirectories & helpers
@@ -2916,8 +2912,11 @@ export class LoadManager {
 
         const t1 = process.hrtime();
 
-        // sets lm.options and lm.files
-        await lm.doPrePluginsInit();
+        g.app.disable_redraw = true;
+        await lm.doPrePluginsInit(); // sets lm.options and lm.files
+
+        //Compute the signon after initing the gui.
+        g.app.computeSignon();
         g.app.printSignon();
         if (lm.options['version']) {
             return;
@@ -2925,8 +2924,7 @@ export class LoadManager {
         if (!g.app.gui) {
             return;
         }
-        // Disable redraw until all files are loaded.
-        g.app.disable_redraw = true;
+
         const t2 = process.hrtime();
         g.doHook('start1');
         const t3 = process.hrtime();
@@ -2934,10 +2932,7 @@ export class LoadManager {
         if (g.app.killed) {
             return;
         }
-
-        // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ----------------
         g.app.idleTimeManager.start();
-        // ! ----------------------------------------------------------------------------------------
 
         const t4 = process.hrtime();
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
@@ -2945,7 +2940,6 @@ export class LoadManager {
 
         g.app.gui.finishStartup();
 
-        g.es(''); // Clears horizontal scrolling in the log pane.
 
         if (!ok) {
             // --screen-shot causes an immediate exit.
@@ -2955,10 +2949,7 @@ export class LoadManager {
             }
             return;
         }
-        if (g.app.listen_to_log_flag) {
-            // TODO: ?
-            // g.app.listenToLog();
-        }
+        g.es(''); // Clears horizontal scrolling in the log pane.
         if (g.app.debug.includes('startup')) {
             const t5 = process.hrtime();
             console.log('');
@@ -3022,9 +3013,6 @@ export class LoadManager {
             }
         }
 
-        // Enable redraws.
-        g.app.disable_redraw = false;
-
         const allowNoDocumentStart = true; // ! TODO: FIX THIS EXPERIMENTAL FLAG !
 
         if (!c1 && !allowNoDocumentStart) {
@@ -3042,14 +3030,13 @@ export class LoadManager {
             // Leo is out of options: Force an immediate exit.
             return false;
         }
-        // #199.
-        await g.app.runAlreadyOpenDialog(c1!);
+        await g.app.runAlreadyOpenDialog(c1!); // #199.
 
         // Final inits...
         g.app.logInited = true;
         g.app.initComplete = true;
-
         // c.setLog();
+        g.app.disable_redraw = false;
         if (c) {
             c.redraw();
             g.doHook("start2", { c: c, p: c.p, fileName: c.fileName() });
@@ -3149,8 +3136,6 @@ export class LoadManager {
 
         // Create the gui after reading options and settings.
         lm.createGui();
-        // We can't print the signon until we know the gui.
-        return g.app.computeSignon(); // Set app.signon/signon1 for commanders.
     }
 
     //@+node:felix.20230529220941.1: *5* LM.createAllImporterData & helpers
@@ -3812,8 +3797,9 @@ export class LoadManager {
             if (!g.unitTesting) {
                 g.es_print(`Reverted ${c.fileName()}`);
             }
-        } catch {
+        } catch (e) {
             // Does not exist !
+            console.error(`Revert failed: ${fn}`, e);
         } finally {
             g.app.reverting = false;
         }

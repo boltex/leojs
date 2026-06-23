@@ -185,15 +185,15 @@ export class CommanderHelpCommands {
 
     @commander_command(
         'open-my-leo-settings',
-        'Open myLeoSettings.leo in a new Leo window.'
+        'Open myLeoSettings in a new Leo window.'
     )
     @commander_command(
         'open-my-leo-settings-leo',
-        'Open myLeoSettings.leo in a new Leo window.'
+        'Open myLeoSettings in a new Leo window.'
     ) // #1343.
     @commander_command(
         'my-leo-settings',
-        'Open myLeoSettings.leo in a new Leo window.'
+        'Open myLeoSettings in a new Leo window.'
     )
     public async openMyLeoSettings(
         this: Commands
@@ -201,12 +201,12 @@ export class CommanderHelpCommands {
         //@+others
         //@+node:felix.20220612234816.15: *5* function: c_help.createMyLeoSettings
         /**
-         * createMyLeoSettings - Return true if myLeoSettings.leo created ok
+         * createMyLeoSettings - Return true if myLeoSettings.leojs  created ok
          */
         async function createMyLeoSettings(
             c: Commands
         ): Promise<Commands | undefined> {
-            const name = 'myLeoSettings.leo';
+            const name = 'myLeoSettings.leojs';
             let homeLeoDir = g.app.homeLeoDir;
             // const loadDir = g.app.loadDir;
             let fileName;
@@ -223,8 +223,8 @@ export class CommanderHelpCommands {
 
             ok = await g.app.gui.runAskYesNoDialog(
                 c,
-                'Create myLeoSettings.leo?',
-                `Create myLeoSettings.leo in ${homeLeoDir}?`
+                'Create myLeoSettings.leojs?',
+                `Create myLeoSettings.leojs in ${homeLeoDir}?`
             );
 
             if (ok === 'no') {
@@ -265,12 +265,12 @@ export class CommanderHelpCommands {
             let nd = c2!.rootPosition()!;
             nd.h = 'Settings README';
             nd.b =
-                `myLeoSettings.leo personal settings file created ${g.dayjs().format(
+                `myLeoSettings.leojs personal settings file created ${g.dayjs().format(
                     'llll'
                 )}\n\n` +
                 'Only nodes that are descendants of the @settings node are read.\n\n' +
                 'Only settings you need to modify should be in this file, do\n' +
-                'not copy large parts of leoSettings.py here.\n\n' +
+                'not copy large parts of leoSettings here.\n\n' +
                 'For more information see https://leo-editor.github.io/leo-editor/customizing.html';
 
             nd = nd.insertAfter();
@@ -302,7 +302,7 @@ export class CommanderHelpCommands {
             if (w_path) {
                 return g.openWithFileName(w_path, c, g.app.gui);
             }
-            g.es('not found: myLeoSettings.leo');
+            g.es('myLeoSettings not found');
             return createMyLeoSettings(c);
         } catch (exception) {
             return undefined;

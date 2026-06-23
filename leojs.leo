@@ -9,6 +9,9 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20260606153503.1"><vh>1.0.19</vh></v>
+<v t="felix.20260605171910.1"><vh>1.0.18</vh></v>
+<v t="felix.20260501210029.1"><vh>1.0.17</vh></v>
 <v t="felix.20260428003551.1"><vh>1.0.16</vh></v>
 <v t="felix.20251014222608.1"><vh>1.0.15</vh></v>
 <v t="felix.20250622002355.1"><vh>1.0.14</vh></v>
@@ -280,11 +283,12 @@
 <v t="felix.20220505215916.7"><vh>findQuick_marked</vh></v>
 <v t="felix.20220505215916.8"><vh>showGotoPane</vh></v>
 <v t="felix.20220505215916.9"><vh>gotoNavEntry</vh></v>
+<v t="felix.20221227223718.1"><vh>_get_focus</vh></v>
 <v t="felix.20240630150534.1"><vh>revealGotoNavEntry</vh></v>
 <v t="felix.20221027155905.1"><vh>navigateNavEntry</vh></v>
 </v>
 <v t="felix.20220505215924.1"><vh>Search</vh>
-<v t="felix.20221227223718.1"><vh>_get_focus</vh></v>
+<v t="felix.20260604180832.1"><vh>doArrow</vh></v>
 <v t="felix.20220505215924.2"><vh>navEnter</vh></v>
 <v t="felix.20220505215924.3"><vh>navTextChange</vh></v>
 <v t="felix.20221222003636.1"><vh>navTextClear</vh></v>
@@ -861,7 +865,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
 </t>
 <t tx="felix.20201208214250.2"></t>
-<t tx="felix.20201208214319.1" _mod_time="46313737373030313735302e3133340a2e">@language md
+<t tx="felix.20201208214319.1" _mod_time="46313737373335313038382e3835320a2e">@language md
 @tabwidth -4
 # ![Leo Editor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline
 
@@ -1142,7 +1146,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313737373335303936322e3939390a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738323037323731382e3236310a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -1993,7 +1997,7 @@ export async function activate(p_context: vscode.ExtensionContext): Promise&lt;t
 [CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
-<t tx="felix.20201214151326.1" _mod_time="46313737343735323434352e3139310a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151326.1" _mod_time="46313737373335313038382e3838390a2e">import * as vscode from "vscode";
 
 @language typescript
 @tabwidth -4
@@ -2864,7 +2868,7 @@ public get description(): string | boolean {
 }
 
 </t>
-<t tx="felix.20201214151429.1" _mod_time="46313736393330343439372e3830330a2e">import * as vscode from "vscode";
+<t tx="felix.20201214151429.1" _mod_time="46313737373335313038382e3932330a2e">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import { Constants } from "./constants";
@@ -2962,7 +2966,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
 }
 </t>
-<t tx="felix.20201214151447.1" _mod_time="46313736373036323136342e3139330a2e">import * as utils from "./utils";
+<t tx="felix.20201214151447.1" _mod_time="46313737373335313038382e3932360a2e">import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
 import { LeoPackageStates } from "./types";
@@ -3317,7 +3321,7 @@ private _updateLeoObjectIndicator(): void {
 }
 
 </t>
-<t tx="felix.20201214154816.1" _mod_time="46313737343735323433382e3239370a2e">import * as vscode from "vscode";
+<t tx="felix.20201214154816.1" _mod_time="46313738323036393936332e3730350a2e">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { RClick } from "./core/mod_scripting";
 
@@ -3466,7 +3470,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313737343932313530372e3836310a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738323037303930322e3234320a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4661,13 +4665,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313737373335303936332e3034320a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738323037343031332e33310a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.16",
+  "version": "1.0.19",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -7203,14 +7207,16 @@ public async showRecentLeoFiles(): Promise&lt;unknown&gt; {
         }
 
         // Either way, try to open the file
-        await this.openLeoFile(vscode.Uri.file(w_result));
+        return this.openLeoFile(vscode.Uri.file(w_result)).then(
+            () =&gt; {
+                // Now, maybe there is a file opened?
+                if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
+                    // Already opened file
+                    const c = g.app.windowList[this.frameIndex].c;
+                    g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
+                }
+            });
 
-        // Now, maybe there is a file opened?
-        if (g.app.windowList.length &amp;&amp; g.app.windowList[this.frameIndex]) {
-            // Already opened file
-            const c = g.app.windowList[this.frameIndex].c;
-            g.doHook("recentfiles2", { c: c, p: c.p, v: c.p.v, fileName: w_result });
-        }
     }
     return Promise.resolve(undefined);
 
@@ -8028,7 +8034,7 @@ public incTreeId(): void {
   }
 },
 </t>
-<t tx="felix.20211007213344.1" _mod_time="46313737343735323436372e3635340a2e">import * as vscode from "vscode";
+<t tx="felix.20211007213344.1" _mod_time="46313737373335313038382e3838380a2e">import * as vscode from "vscode";
 import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -9883,7 +9889,7 @@ public finishStartup(): void {
 }
 
 </t>
-<t tx="felix.20220417155704.1" _mod_time="46313736393636333134302e3838390a2e">import * as vscode from "vscode";
+<t tx="felix.20220417155704.1" _mod_time="46313737373335313038382e3837350a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Position } from "./core/leoNodes";
 import { LeoButtonNode } from "./leoButtons";
@@ -10243,6 +10249,7 @@ public loadSearchSettings(): void {
     const leoISettings = c.findCommands.ftm.get_settings();
     const w_settings: LeoSearchSettings = {
         // Nav options
+        frozen: scon.frozen,
         navText: scon.navText,
         showParents: scon.showParents,
         isTag: scon.isTag,
@@ -10300,6 +10307,7 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
     // convert to LeoGuiFindTabManagerSettings
     const searchSettings: LeoGuiFindTabManagerSettings = {
         // Nav settings
+        frozen: p_settings.frozen,
         is_tag: p_settings.isTag,
         nav_text: p_settings.navText,
         show_parents: p_settings.showParents,
@@ -10328,6 +10336,7 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
 
     // * Try to set the search settings
     // nav settings
+    scon.frozen = searchSettings.frozen;
     scon.navText = searchSettings.nav_text;
     scon.showParents = searchSettings.show_parents;
     scon.isTag = searchSettings.is_tag;
@@ -10394,12 +10403,10 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
     const suboutlineOnly = searchSettings.suboutline_only || false;
 
     if (!nodeOnly &amp;&amp; !suboutlineOnly &amp;&amp; !fileOnly) {
-        find.entire_outline = true;
         if (!w.isChecked()) {
             w.toggle();
         }
     } else {
-        find.entire_outline = false;
         if (w.isChecked()) {
             w.toggle();
         }
@@ -10683,6 +10690,7 @@ export const enum LeoSearchScope {
  */
 export interface LeoSearchSettings {
     // Nav options
+    frozen: boolean;
     navText: string;
     isTag: boolean;
     showParents: boolean;
@@ -10706,7 +10714,8 @@ export interface LeoSearchSettings {
  * * Leo's GUI search settings internal structure
  */
 export interface LeoGuiFindTabManagerSettings {
-    // Nav options
+    // Nav option
+    frozen: boolean;
     nav_text: string;
     is_tag: boolean;
     show_parents: boolean;
@@ -10774,7 +10783,7 @@ export interface ChooseRClickItem extends vscode.QuickPickItem {
 }
 
 </t>
-<t tx="felix.20220505221929.1" _mod_time="46313737343932313532322e3130350a2e">import * as vscode from "vscode";
+<t tx="felix.20220505221929.1" _mod_time="46313737373335313038382e3932340a2e">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import * as g from './core/leoGlobals';
 import { QuickSearchController } from "./core/quicksearch";
@@ -15915,7 +15924,7 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231219233411.1"></t>
-<t tx="felix.20231219233427.1" _mod_time="46313737353234363238312e3834360a2e">// @ts-check
+<t tx="felix.20231219233427.1" _mod_time="46313738323037323537342e34350a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -15925,9 +15934,9 @@ set leoEditHeadline(p_value: boolean) {
     // @ts-expect-error
     const vscode = acquireVsCodeApi();
 
+    /** @type {ReturnType&lt;typeof setTimeout&gt; | undefined} */
     let timer; // for debouncing sending the settings from this webview to LeoJS
     let dirty = false; // all but nav input
-    let navTextDirty = false;
 
     let activeTab = 'tab2'; // Initial active tab
     let firstFindTabElId = 'findText';
@@ -15935,23 +15944,21 @@ set leoEditHeadline(p_value: boolean) {
     let firstNavTabElId = 'searchOptions';
     let lastNavTabElId = 'navText';
     let lastGotoContent = [];
+
+    /** @type any */
     let lastSelectedGotoItem;
 
-    /**
-     * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
-     * - Resets when switching to tag, or when clearing the input field.
-     * - Sets when pressing Enter with non-empty input field &amp;&amp; not tag mode.
-     */
-    let frozen = false;
     let w_freezeElement = document.getElementById("freeze");
     if (w_freezeElement) {
         w_freezeElement.style.display = 'none';
     }
+    /** @type {ReturnType&lt;typeof setTimeout&gt; | undefined} */
     let navSearchTimer; // for debouncing the search-headline while typing if unfrozen
 
     // * LeoSearchSettings Type
     let searchSettings = {
         // Nav settings
+        frozen: false,
         navText: '',
         showParents: true,
         isTag: false,
@@ -15984,13 +15991,10 @@ set leoEditHeadline(p_value: boolean) {
 
     function resetTagNav() {
         navSearchTimer = setTimeout(() =&gt; {
-            if (navTextDirty) {
-                navTextDirty = false;
-                if (navSearchTimer) {
-                    clearTimeout(navSearchTimer);
-                }
-                sendSearchConfig();
+            if (navSearchTimer) {
+                clearTimeout(navSearchTimer);
             }
+            sendSearchConfig();
             vscode.postMessage({ type: 'leoNavTextChange' });
         }, 250); // quarter second
     }
@@ -16004,6 +16008,7 @@ set leoEditHeadline(p_value: boolean) {
         // * Needed Checks
         if (searchSettings.navText.length === 0) {
             setFrozen(false);
+            sendSearchConfig();
             // if tagging but empty: SEND SEARCH LIST-ALL-TAGS COMMAND
             if (searchSettings.isTag) {
                 resetTagNav();
@@ -16013,33 +16018,26 @@ set leoEditHeadline(p_value: boolean) {
         if (searchSettings.navText === "m" &amp;&amp; !searchSettings.isTag) {
             // ! Easter Egg: calls 'marked-list', which list all marked nodes !
             navSearchTimer = setTimeout(() =&gt; {
-                if (navTextDirty) {
-                    navTextDirty = false;
-                    if (navSearchTimer) {
-                        clearTimeout(navSearchTimer);
-                    }
-                    sendSearchConfig();
+                if (navSearchTimer) {
+                    clearTimeout(navSearchTimer);
                 }
+                sendSearchConfig();
                 vscode.postMessage({ type: 'leoNavMarkedList' });
-
             }, 40); // Shorter delay for this command
             return false;
         }
 
         // User changed text in nav text input
-        if (frozen || searchSettings.navText.length &lt; 3) {
+        if (searchSettings.frozen || searchSettings.navText.length &lt; 3) {
             return; // dont even continue if not long enough or already frozen
         }
 
         // DEBOUNCE .25 to .5 seconds with navSearchTimer
         navSearchTimer = setTimeout(() =&gt; {
-            if (navTextDirty) {
-                navTextDirty = false;
-                if (navSearchTimer) {
-                    clearTimeout(navSearchTimer);
-                }
-                sendSearchConfig();
+            if (navSearchTimer) {
+                clearTimeout(navSearchTimer);
             }
+            sendSearchConfig();
             vscode.postMessage({ type: 'leoNavTextChange' });
         }, 400); // almost half second
 
@@ -16117,10 +16115,10 @@ set leoEditHeadline(p_value: boolean) {
     }
 
     function setFrozen(p_focus) {
-        frozen = p_focus;
+        searchSettings.frozen = p_focus;
         w_freezeElement = document.getElementById("freeze");
         if (w_freezeElement) {
-            if (frozen) {
+            if (searchSettings.frozen) {
                 w_freezeElement.style.display = '';
             } else {
                 w_freezeElement.style.display = 'none';
@@ -16130,6 +16128,8 @@ set leoEditHeadline(p_value: boolean) {
 
     function setSettings(p_settings) {
         // Nav controls
+        setFrozen(p_settings["frozen"]);
+
         // @ts-expect-error
         document.getElementById("navText").value = p_settings["navText"];
         searchSettings["navText"] = p_settings["navText"];
@@ -16352,7 +16352,10 @@ set leoEditHeadline(p_value: boolean) {
             }
         }
 
-        if (activeTab === 'tab3' &amp;&amp; lastGotoContent.length &amp;&amp; actEl &amp;&amp; gotoPaneContainer &amp;&amp; (actEl === gotoPaneContainer || gotoPaneContainer.contains(actEl))) {
+        if (
+            activeTab === 'tab3' &amp;&amp; lastGotoContent.length &amp;&amp; actEl &amp;&amp; gotoPaneContainer &amp;&amp;
+            (actEl === gotoPaneContainer || gotoPaneContainer.contains(actEl))
+        ) {
             navKeyHandler(p_event);
         }
 
@@ -16520,16 +16523,13 @@ set leoEditHeadline(p_value: boolean) {
         } else {
             if (searchSettings.navText.length &gt;= 3 || searchSettings.isTag) {
                 setFrozen(true);
-                if (navTextDirty) {
-                    navTextDirty = false;
-                    if (timer) {
-                        clearTimeout(timer);
-                    }
-                    if (navSearchTimer) {
-                        clearTimeout(navSearchTimer);
-                    }
-                    sendSearchConfig();
+                if (timer) {
+                    clearTimeout(timer);
                 }
+                if (navSearchTimer) {
+                    clearTimeout(navSearchTimer);
+                }
+                sendSearchConfig();
                 vscode.postMessage({ type: 'leoNavEnter' });
             }
             if (searchSettings.navText.length === 0) {
@@ -16554,7 +16554,6 @@ set leoEditHeadline(p_value: boolean) {
         w_navTextEl.addEventListener('input', function (p_event) {
             // @ts-expect-error
             searchSettings.navText = this.value;
-            navTextDirty = true;
             navTextChange(); // DEBOUNCE THIS! Don't process change too fast!
         });
     }
@@ -16596,6 +16595,28 @@ set leoEditHeadline(p_value: boolean) {
             processChange();
         });
 
+    }
+
+    const findTextEl = document.getElementById('findText');
+    // Listen to arrowUp or arrowDown to trigger call to do_arroww command in leointeg
+    if (findTextEl) {
+        findTextEl.onkeydown = function (p_event) {
+            if (!p_event) {
+                // @ts-expect-error
+                p_event = window.event;
+            }
+            const keyCode = p_event.code || p_event.key;
+            console.log('findTextEl keydown', { keyCode, ctrlKey: p_event.ctrlKey, shiftKey: p_event.shiftKey });
+            if (keyCode === 'ArrowUp') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowUp' });
+            } else if (keyCode === 'ArrowDown') {
+                p_event.preventDefault();
+                p_event.stopPropagation();
+                vscode.postMessage({ type: 'leoArrowDown' });
+            }
+        };
     }
 
     findReplaceInputIds.forEach((p_inputId) =&gt; {
@@ -17431,7 +17452,7 @@ div.col-nav {
 - Fixed bug that sometimes asked to 'save' and overwrite/confirm when new node was created with body text containing an ampersand or when using vscode's quick-suggestion autocomplete.
 
 </t>
-<t tx="felix.20231224201746.1" _mod_time="46313737343239393531392e3431360a2e">import * as vscode from 'vscode';
+<t tx="felix.20231224201746.1" _mod_time="46313737373335313038382e3931360a2e">import * as vscode from 'vscode';
 import { LeoUI } from './leoUI';
 
 @language typescript
@@ -17457,7 +17478,7 @@ import { LeoUI } from './leoUI';
 
 }
 </t>
-<t tx="felix.20231226205226.1" _mod_time="46313737343035383031302e3430320a2e">import * as vscode from 'vscode';
+<t tx="felix.20231226205226.1" _mod_time="46313737373335313038382e3933390a2e">import * as vscode from 'vscode';
 import { Constants } from "./constants";
 
 export class UnlProvider implements vscode.DocumentLinkProvider {
@@ -18229,7 +18250,7 @@ public async openAside(p?: Position): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20240401213604.1" _mod_time="46313737373233333730342e30380a2e">import * as vscode from "vscode";
+<t tx="felix.20240401213604.1" _mod_time="46313737373335313038382e3932310a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import * as path from 'path';
@@ -19544,7 +19565,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313737373335313030312e3838360a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313738303737343535302e3139390a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19581,7 +19602,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.16&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.19&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21875,7 +21896,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed bug in goPrev method related to selecting previously visited nodes.
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
-- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Fixed dirty node handling in ExternalFilesController when reading modified files. Mirror of Leo's #4566.
 - Improved 'folder' icon image.
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
 - Fixed goto-prev-marked command.
@@ -21884,7 +21905,39 @@ set leoAtLeoFile(p_value: boolean) {
 </t>
 <t tx="felix.20260428003551.1">## 1.0.16
 
-- ...
+- Fixed markdown writer.
+
+</t>
+<t tx="felix.20260501210029.1">## 1.0.17
+
+- Fixed cff command in leoFind as per Leo's #4640
+- Fixed Java importer as per Leo's #4471
+- Allow .leojs JSON format for "myLeoSettings".
+- Added Up/Down arrow support for search-history navigation in the find-pattern input box.
+- Fixed issue #196, a UI freeze that happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
+
+</t>
+<t tx="felix.20260604180832.1">/**
+ * Call the Leo do_arrow function with that char parameter, then refresh the find panel settings.
+ */
+public doArrow(key: "Up" | "Down") {
+    const c = g.app.windowList[this.frameIndex].c;
+    const fc = c.findCommands;
+    fc.do_arrow(key);
+    this.loadSearchSettings();
+}
+
+</t>
+<t tx="felix.20260605171910.1">## 1.0.18
+
+- Fixed issue #199, a UI Freeze that happened when loading a leo file with missing external files
+
+</t>
+<t tx="felix.20260606153503.1">## 1.0.19
+
+- Improved error messages when writing external files. Mirror of Leo's #4732
+- Removed documentation sections which contained python-only/docutils features which are unavailable for now in LeoJS.
+- Fixed nav pane 'frozen' state and icon persistence across documents.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
@@ -21892,7 +21945,7 @@ set leoAtLeoFile(p_value: boolean) {
 - Fixed regex patterns in 'get_patterns' to support web browser's more unstable support.
 
 </t>
-<t tx="fil.20240709150317.1" _mod_time="46313737313930353931352e3837360a2e">&lt;!DOCTYPE html&gt;
+<t tx="fil.20240709150317.1" _mod_time="46313737373335313038382e3835340a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;

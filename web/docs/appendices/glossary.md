@@ -9,8 +9,6 @@ This is a short glossary of important terms in Leo's world. For more information
 
 ## \@
 
-### \@
-
     Starts a doc part. Doc parts continue until an @c
     directive or the end of the body text.
 

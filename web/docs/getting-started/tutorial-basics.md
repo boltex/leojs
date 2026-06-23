@@ -201,7 +201,7 @@ Leo uses outlines for just about *everything*, including configuring Leo:
 
 - Any other .leo file may also contain **local settings**. Local settings apply only to that file and override all other settings.
 
-**Settings nodes** specify settings. These nodes *must* be descendants of an **@settings** node. Moving a settings node out from the @settings tree disables the setting. Headlines start with @ followed by a type, and possibly a value.  Here are some examples, with body text shown indented from headlines:
+**Settings nodes** specify settings. These nodes *must* be descendants of an **@settings** node. Moving a settings node out from the @settings tree disables the setting. Headlines start with @ followed by a type, and possibly a value.
 
 ![Settings](./img/settings-sample.png)
 

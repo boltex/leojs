@@ -490,7 +490,8 @@ export class Commands {
         c.write_script_file = getBool('write-script-file');
     }
 
-    //@+node:felix.20240531224459.1: *3* @cmd c.execute-general-script
+    //@+node:felix.20260620163922.1: *3* @cmd commands
+    //@+node:felix.20240531224459.1: *4* @cmd c.execute-general-script
     @cmd('execute-general-script',
         'Execute c.p and all its descendants as a script. Create a temp file if c.p is not an @<file> node.'
     )
@@ -557,12 +558,12 @@ export class Commands {
         }
         await c.general_script_helper(command, ext, language, p, directory, regex,);
     }
-    //@+node:felix.20240603233303.1: *3* @cmd c.execute-external-file
+    //@+node:felix.20240603233303.1: *4* @cmd c.execute-external-file
     @cmd('execute-external-file', 'Run external files.')
     public async execute_external_file(): Promise<void> {
         /*
         //@+<< docstring >>
-        //@+node:felix.20240603233303.2: *4* << docstring >>
+        //@+node:felix.20240603233303.2: *5* << docstring >>
         Run external files.
 
         If there is an @language directive in the top node of the file,
@@ -619,9 +620,9 @@ export class Commands {
         const c = this;
         const MAP_SETTING_NODE = 'run-external-processor-map';
         //@+others
-        //@+node:felix.20240603233303.3: *4* Declarations
+        //@+node:felix.20240603233303.3: *5* Declarations
         const PREFERRED_TERMINALS = ['konsole', 'xfce4-terminal', 'mate-terminal', 'gnome-terminal', 'xterm'];
-        //@+node:felix.20240603233303.4: *4* SETTINGS_HELP
+        //@+node:felix.20240603233303.4: *5* SETTINGS_HELP
         const SETTINGS_HELP = `The data in the @data node body must have a
         PROCESSORS and an EXTENSIONS section, plus an optional TERMINAL
         section, looking like this example:
@@ -643,7 +644,7 @@ export class Commands {
 
         Blank lines and lines starting with a "#" are ignored.
         `;
-        //@+node:felix.20240603233303.5: *4* extension map
+        //@+node:felix.20240603233303.5: *5* extension map
         let LANGUAGE_EXTENSION_MAP: Record<string, string> = {
             '.cmd': 'batch',
             '.bat': 'batch',  // We'll get confused if a Linux program uses a .bat extension
@@ -654,7 +655,7 @@ export class Commands {
             '.pyw': 'python',
             'rb': 'ruby',
         };
-        //@+node:felix.20240603233303.6: *4* processor map
+        //@+node:felix.20240603233303.6: *5* processor map
         let PROCESSORS: Record<string, string> = {
             'batch': 'cmd.exe',
             'julia': 'julia',
@@ -663,7 +664,7 @@ export class Commands {
             'ruby': 'ruby',
             'shellscript': 'bash',
         };
-        //@+node:felix.20240603233303.7: *4* get_external_maps
+        //@+node:felix.20240603233303.7: *5* get_external_maps
         function get_external_maps(): [Record<string, string> | null, Record<string, string> | null, string] {
             /*
                 Return processor, extension maps for @data node.
@@ -747,7 +748,7 @@ export class Commands {
             const extension_map = scan_map('EXTENSIONS');
             return [processor_map, extension_map, terminal];
         }
-        //@+node:felix.20240603233303.8: *4* getExeKind
+        //@+node:felix.20240603233303.8: *5* getExeKind
         /**
          * Return the executable kind of the external file.
          *
@@ -757,7 +758,7 @@ export class Commands {
         function getExeKind(ext: string): string {
             return c.getLanguage(c.p) || LANGUAGE_EXTENSION_MAP[ext] || '';
         }
-        //@+node:felix.20240603233303.9: *4* getProcessor
+        //@+node:felix.20240603233303.9: *5* getProcessor
         async function getProcessor(language: string, p_path: string, extension: string): Promise<string> {
             let processor = '';
             if (language === 'python') {
@@ -788,7 +789,7 @@ export class Commands {
             }
             return processor;
         }
-        //@+node:felix.20240603233303.10: *4* Get Windows File Associations
+        //@+node:felix.20240603233303.10: *5* Get Windows File Associations
         /**
          * Return Windows association for given file extension, or ''.
          *
@@ -838,7 +839,7 @@ export class Commands {
                 });
             });
         }
-        //@+node:felix.20240603233303.11: *4* getShell
+        //@+node:felix.20240603233303.11: *5* getShell
         async function getShell(): Promise<string> {
             //  Prefer bash unless it is not present - we know its options' names
             let shell = 'bash';
@@ -851,9 +852,9 @@ export class Commands {
             }
             return shell;
         }
-        //@+node:felix.20240603233303.12: *4* getTerminal
+        //@+node:felix.20240603233303.12: *5* getTerminal
         //@+others
-        //@+node:felix.20240603233303.13: *5* getTerminalFromDirectory
+        //@+node:felix.20240603233303.13: *6* getTerminalFromDirectory
         async function getTerminalFromDirectory(dir: string): Promise<string> {
             const BAD_NAMES = ['xdg-terminal', 'setterm', 'ppmtoterm', 'koi8rxterm', 'rofi-sensible-terminal', 'x-terminal-emulator'];
             const TERM_STRINGS = ['*-terminal', '*term'];
@@ -881,7 +882,7 @@ export class Commands {
             }
             return '';
         }
-        //@+node:felix.20240603233303.14: *5* getCommonTerminal
+        //@+node:felix.20240603233303.14: *6* getCommonTerminal
         async function getCommonTerminal(names: string | string[]): Promise<string> {
             let term = '';
             if (typeof names === 'string') {
@@ -903,7 +904,7 @@ export class Commands {
             const w_getTerminalFromDirectory2 = await getTerminalFromDirectory('/bin');
             return w_getCommonTerminal || w_getTerminalFromDirectory1 || w_getTerminalFromDirectory2;
         }
-        //@+node:felix.20240603233303.15: *4* getTermExecuteCmd
+        //@+node:felix.20240603233303.15: *5* getTermExecuteCmd
         /**
          * Given a terminal's name, find the command line arg to launch a program.
          *
@@ -915,7 +916,7 @@ export class Commands {
             const EXECUTESTR = 'execute';
 
             //@+others
-            //@+node:felix.20240603233303.16: *5* get_help_message
+            //@+node:felix.20240603233303.16: *6* get_help_message
             function get_help_message(terminal: string, help_cmd: string): Promise<string> {
                 const cmd = `${terminal} ${help_cmd}`;
                 return new Promise((resolve, reject) => {
@@ -929,7 +930,7 @@ export class Commands {
                 });
             }
 
-            //@+node:felix.20240603233303.17: *5* find_ex_arg
+            //@+node:felix.20240603233303.17: *6* find_ex_arg
             function find_ex_arg(help_msg: string): string {
                 for (let line of help_msg.split('\n')) {
                     if (line.includes('--command')) {
@@ -969,7 +970,7 @@ export class Commands {
             }
             return arg;
         }
-        //@+node:felix.20240603233303.18: *4* checkShebang
+        //@+node:felix.20240603233303.18: *5* checkShebang
         async function checkShebang(filepath: string): Promise<boolean> {
 
             const w_uri = g.makeVscodeUri(filepath);
@@ -979,7 +980,7 @@ export class Commands {
             const file = Buffer.from(readData).toString('utf-8');
             return file.startsWith('#!');
         }
-        //@+node:felix.20240603233303.19: *4* runFile
+        //@+node:felix.20240603233303.19: *5* runFile
         async function runfile(fullpath: string, processor: string, terminal: string): Promise<void> {
             // direc: str = os.path.expanduser(os.path.dirname(fullpath))
             let direc = path.dirname(fullpath);
@@ -1072,7 +1073,7 @@ export class Commands {
         }
 
     }
-    //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
+    //@+node:felix.20221010233956.1: *4* @cmd execute-script & public helpers
     @cmd('execute-script', 'Execute a *Leo* script, written in javascript.')
     public async executeScript(
         args: any = undefined,
@@ -1208,7 +1209,7 @@ export class Commands {
         return callResult;
     }
 
-    //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
+    //@+node:felix.20221010233956.2: *5* c.executeScriptHelper
     public async executeScriptHelper(
         args: any,
         define_g: boolean,
@@ -1309,7 +1310,7 @@ export class Commands {
         return callResult;
     }
 
-    //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
+    //@+node:felix.20221010233956.3: *5* c.redirectScriptOutput
     public redirectScriptOutput(): void {
         const c: Commands = this;
         if (
@@ -1323,7 +1324,7 @@ export class Commands {
             g.redirectStderr();  // Redirect stderr
         }
     }
-    //@+node:felix.20221010233956.4: *4* c.setCurrentDirectoryFromContext
+    //@+node:felix.20221010233956.4: *5* c.setCurrentDirectoryFromContext
     public setCurrentDirectoryFromContext(p: Position): void {
         const c: Commands = this;
         const w_path = c.getPath(p);
@@ -1338,7 +1339,7 @@ export class Commands {
         }
     }
 
-    //@+node:felix.20221010233956.5: *4* c.unredirectScriptOutput
+    //@+node:felix.20221010233956.5: *5* c.unredirectScriptOutput
     public unredirectScriptOutput(): void {
         const c: Commands = this;
         if (
@@ -1349,7 +1350,7 @@ export class Commands {
             g.restoreStdout();
         }
     }
-    //@+node:felix.20240618002443.1: *3* @cmd toggleUnlView
+    //@+node:felix.20240618002443.1: *4* @cmd toggleUnlView
     @cmd('toggle-unl-view', 'Toggles the status-bar UNL display setting.')
     public toggleUnlView(): void {
         const c: Commands = this;
@@ -1358,24 +1359,24 @@ export class Commands {
             c.frame.toggleUnlView();
         }
     }
-    //@+node:felix.20240922160541.1: *3* @cmd goAnywhere
+    //@+node:felix.20240922160541.1: *4* @cmd goAnywhere
     @cmd('go-anywhere', 'Go to any node by headline.')
     public goAnywhere(): Thenable<unknown> {
         return g.app.gui.goAnywhere();
     }
 
 
-    //@+node:felix.20240922160608.1: *3* @cmd openAside
+    //@+node:felix.20240922160608.1: *4* @cmd openAside
     @cmd('open-aside', 'Open detached body pane on the side.')
     public openAside(): Thenable<unknown> {
         return g.app.gui.openAside();
     }
-    //@+node:felix.20240922160548.1: *3* @cmd showWelcomeSettings
+    //@+node:felix.20240922160548.1: *4* @cmd showWelcomeSettings
     @cmd('show-welcome-settings', 'Open the LeoJS welcome and settings screen.')
     public showSettings(): Thenable<unknown> {
         return g.app.gui.showSettings();
     }
-    //@+node:felix.20250923201250.1: *3* @cmd exportHTMLOutlineViewer
+    //@+node:felix.20250923201250.1: *4* @cmd exportHTMLOutlineViewer
     @cmd('export-html-outline-viewer', 'Export the outline viewer as HTML.')
     public async exportHTMLOutlineViewer() {
         const c = this;
@@ -2580,7 +2581,6 @@ export class Commands {
     //@+node:felix.20210131011607.7: *5* c.setBodyString
     /**
      * This is equivalent to p.b = s.
-     * Warning: This method may call c.recolor() or c.redraw().
      */
     public setBodyString(p: Position, s: string): void {
         const c: Commands = this;
@@ -2589,16 +2589,14 @@ export class Commands {
             return;
         }
         s = g.toUnicode(s);
-        const current: Position = c.p;
-        // 1/22/05: Major change: the previous test was: 'if p == current:'
-        // This worked because commands work on the presently selected node.
-        // But setRecentFiles may change a _clone_ of the selected node!
-        if (current && current.__bool__() && p.v.gnx === current.v.gnx) {
+
+        if (c.p && p.v === c.p.v) {
             const w = c.frame.body.wrapper;
             w.setAllText(s);
             v.setSelection(0, 0);
             c.recolor();
         }
+
         // Keep the body text in the VNode up-to-date.
         if (v.b !== s) {
             v.setBodyString(s);
@@ -4569,10 +4567,6 @@ export class Commands {
         if (c.requestLaterRedraw) {
             if (c.enableRedrawFlag) {
                 c.requestLaterRedraw = false;
-                // if ('drawing' in g.app.debug and not g.unitTesting) {
-                //     g.trace('\nDELAYED REDRAW')
-                //     time.sleep(1.0)
-                // }
             }
             c.redraw();
         }
@@ -4607,8 +4601,7 @@ export class Commands {
 
     //@+node:felix.20211120224224.1: *5* c.recolor
     public recolor(): void {
-        // TODO
-        // console.log("TODO: recolor");
+        // Automatic in LeoJs: the vscode editor handles recoloring.
     }
     //@+node:felix.20221027153010.1: *5* c.widget_name
     public widget_name(widget: StringTextWrapper): string {
@@ -4619,28 +4612,26 @@ export class Commands {
     //@+node:felix.20211120224229.1: *6* c.redraw
     public redraw(p?: Position): void {
         const c: Commands = this;
-
         if (!p || !p.__bool__()) {
             p = c.p;
         }
         if (!p || !p.__bool__()) {
-            p = c.rootPosition();
-        }
-        if (!p || !p.__bool__()) {
             return;
         }
-
         if (!c.positionExists(p)) {
             g.trace(`Invalid position: ${String(p)}`);
             g.trace(g.callers());
-            p = c.rootPosition();
+            return;
         }
-
+        c.requestLaterRedraw = false;
         c.expandAllAncestors(p!);
+        // Fix bug https://bugs.launchpad.net/leo-editor/+bug/1183855
+        //  This looks redundant, but it is probably the only safe fix.
+        c.frame.tree.select(p);
+        c.selectPosition(p);
+        // Clear the redraw request, again.
+        c.requestLaterRedraw = false;
 
-        if (p && p.__bool__()) {
-            c.selectPosition(p);
-        }
         // g.app.gui.fullRefresh(); // Overkill ?
     }
     //@+node:felix.20211120224231.1: *6* c.redraw_after_icons_changed
@@ -4679,18 +4670,7 @@ export class Commands {
      * Redraw the screen after node p has been selected.
      */
     public redraw_after_select(p: Position): void {
-        const c: Commands = this;
-        let flag: boolean;
-        if (c.enableRedrawFlag) {
-            flag = c.expandAllAncestors(p);
-            if (flag) {
-                //c.frame.tree.redraw_after_select(p);
-                c.redraw();
-                // This is the same as c.frame.tree.full_redraw().
-            }
-        } else {
-            c.requestLaterRedraw = true;
-        }
+        this.redraw(p);
     }
 
     //@+node:felix.20211122010434.9: *6* c.redraw_later
@@ -5380,9 +5360,7 @@ export class Commands {
             p = c.p;
         }
         if (p && p.__bool__()) {
-            // Do not call expandAllAncestors here.
-            c.selectPosition(p);
-            c.redraw_after_select(p);
+            c.redraw(p);
         }
         c.treeFocusHelper(); // This is essential.
     }

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 6
 toc_max_heading_level: 2
 ---
 
@@ -35,7 +35,7 @@ Put your [personal settings](../users-guide/customizing.md#using-settings) in my
 - The my-leo-settings command opens myLeoSettings.leo.
 - Copy the desired settings nodes from leoSettings.leo to myLeoSettings.leo.
 
-### Search for settings in leoSettings.leo
+### Search for settings in leojsSettings.leojs
 
 leojsSettings.leojs contains the defaults for all of LeoJS settings, with
 documentation for each.

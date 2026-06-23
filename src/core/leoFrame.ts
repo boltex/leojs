@@ -922,18 +922,19 @@ export class NullTree {
         const c = this.c;
         const w = c.frame.body.wrapper;
         const s = p.v.b; // Guaranteed to be unicode.
+
         // Part 1: get the old text.
         const old_s = w.getAllText();
         if (p && p.__bool__() && p.__eq__(old_p) && s === old_s) {
             return;
         }
+
         // Part 2: set the new text. This forces a recolor.
-        // Important: do this *before* setting text,
-        // so that the colorizer will have the proper c.p.
+        // Important: set c.p *before* setting text.
+
         c.setCurrentPosition(p);
         w.setAllText(s);
-        // This is now done after c.p has been changed.
-        // p.restoreCursorAndScroll()
+
     }
 
     //@+node:felix.20221210193746.5: *5* 3. LeoTree.change_current_position
@@ -1048,23 +1049,24 @@ export class NullTree {
         }
     }
     //@+node:felix.20221102232749.6: *3* NullTree.Drawing & scrolling
-    public redraw(p?: Position): void {
+    public redraw_tree(p?: Position): Position | undefined {
         this.redrawCount += 1;
+        return p;
     }
     public redraw_now(p?: Position): void {
-        this.redraw();
+        this.redraw_tree();
     }
     public redraw_after_contract(p: Position): void {
-        this.redraw();
+        this.redraw_tree();
     }
     public redraw_after_expand(p: Position): void {
-        this.redraw();
+        this.redraw_tree();
     }
     public redraw_after_head_changed(): void {
-        this.redraw();
+        // pass
     }
     public redraw_after_select(p?: Position): void {
-        this.redraw();
+        this.redraw_tree();
     }
     public scrollTo(p: Position): void {
         // pass

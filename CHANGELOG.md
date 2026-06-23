@@ -1,8 +1,26 @@
 # Change Log
 
+## 1.0.19
+
+- Improved error messages when writing external files. Mirror of Leo's #4732
+- Removed documentation sections which contained python-only/docutils features which are unavailable for now in LeoJS.
+- Fixed nav pane 'frozen' state and icon persistence across documents.
+
+## 1.0.18
+
+- Fixed issue #199, a UI Freeze that happened when loading a leo file with missing external files
+
+## 1.0.17
+
+- Fixed cff command in leoFind as per Leo's #4640
+- Fixed Java importer as per Leo's #4471
+- Allow .leojs JSON format for "myLeoSettings".
+- Added Up/Down arrow support for search-history navigation in the find-pattern input box.
+- Fixed issue #196, a UI freeze that happened when reloading modified opened Leo documents (.leo, .leojs files themselves)
+
 ## 1.0.16
 
-- ...
+- Fixed markdown writer.
 
 ## 1.0.15
 
@@ -19,7 +37,7 @@
 - Fixed bug in goPrev method related to selecting previously visited nodes.
 - Fixed HTML exporter by escaping properly reserved characters such as tag brackets and ampersands.
 - Fixed an ignored config check for external file change settings in ExternalFilesController.
-- Fixed dirty node handling in ExternalFilesController when reading modified  files. Mirror of Leo's #4566.
+- Fixed dirty node handling in ExternalFilesController when reading modified files. Mirror of Leo's #4566.
 - Improved 'folder' icon image.
 - Removed configuration settings for external file detection: Leo's raise-file-update-dialogs and check-for-changed-external-files can now be used in settings nodes or myLeoSettings.leo.
 - Fixed goto-prev-marked command.

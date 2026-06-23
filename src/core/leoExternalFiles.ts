@@ -344,13 +344,17 @@ export class ExternalFilesController {
         // #1888:
         const val = await this.ask(c, w_path);
         if (['yes', 'yes-all'].includes(val)) {
+
+            // ! RESOLVE "onIdlePromise" BECAUSE revertCommander WILL AWAIT IT AND IT WILL BLOCK !
+            this.resolveOnIdle();
+
             // Do a complete restart of Leo.
             await g.app.loadManager!.revertCommander(c);
             // ! LEOJS : FORCE GUI REFRESH AFTER A Change of opened document!
             g.app.gui.fullRefresh(true);
             g.es_print(`reloaded ${w_path}`);
             void vscode.window.showInformationMessage(
-                'Changes to Leo files were detected. Reloaded.'
+                `Changes to Leo file detected. Reloaded ${g.shortFilename(w_path)}`
             );
         }
     }
@@ -461,20 +465,20 @@ export class ExternalFilesController {
      */
     public compute_ext(c: Commands, p: Position, ext: string): string {
         if (ext) {
-            if (ext.startsWith("'")) {
-                ext = ext.replace(/^'+/, '');
-                ext = ext.replace(/'+$/, '');
-            }
-            if (ext.startsWith('"')) {
-                ext = ext.replace(/^"+/, '');
-                ext = ext.replace(/"+$/, '');
+            if ((ext.startsWith("'") && ext.endsWith("'")) ||
+                (ext.startsWith('"') && ext.endsWith('"'))) {
+                ext = ext.slice(1, -1);
             }
         }
         if (!ext) {
             // if node is part of @<file> tree, get ext from file name
             for (const p2 of p.self_and_parents(false)) {
                 if (p2.isAnyAtFileNode()) {
-                    const fn = p2.h.split(' ', 1)[1];
+                    const trimmed = p2.h.trim();
+                    const firstSpaceIndex = trimmed.search(/\s/);
+
+                    // If a space is found, grab everything after it; otherwise, default to empty
+                    const fn = firstSpaceIndex !== -1 ? trimmed.substring(firstSpaceIndex).trim() : '';
                     ext = g.os_path_splitext(fn)[1];
                     break;
                 }
@@ -860,6 +864,13 @@ export class ExternalFilesController {
         // with open(path, 'rb') as f
         //     s = f.read()
 
+        const w_exists = await g.os_path_exists(p_path);
+        if (!w_exists) {
+            console.warn(`checksum: file does not exist: ${p_path}`);
+            void vscode.window.showWarningMessage(`Checksum: file does not exist: ${p_path}`);
+            return '';
+        }
+
         const w_uri = g.makeVscodeUri(p_path);
         const s = await vscode.workspace.fs.readFile(w_uri);
 
@@ -997,8 +1008,9 @@ export class ExternalFilesController {
         if (!t) {
             t = await this.get_mtime(p_path);
         }
+        // t will be zero if file doesn't exist, but that should be handled by the caller.
         this._time_d[g.os_path_realpath(p_path)] = t;
-        if (!skip_checksum) {
+        if (t && !skip_checksum) {
             // To prevent false positives when timestamp (not content) is modified by external program
             this.checksum_d[p_path] = await this.checksum(p_path);
         }

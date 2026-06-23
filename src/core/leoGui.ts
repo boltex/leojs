@@ -43,7 +43,6 @@ export class LeoGui {
     public frameIndex: number = 0;
 
     public splashScreen: any;
-    public utils: any;
 
     // public ScriptingControllerClass: any; // ? UNEEDED IN LEOJS ?
     //
@@ -74,7 +73,6 @@ export class LeoGui {
         this.scriptFileName = undefined;
 
         this.splashScreen = undefined;
-        this.utils = undefined;
 
         // this.ScriptingControllerClass = NullScriptingControllerClass; // ? UNEEDED IN LEOJS ?
         //
