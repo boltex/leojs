@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.20
+
+- ...
+
 ## 1.0.19
 
 - Improved error messages when writing external files. Mirror of Leo's #4732
