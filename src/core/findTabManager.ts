@@ -214,6 +214,9 @@ export class StringFindTabManager {
         const c = this.c;
         const finder = c.findCommands;
         const bunch: ISettings = {
+            // State...
+            in_headline: false,
+            reverse: false,
             // Find/change strings...
             find_text: this.find_findbox.text(),
             change_text: this.find_replacebox.text(),

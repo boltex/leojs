@@ -44,6 +44,7 @@ const config = {
         },
         docs: {
           sidebarPath: './sidebars.js',
+          breadcrumbs: false,
         },
         blog: false,
         // blog: {

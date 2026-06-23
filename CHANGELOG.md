@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.19
+
+- Improved error messages when writing external files. Mirror of Leo's #4732
+- Removed documentation sections which contained python-only/docutils features which are unavailable for now in LeoJS.
+- Fixed nav pane 'frozen' state and icon persistence across documents.
+
 ## 1.0.18
 
 - Fixed issue #199, a UI Freeze that happened when loading a leo file with missing external files

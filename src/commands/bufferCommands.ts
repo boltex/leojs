@@ -248,8 +248,7 @@ export class BufferCommandsClass extends BaseEditCommandsClass {
         const p = this.findBuffer(name);
 
         if (p && p.__bool__()) {
-            c.selectPosition(p);
-            c.redraw_after_select(p);
+            c.redraw(p);
         }
     }
     //@+node:felix.20240615152154.14: *3* buffer.Utils

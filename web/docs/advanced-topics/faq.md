@@ -397,7 +397,7 @@ HTML stuff
 ```
 
 > 🚨 **IMPORTANT**\
-> Leo can not revert to previous delimiters automatically; you must change back to previous delimiters using another @delims directive_.
+> Leo can not revert to previous delimiters automatically; _you must change back to previous delimiters using another @delims directive_.
 
 ### How can I disable PHP comments?
 _Contributed By Zvi Boshernitzan_

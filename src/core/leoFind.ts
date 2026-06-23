@@ -1501,7 +1501,7 @@ export class LeoFind {
 
                     g.app.gui.loadSearchSettings();
 
-                    return;
+                    return w_result;
 
                 }
             });
@@ -1679,8 +1679,7 @@ export class LeoFind {
                 `changed ${count} instances${count} ` + `in ${t2 - t1} sec.`
             );
         }
-        // c.recolor(); // ? NEEDED ?
-        // c.redraw(p); // ? NEEDED ?
+
         c.redraw(new_p);
         this.restore(saveData);
 
@@ -2775,7 +2774,7 @@ export class LeoFind {
                 }
             }
             return true;
-        }
+        };
 
         // Replace the placeholder text.
         settings.find_text = settings.find_text.replace('<find pattern here>', '');

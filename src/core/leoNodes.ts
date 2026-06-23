@@ -3712,8 +3712,6 @@ export class VNode {
     }
 
     public setHeadString(s: string): void {
-        // Fix bug: https://bugs.launchpad.net/leo-editor/+bug/1245535
-        // API allows headlines to contain newlines.
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
         v._headString = s.replace(/\n/g, '');

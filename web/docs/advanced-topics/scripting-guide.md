@@ -328,16 +328,16 @@ const w = c.frame.body.wrapper; // Leo's body pane.
 
 // Scripts can get or change the context of the body as follows:
 
-w.appendText(s)                     // Append s to end of body text.
-w.delete(i,j=None)                  // Delete characters from i to j.
-w.deleteTextSelection()             // Delete the selected text, if any.
-s = w.get(i,j=None)                 // Return the text from i to j.
-s = w.getAllText                    // Return the entire body text.
-i = w.getInsertPoint()              // Return the location of the cursor.
-s = w.getSelectedText()             // Return the selected text, if any.
-[i,j] = w.getSelectionRange(sort=True)// Return the range of selected text.
-w.setAllText(s)                     // Set the entire body text to s.
-w.setSelectionRange(i,j,insert=None) // Select the text.
+w.appendText(s);                     // Append s to end of body text.
+w.delete(i,j);                  // Delete characters from i to j.
+w.deleteTextSelection();             // Delete the selected text, if any.
+s = w.get(i,j);                 // Return the text from i to j.
+s = w.getAllText();                    // Return the entire body text.
+i = w.getInsertPoint();              // Return the location of the cursor.
+s = w.getSelectedText();             // Return the selected text, if any.
+[i,j] = w.getSelectionRange(sortFlag); // Return the range of selected text. 
+w.setAllText(s);                     // Set the entire body text to s.
+w.setSelectionRange(i,j,insert) // Select the text.
 ```
 
 > 📌 **NOTE**\
@@ -646,15 +646,3 @@ g.execute_shell_commands('python /test/qt_test.py');
 
 g.execute_shell_commands_with_options inits an environment and then calls g.execute_shell_commands.  See Leo's source code for details.
 
-## Working and paths
-
-d.get('path') returns the full, absolute path created by all @path directives that are in ancestors of node p. If p is any kind of @file node (including @file, @auto, @clean, etc.), the following script will print the full path to the created file:
-
-```ts
-const myPath = d['path'];
-let name = p.anyAtFileNodeName();
-if (name){
-    name = g.os_path_finalize_join(myPath, name);
-    g.es(name);
-}
-```

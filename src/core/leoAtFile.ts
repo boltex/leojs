@@ -3574,7 +3574,7 @@ export class AtFile {
         const theDir = g.os_path_dirname(fileName);
         const w_exists = await g.os_path_exists(theDir);
         if (theDir && !w_exists) {
-            at.error(`Directory not found:\n${theDir}`);
+            at.error(`${root.h}: Directory not found:\n${theDir}`);
             return false;
         }
         //
@@ -3989,31 +3989,24 @@ export class AtFile {
     public warnAboutOrphandAndIgnoredNodes(): void {
         const at = this;
         const root = this.root!;
+        const message = 'The node is included neither by an @others directive nor a section reference';
         if (at.errors) {
             return; // No need to repeat this.
         }
-        for (const p of root.self_and_subtree(false)) {
-            if (!p.v.isVisited()) {
-                at.writeError('Orphan node:  ' + p.h);
-                if (p.hasParent()) {
-                    g.blue('parent node:', p.parent().h);
-                }
-            }
+        if (root.isAtAllNode()) {
+            return;
         }
-        const p = root.copy();
-        const after = p.nodeAfterTree();
-        while (p && p.__bool__() && !p.__eq__(after)) {
-            if (p.isAtAllNode()) {
-                p.moveToNodeAfterTree();
-            } else {
-                // #1050: test orphan bit.
-                if (p.isOrphan()) {
-                    at.writeError('Orphan node: ' + p.h);
-                    if (p.hasParent()) {
-                        g.blue('parent node:', p.parent().h);
-                    }
+        if (root.isOrphan()) {
+            return;
+        }
+        for (const p of root.subtree(false)) {
+            if (!p.v.isVisited()) {
+                at.writeError("Orphan node:  " + p.h)
+                g.es_print_unique_message(message)
+                if (p.hasParent()) {
+                    g.blue("parent node:", p.parent().h);
+
                 }
-                p.moveToThreadNext();
             }
         }
     }
