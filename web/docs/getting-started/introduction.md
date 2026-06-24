@@ -50,9 +50,7 @@ Listed here are the most useful commands and their keyboard shortcuts to edit an
 
 | Outline Commands |                                                                  |
 | :--------------- | :--------------------------------------------------------------- |
-| Undo / Redo      | `Ctrl + Z` &nbsp;&nbsp;/&nbsp;&nbsp; `Ctrl + Shift + Z`          |
 | Insert Node      | `Ctrl + I` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift + Insert`         |
-| Insert Child     | `Ctrl + Insert`                                                  |
 | Edit Headline    | `Ctrl + H`                                                       |
 | Mark / Unmark    | `Ctrl + M`                                                       |
 | Copy Node        | `Ctrl + Shift + C`                                               |
