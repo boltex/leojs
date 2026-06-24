@@ -51,6 +51,7 @@ Essential Outline Commands and Keyboard Shortcuts
 | Outline Commands |                                                                  |
 | :--------------- | :--------------------------------------------------------------- |
 | Insert Node      | `Ctrl + I` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift + Insert`         |
+| Insert Child     | `Ctrl + Insert`                                                  |
 | Edit Headline    | `Ctrl + H`                                                       |
 | Mark / Unmark    | `Ctrl + M`                                                       |
 | Copy Node        | `Ctrl + Shift + C`                                               |
