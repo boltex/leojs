@@ -46,7 +46,7 @@ The keybinding architecture is designed to be context-aware. When your focus is 
 
 ## An Outline Editor
 
-Listed here are the most useful commands and their keyboard shortcuts to edit an outline.
+Essential Outline Commands and Keyboard Shortcuts
 
 | Outline Commands |                                                                  |
 | :--------------- | :--------------------------------------------------------------- |
