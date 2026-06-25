@@ -273,6 +273,21 @@ export class TopLevelEditCommands {
             }
         }
     }
+    //@+node:felix.20260624214709.1: *3* @g.command('show-node-files')
+    @command(
+        'show-node-files',
+        'Display the headlines of all @<file> nodes containing this node.'
+        )
+    public show_node_files(this: Commands): void {
+        const c: Commands = this;
+        if (c && c.p && c.p.v) {
+            const p = c.p;
+            for(const v of p.v.findAllAncestorAtFileNodes()) {
+                g.es(v.h, {color:'blue'});
+            }
+        }
+    }
+
     //@+node:felix.20230708211959.1: *3* @g.command('show-clone-parents')
     @command(
         'show-clone-parents',

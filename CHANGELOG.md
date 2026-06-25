@@ -2,7 +2,7 @@
 
 ## 1.0.20
 
-- ...
+- Added show-node-files command as per Leo's #4749
 
 ## 1.0.19
 
