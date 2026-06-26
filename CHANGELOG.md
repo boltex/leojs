@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.21
+ 
+- Fixed markdown writer to preserve titles that start with '!'.
+
 ## 1.0.20
 
 - Added show-node-files command as per Leo's #4749

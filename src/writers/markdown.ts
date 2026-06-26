@@ -15,34 +15,57 @@ import { BaseWriter } from './basewriter';
  */
 export class MarkdownWriter extends BaseWriter {
     public root: Position | null = null;
+    private placeholder_regex = /^placeholder level [0-9]+/;
 
     //@+others
     //@+node:felix.20230914214935.3: *3* mdw.write
     /**
      * Write all the *descendants* of an @auto-markdown node.
      */
+
+    /* Original Python Code to use as LOOSE reference:
+
+    def write(self, root: Position) -> None:
+        """Write all the *descendants* of an @auto-markdown node."""
+        self.root = root
+        self.write_root(root)
+        for p in root.subtree():
+            if g.app.force_at_auto_sentinels:  # pragma: no cover
+                self.put_node_sentinel(p, '<!--', delim2='-->')
+            if self.placeholder_regex.match(p.h):
+                # skip this 'placeholder level X' node
+                pass
+            else:
+                self.write_headline(p)
+                lines = p.b.splitlines(False)
+                for s in lines:
+                    if not g.isDirective(s):
+                        self.put(s)
+        root.setVisited()
+
+    */
+
+
     public write(root: Position): void {
-        const placeholder_regex = /placeholder level [0-9]+/;
         this.root = root;
         this.write_root(root);
 
-        let count = 0;
         for (const p of root.subtree()) {
-            count += 1;
             if (g.app.force_at_auto_sentinels) {
                 this.put_node_sentinel(p, '<!--', '-->');
             }
-            if (placeholder_regex.test(p.h)) {
+            if (this.placeholder_regex.test(p.h)) {
                 // skip this 'placeholder level X' node
+                // pass
             } else {
                 this.write_headline(p);
                 const normalized = p.b.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
                 const lines = normalized.endsWith('\n')
                     ? normalized.split('\n').slice(0, -1)
                     : normalized.split('\n');
-                for (const line of lines) {
-                    if (!g.isDirective(line)) {
-                        this.put(line);
+                for (const s of lines) {
+                    if (!g.isDirective(s)) {
+                        this.put(s);
                     }
                 }
             }
@@ -53,15 +76,18 @@ export class MarkdownWriter extends BaseWriter {
     /**
      * Write or skip the headline.
      *
-     * New in Leo 5.5: Always write '#' sections.
-     * This will cause perfect import to fail.
-     * The alternatives are much worse.
+     *  New in Leo 5.5:
+     *  - Always write '#' sections.
+     *    This will cause perfect import to fail. The alternatives are worse.
+     *  - Skip !Declarations.
+     *
+     *  New in Leo 6.7.7:
+     *  - Don't write headlines of placeholder nodes.
      */
     public write_headline(p: Position): void {
         const level = p.level() - (this.root?.level() || 0);
-        const kind = p.h && p.h[0];
-        if (kind === '!') {
-            // The signal for a declaration node.
+        if (p.h === '!Declarations' || this.placeholder_regex.test(p.h)) {
+            // pass
         } else {
             this.put(`${'#'.repeat(level)} ${p.h.trimStart()}`); // Leo 6.6.4: preserve spacing.
         }
