@@ -2,7 +2,7 @@
 
 ## 1.0.21
  
-- ...
+- Fixed markdown writer to preserve titles that start with '!'.
 
 ## 1.0.20
 
