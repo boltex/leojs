@@ -46,11 +46,10 @@ The keybinding architecture is designed to be context-aware. When your focus is 
 
 ## An Outline Editor
 
-Listed here are the most useful commands and their keyboard shortcuts to edit an outline.
+Essential Outline Commands and Keyboard Shortcuts
 
 | Outline Commands |                                                                  |
 | :--------------- | :--------------------------------------------------------------- |
-| Undo / Redo      | `Ctrl + Z` &nbsp;&nbsp;/&nbsp;&nbsp; `Ctrl + Shift + Z`          |
 | Insert Node      | `Ctrl + I` &nbsp;&nbsp;_or_&nbsp;&nbsp; `Shift + Insert`         |
 | Insert Child     | `Ctrl + Insert`                                                  |
 | Edit Headline    | `Ctrl + H`                                                       |

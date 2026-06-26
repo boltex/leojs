@@ -481,7 +481,7 @@ export class CommanderFileCommands {
         at.changed_roots = [];
         c.fileCommands.handleNodeConflicts();
         c.setChanged();
-        c.redraw();
+        c.redraw(update_p);
         c.undoer.clearAndWarn('refresh-from-disk');
     }
     //@+node:felix.20220105210716.13: *4* c_file.pwd

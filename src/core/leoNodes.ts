@@ -3590,6 +3590,53 @@ export class VNode {
         g.contentModifiedSet.push(this);
     }
 
+    //@+node:felix.20260624214514.1: *4* v.findAllAncestorAtFileNodes
+    /**
+     * Return a list of all @<file> nodes containing this VNode.
+     *
+     * Original idea by Виталије Милошевић (Vitalije Milosevic).
+     *
+     * PR #4566: Rewritten by EKR to use the to_do_set kwarg.
+     * https://github.com/leo-editor/leo-editor/pull/4566
+     *
+     * PR #4747: Create this helper function.
+     * https://github.com/leo-editor/leo-editor/pull/4747
+     */
+    public findAllAncestorAtFileNodes(to_do_set?: Set<VNode>): VNode[] {
+
+        const v: VNode = this;
+
+        // Init seen and to_do_list.
+        const seen: Set<VNode> = new Set([v.context.hiddenRootNode]);
+        let to_do_list: VNode[] = to_do_set ? Array.from(to_do_set) : [v];
+
+        if (to_do_set) {
+            for (const v2 of to_do_set) {
+                to_do_list.push(...v2.parents);
+            }
+        }
+        to_do_list = Array.from(new Set(to_do_list));
+
+        // The main loop.
+        const result: Set<VNode> = new Set();
+        while (to_do_list.length > 0) {
+            const v2 = to_do_list.pop()!;
+            seen.add(v2);
+            if (v2.isAnyAtFileNode()) {
+                result.add(v2);
+            } else {
+                // Nested @<file> nodes are no longer valid.
+                for (const parent_v of v2.parents) {
+                    if (!seen.has(parent_v)) {
+                        to_do_list.push(parent_v);
+                    }
+                }
+            }
+
+        }
+        return Array.from(result);
+
+    }
     //@+node:felix.20210207213328.1: *4* v.restoreCursorAndScroll
     // Called only by LeoTree.selectHelper.
 
@@ -3657,40 +3704,19 @@ export class VNode {
         }
     }
 
-    //@+node:felix.20210116003530.1: *4* v.setAllAncestorAtFileNodesDirty
+    //@+node:felix.20260624214543.1: *4* v.setAllAncestorAtFileNodesDirty
     /**
      * Original idea by Bитaлиje Mилoшeвић (Vitalije Milosevic).
-     * #4565: Rewritten by EKR to use the to_do_set kwarg.
+     * Modified by EKR.
+     * Translated by Félix Malboeuf
      */
     public setAllAncestorAtFileNodesDirty(to_do_set?: Set<VNode>): void {
         const v: VNode = this;
-        // Init seen and to_do_list.
-        const seen: Set<VNode> = new Set([v.context.hiddenRootNode]);
-        let to_do_list: VNode[] = to_do_set ? Array.from(to_do_set) : [v];
 
-        if (to_do_set) {
-            for (const v2 of to_do_set) {
-                to_do_list.push(...v2.parents);
-            }
+        for (const v2 of v.findAllAncestorAtFileNodes(to_do_set)) {
+            v2.setDirty();
         }
-        to_do_list = Array.from(new Set(to_do_list));
 
-        // The main loop.
-        while (to_do_list.length > 0) {
-            const v2 = to_do_list.pop()!;
-            seen.add(v2);
-            if (v2.isAnyAtFileNode()) {
-                v2.setDirty();
-            } else {
-                // Nested @<file> nodes are no longer valid.
-                for (const parent_v of v2.parents) {
-                    if (!seen.has(parent_v)) {
-                        to_do_list.push(parent_v);
-                    }
-                }
-            }
-
-        }
     }
 
     //@+node:felix.20210115195450.21: *4* v.setBodyString & v.setHeadString

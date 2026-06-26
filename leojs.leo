@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20260622205125.1"><vh>1.0.20</vh></v>
 <v t="felix.20260606153503.1"><vh>1.0.19</vh></v>
 <v t="felix.20260605171910.1"><vh>1.0.18</vh></v>
 <v t="felix.20260501210029.1"><vh>1.0.17</vh></v>
@@ -1146,7 +1147,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738323037323731382e3236310a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738323434353833332e3236310a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -3321,7 +3322,7 @@ private _updateLeoObjectIndicator(): void {
 }
 
 </t>
-<t tx="felix.20201214154816.1" _mod_time="46313738323036393936332e3730350a2e">import * as vscode from "vscode";
+<t tx="felix.20201214154816.1" _mod_time="46313738323137343437362e3333360a2e">import * as vscode from "vscode";
 import { Position } from "./core/leoNodes";
 import { RClick } from "./core/mod_scripting";
 
@@ -3470,7 +3471,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313738323037303930322e3234320a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738323137343437362e3331390a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4665,13 +4666,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738323037343031332e33310a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738323434353730382e3030330a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -15924,7 +15925,7 @@ set leoEditHeadline(p_value: boolean) {
 
 </t>
 <t tx="felix.20231219233411.1"></t>
-<t tx="felix.20231219233427.1" _mod_time="46313738323037323537342e34350a2e">// @ts-check
+<t tx="felix.20231219233427.1" _mod_time="46313738323137343437362e32370a2e">// @ts-check
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
@@ -19565,7 +19566,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313738303737343535302e3139390a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313738323137353932352e3035380a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19602,7 +19603,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.19&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.20&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21938,6 +21939,12 @@ public doArrow(key: "Up" | "Down") {
 - Improved error messages when writing external files. Mirror of Leo's #4732
 - Removed documentation sections which contained python-only/docutils features which are unavailable for now in LeoJS.
 - Fixed nav pane 'frozen' state and icon persistence across documents.
+
+</t>
+<t tx="felix.20260622205125.1">## 1.0.20
+
+- Added show-node-files command as per Leo's #4749
+- Fixed external file outline refresh upon change detection
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

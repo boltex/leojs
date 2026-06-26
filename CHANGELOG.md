@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.0.20
+
+- Added show-node-files command as per Leo's #4749
+- Fixed external file outline refresh upon change detection
+
 ## 1.0.19
 
 - Improved error messages when writing external files. Mirror of Leo's #4732
