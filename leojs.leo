@@ -1147,7 +1147,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738323335323038332e3537310a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738323434353833332e3236310a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4666,7 +4666,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738323137353837332e3137370a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738323434353730382e3030330a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -21944,6 +21944,7 @@ public doArrow(key: "Up" | "Down") {
 <t tx="felix.20260622205125.1">## 1.0.20
 
 - Added show-node-files command as per Leo's #4749
+- Fixed external file outline refresh upon change detection
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

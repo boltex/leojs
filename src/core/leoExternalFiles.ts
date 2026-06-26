@@ -255,6 +255,7 @@ export class ExternalFilesController {
         let changed = false;
         let state = 'no';
         const old_p = c.p;  // To restore selection if refresh option set to yes-all & is descendant of at-file
+        const changed_roots: Set<string> = new Set();
 
         for (const p of c.all_unique_positions()) {
             if (!p.isAnyAtFileNode()) {
@@ -288,6 +289,7 @@ export class ExternalFilesController {
 
                 // #4565: set all ancestor file nodes dirty and redraw.
                 p.v.setDirty();
+                changed_roots.add(p.h);
                 const to_do_set: Set<VNode> = new Set();
                 for (const p2 of c.all_positions()) {
                     if (p2.v.isDirty()) {
@@ -311,12 +313,6 @@ export class ExternalFilesController {
         }
         // #4570: Write all update messages here, and only here.
         if (!g.unitTesting) {
-            const changed_roots: Set<string> = new Set();
-            for (const p2 of c.all_positions()) {
-                if (p2.isAnyAtFileNode() && p2.isDirty()) {
-                    changed_roots.add(p2.h);
-                }
-            }
             for (const s of Array.from(changed_roots).sort()) {
                 g.es_print('update:', s);
             }
