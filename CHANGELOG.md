@@ -2,7 +2,7 @@
 
 ## 1.0.22
 
-- ...
+- Fixed typo in error string template.
 
 ## 1.0.21
  

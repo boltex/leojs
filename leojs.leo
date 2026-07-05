@@ -1149,7 +1149,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738323531343832362e32310a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738333239343931332e3439320a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4668,7 +4668,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738323531343833362e3032390a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738333239343530372e3830340a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -19568,7 +19568,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313738323531343836352e3938360a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313738333239343530372e3830360a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -21956,7 +21956,7 @@ public doArrow(key: "Up" | "Down") {
 </t>
 <t tx="felix.20260626190009.1">## 1.0.22
 
-- ...
+- Fixed typo in error string template.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

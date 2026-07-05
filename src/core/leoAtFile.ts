@@ -843,7 +843,7 @@ export class AtFile {
 
         const fileName = c.fullPath(p); // #1521, #1341, #1914.
         if (!(await g.os_path_exists(fileName))) {
-            g.error(`not found: ${p.h}̀`);
+            g.error(`not found: ${p.h}`);
             return p;
         }
 
@@ -897,7 +897,7 @@ export class AtFile {
             fileName = c.fullPath(root);
             const w_exists = await g.os_path_exists(fileName);
             if (!w_exists) {
-                g.es_print(`not found: ${fileName}̀`);
+                g.es_print(`not found: ${fileName}`);
                 return;
             }
 
