@@ -2,7 +2,7 @@
 
 ## 1.0.23
 
-- ...
+- Fixed possible bug in clone-find commands.
 
 ## 1.0.22
 
