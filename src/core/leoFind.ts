@@ -3081,11 +3081,11 @@ export class LeoFind {
                     clones.push(p.copy());
                     cloned_vnodes.push(p.v);
                     count += 1;
-                    if (flatten) {
-                        p.moveToThreadNext();
-                    } else {
-                        p.moveToNodeAfterTree();
-                    }
+                }
+                if (flatten) {
+                    p.moveToThreadNext();
+                } else {
+                    p.moveToNodeAfterTree();
                 }
             } else {
                 p.moveToThreadNext();
