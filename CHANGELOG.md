@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.24
+
+- ...
+
 ## 1.0.23
 
 - Fixed possible bug in clone-find commands.
