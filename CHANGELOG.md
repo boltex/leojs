@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.23
+
+- Fixed possible bug in clone-find commands.
+
 ## 1.0.22
 
 - Fixed typo in error string template.
