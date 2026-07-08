@@ -3108,7 +3108,7 @@ export class LeoFind {
         this.suboutline_only = false;
         this.node_only = false;
         this.root = undefined;
-        g.es(`found ${count}, matches for ${this.find_text}`);
+        g.es(`found ${count} matches for ${this.find_text}`);
         return count; // Might be useful for the gui update.
     }
     //@+node:felix.20221020232631.3: *5* find._cfa_create_nodes
