@@ -246,6 +246,16 @@ export class LeoUnitTest {
         clone.moveToLastChildOf(p);
     }
 
+    //@+node:felix.20260714000950.1: *3* LeoUnitTest.prep
+    /**
+     * Return the "prepped" version of s.
+     */
+    public prep(s: string): string {
+        
+        return g.dedent(s).trim() + '\n';
+
+    }
+
     //@+node:felix.20230529213901.1: *3* LeoUnitTest.dump_headlines
     /**
      * Dump root's headlines, or all headlines if root is None.
