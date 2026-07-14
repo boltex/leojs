@@ -2,7 +2,7 @@
 
 ## 1.0.24
 
-- ...
+- Fixed @auto-md / @auto-markdown handling of @noheader nodes - From original Leo's #4787 by Alexander Przemysław Kamiński
 
 ## 1.0.23
 
