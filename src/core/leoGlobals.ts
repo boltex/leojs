@@ -6606,7 +6606,7 @@ export async function handleUrlHelper(url: string, c: Commands, p: Position): Pr
     } else if (['', 'file'].includes(parsed.scheme)) {
 
         // TODO : check if unquote_path is needed !
-        const unquote_path = unquoteUrl(leo_path);
+        const unquote_path = unquote(leo_path);
         if (await os_path_exists(leo_path)) {
 
             if (isBrowser) {
@@ -7075,11 +7075,21 @@ export async function openUrlHelper(c: Commands, url?: string): Promise<string |
     return undefined;
 
 }
-//@+node:felix.20230724154323.25: *3* g.unquoteUrl
+//@+node:felix.20260713212712.1: *3* g.quote
+/**
+ * g.quote mimics the safe='' argument of urllib.parse.quote in Python.
+ */
+export function quote(value: string): string {
+    return encodeURIComponent(value).replace(
+        /[!'()*]/g,
+        (char: string) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
+    );
+}
+//@+node:felix.20260713212719.1: *3* g.unquote
 /**
  * Replace escaped characters (especially %20, by their equivalent).
  */
-export function unquoteUrl(url: string): string {
+export function unquote(url: string): string {
 
     // return urllib.parse.unquote(url);
 

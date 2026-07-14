@@ -23,6 +23,7 @@ export class Markdown_Importer extends Importer {
     // Regular expression patterns.
     public md_hash_pattern: RegExp = /^(#+)\s*(.+)\s*\n/;
     public md_pattern_table: RegExp[] = [/^(=+)\n/, /^(-+)\n/];
+    public md_noheader_pattern: RegExp = /^\s*<!--\s*leo-noheader level=(\d+)\s+headline=(.*?)\s*-->\s*\n?$/;
 
     constructor(c: Commands) {
         super(c);
@@ -38,7 +39,7 @@ export class Markdown_Importer extends Importer {
      *
      * i.gen_lines adds the @language and @tabwidth directives.
      */
-    public gen_block(parent: Position): void {
+    public override gen_block(parent: Position): void {
         g.assert(parent.__eq__(this.root));
         const lines: string[] = this.lines;
         this.lines_dict[parent.v.gnx] = [];  // Initialize lines_dict for the parent vnode.
@@ -46,13 +47,17 @@ export class Markdown_Importer extends Importer {
         let in_code: boolean = false;
         let skip: number = 0;
         for (let i: number = 0; i < lines.length; i++) {
-            const line: string = lines[i];
-            const top: Position = this.stack[this.stack.length - 1];
+            const line: string = lines[i]!;
+            const top: Position = this.stack[this.stack.length - 1]!;
             let [level, name]: [number | null, string | null] = this.is_hash(line);
+            let marker = this.is_noheader_marker(line);
             if (skip > 0) {
                 skip -= 1;
+            } else if (!in_code && marker) {
+                const [marker_level, marker_name] = marker;
+                this.make_noheader_node(marker_level, marker_name);
             } else if (!in_code && this.lookahead_underline(i)) {
-                level = lines[i + 1].startsWith('=') ? 1 : 2;
+                level = lines[i + 1]!.startsWith('=') ? 1 : 2;
                 this.make_markdown_node(level, line);
                 skip = 1;
             } else if (!in_code && name && level != null) {
@@ -63,19 +68,19 @@ export class Markdown_Importer extends Importer {
                 if (line.startsWith('```')) {
                     in_code = false;
                 }
-                this.lines_dict[top.v.gnx].push(line);
+                this.lines_dict[top.v.gnx]!.push(line);
             } else if (line.startsWith('```')) {
                 in_code = true;
-                this.lines_dict[top.v.gnx].push(line);
+                this.lines_dict[top.v.gnx]!.push(line);
             } else {
-                this.lines_dict[top.v.gnx].push(line);
+                this.lines_dict[top.v.gnx]!.push(line);
             }
         }
 
         // Set p.b from the lines_dict.
         g.assert(parent.__eq__(this.root));
         for (const p of parent.self_and_subtree()) {
-            p.b = this.lines_dict[p.v.gnx].join('');
+            p.b = this.lines_dict[p.v.gnx]!.join('');
         }
     }
     //@+node:felix.20230913225656.4: *4* md_i.is_hash
@@ -93,6 +98,19 @@ export class Markdown_Importer extends Importer {
             }
         }
         return [null, null];
+    }
+    //@+node:felix.20260713212301.1: *4* md_i.is_noheader_marker
+    /**
+     * Return level, name if line is a Leo noheader marker.
+     */
+    public is_noheader_marker(line: string): [number, string] | null {
+        const m: RegExpMatchArray | null = line.match(this.md_noheader_pattern);
+        if (m != null) {
+            const level: number = parseInt(m[1]!);
+            const name: string = decodeURIComponent(m[2]!);
+            return [level, name];
+        }
+        return null;
     }
     //@+node:felix.20230913225656.5: *4* md_i.is_underline
     /**
@@ -133,6 +151,15 @@ export class Markdown_Importer extends Importer {
         child.h = '!Declarations';
         lines_dict[child.v.gnx] = [line];
         this.stack.push(child);
+    }
+    //@+node:felix.20260713212306.1: *4* md_i.make_noheader_node
+    /**
+     * Create a node represented by a Leo noheader HTML comment.
+     */
+    public make_noheader_node(level: number, name: string): Position {
+        const child: Position = this.make_markdown_node(level, name);
+        this.lines_dict[child.v.gnx]!.push('@noheader\n');
+        return child;
     }
     //@+node:felix.20230913225656.8: *4* md_i.make_markdown_node
     /**
