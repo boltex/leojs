@@ -11,6 +11,7 @@ import { RstWriter } from '../writers/leo_rst';
 import { TreePad_Writer } from '../writers/treepad';
 import { Position } from '../core/leoNodes';
 import { MarkdownWriter } from '../writers/markdown';
+import { Markdown_Importer } from '../importers/markdown';
 
 //@+others
 //@+node:felix.20230923152630.1: ** base class
@@ -120,18 +121,41 @@ suite('TestDartWriter', () => {
 
 });
 //@+node:felix.20260713221547.1: ** suite TestMDWriter
-/*
-class TestMDWriter(BaseTestWriter):
-    """Test Cases for the markdown writer plugin."""
+/**
+ *  Test Cases for the markdown writer plugin.
+ */
+
+
+suite('TestMDWriter', () => {
+
+    let self: BaseTestWriter;
+
+    before(() => {
+        self = new BaseTestWriter();
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
 
     //@+others
     //@+node:felix.20260713221547.3: *3* TestMDWriter.test_markdown_sections
-    def test_markdown_sections(self):
-        c, root = self.c, self.c.p
+    test('test_markdown_sections', () => {
+
+        const c = self.c;
+        const root = self.c.p;
+
         //@+<< define contents: test_markdown_sections >>
         //@+node:felix.20260713221547.4: *4* << define contents: test_markdown_sections >>
-        contents = (
-            """
+        const contents =
+            `
             # 1st level title X
 
             some text in body X
@@ -145,120 +169,154 @@ class TestMDWriter(BaseTestWriter):
             ## 2nd level title B
 
             some body content of the 2nd node
-        """.strip()
-            + '\n'
-        )  # End the last node with '\n'.
+        `.trim() + '\n';  // End the last node with '\n'.
         //@-<< define contents: test_markdown_sections >>
 
-        # Import contents into root's tree.
-        importer = Markdown_Importer(c)
-        importer.import_from_string(parent=root, s=contents)
+        // Import contents into root's tree.
+        const importer = new Markdown_Importer(c);
+        importer.import_from_string(root, contents);
 
-        if 0:
-            for z in root.self_and_subtree():
-                g.printObj(g.splitLines(z.b), tag=z.h)
-            print('\n=== End dump ===\n')
+        if (0) {
+            for (const z of root.self_and_subtree()) {
+                g.printObj(g.splitLines(z.b), z.h);
+            }
+            g.pr('\n=== End dump ===\n');
+        }
 
-        # Write the tree.
-        writer = MarkdownWriter(c)
-        writer.write(root)
-        results_list = c.atFileCommands.outputList
-        results_s = ''.join(results_list)
-        if contents != results_s:
-            g.printObj(contents, tag='contents')
-            g.printObj(results_s, tag='results_s')
-        self.assertEqual(results_s, contents)
+        // Write the tree.
+        const writer = new MarkdownWriter(c);
+        writer.write(root);
+        const results_list = c.atFileCommands.outputList;
+        const results_s = results_list.join('');
 
+        if (contents !== results_s) {
+            g.printObj(contents, 'contents');
+            g.printObj(results_s, 'results_s');
+        }
+        assert.strictEqual(results_s, contents);
+
+    });
     //@+node:felix.20260713221547.5: *3* TestMDWriter.test_markdown_image
-    def test_markdown_image(self):
-        c, root = self.c, self.c.p
+    test('test_markdown_image', () => {
+
+        const c = self.c;
+        const root = self.c.p;
+
         //@+<< define contents: test_markdown_image >>
         //@+node:felix.20260713221547.6: *4* << define contents: test_markdown_image >>
-        contents = (
-            """
+        const contents = `
             declaration text
 
             # ![label](https://raw.githubusercontent.com/boltext/leojs/master/resources/leoapp.png)
 
             Body text
-        """.strip()
-            + '\n'
-        )  # End the last node with '\n'.
+        `.trim() + '\n'; // End the last node with '\n'.
         //@-<< define contents: test_markdown_image >>
 
-        # Import contents into root's tree.
-        importer = Markdown_Importer(c)
-        importer.import_from_string(parent=root, s=contents)
+        // Import contents into root's tree.
+        const importer = new Markdown_Importer(c);
+        importer.import_from_string(root, contents);
 
-        if 0:
-            for z in root.self_and_subtree():
-                g.printObj(g.splitLines(z.b), tag=z.h)
-            print('\n=== End dump ===\n')
+        if (0) {
+            for (const z of root.self_and_subtree()) {
+                g.printObj(g.splitLines(z.b), z.h);
+            }
+            g.pr('\n=== End dump ===\n');
+        }
 
-        # Write the tree.
-        writer = MarkdownWriter(c)
-        writer.write(root)
-        results_list = c.atFileCommands.outputList
-        results_s = ''.join(results_list)
-        if contents != results_s:
-            g.printObj(contents, tag='contents')
-            g.printObj(results_s, tag='results_s')
-        self.assertEqual(results_s, contents)
+        // Write the tree.
+        const writer = new MarkdownWriter(c);
+        writer.write(root);
+        const results_list = c.atFileCommands.outputList;
+        const results_s = results_list.join('');
 
+        if (contents !== results_s) {
+            g.printObj(contents, 'contents');
+            g.printObj(results_s, 'results_s');
+        }
+        assert.strictEqual(results_s, contents);
+
+    });
     //@+node:felix.20260713221547.7: *3* TestMDWriter.test_markdown_noheader_leaf
-    def test_markdown_noheader_leaf(self):
-        root = self.c.p
-        hidden = root.insertAsLastChild()
-        hidden.h = 'Hidden leaf'
-        hidden.b = '@noheader\nLeaf body\n'
-        visible = root.insertAsLastChild()
-        visible.h = 'Visible sibling'
-        visible.b = 'Visible body\n'
+    test('test_markdown_noheader_leaf', () => {
 
-        results_s = self.render_markdown(root)
-        self.assertEqual(
+        const root = self.c.p;
+
+        const hidden = root.insertAsLastChild();
+        hidden.h = 'Hidden leaf';
+        hidden.b = '@noheader\nLeaf body\n';
+
+        const visible = root.insertAsLastChild();
+        visible.h = 'Visible sibling';
+        visible.b = 'Visible body\n';
+
+        const results_s = self.render_markdown(root);
+
+        assert.strictEqual(
             results_s,
-            '<!-- leo-noheader level=1 headline=Hidden%20leaf -->\n'
-            'Leaf body\n'
-            '# Visible sibling\n'
-            'Visible body\n',
-        )
-        self.assertNotIn('@noheader', results_s)
+            '<!-- leo-noheader level=1 headline=Hidden%20leaf -->\n' +
+            'Leaf body\n' +
+            '# Visible sibling\n' +
+            'Visible body\n'
+        );
+
+        assert.ok(
+            !results_s.includes('@noheader'),
+            'results_s should not contain "@noheader"',
+        );
+
+
+    });
 
     //@+node:felix.20260713221547.8: *3* TestMDWriter.test_markdown_noheader_intermediate
-    def test_markdown_noheader_intermediate(self):
-        root = self.c.p
-        hidden = root.insertAsLastChild()
-        hidden.h = 'Hidden parent'
-        hidden.b = '@noheader\nParent body\n'
-        child = hidden.insertAsLastChild()
-        child.h = 'Visible child'
-        child.b = 'Child body\n'
-        sibling = root.insertAsLastChild()
-        sibling.h = 'Visible sibling'
-        sibling.b = 'Sibling body\n'
+    test('test_markdown_noheader_intermediate', () => {
 
-        results_s = self.render_markdown(root)
-        self.assertEqual(
+        const root = self.c.p;
+
+        const hidden = root.insertAsLastChild();
+        hidden.h = 'Hidden parent';
+        hidden.b = '@noheader\nParent body\n';
+
+        const child = hidden.insertAsLastChild();
+        child.h = 'Visible child';
+        child.b = 'Child body\n';
+
+        const sibling = root.insertAsLastChild();
+        sibling.h = 'Visible sibling';
+        sibling.b = 'Sibling body\n';
+
+        const results_s = self.render_markdown(root);
+
+        assert.strictEqual(
             results_s,
-            '<!-- leo-noheader level=1 headline=Hidden%20parent -->\n'
-            'Parent body\n'
-            '## Visible child\n'
-            'Child body\n'
-            '# Visible sibling\n'
-            'Sibling body\n',
-        )
-        self.assertNotIn('# Hidden parent\n', results_s)
-        self.assertNotIn('@noheader', results_s)
+            '<!-- leo-noheader level=1 headline=Hidden%20parent -->\n' +
+            'Parent body\n' +
+            '## Visible child\n' +
+            'Child body\n' +
+            '# Visible sibling\n' +
+            'Sibling body\n'
+        );
 
+        assert.ok(
+            !results_s.includes('@noheader'),
+            'results_s should not contain "@noheader"',
+        );
+        assert.ok(
+            !results_s.includes('# Hidden parent\n'),
+            'results_s should not contain "# Hidden parent\\n"',
+        );
+
+    });
     //@+node:felix.20260713221547.9: *3* TestMDWriter.test_placeholders
-    def test_markdown_placeholders(self):
-        c, root = self.c, self.c.p
+    test('test_markdown_placeholders', () => {
+
+        const c = self.c;
+        const root = self.c.p;
+
         //@+<< define contents: test_markdown_placeholders >>
         //@+node:felix.20260713221547.10: *4* << define contents: test_markdown_placeholders >>
-        # There must be two newlines after each node.
-        contents = (
-            """
+        // There must be two newlines after each node.
+        const contents = ` 
             # Level 1
 
             Level 1 text.
@@ -266,34 +324,37 @@ class TestMDWriter(BaseTestWriter):
             ### Level 3
 
             Level 3 text.
-        """.strip()
-            + '\n'
-        )  # End the last node with '\n'.
+        `.trim() + '\n';  // End the last node with '\n'.
         //@-<< define contents: test_markdown_placeholders >>
 
-        # Import contents into root's tree.
-        importer = Markdown_Importer(c)
-        importer.import_from_string(parent=root, s=contents)
+        // Import contents into root's tree.
+        const importer = new Markdown_Importer(c);
+        importer.import_from_string(root, contents);
 
-        if 0:
-            for z in root.self_and_subtree():
-                g.printObj(g.splitLines(z.b), tag=z.h)
-            print('\n=== End dump ===\n')
+        if (0) {
+            for (const z of root.self_and_subtree()) {
+                g.printObj(g.splitLines(z.b), z.h);
+            }
+            g.pr('\n=== End dump ===\n');
+        }
 
-        # Write the tree.
-        writer = MarkdownWriter(c)
-        writer.write(root)
-        results_list = c.atFileCommands.outputList
-        results_s = ''.join(results_list)
-        if contents != results_s:
-            g.printObj(contents, tag='contents')
-            g.printObj(results_s, tag='results_s')
-        self.assertEqual(results_s, contents)
+        // Write the tree.
+        const writer = new MarkdownWriter(c);
+        writer.write(root);
+        const results_list = c.atFileCommands.outputList;
+        const results_s = results_list.join('');
 
+        if (contents !== results_s) {
+            g.printObj(contents, 'contents');
+            g.printObj(results_s, 'results_s');
+        }
+        assert.strictEqual(results_s, contents);
+
+    });
     //@-others
 
+});
 
-*/
 
 //@+node:felix.20230923154219.1: ** suite TestRstWriter
 /**
