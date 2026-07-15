@@ -1151,7 +1151,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738333939323833342e3832350a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738343038353133322e3034320a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21952,7 +21952,7 @@ public doArrow(key: "Up" | "Down") {
 
 </t>
 <t tx="felix.20260626135708.1">## 1.0.21
- 
+
 - Fixed markdown writer to preserve titles that start with '!'.
 
 </t>
