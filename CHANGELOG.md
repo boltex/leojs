@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.24
+
+- Fixed @auto-md / @auto-markdown handling of @noheader nodes - From original Leo's #4787 by Alexander Przemysław Kamiński
+
 ## 1.0.23
 
 - Fixed possible bug in clone-find commands.
@@ -9,7 +13,7 @@
 - Fixed typo in error string template.
 
 ## 1.0.21
- 
+
 - Fixed markdown writer to preserve titles that start with '!'.
 
 ## 1.0.20

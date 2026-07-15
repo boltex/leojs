@@ -9,6 +9,9 @@ import { BaseWriter } from '../writers/basewriter';
 import { DartWriter } from '../writers/dart';
 import { RstWriter } from '../writers/leo_rst';
 import { TreePad_Writer } from '../writers/treepad';
+import { Position } from '../core/leoNodes';
+import { MarkdownWriter } from '../writers/markdown';
+import { Markdown_Importer } from '../importers/markdown';
 
 //@+others
 //@+node:felix.20230923152630.1: ** base class
@@ -17,9 +20,18 @@ import { TreePad_Writer } from '../writers/treepad';
  */
 export class BaseTestWriter extends LeoUnitTest {
 
-    // 
+    //@+others
+    //@+node:felix.20260713222027.1: *3* TestMDWriter.render_markdown
+    public render_markdown(root: Position) {
+        const writer = new MarkdownWriter(this.c);
+        writer.write(root);
+        return this.c.atFileCommands.outputList.join('');
+    }
+
+    //@-others
 
 }
+
 //@+node:felix.20230923153010.1: ** suite TestBaseWriter
 /**
  * Test cases for the BaseWriter class.
@@ -108,6 +120,242 @@ suite('TestDartWriter', () => {
     //@-others
 
 });
+//@+node:felix.20260713221547.1: ** suite TestMDWriter
+/**
+ *  Test Cases for the markdown writer plugin.
+ */
+
+
+suite('TestMDWriter', () => {
+
+    let self: BaseTestWriter;
+
+    before(() => {
+        self = new BaseTestWriter();
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20260713221547.3: *3* TestMDWriter.test_markdown_sections
+    test('test_markdown_sections', () => {
+
+        const c = self.c;
+        const root = self.c.p;
+
+        //@+<< define contents: test_markdown_sections >>
+        //@+node:felix.20260713221547.4: *4* << define contents: test_markdown_sections >>
+        const contents =
+            `
+            # 1st level title X
+
+            some text in body X
+
+            ## 2nd level title Z
+
+            some text in body Z
+
+            # 1st level title A
+
+            ## 2nd level title B
+
+            some body content of the 2nd node
+        `.trim() + '\n';  // End the last node with '\n'.
+        //@-<< define contents: test_markdown_sections >>
+
+        // Import contents into root's tree.
+        const importer = new Markdown_Importer(c);
+        importer.import_from_string(root, contents);
+
+        if (0) {
+            for (const z of root.self_and_subtree()) {
+                g.printObj(g.splitLines(z.b), z.h);
+            }
+            g.pr('\n=== End dump ===\n');
+        }
+
+        // Write the tree.
+        const writer = new MarkdownWriter(c);
+        writer.write(root);
+        const results_list = c.atFileCommands.outputList;
+        const results_s = results_list.join('');
+
+        if (contents !== results_s) {
+            g.printObj(contents, 'contents');
+            g.printObj(results_s, 'results_s');
+        }
+        assert.strictEqual(results_s, contents);
+
+    });
+    //@+node:felix.20260713221547.5: *3* TestMDWriter.test_markdown_image
+    test('test_markdown_image', () => {
+
+        const c = self.c;
+        const root = self.c.p;
+
+        //@+<< define contents: test_markdown_image >>
+        //@+node:felix.20260713221547.6: *4* << define contents: test_markdown_image >>
+        const contents = `
+            declaration text
+
+            # ![label](https://raw.githubusercontent.com/boltext/leojs/master/resources/leoapp.png)
+
+            Body text
+        `.trim() + '\n'; // End the last node with '\n'.
+        //@-<< define contents: test_markdown_image >>
+
+        // Import contents into root's tree.
+        const importer = new Markdown_Importer(c);
+        importer.import_from_string(root, contents);
+
+        if (0) {
+            for (const z of root.self_and_subtree()) {
+                g.printObj(g.splitLines(z.b), z.h);
+            }
+            g.pr('\n=== End dump ===\n');
+        }
+
+        // Write the tree.
+        const writer = new MarkdownWriter(c);
+        writer.write(root);
+        const results_list = c.atFileCommands.outputList;
+        const results_s = results_list.join('');
+
+        if (contents !== results_s) {
+            g.printObj(contents, 'contents');
+            g.printObj(results_s, 'results_s');
+        }
+        assert.strictEqual(results_s, contents);
+
+    });
+    //@+node:felix.20260713221547.7: *3* TestMDWriter.test_markdown_noheader_leaf
+    test('test_markdown_noheader_leaf', () => {
+
+        const root = self.c.p;
+
+        const hidden = root.insertAsLastChild();
+        hidden.h = 'Hidden leaf';
+        hidden.b = '@noheader\nLeaf body\n';
+
+        const visible = root.insertAsLastChild();
+        visible.h = 'Visible sibling';
+        visible.b = 'Visible body\n';
+
+        const results_s = self.render_markdown(root);
+
+        assert.strictEqual(
+            results_s,
+            '<!-- leo-noheader level=1 headline=Hidden%20leaf -->\n' +
+            'Leaf body\n' +
+            '# Visible sibling\n' +
+            'Visible body\n'
+        );
+
+        assert.ok(
+            !results_s.includes('@noheader'),
+            'results_s should not contain "@noheader"',
+        );
+
+
+    });
+
+    //@+node:felix.20260713221547.8: *3* TestMDWriter.test_markdown_noheader_intermediate
+    test('test_markdown_noheader_intermediate', () => {
+
+        const root = self.c.p;
+
+        const hidden = root.insertAsLastChild();
+        hidden.h = 'Hidden parent';
+        hidden.b = '@noheader\nParent body\n';
+
+        const child = hidden.insertAsLastChild();
+        child.h = 'Visible child';
+        child.b = 'Child body\n';
+
+        const sibling = root.insertAsLastChild();
+        sibling.h = 'Visible sibling';
+        sibling.b = 'Sibling body\n';
+
+        const results_s = self.render_markdown(root);
+
+        assert.strictEqual(
+            results_s,
+            '<!-- leo-noheader level=1 headline=Hidden%20parent -->\n' +
+            'Parent body\n' +
+            '## Visible child\n' +
+            'Child body\n' +
+            '# Visible sibling\n' +
+            'Sibling body\n'
+        );
+
+        assert.ok(
+            !results_s.includes('@noheader'),
+            'results_s should not contain "@noheader"',
+        );
+        assert.ok(
+            !results_s.includes('# Hidden parent\n'),
+            'results_s should not contain "# Hidden parent\\n"',
+        );
+
+    });
+    //@+node:felix.20260713221547.9: *3* TestMDWriter.test_placeholders
+    test('test_markdown_placeholders', () => {
+
+        const c = self.c;
+        const root = self.c.p;
+
+        //@+<< define contents: test_markdown_placeholders >>
+        //@+node:felix.20260713221547.10: *4* << define contents: test_markdown_placeholders >>
+        // There must be two newlines after each node.
+        const contents = ` 
+            # Level 1
+
+            Level 1 text.
+
+            ### Level 3
+
+            Level 3 text.
+        `.trim() + '\n';  // End the last node with '\n'.
+        //@-<< define contents: test_markdown_placeholders >>
+
+        // Import contents into root's tree.
+        const importer = new Markdown_Importer(c);
+        importer.import_from_string(root, contents);
+
+        if (0) {
+            for (const z of root.self_and_subtree()) {
+                g.printObj(g.splitLines(z.b), z.h);
+            }
+            g.pr('\n=== End dump ===\n');
+        }
+
+        // Write the tree.
+        const writer = new MarkdownWriter(c);
+        writer.write(root);
+        const results_list = c.atFileCommands.outputList;
+        const results_s = results_list.join('');
+
+        if (contents !== results_s) {
+            g.printObj(contents, 'contents');
+            g.printObj(results_s, 'results_s');
+        }
+        assert.strictEqual(results_s, contents);
+
+    });
+    //@-others
+
+});
+
+
 //@+node:felix.20230923154219.1: ** suite TestRstWriter
 /**
  * Test Cases for the leo_rst writer plugin.

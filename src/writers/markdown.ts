@@ -18,34 +18,35 @@ export class MarkdownWriter extends BaseWriter {
     private placeholder_regex = /^placeholder level [0-9]+/;
 
     //@+others
+    //@+node:felix.20260713212900.1: *3* mdw.has_noheader
+    /**
+     * Return True if p contains a local @noheader directive.
+     */
+    private has_noheader(p: Position): boolean {
+        for (const line of [p.h, ...g.splitLines(p.b)]) {
+            if (g.isDirective(line)) {
+                const m = g.g_is_directive_pattern.exec(line);
+                if (m && m[1] === 'noheader') {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    //@+node:felix.20260713212904.1: *3* mdw.noheader_marker
+    /**
+     * Return the HTML comment marker for a hidden markdown node.
+     */
+    private noheader_marker(p: Position): string {
+        const level = p.level() - (this.root?.level() || 0);
+        const headline = g.quote(p.h); // g.quote mimics the safe='' argument of urllib.parse.quote in Python.
+        return `<!-- leo-noheader level=${level} headline=${headline} -->`;
+    }
     //@+node:felix.20230914214935.3: *3* mdw.write
     /**
      * Write all the *descendants* of an @auto-markdown node.
      */
-
-    /* Original Python Code to use as LOOSE reference:
-
-    def write(self, root: Position) -> None:
-        """Write all the *descendants* of an @auto-markdown node."""
-        self.root = root
-        self.write_root(root)
-        for p in root.subtree():
-            if g.app.force_at_auto_sentinels:  # pragma: no cover
-                self.put_node_sentinel(p, '<!--', delim2='-->')
-            if self.placeholder_regex.match(p.h):
-                # skip this 'placeholder level X' node
-                pass
-            else:
-                self.write_headline(p)
-                lines = p.b.splitlines(False)
-                for s in lines:
-                    if not g.isDirective(s):
-                        self.put(s)
-        root.setVisited()
-
-    */
-
-
     public write(root: Position): void {
         this.root = root;
         this.write_root(root);
@@ -58,6 +59,9 @@ export class MarkdownWriter extends BaseWriter {
                 // skip this 'placeholder level X' node
                 // pass
             } else {
+                if (this.has_noheader(p)) {
+                    this.put(this.noheader_marker(p));
+                }
                 this.write_headline(p);
                 const normalized = p.b.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
                 const lines = normalized.endsWith('\n')
@@ -86,7 +90,7 @@ export class MarkdownWriter extends BaseWriter {
      */
     public write_headline(p: Position): void {
         const level = p.level() - (this.root?.level() || 0);
-        if (p.h === '!Declarations' || this.placeholder_regex.test(p.h)) {
+        if (p.h === '!Declarations' || this.placeholder_regex.test(p.h) || this.has_noheader(p)) {
             // pass
         } else {
             this.put(`${'#'.repeat(level)} ${p.h.trimStart()}`); // Leo 6.6.4: preserve spacing.

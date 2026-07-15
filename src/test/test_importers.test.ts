@@ -2328,9 +2328,99 @@ suite('TestMarkdown', () => {
             [2, '1.1 Something', '\nThis is something\n\n'],
             [1, 'Chapter 2: two', '\nWelcome to chapter 2\n'],
         ];
-        await self.new_run_test(s, expected_results)  // check=False)
+        await self.new_run_test(s, expected_results);  // check=False)
 
     });
+    //@+node:felix.20260713222406.1: *3* TestMarkdown.test_markdown_importer_noheader_marker
+    test('test_markdown_importer_noheader_marker', async () => {
+
+        const s = `
+            <!-- leo-noheader level=1 headline=First%20hidden -->
+            First body
+            <!-- leo-noheader level=1 headline=Second%20hidden -->
+            Second body
+            ## Visible child
+            Child body
+            # Visible sibling
+            Sibling body
+        `;
+
+        const expected_results: [number, string, string][] = [
+            [
+                0, '',  // Ignore the first headline.
+                '@language md\n' +
+                '@tabwidth -4\n'
+            ],
+            [
+                1, 'First hidden',
+                '@noheader\n' +
+                'First body\n'
+            ],
+            [
+                1, 'Second hidden',
+                '@noheader\n' +
+                'Second body\n'
+            ],
+            [
+                2, 'Visible child',
+                'Child body\n'
+            ],
+            [
+                1, 'Visible sibling',
+                'Sibling body\n'
+            ],
+        ];
+
+        const p = await self.run_test(s);
+        self.check_outline(p, expected_results);
+        await self.check_round_trip(p, self.prep(s));
+
+    });
+
+
+    /*
+    def test_markdown_importer_noheader_marker(self):
+        s = """
+            <!-- leo-noheader level=1 headline=First%20hidden -->
+            First body
+            <!-- leo-noheader level=1 headline=Second%20hidden -->
+            Second body
+            ## Visible child
+            Child body
+            # Visible sibling
+            Sibling body
+        """
+        expected_results = (
+            (
+                0, '',  # Ignore the first headline.
+                '@language md\n'
+                '@tabwidth -4\n'
+            ),
+            (
+                1, 'First hidden',
+                '@noheader\n'
+                'First body\n'
+            ),
+            (
+                1, 'Second hidden',
+                '@noheader\n'
+                'Second body\n'
+            ),
+            (
+                2, 'Visible child',
+                'Child body\n'
+            ),
+            (
+                1, 'Visible sibling',
+                'Sibling body\n'
+            ),
+        )  # fmt: skip
+        p = self.run_test(s)
+        self.check_outline(p, expected_results)
+        self.check_round_trip(p, self.prep(s))
+    */
+
+
     //@+node:felix.20230922003511.5: *3* TestMarkdown.test_markdown_importer_implicit_section
     test('test_markdown_importer_implicit_section', async () => {
         const s = `
