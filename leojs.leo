@@ -4670,13 +4670,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738343037393237302e3831360a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738343038353832372e30360a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -19570,7 +19570,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313738333438343136332e3136370a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313738343038353834382e3135370a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19607,7 +19607,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.24&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.25&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
