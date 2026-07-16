@@ -2291,11 +2291,11 @@ export class Commands {
      * Return true if a position exists in c's tree
      */
     public positionExists(
-        p: Position,
+        p?: Position,
         root?: Position,
         trace?: boolean
     ): boolean {
-        if (!p.__bool__() || !p.v) {
+        if (!p || !p.__bool__() || !p.v) {
             return false;
         }
 
@@ -4619,8 +4619,8 @@ export class Commands {
             return;
         }
         if (!c.positionExists(p)) {
-            g.trace(`Invalid position: ${String(p)}`);
-            g.trace(g.callers());
+            g.trace(`Invalid position: ${String(p)} in ${c.shortFileName()}\n${g.callers(10)}`);
+            c.setCurrentPosition(c.rootPosition()!);
             return;
         }
         c.requestLaterRedraw = false;

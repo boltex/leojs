@@ -2095,8 +2095,11 @@ export class FileCommands {
         if (str_pos !== undefined) {
             current = this.archivedPositionToPosition(str_pos);
         }
-
-        c.setCurrentPosition(current || c.rootPosition()!);
+        if (!c.positionExists(current)) {  // #4789.
+            current = c.rootPosition()!;
+        }
+        // current will not be undefined because of the previous check.
+        c.setCurrentPosition(current!);
     }
     //@+node:felix.20211213224237.1: *3* fc: Writing
     //@+node:felix.20211213224237.2: *4* fc: Writing save*
