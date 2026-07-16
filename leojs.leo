@@ -1151,13 +1151,13 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738343038363235382e36310a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738343137323938312e3638330a2e">@language md
 @tabwidth -4
 # Change Log
 
 ## 1.0.25
 
-- ...
+- Added clone-diff-pr command as per Leo's #4780
 
 @others
 </t>

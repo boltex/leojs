@@ -2,7 +2,7 @@
 
 ## 1.0.25
 
-- ...
+- Added clone-diff-pr command as per Leo's #4780
 
 ## 1.0.24
 
