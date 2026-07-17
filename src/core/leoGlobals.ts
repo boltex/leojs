@@ -18,6 +18,7 @@ import {
 import * as os from 'os';
 import * as child from 'child_process';
 import * as path from 'path';
+import binaryExtensions from 'binary-extensions';
 import * as GitAPI from '../git';
 import * as GitBaseAPI from '../git-base';
 import opn = require('open');
@@ -57,6 +58,7 @@ export let extensionUri: Uri;
 /** For accessing files in the current workspace */
 export let workspaceUri: Uri;
 
+export const binary_file_extensions: readonly string[] = binaryExtensions;
 export let SQL: SqlJsStatic;
 export let pako: typeof pakoObj = pakoObj;
 export let showdown: typeof showdownObj = showdownObj;
@@ -1645,35 +1647,14 @@ export function fullPath(
 //     return f and isinstance(f, io.BufferedIOBase)
 
 // }
-export async function is_binary_external_file(
+export function is_binary_external_file(
     fileName: string
-): Promise<boolean> {
-    try {
-        // with open(fileName, 'rb') as f:
-        //     s = f.read(1024)  // bytes, in Python 3.
-        const w_readUri = makeVscodeUri(fileName);
-        const readData = await workspace.fs.readFile(w_readUri);
-        const s = readData.slice(0, 1024);
-        return is_binary_string(s);
-        // except IOError:
-        //     return False
-    } catch (exception) {
-        es_exception(exception);
+): boolean {
+    if (!fileName) {
         return false;
     }
-}
-export function is_binary_string(s: Uint8Array): boolean {
-    // http://stackoverflow.com/questions/898669
-    // aList is a list of all non-binary characters.
-    // aList = [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))
-    for (let i = 0; i < s.length; i++) {
-        const byte = s[i];
-        if ((byte < 0x20 || byte > 0xFF) && // Check for non-ASCII and extended ASCII range
-            ![0x07, 0x08, 0x09, 0x0A, 0x0C, 0x0D, 0x1B].includes(byte)) { // Exclude specific control characters
-            return true; // Binary byte found
-        }
-    }
-    return false; // No binary bytes found
+    const [_root, ext] = os_path_splitext(fileName);
+    return binary_file_extensions.includes(ext);
 }
 //@+node:felix.20240802220312.1: *3* g.isExecutableInPath
 export async function isExecutableInPath(executableName: string): Promise<string> {

@@ -4674,7 +4674,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738343038353832372e30360a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738343235303230392e3432350a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -6912,6 +6912,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 </t>
 <t tx="felix.20201214205159.81">"@xmldom/xmldom": "^0.9.2",
 "assert": "^2.0.0",
+"binary-extensions": "^3.1.0",
 "binascii": "^0.0.2",
 "bowser": "^2.11.0",
 "browser-process-hrtime": "^1.0.0",

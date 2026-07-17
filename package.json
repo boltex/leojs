@@ -4668,6 +4668,7 @@
   "dependencies": {
     "@xmldom/xmldom": "^0.9.2",
     "assert": "^2.0.0",
+    "binary-extensions": "^3.1.0",
     "binascii": "^0.0.2",
     "bowser": "^2.11.0",
     "browser-process-hrtime": "^1.0.0",

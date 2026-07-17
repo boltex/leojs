@@ -813,7 +813,7 @@ export class LeoImportCommands {
         const p = parent.copy();
         this.treeType = treeType;
         const fileName = c.fullPath(parent);
-        const w_isBinary = await g.is_binary_external_file(fileName);
+        const w_isBinary = g.is_binary_external_file(fileName);
         if (w_isBinary) {
             return this.import_binary_file(fileName, parent);
         }
