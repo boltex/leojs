@@ -678,26 +678,27 @@ export class SettingsDict extends Map<string, any> {
 
     // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
     public toString = (): string => {
-        return `<SettingsDict name:${this._name} `;
+        return `<SettingsDict name:${this._name}>`;
     };
 
     //@+node:felix.20220628012349.1: *4* td.copy
     public copy(name?: string): SettingsDict {
         // The result is a g.SettingsDict.
         // return copy.deepcopy(self)
-        const newDict = new SettingsDict(this._name);
+        const newDict = new SettingsDict(name ?? this._name);
         for (const p_key of this.keys()) {
+            const gs = this.get(p_key);
             newDict.set(
                 p_key,
                 new GeneralSetting({
-                    kind: this.get(p_key).kind,
-                    encoding: this.get(p_key).encoding,
-                    ivar: this.get(p_key).ivar,
-                    source: this.get(p_key).source,
-                    val: this.get(p_key).val,
-                    path: this.get(p_key).path,
-                    tag: this.get(p_key).tag,
-                    unl: this.get(p_key).unl,
+                    kind: gs.kind,
+                    encoding: gs.encoding,
+                    ivar: gs.ivar,
+                    source: gs.source,
+                    val: deepCloneVal(gs.val),
+                    path: gs.path,
+                    tag: gs.tag,
+                    unl: gs.unl,
                 })
             );
         }
@@ -4243,6 +4244,18 @@ export function es_print_unique_message(message: string, color?: string): boolea
 }
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20260716232329.1: *3* g.deepCloneVal
+export function deepCloneVal<T>(value: T): T {
+    try {
+        return structuredClone(value);
+    } catch {
+        try {
+            return JSON.parse(JSON.stringify(value)) as T;
+        } catch {
+            return value;
+        }
+    }
+}
 //@+node:felix.20240304235518.1: *3* g.IDDialog
 export function IDDialog(): Thenable<string> {
     return vscode.window.showInputBox({
