@@ -722,6 +722,15 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     public async gitDiffPullRequest(): Promise<void> {
         await new GitDiffController(this.c).diff_pull_request();
     }
+    //@+node:felix.20260715214433.1: *3* efc.cloneDiffPR (clone-diff-pr)
+    @cmd('clone-diff-pr', 'Show the added, deleted and changed nodes (without diffs) of the given PR.')
+    public async cloneDiffPR(): Promise<void> {
+
+        const controller = new GitDiffController(this.c);
+        await controller.clone_diff_pr();
+
+    }
+
     //@+node:felix.20230709010427.23: *3* efc.insertFile
     @cmd(
         'file-insert',
@@ -922,6 +931,62 @@ export class GitDiffController {
 
     //@+others
     //@+node:felix.20230709010434.2: *3* gdc.Entries...
+    //@+node:felix.20260715214504.1: *4* gdc.clone_diff_file
+    /**
+     * Create an outline for the git-diff-pr-clone-changed command.
+     */
+    public async clone_diff_file(fn: string, rev1 = 'HEAD', rev2 = ''): Promise<void> {
+
+        const c = this.c;
+        const directory = await this.get_parent_of_git_directory();
+        if (!directory) {
+            return;
+        }
+        // #4095: honor @bool diff-leo-files.
+        if ((fn.endsWith('.leo') || fn.endsWith('.leojs')) && !this.diff_leo_files) {
+            return;
+        }
+        const s1 = await this.get_file_from_rev(rev1, fn);
+        const s2 = await this.get_file_from_rev(rev2, fn);
+
+        this.file_node = this.root!.insertAsLastChild();
+        this.file_node.h = fn.trim();
+
+        // #1777: The file node will contain the entire added/deleted file.
+        if (!s1) {
+            this.file_node.h = `Added: ${this.file_node.h}`;
+            return;
+        }
+        if (!s2) {
+            this.file_node.h = `Deleted: ${this.file_node.h}`;
+            return;
+        }
+        // Finish.
+        const w_path = g.finalize_join(directory, fn); // #1781: bug fix.
+
+        let c1;
+        let c2;
+
+        if (fn.endsWith('.leo') || fn.endsWith('.leojs')) {
+            c1 = await this.make_leo_outline(fn, w_path, s1, rev1);
+            c2 = await this.make_leo_outline(fn, w_path, s2, rev2);
+        } else {
+            const root = this.find_file(fn);
+            if (await c.looksLikeDerivedFile(w_path)) {
+                c1 = this.make_at_file_outline(fn, s1, rev1);
+                c2 = this.make_at_file_outline(fn, s2, rev2);
+            } else if (root) {
+                c1 = await this.make_at_clean_outline(fn, root, s1, rev1);
+                c2 = await this.make_at_clean_outline(fn, root, s2, rev2);
+            }
+        }
+        if (c1 && c2) {
+            this.make_clone_diff_outlines(c1, c2, fn, rev1, rev2);
+            this.file_node.b = `@language ${c2.target_language}\n`;
+        }
+
+    }
+
     //@+node:felix.20230709010434.3: *4* gdc.diff_file
     /**
      * Create an outline describing the git diffs for fn.
@@ -985,6 +1050,32 @@ export class GitDiffController {
                 `@language ${c2.target_language}\n`;
         }
     }
+    //@+node:felix.20260715214520.1: *4* gdc.clone_diff_pr
+    /**
+     * Like git-diff-pr, showing only clones of changed nodes, organized by file:
+     *  - Omit the diffs.
+     *  - Don't show added or deleted nodes.
+     */
+    public async clone_diff_pr(): Promise<void> {
+
+        const directory = await this.get_parent_of_git_directory()
+        if (!directory) {
+            return;
+        }
+        const aList = await g.execGitCommand("git rev-parse devel", directory);
+
+        if (aList && aList.length > 0) {
+            const devel_rev = aList[0].slice(0, 8);
+            g.trace('devel_rev', devel_rev);
+            await this.clone_diff_two_revs(
+                devel_rev,  //  Before: Latest devel commit.
+                'HEAD',  //  After: Latest branch commit
+            );
+        } else {
+            g.es_print('FAIL: git rev-parse devel');
+        }
+    }
+
     //@+node:felix.20230709010434.4: *4* gdc.diff_pull_request
     /**
      * Create a Leonine version of the diffs that would be
@@ -1714,6 +1805,93 @@ export class GitDiffController {
     }
 
     //@+node:felix.20230709010434.9: *3* gdc.Utils
+    //@+node:felix.20260715214612.1: *4* gdc.create_clone_diff_node
+    /**
+     * Create nodes for clone-diff-pr.
+     */
+    public create_clone_diff_node(
+        branch: string,
+        c1: Commands,
+        c2: Commands,
+        d: Record<string, [VNode, VNode]>,
+        kind: 'changed' | 'Changed',
+        rev1: string,
+        rev2: string,
+    ): void;
+    public create_clone_diff_node(
+        branch: string,
+        c1: Commands,
+        c2: Commands,
+        d: Record<string, VNode>,
+        kind: 'added' | 'Added' | 'deleted' | 'Deleted',
+        rev1: string,
+        rev2: string,
+    ): void;
+    public create_clone_diff_node(
+        branch: string,
+        c1: Commands,
+        c2: Commands,
+        d: Record<string, [VNode, VNode]> | Record<string, VNode>,
+        kind: 'changed' | 'Changed' | 'added' | 'Added' | 'deleted' | 'Deleted',
+        rev1: string,
+        rev2: string,
+    ): void {
+
+        if (!d || Object.keys(d).length === 0 || !this.file_node) {
+            return;
+        }
+
+        const branches_match =
+            branch === rev2 ||
+            rev2 === 'HEAD' ||
+            rev1 === 'HEAD' && rev2 === '';  // diffing the latest changes.
+
+        let parent;
+        // A useful hack: don't create an organizer node for changed nodes.
+        if (kind.toLowerCase() === 'changed') {
+            parent = this.file_node;
+        } else {
+            parent = this.file_node.insertAsLastChild();
+            parent.h = kind;
+        }
+
+        for (const key in d) {
+            if (kind.toLowerCase() === 'changed') {
+                const [v1, v2] = (d as Record<string, [VNode, VNode]>)[key];
+                // Make a clone, if possible.
+                g.assert(v1.fileIndex === v2.fileIndex);
+                const p_in_c = this.find_gnx(this.c, v1.fileIndex);
+                let p3;
+                if (p_in_c && p_in_c.v && branches_match) {  // #4645.
+                    p3 = p_in_c.clone();
+                    p3.moveToLastChildOf(parent);
+                } else {
+                    p3 = parent.insertAsLastChild();
+                    p3.h = 'New:' + v2.h;
+                    p3.b = v2.b;
+                }
+            } else if (kind.toLowerCase() === 'added') {
+                // Make a clone, if possible.
+                const v = (d as Record<string, VNode>)[key];
+                const new_p = this.find_gnx(this.c, v.fileIndex);
+                if (new_p && new_p.v) {
+                    const p = new_p.clone();
+                    p.moveToLastChildOf(parent);
+                } else {
+                    const p = parent.insertAsLastChild();
+                    p.h = v.h;
+                    p.b = v.b;
+                }
+            } else {
+                const v = (d as Record<string, VNode>)[key];
+                const p = parent.insertAsLastChild();
+                p.h = v.h;
+                p.b = v.b;
+            }
+
+        }
+    }
+
     //@+node:felix.20230709010434.10: *4* gdc.create_compare_node
     /**
      * Create nodes describing the changes.
@@ -2265,6 +2443,33 @@ export class GitDiffController {
         }
         return [added, deleted, changed];
     }
+    //@+node:felix.20260715214640.1: *4* gdc.make_clone_diff_outlines
+    /**
+     * Create an outline for the git-diff-pr-clone-changed command from
+     * *hidden* outlines c1 and c2.
+     */
+    public make_clone_diff_outlines(
+        c1: Commands,
+        c2: Commands,
+        fn: string,
+        rev1 = '',
+        rev2 = '',
+    ): void {
+        const [branch, _commit] = g.gitInfo();
+        const [added, deleted, changed] = this.compute_dicts(c1, c2);
+        const table: [Record<string, VNode> | Record<string, [VNode, VNode]>, string][] = [
+            [added, 'Added'],
+            [deleted, 'Deleted'],
+            [changed, 'Changed'],
+        ];
+
+        for (const [d, kind] of table) {
+            // @ts-ignore Will have the proper d type depending on kind.
+            this.create_clone_diff_node(branch, c1, c2, d, kind, rev1, rev2);
+        }
+
+    }
+
     //@+node:felix.20230709010434.26: *4* gdc.make_leo_outline
     /**
      * Create a hidden temp outline for the .leo file in s.
@@ -2278,12 +2483,65 @@ export class GitDiffController {
         const hidden_c = new Commands(fn, g.app.nullGui);
         hidden_c.frame.createFirstTreeNode();
         const root = hidden_c.rootPosition()!;
-        root.h = fn + ':' + rev ? rev : fn;
+        root.h = fn + ':' + (rev ? rev : fn);
         // await hidden_c.fileCommands.getLeoFile(s, p_path, false, false, false);
         const fc = hidden_c.fileCommands;
         await fc.getAnyLeoFileByName(p_path, false, false);
 
         return hidden_c;
+    }
+
+    //@+node:felix.20260715214648.1: *4* gdc.clone_diff_two_revs
+    /**
+     * * Like diff_two_revs showing only clones of changed nodes, organized by file:
+     *  - Omit the diffs.
+     *  - Don't show added or deleted nodes.
+     */
+    public async clone_diff_two_revs(
+        rev1 = 'HEAD', rev2 = '', p_path?: string
+    ): Promise<void> {
+
+        const c = this.c;
+        const u = this.c.undoer;
+
+        if (!(await this.get_parent_of_git_directory())) {
+            return;
+        }
+        // Get list of changed files.
+        const files = await this.get_files(rev1, rev2, p_path);
+        const n = files.length;
+        if (!g.unitTesting) {
+            g.es_print(`diffing ${n} file${g.plural(n)}`);
+            if (n > 5) {
+                g.es_print('This may take a while...');
+            }
+        }
+
+        c.selectPosition(c.lastTopLevel());  // pre-select to help undo-insert
+
+        // Create the root node.
+        const undoData = u.beforeInsertNode(c.p);  // c.p is subject of 'insertAfter'
+        this.root = c.lastTopLevel().insertAfter();
+        let root_h = `clone-diff-pr revs: ${rev1} ${rev2}`;
+        if (p_path && p_path.trim()) {
+            root_h += ` (${p_path})`;
+        }
+        this.root.h = root_h;
+        this.root.b = '@ignore\n@nosearch\n';
+
+        // Create diffs of all files.
+        for (const [i, fn] of files.entries()) {
+            {
+                await this.clone_diff_file(fn, rev1, rev2);
+                if ((i % 10) == 0) {
+                    g.es_print(`diff: ${i} files`, { color: 'blue' });
+                }
+            }
+            u.afterInsertNode(this.root, 'clone-diff-pr', undoData);
+            this.finish();
+            g.es_print(`done! diffed: ${n} files`);
+
+        }
     }
 
     //@-others

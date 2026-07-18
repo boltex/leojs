@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.0.25
+
+- Added clone-diff-pr command as per Leo's #4780
+- Fixed "detect binary files" as per Leo's PR 4793.
+
 ## 1.0.24
 
 - Fixed @auto-md / @auto-markdown handling of @noheader nodes - From original Leo's #4787 by Alexander Przemysław Kamiński
