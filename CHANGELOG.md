@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.26
+
+- ...
+
 ## 1.0.25
 
 - Added clone-diff-pr command as per Leo's #4780
