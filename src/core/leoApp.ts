@@ -1823,7 +1823,6 @@ export class LeoApp {
      * A factory returning a scanner function for the given file extension.
      */
     public scanner_for_ext(
-        c: Commands,
         ext: string
     ): ((...args: any[]) => any) | undefined {
         return g.app.classDispatchDict[ext];
@@ -2982,7 +2981,7 @@ export class LoadManager {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < lm.files.length - 1;
-                    c = await lm.loadLocalFile(fn, g.app.gui);
+                    c = await lm.openWithFileName(fn, g.app.gui);
                     // Returns None if the file is open in another instance of Leo.
                     if (c && !c1) {
                         c1 = c;
@@ -3089,7 +3088,7 @@ export class LoadManager {
         */
         const fn: string = '';
         g.app.numberOfUntitledWindows += 1; // To create unique names.
-        const c = await lm.loadLocalFile(fn, g.app.gui);
+        const c = await lm.openWithFileName(fn, g.app.gui);
 
         if (!c) {
             return undefined;
@@ -3389,202 +3388,41 @@ export class LoadManager {
         return;
     }
 
-    //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public async loadLocalFile(
-        fn: string,
-        gui?: LeoGui,
-        old_c?: Commands,
-        skipSaveSession?: boolean
-    ): Promise<Commands | undefined> {
-        /*
-            Completely read a file, creating the corresponding outline.
-
-            1. If fn is an existing .leo file (possibly zipped), read it twice:
-            the first time with a NullGui to discover settings,
-            the second time with the requested gui to create the outline.
-
-            2. If fn is an external file:
-            get settings from the leoSettings.leo and myLeoSetting.leo, then
-            create a "wrapper" outline containing an @file node for the external file.
-
-            3. If fn is empty:
-            get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
-            or open an empty outline.
-        */
-
-        fn = g.os_path_fix_drive(fn); // EMULATE PYTHON WITH CAPITAL DRIVE LETTERS
-        fn = g.os_path_normslashes(fn);
-
-        const lm: LoadManager = this;
-        let c: Commands | undefined;
-
-        // #2489: If fn is empty, open an empty, untitled .leo file.
-        if (!fn) {
-            c = await lm.openEmptyLeoFile(gui, old_c);
-            return c;
-        }
-
-        // Step 0: Return if the file is already open.
-        // fn = g.finalize(fn);
-
-        if (fn) {
-            c = lm.findOpenFile(fn);
-            if (c) {
-                return c; // Found it aready opened !
-            }
-        }
-        // Step 1: get the previous settings.
-        // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
-        // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-        const previousSettings: PreviousSettings = await lm.getPreviousSettings(
-            fn
-        );
-
-        // Step 2: open the outline in the requested gui.
-        // For .leo files (and zipped .leo file) this opens the file a second time.
-        c = await lm.openFileByName(fn, gui, old_c, previousSettings);
-
-        if (!skipSaveSession) {
-            await g.app.saveSession(); // IN LEOJS: Save sessions here to skip saving session on program exit.
-        }
-
-        return c;
-    }
-    //@+node:felix.20220418012120.1: *5* LM.openEmptyLeoFile
+    //@+node:felix.20260722223354.1: *4* LM.openWithFileName & helpers
     /**
-     * Open an empty, untitled, new Leo file.
-     */
-    public async openEmptyLeoFile(
-        gui?: LeoGui,
-        old_c?: Commands
-    ): Promise<Commands> {
-        const lm = this;
-        const w_previousSettings = await lm.getPreviousSettings(undefined);
-        // Create the commander for the .leo  file.
-        const c: Commands = g.app.newCommander('', gui, w_previousSettings);
-
-        // ! LEOJS : SET c.openDirectory to the g.vscodeWorkspaceUri !
-        // c.openDirectory = g.vscodeWorkspaceUri?.fsPath;
-        // if (c.openDirectory) {
-        //     c.frame.openDirectory = c.openDirectory;
-        // }
-
-        g.doHook('open0');
-
-        g.doHook('open1', {
-            old_c: old_c,
-            c: c,
-            new_c: c,
-            fileName: undefined,
-        });
-
-        c.mFileName = '';
-        c.wrappedFileName = undefined;
-
-        // Late inits. Order matters.
-        if (c.config.getBool('use-chapters') && c.chapterController) {
-            c.chapterController.finishCreate();
-        }
-        c.clearChanged();
-        g.doHook('open2', {
-            old_c: old_c,
-            c: c,
-            new_c: c,
-            fileName: undefined,
-        });
-
-        // TODO USE ORIGINAL MECHANICS!
-        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
-        c.theScriptingController = new ScriptingController(c);
-        await c.theScriptingController.createAllButtons();
-
-        g.doHook('new', { old_c: old_c, c: c, new_c: c });
-
-        lm.finishOpen(c);
-
-        return c;
-    }
-
-    //@+node:felix.20210120004121.32: *5* LM.openFileByName & helpers
-    /**
-     *  Create an outline (Commander) for either:
-     *  - a Leo file (including .leo or zipped file),
-     *  - an external file.
+     * Completely read a file, creating the corresponding outline.
      *
-     *  Note: The settings don't matter for pre-reads!
-     *  For second read, the settings for the file are *exactly* previousSettings.
+     *  1. If fn is an existing .leo, .db or .leojs file:
+     *     - Read fn once with a NullGui to discover all settings.
+     *     - Read fn again with the requested gui to create the outline.
+     *
+     *  2. If fn is an *existing* external file.
+     *     - Get settings from the leoSettings.leo and myLeoSetting.leo.
+     *     - Create an *unnamed* outline containing an @file or @edit node.
+     *     - Refresh the @file or @edit node from disk
+     *
+     *  3. Open an empty Leo outline if fn is empty or does not exist.
      */
-    public async openFileByName(
-        fn: string,
-        gui?: LeoGui,
-        old_c?: Commands,
-        previousSettings?: PreviousSettings
-    ): Promise<Commands | undefined> {
-        const lm: LoadManager = this;
-        if (!fn) {
-            return undefined;  // Should not happen.
-        }
-        // Disable the log.
-        // g.app.setLog(None)
-        // g.app.lockLog()
-
-        // Create the a commander for the .leo file.
-        let c = g.app.newCommander(fn, gui, previousSettings);
-
-        g.doHook('open0');
-
-        // Do common completion tasks.
-        const complete_inits = (c: Commands) => {
-            // g.app.unlockLog()
-            // c.frame.log.enable(True)
-            // g.app.writeWaitingLog(c);
-            // c.setLog()
-            lm.createMenu(c, fn);
-            lm.finishOpen(c);
-        };
-
-        if (!lm.isLeoFile(fn)) {
-            // Handle a wrapper file.
-            c = await lm.initWrapperLeoFile(c, fn); // #2489
-            // Finish.
-            g.doHook("new", { old_c: old_c, c: c, new_c: c });  // #2489.
-            g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
-            // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
-            c.theScriptingController = new ScriptingController(c);
-            await c.theScriptingController.createAllButtons();
-
-            complete_inits(c);
-            return c;
-        }
-        // Read the outline, but only if it exists.
-        if (await g.os_path_exists(fn)) {
-            const v = await c.fileCommands.getAnyLeoFileByName(fn, !!previousSettings);
-            if (!v) {
-                return undefined;
+    public async openWithFileName(fn: string, gui?: LeoGui, old_c?: Commands, skipSaveSession?: boolean): Promise<Commands> {
+        // PR #4795: Make *sure* this code never crashes and that c.p. is valid.
+        let file_name: string = '';
+        try {
+            file_name = fn ? g.finalize(fn) : '';
+            const c = await this.openWithFileNameHelper(file_name, gui, old_c, skipSaveSession);
+            if (c) {
+                if (!c.positionExists(c.p)) {
+                    c.p = c.rootPosition()!;
+                }
+                return c;
             }
+        } catch (e) {
+            g.trace(`Unexpected exception: ${e} opening ${file_name}`);
         }
-        // Finish.
-        g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
-        g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
-        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
-        c.theScriptingController = new ScriptingController(c);
-        await c.theScriptingController.createAllButtons();
 
-        complete_inits(c);
-        // ! IN LEOJS : make sure .leoRecentFiles.txt is written on open and save file instead.
-        if (g.app.recentFilesManager) {
-            const oldFiles = JSON.stringify(g.app.recentFilesManager.recentFiles);
-            g.app.recentFilesManager.updateRecentFiles(fn);
-            const newFiles = JSON.stringify(g.app.recentFilesManager.recentFiles);
-            if (newFiles !== oldFiles) {
-                await g.app.recentFilesManager.writeRecentFilesFile(c);
-            }
-        }
-        return c;
-
+        // The default: open an empty Leo file.
+        return this.openEmptyLeoFile(file_name, gui, old_c);
     }
-
-    //@+node:felix.20240105002740.1: *6* LM.createMenu
+    //@+node:felix.20260722223354.2: *5* LM.createMenu
     public createMenu(c: Commands, fn?: string): void {
         // lm = self
         // Create the menu as late as possible so it can use user commands.
@@ -3598,7 +3436,7 @@ export class LoadManager {
             // c.enableMenuBar()
         }
     }
-    //@+node:felix.20210124192005.1: *6* LM.findOpenFile
+    //@+node:felix.20260722223354.3: *5* LM.findOpenFile
     /**
      * Returns the commander of already opened Leo file
      * returns undefined otherwise
@@ -3626,15 +3464,23 @@ export class LoadManager {
         return undefined;
     }
 
-    //@+node:felix.20220418013716.1: *6* LM.finishOpen
+    //@+node:felix.20260722223354.4: *5* LM.finishOpen
     public finishOpen(c: Commands): void {
-        // lm = self
+        const lm = this;
+
         // const k = c.k;
         // g.assert(k);
 
         // New in Leo 4.6: provide an official way for very late initialization.
         // c.frame.tree.initAfterLoad();
         // c.initAfterLoad();
+        lm.createMenu(c, c.fileName())
+
+        lm.globalSettingsDict.delete('menus');
+
+        // This left the "g.es('over-riding setting:', name, 'from', w_path);" message!
+        //c.config.set(null, 'menus', 'menus', null); 
+        c.config.settingsDict.delete('menus'); // This fixed it, but it is not clear why.
 
         // chapterController.finishCreate must be called after the first real redraw
         // because it requires a valid value for c.rootPosition().
@@ -3658,76 +3504,15 @@ export class LoadManager {
         c.outerUpdate(); // #181: Honor focus requests.
         c.initialFocusHelper();
     }
-    //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
-    /**
-     * Create an empty file if the external fn is empty.
-     *
-     * Otherwise, create an @edit or @file node for the external file.
-     */
-    public async initWrapperLeoFile(
-        c: Commands,
-        fn: string
-    ): Promise<Commands> {
-        let p: Position | undefined;
-
-        const exists = await g.os_path_exists(fn);
-
-        if (!exists) {
-            p = c.rootPosition()!;
-            // Create an empty @edit node unless fn is an .leo file.
-            // Fix #1070: Use "newHeadline", not fn.
-            p.h = fn.endsWith('.leo') ? 'newHeadline' : `@edit ${fn}`;
-            c.selectPosition(p);
-
-            // TODO: importCommands and importDerivedFiles method !
-
-            /* 
-
-            }else if( c.looksLikeDerivedFile(fn)){
-                // 2011/10/10: Create an @file node.
-                p = await c.importCommands.importDerivedFiles(parent=c.rootPosition(),
-                    paths=[fn], command=undefined);  // Not undoable.
-                if p && p.hasBack()
-                    p.back().doDelete();
-                    p = c.rootPosition();
-                if !p
-                    return undefined;
-
-            */
-        } else {
-            // Create an @<file> node.
-            p = c.rootPosition();
-            if (p && p.__bool__()) {
-                const load_type = this.options['load_type'];
-                p.setHeadString(`${load_type} ${fn}`);
-                await c.refreshFromDisk(p);
-            }
-        }
-        // Fix critical bug 1184855: data loss with command line 'leo somefile.ext'
-        // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
-        c.mFileName = fn.endsWith('.leo') ? fn : `${fn}.leo`;
-        c.wrappedFileName = fn;
-        c.frame.title = c.computeWindowTitle();
-
-        // chapterController.finishCreate must be called after the first real redraw
-        // because it requires a valid value for c.rootPosition().
-
-        if (c.config.getBool('use-chapters') && c.chapterController) {
-            c.chapterController.finishCreate();
-        }
-
-        return c;
-    }
-
-    //@+node:felix.20220109233448.1: *6* LM.isLeoFile & LM.isZippedFile
+    //@+node:felix.20260722223354.5: *5* LM.isLeoFile & LM.isZippedFile
     public isLeoFile(fn: string): boolean {
         if (!fn) {
             return false;
         }
         // console.log('TODO: isZippedFile');
-        // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
+        // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', '.db', '.leojs'))
         return (
-            fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs')
+            fn.endsWith('.leo') || fn.endsWith('.db') || fn.endsWith('.leojs')
         );
     }
     public isZippedFile(fn: string): boolean {
@@ -3760,6 +3545,258 @@ export class LoadManager {
         }
         */
         // return fn && zipfile.is_zipfile(fn);
+    }
+    //@+node:felix.20260722223354.6: *5* LM.openEmptyLeoFile
+    /**
+     * Open an empty Leo file with the given file name.
+     */
+    public async openEmptyLeoFile(
+        fn: string,
+        gui?: LeoGui,
+        old_c?: Commands
+    ): Promise<Commands> {
+        const lm = this;
+        // Disable the log.
+        // g.app.setLog(null);
+        // g.app.lockLog();
+
+        // Create the commander.
+        const w_previousSettings = await lm.getPreviousSettings(fn);
+        const c: Commands = g.app.newCommander(fn, gui, w_previousSettings);
+
+        // Init the frame.
+        g.doHook('open0');
+        g.doHook('open1', {
+            old_c: old_c,
+            c: c,
+            new_c: c,
+            fileName: undefined,
+        });
+        // c.frame.setInitialWindowGeometry();
+        // c.frame.deiconify();
+        // c.frame.lift();
+        // const [splitVerticalFlag, r1, r2] = c.frame.initialRatios();
+        // c.frame.splitVerticalFlag = splitVerticalFlag;
+        // c.frame.resizePanesToRatio(r1, r2);
+        c.frame.setTitle(c.frame.title);
+        g.doHook('open2', {
+            old_c: old_c,
+            c: c,
+            new_c: c,
+            fileName: undefined,
+        });
+
+        // * In Leo, this was done in mod_scripting using 'hook' mechanism on 'open2' and 'new' events.
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
+
+        g.doHook('new', { old_c: old_c, c: c, new_c: c });
+
+        // Finish
+        c.clearChanged();
+        lm.finishOpen(c);
+        return c;
+    }
+    //@+node:felix.20260722223354.7: *5* LM.openExistingLeoFile & helper
+    // New typescript implementation 
+    /**
+     * Create a commander for an existing .leo, .db, or .leojs file.
+     */
+    public async openExistingLeoFile(fn: string, gui?: LeoGui, old_c?: Commands): Promise<Commands> {
+        const lm = this;
+
+        // Disable the log.
+        // g.app.setLog(null);
+        // g.app.lockLog();
+
+        // Get the appropriate settings.
+        const previousSettings = await lm.getPreviousSettings(fn);
+
+        // Create the a commander for the .leo file.
+        const c = g.app.newCommander(
+            fn,
+            gui,
+            previousSettings,
+        );
+
+        // Read the outline.
+        g.doHook('open0');
+        const v = await c.fileCommands.getAnyLeoFileByName(fn, Boolean(previousSettings));
+        if (!v) {
+            // #3656: Recover gracefully.
+            await lm.openBadLeoFile(c, fn);
+        }
+
+        g.doHook("open1", { old_c: null, c: c, new_c: c, fileName: fn });
+
+        // * In Leo, this was done in mod_scripting using 'hook' mechanism on 'open2' and 'new' events.
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
+        g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: fn });
+
+        // Finish.
+        lm.finishOpen(c);
+        return c;
+    }
+    //@+node:felix.20260722223354.8: *6* LM.openBadLeoFile
+    // New typescript implementation
+    /**
+     * Open a bad Leo file using some of the logic of lm.openExternalFile.
+     */
+    public async openBadLeoFile(c: Commands, fn: string): Promise<void> {
+        if (!fn) {
+            return;  // Should not happen.
+        }
+        const exists = await g.os_path_exists(fn);
+        if (!exists) {
+            return;  // Should not happen.
+        }
+
+        if (await c.looksLikeDerivedFile(fn)) {
+            // Create an @file node. Not undoable!
+            let p = await c.importCommands.importDerivedFiles(c.rootPosition()!, [fn], '');
+            if (!p) {
+                return;
+            }
+            if (p.hasBack()) {
+                p.back().doDelete();
+                p = c.rootPosition()!;
+            }
+            c.selectPosition(p);
+            c.redraw();
+        } else {
+            // Make the root node an @edit node.
+            const p = c.rootPosition()!;
+            p.h = `@edit ${fn}`;
+            await c.refreshFromDisk(p);  // Calls c.redraw()
+        }
+
+        c.mFileName = fn;  // It *is* valid to save the file.
+        const title = c.computeWindowTitle();
+        c.frame.title = title;
+        c.frame.setTitle(title);
+        c.clearChanged();
+    }
+    //@+node:felix.20260722223354.9: *5* LM.openExternalFile
+    // Typescript implementation
+    /**
+     * Create a wrapper commander (in a new tab) for the given external file.
+     *
+     * The commander's outline contains an @edit or @file node for the external file.
+     */
+    public async openExternalFile(fn: string, gui?: LeoGui, old_c?: Commands): Promise<Commands | undefined> {
+        const lm = this;
+
+        // Disable the log. Not needed in leo-web, but we keep it for consistency with the original code.
+        // g.app.setLog(null);
+        // g.app.lockLog();
+        const previousSettings = await lm.getPreviousSettings('');
+
+        // Create the commander.
+        const c = g.app.newCommander(
+            fn,
+            gui,
+            previousSettings,
+        );
+        // Use the config params to set the size and location of the window.
+        g.doHook('open0');
+        g.doHook("open1", { old_c, c, new_c: c, fileName: null });
+        const frame = c.frame;
+
+        // Skip those few lines in leo-web.
+        // frame.setInitialWindowGeometry();
+        // frame.deiconify();
+        // frame.lift();
+        // // #1570: Resize the _new_ frame.
+        // const [splitVerticalFlag, r1, r2] = frame.initialRatios();
+        // frame.resizePanesToRatio(r1, r2);
+
+        if (!(await g.os_path_exists(fn))) {
+            const p = c.rootPosition()!;
+            // Create an empty @edit node unless fn is an .leo file.
+            // Fix #1070: Use "newHeadline", not fn.
+            p.h = (fn.endsWith('.leo') || fn.endsWith('.leojs')) ? "newHeadline" : `@edit ${fn}`;
+            c.selectPosition(p);
+            c.redraw();
+        } else if (await c.looksLikeDerivedFile(fn)) {
+            // Create an @file node. Not undoable!
+            let p = await c.importCommands.importDerivedFiles(  // type:ignore  // We will test p next.
+                c.rootPosition()!,
+                [fn],
+                '',
+            );
+            if (!p || !p.v) {
+                return undefined;
+            }
+            if (p.hasBack()) {
+                p.back().doDelete();
+                p = c.rootPosition()!;
+            }
+            c.selectPosition(p);
+            c.redraw();
+        } else {
+            // Make the root node an @auto node if an importer exists. @edit otherwise.
+            const ext = g.os_path_splitext(fn)[1];
+            const func = g.app.scanner_for_ext(ext);
+            const p = c.rootPosition()!;
+            p.h = func ? `@auto ${fn}` : `@edit ${fn}`;
+            await c.refreshFromDisk(p);
+        }
+
+        c.mFileName = '';  // #3546: Do *not* automatically save the .leo file.
+        c.frame.title = c.computeTabTitle();
+        c.frame.setTitle(c.frame.title);
+
+        // * In Leo, this was done in mod_scripting using 'hook' mechanism on 'open2' and 'new' events.
+        c.theScriptingController = new ScriptingController(c);
+        await c.theScriptingController.createAllButtons();
+
+        g.doHook("open2", { old_c, c, new_c: c, fileName: fn });
+        // Finish.
+        frame.c.clearChanged();
+        lm.finishOpen(c);
+        return c;
+    }
+    //@+node:felix.20260722223354.10: *5* LM.openWithFileNameHelper
+    /**
+     * Open the file with the given name or and empty Leo outline.
+     */
+    public async openWithFileNameHelper(
+        file_name: string,
+        gui?: LeoGui,
+        old_c?: Commands,
+        skipSaveSession?: boolean
+    ): Promise<Commands | undefined> {
+        if (!file_name) {
+            return undefined;
+        }
+        let c: Commands | undefined;
+
+        // Return the commander if the file is an already open outline.
+        c = this.findOpenFile(file_name);
+        if (c) {
+            return c;
+        }
+
+        // Open a Leo outline or an external file if possible.
+        const exists = await g.os_path_exists(file_name);
+        const is_leo = this.isLeoFile(file_name);
+        if (is_leo && exists) {
+            c = await this.openExistingLeoFile(file_name, gui, old_c);
+            if (c) {
+                return c;
+            }
+        }
+        if (!is_leo) {
+            c = await this.openExternalFile(file_name, gui, old_c);
+            if (c) {
+                if (!skipSaveSession) {
+                    await g.app.saveSession(); // IN LEO-WEB: Save sessions here to skip saving session on program exit.
+                }
+                return c;
+            }
+        }
+        return undefined;
     }
     //@+node:felix.20220109232545.1: *3* LM.revertCommander
     /**

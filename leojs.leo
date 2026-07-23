@@ -1153,7 +1153,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738343334363431352e3038390a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738343737353531332e3135330a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -3477,7 +3477,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313738323137343437362e3331390a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738343737353438372e3738330a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -7137,7 +7137,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         }
         if (fileName &amp;&amp; g.app.loadManager) {
             await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
-            const commander = await g.app.loadManager.loadLocalFile(fileName, this);
+            const commander = await g.app.loadManager.openWithFileName(fileName, this);
             if (!commander) {
                 void vscode.window.showErrorMessage('can not open:' + '"' + fileName + '"');
                 return Promise.resolve();
@@ -11212,7 +11212,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
     if (!this.leoStates.fileOpenedReady) {
         if (g.app.loadManager) {
             g.app.numberOfUntitledWindows += 1; // To create unique names.
-            await g.app.loadManager.openEmptyLeoFile(this);
+            await g.app.loadManager.openEmptyLeoFile('', this);
         }
     } else {
         await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
@@ -21982,7 +21982,8 @@ public doArrow(key: "Up" | "Down") {
 </t>
 <t tx="felix.20260717234638.1">## 1.0.26
 
-- ...
+- Implemented Leo's PR #4795 which fixes file new &amp; open procedures.
+- Added c.p setter.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

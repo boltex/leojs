@@ -2,7 +2,8 @@
 
 ## 1.0.26
 
-- ...
+- Implemented Leo's PR #4795 which fixes file new & open procedures.
+- Added c.p setter.
 
 ## 1.0.25
 

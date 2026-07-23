@@ -576,6 +576,7 @@ export class ShadowController {
         if (copy && x.errors === 0 && at.errors === 0) {
             s = new_private_lines.join('');
             await x.replaceFileWithString(at.encoding, fn, s);
+            x.message(`updated private ${fn} from public ${old_public_file}`);
         }
         return copy;
     }
@@ -593,18 +594,8 @@ export class ShadowController {
         const w_isSig = await x.isSignificantPublicFile(fn);
         if (w_isSig) {
             // Update the private shadow file from the public file.
-            const written = await x.propagate_changes(fn, shadow_fn);
-            if (written) {
-                x.message(`updated private ${shadow_fn} from public ${fn}`);
-            }
-        } else {
-            // pass
+            await x.propagate_changes(fn, shadow_fn);
         }
-        // Don't write *anything*.
-        // if 0: # This causes considerable problems.
-        // # Create the public file from the private shadow file.
-        // x.copy_file_removing_sentinels(shadow_fn,fn)
-        // x.message("created public %s from private %s " % (fn, shadow_fn))
     }
     //@+node:felix.20230410203541.28: *3* x.Utils...
     //@+node:felix.20230410203541.29: *4* x.error & message & verbatim_error

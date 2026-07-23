@@ -1598,7 +1598,7 @@ export class Position {
      */
     public _linkAfter(p_after: Position): void {
         const p: Position = this;
-        const parent_v = p_after._parentVnode()!;
+        const parent_v = p_after._parentVnode();
         p.stack = [...p_after.stack];
         p._childIndex = p_after._childIndex + 1;
         const child: VNode = p.v;
@@ -1612,7 +1612,7 @@ export class Position {
      */
     public _linkCopiedAfter(p_after: Position): void {
         const p: Position = this;
-        const parent_v: VNode = p_after._parentVnode()!;
+        const parent_v: VNode = p_after._parentVnode();
         p.stack = [...p_after.stack];
         p._childIndex = p_after._childIndex + 1;
         const child: VNode = p.v;
@@ -1669,21 +1669,23 @@ export class Position {
 
     //@+node:felix.20210127234205.8: *4* p._parentVnode
     /**
-     * Return the parent VNode.
-     * Return the hiddenRootNode if there is no other parent.
+     * Return the parent VNode or the hidden root VNode.
      */
-    public _parentVnode(): VNode | undefined {
+    public _parentVnode(): VNode {
         const p: Position = this;
-        if (p.v) {
-            const data: false | StackEntry =
-                !!p.stack.length && p.stack[p.stack.length - 1];
-            if (data) {
-                const v: VNode = data[0];
-                return v;
-            }
-            return p.v.context.hiddenRootNode;
+        const c = p.v.context
+        if (!p.v || p.v === c.hiddenRootNode) {
+            return c.hiddenRootNode;
         }
-        return undefined;
+
+        const data: false | StackEntry =
+            !!p.stack.length && p.stack[p.stack.length - 1]!;
+        if (data) {
+            const v: VNode = data[0];
+            return v;
+        }
+        return p.v.context.hiddenRootNode;
+
     }
 
     //@+node:felix.20210127234205.9: *4* p._relinkAsCloneOf
@@ -1723,7 +1725,7 @@ export class Position {
     public _unlink(): void {
         const p: Position = this;
         const n: number = p._childIndex;
-        const parent_v: VNode = p._parentVnode()!;
+        const parent_v: VNode = p._parentVnode();
         // returns None if p.v is None
         const child: VNode = p.v;
         g.assert(p.v);
@@ -1790,7 +1792,7 @@ export class Position {
     public moveToBack(): Position {
         const p: Position = this;
         const n: number = p._childIndex;
-        const parent_v: VNode | undefined = p._parentVnode(); // Returns None if p.v is None.
+        const parent_v = p._parentVnode(); // Returns None if p.v is None.
 
         // Do not assume n is in range: this is used by positionExists.
         if (parent_v && p.v && 0 < n && n <= parent_v.children.length) {
@@ -1863,7 +1865,7 @@ export class Position {
     public moveToNext(): Position {
         const p: Position = this;
         const n: number = p._childIndex;
-        const parent_v: VNode = p._parentVnode()!;
+        const parent_v: VNode = p._parentVnode();
         // Returns None if p.v is None.
         if (!p.v) {
             g.trace('no p.v:', p, g.callers());
@@ -2407,7 +2409,7 @@ export class Position {
      */
     public promote(): void {
         const p: Position = this; //  Do NOT copy the position.
-        const parent_v: VNode = p._parentVnode()!;
+        const parent_v: VNode = p._parentVnode();
         const children: VNode[] = p.v.children;
         // Add the children to parent_v's children.
         const n: number = p.childIndex() + 1;

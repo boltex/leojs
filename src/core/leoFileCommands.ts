@@ -1844,13 +1844,6 @@ export class FileCommands {
     }
     //@+node:felix.20211213224232.30: *4* fc: Read Utils
     // Methods common to both the sax and non-sax code.
-    //@+node:felix.20211213224232.31: *5* fc.archivedPositionToPosition
-    /**
-     * Convert an archived position (a string) to a position.
-     */
-    public archivedPositionToPosition(s: string): Position | undefined {
-        return this.c.archivedPositionToPosition(s);
-    }
     //@+node:felix.20211213224232.33: *5* fc.getDescendentAttributes
     /**
      * s is a list of gnx's, separated by commas from a <v> or <t> element.
@@ -2093,13 +2086,13 @@ export class FileCommands {
         }
 
         if (str_pos !== undefined) {
-            current = this.archivedPositionToPosition(str_pos);
+            current = c.archivedPositionToPosition(str_pos);
         }
         if (!c.positionExists(current)) {  // #4789.
             current = c.rootPosition()!;
         }
         // current will not be undefined because of the previous check.
-        c.setCurrentPosition(current!);
+        c.p = current!;
     }
     //@+node:felix.20211213224237.1: *3* fc: Writing
     //@+node:felix.20211213224237.2: *4* fc: Writing save*
