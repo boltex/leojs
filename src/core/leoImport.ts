@@ -867,7 +867,7 @@ export class LeoImportCommands {
     ): ((...args: any[]) => any) | undefined {
         // Match the @auto type first, then the file extension.
         const c = this.c;
-        return g.app.scanner_for_at_auto(c, p) || g.app.scanner_for_ext(c, ext);
+        return g.app.scanner_for_at_auto(c, p) || g.app.scanner_for_ext(ext);
     }
     //@+node:felix.20230511002352.24: *5* ic.import_binary_file
     public import_binary_file(fileName: string, parent: Position): Position {

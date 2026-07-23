@@ -171,7 +171,7 @@ export class CommanderHelpCommands {
             lm.finishOpen(c);
             g.doHook('new', { old_c: old_c, c: c, new_c: c });
 
-            // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+            // * In Leo, this was done in mod_scripting using 'hook' mechanism on 'open2' and 'new' events.
             c.theScriptingController = new ScriptingController(c);
             await c.theScriptingController.createAllButtons();
 

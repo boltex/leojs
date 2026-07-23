@@ -1,3 +1,4 @@
+
 //@+leo-ver=5-thin
 //@+node:felix.20210102012410.1: * @file src/core/leoGlobals.ts
 /**
@@ -1554,7 +1555,7 @@ export async function createHiddenCommander(
         if (app.loadManager!.isLeoFile(fn) && exists) {
             // await c.fileCommands.openLeoFile(fn, true, true);
             const lm = app.loadManager!;
-            const c = lm.openFileByName(fn, app.nullGui);
+            const c = await lm.openWithFileName(fn, app.nullGui);
             return c;
         }
     } catch (e) {
@@ -1724,7 +1725,7 @@ export function openWithFileName(
     gui?: LeoGui,
     skipSaveSession?: boolean
 ): Promise<Commands | undefined> {
-    return app.loadManager!.loadLocalFile(fileName, gui, old_c, skipSaveSession);
+    return app.loadManager!.openWithFileName(fileName, gui, old_c, skipSaveSession);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
 /**

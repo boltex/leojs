@@ -655,7 +655,7 @@ export class Chapter {
         }
         c.hoistStack.push({ p: root.copy(), expanded: true });
         // Careful: c.selectPosition would pop the hoist stack.
-        c.setCurrentPosition(p);
+        c.p = p;
         g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20220429005433.31: *4* chapter.findPositionInChapter
@@ -756,10 +756,10 @@ export class Chapter {
         if (c.hoistStack.length) {
             const p = c.hoistStack[c.hoistStack.length - 1].p;
             // Careful: c.selectPosition would pop the hoist stack.
-            c.setCurrentPosition(p);
+            c.p = p;
         } else {
             const p = root || c.p;
-            c.setCurrentPosition(p);
+            c.p = p;
         }
     }
     //@-others

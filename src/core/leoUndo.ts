@@ -1588,7 +1588,7 @@ export class Undoer {
     public redoDemote(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!;
+        const parent_v: VNode = u.p!._parentVnode();
         const n: number = u.p!.childIndex();
 
         // Move the demoted nodes from the old parent to the new parent.
@@ -1606,7 +1606,7 @@ export class Undoer {
             v.parents.push(u.p!.v);
         }
         u.p!.setDirty();
-        c.setCurrentPosition(u.p!);
+        c.p = u.p!;
     }
     //@+node:felix.20211026230613.93: *4* u.redoGroup
     /**
@@ -1811,7 +1811,7 @@ export class Undoer {
     public redoPromote(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!;
+        const parent_v: VNode = u.p!._parentVnode();
         // Add the children to parent_v's children.
         let n: number = u.p!.childIndex() + 1;
         const old_children: VNode[] = [...parent_v.children];
@@ -1834,7 +1834,7 @@ export class Undoer {
             child.parents.push(parent_v);
         }
         u.p!.setDirty();
-        c.setCurrentPosition(u.p!);
+        c.p = u.p!;
     }
     //@+node:felix.20211026230613.100: *4* u.redoSort
     public redoSort(): void {
@@ -1844,7 +1844,7 @@ export class Undoer {
         if (u.sortChildren) {
             p.v.children = [...u.newChildren];
         } else {
-            const parent_v = p._parentVnode()!;
+            const parent_v = p._parentVnode();
             parent_v.children = [...u.newChildren];
             // Only the child index of new position changes!
             for (var _i = 0; _i < parent_v.children.length; _i++) {
@@ -1856,7 +1856,7 @@ export class Undoer {
             }
         }
         p.setAllAncestorAtFileNodesDirty();
-        c.setCurrentPosition(p);
+        c.p = p;
     }
     //@+node:felix.20211026230613.101: *4* u.redoTree
     /**
@@ -2086,7 +2086,7 @@ export class Undoer {
     public undoDemote(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!;
+        const parent_v: VNode = u.p!._parentVnode();
         let n: number = u.followingSibs.length;
         // Remove the demoted nodes from p's children.
         u.p!.v.children = u.p!.v.children.slice(0, -n);
@@ -2104,7 +2104,7 @@ export class Undoer {
             sib.parents.push(parent_v);
         }
         u.p!.setAllAncestorAtFileNodesDirty();
-        c.setCurrentPosition(u.p!);
+        c.p = u.p!;
     }
     //@+node:felix.20211026230613.115: *4* u.undoGroup
     /**
@@ -2300,7 +2300,7 @@ export class Undoer {
     public undoPromote(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!; // The parent of the all the *promoted* nodes.
+        const parent_v: VNode = u.p!._parentVnode(); // The parent of the all the *promoted* nodes.
         // Remove the promoted nodes from parent_v's children.
         let n: number = u.p!.childIndex() + 1;
         // Adjust the old parents children
@@ -2327,7 +2327,7 @@ export class Undoer {
             child.parents.push(u.p!.v);
         }
         u.p!.setAllAncestorAtFileNodesDirty();
-        c.setCurrentPosition(u.p!);
+        c.p = u.p!;
     }
     //@+node:felix.20211026230613.122: *4* u.undoRedoText
     /**
@@ -2420,7 +2420,7 @@ export class Undoer {
         if (u.sortChildren) {
             p.v.children = [...u.oldChildren];
         } else {
-            const parent_v = p._parentVnode()!;
+            const parent_v = p._parentVnode();
             parent_v.children = [...u.oldChildren];
             // Only the child index of new position changes!
             for (var _i = 0; _i < parent_v.children.length; _i++) {
@@ -2432,7 +2432,7 @@ export class Undoer {
             }
         }
         p.setAllAncestorAtFileNodesDirty();
-        c.setCurrentPosition(p);
+        c.p = p;
     }
     //@+node:felix.20211026230613.126: *4* u.undoTree
     /**
@@ -2462,15 +2462,7 @@ export class Undoer {
         // Redraw and recolor.
         // c.frame.body.updateEditors();  // New in Leo 4.4.8.
 
-        //
-        // Set the new position.
-        if (0) {
-            // Don't do this: it interferes with selection ranges.
-            // This strange code forces a recomputation of the root position.
-            c.selectPosition(c.p);
-        } else {
-            c.setCurrentPosition(c.p);
-        }
+        // PR #4809. c.p has already been set.
         //
         // # 1451. *Always* set the changed bit.
         // Redrawing *must* be done here before setting u.undoing to false.

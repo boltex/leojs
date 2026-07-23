@@ -274,12 +274,12 @@ export class CommanderFileCommands {
         // frame.resizePanesToRatio(frame.ratio, frame.secondary_ratio)
         // Resize the _new_ frame.
         // c.frame.createFirstTreeNode()
-        lm.createMenu(c);
+
         lm.finishOpen(c);
         //g.app.writeWaitingLog(c);
         g.doHook('new', { old_c: old_c, c: c, new_c: c });
 
-        // ! mod_scripting ORIGINALLY INIT ON open2 or new HOOK IN LEO !
+        // * In Leo, this was done in mod_scripting using 'hook' mechanism on 'open2' and 'new' events.
         c.theScriptingController = new ScriptingController(c);
         await c.theScriptingController.createAllButtons();
 
@@ -304,6 +304,10 @@ export class CommanderFileCommands {
     }
     //@+node:felix.20220105210716.10: *4* c_file.open_outline
     @commander_command(
+        'open-file',
+        'Open a Leo window containing the contents of a .leo file.'
+    )
+    @commander_command(
         'open-outline',
         'Open a Leo window containing the contents of a .leo file.'
     )
@@ -312,115 +316,24 @@ export class CommanderFileCommands {
         p_uri?: vscode.Uri
     ): Promise<unknown> {
         const c: Commands = this;
-
-        //@+others // Defines open_completer function.
-        //@+node:felix.20220105210716.11: *5* function: open_completer
-        async function open_completer(
-            p_c: Commands,
-            closeFlag: boolean,
-            fileName?: string
-        ): Promise<unknown> {
-
-            // FIX SLASHES AND CAPITALIZE DRIVE LETTERS TO EMULATE PYTHON OPEN FILE DIALOG RESULT
-            if (fileName) {
-                fileName = g.os_path_fix_drive(fileName);
-                fileName = g.os_path_normslashes(fileName);
-            }
-
-            p_c.bringToFront();
-            p_c.init_error_dialogs();
-
-            let ok: any = false;
-
-            // ! THIS METHOD VOLUNTARILY DIFFERENT THAN LEO'S PYTHON CODE
-
-            let q_result = Promise.resolve();
-            if (fileName) {
-                if (g.app.loadManager!.isLeoFile(fileName)) {
-                    const c2 = await g.openWithFileName(fileName, p_c, c.gui);
-                    if (c2) {
-                        // c2.k.makeAllBindings(); // ? needed ?
-
-                        // Fix #579: Key bindings don't take for commands defined in plugins.
-                        await g.chdir(fileName);
-                        g.setGlobalOpenDir(fileName);
-                    }
-                    if (c2 && closeFlag) {
-                        await g.app.destroyWindow(p_c.frame);
-                        // ! Need to remove here in leojs !
-                        let index = g.app.windowList.indexOf(p_c.frame, 0);
-                        if (index > -1) {
-                            g.app.windowList.splice(index, 1);
-                        }
-
-                        // Set UI document's pane and outline proper refresh selected index!
-
-                        index = g.app.windowList.indexOf(c2.frame);
-                        if (index >= 0) {
-                            g.app.gui.frameIndex = index;
-                        }
-                    }
-                } else {
-                    // Create an @file node for files containing Leo sentinels.
-                    const w_looksDerived = await p_c.looksLikeDerivedFile(
-                        fileName
-                    );
-                    if (w_looksDerived) {
-                        ok = await p_c.importCommands.importDerivedFiles(
-                            p_c.p,
-                            [fileName],
-                            'Open'
-                        );
-                    } else {
-                        // otherwise, create an @edit node.
-                        ok = p_c.createNodeFromExternalFile(fileName);
-                    }
-                }
-            }
-            await p_c.raise_error_dialogs('write');
-            await g.app.runAlreadyOpenDialog(p_c);
-
-            return q_result;
-        }
-        //@-others
-
-        // ! THIS METHOD VOLUNTARILY DIFFERENT THAN LEO'S PYTHON CODE
-        // Close the window if this command completes successfully?
-        let closeFlag: boolean =
-            c.frame.startupWindow &&
-            // The window was open on startup
-            !c.changed &&
-            !c.fileName() &&
-            !c.frame.saved &&
-            // The window has never been changed
-            g.app.numberOfUntitledWindows === 1;
-        // Only one untitled window has ever been opened
-
-        let table: [string, string][] = [
+        let filetypes: [string, string][] = [
             ['Leo files', '*.leojs *.leo *.db'],
             ['Python files', '*.py'],
             ['All files', '*'],
         ];
-        // maybe from c.k.
-        let fileName: string = c.k?.givenArgs?.join('');
-
+        let fileName: string | undefined;
         // override with given argument
-
         if (p_uri && p_uri.fsPath && p_uri.fsPath.trim()) {
             fileName = p_uri.fsPath;
-        }
-
-        if (fileName) {
-            return open_completer(c, closeFlag, fileName);
+            if (fileName) {
+                return g.openWithFileName(fileName, c);
+            }
         }
         // Equivalent to legacy code.
-        fileName = await g.app.gui.runOpenFileDialog(
-            c,
-            'Open',
-            table,
-        );
-
-        return open_completer(c, closeFlag, fileName);
+        fileName = await g.app.gui.runOpenFileDialog(c, 'Open', filetypes,);
+        if (fileName) {
+            return g.openWithFileName(fileName, c);
+        }
     }
     //@+node:felix.20220105210716.12: *4* c_file.refreshFromDisk
     // refresh_pattern = re.compile(r'^(@[\w-]+)')

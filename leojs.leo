@@ -9,6 +9,8 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20260717234638.1"><vh>1.0.26</vh></v>
+<v t="felix.20260717234621.1"><vh>1.0.25</vh></v>
 <v t="felix.20260708001513.1"><vh>1.0.24</vh></v>
 <v t="felix.20260705194959.1"><vh>1.0.23</vh></v>
 <v t="felix.20260626190009.1"><vh>1.0.22</vh></v>
@@ -1151,14 +1153,9 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738343235313331322e3234310a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738343737353531332e3135330a2e">@language md
 @tabwidth -4
 # Change Log
-
-## 1.0.25
-
-- Added clone-diff-pr command as per Leo's #4780
-- Fixed "detect binary files" as per Leo's PR 4793.
 
 @others
 </t>
@@ -3480,7 +3477,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313738323137343437362e3331390a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313738343737353438372e3738330a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4675,13 +4672,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738343235303230392e3432350a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738343334363239382e3631350a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -7140,7 +7137,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         }
         if (fileName &amp;&amp; g.app.loadManager) {
             await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
-            const commander = await g.app.loadManager.loadLocalFile(fileName, this);
+            const commander = await g.app.loadManager.openWithFileName(fileName, this);
             if (!commander) {
                 void vscode.window.showErrorMessage('can not open:' + '"' + fileName + '"');
                 return Promise.resolve();
@@ -11215,7 +11212,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
     if (!this.leoStates.fileOpenedReady) {
         if (g.app.loadManager) {
             g.app.numberOfUntitledWindows += 1; // To create unique names.
-            await g.app.loadManager.openEmptyLeoFile(this);
+            await g.app.loadManager.openEmptyLeoFile('', this);
         }
     } else {
         await utils.setContext(Constants.CONTEXT_FLAGS.LEO_OPENING_FILE, true);
@@ -19576,7 +19573,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313738343038353834382e3135370a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313738343334363331362e3638380a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19613,7 +19610,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.25&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.26&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21975,6 +21972,18 @@ public doArrow(key: "Up" | "Down") {
 <t tx="felix.20260708001513.1">## 1.0.24
 
 - Fixed @auto-md / @auto-markdown handling of @noheader nodes - From original Leo's #4787 by Alexander Przemysław Kamiński
+
+</t>
+<t tx="felix.20260717234621.1">## 1.0.25
+
+- Added clone-diff-pr command as per Leo's #4780
+- Fixed "detect binary files" as per Leo's PR 4793.
+
+</t>
+<t tx="felix.20260717234638.1">## 1.0.26
+
+- Implemented Leo's PR #4795 which fixes file new &amp; open procedures.
+- Added c.p setter.
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

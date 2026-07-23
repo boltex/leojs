@@ -440,10 +440,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         if (g.app.diff) {
             if (commanders.length === 2) {
                 [c1, c2] = commanders;
-                const fn1 =
-                    g.shortFileName(c1.wrappedFileName) || c1.shortFileName();
-                const fn2 =
-                    g.shortFileName(c2.wrappedFileName) || c2.shortFileName();
+                const fn1 = c1.shortFileName();
+                const fn2 = c2.shortFileName();
                 g.es('--diff auto compare');
                 g.es(fn1);
                 g.es(fn2);
@@ -550,8 +548,8 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         parent.setHeadString(undoType);
         u.afterInsertNode(parent, undoType, undoData);
         // Use the wrapped file name if possible.
-        const fn1 = g.shortFileName(c1.wrappedFileName) || c1.shortFileName();
-        const fn2 = g.shortFileName(c2.wrappedFileName) || c2.shortFileName();
+        const fn1 = c1.shortFileName();
+        const fn2 = c2.shortFileName();
         const table: [{ [key: string]: Position }, string][] = [
             [deleted, `not in ${fn2}`],
             [inserted, `not in ${fn1}`],

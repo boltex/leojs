@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.0.26
+
+- Implemented Leo's PR #4795 which fixes file new & open procedures.
+- Added c.p setter.
+
 ## 1.0.25
 
 - Added clone-diff-pr command as per Leo's #4780
