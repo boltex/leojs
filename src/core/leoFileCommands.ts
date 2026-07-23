@@ -1781,7 +1781,7 @@ export class FileCommands {
         c.frame.setTopGeometry(w, h, x, y);
         c.frame.resizePanesToRatio(r1, r2);
         const p = fc.decodePosition(encp);
-        c.setCurrentPosition(p);
+        c.p = p;
         return rootChildren[0];
 
     }

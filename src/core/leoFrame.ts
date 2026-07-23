@@ -932,7 +932,7 @@ export class NullTree {
         // Part 2: set the new text. This forces a recolor.
         // Important: set c.p *before* setting text.
 
-        c.setCurrentPosition(p);
+        c.p = p;
         w.setAllText(s);
 
     }

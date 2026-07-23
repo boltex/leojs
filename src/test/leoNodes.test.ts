@@ -579,7 +579,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p5 = p.insertAsNthChild(3);
         p5.setHeadString('D');
         p.expand();
-        c.setCurrentPosition(p3);
+        c.p = p3;
         c.demote();
         p = c.p;
         assert.ok(p.__eq__(p3));
@@ -619,7 +619,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p3 = p.insertAsNthChild(1);
         p3.setHeadString('B');
         p.expand();
-        c.setCurrentPosition(p2);
+        c.p = p2;
         const p4 = c.insertHeadline();
         assert.ok(p4?.__eq__(c.p));
         p = c.p;
@@ -663,7 +663,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p5 = p.insertAsNthChild(3);
         p5.setHeadString('D');
         p.expand();
-        c.setCurrentPosition(p3);
+        c.p = p3;
         c.moveOutlineDown();
         let moved = c.p;
         assert.strictEqual(moved.h, 'B');
@@ -696,7 +696,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p2 = p.insertAsNthChild(0);
         p2.setHeadString('A');
         p.expand();
-        c.setCurrentPosition(p2);
+        c.p = p2;
         c.moveOutlineLeft();
         const moved = c.p;
         assert.strictEqual(moved.h, 'A');
@@ -718,7 +718,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p4 = p.insertAsNthChild(2);
         p4.setHeadString('C');
         p.expand();
-        c.setCurrentPosition(p3);
+        c.p = p3;
         c.moveOutlineRight();
         const moved = c.p;
         assert.strictEqual(moved.h, 'B');
@@ -741,7 +741,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p5 = p.insertAsNthChild(3);
         p5.setHeadString('D');
         p.expand();
-        c.setCurrentPosition(p4);
+        c.p = p4;
         c.moveOutlineUp();
         const moved = c.p;
         assert.strictEqual(moved.h, 'C');
@@ -828,7 +828,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         p.expand();
         const p6 = p.insertAsNthChild(2);
         p6.setHeadString('C');
-        c.setCurrentPosition(p3);
+        c.p = p3;
         c.promote();
         p = c.p;
         assert.ok(p.__eq__(p3));
