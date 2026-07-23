@@ -1,5 +1,9 @@
 # Change Log
 
+# 1.0.27 
+
+- ...
+
 ## 1.0.26
 
 - Implemented Leo's PR #4795 which fixes file new & open procedures.

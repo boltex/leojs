@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20260723002653.1"><vh>1.0.27</vh></v>
 <v t="felix.20260717234638.1"><vh>1.0.26</vh></v>
 <v t="felix.20260717234621.1"><vh>1.0.25</vh></v>
 <v t="felix.20260708001513.1"><vh>1.0.24</vh></v>
@@ -1153,7 +1154,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738343737353531332e3135330a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313738343738303832312e3236390a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4672,13 +4673,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313738343334363239382e3631350a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313738343738303739342e3232390a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -19573,7 +19574,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313738343334363331362e3638380a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313738343738303833382e3635390a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -19610,7 +19611,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.26&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.27&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -21984,6 +21985,11 @@ public doArrow(key: "Up" | "Down") {
 
 - Implemented Leo's PR #4795 which fixes file new &amp; open procedures.
 - Added c.p setter.
+
+</t>
+<t tx="felix.20260723002653.1"># 1.0.27 
+
+- ...
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
