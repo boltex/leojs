@@ -23,10 +23,7 @@ export class Rust_Importer extends Importer {
 
         ['enum', /\s*enum\s+(\w+)\s*\{/],
         ['enum', /\s*pub\s+enum\s+(\w+)\s*\{/],
-
         ['enum', /\s*pub\s*\(\s*crate\s*\)\s*enum\s+(\w+)\s*\{/],
-        ['enum', /\s*pub\s+enum\s+(\w+)\s*\{/],
-
         ['macro', /\s*(\w+)\!\s*\{/],
         ['use', /\s*use.*?\{/],  // No m.group(1).
 
@@ -519,7 +516,6 @@ export class Rust_Importer extends Importer {
             }
 
             // Scan across blank lines, /// comment lines, and use lines.
-            lines = g.splitLines(child1.b);
             let i = 0;
             for (const line of g.splitLines(child1.b)) {
                 const s = line.trim();
