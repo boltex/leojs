@@ -23,6 +23,10 @@ export class Rust_Importer extends Importer {
 
         ['enum', /\s*enum\s+(\w+)\s*\{/],
         ['enum', /\s*pub\s+enum\s+(\w+)\s*\{/],
+
+        ['enum', /\s*pub\s*\(\s*crate\s*\)\s*enum\s+(\w+)\s*\{/],
+        ['enum', /\s*pub\s+enum\s+(\w+)\s*\{/],
+
         ['macro', /\s*(\w+)\!\s*\{/],
         ['use', /\s*use.*?\{/],  // No m.group(1).
 
@@ -30,8 +34,8 @@ export class Rust_Importer extends Importer {
         // 2018 edition+, paths for pub(in path) must start with crate, self, or super.
 
         // Function patterns require *neither* '(' nor '{' on the same line...
-
         // Ruff starts some lines with  fn name< (!)
+
         ['fn', /\s*fn\s+(\w+)/],
         ['fn', /\s*pub\s+fn\s+(\w+)/],
 
@@ -49,6 +53,9 @@ export class Rust_Importer extends Importer {
 
         ['struct', /\s*struct\b(.*?)$/m],
         ['struct', /\s*pub\s+struct\b(.*?)$/m],
+
+        ['struct', /\s*pub\s*\(\s*crate\)\s*struct\b(.*?)$/m],
+
         ['trait', /\s*trait\b(.*?)$/m],
         ['trait', /\s*pub\s+trait\b(.*?)$/m],
     ];
@@ -498,9 +505,12 @@ export class Rust_Importer extends Importer {
 
         //@+node:felix.20250221202233.15: *4* function: move_module_preamble
         /**
-         * Move the preamble lines from the parent's first child to the start of parent.b.
+         * Move the preamble lines from the parent's children to the start of parent.b.
          *
-         * For Rust, this consists of leading 'use' statements and any comments that precede them.
+         * For Rust, the preamble consists of all leading blank lines, "use"
+         * statements, and /// comments.
+         *
+         * However, *trailing* /// comments belong to following enum, struct, function, etc.
         */
         const move_module_preamble = (lines: string[], parent: Position): void => {
             const child1 = parent.firstChild();
@@ -508,54 +518,53 @@ export class Rust_Importer extends Importer {
                 return;
             }
 
-            // Compute the potential preamble: all the leading lines.
-            const preamble_start = Math.max(0, g.splitLines(child1.b).length - 1);
-            const preamble_lines = lines.slice(0, preamble_start);
-
-            // Include only comment, blank, and 'use' lines.
-            let found_use = false;
+            // Scan across blank lines, /// comment lines, and use lines.
+            lines = g.splitLines(child1.b);
             let i = 0;
-            for (; i < preamble_lines.length; i++) {
-                const stripped_line = preamble_lines[i].trim();
-                if (stripped_line.startsWith('use')) {
-                    found_use = true;
-                } else if (stripped_line.startsWith('///')) {
-                    if (found_use) {
-                        break;
-                    }
-                } else if (stripped_line) {
+            for (const line of g.splitLines(child1.b)) {
+                const s = line.trim();
+                if (!s || s.startsWith('///') || s.startsWith('use')) {
+                    lines.push(line);
+                    i += 1;
+                } else {
                     break;
                 }
             }
+            lines = lines.slice(0, i);
 
-            if (!found_use) {
-                // Assume all the comments belong to the first node.
-                return;
+            // Unscan trailing /// comment lines.
+            while (lines.length && lines[lines.length - 1].trim().startsWith('///')) {
+                lines.pop();
             }
 
-            const real_preamble_lines = lines.slice(0, i);
-            const preamble_s = real_preamble_lines.join('');
-            if (!preamble_s.trim()) {
-                return;
-            }
-
-            // Adjust the bodies.
-            parent.b = preamble_s + parent.b;
-            child1.b = child1.b.replace(preamble_s, '');
-
-            // Next, move leading lines to the parent, before the @others line.
-            while (child1.b.startsWith('\n')) {
-                if (parent.b.includes('@others')) {
-                    // Assume the importer created the @others.
-                    parent.b = parent.b.replace('@others', '\n@others');
-                } else {
-                    parent.b += '\n';
+            // Move the lines into the parent before the @others directive.
+            const move_lines = (child: Position, lines: string[]) => {
+                if (lines.length) {
+                    const i = parent.b.includes('@others') ? parent.b.indexOf('@others') : 0;
+                    parent.b = parent.b.slice(0, i) + lines.join('') + parent.b.slice(i);
+                    const new_child_lines = g.splitLines(child.b).slice(lines.length);
+                    child.b = new_child_lines.join('');
                 }
-                child1.b = child1.b.slice(1);
+            };
+
+            move_lines(child1, lines);
+            // Move the body text all unnamed child `unnamed use` nodes.
+            let child = child1;
+            let n = 0;
+            while (child && child.__bool__() && child.h === 'unnamed use') {
+                n += 1;
+                move_lines(child, g.splitLines(child.b));
+                child = child.next();
             }
+
+            // Delete the `unnamed use` nodes.
+            for (let i = 0; i < n; i++) {
+                child = parent.firstChild();
+                child.doDelete();
+            }
+
         };
         //@-others
-
 
         this.move_blank_lines(parent);  // Base-class method.
 
