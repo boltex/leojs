@@ -1154,7 +1154,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313738343738303832312e3236390a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313739303931343531392e3438320a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -21989,7 +21989,7 @@ public doArrow(key: "Up" | "Down") {
 </t>
 <t tx="felix.20260723002653.1"># 1.0.27 
 
-- ...
+- Implemented fix for rust importer matching Leo's original PR # 4981
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
