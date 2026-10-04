@@ -1155,7 +1155,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313739303936393137312e3631370a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313739313038393536322e3838370a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4674,7 +4674,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313739303936393138362e340a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313739313038393334302e3734360a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -21988,14 +21988,14 @@ public doArrow(key: "Up" | "Down") {
 - Added c.p setter.
 
 </t>
-<t tx="felix.20260723002653.1"># 1.0.27 
+<t tx="felix.20260723002653.1"># 1.0.27
 
 - Implemented fix for rust importer matching Leo's original PR # 4981
 
 </t>
 <t tx="felix.20261002152551.1"># 1.0.28
 
-- ...
+- Added promote-to-at-others and promote-section-def commands as per Leo's original PR #4991
 
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5

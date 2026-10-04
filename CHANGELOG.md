@@ -2,9 +2,9 @@
 
 # 1.0.28
 
-- ...
+- Added promote-to-at-others and promote-section-def commands as per Leo's original PR #4991
 
-# 1.0.27 
+# 1.0.27
 
 - Implemented fix for rust importer matching Leo's original PR # 4981
 
