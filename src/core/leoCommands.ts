@@ -5352,7 +5352,7 @@ export class Commands {
         }
 
         c.frame.tree.select(p);
-
+        // Calls c.setCurrentPosition, which *does* test whether the position exists.
         c.p = p;
     }
 

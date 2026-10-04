@@ -579,14 +579,6 @@ export class Undoer {
         const c: Commands = this.c;
 
         const w: StringTextWrapper = c.frame.body.wrapper;
-        if (!p.__eq__(c.p)) {  // Prepare to ignore p argument.
-            if (!u.changeGroupWarning) {
-                u.changeGroupWarning = true;
-                g.trace("Position mismatch", g.callers());
-                console.log('p:', p.h);
-                console.log('c.p', c.p.h);
-            }
-        }
 
         if (u.redoing || u.undoing) {
             return;
@@ -604,10 +596,9 @@ export class Undoer {
         // Set the types & helpers.
         bunch.kind = 'afterGroup';
         bunch.undoType = undoType;
-        // Set helper only for undo:
-        // The bead pointer will point to an 'beforeGroup' bead for redo.
         bunch.undoHelper = u.undoGroup;
         bunch.redoHelper = u.redoGroup;
+        bunch.p = p.copy();  // PR #4991.
         bunch.newP = p.copy();
 
         bunch.newSel = w.getSelectionRange();
@@ -996,15 +987,6 @@ export class Undoer {
         verboseUndoGroup = true
     ): void {
         const u: Undoer = this;
-        const c: Commands = u.c;
-        if (!p.__eq__(c.p)) {  // Prepare to ignore p argument.
-            if (!u.changeGroupWarning) {
-                u.changeGroupWarning = true;
-                g.trace("Position mismatch", g.callers());
-                console.log('p:', p);
-                console.log('c.p', c.p);
-            }
-        }
         const bunch: Bead = u.createCommonBunch(p);
         // Set types.
         bunch.kind = 'beforeGroup';
@@ -1580,9 +1562,14 @@ export class Undoer {
     public redoDeleteNode(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
+
+        const newP: Position = u.newP && u.newP.v ? u.newP.copy() : c.p.copy();
+
         c.selectPosition(u.p!);
         c.deleteOutline();
-        c.selectPosition(u.newP);
+        if (c.positionExists(newP)) {  // PR #4991.
+            c.p = newP;
+        }
     }
     //@+node:felix.20211026230613.92: *4* u.redoDemote
     public redoDemote(): void {
@@ -1618,15 +1605,6 @@ export class Undoer {
         // Remember these values.
         const newSel: number[] = u.newSel;
 
-        const p: Position = u.p!.copy();  // u.p must exist now.
-        // #4373: u.newP might not exist now.
-        let newP: Position;
-        if (u.newP && u.newP.v) {
-            newP = u.newP.copy();
-        } else {
-            newP = c.p.copy();
-        }
-
         u.groupCount += 1;
         const bunch: Bead = u.beads[u.bead + 1];
         let count: number = 0;
@@ -1642,7 +1620,7 @@ export class Undoer {
                     z.redoHelper.bind(u)(); // Properly bound to undoer instead of bunch
                     count += 1;
                 } else {
-                    g.trace(`oops: no redo helper for ${u.undoType} ${p.h}`);
+                    g.trace(`oops: no redo helper for ${u.undoType} ${u.p?.h}`);
                 }
             }
         }
@@ -1651,12 +1629,8 @@ export class Undoer {
         if (!g.unitTesting && u.verboseUndoGroup) {
             g.es('redo', count, 'instances');
         }
-        // Helpers set dirty bits.
-        // Set c.p, independently of helpers.
-        if (g.unitTesting) {
-            g.assert(c.positionExists(newP), newP.toString());
-        }
-        c.selectPosition(newP);
+        // PR #4991: Helpers set dirty bits and c.p. Do not set c.p here!
+
         // Set the selection, independently of helpers.
         if (newSel && newSel.length) {
             let i, j;
@@ -1932,10 +1906,7 @@ export class Undoer {
         const u: Undoer = this;
         const c: Commands = u.c;
         const w: StringTextWrapper = c.frame.body.wrapper;
-        // selectPosition causes recoloring, so don't do this unless needed.
-        if (!c.p.__eq__(u.p!)) {
-            c.selectPosition(u.p!);
-        }
+        // PR #4991: do not change c.p here!
         u.p!.setDirty();
         u.p!.b = u.oldBody;
         u.p!.h = u.oldHead;
@@ -2080,7 +2051,7 @@ export class Undoer {
             u.p!._linkAsRoot();
         }
         u.p!.setDirty();
-        c.selectPosition(u.p!);
+        c.selectPosition(u.p!); // Required.
     }
     //@+node:felix.20211026230613.114: *4* u.undoDemote
     public undoDemote(): void {
@@ -2113,16 +2084,7 @@ export class Undoer {
     public undoGroup(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        // Remember these values.
         const oldSel: number[] = u.oldSel;
-
-        // #4373: u.p might not exist now.
-        let p: Position;
-        if (u.p && u.p.v) {
-            p = u.p.copy();
-        } else {
-            p = c.p.copy();
-        }
 
         u.groupCount += 1;
         const bunch: Bead = u.beads[u.bead];
@@ -2142,7 +2104,7 @@ export class Undoer {
                     z.undoHelper.bind(u)(); // Properly bound to undoer instead of bunch
                     count += 1;
                 } else {
-                    g.trace(`oops: no undo helper for ${u.undoType} ${p.v}`);
+                    g.trace(`oops: no undo helper for ${u.undoType} ${u.p?.v}`);
                 }
             }
         }
@@ -2151,11 +2113,9 @@ export class Undoer {
         if (!g.unitTesting && u.verboseUndoGroup) {
             g.es('undo', count, 'instances');
         }
-        // Helpers set dirty bits.
-        // Set c.p, independently of helpers.
-        c.selectPosition(p);
-        // Restore the selection, independently of helpers.
+        // PR #4991: Helpers set dirty bits and c.p. Do not set c.p here!
         if (oldSel && oldSel.length) {
+            // Restore the selection, independently of helpers.
             let i, j;
             [i, j] = oldSel;
             c.frame.body.wrapper.setSelectionRange(i, j);

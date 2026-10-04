@@ -789,6 +789,171 @@ export class CommanderEditCommands {
         c.redraw(p);
         c.bodyWantsFocus();
     }
+    //@+node:felix.20261003210339.1: *3* c_ec.preferences
+    @commander_command('settings', 'Handle the preferences command.')
+    public preferences(this: Commands): Promise<Commands | undefined> {
+        const c = this;
+        return c.openLeoSettings();
+    }
+    //@+node:felix.20261003210802.1: *3* c_ec.promoteToAtOthers (promote-to-at-others)
+    @commander_command(
+        'promote-to-at-others',
+        'Undoably replace the @others with the properly indented contents of all nodes included by the @others.'
+    )
+    public promoteToAtOthers(this: Commands): void {
+        /*
+            c.p must contain exactly one @others directive.
+            Otherwise this command does nothing.
+
+            Undoably replace the @others with the properly indented contents of all
+            nodes included by the @others.
+        */
+        const c: Commands = this;
+        const p = this.p;
+        const u = this.undoer;
+        const command = 'promote-to-at-others';
+        const w = this.frame.body.wrapper;
+        c.endEditing();
+
+        // Find the @others directive, ignoring the possibility that
+        // strings or comments might contain the match.
+        const at_others_pat = /^(\s*)@others\n/;
+        const matches: [number, RegExpExecArray][] = [];
+        const bodyLines = g.splitLines(p.b);
+
+        for (let i = 0; i < bodyLines.length; i++) {
+            const z = bodyLines[i];
+            const match = at_others_pat.exec(z);
+            if (match) {
+                matches.push([i, match]);
+            }
+        }
+        if (matches.length !== 1) {
+            g.error('c.p must contain exactly one @others directive');
+            return;
+        }
+        const [i, m] = matches[0];
+        const indent = m[1];
+
+        // Find all children that aren't section definitions.
+        const section_def_pat = /^\s*\<\<(.*?)\>\>/;
+        const to_promote = [];
+        for (const child of p.children()) {
+            if (!section_def_pat.test(child.h)) {
+                to_promote.push(child.copy());
+            }
+        }
+        if (to_promote.length === 0) {
+            g.error('No promotable children');
+            return;
+        }
+
+        const ins = p.b.indexOf('@others') - indent.length;
+
+        // Undoably update p.b
+        u.beforeChangeGroup(p, command);
+        const lines = g.splitLines(p.b);
+        const result = lines.slice(0, i);
+        for (const child of to_promote) {
+            for (const z of g.splitLines(child.b)) {
+                result.push(`${indent}${z}`);
+            }
+            result.push(child.b.endsWith('\n') ? '\n' : '\n\n');
+        }
+        result.push(...lines.slice(i + 1));
+        const bunch = u.beforeChangeBody(p);
+        p.b = result.join('');
+        u.afterChangeBody(p, command, bunch);
+
+        // Undoably delete all the promoted nodes.
+        for (const child of [...to_promote].reverse()) {
+            const bunch2 = u.beforeDeleteNode(child);
+            child.doDelete();
+            u.afterDeleteNode(p, command, bunch2);
+        }
+        u.afterChangeGroup(p, command);
+
+        // Redraw.
+        c.redraw(p);
+        w.setInsertPoint(ins);
+
+    }
+    //@+node:felix.20261003210833.1: *3* c_ec.promoteSectionDefinition (promote-section-definition)
+    @commander_command(
+        'promote-section-def',
+        'Undoably promote c.p.b into the nearest ancestor node containing the section ref.'
+    )
+    public promoteSectionDefinition(this: Commands): void {
+        /*
+            c.p must be a section definition node and an ancestor node must contain
+            exactly one section reference.
+            Otherwise, this command does nothing.
+
+            Undoably promote c.p.b into the nearest ancestor node containing the section ref.
+        */
+        const c: Commands = this;
+        const p = this.p;
+        const u = this.undoer;
+        const command = 'promote-section-def';
+        const w = this.frame.body.wrapper;
+        c.endEditing();
+        // Find the section ref, ignoring the possibility that
+        // strings or comments might contain the match.
+        const section_def_pat = /^(\s)*\<\<(.*?)\>\>/;
+        const match = section_def_pat.exec(p.h);
+        if (!match) {
+            g.error('c.p must be a section definition node');
+            return;
+        }
+        const matches: [number, RegExpExecArray, Position][] = [];
+        const section_name = match[2].trim();
+        const [rb, lb] = ['>>', '<<'];
+        const section_ref_pat = new RegExp(`^(\\s*)${lb}\\s*(${section_name})\\s*${rb}`);
+        for (const parent of p.parents()) {
+            const lines = g.splitLines(parent.b);
+            for (let i = 0; i < lines.length; i++) {
+                const z = lines[i];
+                const m = section_ref_pat.exec(z);
+                if (m) {
+                    matches.push([i, m, parent.copy()]);
+                }
+            }
+            if (matches.length) {
+                break;
+            }
+        }
+        if (matches.length !== 1) {
+            g.error(`No unique ref to ${lb} ${section_name} ${rb}`);
+            return;
+        }
+
+        // Compute the old insert point in the parent.
+        const [i, m, parent] = matches[0];
+        const indent = m[1];
+        const ins = parent.b.indexOf(m[0]);
+
+        // Replace the section ref in parent.b with p.b, properly indented.
+        u.beforeChangeGroup(parent, command);
+        const lines = g.splitLines(parent.b);
+        const result = lines.slice(0, i);
+        result.push(...g.splitLines(p.b).map(z => `${indent}${z}`));
+        result.push(...lines.slice(i + 1));
+        result.push(lines[lines.length - 1].endsWith('\n') ? '\n' : '\n\n');
+        const bunch = u.beforeChangeBody(parent);
+        parent.b = result.join('');
+        u.afterChangeBody(parent, command, bunch);
+
+        // Delete the definition node.
+        const bunch2 = u.beforeDeleteNode(p);
+        p.doDelete();
+        u.afterDeleteNode(p, command, bunch2);
+        u.afterChangeGroup(parent, command);
+
+        // Redraw.
+        c.redraw(parent);
+        w.setInsertPoint(ins);
+
+    }
     //@+node:felix.20240616233556.1: *3* c_ec.reformatBody
     @commander_command('reformat-body', 'Reformat all paragraphs in the body.')
     public reformatBody(this: Commands): void {
