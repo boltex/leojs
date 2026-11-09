@@ -1082,7 +1082,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 }
 
 </t>
-<t tx="felix.20201208214250.2">test</t>
+<t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1" _mod_time="46313737373335313038382e3835320a2e">@language md
 @tabwidth -4
 # ![Leo Editor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline

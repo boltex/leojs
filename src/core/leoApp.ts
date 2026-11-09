@@ -2939,7 +2939,6 @@ export class LoadManager {
 
         g.app.gui.finishStartup();
 
-
         if (!ok) {
             // --screen-shot causes an immediate exit.
             if (g.app.debug.includes('shutdown') || g.app.debug.includes('startup')) {
