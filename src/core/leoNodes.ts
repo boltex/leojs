@@ -1673,7 +1673,7 @@ export class Position {
      */
     public _parentVnode(): VNode {
         const p: Position = this;
-        const c = p.v.context
+        const c = p.v.context;
         if (!p.v || p.v === c.hiddenRootNode) {
             return c.hiddenRootNode;
         }

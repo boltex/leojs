@@ -3474,7 +3474,7 @@ export class LoadManager {
         // New in Leo 4.6: provide an official way for very late initialization.
         // c.frame.tree.initAfterLoad();
         // c.initAfterLoad();
-        lm.createMenu(c, c.fileName())
+        lm.createMenu(c, c.fileName());
 
         lm.globalSettingsDict.delete('menus');
 

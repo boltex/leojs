@@ -4001,8 +4001,8 @@ export class AtFile {
         }
         for (const p of root.subtree(false)) {
             if (!p.v.isVisited()) {
-                at.writeError("Orphan node:  " + p.h)
-                g.es_print_unique_message(message)
+                at.writeError("Orphan node:  " + p.h);
+                g.es_print_unique_message(message);
                 if (p.hasParent()) {
                     g.blue("parent node:", p.parent().h);
 

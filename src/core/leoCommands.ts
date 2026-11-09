@@ -4407,7 +4407,7 @@ export class Commands {
      */
     public putHelpFor(s: string, short_title = ''): void {
         const c = this;
-        g.app.gui.put_help(c, s, short_title);
+        void g.app.gui.put_help(c, s, short_title);
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
     /**
