@@ -4693,8 +4693,5 @@
     "showdown": "^2.1.0",
     "stream": "^0.0.2",
     "typescript": "~5.9.0"
-  },
-  "gitCommit": "60e6249",
-  "gitBranch": "new-undo-system",
-  "gitDate": "2026-10-04 00:52:53 -0400"
+  }
 }

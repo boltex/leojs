@@ -4884,7 +4884,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313739343138323936372e3036350a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313739343138393231372e3834340a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -4943,10 +4943,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "60e6249",
-  "gitBranch": "new-undo-system",
-  "gitDate": "2026-10-04 00:52:53 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
