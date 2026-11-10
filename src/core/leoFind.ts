@@ -1665,7 +1665,7 @@ export class LeoFind {
             new_p = found_p;
             u.afterInsertNode(found_p, undoType, undoData);
         } else {
-            new_p = c.p
+            new_p = c.p;
         }
         // suboutline-only is a one-shot for batch commands.
         this.root = undefined;

@@ -1523,7 +1523,7 @@ export class LeoApp {
 
         if (!finish_quit) {
             // NOT FINISH_QUIT SO SAVE NEW SESSION WITH THIS FILE REMOVED FROM SESSION LIST!
-            await g.app.saveSession();
+            g.app.saveSession();
         }
 
         if (g.app.windowList.length) {
@@ -1638,12 +1638,12 @@ export class LeoApp {
     /**
      * Save session data depending on command-line arguments.
      */
-    public async saveSession(): Promise<void> {
+    public saveSession(): void {
 
         if (this.sessionManager && (
             this.loaded_session || this.always_write_session_data
         )) {
-            await this.sessionManager.save_snapshot();
+            this.sessionManager.save_snapshot();
         }
 
     }
@@ -2939,7 +2939,6 @@ export class LoadManager {
 
         g.app.gui.finishStartup();
 
-
         if (!ok) {
             // --screen-shot causes an immediate exit.
             if (g.app.debug.includes('shutdown') || g.app.debug.includes('startup')) {
@@ -3474,7 +3473,7 @@ export class LoadManager {
         // New in Leo 4.6: provide an official way for very late initialization.
         // c.frame.tree.initAfterLoad();
         // c.initAfterLoad();
-        lm.createMenu(c, c.fileName())
+        lm.createMenu(c, c.fileName());
 
         lm.globalSettingsDict.delete('menus');
 
@@ -3687,7 +3686,7 @@ export class LoadManager {
     public async openExternalFile(fn: string, gui?: LeoGui, old_c?: Commands): Promise<Commands | undefined> {
         const lm = this;
 
-        // Disable the log. Not needed in leo-web, but we keep it for consistency with the original code.
+        // Disable the log. Not needed in leojs, but we keep it for consistency with the original code.
         // g.app.setLog(null);
         // g.app.lockLog();
         const previousSettings = await lm.getPreviousSettings('');
@@ -3703,7 +3702,7 @@ export class LoadManager {
         g.doHook("open1", { old_c, c, new_c: c, fileName: null });
         const frame = c.frame;
 
-        // Skip those few lines in leo-web.
+        // Skip those few lines in leojs.
         // frame.setInitialWindowGeometry();
         // frame.deiconify();
         // frame.lift();
@@ -3784,6 +3783,9 @@ export class LoadManager {
         if (is_leo && exists) {
             c = await this.openExistingLeoFile(file_name, gui, old_c);
             if (c) {
+                if (!skipSaveSession) {
+                    g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.                    
+                }
                 return c;
             }
         }
@@ -3791,7 +3793,7 @@ export class LoadManager {
             c = await this.openExternalFile(file_name, gui, old_c);
             if (c) {
                 if (!skipSaveSession) {
-                    await g.app.saveSession(); // IN LEO-WEB: Save sessions here to skip saving session on program exit.
+                    g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.                    
                 }
                 return c;
             }

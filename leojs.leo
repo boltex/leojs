@@ -644,7 +644,216 @@
 <v t="felix.20230427003032.1"><vh>@file src/core/leoRst.ts</vh></v>
 <v t="felix.20231003002131.1"><vh>@file src/core/leoSessions.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
+<v t="felix.20261108133141.1"><vh>@@file src/core/leoUndoOld.ts</vh>
+<v t="felix.20211026230613.2"><vh>&lt;&lt; How Leo implements unlimited undo &gt;&gt;</vh></v>
+<v t="felix.20220104010834.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
+<v t="felix.20211028004540.1"><vh>Interfaces</vh></v>
+<v t="felix.20211026230613.3"><vh>u.cmd (decorator)</vh></v>
+<v t="felix.20211026230613.4"><vh>class Undoer</vh>
+<v t="felix.20211026230613.5"><vh>u.Birth</vh>
+<v t="felix.20211026230613.6"><vh>u.__init__</vh></v>
+<v t="felix.20211026230613.7"><vh>u.reloadSettings</vh></v>
+</v>
+<v t="felix.20211026230613.8"><vh>u.Internal helpers</vh>
+<v t="felix.20211026230613.9"><vh>u.clearOptionalIvars</vh></v>
+<v t="felix.20211026230613.10"><vh>u.cutStack</vh></v>
+<v t="felix.20211026230613.11"><vh>u.dumpBead</vh></v>
+<v t="felix.20211026230613.12"><vh>u.getBead</vh></v>
+<v t="felix.20211026230613.13"><vh>u.peekBead</vh></v>
+<v t="felix.20211026230613.14"><vh>u.pushBead</vh></v>
+<v t="felix.20211026230613.15"><vh>u.redoMenuName, undoMenuName</vh></v>
+<v t="felix.20211026230613.16"><vh>u.setIvarsFromBunch</vh></v>
+<v t="felix.20211026230613.17"><vh>u.setRedoType</vh></v>
+<v t="felix.20211026230613.18"><vh>u.setUndoType</vh></v>
+<v t="felix.20211026230613.19"><vh>u.setUndoTypes</vh></v>
+<v t="felix.20211026230613.20"><vh>u.restoreTree &amp; helpers</vh>
+<v t="felix.20211026230613.21"><vh>u.restoreVnodeUndoInfo</vh></v>
+<v t="felix.20211026230613.22"><vh>u.restoreTnodeUndoInfo</vh></v>
+</v>
+<v t="felix.20211026230613.23"><vh>u.saveTree &amp; helpers</vh>
+<v t="felix.20211026230613.24"><vh>&lt;&lt; about u.saveTree &gt;&gt;</vh></v>
+<v t="felix.20211026230613.25"><vh>u.createVnodeUndoInfo</vh></v>
+</v>
+<v t="felix.20211026230613.27"><vh>u.trace</vh></v>
+<v t="felix.20211026230613.28"><vh>u.updateMarks</vh></v>
+</v>
+<v t="felix.20211026230613.29"><vh>u.Externally visible entries</vh>
+<v t="felix.20211026230613.30"><vh>u.afterX...</vh>
+<v t="felix.20211026230613.31"><vh>u.afterChangeBody</vh></v>
+<v t="felix.20211026230613.32"><vh>u.afterChangeGroup</vh></v>
+<v t="felix.20211026230613.33"><vh>u.afterChangeNodeContents</vh></v>
+<v t="felix.20211026230613.34"><vh>u.afterChangeHeadline</vh></v>
+<v t="felix.20230331230459.1"><vh>u.afterChangeMultiHeadline</vh></v>
+<v t="felix.20211026230613.35"><vh>u.afterChangeTree</vh></v>
+<v t="felix.20231227215945.1"><vh>u.afterChangeUA</vh></v>
+<v t="felix.20231123235346.1"><vh>u.afterClearRecentFiles</vh></v>
+<v t="felix.20211026230613.37"><vh>u.afterCloneMarkedNodes</vh></v>
+<v t="felix.20211026230613.38"><vh>u.afterCopyMarkedNodes</vh></v>
+<v t="felix.20211026230613.39"><vh>u.afterCloneNode</vh></v>
+<v t="felix.20211026230613.41"><vh>u.afterDeleteNode</vh></v>
+<v t="felix.20211026230613.42"><vh>u.afterDeleteMarkedNodes</vh></v>
+<v t="felix.20211026230613.43"><vh>u.afterDemote</vh></v>
+<v t="felix.20211026230613.45"><vh>u.afterInsertNode</vh></v>
+<v t="felix.20211026230613.46"><vh>u.afterMark</vh></v>
+<v t="felix.20211026230613.47"><vh>u.afterMoveNode</vh></v>
+<v t="felix.20211026230613.48"><vh>u.afterPromote</vh></v>
+<v t="felix.20211026230613.49"><vh>u.afterSort</vh></v>
+</v>
+<v t="felix.20211026230613.50"><vh>u.beforeX...</vh>
+<v t="felix.20211026230613.51"><vh>u.beforeChangeBody</vh></v>
+<v t="felix.20211026230613.52"><vh>u.beforeChangeGroup</vh></v>
+<v t="felix.20211026230613.53"><vh>u.beforeChangeHeadline</vh></v>
+<v t="felix.20230331230548.1"><vh>u.beforeChangeMultiHeadline</vh></v>
+<v t="felix.20211026230613.54"><vh>u.beforeChangeNodeContents</vh></v>
+<v t="felix.20211026230613.55"><vh>u.beforeChangeTree</vh></v>
+<v t="felix.20231227220022.1"><vh>u.beforeChangeUA</vh></v>
+<v t="felix.20231123235410.1"><vh>u.beforeClearRecentFiles</vh></v>
+<v t="felix.20211026230613.57"><vh>u.beforeCloneNode</vh></v>
+<v t="felix.20211026230613.58"><vh>u.beforeDeleteNode</vh></v>
+<v t="felix.20211026230613.59"><vh>u.beforeInsertNode</vh></v>
+<v t="felix.20211026230613.60"><vh>u.beforeMark</vh></v>
+<v t="felix.20211026230613.61"><vh>u.beforeMoveNode</vh></v>
+<v t="felix.20211026230613.62"><vh>u.beforeSort</vh></v>
+<v t="felix.20211026230613.63"><vh>u.createCommonBunch</vh></v>
+</v>
+<v t="felix.20211026230613.64"><vh>u.canRedo &amp; canUndo</vh></v>
+<v t="felix.20230717215351.1"><vh>u.clearAndWarn</vh></v>
+<v t="felix.20211026230613.65"><vh>u.clearUndoState</vh></v>
+<v t="felix.20211026230613.76"><vh>u.enableMenuItems</vh></v>
+<v t="felix.20211026230613.77"><vh>u.onSelect &amp; helpers</vh>
+<v t="felix.20211026230613.78"><vh>u.putIvarsToVnode</vh></v>
+<v t="felix.20211026230613.79"><vh>u.setIvarsFromVnode</vh></v>
+</v>
+<v t="felix.20211026230613.80"><vh>u.updateAfterTyping</vh></v>
+<v t="felix.20230730204242.1"><vh>u.restoreFromCopiedTree</vh>
+<v t="felix.20230730204242.2"><vh>&lt;&lt; docstring: restoreFromCopiedTree &gt;&gt;</vh></v>
+</v>
+</v>
+<v t="felix.20211026230613.81"><vh>u.redo</vh></v>
+<v t="felix.20211026230613.82"><vh>u.redo helpers</vh>
+<v t="felix.20211026230613.83"><vh> u.reloadHelper (do nothing)</vh></v>
+<v t="felix.20211026230613.84"><vh>u.redoChangeBody</vh></v>
+<v t="felix.20211026230613.85"><vh>u.redoChangeHeadline</vh></v>
+<v t="felix.20230331230645.1"><vh>u.redoChangeMultiHeadline</vh></v>
+<v t="felix.20231227220055.1"><vh>u.redoChangeUA</vh></v>
+<v t="felix.20211026230613.87"><vh>u.redoCloneMarkedNodes</vh></v>
+<v t="felix.20211026230613.88"><vh>u.redoCopyMarkedNodes</vh></v>
+<v t="felix.20231123235536.1"><vh>u.redoClearRecentFiles</vh></v>
+<v t="felix.20211026230613.89"><vh>u.redoCloneNode</vh></v>
+<v t="felix.20211026230613.90"><vh>u.redoDeleteMarkedNodes</vh></v>
+<v t="felix.20211026230613.91"><vh>u.redoDeleteNode</vh></v>
+<v t="felix.20211026230613.92"><vh>u.redoDemote</vh></v>
+<v t="felix.20211026230613.93"><vh>u.redoGroup</vh></v>
+<v t="felix.20211026230613.94"><vh>u.redoHoistNode &amp; redoDehoistNode</vh></v>
+<v t="felix.20211026230613.95"><vh>u.redoInsertNode</vh></v>
+<v t="felix.20211026230613.96"><vh>u.redoMark</vh></v>
+<v t="felix.20211026230613.97"><vh>u.redoMove</vh></v>
+<v t="felix.20211026230613.98"><vh>u.redoNodeContents</vh></v>
+<v t="felix.20230717220137.1"><vh>u.redoParseBody</vh></v>
+<v t="felix.20211026230613.99"><vh>u.redoPromote</vh></v>
+<v t="felix.20211026230613.100"><vh>u.redoSort</vh></v>
+<v t="felix.20211026230613.101"><vh>u.redoTree</vh></v>
+</v>
+<v t="felix.20211026230613.103"><vh>u.undo</vh></v>
+<v t="felix.20211026230613.104"><vh>u.undo helpers</vh>
+<v t="felix.20211026230613.105"><vh> u.undoHelper</vh></v>
+<v t="felix.20211026230613.106"><vh>u.undoChangeBody</vh></v>
+<v t="felix.20211026230613.107"><vh>u.undoChangeHeadline</vh></v>
+<v t="felix.20230331230746.1"><vh>u.undoChangeMultiHeadline</vh></v>
+<v t="felix.20231227220123.1"><vh>u.undoChangeUA</vh></v>
+<v t="felix.20231123235503.1"><vh>u.undoClearRecentFiles</vh></v>
+<v t="felix.20211026230613.109"><vh>u.undoCloneMarkedNodes</vh></v>
+<v t="felix.20211026230613.110"><vh>u.undoCloneNode</vh></v>
+<v t="felix.20211026230613.111"><vh>u.undoCopyMarkedNodes</vh></v>
+<v t="felix.20211026230613.112"><vh>u.undoDeleteMarkedNodes</vh></v>
+<v t="felix.20211026230613.113"><vh>u.undoDeleteNode</vh></v>
+<v t="felix.20211026230613.114"><vh>u.undoDemote</vh></v>
+<v t="felix.20211026230613.115"><vh>u.undoGroup</vh></v>
+<v t="felix.20211026230613.116"><vh>u.undoHoistNode &amp; undoDehoistNode</vh></v>
+<v t="felix.20211026230613.117"><vh>u.undoInsertNode</vh></v>
+<v t="felix.20211026230613.118"><vh>u.undoMark</vh></v>
+<v t="felix.20211026230613.119"><vh>u.undoMove</vh></v>
+<v t="felix.20211026230613.120"><vh>u.undoNodeContents</vh></v>
+<v t="felix.20230717220329.1"><vh>u.undoParseBody</vh></v>
+<v t="felix.20211026230613.121"><vh>u.undoPromote</vh></v>
+<v t="felix.20211026230613.122"><vh>u.undoRedoText</vh>
+<v t="felix.20211026230613.123"><vh>&lt;&lt; Compute the result using p's body text &gt;&gt;</vh></v>
+</v>
+<v t="felix.20211026230613.124"><vh>u.undoRedoTree</vh></v>
+<v t="felix.20211026230613.125"><vh>u.undoSort</vh></v>
+<v t="felix.20211026230613.126"><vh>u.undoTree</vh></v>
+</v>
+<v t="felix.20211026230613.128"><vh>u.update_status</vh></v>
+</v>
+</v>
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
+<v t="felix.20261107191026.1"><vh>@@file src/core/leoUndo.py</vh>
+<v t="felix.20261107191026.2"><vh>&lt;&lt; leoUndo imports &amp; annotations &gt;&gt;</vh></v>
+<v t="felix.20261107191026.3"><vh>class UndoBead</vh>
+<v t="felix.20261107191026.4"><vh>&lt;&lt; UndoBead: slots &gt;&gt;</vh></v>
+<v t="felix.20261107191026.5"><vh>UndoBead.__init__</vh></v>
+<v t="felix.20261107191026.6"><vh>undoBead.add_redraw_finishers</vh></v>
+<v t="felix.20261107191026.7"><vh>undoBead.add_recolor</vh></v>
+<v t="felix.20261107191026.8"><vh>undoBead.add_redraw</vh></v>
+<v t="felix.20261107191026.9"><vh>undoBead.add_redraw_and_edit</vh></v>
+<v t="felix.20261107191026.10"><vh>undoBead.add_redraw_after_head_changed</vh></v>
+<v t="felix.20261107191026.11"><vh>UndoBead.redo</vh></v>
+<v t="felix.20261107191026.12"><vh>UndoBead.add_helpers &amp; add_finishers</vh></v>
+<v t="felix.20261107191026.13"><vh>UndoBead.undo</vh></v>
+</v>
+<v t="felix.20261107191026.22"><vh>class Undoer</vh>
+<v t="felix.20261107191026.23"><vh>&lt;&lt; class Undoer: __slots__ &gt;&gt;</vh></v>
+<v t="felix.20261107191026.24"><vh>u.__init__</vh></v>
+<v t="felix.20261107191026.25"><vh>u: Entries</vh>
+<v t="felix.20261107191026.26"><vh>u.canRedo &amp; canUndo</vh></v>
+<v t="felix.20261107191026.27"><vh>u.clearAndWarn</vh></v>
+<v t="felix.20261107191026.28"><vh>u.clearUndoState</vh></v>
+<v t="felix.20261107191026.29"><vh>u.redo</vh></v>
+<v t="felix.20261107191026.32"><vh>u.undo</vh></v>
+<v t="felix.20261107191026.33"><vh>u: actions</vh>
+<v t="felix.20261107191026.34"><vh>u.clone_node</vh></v>
+<v t="felix.20261107191026.35"><vh>u.delete_node</vh></v>
+<v t="felix.20261107191026.36"><vh>u.insert_node</vh></v>
+<v t="felix.20261107191026.37"><vh>u.set_body</vh></v>
+<v t="felix.20261107191026.38"><vh>u.set_command_name</vh></v>
+</v>
+<v t="felix.20261107191026.39"><vh>u: contexts</vh>
+<v t="felix.20261107191026.40"><vh>u.change_headline</vh></v>
+<v t="felix.20261107191026.41"><vh>u.change_node</vh></v>
+<v t="felix.20261107191026.42"><vh>u.change_outline &amp; helpers</vh>
+<v t="felix.20261107191026.43"><vh>u.capture_outline</vh></v>
+<v t="felix.20261107191026.44"><vh>u.restore_outline</vh></v>
+</v>
+<v t="felix.20261107191026.45"><vh>u.change_recent_files</vh></v>
+<v t="felix.20261107191026.46"><vh>u.move_node</vh></v>
+<v t="felix.20261107191026.47"><vh>u:common context helpers</vh>
+<v t="felix.20261107191026.48"><vh>u.capture_node</vh></v>
+<v t="felix.20261107191026.49"><vh>u.capture_ui</vh></v>
+<v t="felix.20261107191026.50"><vh>u.restore_node</vh></v>
+<v t="felix.20261107191026.51"><vh>u.restore_ui</vh></v>
+</v>
+</v>
+<v t="felix.20261107191026.52"><vh>u: redrawers &amp; finishers</vh>
+<v t="felix.20261107191026.53"><vh>u._redraw</vh></v>
+<v t="felix.20261107191026.54"><vh>u.redraw_after_head_changed</vh></v>
+<v t="felix.20261107191026.55"><vh>u.redraw_and_edit</vh></v>
+</v>
+</v>
+<v t="felix.20261107191026.56"><vh>u: Helpers</vh>
+<v t="felix.20261107191026.57"><vh>u.__enter__ and __exit__</vh></v>
+<v t="felix.20261107191026.58"><vh>u._can_merge</vh></v>
+<v t="felix.20261107191026.59"><vh>u._require_bead</vh></v>
+<v t="felix.20261107191026.60"><vh>u.cutStack</vh></v>
+<v t="felix.20261107191026.61"><vh>u.getBead</vh></v>
+<v t="felix.20261107191026.62"><vh>u.peekBead</vh></v>
+<v t="felix.20261107191026.63"><vh>u.pushBead</vh></v>
+<v t="felix.20261107191026.64"><vh>u.redoMenuName, undoMenuName</vh></v>
+<v t="felix.20261107191026.65"><vh>u.setRedoType</vh></v>
+<v t="felix.20261107191026.66"><vh>u.setUndoType</vh></v>
+<v t="felix.20261107191026.67"><vh>u.setUndoTypes</vh></v>
+</v>
+</v>
+</v>
 <v t="felix.20230924174338.1"><vh>@file src/core/mod_scripting.ts</vh></v>
 <v t="felix.20221019001448.1"><vh>@file src/core/nodeTags.ts</vh></v>
 <v t="felix.20221105221426.1"><vh>@file src/core/quicksearch.ts</vh></v>
@@ -1137,7 +1346,8 @@ See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendi
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1" _mod_time="46313734313734313439342e3437330a2e">import * as vscode from 'vscode';
+<t tx="felix.20201208214322.1" _mod_time="46313739343238313536352e3731310a2e">import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
+import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 
 import * as GitAPI from './git';
@@ -3479,7 +3689,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313738343737353438372e3738330a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313739343238313538352e3330350a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4674,7 +4884,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313739313038393334302e3734360a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313739343238333536312e3033350a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -6890,16 +7100,16 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "@types/lodash": "^4.14.177",
 "@types/md5": "^2.3.1",
 "@types/mocha": "^9.1.0",
-"@types/node": "16.x",
+"@types/node": "18.x",
 "@types/pako": "^2.0.0",
 "@types/safe-json-stringify": "^1.1.2",
 "@types/showdown": "^2.0.6",
 "@types/sql.js": "^1.4.4",
 "@types/uuid": "^9.0.7",
 "@types/vscode": "^1.86.0",
-"@types/webpack-env": "^1.16.3",
-"@typescript-eslint/eslint-plugin": "^5.16.0",
-"@typescript-eslint/parser": "^5.16.0",
+"@types/webpack-env": "^1.18.8",
+"@typescript-eslint/eslint-plugin": "^8.0.0",
+"@typescript-eslint/parser": "^8.0.0",
 "@vscode/test-electron": "^2.0.3",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
@@ -6936,7 +7146,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 "process": "^0.11.10",
 "showdown": "^2.1.0",
 "stream": "^0.0.2",
-"typescript": "^4.9.5"
+"typescript": "~5.9.0"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showSettingsPage",
@@ -8044,7 +8254,7 @@ public incTreeId(): void {
   }
 },
 </t>
-<t tx="felix.20211007213344.1" _mod_time="46313737373335313038382e3838380a2e">import * as vscode from "vscode";
+<t tx="felix.20211007213344.1" _mod_time="46313739343237323034342e3932310a2e">import * as vscode from "vscode";
 import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8130,8 +8340,10 @@ public buildFromSavedSettings(): void {
         // * Currently setting config, wait until its done all, and this will be called automatically
         return;
     } else {
+
         // this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
         // this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+
         this.sessionPerWorkspace = GET(NAME).get(NAMES.SESSION_PER_WORKSPACE, DEFAULTS.SESSION_PER_WORKSPACE);
         this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
         this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
@@ -8159,17 +8371,6 @@ public buildFromSavedSettings(): void {
         this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
         this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
         this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
-
-        // this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
-        // this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
-        // this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
-        // this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
-        // this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
-        // this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
-        // this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
-        // this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
-        // this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
-        // this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
 
         this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
         this.leoID = GET(NAME).get(NAMES.LEO_ID, DEFAULTS.LEO_ID);
@@ -8216,17 +8417,6 @@ export class Config implements ConfigMembers {
     public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
     public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
 
-    // public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
-    // public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
-    // public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
-    // public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
-    // public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
-    // public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
-    // public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
-    // public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
-    // public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
-    // public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
-
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
@@ -8256,8 +8446,10 @@ export class Config implements ConfigMembers {
  */
 public getConfig(): ConfigMembers {
     return {
+
         // checkForChangeExternalFiles: this.checkForChangeExternalFiles,
         // defaultReloadIgnore: this.defaultReloadIgnore,
+
         sessionPerWorkspace: this.sessionPerWorkspace, // Used as Context Flag
         leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
         treeKeepFocus: this.treeKeepFocus,
@@ -8284,17 +8476,6 @@ public getConfig(): ConfigMembers {
         showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
         showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
         showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
-
-        // showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
-        // showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
-        // showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
-        // showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
-        // showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
-        // showImportOnBody: this.showImportOnBody, // Used as Context Flag
-        // showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
-        // showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
-        // showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
-        // showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
         invertNodeContrast: this.invertNodeContrast,
         leoID: this.leoID
@@ -8551,7 +8732,7 @@ public static FIND_INPUTS_IDS = {
 };
 
 </t>
-<t tx="felix.20211010192923.1" _mod_time="46313732313539313833332e3138380a2e">import * as vscode from "vscode";
+<t tx="felix.20211010192923.1" _mod_time="46313739343136393639352e3235380a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import * as path from 'path';
 import { BodyTimeInfo } from "./types";
@@ -8658,7 +8839,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _onDidChangeFileEmitter = new vscode.EventEmitter&lt;vscode.FileChangeEvent[]&gt;();
     readonly onDidChangeFile: vscode.Event&lt;vscode.FileChangeEvent[]&gt; = this._onDidChangeFileEmitter.event;
     private _bufferedEvents: vscode.FileChangeEvent[] = [];
-    private _fireSoonHandle?: NodeJS.Timer;
+    private _fireSoonHandle?: NodeJS.Timeout;
 
     constructor(private _leoUi: LeoUI) { }
 
@@ -8847,6 +9028,2173 @@ public getTextFromClipboard(): string {
 
 </t>
 <t tx="felix.20211024012536.1"></t>
+<t tx="felix.20211026230613.10">public cutStack(): void {
+    const u: Undoer = this;
+    const n: number = u.max_undo_stack_size;
+    if (u.bead &gt;= n &amp;&amp; n &gt; 0 &amp;&amp; !g.unitTesting) {
+        // Do nothing if we are in the middle of creating a group.
+        let i = u.beads.length - 1;
+        while (i &gt;= 0) {
+            const bunch: Bead = u.beads[i];
+            if (bunch.kind &amp;&amp; bunch.kind === 'beforeGroup') {
+                return;
+            }
+            i -= 1;
+        }
+        // This work regardless of how many items appear after bead n.
+        // g.trace('Cutting undo stack to %d entries' % (n))
+        u.beads = u.beads.slice(-n);
+        u.bead = n - 1;
+    }
+
+    if (g.app.debug.includes('undo') &amp;&amp; g.app.debug.includes('verbose')) {
+        console.log(`u.cutStack: ${u.beads.length}`);
+    }
+}
+</t>
+<t tx="felix.20211026230613.100">public redoSort(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const p = u.p!;
+    if (u.sortChildren) {
+        p.v.children = [...u.newChildren];
+    } else {
+        const parent_v = p._parentVnode();
+        parent_v.children = [...u.newChildren];
+        // Only the child index of new position changes!
+        for (var _i = 0; _i &lt; parent_v.children.length; _i++) {
+            const v = parent_v.children[_i];
+            if (v.gnx === p.v.gnx) {
+                p._childIndex = _i;
+                break;
+            }
+        }
+    }
+    p.setAllAncestorAtFileNodesDirty();
+    c.p = p;
+}
+</t>
+<t tx="felix.20211026230613.101">/**
+ * Redo replacement of an entire tree.
+ */
+// public redoTree(): void {
+//     const u: Undoer = this;
+//     const c: Commands = u.c;
+//     u.p = this.undoRedoTree(u.p!, u.oldTree, u.newTree);
+//     u.p!.setDirty();
+//     c.selectPosition(u.p!); // Does full recolor.
+//     if (u.newSel &amp;&amp; u.newSel.length) {
+//         let i, j;
+//         [i, j] = u.newSel;
+//         c.frame.body.wrapper.setSelectionRange(i, j);
+//     }
+// }
+</t>
+<t tx="felix.20211026230613.103">@cmd('undo', 'Undo the operation described by the undo parameters.')
+public undo(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    if (!c.p || !c.p.__bool__()) {
+        g.trace('no current position');
+        return;
+    }
+    // End editing *before* getting state.
+    c.endEditing();
+
+    if (u.per_node_undo) {
+        // 2011/05/19
+        u.setIvarsFromVnode(c.p);
+    }
+    if (!u.canUndo()) {
+        return;
+    }
+    if (!u.getBead(u.bead)) {
+        return;
+    }
+
+    // Init status.
+    u.undoing = true;
+    u.groupCount = 0;
+    //
+    // Dispatch.
+    if (u.undoHelper) {
+        u.undoHelper();
+    } else {
+        g.trace(`no undo helper for ${u.kind} ${u.undoType}`);
+    }
+    //
+    // Finish.
+    c.checkOutline();
+    u.update_status();
+    u.undoing = false;
+    u.bead -= 1;
+    u.setUndoTypes();
+}
+</t>
+<t tx="felix.20211026230613.104"></t>
+<t tx="felix.20211026230613.105">/**
+ * The default do-nothing undo helper.
+ */
+public undoHelper(): void {
+    // pass
+}
+</t>
+<t tx="felix.20211026230613.106">/**
+ * Undo all changes to the contents of a node,
+ * including headline and body text, and marked bits.
+ */
+public undoChangeBody(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    // PR #4991: do not change c.p here!
+    u.p!.setDirty();
+    u.p!.b = u.oldBody;
+    u.p!.h = u.oldHead;
+    // This is required.  Otherwise c.redraw will revert the change!
+    c.frame.tree.setHeadline(u.p!, u.oldHead);
+
+    if (u.oldMarked) {
+        u.p!.setMarked();
+    } else {
+        u.p!.clearMarked();
+    }
+    if (w &amp;&amp; u.groupCount === 0) {
+        w.setAllText &amp;&amp; w.setAllText(u.oldBody);
+        let i, j;
+        [i, j] = u.oldSel;
+        w.setSelectionRange &amp;&amp; w.setSelectionRange(i, j, u.oldIns);
+        w.setYScrollPosition &amp;&amp; w.setYScrollPosition(u.oldYScroll);
+        //c.frame.body.recolor(u.p);
+    }
+    u.updateMarks('old');
+}
+</t>
+<t tx="felix.20211026230613.107">/**
+ * Undo a change to a node's headline.
+ */
+public undoChangeHeadline(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    // selectPosition causes recoloring, so don't do this unless needed.
+    if (!c.p.__eq__(u.p!)) {
+        c.selectPosition(u.p!);
+    }
+    u.p!.setDirty();
+    // c.frame.body.recolor(u.p);
+    u.p!.initHeadString(u.oldHead);
+
+    // This is required.  Otherwise c.redraw will revert the change!
+    c.frame.tree.setHeadline(u.p!, u.oldHead);
+}
+</t>
+<t tx="felix.20211026230613.109">public undoCloneMarkedNodes(): void {
+    const u: Undoer = this;
+    const next: Position = u.p!.next();
+    g.assert(next.h === 'Clones of marked nodes', next.h);
+    next.doDelete();
+    u.p!.setAllAncestorAtFileNodesDirty();
+    u.c.selectPosition(u.p!);
+}
+</t>
+<t tx="felix.20211026230613.11">public dumpBead(n: number): string {
+    const u: Undoer = this;
+
+    if (n &lt; 0 || n &gt;= u.beads.length) {
+        return 'no bead: n = ' + n;
+    }
+    // bunch = u.beads[n]
+    const result: string[] = [];
+    result.push('-'.repeat(10));
+    result.push(`u.beads.length: ${u.beads.length}, n: ${n}`);
+
+    for (let ivar of ['kind', 'newP', 'newN', 'p', 'oldN', 'undoHelper']) {
+        // @ts-expect-error
+        result.push(`${ivar} = ${u[ivar]}`);
+    }
+    return result.join('\n');
+}
+
+public dumpTopBead(): string {
+    const u: Undoer = this;
+    const n: number = u.beads.length;
+
+    if (n &gt; 0) {
+        return this.dumpBead(n - 1);
+    }
+    return '&lt;no top bead&gt;';
+}
+</t>
+<t tx="felix.20211026230613.110">public undoCloneNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const cc: ChapterController = c.chapterController;
+    if (cc) {
+        cc.selectChapterByName('main');
+    }
+    c.selectPosition(u.newP);
+    c.deleteOutline();
+    u.p!.setDirty();
+    c.selectPosition(u.p!);
+}
+</t>
+<t tx="felix.20211026230613.111">public undoCopyMarkedNodes(): void {
+    const u: Undoer = this;
+    const next: Position = u.p!.next();
+    g.assert(next.h === 'Copies of marked nodes', next.h);
+    next.doDelete();
+    u.p!.setAllAncestorAtFileNodesDirty();
+    u.c.selectPosition(u.p!);
+}
+</t>
+<t tx="felix.20211026230613.112">public undoDeleteMarkedNodes(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    // Undo the deletes in reverse order
+    const aList: Position[] = [...u.deleteMarkedNodesData];
+    aList.reverse();
+    let parent_v: VNode;
+    for (let p of aList) {
+        if (p.stack.length) {
+            parent_v = p.stack[p.stack.length - 1][0];
+        } else {
+            parent_v = c.hiddenRootNode;
+        }
+        p.v._addLink(p._childIndex, parent_v);
+        p.v.setDirty();
+    }
+    u.p!.setAllAncestorAtFileNodesDirty();
+    c.selectPosition(u.p!);
+}
+</t>
+<t tx="felix.20211026230613.113">public undoDeleteNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+
+    if (u.oldBack.__bool__()) {
+        u.p!._linkAfter(u.oldBack);
+    } else if (u.oldParent.__bool__()) {
+        u.p!._linkAsNthChild(u.oldParent, 0);
+    } else {
+        u.p!._linkAsRoot();
+    }
+    u.p!.setDirty();
+    c.selectPosition(u.p!); // Required.
+}
+</t>
+<t tx="felix.20211026230613.114">public undoDemote(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const parent_v: VNode = u.p!._parentVnode();
+    let n: number = u.followingSibs.length;
+    // Remove the demoted nodes from p's children.
+    u.p!.v.children = u.p!.v.children.slice(0, -n);
+    // Add the demoted nodes to the parent's children.
+    parent_v.children.push(...u.followingSibs);
+    // Adjust the parent links.
+    // There is no need to adjust descendant links.
+    parent_v.setDirty();
+    for (let sib of u.followingSibs) {
+        //sib.parents.remove(u.p!.v);
+        const i_upv: number = sib.parents.indexOf(u.p!.v);
+        if (i_upv &gt; -1) {
+            sib.parents.splice(i_upv, 1);
+        }
+        sib.parents.push(parent_v);
+    }
+    u.p!.setAllAncestorAtFileNodesDirty();
+    c.p = u.p!;
+}
+</t>
+<t tx="felix.20211026230613.115">/**
+ * Process beads until the matching 'beforeGroup' bead is seen.
+ */
+public undoGroup(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const oldSel: number[] = u.oldSel;
+
+    u.groupCount += 1;
+    const bunch: Bead = u.beads[u.bead];
+    let count: number = 0;
+    if (!bunch['items']) {
+        g.trace(
+            `oops: expecting bunch.items. got bunch.kind = ${bunch.kind}`
+        );
+        g.trace(bunch);
+    } else {
+        // Important bug fix: 9/8/06: reverse the items first.
+        const reversedItems: any[] = [...bunch.items];
+        reversedItems.reverse();
+        for (let z of reversedItems) {
+            u.setIvarsFromBunch(z);
+            if (z.undoHelper) {
+                z.undoHelper.bind(u)(); // Properly bound to undoer instead of bunch
+                count += 1;
+            } else {
+                g.trace(`oops: no undo helper for ${u.undoType} ${u.p?.v}`);
+            }
+        }
+    }
+    u.groupCount -= 1;
+    u.updateMarks('old'); // Bug fix: Leo 4.4.6.
+    if (!g.unitTesting &amp;&amp; u.verboseUndoGroup) {
+        g.es('undo', count, 'instances');
+    }
+    // PR #4991: Helpers set dirty bits and c.p. Do not set c.p here!
+    if (oldSel &amp;&amp; oldSel.length) {
+        // Restore the selection, independently of helpers.
+        let i, j;
+        [i, j] = oldSel;
+        c.frame.body.wrapper.setSelectionRange(i, j);
+    }
+}
+</t>
+<t tx="felix.20211026230613.116">public undoHoistNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    u.p!.setDirty();
+    c.selectPosition(u.p!);
+    c.dehoist();
+}
+public undoDehoistNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    u.p!.setDirty();
+    c.selectPosition(u.p!);
+    c.hoist();
+}
+</t>
+<t tx="felix.20211026230613.117">public undoInsertNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const cc: ChapterController = c.chapterController;
+    if (cc) {
+        cc.selectChapterByName('main');
+    }
+    u.newP.setAllAncestorAtFileNodesDirty();
+    c.selectPosition(u.newP);
+    c.deleteOutline();
+    // Bug fix: 2016/03/30.
+    // This always selects the proper new position.
+    // c.selectPosition(u.p)
+    if (u.pasteAsClone) {
+        for (let bunch of u.beforeTree) {
+            const v: VNode = bunch.v;
+            if (u.p!.v === v) {
+                u.p!.b = bunch.body;
+                u.p!.h = bunch.head;
+            } else {
+                v.setBodyString(bunch.body);
+                v.setHeadString(bunch.head);
+            }
+        }
+    }
+}
+</t>
+<t tx="felix.20211026230613.118">public undoMark(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    u.updateMarks('old');
+    if (u.groupCount === 0) {
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
+    }
+}
+</t>
+<t tx="felix.20211026230613.119">public undoMove(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const cc: ChapterController = c.chapterController;
+    if (cc) {
+        cc.selectChapterByName('main');
+    }
+    const v: VNode = u.p!.v;
+    g.assert(u.oldParent_v);
+    g.assert(u.newParent_v);
+    g.assert(v);
+    // Adjust the children arrays.
+    g.assert(u.newParent_v.children[u.newN] === v);
+
+    // del u.newParent_v.children[u.newN]
+    u.newParent_v.children.splice(u.newN, 1);
+
+    u.oldParent_v.children.splice(u.oldN, 0, v);
+
+    // Recompute the parent links.
+    v.parents.push(u.oldParent_v);
+
+    // v.parents.remove(u.newParent_v)
+    const index = v.parents.indexOf(u.newParent_v);
+    if (index &gt; -1) {
+        v.parents.splice(index, 1);
+    }
+
+    u.updateMarks('old');
+    u.p!.setDirty();
+    c.selectPosition(u.p!);
+}
+</t>
+<t tx="felix.20211026230613.12">/**
+ * Set Undoer ivars from the bunch at the top of the undo stack.
+ */
+public getBead(n: number): Bead | undefined {
+    const u: Undoer = this;
+    if (n &lt; 0 || n &gt;= u.beads.length) {
+        return undefined;
+    }
+    const bunch = u.beads[n];
+    u.setIvarsFromBunch(bunch);
+    if (g.app.debug.includes('undo')) {
+        console.log(` u.getBead: ${n} of ${u.beads.length}`);
+    }
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.120">/**
+ * Undo all changes to the contents of a node,
+ * including headline and body text, and marked bits.
+ */
+public undoNodeContents(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    // selectPosition causes recoloring, so don't do this unless needed.
+    if (!c.p.__eq__(u.p!)) {
+        c.selectPosition(u.p!);
+    }
+    u.p!.setDirty();
+    u.p!.b = u.oldBody;
+    w.setAllText(u.oldBody);
+    // c.frame.body.recolor(u.p)
+    u.p!.h = u.oldHead;
+
+    // This is required.  Otherwise c.redraw will revert the change!
+    c.frame.tree.setHeadline(u.p!, u.oldHead);
+
+    if (u.groupCount === 0 &amp;&amp; u.oldSel &amp;&amp; u.oldSel.length) {
+        let i, j;
+        [i, j] = u.oldSel;
+        w.setSelectionRange &amp;&amp; w.setSelectionRange(i, j);
+    }
+    if (u.groupCount === 0 &amp;&amp; (u.oldYScroll || u.oldYScroll === 0)) {
+        w.setYScrollPosition &amp;&amp; w.setYScrollPosition(u.oldYScroll);
+    }
+    u.updateMarks('old');
+}
+</t>
+<t tx="felix.20211026230613.121">public undoPromote(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const parent_v: VNode = u.p!._parentVnode(); // The parent of the all the *promoted* nodes.
+    // Remove the promoted nodes from parent_v's children.
+    let n: number = u.p!.childIndex() + 1;
+    // Adjust the old parents children
+    const old_children: VNode[] = parent_v.children;
+
+    parent_v.children = old_children.slice(0, n);
+    // Add the nodes before the promoted nodes.
+
+    parent_v.children.push(...old_children.slice(n + u.children.length));
+    // Add the nodes after the promoted nodes.
+
+    // Add the demoted nodes to v's children.
+    u.p!.v.children = [...u.children];
+
+    // Adjust the parent links.
+    // There is no need to adjust descendant links.
+    parent_v.setDirty();
+    for (let child of u.children) {
+        let i_parent_v = child.parents.indexOf(parent_v);
+        if (i_parent_v &gt; -1) {
+            child.parents.splice(i_parent_v, 1);
+        }
+        //child.parents.remove(parent_v);
+        child.parents.push(u.p!.v);
+    }
+    u.p!.setAllAncestorAtFileNodesDirty();
+    c.p = u.p!;
+}
+</t>
+<t tx="felix.20211026230613.122">/**
+ * Handle text undo and redo: converts _new_ text into _old_ text.
+ */
+public undoRedoText(
+    p: Position,
+    leading: number,
+    trailing: number, // Number of matching leading &amp; trailing lines.
+    oldMidLines: string[],
+    newMidLines: string[], // Lists of unmatched lines.
+    oldNewlines: number,
+    newNewlines: number, // Number of trailing newlines.
+    tag: string = 'undo', // "undo" or "redo"
+    undoType?: string
+): void {
+    // newNewlines is unused, but it has symmetry.
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    &lt;&lt; Compute the result using p's body text &gt;&gt;
+    p.setBodyString(result);
+    p.setDirty();
+    w.setAllText(result);
+    const sel: number[] = tag === 'undo' ? u.oldSel : u.newSel;
+    if (sel &amp;&amp; sel.length) {
+        let i, j;
+        [i, j] = sel;
+        w.setSelectionRange(i, j, j);
+    }
+
+    // c.frame.body.recolor(p);
+    w.seeInsertPoint(); // 2009/12/21
+}
+</t>
+<t tx="felix.20211026230613.123">// Recreate the text using the present body text.
+let body: string = p.b;
+body = g.checkUnicode(body);
+
+const body_lines: string[] = body.split('\n');
+let s: string[] | string = [];
+
+if (leading &gt; 0) {
+    s.push(...body_lines.slice(0, leading));
+}
+if (oldMidLines.length) {
+    s.push(...oldMidLines);
+}
+if (trailing &gt; 0) {
+    s.push(...body_lines.slice(-trailing));
+}
+// s = '\n'.join(s);
+s = s.join('\n');
+
+// Remove trailing newlines in s.
+while (s &amp;&amp; s[s.length - 1] === '\n') {
+    s = s.slice(0, -1);
+}
+// Add oldNewlines newlines.
+if (oldNewlines &gt; 0) {
+    s = s + '\n'.repeat(oldNewlines);
+}
+const result: string = s;
+</t>
+<t tx="felix.20211026230613.124">/**
+ * Replace p and its subtree using old_data during undo.
+ */
+// public undoRedoTree(p: Position, new_data: any, old_data: any): Position {
+//     // Same as undoReplace except uses g.Bunch.
+//     const u: Undoer = this;
+//     const c: Commands = u.c;
+//     if (!new_data) {
+//         // This is the first time we have undone the operation.
+//         // Put the new data in the bead.
+//         const bunch: Bead = u.beads[u.bead];
+//         bunch.newTree = u.saveTree(p.copy());
+//         u.beads[u.bead] = bunch;
+//     }
+//     // Replace data in tree with old data.
+//     u.restoreTree(old_data);
+//     c.setBodyString(p, p.b); // This is not a do-nothing.
+//     return p; // Nothing really changes.
+// }
+</t>
+<t tx="felix.20211026230613.125">public undoSort(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const p = u.p!;
+    if (u.sortChildren) {
+        p.v.children = [...u.oldChildren];
+    } else {
+        const parent_v = p._parentVnode();
+        parent_v.children = [...u.oldChildren];
+        // Only the child index of new position changes!
+        for (var _i = 0; _i &lt; parent_v.children.length; _i++) {
+            const v = parent_v.children[_i];
+            if (v.gnx === p.v.gnx) {
+                p._childIndex = _i;
+                break;
+            }
+        }
+    }
+    p.setAllAncestorAtFileNodesDirty();
+    c.p = p;
+}
+</t>
+<t tx="felix.20211026230613.126">/**
+ * Redo replacement of an entire tree.
+ */
+// public undoTree(): void {
+//     const u: Undoer = this;
+//     const c: Commands = u.c;
+//     u.p = u.undoRedoTree(u.p!, u.newTree, u.oldTree);
+//     u.p.setAllAncestorAtFileNodesDirty();
+//     c.selectPosition(u.p); // Does full recolor.
+//     if (u.oldSel &amp;&amp; u.oldSel.length) {
+//         let i, j;
+//         [i, j] = u.oldSel;
+//         c.frame.body.wrapper.setSelectionRange(i, j);
+//     }
+// }
+</t>
+<t tx="felix.20211026230613.128">/**
+ * Update status after either an undo or redo
+ */
+public update_status(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+
+    // Redraw and recolor.
+    // c.frame.body.updateEditors();  // New in Leo 4.4.8.
+
+    // PR #4809. c.p has already been set.
+    //
+    // # 1451. *Always* set the changed bit.
+    // Redrawing *must* be done here before setting u.undoing to false.
+    let i, j;
+    [i, j] = w.getSelectionRange();
+    const ins: number = w.getInsertPoint();
+
+    c.redraw();
+    // c.recolor();
+
+    if (u.inHead) {
+        // ! LEOJS has no editing headline features nor wrapper around tree.editLabel
+        // c.editHeadline();
+
+        u.inHead = false;
+    } else {
+        c.bodyWantsFocus();
+        w.setSelectionRange(i, j, ins);
+        w.seeInsertPoint();
+    }
+}
+</t>
+<t tx="felix.20211026230613.13">public peekBead(n: number): Bead | undefined {
+    const u: Undoer = this;
+    if (n &lt; 0 || n &gt;= u.beads.length) {
+        return undefined;
+    }
+    return u.beads[n];
+}
+</t>
+<t tx="felix.20211026230613.14">public pushBead(bunch: Bead): void {
+    const u: Undoer = this;
+    // New in 4.4b2:  Add this to the group if it is being accumulated.
+    let bunch2: Bead | boolean = u.bead &gt;= 0 &amp;&amp; u.bead &lt; u.beads.length;
+    if (bunch2) {
+        bunch2 = u.beads[u.bead];
+    }
+    if (
+        bunch2 &amp;&amp;
+        (bunch2 as Bead).kind &amp;&amp;
+        (bunch2 as Bead).kind === 'beforeGroup'
+    ) {
+        // Just append the new bunch the group's items.
+        (bunch2 as Bead).items.push(bunch);
+    } else {
+        // Push the bunch.
+        u.bead += 1;
+
+        // u.beads[u.bead:] = [bunch]
+        u.beads.splice(u.bead, u.beads.length - u.bead, bunch);
+
+        // Recalculate the menu labels.
+        u.setUndoTypes();
+    }
+    if (g.app.debug.includes('undo')) {
+        console.log(`u.pushBead: ${u.beads.length} ${bunch.undoType}`);
+    }
+}
+</t>
+<t tx="felix.20211026230613.15">public redoMenuName(name: string): string {
+    if (name.startsWith("Can't Redo")) {
+        return name;
+    }
+    return 'Redo ' + name;
+}
+
+public undoMenuName(name: string): string {
+    if (name.startsWith("Can't Undo")) {
+        return name;
+    }
+    return 'Undo ' + name;
+}
+</t>
+<t tx="felix.20211026230613.16">public setIvarsFromBunch(bunch: Bead): void {
+    const u: Undoer = this;
+    u.clearOptionalIvars();
+
+    // bunch is not a dict, so bunch.keys() is required.
+    for (let key of Object.keys(bunch)) {
+        const val: any = bunch[key];
+        (u as any)[key] = val;
+        if (!u.optionalIvars.includes(key)) {
+            u.optionalIvars.push(key);
+        }
+    }
+}
+</t>
+<t tx="felix.20211026230613.17">// These routines update both the ivar and the menu label.
+
+public setRedoType(theType: any): void {
+    const u: Undoer = this;
+    // frame = u.c.frame;
+    if (!(typeof theType === 'string' || theType instanceof String)) {
+        g.trace(`oops: expected string for command, got ${theType}`);
+        g.trace(g.callers());
+        theType = '&lt;unknown&gt;';
+    }
+    // menu = frame.menu.getMenu("Edit")
+    const name: string = u.redoMenuName(theType);
+    if (name !== u.redoMenuLabel) {
+        // Update menu using old name.
+        // realLabel = frame.menu.getRealMenuName(name)
+        // if realLabel == name:
+        //     underline = -1 if g.match(name, 0, "Can't") else 0
+        // else:
+        //     underline = realLabel.find("&amp;")
+        // realLabel = realLabel.replace("&amp;", "")
+        // frame.menu.setMenuLabel(
+        //     menu, u.realRedoMenuLabel, realLabel, underline=underline)
+        u.redoMenuLabel = name;
+        u.realRedoMenuLabel = name;
+    }
+}
+</t>
+<t tx="felix.20211026230613.18">public setUndoType(theType: any): void {
+    const u: Undoer = this;
+    // frame = u.c.frame
+
+    if (!(typeof theType === 'string' || theType instanceof String)) {
+        g.trace(`oops: expected string for command, got ${theType}`);
+        g.trace(g.callers());
+        theType = '&lt;unknown&gt;';
+    }
+
+    //menu = frame.menu.getMenu("Edit")
+    const name: string = u.undoMenuName(theType);
+    if (name !== u.undoMenuLabel) {
+        // Update menu using old name.
+        // realLabel = frame.menu.getRealMenuName(name)
+        // if realLabel == name:
+        //     underline = -1 if g.match(name, 0, "Can't") else 0
+        // else:
+        //     underline = realLabel.find("&amp;")
+        // realLabel = realLabel.replace("&amp;", "")
+        // frame.menu.setMenuLabel(
+        //     menu, u.realUndoMenuLabel, realLabel, underline=underline)
+        u.undoType = theType;
+        u.undoMenuLabel = name;
+        u.realUndoMenuLabel = name;
+    }
+}
+</t>
+<t tx="felix.20211026230613.19">public setUndoTypes(): void {
+    const u: Undoer = this;
+    // Set the undo type and undo menu label.
+    let bunch: Bead | undefined = u.peekBead(u.bead);
+    let undoType;
+    if (bunch) {
+        u.setUndoType(bunch.undoType);
+    } else {
+        if (u.last_undoable_command_name) {
+            undoType = `Can't Undo ${u.last_undoable_command_name}`;
+        } else {
+            undoType = "Can't Undo";
+        }
+        u.setUndoType(undoType);
+    }
+    // Set only the redo menu label.
+    bunch = u.peekBead(u.bead + 1);
+    if (bunch) {
+        u.setRedoType(bunch.undoType);
+    } else {
+        u.setRedoType("Can't Redo");
+    }
+    u.cutStack();
+}
+</t>
+<t tx="felix.20211026230613.2">@
+Think of the actions that may be Undone or Redone as a string of beads
+(g.Bunches) containing all information needed to undo _and_ redo an operation.
+
+A bead pointer points to the present bead. Undoing an operation moves the bead
+pointer backwards; redoing an operation moves the bead pointer forwards. The
+bead pointer points in front of the first bead when Undo is disabled. The bead
+pointer points at the last bead when Redo is disabled.
+
+The Undo command uses the present bead to undo the action, then moves the bead
+pointer backwards. The Redo command uses the bead after the present bead to redo
+the action, then moves the bead pointer forwards. The list of beads does not
+branch; all undoable operations (except the Undo and Redo commands themselves)
+delete any beads following the newly created bead.
+
+New in Leo 4.3: User (client) code should call u.beforeX and u.afterX methods to
+create a bead describing the operation that is being performed. (By convention,
+the code sets u = c.undoer for undoable operations.) Most u.beforeX methods
+return 'undoData' that the client code merely passes to the corresponding
+u.afterX method. This data contains the 'before' snapshot. The u.afterX methods
+then create a bead containing both the 'before' and 'after' snapshots.
+
+New in Leo 4.3: u.beforeChangeGroup and u.afterChangeGroup allow multiple calls
+to u.beforeX and u.afterX methods to be treated as a single undoable entry. See
+the code for the Replace All, Sort, Promote and Demote commands for examples.
+u.before/afterChangeGroup substantially reduce the number of u.before/afterX
+methods needed.
+
+New in Leo 4.3: It would be possible for plugins or other code to define their
+own u.before/afterX methods. Indeed, u.afterX merely needs to set the
+bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo
+the operation. See the code for the various u.before/afterX methods for
+guidance.
+
+I first saw this model of unlimited undo in the documentation for Apple's Yellow Box classes.
+
+</t>
+<t tx="felix.20211026230613.20">/**
+ * Use the tree info to restore all VNode data, including all links.
+ */
+// public restoreTree(treeInfo: any[]): void {
+//     const u: Undoer = this;
+//     // This effectively relinks all vnodes.
+//     for (let p_tree of treeInfo) {
+//         u.restoreVnodeUndoInfo(p_tree[1]);
+//     }
+// }
+</t>
+<t tx="felix.20211026230613.21">/**
+ * Restore all ivars saved in the bunch.
+ */
+// public restoreVnodeUndoInfo(bunch: Bead): void {
+//     const v: VNode = bunch.v;
+//     v.statusBits = bunch.statusBits;
+//     v.children = bunch.children;
+//     v.parents = bunch.parents;
+//     const uA: any = bunch.unknownAttributes;
+//     if (uA) {
+//         v.unknownAttributes = uA;
+//         v._p_changed = true;
+//     }
+// }
+</t>
+<t tx="felix.20211026230613.22">// public restoreTnodeUndoInfo(bunch: Bead): void {
+//     const v: VNode = bunch.v;
+//     v.h = bunch.headString;
+//     v.b = bunch.bodyString;
+//     v.statusBits = bunch.statusBits;
+//     const uA: any = bunch.unknownAttributes;
+//     if (uA) {
+//         v.unknownAttributes = uA;
+//         v._p_changed = true;
+//     }
+// }
+</t>
+<t tx="felix.20211026230613.23">/**
+ * Return a list of tuples with all info needed to handle a general undo operation.
+ */
+// public saveTree(p: Position, treeInfo?: TreeData[]): TreeData[] {
+//     // WARNING: read this before doing anything "clever"
+&lt;&lt; about u.saveTree &gt;&gt;
+
+//     const u: Undoer = this;
+//     const topLevel: boolean = !treeInfo; // don't check length intended
+//     if (topLevel) {
+//         treeInfo = [];
+//     }
+//     // Add info for p.v.  Duplicate info is harmless.
+//     const data: TreeData = [p.v, u.createVnodeUndoInfo(p.v)];
+//     treeInfo!.push(data);
+//     // Recursively add info for the subtree.
+//     let child: Position = p.firstChild();
+//     while (child &amp;&amp; child.__bool__()) {
+//         u.saveTree(child, treeInfo);
+//         child = child.next();
+//     }
+//     return treeInfo!;
+// }
+</t>
+<t tx="felix.20211026230613.24">@language rest
+@
+The old code made a free-standing copy of the tree using v.copy and
+t.copy. This looks "elegant" and is WRONG. The problem is that it can
+not handle clones properly, especially when some clones were in the
+"undo" tree and some were not. Moreover, it required complex
+adjustments to t.vnodeLists.
+
+Instead of creating new nodes, the new code creates all information
+needed to properly restore the vnodes and tnodes. It creates a list of
+tuples, on tuple for each VNode in the tree. Each tuple has the form,
+
+(vnodeInfo, tnodeInfo)
+
+where vnodeInfo and tnodeInfo are dicts contain all info needed to
+recreate the nodes. The v.createUndoInfoDict and t.createUndoInfoDict
+methods correspond to the old v.copy and t.copy methods.
+
+Aside: Prior to 4.2 Leo used a scheme that was equivalent to the
+createUndoInfoDict info, but quite a bit uglier.
+</t>
+<t tx="felix.20211026230613.25">/**
+ * Create a bunch containing all info needed to recreate a VNode for undo.
+ */
+// public createVnodeUndoInfo(v: VNode): Bead {
+//     const bunch: Bead = {
+//         v: v,
+//         statusBits: v.statusBits,
+//         parents: [...v.parents],
+//         children: [...v.children],
+//     };
+
+//     if (v.unknownAttributes) {
+//         bunch.unknownAttributes = v.unknownAttributes;
+//     }
+//     return bunch;
+// }
+</t>
+<t tx="felix.20211026230613.27">public trace(): void {
+    const ivars: string[] = ['kind', 'undoType'];
+    for (let ivar of ivars) {
+        g.pr(ivar, (this as any)[ivar]);
+    }
+}
+</t>
+<t tx="felix.20211026230613.28">/**
+ * Update dirty and marked bits.
+ */
+public updateMarks(oldOrNew: string): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    if (!['new', 'old'].includes(oldOrNew)) {
+        g.trace("can't happen");
+        return;
+    }
+    const isOld: boolean = oldOrNew === 'old';
+    const marked: boolean = isOld ? u.oldMarked : u.newMarked;
+    // Note: c.set/clearMarked call a hook.
+    if (marked) {
+        c.setMarked(u.p!);
+    } else {
+        c.clearMarked(u.p!);
+    }
+    // Undo/redo always set changed/dirty bits because the file may have been saved.
+    u.p!.setDirty();
+    u.c.setChanged();
+}
+</t>
+<t tx="felix.20211026230613.29"></t>
+<t tx="felix.20211026230613.3">/**
+ * Command decorator for the Undoer class.
+ */
+function cmd(p_name: string, p_doc: string) {
+    return new_cmd_decorator(p_name, p_doc, ['c', 'undoer']);
+}
+</t>
+<t tx="felix.20211026230613.30"></t>
+<t tx="felix.20211026230613.31">/**
+ * Create an undo node using d created by beforeChangeNode.
+ * *Important*: Before calling this method, caller must:
+ * - Set p.v.b. (Setting p.b would cause a redraw).
+ * - Set the desired selection range and insert point.
+ * - Set the y-scroll position, if desired.
+ */
+public afterChangeBody(p: Position, command: string, bunch: Bead): void {
+    const c: Commands = this.c;
+    const u: Undoer = this;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+
+    if (u.redoing || u.undoing) {
+        return;
+    }
+
+    // Set the type &amp; helpers.
+    bunch.kind = 'body';
+    bunch.undoType = command;
+    bunch.undoHelper = u.undoChangeBody;
+    bunch.redoHelper = u.redoChangeBody;
+    bunch.newBody = p.b;
+    bunch.newHead = p.h;
+    bunch.newIns = w.getInsertPoint();
+    bunch.newMarked = p.isMarked();
+
+    // Careful: don't use ternary operator.
+    if (w &amp;&amp; w.getSelectionRange) {
+        bunch.newSel = w.getSelectionRange();
+    } else {
+        bunch.newSel = [0, 0];
+    }
+
+    // bunch.newYScroll = w.getYScrollPosition() if w else 0
+    u.pushBead(bunch);
+    //
+    if (g.unitTesting) {
+        // assert command.lower() !== 'typing', g.callers()
+    } else if (command.toLowerCase() === 'typing') {
+        g.trace(
+            'Error: undoType should not be "Typing"\n' +
+            'Call u.doTyping instead'
+        );
+    }
+    u.updateAfterTyping(p, w);
+}
+</t>
+<t tx="felix.20211026230613.32">/**
+ * Create an undo node for general tree operations using d created by
+ * beforeChangeGroup
+ */
+public afterChangeGroup(p: Position, undoType: string): void {
+    const u: Undoer = this;
+    const c: Commands = this.c;
+
+    const w: StringTextWrapper = c.frame.body.wrapper;
+
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    if (!u.beads.length) {
+        g.trace('oops: empty undo stack.');
+        return;
+    }
+    const bunch = u.beads[u.bead];
+    if (bunch.kind === 'beforeGroup') {
+        bunch.kind = 'afterGroup';
+    } else {
+        g.trace('oops: expecting beforeGroup, got ${bunch.kind}');
+    }
+    // Set the types &amp; helpers.
+    bunch.kind = 'afterGroup';
+    bunch.undoType = undoType;
+    bunch.undoHelper = u.undoGroup;
+    bunch.redoHelper = u.redoGroup;
+    bunch.p = p.copy();  // PR #4991.
+    bunch.newP = p.copy();
+
+    bunch.newSel = w.getSelectionRange();
+
+    // if 0:
+    //     // Push the bunch.
+    //     u.bead += 1
+    //     u.beads[u.bead:] = [bunch]
+
+    // Recalculate the menu labels.
+    u.setUndoTypes();
+}
+</t>
+<t tx="felix.20211026230613.33">/**
+ * Create an undo node using d created by beforeChangeNode.
+ */
+public afterChangeNodeContents(
+    p: Position,
+    command: string,
+    bunch: Bead
+): void {
+    const u: Undoer = this;
+    const c: Commands = this.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set the type &amp; helpers.
+    bunch.kind = 'node';
+    bunch.undoType = command;
+    bunch.undoHelper = u.undoNodeContents;
+    bunch.redoHelper = u.redoNodeContents;
+    bunch.inHead = false; // 2013/08/26
+    bunch.newBody = p.b;
+    bunch.newHead = p.h;
+    bunch.newMarked = p.isMarked();
+    // Bug fix 2017/11/12: don't use ternary operator.
+    if (w &amp;&amp; w.getSelectionRange) {
+        bunch.newSel = w.getSelectionRange();
+    } else {
+        bunch.newSel = [0, 0];
+    }
+    //bunch.newYScroll = w.getYScrollPosition() if w else 0
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.34">/**
+ * Create an undo node using d created by beforeChangeHeadline.
+ */
+public afterChangeHeadline(
+    p: Position,
+    command: string,
+    bunch: Bead
+): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set the type &amp; helpers.
+    bunch.kind = 'headline';
+    bunch.undoType = command;
+    bunch.undoHelper = u.undoChangeHeadline;
+    bunch.redoHelper = u.redoChangeHeadline;
+    bunch.newHead = p.h;
+    u.pushBead(bunch);
+}
+
+// afterChangeHead = afterChangeHeadline // TODO (not used) !
+
+</t>
+<t tx="felix.20211026230613.35">/**
+ * Create an undo node for general tree operations using d created by beforeChangeTree
+ */
+// public afterChangeTree(p: Position, command: string, bunch: Bead): void {
+//     const u: Undoer = this;
+//     const c: Commands = this.c;
+//     const w: StringTextWrapper = c.frame.body.wrapper;
+//     if (u.redoing || u.undoing) {
+//         return;
+//     }
+//     // Set the types &amp; helpers.
+//     bunch.kind = 'tree';
+//     bunch.undoType = command;
+//     bunch.undoHelper = u.undoTree;
+//     bunch.redoHelper = u.redoTree;
+//     // Set by beforeChangeTree: changed, oldSel, oldText, oldTree, p
+//     bunch.newSel = w.getSelectionRange(); // [0, 0]; //
+//     bunch.newText = w.getAllText(); // p.b; //
+//     bunch.newTree = u.saveTree(p);
+//     u.pushBead(bunch);
+// }
+</t>
+<t tx="felix.20211026230613.37">public afterCloneMarkedNodes(p: Position): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // createCommonBunch sets:
+    //   oldDirty = p.isDirty()
+    //   oldMarked = p.isMarked()
+    //   oldSel = w and w.getSelectionRange() or None
+    //   p = p.copy()
+    const bunch: Bead = u.createCommonBunch(p);
+    // Set types.
+    bunch.kind = 'clone-marked-nodes';
+    bunch.undoType = 'clone-marked-nodes';
+    // Set helpers.
+    bunch.undoHelper = u.undoCloneMarkedNodes;
+    bunch.redoHelper = u.redoCloneMarkedNodes;
+    bunch.newP = p.next();
+    bunch.newMarked = p.isMarked();
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.38">public afterCopyMarkedNodes(p: Position): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // createCommonBunch sets:
+    //   oldDirty = p.isDirty()
+    //   oldMarked = p.isMarked()
+    //   oldSel = w and w.getSelectionRange() or None
+    //   p = p.copy()
+    const bunch: Bead = u.createCommonBunch(p);
+    // Set types &amp; helpers
+    bunch.kind = 'copy-marked-nodes';
+    bunch.undoType = 'copy-marked-nodes';
+    // Set helpers
+    bunch.undoHelper = u.undoCopyMarkedNodes;
+    bunch.redoHelper = u.redoCopyMarkedNodes;
+    bunch.newP = p.next();
+    bunch.newMarked = p.isMarked();
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.39">public afterCloneNode(p: Position, command: string, bunch: Bead): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set types &amp; helpers
+    bunch.kind = 'clone';
+    bunch.undoType = command;
+    // Set helpers
+    bunch.undoHelper = u.undoCloneNode;
+    bunch.redoHelper = u.redoCloneNode;
+    bunch.newBack = p.back(); // 6/15/05;
+    bunch.newParent = p.parent(); // 6/15/05;
+    bunch.newP = p.copy();
+    bunch.newMarked = p.isMarked();
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.4">/**
+ * A class that implements unlimited undo and redo.
+ */
+export class Undoer {
+    public c: Commands;
+    public p: Position | undefined;
+    public granularity!: string; // Set in reloadSettings.
+    public max_undo_stack_size: number;
+
+    // State ivars...
+    public beads: Bead[] = []; // List of undo nodes.
+    public bead: number = -1; // Index of the present bead: -1:len(beads)
+    public undoType: string = "Can't Undo";
+    public last_undoable_command_name = "";  // Name of last undoable command.
+
+    public groupCount: number = 0;
+    // These must be set here, _not_ in clearUndoState.
+    public redoMenuLabel: string = "Can't Redo";
+    public undoMenuLabel: string = "Can't Undo";
+    public realRedoMenuLabel: string = "Can't Redo";
+    public realUndoMenuLabel: string = "Can't Undo";
+    public undoing: boolean = false; // True if executing an Undo command.
+    public redoing: boolean = false; // True if executing a Redo command.
+    public per_node_undo: boolean = false; // True: v may contain undo_info ivar.
+    // New in 4.2...
+    public optionalIvars: string[] = [];
+    // Set the following ivars to keep pylint happy.
+    public afterTree!: { v: VNode; head: string; body: string }[];
+    public beforeTree!: { v: VNode; head: string; body: string }[];
+    public children!: VNode[];
+    public deleteMarkedNodesData!: Position[];
+    public followingSibs!: VNode[];
+    public headlines!: { [key: string]: [string, string | undefined] };
+    public inHead!: boolean;
+    public kind!: string;
+    public newBack!: Position;
+    public newBody!: string;
+    public newChildren!: VNode[];
+    public newHead!: string;
+    public newIns!: number;
+    public newMarked!: boolean;
+    public newN!: number;
+    public newP!: Position;
+    public newParent!: Position;
+    public newParent_v!: VNode;
+    public newRecentFiles!: string[];
+    public newSel!: number[];
+    public newTree!: TreeData[];
+    public newUA!: Record&lt;string, any&gt;;
+    public newYScroll!: number;
+    public oldBack!: Position;
+    public oldBody!: string;
+    public oldChildren!: VNode[];
+    public oldHead!: string;
+    public oldIns!: number;
+    public oldMarked!: boolean;
+    public oldN!: number;
+    public oldParent!: Position;
+    public oldParent_v!: VNode;
+    public oldRecentFiles!: string[];
+    public oldSel!: number[];
+    public oldTree!: TreeData[];
+    public oldUA!: Record&lt;string, any&gt;;
+    public oldYScroll!: number;
+    public pasteAsClone!: boolean;
+    public prevSel!: number[];
+    public sortChildren!: boolean;
+    public verboseUndoGroup!: boolean;
+    public changeGroupWarning = false;
+
+
+    @others
+}
+</t>
+<t tx="felix.20211026230613.41">public afterDeleteNode(p: Position, command: string, bunch: Bead): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set types &amp; helpers
+    bunch.kind = 'delete';
+    bunch.undoType = command;
+    // Set helpers
+    bunch.undoHelper = u.undoDeleteNode;
+    bunch.redoHelper = u.redoDeleteNode;
+    bunch.newP = p.copy();
+    bunch.newMarked = p.isMarked();
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.42">public afterDeleteMarkedNodes(data: any, p: Position): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    const bunch: Bead = u.createCommonBunch(p);
+    // Set types &amp; helpers
+    bunch.kind = 'delete-marked-nodes';
+    bunch.undoType = 'delete-marked-nodes';
+    // Set helpers
+    bunch.undoHelper = u.undoDeleteMarkedNodes;
+    bunch.redoHelper = u.redoDeleteMarkedNodes;
+    bunch.newP = p.copy();
+    bunch.deleteMarkedNodesData = data;
+    bunch.newMarked = p.isMarked();
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.43">/**
+ * Create an undo node for demote operations.
+ */
+public afterDemote(p: Position, followingSibs: any): void {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    // Set types.
+    bunch.kind = 'demote';
+    bunch.undoType = 'Demote';
+    bunch.undoHelper = u.undoDemote;
+    bunch.redoHelper = u.redoDemote;
+    bunch.followingSibs = followingSibs;
+    // Push the bunch.
+    u.bead += 1;
+
+    // u.beads[u.bead:] = [bunch]
+    u.beads.splice(u.bead, u.beads.length - u.bead, bunch);
+
+    // Recalculate the menu labels.
+    u.setUndoTypes();
+}
+</t>
+<t tx="felix.20211026230613.45">public afterInsertNode(p: Position, command: string, bunch: Bead): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set types &amp; helpers
+    bunch.kind = 'insert';
+    bunch.undoType = command;
+    // Set helpers
+    bunch.undoHelper = u.undoInsertNode;
+    bunch.redoHelper = u.redoInsertNode;
+    bunch.newP = p.copy();
+    bunch.newBack = p.back();
+    bunch.newParent = p.parent();
+    bunch.newMarked = p.isMarked();
+    let beforeTree: Bead[];
+    if (bunch.pasteAsClone) {
+        beforeTree = bunch.beforeTree;
+        const afterTree: { v: VNode; head: string; body: string }[] = [];
+        for (let bunch2 of beforeTree) {
+            const v: VNode = bunch2.v;
+            afterTree.push({
+                v: v,
+                head: v.h.slice(0),
+                body: v.b.slice(0),
+            });
+        }
+        bunch.afterTree = afterTree;
+    }
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.46">/**
+ * Create an undo node for mark and unmark commands.
+ */
+public afterMark(p: Position, command: string, bunch: Bead): void {
+    // 'command' unused, but present for compatibility with similar methods.
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set the type &amp; helpers.
+    bunch.undoHelper = u.undoMark;
+    bunch.redoHelper = u.redoMark;
+    bunch.newMarked = p.isMarked();
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.47">public afterMoveNode(p: Position, command: string, bunch: Bead): void {
+    const u: Undoer = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set the types &amp; helpers.
+    bunch.kind = 'move';
+    bunch.undoType = command;
+    // Set helper only for undo:
+    // The bead pointer will point to an 'beforeGroup' bead for redo.
+    bunch.undoHelper = u.undoMove;
+    bunch.redoHelper = u.redoMove;
+    bunch.newMarked = p.isMarked();
+    bunch.newN = p.childIndex();
+    bunch.newParent_v = p._parentVnode();
+    bunch.newP = p.copy();
+    u.pushBead(bunch);
+}
+</t>
+<t tx="felix.20211026230613.48">/**
+ * Create an undo node for demote operations.
+ */
+public afterPromote(p: Position, children: any): void {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    // Set types.
+    bunch.kind = 'promote';
+    bunch.undoType = 'Promote';
+    bunch.undoHelper = u.undoPromote;
+    bunch.redoHelper = u.redoPromote;
+    bunch.children = children;
+    // Push the bunch.
+    u.bead += 1;
+
+    // u.beads[u.bead:] = [bunch]
+    u.beads.splice(u.bead, u.beads.length - u.bead, bunch);
+
+    // Recalculate the menu labels.
+    u.setUndoTypes();
+}
+</t>
+<t tx="felix.20211026230613.49">/**
+ * Create an undo node for sort operations
+ */
+public afterSort(p: Position, bunch: Bead): void {
+    const u: Undoer = this;
+    // c = this.c
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Recalculate the menu labels.
+    u.setUndoTypes();
+}
+</t>
+<t tx="felix.20211026230613.5"></t>
+<t tx="felix.20211026230613.50"></t>
+<t tx="felix.20211026230613.51">/**
+ * Return data that gets passed to afterChangeBody.
+ */
+public beforeChangeBody(p: Position): Bead {
+    const w: any = this.c.frame.body.wrapper;
+    const bunch: Bead = this.createCommonBunch(p);
+    // Sets u.oldMarked, u.oldSel, u.p
+    bunch.oldBody = p.b;
+    bunch.oldHead = p.h;
+    bunch.oldIns = w &amp;&amp; w.getInsertPoint ? w.getInsertPoint() : 0;
+    bunch.oldYScroll =
+        w &amp;&amp; w.getYScrollPosition ? w.getYScrollPosition() : 0;
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.52">/**
+ * Prepare to undo a group of undoable operations.
+ */
+public beforeChangeGroup(
+    p: Position,
+    command: string,
+    verboseUndoGroup = true
+): void {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    // Set types.
+    bunch.kind = 'beforeGroup';
+    bunch.undoType = command;
+    bunch.verboseUndoGroup = verboseUndoGroup;
+    // Set helper only for redo:
+    // The bead pointer will point to an 'afterGroup' bead for undo.
+    bunch.undoHelper = u.undoGroup;
+    bunch.redoHelper = u.redoGroup;
+    bunch.items = [];
+    // Push the bunch.
+    u.bead += 1;
+
+    // u.beads[u.bead:] = [bunch]
+    u.beads.splice(u.bead, u.beads.length - u.bead, bunch);
+}
+</t>
+<t tx="felix.20211026230613.53">/**
+ * Return data that gets passed to afterChangeNode.
+ * The oldHead kwarg works around a Qt difficulty when changing headlines.
+ */
+public beforeChangeHeadline(p: Position): Bead {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.oldHead = p.h;
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.54">/**
+ * Return data that gets passed to afterChangeNode.
+ */
+public beforeChangeNodeContents(p: Position): Bead {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.oldBody = p.b;
+    bunch.oldHead = p.h;
+    // #1413: Always restore yScroll if possible.
+    bunch.oldYScroll =
+        w &amp;&amp; w.getYScrollPosition ? w.getYScrollPosition() : 0;
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.55">// public beforeChangeTree(p: Position): Bead {
+//     const u: Undoer = this;
+//     const c: Commands = u.c;
+//     const w: StringTextWrapper = c.frame.body.wrapper;
+//     const bunch: Bead = u.createCommonBunch(p);
+//     bunch.oldSel = [0, 0]; // w.getSelectionRange(); // TODO ?
+//     bunch.oldText = p.b; //w.getAllText(); // TODO ?
+//     bunch.oldTree = u.saveTree(p);
+//     return bunch;
+// }
+</t>
+<t tx="felix.20211026230613.57">public beforeCloneNode(p: Position): Bead {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.58">public beforeDeleteNode(p: Position): Bead {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.oldBack = p.back();
+    bunch.oldParent = p.parent();
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.59">public beforeInsertNode(
+    p: Position,
+    pasteAsClone: boolean = false,
+    copiedBunchList?: Bead[]
+): Bead {
+    const u: Undoer = this;
+    if (!copiedBunchList) {
+        copiedBunchList = [];
+    }
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.pasteAsClone = pasteAsClone;
+    if (pasteAsClone) {
+        // Save the list of bunched.
+        bunch.beforeTree = copiedBunchList;
+    }
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.6">constructor(c: Commands) {
+    this.c = c;
+    this.granularity = ''; // Set in reloadSettings.
+    this.max_undo_stack_size = c.config.getInt('max-undo-stack-size') || 99; // Default to 99 for safety.
+    this.reloadSettings();
+}
+</t>
+<t tx="felix.20211026230613.60">public beforeMark(p: Position, command: string): Bead {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.kind = 'mark';
+    bunch.undoType = command;
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.61">public beforeMoveNode(p: Position): Bead {
+    const u: Undoer = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.oldN = p.childIndex();
+    bunch.oldParent_v = p._parentVnode();
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.62">/**
+ * Create an undo node for sort operations.
+ */
+public beforeSort(
+    p: Position,
+    undoType: string,
+    oldChildren: VNode[],
+    newChildren: VNode[],
+    sortChildren: boolean
+): Bead {
+    const u: Undoer = this;
+    let bunch: Bead;
+    if (sortChildren) {
+        bunch = u.createCommonBunch(p.parent());
+    } else {
+        bunch = u.createCommonBunch(p);
+    }
+    // Set types.
+    bunch.kind = 'sort';
+    bunch.undoType = undoType;
+    bunch.undoHelper = u.undoSort;
+    bunch.redoHelper = u.redoSort;
+    bunch.oldChildren = oldChildren;
+    bunch.newChildren = newChildren;
+    bunch.sortChildren = sortChildren; // A bool
+    // Push the bunch.
+    u.bead += 1;
+    // u.beads[u.bead:] = [bunch]
+    u.beads.splice(u.bead, u.beads.length - u.bead, bunch);
+    return bunch;
+}
+</t>
+<t tx="felix.20211026230613.63">/**
+ * Return a bunch containing all common undo info.
+ * This is mostly the info for recreating an empty node at position p.
+ */
+public createCommonBunch(p: Position): Bead {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    return {
+        oldMarked: p &amp;&amp; p.__bool__() &amp;&amp; p.isMarked(),
+        oldSel:
+            (w &amp;&amp; w.getSelectionRange &amp;&amp; w.getSelectionRange()) ||
+            undefined,
+        p: p &amp;&amp; p.__bool__() &amp;&amp; p.copy(), // &amp;&amp; makes sure the copy ends up in p.
+    };
+}
+</t>
+<t tx="felix.20211026230613.64">// Translation does not affect these routines.
+
+public canRedo(): boolean {
+    const u: Undoer = this;
+    return !u.redoMenuLabel.startsWith("Can't Redo");
+}
+
+public canUndo(): boolean {
+    const u: Undoer = this;
+    return !u.undoMenuLabel.startsWith("Can't Undo");
+}
+</t>
+<t tx="felix.20211026230613.65">/**
+ * Clears then entire Undo state.
+ * All non-undoable commands should call this method.
+ */
+public clearUndoState(): void {
+    const u: Undoer = this;
+    u.clearOptionalIvars(); // Do this first.
+    u.setRedoType("Can't Redo");
+    let undoType;
+    if (u.last_undoable_command_name) {
+        undoType = `Can't Undo ${u.last_undoable_command_name}`;
+    } else {
+        undoType = "Can't Undo";
+    }
+    u.setUndoType(undoType);
+    u.beads = []; // List of undo nodes.
+    u.bead = -1; // Index of the present bead: -1:len(beads)
+}
+</t>
+<t tx="felix.20211026230613.7">/**
+ * Undoer.reloadSettings.
+ */
+public reloadSettings() {
+    const c: Commands = this.c;
+    this.granularity = c.config.getString('undo-granularity');
+    if (this.granularity) {
+        this.granularity = this.granularity.toLowerCase();
+    }
+    if (!['node', 'line', 'word', 'char'].includes(this.granularity)) {
+        this.granularity = 'line';
+    }
+}
+</t>
+<t tx="felix.20211026230613.76">public enableMenuItems(): void {
+    // ! UNUSED
+    // const u:Undoer = this;
+    // frame = u.c.frame
+    // menu = frame.menu.getMenu("Edit")
+    // if menu:
+    //     frame.menu.enableMenu(menu, u.redoMenuLabel, u.canRedo())
+    //     frame.menu.enableMenu(menu, u.undoMenuLabel, u.canUndo())
+}
+</t>
+<t tx="felix.20211026230613.77">public onSelect(old_p: Position, p: Position): void {
+    const u: Undoer = this;
+    if (u.per_node_undo) {
+        if (old_p &amp;&amp; old_p.__bool__() &amp;&amp; u.beads.length) {
+            u.putIvarsToVnode(old_p);
+        }
+        u.setIvarsFromVnode(p);
+        u.setUndoTypes();
+    }
+}
+</t>
+<t tx="felix.20211026230613.78">public putIvarsToVnode(p: Position): void {
+    const u: Undoer = this;
+    const v: VNode = p.v;
+    g.assert(this.per_node_undo);
+
+    const bunch: Bead = {};
+    for (let key of this.optionalIvars) {
+        bunch[key] = (u as any)[key];
+    }
+    // Put these ivars by hand.
+    for (let key of ['bead', 'beads', 'undoType']) {
+        bunch[key] = (u as any)[key];
+    }
+    v.undo_info = bunch;
+}
+</t>
+<t tx="felix.20211026230613.79">public setIvarsFromVnode(p: Position): void {
+    const u: Undoer = this;
+    const v: VNode = p.v;
+
+    g.assert(this.per_node_undo);
+    u.clearUndoState();
+    if (v['undo_info'] || v['undo_info'] === 0) {
+        u.setIvarsFromBunch(v.undo_info);
+    }
+}
+</t>
+<t tx="felix.20211026230613.8"></t>
+<t tx="felix.20211026230613.80">/**
+ * Perform all update tasks after changing body text.
+ * This is ugly, ad-hoc code, but should be done uniformly.
+ */
+public updateAfterTyping(p: Position, w: any): void {
+    const c: Commands = this.c;
+
+    if (g.isTextWrapper(w)) {
+        // An important, ever-present unit test.
+        if (p.__eq__(c.p)) {
+            const all: string = w.getAllText();
+            if (g.unitTesting) {
+                // assert p.b == all, (w, g.callers())
+            } else if (p.b !== all) {
+                g.trace(
+                    `\np.b != w.getAllText() p: ${p.h} \n` +
+                    `w: ${w} \n${g.callers()}\n`
+                );
+            }
+        }
+        p.v.insertSpot = w.getInsertPoint();
+        const ins: number = p.v.insertSpot;
+        // From u.doTyping.
+        const newSel: number[] = w.getSelectionRange();
+        if (newSel === undefined) {
+            p.v.selectionStart = ins;
+            p.v.selectionLength = 0;
+        } else {
+            let i, j;
+            [i, j] = newSel;
+            p.v.selectionStart = i;
+            p.v.selectionLength = j - i;
+        }
+    } else {
+        // if g.unitTesting:
+        //     assert False, f"Not a text wrapper: {g.callers()}"
+        g.trace('Not a text wrapper');
+        p.v.insertSpot = 0;
+        p.v.selectionStart = 0;
+        p.v.selectionLength = 0;
+    }
+
+    if (!p.isDirty()) {
+        p.setDirty();
+    }
+    if (!c.isChanged()) {
+        c.setChanged();
+    }
+
+    // Update editors.
+    // c.frame.body.updateEditors(); // ! LEOJS will refresh !
+
+    // Update icons.
+    const val: number = p.computeIcon();
+    if (p.v['iconVal'] === 0 || !p.v['iconVal'] || val !== p.v.iconVal) {
+        p.v.iconVal = val;
+    }
+    if (p.__eq__(c.p)) {
+        // Recolor the body.
+        c.frame.scanForTabWidth(p); // Calls frame.setTabWidth()
+        c.recolor();
+        w.setFocus();
+    }
+}
+</t>
+<t tx="felix.20211026230613.81">@cmd('redo', 'Redo the operation undone by the last undo.')
+public redo(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    if (!c.p || !c.p.__bool__()) {
+        return;
+    }
+    // End editing *before* getting state.
+    c.endEditing();
+    if (!u.canRedo()) {
+        return;
+    }
+    if (!u.getBead(u.bead + 1)) {
+        return;
+    }
+    //
+
+    // Init status.
+    u.redoing = true;
+    u.groupCount = 0;
+    if (u.redoHelper) {
+        u.redoHelper();
+    } else {
+        g.trace(`no redo helper for ${u.kind} ${u.undoType}`);
+    }
+    //
+    // Finish.
+    c.checkOutline();
+    u.update_status();
+    u.redoing = false;
+    u.bead += 1;
+    u.setUndoTypes();
+}
+</t>
+<t tx="felix.20211026230613.82"></t>
+<t tx="felix.20211026230613.83">/**
+ * The default do-nothing redo helper.
+ */
+public redoHelper(): void {
+    // pass
+}
+</t>
+<t tx="felix.20211026230613.84">public redoChangeBody(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    // selectPosition causes recoloring, so don't do this unless needed.
+    if (!c.p.__eq__(u.p!)) {
+        // #1333.
+        c.selectPosition(u.p!);
+    }
+    u.p!.setDirty();
+    u.p!.b = u.newBody;
+    u.p!.h = u.newHead;
+
+    // This is required so. Otherwise redraw will revert the change!
+    c.frame.tree.setHeadline(u.p!, u.newHead);
+
+    if (u.newMarked) {
+        u.p!.setMarked();
+    } else {
+        u.p!.clearMarked();
+    }
+    if (w &amp;&amp; u.groupCount === 0) {
+        if (w.setAllText) {
+            w.setAllText(u.newBody);
+        }
+        if (w.setSelectionRange) {
+            w.setSelectionRange(u.newSel[0], u.newSel[1], u.newIns);
+        }
+        if (w.setYScrollPosition) {
+            w.setYScrollPosition(u.newYScroll);
+        }
+        let i, j;
+        [i, j] = u.newSel;
+        w.setSelectionRange(i, j, u.newIns);
+        w.setYScrollPosition(u.newYScroll);
+        // c.frame.body.recolor(u.p);
+    }
+    u.updateMarks('new');
+    u.p!.setDirty();
+}
+</t>
+<t tx="felix.20211026230613.85">public redoChangeHeadline(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    // selectPosition causes recoloring, so don't do this unless needed.
+    if (!c.p.__eq__(u.p!)) {
+        // #1333.
+        c.selectPosition(u.p!);
+    }
+    u.p!.setDirty();
+    // c.frame.body.recolor(u.p!);
+    // Restore the headline.
+    u.p!.initHeadString(u.newHead);
+
+    // This is required so.  Otherwise redraw will revert the change!
+    c.frame.tree.setHeadline(u.p!, u.newHead);
+}
+</t>
+<t tx="felix.20211026230613.87">public redoCloneMarkedNodes(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    c.selectPosition(u.p!);
+    c.cloneMarked();
+    u.newP = c.p;
+}
+</t>
+<t tx="felix.20211026230613.88">public redoCopyMarkedNodes(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    c.selectPosition(u.p!);
+    c.copyMarked();
+    u.newP = c.p;
+}
+</t>
+<t tx="felix.20211026230613.89">public redoCloneNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const cc: ChapterController = c.chapterController;
+    if (cc) {
+        cc.selectChapterByName('main');
+    }
+    if (u.newBack.__bool__()) {
+        u.newP._linkAfter(u.newBack);
+    } else if (u.newParent.__bool__()) {
+        u.newP._linkAsNthChild(u.newParent, 0);
+    } else {
+        u.newP._linkAsRoot();
+    }
+    c.selectPosition(u.newP);
+    u.newP.setDirty();
+}
+</t>
+<t tx="felix.20211026230613.9">public clearOptionalIvars(): void {
+    const u: Undoer = this;
+    u.p = undefined; // The position/node being operated upon for undo and redo.
+
+    // for(let ivar in u.optionalIvars){
+    //     delete u.optionalIvars[ivar];
+    //     // ivar = undefined;
+    // }
+    u.optionalIvars.splice(0, u.optionalIvars.length);
+}
+</t>
+<t tx="felix.20211026230613.90">public redoDeleteMarkedNodes(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    c.selectPosition(u.p!);
+    c.deleteMarked();
+    c.selectPosition(u.newP);
+}
+</t>
+<t tx="felix.20211026230613.91">public redoDeleteNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+
+    const newP: Position = u.newP &amp;&amp; u.newP.v ? u.newP.copy() : c.p.copy();
+
+    c.selectPosition(u.p!);
+    c.deleteOutline();
+    if (c.positionExists(newP)) {  // PR #4991.
+        c.p = newP;
+    }
+}
+</t>
+<t tx="felix.20211026230613.92">public redoDemote(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const parent_v: VNode = u.p!._parentVnode();
+    const n: number = u.p!.childIndex();
+
+    // Move the demoted nodes from the old parent to the new parent.
+    parent_v.children = parent_v.children.slice(0, n + 1);
+
+    u.p!.v.children.push(...u.followingSibs);
+    // Adjust the parent links of the moved nodes.
+    // There is no need to adjust descendant links.
+    for (let v of u.followingSibs) {
+        // v.parents.remove(parent_v);
+        const i_parent_v: number = v.parents.indexOf(parent_v);
+        if (i_parent_v &gt; -1) {
+            v.parents.splice(i_parent_v, 1);
+        }
+        v.parents.push(u.p!.v);
+    }
+    u.p!.setDirty();
+    c.p = u.p!;
+}
+</t>
+<t tx="felix.20211026230613.93">/**
+ * Process beads until the matching 'afterGroup' bead is seen.
+ */
+public redoGroup(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    // Remember these values.
+    const newSel: number[] = u.newSel;
+
+    u.groupCount += 1;
+    const bunch: Bead = u.beads[u.bead + 1];
+    let count: number = 0;
+    if (!bunch['items']) {
+        g.trace(
+            `oops: expecting bunch.items. got bunch.kind = ${bunch.kind}`
+        );
+        g.trace(bunch);
+    } else {
+        for (let z of bunch.items) {
+            u.setIvarsFromBunch(z);
+            if (z.redoHelper) {
+                z.redoHelper.bind(u)(); // Properly bound to undoer instead of bunch
+                count += 1;
+            } else {
+                g.trace(`oops: no redo helper for ${u.undoType} ${u.p?.h}`);
+            }
+        }
+    }
+    u.groupCount -= 1;
+    u.updateMarks('new'); // Bug fix: Leo 4.4.6.
+    if (!g.unitTesting &amp;&amp; u.verboseUndoGroup) {
+        g.es('redo', count, 'instances');
+    }
+    // PR #4991: Helpers set dirty bits and c.p. Do not set c.p here!
+
+    // Set the selection, independently of helpers.
+    if (newSel &amp;&amp; newSel.length) {
+        let i, j;
+        [i, j] = newSel;
+        c.frame.body.wrapper.setSelectionRange(i, j);
+    }
+}
+</t>
+<t tx="felix.20211026230613.94">public redoHoistNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    u.p!.setDirty();
+    c.selectPosition(u.p!);
+    c.hoist();
+}
+public redoDehoistNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    u.p!.setDirty();
+    c.selectPosition(u.p!);
+    c.dehoist();
+}
+</t>
+<t tx="felix.20211026230613.95">public redoInsertNode(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const cc: ChapterController = c.chapterController;
+    if (cc) {
+        cc.selectChapterByName('main');
+    }
+    if (u.newBack.__bool__()) {
+        u.newP._linkAfter(u.newBack);
+    } else if (u.newParent.__bool__()) {
+        u.newP._linkAsNthChild(u.newParent, 0);
+    } else {
+        u.newP._linkAsRoot();
+    }
+    if (u.pasteAsClone) {
+        for (let bunch of u.afterTree) {
+            const v: VNode = bunch.v;
+            if (u.newP.v.gnx === v.gnx) {
+                u.newP.b = bunch.body;
+                u.newP.h = bunch.head;
+            } else {
+                v.setBodyString(bunch.body);
+                v.setHeadString(bunch.head);
+            }
+        }
+    }
+    u.newP.setDirty();
+    c.selectPosition(u.newP);
+}
+</t>
+<t tx="felix.20211026230613.96">public redoMark(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    u.updateMarks('new');
+    if (u.groupCount === 0) {
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
+    }
+}
+</t>
+<t tx="felix.20211026230613.97">public redoMove(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const cc: ChapterController = c.chapterController;
+    const v: VNode = u.p!.v;
+    g.assert(u.oldParent_v);
+    g.assert(u.newParent_v);
+    g.assert(v);
+    if (cc) {
+        cc.selectChapterByName('main');
+    }
+    // Adjust the children arrays of the old parent.
+    g.assert(u.oldParent_v.children[u.oldN] === v);
+
+    // del u.oldParent_v.children[u.oldN]
+    u.oldParent_v.children.splice(u.oldN, 1);
+    u.oldParent_v.setDirty();
+    // Adjust the children array of the new parent.
+    const parent_v: VNode = u.newParent_v;
+
+    // parent_v.children.insert(u.newN, v)
+    parent_v.children.splice(u.newN, 0, v);
+
+    v.parents.push(u.newParent_v);
+
+    // v.parents.remove(u.oldParent_v)
+    const index = v.parents.indexOf(u.oldParent_v);
+    if (index &gt; -1) {
+        v.parents.splice(index, 1);
+    }
+
+    u.newParent_v.setDirty();
+    //
+    u.updateMarks('new');
+    u.newP.setDirty();
+    c.selectPosition(u.newP);
+}
+</t>
+<t tx="felix.20211026230613.98">public redoNodeContents(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const w: StringTextWrapper = c.frame.body.wrapper;
+    // selectPosition causes recoloring, so don't do this unless needed.
+    if (!c.p.__eq__(u.p!)) {
+        // #1333.
+        c.selectPosition(u.p!);
+    }
+    u.p!.setDirty();
+    // Restore the body.
+    u.p!.setBodyString(u.newBody);
+    w.setAllText(u.newBody);
+
+    // c.frame.body.recolor(u.p!);
+
+    // Restore the headline.
+    u.p!.initHeadString(u.newHead);
+
+    // This is required so.  Otherwise redraw will revert the change!
+    c.frame.tree.setHeadline(u.p!, u.newHead); // New in 4.4b2.
+
+    if (u.groupCount === 0 &amp;&amp; u.newSel &amp;&amp; u.newSel.length) {
+        let i, j;
+        [i, j] = u.newSel;
+        w.setSelectionRange &amp;&amp; w.setSelectionRange(i, j);
+    }
+    if (u.groupCount === 0 &amp;&amp; (u.newYScroll || u.newYScroll === 0)) {
+        w.setYScrollPosition &amp;&amp; w.setYScrollPosition(u.newYScroll);
+    }
+    u.updateMarks('new');
+    u.p!.setDirty();
+}
+</t>
+<t tx="felix.20211026230613.99">public redoPromote(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const parent_v: VNode = u.p!._parentVnode();
+    // Add the children to parent_v's children.
+    let n: number = u.p!.childIndex() + 1;
+    const old_children: VNode[] = [...parent_v.children];
+    parent_v.children = old_children.slice(0, n);
+    // Add children up to the promoted nodes.
+    parent_v.children.push(...u.children);
+    // Add the promoted nodes.
+    parent_v.children.push(...old_children.slice(n));
+    // Add the children up to the promoted nodes.
+    // Remove the old children.
+    u.p!.v.children = [];
+    // Adjust the parent links in the moved children.
+    // There is no need to adjust descendant links.
+    for (let child of u.children) {
+        // child.parents.remove(u.p.v);
+        const index = child.parents.indexOf(u.p!.v);
+        if (index &gt; -1) {
+            child.parents.splice(index, 1);
+        }
+        child.parents.push(parent_v);
+    }
+    u.p!.setDirty();
+    c.p = u.p!;
+}
+</t>
+<t tx="felix.20211028004540.1">export interface Bead {
+    [key: string]: any;
+}
+
+interface TreeData extends Array&lt;VNode | any | any&gt; {
+    0: VNode;
+    1: any;
+}
+</t>
 <t tx="felix.20211030165058.1"></t>
 <t tx="felix.20211117232843.1">{
   "command": "leojs.undoFromOutline",
@@ -9435,6 +11783,14 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     'insert-node-before': 'async-insert-node-before',
 };
 
+</t>
+<t tx="felix.20220104010834.1">import * as g from './leoGlobals';
+import { new_cmd_decorator } from './decorators';
+import { Position, VNode } from './leoNodes';
+import { Commands } from './leoCommands';
+import { ChapterController } from './leoChapters';
+import { StringTextWrapper } from './leoFrame';
+import { FastRead } from './leoFileCommands';
 </t>
 <t tx="felix.20220107223824.1">public runOpenFileDialog(
     c: Commands | undefined,
@@ -15732,6 +18088,98 @@ private _addToMinibufferHistory(p_command: vscode.QuickPickItem): void {
     &lt;/tr&gt;
 &lt;/table&gt;
 </t>
+<t tx="felix.20230331230459.1">/**
+ * Create an undo node using d created by beforeChangeMultiHeadline.
+ */
+public afterChangeMultiHeadline(command: string, bunch: Bead): void {
+    const u: Undoer = this;
+    const c: Commands = this.c;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    // Set the type &amp; helpers.
+    bunch.kind = 'multipleHeadline';
+    bunch.undoType = command;
+    bunch.undoHelper = u.undoChangeMultiHeadline;
+    bunch.redoHelper = u.redoChangeMultiHeadline;
+    const oldHeadlines = bunch.headlines;
+    const newHeadlines: { [key: string]: [string, string | undefined] } =
+        {};
+    for (const p of c.all_unique_positions()) {
+        if (p.h !== oldHeadlines[p.gnx][0]) {
+            newHeadlines[p.gnx] = [oldHeadlines[p.gnx][0], p.h];
+        }
+    }
+    // Filtered down dict containing only the changed ones.
+    bunch.headlines = newHeadlines;
+    u.pushBead(bunch);
+}
+// afterChangeMultiHead = afterChangeMultiHeadline // TODO (not used) !
+</t>
+<t tx="felix.20230331230548.1">/**
+ * Return data that gets passed to afterChangeMultiHeadline.
+ * p is used to select position after undo/redo multiple headline changes is done
+ */
+public beforeChangeMultiHeadline(p: Position): Bead {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const bunch: Bead = u.createCommonBunch(p);
+    const headlines: { [key: string]: [string, string | undefined] } = {};
+    for (const p of c.all_unique_positions()) {
+        headlines[p.gnx] = [p.h, undefined];
+    }
+    // contains all, but will get reduced by afterChangeMultiHeadline
+    bunch.headlines = headlines;
+    return bunch;
+}
+</t>
+<t tx="felix.20230331230645.1">public redoChangeMultiHeadline(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    // c.frame.body.recolor(u.p);
+    // Swap the ones from the 'bunch.headline' dict
+    for (const [gnx, oldNewTuple] of Object.entries(u.headlines)) {
+        const v = c.fileCommands.gnxDict[gnx];
+        v.initHeadString(oldNewTuple[1]!);
+        if (u.p &amp;&amp; v.gnx === u.p.gnx) {
+            u.p.setDirty();
+            // This is required.  Otherwise redraw will revert the change!
+            c.frame.tree.setHeadline(u.p, oldNewTuple[1]!);
+        }
+    }
+
+    // selectPosition causes recoloring, so don't do this unless needed.
+    if (!c.p.__eq__(u.p) &amp;&amp; u.p) {
+        // #1333.
+        c.selectPosition(u.p);
+    }
+}
+</t>
+<t tx="felix.20230331230746.1">/**
+ * Undo a change to a node's headline.
+ */
+public undoChangeMultiHeadline(): void {
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    // selectPosition causes recoloring, so don't do this unless needed.
+    // c.frame.body.recolor(u.p)
+    // Swap the ones from the 'bunch.headline' dict
+    for (const [gnx, oldNewTuple] of Object.entries(u.headlines)) {
+        const v = c.fileCommands.gnxDict[gnx];
+        v.initHeadString(oldNewTuple[0]);
+        if (u.p &amp;&amp; v.gnx === u.p.gnx) {
+            u.p.setDirty();
+            // This is required.  Otherwise redraw will revert the change!
+            c.frame.tree.setHeadline(u.p, oldNewTuple[0]);
+        }
+    }
+    //
+    if (!c.p.__eq__(u.p) &amp;&amp; u.p) {
+        // #1333.
+        c.selectPosition(u.p);
+    }
+}
+</t>
 <t tx="felix.20230403223923.1">/**
  * Currently selected can de-hoist state
  */
@@ -15760,6 +18208,102 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
 </t>
 <t tx="felix.20230715185802.1"></t>
 <t tx="felix.20230715185809.1"></t>
+<t tx="felix.20230717215351.1">/**
+ * Clear all undo state and issue a warning.
+ *
+ * All non-undoable commands should call this method.
+ */
+public clearAndWarn(command_name: string): void {
+    const u = this;
+    u.last_undoable_command_name = command_name;
+    u.clearUndoState();
+}
+</t>
+<t tx="felix.20230717220137.1">/**
+ * Redo the parse-body command.
+ */
+public redoParseBody(): void {
+
+    const u: Undoer = this;
+    const c: Commands = u.c;
+    const ic = c.importCommands;
+    const p = u.p!;
+    if (!c.p.__eq__(p)) {
+        c.selectPosition(p);
+    }
+    ic.parse_body(p);
+
+}
+</t>
+<t tx="felix.20230717220329.1">/**
+ * Restore p.b and delete all children.
+ */
+public undoParseBody(): void {
+
+    const u = this;
+    const c = u.c;
+    const p = u.p!;
+    const w = c.frame.body.wrapper;
+    p.deleteAllChildren();
+    c.selectPosition(p);
+    p.setDirty();
+    p.b = u.oldBody;
+    w.setAllText(u.oldBody);
+    w.setSelectionRange(0, 0, 0);
+    w.setYScrollPosition(0);
+}
+</t>
+<t tx="felix.20230730204242.1">public restoreFromCopiedTree(v: VNode, s: string): void {
+    &lt;&lt; docstring: restoreFromCopiedTree &gt;&gt;
+    const c = this.c;
+    const u = this;
+    const fc = c.fileCommands;
+    if (!(v instanceof VNode)) {
+        // @ts-expect-error
+        g.trace(`Can't happen: not a vnode: ${v.toString()}`);
+        return;
+    }
+    const old_parents = [...v.parents];  // Essential.
+
+    // This encoding must match the encoding used in outline_to_clipboard_string.
+    const encoding = fc.leo_file_encoding;
+
+    // Create a tree of vnodes from s.
+    const x = new FastRead(c, fc.gnxDict);  // Must use fc.gnxDict.
+    fc.initReadIvars();
+    const s_bytes = g.toEncodedString(s, encoding, true);
+    const hidden_v = x.readFileFromClipboard(s_bytes);
+    fc.initReadIvars();
+    if (!hidden_v) {
+        u.clearAndWarn('undo-change-tree');
+        return;
+    }
+    // The big switcharoo: change v in place.
+    const new_v = hidden_v.children[0];
+    new_v.parents = old_parents;  // restore v.parents.
+    g.assert(v.gnx === new_v.gnx);
+    v = new_v;  // Experimental.
+
+    // All pasted nodes should have unique gnx's.
+    const ni = g.app.nodeIndices!;
+    for (const v of c.all_unique_nodes()) {
+        ni.check_gnx(c, v.fileIndex, v);
+    }
+}
+</t>
+<t tx="felix.20230730204242.2">/*
+c.restoreFromCopiedTree: restore v from a copied tree.
+
+This is a low-level method. See u.undo/redoChangeTree for examples.
+
+The caller is responsible for:
+
+- Calling c.endEditing.
+- Setting c.p correctly.
+- Updating selection range and y-scroll position in c.frame.body.wrapper.
+- Calling c.redraw.
+*/
+</t>
 <t tx="felix.20230820145332.1">/**
  * * Cycle opened documents
  */
@@ -15877,6 +18421,40 @@ set leoEditHeadline(p_value: boolean) {
     // pass // Nothing more needs to be done once all windows have been destroyed.
 }
 
+</t>
+<t tx="felix.20231123235346.1">public afterClearRecentFiles(bunch: Bead): Bead {
+    const u = this;
+    bunch.newRecentFiles = g.app.config.recentFiles.slice();
+    bunch.undoType = 'Clear Recent Files';
+    bunch.undoHelper = u.undoClearRecentFiles;
+    bunch.redoHelper = u.redoClearRecentFiles;
+    u.pushBead(bunch);
+    return bunch;
+}
+</t>
+<t tx="felix.20231123235410.1">public beforeClearRecentFiles(): Bead {
+    const u = this;
+    const p = u.c.p;
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.oldRecentFiles = g.app.config.recentFiles.slice();
+    return bunch;
+}
+</t>
+<t tx="felix.20231123235503.1">public undoClearRecentFiles(): void {
+    const c = this.c;
+    const u = this;
+    const rf = g.app.recentFilesManager;
+    rf.setRecentFiles(u.oldRecentFiles.slice());
+    rf.createRecentFilesMenuItems(c);
+}
+</t>
+<t tx="felix.20231123235536.1">public redoClearRecentFiles(): void {
+    const c = this.c;
+    const u = this;
+    const rf = g.app.recentFilesManager;
+    rf.setRecentFiles(u.newRecentFiles.slice());
+    rf.createRecentFilesMenuItems(c);
+}
 </t>
 <t tx="felix.20231127195758.1">public setConfirmBeforeClose(p_state: boolean): Thenable&lt;void&gt; {
     return vscode.workspace.getConfiguration("window")
@@ -17612,6 +20190,43 @@ public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
 }
 
 </t>
+<t tx="felix.20231227215945.1">public afterChangeUA(p: Position, command: string, bunch: Bead) {
+    const u = this;
+    if (u.redoing || u.undoing) {
+        return;
+    }
+    bunch.undoType = command;
+    bunch.newUA = p.v.u;
+    bunch.undoHelper = u.undoChangeUA;
+    bunch.redoHelper = u.redoChangeUA;
+    u.pushBead(bunch);
+}
+
+</t>
+<t tx="felix.20231227220022.1">public beforeChangeUA(p: Position) {
+    const u = this;
+    const bunch: Bead = u.createCommonBunch(p);
+    bunch.oldUA = p.v.u;
+    return bunch;
+}
+
+</t>
+<t tx="felix.20231227220055.1">public redoChangeUA() {
+    const u = this;
+    const v = u.p!.v;
+    v.setDirty();
+    v.u = u.newUA;
+}
+
+</t>
+<t tx="felix.20231227220123.1">public undoChangeUA() {
+    const u = this;
+    const v = u.p!.v;
+    v.setDirty();
+    v.u = u.oldUA;
+}
+
+</t>
 <t tx="felix.20231231203518.1">/**
  * Checks if Session per workspace is true, if so returns unl list
  * Undefined otherwise.
@@ -17619,7 +20234,8 @@ public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
  */
 public getWorkspaceSession(): string[] | undefined {
     if (this.config.sessionPerWorkspace) {
-        return this._context.workspaceState.get(Constants.LAST_FILES_KEY) || [];
+        const workspaceSession: string[] | undefined = this._context.workspaceState.get(Constants.LAST_FILES_KEY);
+        return workspaceSession || [];
     } else {
         return undefined;
     }
@@ -18260,7 +20876,7 @@ public async openAside(p?: Position): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20240401213604.1" _mod_time="46313737373335313038382e3932310a2e">import * as vscode from "vscode";
+<t tx="felix.20240401213604.1" _mod_time="46313739343136393730372e3336340a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import * as path from 'path';
@@ -18414,7 +21030,7 @@ export class LeoBodyDetachedProvider implements vscode.FileSystemProvider {
     private _onDidChangeFileEmitter = new vscode.EventEmitter&lt;vscode.FileChangeEvent[]&gt;();
     readonly onDidChangeFile: vscode.Event&lt;vscode.FileChangeEvent[]&gt; = this._onDidChangeFileEmitter.event;
     private _bufferedEvents: vscode.FileChangeEvent[] = [];
-    private _fireSoonHandle?: NodeJS.Timer;
+    private _fireSoonHandle?: NodeJS.Timeout;
 
     constructor(private _leoUi: LeoUI) { }
 
@@ -21997,6 +24613,1131 @@ public doArrow(key: "Up" | "Down") {
 
 - Added promote-to-at-others and promote-section-def commands as per Leo's original PR #4991
 
+</t>
+<t tx="felix.20261107191026.1">"""
+Leo's undo/redo manager.
+
+For the Theory of Operation, see Leo's appendices:
+https://leo-editor.github.io/leo-editor/appendices.html
+"""
+
+&lt;&lt; leoUndo imports &amp; annotations &gt;&gt;
+
+
+def cmd(name: str) -&gt; Callable:
+    """Command decorator for the Undoer class."""
+    return g.new_cmd_decorator(name, ['c', 'undoer'])
+
+
+@others
+@language python
+@tabwidth -4
+@pagewidth 70
+</t>
+<t tx="felix.20261107191026.10">def add_redraw_after_head_changed(self) -&gt; None:
+
+    c = self.c
+
+    # A single finisher suffices.
+    def redraw_after_head_changed_finisher() -&gt; None:
+        c.redraw_after_head_changed()
+
+    self.add_redraw_finishers(
+        redraw_after_head_changed_finisher, redraw_after_head_changed_finisher
+    )
+
+</t>
+<t tx="felix.20261107191026.11">def redo(self) -&gt; None:
+    c = self.c
+    for f in self.redo_functions:
+        f()
+    if self.redraw_finishers:
+        self.redraw_finishers[0]()
+    for f in self.redo_finishers:
+        f()
+    c.setChanged()  # Elegant!
+
+</t>
+<t tx="felix.20261107191026.12">def add_helpers(self, redo_function: Callable, undo_function: Callable) -&gt; None:
+    """Append the helpers (in correct order!) to the undo/redo lists."""
+    if self.undoer.capture_level:
+        return  # The enclosing snapshot records the complete operation.
+    self.redo_functions.append(redo_function)
+    self.undo_functions.insert(0, undo_function)  # Execute in reverse order.
+
+def add_finishers(self, redo_finisher: Callable, undo_finisher: Callable) -&gt; None:
+    """Append the helpers (in correct order!) to the undo/redo lists."""
+    if self.undoer.capture_level:
+        return
+    self.redo_finishers.append(redo_finisher)
+    self.undo_finishers.append(undo_finisher)  # Execute in given order.
+
+</t>
+<t tx="felix.20261107191026.13">def undo(self) -&gt; None:
+    c = self.c
+    for f in self.undo_functions:
+        f()
+    if self.redraw_finishers:
+        self.redraw_finishers[1]()
+    for f in self.undo_finishers:
+        f()
+    # A save may have occurred since this bead was created.
+    c.setChanged()
+
+</t>
+<t tx="felix.20261107191026.2">from __future__ import annotations
+from collections.abc import Callable, Generator
+from contextlib import contextmanager
+from copy import deepcopy
+from typing import cast, Self, TYPE_CHECKING
+from types import TracebackType
+from leo.core import leoGlobals as g
+from leo.core.leoNodes import Position, VNode
+
+if TYPE_CHECKING:  # pragma: no cover
+    from leo.core.leoCommands import Commands as Cmdr
+    from leo.core.leoGui import LeoKeyEvent
+    from leo.plugins.qt_text import QTextMixin
+
+
+</t>
+<t tx="felix.20261107191026.22">class Undoer:
+    """A class that implements unlimited undo and redo."""
+
+    &lt;&lt; class Undoer: __slots__ &gt;&gt;
+
+    @others
+
+
+</t>
+<t tx="felix.20261107191026.23">__slots__ = (
+    'bead',
+    'beads',
+    'c',
+    'capture_level',
+    'groupCount',
+    'inHead',
+    'max_undo_stack_size',
+    'node_captures',
+    'p',
+    'realRedoMenuLabel',
+    'realUndoMenuLabel',
+    'redoMenuLabel',
+    'redoing',
+    'undoBead',
+    'undoBeadLevel',
+    'undoMenuLabel',
+    'undoType',
+    'undoing',
+)
+</t>
+<t tx="felix.20261107191026.24">def __init__(self, c: Cmdr) -&gt; None:
+    self.c = c
+    # State.
+    self.bead = -1  # Index of the present bead.
+    self.beads: list[UndoBead] = []  # List of undo nodes.
+    self.capture_level = 0
+    self.groupCount = 0
+    self.inHead = False
+    self.max_undo_stack_size = c.config.getInt('max-undo-stack-size') or 0
+    self.node_captures: set[VNode] = set()
+    self.p = cast(Position, None)
+    self.realRedoMenuLabel = "Can't Redo"
+    self.realUndoMenuLabel = "Can't Undo"
+    self.redoMenuLabel = "Can't Redo"
+    self.redoing = False
+    self.undoBead: UndoBead | None = None
+    self.undoBeadLevel = 0
+    self.undoMenuLabel = "Can't Undo"
+    self.undoType = "Can't Undo"
+    self.undoing = False
+
+</t>
+<t tx="felix.20261107191026.25"></t>
+<t tx="felix.20261107191026.26"># Translation does not affect these routines.
+
+def canRedo(self) -&gt; bool:
+    u = self
+    return u.redoMenuLabel != "Can't Redo"
+
+def canUndo(self) -&gt; bool:
+    u = self
+    return u.undoMenuLabel != "Can't Undo"
+
+</t>
+<t tx="felix.20261107191026.27">def clearAndWarn(self, command_name: str) -&gt; None:
+    """
+    Clear all undo state, but *only* if we aren't in an undo-related `with` block.
+    """
+    u = self
+    if u.undoBeadLevel == 0:  # PR #5025
+        # We aren't in undo code.
+        u.clearUndoState()
+        # This message would be annoying.
+        # g.es_print_unique_message(f"{command_name} is not undoable")
+
+</t>
+<t tx="felix.20261107191026.28">def clearUndoState(self) -&gt; None:
+    """Clears the entire Undo state."""
+    u = self
+    u.setRedoType("Can't Redo")
+    u.setUndoType("Can't Undo")
+    u.beads = []
+    u.bead = -1
+
+</t>
+<t tx="felix.20261107191026.29">@cmd('redo')
+def redo(self, event: LeoKeyEvent | None = None) -&gt; None:
+    """Redo the operation undone by the last undo."""
+    u = self
+    c = u.c
+    if not c.p:
+        return
+    # End editing *before* getting state.
+    c.endEditing()
+    if not u.canRedo():
+        return
+    obj = u.getBead(u.bead + 1)
+    if not obj:
+        return
+
+    # Init status.
+    u.redoing = True
+    u.groupCount = 0
+
+    # Dispatch.
+    try:
+        if isinstance(obj, UndoBead):
+            obj.redo()
+        else:
+            g.es_print_unique_message(f"no redo helper for {u.kind} {u.undoType}")
+        c.checkOutline()
+    finally:
+        u.redoing = False
+    u.bead += 1
+    u.setUndoTypes()
+
+</t>
+<t tx="felix.20261107191026.3">class UndoBead:
+    &lt;&lt; UndoBead: slots &gt;&gt;
+
+    def __repr__(self) -&gt; str:
+        return f"UndoBead: {self.command_name or '&lt;no command_name&gt;'}"
+
+    @others
+
+</t>
+<t tx="felix.20261107191026.32">@cmd('undo')
+def undo(self, event: LeoKeyEvent | None = None) -&gt; None:
+    """Undo the operation described by the undo parameters."""
+    u = self
+    c = u.c
+    if not c.p:
+        g.trace('no current position')
+        return
+    # End editing *before* getting state.
+    c.endEditing()
+    if not u.canUndo():
+        return
+    obj = u.getBead(u.bead)
+    if not obj:
+        return
+
+    # Init status.
+    u.undoing = True
+    u.groupCount = 0
+
+    # Dispatch.
+    try:
+        if isinstance(obj, UndoBead):
+            obj.undo()
+        else:
+            g.es_print_unique_message(f"no undo helper for {u.kind} {u.undoType}")
+        c.checkOutline()
+    finally:
+        u.undoing = False
+    u.bead -= 1
+    u.setUndoTypes()
+
+</t>
+<t tx="felix.20261107191026.33"></t>
+<t tx="felix.20261107191026.34">def clone_node(self, p: Position) -&gt; Position:
+    """Clone p, returning and selecting the new occurrence."""
+    u = self
+    b = u._require_bead()
+    c = u.c
+    old_p = p.copy()
+    clone = p.clone()
+
+    # Do the action.
+    clone.setDirty()
+    c.p = clone
+    clone_p = clone.copy()
+    clone_p.setAllAncestorAtFileNodesDirty()
+
+    def clone_redoer() -&gt; None:
+        clone_p._linkAfter(old_p)
+        clone_p.setDirty()
+        c.p = clone_p
+
+    def clone_undoer() -&gt; None:
+        clone_p.doDelete(old_p)
+        c.p = old_p
+
+    b.add_helpers(clone_redoer, clone_undoer)
+    return clone
+
+</t>
+<t tx="felix.20261107191026.35">def delete_node(self, p: Position) -&gt; None:
+    """Delete p without scheduling a redraw; retain its original links."""
+    u = self
+    b = u._require_bead()
+    c = u.c
+    old_p = p.copy()
+    old_back, old_parent = p.back(), p.parent()
+    new_p = p.visBack(c) if p.hasVisBack(c) else p.next()
+    if not new_p:
+        g.trace("Can not delete the outline's only node")
+        return
+
+    # Do the action.
+    old_p.doDelete(new_p)
+    c.p = new_p
+    new_p.setDirty()
+    c.p.setAllAncestorAtFileNodesDirty()
+    c.checkOutline()
+
+    def delete_node_redoer() -&gt; None:
+        old_p.doDelete()
+        c.p = new_p
+
+    def delete_node_undoer() -&gt; None:
+        if old_back:
+            old_p._linkAfter(old_back)
+        elif old_parent:
+            old_p._linkAsNthChild(old_parent, 0)
+        else:
+            old_p._linkAsRoot()
+        old_p.setDirty()
+        c.p = old_p
+
+    if old_p.v not in u.node_captures:
+        b.add_helpers(delete_node_redoer, delete_node_undoer)
+
+</t>
+<t tx="felix.20261107191026.36">def insert_node(
+    self,
+    p: Position,
+    *,
+    as_child: bool = False,
+    index: int | None = None,
+    before: bool = False,
+) -&gt; Position:
+    """Insert a node once; redo relinks that same vnode, including its subtree."""
+    u = self
+    b = u._require_bead()
+    c = u.c
+    old_p = p.copy()
+    if before:
+        new_p = p.insertBefore()
+        # Inserting before p changes p's original index.
+    elif (
+        as_child
+        or p.hasChildren()
+        and p.isExpanded()
+        or c.hoistStack
+        and p == c.hoistStack[-1].p
+    ):
+        if index is None:
+            insert_at_end = c.config.getBool('insert-new-nodes-at-end')
+            index = p.numberOfChildren() if insert_at_end else 0
+        new_p = p.insertAsNthChild(index)
+    else:
+        new_p = p.insertAfter()
+
+    # Do the action.
+    new_p.setDirty()
+    c.p = new_p
+    parent = new_p.parent()
+    back = new_p.back()
+    saved = new_p.copy()
+    new_p.setAllAncestorAtFileNodesDirty()
+
+    def insert_node_redoer() -&gt; None:
+        if back:
+            saved._linkAfter(back)
+        elif parent:
+            saved._linkAsNthChild(parent, 0)
+        else:
+            saved._linkAsRoot()
+        saved.setDirty()
+        c.p = saved
+
+    def insert_node_undoer() -&gt; None:
+        saved.doDelete()
+        old_p.setAllAncestorAtFileNodesDirty()
+        c.p = old_p
+
+    b.add_helpers(insert_node_redoer, insert_node_undoer)
+    g.doHook('create-node', c=c, p=new_p)
+    return new_p
+
+</t>
+<t tx="felix.20261107191026.37">def set_body(
+    self,
+    new_p: Position,
+    new_body: str,
+    *,
+    old_body: str | None = None,
+) -&gt; None:
+    """Change p.b"""
+    u = self
+    b = u._require_bead()
+    c = u.c
+    w = c.frame.body.wrapper
+    if not g.isTextWrapper(w):
+        g.error(f"Not a text wrapper: {w=} {g.callers()}")
+        return
+
+    new_p = new_p.copy()
+    if old_body is None:
+        old_body = new_p.b
+    if old_body == new_body:
+        return
+
+    def set_body_update(p: Position, body: str) -&gt; None:
+        """Update p's data."""
+        # Set p.v.b, not p.b! The p.b setter clears the selection!
+        p.v.b = body
+        p.setDirty()
+        val = p.computeIcon()
+        if not hasattr(p.v, "iconVal") or val != p.v.iconVal:
+            p.v.iconVal = val
+        c.recolor(p)  # Only for QScintilla.
+        p.setAllAncestorAtFileNodesDirty()
+
+    # Do the action!
+    set_body_update(new_p, new_body)
+
+    if c.p == new_p and w.getAllText() != new_body:
+        sel, ins = w.getSelectionRange(), w.getInsertPoint()
+        w.setAllText(new_body)
+        w.setSelectionRange(*sel, insert=ins)
+
+    # Add helpers. Use distinct names for debugging.
+
+    def set_body_redoer() -&gt; None:
+        set_body_update(new_p, new_body)
+
+    def set_body_undoer() -&gt; None:
+        set_body_update(new_p, old_body)
+
+    if new_p.v not in u.node_captures:
+        b.add_helpers(set_body_redoer, set_body_undoer)
+
+</t>
+<t tx="felix.20261107191026.38">def set_command_name(self, command_name: str) -&gt; None:
+    u = self
+    b = u._require_bead()
+    assert isinstance(b, UndoBead), repr(b)
+    if u.undoBeadLevel == 1:
+        b.command_name = command_name
+        b.undoType = command_name
+        # Menu labels are updated when the completed bead is pushed.
+
+</t>
+<t tx="felix.20261107191026.39"></t>
+<t tx="felix.20261107191026.4">__slots__ = (
+    'c',
+    'command_name',
+    'old_p',
+    'redo_finishers',
+    'redo_functions',
+    'redraw_finishers',
+    'undoType',
+    'undo_finishers',
+    'undo_functions',
+    'undoer',
+)
+
+</t>
+<t tx="felix.20261107191026.40">def change_headline(self, p: Position, new_h: str, *, ch: str = '') -&gt; None:
+    """
+    Change a headline and preserve directives, dirty bits and editor state.
+
+    Called *only* from LeoTree.onHeadChanged
+
+    This method should *not* have an @contextmanager decorator:
+    it is never called from within other @contextmanager methods.
+    """
+    u = self
+    b = u._require_bead()
+    c = u.c
+    old_h = p.h
+    if old_h == new_h:
+        return
+
+    p = p.copy()
+
+    def update(head: str) -&gt; None:
+        c.p = p
+        p.initHeadString(head)
+        p.setDirty()  # Call p.v.setAllAncestorAtFileNodesDirty()
+        c.frame.tree.setHeadline(p, head)
+
+    # Do the action.
+    # Leave the live editor alone: it may contain multiline abbreviation text.
+    p.initHeadString(new_h)
+    p.setDirty()  # Call p.v.setAllAncestorAtFileNodesDirty()
+    c.frame.scanForTabWidth(p)
+    c.recolor(p)
+    g.doHook('headkey2', c=c, p=p, ch=ch, changed=True)
+
+    # Add helpers
+
+    def change_headline_redoer() -&gt; None:
+        update(new_h)
+
+    def change_headline_undoer() -&gt; None:
+        update(old_h)
+
+    b.add_helpers(change_headline_redoer, change_headline_undoer)
+    b.add_recolor(p, p)
+
+</t>
+<t tx="felix.20261107191026.41">@contextmanager
+def change_node(self, p: Position, command_name: str) -&gt; Generator[Undoer]:
+    """
+    Handle doing, undoing, and redoing changes to one node.
+
+    u.restore_node does the heavy lifting.
+    """
+    u = self
+    c = u.c
+    if u.undoing or u.redoing:
+        yield u
+        return
+    if not c.changed:
+        c.setChanged()
+    with u:
+        u.set_command_name(command_name)
+        if u.capture_level &gt; 0 or p.v in u.node_captures:
+            yield u
+            return
+        old_p = c.p
+        old_state = u.capture_node(p.v)
+        old_ui = u.capture_ui()
+        u.node_captures.add(p.v)
+        if old_p.v != c.p.v:
+            message = f"u.change_node changed p.v: {p.v.h=} {g.callers()=}"
+            g.es_print_unique_message(message)
+        try:
+            yield u
+        finally:
+            u.node_captures.remove(p.v)
+            new_p = c.p
+            new_state = u.capture_node(p.v)
+            if old_state != new_state:
+                u._redraw(new_p)  # PR #5027 Redraw only if node has changed.
+                new_ui = u.capture_ui()
+
+                def change_node_redoer() -&gt; None:
+                    u.restore_node(p.v, new_state)
+
+                def change_node_undoer() -&gt; None:
+                    u.restore_node(p.v, old_state)
+
+                u.undoBead.add_helpers(change_node_redoer, change_node_undoer)
+
+                def change_node_ui_redoer() -&gt; None:
+                    u.restore_ui(new_ui)
+                    u._redraw(new_p)
+
+                def change_node_ui_undoer() -&gt; None:
+                    u.restore_ui(old_ui)
+                    u._redraw(old_p)
+
+                u.undoBead.add_finishers(change_node_ui_redoer, change_node_ui_undoer)
+
+</t>
+<t tx="felix.20261107191026.42">@contextmanager
+def change_outline(self, command_name: str) -&gt; Generator[Undoer]:
+    """
+    Handle doing, undoing, and redoing changes throughout an outline.
+
+    Prefer u.change_node for actions affecting only a single node.
+
+    This method scans the entire outline, but creates minimal undo/redo data.
+    Despite the scan, this method is fast, taking about 0.04 sec. to scan LeoPyRef.leo.
+
+    u.restore_node does the heavy lifting of restoring all data.
+    """
+    u = self
+    c = u.c
+    if u.undoing or u.redoing:
+        yield u
+        return
+    if not c.changed:
+        c.setChanged()
+    with u:
+        u.set_command_name(command_name)
+        if u.capture_level &gt; 0:
+            yield u
+            return
+        assert not u.node_captures, "Use change_outline outside change_node for bulk edits"
+        old_p = c.p
+        old_state = u.capture_outline()
+        old_ui = u.capture_ui()
+        u.capture_level += 1
+        try:
+            yield u
+        finally:
+            u.capture_level -= 1
+            new_p = c.p  # PR #5005
+            u._redraw(new_p)  # PR #5005: calls new_p.setDirty()
+            new_state = u.capture_outline()
+            old_delta, new_delta = {}, {}
+            for v in old_state.keys() | new_state.keys():
+                old = old_state.get(v)
+                new = new_state.get(v)
+                if old is None:
+                    # Preserve the detached subtree's internal links on undo.
+                    old = (*new[:2], tuple(p for p in new[2] if p not in old_state))  # type:ignore
+                if new is None:
+                    new = (*old[:2], tuple(p for p in old[2] if p not in new_state))
+                if old != new:
+                    old_delta[v], new_delta[v] = old, new
+            if old_delta:
+                new_ui = u.capture_ui()
+
+                def change_outline_redoer() -&gt; None:
+                    u.restore_outline(new_delta)
+
+                def change_outline_undoer() -&gt; None:
+                    u.restore_outline(old_delta)
+
+                u.undoBead.add_helpers(change_outline_redoer, change_outline_undoer)
+
+                def change_outline_ui_redoer() -&gt; None:
+                    u.restore_ui(new_ui)
+                    u._redraw(new_p)  # Calls new_p.setDirty()
+
+                def change_outline_ui_undoer() -&gt; None:
+                    u.restore_ui(old_ui)
+                    u._redraw(old_p)  # Calls old_p.setDirty()
+
+                u.undoBead.add_finishers(change_outline_ui_redoer, change_outline_ui_undoer)
+
+</t>
+<t tx="felix.20261107191026.43">def capture_outline(self) -&gt; dict:
+    u = self
+    c = u.c
+    result = {}
+    pending = [c.hiddenRootNode]
+    while pending:
+        v = pending.pop()
+        if v in result:
+            continue
+        result[v] = u.capture_node(v), tuple(v.children), tuple(v.parents)
+        pending.extend(v.children)
+    return result
+
+</t>
+<t tx="felix.20261107191026.44">def restore_outline(self, delta: dict) -&gt; None:
+    # Restore every link before touching content or propagating dirty bits.
+    u = self
+    for v in delta:
+        v.setAllAncestorAtFileNodesDirty()
+    for v, (_, children, parents) in delta.items():
+        v.children = list(children)
+        v.parents = list(parents)
+    for v, (state, _, _) in delta.items():
+        u.restore_node(v, state)
+
+</t>
+<t tx="felix.20261107191026.45">@contextmanager
+def change_recent_files(self, command_name: str = 'Clear Recent Files') -&gt; Generator[Undoer]:
+    """
+    Handling doing, undoing and redoing for the 'Clear Recent Files' menu item."""
+    u = self
+    rf = g.app.recentFilesManager
+    old_files = rf.recentFiles[:]
+    with u:
+        u.set_command_name(command_name)
+        try:
+            yield u
+        finally:
+            new_files = rf.recentFiles[:]
+            if old_files != new_files:
+
+                def restore_recent_files(files: list[str]) -&gt; None:
+                    rf.recentFiles = files[:]
+                    for frame in g.app.windowList:
+                        rf.createRecentFilesMenuItems(frame.c)
+                    rf.writeRecentFilesFile(u.c)
+
+                def change_recent_files_redoer() -&gt; None:
+                    restore_recent_files(new_files)
+
+                def change_recent_files_undoer() -&gt; None:
+                    restore_recent_files(old_files)
+
+                u.undoBead.add_helpers(change_recent_files_redoer, change_recent_files_undoer)
+
+</t>
+<t tx="felix.20261107191026.46">@contextmanager
+def move_node(self, p: Position, command_name: str) -&gt; Generator[Undoer]:
+    """
+    Handle doing, undoing, and redoing moving a node.
+
+    The internal move function does the heavy lifting.
+    """
+    u = self
+    c = u.c
+    if u.undoing or u.redoing:
+        yield u
+        return
+    if not c.changed:
+        c.setChanged()
+    with u:
+        u.set_command_name(command_name)
+        if u.capture_level &gt; 0:
+            yield u
+            return
+        old_p, old_ui = p.copy(), u.capture_ui()
+        try:
+            yield u
+        finally:
+            new_p = p.copy()
+            if old_p.v != c.p.v:
+                message = f"u.move_node changed p.v: {p.v.h=} {g.callers()=}"
+                g.es_print_unique_message(message)
+            if old_p != new_p:
+                new_ui = u.capture_ui()
+                u._redraw(new_p)  # PR #5005: calls new_p.setDirty()
+
+                def move(source: Position, target: Position) -&gt; None:
+                    source.v._cutLink(source.childIndex(), source._parentVnode())
+                    target.v._addLink(target.childIndex(), target._parentVnode())
+                    # These call p.v.setAllAncestorAtFileNodesDirty()
+                    source.setDirty()
+                    target.setDirty()
+
+                def move_position_redoer() -&gt; None:
+                    move(old_p, new_p)
+
+                def move_position_undoer() -&gt; None:
+                    move(new_p, old_p)
+
+                u.undoBead.add_helpers(move_position_redoer, move_position_undoer)
+
+                def restore_ui_redoer() -&gt; None:
+                    u.restore_ui(new_ui)
+                    u._redraw(new_p)
+
+                def restore_ui_undoer() -&gt; None:
+                    u.restore_ui(old_ui)
+                    u._redraw(old_p)
+
+                u.undoBead.add_finishers(restore_ui_redoer, restore_ui_undoer)
+
+</t>
+<t tx="felix.20261107191026.47"></t>
+<t tx="felix.20261107191026.48">def capture_node(self, v: VNode) -&gt; tuple:
+    """
+    Record everything needed by u.restore_node.
+    """
+    return v.h, v.b, v.isMarked(), deepcopy(v.u)
+
+</t>
+<t tx="felix.20261107191026.49">def capture_ui(self) -&gt; tuple:
+    c = self.c
+    w = c.frame.body.wrapper
+    return c.p.copy(), w.getSelectionRange(), w.getInsertPoint(), w.getYScrollPosition()
+
+</t>
+<t tx="felix.20261107191026.5">def __init__(self, undoer: Undoer) -&gt; None:
+    # Let.
+    c = undoer.c
+    self.c = c
+    self.command_name = None
+    self.old_p = c.p.copy()
+    self.redo_finishers: list[Callable] = []
+    self.redo_functions: list[Callable] = []
+    self.redraw_finishers: tuple[Callable, Callable] | None = None
+    self.undoType = ''  # Required. Set by u.set_command_name
+    self.undo_finishers: list[Callable] = []
+    self.undo_functions: list[Callable] = []
+    self.undoer = undoer
+
+</t>
+<t tx="felix.20261107191026.50">def restore_node(self, v: VNode, state: tuple) -&gt; None:
+    """
+    Restore everything related to the given VNode:
+    - dirty bits, including calling setAllAncestorAtFileNodesDirty.
+    - marked bits.
+    - uAs.
+    - v.b
+    - v.h
+    """
+    u = self
+    c = u.c
+    head, body, marked, ua = state
+    head_changed = v.h != head
+    v.initHeadString(head)
+    v.setBodyString(body)
+    v.u = deepcopy(ua)
+    if marked:
+        v.setMarked()
+    else:
+        v.clearMarked()
+    val = v.computeIcon()
+    if not hasattr(v, "iconVal") or val != v.iconVal:
+        v.iconVal = val
+    v.setAllAncestorAtFileNodesDirty()
+    v.setDirty()
+
+    # Keep the headline editor from restoring stale text at the next redraw.
+    if head_changed:
+        for p in c.vnode2allPositions(v):
+            c.frame.tree.setHeadline(p, head)
+
+</t>
+<t tx="felix.20261107191026.51">def restore_ui(self, state: tuple) -&gt; None:
+    c = self.c
+    p, sel, ins, scroll = state
+    c.p = p
+    c.selectPosition(p)
+    c.frame.scanForTabWidth(c.p)
+    c.recolor(c.p)
+    w = c.frame.body.wrapper
+    w.setSelectionRange(*sel, insert=ins)
+    w.setYScrollPosition(scroll)
+
+</t>
+<t tx="felix.20261107191026.52"></t>
+<t tx="felix.20261107191026.53">def _redraw(self, p: Position) -&gt; None:
+    """Redraw now and choose the command's single undo/redo redraw."""
+    u = self
+    c = u.c
+    w = c.frame.body.wrapper
+    # Ignore redrawers in inner levels.
+    if u.undoBeadLevel &gt; 1:
+        return
+    p.setDirty()  # Call p.v.setAllAncestorAtFileNodesDirty()
+    preserve_body = p == c.p and p.b == w.getAllText()
+    if preserve_body:
+        sel, ins, scroll = w.getSelectionRange(), w.getInsertPoint(), w.getYScrollPosition()
+    c.updateSyntaxColorer(p)
+    c.recolor()
+    c.redraw(p)
+    if preserve_body:
+        w.setSelectionRange(*sel, insert=ins)
+        w.setYScrollPosition(scroll)
+
+</t>
+<t tx="felix.20261107191026.54">def redraw_after_head_changed(self) -&gt; None:
+    """Refresh headlines now and after undo/redo."""
+    u = self
+    u._require_bead()
+    c = u.c
+    # Ignore redrawers in inner levels.
+    if u.undoBeadLevel &gt; 1:
+        return
+    if not c.changed:
+        c.setChanged()
+    c.p.setDirty()  # p.setDirty() calls p.v.setAllAncestorAtFileNodesDirty()
+    c.redraw_after_head_changed()
+    u.undoBead.add_redraw_after_head_changed()
+
+</t>
+<t tx="felix.20261107191026.55">def redraw_and_edit(self, new_p: Position) -&gt; None:
+    """Redraw and edit now and after undo/redo."""
+    u = self
+    c = u.c
+    u._require_bead()
+    # Ignore redrawers in inner levels.
+    if u.undoBeadLevel &gt; 1:
+        return
+    if not c.changed:
+        c.setChanged()
+    c.p.setDirty()  # p.setDirty() calls p.v.setAllAncestorAtFileNodesDirty()
+    c.redrawAndEdit(new_p, selectAll=True)
+    u.undoBead.add_redraw_and_edit(new_p, self.undoBead.old_p)
+
+</t>
+<t tx="felix.20261107191026.56"></t>
+<t tx="felix.20261107191026.57">def __enter__(self) -&gt; Self:
+    """Compose nested operations into one bead, published on outermost exit."""
+    u = self
+    if u.undoBeadLevel == 0:
+        u.undoBead = UndoBead(u)
+    u.undoBeadLevel += 1
+    assert u.undoBead
+    return u
+
+def __exit__(
+    self,
+    exc_type: type[BaseException] | None,
+    exc_value: object,
+    traceback: TracebackType | None,
+) -&gt; None:
+    u = self
+    b = u.undoBead
+    assert b
+    u.undoBeadLevel -= 1
+    if u.undoBeadLevel:
+        return
+    u.undoBead = None
+    if b.undo_functions and not (u.undoing or u.redoing):
+        if not b.command_name:
+            raise AssertionError("Missing call to u.set_command_name")
+        # Record partial mutations even if the command raised an exception.
+        u.pushBead(b)
+
+</t>
+<t tx="felix.20261107191026.58">def _can_merge(
+    self,
+    *,
+    oldSel: tuple[int, int],
+    oldText: str,
+    newSel: tuple[int, int],
+    newText: str,
+) -&gt; bool:
+    """
+    Return True if we should merge changes into the previous UndoTyping node.
+    """
+    u = self
+    bead = u.peekBead(u.bead)
+    assert bead is None or isinstance(bead, UndoBead), repr(bead)
+    c = u.c
+    p = c.p
+    if (
+        not isinstance(bead, TypingBead)  # Intervening command.
+        or u.bead != len(u.beads) - 1     # Previous undo.
+        or bead.p.v != p.v                # Changed node.
+        or not c.changed                  # For unit tests.
+    ):  # fmt: skip
+        return False
+
+    # All lines *except* the current line must match.
+    leading, trailing, _, _ = TypingBead.split_patch(oldText, newText)
+    if (leading, trailing) != (bead.leading, bead.trailing):
+        return False
+
+    # The selection ranges must match.
+    if bead.new_sel is None:
+        return False
+    old_start, old_end = oldSel
+    new_start, new_end = newSel
+    if old_start != old_end or new_start != new_end:
+        return False
+
+    # The position of the lines must match.
+    old_row, old_col = g.convertPythonIndexToRowCol(oldText, old_start)
+    new_row, new_col = g.convertPythonIndexToRowCol(newText, new_start)
+    prev_row, prev_col = g.convertPythonIndexToRowCol(oldText, bead.new_sel[0])
+    if (
+        old_col == 0
+        or new_col == 0
+        or old_row != new_row
+        or abs(new_col - prev_col) != 1
+    ):  # fmt: skip
+        return False
+
+    # We must not be starting a new word.
+    old_ch = oldText[old_start - 1]
+    new_ch = newText[new_start - 1]
+    return not (not old_ch.isspace() and new_ch.isspace())
+
+</t>
+<t tx="felix.20261107191026.59">def _require_bead(self) -&gt; UndoBead:
+    """Reject helper calls outside a context before any mutation occurs."""
+    assert isinstance(self.undoBead, UndoBead), "Undo helper requires 'with c.undoer'"
+    return self.undoBead
+
+</t>
+<t tx="felix.20261107191026.6">def add_redraw_finishers(
+    self,
+    redo_redraw_finisher: Callable,
+    undo_redraw_finisher: Callable,
+) -&gt; None:
+
+    if self.redraw_finishers is not None:
+        message = f"u.redraw_finishers already exist: {g.callers()=}\n"
+        if g.unitTesting:
+            assert False, message
+        print()
+        g.trace()
+
+    self.redraw_finishers = redo_redraw_finisher, undo_redraw_finisher
+
+</t>
+<t tx="felix.20261107191026.60">def cutStack(self) -&gt; None:
+    u = self
+    n = u.max_undo_stack_size
+    if u.bead &gt;= n &gt; 0:
+        # This work regardless of how many items appear after bead n.
+        u.beads = u.beads[-n:]
+        u.bead = n - 1
+
+</t>
+<t tx="felix.20261107191026.61">def getBead(self, n: int) -&gt; UndoBead | None:
+    """Set Undoer ivars from the bead at the top of the undo stack."""
+    u = self
+    if n &lt; 0 or n &gt;= len(u.beads):
+        return None
+    return u.beads[n]
+
+</t>
+<t tx="felix.20261107191026.62">def peekBead(self, n: int) -&gt; UndoBead | None:
+    u = self
+    if n &lt; 0 or n &gt;= len(u.beads):
+        return None
+    return u.beads[n]
+
+</t>
+<t tx="felix.20261107191026.63">def pushBead(self, bead: UndoBead) -&gt; None:
+    u = self
+    u.bead += 1
+    u.beads[u.bead :] = [bead]
+    u.setUndoTypes()
+
+</t>
+<t tx="felix.20261107191026.64">def redoMenuName(self, name: str) -&gt; str:
+    if name.startswith("Can't Redo"):
+        return name
+    return "Redo " + name
+
+def undoMenuName(self, name: str) -&gt; str:
+    if name.startswith("Can't Undo"):
+        return name
+    return "Undo " + name
+
+</t>
+<t tx="felix.20261107191026.65"># These routines update both the ivar and the menu label.
+
+def setRedoType(self, theType: str) -&gt; None:
+    u = self
+    frame = u.c.frame
+    if not isinstance(theType, str):  # pragma: no cover
+        g.trace(f"oops: expected string for command, got {theType!r}")
+        g.trace(g.callers())
+        theType = '&lt;unknown&gt;'
+    menu = frame.menu.getMenu("Edit")
+    name = u.redoMenuName(theType)
+    if name != u.redoMenuLabel:
+        # Update menu using old name.
+        realLabel = frame.menu.getRealMenuName(name)
+        if realLabel == name:
+            underline = -1 if g.match(name, 0, "Can't") else 0
+        else:
+            underline = realLabel.find("&amp;")
+        realLabel = realLabel.replace("&amp;", "")
+        frame.menu.setMenuLabel(menu, u.realRedoMenuLabel, realLabel, underline=underline)
+        u.redoMenuLabel = name
+        u.realRedoMenuLabel = realLabel
+
+</t>
+<t tx="felix.20261107191026.66">def setUndoType(self, theType: str) -&gt; None:
+    u = self
+    frame = u.c.frame
+    if not isinstance(theType, str):
+        g.trace(f"oops: expected string for command, got {repr(theType)}")
+        g.trace(g.callers())
+        theType = '&lt;unknown&gt;'
+    menu = frame.menu.getMenu("Edit")
+    name = u.undoMenuName(theType)
+    if name != u.undoMenuLabel:
+        # Update menu using old name.
+        realLabel = frame.menu.getRealMenuName(name)
+        if realLabel == name:
+            underline = -1 if g.match(name, 0, "Can't") else 0
+        else:
+            underline = realLabel.find("&amp;")
+        realLabel = realLabel.replace("&amp;", "")
+        frame.menu.setMenuLabel(menu, u.realUndoMenuLabel, realLabel, underline=underline)
+        u.undoType = theType
+        u.undoMenuLabel = name
+        u.realUndoMenuLabel = realLabel
+
+</t>
+<t tx="felix.20261107191026.67">def setUndoTypes(self) -&gt; None:
+    u = self
+    # Set the undo type and undo menu label.
+    if bead := u.peekBead(u.bead):
+        u.setUndoType(bead.undoType)
+    else:
+        u.setUndoType("Can't Undo")
+    # Set only the redo menu label.
+    if bead := u.peekBead(u.bead + 1):
+        u.setRedoType(bead.undoType)
+    else:
+        u.setRedoType("Can't Redo")
+    u.cutStack()
+
+</t>
+<t tx="felix.20261107191026.7">def add_recolor(self, new_p: Position, old_p: Position) -&gt; None:
+
+    c = self.c
+    new_p = new_p.copy()
+    old_p = old_p.copy()
+
+    def recolor_redoer() -&gt; None:
+        c.frame.scanForTabWidth(new_p)
+        c.recolor(new_p)
+
+    def recolor_undoer() -&gt; None:
+        c.frame.scanForTabWidth(old_p)
+        c.recolor(old_p)
+
+    self.add_finishers(recolor_redoer, recolor_undoer)
+
+</t>
+<t tx="felix.20261107191026.8">def add_redraw(self, new_p: Position, old_p: Position) -&gt; None:
+    """
+    Add finishers that will call c.redraw.
+    The caller chooses the final redraw for the entire command.
+    """
+    c = self.c
+    new_p = new_p.copy()
+    old_p = old_p.copy()
+
+    def redraw_redoer() -&gt; None:
+        c.redraw(new_p)
+
+    def redraw_undoer() -&gt; None:
+        c.redraw(old_p)
+
+    self.add_redraw_finishers(redraw_redoer, redraw_undoer)
+
+</t>
+<t tx="felix.20261107191026.9">def add_redraw_and_edit(self, new_p: Position, old_p: Position) -&gt; None:
+
+    c = self.c
+    new_p = new_p.copy()
+    old_p = old_p.copy()
+
+    def redraw_and_edit_redoer_finisher() -&gt; None:
+        c.redrawAndEdit(new_p, selectAll=True)
+
+    def redraw_and_edit_undoer_finisher() -&gt; None:
+        c.redrawAndEdit(old_p, selectAll=True)
+
+    self.add_redraw_finishers(
+        redraw_and_edit_redoer_finisher,
+        redraw_and_edit_undoer_finisher,
+    )
+
+</t>
+<t tx="felix.20261108133141.1">/**
+ * Leo's undo/redo manager.
+ */
+&lt;&lt; How Leo implements unlimited undo &gt;&gt;
+&lt;&lt; imports &gt;&gt;
+@others
+@language typescript
+@tabwidth -4
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 

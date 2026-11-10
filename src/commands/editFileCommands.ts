@@ -1056,7 +1056,7 @@ export class GitDiffController {
      */
     public async clone_diff_pr(): Promise<void> {
 
-        const directory = await this.get_parent_of_git_directory()
+        const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return;
         }

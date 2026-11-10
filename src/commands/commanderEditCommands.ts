@@ -35,7 +35,7 @@ export class CommanderEditCommands {
         let language = c.getLanguage(p);
 
         if (c.hasAmbiguousLanguage(p)) {
-            language = c.getLanguageAtCursor(p, language)
+            language = c.getLanguageAtCursor(p, language);
         }
         let d1, d2, d3, openDelim, closeDelim;
         [d1, d2, d3] = g.set_delims_from_language(language);
@@ -68,7 +68,7 @@ export class CommanderEditCommands {
 
         // Set the selection range and scroll position.
         i = head.length;
-        const j = Math.max(i, head.length + middle.length - 1)
+        const j = Math.max(i, head.length + middle.length - 1);
         w.setSelectionRange(i, j, j);
         w.setYScrollPosition(oldYview);
 

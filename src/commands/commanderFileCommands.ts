@@ -529,7 +529,7 @@ export class CommanderFileCommands {
 
             await g.chdir(new_file_name);
 
-            await g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.
+            g.app.saveSession(); // IN LEOJS: To skip saving session on program exit.
 
             return new_file_name;
         };

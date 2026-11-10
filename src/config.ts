@@ -42,17 +42,6 @@ export class Config implements ConfigMembers {
     public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
     public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
 
-    // public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
-    // public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
-    // public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
-    // public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
-    // public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
-    // public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
-    // public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
-    // public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
-    // public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
-    // public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
-
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
@@ -79,8 +68,10 @@ export class Config implements ConfigMembers {
      */
     public getConfig(): ConfigMembers {
         return {
+
             // checkForChangeExternalFiles: this.checkForChangeExternalFiles,
             // defaultReloadIgnore: this.defaultReloadIgnore,
+
             sessionPerWorkspace: this.sessionPerWorkspace, // Used as Context Flag
             leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
             treeKeepFocus: this.treeKeepFocus,
@@ -107,17 +98,6 @@ export class Config implements ConfigMembers {
             showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
             showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
             showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
-
-            // showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
-            // showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
-            // showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
-            // showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
-            // showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
-            // showImportOnBody: this.showImportOnBody, // Used as Context Flag
-            // showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
-            // showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
-            // showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
-            // showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
             invertNodeContrast: this.invertNodeContrast,
             leoID: this.leoID
@@ -314,8 +294,10 @@ export class Config implements ConfigMembers {
             // * Currently setting config, wait until its done all, and this will be called automatically
             return;
         } else {
+
             // this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
             // this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+
             this.sessionPerWorkspace = GET(NAME).get(NAMES.SESSION_PER_WORKSPACE, DEFAULTS.SESSION_PER_WORKSPACE);
             this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
             this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
@@ -343,17 +325,6 @@ export class Config implements ConfigMembers {
             this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
             this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
             this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
-
-            // this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
-            // this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
-            // this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
-            // this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
-            // this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
-            // this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
-            // this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
-            // this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
-            // this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
-            // this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
 
             this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
             this.leoID = GET(NAME).get(NAMES.LEO_ID, DEFAULTS.LEO_ID);

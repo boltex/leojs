@@ -1,3 +1,4 @@
+import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
 import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 

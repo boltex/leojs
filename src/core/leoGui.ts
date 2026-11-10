@@ -401,8 +401,9 @@ export class LeoGui {
     // or dialog being created. The commander may be a Commands instance or
     // one of its subcommanders.
     //@+node:felix.20221120001229.15: *5* LeoGui.Clipboard
-    public replaceClipboardWith(s: string): void {
+    public replaceClipboardWith(s: string): Thenable<string> {
         this.oops();
+        return Promise.resolve('');
     }
     public getTextFromClipboard(): string {
         this.oops();
@@ -506,8 +507,9 @@ export class LeoGui {
         }
     }
     //@+node:felix.20221120001229.26: *4* LeoGui.put_help
-    public put_help(c: Commands, s: string, short_title: string): void {
+    public put_help(c: Commands, s: string, short_title: string): Promise<void> {
         // pass
+        return Promise.resolve();
     }
     //@+node:felix.20221120001229.27: *4* LeoGui.widget_name (LeoGui)
     public widget_name(w: any): string {
@@ -567,12 +569,16 @@ export class NullGui extends LeoGui {
     public makeAllBindings(): void { }
     public finishStartup(): void { }
 
-    public launchRefresh(): void { }
+    public launchRefresh(): Promise<unknown> | undefined {
+        return undefined;
+    }
     public fullRefresh(p_keepFocus?: boolean): void { }
     public findQuick(p_string?: string, p_forceEnter?: boolean): Thenable<unknown> {
         return Promise.resolve();
     }
-    public showNavResults(): void { }
+    public showNavResults(): Thenable<unknown> {
+        return Promise.resolve();
+    }
 
     public replaceClipboardWith(s: string): Thenable<string> {
         this.clipboardContents = s; // also set immediate clipboard string
