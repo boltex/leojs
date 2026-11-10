@@ -1346,7 +1346,7 @@ See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendi
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1" _mod_time="46313739343138323432342e3237310a2e">import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
+<t tx="felix.20201208214322.1" _mod_time="46313739343238313536352e3731310a2e">import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
 import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 
@@ -3689,7 +3689,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313739343137323235302e3735350a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313739343238313538352e3330350a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4884,7 +4884,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313739343138393231372e3834340a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313739343238313932362e30370a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -8254,7 +8254,7 @@ public incTreeId(): void {
   }
 },
 </t>
-<t tx="felix.20211007213344.1" _mod_time="46313737373335313038382e3838380a2e">import * as vscode from "vscode";
+<t tx="felix.20211007213344.1" _mod_time="46313739343237323034342e3932310a2e">import * as vscode from "vscode";
 import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8340,8 +8340,10 @@ public buildFromSavedSettings(): void {
         // * Currently setting config, wait until its done all, and this will be called automatically
         return;
     } else {
+
         // this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
         // this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+
         this.sessionPerWorkspace = GET(NAME).get(NAMES.SESSION_PER_WORKSPACE, DEFAULTS.SESSION_PER_WORKSPACE);
         this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
         this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
@@ -8369,17 +8371,6 @@ public buildFromSavedSettings(): void {
         this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
         this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
         this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
-
-        // this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
-        // this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
-        // this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
-        // this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
-        // this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
-        // this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
-        // this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
-        // this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
-        // this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
-        // this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
 
         this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
         this.leoID = GET(NAME).get(NAMES.LEO_ID, DEFAULTS.LEO_ID);
@@ -8426,17 +8417,6 @@ export class Config implements ConfigMembers {
     public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
     public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
 
-    // public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
-    // public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
-    // public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
-    // public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
-    // public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
-    // public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
-    // public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
-    // public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
-    // public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
-    // public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
-
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
@@ -8466,8 +8446,10 @@ export class Config implements ConfigMembers {
  */
 public getConfig(): ConfigMembers {
     return {
+
         // checkForChangeExternalFiles: this.checkForChangeExternalFiles,
         // defaultReloadIgnore: this.defaultReloadIgnore,
+
         sessionPerWorkspace: this.sessionPerWorkspace, // Used as Context Flag
         leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
         treeKeepFocus: this.treeKeepFocus,
@@ -8494,17 +8476,6 @@ public getConfig(): ConfigMembers {
         showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
         showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
         showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
-
-        // showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
-        // showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
-        // showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
-        // showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
-        // showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
-        // showImportOnBody: this.showImportOnBody, // Used as Context Flag
-        // showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
-        // showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
-        // showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
-        // showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
         invertNodeContrast: this.invertNodeContrast,
         leoID: this.leoID
@@ -20263,7 +20234,8 @@ public async handleUnl(p_arg: { unl: string }): Promise&lt;void&gt; {
  */
 public getWorkspaceSession(): string[] | undefined {
     if (this.config.sessionPerWorkspace) {
-        return this._context.workspaceState.get(Constants.LAST_FILES_KEY) || [];
+        const workspaceSession: string[] | undefined = this._context.workspaceState.get(Constants.LAST_FILES_KEY);
+        return workspaceSession || [];
     } else {
         return undefined;
     }
