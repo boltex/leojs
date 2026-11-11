@@ -1,8 +1,14 @@
 # Change Log
 
+# 1.0.29
+
+- ...
+
 # 1.0.28
 
 - Added promote-to-at-others and promote-section-def commands as per Leo's original PR #4991
+- Upgraded TypeScript version to ~5.9.0.
+- Fixed restoring session of last-opened files per workspace.
 
 # 1.0.27
 
