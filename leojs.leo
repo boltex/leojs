@@ -1346,7 +1346,7 @@ See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendi
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1" _mod_time="46313739343238313536352e3731310a2e">import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
+<t tx="felix.20201208214322.1" _mod_time="46313739343238343139332e35360a2e">import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
 import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 
@@ -1365,7 +1365,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313739313038393536322e3838370a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313739343432343730392e3537350a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -3689,7 +3689,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313739343238313538352e3330350a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313739343238343139332e3536350a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4884,7 +4884,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313739343238333536312e3033350a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313739343238343139332e3533380a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -8254,7 +8254,7 @@ public incTreeId(): void {
   }
 },
 </t>
-<t tx="felix.20211007213344.1" _mod_time="46313739343237323034342e3932310a2e">import * as vscode from "vscode";
+<t tx="felix.20211007213344.1" _mod_time="46313739343238343139332e3534340a2e">import * as vscode from "vscode";
 import { ConfigMembers, ConfigSetting } from "./types";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
@@ -8732,7 +8732,7 @@ public static FIND_INPUTS_IDS = {
 };
 
 </t>
-<t tx="felix.20211010192923.1" _mod_time="46313739343136393639352e3235380a2e">import * as vscode from "vscode";
+<t tx="felix.20211010192923.1" _mod_time="46313739343238343139332e3536310a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import * as path from 'path';
 import { BodyTimeInfo } from "./types";
@@ -20876,7 +20876,7 @@ public async openAside(p?: Position): Promise&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20240401213604.1" _mod_time="46313739343136393730372e3336340a2e">import * as vscode from "vscode";
+<t tx="felix.20240401213604.1" _mod_time="46313739343238343139332e3536320a2e">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import * as path from 'path';
@@ -24612,6 +24612,8 @@ public doArrow(key: "Up" | "Down") {
 <t tx="felix.20261002152551.1"># 1.0.28
 
 - Added promote-to-at-others and promote-section-def commands as per Leo's original PR #4991
+- Upgraded TypeScript version to ~5.9.0.
+- Fixed restoring session of last-opened files per workspace.
 
 </t>
 <t tx="felix.20261107191026.1">"""
