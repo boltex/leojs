@@ -6578,7 +6578,8 @@ export class LeoUI extends NullGui {
      */
     public getWorkspaceSession(): string[] | undefined {
         if (this.config.sessionPerWorkspace) {
-            return this._context.workspaceState.get(Constants.LAST_FILES_KEY) || [];
+            const workspaceSession: string[] | undefined = this._context.workspaceState.get(Constants.LAST_FILES_KEY);
+            return workspaceSession || [];
         } else {
             return undefined;
         }

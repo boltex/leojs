@@ -1268,7 +1268,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             assert.ok(g.isValidUrl(unl), unl);
         }
         for (const unl of [...invalid_unls, ...bad_table]) {
-            assert(!g.isValidUrl(unl), unl);
+            assert.ok(!g.isValidUrl(unl), unl);
         }
     });
     //@+node:felix.20230724012811.7: *4* TestGlobals.test_g_findAnyUnl

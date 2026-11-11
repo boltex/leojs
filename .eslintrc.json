@@ -13,7 +13,6 @@
     "rules": {
         "@typescript-eslint/naming-convention": "off",
         "@typescript-eslint/camelcase": "off",
-        "@typescript-eslint/semi": "warn",
         "@typescript-eslint/strict-boolean-expressions": "warn",
         "@typescript-eslint/no-floating-promises": "error",
         "@typescript-eslint/no-misused-promises": "error",
@@ -22,7 +21,7 @@
         "curly": "warn",
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
-        "semi": "off"
+        "semi": "warn"
     },
     "ignorePatterns": [
         "out",
