@@ -1,5 +1,9 @@
 # Change Log
 
+# 1.0.29
+
+- ...
+
 # 1.0.28
 
 - Added promote-to-at-others and promote-section-def commands as per Leo's original PR #4991

@@ -9,6 +9,7 @@
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh>
+<v t="felix.20261111142329.1"><vh>1.0.29</vh></v>
 <v t="felix.20261002152551.1"><vh>1.0.28</vh></v>
 <v t="felix.20260723002653.1"><vh>1.0.27</vh></v>
 <v t="felix.20260717234638.1"><vh>1.0.26</vh></v>
@@ -1365,7 +1366,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208214506.1" _mod_time="46313739343432343730392e3537350a2e">@language md
+<t tx="felix.20201208214506.1" _mod_time="46313739343432353032362e3833330a2e">@language md
 @tabwidth -4
 # Change Log
 
@@ -4884,13 +4885,13 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313739343238343139332e3533380a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313739343432353033372e3339390a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "LeoJS — The literate editor with outline javaScript implementation",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -22191,7 +22192,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
 
 </t>
 <t tx="felix.20240722220730.1"></t>
-<t tx="felix.20240722220738.1" _mod_time="46313739303936393433352e3831360a2e">&lt;!DOCTYPE html&gt;
+<t tx="felix.20240722220738.1" _mod_time="46313739343432353038302e3935340a2e">&lt;!DOCTYPE html&gt;
 &lt;html lang="en" tabindex="-1"&gt;
 
 &lt;head&gt;
@@ -22228,7 +22229,7 @@ public createLogPane(): asserts this is { _leoLogPane: vscode.OutputChannel } {
     &lt;div class="content__area"&gt;
       &lt;section id="welcome" class="section--full mb-0"&gt;
         &lt;h2 class="section__title section__title--primary"&gt;
-          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.28&lt;/span&gt;
+          Welcome to &lt;span class="highlight"&gt;LeoJS 1.0.29&lt;/span&gt;
         &lt;/h2&gt;
         &lt;div class="center mt-1"&gt;
           &lt;a class="button button--flat is-sidebar-hidden"
@@ -25740,6 +25741,11 @@ def setRedoType(self, theType: str) -&gt; None:
 @others
 @language typescript
 @tabwidth -4
+</t>
+<t tx="felix.20261111142329.1"># 1.0.29
+
+- ...
+
 </t>
 <t tx="fil.20231216220210.1">## 0.2.5
 
