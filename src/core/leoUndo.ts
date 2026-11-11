@@ -3,45 +3,6 @@
 /**
  * Leo's undo/redo manager.
  */
-//@+<< How Leo implements unlimited undo >>
-//@+node:felix.20211026230613.2: ** << How Leo implements unlimited undo >>
-//@+at
-// Think of the actions that may be Undone or Redone as a string of beads
-// (g.Bunches) containing all information needed to undo _and_ redo an operation.
-//
-// A bead pointer points to the present bead. Undoing an operation moves the bead
-// pointer backwards; redoing an operation moves the bead pointer forwards. The
-// bead pointer points in front of the first bead when Undo is disabled. The bead
-// pointer points at the last bead when Redo is disabled.
-//
-// The Undo command uses the present bead to undo the action, then moves the bead
-// pointer backwards. The Redo command uses the bead after the present bead to redo
-// the action, then moves the bead pointer forwards. The list of beads does not
-// branch; all undoable operations (except the Undo and Redo commands themselves)
-// delete any beads following the newly created bead.
-//
-// New in Leo 4.3: User (client) code should call u.beforeX and u.afterX methods to
-// create a bead describing the operation that is being performed. (By convention,
-// the code sets u = c.undoer for undoable operations.) Most u.beforeX methods
-// return 'undoData' that the client code merely passes to the corresponding
-// u.afterX method. This data contains the 'before' snapshot. The u.afterX methods
-// then create a bead containing both the 'before' and 'after' snapshots.
-//
-// New in Leo 4.3: u.beforeChangeGroup and u.afterChangeGroup allow multiple calls
-// to u.beforeX and u.afterX methods to be treated as a single undoable entry. See
-// the code for the Replace All, Sort, Promote and Demote commands for examples.
-// u.before/afterChangeGroup substantially reduce the number of u.before/afterX
-// methods needed.
-//
-// New in Leo 4.3: It would be possible for plugins or other code to define their
-// own u.before/afterX methods. Indeed, u.afterX merely needs to set the
-// bunch.undoHelper and bunch.redoHelper ivars to the methods used to undo and redo
-// the operation. See the code for the various u.before/afterX methods for
-// guidance.
-//
-// I first saw this model of unlimited undo in the documentation for Apple's Yellow Box classes.
-//
-//@-<< How Leo implements unlimited undo >>
 //@+<< imports >>
 //@+node:felix.20220104010834.1: ** << imports >>
 import * as g from './leoGlobals';
