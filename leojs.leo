@@ -646,7 +646,7 @@
 <v t="felix.20231003002131.1"><vh>@file src/core/leoSessions.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
-<v t="ekr.20031218072017.3603"><vh>@file src/core/leoUndo.py</vh></v>
+<v t="felix.20261113220457.1"><vh>@file src/core/leoUndo.py</vh></v>
 <v t="felix.20230924174338.1"><vh>@file src/core/mod_scripting.ts</vh></v>
 <v t="felix.20221019001448.1"><vh>@file src/core/nodeTags.ts</vh></v>
 <v t="felix.20221105221426.1"><vh>@file src/core/quicksearch.ts</vh></v>
@@ -1139,7 +1139,7 @@ See [Leo's acknowledgements webpage](https://boltex.github.io/leojs/docs/appendi
 
 ## 🤍 To sponsor, donate or contribute see my [user page 🦁](https://boltex.github.io/)
 </t>
-<t tx="felix.20201208214322.1" _mod_time="46313739343238343139332e35360a2e">import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
+<t tx="felix.20201208214322.1" _mod_time="46313739343434353436372e3332320a2e">import './disposeShim'; // Must stay first: defines Symbol.dispose before anything else loads.
 import * as vscode from 'vscode';
 import initSqlJs from '../sqlite/sql-wasm-debug';
 
@@ -4677,7 +4677,7 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
 }
 
 </t>
-<t tx="felix.20201214205159.1" _mod_time="46313739343432353138352e3632320a2e">@language json
+<t tx="felix.20201214205159.1" _mod_time="46313739343435313732332e3430360a2e">@language json
 @tabwidth -2
 {
   "name": "leojs",
@@ -4736,7 +4736,10 @@ public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "891c959",
+  "gitBranch": "new-undo-system",
+  "gitDate": "2026-11-11 14:34:34 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
