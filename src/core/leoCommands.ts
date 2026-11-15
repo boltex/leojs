@@ -4603,7 +4603,7 @@ export class Commands {
     }
 
     //@+node:felix.20211120224224.1: *5* c.recolor
-    public recolor(): void {
+    public recolor(p?: Position): void {
         // Automatic in LeoJs: the vscode editor handles recoloring.
     }
     //@+node:felix.20221027153010.1: *5* c.widget_name

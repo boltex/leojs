@@ -319,5 +319,3 @@ TypeScript:
 ```
 
 Pretty close!
-
-####

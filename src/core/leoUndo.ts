@@ -12,6 +12,7 @@ import * as g from './leoGlobals';
 import { new_cmd_decorator } from './decorators';
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
+import { StringTextWrapper } from './leoFrame';
 //@-<< imports >>
 
 /**
@@ -26,175 +27,187 @@ function cmd(p_name: string, p_doc: string) {
 //@+node:felix.20261113231808.1: ** class UndoBead
 export class UndoBead {
 
-    // 'c',
-    // 'command_name',
-    // 'old_p',
-    // 'redo_finishers',
-    // 'redo_functions',
-    // 'redraw_finishers',
-    // 'undoType',
-    // 'undo_finishers',
-    // 'undo_functions',
-    // 'undoer',
-    // 'w',
+    public c: Commands;
+    public command_name: string;
+    public old_p: Position;
+    public redo_finishers: Array<() => void>;
+    public redo_functions: Array<() => void>;
+    public redraw_finishers: [() => void, () => void] | null;
+    public undoType: string;
+    public undo_finishers: Array<() => void>;
+    public undo_functions: Array<() => void>;
+    public undoer: Undoer;
+    public w: StringTextWrapper | null;
 
     //@+others
     //@+node:felix.20261113231808.3: *3* UndoBeadconstructor
-    /* 
-    constructor(undoer: Undoer){
+    constructor(undoer: Undoer) {
 
-        c = undoer.c
-        self.c = c
-        self.command_name = ''
-        self.old_p = c.p.copy()
-        self.redo_finishers: list[Callable] = []
-        self.redo_functions: list[Callable] = []
-        self.redraw_finishers: tuple[Callable, Callable] | None = None
-        self.undoType = ''  # Required. Set by u.set_command_name
-        self.undo_finishers: list[Callable] = []
-        self.undo_functions: list[Callable] = []
-        self.undoer = undoer
-        self.w: QTextMixin | None = None
+        const c = undoer.c;
+        this.c = c;
+        this.command_name = '';
+        this.old_p = c.p.copy();
+        this.redo_finishers = [];
+        this.redo_functions = [];
+        this.redraw_finishers = null;;
+        this.undoType = '';  // Required. Set by u.set_command_name
+        this.undo_finishers = [];
+        this.undo_functions = [];
+        this.undoer = undoer;
+        this.w = null;
 
     }
-     */
+
     //@+node:felix.20261113231808.4: *3* undoBead.add_redraw_finishers
-    /*
-    def add_redraw_finishers(
-        self,
-        redo_redraw_finisher: Callable,
-        undo_redraw_finisher: Callable,
-    ) -> None:
+    public add_redraw_finishers(
+        redo_redraw_finisher: () => void,
+        undo_redraw_finisher: () => void,
+    ): void {
 
-        if self.redraw_finishers is not None:
-            message = f"u.redraw_finishers already exist: {g.callers()=}\n"
-            if g.unitTesting:
-                assert False, message
-            print()
-            g.trace()
+        if (this.redraw_finishers != null) {
+            const message = `u.redraw_finishers already exist: g.callers()=${g.callers()}\n`;
+            if (g.unitTesting) {
+                g.assert(false, message);
+            }
+            g.trace();
+        }
+        this.redraw_finishers = [redo_redraw_finisher, undo_redraw_finisher];
+    }
 
-        self.redraw_finishers = redo_redraw_finisher, undo_redraw_finisher
-
-     */
     //@+node:felix.20261113231808.5: *3* undoBead.add_recolor
-    /* 
-    def add_recolor(self, new_p: Position, old_p: Position) -> None:
+    public add_recolor(new_p: Position, old_p: Position): void {
 
-        c = self.c
-        new_p = new_p.copy()
-        old_p = old_p.copy()
+        const c = this.c;
+        new_p = new_p.copy();
+        old_p = old_p.copy();
 
-        def recolor_redoer() -> None:
-            c.frame.scanForTabWidth(new_p)
-            c.recolor(new_p)
+        const recolor_redoer = () => {
+            c.frame.scanForTabWidth(new_p);
+            c.recolor(new_p);
+        };
 
-        def recolor_undoer() -> None:
-            c.frame.scanForTabWidth(old_p)
-            c.recolor(old_p)
+        const recolor_undoer = () => {
+            c.frame.scanForTabWidth(old_p);
+            c.recolor(old_p);
+        };
 
-        self.add_finishers(recolor_redoer, recolor_undoer)
-
-     */
+        this.add_finishers(recolor_redoer, recolor_undoer);
+    }
     //@+node:felix.20261113231808.6: *3* undoBead.add_redraw
-    /* 
-    def add_redraw(self, new_p: Position, old_p: Position) -> None:
-        """
-        Add finishers that will call c.redraw.
-        The caller chooses the final redraw for the entire command.
-        """
-        c = self.c
-        new_p = new_p.copy()
-        old_p = old_p.copy()
-
-        def redraw_redoer() -> None:
-            c.redraw(new_p)
-
-        def redraw_undoer() -> None:
-            c.redraw(old_p)
-
-        self.add_redraw_finishers(redraw_redoer, redraw_undoer)
-
+    /**
+     * Add finishers that will call c.redraw.
+     * The caller chooses the final redraw for the entire command.
      */
+    public add_redraw(new_p: Position, old_p: Position): void {
+
+        const c = this.c;
+        new_p = new_p.copy();
+        old_p = old_p.copy();
+
+        const redraw_redoer = () => {
+            c.redraw(new_p);
+        };
+
+        const redraw_undoer = () => {
+            c.redraw(old_p);
+        };
+
+        this.add_redraw_finishers(redraw_redoer, redraw_undoer);
+    }
+
     //@+node:felix.20261113231808.7: *3* undoBead.add_redraw_and_edit
-    /* 
-    def add_redraw_and_edit(self, new_p: Position, old_p: Position) -> None:
+    public add_redraw_and_edit(new_p: Position, old_p: Position): void {
 
-        c = self.c
-        new_p = new_p.copy()
-        old_p = old_p.copy()
+        const c = this.c;
+        new_p = new_p.copy();
+        old_p = old_p.copy();
 
-        def redraw_and_edit_redoer_finisher() -> None:
-            c.redrawAndEdit(new_p, selectAll=True)
+        const redraw_and_edit_redoer_finisher = () => {
+            c.redrawAndEdit(new_p, true);
+        };
 
-        def redraw_and_edit_undoer_finisher() -> None:
-            c.redrawAndEdit(old_p, selectAll=True)
+        const redraw_and_edit_undoer_finisher = () => {
+            c.redrawAndEdit(old_p, true);
+        };
 
-        self.add_redraw_finishers(
+        this.add_redraw_finishers(
             redraw_and_edit_redoer_finisher,
             redraw_and_edit_undoer_finisher,
-        )
+        );
+    }
 
-     */
     //@+node:felix.20261113231808.8: *3* undoBead.add_redraw_after_head_changed
-    /* 
-    def add_redraw_after_head_changed(self) -> None:
+    public add_redraw_after_head_changed(): void {
 
-        c = self.c
+        const c = this.c;
 
-        # A single finisher suffices.
-        def redraw_after_head_changed_finisher() -> None:
-            c.redraw_after_head_changed()
+        // A single finisher suffices.
+        const redraw_after_head_changed_finisher = () => {
+            c.redraw_after_head_changed();
+        };
 
-        self.add_redraw_finishers(
-            redraw_after_head_changed_finisher, redraw_after_head_changed_finisher
-        )
+        this.add_redraw_finishers(
+            redraw_after_head_changed_finisher,
+            redraw_after_head_changed_finisher
+        );
+    }
 
-     */
     //@+node:felix.20261113231808.9: *3* UndoBead.redo
-    /* 
-    def redo(self) -> None:
-        c = self.c
-        for f in self.redo_functions:
-            f()
-        if self.redraw_finishers:
-            self.redraw_finishers[0]()
-        for f in self.redo_finishers:
-            f()
-        c.setChanged()  # Elegant!
+    public redo(): void {
+        const c = this.c;
+        for (const f of this.redo_functions) {
+            f();
+        }
+        if (this.redraw_finishers && this.redraw_finishers.length) {
+            this.redraw_finishers[0]();
+        }
+        for (const f of this.redo_finishers) {
+            f();
+        }
 
-     */
+        c.setChanged();  // Elegant!
+    }
+
     //@+node:felix.20261113231808.11: *3* UndoBead.undo
-    /* 
-    def undo(self) -> None:
-        c = self.c
-        for f in self.undo_functions:
-            f()
-        if self.redraw_finishers:
-            self.redraw_finishers[1]()
-        for f in self.undo_finishers:
-            f()
-        # A save may have occurred since this bead was created.
-        c.setChanged()
+    public undo(): void {
+        const c = this.c;
+        for (const f of this.undo_functions) {
+            f();
+        }
+        if (this.redraw_finishers && this.redraw_finishers.length) {
+            this.redraw_finishers[0]();
+        }
+        for (const f of this.undo_finishers) {
+            f();
+        }
 
-     */
+        // A save may have occurred since this bead was created.
+        c.setChanged();
+    }
+
     //@+node:felix.20261113231808.10: *3* UndoBead.add_helpers & add_finishers
-    /* 
-    def add_helpers(self, redo_function: Callable, undo_function: Callable) -> None:
-        """Append the helpers (in correct order!) to the undo/redo lists."""
-        if self.undoer.capture_level:
-            return  # The enclosing snapshot records the complete operation.
-        self.redo_functions.append(redo_function)
-        self.undo_functions.insert(0, undo_function)  # Execute in reverse order.
-
-
-    def add_finishers(self, redo_finisher: Callable, undo_finisher: Callable) -> None:
-        """Append the helpers (in correct order!) to the undo/redo lists."""
-        if self.undoer.capture_level:
-            return
-        self.redo_finishers.append(redo_finisher)
-        self.undo_finishers.append(undo_finisher)  # Execute in given order.
-
+    /**
+     * Append the helpers (in correct order!) to the undo/redo lists.
      */
+    public add_helpers(redo_function: () => void, undo_function: () => void): void {
+        if (this.undoer.capture_level) {
+            return;  // The enclosing snapshot records the complete operation.
+        }
+        this.redo_functions.push(redo_function);
+        this.undo_functions.unshift(undo_function);  // Execute in reverse order.
+    }
+
+    /**
+     * Append the finishers (in correct order!) to the undo/redo lists.
+     */
+    public add_finishers(redo_finisher: () => void, undo_finisher: () => void): void {
+        if (this.undoer.capture_level) {
+            return;
+        }
+        this.redo_finishers.push(redo_finisher);
+        this.undo_finishers.push(undo_finisher);  // Execute in given order.
+    }
+
     //@-others
 
     public toString(): string {
@@ -213,7 +226,6 @@ export class Undoer {
     public p: Position | undefined;
 
     public max_undo_stack_size: number;
-
 
     public bead: number; // Index of the present bead: -1:len(beads)
     public beads: UndoBead[]; // List of undo nodes.
@@ -234,9 +246,6 @@ export class Undoer {
     public node_captures: Set<VNode>;
     public undoBead: UndoBead | undefined;
     public undoBeadLevel: number;
-
-
-
 
     //@+others
     //@+node:felix.20261113233748.1: *3* u.constructor
@@ -261,6 +270,7 @@ export class Undoer {
         this.undoType = "Can't Undo";
         this.undoing = false;
     }
+
     //@+node:felix.20261113233806.1: *3* u: Entries
     //@+node:felix.20261113233806.2: *4* u.canRedo & canUndo
     // Translation does not affect these routines.
@@ -282,6 +292,7 @@ export class Undoer {
     public clearAndWarn(command_name: string): void {
 
         const u = this;
+
         if (u.undoBeadLevel === 0) {  // PR #5025
             // We aren't in undo code.
             u.clearUndoState()
@@ -303,315 +314,352 @@ export class Undoer {
     }
 
     //@+node:felix.20261113233806.5: *4* u.redo
-    /* 
-    @cmd('redo')
-    def redo(self, event: LeoKeyEvent | None = None) -> None:
-        """Redo the operation undone by the last undo."""
-        u = self
-        c = u.c
-        if not c.p:
-            return
-        # End editing *before* getting state.
-        c.endEditing()
-        if not u.canRedo():
-            return
-        obj = u.getBead(u.bead + 1)
-        if not obj:
-            return
 
-        # Init status.
-        u.redoing = True
-        u.groupCount = 0
+    @cmd('redo', 'Redo the operation undone by the last undo.')
+    public redo(): void {
 
-        # Dispatch.
-        try:
-            if isinstance(obj, UndoBead):
-                obj.redo()
-            else:
-                g.es_print_unique_message(f"no redo helper for {u.kind} {u.undoType}")
-            c.checkOutline()
-        finally:
-            u.redoing = False
-        u.bead += 1
-        u.setUndoTypes()
+        const u = this;
+        const c = u.c;
+        if (!c.p || !c.p.v) {
+            return;
+        }
+        // End editing *before* getting state.
+        c.endEditing();
+        if (!u.canRedo()) {
+            return;
+        }
+        const obj = u.getBead(u.bead + 1);
+        if (!obj) {
+            return;
+        }
 
-     */
+        // Init status.
+        u.redoing = true;
+        u.groupCount = 0;
+
+        // Dispatch.
+        try {
+            if (obj instanceof UndoBead) {
+                obj.redo();
+            } else {
+                g.es_print_unique_message(`no redo helper for ${u.undoType}`);
+            }
+            c.checkOutline();
+        } finally {
+            u.redoing = false;
+        }
+        u.bead += 1;
+        u.setUndoTypes();
+    }
+
     //@+node:felix.20261113233806.6: *4* u.undo
-    /* 
-    @cmd('undo')
-    def undo(self, event: LeoKeyEvent | None = None) -> None:
-        """Undo the operation described by the undo parameters."""
-        u = self
-        c = u.c
-        if not c.p:
-            g.trace('no current position')
-            return
-        # End editing *before* getting state.
-        c.endEditing()
-        if not u.canUndo():
-            return
-        obj = u.getBead(u.bead)
-        if not obj:
-            return
 
-        # Init status.
-        u.undoing = True
-        u.groupCount = 0
+    @cmd('undo', 'Undo the operation described by the undo parameters.')
+    public undo(): void {
 
-        # Dispatch.
-        try:
-            if isinstance(obj, UndoBead):
-                obj.undo()
-            else:
-                g.es_print_unique_message(f"no undo helper for {u.kind} {u.undoType}")
-            c.checkOutline()
-        finally:
-            u.undoing = False
-        u.bead -= 1
-        u.setUndoTypes()
+        const u = this;
+        const c = u.c;
+        if (!c.p || !c.p.v) {
+            g.trace('no current position');
+            return;
+        }
 
-     */
+        // End editing *before* getting state.
+        c.endEditing();
+        if (!u.canUndo()) {
+            return;
+        }
+        const obj = u.getBead(u.bead + 1);
+        if (!obj) {
+            return;
+        }
+
+        // Init status.
+        u.undoing = true;
+        u.groupCount = 0;
+
+        // Dispatch.
+        try {
+            if (obj instanceof UndoBead) {
+                obj.undo();
+            } else {
+                g.es_print_unique_message(`no undo helper for ${u.undoType}`);
+            }
+            c.checkOutline();
+        } finally {
+            u.undoing = false;
+        }
+        u.bead -= 1;
+        u.setUndoTypes();
+
+
+    }
     //@+node:felix.20261113233806.7: *4* u: actions
     //@+node:felix.20261113233806.8: *5* u.change_headline
-    /* 
-    def change_headline(self, p: Position, new_h: str, *, ch: str = '') -> None:
-        """
-        Change a headline and preserve directives, dirty bits and editor state.
-
-        Called *only* from LeoTree.onHeadChanged
-
-        This method should *not* have an @contextmanager decorator:
-        it is never called from within other @contextmanager methods.
-        """
-        u = self
-        b = u._require_bead()
-        c = u.c
-        old_h = p.h
-        if old_h == new_h:
-            return
-
-        p = p.copy()
-
-        def update(head: str) -> None:
-            c.p = p
-            p.initHeadString(head)
-            p.setDirty()  # Call p.v.setAllAncestorAtFileNodesDirty()
-            c.frame.tree.setHeadline(p, head)
-
-        # Do the action.
-        # Leave the live editor alone: it may contain multiline abbreviation text.
-        p.initHeadString(new_h)
-        p.setDirty()  # Call p.v.setAllAncestorAtFileNodesDirty()
-        c.frame.scanForTabWidth(p)
-        c.recolor(p)
-        g.doHook('headkey2', c=c, p=p, ch=ch, changed=True)
-
-        # Add helpers
-
-        def change_headline_redoer() -> None:
-            update(new_h)
-
-        def change_headline_undoer() -> None:
-            update(old_h)
-
-        b.add_helpers(change_headline_redoer, change_headline_undoer)
-        b.add_recolor(p, p)
-
+    /**
+     * Change a headline and preserve directives, dirty bits and editor state.
+     *
+     * Called *only* from LeoTree.onHeadChanged
+     *
+     * This method should *not* have an @contextmanager decorator:
+     * it is never called from within other @contextmanager methods.
      */
+    public change_headline(p: Position, new_h: string, ch = ''): void {
+
+        const u = this;
+        const b = u._require_bead();
+        const c = u.c;
+        const old_h = p.h;
+        if (old_h == new_h) {
+            return;
+        }
+        p = p.copy();
+
+        const update = (head: string) => {
+            c.p = p;
+            p.initHeadString(head);
+            p.setDirty();  // Call p.v.setAllAncestorAtFileNodesDirty()
+            c.frame.tree.setHeadline(p, head);
+        };
+
+        // Do the action.
+        // Leave the live editor alone: it may contain multiline abbreviation text.
+        p.initHeadString(new_h);
+        p.setDirty();  // Call p.v.setAllAncestorAtFileNodesDirty()
+        c.frame.scanForTabWidth(p);
+        c.recolor(p);
+        g.doHook('headkey2', { c: c, p: p, ch: ch, changed: true });
+
+        // Add helpers
+
+        const change_headline_redoer = () => {
+            update(new_h);
+        }
+
+        const change_headline_undoer = () => {
+            update(old_h);
+        }
+
+        b.add_helpers(change_headline_redoer, change_headline_undoer);
+        b.add_recolor(p, p);
+
+    }
+
     //@+node:felix.20261113233806.9: *5* u.clone_node
-    /* 
-    def clone_node(self, p: Position) -> Position:
-        """Clone p, returning and selecting the new occurrence."""
-        u = self
-        b = u._require_bead()
-        c = u.c
-        old_p = p.copy()
-        clone = p.clone()
-
-        # Do the action.
-        clone.setDirty()
-        c.p = clone
-        clone_p = clone.copy()
-        clone_p.setAllAncestorAtFileNodesDirty()
-
-        def clone_redoer() -> None:
-            clone_p._linkAfter(old_p)
-            clone_p.setDirty()
-            c.p = clone_p
-
-        def clone_undoer() -> None:
-            clone_p.doDelete(old_p)
-            c.p = old_p
-
-        b.add_helpers(clone_redoer, clone_undoer)
-        return clone
-
+    /**
+     * Clone p, returning and selecting the new occurrence.
      */
+    public clone_node(p: Position): Position {
+
+        const u = this;
+        const b = u._require_bead();
+        const c = u.c;
+        const old_p = p.copy();
+        const clone = p.clone();
+
+        // Do the action.
+        clone.setDirty();
+        c.p = clone;
+        const clone_p = clone.copy();
+        clone_p.setAllAncestorAtFileNodesDirty();
+
+        const clone_redoer = () => {
+            clone_p._linkAfter(old_p);
+            clone_p.setDirty();
+            c.p = clone_p;
+        };
+
+        const clone_undoer = () => {
+            clone_p.doDelete(old_p);
+            c.p = old_p;
+        };
+
+        b.add_helpers(clone_redoer, clone_undoer);
+        return clone;
+    }
+
     //@+node:felix.20261113233806.10: *5* u.delete_node
-    /* 
-    def delete_node(self, p: Position) -> None:
-        """Delete p without scheduling a redraw; retain its original links."""
-        u = self
-        b = u._require_bead()
-        c = u.c
-        old_p = p.copy()
-        old_back, old_parent = p.back(), p.parent()
-        new_p = p.visBack(c) if p.hasVisBack(c) else p.next()
-        if not new_p:
-            g.trace("Can not delete the outline's only node")
-            return
-
-        # Do the action.
-        old_p.doDelete(new_p)
-        c.p = new_p
-        new_p.setDirty()
-        c.p.setAllAncestorAtFileNodesDirty()
-        c.checkOutline()
-
-        def delete_node_redoer() -> None:
-            old_p.doDelete()
-            c.p = new_p
-
-        def delete_node_undoer() -> None:
-            if old_back:
-                old_p._linkAfter(old_back)
-            elif old_parent:
-                old_p._linkAsNthChild(old_parent, 0)
-            else:
-                old_p._linkAsRoot()
-            old_p.setDirty()
-            c.p = old_p
-
-        if old_p.v not in u.node_captures:
-            b.add_helpers(delete_node_redoer, delete_node_undoer)
-
+    /**
+     * Delete p without scheduling a redraw; retain its original links.
      */
+    public delete_node(p: Position): void {
+
+        const u = this;
+        const b = u._require_bead();
+        const c = u.c;
+        const old_p = p.copy();
+        const [old_back, old_parent] = [p.back(), p.parent()];
+        const new_p = p.hasVisBack(c) ? p.visBack(c) : p.next();
+        if (!new_p || !new_p.v) {
+            g.trace("Can not delete the outline's only node");
+            return;
+        }
+        // Do the action.
+        old_p.doDelete(new_p);
+        c.p = new_p;
+        new_p.setDirty();
+        c.p.setAllAncestorAtFileNodesDirty();
+        c.checkOutline();
+
+        const delete_node_redoer = () => {
+            old_p.doDelete();
+            c.p = new_p;
+        };
+        const delete_node_undoer = () => {
+            if (old_back) {
+                old_p._linkAfter(old_back);
+            } else if (old_parent) {
+                old_p._linkAsNthChild(old_parent, 0);
+            } else {
+                old_p._linkAsRoot();
+            }
+            old_p.setDirty();
+            c.p = old_p;
+        };
+
+        if (!u.node_captures.has(old_p.v)) {
+            b.add_helpers(delete_node_redoer, delete_node_undoer);
+        }
+    }
+
     //@+node:felix.20261113233806.11: *5* u.insert_node
-    /* 
-    def insert_node(
-        self,
+    /**
+     * Insert a node once; redo relinks that same vnode, including its subtree.
+     */
+    public insert_node(
         p: Position,
-        *,
-        as_child: bool = False,
-        index: int | None = None,
-        before: bool = False,
-    ) -> Position:
-        """Insert a node once; redo relinks that same vnode, including its subtree."""
-        u = self
-        b = u._require_bead()
-        c = u.c
-        old_p = p.copy()
-        if before:
+        as_child = false,
+        index: number | undefined = undefined,
+        before = false,
+    ): Position {
+
+        const u = this;
+        const b = u._require_bead();
+        const c = u.c;
+        const old_p = p.copy();
+        let new_p: Position;
+
+        if (before) {
             new_p = p.insertBefore()
-            # Inserting before p changes p's original index.
-        elif (
-            as_child
-            or p.hasChildren()
-            and p.isExpanded()
-            or c.hoistStack
-            and p == c.hoistStack[-1].p
-        ):
-            if index is None:
-                insert_at_end = c.config.getBool('insert-new-nodes-at-end')
-                index = p.numberOfChildren() if insert_at_end else 0
-            new_p = p.insertAsNthChild(index)
-        else:
-            new_p = p.insertAfter()
+            // Inserting before p changes p's original index.
+        } else if (
+            as_child || p.hasChildren() && p.isExpanded() || c.hoistStack && p.__eq__(c.hoistStack[-1].p)
+        ) {
+            if (index == null) {
+                const insert_at_end = c.config.getBool('insert-new-nodes-at-end');
+                index = insert_at_end ? p.numberOfChildren() : 0;
+            }
+            new_p = p.insertAsNthChild(index);
+        } else {
+            new_p = p.insertAfter();
+        }
 
-        # Do the action.
-        new_p.setDirty()
-        c.p = new_p
-        parent = new_p.parent()
-        back = new_p.back()
-        saved = new_p.copy()
-        new_p.setAllAncestorAtFileNodesDirty()
+        // Do the action.
+        new_p.setDirty();
+        c.p = new_p;
+        const parent = new_p.parent();
+        const back = new_p.back();
+        const saved = new_p.copy();
+        new_p.setAllAncestorAtFileNodesDirty();
 
-        def insert_node_redoer() -> None:
-            if back:
-                saved._linkAfter(back)
-            elif parent:
-                saved._linkAsNthChild(parent, 0)
-            else:
-                saved._linkAsRoot()
-            saved.setDirty()
-            c.p = saved
+        const insert_node_redoer = () => {
+            if (back && back.v) {
+                saved._linkAfter(back);
+            } else if (parent && parent.v) {
+                saved._linkAsNthChild(parent, 0);
+            } else {
+                saved._linkAsRoot();
+            }
+            saved.setDirty();
+            c.p = saved;
+        };
+        const insert_node_undoer = () => {
+            saved.doDelete();
+            old_p.setAllAncestorAtFileNodesDirty();
+            c.p = old_p;
+        };
+        b.add_helpers(insert_node_redoer, insert_node_undoer);
+        g.doHook('create-node', { c: c, p: new_p });
+        return new_p;
 
-        def insert_node_undoer() -> None:
-            saved.doDelete()
-            old_p.setAllAncestorAtFileNodesDirty()
-            c.p = old_p
+    }
 
-        b.add_helpers(insert_node_redoer, insert_node_undoer)
-        g.doHook('create-node', c=c, p=new_p)
-        return new_p
-     */
     //@+node:felix.20261113233806.12: *5* u.set_body
-    /* 
-    def set_body(
-        self,
+    /**
+     * Change p.b
+     */
+    public set_body(
         new_p: Position,
-        new_body: str,
-        *,
-        old_body: str | None = None,
-    ) -> None:
-        """Change p.b"""
-        u = self
-        b = u._require_bead()
-        c = u.c
-        w = c.frame.body.wrapper
-        if not g.isTextWrapper(w):
-            g.error(f"Not a text wrapper: {w=} {g.callers()}")
-            return
+        new_body: string,
+        old_body: string | null = null,
+    ): void {
 
-        new_p = new_p.copy()
-        if old_body is None:
-            old_body = new_p.b
-        if old_body == new_body:
-            return
+        const u = this;
+        const b = u._require_bead();
+        const c = u.c;
+        const w = c.frame.body.wrapper;
 
-        def set_body_update(p: Position, body: str) -> None:
-            """Update p's data."""
-            # Set p.v.b, not p.b! The p.b setter clears the selection!
-            p.v.b = body
-            p.setDirty()
-            val = p.computeIcon()
-            if not hasattr(p.v, "iconVal") or val != p.v.iconVal:
-                p.v.iconVal = val
-            c.recolor(p)  # Only for QScintilla.
-            p.setAllAncestorAtFileNodesDirty()
+        if (!g.isTextWrapper(w)) {
+            g.error(`Not a text wrapper: ${g.callers()}`);
+            return;
+        }
 
-        # Do the action!
-        set_body_update(new_p, new_body)
+        new_p = new_p.copy();
+        if (old_body == null) {
+            old_body = new_p.b;
+        }
+        if (old_body == new_body) {
+            return;
+        }
 
-        if c.p == new_p and w.getAllText() != new_body:
-            sel, ins = w.getSelectionRange(), w.getInsertPoint()
-            w.setAllText(new_body)
-            w.setSelectionRange(*sel, insert=ins)
+        /**
+         * Update p's data.
+         */
+        const set_body_update = (p: Position, body: string) => {
+            // Set p.v.b, not p.b! The p.b setter clears the selection!
+            p.v.b = body;
+            p.setDirty();
+            const val = p.computeIcon();
+            if (!("iconVal" in p.v) || val != p.v.iconVal) {
+                p.v.iconVal = val;
+            }
+            c.recolor(p);  // Only for QScintilla.
+            p.setAllAncestorAtFileNodesDirty();
+        };
 
-        # Add helpers. Use distinct names for debugging.
+        // Do the action!
+        set_body_update(new_p, new_body);
 
-        def set_body_redoer() -> None:
-            set_body_update(new_p, new_body)
+        if (c.p.__eq__(new_p) && w.getAllText() != new_body) {
+            const [sel, ins] = [w.getSelectionRange(), w.getInsertPoint()];
+            w.setAllText(new_body);
+            w.setSelectionRange(...sel, ins);
+        }
+        // Add helpers. Use distinct names for debugging.
 
-        def set_body_undoer() -> None:
-            set_body_update(new_p, old_body)
+        const set_body_redoer = () => {
+            set_body_update(new_p, new_body);
+        };
+        const set_body_undoer = () => {
+            set_body_update(new_p, old_body);
+        };
+        if (!u.node_captures.has(new_p.v)) {
+            b.add_helpers(set_body_redoer, set_body_undoer);
+        }
+    }
 
-        if new_p.v not in u.node_captures:
-            b.add_helpers(set_body_redoer, set_body_undoer)
-
-     */
     //@+node:felix.20261113233806.13: *5* u.set_command_name
-    /* 
-    def set_command_name(self, command_name: str) -> None:
-        u = self
-        b = u._require_bead()
-        assert isinstance(b, UndoBead), repr(b)
-        if u.undoBeadLevel == 1:
-            b.command_name = command_name
-            b.undoType = command_name
-            # Menu labels are updated when the completed bead is pushed.
+    public set_command_name(command_name: string): void {
+        const u = this;
+        const b = u._require_bead();
+        g.assert(b instanceof UndoBead, b.toString());
+        if (u.undoBeadLevel === 1) {
+            b.command_name = command_name;
+            b.undoType = command_name;
+        }
+        // Menu labels are updated when the completed bead is pushed.
+    }
 
-     */
     //@+node:felix.20261113233806.14: *4* u: contexts
     //@+node:felix.20261113233806.15: *5* u.change_node
     /* 
@@ -743,7 +791,7 @@ export class Undoer {
      */
     //@+node:felix.20261113233806.17: *6* u.capture_outline
     /* 
-    def capture_outline(self) -> dict:
+    def capture_outline(self) -> dict:  # in typescript, for LeoJS,  this could return Map with VNode key.
         u = self
         c = u.c
         result = {}
@@ -832,128 +880,134 @@ export class Undoer {
      */
     //@+node:felix.20261113233806.20: *5* u:common context helpers
     //@+node:felix.20261113233806.21: *6* u.capture_node
-    /* 
-    def capture_node(self, v: VNode) -> tuple:
-        """
-        Record everything needed by u.restore_node.
-        """
-        return v.h, v.b, v.isMarked(), deepcopy(v.u)
-
+    /**
+     * Record everything needed by u.restore_node.
      */
+    public capture_node(v: VNode): [string, string, boolean, any] {
+        return [v.h, v.b, v.isMarked(), JSON.parse(JSON.stringify((v.u)))];
+    }
+
     //@+node:felix.20261113233806.22: *6* u.capture_ui
-    /* 
-    def capture_ui(self) -> tuple:
-        c = self.c
-        w = c.frame.body.wrapper
-        return c.p.copy(), w.getSelectionRange(), w.getInsertPoint(), w.getYScrollPosition()
+    public capture_ui(): [Position, [number, number], number, number] {
+        const c = this.c;
+        const w = c.frame.body.wrapper;
+        return [c.p.copy(), w.getSelectionRange(), w.getInsertPoint(), w.getYScrollPosition()];
+    }
 
-     */
     //@+node:felix.20261113233806.23: *6* u.restore_node
-    /* 
-    def restore_node(self, v: VNode, state: tuple) -> None:
-        """
-        Restore everything related to the given VNode:
-        - dirty bits, including calling setAllAncestorAtFileNodesDirty.
-        - marked bits.
-        - uAs.
-        - v.b
-        - v.h
-        """
-        u = self
-        c = u.c
-        head, body, marked, ua = state
-        head_changed = v.h != head
-        v.initHeadString(head)
-        v.setBodyString(body)
-        v.u = deepcopy(ua)
-        if marked:
-            v.setMarked()
-        else:
-            v.clearMarked()
-        val = v.computeIcon()
-        if not hasattr(v, "iconVal") or val != v.iconVal:
-            v.iconVal = val
-        v.setAllAncestorAtFileNodesDirty()
-        v.setDirty()
-
-        # Keep the headline editor from restoring stale text at the next redraw.
-        if head_changed:
-            for p in c.vnode2allPositions(v):
-                c.frame.tree.setHeadline(p, head)
-
+    /**
+     * 
+     * Restore everything related to the given VNode:
+     * - dirty bits, including calling setAllAncestorAtFileNodesDirty.
+     * - marked bits.
+     * - uAs.
+     * - v.b
+     * - v.h
      */
+    public restore_node(v: VNode, state: [string, string, boolean, any]): void {
+        const [head, body, marked, ua] = state;
+        const head_changed = v.h !== head;
+        v.initHeadString(head);
+        v.setBodyString(body);
+        v.u = JSON.parse(JSON.stringify(ua));
+        if (marked) {
+            v.setMarked();
+        } else {
+            v.clearMarked();
+        }
+        const val = v.computeIcon();
+        if (!("iconVal" in v) || val !== v.iconVal) {
+            v.iconVal = val;
+        }
+        v.setAllAncestorAtFileNodesDirty();
+        v.setDirty();
+
+        // Keep the headline editor from restoring stale text at the next redraw.
+        if (head_changed) {
+            const c = this.c;
+            for (const p of c.vnode2allPositions(v)) {
+                c.frame.tree.setHeadline(p, head);
+            }
+        }
+    }
+
     //@+node:felix.20261113233806.24: *6* u.restore_ui
-    /* 
-    def restore_ui(self, state: tuple) -> None:
-        c = self.c
-        p, sel, ins, scroll = state
-        c.p = p
-        c.frame.scanForTabWidth(c.p)
-        c.recolor(c.p)
-        w = c.frame.body.wrapper
-        w.setSelectionRange(*sel, insert=ins)
-        w.setYScrollPosition(scroll)
+    public restore_ui(state: [Position, [number, number], number, number]): void {
+        const c = this.c;
+        const [p, sel, ins, scroll] = state;
+        c.p = p;
+        c.frame.scanForTabWidth(c.p);
+        c.recolor(c.p);
+        const w = c.frame.body.wrapper;
+        w.setSelectionRange(...sel, ins);
+        w.setYScrollPosition(scroll);
+    }
 
-        # Do *not* call w.setAllText here!
-
-     */
     //@+node:felix.20261113233806.25: *4* u: redrawers & finishers
     //@+node:felix.20261113233806.26: *5* u._redraw
-    /* 
-    def _redraw(self, p: Position) -> None:
-        """Redraw now and choose the command's single undo/redo redraw."""
-        u = self
-        c = u.c
-        w = c.frame.body.wrapper
-        # Ignore redrawers in inner levels.
-        if u.undoBeadLevel > 1:
-            return
-        p.setDirty()  # Call p.v.setAllAncestorAtFileNodesDirty()
-        preserve_body = p == c.p and p.b == w.getAllText()
-        if preserve_body:
-            sel, ins, scroll = w.getSelectionRange(), w.getInsertPoint(), w.getYScrollPosition()
-        c.updateSyntaxColorer(p)
-        c.recolor()
-        c.redraw(p)
-        if preserve_body:
-            w.setSelectionRange(*sel, insert=ins)
-            w.setYScrollPosition(scroll)
-
+    /**
+     * Redraw now and choose the command's single undo/redo redraw.
      */
+    private _redraw(p: Position): void {
+        const u = this;
+        const c = u.c;
+        const w = c.frame.body.wrapper;
+        // Ignore redrawers in inner levels.
+        if (u.undoBeadLevel > 1) {
+            return;
+        }
+        p.setDirty();  // Call p.v.setAllAncestorAtFileNodesDirty()
+        const preserve_body = p.__eq__(c.p) && p.b === w.getAllText();
+        let sel: [number, number], ins: number, scroll: number;
+        if (preserve_body) {
+            [sel, ins, scroll] = [w.getSelectionRange(), w.getInsertPoint(), w.getYScrollPosition()];
+        }
+        // c.updateSyntaxColorer(p); // Not used in LeoJS
+        c.recolor();
+        c.redraw(p);
+        if (preserve_body) {
+            w.setSelectionRange(...sel!, ins!);
+            w.setYScrollPosition(scroll!);
+        }
+    }
+
     //@+node:felix.20261113233806.27: *5* u.redraw_after_head_changed
-    /* 
-    def redraw_after_head_changed(self) -> None:
-        """Refresh headlines now and after undo/redo."""
-        u = self
-        u._require_bead()
-        c = u.c
-        # Ignore redrawers in inner levels.
-        if u.undoBeadLevel > 1:
-            return
-        if not c.changed:
-            c.setChanged()
-        c.p.setDirty()  # p.setDirty() calls p.v.setAllAncestorAtFileNodesDirty()
-        c.redraw_after_head_changed()
-        u.undoBead.add_redraw_after_head_changed()
-
+    /**
+     * Refresh headlines now and after undo/redo.
      */
+    public redraw_after_head_changed(): void {
+        const u = this;
+        const c = u.c;
+        if (u.undoBeadLevel > 1) {
+            return;
+        }
+        if (!c.changed) {
+            c.setChanged();
+        }
+        c.p.setDirty();
+        c.redraw_after_head_changed();
+        u.undoBead!.add_redraw_after_head_changed();
+    }
+
     //@+node:felix.20261113233806.28: *5* u.redraw_and_edit
-    /* 
-    def redraw_and_edit(self, new_p: Position) -> None:
-        """Redraw and edit now and after undo/redo."""
-        u = self
-        c = u.c
-        u._require_bead()
-        # Ignore redrawers in inner levels.
-        if u.undoBeadLevel > 1:
-            return
-        if not c.changed:
-            c.setChanged()
-        c.p.setDirty()  # p.setDirty() calls p.v.setAllAncestorAtFileNodesDirty()
-        c.redrawAndEdit(new_p, selectAll=True)
-        u.undoBead.add_redraw_and_edit(new_p, self.undoBead.old_p)
-
+    /**
+     * Redraw and edit now and after undo/redo.
      */
+    public redraw_and_edit(new_p: Position): void {
+        const u = this;
+        const c = u.c;
+        u._require_bead();
+        if (u.undoBeadLevel > 1) {
+            return;
+        }
+        if (!c.changed) {
+            c.setChanged();
+        }
+        c.p.setDirty();
+        c.redrawAndEdit(new_p, true);
+        u.undoBead!.add_redraw_and_edit(new_p, u.undoBead!.old_p);
+    }
+
     //@+node:felix.20261113233810.1: *3* u: Helpers
     //@+node:felix.20261113233810.2: *4* u.__enter__ and __exit__
     /* 
@@ -987,134 +1041,149 @@ export class Undoer {
 
      */
     //@+node:felix.20261113233810.3: *4* u._require_bead
-    /* 
-    def _require_bead(self) -> UndoBead:
-        """Reject helper calls outside a context before any mutation occurs."""
-        assert isinstance(self.undoBead, UndoBead), "Undo helper requires 'with c.undoer'"
-        return self.undoBead
-
+    /**
+     * Reject helper calls outside a context before any mutation occurs.
      */
+    private _require_bead(): UndoBead {
+        const u = this;
+        if (!(u.undoBead instanceof UndoBead)) {
+            throw new Error("Undo helper requires 'with c.undoer'");
+        }
+        return u.undoBead;
+    }
+
     //@+node:felix.20261113233810.4: *4* u.cutStack
-    /* 
-    def cutStack(self) -> None:
-        u = self
-        n = u.max_undo_stack_size
-        if u.bead >= n > 0:
-            # This work regardless of how many items appear after bead n.
-            u.beads = u.beads[-n:]
-            u.bead = n - 1
+    public cutStack(): void {
+        const u = this;
+        const n = u.max_undo_stack_size;
+        if (u.bead >= n && n > 0) {
+            // This works regardless of how many items appear after bead n.
+            u.beads = u.beads.slice(-n);
+            u.bead = n - 1;
+        }
+    }
 
-     */
     //@+node:felix.20261113233810.5: *4* u.getBead
-    /* 
-    def getBead(self, n: int) -> UndoBead | None:
-        """Set Undoer ivars from the bead at the top of the undo stack."""
-        u = self
-        if n < 0 or n >= len(u.beads):
-            return None
-        return u.beads[n]
-
+    /**
+     * Set Undoer ivars from the bead at the top of the undo stack.
      */
+    public getBead(n: number): UndoBead | null {
+        const u = this;
+        if (n < 0 || n >= u.beads.length) {
+            return null;
+        }
+        return u.beads[n];
+    }
+
     //@+node:felix.20261113233810.6: *4* u.peekBead
-    /* 
-    def peekBead(self, n: int) -> UndoBead | None:
-        u = self
-        if n < 0 or n >= len(u.beads):
-            return None
-        return u.beads[n]
+    public peekBead(n: number): UndoBead | null {
+        const u = this;
+        if (n < 0 || n >= u.beads.length) {
+            return null;
+        }
+        return u.beads[n];
+    }
 
-     */
     //@+node:felix.20261113233810.7: *4* u.pushBead
-    /* 
-    def pushBead(self, bead: UndoBead) -> None:
-        u = self
-        u.bead += 1
-        u.beads[u.bead :] = [bead]
-        u.setUndoTypes()
+    public pushBead(bead: UndoBead): void {
+        const u = this;
+        u.bead += 1;
+        u.beads.splice(u.bead, u.beads.length - u.bead, bead);
+        u.setUndoTypes();
+    }
 
-     */
     //@+node:felix.20261113233810.8: *4* u.redoMenuName, undoMenuName
-    /* 
-    def redoMenuName(self, name: str) -> str:
-        if name.startswith("Can't Redo"):
-            return name
-        return "Redo " + name
+    public redoMenuName(name: string): string {
+        if (name.startsWith("Can't Redo")) {
+            return name;
+        }
+        return "Redo " + name;
+    }
 
-    def undoMenuName(self, name: str) -> str:
-        if name.startswith("Can't Undo"):
-            return name
-        return "Undo " + name
+    public undoMenuName(name: string): string {
+        if (name.startsWith("Can't Undo")) {
+            return name;
+        }
+        return "Undo " + name;
+    }
 
-     */
     //@+node:felix.20261113233810.9: *4* u.setRedoType
-    /* 
-    # These routines update both the ivar and the menu label.
+    // These routines update both the ivar and the menu label.
 
-    def setRedoType(self, theType: str) -> None:
-        u = self
-        frame = u.c.frame
-        if not isinstance(theType, str):  # pragma: no cover
-            g.trace(f"oops: expected string for command, got {theType!r}")
-            g.trace(g.callers())
-            theType = '<unknown>'
-        menu = frame.menu.getMenu("Edit")
-        name = u.redoMenuName(theType)
-        if name != u.redoMenuLabel:
-            # Update menu using old name.
-            realLabel = frame.menu.getRealMenuName(name)
-            if realLabel == name:
-                underline = -1 if g.match(name, 0, "Can't") else 0
-            else:
-                underline = realLabel.find("&")
-            realLabel = realLabel.replace("&", "")
-            frame.menu.setMenuLabel(menu, u.realRedoMenuLabel, realLabel, underline=underline)
-            u.redoMenuLabel = name
-            u.realRedoMenuLabel = realLabel
+    // typescript implementation
+    public setRedoType(theType: string): void {
+        const u = this;
+        const frame = u.c.frame;
+        if (typeof theType !== "string") {
+            g.trace(`oops: expected string for command, got ${theType}`);
+            g.trace(g.callers());
+            theType = "<unknown>";
+        }
+        const name = u.redoMenuName(theType);
 
-     */
+        // * Python code to adapt later *
+        // const menu = frame.menu.getMenu("Edit");
+        // if (name !== u.redoMenuLabel) {
+        //     const realLabel = frame.menu.getRealMenuName(name);
+        //     let underline;
+        //     if (realLabel === name) {
+        //         underline = name.startsWith("Can't") ? -1 : 0;
+        //     } else {
+        //         underline = realLabel.indexOf("&");
+        //     }
+        //     const finalLabel = realLabel.replace("&", "");
+        //     frame.menu.setMenuLabel(menu, u.realRedoMenuLabel, finalLabel, underline);
+        //     u.redoMenuLabel = name;
+        //     u.realRedoMenuLabel = finalLabel;
+        // }
+        u.redoMenuLabel = name;
+        u.realRedoMenuLabel = name; // finalLabel;
+    }
+
     //@+node:felix.20261113233810.10: *4* u.setUndoType
-    /* 
-    def setUndoType(self, theType: str) -> None:
-        u = self
-        frame = u.c.frame
-        if not isinstance(theType, str):
-            g.trace(f"oops: expected string for command, got {repr(theType)}")
-            g.trace(g.callers())
-            theType = '<unknown>'
-        menu = frame.menu.getMenu("Edit")
-        name = u.undoMenuName(theType)
-        if name != u.undoMenuLabel:
-            # Update menu using old name.
-            realLabel = frame.menu.getRealMenuName(name)
-            if realLabel == name:
-                underline = -1 if g.match(name, 0, "Can't") else 0
-            else:
-                underline = realLabel.find("&")
-            realLabel = realLabel.replace("&", "")
-            frame.menu.setMenuLabel(menu, u.realUndoMenuLabel, realLabel, underline=underline)
-            u.undoType = theType
-            u.undoMenuLabel = name
-            u.realUndoMenuLabel = realLabel
+    public setUndoType(theType: string): void {
+        const u = this;
+        const frame = u.c.frame;
+        if (typeof theType !== "string") {
+            g.trace(`oops: expected string for command, got ${theType}`);
+            g.trace(g.callers());
+            theType = "<unknown>";
+        }
+        const name = u.undoMenuName(theType);
 
-     */
+        // * Python code to adapt later *
+        // const menu = frame.menu.getMenu("Edit");
+        // if name != u.undoMenuLabel:
+        //     # Update menu using old name.
+        //     realLabel = frame.menu.getRealMenuName(name)
+        //     if realLabel == name:
+        //         underline = -1 if g.match(name, 0, "Can't") else 0
+        //     else:
+        //         underline = realLabel.find("&")
+        //     realLabel = realLabel.replace("&", "")
+        //     frame.menu.setMenuLabel(menu, u.realUndoMenuLabel, realLabel, underline=underline)
+        //     u.undoType = theType
+        //     u.undoMenuLabel = name
+        //     u.realUndoMenuLabel = realLabel
+        u.undoMenuLabel = name;
+        u.realUndoMenuLabel = name; // finalLabel;
+    }
 
     //@+node:felix.20261113233810.11: *4* u.setUndoTypes
-    /* 
-    def setUndoTypes(self) -> None:
-        u = self
-        # Set the undo type and undo menu label.
-        if bead := u.peekBead(u.bead):
-            u.setUndoType(bead.undoType)
-        else:
-            u.setUndoType("Can't Undo")
-        # Set only the redo menu label.
-        if bead := u.peekBead(u.bead + 1):
-            u.setRedoType(bead.undoType)
-        else:
-            u.setRedoType("Can't Redo")
-        u.cutStack()
-
-     */
+    public setUndoTypes(): void {
+        const u = this;
+        if (u.peekBead(u.bead)) {
+            u.setUndoType(u.peekBead(u.bead)!.undoType);
+        } else {
+            u.setUndoType("Can't Undo");
+        }
+        if (u.peekBead(u.bead + 1)) {
+            u.setRedoType(u.peekBead(u.bead + 1)!.undoType);
+        } else {
+            u.setRedoType("Can't Redo");
+        }
+        u.cutStack();
+    }
     //@-others
 }
 //@-others
