@@ -13,6 +13,21 @@ import { new_cmd_decorator } from './decorators';
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
 import { StringTextWrapper } from './leoFrame';
+import { cloneDeep, isEqual } from 'lodash';
+
+type NodeState = [string, string, boolean, ReturnType<typeof cloneDeep>];
+type OutlineEntry = [NodeState, VNode[], VNode[]];
+type OutlineState = Map<VNode, OutlineEntry>;
+
+function sameLinks(a: VNode[], b: VNode[]): boolean {
+    return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+function sameOutlineEntry(a: OutlineEntry, b: OutlineEntry): boolean {
+    return isEqual(a[0], b[0])
+        && sameLinks(a[1], b[1])
+        && sameLinks(a[2], b[2]);
+}
 //@-<< imports >>
 
 /**
@@ -175,7 +190,7 @@ export class UndoBead {
             f();
         }
         if (this.redraw_finishers && this.redraw_finishers.length) {
-            this.redraw_finishers[0]();
+            this.redraw_finishers[1]();
         }
         for (const f of this.undo_finishers) {
             f();
@@ -369,7 +384,7 @@ export class Undoer {
         if (!u.canUndo()) {
             return;
         }
-        const obj = u.getBead(u.bead + 1);
+        const obj = u.getBead(u.bead);
         if (!obj) {
             return;
         }
@@ -506,9 +521,9 @@ export class Undoer {
             c.p = new_p;
         };
         const delete_node_undoer = () => {
-            if (old_back) {
+            if (old_back && old_back.v) {
                 old_p._linkAfter(old_back);
-            } else if (old_parent) {
+            } else if (old_parent && old_parent.v) {
                 old_p._linkAsNthChild(old_parent, 0);
             } else {
                 old_p._linkAsRoot();
@@ -540,10 +555,10 @@ export class Undoer {
         let new_p: Position;
 
         if (before) {
-            new_p = p.insertBefore()
+            new_p = p.insertBefore();
             // Inserting before p changes p's original index.
         } else if (
-            as_child || p.hasChildren() && p.isExpanded() || c.hoistStack && p.__eq__(c.hoistStack[-1].p)
+            as_child || p.hasChildren() && p.isExpanded() || c.hoistStack.length && p.__eq__(c.hoistStack[c.hoistStack.length - 1].p)
         ) {
             if (index == null) {
                 const insert_at_end = c.config.getBool('insert-new-nodes-at-end');
@@ -662,6 +677,60 @@ export class Undoer {
 
     //@+node:felix.20261113233806.14: *4* u: contexts
     //@+node:felix.20261113233806.15: *5* u.change_node
+    public change_node(p: Position, command_name: string): Disposable {
+        const u = this;
+        const c = u.c;
+
+        if (u.undoing || u.redoing) {
+            return new DisposableStack();
+        }
+        if (!c.changed) {
+            c.setChanged();
+        }
+
+        using scope = new DisposableStack();
+        scope.use(u.begin());
+        u.set_command_name(command_name);
+
+        const v = p.v;
+        if (u.capture_level > 0 || u.node_captures.has(v)) {
+            return scope.move();
+        }
+
+        const old_p = c.p.copy();
+        const old_state = u.capture_node(v);
+        const old_ui = u.capture_ui();
+        u.node_captures.add(v);
+
+        scope.defer(() => {
+            u.node_captures.delete(v);
+
+            const new_p = c.p.copy();
+            const new_state = u.capture_node(v);
+            if (!isEqual(old_state, new_state)) {
+                u._redraw(new_p);
+                const new_ui = u.capture_ui();
+                const bead = u._require_bead();
+
+                bead.add_helpers(
+                    () => u.restore_node(v, new_state),
+                    () => u.restore_node(v, old_state),
+                );
+                bead.add_finishers(
+                    () => {
+                        u._redraw(new_p);
+                        u.restore_ui(new_ui);
+                    },
+                    () => {
+                        u._redraw(old_p);
+                        u.restore_ui(old_ui);
+                    },
+                );
+            }
+        });
+
+        return scope.move();
+    }
     /* 
     @contextmanager
     def change_node(self, p: Position, command_name: str) -> Generator[Undoer]:
@@ -719,6 +788,96 @@ export class Undoer {
 
      */
     //@+node:felix.20261113233806.16: *5* u.change_outline & helpers
+
+    public change_outline(command_name: string): Disposable {
+        const u = this;
+        const c = u.c;
+
+        if (u.undoing || u.redoing) {
+            return new DisposableStack();
+        }
+        if (!c.changed) {
+            c.setChanged();
+        }
+
+        using scope = new DisposableStack();
+        scope.use(u.begin());
+        u.set_command_name(command_name);
+
+        if (u.capture_level > 0) {
+            return scope.move();
+        }
+        if (u.node_captures.size) {
+            throw new Error('Use change_outline outside change_node for bulk edits');
+        }
+
+        const old_p = c.p.copy();
+        const old_state = u.capture_outline();
+        const old_ui = u.capture_ui();
+        u.capture_level++;
+
+        scope.defer(() => {
+            u.capture_level--;
+
+            const new_p = c.p.copy();
+            u._redraw(new_p);
+            const new_state = u.capture_outline();
+            const old_delta: OutlineState = new Map();
+            const new_delta: OutlineState = new Map();
+
+            const vnodes = new Set([...old_state.keys(), ...new_state.keys()]);
+            for (const v of vnodes) {
+                let old = old_state.get(v);
+                let current = new_state.get(v);
+
+                if (!old) {
+                    if (!current) {
+                        throw new Error('Missing outline snapshot entry');
+                    }
+                    old = [
+                        current[0],
+                        current[1],
+                        current[2].filter(parent => !old_state.has(parent)),
+                    ];
+                }
+                if (!current) {
+                    current = [
+                        old[0],
+                        old[1],
+                        old[2].filter(parent => !new_state.has(parent)),
+                    ];
+                }
+
+                if (!sameOutlineEntry(old, current)) {
+                    old_delta.set(v, old);
+                    new_delta.set(v, current);
+                }
+            }
+
+            if (old_delta.size) {
+                const new_ui = u.capture_ui();
+                const bead = u._require_bead();
+
+                bead.add_helpers(
+                    () => u.restore_outline(new_delta),
+                    () => u.restore_outline(old_delta),
+                );
+                bead.add_finishers(
+                    () => {
+                        u.restore_ui(new_ui);
+                        u._redraw(new_p);
+                    },
+                    () => {
+                        u.restore_ui(old_ui);
+                        u._redraw(old_p);
+                    },
+                );
+            }
+        });
+
+        return scope.move();
+    }
+
     /* 
     @contextmanager
     def change_outline(self, command_name: str) -> Generator[Undoer]:
@@ -790,7 +949,7 @@ export class Undoer {
 
      */
     //@+node:felix.20261113233806.17: *6* u.capture_outline
-    public capture_outline(): Map<VNode, [any, VNode[], VNode[]]> {
+    public capture_outline(): OutlineState {
         const u = this;
         const c = u.c;
         const result = new Map<VNode, [any, VNode[], VNode[]]>();
@@ -810,7 +969,7 @@ export class Undoer {
     /**
      * Restore every link before touching content or propagating dirty bits.
      */
-    public restore_outline(delta: Map<VNode, [any, VNode[], VNode[]]>): void {
+    public restore_outline(delta: OutlineState): void {
         const u = this;
         for (const v of delta.keys()) {
             v.setAllAncestorAtFileNodesDirty();
@@ -825,6 +984,71 @@ export class Undoer {
     }
 
     //@+node:felix.20261113233806.19: *5* u.move_node
+
+    public move_node(p: Position, command_name: string): Disposable {
+        const u = this;
+        const c = u.c;
+
+        if (u.undoing || u.redoing) {
+            return new DisposableStack();
+        }
+        if (!c.changed) {
+            c.setChanged();
+        }
+
+        using scope = new DisposableStack();
+        scope.use(u.begin());
+        u.set_command_name(command_name);
+
+        if (u.capture_level > 0) {
+            return scope.move();
+        }
+
+        const old_p = p.copy();
+        const old_ui = u.capture_ui();
+
+        scope.defer(() => {
+            const new_p = p.copy();
+
+            if (old_p.v !== c.p.v) {
+                g.es_print_unique_message(
+                    `u.move_node changed p.v: ${p.v.h} ${g.callers()}`
+                );
+            }
+
+            if (!old_p.__eq__(new_p)) {
+                const new_ui = u.capture_ui();
+                u._redraw(new_p);
+
+                const move = (source: Position, target: Position): void => {
+                    source.v._cutLink(source.childIndex(), source._parentVnode());
+                    target.v._addLink(target.childIndex(), target._parentVnode());
+                    source.setDirty();
+                    target.setDirty();
+                };
+
+                const bead = u._require_bead();
+                bead.add_helpers(
+                    () => move(old_p, new_p),
+                    () => move(new_p, old_p),
+                );
+                bead.add_finishers(
+                    () => {
+                        u.restore_ui(new_ui);
+                        u._redraw(new_p);
+                    },
+                    () => {
+                        u.restore_ui(old_ui);
+                        u._redraw(old_p);
+                    },
+                );
+            }
+        });
+
+        return scope.move();
+    }
+
+
     /* 
     @contextmanager
     def move_node(self, p: Position, command_name: str) -> Generator[Undoer]:
@@ -889,7 +1113,7 @@ export class Undoer {
      * Record everything needed by u.restore_node.
      */
     public capture_node(v: VNode): [string, string, boolean, any] {
-        return [v.h, v.b, v.isMarked(), JSON.parse(JSON.stringify((v.u)))];
+        return [v.h, v.b, v.isMarked(), cloneDeep(v.u)];
     }
 
     //@+node:felix.20261113233806.22: *6* u.capture_ui
@@ -914,7 +1138,7 @@ export class Undoer {
         const head_changed = v.h !== head;
         v.initHeadString(head);
         v.setBodyString(body);
-        v.u = JSON.parse(JSON.stringify(ua));
+        v.u = cloneDeep(ua);
         if (marked) {
             v.setMarked();
         } else {
@@ -982,6 +1206,7 @@ export class Undoer {
      */
     public redraw_after_head_changed(): void {
         const u = this;
+        u._require_bead();
         const c = u.c;
         if (u.undoBeadLevel > 1) {
             return;
@@ -1015,6 +1240,44 @@ export class Undoer {
 
     //@+node:felix.20261113233810.1: *3* u: Helpers
     //@+node:felix.20261113233810.2: *4* u.__enter__ and __exit__
+    public begin(): Disposable {
+        const u = this;
+
+        if (u.undoBeadLevel === 0) {
+            u.undoBead = new UndoBead(u);
+        }
+
+        const bead = u._require_bead();
+        const level = ++u.undoBeadLevel;
+        let disposed = false;
+
+        return {
+            [Symbol.dispose](): void {
+                if (disposed) {
+                    return;
+                }
+                if (u.undoBead !== bead || u.undoBeadLevel !== level) {
+                    throw new Error('Undo scopes must be disposed in reverse order');
+                }
+
+                disposed = true;
+                u.undoBeadLevel--;
+
+                if (u.undoBeadLevel !== 0) {
+                    return;
+                }
+
+                u.undoBead = undefined;
+                if (bead.undo_functions.length && !u.undoing && !u.redoing) {
+                    if (!bead.command_name) {
+                        throw new Error('Missing call to u.set_command_name');
+                    }
+                    u.pushBead(bead);
+                }
+            },
+        };
+    }
+
     /* 
     def __enter__(self) -> Self:
         """Compose nested operations into one bead, published on outermost exit."""
@@ -1128,21 +1391,20 @@ export class Undoer {
 
         // * Python code to adapt later *
         // const menu = frame.menu.getMenu("Edit");
-        // if (name !== u.redoMenuLabel) {
-        //     const realLabel = frame.menu.getRealMenuName(name);
-        //     let underline;
-        //     if (realLabel === name) {
-        //         underline = name.startsWith("Can't") ? -1 : 0;
-        //     } else {
-        //         underline = realLabel.indexOf("&");
-        //     }
-        //     const finalLabel = realLabel.replace("&", "");
-        //     frame.menu.setMenuLabel(menu, u.realRedoMenuLabel, finalLabel, underline);
-        //     u.redoMenuLabel = name;
-        //     u.realRedoMenuLabel = finalLabel;
-        // }
-        u.redoMenuLabel = name;
-        u.realRedoMenuLabel = name; // finalLabel;
+        if (name !== u.redoMenuLabel) {
+            // const realLabel = frame.menu.getRealMenuName(name);
+            // let underline;
+            // if (realLabel === name) {
+            //     underline = name.startsWith("Can't") ? -1 : 0;
+            // } else {
+            //     underline = realLabel.indexOf("&");
+            // }
+            // const finalLabel = realLabel.replace("&", "");
+            // frame.menu.setMenuLabel(menu, u.realRedoMenuLabel, finalLabel, underline);
+            u.redoMenuLabel = name;
+            // u.realRedoMenuLabel = finalLabel;
+        }
+
     }
 
     //@+node:felix.20261113233810.10: *4* u.setUndoType
@@ -1156,22 +1418,22 @@ export class Undoer {
         }
         const name = u.undoMenuName(theType);
 
-        // * Python code to adapt later *
         // const menu = frame.menu.getMenu("Edit");
-        // if name != u.undoMenuLabel:
-        //     # Update menu using old name.
-        //     realLabel = frame.menu.getRealMenuName(name)
-        //     if realLabel == name:
-        //         underline = -1 if g.match(name, 0, "Can't") else 0
-        //     else:
-        //         underline = realLabel.find("&")
-        //     realLabel = realLabel.replace("&", "")
-        //     frame.menu.setMenuLabel(menu, u.realUndoMenuLabel, realLabel, underline=underline)
-        //     u.undoType = theType
-        //     u.undoMenuLabel = name
-        //     u.realUndoMenuLabel = realLabel
-        u.undoMenuLabel = name;
-        u.realUndoMenuLabel = name; // finalLabel;
+        if (name !== u.undoMenuLabel) {
+            // Update menu using old name.
+            // const realLabel = frame.menu.getRealMenuName(name);
+            // let underline;
+            // if (realLabel == name){
+            //     underline = g.match(name, 0, "Can't") ? -1 : 0;
+            // }else{
+            //     underline = realLabel.indexOf("&");
+            // }
+            // const finalLabel = realLabel.replace("&", "");
+            // frame.menu.setMenuLabel(menu, u.realUndoMenuLabel, finalLabel, underline);
+            u.undoType = theType;
+            u.undoMenuLabel = name;
+            // u.realUndoMenuLabel = finalLabel;
+        }
     }
 
     //@+node:felix.20261113233810.11: *4* u.setUndoTypes
