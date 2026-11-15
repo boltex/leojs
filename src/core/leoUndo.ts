@@ -790,35 +790,40 @@ export class Undoer {
 
      */
     //@+node:felix.20261113233806.17: *6* u.capture_outline
-    /* 
-    def capture_outline(self) -> dict:  # in typescript, for LeoJS,  this could return Map with VNode key.
-        u = self
-        c = u.c
-        result = {}
-        pending = [c.hiddenRootNode]
-        while pending:
-            v = pending.pop()
-            if v in result:
-                continue
-            result[v] = u.capture_node(v), tuple(v.children), tuple(v.parents)
-            pending.extend(v.children)
-        return result
+    public capture_outline(): Map<VNode, [any, VNode[], VNode[]]> {
+        const u = this;
+        const c = u.c;
+        const result = new Map<VNode, [any, VNode[], VNode[]]>();
+        const pending = [c.hiddenRootNode];
+        while (pending.length > 0) {
+            const v = pending.pop()!;
+            if (result.has(v)) {
+                continue;
+            }
+            result.set(v, [u.capture_node(v), Array.from(v.children), Array.from(v.parents)]);
+            pending.push(...v.children);
+        }
+        return result;
+    }
 
-     */
     //@+node:felix.20261113233806.18: *6* u.restore_outline
-    /* 
-    def restore_outline(self, delta: dict) -> None:
-        # Restore every link before touching content or propagating dirty bits.
-        u = self
-        for v in delta:
-            v.setAllAncestorAtFileNodesDirty()
-        for v, (_, children, parents) in delta.items():
-            v.children = list(children)
-            v.parents = list(parents)
-        for v, (state, _, _) in delta.items():
-            u.restore_node(v, state)
-
+    /**
+     * Restore every link before touching content or propagating dirty bits.
      */
+    public restore_outline(delta: Map<VNode, [any, VNode[], VNode[]]>): void {
+        const u = this;
+        for (const v of delta.keys()) {
+            v.setAllAncestorAtFileNodesDirty();
+        }
+        for (const [v, [, children, parents]] of delta.entries()) {
+            v.children = Array.from(children);
+            v.parents = Array.from(parents);
+        }
+        for (const [v, [state]] of delta.entries()) {
+            u.restore_node(v, state);
+        }
+    }
+
     //@+node:felix.20261113233806.19: *5* u.move_node
     /* 
     @contextmanager
