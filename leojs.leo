@@ -3482,7 +3482,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313739343238343139332e3536350a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313739343731393039312e3230370a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -9224,10 +9224,6 @@ private _bodySaveDocument(
 ): Thenable&lt;boolean&gt; {
     if (p_document) {
 
-        // const c = g.app.windowList[this.frameIndex].c;
-        // const u = c.undoer;
-        // const wrapper = c.frame.body.wrapper;
-        // const w_gnx = utils.leoUriToStr(p_document.uri);
         const body = p_document.getText().replace(/\r\n/g, "\n"); // new body text
 
         let id: string = ""; // STARTS FALSY

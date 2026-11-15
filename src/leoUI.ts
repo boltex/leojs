@@ -1931,10 +1931,6 @@ export class LeoUI extends NullGui {
     ): Thenable<boolean> {
         if (p_document) {
 
-            // const c = g.app.windowList[this.frameIndex].c;
-            // const u = c.undoer;
-            // const wrapper = c.frame.body.wrapper;
-            // const w_gnx = utils.leoUriToStr(p_document.uri);
             const body = p_document.getText().replace(/\r\n/g, "\n"); // new body text
 
             let id: string = ""; // STARTS FALSY
