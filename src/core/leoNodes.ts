@@ -8,7 +8,6 @@
 import * as g from './leoGlobals';
 import * as utils from '../utils';
 import { Commands } from './leoCommands';
-import { Bead } from './leoUndo';
 import { FileCommands } from './leoFileCommands';
 import { NullBody } from './leoFrame';
 import 'date-format-lite';
@@ -2956,7 +2955,6 @@ export class VNode {
 
     // * used by undoer
     _p_changed: boolean;
-    undo_info: Bead | undefined;
 
     // * Structure data...
     children: VNode[]; // Ordered list of all children of this node.
@@ -3370,7 +3368,7 @@ export class VNode {
     /**
      * Return True if v is the n'th child of parent_v.
      */
-    public isNthChildOf(n: number, parent_v: VNode): boolean {
+    public isNthChildOf(n: number, parent_v?: VNode): boolean {
         const children: VNode[] | undefined = parent_v
             ? parent_v.children
             : undefined;
