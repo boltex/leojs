@@ -794,9 +794,8 @@ export class LeoFind {
 
     // Compatibility. 
     // find_var = find_def
-    public find_var(): [number, Position, string][] {
-        return this.find_def();
-    }
+    public find_var = this.find_def;
+
     //@+node:felix.20240529213126.2: *5* find.do_find_def & helpers
     /*
      * A helper for find_def's.
@@ -866,9 +865,8 @@ export class LeoFind {
 
     // Compatibility.
     // do_find_var = do_find_def
-    public do_find_var(word: string): [number, Position, string][] {
-        return this.do_find_def(word);
-    }
+    public do_find_var = this.do_find_def;
+
     //@+node:felix.20240529213126.3: *6* find._load_quicksearch_entries
     public _load_quicksearch_entries(word?: string, matches: [number, Position, string][] = []): void {
         /* Put all matches in the Nav pane. */

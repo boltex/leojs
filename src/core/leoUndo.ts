@@ -108,28 +108,6 @@ export class UndoBead {
 
         this.add_finishers(recolor_redoer, recolor_undoer);
     }
-    //@+node:felix.20261113231808.6: *3* undoBead.add_redraw
-    /**
-     * Add finishers that will call c.redraw.
-     * The caller chooses the final redraw for the entire command.
-     */
-    public add_redraw(new_p: Position, old_p: Position): void {
-
-        const c = this.c;
-        new_p = new_p.copy();
-        old_p = old_p.copy();
-
-        const redraw_redoer = () => {
-            c.redraw(new_p);
-        };
-
-        const redraw_undoer = () => {
-            c.redraw(old_p);
-        };
-
-        this.add_redraw_finishers(redraw_redoer, redraw_undoer);
-    }
-
     //@+node:felix.20261113231808.7: *3* undoBead.add_redraw_and_edit
     public add_redraw_and_edit(new_p: Position, old_p: Position): void {
 
@@ -206,7 +184,7 @@ export class UndoBead {
      */
     public add_helpers(redo_function: () => void, undo_function: () => void): void {
         if (this.undoer.capture_level) {
-            return;  // The enclosing snapshot records the complete operation.
+            return;
         }
         this.redo_functions.push(redo_function);
         this.undo_functions.unshift(undo_function);  // Execute in reverse order.
@@ -463,6 +441,14 @@ export class Undoer {
     //@+node:felix.20261113233806.9: *5* u.clone_node
     /**
      * Clone p, returning and selecting the new occurrence.
+     *
+     * Example usage, from Leo's clone-node command:
+     *
+     * with u.change_outline('clone-node'):
+     *     clone = u.clone_node(c.p)  # Cloning a node is *always* valid.
+     *     c.p = clone
+     *     c.treeWantsFocus()
+     *     return clone
      */
     public clone_node(p: Position): Position {
 
@@ -495,7 +481,12 @@ export class Undoer {
 
     //@+node:felix.20261113233806.10: *5* u.delete_node
     /**
-     * Delete p without scheduling a redraw; retain its original links.
+     * Delete node p.
+     *
+     * Example usage, from Leo's delete-node command:
+     *
+     * with u.change_outline(op_name):
+     *     u.delete_node(p)  # Calculates new c.p.
      */
     public delete_node(p: Position): void {
 
@@ -539,7 +530,15 @@ export class Undoer {
 
     //@+node:felix.20261113233806.11: *5* u.insert_node
     /**
-     * Insert a node once; redo relinks that same vnode, including its subtree.
+     * Insert a node, at the position given by the kwargs.
+     *
+     * For example usage, see the source code for the following Leo commands:
+
+     * - insert-as-first-child.
+     * - insert-as-last-child.
+     * - insert-child
+     * - insert-node
+     * - insert-node-before.
      */
     public insert_node(
         p: Position,
@@ -599,70 +598,6 @@ export class Undoer {
 
     }
 
-    //@+node:felix.20261113233806.12: *5* u.set_body
-    /**
-     * Change p.b
-     */
-    public set_body(
-        new_p: Position,
-        new_body: string,
-        old_body: string | null = null,
-    ): void {
-
-        const u = this;
-        const b = u._require_bead();
-        const c = u.c;
-        const w = c.frame.body.wrapper;
-
-        if (!g.isTextWrapper(w)) {
-            g.error(`Not a text wrapper: ${g.callers()}`);
-            return;
-        }
-
-        new_p = new_p.copy();
-        if (old_body == null) {
-            old_body = new_p.b;
-        }
-        if (old_body == new_body) {
-            return;
-        }
-
-        /**
-         * Update p's data.
-         */
-        const set_body_update = (p: Position, body: string) => {
-            // Set p.v.b, not p.b! The p.b setter clears the selection!
-            p.v.b = body;
-            p.setDirty();
-            const val = p.computeIcon();
-            if (!("iconVal" in p.v) || val != p.v.iconVal) {
-                p.v.iconVal = val;
-            }
-            c.recolor(p);  // Only for QScintilla.
-            p.setAllAncestorAtFileNodesDirty();
-        };
-
-        // Do the action!
-        set_body_update(new_p, new_body);
-
-        if (c.p.__eq__(new_p) && w.getAllText() != new_body) {
-            const [sel, ins] = [w.getSelectionRange(), w.getInsertPoint()];
-            w.setAllText(new_body);
-            w.setSelectionRange(...sel, ins);
-        }
-        // Add helpers. Use distinct names for debugging.
-
-        const set_body_redoer = () => {
-            set_body_update(new_p, new_body);
-        };
-        const set_body_undoer = () => {
-            set_body_update(new_p, old_body);
-        };
-        if (!u.node_captures.has(new_p.v)) {
-            b.add_helpers(set_body_redoer, set_body_undoer);
-        }
-    }
-
     //@+node:felix.20261113233806.13: *5* u.set_command_name
     public set_command_name(command_name: string): void {
         const u = this;
@@ -677,6 +612,16 @@ export class Undoer {
 
     //@+node:felix.20261113233806.14: *4* u: contexts
     //@+node:felix.20261113233806.15: *5* u.change_node
+
+    /**
+     * Handle doing, undoing, and redoing changes to one node.Add a comment on  lines R595 to R754Add diff commentMarkdown input:  edit mode selected.WritePreviewAdd a suggestionHeadingBold(control b) control⌃ bBItalic(control i) control⌃ iIQuote(control shift right angle bracket) control⌃ shift⇧ right angle bracket>Code(control e) control⌃ eELink(control k) control⌃ kKUnordered list(control 8) control⌃ 88Numbered list(control shift ampersand) control⌃ shift⇧ ampersand&Task list(control shift l) control⌃ shift⇧ lLMentionReferenceSlash commandsMore itemsSaved repliesPaste, drop, or click to add filesCancelCommentStart a review
+     *
+     * Example usage, from Leo's promote-bodies command:
+     *
+     *  with u.change_node(p, 'promote-bodies'):
+     *       p.b = ''.join(result).rstrip() + '\n\n'
+     */
+
     public change_node(p: Position, command_name: string): Disposable {
         const u = this;
         const c = u.c;
@@ -704,7 +649,6 @@ export class Undoer {
 
         scope.defer(() => {
             u.node_captures.delete(v);
-
             const new_p = c.p.copy();
             const new_state = u.capture_node(v);
             if (!isEqual(old_state, new_state)) {
@@ -789,6 +733,33 @@ export class Undoer {
      */
     //@+node:felix.20261113233806.16: *5* u.change_outline & helpers
 
+    /**
+     * Handle doing, undoing, and redoing changes throughout an outline.
+     *
+     * Prefer u.change_node for actions affecting only a single node.
+     *
+     * This method scans the entire outline, but creates minimal undo/redo data.
+     * Despite the scan, this method is fast, taking about 0.04 sec. to scan LeoPyRef.leo.
+     *
+     * For example usage, look for calls to this method.
+     *
+     * Here is a relatively straightforward example from c.dragCloneAfter:
+     *
+     * with u.change_outline('c.dragCloneAfter'):
+     *     clone = p.clone()
+     *     if (
+     *         c.checkDrag(p, after) and
+     *         c.checkMoveWithParentWithWarning(clone, after.parent(), True)
+     *     ):  # fmt: skip
+     *         clone.setDirty()
+     *         clone.moveAfter(after)
+     *         clone.setDirty()
+     *         p = clone
+     *     else:
+     *         # Destroys clone and makes p the current node.
+     *         clone.doDelete(newNode=p)
+     *     c.p = p
+     */
     public change_outline(command_name: string): Disposable {
         const u = this;
         const c = u.c;
@@ -831,6 +802,7 @@ export class Undoer {
                 let current = new_state.get(v);
 
                 if (!old) {
+                    // A node was inserted.
                     if (!current) {
                         throw new Error('Missing outline snapshot entry');
                     }
@@ -841,6 +813,7 @@ export class Undoer {
                     ];
                 }
                 if (!current) {
+                    // A node was deleted.
                     current = [
                         old[0],
                         old[1],
@@ -984,7 +957,17 @@ export class Undoer {
     }
 
     //@+node:felix.20261113233806.19: *5* u.move_node
-
+    /**
+     * Handle doing, undoing, and redoing moving a node.
+     *
+     * Example usage, from Leo's move-outline-to-last-child command:
+     *
+     * with u.move_node(p, 'move-outline-to-last-child'):
+     *     p.setDirty()
+     *     p.moveToNthChildOf(parent, len(parent.v.children) - 1)
+     *     p.setDirty()
+     *     c.p = p
+     */
     public move_node(p: Position, command_name: string): Disposable {
         const u = this;
         const c = u.c;
@@ -1321,6 +1304,9 @@ export class Undoer {
     }
 
     //@+node:felix.20261113233810.4: *4* u.cutStack
+    /**
+     * Cut the stack back to u.max_undo_stack_size entries.
+     */
     public cutStack(): void {
         const u = this;
         const n = u.max_undo_stack_size;
@@ -1342,15 +1328,7 @@ export class Undoer {
         }
         return u.beads[n];
     }
-
-    //@+node:felix.20261113233810.6: *4* u.peekBead
-    public peekBead(n: number): UndoBead | null {
-        const u = this;
-        if (n < 0 || n >= u.beads.length) {
-            return null;
-        }
-        return u.beads[n];
-    }
+    public peekBead = this.getBead;  // Compatibility
 
     //@+node:felix.20261113233810.7: *4* u.pushBead
     public pushBead(bead: UndoBead): void {
@@ -1426,6 +1404,7 @@ export class Undoer {
             // if (realLabel == name){
             //     underline = g.match(name, 0, "Can't") ? -1 : 0;
             // }else{
+            //     // Do *not* change this line!
             //     underline = realLabel.indexOf("&");
             // }
             // const finalLabel = realLabel.replace("&", "");
@@ -1439,13 +1418,13 @@ export class Undoer {
     //@+node:felix.20261113233810.11: *4* u.setUndoTypes
     public setUndoTypes(): void {
         const u = this;
-        if (u.peekBead(u.bead)) {
-            u.setUndoType(u.peekBead(u.bead)!.undoType);
+        if (u.getBead(u.bead)) {
+            u.setUndoType(u.getBead(u.bead)!.undoType);
         } else {
             u.setUndoType("Can't Undo");
         }
-        if (u.peekBead(u.bead + 1)) {
-            u.setRedoType(u.peekBead(u.bead + 1)!.undoType);
+        if (u.getBead(u.bead + 1)) {
+            u.setRedoType(u.getBead(u.bead + 1)!.undoType);
         } else {
             u.setRedoType("Can't Redo");
         }

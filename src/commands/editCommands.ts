@@ -277,13 +277,13 @@ export class TopLevelEditCommands {
     @command(
         'show-node-files',
         'Display the headlines of all @<file> nodes containing this node.'
-        )
+    )
     public show_node_files(this: Commands): void {
         const c: Commands = this;
         if (c && c.p && c.p.v) {
             const p = c.p;
-            for(const v of p.v.findAllAncestorAtFileNodes()) {
-                g.es(v.h, {color:'blue'});
+            for (const v of p.v.findAllAncestorAtFileNodes()) {
+                g.es(v.h, { color: 'blue' });
             }
         }
     }
@@ -625,7 +625,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const txt = w.getSelectedText();
         let ntxt: string;
         if (which === 'tabify') {
-            const pattern = new RegExp(' {4,4}', 'g');
+            const pattern = new RegExp(' {4,4}', 'g'); // exactly four blanks.
             ntxt = txt.replace(pattern, '\t');
         } else {
             const pattern = new RegExp('\t', 'g');

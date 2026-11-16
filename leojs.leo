@@ -652,8 +652,6 @@
 <v t="felix.20221105221426.1"><vh>@file src/core/quicksearch.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
-<v t="felix.20221220233857.1"><vh>@file src/commands/baseCommands.ts</vh></v>
-<v t="felix.20240615152154.1"><vh>@file src/commands/bufferCommands.ts</vh></v>
 <v t="felix.20220414231314.1"><vh>@file src/commands/commanderEditCommands.ts</vh></v>
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
 <v t="felix.20220612234816.1"><vh>@file src/commands/commanderHelpCommands.ts</vh></v>

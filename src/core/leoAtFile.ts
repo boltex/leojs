@@ -1929,7 +1929,7 @@ export class AtFile {
         }
     }
 
-    // silentWrite = asisWrite  // Compatibility with old scripts. // TODO ?
+    public silentWrite = this.asisWrite;  // Compatibility with old scripts. // TODO ?
     //@+node:felix.20230415162517.18: *7* at.writeAsisNode
     /**
      * Write the p's node to an @asis file.

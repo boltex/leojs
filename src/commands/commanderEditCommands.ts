@@ -16,22 +16,19 @@ export class CommanderEditCommands {
     @commander_command('add-comments', 'Undoably add comments to the selected text.')
     public addComments(this: Commands): void {
 
-        const c: Commands = this;
+        const c = this;
         const u = this.undoer;
         const p = this.p;
         const w = this.frame.body.wrapper;
 
-        // "Before" snapshot.
-        const bunch = u.beforeChangeBody(p);
-        // Make sure there is a selection.
-        let head, lines, tail, oldSel, oldYview;
-        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        let head, lines, tail, _old_sel, old_y_scroll;
+        [head, lines, tail, _old_sel, old_y_scroll] = c.getBodyLines();
         if (!lines.length) {
             g.warning('no text selected');
             return;
         }
 
-        // The default language in effect at p.
+        // Get the language in effect at p.
         let language = c.getLanguage(p);
 
         if (c.hasAmbiguousLanguage(p)) {
@@ -46,7 +43,7 @@ export class CommanderEditCommands {
         } else {
             [openDelim, closeDelim] = [d2 + ' ', ' ' + d3];
         }
-        // Calculate the result.
+        // Calculate the results.
         const result = [];
         let i: number | null = null;
         for (const line of lines) {
@@ -60,21 +57,16 @@ export class CommanderEditCommands {
                 result.push(line);
             }
         }
-        // Set p.b and w's text first.
         const middle = result.join('');
-        p.b = head + middle + tail;  // Sets dirty and changed bits.
-        w.setAllText(head + middle + tail);
-
-
-        // Set the selection range and scroll position.
         i = head.length;
         const j = Math.max(i, head.length + middle.length - 1);
-        w.setSelectionRange(i, j, j);
-        w.setYScrollPosition(oldYview);
-
-        // "after" snapshot.
-        u.afterChangeBody(p, 'Add Comments', bunch);
-
+        {
+            using change = u.change_node(p, 'add-comments');
+            p.v.b = head + middle + tail;  // Sets dirty and changed bits.
+            w.setAllText(head + middle + tail);
+            w.setSelectionRange(i, j, j);
+            w.setYScrollPosition(old_y_scroll);
+        }
 
     }
 
@@ -84,53 +76,49 @@ export class CommanderEditCommands {
         'Convert all blanks to tabs in the selected outline.'
     )
     public convertAllBlanks(this: Commands): void {
-        const c: Commands = this;
+        const c = this;
         const u = this.undoer;
 
-        const undoType = 'Convert All Blanks';
         const current = c.p;
         if (g.app.batchMode) {
-            c.notValidInBatchMode(undoType);
+            c.notValidInBatchMode('convert-all-blanks');
             return;
         }
         const tabWidth = c.getTabWidth(c.p);
         let count = 0;
-        u.beforeChangeGroup(current, undoType);
-
-        for (let p of current.self_and_subtree()) {
-            let changed = false;
-            const innerUndoData = u.beforeChangeNodeContents(p);
-            if (p === current) {
-                changed = c.convertBlanks();
-                if (changed) {
-                    count += 1;
-                }
-            } else {
-                changed = false;
-                const result: string[] = [];
-                const text = p.v.b;
-                const lines = text.split('\n');
-                for (let line of lines) {
-                    let i;
-                    let w;
-                    [i, w] = g.skip_leading_ws_with_indent(line, 0, tabWidth);
-                    let s =
-                        g.computeLeadingWhitespace(w, Math.abs(tabWidth)) +
-                        line.slice(i); // use positive width.
-                    if (s !== line) {
-                        changed = true;
+        {
+            using change = u.change_outline('convert-all-blanks');
+            for (let p of current.self_and_subtree()) {
+                let changed = false;
+                if (p === current) {
+                    changed = c.convertBlanks();
+                    if (changed) {
+                        count += 1;
                     }
-                    result.push(s);
-                }
-                if (changed) {
-                    count += 1;
-                    p.setDirty();
-                    p.setBodyString(result.join('\n'));
-                    u.afterChangeNodeContents(p, undoType, innerUndoData);
+                } else {
+                    changed = false;
+                    const result: string[] = [];
+                    const text = p.v.b;
+                    const lines = text.split('\n');
+                    for (let line of lines) {
+                        let i;
+                        let w;
+                        [i, w] = g.skip_leading_ws_with_indent(line, 0, tabWidth);
+                        // use positive width.
+                        let s = g.computeLeadingWhitespace(w, Math.abs(tabWidth)) + line.slice(i);
+                        if (s !== line) {
+                            changed = true;
+                        }
+                        result.push(s);
+                    }
+                    if (changed) {
+                        count += 1;
+                        p.setDirty();
+                        p.setBodyString(result.join('\n'));
+                    }
                 }
             }
         }
-        u.afterChangeGroup(current, undoType);
         if (!g.unitTesting) {
             g.es('blanks converted to tabs in', count, 'nodes');
             // Must come before c.redraw().
@@ -143,55 +131,53 @@ export class CommanderEditCommands {
         'Convert all tabs to blanks in the selected outline.'
     )
     public convertAllTabs(this: Commands): void {
-        const c: Commands = this;
+        const c = this;
         const u = this.undoer;
-        const undoType = 'Convert All Tabs';
         const current = c.p;
 
         if (g.app.batchMode) {
-            c.notValidInBatchMode(undoType);
+            c.notValidInBatchMode('convert-all-tabs');
             return;
         }
 
         const tabWidth = c.getTabWidth(c.p);
         let count = 0;
 
-        u.beforeChangeGroup(current, undoType);
+        {
+            using change = u.change_outline('convert-all-tabs');
+            for (let p of current.self_and_subtree()) {
+                let changed = false;
 
-        for (let p of current.self_and_subtree()) {
-            const undoData = u.beforeChangeNodeContents(p);
-            let changed = false;
-
-            if (p === current) {
-                changed = c.convertTabs();
-                if (changed) {
-                    count += 1;
-                }
-            } else {
-                const result: string[] = [];
-                const text = p.v.b;
-                const lines = text.split('\n');
-
-                for (let line of lines) {
-                    let i, w;
-                    [i, w] = g.skip_leading_ws_with_indent(line, 0, tabWidth);
-                    const s = g.computeLeadingWhitespace(w, -Math.abs(tabWidth)) + line.slice(i); // use negative width
-                    if (s !== line) {
-                        changed = true;
+                if (p === current) {
+                    changed = c.convertTabs();
+                    if (changed) {
+                        count += 1;
                     }
-                    result.push(s);
-                }
+                } else {
+                    const result: string[] = [];
+                    const text = p.v.b;
+                    const lines = text.split('\n');
 
-                if (changed) {
-                    count += 1;
-                    p.setDirty();
-                    p.setBodyString(result.join('\n'));
-                    u.afterChangeNodeContents(p, undoType, undoData);
+                    for (let line of lines) {
+                        let i, w;
+                        [i, w] = g.skip_leading_ws_with_indent(line, 0, tabWidth);
+                        // use negative width.
+                        const s = g.computeLeadingWhitespace(w, -Math.abs(tabWidth)) + line.slice(i);
+                        if (s !== line) {
+                            changed = true;
+                        }
+                        result.push(s);
+                    }
+
+                    if (changed) {
+                        count += 1;
+                        p.setDirty();
+                        p.setBodyString(result.join('\n'));
+                    }
                 }
             }
         }
 
-        u.afterChangeGroup(current, undoType);
         if (!g.unitTesting) {
             g.es('tabs converted to blanks in', count, 'nodes');
         }
@@ -204,26 +190,19 @@ export class CommanderEditCommands {
         'Return True if the the p.b was changed.'
     )
     public convertBlanks(this: Commands): boolean {
-        const c: Commands = this;
+        const c = this;
         const p = this.p;
         const u = this.undoer;
         const w = this.frame.body.wrapper;
 
-        //
-        // "Before" snapshot.
-        const bunch = u.beforeChangeBody(p);
-        let oldYview = w.getYScrollPosition();
         w.selectAllText();
-        let head, lines, tail, oldSel;
-        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
-        //
-        // Use the relative @tabwidth, not the global one.
+        let head, lines, tail, _old_sel, old_y_scroll;
+        [head, lines, tail, _old_sel, old_y_scroll] = c.getBodyLines();
         const tabWidth = c.getTabWidth(c.p);
         if (!tabWidth) {
             return false;
         }
-        //
-        // Calculate the result.
+
         let changed = false;
         const result: string[] = [];
 
@@ -241,16 +220,14 @@ export class CommanderEditCommands {
         //
         // Set p.b and w's text first.
         const middle = result.join('');
-        p.b = head + middle + tail; // Sets dirty and changed bits.
-        w.setAllText(head + middle + tail);
-        //
-        // Select all text and set scroll position.
-        w.selectAllText();
-        w.setYScrollPosition(oldYview);
-        //
-        // "after" snapshot.
-        u.afterChangeBody(p, 'Indent Region', bunch);
-        return true;
+
+        {
+            using change = u.change_node(p, 'convert-blanks');
+            p.v.b = head + middle + tail; // Sets dirty and changed bits.
+            w.setAllText(head + middle + tail);
+            w.setYScrollPosition(old_y_scroll);
+            return true;
+        }
     }
     //@+node:felix.20250408005409.1: *3* c_ec.convertTabs
     @commander_command(
@@ -258,24 +235,15 @@ export class CommanderEditCommands {
         'Convert all tabs to blanks in the selected node.'
     )
     public convertTabs(this: Commands): boolean {
-        const c: Commands = this;
+        const c = this;
         const p = this.p;
         const u = this.undoer;
         const w = this.frame.body.wrapper;
 
-        //
-        // "Before" snapshot.
-        const bunch = u.beforeChangeBody(p);
-        let oldYview = w.getYScrollPosition();
         w.selectAllText();
-        let head, lines, tail, oldSel;
-        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        let head, lines, tail, _old_sel, old_y_scroll;
+        [head, lines, tail, _old_sel, old_y_scroll] = c.getBodyLines();
         const tabWidth = c.getTabWidth(c.p);
-        // if (!tabWidth) {
-        //     return false;
-        // }
-
-        // Calculate the result.
         let changed = false;
         const result: string[] = [];
 
@@ -292,22 +260,22 @@ export class CommanderEditCommands {
             return false;
         }
 
-        // Set p.b and w's text first.
-        const middle = result.join('');
-        p.b = head + middle + tail; // Sets dirty and changed bits.
-        w.setAllText(head + middle + tail);
-
         // Calculate the proper selection range (i, j, ins).
+        const middle = result.join('');
         const i = head.length;
         const j = Math.max(i, head.length + middle.length - 1);
 
-        // Set the selection range and scroll position.
-        w.setSelectionRange(i, j, j);
-        w.setYScrollPosition(oldYview);
+        {
+            using change = u.change_node(p, 'convert-tabs');
+            p.b = head + middle + tail; // Sets dirty and changed bits.
+            w.setAllText(head + middle + tail);
+            // Set the selection range and scroll position.
+            w.setSelectionRange(i, j, j);
+            w.setYScrollPosition(old_y_scroll);
 
-        // "after" snapshot.
-        u.afterChangeBody(p, 'Add Comments', bunch);
-        return true;
+            return true;
+        }
+
     }
 
     //@+node:felix.20230702194637.1: *3* c_ec.editHeadline (edit-headline)
@@ -316,19 +284,10 @@ export class CommanderEditCommands {
         'Begin editing the headline of the selected node.'
     )
     public editHeadline(): Thenable<unknown> {
+
+        // LeoJS: Delegated to the GUI's editHeadline method.
         return g.app.gui.editHeadline();
 
-        // c = self
-        // k, tree = c.k, c.frame.tree
-        // if g.app.batchMode:
-        //     c.notValidInBatchMode("Edit Headline")
-        //     return None, None
-        // e, wrapper = tree.editLabel(c.p)
-        // if k:
-        //     # k.setDefaultInputState()
-        //     k.setEditingState()
-        //     k.showStateAndMode(w=wrapper)
-        // return e, wrapper  # Neither of these is used by any caller.
     }
     //@+node:felix.20230221160425.3: *3* createFirstChildNode extract helper
     /**
@@ -455,11 +414,10 @@ export class CommanderEditCommands {
         };
         //@-others
 
-        const c: Commands = this;
+        const c = this;
         const u = this.undoer;
         const w = this.frame.body.wrapper;
 
-        const undoType = 'Extract';
         // Set data.
         let lines: string[];
         let head, tail, oldSel, oldYview;
@@ -501,50 +459,48 @@ export class CommanderEditCommands {
         } else {
             [h, b, middle] = [lines[0].trim(), lines.slice(1), ''];
         }
-        //
-        // Start the outer undo group.
-        u.beforeChangeGroup(c.p, undoType);
-        const undoData = u.beforeInsertNode(c.p);
-        const p = this.createFirstChildNode(c, c.p, h, b.join(''));
-        u.afterInsertNode(p, undoType, undoData);
-        //
-        // Start inner undo.
-        let i, j;
-        if (oldSel) {
-            [i, j] = oldSel;
+
+        {
+            using change = u.change_outline('extract');
+
+            const p = this.createFirstChildNode(c, c.p, h, b.join(''));
+
+            let i, j;
+            if (oldSel) {
+                [i, j] = oldSel;
+                w.setSelectionRange(i, j, j);
+            }
+
+            // Update the text and selection
+            c.p.v.b = head + middle + tail; // Don't redraw.
+            w.setAllText(head + middle + tail);
+            i = head.length;
+            j = Math.max(i, head.length + middle.length - 1);
             w.setSelectionRange(i, j, j);
+
+            // Scroll as necessary.
+            if (oldYview) {
+                w.setYScrollPosition(oldYview);
+            } else {
+                w.seeInsertPoint();
+            }
+
+            p.parent().expand();
+            c.p = p.parent();  // A bit more convenient than p.
+            c.bodyWantsFocus();
         }
-        const bunch = u.beforeChangeBody(c.p); // Not p.
-        //
-        // Update the text and selection
-        c.p.v.b = head + middle + tail; // Don't redraw.
-        w.setAllText(head + middle + tail);
-        i = head.length;
-        j = Math.max(i, head.length + middle.length - 1);
-        w.setSelectionRange(i, j, j);
-        //
-        // End the inner undo.
-        u.afterChangeBody(c.p, undoType, bunch);
-        //
-        // Scroll as necessary.
-        if (oldYview) {
-            w.setYScrollPosition(oldYview);
-        } else {
-            w.seeInsertPoint();
-        }
-        //
-        // Add the changes to the outer undo group.
-        u.afterChangeGroup(c.p, undoType);
-        p.parent().expand();
-        c.redraw(p.parent()); // A bit more convenient than p.
-        c.bodyWantsFocus();
     }
 
     // Compatibility
     // ? Needed ?
     // g.command_alias('extractSection', extract)
     // g.command_alias('extractPythonMethod', extract)
+
     //@+node:felix.20230221160431.1: *3* c_ec.extractSectionNames
+    @commander_command(
+        'extract-section-names',
+        'Create child nodes for every section reference in the selected text.'
+    )
     @commander_command(
         'extract-names',
         'Create child nodes for every section reference in the selected text.'
@@ -579,47 +535,47 @@ export class CommanderEditCommands {
 
         //@-others
 
-        const c: Commands = this;
+        const c = this;
         const current = c.p;
         const u = c.undoer;
+        const w = this.frame.body.wrapper;
+        if (!g.isTextWrapper(w)) {
+            return;
+        }
 
-        const undoType = 'Extract Section Names';
-        const body = c.frame.body;
-        let head, lines, tail, oldSel, oldYview;
-        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        let head, lines, tail, old_sel, _old_y_view;
+        [head, lines, tail, old_sel, _old_y_view] = c.getBodyLines();
+        let i, j;
+        [i, j] = old_sel;
+
         if (!lines || !lines.length) {
             g.warning('No lines selected');
             return;
         }
         let found = false;
         let p;
+        let name;
         for (const s of lines) {
-            const name = findSectionName(s);
+            name = findSectionName(s);
             if (name) {
-                if (!found) {
-                    u.beforeChangeGroup(current, undoType); // first one!
-                }
-                const undoData = u.beforeInsertNode(current);
-                p = this.createFirstChildNode(c, current, name, undefined);
-                u.afterInsertNode(p, undoType, undoData);
                 found = true;
             }
         }
         c.checkOutline();
         if (found) {
-            u.afterChangeGroup(current, undoType);
-            c.redraw(p);
+            // pass
         } else {
             g.warning('selected text should contain section names');
+            return;
         }
-        // Restore the selection.
-        let i, j;
-        [i, j] = oldSel;
-        const w = body.wrapper;
-        if (w) {
+        {
+            using changes = u.change_outline('extract-section-names');
+            c.p = this.createFirstChildNode(c, current, name!, '');
+            c.checkOutline();
             w.setSelectionRange(i, j);
             w.setFocus();
         }
+
     }
     //@+node:felix.20240611204157.1: *3* c_ec.alwaysIndentBody (always-indent-region)
     @commander_command(
@@ -640,13 +596,10 @@ export class CommanderEditCommands {
         //     return;
         // }
 
-        // "Before" snapshot.
-        const bunch = u.beforeChangeBody(p);
-
         // Initial data.
         const [sel_1, sel_2] = w.getSelectionRange();
         const tab_width = c.getTabWidth(p) || 0;
-        const [head, lines, tail, oldSel, oldYview] = this.getBodyLines();
+        const [head, lines, tail, _old_sel, old_y_scroll] = this.getBodyLines();
 
         // Calculate the result.
         let changed = false;
@@ -667,13 +620,9 @@ export class CommanderEditCommands {
             return;
         }
 
-        // Set p.b and w's text first.
         const middle = result.join('');
-        const all = head + middle + tail;
-        p.b = all;  // Sets dirty and changed bits.
-        w.setAllText(all);
+        const new_s = head + middle + tail;
 
-        // Calculate the proper selection range (i, j, ins).
         let i, j;
         if (sel_1 === sel_2) {
             const line = result[0];
@@ -687,12 +636,13 @@ export class CommanderEditCommands {
             }
         }
 
-        // Set the selection range and scroll position.
-        w.setSelectionRange(i, j, j);
-        w.setYScrollPosition(oldYview);
-
-        // "After" snapshot.
-        u.afterChangeBody(p, 'Indent Region', bunch);
+        {
+            using change = u.change_node(p, 'always-indent-region');
+            p.v.b = new_s;
+            w.setAllText(new_s);
+            w.setSelectionRange(i, j, j);
+            w.setYScrollPosition(old_y_scroll);
+        }
     }
     //@+node:felix.20240611203816.1: *3* c_ec.indentBody (indent-region)
     @commander_command('indent-region', 'Indents each line of the selected body text.')
@@ -725,23 +675,25 @@ export class CommanderEditCommands {
         'Insert a time/date stamp at the cursor.'
     )
     public insertBodyTime(this: Commands): void {
-        const c: Commands = this;
+        const c = this;
         const p = this.p;
         const u = this.undoer;
         const w = this.frame.body.wrapper;
 
-        const undoType = 'Insert Body Time';
         if (g.app.batchMode) {
-            c.notValidInBatchMode(undoType);
+            c.notValidInBatchMode('insert-body-time');
             return;
         }
-        const bunch = u.beforeChangeBody(p);
-        w.deleteTextSelection();
         const s = this.getTime(true);
-        const i = w.getInsertPoint();
-        w.insert(i, s);
-        p.v.b = w.getAllText();
-        u.afterChangeBody(p, undoType, bunch);
+
+        {
+            using change = u.change_node(p, 'insert-body-time');
+            w.deleteTextSelection();
+            const i = w.getInsertPoint();
+            w.insert(i, s);
+            p.v.b = w.getAllText();
+        }
+
     }
     //@+node:felix.20230221160455.1: *3* c_ec.line_to_headline
     @commander_command(
@@ -751,12 +703,12 @@ export class CommanderEditCommands {
     public line_to_headline(this: Commands): void {
         // Cut the selected line and make it the new node's headline
 
-        const c: Commands = this;
+        const c = this;
         const p = this.p;
         const u = this.undoer;
         const w = this.frame.body.wrapper;
 
-        const undoType = 'line-to-headline';
+
         const ins = w.getInsertPoint();
         const s = p.b;
         const i = g.find_line_start(s, ins);
@@ -765,29 +717,18 @@ export class CommanderEditCommands {
         if (!line) {
             return;
         }
-        u.beforeChangeGroup(p, undoType);
-        //
-        // Start outer undo.
-        const undoData = u.beforeInsertNode(p);
-        const p2 = p.insertAsLastChild();
-        p2.h = line;
-        u.afterInsertNode(p2, undoType, undoData);
-        //
-        // "before" snapshot.
-        const bunch = u.beforeChangeBody(p);
-        p.b = s.substring(0, i) + s.substring(j);
-        w.setInsertPoint(i);
-        p2.setDirty();
-        c.setChanged();
-        //
-        // "after" snapshot.
-        u.afterChangeBody(p, undoType, bunch);
-        //
-        // Finish outer undo.
-        u.afterChangeGroup(p, undoType);
-        p.expand();
-        c.redraw(p);
-        c.bodyWantsFocus();
+        {
+            using change = u.change_outline('line-to-headline');
+
+            const p2 = p.insertAsLastChild();
+            p2.h = line;
+            p.b = s.substring(0, i) + s.substring(j);
+            w.setInsertPoint(i);
+            p2.setDirty();
+            p.expand();
+            c.p = p;
+            c.bodyWantsFocus();
+        }
     }
     //@+node:felix.20261003210339.1: *3* c_ec.preferences
     @commander_command('settings', 'Handle the preferences command.')
@@ -808,76 +749,93 @@ export class CommanderEditCommands {
             Undoably replace the @others with the properly indented contents of all
             nodes included by the @others.
         */
-        const c: Commands = this;
-        const p = this.p;
-        const u = this.undoer;
-        const command = 'promote-to-at-others';
+        const c = this;
+        const old_p = c.p;
+        const u = c.undoer;
         const w = this.frame.body.wrapper;
         c.endEditing();
 
-        // Find the @others directive, ignoring the possibility that
-        // strings or comments might contain the match.
         const at_others_pat = /^(\s*)@others\n/;
-        const matches: [number, RegExpExecArray][] = [];
-        const bodyLines = g.splitLines(p.b);
 
-        for (let i = 0; i < bodyLines.length; i++) {
-            const z = bodyLines[i];
-            const match = at_others_pat.exec(z);
-            if (match) {
-                matches.push([i, match]);
+        /**
+         * Find the @others directive, ignoring the possibility that
+         * strings or comments might contain the match.
+         *
+         * Return the indentation (leading ws) of the directive or -1 if not found.
+         */
+        const find_at_others = (p: Position): [number, string] => {
+            const bodyLines = g.splitLines(p.b);
+            const matches: [number, RegExpExecArray][] = [];
+            for (let i = 0; i < bodyLines.length; i++) {
+                const z = bodyLines[i];
+                const match = at_others_pat.exec(z);
+                if (match) {
+                    matches.push([i, match]);
+                }
             }
-        }
-        if (matches.length !== 1) {
-            g.error('c.p must contain exactly one @others directive');
+            if (matches.length !== 1) {
+                g.error('c.p must contain exactly one @others directive');
+                return [-1, ''];
+            }
+            const [i, m] = matches[0];
+            return [i, m[1]];
+        };
+
+        const section_def_pat = /^\s*\<\<(.*?)\>\>/;
+
+        /**
+         * Find all children that aren't section definitions
+         */
+        const find_promotable_children = (p: Position): Position[] => {
+            const result: Position[] = [];
+            for (const child of p.children()) {
+                if (!section_def_pat.test(child.h)) {
+                    result.push(child.copy());
+                }
+            }
+            return result;
+        };
+
+        /**
+         * Compute the new body.
+         */
+        const compute_new_body = (i: number, p: Position, children: Position[], indent: string): string => {
+            const lines = g.splitLines(p.b);
+            const result = lines.slice(0, i);
+            for (const child of children) {
+                for (const z of g.splitLines(child.b)) {
+                    result.push(`${indent}${z}`);
+                }
+                result.push(child.b.endsWith('\n') ? '\n' : '\n\n');
+            }
+            result.push(...lines.slice(i + 1));
+            return result.join('');
+        };
+
+        const [i, indent] = find_at_others(old_p);
+        if (i === -1) {
             return;
         }
-        const [i, m] = matches[0];
-        const indent = m[1];
-
-        // Find all children that aren't section definitions.
-        const section_def_pat = /^\s*\<\<(.*?)\>\>/;
-        const to_promote = [];
-        for (const child of p.children()) {
-            if (!section_def_pat.test(child.h)) {
-                to_promote.push(child.copy());
-            }
-        }
+        const to_promote = find_promotable_children(old_p);
         if (to_promote.length === 0) {
             g.error('No promotable children');
             return;
         }
-
-        const ins = p.b.indexOf('@others') - indent.length;
-
-        // Undoably update p.b
-        u.beforeChangeGroup(p, command);
-        const lines = g.splitLines(p.b);
-        const result = lines.slice(0, i);
-        for (const child of to_promote) {
-            for (const z of g.splitLines(child.b)) {
-                result.push(`${indent}${z}`);
+        const new_body = compute_new_body(i, old_p, to_promote, indent);
+        const ins = old_p.b.indexOf('@others') - indent.length;
+        {
+            using change = u.change_outline('promote-to-at-others');
+            w.setSelectionRange(ins, ins, ins);
+            old_p.b = new_body;
+            old_p.setDirty();
+            for (const child of to_promote.reverse()) {
+                child.doDelete();
             }
-            result.push(child.b.endsWith('\n') ? '\n' : '\n\n');
+            c.p = old_p;
+            c.bodyWantsFocusNow(); // Maybe check if bodyWantsFocus is better than bodyWantsFocusNow
         }
-        result.push(...lines.slice(i + 1));
-        const bunch = u.beforeChangeBody(p);
-        p.b = result.join('');
-        u.afterChangeBody(p, command, bunch);
-
-        // Undoably delete all the promoted nodes.
-        for (const child of [...to_promote].reverse()) {
-            const bunch2 = u.beforeDeleteNode(child);
-            child.doDelete();
-            u.afterDeleteNode(p, command, bunch2);
-        }
-        u.afterChangeGroup(p, command);
-
-        // Redraw.
-        c.redraw(p);
-        w.setInsertPoint(ins);
-
     }
+
     //@+node:felix.20261003210833.1: *3* c_ec.promoteSectionDefinition (promote-section-definition)
     @commander_command(
         'promote-section-def',
@@ -891,10 +849,9 @@ export class CommanderEditCommands {
 
             Undoably promote c.p.b into the nearest ancestor node containing the section ref.
         */
-        const c: Commands = this;
+        const c = this;
         const p = this.p;
         const u = this.undoer;
-        const command = 'promote-section-def';
         const w = this.frame.body.wrapper;
         c.endEditing();
         // Find the section ref, ignoring the possibility that
@@ -930,55 +887,42 @@ export class CommanderEditCommands {
         // Compute the old insert point in the parent.
         const [i, m, parent] = matches[0];
         const indent = m[1];
-        const ins = parent.b.indexOf(m[0]);
+        // const ins = parent.b.indexOf(m[0]);
 
-        // Replace the section ref in parent.b with p.b, properly indented.
-        u.beforeChangeGroup(parent, command);
-        const lines = g.splitLines(parent.b);
-        const result = lines.slice(0, i);
-        result.push(...g.splitLines(p.b).map(z => `${indent}${z}`));
-        result.push(...lines.slice(i + 1));
-        result.push(lines[lines.length - 1].endsWith('\n') ? '\n' : '\n\n');
-        const bunch = u.beforeChangeBody(parent);
-        parent.b = result.join('');
-        u.afterChangeBody(parent, command, bunch);
-
-        // Delete the definition node.
-        const bunch2 = u.beforeDeleteNode(p);
-        p.doDelete();
-        u.afterDeleteNode(p, command, bunch2);
-        u.afterChangeGroup(parent, command);
-
-        // Redraw.
-        c.redraw(parent);
-        w.setInsertPoint(ins);
-
+        {
+            using changes = u.change_outline('promote-section-def');
+            // Set parent.b.
+            const lines = g.splitLines(parent.b);
+            const result = lines.slice(0, i);
+            result.push(...g.splitLines(p.b).map(z => `${indent}${z}`));
+            result.push(...lines.slice(i + 1));
+            result.push(lines[lines.length - 1].endsWith('\n') ? '\n' : '\n\n');
+            parent.b = result.join('');
+            // Delete the definition node.
+            p.doDelete();
+            c.p = parent;
+        }
     }
     //@+node:felix.20240616233556.1: *3* c_ec.reformatBody
     @commander_command('reformat-body', 'Reformat all paragraphs in the body.')
     public reformatBody(this: Commands): void {
-        /** Reformat all paragraphs in the body. **/
         const c = this;
         const p = this.p;
-        const undoType = 'reformat-body';
-        const w = c.frame.body.wrapper;
-
-        c.undoer.beforeChangeGroup(p, undoType);
-        w.setInsertPoint(0);
-
-        while (true) {
-            const progress = w.getInsertPoint();
-            c.reformatParagraph(undoType);
-            const ins = w.getInsertPoint();
-            const s = w.getAllText();
-            w.setInsertPoint(ins);
-
-            if (ins <= progress || ins >= s.length) {
-                break;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper; // Only valid in body.
+        {
+            using changes = u.change_node(p, 'reformat-body');
+            w.setInsertPoint(0);
+            while (true) {
+                const progress = w.getInsertPoint();
+                c.reformatParagraph('reformat-body');
+                const ins = w.getInsertPoint();
+                const s = w.getAllText();
+                if (ins <= progress || ins >= s.length) {
+                    break;
+                }
             }
         }
-
-        c.undoer.afterChangeGroup(p, undoType);
     }
     //@+node:felix.20240612234518.1: *3* c_ec.reformatParagraph & helpers
     @commander_command('reformat-paragraph', 'Reformat a text paragraph')
@@ -1009,10 +953,11 @@ export class CommanderEditCommands {
         if (!lines) {
             return;
         }
-        const [oldSel, oldYview, original, pageWidth, tabWidth] = this.rp_get_args(c);
+        const old_ins = w.getInsertPoint();
+        const [old_sel, old_y_scroll, old_s, pageWidth, tabWidth] = this.rp_get_args(c);
         const [indents, leading_ws] = this.rp_get_leading_ws(c, lines, tabWidth);
         const result = this.rp_wrap_all_lines(c, indents, leading_ws, lines, pageWidth);
-        this.rp_reformat(c, head, oldSel, oldYview, original, result, tail, undoType);
+        this.rp_reformat(c, head, old_ins, old_sel, old_y_scroll, old_s, result, tail, undoType);
     }
     //@+node:felix.20240612234518.2: *4* function: ends_paragraph & single_line_paragraph
     /**
@@ -1099,7 +1044,7 @@ export class CommanderEditCommands {
     /**
      * Compute and return oldSel, oldYview, original, pageWidth, tabWidth. 
      */
-    private rp_get_args(c: Commands): [number[], number, string, number, number] {
+    private rp_get_args(c: Commands): [[number, number], number, string, number, number] {
         const body = c.frame.body;
         const w = body.wrapper;
         let pageWidth: number;
@@ -1138,9 +1083,10 @@ export class CommanderEditCommands {
     private rp_reformat(
         c: Commands,
         head: string,
-        oldSel: any,
-        oldYview: any,
-        original: any,
+        old_ins: number,
+        old_sel: [number, number],
+        old_y_scroll: number,
+        old_s: string,
         result: string,
         tail: string,
         undoType: string
@@ -1150,39 +1096,39 @@ export class CommanderEditCommands {
         const u = c.undoer;
         const w = c.frame.body.wrapper;
         const s = head + result + tail;
-        const changed = original !== s;
-        const bunch = u.beforeChangeBody(p);
-        if (changed) {
-            w.setAllText(s);  // Destroys coloring.
-        }
-        // #1748: Always advance to the next paragraph.
-        let i = head.length;
-        let j = Math.max(i, head.length + result.length - 1);
-        let ins = j + 1;
-        while (ins < s.length) {
-            [i, j] = g.getLine(s, ins);
-            const line = s.slice(i, j);
-            // It's annoying, imo, to treat @ lines differently.
-            if (line.trim() === "") {
-                ins = j + 1;
-            } else {
-                ins = i;
-                break;
-            }
-        }
-        ins = Math.min(ins, s.length);
-        w.setSelectionRange(ins, ins, ins);
-        // Show more lines, if they exist.
-        const k = g.see_more_lines(s, ins, 4);
-        p.v.insertSpot = ins;
-        w.see(k);  // New in 6.4. w.see works!
-        if (!changed) {
+        if (old_s === s) {
             return;
         }
-        // Finish.
-        p.v.b = s;  // p.b would cause a redraw.
-        u.afterChangeBody(p, undoType, bunch);
-        w.setXScrollPosition(0);  // Never scroll horizontally.
+        {
+            using changes = u.change_node(p, undoType);
+            w.setAllText(s);  // Destroys coloring.
+            // #1748: Always advance to the next paragraph.
+            let i = head.length;
+            let j = Math.max(i, head.length + result.length - 1);
+            let ins = j + 1;
+            while (ins < s.length) {
+                [i, j] = g.getLine(s, ins);
+                const line = s.slice(i, j);
+                // It's annoying, imo, to treat @ lines differently.
+                if (line.trim() === "") {
+                    ins = j + 1;
+                } else {
+                    ins = i;
+                    break;
+                }
+            }
+            ins = Math.min(ins, s.length);
+            w.setSelectionRange(ins, ins, ins);
+            // Show more lines, if they exist.
+            const k = g.see_more_lines(s, ins, 4);
+            p.v.insertSpot = ins;
+            w.see(k);  // New in 6.4. w.see works!
+
+            // Finish.
+            p.v.b = s;  // p.b would cause a redraw.
+            w.setXScrollPosition(0);  // Never scroll horizontally.
+        }
+
     }
     //@+node:felix.20240612234518.7: *4* function: rp_wrap_all_lines
     private rp_wrap_all_lines(
@@ -1286,34 +1232,30 @@ export class CommanderEditCommands {
             return;
         }
 
-        const bunch = u.beforeChangeBody(p);
-        const [oldSel, oldYview, original, pageWidth, tabWidth] = this.rp_get_args(c);
+
         const [head, middle, tail] = c.frame.body.getSelectionLines();
         const lines = g.splitLines(middle);
 
         if (!lines.length) {
             return;
         }
-
+        const [_old_sel, _old_y_scroll, old_s, pageWidth, tabWidth] = this.rp_get_args(c);
         const [indents, leading_ws] = this.rp_get_leading_ws(c, lines, tabWidth);
         const result = this.rp_wrap_all_lines(c, indents, leading_ws, lines, pageWidth);
         const s = head + result + tail;
-
-        if (s === original) {
+        if (s === old_s) {
             return;
         }
-
-        // Update the text and the selection.
-        w.setAllText(s);  // Destroys coloring.
         const i = head.length;
         let j = Math.max(i, head.length + result.length - 1);
         j = Math.min(j, s.length);
-        w.setSelectionRange(i, j, j);
-
-        // Finish.
-        p.v.b = s;  // p.b would cause a redraw.
-        u.afterChangeBody(p, undoType, bunch);
-        w.setXScrollPosition(0);  // Never scroll horizontally.
+        {
+            using changes = u.change_node(p, undoType);
+            w.setAllText(s);  // Destroys coloring.
+            w.setSelectionRange(i, j, j);
+            p.v.b = s;  // p.b would cause a redraw.
+            w.setXScrollPosition(0);  // Never scroll horizontally.
+        }
     }
     //@+node:felix.20240616233633.1: *3* c_ec.toggleAngleBrackets
     @commander_command(
@@ -1323,11 +1265,11 @@ export class CommanderEditCommands {
     public toggleAngleBrackets(this: Commands): void {
         /** Add or remove double angle brackets from the headline of the selected node. **/
         const c = this;
+        const u = c.undoer;
         const p = this.p;
-        const command = 'toggle-angle-brackets';
 
         if (g.app.batchMode) {
-            c.notValidInBatchMode("Toggle Angle Brackets");
+            c.notValidInBatchMode('toggle-angle-brackets');
             return;
         }
 
@@ -1349,15 +1291,10 @@ export class CommanderEditCommands {
             s = g.angleBrackets(` ${s} `);
         }
         if (s !== oldHead) {
-            const u = c.undoer;
-            const data = u.beforeChangeHeadline(p);
-
-            p.setHeadString(s);
-            p.setDirty();  // #1449.
-            c.setChanged();  // #1449.
-            u.afterChangeHeadline(p, command, data);
-            // c.redrawAndEdit(p, true);
-
+            {
+                using changes = u.change_node(p, 'toggle-angle-brackets');
+                p.setHeadString(s);
+            }
         }
     }
     //@+node:felix.20240616233651.1: *3* c_ec.unformatParagraph & helper
@@ -1412,33 +1349,31 @@ export class CommanderEditCommands {
         const w = c.frame.body.wrapper;
         const s = head + result + tail;
         let ins = Math.max(head.length, head.length + result.length - 1);
-        const bunch = u.beforeChangeBody(p);
-        w.setAllText(s);  // Destroys coloring.
-        const changed = original !== s;
+        {
+            using changes = u.change_node(p, undoType);
 
-        if (changed) {
-            p.v.b = w.getAllText();
-            u.afterChangeBody(p, undoType, bunch);
-        }
-
-        // Advance to the next paragraph.
-        ins += 1;  // Move past the selection.
-        while (ins < s.length) {
-            const [i, j] = g.getLine(s, ins);
-            const line = s.substring(i, j);
-            if (line.trim() === "") {
-                ins = j + 1;
-            } else {
-                ins = i;
-                break;
+            w.setAllText(s);  // Destroys coloring.
+            if (original !== s) {
+                p.v.b = w.getAllText();
             }
-        }
 
-        c.recolor();  // Required.
-        w.setSelectionRange(ins, ins, ins);
-        w.see(ins);
-        // Make sure we never scroll horizontally.
-        w.setXScrollPosition(0);
+            // Advance to the next paragraph.
+            ins += 1;  // Move past the selection.
+            while (ins < s.length) {
+                const [i, j] = g.getLine(s, ins);
+                const line = s.substring(i, j);
+                if (line.trim() === "") {
+                    ins = j + 1;
+                } else {
+                    ins = i;
+                    break;
+                }
+            }
+            w.setSelectionRange(ins, ins, ins);
+            w.see(ins);
+            // Make sure we never scroll horizontally.
+            w.setXScrollPosition(0);
+        }
     }
     //@+node:felix.20240617000519.1: *3* c_ec: insert-jupyter-toc & insert-markdown-toc
     @commander_command('insert-jupyter-toc', 'Insert a Jupyter table of contents at the cursor, replacing any selected text.')
@@ -1455,24 +1390,22 @@ export class CommanderEditCommands {
      * Insert a table of contents at the cursor.
      */
     private insert_toc(c: Commands, kind: string): void {
-
         const p = c.p;
         const u = c.undoer;
         const w = c.frame.body.wrapper;
         const undoType = `Insert ${kind.charAt(0).toUpperCase() + kind.slice(1)} TOC`;
-
         if (g.app.batchMode) {
             c.notValidInBatchMode(undoType);
             return;
         }
-
-        const bunch = u.beforeChangeBody(p);
-        w.deleteTextSelection();
         const s = this.make_toc(c, kind, c.p);
-        const i = w.getInsertPoint();
-        w.insert(i, s);
-        p.v.b = w.getAllText();
-        u.afterChangeBody(p, undoType, bunch);
+        {
+            using changes = u.change_node(p, undoType);
+            w.deleteTextSelection();
+            const i = w.getInsertPoint();
+            w.insert(i, s);
+            p.v.b = w.getAllText();
+        }
     }
     //@+node:felix.20240617000519.3: *4* make_toc
     /**
