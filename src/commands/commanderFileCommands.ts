@@ -220,16 +220,16 @@ export class CommanderFileCommands {
         const c: Commands = this;
         const u = c.undoer;
         g.setGlobalOpenDir(fn);
-        const undoData = u.beforeInsertNode(c.p);
-        const p = c.p.insertAfter();
-        p.h = `@edit ${g.relativeDirectory(c, fn)}`;
-        let s: string | undefined;
-        let e: any;
-        [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
-        p.b = s!;
-        u.afterInsertNode(p, 'Import', undoData);
-        c.setChanged();
-        c.redraw(p);
+        {
+            using changes = u.change_outline('import-text-file');
+            const p = c.p.insertAfter();
+            p.h = `@edit ${g.relativeDirectory(c, fn)}`;
+            let s: string | undefined;
+            let e: any;
+            [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
+            p.b = s!;
+            c.p = p;
+        }
     }
     //@+node:felix.20220105210716.9: *4* c_file.new
     @commander_command('file-new', 'Create a new Leo window.')
@@ -345,10 +345,14 @@ export class CommanderFileCommands {
     public async refreshFromDisk(
         this: Commands,
         p?: Position,
+        redraw_flag = true,
         silent = true  // No longer used.
     ): Promise<void> {
+        // * This command is not undoable directly, but callers may make (parts of it) undoable. 
         const c: Commands = this;
         const at = c.atFileCommands;
+        const u = c.undoer;  // PR #5025
+
         if (!p) {
             p = c.p;
         }
@@ -394,8 +398,12 @@ export class CommanderFileCommands {
         at.changed_roots = [];
         c.fileCommands.handleNodeConflicts();
         c.setChanged();
-        c.redraw(update_p);
-        c.undoer.clearAndWarn('refresh-from-disk');
+        // Select a valid position!
+        c.p = c.positionExists(update_p) ? update_p : c.rootPosition()!;
+        if (redraw_flag) {
+            c.redraw(update_p);
+        }
+        u.clearAndWarn('refresh-from-disk');
     }
     //@+node:felix.20220105210716.13: *4* c_file.pwd
     @commander_command('pwd', 'Prints the current working directory')
@@ -796,32 +804,25 @@ export class CommanderFileCommands {
     )
     public flattenOutlineToNode(this: Commands): void {
         const c: Commands = this;
-        const root: Position = this.p;
-        const u: Undoer = this.undoer;
-
-        const current = c.p;
-        const undoType = 'flatten-outline-to-node';
-
+        const root = c.p;
+        const u = c.undoer;
         if (!root.hasChildren()) {
             return;
         }
-
-        u.beforeChangeGroup(current, undoType);
-        const bunch = u.beforeInsertNode(current);
-        const aList = [];
-        for (const p of root.self_and_subtree()) {
-            if (p.b.trim()) {
-                aList.push(`===== ${p.h}\n\n`);
-                aList.push(`${p.b.trim()}'\n\n`);
+        {
+            using changes = u.change_outline('flatten-outline-to-node');
+            const aList = [];
+            for (const p of root.self_and_subtree()) {
+                if (p.b.trim()) {
+                    aList.push(`===== ${p.h}\n\n`);
+                    aList.push(`${p.b.trim()}'\n\n`);
+                }
             }
+            const p = c.lastTopLevel().insertAfter();
+            p.h = `Flattened ${root.h}`;
+            p.b = aList.join('').trim() + '\n';
+            c.p = p;
         }
-        const p = c.lastTopLevel().insertAfter();
-        p.h = `Flattened ${root.h}`;
-        p.b = aList.join('').trim() + '\n';
-        u.afterInsertNode(p, undoType, bunch);
-        u.afterChangeGroup(current, undoType);
-        c.selectPosition(p);
-        c.redraw(p);
     }
     //@+node:felix.20220105210716.26: *4* c_file.outlineToCWEB
     @commander_command(
@@ -941,14 +942,9 @@ export class CommanderFileCommands {
     )
     public async readAtAutoNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
-        const p: Position = this.p;
-        const u: Undoer = this.undoer;
-
         c.endEditing();
         c.init_error_dialogs();
-        // const undoData: Bead = u.beforeChangeTree(p);
         await c.importCommands.readAtAutoNodes();
-        // u.afterChangeTree(p, 'Read @auto Nodes', undoData);
         c.redraw();
         await c.raise_error_dialogs('read');
         return c.undoer.clearAndWarn('read-at-auto-nodes');
@@ -962,15 +958,11 @@ export class CommanderFileCommands {
     public async readAtFileNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
         const p: Position = this.p;
-        const u: Undoer = this.undoer;
-
         c.endEditing();
-        // const undoData: Bead = u.beforeChangeTree(p);
-
         await c.atFileCommands.readAllSelected(p);
+
         // Force an update of the body pane.
         c.setBodyString(p, p.b); // Not a do-nothing!
-        // u.afterChangeTree(p, 'Read @file Nodes', undoData);
         c.redraw();
         return c.undoer.clearAndWarn('read-at-file-nodes');
     }
@@ -984,13 +976,9 @@ export class CommanderFileCommands {
     public async readAtShadowNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
         const p: Position = this.p;
-        const u: Undoer = this.undoer;
-
         c.endEditing();
         c.init_error_dialogs();
-        // const undoData: Bead = u.beforeChangeTree(p);
         await c.atFileCommands.readAtShadowNodes(p);
-        // u.afterChangeTree(p, 'Read @shadow Nodes', undoData);
         c.redraw();
         await c.raise_error_dialogs('read');
         return c.undoer.clearAndWarn('read-at-shadow-nodes');
@@ -1003,7 +991,7 @@ export class CommanderFileCommands {
     public async readFileIntoNode(this: Commands): Promise<unknown> {
         const c: Commands = this;
         const u = c.undoer;
-        const undoType: string = 'Read File Into Node';
+        const w = c.frame.body.wrapper;
         c.endEditing();
         const filetypes: [string, string][] = [
             ['All files', '*'],
@@ -1029,14 +1017,17 @@ export class CommanderFileCommands {
         }
         await g.chdir(fileName);
         s = '@nocolor\n' + s;
-        const w = c.frame.body.wrapper;
-        const undoData = u.beforeInsertNode(c.p);
-        const p = c.p.insertAfter();
-        p.setHeadString('@read-file-into-node ' + fileName);
-        p.setBodyString(s);
-        u.afterInsertNode(p, undoType, undoData);
-        w.setAllText(s);
-        return c.redraw(p);
+        {
+            using changes = u.change_outline('read-file-into-node');
+            const p = c.p.insertAfter();
+            p.setHeadString('@read-file-into-node ' + fileName);
+            p.setBodyString(s);
+            w.setAllText(s);
+            c.p = p;
+
+
+        }
+
     }
     //@+node:felix.20220105210716.36: *4* c_file.writeFileFromNode
     @commander_command(
