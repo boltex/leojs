@@ -3480,7 +3480,7 @@ export interface LeoButton {
 }
 
 </t>
-<t tx="felix.20201214194144.1" _mod_time="46313739343731393039312e3230370a2e">import * as vscode from "vscode";
+<t tx="felix.20201214194144.1" _mod_time="46313739343739343139302e3637380a2e">import * as vscode from "vscode";
 import * as showdown from "showdown";
 import { DebouncedFunc, debounce } from "lodash";
 
@@ -4535,12 +4535,10 @@ public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?:
             if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
                 return w_p;  // The hook claims to have handled the event.
             }
-            const undoData = u.beforeChangeHeadline(w_p);
-            c.setHeadString(w_p, p_newHeadline); // Set v.h *after* calling the undoer's before method.
-            if (!c.changed) {
-                c.setChanged();
+            {
+                using change = u.change_node(w_p, 'edit-headline');
+                c.setHeadString(w_p, p_newHeadline); // Set v.h *after* calling the undoer's before method.
             }
-            u.afterChangeHeadline(w_p, 'Edit Headline', undoData);
             g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
             void this.launchRefresh();
         }
@@ -9275,16 +9273,16 @@ private _bodySaveDocument(
                 }
                 if (w_p) {
                     // ok we got a valid p.
-                    const bunch = u.beforeChangeNodeContents(w_p);
-                    w_p.v.setBodyString(body);
-                    u.afterChangeNodeContents(w_p, "Body Text", bunch);
+                    {
+                        using change = u.change_node(w_p, "Body Text");
+                        w_p.v.setBodyString(body);
+                    }
+
                     // Set in wrapper too if same gnx
                     if (c.p.__eq__(w_p)) {
                         wrapper.setAllText(body);
                     }
-                    if (!c.isChanged()) {
-                        c.setChanged();
-                    }
+
                     if (!w_p.v.isDirty()) {
                         w_p.setDirty();
                     }
@@ -9355,12 +9353,10 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
     if (g.doHook("headkey1", { c: c, p: c.p, ch: '\n', changed: true })) {
         return;  // The hook claims to have handled the event.
     }
-    const undoData = u.beforeChangeHeadline(c.p);
-    c.setHeadString(c.p, p_name);  // Set v.h *after* calling the undoer's before method.
-    if (!c.changed) {
-        c.setChanged();
+    {
+        using change = u.change_node(c.p, 'edit-headline');
+        c.setHeadString(c.p, p_name);  // Set v.h *after* calling the undoer's before method.
     }
-    u.afterChangeHeadline(c.p, 'Edit Headline', undoData);
     g.doHook("headkey2", { c: c, p: c.p, ch: '\n', changed: true });
     return value;
 }
