@@ -9,7 +9,7 @@ import { commander_command } from '../core/decorators';
 import { StackEntry, Position, VNode } from '../core/leoNodes';
 import { FastRead } from '../core/leoFileCommands';
 import { Commands, HoistStackEntry } from '../core/leoCommands';
-import { Bead, Undoer } from '../core/leoUndo';
+import { Undoer } from '../core/leoUndo';
 
 //@+others
 //@+node:felix.20211101020339.1: ** function cantMoveMessage
@@ -35,8 +35,8 @@ function createMoveMarkedNode(c: Commands): Position {
  * FileCommands read logic. Several experiments failed, and the code is very ugly.
  * In short, it seems wise to do things the foolproof way.
  */
-function computeVnodeInfoDict(c: Commands): Record<string, Bead> {
-    const d: Record<string, Bead> = {};
+function computeVnodeInfoDict(c: Commands): Record<string, any> {
+    const d: Record<string, any> = {};
     for (let v of c.all_unique_nodes()) {
         if (!d[v.toString()]) {
             d[v.toString()] = { v: v, head: v.h, body: v.b };
@@ -51,17 +51,17 @@ function computeVnodeInfoDict(c: Commands): Record<string, Bead> {
 function computeCopiedBunchList(
     c: Commands,
     pasted: Position,
-    vnodeInfoDict: { [key: string]: Bead }
-): Bead[] {
+    vnodeInfoDict: { [key: string]: any }
+): any[] {
     const d: { [key: string]: VNode } = {};
     for (let p of pasted.self_and_subtree(false)) {
         d[p.v.toString()] = p.v;
     }
-    const aList: Bead[] = [];
+    const aList: any[] = [];
     // Use string keys instead of v keys like original Leo
     for (let v in vnodeInfoDict) {
         if (d[v]) {
-            const bunch: Bead = vnodeInfoDict[v];
+            const bunch: any = vnodeInfoDict[v];
             aList.push(bunch);
         }
     }
@@ -197,60 +197,49 @@ export class CommanderOutlineCommands {
     public pasteOutline(
         this: Commands,
         s: string | undefined = undefined,
-        undoFlag: boolean = true
     ): Position | undefined {
+        const c: Commands = this;
+        const u = c.undoer;
         if (s === undefined) {
             s = g.app.gui.getTextFromClipboard();
         }
-        const c: Commands = this;
-        c.endEditing();
         if (!s || !c.canPasteOutline(s)) {
             return undefined; // This should never happen.
         }
+        c.endEditing();
         const isLeo =
             s.trimStart().startsWith('{') ||
             g.match(s, 0, g.app.prolog_prefix_string);
         if (!isLeo) {
             return undefined;
         }
-        // Get *position* to be pasted.
-        const pasted: Position = c.fileCommands.getLeoOutlineFromClipboard(s)!;
-        if (!pasted) {
-            // Leo no longer supports MORE outlines. Use import-MORE-files instead.
-            return undefined;
+        {
+            using changes = u.change_outline('paste-node');
+
+            const pasted: Position = c.fileCommands.getLeoOutlineFromClipboard(s)!;
+            if (!pasted) {
+                // Leo no longer supports MORE outlines. Use import-MORE-files instead.
+                return undefined;
+            }
+            if (c.checkOutline()) {
+                pasted.doDelete();
+                c.p = c.rootPosition()!;
+                return undefined;
+            }
+            pasted.setDirty();
+            const back: Position = pasted.back();
+            if (
+                back &&
+                back.__bool__() &&
+                back.hasChildren() &&
+                back.isExpanded()
+            ) {
+                pasted.moveToNthChildOf(back, 0);
+                pasted.setDirty()
+            }
+            c.p = pasted;
+            return pasted;
         }
-        // Validate.
-        const errors = c.checkOutline();
-        if (errors > 0) {
-            return undefined;
-        }
-        // Handle the "before" data for undo.
-        let undoData: Bead;
-        if (undoFlag) {
-            // undoData now exists for sure because of undoFlag
-            undoData = c.undoer.beforeInsertNode(c.p, false, []);
-        }
-        // Paste the node into the outline.
-        c.selectPosition(pasted);
-        pasted.setDirty();
-        c.setChanged();
-        // Prevent flash when fixing #387.
-        const back: Position = pasted.back();
-        if (
-            back &&
-            back.__bool__() &&
-            back.hasChildren() &&
-            back.isExpanded()
-        ) {
-            pasted.moveToNthChildOf(back, 0);
-        }
-        // Finish the command.
-        if (undoFlag) {
-            // undoData does exists for sure because of undoFlag
-            c.undoer.afterInsertNode(pasted, 'Paste Node', undoData!);
-        }
-        c.redraw(pasted);
-        return pasted;
     }
     //@+node:felix.20220103211308.1: *4* c_oc.asyncPasteOutline
     // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
@@ -276,62 +265,54 @@ export class CommanderOutlineCommands {
         this: Commands,
         s: string | undefined = undefined,
     ): Position | undefined {
+        const c: Commands = this;
+        const u = c.undoer;
+
         if (s === undefined) {
             s = g.app.gui.getTextFromClipboard();
         }
-        const c: Commands = this;
         c.endEditing();
         if (!s || !c.canPasteOutline(s)) {
-            return undefined; // This should never happen.
-        }
-        // Get *position* to be pasted.
-        const pasted: Position =
-            c.fileCommands.getLeoOutlineFromClipboardRetainingClones(s)!;
-        if (!pasted) {
-            // Leo no longer supports MORE outlines. Use import-MORE-files instead.
             return undefined;
         }
-        // Validate.
-        const errors = c.checkOutline();
-        if (errors > 0) {
+        const isLeo =
+            s.trimStart().startsWith('{') ||
+            g.match(s, 0, g.app.prolog_prefix_string);
+        if (!isLeo) {
             return undefined;
         }
-        // Handle the "before" data for undo.
-        let vnodeInfoDict: any;
-        let undoData: Bead;
-        if (true) { // undoFlag
-            vnodeInfoDict = computeVnodeInfoDict(c);
-            undoData = c.undoer.beforeInsertNode(
-                c.p,
-                true,
-                computeCopiedBunchList(c, pasted, vnodeInfoDict)
-            );
-        }
-        // Paste the node into the outline.
-        c.selectPosition(pasted);
-        pasted.setDirty();
-        c.setChanged();
-        // Prevent flash when fixing #387.
-        const back: Position = pasted.back();
-        if (
-            back &&
-            back.__bool__() &&
-            back.hasChildren() &&
-            back.isExpanded()
-        ) {
-            pasted.moveToNthChildOf(back, 0);
+        {
+            using changes = u.change_outline('paste-retaining-clones');
+            const pasted: Position =
+                c.fileCommands.getLeoOutlineFromClipboardRetainingClones(s)!;
+            if (!pasted) {
+                // Leo no longer supports MORE outlines. Use import-MORE-files instead.
+                return undefined;
+            }
+            if (c.checkOutline()) {  // Error.
+                pasted.doDelete();
+                c.p = c.rootPosition()!;
+                return undefined;
+            }
             pasted.setDirty();
+            // Prevent flash when fixing #387.
+            const back: Position = pasted.back();
+            if (
+                back &&
+                back.__bool__() &&
+                back.hasChildren() &&
+                back.isExpanded()
+            ) {
+                pasted.moveToNthChildOf(back, 0);
+                pasted.setDirty();
+            }
+            for (let p of pasted.self_and_subtree()) {
+                p.setAllAncestorAtFileNodesDirty();
+            }
+            c.p = pasted;
+            return pasted;
         }
-        // Set dirty bits for ancestors of *all* pasted nodes.
-        for (let p of pasted.self_and_subtree()) {
-            p.setAllAncestorAtFileNodesDirty();
-        }
-        // Finish the command.
-        if (true) { // undoFlag
-            c.undoer.afterInsertNode(pasted, 'Paste As Clone', undoData);
-        }
-        c.redraw(pasted);
-        return pasted;
+
     }
     //@+node:felix.20220103213833.1: *4* c_oc.asyncPasteOutlineRetainingClones
     // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
@@ -359,7 +340,9 @@ export class CommanderOutlineCommands {
         }
         const c: Commands = this;
         const p: Position = c.p;
+        const u: Undoer = c.undoer;
         if (!s || !c.canPasteOutline(s)) {
+            g.trace("Can not paste" + s.toString());
             return; // This should never happen.
         }
         const isJson = s.trimStart().startsWith('{');
@@ -372,8 +355,6 @@ export class CommanderOutlineCommands {
         let uas: { [key: string]: any } = {};
         let translation: { [key: string]: string } = {};
         let seen: string[] = [];
-        let bunch: Bead;
-
         let vpar: VNode;
         let pasted: VNode;
         let index: number;
@@ -528,22 +509,7 @@ export class CommanderOutlineCommands {
 
             return pasted;
         }
-        //@+node:felix.20211208235043.14: *5* undoHelper
-        function undoHelper(): void {
-            const v: VNode = vpar.children.splice(index, 1)[0];
 
-            const i_vpar = v.parents.indexOf(vpar);
-            if (i_vpar > -1) {
-                v.parents.splice(i_vpar, 1);
-            }
-            c.redraw(bunch.p);
-        }
-        //@+node:felix.20211208235043.15: *5* redoHelper
-        function redoHelper(): void {
-            vpar.children.splice(index, 0, pasted);
-            pasted.parents.push(vpar);
-            c.redraw(newp);
-        }
         //@-others
 
         const x = new FastRead(c, {});
@@ -571,7 +537,7 @@ export class CommanderOutlineCommands {
                     }
                 }
             };
-            // generate bodies for all possible nodes, not just non-empty bodies.
+            // Generate bodies for all possible nodes, not just non-empty bodies.
             addBody(xvelements[0]);
             uas = {};
             Object.assign(uas, xroot['uas'] || {});
@@ -583,57 +549,55 @@ export class CommanderOutlineCommands {
             outside.push(x.gnx);
         }
 
+        // Generate a new gnx for each node in the copied tree
         for (let x in bodies) {
             // Voluntary use of 'in' for keys
             translation[x] = translate_gnx(x);
         }
-        // we generate new gnx for each node in the copied tree
 
-        seen = [...outside]; // required for the treatment of local clones inside the copied tree
+        // required for the treatment of local clones inside the copied tree
+        seen = [...outside];
 
         heads = {};
 
-        bunch = c.undoer.createCommonBunch(p);
+        {
+            using changes = u.change_outline('paste-retaining-outside-clones');
 
-        //@+<< prepare destination data >>
-        //@+node:felix.20211208235043.16: *5* << prepare destination data >>
-        // destination data consists of
-        //    1. vpar --- parent v node that should receive pasted child
-        //    2. index --- at which pasted child will be
-        //    3. parStack --- a stack for creating new position of the pasted node
-        //
-        // the new position will be:  Position(vpar.children[index], index, parStack)
-        // but it can't be calculated yet, before actual paste is done
+            //@+<< prepare destination data >>
+            //@+node:felix.20211208235043.16: *5* << prepare destination data >>
+            // destination data consists of
+            //    1. vpar --- parent v node that should receive pasted child
+            //    2. index --- at which pasted child will be
+            //    3. parStack --- a stack for creating new position of the pasted node
+            //
+            // the new position will be:  Position(vpar.children[index], index, parStack)
+            // but it can't be calculated yet, before actual paste is done
 
-        if (p.isExpanded()) {
-            // paste as a first child of current position
-            vpar = p.v;
-            index = 0;
-            parStack = [...p.stack];
-            parStack.push([p.v, p._childIndex]);
-        } else {
-            // paste after the current position
-            parStack = p.stack;
-            if (p.stack && p.stack.length) {
-                vpar = p.stack[p.stack.length - 1][0];
+            if (p.isExpanded()) {
+                // paste as a first child of current position
+                vpar = p.v;
+                index = 0;
+                parStack = [...p.stack];
+                parStack.push([p.v, p._childIndex]);
             } else {
-                vpar = c.hiddenRootNode;
+                // paste after the current position
+                parStack = p.stack;
+                if (p.stack && p.stack.length) {
+                    vpar = p.stack[p.stack.length - 1][0];
+                } else {
+                    vpar = c.hiddenRootNode;
+                }
+                index = p._childIndex + 1;
             }
-            index = p._childIndex + 1;
+            //@-<< prepare destination data >>
+
+            pasted = do_paste(vpar, index); // Local 'pasted' variable
+            const newp = new Position(pasted, index, parStack);
+
+            newp.setDirty();
+            c.p = newp;
         }
-        //@-<< prepare destination data >>
 
-        pasted = do_paste(vpar, index); // Local 'pasted' variable
-
-        const newp = new Position(pasted, index, parStack);
-
-        bunch.undoHelper = undoHelper;
-        bunch.redoHelper = redoHelper;
-        bunch.undoType = 'paste-retaining-outside-clones';
-
-        newp.setDirty();
-        c.undoer.pushBead(bunch);
-        c.redraw(newp);
     }
     //@+node:felix.20220103214054.1: *4* c_oc.asyncPasteAsTemplate
     // Only USER GUI interaction uses async clipboard methods. Scripts use normal methods.
@@ -1471,28 +1435,19 @@ export class CommanderOutlineCommands {
     @commander_command('clone-node', 'Create a clone of the selected outline.')
     public clone(this: Commands): Position | undefined {
         const c: Commands = this;
-        const p: Position = c.p;
         const u: Undoer = c.undoer;
-
-        if (!p || !p.__bool__()) {
+        if (!c.p || !c.p.__bool__()) {
             return undefined;
         }
+        c.endEditing();
+        {
+            using changes = u.change_outline('clone-node');
 
-        const undoData: Bead = c.undoer.beforeCloneNode(p);
-
-        c.endEditing(); // Capture any changes to the headline.
-        const clone: Position = p.clone();
-        clone.setDirty();
-        c.setChanged();
-        if (c.checkOutline() === 0) {
-            u.afterCloneNode(clone, 'Clone Node', undoData);
-            c.redraw(clone); // redraw selects p
+            const clone = u.clone_node(c.p); // Cloning a node is *always* valid.
+            c.p = clone;
             c.treeWantsFocus();
-            return clone; // For mod_labels and chapters plugins.
+            return clone;
         }
-        clone.doDelete();
-        c.p = p;
-        return undefined;
     }
     //@+node:felix.20211031143555.3: *4* c_oc.cloneToAtSpot
     @commander_command(
@@ -1514,35 +1469,42 @@ export class CommanderOutlineCommands {
             g.es('can not clone @spot node');
             return;
         }
-        let last_spot: Position | undefined;
 
-        for (let p2 of c.all_positions()) {
-            if (g.match_word(p2.h, 0, '@spot')) {
-                last_spot = p2.copy();
-            }
-        }
-        if (!last_spot || !last_spot.__bool__()) {
-            const last: Position = c.lastTopLevel();
-            last_spot = last.insertAfter();
-            last_spot.h = '@spot';
-        }
-
-        const undoData = c.undoer.beforeCloneNode(p);
-
+        // Start the undo Group.
         c.endEditing(); // Capture any changes to the headline.
+        {
+            using changes = u.change_outline('clone-to-at-spot');
+            // Create the @spot node if necessary.
+            let created_last_spot = false;
+            let last_spot: Position | undefined;
 
-        const clone: Position = p.copy();
-        clone._linkAsNthChild(last_spot, last_spot.numberOfChildren());
-        clone.setDirty();
-        c.setChanged();
+            for (let p2 of c.all_positions()) {
+                if (g.match_word(p2.h, 0, '@spot')) {
+                    last_spot = p2.copy();
+                }
+            }
+            if (!last_spot || !last_spot.__bool__()) {
+                const last: Position = c.lastTopLevel();
+                created_last_spot = true;
+                last_spot = last.insertAfter();
+                last_spot.h = '@spot';
+            }
 
-        if (c.checkOutline() === 0) {
-            u.afterCloneNode(clone, 'Clone Node', undoData);
-            c.contractAllHeadlines();
-            c.redraw(clone);
-        } else {
-            clone.doDelete();
-            c.p = p;
+            // Create the clone as the last child of the @spot node.
+            const clone: Position = p.copy();
+            clone._linkAsNthChild(last_spot, last_spot.numberOfChildren());
+            clone.setDirty();
+
+            if (c.checkOutline() === 0) {
+                c.contractAllHeadlines();
+                c.p = clone
+            } else {
+                clone.doDelete();
+                if (created_last_spot) {
+                    last_spot.doDelete();
+                }
+                c.p = p;
+            }
         }
     }
     //@+node:felix.20211031143555.4: *4* c_oc.cloneToLastNode
@@ -1560,19 +1522,20 @@ export class CommanderOutlineCommands {
             return;
         }
         const prev: Position = p.copy();
-        const undoData: Bead = c.undoer.beforeCloneNode(p);
+
         c.endEditing(); // Capture any changes to the headline.
-        const clone: Position = p.clone();
-        const last: Position = c.rootPosition()!;
-        while (last && last.__bool__() && last.hasNext()) {
-            last.moveToNext();
+        {
+            using changes = u.change_outline('clone-node-to-last-node');
+            const clone: Position = p.clone();
+            const last: Position = c.rootPosition()!;
+            while (last && last.__bool__() && last.hasNext()) {
+                last.moveToNext();
+            }
+            clone.moveAfter(last);
+            clone.setDirty();
+            c.p = prev;
         }
-        clone.moveAfter(last);
-        clone.setDirty();
-        c.setChanged();
-        u.afterCloneNode(clone, 'Clone Node To Last', undoData);
-        c.redraw(prev); // redraw selects p
-        // return clone // For mod_labels and chapters plugins.
+
     }
     //@+node:felix.20211031143555.5: *4* c_oc.deleteOutline
     @commander_command('delete-node', 'Deletes the selected outline.')
@@ -1586,38 +1549,13 @@ export class CommanderOutlineCommands {
         if (!p || !p.__bool__()) {
             return;
         }
-        let newNode: Position | undefined;
         c.endEditing(); // Make sure we capture the headline for Undo.
-        if (false) {
-            // c.config.getBool('select-next-after-delete'):
-            // #721: Optionally select next node after delete.
-            if (p.hasVisNext(c)) {
-                newNode = p.visNext(c);
-            } else if (p.hasParent()) {
-                newNode = p.parent();
-            } else {
-                newNode = p.back(); // _not_ p.visBack(): we are at the top level.
-            }
-        } else {
-            // Legacy: select previous node if possible.
-            const back = p.hasVisBack(c);
-            if (back && back.__bool__()) {
-                newNode = p.visBack(c);
-            } else {
-                newNode = p.next(); // _not_ p.visNext(): we are at the top level.
-            }
+        {
+            using changes = u.change_node(p, op_name);
+            u.delete_node(p);  // Calculates new c.p.
+            c.redraw();
         }
 
-        if (!newNode || !newNode.__bool__()) {
-            return;
-        }
-        const undoData: Bead = u.beforeDeleteNode(p);
-        p.setDirty();
-        p.doDelete(newNode);
-        c.setChanged();
-        u.afterDeleteNode(newNode, op_name, undoData);
-        c.redraw(newNode); // redraw selects p
-        c.validateOutline();
     }
     //@+node:felix.20211031143555.6: *4* c_oc.insertChild
     @commander_command(
@@ -1626,7 +1564,18 @@ export class CommanderOutlineCommands {
     )
     public insertChild(this: Commands): Position | undefined {
         const c: Commands = this;
-        return c.insertHeadline('Insert Child', true);
+        const p = c.p;
+        const u = c.undoer;
+        if (!p || !p.__bool__()) {
+            return;
+        }
+        c.endEditing();
+        {
+            using changes = u.change_node(p, 'insert-child');
+            const new_p = u.insert_node(c.p, true);
+            u.redraw_and_edit(new_p);
+            return new_p;  // For unit tests.
+        }
     }
     //@+node:felix.20230702235720.1: *4* c_oc.asyncInsertChild
     @commander_command(
@@ -1651,8 +1600,18 @@ export class CommanderOutlineCommands {
         as_child: boolean = false
     ): Position | undefined {
         const c: Commands = this;
-        // Fix #600.
-        return this.insertHeadlineHelper(c, op_name, as_child, false, false);
+        const p = c.p;
+        const u = c.undoer;
+        if (!p || !p.__bool__()) {
+            return undefined;
+        }
+        c.endEditing();
+        {
+            using changes = u.change_node(p, op_name);
+            const new_p = u.insert_node(c.p, as_child);
+            u.redraw_and_edit(new_p);
+            return new_p;  // For unit tests.
+        }
     }
     @commander_command(
         'insert-as-first-child',
@@ -1660,7 +1619,18 @@ export class CommanderOutlineCommands {
     )
     public insertNodeAsFirstChild(this: Commands): Position | undefined {
         const c: Commands = this;
-        return this.insertHeadlineHelper(c, undefined, false, true, false);
+        const p = c.p;
+        const u = c.undoer;
+        if (!p || !p.__bool__()) {
+            return undefined;
+        }
+        c.endEditing();
+        {
+            using changes = u.change_node(p, 'insert-as-first-child');
+            const new_p = u.insert_node(p, true, 0);
+            u.redraw_and_edit(new_p);
+            return new_p;  // For unit tests.
+        }
     }
     @commander_command(
         'insert-as-last-child',
@@ -1668,53 +1638,18 @@ export class CommanderOutlineCommands {
     )
     public insertNodeAsLastChild(this: Commands): Position | undefined {
         const c: Commands = this;
-        return this.insertHeadlineHelper(c, undefined, false, false, true);
-    }
-    //@+node:felix.20211031143555.8: *4* private insertHeadlineHelper
-    /**
-     * Insert a node after the presently selected node.
-     */
-    private insertHeadlineHelper(
-        c: Commands,
-        op_name = 'Insert Node',
-        as_child: boolean = false,
-        as_first_child: boolean = false,
-        as_last_child: boolean = false
-    ): Position | undefined {
-        const u: Undoer = c.undoer;
-        const current: Position = c.p;
-        if (!current || !current.__bool__()) {
-            return;
+        const p = c.p;
+        const u = c.undoer;
+        if (!p || !p.__bool__()) {
+            return undefined;
         }
         c.endEditing();
-        const undoData: Bead = c.undoer.beforeInsertNode(current);
-        let p: Position;
-        if (as_first_child) {
-            p = current.insertAsNthChild(0);
-        } else if (as_last_child) {
-            p = current.insertAsLastChild();
-        } else if (
-            as_child ||
-            (current.hasChildren() && current.isExpanded()) ||
-            (c.hoistStack.length &&
-                current.__eq__(c.hoistStack[c.hoistStack.length - 1].p))
-        ) {
-            // Make sure the new node is visible when hoisting.
-            if (c.config.getBool('insert-new-nodes-at-end')) {
-                p = current.insertAsLastChild();
-            } else {
-                p = current.insertAsNthChild(0);
-            }
-        } else {
-            p = current.insertAfter();
+        {
+            using changes = u.change_node(p, 'insert-as-last-child');
+            const new_p = u.insert_node(c.p, true, c.p.numberOfChildren());
+            u.redraw_and_edit(new_p);
+            return new_p;  // For unit tests.
         }
-        g.doHook('create-node', { c: c, p: p });
-        p.setDirty();
-        c.setChanged();
-        u.afterInsertNode(p, op_name, undoData);
-        // c.redrawAndEdit(p, true);
-        c.redraw(p);
-        return p;
     }
     //@+node:felix.20230702232913.1: *4* c_oc.asyncInsertHeadline (insert-*)
     //
@@ -1730,29 +1665,38 @@ export class CommanderOutlineCommands {
         this: Commands,
         op_name: string = 'Insert Node',
         as_child: boolean = false
-    ): Thenable<Position> {
+    ): Thenable<Position | undefined> {
         const c: Commands = this;
         // Fix #600.
-        const p = this.insertHeadlineHelper(c, op_name, as_child, false, false);
+        const p = this.insertHeadline();
+        if (!p) {
+            return Promise.resolve(undefined);
+        }
         return g.app.gui.editHeadline(p, true, op_name);
     }
     @commander_command(
         'async-insert-as-first-child',
         'Insert a node as the first child of the previous node.'
     )
-    public asyncInsertNodeAsFirstChild(this: Commands): Thenable<Position> {
+    public asyncInsertNodeAsFirstChild(this: Commands): Thenable<Position | undefined> {
         const c: Commands = this;
-        const p = this.insertHeadlineHelper(c, undefined, false, true, false);
-        return g.app.gui.editHeadline(p, true, 'Insert As First Child');
+        const p = this.insertNodeAsFirstChild();
+        if (!p) {
+            return Promise.resolve(undefined);
+        }
+        return g.app.gui.editHeadline(p, true, 'insert-as-first-child');
     }
     @commander_command(
         'async-insert-as-last-child',
         'Insert a node as the last child of the previous node.'
     )
-    public asyncInsertNodeAsLastChild(this: Commands): Thenable<Position> {
+    public asyncInsertNodeAsLastChild(this: Commands): Thenable<Position | undefined> {
         const c: Commands = this;
-        const p = this.insertHeadlineHelper(c, undefined, false, false, true);
-        return g.app.gui.editHeadline(p, true, 'Insert As Last Child');
+        const p = this.insertNodeAsLastChild();
+        if (!p) {
+            return Promise.resolve(undefined);
+        }
+        return g.app.gui.editHeadline(p, true, 'insert-as-last-child');
     }
     //@+node:felix.20211031143555.9: *4* c_oc.insertHeadlineBefore
     @commander_command(
@@ -1761,30 +1705,22 @@ export class CommanderOutlineCommands {
     )
     public insertHeadlineBefore(this: Commands): Position | undefined {
         const c: Commands = this;
-        const current: Position = c.p;
-        const u: Undoer = c.undoer;
-        const op_name: string = 'Insert Node Before';
-        if (!current || !current.__bool__()) {
-            return;
+        const p = c.p;
+        const u = c.undoer;
+        if (!p || !p.__bool__()) {
+            return undefined;
         }
-        // Can not insert before the base of a hoist.
-        if (
-            c.hoistStack.length &&
-            current.__eq__(c.hoistStack[c.hoistStack.length - 1].p)
-        ) {
+        if (c.hoistStack.length && c.p.__eq__(c.hoistStack[c.hoistStack.length - 1].p)) {
             g.warning('can not insert a node before the base of a hoist');
-            return;
+            return undefined;
         }
         c.endEditing();
-        const undoData: Bead = u.beforeInsertNode(current);
-        const p: Position = current.insertBefore();
-        g.doHook('create-node', { c: c, p: p });
-        p.setDirty();
-        c.setChanged();
-        u.afterInsertNode(p, op_name, undoData);
-        // c.redrawAndEdit(p, true);
-        c.redraw(p);
-        return p;
+        {
+            using changes = u.change_node(p, 'insert-node-before');
+            const new_p = u.insert_node(c.p, true);
+            u.redraw_and_edit(new_p);
+            return new_p;  // For unit tests.
+        }
     }
     //@+node:felix.20230702232930.1: *4* c_oc.asyncInsertHeadlineBefore
     @commander_command(
@@ -1794,32 +1730,11 @@ export class CommanderOutlineCommands {
     public asyncInsertHeadlineBefore(
         this: Commands
     ): Thenable<Position | undefined> {
-        const c: Commands = this;
-        const current: Position = c.p;
-        const u: Undoer = c.undoer;
-        const op_name: string = 'Insert Node Before';
-        if (!current || !current.__bool__()) {
+        const p = this.insertHeadlineBefore();
+        if (!p) {
             return Promise.resolve(undefined);
         }
-        // Can not insert before the base of a hoist.
-        if (
-            c.hoistStack.length &&
-            current.__eq__(c.hoistStack[c.hoistStack.length - 1].p)
-        ) {
-            g.warning('can not insert a node before the base of a hoist');
-            return Promise.resolve(undefined);
-        }
-        c.endEditing();
-        const undoData: Bead = u.beforeInsertNode(current);
-        const p: Position = current.insertBefore();
-        g.doHook('create-node', { c: c, p: p });
-        p.setDirty();
-        c.setChanged();
-        u.afterInsertNode(p, op_name, undoData);
-
-        // return c.redrawAndEdit(p, true);
-        c.redraw(p);
-        return g.app.gui.editHeadline(p, true, op_name);
+        return g.app.gui.editHeadline(p, true, 'insert-node-before');
     }
     //@+node:felix.20211025223803.1: *3* c_oc.Mark commands
     //@+node:felix.20211025223803.2: *4* c_oc.cloneMarked
@@ -1828,47 +1743,48 @@ export class CommanderOutlineCommands {
         'Clone all marked nodes as children of a new node.'
     )
     public cloneMarked(this: Commands): void {
-        const c: Commands = this;
-        const u: Undoer = c.undoer;
-        const p1: Position = c.p.copy();
-        // Create a new node to hold clones.
-        const parent: Position = p1.insertAfter();
-        parent.h = 'Clones of marked nodes';
+        // TODO : MOVED TO leoFind.ts !
+        // const c: Commands = this;
+        // const u: Undoer = c.undoer;
+        // const p1: Position = c.p.copy();
+        // // Create a new node to hold clones.
+        // const parent: Position = p1.insertAfter();
+        // parent.h = 'Clones of marked nodes';
 
-        const cloned: string[] = []; // GNX instead of direct 'v' to ease comparison
-        let n: number = 0;
-        let p: Position = c.rootPosition()!;
+        // const cloned: string[] = []; // GNX instead of direct 'v' to ease comparison
+        // let n: number = 0;
+        // let p: Position = c.rootPosition()!;
 
-        while (p && p.__bool__()) {
-            // Careful: don't clone already-cloned nodes.
-            if (p.__eq__(parent)) {
-                p.moveToNodeAfterTree();
-                // }else if(p.isMarked() && (p.v.gnx not in cloned) ){
-            } else if (p.isMarked() && !cloned.includes(p.v.gnx)) {
-                cloned.push(p.v.gnx);
-                // Create the clone directly as a child of parent.
-                const p2 = p.copy();
-                n = parent.numberOfChildren();
-                p2._linkAsNthChild(parent, n);
-                p.moveToNodeAfterTree();
-                n += 1;
-            } else {
-                p.moveToThreadNext();
-            }
-        }
-        if (n) {
-            c.setChanged();
-            parent.expand();
-            c.selectPosition(parent);
-            u.afterCloneMarkedNodes(p1);
-        } else {
-            parent.doDelete();
-            c.selectPosition(p1);
-        }
-        if (!g.unitTesting) {
-            g.blue(`cloned ${n} nodes`);
-        }
-        c.redraw();
+        // while (p && p.__bool__()) {
+        //     // Careful: don't clone already-cloned nodes.
+        //     if (p.__eq__(parent)) {
+        //         p.moveToNodeAfterTree();
+        //         // }else if(p.isMarked() && (p.v.gnx not in cloned) ){
+        //     } else if (p.isMarked() && !cloned.includes(p.v.gnx)) {
+        //         cloned.push(p.v.gnx);
+        //         // Create the clone directly as a child of parent.
+        //         const p2 = p.copy();
+        //         n = parent.numberOfChildren();
+        //         p2._linkAsNthChild(parent, n);
+        //         p.moveToNodeAfterTree();
+        //         n += 1;
+        //     } else {
+        //         p.moveToThreadNext();
+        //     }
+        // }
+        // if (n) {
+        //     c.setChanged();
+        //     parent.expand();
+        //     c.selectPosition(parent);
+        //     u.afterCloneMarkedNodes(p1);
+        // } else {
+        //     parent.doDelete();
+        //     c.selectPosition(p1);
+        // }
+        // if (!g.unitTesting) {
+        //     g.blue(`cloned ${n} nodes`);
+        // }
+        // c.redraw();
     }
 
     //@+node:felix.20211025223803.3: *4* c_oc.copyMarked
@@ -1881,38 +1797,39 @@ export class CommanderOutlineCommands {
         const u: Undoer = c.undoer;
         const p1: Position = c.p.copy();
         // Create a new node to hold clones.
-        const parent: Position = p1.insertAfter();
-        parent.h = 'Copies of marked nodes';
-        const copied: string[] = []; // GNX instead of direct 'v' to ease comparison
-        let n: number = 0;
-        let p: Position = c.rootPosition()!;
-        while (p && p.__bool__()) {
-            // Careful: don't clone already-cloned nodes.
-            if (p.__eq__(parent)) {
-                p.moveToNodeAfterTree();
-            } else if (p.isMarked() && !copied.includes(p.v.gnx)) {
-                copied.push(p.v.gnx);
-                const p2 = p.copyWithNewVnodes(true);
-                p2._linkAsNthChild(parent, n);
-                p.moveToNodeAfterTree();
-                n += 1;
+        {
+            using changes = u.change_outline('copy-marked-nodes');
+
+            const parent: Position = p1.insertAfter();
+            parent.h = 'Copies of marked nodes';
+            const copied: string[] = []; // GNX instead of direct 'v' to ease comparison
+            let n: number = 0;
+            let p: Position = c.rootPosition()!;
+            while (p && p.__bool__()) {
+                // Careful: don't clone already-cloned nodes.
+                if (p.__eq__(parent)) {
+                    p.moveToNodeAfterTree();
+                } else if (p.isMarked() && !copied.includes(p.v.gnx)) {
+                    copied.push(p.v.gnx);
+                    const p2 = p.copyWithNewVnodes(true);
+                    p2._linkAsNthChild(parent, n);
+                    p.moveToNodeAfterTree();
+                    n += 1;
+                } else {
+                    p.moveToThreadNext();
+                }
+            }
+            if (n) {
+                if (!g.unitTesting) {
+                    g.blue(`copied ${n} nodes`);
+                }
+                parent.expand();
+                c.p = parent;
             } else {
-                p.moveToThreadNext();
+                parent.doDelete();
+                c.p = p1;
             }
         }
-        if (n) {
-            c.setChanged();
-            parent.expand();
-            c.selectPosition(parent);
-            u.afterCopyMarkedNodes(p1);
-        } else {
-            parent.doDelete();
-            c.selectPosition(p1);
-        }
-        if (!g.unitTesting) {
-            g.blue(`copied ${n} nodes`);
-        }
-        c.redraw();
     }
 
     //@+node:felix.20211025223803.4: *4* c_oc.deleteMarked
@@ -1920,29 +1837,33 @@ export class CommanderOutlineCommands {
     public deleteMarked(this: Commands): void {
         const c: Commands = this;
         const u: Undoer = c.undoer;
-        const p1: Position = c.p.copy();
-        const undo_data: Position[] = [];
-        let p: Position = c.rootPosition()!;
-        while (p && p.__bool__()) {
-            if (p.isMarked()) {
-                undo_data.push(p.copy());
-                const next = p.positionAfterDeletedTree();
-                p.doDelete();
-                p = next;
-            } else {
-                p.moveToThreadNext();
+        {
+            using changes = u.change_outline('delete-marked-nodes');
+
+            const p1: Position = c.p.copy();
+            const undo_data: Position[] = [];
+            let p: Position = c.rootPosition()!;
+            while (p && p.__bool__()) {
+                if (p.isMarked()) {
+                    undo_data.push(p.copy());
+                    const next = p.positionAfterDeletedTree();
+                    p.doDelete();
+                    p = next;
+                } else {
+                    p.moveToThreadNext();
+                }
             }
-        }
-        if (undo_data.length) {
-            u.afterDeleteMarkedNodes(undo_data, p1);
-            if (!g.unitTesting) {
-                g.blue(`deleted ${undo_data.length} nodes`);
+            if (undo_data.length) {
+
+                if (!g.unitTesting) {
+                    g.blue(`deleted ${undo_data.length} nodes`);
+                }
             }
-            c.setChanged();
+            // Don't even *think* about restoring the old position.
+            c.contractAllHeadlines();
+            c.p = c.rootPosition()!;
         }
-        // Don't even *think* about restoring the old position.
-        c.contractAllHeadlines();
-        c.redraw(c.rootPosition());
+
     }
 
     //@+node:felix.20211025223803.5: *4* c_oc.moveMarked
@@ -2037,30 +1958,40 @@ export class CommanderOutlineCommands {
     )
     public markChangedHeadlines(this: Commands): void {
         const c: Commands = this;
-        const current: Position = this.p;
         const u: Undoer = c.undoer;
-        const undoType: string = 'Mark Changed';
         c.endEditing();
-        let changed = false;
-        for (let p of c.all_unique_positions()) {
-            if (p.isDirty() && !p.isMarked()) {
-                if (!changed) {
-                    u.beforeChangeGroup(current, undoType);
+        {
+            using changes = u.change_outline('mark-changed-nodes');
+            for (let p of c.all_unique_positions()) {
+                if (p.isDirty() && !p.isMarked()) {
+                    // c.setMarked calls a hook.
+                    c.setMarked(p);
+                    p.setDirty();
                 }
-                changed = true;
-                const bunch = u.beforeMark(p, undoType);
-                // c.setMarked calls a hook.
-                c.setMarked(p);
-                p.setDirty();
-                c.setChanged();
-                u.afterMark(p, undoType, bunch);
             }
         }
-        if (changed) {
-            u.afterChangeGroup(current, undoType);
-        }
-        if (!g.unitTesting) {
-            g.blue('done');
+    }
+
+    /**
+     * Mark all changed @root nodes.
+     */
+    public markChangedRoots(this: Commands): void {
+        const c = this;
+        const u: Undoer = c.undoer;
+        c.endEditing();
+        {
+            using changes = u.change_outline('c.markChangedRoots');
+
+            for (let p of c.all_unique_positions()) {
+                if (p.isDirty() && !p.isMarked()) {
+                    const s = p.b;
+                    const [flag, i] = g.is_special(s, "@root");
+                    if (flag) {
+                        c.setMarked(p);  // Calls a hook.
+                        p.setDirty();
+                    }
+                }
+            }
         }
     }
 
@@ -2076,16 +2007,18 @@ export class CommanderOutlineCommands {
         }
         c.endEditing();
         const undoType: string = p.isMarked() ? 'Unmark' : 'Mark';
-        const bunch = u.beforeMark(p, undoType);
-        // c.set/clearMarked call a hook.
-        if (p.isMarked()) {
-            c.clearMarked(p);
-        } else {
-            c.setMarked(p);
+
+        {
+            using changes = u.change_node(p, undoType);
+
+            // c.set/clearMarked call a hook.
+            if (p.isMarked()) {
+                c.clearMarked(p);
+            } else {
+                c.setMarked(p);
+            }
+            p.setDirty();
         }
-        p.setDirty();
-        c.setChanged();
-        u.afterMark(p, undoType, bunch);
     }
     //@+node:felix.20211025223803.10: *4* c_oc.markSubheads
     @commander_command(
@@ -2096,27 +2029,19 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const current: Position = this.p;
         const u: Undoer = c.undoer;
-        const undoType: string = 'Mark Subheads';
+
         if (!current || !current.__bool__()) {
             return;
         }
         c.endEditing();
-        let changed = false;
-        for (let p of current.children()) {
-            if (!p.isMarked()) {
-                if (!changed) {
-                    u.beforeChangeGroup(current, undoType);
+        {
+            using  changes = u.change_outline('mark-subheads');
+            for (let p of current.children()) {
+                if (!p.isMarked()) {
+                    c.setMarked(p); // Calls a hook.
+                    p.setDirty();
                 }
-                changed = true;
-                const bunch = u.beforeMark(p, undoType);
-                c.setMarked(p); // Calls a hook.
-                p.setDirty();
-                c.setChanged();
-                u.afterMark(p, undoType, bunch);
             }
-        }
-        if (changed) {
-            u.afterChangeGroup(current, undoType);
         }
     }
     //@+node:felix.20211025223803.11: *4* c_oc.unmarkAll
@@ -2125,31 +2050,28 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const current: Position = this.p;
         const u: Undoer = c.undoer;
-        const undoType: string = 'Unmark All';
+
         if (!current || !current.__bool__()) {
             return;
         }
         c.endEditing();
-        let changed = false;
-        let w_p: Position | undefined; //  To keep pylint happy.
-        for (let p of c.all_unique_positions()) {
-            if (p.isMarked()) {
-                if (!changed) {
-                    u.beforeChangeGroup(current, undoType);
+        {
+            using changes = u.change_outline('unmark-all');
+
+            let changed = false;
+            let w_p: Position | undefined; //  To keep pylint happy.
+            for (let p of c.all_unique_positions()) {
+                if (p.isMarked()) {
+                    // c.clearMarked(p) // Very slow: calls a hook.
+                    p.v.clearMarked();
+                    p.setDirty();
+                    changed = true;
                 }
-                const bunch = u.beforeMark(p, undoType);
-                // c.clearMarked(p) // Very slow: calls a hook.
-                p.v.clearMarked();
-                p.setDirty();
-                u.afterMark(p, undoType, bunch);
-                changed = true;
+                w_p = p;
             }
-            w_p = p;
-        }
-        if (changed) {
-            g.doHook("clear-all-marks", { c: c, p: w_p });
-            c.setChanged();
-            u.afterChangeGroup(current, undoType);
+            if (changed) {
+                g.doHook("clear-all-marks", { c: c, p: w_p });
+            }
         }
     }
     //@+node:felix.20211031235049.1: *3* c_oc.Move commands
@@ -2177,29 +2099,30 @@ export class CommanderOutlineCommands {
             next.moveToNext();
         }
         c.endEditing();
-        const parent_v: VNode = p._parentVnode();
-        const n: number = p.childIndex();
-        const followingSibs: VNode[] = parent_v.children.slice(n + 1);
-        // Remove the moved nodes from the parent's children.
-        parent_v.children = parent_v.children.slice(0, n + 1);
-        // Add the moved nodes to p's children
-        p.v.children.push(...followingSibs);
-        // Adjust the parent links in the moved nodes.
-        // There is no need to adjust descendant links.
-        for (let child of followingSibs) {
-            // child.parents.remove(parent_v);
-            const index = child.parents.indexOf(parent_v);
-            if (index >= 0) {
-                child.parents.splice(index, 1);
+        {
+            using changes = u.change_outline('demote');
+
+            const parent_v: VNode = p._parentVnode();
+            const n: number = p.childIndex();
+            const followingSibs: VNode[] = parent_v.children.slice(n + 1);
+            // Remove the moved nodes from the parent's children.
+            parent_v.children = parent_v.children.slice(0, n + 1);
+            // Add the moved nodes to p's children
+            p.v.children.push(...followingSibs);
+            // Adjust the parent links in the moved nodes.
+            // There is no need to adjust descendant links.
+            for (let child of followingSibs) {
+                // child.parents.remove(parent_v);
+                const index = child.parents.indexOf(parent_v);
+                if (index >= 0) {
+                    child.parents.splice(index, 1);
+                }
+                child.parents.push(p.v);
             }
-            child.parents.push(p.v);
+            p.expand();
+            p.setDirty();
+            c.p = p;
         }
-        p.expand();
-        p.setDirty();
-        c.setChanged();
-        u.afterDemote(p, followingSibs);
-        c.redraw(p); // redraw selects p
-        // c.updateSyntaxColorer(p); // Moving can change syntax coloring.
     }
     //@+node:felix.20211031235049.3: *4* c_oc.moveOutlineDown
     @commander_command('move-outline-down', 'Move the selected node down.')
@@ -2236,47 +2159,49 @@ export class CommanderOutlineCommands {
             return;
         }
         c.endEditing();
-        const undoData: Bead = u.beforeMoveNode(p);
 
-        let moved: boolean;
+        {
+            using changes = u.move_node(p, 'move-outline-down');
 
-        //@+<< Move p down & set moved if successful >>
-        //@+node:felix.20211031235049.4: *5* << Move p down & set moved if successful >>
-        if (next.hasChildren() && next.isExpanded()) {
-            // Attempt to move p to the first child of next.
-            moved = c.checkMoveWithParentWithWarning(p, next, true);
+            let moved: boolean;
+
+            //@+<< Move p down & set moved if successful >>
+            //@+node:felix.20211031235049.4: *5* << Move p down & set moved if successful >>
+            if (next.hasChildren() && next.isExpanded()) {
+                // Attempt to move p to the first child of next.
+                moved = c.checkMoveWithParentWithWarning(p, next, true);
+                if (moved) {
+                    p.setDirty();
+                    p.moveToNthChildOf(next, 0);
+                }
+            } else {
+                // Attempt to move p after next.
+                moved = c.checkMoveWithParentWithWarning(p, next.parent(), true);
+                if (moved) {
+                    p.setDirty();
+                    p.moveAfter(next);
+                }
+            }
+            // Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+            if (
+                c.collapse_nodes_after_move &&
+                moved &&
+                c.sparse_move &&
+                parent.__bool__() &&
+                !parent.isAncestorOf(p)
+            ) {
+                // New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
+                parent.contract();
+            }
+            //@-<< Move p down & set moved if successful >>
+
             if (moved) {
                 p.setDirty();
-                p.moveToNthChildOf(next, 0);
-            }
-        } else {
-            // Attempt to move p after next.
-            moved = c.checkMoveWithParentWithWarning(p, next.parent(), true);
-            if (moved) {
-                p.setDirty();
-                p.moveAfter(next);
+                c.p = p;
             }
         }
-        // Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
-        if (
-            c.collapse_nodes_after_move &&
-            moved &&
-            c.sparse_move &&
-            parent.__bool__() &&
-            !parent.isAncestorOf(p)
-        ) {
-            // New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
-            parent.contract();
-        }
-        //@-<< Move p down & set moved if successful >>
 
-        if (moved) {
-            p.setDirty();
-            c.setChanged();
-            u.afterMoveNode(p, 'Move Down', undoData);
-        }
-        c.redraw(p); // redraw selects p
-        // c.updateSyntaxColorer(p) // Moving can change syntax coloring.
+
     }
     //@+node:felix.20211031235049.5: *4* c_oc.moveOutlineLeft
     @commander_command(
@@ -2303,18 +2228,19 @@ export class CommanderOutlineCommands {
         }
         const parent: Position = p.parent();
         c.endEditing();
-        const undoData: Bead = u.beforeMoveNode(p);
-        p.setDirty();
-        p.moveAfter(parent);
-        p.setDirty();
-        c.setChanged();
-        u.afterMoveNode(p, 'Move Left', undoData);
-        // Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
-        if (c.collapse_nodes_after_move && c.sparse_move) {
-            // New in Leo 4.4.2
-            parent.contract();
+
+        {
+            using changes = u.move_node(p, 'move-outline-left');
+            p.setDirty();
+            p.moveAfter(parent);
+            p.setDirty();
+            // Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+            if (c.collapse_nodes_after_move && c.sparse_move) {
+                // New in Leo 4.4.2
+                parent.contract();
+            }
+            c.p = p;
         }
-        c.redraw(p); // redraw selects p
     }
     //@+node:felix.20211031235049.6: *4* c_oc.moveOutlineRight
     @commander_command(
@@ -2346,14 +2272,16 @@ export class CommanderOutlineCommands {
             return;
         }
         c.endEditing();
-        const undoData: Bead = u.beforeMoveNode(p);
-        p.setDirty();
-        const n: number = back.numberOfChildren();
-        p.moveToNthChildOf(back, n);
-        p.setDirty();
-        c.setChanged(); // #2036.
-        u.afterMoveNode(p, 'Move Right', undoData);
-        c.redraw(p); // redraw selects p
+
+        {
+            using changes = u.move_node(p, 'move-outline-right');
+
+            p.setDirty();
+            const n: number = back.numberOfChildren();
+            p.moveToNthChildOf(back, n);
+            p.setDirty();
+            c.p = p;
+        }
     }
     //@+node:felix.20211031235049.7: *4* c_oc.moveOutlineUp
     @commander_command(
@@ -2381,67 +2309,70 @@ export class CommanderOutlineCommands {
         }
         const back2 = back.visBack(c);
         c.endEditing();
-        const undoData: Bead = u.beforeMoveNode(p);
-        let moved: boolean = false;
 
-        //@+<< Move p up >>
-        //@+node:felix.20211031235049.8: *5* << Move p up >>
-        const parent: Position = p.parent();
-        if (!back2 || !back2.__bool__()) {
-            if (c.hoistStack.length) {
-                // hoist or chapter.
-                const w_visLimit: [Position | undefined, boolean | undefined] =
-                    c.visLimit();
-                const limit: Position | undefined = w_visLimit[0];
-                const limitIsVisible: boolean | undefined = w_visLimit[1];
-                // assert limit
-                if (limitIsVisible) {
-                    // canMoveOutlineUp should have caught this.
-                    g.trace('can not happen. In hoist');
+        {
+            using changes = u.move_node(p, 'move-outline-up');
+
+            let moved: boolean = false;
+
+            //@+<< Move p up >>
+            //@+node:felix.20211031235049.8: *5* << Move p up >>
+            const parent: Position = p.parent();
+            if (!back2 || !back2.__bool__()) {
+                if (c.hoistStack.length) {
+                    // hoist or chapter.
+                    const w_visLimit: [Position | undefined, boolean | undefined] =
+                        c.visLimit();
+                    const limit: Position | undefined = w_visLimit[0];
+                    const limitIsVisible: boolean | undefined = w_visLimit[1];
+                    // assert limit
+                    if (limitIsVisible) {
+                        // canMoveOutlineUp should have caught this.
+                        g.trace('can not happen. In hoist');
+                    } else {
+                        moved = true;
+                        p.setDirty();
+                        p.moveToFirstChildOf(limit!);
+                    }
                 } else {
+                    // p will be the new root node;
+                    p.setDirty();
+                    p.moveToRoot();
+                    moved = true;
+                }
+            } else if (back2.hasChildren() && back2.isExpanded()) {
+                if (c.checkMoveWithParentWithWarning(p, back2, true)) {
                     moved = true;
                     p.setDirty();
-                    p.moveToFirstChildOf(limit!);
+                    p.moveToNthChildOf(back2, 0);
                 }
             } else {
-                // p will be the new root node;
-                p.setDirty();
-                p.moveToRoot();
-                moved = true;
+                if (c.checkMoveWithParentWithWarning(p, back2.parent(), true)) {
+                    moved = true;
+                    p.setDirty();
+                    p.moveAfter(back2);
+                }
             }
-        } else if (back2.hasChildren() && back2.isExpanded()) {
-            if (c.checkMoveWithParentWithWarning(p, back2, true)) {
-                moved = true;
-                p.setDirty();
-                p.moveToNthChildOf(back2, 0);
+            // Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+            if (
+                c.collapse_nodes_after_move &&
+                moved &&
+                c.sparse_move &&
+                parent.__bool__() &&
+                !parent.isAncestorOf(p)
+            ) {
+                // New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
+                parent.contract();
             }
-        } else {
-            if (c.checkMoveWithParentWithWarning(p, back2.parent(), true)) {
-                moved = true;
-                p.setDirty();
-                p.moveAfter(back2);
-            }
-        }
-        // Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
-        if (
-            c.collapse_nodes_after_move &&
-            moved &&
-            c.sparse_move &&
-            parent.__bool__() &&
-            !parent.isAncestorOf(p)
-        ) {
-            // New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
-            parent.contract();
-        }
-        //@-<< Move p up >>
+            //@-<< Move p up >>
 
-        if (moved) {
-            p.setDirty();
-            c.setChanged();
-            u.afterMoveNode(p, 'Move Up', undoData);
+            if (moved) {
+                p.setDirty();
+            }
+            c.p = p;
+
+
         }
-        c.redraw(p); // redraw selects p
-        // c.updateSyntaxColorer(p);  // Moving can change syntax coloring.
     }
     //@+node:felix.20230902141341.1: *4* c_oc.moveOutlineToFirstChild
     @commander_command('move-outline-to-first-child',
@@ -2468,13 +2399,14 @@ export class CommanderOutlineCommands {
             return;
         }
         c.endEditing();
-        const undoData = u.beforeMoveNode(p);
-        p.moveToNthChildOf(p.parent(), 0);
-        p.setDirty();
-        c.setChanged();
-        u.afterMoveNode(p, 'Move To First Child', undoData);
-        c.redraw(p);
+        {
+            using changes = u.move_node(p, 'move-outline-to-first-child');
 
+            p.setDirty();
+            p.moveToNthChildOf(p.parent(), 0);
+            p.setDirty();
+            c.p = p;
+        }
     }
     //@+node:felix.20230902141347.1: *4* c_oc.moveOutlineToLastChild
     @commander_command('move-outline-to-last-child',
@@ -2501,20 +2433,21 @@ export class CommanderOutlineCommands {
             return;
         }
         c.endEditing();
-        const undoData = u.beforeMoveNode(p);
-        p.moveToNthChildOf(parent, parent.v.children.length - 1);
-        p.setDirty();
-        c.setChanged();
-        u.afterMoveNode(p, 'Move To Last Child', undoData);
-        c.redraw(p);
 
+        {
+            using changes = u.move_node(p, 'move-outline-to-last-child');
+            p.setDirty();
+            p.moveToNthChildOf(parent, parent.v.children.length - 1);
+            p.setDirty();
+            c.p = p;
+        }
     }
     //@+node:felix.20211031235049.9: *4* c_oc.promote
     @commander_command(
         'promote',
         'Make all children of the selected nodes siblings of the selected node.'
     )
-    public promote(this: Commands, undoFlag = true): void {
+    public promote(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
         const u: Undoer = c.undoer;
@@ -2523,15 +2456,13 @@ export class CommanderOutlineCommands {
             return;
         }
         c.endEditing();
-        const children: VNode[] = p.v.children; // First, for undo.
-        p.promote();
-        c.setChanged();
-        if (undoFlag) {
+        {
+            using changes = u.change_outline('promote');
+
+            p.promote();
             p.setDirty();
-            u.afterPromote(p, children);
+            c.p = p;
         }
-        c.redraw(p); // redraw selects p
-        // c.updateSyntaxColorer(p); // Moving can change syntax coloring.
     }
     //@+node:felix.20211031235049.10: *4* c_oc.toggleSparseMove
     @commander_command(
@@ -2597,7 +2528,7 @@ export class CommanderOutlineCommands {
         const oldP = p.copy();
         const newP = p.copy();
         c.endEditing();
-        let undoType: string = sortChildren ? 'Sort Children' : 'Sort Siblings';
+        let undoType: string = sortChildren ? 'sort-children' : 'sort-siblings';
         if (reverse) {
             undoType = 'Reverse ' + undoType;
         }
@@ -2631,34 +2562,26 @@ export class CommanderOutlineCommands {
         if (same) {
             return; // Not even needed!
         }
-        // 2010/01/20. Fix bug 510148.
-        c.setChanged();
-        const bunch: Bead = u.beforeSort(
-            p,
-            undoType,
-            oldChildren,
-            newChildren,
-            sortChildren
-        );
-        // A copy, so its not the undo bead's oldChildren. Fixes #3205
-        parent_v.children = [...newChildren];
-        // Sorting destroys position p, and possibly the root position.
-        // Only the child index of new position changes!
-        for (var _i = 0; _i < newChildren.length; _i++) {
-            const v = newChildren[_i];
-            if (v.gnx === oldP.v.gnx) {
-                newP._childIndex = _i;
-                break;
+        {
+            using changes = u.change_outline(undoType);
+
+            // A copy, so its not the undo bead's oldChildren. Fixes #3205
+            parent_v.children = [...newChildren];
+            // Sorting destroys position p, and possibly the root position.
+            // Only the child index of new position changes!
+            for (var _i = 0; _i < newChildren.length; _i++) {
+                const v = newChildren[_i];
+                if (v.gnx === oldP.v.gnx) {
+                    newP._childIndex = _i;
+                    break;
+                }
             }
+            if (newP.parent() && newP.parent().__bool__()) {
+                newP.parent().setDirty();
+            }
+            c.p = sortChildren ? newP.parent() : newP;
         }
-        if (newP.parent() && newP.parent().__bool__()) {
-            newP.parent().setDirty();
-        }
-        if (sortChildren) {
-            c.redraw(newP.parent());
-        } else {
-            c.redraw(newP);
-        }
+
     }
     //@+node:felix.20230322231828.1: *3* count-children
 

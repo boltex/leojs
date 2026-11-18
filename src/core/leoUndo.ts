@@ -485,8 +485,9 @@ export class Undoer {
      *
      * Example usage, from Leo's delete-node command:
      *
-     * with u.change_outline(op_name):
+     * with u.change_node(op_name):
      *     u.delete_node(p)  # Calculates new c.p.
+     *     c.redraw(p)
      */
     public delete_node(p: Position): void {
 
@@ -500,7 +501,7 @@ export class Undoer {
             g.trace("Can not delete the outline's only node");
             return;
         }
-        // Do the action.
+        // Do the action. The calling undoer (u.change_node) saves/restores the ui.
         old_p.doDelete(new_p);
         c.p = new_p;
         new_p.setDirty();
@@ -510,7 +511,9 @@ export class Undoer {
         const delete_node_redoer = () => {
             old_p.doDelete();
             c.p = new_p;
+            u._redraw(new_p);
         };
+
         const delete_node_undoer = () => {
             if (old_back && old_back.v) {
                 old_p._linkAfter(old_back);
@@ -521,11 +524,10 @@ export class Undoer {
             }
             old_p.setDirty();
             c.p = old_p;
+            u._redraw(old_p);
         };
 
-        if (!u.node_captures.has(old_p.v)) {
-            b.add_helpers(delete_node_redoer, delete_node_undoer);
-        }
+        b.add_helpers(delete_node_redoer, delete_node_undoer);
     }
 
     //@+node:felix.20261113233806.11: *5* u.insert_node
