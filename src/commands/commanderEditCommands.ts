@@ -87,7 +87,7 @@ export class CommanderEditCommands {
         const tabWidth = c.getTabWidth(c.p);
         let count = 0;
         {
-            using change = u.change_outline('convert-all-blanks');
+            using changes = u.change_outline('convert-all-blanks');
             for (let p of current.self_and_subtree()) {
                 let changed = false;
                 if (p === current) {
@@ -144,7 +144,7 @@ export class CommanderEditCommands {
         let count = 0;
 
         {
-            using change = u.change_outline('convert-all-tabs');
+            using changes = u.change_outline('convert-all-tabs');
             for (let p of current.self_and_subtree()) {
                 let changed = false;
 
@@ -461,7 +461,7 @@ export class CommanderEditCommands {
         }
 
         {
-            using change = u.change_outline('extract');
+            using changes = u.change_outline('extract');
 
             const p = this.createFirstChildNode(c, c.p, h, b.join(''));
 
@@ -718,7 +718,7 @@ export class CommanderEditCommands {
             return;
         }
         {
-            using change = u.change_outline('line-to-headline');
+            using changes = u.change_outline('line-to-headline');
 
             const p2 = p.insertAsLastChild();
             p2.h = line;
@@ -824,7 +824,7 @@ export class CommanderEditCommands {
         const new_body = compute_new_body(i, old_p, to_promote, indent);
         const ins = old_p.b.indexOf('@others') - indent.length;
         {
-            using change = u.change_outline('promote-to-at-others');
+            using changes = u.change_outline('promote-to-at-others');
             w.setSelectionRange(ins, ins, ins);
             old_p.b = new_body;
             old_p.setDirty();
