@@ -4,9 +4,7 @@ import * as g from '../core/leoGlobals';
 import { new_cmd_decorator, command } from '../core/decorators';
 import { Position, VNode } from '../core/leoNodes';
 import { Commands } from '../core/leoCommands';
-import { Bead } from '../core/leoUndo';
 import { StringTextWrapper } from '../core/leoFrame';
-import { BaseEditCommandsClass } from './baseCommands';
 
 //@+others
 //@+node:felix.20220503223721.1: ** editCommands.cmd (decorator)
@@ -24,27 +22,22 @@ export class TopLevelEditCommands {
     public mark_node_and_parents(this: Commands): Position[] {
         const c: Commands = this;
         const changed: Position[] = [];
-        const tag = 'mark-node-and-parents';
         if (!c) {
             return changed;
         }
         const u = c.undoer;
-        for (let parent of c.p.self_and_parents()) {
+        for (const parent of c.p.self_and_parents()) {
             if (!parent.isMarked()) {
-                if (!changed.length) {
-                    u.beforeChangeGroup(c.p, tag);
-                }
-                const bunch = u.beforeMark(parent, 'mark');
-                parent.setMarked();
-                parent.setDirty();
-                u.afterMark(parent, 'mark', bunch);
-                changed.push(parent.copy());
+                changed.push(parent);
             }
         }
         if (changed.length) {
-            u.afterChangeGroup(c.p, tag);
-            c.setChanged();
-            c.redraw();
+            {
+                using changes = u.change_outline('mark-node-and-parents');
+                for (const z of changed) {
+                    z.setMarked();
+                }
+            }
         }
         return changed;
     }
@@ -57,11 +50,9 @@ export class TopLevelEditCommands {
     public promote_section_definition(this: Commands): void {
 
         const c: Commands = this;
-        const tag = 'promote-section-definition';
         if (!c) {
             return;
         }
-
         c.endEditing();
         const u = c.undoer;
         const h = c.p.h.trim();
@@ -83,13 +74,7 @@ export class TopLevelEditCommands {
             g.es_print('Reference not found:', ref_s);
             return;
         }
-
-        // Start the undo group.
         const ref_p: Position = w_parent!;
-        u.beforeChangeGroup(c.p, tag);
-
-        // Change ref_p.b.
-        const bunch1 = u.beforeChangeBody(ref_p);
         const new_ref_lines = [];
         for (const line of g.splitLines(ref_p.b)) {
             if (line.trim() === ref_s) {
@@ -98,34 +83,25 @@ export class TopLevelEditCommands {
                 new_ref_lines.push(line);
             }
         }
-        ref_p.b = new_ref_lines.join('');
-        u.afterChangeBody(ref_p, 'change-body', bunch1);
+        {
+            using changes = u.change_outline('promote-section-definition');
+            ref_p.b = new_ref_lines.join('');
 
-        // Delete and select ref_p.
-        const bunch2 = u.beforeDeleteNode(c.p);
-        c.p.doDelete(ref_p);
-        u.afterDeleteNode(ref_p, 'delete-node', bunch2);
-        c.selectPosition(ref_p);
-
-        // Finish the group.
-        u.afterChangeGroup(c.p, tag);
-        c.setChanged();
-        c.redraw(ref_p);
-
+            c.p.doDelete(ref_p);
+            c.p = ref_p;
+        }
     }
     //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
     @command(
         'merge-node-with-next-node',
-        'Merge p.b into p.next().b and delete p, *provided* that p has no children. ' +
-        "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
+        'Merge p.b into p.next().b and delete p, *provided* that p has no children. '
     )
     public merge_node_with_next_node(this: Commands): void {
         const c: Commands = this;
         if (!c) {
             return;
         }
-        const [command, p, u, w] = [
-            'merge-node-with-next-node',
+        const [p, u, w] = [
             c.p,
             c.undoer,
             c.frame.body.wrapper,
@@ -137,35 +113,25 @@ export class TopLevelEditCommands {
         if (!next || !next.__bool__()) {
             return;
         }
-        // Outer undo.
-        u.beforeChangeGroup(p, command);
-        // Inner undo 1: change next.b.
-        const bunch1 = u.beforeChangeBody(next);
-        next.b = p.b.trimEnd() + '\n\n' + next.b;
-        w.setAllText(next.b);
-        u.afterChangeBody(next, command, bunch1);
-        // Inner undo 2: delete p.
-        const bunch2 = u.beforeDeleteNode(p);
-        p.doDelete(next); // This adjusts next._childIndex.
-        c.selectPosition(next);
-        u.afterDeleteNode(next, command, bunch2);
-        // End outer undo:
-        u.afterChangeGroup(next, command);
-        c.redraw(next);
+        {
+            using changes = u.change_outline('merge-node-with-next-node');
+            next.b = p.b.trimEnd() + '\n\n' + next.b;
+            w.setAllText(next.b);
+            p.doDelete(next); // This adjusts next._childIndex.
+            c.p = next;
+        }
     }
     //@+node:felix.20230708211849.1: *3* @g.command('merge-node-with-prev-node')
     @command(
         'merge-node-with-prev-node',
-        'Merge p.b into p.back().b and delete p, *provided* that p has no children. ' +
-        "Undo works, but redo doesn't: probably a bug in the u.before/AfterChangeGroup."
+        'Merge p.b into p.back().b and delete p, *provided* that p has no children.'
     )
     public merge_node_with_prev_node(this: Commands): void {
         const c: Commands = this;
         if (!c) {
             return;
         }
-        const [command, p, u, w] = [
-            'merge-node-with-prev-node',
+        const [p, u, w] = [
             c.p,
             c.undoer,
             c.frame.body.wrapper,
@@ -177,21 +143,15 @@ export class TopLevelEditCommands {
         if (!prev || !prev.__bool__()) {
             return;
         }
-        // Outer undo.
-        u.beforeChangeGroup(p, command);
-        // Inner undo 1: change prev.b.
-        const bunch1 = u.beforeChangeBody(prev);
-        prev.b = prev.b.trimEnd() + '\n\n' + p.b;
-        w.setAllText(prev.b);
-        u.afterChangeBody(prev, command, bunch1);
-        // Inner undo 2: delete p, select prev.
-        const bunch2 = u.beforeDeleteNode(p);
-        p.doDelete(); // No need to adjust prev._childIndex.
-        c.selectPosition(prev);
-        u.afterDeleteNode(prev, command, bunch2);
-        // End outer undo.
-        u.afterChangeGroup(prev, command);
-        c.redraw(prev);
+        {
+            using changes = u.change_outline('merge-node-with-prev-node');
+            prev.b = prev.b.trimEnd() + '\n\n' + p.b;
+            w.setAllText(prev.b);
+            p.doDelete(); // No need to adjust prev._childIndex.
+            c.p = prev;
+        }
+
+
     }
     //@+node:felix.20220504203200.3: *3* @g.command('promote-bodies')
     @command(
@@ -204,10 +164,12 @@ export class TopLevelEditCommands {
             return;
         }
         const p: Position = c.p;
-        const bunch = c.undoer.beforeChangeNodeContents(p);
+        const u = c.undoer;
         const result = [...p.subtree()].map((child: Position) => child.b.trimEnd() + '\n\n');
-        p.b = result.join('').trimEnd() + '\n\n';
-        c.undoer.afterChangeNodeContents(p, 'promote-bodies', bunch);
+        {
+            using changes = u.change_node(p, 'promote-bodies');
+            p.b = result.join('').trimEnd() + '\n\n';
+        }
     }
     //@+node:felix.20220504203200.4: *3* @g.command('promote-headlines')
     @command(
@@ -220,17 +182,17 @@ export class TopLevelEditCommands {
             return;
         }
         const p: Position = c.p;
-
-        const b: Bead = c.undoer.beforeChangeNodeContents(p);
-
+        const u = c.undoer;
         const result: string = [...p.subtree()]
             .map((p_p) => p_p.h.trimEnd())
             .join('\n');
         // '\n'.join([p.h.trimEnd() for p in p.subtree()])
 
         if (result) {
-            p.b = p.b.trimStart() + '\n' + result;
-            c.undoer.afterChangeNodeContents(p, 'promote-headlines', b);
+            {
+                using changes = u.change_node(p, 'promote-headlines');
+                p.b = p.b.trimStart() + '\n' + result;
+            }
         }
     }
 
@@ -324,34 +286,33 @@ export class TopLevelEditCommands {
     public unmark_node_and_parents(this: Commands): Position[] {
         const c: Commands = this;
         const changed: Position[] = [];
-        const tag = 'unmark-node-and-parents';
         if (!c) {
             return changed;
         }
         const u = c.undoer;
         for (let parent of c.p.self_and_parents()) {
             if (parent.isMarked()) {
-                if (!changed.length) {
-                    u.beforeChangeGroup(c.p, tag);
-                }
-                const bunch = u.beforeMark(parent, 'unmark');
+
                 parent.clearMarked();
                 parent.setDirty();
-                u.afterMark(parent, 'unmark', bunch);
                 changed.push(parent.copy());
             }
         }
         if (changed.length) {
-            u.afterChangeGroup(c.p, tag);
-            c.setChanged();
-            c.redraw();
+            {
+                using changes = u.change_outline('unmark-node-and-parents');
+                for (const z of changed) {
+                    z.clearMarked();
+                }
+            }
         }
         return changed;
     }
     //@-others
 }
 //@+node:felix.20220503222535.1: ** class EditCommandsClass
-export class EditCommandsClass extends BaseEditCommandsClass {
+export class EditCommandsClass {
+    private c: Commands;
     public ccolumn = 0;  // For comment column functions.
     public cursorStack: [Position, number, number, number][] = [];  // Values are tuples, (i, j, ins)
     public extendMode = false;  // True: all cursor move commands extend the selection.
@@ -377,7 +338,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+others
     //@+node:felix.20220504204405.1: *3* ec.constructor
     constructor(c: Commands) {
-        super(c);
+        this.c = c;
         // Settings...
         const cf = c.config;
         this.autocompleteBrackets = cf.getBool('autocomplete-brackets');
@@ -418,7 +379,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
 
         const c = this.c;
         const u = this.c.undoer;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
 
         const filetypes: [string, string][] = [
             ['All files', '*']
@@ -435,58 +396,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         w.insert(i, fileName);
         const newText = w.getAllText();
         if (p.b !== newText) {
-            const bunch = u.beforeChangeBody(p);
-            p.v.b = newText; // p.b would cause a redraw.
-            u.afterChangeBody(p, 'insert-file-name', bunch);
+            {
+                using changes = u.change_node(c.p, 'insert-file-name');
+                p.v.b = newText; // p.b would cause a redraw.
+            }
+
         }
-
-        /* 
-         ORIGINAL BEHAVIOR 
-         =================
-
-         Prompt for a file name, then insert it at the cursor position.
-         This operation is undoable if done in the body pane.
-
-         The initial path is made by concatenating path_for_p() and the selected
-         text, if there is any, or any path like text immediately preceding the cursor.
-        */
-
-
-
-        // c, u, w = self.c, self.c.undoer, self.editWidget(event)
-        // if not w:
-        //     return
-
-        // def callback(arg: str, w: Wrapper = w) -> None:
-        //     i = w.getSelectionRange()[0]
-        //     p = c.p
-        //     w.deleteTextSelection()
-        //     w.insert(i, arg)
-        //     newText = w.getAllText()
-        //     if g.app.gui.widget_name(w) == 'body' and p.b != newText:
-        //         bunch = u.beforeChangeBody(p)
-        //         p.v.b = newText  # p.b would cause a redraw.
-        //         u.afterChangeBody(p, 'insert-file-name', bunch)
-
-        // # see if the widget already contains the start of a path
-
-        // start_text = w.getSelectedText()
-        // if not start_text:  # look at text preceding insert point
-        //     start_text = w.getAllText()[: w.getInsertPoint()]
-        //     if start_text:
-        //         # make non-path characters whitespace
-        //         start_text = ''.join(i if i not in '\'"`()[]{}<>!|*,@#$&' else ' '
-        //                              for i in start_text)
-        //         if start_text[-1].isspace():  # use node path if nothing typed
-        //             start_text = ''
-        //         else:
-        //             start_text = start_text.rsplit(None, 1)[-1]
-        //             # set selection range so w.deleteTextSelection() works in the callback
-        //             w.setSelectionRange(
-        //                 w.getInsertPoint() - len(start_text), w.getInsertPoint())
-
-        // c.k.functionTail = g.finalize_join(self.path_for_p(c, c.p), start_text or '')
-        // c.k.getFileName(event, callback=callback)
     }
     //@+node:felix.20220503225225.1: *3* ec.insertHeadlineTime
     @cmd(
@@ -499,32 +414,27 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const u = this.c.undoer;
 
         if (g.app.batchMode) {
-            c.notValidInBatchMode('Insert Headline Time');
+            c.notValidInBatchMode('insert-headline-time');
             return Promise.resolve(p);
         }
 
-        c.endEditing();
-        const time = c.getTime(false);
-        const s = p.h.trimEnd();
+        {
+            using changes = u.change_outline('insert-headline-time');
 
-        const h = p.h;
-        const undoType = 'insert-headline-time';
-        const undoData = u.beforeChangeNodeContents(p);
-        if (s) {
-            p.h = [s, time].join(' ');
-        } else {
-            p.h = time;
-        }
-        const changed = p.h !== h;
-        if (changed) {
-            c.setChanged();
+            c.endEditing();
+            const time = c.getTime(false);
+            const s = p.h.trimEnd();
+
+            if (s) {
+                p.h = [s, time].join(' ');
+            } else {
+                p.h = time;
+            }
+
             p.setDirty();
-            u.afterChangeNodeContents(p, undoType, undoData);
+            u.redraw_and_edit(p);
+            return Promise.resolve(p);
         }
-
-        // return c.redrawAndEdit(p, true);
-        c.redraw(p);
-        return Promise.resolve(p);
 
     }
     //@+node:felix.20220503225231.1: *3* ec.capitalizeHeadline
@@ -538,12 +448,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const u = this.c.undoer;
 
         if (g.app.batchMode) {
-            c.notValidInBatchMode('Capitalize Headline');
+            c.notValidInBatchMode('capitalize-headline');
             return;
         }
         const h = p.h;
-        const undoType = 'capitalize-headline';
-        const undoData = u.beforeChangeNodeContents(p);
 
         // const words = [w.capitalize() for w in h.split(" ")];
         const words = h
@@ -551,13 +459,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             .map(w => g.capitalize(w));
 
         const capitalized = words.join(' ');
-        const changed = capitalized !== h;
-        if (changed) {
-            p.h = capitalized;
-            c.setChanged();
-            p.setDirty();
-            u.afterChangeNodeContents(p, undoType, undoData);
-            c.redraw();
+
+        if (capitalized !== h) {
+            {
+                using changes = u.change_node(p, 'capitalize-headline');
+                p.h = capitalized;
+            }
         }
     }
     //@+node:felix.20250408222558.1: *3* ec.path_for_p
@@ -616,26 +523,32 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
 
     private tabifyHelper(which: string): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
+        const p = c.p;
         if (!w || !w.hasSelection()) {
             return;
         }
-        this.beginCommand(w, which);
-        const [i, end] = w.getSelectionRange();
-        const txt = w.getSelectedText();
-        let ntxt: string;
-        if (which === 'tabify') {
-            const pattern = new RegExp(' {4,4}', 'g'); // exactly four blanks.
-            ntxt = txt.replace(pattern, '\t');
-        } else {
-            const pattern = new RegExp('\t', 'g');
-            ntxt = txt.replace(pattern, '    ');
+        const u = c.undoer;
+        {
+            using changes = u.change_node(p, which);
+            const [i, end] = w.getSelectionRange();
+            const txt = w.getSelectedText();
+            let ntxt: string;
+            if (which === 'tabify') {
+                const pattern = new RegExp(' {4,4}', 'g'); // exactly four blanks.
+                ntxt = txt.replace(pattern, '\t');
+            } else {
+                const pattern = new RegExp('\t', 'g');
+                ntxt = txt.replace(pattern, '    ');
+            }
+            w.delete(i, end);
+            w.insert(i, ntxt);
+            const n = i + ntxt.length;
+            w.setSelectionRange(n, n, n);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel()
         }
-        w.delete(i, end);
-        w.insert(i, ntxt);
-        const n = i + ntxt.length;
-        w.setSelectionRange(n, n, n);
-        this.endCommand(undefined, true, true);
     }
     //@+node:felix.20240611161637.1: *3* ec: capitalization & case
     //@+node:felix.20240611161637.2: *4* ec.capitalizeWord & up/downCaseWord
@@ -655,7 +568,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240611161637.3: *4* ec.capitalizeHelper
     private capitalizeHelper(which: string, undoType: string): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;  // defensive programming
         }
@@ -667,7 +583,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;  // defensive programming
         }
 
-        this.beginCommand(w, undoType);
 
         let word2: string;
         if (which === 'cap') {
@@ -681,14 +596,19 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
 
-        const changed = word !== word2;
-        if (changed) {
-            w.delete(i, j);
-            w.insert(i, word2);
+        {
+            using changes = u.change_node(p, undoType);
+
+            if (word !== word2) {
+                w.delete(i, j);
+                w.insert(i, word2);
+            }
+            p.v.b = w.getAllText();
             w.setSelectionRange(ins, ins, ins);
+            // c.k.resetLabel()
         }
 
-        this.endCommand(undefined, changed, true);
+
     }
     //@+node:felix.20240611161637.4: *4* ec.capitalizeWords & selection
     @cmd(
@@ -700,14 +620,11 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const c = frame.c;
         const p = c.p;
         const u = c.undoer;
-        const w = frame.editWidget();
+        const w = c.frame.body.wrapper;
         const s = w.getAllText();
         if (!s) {
             return;
         }
-
-        const undoType = 'capitalize-body-words';
-        const undoData = u.beforeChangeNodeContents(p);
 
         const [i, j] = w.getSelectionRange();
         const sel = i === j ? '' : s.substring(i, j);
@@ -722,13 +639,14 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const capitalized = text.replace(/(^|\s)(\S)/g, convert_to_uppercase);
 
         if (capitalized !== text) {
-            p.b = sel ? prefix + capitalized + suffix : capitalized;
-            c.setChanged();
-            p.setDirty();
-            u.afterChangeNodeContents(p, undoType, undoData);
-            c.redraw();
-        }
+            {
+                using changes = u.change_node(p, 'capitalize-body-words');
 
+                p.v.b = sel ? prefix + capitalized + suffix : capitalized;
+                c.setChanged();
+                p.setDirty();
+            }
+        }
     }
 
     //@+node:felix.20240611161619.1: *3* ec: clicks and focus
@@ -751,7 +669,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240611163934.2: *4* ec.setCommentColumn
     @cmd('set-comment-column', 'Set the comment column for the indent-to-comment-column command.')
     public setCommentColumn(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;  // defensive programming
         }
@@ -766,25 +685,33 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Insert whitespace to indent the line containing the insert point to the comment column.'
     )
     public indentToCommentColumn(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;  // defensive programming
         }
-        this.beginCommand(w, 'indent-to-comment-column');
-        const s = w.getAllText();
-        const ins = w.getInsertPoint();
-        const [i, j] = g.getLine(s, ins);
-        const line = s.substring(i, j);
-        const c1 = this.ccolumn;  // already an int
-        const line2 = ' '.repeat(c1) + line.trimStart();
+        {
+            using changes = u.change_node(p, 'indent-to-comment-column');
 
-        if (line2 !== line) {
-            w.delete(i, j);
-            w.insert(i, line2);
+            const s = w.getAllText();
+            const ins = w.getInsertPoint();
+            const [i, j] = g.getLine(s, ins);
+            const line = s.substring(i, j);
+            const c1 = this.ccolumn;
+            const line2 = ' '.repeat(c1) + line.trimStart();
+
+            if (line2 !== line) {
+                w.delete(i, j);
+                w.insert(i, line2);
+            }
+
+            w.setInsertPoint(i + c1);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel();
         }
 
-        w.setInsertPoint(i + c1);
-        this.endCommand(undefined, true, true);
     }
     //@+node:felix.20240611165606.1: *3* ec: fill column and centering
     //@+at
@@ -808,7 +735,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('center-line', 'Centers line within current fill column')
     public centerLine(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;  // defensive programming
         }
@@ -826,24 +755,29 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         if (!line || line.length >= fillColumn) {
             return;
         }
+        {
+            using changes = u.change_node(p, 'center-line');
 
-        this.beginCommand(w, 'center-line');
-        const n = (fillColumn - line.length) / 2;
-        const ws = ' '.repeat(Math.floor(n));
-        const k = g.skip_ws(s, i);
-        if (k > i) {
-            w.delete(i, k - i);
+            const n = (fillColumn - line.length) / 2;
+            const ws = ' '.repeat(Math.floor(n));
+            const k = g.skip_ws(s, i);
+            if (k > i) {
+                w.delete(i, k - i);
+            }
+            w.insert(i, ws);
+            p.v.b = w.getAllText();
+            w.setInsertPoint(i);
+            // c.k.resetLabel()
         }
-        w.insert(i, ws);
-        this.endCommand(undefined, true, true);
 
     }
     //@+node:felix.20240611165606.3: *4* ec.setFillColumn
     @cmd('set-fill-column', 'Set the fill column used by the center-line and center-region commands.')
     public async setFillColumn(): Promise<void> {
         /** Set the fill column used by the center-line and center-region commands. */
-        this.w = this.editWidget();
-        if (!this.w) {
+        const c = this.c;
+        const w = c.frame.body.wrapper;
+        if (!w) {
             return;  // defensive programming
         }
 
@@ -857,8 +791,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         if (!arg) {
             arg = "";
         }
-        const c = this.c;
-        const w = this.w;
         try {
             // Bug fix: 2011/05/23: set the fillColumn ivar!
             this.fillColumn = isNaN(parseInt(arg, 10)) ? 0 : parseInt(arg, 10);
@@ -874,7 +806,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public centerRegion(): void {
 
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -890,35 +824,38 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         } else {
             fillColumn = c.getPageWidth(c.p);
         }
+        {
+            using changes = u.change_node(p, 'center-region');
+            let inserted = 0;
 
-        this.beginCommand(w, 'center-region');
-        let inserted = 0;
-
-        while (ind < end) {
-            s = w.getAllText();
-            const [i, j] = g.getLine(s, ind);
-            const line = s.substring(i, j).trim();
-            if (line.length >= fillColumn) {
-                ind = j;
-            } else {
-                const n = Math.floor((fillColumn - line.length) / 2);
-                inserted += n;
-                const k = g.skip_ws(s, i);
-                if (k > i) {
-                    w.delete(i, k - i);
+            while (ind < end) {
+                s = w.getAllText();
+                const [i, j] = g.getLine(s, ind);
+                const line = s.substring(i, j).trim();
+                if (line.length >= fillColumn) {
+                    ind = j;
+                } else {
+                    const n = Math.floor((fillColumn - line.length) / 2);
+                    inserted += n;
+                    const k = g.skip_ws(s, i);
+                    if (k > i) {
+                        w.delete(i, k - i);
+                    }
+                    w.insert(i, ' '.repeat(n));
+                    ind = j + n - (k - i);
                 }
-                w.insert(i, ' '.repeat(n));
-                ind = j + n - (k - i);
             }
+            w.setSelectionRange(sel_1, sel_2 + inserted);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel();
         }
-        w.setSelectionRange(sel_1, sel_2 + inserted);
-        this.endCommand(undefined, true, true);
 
     }
     //@+node:felix.20240611165606.5: *4* ec.setFillPrefix
     @cmd('set-fill-prefix', 'Make the selected text the fill prefix.')
     public setFillPrefix(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -961,8 +898,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         });
 
         let ok = false;
-        this.w = this.editWidget();
-        const w = this.w;
+        const c = this.c;
+        const w = c.frame.body.wrapper;
 
         if (w_n && /^\d+$/.test(w_n)) {
             const n: number = Number(w_n);
@@ -1014,8 +951,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             placeHolder: '#',
         });
 
-        this.w = this.editWidget();
-        const w = this.w;
+        const c = this.c;
+        const w = c.frame.body.wrapper;
+
 
         if (w_n && /^\d+$/.test(w_n)) {
             const n: number = Number(w_n);
@@ -1055,14 +993,15 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const command = 'add-all-headline-numbers';
         const u = c.undoer;
 
-        const data = u.beforeChangeMultiHeadline(c.p);
-        for (const p of c.all_unique_positions()) {
-            this.hn_delete(p);
-            this.hn_add(p);
+        {
+            using changes = u.change_outline('add-all-headline-numbers');
+
+            for (const p of c.all_unique_positions()) {
+                this.hn_delete(p);
+                this.hn_add(p);
+            }
         }
-        c.setChanged();
-        u.afterChangeMultiHeadline(command, data);
-        c.redraw();
+
     }
     //@+node:felix.20230402171528.3: *5* hn_add
     /**
@@ -1118,18 +1057,18 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     )
     public hn_add_children(): void {
         const c: Commands = this.c;
-        const command = 'add-subtree-headline-numbers';
         const u = c.undoer;
         const root = c.p;
-        const data = u.beforeChangeMultiHeadline(root);
-        for (const p of c.p.subtree()) {
-            this.hn_delete(p);
-            this.hn_add_relative(p, root);
+        {
+            using changes = u.change_outline('add-subtree-headline-numbers');
+            for (const p of c.p.subtree()) {
+                this.hn_delete(p);
+                this.hn_add_relative(p, root);
+            }
+
+            root.expand();
         }
-        c.setChanged();
-        u.afterChangeMultiHeadline(command, data);
-        root.expand();
-        c.redraw();
+
     }
     //@+node:felix.20230402171528.5: *5* hn_add_relative
     /**
@@ -1161,16 +1100,14 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     )
     public hn_delete_all(): void {
         const c: Commands = this.c;
-        const command = 'delete-all-headline-numbers';
         const u = c.undoer;
+        {
+            using changes = u.change_outline('delete-all-headline-numbers');
 
-        const data = u.beforeChangeMultiHeadline(c.p);
-        for (const p of c.all_unique_positions()) {
-            this.hn_delete(p);
+            for (const p of c.all_unique_positions()) {
+                this.hn_delete(p);
+            }
         }
-        c.setChanged();
-        u.afterChangeMultiHeadline(command, data);
-        c.redraw();
     }
     //@+node:felix.20230402171528.7: *4* hn-delete-subtree
     @cmd('hn-delete-subtree', "Delete all headline numbers in c.p's subtree.")
@@ -1184,16 +1121,14 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     )
     public hn_delete_tree(): void {
         const c: Commands = this.c;
-        const command = 'delete-subtree-headline-numbers';
         const u = c.undoer;
 
-        const data = u.beforeChangeMultiHeadline(c.p);
-        for (const p of c.p.subtree()) {
-            this.hn_delete(p);
+        {
+            using changes = u.change_outline('delete-subtree-headline-numbers');
+            for (const p of c.p.subtree()) {
+                this.hn_delete(p);
+            }
         }
-        c.setChanged();
-        u.afterChangeMultiHeadline(command, data);
-        c.redraw();
     }
     //@+node:felix.20230402171528.8: *4* hn_delete
 
@@ -1216,7 +1151,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240611172230.2: *4* ec.deleteIndentation
     @cmd('delete-indentation', 'Delete indentation in the presently line.')
     public deleteIndentation(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1227,12 +1165,13 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const line2 = line.trimStart();
         const delta = line.length - line2.length;
         if (delta) {
-            this.beginCommand(w, 'delete-indentation');
-            w.delete(i, j);
-            w.insert(i, line2);
-            const newIns = ins - delta;
-            w.setSelectionRange(newIns, newIns, newIns);
-            this.endCommand(undefined, true, true);
+            {
+                using changes = u.change_node(p, 'delete-indentation');
+                w.delete(i, j);
+                w.insert(i, line2);
+                const newIns = ins - delta;
+                w.setSelectionRange(newIns, newIns, newIns);
+            }
         }
     }
     //@+node:felix.20240611172230.3: *4* ec.indentRelative
@@ -1250,11 +1189,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         indentation point then applicable is used. If no indentation point is
         applicable even then whitespace equivalent to a single tab is inserted.
         */
-
-        const p = this.c.p;
-        const u = this.c.undoer;
-        const undoType = 'indent-relative';
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1272,9 +1210,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 break;
             }
         }
-        this.beginCommand(w, undoType);
-        try {
-            const bunch = u.beforeChangeBody(p);
+        {
+            using changes = u.change_outline('indent-relative');
+
             const k = g.skip_ws(s, i);
             const ws = s.substring(i, k);
             const [i2, j2] = g.getLine(s, ins);
@@ -1284,9 +1222,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             w.insert(i2, line);
             w.setInsertPoint(i2 + ws.length);
             p.v.b = w.getAllText();
-            u.afterChangeBody(p, undoType, bunch);
-        } finally {
-            this.endCommand(undefined, true, true);
         }
 
     }
@@ -1333,8 +1268,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Print the character at the insert point, its row and column, and the total number of characters.'
     )
     public lineNumber(): void {
-
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1370,7 +1305,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Print the line number of the line containing the cursor.'
     )
     public whatLine(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
 
         if (w) {
             const s = w.getAllText();
@@ -1407,7 +1343,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240611185548.3: *5* ec.addRemoveHelper
     private addRemoveHelper(ch: string, add: boolean, undoType: string): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1425,7 +1363,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         if (ch === '\t' && width < 0) {
             ch = ' '.repeat(Math.abs(width));
         }
-        this.beginCommand(w, undoType);
         const lines = g.splitLines(s);
         let result_list: string[];
         if (add) {
@@ -1434,22 +1371,29 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             result_list = lines.map(line => line.startsWith(ch) ? line.slice(ch.length) : line);
         }
         const result = result_list.join('');
-        if (w.hasSelection()) {
-            const [i, j] = w.getSelectionRange();
-            w.delete(i, j);
-            w.insert(i, result);
-            w.setSelectionRange(i, i + result.length);
-        } else {
-            w.setAllText(result);
-            w.setSelectionRange(0, s.length);
+        {
+            using changes = u.change_node(p, undoType);
+
+            if (w.hasSelection()) {
+                const [i, j] = w.getSelectionRange();
+                w.delete(i, j);
+                w.insert(i, result);
+                p.v.b = w.getAllText();
+                w.setSelectionRange(i, i + result.length);
+            } else {
+                w.setAllText(result);
+                p.v.b = w.getAllText();
+                w.setSelectionRange(0, s.length);
+            }
         }
-        this.endCommand(undefined, true, true);
     }
     //@+node:felix.20240611185548.4: *4* ec.backwardDeleteCharacter
     @cmd('backward-delete-char', 'Delete the character to the left of the cursor.')
     public backwardDeleteCharacter(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1457,9 +1401,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         let ins = w.getInsertPoint();
         let [i, j] = w.getSelectionRange();
 
-        this.beginCommand(w, 'Typing');
         let changed = true;
-        try {
+        {
+            using changes = u.change_node(p, 'Typing');
+
             const tab_width = c.getTabWidth(c.p) || 0;
             if (i !== j) {
                 w.delete(i, j);
@@ -1497,9 +1442,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 w.setSelectionRange(i, i, i);
                 //@-<< backspace with negative tab_width >>
             }
-        } finally {
-            // Necessary to make text changes stick.
-            this.endCommand(undefined, changed, false);
         }
 
     }
@@ -1509,33 +1451,31 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         /** Clean all lines in the selected tree. */
         const c = this.c;
         const u = c.undoer;
-        const tag = 'clean-all-lines';
         const roots = g.findRootsWithPredicate(c, c.p);
-        u.beforeChangeGroup(c.p, tag);
-        let n = 0;
-        for (const root of roots) {
-            for (const p of root.self_and_subtree()) {
-                let lines: string[] = [];
-                for (let line of g.splitLines(p.b)) {
-                    if (g.rstrip(line)) {
-                        lines.push(g.rstrip(line));
+        {
+            using changes = u.change_outline('clean-all-lines');
+            let n = 0;
+            for (const root of roots) {
+                for (const p of root.self_and_subtree()) {
+                    let lines: string[] = [];
+                    for (let line of g.splitLines(p.b)) {
+                        if (g.rstrip(line)) {
+                            lines.push(g.rstrip(line));
+                        }
+                        if (line.endsWith('\n')) {
+                            lines.push('\n');
+                        }
                     }
-                    if (line.endsWith('\n')) {
-                        lines.push('\n');
+                    const s2 = lines.join('');
+                    if (s2 !== p.b) {
+                        p.b = s2;
+                        p.setDirty();
+                        n += 1;
                     }
-                }
-                const s2 = lines.join('');
-                if (s2 !== p.b) {
-                    const bunch = u.beforeChangeNodeContents(p);
-                    p.b = s2;
-                    p.setDirty();
-                    n += 1;
-                    u.afterChangeNodeContents(p, tag, bunch);
                 }
             }
+            g.es(`cleaned ${n} nodes`);
         }
-        u.afterChangeGroup(c.p, tag);
-        g.es(`cleaned ${n} nodes`);
     }
     //@+node:felix.20240611185548.7: *4* ec.cleanLines
     @cmd('clean-lines', 'Removes trailing whitespace from all lines, preserving newlines. Not recommended: reindent is better.')
@@ -1544,7 +1484,10 @@ export class EditCommandsClass extends BaseEditCommandsClass {
          * Removes trailing whitespace from all lines, preserving newlines.
          * Not recommended: reindent is better.
          */
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1560,17 +1503,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
         const result = lines.join('');
         if (s !== result) {
-            this.beginCommand(w, 'clean-lines');
-            w.delete(0, w.getLastIndex());
-            w.insert(0, result);
-            w.setInsertPoint(0);
-            this.endCommand(undefined, true, true);
+            {
+                using changes = u.change_node(p, 'clean-lines');
+                w.delete(0, w.getLastIndex());
+                w.insert(0, result);
+                p.v.b = w.getAllText();
+                w.setInsertPoint(0);
+                // c.k.resetLabel();
+            }
         }
     }
     //@+node:felix.20240611185548.8: *4* ec.clearSelectedText
     @cmd('clear-selected-text', 'Delete the selected text.')
     clearSelectedText(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1578,10 +1527,13 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         if (i === j) {
             return;
         }
-        this.beginCommand(w, 'clear-selected-text');
-        w.delete(i, j);
-        w.setInsertPoint(i);
-        this.endCommand(undefined, true, true);
+        {
+            using changes = u.change_node(p, 'clear-selected-text');
+            w.delete(i, j);
+            p.v.b = w.getAllText();
+            w.setInsertPoint(i);
+            // c.k.resetLabel();
+        }
     }
     //@+node:felix.20240611185548.9: *4* ec.delete-word & backward-delete-word
     @cmd(
@@ -1615,56 +1567,67 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
 
     private deleteWordHelper(forward: boolean, smart: boolean = false): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
-        this.beginCommand(w, 'delete-word');
-        let from_pos: number;
-        let to_pos: number;
-        if (w.hasSelection()) {
-            [from_pos, to_pos] = w.getSelectionRange();
-        } else {
-            from_pos = w.getInsertPoint();
-            this.moveWordHelper(false, forward, smart);
-            to_pos = w.getInsertPoint();
+        {
+            using changes = u.change_node(p, 'delete-word');
+            let from_pos: number;
+            let to_pos: number;
+            if (w.hasSelection()) {
+                [from_pos, to_pos] = w.getSelectionRange();
+            } else {
+                from_pos = w.getInsertPoint();
+                this.moveWordHelper(false, forward, smart);
+                to_pos = w.getInsertPoint();
+            }
+            // Ensure to_pos > from_pos for consistency
+            if (from_pos > to_pos) {
+                [from_pos, to_pos] = [to_pos, from_pos];
+            }
+            w.delete(from_pos, to_pos);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel();
         }
-        // Ensure to_pos > from_pos for consistency
-        if (from_pos > to_pos) {
-            [from_pos, to_pos] = [to_pos, from_pos];
-        }
-        w.delete(from_pos, to_pos);
-        this.endCommand(undefined, true, true);
     }
     //@+node:felix.20240611185548.10: *4* ec.deleteNextChar
     @cmd('delete-char', 'Delete the character to the right of the cursor.')
     public deleteNextChar(): void {
         /** Delete the character to the right of the cursor. */
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
         const s = w.getAllText();
         const [i, j] = w.getSelectionRange();
-        this.beginCommand(w, 'delete-char');
-        let changed = true;
-        if (i !== j) {
-            w.delete(i, j);
-            w.setInsertPoint(i);
-        } else if (j < s.length) {
-            w.delete(i);
-            w.setInsertPoint(i);
-        } else {
-            changed = false;
+        {
+            using changes = u.change_node(p, 'delete-char');
+            if (i !== j) {
+                w.delete(i, j);
+                w.setInsertPoint(i);
+                p.v.b = w.getAllText();
+            } else if (j < s.length) {
+                w.delete(i);
+                w.setInsertPoint(i);
+                p.v.b = w.getAllText();
+            }
         }
-        this.endCommand(undefined, changed, false);
     }
     //@+node:felix.20240611185548.11: *4* ec.deleteSpaces
     @cmd('delete-spaces', 'Delete all whitespace surrounding the cursor.')
     public deleteSpaces(insertspace: boolean = false): void {
         /** Delete all whitespace surrounding the cursor. */
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1682,16 +1645,19 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             w2 += 1;
         }
         const spaces = s.slice(w1, w2);
+
         if (spaces) {
-            this.beginCommand(w, undoType);
-            if (insertspace) {
-                s = s.slice(0, w1) + ' ' + s.slice(w2);
-            } else {
-                s = s.slice(0, w1) + s.slice(w2);
+            {
+                using changes = u.change_node(p, undoType);
+                if (insertspace) {
+                    s = s.slice(0, w1) + ' ' + s.slice(w2);
+                } else {
+                    s = s.slice(0, w1) + s.slice(w2);
+                }
+                w.setAllText(s);
+                w.setInsertPoint(w1);
+                p.v.b = w.getAllText();
             }
-            w.setAllText(s);
-            w.setInsertPoint(w1);
-            this.endCommand(undefined, true, true);
         }
     }
     //@+node:felix.20240611185548.12: *4* ec.insertHardTab
@@ -1699,7 +1665,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public insertHardTab(): void {
         /** Insert one hard tab. */
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1711,11 +1679,14 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
         let ins = w.getInsertPoint();
-        this.beginCommand(w, 'insert-hard-tab');
-        w.insert(ins, '\t');
-        ins += 1;
-        w.setSelectionRange(ins, ins, ins);
-        this.endCommand(undefined);
+
+        {
+            using changes = u.change_node(p, 'insert-hard-tab');
+            w.insert(ins, '\t');
+            ins += 1;
+            w.setSelectionRange(ins, ins, ins);
+            p.v.b = w.getAllText();
+        }
     }
     //@+node:felix.20240611185548.13: *4* ec.insertNewLine (insert-newline)
     @cmd('insert-newline', 'Insert a newline at the cursor.')
@@ -1730,7 +1701,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         /** A helper that can be monkey-patched by tables.py plugin. */
         // Note: insertNewlineHelper already exists.
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1742,11 +1715,15 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
         const oldSel = w.getSelectionRange();
-        this.beginCommand(w, 'newline');
-        this.insertNewlineHelper(w, oldSel);
-        // k.setInputState('insert');
-        // k.showStateAndMode();
-        this.endCommand(undefined);
+        {
+            using changes = u.change_node(p, 'newline');
+            this.insertNewlineHelper(w, oldSel);
+            // k.setInputState('insert');
+            // k.showStateAndMode();
+            p.v.b = w.getAllText();
+        }
+
+
     }
     //@+node:felix.20240611185548.14: *4* ec.insertNewLineAndTab (newline-and-indent)
     @cmd('newline-and-indent', 'Insert a newline and tab at the cursor.')
@@ -1754,7 +1731,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const trace = g.app.debug.includes('keys');
         const c = this.c;
         const p = c.p;
-        const w = this.editWidget();
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1768,31 +1746,40 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         if (trace) {
             g.trace('(newline-and-indent)');
         }
-        this.beginCommand(w, 'insert-newline-and-indent');
-        const oldSel = w.getSelectionRange();
-        this.insertNewlineHelper(w, oldSel, undefined);
-        this.updateTab(p, w, false);
-        // k.setInputState('insert');
-        // k.showStateAndMode();
-        this.endCommand(undefined, true, false);
+        {
+            using changes = u.change_node(p, 'insert-newline-and-indent');
+            const oldSel = w.getSelectionRange();
+            this.insertNewlineHelper(w, oldSel, undefined);
+            this.updateTab(p, w, false);
+            // k.setInputState('insert');
+            // k.showStateAndMode();
+            p.v.b = w.getAllText();
+        }
     }
     //@+node:felix.20240611185548.15: *4* ec.insertParentheses
     @cmd('insert-parentheses', 'Insert () at the cursor.')
     public insertParentheses(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (w) {
-            this.beginCommand(w, 'insert-parenthesis');
-            const i = w.getInsertPoint();
-            w.insert(i, '()');
-            w.setInsertPoint(i + 1);
-            this.endCommand(undefined, true, false);
+            {
+                using changes = u.change_node(p, 'insert-parenthesis');
+                const i = w.getInsertPoint();
+                w.insert(i, '()');
+                w.setInsertPoint(i + 1);
+                p.v.b = w.getAllText();
+            }
         }
     }
     //@+node:felix.20240611185548.16: *4* ec.insertSoftTab
     @cmd('insert-soft-tab', 'Insert spaces equivalent to one tab.')
     public insertSoftTab(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1805,11 +1792,14 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
         const tab_width = Math.abs(c.getTabWidth(c.p) || 0);
         let ins = w.getInsertPoint();
-        this.beginCommand(w, 'insert-soft-tab');
-        w.insert(ins, ' '.repeat(tab_width));
-        ins += tab_width;
-        w.setSelectionRange(ins, ins, ins);
-        this.endCommand(undefined);
+        {
+            using changes = u.change_node(p, 'insert-soft-tab');
+            w.insert(ins, ' '.repeat(tab_width));
+            ins += tab_width;
+            w.setSelectionRange(ins, ins, ins);
+            p.v.b = w.getAllText();
+
+        }
     }
     //@+node:felix.20240611185548.17: *4* ec.removeBlankLines (remove-blank-lines)
     @cmd(
@@ -1821,42 +1811,41 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const c = this.c;
         const p = this.c.p;
         const u = this.c.undoer;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
 
-        // "Before" snapshot.
-        const bunch = u.beforeChangeBody(p);
+        {
+            using changes = u.change_node(p, 'remove-blank-lines');
+            // Initial data.
+            const oldYview = w.getYScrollPosition();
+            const lines = g.splitLines(w.getAllText());
 
-        // Initial data.
-        const oldYview = w.getYScrollPosition();
-        const lines = g.splitLines(w.getAllText());
-
-        // Calculate the result.
-        const result_list: string[] = [];
-        let changed = false;
-        for (const line of lines) {
-            if (line.trim()) {
-                result_list.push(line);
-            } else {
-                changed = true;
+            // Calculate the result.
+            const result_list: string[] = [];
+            let changed = false;
+            for (const line of lines) {
+                if (line.trim()) {
+                    result_list.push(line);
+                } else {
+                    changed = true;
+                }
             }
-        }
-        if (!changed) {
-            return;
+            if (!changed) {
+                return;
+            }
+
+            // Set p.b and w's text first.
+            const result = result_list.join('');
+            p.v.b = result;
+            w.setAllText(result);
+            const i = 0, j = Math.max(0, result.length - 1);
+            w.setSelectionRange(i, j, j);
+            w.setYScrollPosition(oldYview);
         }
 
-        // Set p.b and w's text first.
-        const result = result_list.join('');
-        p.b = result;
-        w.setAllText(result);
-        const i = 0, j = Math.max(0, result.length - 1);
-        w.setSelectionRange(i, j, j);
-        w.setYScrollPosition(oldYview);
 
-        // "After" snapshot.
-        c.undoer.afterChangeBody(p, 'remove-blank-lines', bunch);
     }
     //@+node:felix.20240611185548.18: *4* ec.replaceCurrentCharacter
     @cmd(
@@ -1865,10 +1854,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     )
     public async replaceCurrentCharacter(): Promise<void> {
         /** Replace the current character with the next character typed. */
-
-        this.w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         let ch;
-        if (this.w) {
+        if (w) {
             // k.setLabelBlue('Replace Character: ');
             ch = await g.app.gui.get1Arg({
                 title: 'Replace Character',
@@ -1878,9 +1869,6 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         } else {
             return;
         }
-
-        const c = this.c;
-        const w = this.w;
 
         if (ch) {
             let [i, j] = w.getSelectionRange();
@@ -1916,7 +1904,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240611201520.2: *5* ec.insertNewlineHelper
     private insertNewlineHelper(w: StringTextWrapper, oldSel: [number, number], undoType?: string): void {
-        const c = this.c, p = this.c.p;
+        const c = this.c;
+        const p = this.c.p;
         let [i, j] = oldSel;
         const ch = '\n';
         if (i !== j) {
@@ -2079,44 +2068,51 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('move-lines-to-next-node', 'Move one or *trailing* lines to the start of the next node.')
     public moveLineToNextNode(): void {
         const c = this.c;
+        let p = c.p;
+        const u = c.undoer;
         if (!c.p.threadNext()) {
             return;
         }
-        const w = this.editWidget();
-        if (!w) {
+        const w = c.frame.body.wrapper;
+        if (!g.isTextWrapper(w)) {
             return;
         }
         const s = w.getAllText();
         const [sel_1, sel_2] = w.getSelectionRange();
         const [i, _junk] = g.getLine(s, sel_1);
-        const [i2, j] = g.getLine(s, sel_2);
-        const lines = s.substring(i, j);
+        const lines = s.substring(i);
         if (!lines.trim()) {
             return;
         }
-        this.beginCommand(w, 'move-lines-to-next-node');
-        try {
-            const [next_i, next_j] = g.getLine(s, j);
-            w.delete(i, next_j);
-            c.p.b = w.getAllText().trimEnd() + '\n';
-            c.selectPosition(c.p.threadNext());
-            c.p.b = lines + '\n' + c.p.b;
-            c.recolor();
-        } finally {
-            this.endCommand(undefined, true, true);
+        {
+            using changes = u.change_outline('move-lines-to-next-node');
+
+            w.delete(i, s.length);  // PR #5020
+            p.v.b = w.getAllText().trimEnd() + '\n';
+            p = p.threadNext();
+            c.p = p;
+            p.v.b = lines + '\n' + p.v.b;
+            // c.k.resetLabel()
         }
     }
+
     //@+node:felix.20240612224828.3: *4* ec.splitLine
     @cmd('split-line', 'Split a line at the cursor position.')
     public splitLine(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (w) {
-            this.beginCommand(w, 'split-line');
-            const s = w.getAllText();
-            const ins = w.getInsertPoint();
-            w.setAllText(s.slice(0, ins) + '\n' + s.slice(ins));
-            w.setInsertPoint(ins + 1);
-            this.endCommand(undefined, true, true);
+            {
+                using changes = u.change_node(p, 'split-line');
+                const s = w.getAllText();
+                const ins = w.getInsertPoint();
+                w.setAllText(s.slice(0, ins) + '\n' + s.slice(ins));
+                w.setInsertPoint(ins + 1);
+                p.v.b = w.getAllText();
+                //c.k.resetLabel()
+            }
         }
     }
     //@+node:felix.20221220002620.1: *3* ec: move cursor
@@ -2131,7 +2127,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
      */
     private extendHelper(w: StringTextWrapper, extend: boolean, spot: number, upOrDown: boolean = false): void {
         const c = this.c;
-        const p = this.c.p;
+        const p = c.p;
         extend = extend || this.extendMode;
         const ins = w.getInsertPoint();
         let [i, j] = w.getSelectionRange();
@@ -2200,7 +2196,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
      */
     private moveToHelper(spot: number, extend: boolean): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2220,7 +2216,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240611210227.4: *5* ec.moveWithinLineHelper
     private moveWithinLineHelper(spot: string, extend: boolean): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2273,7 +2270,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         The cursor is placed at the start of the word unless end=True
         */
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2421,7 +2418,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         // Smart home:
         // Position the point at the first non-blank character on the line,
         // or the start of the line if already there.
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2448,7 +2446,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240611223554.1: *4* ec.backToIndentation
     @cmd('back-to-indentation', 'Position the point at the first non-blank character on the line.')
     public backToIndentation(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2509,7 +2508,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240611225948.2: *5* ec.moveUpOrDownHelper
     private moveUpOrDownHelper(direction: string, extend: boolean): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
+
         if (!w) {
             return;
         }
@@ -2552,7 +2553,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240611231950.2: *5* ec.moveToBufferHelper
     private moveToBufferHelper(spot: string, extend: boolean): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2584,7 +2586,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240611232508.2: *5* ec.moveToCharacterHelper
     private moveToCharacterHelper(spot: string, extend: boolean): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2617,7 +2620,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
 
     private extendModeHelper(val: boolean): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (w) {
             this.extendMode = val;
             if (!g.unitTesting) {
@@ -2643,7 +2646,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     )
     public exchangePointMark(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2660,7 +2663,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240611235202.1: *4* ec.extend-to-line
     @cmd('extend-to-line', 'Select the line at the cursor.')
     public extendToLine(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2680,7 +2684,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240611235414.1: *4* ec.extend-to-sentence
     @cmd('extend-to-sentence', 'Select the line at the cursor.')
     public extendToSentence(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2704,7 +2709,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         w?: StringTextWrapper
     ): [number, number] {
         if (!w) {
-            w = this.editWidget();
+            const c = this.c;
+            w = c.frame.body.wrapper;
         }
         if (!w) {
             return [0, 0];
@@ -2817,7 +2823,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612000335.2: *5* ec.movePastCloseHelper
     private movePastCloseHelper(extend: boolean): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2890,7 +2896,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
      * Move the cursor up/down one page, possibly extending the selection.
      */
     private movePageHelper(kind: string, extend: boolean): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2930,7 +2937,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240612222722.2: *5* ec.backwardParagraphHelper
     private backwardParagraphHelper(extend: boolean): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return; // Defensive check
         }
@@ -2961,7 +2969,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     //@+node:felix.20240612222722.3: *5* ec.forwardParagraphHelper
     forwardParagraphHelper(extend: boolean): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -2990,7 +2999,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('pop-cursor', 'Restore the node, selection range and insert point from the stack.')
     public popCursor(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (w && this.cursorStack.length > 0) {
             const [p, i, j, ins] = this.cursorStack.pop()!;
             if (c.positionExists(p)) {
@@ -3008,7 +3017,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('push-cursor', 'Push the selection range and insert point on the stack.')
     public pushCursor(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (w) {
             const p = c.p.copy();
             const [i, j] = w.getSelectionRange();
@@ -3021,10 +3030,12 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612223143.1: *4* ec.selectAllText
     @cmd('select-all', 'Select all text.')
     public selectAllText(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
+        w.selectAllText();
     }
     //@+node:felix.20240612223716.1: *4* ec.sentences & helpers
     @cmd('back-sentence', 'Move the cursor to the previous sentence.')
@@ -3046,7 +3057,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612223716.2: *5* ec.backSentenceHelper
     private backSentenceHelper(extend: boolean): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -3127,7 +3138,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612223716.3: *5* ec.forwardSentenceHelper
     private forwardSentenceHelper(extend: boolean): void {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -3213,21 +3224,23 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('backward-kill-paragraph', 'Kill the previous paragraph.')
     public backwardKillParagraph(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = this.c.p;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
-        this.beginCommand(w, 'backward-kill-paragraph');
-        try {
+        {
+            using changes = c.undoer.change_node(c.p, 'backward-kill-paragraph');
+
             this.backwardParagraphHelper(true);
             let [i, j] = w.getSelectionRange();
             if (i > 0) {
                 i = Math.min(i + 1, j);
             }
             c.killBufferCommands.killParagraphHelper(i, j);
+            p.v.b = w.getAllText();
             w.setSelectionRange(i, i, i);
-        } finally {
-            this.endCommand(undefined, true, true);
+            // c.k.resetLabel();
         }
     }
     //@+node:felix.20240612225351.3: *4* ec.fillRegion
@@ -3235,38 +3248,29 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public fillRegion(): void {
         const c = this.c;
         const p = this.c.p;
-        const undoType = 'fill-region';
-        const w = this.editWidget();
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         const [i, j] = w.getSelectionRange();
-        c.undoer.beforeChangeGroup(p, undoType);
+        {
+            using changes = u.change_outline('fill-region');
 
-        while (true) {
-            const progress = w.getInsertPoint();
-            c.reformatParagraph('reformat-paragraph');
-            const ins = w.getInsertPoint();
-            const s = w.getAllText();
-            w.setInsertPoint(ins);
-            if (progress >= ins || ins >= j || ins >= s.length) {
-                break;
+            while (true) {
+                const progress = w.getInsertPoint();
+                c.reformatParagraph('reformat-paragraph');
+                const ins = w.getInsertPoint();
+                const s = w.getAllText();
+                w.setInsertPoint(ins);
+                if (progress >= ins || ins >= j || ins >= s.length) {
+                    break;
+                }
             }
         }
-
-        c.undoer.afterChangeGroup(p, undoType);
-    }
-    //@+node:felix.20240612225351.4: *4* ec.fillRegionAsParagraph
-    @cmd('fill-region-as-paragraph', 'Fill the selected text.')
-    public fillRegionAsParagraph(): void {
-        const w = this.editWidget();
-        if (!w || !this._chckSel()) {
-            return;
-        }
-        this.beginCommand(w, 'fill-region-as-paragraph');
-        this.endCommand(undefined, true, true);
     }
     //@+node:felix.20240612225351.5: *4* ec.fillParagraph
     @cmd('fill-paragraph', 'Fill the selected paragraph')
     public fillParagraph(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;  // Defensive check
         }
@@ -3279,24 +3283,27 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('kill-paragraph', 'Kill the present paragraph.')
     public killParagraph(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
-        this.beginCommand(w, 'kill-paragraph');
-        try {
+        {
+            using changes = u.change_node(p, 'kill-paragraph');
+
             this.extendToParagraph();
             const [i, j] = w.getSelectionRange();
             c.killBufferCommands.killParagraphHelper(i, j);
-            w.setSelectionRange(i, i, i);
-        } finally {
-            this.endCommand(undefined, true, true);
+            // c.k.resetLabel();
+
         }
     }
     //@+node:felix.20240612225351.7: *4* ec.extend-to-paragraph & helper
     @cmd('extend-to-paragraph', 'Select the paragraph surrounding the cursor.')
     public extendToParagraph(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -3353,11 +3360,13 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240613005114.2: *4* ec.tabIndentRegion (indent-rigidly)
     @cmd('indent-rigidly', 'Insert a hard tab at the start of each line of the selected text.')
     public tabIndentRegion(): void {
-        const w = this.editWidget();
-        if (!w || !this._chckSel()) {
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        if (!w || !w.hasSelection()) {
             return;
         }
-        this.beginCommand(w, 'indent-rigidly');
         let s = w.getAllText();
         const [i1, j1] = w.getSelectionRange();
         const [i, junk1] = g.getLine(s, i1);
@@ -3366,16 +3375,21 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const n = lines.length;
         const lines_s = lines.map(line => '\t' + line).join('');
         s = s.substring(0, i) + lines_s + s.substring(j);
-        w.setAllText(s);
-        // Retain original row/col selection.
-        w.setSelectionRange(i1, j1 + n, j1 + n);
-        this.endCommand(undefined, true, true);
+        {
+            using changes = u.change_node(p, 'indent-rigidly');
+
+            w.setAllText(s);
+            // Retain original row/col selection.
+            w.setSelectionRange(i1, j1 + n, j1 + n);
+            p.v.b = s;
+            // c.k.resetLabel()
+        }
     }
     //@+node:felix.20240613005114.3: *4* ec.countRegion
     @cmd('count-region', 'Print the number of lines and characters in the selected text.')
     public countRegion(): void {
-        /**  */
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -3398,7 +3412,9 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     @cmd('move-lines-down', 'Move all lines containing any selected text down one line.')
     public moveLinesDown(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -3410,16 +3426,18 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const lines = s.substring(i, j);
         // Select from start of the first line to the *start* of the last line.
         // This prevents selection creep.
-        this.beginCommand(w, 'move-lines-down');
-        try {
-            const [next_i, next_j] = g.getLine(s, j);  // 2011/04/01: was j+1
-            const next_line = s.substring(next_i, next_j);
-            let n2 = next_j - next_i;
+
+        const [next_i, next_j] = g.getLine(s, j);  // 2011/04/01: was j+1
+        const next_line = s.substring(next_i, next_j);
+        let n2 = next_j - next_i;
+        {
+            using changes = u.change_node(p, 'move-lines-down');
+
             if (j < s.length) {
                 w.delete(i, next_j);
                 let new_lines: string;
                 if (next_line.endsWith('\n')) {
-                    // Simply swap positions with next line
+                    // Swap positions with next line
                     new_lines = next_line + lines;
                 } else {
                     // Last line of the body to be moved up doesn't end in a newline
@@ -3430,21 +3448,22 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 w.insert(i, new_lines);
                 w.setSelectionRange(sel_1 + n2, sel_2 + n2, insert_pt + n2);
             } else {
-                // Leo 5.6: insert a blank line before the selected lines.
+                // Insert a blank line before the selected lines.
                 w.insert(i, '\n');
                 w.setSelectionRange(sel_1 + 1, sel_2 + 1, insert_pt + 1);
             }
-            // Fix bug 799695: colorizer bug after move-lines-up into a docstring
-            c.recolor();
-        } finally {
-            this.endCommand(undefined, true, true);
+            p.v.b = w.getAllText();
+            //c.k.resetLabel()
         }
+
     }
     //@+node:felix.20240613005114.5: *4* ec.moveLinesUp
     @cmd('move-lines-up', 'Move all lines containing any selected text up one line.')
     public moveLinesUp(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -3454,11 +3473,11 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const [i, junk1] = g.getLine(s, sel_1);
         const [i2, j] = g.getLine(s, sel_2);
         const lines = s.substring(i, j);
-        this.beginCommand(w, 'move-lines-up');
-        try {
-            const [prev_i, prev_j] = g.getLine(s, i - 1);
-            const prev_line = s.substring(prev_i, prev_j);
-            const n2 = prev_j - prev_i;
+        const [prev_i, prev_j] = g.getLine(s, i - 1);
+        const prev_line = s.substring(prev_i, prev_j);
+        const n2 = prev_j - prev_i;
+        {
+            using changes = u.change_node(p, 'move-lines-up');
             if (i > 0) {
                 w.delete(prev_i, j);
                 let new_lines: string;
@@ -3477,20 +3496,20 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 w.insert(j, '\n');
                 w.setSelectionRange(sel_1, sel_2, sel_1);
             }
-            // Fix bug 799695: colorizer bug after move-lines-up into a docstring
-            c.recolor();
-        } finally {
-            this.endCommand(undefined, true, true);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel();
         }
     }
     //@+node:felix.20240613005114.6: *4* ec.reverseRegion
     @cmd('reverse-region', 'Reverse the order of lines in the selected text.')
     public reverseRegion(): void {
-        const w = this.editWidget();
-        if (!w || !this._chckSel()) {
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        if (!w || !w.hasSelection()) {
             return;
         }
-        this.beginCommand(w, 'reverse-region');
         const s = w.getAllText();
         const [i1, j1] = w.getSelectionRange();
         const [i, junk1] = g.getLine(s, i1);
@@ -3499,10 +3518,15 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         let aList = txt.split('\n');
         aList.reverse();
         const newText = aList.join('\n') + '\n';
-        w.setAllText(s.substring(0, i1) + newText + s.substring(j1));
-        const ins = i1 + newText.length - 1;
-        w.setSelectionRange(ins, ins, ins);
-        this.endCommand(undefined, true, true);
+        {
+            using charges = u.change_node(p, 'reverse-region');
+
+            w.setAllText(s.substring(0, i1) + newText + s.substring(j1));
+            const ins = i1 + newText.length - 1;
+            w.setSelectionRange(ins, ins, ins);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel();
+        }
     }
     //@+node:felix.20240613005114.7: *4* ec.up/downCaseRegion & helper
     @cmd('downcase-region', 'Convert all characters in the selected text to lower case.')
@@ -3521,11 +3545,13 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
 
     private caseHelper(way: string, undoType: string): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w || !w.hasSelection()) {
             return;
         }
-        this.beginCommand(w, undoType);
         const s = w.getAllText();
         const [i, j] = w.getSelectionRange();
         const ins = w.getInsertPoint();
@@ -3542,17 +3568,24 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         const newText = s.substring(0, i) + sel + s.substring(j);
         const changed = newText !== s;
         if (changed) {
-            w.setAllText(newText);
-            w.setSelectionRange(i, j, ins);
+            {
+                using changes = u.change_node(p, undoType);
+                w.setAllText(newText);
+                w.setSelectionRange(i, j, ins);
+                p.v.b = w.getAllText();
+                // c.k.resetLabel()
+            }
         }
-        this.endCommand(undefined, changed, true);
     }
     //@+node:felix.20240613205401.1: *3* ec: sort
     //@+node:felix.20240613205401.3: *4* ec.sortColumns
     @cmd('sort-columns', 'Sort lines of selected text using only lines in the given columns to do the comparison.')
     sortColumns(): void {
-        const w = this.editWidget();
-        if (!this._chckSel()) {
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        if (!w.hasSelection()) {
             return;
         }
         const s = w.getAllText();
@@ -3561,37 +3594,39 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return g.toPythonIndex(s, index);
         };
 
-        this.beginCommand(w, 'sort-columns');
-        try {
-            const [sel_1, sel_2] = w.getSelectionRange();
-            let [sint1, sint2] = g.convertPythonIndexToRowCol(s, sel_1);
-            let [sint3, sint4] = g.convertPythonIndexToRowCol(s, sel_2);
-            sint1 += 1;
-            sint3 += 1;
-            const [i, junk1] = g.getLine(s, sel_1);
-            const [junk2, j] = g.getLine(s, sel_2);
-            const txt = s.slice(i, j);
-            const columns = Array.from(
-                { length: sint3 - sint1 + 1 },
-                (_, z) => w.get(toInt(`${z + sint1}.${sint2}`), toInt(`${z + sint1}.${sint4}`))
-            );
-            const aList = g.splitLines(txt);
-            const zlist = columns.map((col, idx) => [col, aList[idx]] as [string, string]);
-            zlist.sort((a, b) => {
-                const colComparison = a[0].localeCompare(b[0]);
-                if (colComparison !== 0) {
-                    return colComparison;
-                } else {
-                    return a[1].localeCompare(b[1]);
-                }
-            });
-            const sortedText = zlist.map(z => z[1]).join('');
+
+        const [sel_1, sel_2] = w.getSelectionRange();
+        let [sint1, sint2] = g.convertPythonIndexToRowCol(s, sel_1);
+        let [sint3, sint4] = g.convertPythonIndexToRowCol(s, sel_2);
+        sint1 += 1;
+        sint3 += 1;
+        const [i, junk1] = g.getLine(s, sel_1);
+        const [junk2, j] = g.getLine(s, sel_2);
+        const txt = s.slice(i, j);
+        const columns = Array.from(
+            { length: sint3 - sint1 + 1 },
+            (_, z) => w.get(toInt(`${z + sint1}.${sint2}`), toInt(`${z + sint1}.${sint4}`))
+        );
+        const aList = g.splitLines(txt);
+        const zlist = columns.map((col, idx) => [col, aList[idx]] as [string, string]);
+        zlist.sort((a, b) => {
+            const colComparison = a[0].localeCompare(b[0]);
+            if (colComparison !== 0) {
+                return colComparison;
+            } else {
+                return a[1].localeCompare(b[1]);
+            }
+        });
+        const sortedText = zlist.map(z => z[1]).join('');
+        {
+            using changes = u.change_node(p, 'sort-columns');
             w.delete(i, j);
             w.insert(i, sortedText);
             w.setSelectionRange(sel_1, sel_1 + sortedText.length, sel_1 + sortedText.length);
-        } finally {
-            this.endCommand(undefined, true, true);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel()
         }
+
     }
     //@+node:felix.20240613205401.2: *4* ec.sortLines commands
     @cmd('reverse-sort-lines-ignoring-case', 'Sort the selected lines in reverse order, ignoring case.')
@@ -3608,43 +3643,49 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     }
     @cmd('sort-lines', 'Sort the selected lines.')
     public sortLines(ignoreCase: boolean = false, reverse: boolean = false): void {
-        const w = this.editWidget();
-        if (!this._chckSel()) {
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        if (!w.hasSelection()) {
             return;
         }
         const undoType = reverse ? 'reverse-sort-lines' : 'sort-lines';
-        this.beginCommand(w, undoType);
-        try {
-            let s = w.getAllText();
-            const [sel1, sel2] = w.getSelectionRange();
-            const ins = w.getInsertPoint();
-            const [i, _] = g.getLine(s, sel1);
-            const [__, j] = g.getLine(s, sel2);
-            let s2 = s.substring(i, j);
-            if (!s2.endsWith('\n')) {
-                s2 += '\n';
-            }
-            const aList = g.splitLines(s2);
+        let s = w.getAllText();
+        const [sel1, sel2] = w.getSelectionRange();
+        const ins = w.getInsertPoint();
+        const [i, _] = g.getLine(s, sel1);
+        const [__, j] = g.getLine(s, sel2);
+        let s2 = s.substring(i, j);
+        if (!s2.endsWith('\n')) {
+            s2 += '\n';
+        }
+        const aList = g.splitLines(s2);
 
-            const lower = (str: string) => ignoreCase ? str.toLowerCase() : str;
+        const lower = (str: string) => ignoreCase ? str.toLowerCase() : str;
 
-            aList.sort((a, b) => lower(a).localeCompare(lower(b)));
-            if (reverse) {
-                aList.reverse();
-            }
-            s = aList.join('');
+        aList.sort((a, b) => lower(a).localeCompare(lower(b)));
+        if (reverse) {
+            aList.reverse();
+        }
+        s = aList.join('');
+        {
+            using changes = u.change_node(p, undoType);
             w.delete(i, j);
             w.insert(i, s);
             w.setSelectionRange(sel1, sel2, ins);
-        } finally {
-            this.endCommand(undefined, true, true);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel()
         }
     }
     //@+node:felix.20240613212929.1: *3* ec: swap/transpose
     //@+node:felix.20240613212929.2: *4* ec.transposeLines
     @cmd('transpose-lines', 'Transpose the line containing the cursor with the preceding line.')
     public transposeLines(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -3655,21 +3696,24 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         }
         const [i, j] = g.getLine(s, ins);
         const line1 = s.substring(i, j);
-        this.beginCommand(w, 'transpose-lines');
-        if (i === 0) { // Transpose the next line.
-            const [i2, j2] = g.getLine(s, j + 1);
-            const line2 = s.substring(i2, j2);
-            w.delete(0, j2);
-            w.insert(0, line2 + line1);
-            w.setInsertPoint(j2 - 1);
-        } else { // Transpose the previous line.
-            const [i2, j2] = g.getLine(s, i - 1);
-            const line2 = s.substring(i2, j2);
-            w.delete(i2, j);
-            w.insert(i2, line1 + line2);
-            w.setInsertPoint(j - 1);
+        {
+            using changes = u.change_node(p, 'transpose-lines');
+            if (i === 0) { // Transpose the next line.
+                const [i2, j2] = g.getLine(s, j + 1);
+                const line2 = s.substring(i2, j2);
+                w.delete(0, j2);
+                w.insert(0, line2 + line1);
+                w.setInsertPoint(j2 - 1);
+            } else { // Transpose the previous line.
+                const [i2, j2] = g.getLine(s, i - 1);
+                const line2 = s.substring(i2, j2);
+                w.delete(i2, j);
+                w.insert(i2, line1 + line2);
+                w.setInsertPoint(j - 1);
+            }
+            p.v.b = w.getAllText();
+            // c.k.resetLabel()
         }
-        this.endCommand(undefined, true, true);
     }
     //@+node:felix.20240613212929.3: *4* ec.transposeWords
     @cmd('transpose-words', 'Transpose the word before the cursor with the word after the cursor')
@@ -3679,66 +3723,81 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         * Punctuation between words does not move. For example, ‘FOO, BAR’
         * transposes into ‘BAR, FOO’.
         */
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
-        this.beginCommand(w, 'transpose-words');
-        const s = w.getAllText();
-        let [i1, j1] = this.extendToWord(false);
-        const s1 = s.substring(i1, j1);
-        if (i1 > j1) {
-            [i1, j1] = [j1, i1];
+        {
+            using changes = u.change_node(p, 'transpose-words');
+
+            const s = w.getAllText();
+            let [i1, j1] = this.extendToWord(false);
+            const s1 = s.substring(i1, j1);
+            if (i1 > j1) {
+                [i1, j1] = [j1, i1];
+            }
+            // Search for the next word.
+            let k = j1 + 1;
+            while (k < s.length && s[k] !== '\n' && !g.isWordChar1(s[k])) {
+                k += 1;
+            }
+            const changed = k < s.length;
+            if (changed) {
+                const ws = s.substring(j1, k);
+                w.setInsertPoint(k + 1);
+                const [i2, j2] = this.extendToWord(false);
+                const s2 = s.substring(i2, j2);
+                const s3 = s.substring(0, i1) + s2 + ws + s1 + s.substring(j2);
+                w.setAllText(s3);
+                w.setSelectionRange(j1, j1, j1);
+                p.v.b = w.getAllText();
+                // c.k.resetLabel()
+            }
         }
-        // Search for the next word.
-        let k = j1 + 1;
-        while (k < s.length && s[k] !== '\n' && !g.isWordChar1(s[k])) {
-            k += 1;
-        }
-        const changed = k < s.length;
-        if (changed) {
-            const ws = s.substring(j1, k);
-            w.setInsertPoint(k + 1);
-            const [i2, j2] = this.extendToWord(false);
-            const s2 = s.substring(i2, j2);
-            const s3 = s.substring(0, i1) + s2 + ws + s1 + s.substring(j2);
-            w.setAllText(s3);
-            w.setSelectionRange(j1, j1, j1);
-        }
-        this.endCommand(undefined, changed, true);
     }
     //@+node:felix.20240613212929.4: *4* ec.swapCharacters & transeposeCharacters
     @cmd('transpose-chars', 'Swap the characters at the cursor.')
     public transposeCharacters(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
-        this.beginCommand(w, 'swap-characters');
+
         const s = w.getAllText();
         const i = w.getInsertPoint();
         if (0 < i && i < s.length) {
-            w.setAllText(s.substring(0, i - 1) + s[i] + s[i - 1] + s.substring(i + 1));
-            w.setSelectionRange(i, i, i);
+            {
+                using changes = u.change_node(p, 'swap-characters');
+                w.setAllText(s.substring(0, i - 1) + s[i] + s[i - 1] + s.substring(i + 1));
+                w.setSelectionRange(i, i, i);
+                p.v.b = w.getAllText();
+                c.k.resetLabel();
+            }
         }
-        this.endCommand(undefined, true, true);
+
     }
 
-    public swapCharacters(): void {
-        this.transposeCharacters();
-    }
+    public swapCharacters = this.transposeCharacters;
+
     //@+node:felix.20220503225545.1: *3* ec: uA's
     //@+node:felix.20220503225545.2: *4* ec.clearNodeUas & clearAllUas
     @cmd('clear-node-uas', "Clear the uA's in the selected VNode.")
     public clearNodeUas(): void {
         const c = this.c;
-        const p = c && c.p;
+        const p = c.p;
+        const u = c.undoer;
         if (p && p.__bool__() && p.v.u && Object.keys(p.v.u).length) {
-            p.v.u = {};
-            // #1276.
-            p.setDirty();
-            c.setChanged();
-            c.redraw();
+            {
+                using changes = u.change_outline('clear-node-uas');
+                p.v.u = {};
+                p.setDirty();
+            }
         }
     }
 
@@ -3746,28 +3805,22 @@ export class EditCommandsClass extends BaseEditCommandsClass {
     public clearAllUas(): void {
         const c = this.c;
         const u = this.c.undoer;
-        const undoType = 'clear-all-uas';
-        // #1276.
-        let changed = false;
-        const first_p = c.p;
-        for (let p of c.all_unique_positions()) {
-            if (p.v.u && Object.keys(p.v.u).length) {
-                if (!changed) {  // #4443
-                    u.beforeChangeGroup(first_p, undoType);
-                    changed = true;
+        const changed_v = [];
+        for (let v of c.all_unique_nodes()) {
+            if (v.u && Object.keys(v.u).length) {
+                changed_v.push(v);
+            }
+        }
+        if (changed_v.length) {
+            {
+                using changes = u.change_outline('clear-all-uas');
+                for (let v of changed_v) {
+                    v.u = {};
+                    v.setDirty();
                 }
-                const bunch = u.beforeChangeUA(p);
-                p.v.u = {};
-                p.setDirty();
-                u.afterChangeUA(p, undoType, bunch);
             }
         }
 
-        if (changed) {
-            c.setChanged();
-            u.afterChangeGroup(c.p, undoType);
-            c.redraw();
-        }
     }
     //@+node:felix.20220503225545.3: *4* ec.showUas & showAllUas
     @cmd('show-all-uas', "Print all uA's in the outline.")
@@ -3828,15 +3881,14 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 const c = this.c;
                 const u = this.c.undoer;
                 const p = c.p;
+                {
+                    using changes = u.change_node(p, 'set-ua');
 
-                if (!p.v.u) {
-                    p.v.u = {}; // assert at least an empty dict if null or non existent
+                    if (!p.v.u) {
+                        p.v.u = {}; // assert at least an empty dict if null or non existent
+                    }
+                    p.v.u[w_name] = w_uaVal;
                 }
-                const bunch = u.beforeChangeUA(p);
-                p.v.u[w_name] = w_uaVal;
-                p.setDirty();
-                c.setChanged();
-                u.afterChangeUA(p, 'set-ua', bunch);
                 this.showNodeUas();
                 return Promise.resolve(true);
             }

@@ -83,6 +83,7 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     public lastYankP: Position | undefined; // Assuming 'Position' type as 'any'
     public reset: number | null;
     public addWsToKillRing: boolean | undefined;
+    public c: Commands;
 
     //@+others
     //@+node:felix.20240612230730.4: *3* kill.ctor & reloadSettings
@@ -119,7 +120,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612230730.6: *3* backwardKillSentence
     @cmd('backward-kill-sentence', 'Kill the previous sentence.')
     public backwardKillSentence(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -142,7 +144,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     @cmd('backward-kill-word', 'Kill the previous word.')
     public backwardKillWord(): void {
         const c = this.c;
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (w) {
             this.beginCommand(w, 'backward-kill-word');
             c.editCommands.backwardWord();
@@ -151,7 +154,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     }
     @cmd('kill-word', 'Kill the word containing the cursor.')
     public killWord(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (w) {
             this.beginCommand(w, 'kill-word');
             this.killWordHelper();
@@ -161,7 +165,7 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     private killWordHelper(): void {
         const c = this.c;
         const e = c.editCommands;
-        const w = e.editWidget();
+        const w = c.frame.body.wrapper;
         if (w) {
             // this.killWs();
             e.extendToWord();
@@ -209,7 +213,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     ): void {
 
         const c = this.c;
-        w = this.editWidget();
+        const c = this.c;
+        w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -242,7 +247,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
         to: number,
         undoType?: string,
     ): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -261,7 +267,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612230730.15: *3* ec.killToEndOfLine
     @cmd('kill-to-end-of-line', 'Kill from the cursor to end of the line. ')
     public killToEndOfLine(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -288,7 +295,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     @cmd('kill-line', 'Kill the line containing the cursor.')
     public killLine(): void {
         /** Kill the line containing the cursor. */
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -310,7 +318,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612230730.17: *3* killRegion & killRegionSave
     @cmd('kill-region', 'Kill the text selection.')
     public killRegion(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -331,7 +340,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
         'Add the selected text to the kill ring, but do not delete it.'
     )
     public killRegionSave(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -347,7 +357,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     @cmd('kill-sentence', 'Kill the sentence containing the cursor.')
     public killSentence(): void {
         /** Kill the sentence containing the cursor. */
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -368,7 +379,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     @cmd('kill-ws', 'Kill whitespace.')
     public killWs(undoType: string = 'kill-ws'): void {
         let ws = '';
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -420,7 +432,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
          * pop = True:  insert the next entry of the kill ring.
          */
         const c = this.c;
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -468,7 +481,8 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240612230730.21: *3* zapToCharacter
     @cmd('zap-to-character', 'Kill characters from the insertion point to a given character.')
     public async zapToCharacter(): Promise<void> {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }

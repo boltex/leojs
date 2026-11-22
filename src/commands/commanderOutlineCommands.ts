@@ -26,47 +26,7 @@ function createMoveMarkedNode(c: Commands): Position {
     p.moveToRoot();
     return p;
 }
-//@+node:felix.20211209005212.1: ** function computeVnodeInfoDict
-/**
- * We don't know yet which nodes will be affected by the paste, so we remember
- * everything. This is expensive, but foolproof.
- *
- * The alternative is to try to remember the 'before' values of nodes in the
- * FileCommands read logic. Several experiments failed, and the code is very ugly.
- * In short, it seems wise to do things the foolproof way.
- */
-function computeVnodeInfoDict(c: Commands): Record<string, any> {
-    const d: Record<string, any> = {};
-    for (let v of c.all_unique_nodes()) {
-        if (!d[v.toString()]) {
-            d[v.toString()] = { v: v, head: v.h, body: v.b };
-        }
-    }
-    return d;
-}
-//@+node:felix.20211209005216.1: ** function computeCopiedBunchList
-/**
- * * Create a dict containing only copied vnodes.
- */
-function computeCopiedBunchList(
-    c: Commands,
-    pasted: Position,
-    vnodeInfoDict: { [key: string]: any }
-): any[] {
-    const d: { [key: string]: VNode } = {};
-    for (let p of pasted.self_and_subtree(false)) {
-        d[p.v.toString()] = p.v;
-    }
-    const aList: any[] = [];
-    // Use string keys instead of v keys like original Leo
-    for (let v in vnodeInfoDict) {
-        if (d[v]) {
-            const bunch: any = vnodeInfoDict[v];
-            aList.push(bunch);
-        }
-    }
-    return aList;
-}
+
 //@+node:felix.20211101020440.1: ** Class CommanderOutlineCommands
 export class CommanderOutlineCommands {
     //@+others

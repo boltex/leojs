@@ -8,7 +8,6 @@
 import * as g from '../core/leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
 import { Commands } from '../core/leoCommands';
-import { BaseEditCommandsClass } from './baseCommands';
 //@-<< rectangleCommands imports & annotations >>
 
 /**
@@ -20,11 +19,12 @@ function cmd(p_name: string, p_doc: string) {
 
 //@+others
 //@+node:felix.20240615151733.3: ** class RectangleCommandsClass
-export class RectangleCommandsClass extends BaseEditCommandsClass {
+export class RectangleCommandsClass {
 
     public theKillRectangle: string[];  // Do not re-init this!
     public stringRect: [number, number, number, number] | undefined;
     public commandsDict: Record<string, [string, any]>;
+    public c: Commands;
 
     //@+others
     //@+node:felix.20240615151733.4: *3* rectangle.ctor
@@ -32,7 +32,6 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
      * Ctor for RectangleCommandsClass.
      */
     constructor(c: Commands) {
-        super(c); // Call the parent class constructor
         this.c = c;
         this.theKillRectangle = [];  // Do not re-init this!
         this.stringRect = undefined;
@@ -59,7 +58,8 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240615151733.7: *4* clearRectangle
     @cmd('rectangle-clear', 'Clear the rectangle defined by the start and end of selected text.')
     public clearRectangle(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w || !this.check()) {
             return;
         }
@@ -82,7 +82,8 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240615151733.8: *4* closeRectangle
     @cmd('rectangle-close', 'Delete the rectangle if it contains nothing but whitespace.')
     public closeRectangle(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w || !this.check()) {
             return;
         }
@@ -112,7 +113,8 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240615151733.9: *4* deleteRectangle
     @cmd('rectangle-delete', 'Delete the rectangle defined by the start and end of selected text.')
     public deleteRectangle(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w || !this.check()) {
             return;
         }
@@ -134,7 +136,8 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240615151733.10: *4* killRectangle
     @cmd('rectangle-kill', 'Kill the rectangle defined by the start and end of selected text.')
     public killRectangle(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w || !this.check()) {
             return;
         }
@@ -164,7 +167,8 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
          * Insert blanks in the rectangle defined by the start and end of selected
          * text. This pushes the previous contents of the rectangle rightward.
          */
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w || !this.check()) {
             return;
         }
@@ -188,7 +192,8 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
     @cmd('rectangle-string', 'Prompt for a string, then replace the contents of a rectangle with a string on each line.')
     public async stringRectangle(): Promise<void> {
         let arg;
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
 
         if (g.unitTesting) {
             arg = 's...s';  // This string is known to the unit test.
@@ -229,7 +234,8 @@ export class RectangleCommandsClass extends BaseEditCommandsClass {
     //@+node:felix.20240615151733.13: *4* yankRectangle
     @cmd('rectangle-yank', 'Yank into the rectangle defined by the start and end of selected text.')
     public yankRectangle(): void {
-        const w = this.editWidget();
+        const c = this.c;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }

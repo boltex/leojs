@@ -9,9 +9,9 @@ import * as difflib from 'difflib';
 import * as g from '../core/leoGlobals';
 import * as path from 'path';
 import { new_cmd_decorator } from '../core/decorators';
-import { BaseEditCommandsClass } from './baseCommands';
 import { Commands } from '../core/leoCommands';
 import { Position, VNode } from '../core/leoNodes';
+import { runInThisContext } from 'vm';
 
 //@-<< editFileCommands imports & annotations >>
 
@@ -303,7 +303,14 @@ class CompareTreesController {
 /**
  * A class to load files into buffers and save buffers to files.
  */
-export class EditFileCommandsClass extends BaseEditCommandsClass {
+export class EditFileCommandsClass {
+
+    private c: Commands;
+
+    constructor(c: Commands) {
+        this.c = c;
+    }
+
     //@+others
     //@+node:felix.20230709010427.2: *3* efc.convert-at-root
     @cmd(
@@ -346,30 +353,30 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     @cmd('clean-at-clean-files', 'Adjust whitespace in all @clean files.')
     public cleanAtCleanFiles(): void {
         const c = this.c;
-        const undoType = 'clean-at-clean-files';
-        c.undoer.beforeChangeGroup(c.p, undoType, true);
+
+        const u = c.undoer;
         let total = 0;
-        for (const p of c.all_unique_positions()) {
-            if (p.isAtCleanNode()) {
-                let n = 0;
-                for (const p2 of p.subtree()) {
-                    const bunch2 = c.undoer.beforeChangeNodeContents(p2);
-                    if (this.cleanAtCleanNode(p2)) {
-                        n += 1;
-                        total += 1;
-                        c.undoer.afterChangeNodeContents(p2, undoType, bunch2);
+        {
+
+            using changes = u.change_outline('clean-at-clean-files');
+            for (const p of c.all_unique_positions()) {
+                if (p.isAtCleanNode()) {
+                    let n = 0;
+                    for (const p2 of p.subtree()) {
+                        if (this.cleanAtCleanNode(p2)) {
+                            n += 1;
+                            total += 1;
+                        }
+                    }
+                    if (!g.unitTesting) {
+                        g.es_print(`${n} node${g.plural(n)} ${p.h}`);
                     }
                 }
-                g.es_print(`${n} node${g.plural(n)} ${p.h}`);
             }
         }
-
-        // Call this only once, at end.
-        c.undoer.afterChangeGroup(c.p, undoType);
-        if (total === 0) {
-            g.es('Command did not find any whitespace to adjust');
+        if (!g.unitTesting) {
+            g.es_print(`${total} total node${g.plural(total)}`);
         }
-        g.es_print(`${total} total node${g.plural(total)}`);
     }
     //@+node:felix.20230709010427.6: *4* efc.cleanAtCleanNode
     /**
@@ -411,11 +418,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
             g.es_print('no @clean node found', c.p?.h);
             return;
         }
-        // pylint: disable=undefined-loop-variable
-        // w_p is certainly defined here.
-        // const bunch = c.undoer.beforeChangeTree(w_p!);
         let n = 0;
-        // const undoType = 'clean-@clean-tree';
         for (const p2 of w_p!.subtree()) {
             if (this.cleanAtCleanNode(p2,)) {
                 n += 1;
@@ -539,28 +542,27 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         changed: { [key: string]: Position }
     ): void {
         const c = this.c; // Always use the visible commander
+        const u = c.undoer;
         g.assert(c === c1);
         // Create parent node at the start of the outline.
-        const [u, undoType] = [c.undoer, 'Compare Two Files'];
-        u.beforeChangeGroup(c.p, undoType);
-        const undoData = u.beforeInsertNode(c.p);
-        const parent = c.p.insertAfter();
-        parent.setHeadString(undoType);
-        u.afterInsertNode(parent, undoType, undoData);
-        // Use the wrapped file name if possible.
-        const fn1 = c1.shortFileName();
-        const fn2 = c2.shortFileName();
-        const table: [{ [key: string]: Position }, string][] = [
-            [deleted, `not in ${fn2}`],
-            [inserted, `not in ${fn1}`],
-            [changed, `changed: as in ${fn2}`],
-        ];
-        for (const [d, kind] of table) {
-            this.createCompareClones(d, kind, parent);
+        {
+            using changes = u.change_outline('compare-two-files');
+
+            const parent = c.p.insertAfter();
+            parent.setHeadString('Compare Two Files')
+            // Use the wrapped file name if possible.
+            const fn1 = c1.shortFileName();
+            const fn2 = c2.shortFileName();
+            const table: [{ [key: string]: Position }, string][] = [
+                [deleted, `not in ${fn2}`],
+                [inserted, `not in ${fn1}`],
+                [changed, `changed: as in ${fn2}`],
+            ];
+            for (const [d, kind] of table) {
+                this.createCompareClones(d, kind, parent);
+            }
+            c.p = parent;
         }
-        c.selectPosition(parent);
-        u.afterChangeGroup(parent, undoType);
-        c.redraw();
     }
     //@+node:felix.20230709010427.11: *5* efc.createCompareClones
     public createCompareClones(
@@ -677,12 +679,12 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         const aList = difflib.ndiff(lines1, lines2);
         // add as last top level like other 'diff' result nodes
         c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
-        const p = c.p.insertAfter();
-        p.h = 'diff';
-        p.b = aList.join('');
-        u.afterInsertNode(p, 'file-diff-files', undoData);
-        c.redraw();
+        {
+            using changes = u.change_outline('file-diff-files');
+            const p = c.p.insertAfter();
+            p.h = 'diff';
+            p.b = aList.join('');
+        }
     }
     //@+node:felix.20230709010427.20: *3* efc.getReadableTextFile
     /**
@@ -735,7 +737,10 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         'Prompt for the name of a file. Insert the file\'s contents in the body at the insertion point.'
     )
     public async insertFile(): Promise<void> {
-        const w = this.editWidget();
+        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -745,11 +750,15 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
         }
         const [s, e] = await g.readFileIntoString(fn);
         if (s) {
-            this.beginCommand(w, 'insert-file');
-            const i = w.getInsertPoint();
-            w.insert(i, s);
-            w.seeInsertPoint();
-            this.endCommand(undefined, true, true);
+            {
+                using changes = u.change_node(p, 'insert-file');
+                const i = w.getInsertPoint();
+                w.insert(i, s);
+                w.seeInsertPoint();
+                p.v.b = w.getAllText();
+                // c.k.resetLabel()
+
+            }
         }
     }
     //@+node:felix.20230709010427.24: *3* efc.makeDirectory
@@ -840,7 +849,7 @@ export class EditFileCommandsClass extends BaseEditCommandsClass {
     )
     public async saveFile(): Promise<void> {
         const c = this.c;
-        const w = this.editWidget();
+        const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
@@ -1112,48 +1121,50 @@ export class GitDiffController {
         fn: string
     ): Promise<void> {
         const c = this.c;
-        const [u, undoType] = [c.undoer, 'diff-two-branches'];
+        const u = c.undoer;
         const directory = await this.get_parent_of_git_directory();
         if (!directory) {
             return;
         }
         c.selectPosition(c.lastTopLevel());
-        const undoData = u.beforeInsertNode(c.p);
-        const p = c.lastTopLevel().insertAfter();
-        this.root = p;
-        p.h = `git-diff-branches ${branch1} ${branch2}`;
-        const s1 = await this.get_file_from_branch(branch1, fn);
-        const s2 = await this.get_file_from_branch(branch2, fn);
-        const lines1 = g.splitLines(s1);
-        const lines2 = g.splitLines(s2);
-        const diff_list = difflib.unifiedDiff(lines1, lines2, {
-            fromfile: branch1,
-            tofile: branch2,
-        });
-        diff_list.unshift('@ignore\n@nosearch\n@language patch\n');
+        {
+            using changes = u.change_outline('diff-two-branches');
 
-        this.file_node = this.create_file_node(diff_list, fn);
-        let c1, c2;
-        if (await c.looksLikeDerivedFile(fn)) {
-            c1 = this.make_at_file_outline(fn, s1, branch1);
-            c2 = this.make_at_file_outline(fn, s2, branch2);
-        } else {
-            const root = this.find_file(fn);
-            if (root) {
-                c1 = await this.make_at_clean_outline(fn, root, s1, branch1);
-                c2 = await this.make_at_clean_outline(fn, root, s2, branch2);
+            const p = c.lastTopLevel().insertAfter();
+            this.root = p;
+            p.h = `git-diff-branches ${branch1} ${branch2}`;
+            const s1 = await this.get_file_from_branch(branch1, fn);
+            const s2 = await this.get_file_from_branch(branch2, fn);
+            const lines1 = g.splitLines(s1);
+            const lines2 = g.splitLines(s2);
+            const diff_list = difflib.unifiedDiff(lines1, lines2, {
+                fromfile: branch1,
+                tofile: branch2,
+            });
+            diff_list.unshift('@ignore\n@nosearch\n@language patch\n');
+
+            this.file_node = this.create_file_node(diff_list, fn);
+            let c1, c2;
+            if (await c.looksLikeDerivedFile(fn)) {
+                c1 = this.make_at_file_outline(fn, s1, branch1);
+                c2 = this.make_at_file_outline(fn, s2, branch2);
             } else {
-                c1 = undefined;
-                c2 = undefined;
+                const root = this.find_file(fn);
+                if (root) {
+                    c1 = await this.make_at_clean_outline(fn, root, s1, branch1);
+                    c2 = await this.make_at_clean_outline(fn, root, s2, branch2);
+                } else {
+                    c1 = undefined;
+                    c2 = undefined;
+                }
             }
+            if (c1 && c2) {
+                this.make_diff_outlines(c1, c2, fn);
+                this.file_node.b = `${this.file_node.b.trimEnd()}\n@language ${c2.target_language
+                    }\n`;
+            }
+            this.finish();
         }
-        if (c1 && c2) {
-            this.make_diff_outlines(c1, c2, fn);
-            this.file_node.b = `${this.file_node.b.trimEnd()}\n@language ${c2.target_language
-                }\n`;
-        }
-        u.afterInsertNode(this.root, undoType, undoData);
-        this.finish();
     }
     //@+node:felix.20230709010434.6: *4* gdc.diff_two_revs
     /**
@@ -1161,7 +1172,8 @@ export class GitDiffController {
      * between rev1 and rev2.
      */
     public async diff_two_revs(rev1 = 'HEAD', rev2 = '', p_path?: string): Promise<void> {
-        const [c, u] = [this.c, this.c.undoer];
+        const c = this.c;
+        const u = c.undoer;
 
         const directory = await this.get_parent_of_git_directory();
         if (!directory) {
@@ -1170,6 +1182,10 @@ export class GitDiffController {
         // Get list of changed files.
         const files = await this.get_files(rev1, rev2, p_path);
         const n = files.length;
+        if (n == 0) {
+            g.es_print('No changed files');
+            return;
+        }
         let message = `diffing ${n} file${g.plural(n)}`;
         if (!g.unitTesting) {
             g.es_print(`diffing ${n} file${g.plural(n)}`);
@@ -1177,32 +1193,31 @@ export class GitDiffController {
                 g.es_print('This may take a while...');
             }
         }
-
-        // const undoType = 'Git Diff';
         c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        // u.beforeChangeGroup(c.p, undoType);
+
         // Create the root node.
-        let undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
-        this.root = c.lastTopLevel().insertAfter();
-        let root_h = `git diff revs: ${rev1} ${rev2}`;
-        if (p_path && p_path.trim()) {
-            root_h += ` (${p_path})`;
-        }
-        this.root.h = root_h;
-        this.root.b = '@ignore\n@nosearch\n';
+        {
+            using changes = u.change_outline('diff-two-revs');
 
-        // Create diffs of all files.
-        for (let i = 0; i < files.length; i++) {
-            const fn = files[i];
-            await this.diff_file(fn, rev1, rev2);
-            if ((i % 10) === 0) {
-                g.es_print(`diff: ${i} files`);
+            this.root = c.lastTopLevel().insertAfter();
+            let root_h = `git diff revs: ${rev1} ${rev2}`;
+            if (p_path && p_path.trim()) {
+                root_h += ` (${p_path})`;
             }
-        }
+            this.root.h = root_h;
+            this.root.b = '@ignore\n@nosearch\n';
 
-        u.afterInsertNode(this.root, 'diff-two-revs', undoData);
-        this.finish();
-        g.es_print(`done! diffed: ${n} files`);
+            // Create diffs of all files.
+            for (let i = 0; i < files.length; i++) {
+                const fn = files[i];
+                await this.diff_file(fn, rev1, rev2);
+                if ((i % 10) === 0) {
+                    g.es_print(`diff: ${i} files`);
+                }
+            }
+            this.finish();
+            g.es_print(`done! diffed: ${n} files`);
+        }
     }
     //@+node:felix.20230709010434.7: *4* gdc.git_diff & helper
     /**
@@ -1240,39 +1255,20 @@ export class GitDiffController {
     public async diff_revs(rev1: string, rev2: string): Promise<boolean> {
         const c = this.c;
         const u = c.undoer;
-        const undoType = 'git-diff-revs';
         const files = await this.get_files(rev1, rev2);
         if (!files || !files.length) {
             return false;
         }
         c.selectPosition(c.lastTopLevel());
-        const undoData = u.beforeInsertNode(c.p);
-        this.root = await this.create_root(rev1, rev2);
-        for (const fn of files) {
-            await this.diff_file(fn, rev1, rev2);
+        {
+            using changes = u.change_outline('git-diff-revs');
+            this.root = await this.create_root(rev1, rev2);
+            for (const fn of files) {
+                await this.diff_file(fn, rev1, rev2);
+            }
+            this.finish();
+            return true;
         }
-        u.afterInsertNode(this.root, undoType, undoData);
-        this.finish();
-        return true;
-
-        // const files = await this.get_files(rev1, rev2);
-        // if (files && files.length) {
-        //     const [c, u] = [this.c, this.c.undoer];
-        //     const undoType = 'Git Diff';
-        //     c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        //     u.beforeChangeGroup(c.p, undoType);
-
-        //     this.root = this.create_root(rev1, rev2); // creates it's own undo bead
-
-        //     for (const fn of files) {
-        //         const undoData = u.beforeChangeTree(this.root);
-        //         await this.diff_file(fn, rev1, rev2);
-        //         u.afterChangeTree(this.root, undoType, undoData);
-        //     }
-        //     u.afterChangeGroup(c.p, undoType);
-        //     this.finish();
-        // }
-        // return !!files.length;
     }
     //@+node:felix.20230727182206.1: *4* gdc.node_history & helpers
     /**
@@ -1685,29 +1681,31 @@ export class GitDiffController {
         c.selectPosition(c.lastTopLevel());  // pre-select to help undo-insert
 
         // Undoably create the root node.
-        const undoData = u.beforeInsertNode(c.p);  // c.p is subject of 'insertAfter'
-        this.root = c.lastTopLevel().insertAfter();
-        let root_h = `git summary diff revs: ${rev1} ${rev2}`;
-        if (p_path && p_path.trim()) {
-            root_h += ` (${p_path})`;
-        }
-        this.root.h = root_h;
-        this.root.b = '@nosearch\n';
-        for (let i = 0; i < files.length; i++) {
-            const fn = files[i];
+        {
+            using changes = u.change_outline('summary-diff-two-revs');
 
-            if (fn.endsWith('.py')) {
-                await this.summary_diff_python_file(fn, rev1, rev2);
+            this.root = c.lastTopLevel().insertAfter();
+            let root_h = `git summary diff revs: ${rev1} ${rev2}`;
+            if (p_path && p_path.trim()) {
+                root_h += ` (${p_path})`;
             }
-            if ((i % 10) === 0) {
-                g.es_print(`diff: ${i} files`);
-            }
-        };
-        u.afterInsertNode(this.root, 'summary-diff-two-revs', undoData);
-        c.selectPosition(this.root);
-        this.root.expand();
-        c.redraw(this.root);
-        g.es_print(`done! diffed: ${n} files`);
+            this.root.h = root_h;
+            this.root.b = '@nosearch\n';
+            for (let i = 0; i < files.length; i++) {
+                const fn = files[i];
+
+                if (fn.endsWith('.py')) {
+                    await this.summary_diff_python_file(fn, rev1, rev2);
+                }
+                if ((i % 10) === 0) {
+                    g.es_print(`diff: ${i} files`);
+                }
+            };
+
+            this.root.expand();
+            c.p = this.root;
+            g.es_print(`done! diffed: ${n} files`);
+        }
 
     }
     //@+node:felix.20260124163625.1: *4* gdc.summary_diff_python_file & helper
@@ -1992,11 +1990,6 @@ export class GitDiffController {
      */
     public async create_root(rev1: string, rev2: string): Promise<Position> {
         const c = this.c;
-        // const [c, u] = [this.c, this.c.undoer];
-        // const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
-        // c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        // const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
-
         const [r1, r2] = [rev1 || '', rev2 || ''];
         const p = c.lastTopLevel().insertAfter();
         p.h = `git diff ${r1} ${r2}`;
@@ -2009,8 +2002,6 @@ export class GitDiffController {
         } else {
             p.b += `${r1}=${revno1}`;
         }
-
-        // u.afterInsertNode(p, undoType, undoData);
 
         return p;
     }
@@ -2518,27 +2509,29 @@ export class GitDiffController {
         c.selectPosition(c.lastTopLevel());  // pre-select to help undo-insert
 
         // Create the root node.
-        const undoData = u.beforeInsertNode(c.p);  // c.p is subject of 'insertAfter'
-        this.root = c.lastTopLevel().insertAfter();
-        let root_h = `clone-diff-pr revs: ${rev1} ${rev2}`;
-        if (p_path && p_path.trim()) {
-            root_h += ` (${p_path})`;
-        }
-        this.root.h = root_h;
-        this.root.b = '@ignore\n@nosearch\n';
+        {
+            using changes = u.change_outline('clone-diff-pr');
 
-        // Create diffs of all files.
-        for (const [i, fn] of files.entries()) {
-            {
-                await this.clone_diff_file(fn, rev1, rev2);
-                if ((i % 10) == 0) {
-                    g.es_print(`diff: ${i} files`, { color: 'blue' });
-                }
+            this.root = c.lastTopLevel().insertAfter();
+            let root_h = `clone-diff-pr revs: ${rev1} ${rev2}`;
+            if (p_path && p_path.trim()) {
+                root_h += ` (${p_path})`;
             }
-            u.afterInsertNode(this.root, 'clone-diff-pr', undoData);
-            this.finish();
-            g.es_print(`done! diffed: ${n} files`);
+            this.root.h = root_h;
+            this.root.b = '@ignore\n@nosearch\n';
 
+            // Create diffs of all files.
+            for (const [i, fn] of files.entries()) {
+                {
+                    await this.clone_diff_file(fn, rev1, rev2);
+                    if ((i % 10) == 0) {
+                        g.es_print(`diff: ${i} files`, { color: 'blue' });
+                    }
+                }
+                this.finish();
+                g.es_print(`done! diffed: ${n} files`);
+
+            }
         }
     }
 

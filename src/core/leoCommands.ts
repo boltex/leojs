@@ -22,7 +22,6 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
-// import { TopLevelCommands } from './leoAppCommands';
 import { LeoImportCommands, TopLevelImportCommands, RecursiveImportController } from './leoImport';
 import { ChapterController } from './leoChapters';
 import {
@@ -37,7 +36,6 @@ import {
     EditCommandsClass,
     TopLevelEditCommands,
 } from '../commands/editCommands';
-import { BufferCommandsClass } from '../commands/bufferCommands';
 import { EditFileCommandsClass, GitDiffController } from '../commands/editFileCommands';
 import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands, TopLevelGoToCommands } from '../commands/gotoCommands';
@@ -249,7 +247,6 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public editCommands: EditCommandsClass;
     public db: any; // CommanderWrapper; //  Record<string, any>; // IS A DATABASE 
-    public bufferCommands: BufferCommandsClass;
     public editFileCommands: EditFileCommandsClass;
     public theScriptingController!: ScriptingController; // Set in leoApp at 'open2' event.
     public gotoCommands: GoToCommands;
@@ -326,7 +323,6 @@ export class Commands {
         this.persistenceController = new PersistenceDataController(c);
 
         // command handlers...
-        this.bufferCommands = new BufferCommandsClass(c);
         this.editCommands = new EditCommandsClass(c);
         this.editFileCommands = new EditFileCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
@@ -341,7 +337,6 @@ export class Commands {
         // Create the list of subcommanders.
         this.subCommanders = [
             this.atFileCommands,
-            this.bufferCommands,
             this.chapterController,
             this.editCommands,
             this.editFileCommands,
@@ -5507,8 +5502,15 @@ export class Commands {
                 clones.push(p.copy());
             }
         }
-        if (clones.length) {
-            const undoData = u.beforeInsertNode(c.p);
+        if (!clones.length) {
+            if (failMsg) {
+                g.es(failMsg);
+            }
+            return undefined;
+        }
+        {
+            using changes = u.change_outline(undoType);
+
             root = c.createCloneFindPredicateRoot(flatten, undoType);
             for (let p of clones) {
                 // Create the clone directly as a child of found.
@@ -5516,15 +5518,13 @@ export class Commands {
                 const n = root.numberOfChildren();
                 p2._linkCopiedAsNthChild(root, n);
             }
-            u.afterInsertNode(root, undoType, undoData);
-            c.selectPosition(root);
-            c.setChanged();
+
             c.contractAllHeadlines();
-            root.expand();
-        } else if (failMsg) {
-            g.es(failMsg);
+            root.contract();
+            c.p = root;
+
+            return root;
         }
-        return root;
     }
     //@+node:felix.20221014000217.2: *5* c.setCloneFindByPredicateIcon
     /**
@@ -5582,7 +5582,6 @@ export class Commands {
 
         const c: Commands = this;
         const u = c.undoer;
-        const undoType = 'c.deletePositionsInList';
         const root = c.rootPosition()!;
 
         // Ensure all positions are valid and unique.
@@ -5597,36 +5596,40 @@ export class Commands {
         }
 
         function deletePosition(p: Position): void {
-            if (to_be_deleted.some((p2) => p2.__eq__(p))) {
-                // Remove all to-be-deleted positions in p's subtree.
-                for (let p2 of p.subtree()) {
-                    const index = to_be_deleted.findIndex((p3) => p3.__eq__(p2));
-                    if (index >= 0) {
-                        to_be_deleted.splice(index, 1);
+            {
+                using changes = u.change_outline('function:delete');
+
+                if (to_be_deleted.some((p2) => p2.__eq__(p))) {
+                    // Remove all to-be-deleted positions in p's subtree.
+                    for (let p2 of p.subtree()) {
+                        const index = to_be_deleted.findIndex((p3) => p3.__eq__(p2));
+                        if (index >= 0) {
+                            to_be_deleted.splice(index, 1);
+                        }
                     }
-                }
-                const bunch = u.beforeDeleteNode(p);
-                p.doDelete();
-                u.afterDeleteNode(c.rootPosition()!, 'Inner Undo Node', bunch);
-            } else {
-                // Recursively handle all p's children.
-                for (let child of [...p.children()].reverse()) {
-                    deletePosition(child);
+                    p.doDelete();
+                } else {
+                    // Recursively handle all p's children.
+                    for (let child of [...p.children()].reverse()) {
+                        deletePosition(child);
+                    }
                 }
             }
         }
         // The main line. Start the recursion with the top-level nodes.
-        u.beforeChangeGroup(c.p, undoType, true);
         const to_do: Position[] = [...root.self_and_siblings()].reverse();
-        while (to_do.length) {
-            const p = to_do.pop()!;
-            deletePosition(p);
+        {
+            using changes = u.change_outline('c.deletePositionsInList');
+
+            while (to_do.length) {
+                const p = to_do.pop()!;
+                deletePosition(p);
+            }
+            // Set c.p if necessary.
+            if (!c.positionExists(c.p)) {
+                c.p = c.rootPosition()!;
+            }
         }
-        // Set c.p if necessary.
-        if (!c.positionExists(c.p)) {
-            c.selectPosition(c.rootPosition()!);
-        }
-        u.afterChangeGroup(c.p, undoType);
 
     }
     //@+node:felix.20230525222516.1: *4* c.find_b & find_h

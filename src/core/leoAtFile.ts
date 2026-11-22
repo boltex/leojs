@@ -614,47 +614,50 @@ export class AtFile {
             return null;
         }
         // Undoably create the top-level node.
-        const undoData = u.beforeInsertNode(c.p);
-        const update_p = c.lastTopLevel().insertAfter();
-        update_p.h = 'Updated @clean/@auto nodes';
+        {
+            using changes = u.change_outline('at.clone_all_changed_vnodes');
 
-        // Clone nodes as children of the found node.
-        for (const root of at.changed_roots) {
-            const parent = update_p.insertAsLastChild();
-            parent.h = `Updated from: ${g.shortFileName(c.fullPath(root))}`;
-            const parent_body: string[] = [];
+            const update_p = c.lastTopLevel().insertAfter();
+            update_p.h = 'Updated @clean/@auto nodes';
 
-            // Clone all dirty nodes.
-            root.v.setDirty();
-            for (const p of root.self_and_subtree()) {
-                const v = p.v;
-                if (!v.isDirty()) {
-                    continue;
+            // Clone nodes as children of the found node.
+            for (const root of at.changed_roots) {
+                const parent = update_p.insertAsLastChild();
+                parent.h = `Updated from: ${g.shortFileName(c.fullPath(root))}`;
+                const parent_body: string[] = [];
+
+                // Clone all dirty nodes.
+                root.v.setDirty();
+                for (const p of root.self_and_subtree()) {
+                    const v = p.v;
+                    if (!v.isDirty()) {
+                        continue;
+                    }
+                    const clone = p.clone();
+                    clone.moveToLastChildOf(parent);
+                    // Insert the diff into the parent's body.
+                    const a = g.splitLines(at.bodies_dict[v.gnx] || '');
+                    const b = g.splitLines(p.b);
+                    parent_body.push(`${p.h}\n`);
+                    parent_body.push(...(difflib.unifiedDiff(a, b, {}) as string[]));
+                    parent_body.push('\n');
                 }
-                const clone = p.clone();
-                clone.moveToLastChildOf(parent);
-                // Insert the diff into the parent's body.
-                const a = g.splitLines(at.bodies_dict[v.gnx] || '');
-                const b = g.splitLines(p.b);
-                parent_body.push(`${p.h}\n`);
-                parent_body.push(...(difflib.unifiedDiff(a, b, {}) as string[]));
-                parent_body.push('\n');
+                // Put the diff.
+                parent.b = parent_body.join('');
             }
-            // Put the diff.
-            parent.b = parent_body.join('');
-        }
 
-        // Defensive programming.
-        if (c.checkOutline() > 0) {
-            return null;
-        }
+            // Defensive programming.
+            if (c.checkOutline() > 0) {
+                return null;
+            }
 
-        // Sort the clones in place, without undo.
-        update_p.v.children.sort((v1, v2) => v1.h.toLowerCase().localeCompare(v2.h.toLowerCase()));
-        u.afterInsertNode(update_p, 'Clone Updated Nodes', undoData);
-        c.contractAllHeadlinesCommand();
-        update_p.expand();
-        return update_p;
+            // Sort the clones in place, without undo.
+            update_p.v.children.sort((v1, v2) => v1.h.toLowerCase().localeCompare(v2.h.toLowerCase()));
+            c.contractAllHeadlinesCommand();
+            update_p.expand();
+            c.p = update_p;
+            return update_p;
+        }
     }
     //@+node:felix.20230415162513.9: *6* at.findFilesToRead
     public findFilesToRead(root: Position, all: boolean): Position[] {

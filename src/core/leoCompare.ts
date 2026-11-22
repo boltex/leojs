@@ -746,20 +746,21 @@ export class CompareLeoOutlines {
         const c = this.c;
         const u = this.c.undoer;
 
-        const undoType = 'diff-files';
         c.selectPosition(c.lastTopLevel());
-        const undoData = u.beforeInsertNode(c.p);
-        this.root = this.create_root(aList);
-        this.visible = visible;
-        while (aList.length > 1) {
-            const path1 = aList[0];
-            aList = aList.slice(1);
-            for (const path2 of aList) {
-                await this.diff_two_files(path1, path2); // adds to this.root
+        {
+            using changes = u.change_outline('diff-files');
+
+            this.root = this.create_root(aList);
+            this.visible = visible;
+            while (aList.length > 1) {
+                const path1 = aList[0];
+                aList = aList.slice(1);
+                for (const path2 of aList) {
+                    await this.diff_two_files(path1, path2); // adds to this.root
+                }
             }
+            this.finish();
         }
-        u.afterInsertNode(this.root, undoType, undoData);
-        this.finish();
     }
     //@+node:felix.20230430023337.27: *3* loc.diff_two_files
     /**
@@ -930,11 +931,6 @@ export class CompareLeoOutlines {
     public create_root(aList: string[]): Position {
         const c = this.c;
 
-        // const u = this.c.undoer;
-        // const undoType = 'Create diff root node'; // Same undoType is reused for all inner undos
-        // c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-        // const undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
-
         const p = c.lastTopLevel().insertAfter();
         p.h = 'diff-leo-files';
         p.b = aList.join('\n') + '\n';
@@ -1041,7 +1037,6 @@ export class TopLevelCompareCommands {
             return;
         }
         const u = c.undoer;
-        const undoType = 'diff-marked-nodes'; // Same undoType is reused for all inner undos
 
         let aList = [...c.all_unique_positions()].filter((z) => z.isMarked());
 
@@ -1050,80 +1045,35 @@ export class TopLevelCompareCommands {
             return;
         }
         c.selectPosition(c.lastTopLevel());
-        const undoData = u.beforeInsertNode(c.p);
-        const root = c.lastTopLevel().insertAfter();
-        root.h = 'diff marked nodes';
-        root.b = aList.map((z) => z.h).join('\n') + '\n';
-        let n = 0;
 
-        while (aList.length > 1) {
-            n += 1;
-            let [p1, p2] = [aList[0], aList[1]];
-            aList = aList.slice(1);
-            const lines = new difflib.Differ().compare(
-                g.splitLines(p1.b.trimEnd() + '\n'),
-                g.splitLines(p2.b.trimEnd() + '\n')
-            );
-            const p = root.insertAsLastChild();
-            p.h = `diff ${n}`;
-            p.b = `1: ${p1.h}\n2: ${p2.h}\n${lines.join('')}`;
-            for (const p3 of [p1, p2]) {
-                const clone = p3.clone();
-                clone.moveToLastChildOf(p);
-            }
-        }
-        u.afterInsertNode(root, undoType, undoData);
-        root.expand();
-        c.selectPosition(root);
-        c.redraw();
+        {
+            using changes = u.change_outline('diff-marked-nodes');
 
-        /*
-        let n = 0;
-        if (aList.length >= 2) {
-            u.beforeChangeGroup(c.p, undoType); // going to perform many operations
-
-            c.selectPosition(c.lastTopLevel()); // pre-select to help undo-insert
-            let undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
             const root = c.lastTopLevel().insertAfter();
             root.h = 'diff marked nodes';
             root.b = aList.map((z) => z.h).join('\n') + '\n';
-            u.afterInsertNode(root, 'Create diff root node', undoData);
+            let n = 0;
 
             while (aList.length > 1) {
                 n += 1;
                 let [p1, p2] = [aList[0], aList[1]];
                 aList = aList.slice(1);
-
                 const lines = new difflib.Differ().compare(
                     g.splitLines(p1.b.trimEnd() + '\n'),
                     g.splitLines(p2.b.trimEnd() + '\n')
                 );
-
-                undoData = u.beforeInsertNode(c.p); // c.p is subject of 'insertAfter'
                 const p = root.insertAsLastChild();
-                // p.h = 'Compare: %s, %s' % (g.truncate(p1.h, 22), g.truncate(p2.h, 22))
                 p.h = `diff ${n}`;
                 p.b = `1: ${p1.h}\n2: ${p2.h}\n${lines.join('')}`;
-                u.afterInsertNode(p, undoType, undoData);
-
-                undoData = u.beforeChangeTree(p);
                 for (const p3 of [p1, p2]) {
                     const clone = p3.clone();
                     clone.moveToLastChildOf(p);
                 }
-                u.afterChangeTree(p, undoType, undoData);
             }
-            root.expand();
-            // c.unmarkAll()
-            c.selectPosition(root);
-            // Add the changes to the outer undo group.
-            u.afterChangeGroup(c.p, undoType);
-            c.redraw();
-        } else {
-            g.es_print('Please mark at least 2 nodes');
-        }
-        */
 
+            root.expand();
+            c.p = root;
+        }
     }
     //@-others
 }

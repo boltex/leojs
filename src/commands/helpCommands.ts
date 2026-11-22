@@ -9,9 +9,9 @@
 import * as vscode from 'vscode';
 import * as g from '../core/leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
-import { BaseEditCommandsClass } from './baseCommands';
 import { Constants } from '../constants';
 import { Position } from '../core/leoNodes';
+import { Commands } from '../core/leoCommands';
 //@-<< helpCommands imports & annotations >>
 
 //@+others
@@ -26,7 +26,13 @@ function cmd(p_name: string, p_doc: string) {
 /**
  * A class to display documentation and tips.
  */
-export class HelpCommandsClass extends BaseEditCommandsClass {
+export class HelpCommandsClass {
+
+    public c: Commands;
+
+    constructor(c: Commands) {
+        this.c = c;
+    }
 
     //@+others
     //@+node:felix.20231224164520.2: *3* help
@@ -708,7 +714,7 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
         # About settings
 
         **\@settings trees** specify settings. 
-        
+
         The headline of each node indicates its type. The body text of most nodes contain comments.
 
         However, the body text of \@data, \@font, \@item and \@shortcuts nodes
@@ -717,11 +723,11 @@ export class HelpCommandsClass extends BaseEditCommandsClass {
 
         An internal leojsSettings.leojs is LeoJS\'s main settings file. myLeoSettings.leo contains
         your personal settings. 
-        
+
         Settings in myLeoSettings.leo override the settings in leojsSettings.leojs.
-        
+
         Put myLeoSettings.leo in your home \'\~\' directory or in the \'\~/.leo\' directory. 
-        
+
         Any other .leo file may contain an \@settings tree. Such settings apply only to that file.
 
         `;

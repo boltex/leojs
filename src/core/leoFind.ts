@@ -410,7 +410,6 @@ export class LeoFind {
         const c = this.c;
         const p1 = p.copy();
         const u = this.c.undoer;
-        const undoType = 'Batch Change All';
         // Check...
         if (!find_text) {
             return 0;
@@ -426,7 +425,7 @@ export class LeoFind {
         }
         // Init...
         this.find_text = find_text;
-        this.change_text = this.replace_back_slashes(change_text);
+        this.change_text = change_text;
         let positions: Generator<Position, any, unknown> | Position[];
         if (this.node_only) {
             positions = [p1];
@@ -440,41 +439,39 @@ export class LeoFind {
         this.work_s = s;
         this.work_sel = [0, 0, 0];
         // The main loop.
-        u.beforeChangeGroup(p1, undoType);
-        let count: number = 0;
-        for (const p of positions) {
-            let count_h: number | false = 0;
-            let count_b: number | false = 0;
-            let new_h: string | undefined;
-            let new_b: string | undefined;
+        {
+            using changes = u.change_outline('batch-change-all');
 
-            const undoData = u.beforeChangeNodeContents(p);
-            if (this.search_headline) {
-                [count_h, new_h] = this._change_all_search_and_replace(p.h);
+            let count: number = 0;
+            for (const p of positions) {
+                let count_h: number | false = 0;
+                let count_b: number | false = 0;
+                let new_h: string | undefined;
+                let new_b: string | undefined;
 
-                if (count_h) {
-                    count += count_h;
-                    p.h = new_h!;
+                if (this.search_headline) {
+                    [count_h, new_h] = this._change_all_search_and_replace(p.h);
+
+                    if (count_h) {
+                        count += count_h;
+                        p.h = new_h!;
+                    }
                 }
-            }
-            if (this.search_body) {
-                [count_b, new_b] = this._change_all_search_and_replace(p.b);
-
-                if (count_b) {
-                    count += count_b;
-                    p.b = new_b!;
+                if (this.search_body) {
+                    [count_b, new_b] = this._change_all_search_and_replace(p.b);
+                    if (count_b) {
+                        count += count_b;
+                        p.b = new_b!;
+                    }
                 }
-            }
-            if (count_h || count_b) {
-                u.afterChangeNodeContents(p1, 'Replace All', undoData);
-            }
-        }
-        u.afterChangeGroup(p1, undoType);
 
-        if (!g.unitTesting) {
-            g.es(`${count}: ${find_text} => ${change_text}`);
+            }
+
+            if (!g.unitTesting) {
+                g.es(`${count}: ${find_text} => ${change_text}`);
+            }
+            return count;
         }
-        return count;
     }
     //@+node:felix.20221012233803.4: *4* find._init_from_dict
     /**
@@ -656,6 +653,8 @@ export class LeoFind {
     public cloneFindAllMarked(): void {
         this.do_find_marked(false);
     }
+
+    // TODO : add  @g.commander_command('clone-marked-nodes')   !
     @cmd(
         'clone-find-all-flattened-marked',
         'clone-find-all-flattened-marked, aka cffm. ' +
@@ -684,7 +683,6 @@ export class LeoFind {
     public do_find_marked(flatten: boolean): boolean {
         const c = this.c;
         const u = this.c.undoer;
-        const undoType = 'clone-find-marked';
         const failMsg = 'No marked nodes';
 
         let count = 0;
@@ -700,33 +698,28 @@ export class LeoFind {
         function isMarked(p: Position): boolean {
             return p.isMarked();
         }
-
-        u.beforeChangeGroup(c.p.copy(), undoType, false); // will create a bead.
-
         const root: Position | undefined = c.cloneFindByPredicate(
             c.all_unique_positions.bind(c),
             isMarked,
             failMsg,
             flatten,
             undefined,
-            undoType
+            'clone-find-marked'
         );
-
         if (root) {
-            // Unmarking all nodes is convenient.
-            for (let p of c.all_unique_positions()) {
-                if (p.isMarked()) {
-                    const bunch = u.beforeMark(p, 'Unmark');
-                    c.clearMarked(p);
-                    u.afterMark(p, 'Unmark', bunch);
+            {
+                using changes = u.change_outline('clone-find-marked');
+                // Unmarking all nodes is convenient.
+                for (let p of c.all_unique_positions()) {
+                    if (p.isMarked()) {
+                        c.clearMarked(p);
+                    }
                 }
+                const n = root.numberOfChildren();
+                root.b = `# Found ${n} marked node${g.plural(n)}`;
+                c.p = root;
             }
-            const n = root.numberOfChildren();
-            root.b = `# Found ${n} marked node${g.plural(n)}`;
-            c.selectPosition(root);
-            c.redraw(root);
         }
-        u.afterChangeGroup(c.p.copy(), undoType);
         return !!root && root.__bool__();
     }
     //@+node:felix.20221013234514.6: *4* find.clone-find-parents
@@ -747,8 +740,7 @@ export class LeoFind {
             g.es(`not a clone: ${p.h}`);
             return false;
         }
-        const p0 = p.copy();
-        const undoType = 'Find Clone Parents';
+
         const aList = c.vnode2allPositions(p.v);
         if (!aList.length) {
             g.trace('can not happen: no parents');
@@ -756,30 +748,26 @@ export class LeoFind {
         }
         // Create the node as the last top-level node.
         // All existing positions remain valid.
-        u.beforeChangeGroup(p, undoType);
-        let b = u.beforeInsertNode(p);
-        const found = c.lastTopLevel().insertAfter();
-        found.h = `Found: parents of ${p.h}`;
-        u.afterInsertNode(found, 'insert', b);
-        const seen: VNode[] = [];
-        for (let p2 of aList) {
-            const parent = p2.parent();
-            if (parent && parent.__bool__() && !seen.includes(parent.v)) {
-                seen.push(parent.v);
-                b = u.beforeCloneNode(parent);
-                // Bug fix 2021/06/15: Create the clone directly as a child of found.
-                const clone = parent.copy();
-                const n = found.numberOfChildren();
-                clone._linkCopiedAsNthChild(found, n);
-                u.afterCloneNode(clone, 'clone', b);
+        {
+            using changes = u.change_outline('clone-find-parents');
+
+            const found = c.lastTopLevel().insertAfter();
+            found.h = `Found: parents of ${p.h}`;
+            const seen: VNode[] = [];
+            for (let p2 of aList) {
+                const parent = p2.parent();
+                if (parent && parent.__bool__() && !seen.includes(parent.v)) {
+                    seen.push(parent.v);
+                    // Bug fix 2021/06/15: Create the clone directly as a child of found.
+                    const clone = parent.copy();
+                    const n = found.numberOfChildren();
+                    clone._linkCopiedAsNthChild(found, n);
+                }
             }
+            c.p = found;
+            return true;
         }
 
-        u.afterChangeGroup(p0, undoType);
-        c.setChanged();
-        c.redraw(found);
-
-        return true;
     }
     //@+node:felix.20240529213126.1: *4* find.find-def/var & helper
     @cmd('find-def', 'Find the class, def or assignment to var of the word under the cursor.')
@@ -1017,31 +1005,28 @@ export class LeoFind {
         const c = this.c;
         const ftm = this.ftm;
         const u = c.undoer;
-        const undoData = u.beforeInsertNode(c.p);
+        {
+            using changes = u.change_outline('find-def');
+            // Create the found node.
+            const found = c.lastTopLevel().insertAfter();
+            found.h = `Found ${matches.length}: ${word}`;
+            found.b = `@nosearch\n\n# found ${matches.length} nodes`;
+            // Clone nodes as children of the found node.
+            const clones = matches.map(([i, p, s]) => p);
+            for (const p of clones) {
+                const p2 = p.copy();
+                const n = found.numberOfChildren();
+                p2._linkCopiedAsNthChild(found, n);
+            }
+            // Sort the clones in place, without undo.
+            found.v.children.sort((v1: VNode, v2: VNode) => v1.h.toLowerCase().localeCompare(v2.h.toLowerCase()));
 
-        // Create the found node.
-        const found = c.lastTopLevel().insertAfter();
-        found.h = `Found ${matches.length}: ${word}`;
-        found.b = `@nosearch\n\n# found ${matches.length} nodes`;
-        // Clone nodes as children of the found node.
-        const clones = matches.map(([i, p, s]) => p);
-        for (const p of clones) {
-            const p2 = p.copy();
-            const n = found.numberOfChildren();
-            p2._linkCopiedAsNthChild(found, n);
+            // Set the search text. This is convenient and should not cause problems.
+            this.find_text = word;
+            ftm.set_find_text(word);
+            found.expand();
+            c.p = found;
         }
-        // Sort the clones in place, without undo.
-        found.v.children.sort((v1: VNode, v2: VNode) => v1.h.toLowerCase().localeCompare(v2.h.toLowerCase()));
-
-        // Set the search text. This is convenient and should not cause problems.
-        this.find_text = word;
-        ftm.set_find_text(word);
-
-        // Set the undo data.
-        u.afterInsertNode(found, 'find-def', undoData);
-        c.setChanged();
-        found.expand();
-        c.redraw(found);
     }
     //@+node:felix.20240529213126.7: *6* find._make_patterns
     public _make_patterns(word?: string): RegExp[] {
@@ -1576,112 +1561,103 @@ export class LeoFind {
      */
     private _change_all_helper(settings: ISettings): number {
         // Caller has checked settings.
+        // Caller has checked settings.
         const c = this.c;
         const current = this.c.p;
         const u = this.c.undoer;
-        const undoType = 'Replace All';
         const t1 = g.process_time();
         const saveData = this.save();
-        u.beforeChangeGroup(current, undoType);
+        {
+            using changes = u.change_outline('change-all');
 
-        if (!this.find_text) {
-            return 0;
-        }
-        if (!this.search_headline && !this.search_body) {
-            return 0;
-        }
-        this.find_text = this.replace_back_slashes(this.find_text);  // #4609
-        this.change_text = this.replace_back_slashes(this.change_text);
-        const matches_dict: { body: number[]; head: number[]; v: VNode }[] = [];
-        if (this.pattern_match) {
-            const ok = this.compile_pattern();
-            if (!ok) {
+
+            if (!this.find_text) {
                 return 0;
             }
-        }
-
-        let positions: Position[];
-        // #1428: Honor limiters in replace-all.
-        if (this.node_only) {
-            positions = [c.p];
-        } else if (this.suboutline_only) {
-            positions = [...c.p.self_and_subtree()];
-        } else {
-            positions = [...c.all_unique_positions()];
-        }
-
-        let count = 0;
-        for (let p of positions) {
-            let body: number[] = [];
-            let head: number[] = [];
-            let count_h: number | false = 0;
-            let count_b: number | false = 0;
-            let new_h: string | undefined;
-            let new_b: string | undefined;
-            const undoData = u.beforeChangeNodeContents(p);
-            if (this.search_headline) {
-                [count_h, new_h] = this._change_all_search_and_replace(p.h);
-                if (count_h) {
-                    head = this.find_all_literal_matches_in_string(p.v.h);
-                    count += count_h;
-                    p.h = new_h!;
-                    p.v.setDirty();  // #4660.
+            if (!this.search_headline && !this.search_body) {
+                return 0;
+            }
+            const matches_dict: { body: number[]; head: number[]; v: VNode }[] = [];
+            if (this.pattern_match) {
+                const ok = this.compile_pattern();
+                if (!ok) {
+                    return 0;
                 }
             }
-            if (this.search_body) {
-                [count_b, new_b] = this._change_all_search_and_replace(p.b);
-                if (count_b) {
-                    count += count_b;
-                    body = this.find_all_literal_matches_in_string(p.v.b);
-                    p.b = new_b!;
-                    p.v.setDirty();  // #4660.
+
+            let positions: Position[];
+            // #1428: Honor limiters in replace-all.
+            if (this.node_only) {
+                positions = [c.p];
+            } else if (this.suboutline_only) {
+                positions = [...c.p.self_and_subtree()];
+            } else {
+                positions = [...c.all_unique_positions()];
+            }
+
+            let count = 0;
+            for (let p of positions) {
+                let body: number[] = [];
+                let head: number[] = [];
+                let count_h: number | false = 0;
+                let count_b: number | false = 0;
+                let new_h: string | undefined;
+                let new_b: string | undefined;
+                if (this.search_headline) {
+                    [count_h, new_h] = this._change_all_search_and_replace(p.h);
+                    if (count_h) {
+                        head = this.find_all_literal_matches_in_string(p.v.h);
+                        count += count_h;
+                        p.h = new_h!;
+                        p.v.setDirty();  // #4660.
+                    }
+                }
+                if (this.search_body) {
+                    [count_b, new_b] = this._change_all_search_and_replace(p.b);
+                    if (count_b) {
+                        count += count_b;
+                        body = this.find_all_literal_matches_in_string(p.v.b);
+                        p.b = new_b!;
+                        p.v.setDirty();  // #4660.
+                    }
+                }
+                if (body.length || head.length) {
+                    matches_dict.push({ 'body': body, 'head': head, 'v': p.v });
+                }
+                //  Check if there was at least one change with either body or headline
+                if (count_h || count_b) {
+                    // Also check to honor 'Mark Changes' option
+                    if (this.mark_changes && !p.isMarked()) {
+                        p.setMarked();
+                        p.setDirty();
+
+                    }
                 }
             }
-            if (body.length || head.length) {
-                matches_dict.push({ 'body': body, 'head': head, 'v': p.v });
+            let new_p: Position;
+            if (matches_dict.length) {
+                // Create the result dict.
+                const result_string = this.make_result_from_matches(matches_dict);
+                // Create the summary node.
+                new_p = this.create_summary_node('change-all', result_string);
+            } else {
+                new_p = c.p;
             }
-            //  Check if there was at least one change with either body or headline
-            if (count_h || count_b) {
-                u.afterChangeNodeContents(p, 'Replace All', undoData);
-                // Also check to honor 'Mark Changes' option
-                if (this.mark_changes && !p.isMarked()) {
-                    const markUndoType = 'Mark Changes';
-                    const bunch = u.beforeMark(p, markUndoType);
-                    p.setMarked();
-                    p.setDirty();
-                    u.afterMark(p, markUndoType, bunch);
-                }
+            // suboutline-only is a one-shot for batch commands.
+            this.root = undefined;
+            this.node_only = false;
+            this.suboutline_only = false;
+            let p = c.p;
+            const t2 = g.process_time();
+            if (!g.unitTesting) {
+                g.es_print(
+                    `changed ${count} instances${count} ` + `in ${t2 - t1} sec.`
+                );
             }
+            c.p = new_p;
+            this.restore(saveData);
+            return count;
         }
-        let new_p: Position;
-        if (matches_dict.length) {
-            // Create the result dict.
-            const result_string = this.make_result_from_matches(matches_dict);
-            // Create the summary node.
-            const undoData = u.beforeInsertNode(c.p);
-            const found_p = this.create_summary_node('change-all', result_string);
-            new_p = found_p;
-            u.afterInsertNode(found_p, undoType, undoData);
-        } else {
-            new_p = c.p;
-        }
-        // suboutline-only is a one-shot for batch commands.
-        this.root = undefined;
-        this.node_only = false;
-        this.suboutline_only = false;
-        let p = c.p;
-        u.afterChangeGroup(p, undoType);
-        const t2 = g.process_time();
-        if (!g.unitTesting) {
-            g.es_print(
-                `changed ${count} instances${count} ` + `in ${t2 - t1} sec.`
-            );
-        }
-
-        c.redraw(new_p);
-        this.restore(saveData);
-
-        return count;
     }
 
     //@+node:ekr.20260504060502.1: *7* find.find_all_literal_matches_in_string
@@ -1745,7 +1721,7 @@ export class LeoFind {
         const change = this.change_text;
         // #1166: s0 and find0 aren't affected by ignore-case.
         const s0 = s;
-        const find0 = this.replace_back_slashes(find);
+        const find0 = find;
         if (this.ignore_case) {
             s = s0.toLowerCase();
             find = find0.toLowerCase();
@@ -1822,7 +1798,7 @@ export class LeoFind {
         const change = this.change_text;
         // #1166: s0 and find0 aren't affected by ignore-case.
         const s0 = s;
-        const find0 = this.replace_back_slashes(find);
+        const find0 = find;
         if (this.ignore_case) {
             s = s0.toLowerCase();
             find = find0.toLowerCase();
@@ -2143,15 +2119,14 @@ export class LeoFind {
             tc.show_all_tags();
             return [0, c.p];
         }
+        {
+            using changes = u.change_outline('clone-find-tag');
 
-        const undoData = u.beforeInsertNode(c.p);
-        const found: Position = this._create_clone_tag_nodes(clones);
-        u.afterInsertNode(found, 'Clone Find Tag', undoData);
-        g.assert(c.positionExists(found, undefined, true), found.h);
-        c.setChanged();
-        c.selectPosition(found);
-        // c.redraw()
-        return [clones.length, found];
+            const found: Position = this._create_clone_tag_nodes(clones);
+            g.assert(c.positionExists(found, undefined, true), found.h);
+            c.p = found;
+            return [clones.length, found];
+        }
     }
     //@+node:felix.20221016013001.19: *6* find._create_clone_tag_nodes
     /**
@@ -2219,62 +2194,7 @@ export class LeoFind {
 
 
     }
-    // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
-    //     """
-    //     Create a summary node containing descriptions of all matches of the
-    //     search string.
 
-    //     Typing tab converts this to the change-all command.
-    //     """
-    //     self.ftm.clear_focus()
-    //     self.ftm.set_entry_focus()
-    //     self.start_state_machine(event, 'Search: ',
-    //         handler=self.interactive_find_all1,
-    //         escape_handler=self.find_all_escape_handler,
-    //     )
-
-    // def interactive_find_all1(self, event: Event=None) -> None:  # pragma: no cover (interactive)
-    //     k = self.k
-    //     # Settings.
-    //     find_pattern = k.arg
-    //     self.ftm.set_find_text(find_pattern)
-    //     settings = self.ftm.get_settings()
-    //     self.find_text = find_pattern
-    //     self.change_text = self.ftm.get_change_text()
-    //     self.update_find_list(find_pattern)
-    //     # Gui...
-    //     k.clearState()
-    //     k.resetLabel()
-    //     k.showStateAndMode()
-    //     self.do_find_all(settings)
-
-    // def find_all_escape_handler(self, event: Event) -> None:  # pragma: no cover (interactive)
-    //     k = self.k
-    //     prompt = 'Replace ' + ('Regex' if self.pattern_match else 'String')
-    //     find_pattern = k.arg
-    //     self._sString = k.arg
-    //     self.update_find_list(k.arg)
-    //     s = f"{prompt}: {find_pattern} With: "
-    //     k.setLabelBlue(s)
-    //     self.add_change_string_to_label()
-    //     k.getNextArg(self.find_all_escape_handler2)
-
-    // def find_all_escape_handler2(self, event: Event) -> None:  # pragma: no cover (interactive)
-    //     c, k, w = self.c, self.k, self.c.frame.body.wrapper
-    //     find_pattern = self._sString
-    //     change_pattern = k.arg
-    //     self.update_change_list(change_pattern)
-    //     self.ftm.set_find_text(find_pattern)
-    //     self.ftm.set_change_text(change_pattern)
-    //     self.init_vim_search(find_pattern)
-    //     self.init_in_headline()
-    //     settings = self.ftm.get_settings()
-    //     # Gui...
-    //     k.clearState()
-    //     k.resetLabel()
-    //     k.showStateAndMode()
-    //     c.widgetWantsFocusNow(w)
-    //     self.do_change_all(settings)
     //@+node:felix.20230212180757.2: *5* find.do_find_all & helpers
     /**
      * Top-level helper for find-all command.
@@ -2380,43 +2300,33 @@ export class LeoFind {
             this.restore(saveData);
             return {};
         }
-        // Check first if need to make a 'group' undo bead
-        if (this.mark_finds) {
-            // Start an undo-group instead of a single 'InsertNode' undo
-            u.beforeChangeGroup(c.p, undoType);
-        }
         // Create the result dict.
         const result_string = this.make_result_from_matches(matches_dict);
-        // Create the summary node.
-        const undoData = u.beforeInsertNode(c.p);
-        const found_p = this.create_summary_node('find-all', result_string);
-        u.afterInsertNode(found_p, undoType, undoData);
-        c.selectPosition(found_p);
+        {
+            using changes = u.change_outline('find-all');
 
-        if (this.mark_finds) {
-            for (const match of matches_dict) {
-                const p = c.vnode2position(match['v']);
-                if (p && !p.isMarked()) {
-                    const markUndoType = 'Mark Finds';
-                    const bunch = u.beforeMark(p, markUndoType);
-                    p.setMarked();
-                    p.setDirty();
-                    u.afterMark(p, markUndoType, bunch);
+            // Create the summary node.
+            const found_p = this.create_summary_node('find-all', result_string);
+
+            if (this.mark_finds) {
+                for (const match of matches_dict) {
+                    const p = c.vnode2position(match['v']);
+                    if (p && !p.isMarked()) {
+                        p.setMarked();
+                        p.setDirty();
+                    }
                 }
             }
-            // Finish undo group only if mark_finds is true
-            u.afterChangeGroup(found_p, undoType);
+            c.p = found_p;
+            // Return a dict containing the actual results and statistics.
+            return {
+                distinct_body_lines: distinct_body_lines,
+                match_dict: matches_dict,
+                result_string: result_string,
+                total_matches: total_matches,
+                total_nodes: total_nodes,
+            };
         }
-        c.setChanged();
-        c.redraw();
-        // Return a dict containing the actual results and statistics.
-        return {
-            distinct_body_lines: distinct_body_lines,
-            match_dict: matches_dict,
-            result_string: result_string,
-            total_matches: total_matches,
-            total_nodes: total_nodes,
-        };
     }
     //@+node:felix.20230212180757.4: *7* find.create_summary_node
     /**
@@ -2536,7 +2446,7 @@ export class LeoFind {
         if (!s.trim()) {
             return [];
         }
-        const find_s = this.replace_back_slashes(this.find_text);
+        const find_s = this.find_text;
         const f = this.pattern_match
             ? this.find_all_regex
             : this.find_all_plain;
@@ -2950,24 +2860,6 @@ export class LeoFind {
             });
     }
 
-    //     """tag-children: prompt for a tag and add it to all children of c.p."""
-    //     w = self.c.frame.body.wrapper
-    //     if not w:
-    //         return
-    //     self.start_state_machine(event,
-    //         prefix='Tag Children: ',
-    //         handler=self.interactive_tag_children1)
-
-    // def interactive_tag_children1(self, event: Event) -> None:  # pragma: no cover (interactive)
-    //     c, k, p = self.c, self.k, self.c.p
-    //     # Settings...
-    //     tag = k.arg
-    //     # Gui...
-    //     k.clearState()
-    //     k.resetLabel()
-    //     k.showStateAndMode()
-    //     self.do_tag_children(p, tag)
-    //     c.treeWantsFocus()
     //@+node:felix.20221016013001.34: *5* find.do_tag_children
     /**
      * Handle the tag-children command.
@@ -3090,24 +2982,24 @@ export class LeoFind {
             }
             g.assert(!p.__eq__(progress));
         }
-        if (clones.length) {
-            const undoData = u.beforeInsertNode(c.p);
-            const found_p = this._cfa_create_nodes(clones, false);
-            u.afterInsertNode(found_p, 'Clone Find All', undoData);
-            g.assert(c.positionExists(found_p, undefined, true), found_p.toString());
-            c.setChanged();
-            c.selectPosition(found_p);
-            // Put the count in found_p.h.
-            found_p.h = found_p.h.replace('Found:', `Found ${count}:`);
+        {
+            using changes = u.change_outline('clone-find-all');
+
+            if (clones.length) {
+                const found_p = this._cfa_create_nodes(clones, false);
+                g.assert(c.positionExists(found_p, undefined, true), found_p.toString());
+                c.selectPosition(found_p);
+                found_p.h = found_p.h.replace('Found:', `Found ${count}:`);
+            }
+            // Reset data after calculating results.
+            this.ftm.set_radio_button('entire-outline');
+            // suboutline-only is a one-shot for batch commands.
+            this.suboutline_only = false;
+            this.node_only = false;
+            this.root = undefined;
+            g.es(`found ${count} matches for ${this.find_text}`);
+            return count; // Might be useful for the gui update.
         }
-        // Reset data after calculating results.
-        this.ftm.set_radio_button('entire-outline');
-        // suboutline-only is a one-shot for batch commands.
-        this.suboutline_only = false;
-        this.node_only = false;
-        this.root = undefined;
-        g.es(`found ${count} matches for ${this.find_text}`);
-        return count; // Might be useful for the gui update.
     }
     //@+node:felix.20221020232631.3: *5* find._cfa_create_nodes
     /**
@@ -3211,7 +3103,7 @@ export class LeoFind {
         }
 
         const sel: [number, number] = gui_w.getSelectionRange();
-        const oldSel: [number, number] = sel;
+        const old_sel: [number, number] = sel;
         let start, end;
         [start, end] = sel;
         if (start > end) {
@@ -3222,7 +3114,7 @@ export class LeoFind {
             return false;
         }
 
-        [start, end] = oldSel;
+        [start, end] = old_sel;
         let change_text = this.change_text;
 
         // Perform regex substitutions of \1, \2, ...\9 in the change text.
@@ -3232,54 +3124,55 @@ export class LeoFind {
                 change_text = this.make_regex_subs(change_text, this.match_obj); // ! send m array result instead of groups !
             }
         }
-        change_text = this.replace_back_slashes(change_text);
 
-        // IF [start, end] EQUALS change_text -> skip change and no undo bead
-        if (gui_w.getAllText().substring(start, end) === change_text) {
-            g.es('same text as replacement');
-            return true; // Success but no actual change to body, nor undo created.
-        }
+        {
+            using changes = u.change_node(p, 'change-selection');
 
-        // Update both the gui widget and the work "widget"
-        const new_ins = this.reverse ? start : start + change_text.length;
-        const bunch = u.beforeChangeBody(p);
-
-        if (start !== end) {
-            gui_w.delete(start, end); // PERFORM REPLACE
-        }
-        gui_w.insert(start, change_text);
-        gui_w.setInsertPoint(new_ins);
-        this.work_s = gui_w.getAllText(); // #2220.
-        this.work_sel = [new_ins, new_ins, new_ins];
-
-        // Update the selection for the next match.
-        gui_w.setSelectionRange(start, start + change_text.length);
-        c.widgetWantsFocus(gui_w);
-
-        // No redraws here: they would destroy the headline selection.
-        if (this.in_headline) {
-            // #2220: Let onHeadChanged handle undo, etc.
-            c.frame.tree.onHeadChanged(p, 'Change Headline');
-
-            // gui_w will change after a redraw.
-            gui_w = c.edit_widget(p);
-            if (gui_w) {
-                // find-next and find-prev work regardless of insert point.
-                gui_w.setSelectionRange(start, start + change_text.length);
+            // IF [start, end] EQUALS change_text -> skip change and no undo bead
+            if (gui_w.getAllText().substring(start, end) === change_text) {
+                g.es('same text as replacement');
+                return true; // Success but no actual change to body, nor undo created.
             }
-        } else {
-            p.v.b = gui_w.getAllText();
-            u.afterChangeBody(p, 'Change Body', bunch);
-        }
 
-        if (this.mark_changes && !p.isMarked()) {
-            const undoType = 'Mark Changes';
-            const bunch = u.beforeMark(p, undoType);
-            p.setMarked();
-            p.setDirty();
-            u.afterMark(p, undoType, bunch);
+            // Update both the gui widget and the work "widget"
+            const new_ins = this.reverse ? start : start + change_text.length;
+
+            if (start !== end) {
+                gui_w.delete(start, end); // PERFORM REPLACE
+            }
+            gui_w.insert(start, change_text);
+            gui_w.setInsertPoint(new_ins);
+            this.work_s = gui_w.getAllText(); // #2220.
+            this.work_sel = [new_ins, new_ins, new_ins];
+
+            // Update the selection for the next match.
+            gui_w.setSelectionRange(start, start + change_text.length);
+            c.widgetWantsFocus(gui_w);
+
+            // No redraws here: they would destroy the headline selection.
+            if (this.in_headline) {
+                // #2220: Let onHeadChanged handle undo, etc.
+                c.frame.tree.onHeadChanged(p, 'change-headline');
+                u.redraw_after_head_changed(); // TODO : Make sure this is needed in leo-web !
+                // gui_w will change after a redraw.
+                gui_w = c.edit_widget(p);
+                if (gui_w) {
+                    // find-next and find-prev work regardless of insert point.
+                    gui_w.setSelectionRange(start, start + change_text.length);
+                }
+                if (this.mark_changes && !p.isMarked()) {
+                    p.setMarked();
+                    p.setDirty();
+                }
+                return true;
+            }
+            p.v.b = (gui_w as StringTextWrapper).getAllText();
+            if (this.mark_changes && !p.isMarked()) {
+                p.setMarked();
+                p.setDirty();
+            }
+            return true;
         }
-        return true;
     }
     //@+node:felix.20221020232631.6: *4* find.check_args
     /**
@@ -3348,7 +3241,6 @@ export class LeoFind {
             return [undefined, undefined, undefined];
         }
         let attempts = 0;
-        const u = this.c.undoer;
 
         let ok;
         let pos;
@@ -3363,13 +3255,6 @@ export class LeoFind {
             [pos, newpos] = this._fnm_search(p);
             if (pos !== undefined) {
                 // Success.
-                if (this.mark_finds && !p.isMarked()) {
-                    const undoType = 'Mark Finds';
-                    const bunch = u.beforeMark(p, undoType);
-                    p.setMarked();
-                    p.setDirty();
-                    u.afterMark(p, undoType, bunch);
-                }
                 return [p, pos, newpos!];
             }
             let s: string;
@@ -3629,19 +3514,18 @@ export class LeoFind {
             s = s.toLowerCase();
             pattern = pattern.toLowerCase();
         }
-        pattern = this.replace_back_slashes(pattern);
         const n = pattern.length;
         // Put the indices in range.  Indices can get out of range
         // because the search code strips '\r' characters when searching @edit nodes.
         i = Math.max(0, i);
         j = Math.min(s.length, j);
         // short circuit the search: helps debugging.
-        if (s.indexOf(pattern) === -1) {
+        if (!s.includes(pattern)) {
             return [-1, -1];
         }
         let k: number;
         if (word) {
-            while (1) {
+            while (j >= i) {
                 // k = s.rfind(pattern, i, j)
                 k = this._rfind(s, pattern, i, j);
 
@@ -3651,7 +3535,7 @@ export class LeoFind {
                 if (this._inner_search_match_word(s, k, pattern)) {
                     return [k, k + n];
                 }
-                j = Math.max(0, k - 1);
+                j -= 1;
             }
             return [-1, -1];
         }
@@ -3674,24 +3558,6 @@ export class LeoFind {
         pattern: string
     ): boolean {
         return !!(s && pattern && g.match_word(s, i, pattern, this.ignore_case));
-
-        // if (!s || !pattern || !g.match(s, i, pattern)) {
-        //     return false;
-        // }
-
-        // let pat1;
-        // let pat2;
-        // [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
-        // const n = pattern.length;
-        // const ch1 = 0 <= i - 1 && i - 1 < s.length ? s[i - 1] : '.';
-        // const ch2 = 0 <= i + n && i + n < s.length ? s[i + n] : '.';
-        // const isWordPat1 = g.isWordChar(pat1);
-        // const isWordPat2 = g.isWordChar(pat2);
-        // const isWordCh1 = g.isWordChar(ch1);
-        // const isWordCh2 = g.isWordChar(ch2);
-        // const inWord = (isWordPat1 && isWordCh1) || (isWordPat2 && isWordCh2);
-
-        // return !inWord;
     }
     //@+node:felix.20221023141654.4: *5* find._inner_search_plain
     /**
@@ -3705,7 +3571,7 @@ export class LeoFind {
         nocase: boolean,
         word: boolean
     ): [number, number] {
-        pattern = this.replace_back_slashes(pattern);  // #4660: Do this first.
+        // Do a plain search.
         if (nocase) {
             s = s.toLowerCase();
             pattern = pattern.toLowerCase();
@@ -3723,7 +3589,7 @@ export class LeoFind {
                 if (this._inner_search_match_word(s, k, pattern)) {
                     return [k, k + n];
                 }
-                i = k + n;
+                i = k + 1;
             }
             return [-1, -1];
         }
@@ -3792,7 +3658,7 @@ export class LeoFind {
     }
     //@+node:felix.20221023141705.1: *4* find.make_regex_subs
     /**
-     * Substitute group[i-1] for \\i strings in change_text.
+     * Substitute group[i-1] for \i strings in change_text.
      *
      * Groups is a tuple of strings, one for every matched group.
      */
@@ -3836,47 +3702,7 @@ export class LeoFind {
 
         return result;
     }
-    //@+node:felix.20221023141723.1: *4* find.replace_back_slashes
-    /**
-     * Replace backslash-n with a newline and backslash-t with a tab.
-     */
-    public replace_back_slashes(s: string): string {
 
-        let i = 0;
-        const result: string[] = [];
-
-        while (i < s.length) {
-            const progress = i;
-            let ch = s[i];
-            i += 1;
-
-            if (ch !== '\\' || i >= s.length) {
-                result.push(ch);
-                continue;
-            }
-
-            ch = s[i];
-            i += 1;
-
-            if (ch === 'n') {
-                result.push('\n');
-            } else if (ch === 't') {
-                result.push('\t');
-            } else if (ch === 'f') {
-                result.push('\f');
-            } else if (ch === '\\') {
-                result.push(ch); // #4601 Replace two backslashes with a single backslash.
-            } else {
-                // #4601: A backslash followed by some other characters.
-                result.push('\\');
-                result.push(ch);
-            }
-
-            g.assert(progress < i, "Progress must advance in each iteration.");
-        }
-
-        return result.join('');
-    }
     //@+node:felix.20221022201759.1: *3* LeoFind.Initing & finalizing
     //@+node:felix.20221022201759.2: *4* find.init_in_headline & helper
     /**
@@ -3942,7 +3768,7 @@ export class LeoFind {
         }
         c.selectPosition(p);
         // Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
-        if (this.in_headline) {
+        if (false) { // (this.in_headline) { # PR #5034.
             c.treeWantsFocus();
         } else {
             // Looks good and provides clear indication of failure or termination.

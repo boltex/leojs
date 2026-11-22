@@ -645,12 +645,14 @@ export class Chapter {
                 this.p = p.firstChild();
                 p = this.p;
             } else {
-                const bunch = u.beforeInsertNode(p);
-                // Create a dummy first child.
-                this.p = p.insertAsLastChild();
-                p = this.p;
-                p.h = 'New Headline';
-                u.afterInsertNode(this.p, 'Insert Node', bunch);
+                {
+                    using changes = u.change_outline('insert-node');
+                    // Create a dummy first child.
+                    this.p = p.insertAsLastChild();
+                    p = this.p;
+                    p.h = 'New Headline';
+                }
+
             }
         }
         c.hoistStack.push({ p: root.copy(), expanded: true });

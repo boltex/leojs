@@ -3990,14 +3990,6 @@ export class RecentFilesManager {
     public async clearRecentFiles(c: Commands): Promise<void> {
 
         let rf: this = this;
-        // let menu: Menu = c.frame.menu;
-        // let u: Undoer = c.undoer;
-        // let bunch: any = u.beforeClearRecentFiles();
-        // let recentFilesMenu: Menu = menu.getMenu(this.recentFilesMenuName);
-
-        /* Clear the recent files menu items... */
-        // menu.deleteRecentFilesMenuItems(recentFilesMenu);
-
         /* Add the present file to recent files... */
         rf.recentFiles = [];
         const filename = c.fileName();
@@ -4005,19 +3997,9 @@ export class RecentFilesManager {
             rf.recentFiles.push(filename);
         }
 
-        /* Create recent files menu items for all open windows... */
-        // for (const frame of g.app.windowList) {
-        //     rf.createRecentFilesMenuItems(frame.c);
-        // }
-
-        /* Finalize clearing recent files... */
-        // u.afterClearRecentFiles(bunch);
-
         /* Write the file immediately... */
         await rf.writeRecentFilesFile(c);
 
-        /* Clearing recent files completed. Terminating protocol... */
-        /* Recent files purged. Commencing data write... */
     }
     //@+node:felix.20230923185723.6: *3* rf.createRecentFilesMenuItems
     public createRecentFilesMenuItems(c: Commands): void {
