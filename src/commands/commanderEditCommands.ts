@@ -90,7 +90,7 @@ export class CommanderEditCommands {
             using changes = u.change_outline('convert-all-blanks');
             for (let p of current.self_and_subtree()) {
                 let changed = false;
-                if (p === current) {
+                if (p.__eq__(current)) {
                     changed = c.convertBlanks();
                     if (changed) {
                         count += 1;
@@ -148,7 +148,7 @@ export class CommanderEditCommands {
             for (let p of current.self_and_subtree()) {
                 let changed = false;
 
-                if (p === current) {
+                if (p.__eq__(current)) {
                     changed = c.convertTabs();
                     if (changed) {
                         count += 1;

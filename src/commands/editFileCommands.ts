@@ -549,7 +549,7 @@ export class EditFileCommandsClass {
             using changes = u.change_outline('compare-two-files');
 
             const parent = c.p.insertAfter();
-            parent.setHeadString('Compare Two Files')
+            parent.setHeadString('Compare Two Files');
             // Use the wrapped file name if possible.
             const fn1 = c1.shortFileName();
             const fn2 = c2.shortFileName();

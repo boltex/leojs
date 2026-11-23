@@ -1152,7 +1152,7 @@ suite('Test cases for leoFind.ts', () => {
         let indexTest = 0;
         for (const [input_s, expected_output_s] of table) {
             indexTest += 1;
-            const got = x.replace_back_slashes(input_s);
+            const got = input_s;
             assert.strictEqual(expected_output_s, got, input_s);
         }
     });

@@ -9,7 +9,6 @@ import * as g from '../core/leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
 import { Commands } from '../core/leoCommands';
 import { Position } from '../core/leoNodes';
-import { BaseEditCommandsClass } from './baseCommands';
 //@-<< killBufferCommands imports & annotations >>
 
 /**
@@ -76,7 +75,9 @@ class KillBufferIterClass {
 /**
  * A class to manage the kill buffer.
  */
-export class KillBufferCommandsClass extends BaseEditCommandsClass {
+export class KillBufferCommandsClass {
+
+
 
     public kbiterator: KillBufferIterClass; // Instance of KillBufferIterClass
     public last_clipboard: string | null;
@@ -88,7 +89,7 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     //@+others
     //@+node:felix.20240612230730.4: *3* kill.ctor & reloadSettings
     constructor(c: any) {
-        super(c); // Call the parent class constructor
+
         this.c = c;
         this.kbiterator = this.iterateKillBuffer(); // An instance of KillBufferIterClass.
         // For interacting with system clipboard.
@@ -121,7 +122,10 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     @cmd('backward-kill-sentence', 'Kill the previous sentence.')
     public backwardKillSentence(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
+
         if (!w) {
             return;
         }
@@ -132,48 +136,64 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
         if (i === -1) {
             return;
         }
-        i += ins;  // Add the offset back.
-        const undoType = 'backward-kill-sentence';
-        this.beginCommand(w, undoType);
-        const i2 = s.lastIndexOf('.', i - 1) + 1;
-        this.killHelper(i2, i + 1, w, undoType);
-        w.setInsertPoint(i2);
-        this.endCommand(undefined, true, true);
+        {
+            using changes = u.change_node(p, 'backward-kill-sentence');
+
+            i += ins;  // Add the offset back.
+            const i2 = s.lastIndexOf('.', i - 1) + 1;
+            this.killHelper(i2, i + 1, w);
+            w.setInsertPoint(i2);
+            // c.k.resetLabel();
+            p.v.b = w.getAllText();
+        }
     }
     //@+node:felix.20240612230730.7: *3* backwardKillWord & killWord
     @cmd('backward-kill-word', 'Kill the previous word.')
     public backwardKillWord(): void {
         const c = this.c;
-        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (w) {
-            this.beginCommand(w, 'backward-kill-word');
-            c.editCommands.backwardWord();
-            this.killWordHelper();
+        if (!g.isTextWrapper(w)) {
+            return;
         }
+
+        {
+            using changes = u.change_node(p, 'backward-kill-word');
+            c.editCommands.backwardWord();
+            c.editCommands.extendToWord();
+            let [i, j] = w.getSelectionRange();
+            this.killHelper(i, j, w);
+            if (g.app.is_body_wrapper(w)) {
+                p.v.b = w.getAllText();
+            }
+            // c.k.resetLabel();
+        }
+
     }
     @cmd('kill-word', 'Kill the word containing the cursor.')
     public killWord(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (w) {
-            this.beginCommand(w, 'kill-word');
-            this.killWordHelper();
+        if (!g.isTextWrapper(w)) {
+            return;
         }
+        {
+            using changes = u.change_node(p, 'kill-word');
+
+            c.editCommands.extendToWord();
+            let [i, j] = w.getSelectionRange();
+            this.killHelper(i, j, w);
+            if (g.app.is_body_wrapper(w)) {
+                p.v.b = w.getAllText();
+            }
+            // c.k.resetLabel();
+        }
+
     }
 
-    private killWordHelper(): void {
-        const c = this.c;
-        const e = c.editCommands;
-        const w = c.frame.body.wrapper;
-        if (w) {
-            // this.killWs();
-            e.extendToWord();
-            const [i, j] = w.getSelectionRange();
-            this.killHelper(i, j, w);
-            this.endCommand(undefined, true, true);
-        }
-    }
     //@+node:felix.20240612230730.8: *3* clearKillRing
     @cmd('clear-kill-ring', 'Clear the kill ring.')
     public clearKillRing(): void {
@@ -208,17 +228,16 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     public killHelper(
         frm: number,
         to: number,
-        w: any,
-        undoType?: string,
+        w: any
     ): void {
 
-        const c = this.c;
         const c = this.c;
         w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
         // Extend (frm, to) if it spans a line.
+        const old_y_scroll = w.getYScrollPosition();
         const [i, j] = w.getSelectionRange();
         let s = w.get(i, j);
         if (s.indexOf('\n') > -1) {
@@ -226,16 +245,12 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
             to = j;
         }
         s = w.get(frm, to);
-        if (undoType) {
-            this.beginCommand(w, undoType);
-        }
+
         this.addToKillBuffer(s);
         void g.app.gui.replaceClipboardWith(s);
         w.delete(frm, to);
         w.setInsertPoint(frm);
-        if (undoType) {
-            this.endCommand(undefined, true, true);
-        }
+        w.setYScrollPosition(old_y_scroll);
         g.app.gui.set_focus(c, w);  // 2607
     }
     //@+node:felix.20240612230730.14: *3* ec.killParagraphHelper
@@ -245,31 +260,30 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     public killParagraphHelper(
         frm: number,
         to: number,
-        undoType?: string,
     ): void {
         const c = this.c;
+        const p = c.p;
+
         const w = c.frame.body.wrapper;
         if (!w) {
             return;
         }
         const s = w.get(frm, to);
-        if (undoType) {
-            this.beginCommand(w, undoType);
-        }
+
         this.addToKillBuffer(s);
         void g.app.gui.replaceClipboardWith(s);
         w.delete(frm, to);
+        p.v.b = w.getAllText();
         w.setInsertPoint(frm);
-        if (undoType) {
-            this.endCommand(undefined, true, true);
-        }
     }
     //@+node:felix.20240612230730.15: *3* ec.killToEndOfLine
     @cmd('kill-to-end-of-line', 'Kill from the cursor to end of the line. ')
     public killToEndOfLine(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
         const s = w.getAllText();
@@ -288,7 +302,15 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
             i = j;
         }
         if (i < j) {
-            this.killHelper(i, j, w, 'kill-to-end-of-line');
+            {
+                using changes = u.change_node(p, 'kill-to-end-of-line');
+
+                this.killHelper(i, j, w);
+                if (g.app.is_body_wrapper(w)) {
+                    p.v.b = w.getAllText();
+                }
+                // c.k.resetLabel()
+            }
         }
     }
     //@+node:felix.20240612230730.16: *3* ec.killLine
@@ -296,8 +318,10 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     public killLine(): void {
         /** Kill the line containing the cursor. */
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
         const s = w.getAllText();
@@ -313,14 +337,21 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
         } else {
             // Kill the newline in the present line.
         }
-        this.killHelper(i, j, w, 'kill-line');
+        {
+            using changes = u.change_node(p, 'kill-line');
+            this.killHelper(i, j, w);
+            p.v.b = w.getAllText();
+            //v c.k.resetLabel();
+        }
     }
     //@+node:felix.20240612230730.17: *3* killRegion & killRegionSave
     @cmd('kill-region', 'Kill the text selection.')
     public killRegion(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
         const [i, j] = w.getSelectionRange();
@@ -328,9 +359,13 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
             return;
         }
         const s = w.getSelectedText();
-        this.beginCommand(w, 'kill-region');
-        w.delete(i, j);
-        this.endCommand(undefined, true, true);
+        {
+            using changes = u.change_node(p, 'kill-region');
+            w.delete(i, j);
+            p.v.b = w.getAllText();
+            w.setInsertPoint(i);
+        }
+
         this.addToKillBuffer(s);
         void g.app.gui.replaceClipboardWith(s);
     }
@@ -342,7 +377,7 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     public killRegionSave(): void {
         const c = this.c;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
         const [i, j] = w.getSelectionRange();
@@ -358,8 +393,10 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
     public killSentence(): void {
         /** Kill the sentence containing the cursor. */
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
         const s = w.getAllText();
@@ -368,20 +405,24 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
         if (i === -1) {
             return;
         }
-        const undoType = 'kill-sentence';
-        this.beginCommand(w, undoType);
-        const i2 = s.lastIndexOf('.', ins) + 1;
-        this.killHelper(i2, i + 1, w, undoType);
-        w.setInsertPoint(i2);
-        this.endCommand(undefined, true, true);
+        {
+            using changes = u.change_node(p, 'kill-sentence');
+            const i2 = s.lastIndexOf('.', ins) + 1;
+            this.killHelper(i2, i + 1, w);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel();
+        }
+
     }
     //@+node:felix.20240612230730.19: *3* killWs
     @cmd('kill-ws', 'Kill whitespace.')
     public killWs(undoType: string = 'kill-ws'): void {
         let ws = '';
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
         const s = w.getAllText();
@@ -399,17 +440,21 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
             j += 1;
         }
         if (j > i) {
-            ws = s.substring(i, j);
-            w.delete(i, j);
-            if (undoType) {
-                this.beginCommand(w, undoType);
+            {
+                using changes = u.change_node(p, 'kill-ws');
+
+                ws = s.substring(i, j);
+                w.delete(i, j);
+
+                if (this.addWsToKillRing) {
+                    this.addToKillBuffer(ws);
+                }
+                if (g.app.is_body_wrapper(w)) {
+                    p.v.b = w.getAllText();
+                }
+                w.setInsertPoint(i);
             }
-            if (this.addWsToKillRing) {
-                this.addToKillBuffer(ws);
-            }
-            if (undoType) {
-                this.endCommand(undefined, true, true);
-            }
+
         }
     }
     //@+node:felix.20240612230730.20: *3* yank & yankPop
@@ -432,13 +477,14 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
          * pop = True:  insert the next entry of the kill ring.
          */
         const c = this.c;
-        const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
-        const current: Position = c.p;
-        if (!current) {
+
+        if (!p || !p.v) {
             return;
         }
         const text = w.getAllText();
@@ -448,9 +494,11 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
             return;
         }
         const undoType = pop ? 'yank-pop' : 'yank';
-        this.beginCommand(w, undoType);
-        try {
-            if (!pop || this.lastYankP && this.lastYankP !== current) {
+
+        {
+            using changes = u.change_node(p, undoType);
+
+            if (!pop || this.lastYankP && !this.lastYankP.__eq__(p)) {
                 this.reset = 0;
             }
             let s = this.kbiterator.next().value;
@@ -470,20 +518,22 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
                 }
             }
             w.insert(i, s);
-            // Fix bug 1099035: Leo yank and kill behavior not quite the same as emacs.
-            // w.setSelectionRange(i,i+len(s),insert=i+len(s))
             w.setInsertPoint(i + s.length);
-            this.lastYankP = current.copy();
-        } finally {
-            this.endCommand(undefined, true, true);
+            this.lastYankP = p.copy();
+            if (g.app.is_body_wrapper(w)) {
+                p.v.b = w.getAllText();
+            }
+            // c.k.resetLabel();
         }
     }
     //@+node:felix.20240612230730.21: *3* zapToCharacter
     @cmd('zap-to-character', 'Kill characters from the insertion point to a given character.')
     public async zapToCharacter(): Promise<void> {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w) {
+        if (!g.isTextWrapper(w)) {
             return;
         }
 
@@ -502,12 +552,16 @@ export class KillBufferCommandsClass extends BaseEditCommandsClass {
         if (i === -1) {
             return;
         }
-        this.beginCommand(w, 'zap-to-char');
-        this.addToKillBuffer(s.substring(ins, i));
-        void g.app.gui.replaceClipboardWith(s.substring(ins, i));  // Support for proper yank.
-        w.setAllText(s.substring(0, ins) + s.substring(i));
-        w.setInsertPoint(ins);
-        this.endCommand(undefined, true, true);
+        {
+            using changes = u.change_node(p, 'zap-to-char');
+
+            this.addToKillBuffer(s.substring(ins, i));
+            void g.app.gui.replaceClipboardWith(s.substring(ins, i));  // Support for proper yank.
+            w.setAllText(s.substring(0, ins) + s.substring(i));
+            w.setInsertPoint(ins);
+            p.v.b = w.getAllText();
+            // c.k.resetLabel();
+        }
 
     }
     //@-others

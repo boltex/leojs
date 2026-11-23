@@ -1827,6 +1827,17 @@ export class LeoApp {
     ): ((...args: any[]) => any) | undefined {
         return g.app.classDispatchDict[ext];
     }
+    //@+node:felix.20261122232004.1: *3* app.is_body_wrapper
+    /**
+     * return True if obj is the body pane's wrapper
+     */
+    public is_body_wrapper(obj: any): boolean {
+     
+        let app = this;
+        let gui = app.gui;
+        return gui ? gui.widget_name(obj).startsWith('body') : false;
+    }
+
     //@+node:felix.20220417215246.1: *3* app.makeAllBindings
     /**
      * LeoApp.makeAllBindings:

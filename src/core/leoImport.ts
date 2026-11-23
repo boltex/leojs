@@ -1893,7 +1893,7 @@ export class MindMapImporter {
      * Create an outline from a MindMap (.csv) file.
      */
     public async scan(f: string, target: Position): Promise<void> {
-        // @ts-expect-error: csv can be used this way.
+
         const reader = await csv({
             output: 'csv',
         }).fromString(f);

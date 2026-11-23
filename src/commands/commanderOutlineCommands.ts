@@ -195,7 +195,7 @@ export class CommanderOutlineCommands {
                 back.isExpanded()
             ) {
                 pasted.moveToNthChildOf(back, 0);
-                pasted.setDirty()
+                pasted.setDirty();
             }
             c.p = pasted;
             return pasted;
@@ -1457,7 +1457,7 @@ export class CommanderOutlineCommands {
 
             if (c.checkOutline() === 0) {
                 c.contractAllHeadlines();
-                c.p = clone
+                c.p = clone;
             } else {
                 clone.doDelete();
                 if (created_last_spot) {

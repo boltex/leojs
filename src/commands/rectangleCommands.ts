@@ -8,6 +8,7 @@
 import * as g from '../core/leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
 import { Commands } from '../core/leoCommands';
+import { StringTextWrapper } from '../core/leoFrame';
 //@-<< rectangleCommands imports & annotations >>
 
 /**
@@ -25,7 +26,7 @@ export class RectangleCommandsClass {
     public stringRect: [number, number, number, number] | undefined;
     public commandsDict: Record<string, [string, any]>;
     public c: Commands;
-
+    w!: StringTextWrapper;
     //@+others
     //@+node:felix.20240615151733.4: *3* rectangle.ctor
     /**
@@ -47,20 +48,75 @@ export class RectangleCommandsClass {
 
     }
     //@+node:felix.20240615151733.5: *3* check
+    // /**
+    //  * Return True if there is a selection.
+    //  * Otherwise, return False and issue a warning.
+    //  */
+    // public check(warning = 'No rectangle selected'): boolean {
+    //     return this._chckSel(warning);
+    // }
+
+    // /**
+    //  * Return True if there is a selection in the edit widget.
+    //  */
+    // public _chckSel(warning = 'no selection'): boolean {
+    //     const w = this.editWidget();
+    //     const val = !!(w && w.hasSelection());
+    //     if (warning && !val) {
+    //         g.es(warning);
+    //     }
+    //     return val;
+    // }
+
+    //     public editWidget(forceFocus = true): StringTextWrapper {
+    //     const c = this.c;
+
+    //     // ? needed ?
+    //     // w = event and event.widget
+    //     // // wname = c.widget_name(w) if w else '<no widget>'
+    //     // if w and g.isTextWrapper(w):
+    //     //     pass
+    //     // else:
+    //     //     w = c.frame.body and c.frame.body.wrapper
+
+    //     const w = c.frame.body && c.frame.body.wrapper;
+
+    //     if (w && forceFocus) {
+    //         c.widgetWantsFocusNow(w);
+    //     }
+    //     this.w = w;
+    //     return w;
+    // }
+
     /**
-     * Return True if there is a selection.
-     * Otherwise, return False and issue a warning.
+     * Return the rectangle corresponding to the selection range.
      */
-    public check(warning = 'No rectangle selected'): boolean {
-        return this._chckSel(warning);
+    public getRectanglePoints(
+        w: StringTextWrapper
+    ): [number, number, number, number] {
+        const c = this.c;
+        c.widgetWantsFocusNow(w);
+        const s = w.getAllText();
+        let i, j;
+        [i, j] = w.getSelectionRange();
+        let r1, r2, r3, r4;
+        [r1, r2] = g.convertPythonIndexToRowCol(s, i);
+        [r3, r4] = g.convertPythonIndexToRowCol(s, j);
+        return [r1 + 1, r2, r3 + 1, r4];
     }
+
     //@+node:felix.20240615151733.6: *3* rectangle.Entries
     //@+node:felix.20240615151733.7: *4* clearRectangle
     @cmd('rectangle-clear', 'Clear the rectangle defined by the start and end of selected text.')
     public clearRectangle(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w || !this.check()) {
+        if (!g.isTextWrapper(w)) {
+            return;
+        }
+        if (!w.hasSelection()) {
             return;
         }
 
@@ -68,23 +124,31 @@ export class RectangleCommandsClass {
             return g.toPythonIndex(w.getAllText(), index);
         };
 
-        this.beginCommand(w, 'clear-rectangle');
         const [r1, r2, r3, r4] = this.getRectanglePoints(w);
-        // Change the text.
-        const fill = ' '.repeat(r4 - r2);
-        for (let r = r1; r <= r3; r++) {
-            w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
-            w.insert(toInt(`${r}.${r2}`), fill);
+        {
+            using changes = u.change_node(p, 'clear-rectangle');
+
+            const fill = ' '.repeat(r4 - r2);
+            for (let r = r1; r <= r3; r++) {
+                w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+                w.insert(toInt(`${r}.${r2}`), fill);
+            }
+            p.v.b = w.getAllText();
+            w.setSelectionRange(toInt(`${r1}.${r2}`), toInt(`${r3}.${r2 + fill.length}`));
+
         }
-        w.setSelectionRange(toInt(`${r1}.${r2}`), toInt(`${r3}.${r2 + fill.length}`));
-        this.endCommand();
     }
     //@+node:felix.20240615151733.8: *4* closeRectangle
     @cmd('rectangle-close', 'Delete the rectangle if it contains nothing but whitespace.')
     public closeRectangle(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w || !this.check()) {
+        if (!g.isTextWrapper(w)) {
+            return;
+        }
+        if (!w.hasSelection()) {
             return;
         }
 
@@ -92,7 +156,6 @@ export class RectangleCommandsClass {
             return g.toPythonIndex(w.getAllText(), index);
         };
 
-        this.beginCommand(w, 'close-rectangle');
         const [r1, r2, r3, r4] = this.getRectanglePoints(w);
         // Return if any part of the selection contains something other than whitespace.
         for (let r = r1; r <= r3; r++) {
@@ -101,21 +164,29 @@ export class RectangleCommandsClass {
                 return;
             }
         }
-        // Change the text.
-        for (let r = r1; r <= r3; r++) {
-            w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+        {
+            using changes = u.change_node(p, 'close-rectangle');
+
+            for (let r = r1; r <= r3; r++) {
+                w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+            }
+            const i = toInt(`${r1}.${r2}`);
+            const j = toInt(`${r3}.${r2}`);
+            p.v.b = w.getAllText();
+            w.setSelectionRange(i, j, j);
         }
-        const i = toInt(`${r1}.${r2}`);
-        const j = toInt(`${r3}.${r2}`);
-        w.setSelectionRange(i, j, j);
-        this.endCommand();
     }
     //@+node:felix.20240615151733.9: *4* deleteRectangle
     @cmd('rectangle-delete', 'Delete the rectangle defined by the start and end of selected text.')
     public deleteRectangle(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w || !this.check()) {
+        if (!g.isTextWrapper(w)) {
+            return;
+        }
+        if (!w.hasSelection()) {
             return;
         }
 
@@ -123,22 +194,30 @@ export class RectangleCommandsClass {
             return g.toPythonIndex(w.getAllText(), index);
         };
 
-        this.beginCommand(w, 'delete-rectangle');
         const [r1, r2, r3, r4] = this.getRectanglePoints(w);
-        for (let r = r1; r <= r3; r++) {
-            w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+        {
+            using changes = u.change_node(p, 'delete-rectangle');
+
+            for (let r = r1; r <= r3; r++) {
+                w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+            }
+            const i = toInt(`${r1}.${r2}`);
+            const j = toInt(`${r3}.${r2}`);
+            p.v.b = w.getAllText();
+            w.setSelectionRange(i, j, j);
         }
-        const i = toInt(`${r1}.${r2}`);
-        const j = toInt(`${r3}.${r2}`);
-        w.setSelectionRange(i, j, j);
-        this.endCommand();
     }
     //@+node:felix.20240615151733.10: *4* killRectangle
     @cmd('rectangle-kill', 'Kill the rectangle defined by the start and end of selected text.')
     public killRectangle(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w || !this.check()) {
+        if (!g.isTextWrapper(w)) {
+            return;
+        }
+        if (!w.hasSelection()) {
             return;
         }
 
@@ -146,19 +225,22 @@ export class RectangleCommandsClass {
             return g.toPythonIndex(w.getAllText(), index);
         };
 
-        this.beginCommand(w, 'kill-rectangle');
         const [r1, r2, r3, r4] = this.getRectanglePoints(w);
         this.theKillRectangle = [];
-        for (let r = r1; r <= r3; r++) {
-            const s = w.get(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
-            this.theKillRectangle.push(s);
-            w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+        {
+            using changes = u.change_node(p, 'kill-rectangle');
+
+            for (let r = r1; r <= r3; r++) {
+                const s = w.get(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+                this.theKillRectangle.push(s);
+                w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+            }
+            p.v.b = w.getAllText();
+            if (this.theKillRectangle.length > 0) {
+                const ins = toInt(`${r3}.${r2}`);
+                w.setSelectionRange(ins, ins, ins);
+            }
         }
-        if (this.theKillRectangle.length > 0) {
-            const ins = toInt(`${r3}.${r2}`);
-            w.setSelectionRange(ins, ins, ins);
-        }
-        this.endCommand();
     }
     //@+node:felix.20240615151733.11: *4* openRectangle
     @cmd('rectangle-open', ' Insert blanks in the rectangle defined by the start and end of selected text.')
@@ -168,8 +250,13 @@ export class RectangleCommandsClass {
          * text. This pushes the previous contents of the rectangle rightward.
          */
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
-        if (!w || !this.check()) {
+        if (!g.isTextWrapper(w)) {
+            return;
+        }
+        if (!w.hasSelection()) {
             return;
         }
 
@@ -177,22 +264,26 @@ export class RectangleCommandsClass {
             return g.toPythonIndex(w.getAllText(), index);
         };
 
-        this.beginCommand(w, 'open-rectangle');
         const [r1, r2, r3, r4] = this.getRectanglePoints(w);
         const fill = ' '.repeat(r4 - r2);
-        for (let r = r1; r <= r3; r++) {
-            w.insert(toInt(`${r}.${r2}`), fill);
+        {
+            using changes = u.change_node(p, 'open-rectangle');
+            for (let r = r1; r <= r3; r++) {
+                w.insert(toInt(`${r}.${r2}`), fill);
+            }
+            const i = toInt(`${r1}.${r2}`);
+            const j = toInt(`${r3}.${r2 + fill.length}`);
+            p.v.b = w.getAllText();
+            w.setSelectionRange(i, j, j);
         }
-        const i = toInt(`${r1}.${r2}`);
-        const j = toInt(`${r3}.${r2 + fill.length}`);
-        w.setSelectionRange(i, j, j);
-        this.endCommand();
     }
     //@+node:felix.20240615151733.12: *4* stringRectangle
     @cmd('rectangle-string', 'Prompt for a string, then replace the contents of a rectangle with a string on each line.')
     public async stringRectangle(): Promise<void> {
         let arg;
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
 
         if (g.unitTesting) {
@@ -206,15 +297,16 @@ export class RectangleCommandsClass {
                     placeHolder: "String rectangle",
                 }
             );
-            if (arg == null || !w || !this.check()) {
+            if (arg == null || !g.isTextWrapper(w)) {
+                return;
+            }
+            if (!w.hasSelection()) {
                 return;
             }
             this.stringRect = this.getRectanglePoints(w);
         }
 
-        const c = this.c;
         c.bodyWantsFocus();
-        this.beginCommand(w, 'string-rectangle');
         const [r1, r2, r3, r4] = this.stringRect;
         let s = w.getAllText();
         for (let r = r1; r <= r3; r++) {
@@ -222,19 +314,22 @@ export class RectangleCommandsClass {
             const j = g.convertRowColToPythonIndex(s, r - 1, r4);
             s = s.slice(0, i) + arg + s.slice(j);
         }
-        w.setAllText(s);
+
         const i = g.convertRowColToPythonIndex(s, r1 - 1, r2);
         const j = g.convertRowColToPythonIndex(s, r3 - 1, r2 + arg.length);
-        w.setSelectionRange(i, j);
-        this.endCommand();
-        // 2010/1/1: Fix bug 480422:
-        // string-rectangle kills syntax highlighting.
-        // c.recolor(c.p);
+        {
+            using changes = u.change_node(p, 'string-rectangle');
+            w.setAllText(s);
+            p.v.b = s;
+            w.setSelectionRange(i, j);
+        }
     }
     //@+node:felix.20240615151733.13: *4* yankRectangle
     @cmd('rectangle-yank', 'Yank into the rectangle defined by the start and end of selected text.')
     public yankRectangle(): void {
         const c = this.c;
+        const p = c.p;
+        const u = c.undoer;
         const w = c.frame.body.wrapper;
         if (!w) {
             return;
@@ -252,22 +347,24 @@ export class RectangleCommandsClass {
             g.es('No kill rect');
             return;
         }
+        {
+            using changes = u.change_node(p, 'yank-rectangle');
 
-        this.beginCommand(w, 'yank-rectangle');
-        const [r1, r2, r3, r4] = this.getRectanglePoints(w);
-        let n = 0;
-        for (let r = r1; r <= r3; r++) {
-            if (n >= killRect.length) {
-                break;
+            const [r1, r2, r3, r4] = this.getRectanglePoints(w);
+            let n = 0;
+            for (let r = r1; r <= r3; r++) {
+                if (n >= killRect.length) {
+                    break;
+                }
+                w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
+                w.insert(toInt(`${r}.${r2}`), killRect[n]);
+                n++;
             }
-            w.delete(toInt(`${r}.${r2}`), toInt(`${r}.${r4}`));
-            w.insert(toInt(`${r}.${r2}`), killRect[n]);
-            n++;
+            const i = toInt(`${r1}.${r2}`);
+            const j = toInt(`${r3}.${r2 + killRect[n - 1].length}`);
+            w.setSelectionRange(i, j, j);
+            p.v.b = w.getAllText();
         }
-        const i = toInt(`${r1}.${r2}`);
-        const j = toInt(`${r3}.${r2 + killRect[n - 1].length}`);
-        w.setSelectionRange(i, j, j);
-        this.endCommand();
     }
     //@-others
 

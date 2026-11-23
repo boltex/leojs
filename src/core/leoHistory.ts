@@ -131,7 +131,7 @@ export class NodeHistory {
 
         // #3800: Do nothing if p is the top of the bead list.
         const last_p = this.beadList.length > 0 ? this.beadList[this.beadList.length - 1][0] : null;
-        if (last_p === p) {
+        if (last_p && last_p.__eq__(p)) {
             return;
         }
 
