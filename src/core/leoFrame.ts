@@ -992,22 +992,22 @@ export class NullTree {
     }
 
     //@+node:felix.20221102232749.3: *3* NullTree.edit_widget
-    public edit_widget(p: Position): StringTextWrapper | undefined {
+    public edit_widget(p: Position, override = false): StringTextWrapper | undefined {
         const d = this.editWidgetsDict;
         if (!p || !p.v) {
             return undefined;
         }
         let w = d[p.v.gnx];
-        // ! LEOJS : Mimic from qt_tree
-        // ! Dont return if not already in dict as an active headline editor
-        // if (!w) {
-        //     w = new StringTextWrapper(
-        //         this.c,
-        //         `head-${1 + Object.keys(d).length}`
-        //     );
-        //     d[p.v.gnx] = w;
-        //     w.setAllText(p.h);
-        // }
+        // ! LEOJS : Mimic from qt_tree only if override is true
+        // Otherwise, Dont return if not already in dict as an active headline editor
+        if (override && !w) {
+            w = new StringTextWrapper(
+                this.c,
+                `head-${1 + Object.keys(d).length}`
+            );
+            d[p.v.gnx] = w;
+            w.setAllText(p.h);
+        }
         return w;
     }
     //@+node:felix.20221102232749.4: *3* NullTree.editLabel

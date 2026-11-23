@@ -1147,9 +1147,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         assert.ok(!child_c.isCloned());
         //
         // Change the tree.
-        // const bunch = u.beforeChangeTree(p);
         child_c._relinkAsCloneOf(child_b);
-        // u.afterChangeTree(p, 'relink-clone', bunch);
         // self.dump_tree('Before...')
         u.undo();
         // self.dump_tree('After...')

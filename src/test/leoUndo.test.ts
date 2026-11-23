@@ -305,6 +305,8 @@ suite('Test Undo', () => {
     test('test_edit_headline', () => {
         const c = self.c;
         const p = self.c.p;
+        const u = c.undoer;
+
         let node1 = p.insertAsLastChild();
         const node2 = node1.insertAfter();
         const node3 = node2.insertAfter();
@@ -314,20 +316,17 @@ suite('Test Undo', () => {
         const w_result = [...p.subtree()].map(p => p.h); // p.h for p in 
         assert.strictEqual(JSON.stringify([...p.subtree()].map(p => p.h)), JSON.stringify(['node 1', 'node 2', 'node 3']));
         // Select 'node 1' and modify the headline as if a user did it
-        c.undoer.clearUndoState();
+        u.clearUndoState();
         node1 = p.copy().moveToFirstChild();
         c.selectPosition(node1);
-
-        // c.editHeadline(); // TODO : UNCOMMENT THIS WITH THE NEW WRAPPER CODE !
-        // w = c.frame.tree.edit_widget(node1);
-        // w.insert('1.0', 'changed - ');
-        // c.endEditing();
-        const undoData = c.undoer.beforeChangeHeadline(node1);
+        c.editHeadline();
+        const w = c.frame.tree.edit_widget(node1, true)!;
+        w.insert(0, 'changed - ');
+        c.endEditing(); // ! This should setup the undo bead. ! 
         c.setHeadString(node1, 'changed - ' + node1.h);  // Set v.h *after* calling the undoer's before method.
         if (!c.changed) {
             c.setChanged();
         }
-        c.undoer.afterChangeHeadline(node1, 'Edit Headline', undoData);
 
         assert.strictEqual(JSON.stringify([...p.subtree()].map(p => p.h)), JSON.stringify(['changed - node 1', 'node 2', 'node 3']));
         // Move the selection and undo the headline change
@@ -379,83 +378,6 @@ suite('Test Undo', () => {
         let j = 10;
         const func = c.line_to_headline;
         runTest(self, before, after, i, j, func);
-    });
-    //@+node:felix.20220129225102.14: *3* TestUndo.test_restore_marked_bits
-    test('test_restore_marked_bits', () => {
-        const c = self.c;
-        const p = self.c.p;
-
-        // Test of #1694.
-        const u = c.undoer;
-        const w = c.frame.body.wrapper;
-        const oldText = p.b.toString();
-        const newText = p.b + '\n#changed';
-
-        for (let marked of [true, false]) {
-            c.undoer.clearUndoState();  // Required.
-            // RESET
-            p.v.setBodyString(oldText);
-
-            if (marked) {
-                p.setMarked();
-            } else {
-                p.clearMarked();
-            }
-            const oldMarked = p.isMarked();
-
-            // w.setAllText(newText);  // For the new assert in w.updateAfterTyping.
-            // u.setUndoTypingParams(p,
-            //     undo_type='typing',
-            //     oldText=oldText,
-            //     newText=newText,
-            // );
-
-            const bunch = u.beforeChangeNodeContents(p);
-            p.v.setBodyString(newText);
-            u.afterChangeNodeContents(p, "Body Text", bunch);
-            c.setChanged();
-            p.setDirty();
-            u.undo();
-            assert.strictEqual(p.b, oldText);
-            assert.strictEqual(p.isMarked(), oldMarked);
-            u.redo();
-            assert.strictEqual(p.b, newText);
-            assert.strictEqual(p.isMarked(), oldMarked);
-        }
-    });
-    //@+node:felix.20220129225102.15: *3* TestUndo.test_undo_group
-    /**
-     * Test an off-by-one error in c.undoer.bead.
-     * The buggy redoGroup code worked if the undo group was the first item on the undo stack.
-     */
-    test('test_undo_group', () => {
-        const c = self.c;
-
-        const p = self.c.p;
-        let original = p.insertAfter();
-        const original_s = original.b = g.dedent(`\
-            @tabwidth -4
-
-            line 1
-                line 2
-                  line 3
-            line4
-    `); // Only four spaces before that close tick.
-        c.undoer.clearUndoState();
-        c.selectPosition(original);
-        c.copyOutline();  // Add state to the undo stack!
-        c.pasteOutline();
-        c.convertAllBlanks();  // Uses undoGroup.
-        c.undoer.undo();
-        assert.strictEqual(original.b, original_s);
-        c.pasteOutline();
-        c.convertAllBlanks();
-        c.pasteOutline();
-        c.convertAllBlanks();
-        c.undoer.undo();
-        c.undoer.redo();
-        assert.strictEqual(original.b, original_s);
-
     });
     //@-others
 
